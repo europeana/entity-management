@@ -1,4 +1,4 @@
-# Europeana MyApi
+# Europeana Entity Management API
 
 Spring-Boot2 web application for curating and harvesting entity data from external sources.
 
