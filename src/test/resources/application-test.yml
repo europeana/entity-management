@@ -1,0 +1,5 @@
+server:
+  error:
+    include-message: on_param
+    include-stacktrace: on_param
+    include-exception: true
