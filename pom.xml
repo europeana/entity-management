@@ -40,7 +40,7 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
-        <springCore.version>4.3.23.RELEASE</springCore.version>
+        <springCore.version>5.2.7.RELEASE</springCore.version>
 
         <spring-boot.version>2.4.0</spring-boot.version>
         <swagger.version>3.0.0</swagger.version>

@@ -4,14 +4,11 @@ import java.io.IOException;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
  * JUnit test to check if DataSources are properly deserialized from XML
  */
-@RunWith(SpringJUnit4ClassRunner.class)
 public class DataSourcesDeserializationTest {
 
 	@Test
