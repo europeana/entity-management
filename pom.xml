@@ -12,6 +12,20 @@
         <artifactId>europeana-parent-pom</artifactId>
         <version>2.2</version>
     </parent>
+    
+    <repositories>
+		<repository>
+			<id>libs-release-local</id>
+			<name>europeana-releases</name>
+			<url>http://artifactory.eanadev.org/artifactory/libs-release</url>
+		</repository>
+		<repository>
+			<id>libs-snapshots-local</id>
+			<name>europeana-snapshots</name>
+			<url>http://artifactory.eanadev.org/artifactory/libs-snapshot</url>
+		</repository>
+	</repositories>
+    
 
     <groupId>eu.europeana.api</groupId>
     <artifactId>entity-management</artifactId>
@@ -25,6 +39,8 @@
         <java.version>11</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
+
+        <springCore.version>5.2.7.RELEASE</springCore.version>
 
         <spring-boot.version>2.4.0</spring-boot.version>
         <swagger.version>3.0.0</swagger.version>

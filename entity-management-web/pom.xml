@@ -86,6 +86,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+                   
 
         <!-- For testing error response contents (not possible with MockMvc)-->
         <!-- This issue https://github.com/rest-assured/rest-assured/issues/1175 prevent us from upgrading to 4.3.1 -->
@@ -107,6 +108,23 @@
             <version>4.2.0</version>
             <scope>test</scope>
         </dependency>
+        
+        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.dataformat/jackson-dataformat-xml -->
+		<dependency>
+		    <groupId>com.fasterxml.jackson.dataformat</groupId>
+		    <artifactId>jackson-dataformat-xml</artifactId>
+		    <!-- version>2.11.4</version-->
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
+		<dependency>
+		    <groupId>org.junit.jupiter</groupId>
+		    <artifactId>junit-jupiter-api</artifactId>
+		    <version>5.7.0</version>
+		    <scope>test</scope>
+		</dependency>
+		
+        
 
     </dependencies>
     <build>

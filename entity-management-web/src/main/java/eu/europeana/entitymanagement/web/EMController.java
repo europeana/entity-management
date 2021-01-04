@@ -1,15 +1,12 @@
 package eu.europeana.entitymanagement.web;
 
-import eu.europeana.api.commons.error.EuropeanaApiException;
-import eu.europeana.entitymanagement.exception.DummyException;
+import javax.validation.constraints.Pattern;
+
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.constraints.Pattern;
 
 /**
  * Example Rest Controller class with input validation
