@@ -11,6 +11,12 @@
     <artifactId>entity-management-definitions</artifactId>
     <packaging>jar</packaging>
 
-
+	<dependencies>
+	<dependency>
+		<groupId>eu.europeana.api.commons</groupId>
+		<artifactId>commons-definitions</artifactId>
+		<version>${version.commonsApi}</version>
+	</dependency>
+	</dependencies>
 
 </project>

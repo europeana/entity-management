@@ -29,21 +29,21 @@
 
     <groupId>eu.europeana.api</groupId>
     <artifactId>entity-management</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>${version.entitymanagementApi}</version>
     <packaging>pom</packaging>
 
     <name>Entity Management</name>
     <description>Parent module for the Entity Management API</description>
 
     <properties>
+    	<version.entitymanagementApi>0.0.1-SNAPSHOT</version.entitymanagementApi>
         <java.version>11</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-
         <springCore.version>5.2.7.RELEASE</springCore.version>
-
         <spring-boot.version>2.4.0</spring-boot.version>
         <swagger.version>3.0.0</swagger.version>
+        <version.commonsApi>0.2.12</version.commonsApi>        
     </properties>
 
     <dependencyManagement>

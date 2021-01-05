@@ -60,6 +60,21 @@
             <version>0.2.11-SNAPSHOT</version>
         </dependency>
 
+        
+		<dependency>
+			<groupId>eu.europeana.api.commons</groupId>
+			<artifactId>commons-web</artifactId>
+			<version>${version.commonsApi}</version>
+		</dependency>
+ 		
+		<dependency>
+			<groupId>eu.europeana.api</groupId>
+			<artifactId>entity-management-definitions</artifactId>
+			<version>${version.entitymanagementApi}</version>
+		</dependency>
+		
+        
+
         <!-- for securing (error) output -->
         <dependency>
             <groupId>org.owasp.encoder</groupId>
