@@ -64,7 +64,7 @@
 		<dependency>
 			<groupId>eu.europeana.api.commons</groupId>
 			<artifactId>commons-web</artifactId>
-			<version>${version.commonsApi}</version>
+			<version>${api.commons.version}</version>
 		</dependency>
  		
 		<dependency>

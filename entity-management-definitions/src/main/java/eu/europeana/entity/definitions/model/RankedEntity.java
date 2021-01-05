@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.definitions.model;
+package eu.europeana.entity.definitions.model;
 
 import java.util.Date;
 
