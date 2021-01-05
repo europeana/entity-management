@@ -39,8 +39,8 @@
         <java.version>11</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-
         <api.commons.version>0.2.11-SNAPSHOT</api.commons.version>
+        <corelib.version>2.11.0</corelib.version>
         <junit.version>5.7.0</junit.version>
         <springCore.version>5.2.7.RELEASE</springCore.version>
 		<spring-boot.version>2.4.0</spring-boot.version>
