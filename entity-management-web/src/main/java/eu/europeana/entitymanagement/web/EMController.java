@@ -1,7 +1,18 @@
 package eu.europeana.entitymanagement.web;
 
+<<<<<<< HEAD
 import java.util.Date;
+=======
+import javax.validation.constraints.Pattern;
 
+import org.springframework.http.MediaType;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
+>>>>>>> branch 'EA-2364-entity-retrieval' of https://github.com/europeana/entity-management.git
+
+<<<<<<< HEAD
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Pattern;
 
@@ -32,6 +43,8 @@ import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityConst
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+=======
+>>>>>>> branch 'EA-2364-entity-retrieval' of https://github.com/europeana/entity-management.git
 /**
  * Example Rest Controller class with input validation
  */
