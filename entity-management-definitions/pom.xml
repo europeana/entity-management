@@ -13,6 +13,12 @@
 
 	<dependencies>
 		<dependency>
+		    <groupId>com.fasterxml.jackson.dataformat</groupId>
+		    <artifactId>jackson-dataformat-xml</artifactId>
+		    <version>${jackson.version}</version>
+		</dependency>
+		
+		<dependency>
 			<groupId>eu.europeana.corelib</groupId>
 			<artifactId>corelib-definitions</artifactId>
 			<version>${corelib.version}</version>
@@ -45,6 +51,8 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		
+		
 	</dependencies>
 
 
