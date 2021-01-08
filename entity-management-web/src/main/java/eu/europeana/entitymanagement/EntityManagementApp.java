@@ -27,7 +27,7 @@ public class EntityManagementApp extends SpringBootServletInitializer {
                     System.getenv("CF_INSTANCE_IP"));
 
         // Activate socks proxy (if your application requires it)
-        SocksProxyActivator.activate(new SocksProxyConfig("entitymanagement.properties", "myapi.user.properties"));
+        SocksProxyActivator.activate(new SocksProxyConfig("entitymanagement.properties", "entitymanagement.user.properties"));
 
         SpringApplication.run(EntityManagementApp.class, args);
     }

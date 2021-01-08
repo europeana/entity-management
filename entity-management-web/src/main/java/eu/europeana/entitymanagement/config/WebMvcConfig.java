@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.config;
 
+import eu.europeana.entity.utils.Constants;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -37,7 +38,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
         // releases
         configurer.favorPathExtension(true);
 
-        // set json as default answer, even if no accept header or extension was provided
-        configurer.defaultContentType(MediaType.valueOf(MediaType.APPLICATION_JSON_VALUE), MediaType.APPLICATION_JSON);
+        // application/ld+json should take precedence over application/json
+        configurer.defaultContentType(MediaType.valueOf(Constants.MEDIA_TYPE_JSONLD), MediaType.APPLICATION_JSON);
     }
 }

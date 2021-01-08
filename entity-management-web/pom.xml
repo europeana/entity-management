@@ -67,6 +67,13 @@
             <version>1.2.2</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${apache.commons.version}</version>
+        </dependency>
+
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -123,8 +130,13 @@
 		    <version>${junit.version}</version>
 		    <scope>test</scope>
 		</dependency>
-		
-        
+
+        <dependency>
+            <groupId>eu.europeana.api</groupId>
+            <artifactId>entity-management-definitions</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
 
     </dependencies>
     <build>

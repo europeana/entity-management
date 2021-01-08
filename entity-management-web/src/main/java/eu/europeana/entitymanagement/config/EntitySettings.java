@@ -1,8 +1,6 @@
 package eu.europeana.entitymanagement.config;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -16,20 +14,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.io.ClassPathResource;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 /**
  * Container for all settings that we load from the entitymanagement.properties file and optionally override from
- * myapi.user.properties file
+ * entitymanagement.user.properties file
  */
 @Configuration
 @PropertySource("classpath:entitymanagement.properties")
-@PropertySource(value = "classpath:myapi.user.properties", ignoreResourceNotFound = true)
-public class EMSettings {
+@PropertySource(value = "classpath:entitymanagement.user.properties", ignoreResourceNotFound = true)
+public class EntitySettings {
 
-    private static final Logger LOG = LogManager.getLogger(EMSettings.class);
+    private static final Logger LOG = LogManager.getLogger(EntitySettings.class);
 
     @Value("${datasources.config}")
     private String datasourcesXMLConfig;
@@ -45,9 +42,5 @@ public class EMSettings {
     		}    	         
 	}
     
-    @PostConstruct
-    private void logImportantSettings() {
-        LOG.info("MyAPI settings:");
 
-    }
 }

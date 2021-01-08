@@ -6,18 +6,27 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 @JacksonXmlRootElement(localName = "source")
 public class DataSource {
 
-	@JacksonXmlProperty(isAttribute = true)
-	private String url;
-	
-	public String getUrl() {
-		return url;
-	}
+    public DataSource() {
+        // explicit default constructor
+    }
 
-	@JacksonXmlProperty(isAttribute = true)
-	private String rights;
+    public DataSource(String url, String rights) {
+        this.url = url;
+        this.rights = rights;
+    }
 
-	public String getRights() {
-		return rights;
-	}
+    @JacksonXmlProperty(isAttribute = true)
+    private String url;
+
+    public String getUrl() {
+        return url;
+    }
+
+    @JacksonXmlProperty(isAttribute = true)
+    private String rights;
+
+    public String getRights() {
+        return rights;
+    }
 
 }
