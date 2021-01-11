@@ -17,18 +17,6 @@ import java.io.IOException;
 @ControllerAdvice
 public class MyGlobalExceptionHandler extends EuropeanaGlobalExceptionHandler {
 
-    /**
-     * Add ExceptionHandler methods to handle specific error situations if needed
-     * @param e dummy exception to handle
-     * @param response response object to sent back
-     * @throws IOException when there's a problem sending the error response
-     */
-    @ExceptionHandler
-    @SuppressWarnings("findsecbugs:XSS_SERVLET") // we control error message and use StringEscapeUtils so very low risk
-    public void handleDummyExceptions(DummyException e, HttpServletResponse response) throws IOException {
-        // do some custom processing here
-        // then either rethrow the error or handle it yourself
-        response.sendError(HttpStatus.I_AM_A_TEAPOT.value(), StringEscapeUtils.escapeJson(e.getMessage()));
-    }
+    // error handling inherited from parent
 
 }

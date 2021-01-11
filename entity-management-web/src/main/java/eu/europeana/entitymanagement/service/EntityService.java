@@ -1,8 +1,9 @@
 package eu.europeana.entitymanagement.service;
 
-import eu.europeana.entitymanagement.config.DataSource;
-import eu.europeana.entitymanagement.config.DataSources;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entity.edm.internal.Entity;
+import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.model.DereferenceResponse;
 import eu.europeana.entitymanagement.model.EntityRequest;
 import org.apache.commons.io.FilenameUtils;
@@ -91,24 +92,8 @@ public class EntityService {
         // dereference using Metis. return error if anything goes wrong
         Optional<DereferenceResponse> metisResponse = dereferenceService.dereferenceEntityById(id);
         if (metisResponse.isPresent()) {
-            return checkDereferencedEntityExists(metisResponse.get());
+            return checkEntityExists(metisResponse.get().getExactMatch());
         }
         return Optional.empty();
-    }
-
-
-    /**
-     * Checks if a co-referenced entity exists that matches the owl:sameAs or skos:Exact match values from the Metis response
-     *
-     * @param metisResponse de-reference response from Metis
-     * @return Optional containing matching entity, or empty optional if no match found
-     */
-    private Optional<Entity> checkDereferencedEntityExists(DereferenceResponse metisResponse) {
-        Optional<Entity> coreference = checkEntityExists(metisResponse.getOwlSameAs());
-
-        if (coreference.isEmpty()) {
-            coreference = checkEntityExists(metisResponse.getSkosExactMatch());
-        }
-        return coreference;
     }
 }

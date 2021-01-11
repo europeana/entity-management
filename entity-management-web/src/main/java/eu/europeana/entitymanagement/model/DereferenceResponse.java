@@ -1,34 +1,28 @@
 package eu.europeana.entitymanagement.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 /**
  * Stub class to contain de-reference response from Metis
- * This only contains fields from the XML response that are required for processing
- * entity creation requests.
+ * This only contains fields that are required for processing, and not the entire response object.
  */
+@JsonDeserialize(using = DereferenceResponseSerializer.class)
 public class DereferenceResponse {
 
-    private String owlSameAs;
-    private String skosExactMatch;
+    private final String exactMatch;
 
-    public DereferenceResponse(String owlSameAs, String skosExactMatch) {
-        this.owlSameAs = owlSameAs;
-        this.skosExactMatch = skosExactMatch;
+    public DereferenceResponse(String exactMatch) {
+        this.exactMatch = exactMatch;
     }
 
-
-    public String getOwlSameAs() {
-        return owlSameAs;
+    public String getExactMatch() {
+        return exactMatch;
     }
 
-    public void setOwlSameAs(String owlSameAs) {
-        this.owlSameAs = owlSameAs;
-    }
-
-    public String getSkosExactMatch() {
-        return skosExactMatch;
-    }
-
-    public void setSkosExactMatch(String skosExactMatch) {
-        this.skosExactMatch = skosExactMatch;
+    @Override
+    public String toString() {
+        return "DereferenceResponse{" +
+                "exactMatch='" + exactMatch + '\'' +
+                '}';
     }
 }

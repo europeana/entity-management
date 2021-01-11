@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.web;
 
-import eu.europeana.entity.utils.Constants;
 import eu.europeana.entity.edm.internal.Entity;
+import eu.europeana.entity.utils.Constants;
 import eu.europeana.entitymanagement.model.EntityRequest;
 import eu.europeana.entitymanagement.service.EntityService;
 import org.apache.commons.io.FilenameUtils;

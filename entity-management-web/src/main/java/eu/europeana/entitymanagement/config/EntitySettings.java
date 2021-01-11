@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * Container for all settings that we load from the entitymanagement.properties file and optionally override from
@@ -31,6 +32,9 @@ public class EntitySettings {
     @Value("${datasources.config}")
     private String datasourcesXMLConfig;
     
+    @Value("${metis.baseUrl}")
+    private String metisBaseUrl;
+
     @Bean
 	public DataSources getDataSources() throws IOException {
     	XmlMapper xmlMapper = new XmlMapper();
@@ -41,6 +45,11 @@ public class EntitySettings {
     		    return xmlMapper.readValue(contents, DataSources.class);	
     		}    	         
 	}
-    
 
+    @Bean
+    public WebClient metisWebClient() {
+        return WebClient.builder()
+                .baseUrl(metisBaseUrl)
+                .build();
+    }
 }

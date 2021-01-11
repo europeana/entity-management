@@ -1,40 +1,42 @@
 package eu.europeana.entitymanagement.exception;
 
+
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
- * An exception to demonstrate error handling with ResponseStatus annotation
- * It's recommended that all exceptions created in the API extends the EuropeanaApiException
+ * Exception thrown when a web request cannot be properly handled.
  */
 @ResponseStatus(HttpStatus.BAD_REQUEST)
-public class DummyException extends EuropeanaApiException {
+public class HttpBadRequestException extends EuropeanaApiException {
 
     /**
      * Initialise a new exception for which there is no root cause
+     *
      * @param msg error message
      */
-    public DummyException(String msg) {
+    public HttpBadRequestException(String msg) {
         super(msg);
     }
 
     /**
      * Initialise a new exception for which there is no root cause
-     * @param msg error message
+     *
+     * @param msg       error message
      * @param errorCode error code
      */
-    public DummyException(String msg, String errorCode) {
+    public HttpBadRequestException(String msg, String errorCode) {
         super(msg, errorCode);
     }
 
     /**
      * We don't want to log the stack trace for this exception
+     *
      * @return false
      */
     @Override
     public boolean doLogStacktrace() {
         return false;
     }
-
 }
