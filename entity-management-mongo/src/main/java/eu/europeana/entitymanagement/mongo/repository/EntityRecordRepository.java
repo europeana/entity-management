@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import dev.morphia.Datastore;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.model.mongo.impl.EntityRecordImpl;
 
 
 /**
@@ -25,7 +26,7 @@ public class EntityRecordRepository {
      * @return the total number of resources in the database
      */
     public long count() {
-        return datastore.find(EntityRecord.class).count();
+        return datastore.find(EntityRecordImpl.class).count();
     }
 
     /**
@@ -35,7 +36,7 @@ public class EntityRecordRepository {
      * @return true if yes, otherwise false
      */
     public boolean existsByEntityId(String entityId) {
-        return datastore.find(EntityRecord.class).filter(
+        return datastore.find(EntityRecordImpl.class).filter(
                 eq(ENTITY_ID, entityId)
         ).count() > 0 ;
     }
@@ -46,7 +47,7 @@ public class EntityRecordRepository {
      * @return EntityRecord
      */
     public EntityRecord findByEntityId(String entityId) {
-        return datastore.find(EntityRecord.class).filter(
+        return datastore.find(EntityRecordImpl.class).filter(
                 eq(ENTITY_ID, entityId))
                 .first();
     }
@@ -59,7 +60,7 @@ public class EntityRecordRepository {
      */
     // TODO move this to the loader?
     public long deleteDataset(String entityId) {
-        return datastore.find(EntityRecord.class).filter(
+        return datastore.find(EntityRecordImpl.class).filter(
                 eq(ENTITY_ID,entityId))
                 .delete(MULTI_DELETE_OPTS).getDeletedCount();
     }

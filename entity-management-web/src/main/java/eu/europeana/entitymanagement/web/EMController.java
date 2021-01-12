@@ -1,11 +1,7 @@
 package eu.europeana.entitymanagement.web;
 
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -27,11 +23,10 @@ import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.InternalServerException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.entitymanagement.definitions.formats.FormatTypes;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.RankedEntity;
-import eu.europeana.entitymanagement.definitions.model.impl.BaseTimespan;
-import eu.europeana.entitymanagement.definitions.model.mongo.impl.EntityRecordImpl;
 import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityConstants;
-import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
+import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
 import io.swagger.annotations.ApiOperation;
 
 /**
@@ -42,24 +37,9 @@ import io.swagger.annotations.ApiOperation;
 public class EMController extends BaseRest {
 	
 	@Autowired
-	private EntityRecordRepository entityRecordRepository;
-
-    private static final String MY_REGEX = "^[a-zA-Z0-9_]*$";
-    private static final String INVALID_REQUEST_MESSAGE = "Invalid parameter.";
-
-    /**
-     * Test endpoint
-     * @param someRequest an alpha-numerical String
-     * @return just something, doesn't matter what
-     */
-//    @GetMapping(value = "/{someRequest}", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public String handleMyApiRequest(
-//        @PathVariable(value = "someRequest")
-//            @Pattern(regexp = MY_REGEX, message = INVALID_REQUEST_MESSAGE) String someRequest) {
-//        return "It works!";
-//    }
+	EntityRecordService entityRecordService;
     
-	@ApiOperation(value = "Retrieve a known entity", nickname = "getEntity", response = java.lang.Void.class)
+	@ApiOperation(value = "Retrieve a known entity", nickname = "getEntityJsonLd", response = java.lang.Void.class)
 	@RequestMapping(value = {"/entity/{type}/{namespace}/{identifier}.jsonld"}, method = RequestMethod.GET,
 			produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<String> getJsonLdEntity(
@@ -73,7 +53,7 @@ public class EMController extends BaseRest {
 	    
 	}
 	
-	@ApiOperation(value = "Retrieve a known entity", nickname = "getEntity", response = java.lang.Void.class)
+	@ApiOperation(value = "Retrieve a known entity", nickname = "getEntityXml", response = java.lang.Void.class)
 	@RequestMapping(value = {"/entity/{type}/{namespace}/{identifier}.xml"}, method = RequestMethod.GET, 
 		produces = {HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML, HttpHeaders.CONTENT_TYPE_RDF_XML, MediaType.APPLICATION_XML_VALUE})
 	public ResponseEntity<String> getXmlEntity(
@@ -90,34 +70,13 @@ public class EMController extends BaseRest {
 	private ResponseEntity<String> createResponse(String type, String namespace, String identifier, FormatTypes outFormat,  String contentType, HttpServletRequest request) throws HttpException{
 	    try {
 	    	
-	    	//verifyReadAccess(request);
-        	//Entity entity = entityService.retrieveByUrl(type, namespace, identifier);
-        	//test creating an entity
-	    	BaseTimespan entity = new BaseTimespan();
-	    	entity.setEntityId("http://data.europeana.eu/timespan/1");
-	    	entity.setInternalType("Timespan");
-	    	Map<String, String> prefLabelTest = new HashMap<String, String>();
-	    	//putting the . in the name of the field like prefLabelTest.put("perfLabel.pl", "I wiek") will cause problems during saving to the mongodb
-	    	prefLabelTest.put("perfLabel_pl", "I wiek");
-	    	prefLabelTest.put("perfLabel_da", "1. århundrede");	
-	    	entity.setPrefLabelStringMap(prefLabelTest);
-	        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-	        String dateInString = "2014-10-05T15:23:01Z";
-	        try {
-	            Date date = formatter.parse(dateInString.replaceAll("Z$", "+0000"));
-	            entity.setTimestamp(date);
-	        } catch (ParseException e) {
-	            e.printStackTrace();
-	        }	    	
-	    	EntityRecordImpl entityRecordImpl = new EntityRecordImpl();
-	    	entityRecordImpl.setEntity(entity);
-	    	entityRecordImpl.setEntityId(entity.getEntityId());
+	    	verifyReadAccess(request);
 	    	
-	    	entityRecordRepository.save(entityRecordImpl);
+	    	EntityRecord entity = entityRecordService.retrieveEntityRecordByUri(type, namespace, identifier);
 	    	
-	    	String jsonLd = serialize(entityRecordImpl, outFormat);
+	    	String jsonLd = serialize(entity, outFormat);
         
-    	    	Date timestamp = ((RankedEntity)entity).getTimestamp();
+    	    	Date timestamp = ((RankedEntity)entity.getEntity()).getTimestamp();
     	    	Date etagDate = (timestamp != null)? timestamp : new Date();
     	    	String etag = generateETag(etagDate
     	    		, outFormat.name()
@@ -133,8 +92,7 @@ public class EMController extends BaseRest {
     	    	}
     	    	if(contentType != null && !contentType.isEmpty())
     	    	    headers.add(HttpHeaders.CONTENT_TYPE, contentType);
-    
-//        	System.out.println(jsonLd);
+
     	    	ResponseEntity<String> response = new ResponseEntity<String>(jsonLd, headers, HttpStatus.OK);
         	    	return response;
 	    } catch (RuntimeException e) {
@@ -147,7 +105,5 @@ public class EMController extends BaseRest {
 	    	throw new InternalServerException(e);
 	    }	
 	}
-
-	
 
 }

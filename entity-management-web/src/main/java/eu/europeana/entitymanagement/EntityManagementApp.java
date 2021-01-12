@@ -1,12 +1,13 @@
 package eu.europeana.entitymanagement;
 
-import eu.europeana.entitymanagement.config.SocksProxyConfig;
-import eu.europeana.entitymanagement.util.SocksProxyActivator;
 import org.apache.logging.log4j.LogManager;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+
+import eu.europeana.entitymanagement.config.SocksProxyConfig;
+import eu.europeana.entitymanagement.util.SocksProxyActivator;
 
 /**
  * Main application. Allows deploying as a war and logs instance data when deployed in Cloud Foundry

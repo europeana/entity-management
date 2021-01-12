@@ -1,22 +1,23 @@
 package eu.europeana.entitymanagement.config;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Properties;
 
-import org.apache.commons.lang3.StringUtils;
+import javax.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class EntityConfigurationImpl implements EntityConfiguration {
+public class EntityManagementConfigurationImpl implements EntityManagementConfiguration {
 
-	private Properties entityProperties;
+	@Autowired
+	private EMSettings emSetting;
 	
-	private List<String> solrServerUrls;
+	private Properties entityProperties;
 	
 	@Override
 	public String getComponentName() {
-		return "entity";
+		return "entitymanagement";
 	}
 
 
@@ -38,12 +39,6 @@ public class EntityConfigurationImpl implements EntityConfiguration {
 		return getEntityProperties().getProperty(ENTITY_ENVIRONMENT);
 	}
 
-
-	@Override
-	public int getSuggesterSnippets() {
-		return Integer.parseInt(getEntityProperties().getProperty(KEY_ENTITY_SUGGESTER_SNIPPETS));
-	}
-
 	@Override
 	public String getUserToken() {
 		return getEntityProperties().getProperty(DEFAULT_USER_TOKEN);
@@ -60,19 +55,20 @@ public class EntityConfigurationImpl implements EntityConfiguration {
 	    return getEntityProperties().getProperty(AUTHORIZATION_API_NAME);
 	}
 	
-	@Override
-	public List<String> getSolrServeUrls(){
-	    if(solrServerUrls == null) {
-		String serverList = getEntityProperties().getProperty(SOLR_ENTITY_URL);
-		if(StringUtils.isNotBlank(serverList)) {
-		    solrServerUrls = Arrays.asList(serverList.split(","));
-		}		
-	    }
-	    return solrServerUrls;
-	}
 	
 	@Override
 	public String getApiVersion() {
 	    return getEntityProperties().getProperty(API_VERSION);
 	}	
+	
+    @PostConstruct
+    public void init() {
+    	entityProperties = new Properties();
+    	entityProperties.setProperty(API_VERSION, emSetting.getEntitymanagementApiVersion());
+    	entityProperties.setProperty(AUTHORIZATION_API_NAME, emSetting.getAuthorizationApiName());
+    	entityProperties.setProperty(KEY_APIKEY_JWTTOKEN_SIGNATUREKEY, emSetting.getEuropeanaApikeyJwttokenSiganturekey());
+    	entityProperties.setProperty(DEFAULT_USER_TOKEN, emSetting.getDefaultUserToken());
+    	entityProperties.setProperty(ENTITY_ENVIRONMENT, emSetting.getEntityEnvironment());
+    }
+
 }

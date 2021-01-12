@@ -6,7 +6,7 @@ import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 
 public class BaseEntityProxy implements EntityProxy {
 
-    String id;
+    String proxyId;
     
     Entity entity;
     

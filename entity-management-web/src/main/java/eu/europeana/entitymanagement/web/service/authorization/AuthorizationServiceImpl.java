@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 import eu.europeana.api.commons.definitions.vocabulary.Role;
 import eu.europeana.api.commons.oauth2.service.impl.EuropeanaClientDetailsService;
 import eu.europeana.api.commons.service.authorization.BaseAuthorizationService;
-import eu.europeana.entitymanagement.config.EntityConfiguration;
-import eu.europeana.entitymanagement.config.EntityConfigurationImpl;
+import eu.europeana.entitymanagement.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.config.EntityManagementConfigurationImpl;
 import eu.europeana.entitymanagement.web.model.vocabulary.UserRoles;
 
 @Component
@@ -19,7 +19,7 @@ public class AuthorizationServiceImpl extends BaseAuthorizationService implement
     protected final Logger logger = LogManager.getLogger(getClass());
 
     @Autowired
-    EntityConfigurationImpl configuration;
+    EntityManagementConfigurationImpl configuration;
 
     @Autowired
     EuropeanaClientDetailsService clientDetailsService;
@@ -28,11 +28,11 @@ public class AuthorizationServiceImpl extends BaseAuthorizationService implement
 
     }
 
-    public EntityConfiguration getConfiguration() {
+    public EntityManagementConfiguration getConfiguration() {
 	return configuration;
     }
 
-    public void setConfiguration(EntityConfigurationImpl configuration) {
+    public void setConfiguration(EntityManagementConfigurationImpl configuration) {
 	this.configuration = configuration;
     }
 

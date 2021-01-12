@@ -4,12 +4,12 @@
   <parent>
     <artifactId>entity-management</artifactId>
     <groupId>eu.europeana.api</groupId>
-    <version>${version.entitymanagementApi}</version>
+    <version>0.0.1-SNAPSHOT</version>
   </parent>
 
   <groupId>eu.europeana.api</groupId>
   <artifactId>entity-management-common</artifactId>
-  <version>${version.entitymanagementApi}</version>
+  <version>0.0.1-SNAPSHOT</version>
 
   <name>entity-management-common</name>
   <description>A simple entity-management-common.</description>
@@ -50,6 +50,25 @@
 		<artifactId>spring-context</artifactId>
 		<version>${version.spring}</version>
 	</dependency>
+	<!-- https://mvnrepository.com/artifact/javax.annotation/javax.annotation-api -->
+	<dependency>
+	    <groupId>javax.annotation</groupId>
+	    <artifactId>javax.annotation-api</artifactId>
+	    <version>${version.javax.annotation}</version>
+	</dependency>
+	<dependency>
+	    <groupId>com.fasterxml.jackson.dataformat</groupId>
+	    <artifactId>jackson-dataformat-xml</artifactId>
+	    <version>${jackson.version}</version>
+	</dependency>
+	<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api -->
+	<dependency>
+    	<groupId>org.apache.logging.log4j</groupId>
+    	<artifactId>log4j-api</artifactId>
+    	<version>${version.log4j}</version>
+	</dependency>
+	
+	
   </dependencies>
 
   <build>

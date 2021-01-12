@@ -71,25 +71,25 @@
 		<dependency>
 			<groupId>eu.europeana.api</groupId>
 			<artifactId>entity-management-definitions</artifactId>
-			<version>${version.entitymanagementApi}</version>
+			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>eu.europeana.api</groupId>
 			<artifactId>entity-management-mongo</artifactId>
-			<version>${version.entitymanagementApi}</version>
+			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>eu.europeana.api</groupId>
 			<artifactId>entity-management-utils</artifactId>
-			<version>${version.entitymanagementApi}</version>
+			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>eu.europeana.api</groupId>
 			<artifactId>entity-management-common</artifactId>
-			<version>${version.entitymanagementApi}</version>
+			<version>0.0.1-SNAPSHOT</version>
 		</dependency>		
 		
 		<dependency>

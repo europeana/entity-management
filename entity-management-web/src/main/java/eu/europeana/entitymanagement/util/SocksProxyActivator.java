@@ -1,12 +1,13 @@
 package eu.europeana.entitymanagement.util;
 
-import eu.europeana.entitymanagement.config.SocksProxyConfig;
-import io.micrometer.core.instrument.util.StringUtils;
+import java.net.Authenticator;
+import java.net.PasswordAuthentication;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.net.Authenticator;
-import java.net.PasswordAuthentication;
+import eu.europeana.entitymanagement.config.SocksProxyConfig;
+import io.micrometer.core.instrument.util.StringUtils;
 
 /**
  * Activate the use of a Socks Proxy for all connections (if this is configured properly).

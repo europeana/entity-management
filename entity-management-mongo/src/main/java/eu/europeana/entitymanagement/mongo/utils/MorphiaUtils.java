@@ -14,7 +14,7 @@ public class MorphiaUtils {
     public static final MapperOptions MAPPER_OPTIONS = MapperOptions
             .builder()
             // use legacy settings for backwards-compatibility
-            .discriminatorKey(Fields.ENTITY_ID)
+            .discriminatorKey(Fields.CLASS)
             .discriminator(DiscriminatorFunction.className())
             .fieldNaming(NamingStrategy.identity())
             .build();
@@ -30,6 +30,9 @@ public class MorphiaUtils {
             // private constructor to prevent instantiation
         }
 
-        public static final String ENTITY_ID = "entityId";    }
+        public static final String CLASS = "objectClass";
+        public static final String ENTITY_ID = "entityId";
+        
+    }
 
 }

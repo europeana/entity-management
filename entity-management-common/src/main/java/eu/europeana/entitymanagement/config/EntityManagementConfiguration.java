@@ -1,8 +1,6 @@
 package eu.europeana.entitymanagement.config;
 
-import java.util.List;
-
-public interface EntityConfiguration {
+public interface EntityManagementConfiguration {
 
 	public static final String ENTITY_ENVIRONMENT = "entity.environment";
 	
@@ -10,8 +8,6 @@ public interface EntityConfiguration {
 	public static final String VALUE_ENVIRONMENT_PRODUCTION = "production";
 	public static final String VALUE_ENVIRONMENT_TEST = "test";
 	public static final String VALUE_ENVIRONMENT_DEVELOPMENT = "development";
-
-	public static final String KEY_ENTITY_SUGGESTER_SNIPPETS = "entity.suggester.snippets";
 	public static final String KEY_APIKEY_JWTTOKEN_SIGNATUREKEY = "europeana.apikey.jwttoken.siganturekey";
 	
 	public static final String DEFAULT_USER_TOKEN = "default.user.token";
@@ -19,8 +15,6 @@ public interface EntityConfiguration {
 	public static final String AUTHORIZATION_API_NAME = "authorization.api.name";
 
 	public static final String API_VERSION = "entity.api.version";
-
-	public static final String SOLR_ENTITY_URL = "solr.entity.url";
 	
 	public String getComponentName();
 	
@@ -35,8 +29,6 @@ public interface EntityConfiguration {
 	 */
 	public String getEnvironment();
 	
-	public int getSuggesterSnippets();
-	
 	public String getUserToken();
 
 	public String getJwtTokenSignatureKey();
@@ -44,7 +36,5 @@ public interface EntityConfiguration {
 	public String getAuthorizationApiName();
 
 	public String getApiVersion();
-	    
-	List<String> getSolrServeUrls();
 	
 }

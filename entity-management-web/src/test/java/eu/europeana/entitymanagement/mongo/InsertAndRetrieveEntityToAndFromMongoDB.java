@@ -1,4 +1,6 @@
-package eu.europeana.entitymanagement.web;
+package eu.europeana.entitymanagement.mongo;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -9,6 +11,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseTimespan;
 import eu.europeana.entitymanagement.definitions.model.mongo.impl.EntityRecordImpl;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
@@ -27,7 +30,7 @@ public class InsertAndRetrieveEntityToAndFromMongoDB {
 		EntityRecordRepository entityRecordRepository = context.getBean(EntityRecordRepository.class);
     	
 		BaseTimespan entity = new BaseTimespan();
-    	entity.setEntityId("http://data.europeana.eu/timespan/1");
+    	entity.setEntityId("http://data.europeana.eu/timespan/base/1");
     	entity.setInternalType("Timespan");
     	Map<String, String> prefLabelTest = new HashMap<String, String>();
     	/*
@@ -60,8 +63,9 @@ public class InsertAndRetrieveEntityToAndFromMongoDB {
 		context.refresh();
 		System.out.println("Refreshing the spring context");
 		EntityRecordRepository entityRecordRepository = context.getBean(EntityRecordRepository.class);
-    	
-		entityRecordRepository.findByEntityId("http://data.europeana.eu/timespan/1");
+    	String entityId = "http://data.europeana.eu/timespan/base/1";
+		EntityRecord er = entityRecordRepository.findByEntityId(entityId);		
+		assertEquals(er.getEntityId(), entityId);
 		
     	context.close();
 	}

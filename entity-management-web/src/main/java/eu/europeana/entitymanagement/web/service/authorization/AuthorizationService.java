@@ -1,9 +1,9 @@
 package eu.europeana.entitymanagement.web.service.authorization;
 
-import eu.europeana.entitymanagement.config.EntityConfiguration;
+import eu.europeana.entitymanagement.config.EntityManagementConfiguration;
 
 public interface AuthorizationService extends eu.europeana.api.commons.service.authorization.AuthorizationService{
 
-	EntityConfiguration getConfiguration();
+	EntityManagementConfiguration getConfiguration();
 	
 }
