@@ -3,7 +3,7 @@ package eu.europeana.entitymanagement.definitions.view;
 import java.util.List;
 import java.util.Map;
 
-import eu.europeana.definitions.model.search.results.IdBean;
+import eu.europeana.entitymanagement.definitions.model.search.results.IdBean;
 import eu.europeana.entitymanagement.definitions.model.vocabulary.EntityTypes;
 
 /**

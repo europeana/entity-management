@@ -11,7 +11,7 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 /**
  * Main application. Allows deploying as a war and logs instance data when deployed in Cloud Foundry
  */
-@SpringBootApplication(scanBasePackages = "eu.europeana.entitymanagement")
+@SpringBootApplication(scanBasePackages = {"eu.europeana.entitymanagement", "eu.europeana.api.commons"})
 public class EntityManagementApp extends SpringBootServletInitializer {
 
     /**

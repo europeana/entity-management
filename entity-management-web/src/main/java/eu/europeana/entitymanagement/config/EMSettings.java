@@ -34,7 +34,14 @@ public class EMSettings {
     @Value("${datasources.config}")
     private String datasourcesXMLConfig;
     
-    @Bean
+    @Value("${entitymanagement.api.version}")
+    private String entitymanagementApiVersion;
+    
+    public String getEntitymanagementApiVersion() {
+		return entitymanagementApiVersion;
+	}
+
+	@Bean
 	public DataSources getDataSources() throws IOException {
     	XmlMapper xmlMapper = new XmlMapper();
     	try (InputStream inputStream = getClass().getResourceAsStream(datasourcesXMLConfig);

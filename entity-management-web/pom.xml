@@ -54,17 +54,18 @@
             <version>${swagger.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>eu.europeana.api.commons</groupId>
-            <artifactId>commons-error</artifactId>
-            <version>${api.commons.version}</version>
-        </dependency>
 
         
 		<dependency>
 			<groupId>eu.europeana.api.commons</groupId>
 			<artifactId>commons-web</artifactId>
 			<version>${api.commons.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.mongodb</groupId>
+					<artifactId>mongo-java-driver</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
  		
 		<dependency>
@@ -72,8 +73,51 @@
 			<artifactId>entity-management-definitions</artifactId>
 			<version>${version.entitymanagementApi}</version>
 		</dependency>
+
+		<dependency>
+			<groupId>eu.europeana.api</groupId>
+			<artifactId>entity-management-mongo</artifactId>
+			<version>${version.entitymanagementApi}</version>
+		</dependency>
 		
-        
+		<dependency>
+			<groupId>eu.europeana.api</groupId>
+			<artifactId>entity-management-utils</artifactId>
+			<version>${version.entitymanagementApi}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>eu.europeana.api</groupId>
+			<artifactId>entity-management-common</artifactId>
+			<version>${version.entitymanagementApi}</version>
+		</dependency>		
+		
+		<dependency>
+			<groupId>eu.europeana.corelib</groupId>
+			<artifactId>corelib-schemaorg</artifactId>
+			<version>${version.corelib}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.mongodb.morphia</groupId>
+					<artifactId>morphia</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>eu.europeana.corelib</groupId>
+					<artifactId>corelib-storage</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.mongodb</groupId>
+					<artifactId>mongodb-driver-core</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>eu.europeana.corelib</groupId>
+			<artifactId>corelib-utils</artifactId>
+			<version>${version.corelib}</version>
+		</dependency>
+		       
 
         <!-- for securing (error) output -->
         <dependency>

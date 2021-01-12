@@ -5,6 +5,9 @@
     <modules>
         <module>entity-management-definitions</module>
         <module>entity-management-web</module>
+        <module>entity-management-mongo</module>
+        <module>entity-management-utils</module>
+        <module>entity-management-common</module>
     </modules>
 
     <parent>
@@ -40,13 +43,18 @@
         <java.version>11</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <api.commons.version>0.2.11-SNAPSHOT</api.commons.version>
+        <api.commons.version>0.2.12-SNAPSHOT</api.commons.version>
         <corelib.version>2.11.0</corelib.version>
         <junit.version>5.7.0</junit.version>
         <jackson.version>2.11.4</jackson.version>
         <springCore.version>5.2.7.RELEASE</springCore.version>
+        <version.spring>5.2.7.RELEASE</version.spring>
+        <version.commonsLang3>3.0</version.commonsLang3>
+        <version.annotationLd>1.1.6</version.annotationLd>
         <spring-boot.version>2.4.0</spring-boot.version>
         <swagger.version>3.0.0</swagger.version>
+        <morphia.version>2.0.0</morphia.version>
+        <version.corelib>2.12.0-SNAPSHOT</version.corelib>
     </properties>
 
     <dependencyManagement>

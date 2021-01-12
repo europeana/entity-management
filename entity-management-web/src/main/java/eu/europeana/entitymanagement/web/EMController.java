@@ -1,17 +1,21 @@
 package eu.europeana.entitymanagement.web;
 
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.constraints.Pattern;
+import java.util.HashMap;
+import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -22,10 +26,12 @@ import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.InternalServerException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
-import eu.europeana.entity.definitions.model.Entity;
-import eu.europeana.entity.definitions.model.RankedEntity;
 import eu.europeana.entitymanagement.definitions.formats.FormatTypes;
+import eu.europeana.entitymanagement.definitions.model.RankedEntity;
+import eu.europeana.entitymanagement.definitions.model.impl.BaseTimespan;
+import eu.europeana.entitymanagement.definitions.model.mongo.impl.EntityRecordImpl;
 import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityConstants;
+import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import io.swagger.annotations.ApiOperation;
 
 /**
@@ -34,6 +40,9 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @Validated
 public class EMController extends BaseRest {
+	
+	@Autowired
+	private EntityRecordRepository entityRecordRepository;
 
     private static final String MY_REGEX = "^[a-zA-Z0-9_]*$";
     private static final String INVALID_REQUEST_MESSAGE = "Invalid parameter.";
@@ -43,12 +52,12 @@ public class EMController extends BaseRest {
      * @param someRequest an alpha-numerical String
      * @return just something, doesn't matter what
      */
-    @GetMapping(value = "/{someRequest}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String handleMyApiRequest(
-        @PathVariable(value = "someRequest")
-            @Pattern(regexp = MY_REGEX, message = INVALID_REQUEST_MESSAGE) String someRequest) {
-        return "It works!";
-    }
+//    @GetMapping(value = "/{someRequest}", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public String handleMyApiRequest(
+//        @PathVariable(value = "someRequest")
+//            @Pattern(regexp = MY_REGEX, message = INVALID_REQUEST_MESSAGE) String someRequest) {
+//        return "It works!";
+//    }
     
 	@ApiOperation(value = "Retrieve a known entity", nickname = "getEntity", response = java.lang.Void.class)
 	@RequestMapping(value = {"/entity/{type}/{namespace}/{identifier}.jsonld"}, method = RequestMethod.GET,
@@ -63,13 +72,50 @@ public class EMController extends BaseRest {
 	    return createResponse(type, namespace, identifier, FormatTypes.jsonld, null, request);	
 	    
 	}
+	
+	@ApiOperation(value = "Retrieve a known entity", nickname = "getEntity", response = java.lang.Void.class)
+	@RequestMapping(value = {"/entity/{type}/{namespace}/{identifier}.xml"}, method = RequestMethod.GET, 
+		produces = {HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML, HttpHeaders.CONTENT_TYPE_RDF_XML, MediaType.APPLICATION_XML_VALUE})
+	public ResponseEntity<String> getXmlEntity(
+			@RequestParam(value = CommonApiConstants.PARAM_WSKEY, required=false) String wskey,
+			@PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
+			@PathVariable(value = WebEntityConstants.PATH_PARAM_NAMESPACE) String namespace,
+			@PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
+			HttpServletRequest request
+			) throws HttpException  {
+	    return createResponse(type, namespace, identifier, FormatTypes.xml, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML, request);
+	}
+
 
 	private ResponseEntity<String> createResponse(String type, String namespace, String identifier, FormatTypes outFormat,  String contentType, HttpServletRequest request) throws HttpException{
 	    try {
 	    	
-	    	verifyReadAccess(request);
-        	Entity entity = entityService.retrieveByUrl(type, namespace, identifier);
-        	String jsonLd = serialize(entity, outFormat);
+	    	//verifyReadAccess(request);
+        	//Entity entity = entityService.retrieveByUrl(type, namespace, identifier);
+        	//test creating an entity
+	    	BaseTimespan entity = new BaseTimespan();
+	    	entity.setEntityId("http://data.europeana.eu/timespan/1");
+	    	entity.setInternalType("Timespan");
+	    	Map<String, String> prefLabelTest = new HashMap<String, String>();
+	    	//putting the . in the name of the field like prefLabelTest.put("perfLabel.pl", "I wiek") will cause problems during saving to the mongodb
+	    	prefLabelTest.put("perfLabel_pl", "I wiek");
+	    	prefLabelTest.put("perfLabel_da", "1. århundrede");	
+	    	entity.setPrefLabelStringMap(prefLabelTest);
+	        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+	        String dateInString = "2014-10-05T15:23:01Z";
+	        try {
+	            Date date = formatter.parse(dateInString.replaceAll("Z$", "+0000"));
+	            entity.setTimestamp(date);
+	        } catch (ParseException e) {
+	            e.printStackTrace();
+	        }	    	
+	    	EntityRecordImpl entityRecordImpl = new EntityRecordImpl();
+	    	entityRecordImpl.setEntity(entity);
+	    	entityRecordImpl.setEntityId(entity.getEntityId());
+	    	
+	    	entityRecordRepository.save(entityRecordImpl);
+	    	
+	    	String jsonLd = serialize(entityRecordImpl, outFormat);
         
     	    	Date timestamp = ((RankedEntity)entity).getTimestamp();
     	    	Date etagDate = (timestamp != null)? timestamp : new Date();

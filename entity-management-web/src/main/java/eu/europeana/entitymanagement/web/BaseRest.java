@@ -11,45 +11,49 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import eu.europeana.api.commons.definitions.config.i18n.I18nConstants;
 import eu.europeana.api.commons.definitions.search.result.ResultsPage;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.definitions.vocabulary.CommonLdConstants;
 import eu.europeana.api.commons.definitions.vocabulary.ContextTypes;
-import eu.europeana.api.commons.service.authorization.AuthorizationService;
 import eu.europeana.api.commons.utils.ResultsPageSerializer;
 import eu.europeana.api.commons.web.controller.BaseRestController;
 import eu.europeana.api.commons.web.exception.HttpException;
-import eu.europeana.api.commons.web.exception.ParamValidationException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.corelib.definitions.edm.entity.ConceptScheme;
-import eu.europeana.entity.definitions.exceptions.ConceptSchemeProfileValidationException;
-import eu.europeana.entity.definitions.exceptions.UnsupportedEntityTypeException;
-import eu.europeana.entity.definitions.model.search.SearchProfiles;
-import eu.europeana.entity.definitions.model.vocabulary.LdProfiles;
-import eu.europeana.entity.definitions.model.vocabulary.SuggestAlgorithmTypes;
-import eu.europeana.entity.utils.jsonld.EuropeanaEntityLd;
-import eu.europeana.entity.web.jsonld.EntityResultsPageSerializer;
-import eu.europeana.entity.web.jsonld.EntitySchemaOrgSerializer;
-import eu.europeana.entity.web.service.EntityService;
-import eu.europeana.entity.web.xml.EntityXmlSerializer;
+import eu.europeana.entitymanagement.config.EMSettings;
+import eu.europeana.entitymanagement.config.I18nConstants;
+import eu.europeana.entitymanagement.definitions.exceptions.ConceptSchemeProfileValidationException;
+import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedFormatTypeException;
 import eu.europeana.entitymanagement.definitions.formats.FormatTypes;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.model.search.SearchProfiles;
+import eu.europeana.entitymanagement.definitions.model.vocabulary.LdProfiles;
+import eu.europeana.entitymanagement.definitions.model.vocabulary.SuggestAlgorithmTypes;
 import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityConstants;
+import eu.europeana.entitymanagement.exception.ParamValidationException;
+import eu.europeana.entitymanagement.utils.jsonld.EuropeanaEntityLd;
+import eu.europeana.entitymanagement.web.jsonld.EntityResultsPageSerializer;
+import eu.europeana.entitymanagement.web.jsonld.EntitySchemaOrgSerializer;
+import eu.europeana.entitymanagement.web.service.authorization.AuthorizationService;
+import eu.europeana.entitymanagement.web.service.authorization.AuthorizationServiceImpl;
+import eu.europeana.entitymanagement.web.xml.EntityXmlSerializer;
 
 public abstract class BaseRest extends BaseRestController {
 
-    @Resource
-    private EntityService entityService;
+    @Autowired
+    AuthorizationServiceImpl authorizationService;
+    
+    @Autowired
+    EMSettings emSettings;
 
-    @Resource
-    AuthorizationService authorizationService;
-
-    @Resource
+    @Autowired
     EntityXmlSerializer entityXmlSerializer;
 
     Logger logger = LogManager.getLogger(getClass());
@@ -67,14 +71,6 @@ public abstract class BaseRest extends BaseRestController {
 	return authorizationService;
     }
 
-    protected EntityService getEntityService() {
-	return entityService;
-    }
-
-    public void setEntityService(EntityService entityService) {
-	this.entityService = entityService;
-    }
-
     public Logger getLogger() {
 	return logger;
     }
@@ -87,7 +83,7 @@ public abstract class BaseRest extends BaseRestController {
     }
 
     public String getApiVersion() {
-	return getAuthorizationService().getConfiguration().getApiVersion();
+	return emSettings.getEntitymanagementApiVersion();
     }
 
     /**
@@ -369,17 +365,17 @@ public abstract class BaseRest extends BaseRestController {
      * @throws UnsupportedEntityTypeException
      * @throws HttpException
      */
-    protected String serialize(Entity entity, FormatTypes format) throws UnsupportedEntityTypeException, HttpException {
+    protected String serialize(EntityRecord entityRecord, FormatTypes format) throws UnsupportedEntityTypeException, HttpException {
 
 	String responseBody = null;
 
 	if (FormatTypes.jsonld.equals(format)) {
-	    EuropeanaEntityLd entityLd = new EuropeanaEntityLd(entity);
+	    EuropeanaEntityLd entityLd = new EuropeanaEntityLd(entityRecord.getEntity());
 	    return entityLd.toString(4);
 	} else if (FormatTypes.schema.equals(format)) {
-	    responseBody = (new EntitySchemaOrgSerializer()).serializeEntity(entity);
+	    responseBody = (new EntitySchemaOrgSerializer()).serializeEntity(entityRecord.getEntity());
 	} else if (FormatTypes.xml.equals(format)) {
-	    responseBody = entityXmlSerializer.serializeXml(entity);
+	    responseBody = entityXmlSerializer.serializeXml(entityRecord.getEntity());
 	}
 	return responseBody;
     }
