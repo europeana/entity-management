@@ -1,8 +1,6 @@
 package eu.europeana.entitymanagement.config;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -16,7 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.context.annotation.PropertySources;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
@@ -25,8 +23,11 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
  * myapi.user.properties file
  */
 @Configuration
-@PropertySource("classpath:entitymanagement.properties")
-//@PropertySource(value = "classpath:myapi.user.properties", ignoreResourceNotFound = true)
+@PropertySources
+({
+@PropertySource("classpath:entitymanagement.properties"),
+@PropertySource(value = "classpath:entitymanagement.user.properties", ignoreResourceNotFound = true)
+})
 public class EMSettings {
 
     private static final Logger LOG = LogManager.getLogger(EMSettings.class);
@@ -61,15 +62,6 @@ public class EMSettings {
     public String getAuthorizationApiName() {
 		return authorizationApiName;
 	}
-
-	@Value("${default.user.token}")
-    private String defaultUserToken;
-
-    
-    public String getDefaultUserToken() {
-		return defaultUserToken;
-	}
-
 
 	@Bean
 	public DataSources getDataSources() throws IOException {

@@ -1,7 +1,5 @@
 package eu.europeana.entitymanagement.definitions.model.vocabulary;
 
-import eu.europeana.entitymanagement.definitions.exceptions.ConceptSchemeProfileValidationException;
-
 /**
  * This enumeration is intended for Linked Data profiles
  * 
@@ -17,39 +15,6 @@ public enum LdProfiles implements ProfileKeyword {
 
 	LdProfiles(String preferHeaderValue){
 		this.preferHeaderValue = preferHeaderValue;
-	}
-	
-	/**
-	 * Identifying requested profile by Linked Data value.
-	 * For user friendliness the the comparison is case insensitive  
-	 * @param ldValue
-	 * @return
-	 * @throws ConceptSchemeProfileValidationException 
-	 */
-	public static LdProfiles getByHeaderValue(String headerValue) throws ConceptSchemeProfileValidationException{
-		
-		for(LdProfiles ldType : LdProfiles.values()) {
-			if(headerValue.equals(ldType.getHeaderValue())) {
-				return ldType;
-			}
-		}
-		throw new ConceptSchemeProfileValidationException(headerValue);		
-	}
-	
-	/**
-	 * 
-	 * @param name
-	 * @return
-	 * @throws ConceptSchemeProfileValidationException
-	 */
-	public static LdProfiles getByName(String name) throws ConceptSchemeProfileValidationException{
-		
-		for(LdProfiles ldType : LdProfiles.values()){
-			if(name.equals(ldType.name().toLowerCase())) {
-				return ldType;
-			}
-		}
-		throw new ConceptSchemeProfileValidationException(name);		
 	}
 	
 	@Override

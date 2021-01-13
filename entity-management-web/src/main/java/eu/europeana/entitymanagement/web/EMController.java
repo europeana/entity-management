@@ -24,7 +24,6 @@ import eu.europeana.api.commons.web.exception.InternalServerException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.entitymanagement.definitions.formats.FormatTypes;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.RankedEntity;
 import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
 import io.swagger.annotations.ApiOperation;
@@ -76,7 +75,7 @@ public class EMController extends BaseRest {
 	    	
 	    	String jsonLd = serialize(entity, outFormat);
         
-    	    	Date timestamp = ((RankedEntity)entity.getEntity()).getTimestamp();
+    	    	Date timestamp = entity.getIsAggregatedBy().getCreated();
     	    	Date etagDate = (timestamp != null)? timestamp : new Date();
     	    	String etag = generateETag(etagDate
     	    		, outFormat.name()

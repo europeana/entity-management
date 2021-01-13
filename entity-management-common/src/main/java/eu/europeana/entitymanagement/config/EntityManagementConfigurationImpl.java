@@ -67,7 +67,6 @@ public class EntityManagementConfigurationImpl implements EntityManagementConfig
     	entityProperties.setProperty(API_VERSION, emSetting.getEntitymanagementApiVersion());
     	entityProperties.setProperty(AUTHORIZATION_API_NAME, emSetting.getAuthorizationApiName());
     	entityProperties.setProperty(KEY_APIKEY_JWTTOKEN_SIGNATUREKEY, emSetting.getEuropeanaApikeyJwttokenSiganturekey());
-    	entityProperties.setProperty(DEFAULT_USER_TOKEN, emSetting.getDefaultUserToken());
     	entityProperties.setProperty(ENTITY_ENVIRONMENT, emSetting.getEntityEnvironment());
     }
 

@@ -11,7 +11,9 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.model.impl.BaseAggregation;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseTimespan;
 import eu.europeana.entitymanagement.definitions.model.mongo.impl.EntityRecordImpl;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
@@ -39,17 +41,13 @@ public class InsertAndRetrieveEntityToAndFromMongoDB {
     	prefLabelTest.put("perfLabel_pl", "I wiek");
     	prefLabelTest.put("perfLabel_da", "1. århundrede");	
     	entity.setPrefLabelStringMap(prefLabelTest);
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-        String dateInString = "2014-10-05T15:23:01Z";
-        try {
-            Date date = formatter.parse(dateInString.replaceAll("Z$", "+0000"));
-            entity.setTimestamp(date);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }	    	
+    	Aggregation aggregation = new BaseAggregation();
+    	aggregation.setCreated(new Date());
+	    	
     	EntityRecordImpl entityRecordImpl = new EntityRecordImpl();
     	entityRecordImpl.setEntity(entity);
     	entityRecordImpl.setEntityId(entity.getEntityId());
+    	entityRecordImpl.setIsAggregatedBy(aggregation);
     	
     	entityRecordRepository.save(entityRecordImpl);
     	

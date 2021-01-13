@@ -10,9 +10,8 @@ import java.util.stream.Collectors;
 import org.bson.types.ObjectId;
 
 import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.RankedEntity;
 
-public class BaseEntity implements Entity, RankedEntity {
+public class BaseEntity implements Entity {
 
 	protected String TMP_KEY = "def";
 	
@@ -125,46 +124,6 @@ public class BaseEntity implements Entity, RankedEntity {
 
 	public void setAbout(String about) {
 		setEntityId(about);
-	}
-
-	@Override
-	public Date getTimestamp() {
-		return timestamp;
-	}
-
-	@Override
-	public void setTimestamp(Date timestamp) {
-		this.timestamp = timestamp;
-	}
-
-	@Override
-	public int getWikipediaClicks() {
-		return wikipediaClicks;
-	}
-
-	@Override
-	public void setWikipediaClicks(int wikipediaClicks) {
-		this.wikipediaClicks = wikipediaClicks;
-	}
-
-	@Override
-	public int getEuropeanaDocCount() {
-		return europeanaDocCount;
-	}
-
-	@Override
-	public void setEuropeanaDocCount(int europeanaDocCount) {
-		this.europeanaDocCount = europeanaDocCount;
-	}
-
-	@Override
-	public float getDerivedScore() {
-		return derivedScore;
-	}
-
-	@Override
-	public void setDerivedScore(float derivedScore) {
-		this.derivedScore = derivedScore;
 	}
 
 	public String[] getIsRelatedTo() {

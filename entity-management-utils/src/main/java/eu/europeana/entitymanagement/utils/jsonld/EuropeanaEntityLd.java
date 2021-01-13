@@ -12,7 +12,6 @@ import eu.europeana.api.commons.definitions.utils.DateUtils;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Concept;
-import eu.europeana.entitymanagement.definitions.model.ConceptScheme;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.definitions.model.Place;
@@ -160,10 +159,6 @@ public class EuropeanaEntityLd extends JsonLd {
 	    putTimespanSpecificProperties((Timespan) entity, jsonLdResource);
 	    break;
 
-	case ConceptScheme:
-	    putConceptSchemeSpecificProperties((ConceptScheme) entity, jsonLdResource);
-	    break;
-
 	default:
 	    break;
 	}
@@ -176,12 +171,6 @@ public class EuropeanaEntityLd extends JsonLd {
 	
 	putStringProperty(WebEntityFields.BEGIN, entity.getBeginString(), jsonLdResource);
 	putStringProperty(WebEntityFields.END, entity.getEndString(), jsonLdResource);
-    }
-
-    private void putConceptSchemeSpecificProperties(ConceptScheme entity, JsonLdResource jsonLdResource) {
-	putMapOfStringProperty(WebEntityFields.DEFINITION, entity.getDefinition(), "", ldResource);
-	putStringProperty(WebEntityFields.IS_DEFINED_BY, entity.getIsDefinedBy(), jsonLdResource);
-	jsonLdResource.putProperty(WebEntityFields.TOTAL, entity.getTotal());
     }
 
     private void putPlaceSpecificProperties(Place entity, JsonLdResource jsonLdResource) {
