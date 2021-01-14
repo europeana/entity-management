@@ -23,6 +23,7 @@ import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.InternalServerException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.entitymanagement.definitions.formats.FormatTypes;
+import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
@@ -43,12 +44,13 @@ public class EMController extends BaseRest {
 			produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<String> getJsonLdEntity(
 			@RequestParam(value = CommonApiConstants.PARAM_WSKEY, required=false) String wskey,
+			@RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required=true) String profile,
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_NAMESPACE) String namespace,
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 			HttpServletRequest request
 			) throws HttpException  {
-	    return createResponse(type, namespace, identifier, FormatTypes.jsonld, null, request);	
+	    return createResponse(profile, type, namespace, identifier, FormatTypes.jsonld, null, request);	
 	    
 	}
 	
@@ -57,43 +59,45 @@ public class EMController extends BaseRest {
 		produces = {HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML, HttpHeaders.CONTENT_TYPE_RDF_XML, MediaType.APPLICATION_XML_VALUE})
 	public ResponseEntity<String> getXmlEntity(
 			@RequestParam(value = CommonApiConstants.PARAM_WSKEY, required=false) String wskey,
+			@RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required=true) String profile,
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_NAMESPACE) String namespace,
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 			HttpServletRequest request
 			) throws HttpException  {
-	    return createResponse(type, namespace, identifier, FormatTypes.xml, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML, request);
+	    return createResponse(profile, type, namespace, identifier, FormatTypes.xml, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML, request);
 	}
 
 
-	private ResponseEntity<String> createResponse(String type, String namespace, String identifier, FormatTypes outFormat,  String contentType, HttpServletRequest request) throws HttpException{
+	private ResponseEntity<String> createResponse(String profile, String type, String namespace, String identifier, FormatTypes outFormat,  String contentType, HttpServletRequest request) throws HttpException{
 	    try {
 	    	
 	    	verifyReadAccess(request);
 	    	
 	    	EntityRecord entity = entityRecordService.retrieveEntityRecordByUri(type, namespace, identifier);
 	    	
-	    	String jsonLd = serialize(entity, outFormat);
+	    	String body = serialize(entity, outFormat, profile);
         
-    	    	Date timestamp = entity.getIsAggregatedBy().getCreated();
-    	    	Date etagDate = (timestamp != null)? timestamp : new Date();
-    	    	String etag = generateETag(etagDate
-    	    		, outFormat.name()
-		        , getApiVersion()
-		        );
-    	    	
-    	    	MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
-    	    	headers.add(HttpHeaders.ETAG, "" + etag);
-    	    	headers.add(HttpHeaders.ALLOW, HttpHeaders.ALLOW_GET);
-    	    	if(!outFormat.equals(FormatTypes.schema)) {
-    	    		headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
-    	    		headers.add(HttpHeaders.LINK, HttpHeaders.VALUE_LDP_RESOURCE);
-    	    	}
-    	    	if(contentType != null && !contentType.isEmpty())
-    	    	    headers.add(HttpHeaders.CONTENT_TYPE, contentType);
+	    	Aggregation tmpAggregation = entity.getIsAggregatedBy();
+	    	Date timestamp = (tmpAggregation != null) ? tmpAggregation.getCreated() : null;
+	    	Date etagDate = (timestamp != null)? timestamp : new Date();
+	    	String etag = generateETag(etagDate
+	    		, outFormat.name()
+	        , getApiVersion()
+	        );
+	    	
+	    	MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
+	    	headers.add(HttpHeaders.ETAG, "" + etag);
+	    	headers.add(HttpHeaders.ALLOW, HttpHeaders.ALLOW_GET);
+	    	if(!outFormat.equals(FormatTypes.schema)) {
+	    		headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
+	    		headers.add(HttpHeaders.LINK, HttpHeaders.VALUE_LDP_RESOURCE);
+	    	}
+	    	if(contentType != null && !contentType.isEmpty())
+	    	    headers.add(HttpHeaders.CONTENT_TYPE, contentType);
 
-    	    	ResponseEntity<String> response = new ResponseEntity<String>(jsonLd, headers, HttpStatus.OK);
-        	    	return response;
+	    	ResponseEntity<String> response = new ResponseEntity<String>(body, headers, HttpStatus.OK);
+    	    	return response;
 	    } catch (RuntimeException e) {
 	    	//not found .. 
 	    	throw new InternalServerException(e);
