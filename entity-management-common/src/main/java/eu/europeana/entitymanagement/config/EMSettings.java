@@ -26,7 +26,7 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
  */
 @Configuration
 @PropertySource("classpath:entitymanagement.properties")
-@PropertySource(value = "classpath:myapi.user.properties", ignoreResourceNotFound = true)
+//@PropertySource(value = "classpath:myapi.user.properties", ignoreResourceNotFound = true)
 public class EMSettings {
 
     private static final Logger LOG = LogManager.getLogger(EMSettings.class);
@@ -34,7 +34,44 @@ public class EMSettings {
     @Value("${datasources.config}")
     private String datasourcesXMLConfig;
     
-    @Bean
+    @Value("${entitymanagement.api.version}")
+    private String entitymanagementApiVersion;
+    
+	public String getEntitymanagementApiVersion() {
+		return entitymanagementApiVersion;
+	}
+
+    @Value("${entity.environment}")
+    private String entityEnvironment;
+    
+    public String getEntityEnvironment() {
+		return entityEnvironment;
+	}
+
+	@Value("${europeana.apikey.jwttoken.siganturekey}")
+    private String europeanaApikeyJwttokenSiganturekey;
+    
+    public String getEuropeanaApikeyJwttokenSiganturekey() {
+		return europeanaApikeyJwttokenSiganturekey;
+	}
+
+	@Value("${authorization.api.name}")
+    private String authorizationApiName;
+    
+    public String getAuthorizationApiName() {
+		return authorizationApiName;
+	}
+
+	@Value("${default.user.token}")
+    private String defaultUserToken;
+
+    
+    public String getDefaultUserToken() {
+		return defaultUserToken;
+	}
+
+
+	@Bean
 	public DataSources getDataSources() throws IOException {
     	XmlMapper xmlMapper = new XmlMapper();
     	try (InputStream inputStream = getClass().getResourceAsStream(datasourcesXMLConfig);
