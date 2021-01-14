@@ -2,7 +2,7 @@ package eu.europeana.entitymanagement.mongo.repository;
 
 import static dev.morphia.query.experimental.filters.Filters.eq;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_DELETE_OPTS;
-import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.Fields.ENTITY_ID;
+import static eu.europeana.entitymanagement.mongo.repository.EntityRecordFields.ENTITY_ID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -37,7 +37,7 @@ public class EntityRecordRepository {
      */
     public boolean existsByEntityId(String entityId) {
         return datastore.find(EntityRecordImpl.class).filter(
-                eq(ENTITY_ID, entityId)
+                eq(EntityRecordFields.ENTITY_ID, entityId)
         ).count() > 0 ;
     }
 

@@ -1,8 +1,8 @@
 package eu.europeana.entitymanagement.mongo.repository;
 
 import static dev.morphia.query.experimental.filters.Filters.eq;
+import static eu.europeana.entitymanagement.mongo.repository.EntityRecordFields.ENTITY_ID;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_DELETE_OPTS;
-import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.Fields.ENTITY_ID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;

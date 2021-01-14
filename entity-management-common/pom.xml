@@ -7,10 +7,8 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
 
-  <groupId>eu.europeana.api</groupId>
   <artifactId>entity-management-common</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
-
+  
   <name>entity-management-common</name>
   <description>A simple entity-management-common.</description>
   <!-- FIXME change it to the project's website -->
