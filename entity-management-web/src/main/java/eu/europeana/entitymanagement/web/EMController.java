@@ -22,10 +22,13 @@ import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.InternalServerException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
+import eu.europeana.entitymanagement.config.I18nConstants;
 import eu.europeana.entitymanagement.definitions.formats.FormatTypes;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityConstants;
+import eu.europeana.entitymanagement.exception.ParamValidationException;
+import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
 import io.swagger.annotations.ApiOperation;
 
@@ -73,6 +76,20 @@ public class EMController extends BaseRest {
 	    try {
 	    	
 	    	verifyReadAccess(request);
+	    	
+	    	/*
+	    	 * verify the parameters
+	    	 */
+	    	boolean valid_profile = false;
+	    	for (EntityProfile ep : EntityProfile.values()) {
+	            if (ep.name().equals(profile)) {
+	            	valid_profile = true;
+	            	break;
+	            }
+	        }
+	    	if (!valid_profile) {
+	    		throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, WebEntityConstants.QUERY_PARAM_PROFILE, profile);
+	    	}
 	    	
 	    	EntityRecord entity = entityRecordService.retrieveEntityRecordByUri(type, namespace, identifier);
 	    	

@@ -42,13 +42,6 @@ public class XmlBaseEntityImpl {
 		return entity.getAbout();
 	}
 	
-	@JacksonXmlProperty(localName = XmlConstants.XML_ORE_IS_AGGREGATED_BY)
-	public XmlIsAggregatedByImpl getIsAggregatedBy() {
-	    	if(entity.getCreated() == null && entity.getModified() == null)
-	    	    return null;
-		return new XmlIsAggregatedByImpl(aggregationId);
-	}
-	
 	@JacksonXmlProperty(localName = XmlConstants.XML_FOAF_DEPICTION)
 	public EdmWebResource getDepiction() {
 	    	if(entity.getDepiction() == null)

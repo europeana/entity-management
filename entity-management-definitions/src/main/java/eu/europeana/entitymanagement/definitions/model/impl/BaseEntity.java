@@ -36,12 +36,6 @@ public class BaseEntity implements Entity {
 	private String[] hasPart;
 	private String[] isPartOf;
 
-	// technical fields
-	private Date timestamp;
-	private int wikipediaClicks;
-	private int europeanaDocCount;
-	private float derivedScore;
-
 	// The time at which the Set was created by the user. 
 	private Date created;
 
