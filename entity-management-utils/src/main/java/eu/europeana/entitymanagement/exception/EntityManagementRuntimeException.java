@@ -1,6 +1,6 @@
 package eu.europeana.entitymanagement.exception;
 
-public class EntityManagementRuntimeException extends Exception {
+public class EntityManagementRuntimeException extends RuntimeException {
 
     /**
      * 
