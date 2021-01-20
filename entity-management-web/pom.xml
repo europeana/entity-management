@@ -119,7 +119,8 @@
 		</dependency>
 		       
 		<!-- spring batch dependencies  -->
-		 <dependency>
+	    <!-- 
+    	 <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-batch</artifactId>
         </dependency>
@@ -137,7 +138,7 @@
             <artifactId>spring-batch-test</artifactId>
             <scope>test</scope>
         </dependency>
-
+ -->
 
         <!-- for securing (error) output -->
         <dependency>

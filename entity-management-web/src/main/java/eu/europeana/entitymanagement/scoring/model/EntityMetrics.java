@@ -4,6 +4,12 @@ public class EntityMetrics {
 
     Integer enrichmentCount, hitCount, score;
     Double pageRank;
+    final String entityId;
+    
+    public EntityMetrics(String entityId) {
+	this.entityId = entityId;
+    }
+    
     
     public Integer getEnrichmentCount() {
         return enrichmentCount;
@@ -29,5 +35,9 @@ public class EntityMetrics {
     public void setPageRank(Double pageRank) {
         this.pageRank = pageRank;
     }
+    public String getEntityId() {
+        return entityId;
+    }
+    
     
 }

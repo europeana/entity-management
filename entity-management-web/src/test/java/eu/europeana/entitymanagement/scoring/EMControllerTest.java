@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.web;
+package eu.europeana.entitymanagement.scoring;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +13,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * JUnit test for testing the RecommendController class
+ * JUnit test for testing the EMControllerTest class
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -21,7 +21,7 @@ public class EMControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
+    
     @Test
     public void testMyControllerValidInput() throws Exception {
         // with accept header

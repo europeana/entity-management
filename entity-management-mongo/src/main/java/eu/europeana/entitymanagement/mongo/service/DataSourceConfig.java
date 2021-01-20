@@ -17,7 +17,7 @@ import dev.morphia.Morphia;
 
 @Configuration
 @PropertySource("classpath:entitymanagement.properties")
-//@PropertySource(value = "classpath:entitymanagement.user.properties", ignoreResourceNotFound = true)
+@PropertySource(value = "classpath:entitymanagement.user.properties", ignoreResourceNotFound = true)
 public class DataSourceConfig {
 
     @Bean
