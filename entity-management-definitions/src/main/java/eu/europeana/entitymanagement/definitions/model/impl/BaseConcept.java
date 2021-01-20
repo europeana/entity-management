@@ -106,4 +106,9 @@ public class BaseConcept extends BaseEntity implements Concept {
 	public void setNotation(Map<String, List<String>> notation) {
 		this.notation = notation;
 	}
+
+	@Override
+	public String getInternalType() {
+		return "Concept";
+	}
 }

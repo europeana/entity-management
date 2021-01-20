@@ -4,6 +4,9 @@ import static dev.morphia.query.experimental.filters.Filters.eq;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_DELETE_OPTS;
 import static eu.europeana.entitymanagement.mongo.repository.EntityRecordFields.ENTITY_ID;
 
+import com.mongodb.client.model.ReturnDocument;
+import dev.morphia.ModifyOptions;
+import dev.morphia.query.experimental.updates.UpdateOperators;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -65,8 +68,44 @@ public class EntityRecordRepository {
                 .delete(MULTI_DELETE_OPTS).getDeletedCount();
     }
 
-    public void save(EntityRecord entityRecord){
-        datastore.save(entityRecord);
+    /**
+     * Saves the given entity record to the database.
+     * First generates a numerical ID for the record, before insertion.
+     * @param entityRecord entity record to save
+     * @return saved entity
+     */
+    public EntityRecord save(EntityRecord entityRecord){
+        // first get ID from database before saving
+        long dbId = generateAutoIncrement(entityRecord.getEntity().getInternalType());
+        String entityId = "http://data.europeana.eu/" + entityRecord.getEntity().getInternalType() + "/" + dbId;
+        entityRecord.setDbId(dbId);
+        entityRecord.getEntity().setEntityId(entityId);
+        entityRecord.setEntityId(entityId);
+
+        return datastore.save(entityRecord);
+    }
+
+
+    /**
+     * Generates an autoincrement value for entities, based on the Entity type
+     * @param internalType internal type for Entity
+     * @return autoincrement value
+     */
+    private long generateAutoIncrement(String internalType) {
+        // Get the given key from the auto increment entity and try to increment it.
+        EntityIdGenerator autoIncrement = datastore.find(EntityIdGenerator.class).filter(
+                eq("_id", internalType))
+                .modify(UpdateOperators.inc("value"))
+                .execute(new ModifyOptions()
+                        .returnDocument(ReturnDocument.AFTER));
+
+
+        // If none is found, we need to create one for the given key.
+        if (autoIncrement == null) {
+            autoIncrement = new EntityIdGenerator(internalType, 1L);
+            datastore.save(autoIncrement);
+        }
+        return autoIncrement.getValue();
     }
 
 }

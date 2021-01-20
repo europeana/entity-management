@@ -4,16 +4,19 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 public class RdfResource {
-    
-    @JsonIgnore
+
+    public RdfResource() {
+        // default constructor required for Jackson deserialization
+    }
+
     private String value;
     
     public RdfResource(String value) {
 	this.value = value;
     }
     
-    @JacksonXmlProperty(isAttribute=true, localName=XmlConstants.XML_RDF_RESOURCE)
-    public String toString() {
-	return value;
+    @JacksonXmlProperty(isAttribute=true, namespace = XmlConstants.RDF, localName=XmlConstants.RESOURCE)
+    public String getValue() {
+        return value;
     }
 }

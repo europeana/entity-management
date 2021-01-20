@@ -51,5 +51,9 @@ public class BaseConceptScheme extends BaseEntity implements ConceptScheme {
 	public String getType() {
 	    return getInternalType();
 	}
-	
+
+	@Override
+	public String getInternalType() {
+		return "ConceptScheme";
+	}
 }

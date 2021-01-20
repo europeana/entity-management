@@ -1,13 +1,9 @@
 package eu.europeana.entitymanagement.definitions.model.mongo.impl;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import dev.morphia.annotations.*;
 import org.bson.types.ObjectId;
 
-import dev.morphia.annotations.Entity;
-import dev.morphia.annotations.Field;
-import dev.morphia.annotations.Id;
-import dev.morphia.annotations.Index;
-import dev.morphia.annotations.IndexOptions;
-import dev.morphia.annotations.Indexes;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseEntityRecord;
 
 
@@ -15,15 +11,17 @@ import eu.europeana.entitymanagement.definitions.model.impl.BaseEntityRecord;
 @Indexes(@Index(fields = { @Field("dbId") }, options = @IndexOptions(unique = true)))
 public class EntityRecordImpl extends BaseEntityRecord {
 
-	@Id
-    ObjectId dbId;
+    @Id
+    @JsonIgnore
+    private Long dbId;
 
-    
-    public ObjectId getDbId() {
+    @Override
+    public Long getDbId() {
         return dbId;
     }
 
-    public void setDbId(ObjectId dbId) {
+    @Override
+    public void setDbId(Long dbId) {
         this.dbId = dbId;
     }
 }

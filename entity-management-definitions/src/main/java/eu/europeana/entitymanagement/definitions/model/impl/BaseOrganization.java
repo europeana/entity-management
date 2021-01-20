@@ -427,4 +427,9 @@ public class BaseOrganization extends BaseEntity
 
 		return tmpIdentifier;
 	}
+
+	@Override
+	public String getInternalType() {
+		return "Organization";
+	}
 }

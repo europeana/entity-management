@@ -1,0 +1,54 @@
+package eu.europeana.entitymanagement.web.model.metis;
+
+import eu.europeana.entitymanagement.web.xml.model.*;
+
+import javax.xml.bind.annotation.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * Root element for Metis de-reference response
+ */
+@XmlRootElement(namespace = "http://www.europeana.eu/schemas/metis", name = "result")
+@XmlAccessorType(XmlAccessType.FIELD)
+public class EnrichmentResultBaseWrapper {
+
+    @XmlElements(value = {
+            @XmlElement(name = "Concept", namespace = "http://www.w3.org/2004/02/skos/core#", type = XmlConceptImpl.class),
+            @XmlElement(name = "Agent", namespace = "http://www.europeana.eu/schemas/edm/", type = XmlAgentImpl.class),
+            @XmlElement(name = "Place", namespace = "http://www.europeana.eu/schemas/edm/", type = XmlPlaceImpl.class),
+            @XmlElement(name = "Timespan", namespace = "http://www.europeana.eu/schemas/edm/", type = XmlTimespanImpl.class)})
+    private List<XmlBaseEntityImpl> xmlEntities = new ArrayList<>();
+
+
+    public EnrichmentResultBaseWrapper() {
+    }
+
+    /**
+     * Constructor with all fields
+     *
+     * @param enrichmentBase the enrichment information class generated
+     */
+    public EnrichmentResultBaseWrapper(List<XmlBaseEntityImpl> enrichmentBase) {
+        this.xmlEntities = new ArrayList<>(enrichmentBase);
+    }
+
+    public List<XmlBaseEntityImpl> getEnrichmentBaseList() {
+        return new ArrayList<>(xmlEntities);
+    }
+
+    /**
+     * Convert a collection of {@link XmlBaseEntityImpl} to a list of {@link
+     * EnrichmentResultBaseWrapper}.
+     * <p>This is mostly used for dereferencing.</p>
+     *
+     * @param resultList the collection of {@link XmlBaseEntityImpl}
+     * @return the converted list
+     */
+    public static List<EnrichmentResultBaseWrapper> createEnrichmentResultBaseWrapperList(
+            Collection<List<XmlBaseEntityImpl>> resultList) {
+        return resultList.stream().map(EnrichmentResultBaseWrapper::new).collect(Collectors.toList());
+    }
+}

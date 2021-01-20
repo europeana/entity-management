@@ -12,12 +12,9 @@ import org.bson.types.ObjectId;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.RankedEntity;
 
-public class BaseEntity implements Entity, RankedEntity {
+public abstract class BaseEntity implements Entity, RankedEntity {
 
 	protected String TMP_KEY = "def";
-	
-	// common functional fields
-	private String internalType;
 
 	private String entityId;
 	// depiction
@@ -87,13 +84,8 @@ public class BaseEntity implements Entity, RankedEntity {
 		this.note = note;
 	}
 
-	public String getInternalType() {
-		return internalType;
-	}
+	abstract public String getInternalType();
 
-	public void setInternalType(String internalType) {
-		this.internalType = internalType;
-	}
 
 //	public String[] getSameAs() {
 //		return sameAs;

@@ -8,6 +8,10 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +20,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * Container for all settings that we load from the entitymanagement.properties file and optionally override from
@@ -62,6 +68,10 @@ public class EMSettings {
 	@Value("${default.user.token}")
     private String defaultUserToken;
 
+
+	@Value("${metis.baseUrl}")
+	private String metisBaseUrl;
+
     
     public String getDefaultUserToken() {
 		return defaultUserToken;
@@ -78,10 +88,11 @@ public class EMSettings {
     		    return xmlMapper.readValue(contents, DataSources.class);	
     		}    	         
 	}
-    
-    @PostConstruct
-    private void logImportantSettings() {
-        LOG.info("MyAPI settings:");
 
-    }
+	@Bean
+	public WebClient metisWebClient() {
+		return WebClient.builder()
+				.baseUrl(metisBaseUrl)
+				.build();
+	}
 }
