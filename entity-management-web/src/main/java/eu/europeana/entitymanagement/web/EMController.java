@@ -7,6 +7,7 @@ import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.exception.InternalServerException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.entitymanagement.config.DataSources;
+import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.formats.FormatTypes;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.RankedEntity;
@@ -57,11 +58,10 @@ public class EMController extends BaseRest {
     public ResponseEntity<String> getJsonLdEntity(
             @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
             @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
-            @PathVariable(value = WebEntityConstants.PATH_PARAM_NAMESPACE) String namespace,
             @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
             HttpServletRequest request
-    ) throws HttpException {
-        return createResponse(type, namespace, identifier, FormatTypes.jsonld, null, request);
+    ) throws HttpException, UnsupportedEntityTypeException, EntityNotFoundException {
+        return createResponse(type, identifier, FormatTypes.jsonld, null, request);
 
     }
 
@@ -71,11 +71,10 @@ public class EMController extends BaseRest {
     public ResponseEntity<String> getXmlEntity(
             @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
             @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
-            @PathVariable(value = WebEntityConstants.PATH_PARAM_NAMESPACE) String namespace,
             @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
             HttpServletRequest request
-    ) throws HttpException {
-        return createResponse(type, namespace, identifier, FormatTypes.xml, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML, request);
+    ) throws HttpException, UnsupportedEntityTypeException, EntityNotFoundException {
+        return createResponse(type, identifier, FormatTypes.xml, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML, request);
     }
 
 
@@ -121,12 +120,10 @@ public class EMController extends BaseRest {
         return ResponseEntity.accepted().body(savedEntity);
     }
 
-	private ResponseEntity<String> createResponse(String type, String namespace, String identifier, FormatTypes outFormat,  String contentType, HttpServletRequest request) throws HttpException{
-	    try {
-	    	
-	    	verifyReadAccess(request);
-	    	
-            String entityUri = getEntityUri(type, namespace, identifier);
+	private ResponseEntity<String> createResponse(String type, String identifier, FormatTypes outFormat,  String contentType, HttpServletRequest request) throws HttpException, EntityNotFoundException, UnsupportedEntityTypeException {
+        //            TODO: Re-enable authentication
+        //            verifyReadAccess(request);
+            String entityUri = getEntityUri(type, identifier);
             Optional<EntityRecord> entityRecordOptional = entityRecordService.retrieveEntityRecordByUri(entityUri);
 	    	
             if (entityRecordOptional.isEmpty()) {
@@ -155,26 +152,15 @@ public class EMController extends BaseRest {
 
     	    	ResponseEntity<String> response = new ResponseEntity<String>(jsonLd, headers, HttpStatus.OK);
         	    	return response;
-	    } catch (RuntimeException e) {
-	    	//not found .. 
-	    	throw new InternalServerException(e);
-	    } catch (HttpException e) {
-	    	//avoid wrapping http exception
-	    	throw e;
-	    } catch (Exception e) {
-	    	throw new InternalServerException(e);
-	    }	
 	}
 
 
-    private String getEntityUri(String type, String namespace, String identifier) {
+    private String getEntityUri(String type, String identifier) {
         StringBuilder stringBuilder = new StringBuilder();
 
         stringBuilder.append(BASE_URI_DATA);
         if (StringUtils.isNotEmpty(type))
             stringBuilder.append(type.toLowerCase()).append("/");
-        if (StringUtils.isNotEmpty(namespace))
-            stringBuilder.append(namespace).append("/");
         if (StringUtils.isNotEmpty(identifier))
             stringBuilder.append(identifier);
 

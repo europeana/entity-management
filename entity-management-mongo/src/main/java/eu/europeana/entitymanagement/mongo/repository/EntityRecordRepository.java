@@ -77,7 +77,7 @@ public class EntityRecordRepository {
     public EntityRecord save(EntityRecord entityRecord){
         // first get ID from database before saving
         long dbId = generateAutoIncrement(entityRecord.getEntity().getInternalType());
-        String entityId = "http://data.europeana.eu/" + entityRecord.getEntity().getInternalType() + "/" + dbId;
+        String entityId = "http://data.europeana.eu/" + entityRecord.getEntity().getInternalType().toLowerCase() + "/" + dbId;
         entityRecord.setDbId(dbId);
         entityRecord.getEntity().setEntityId(entityId);
         entityRecord.setEntityId(entityId);
