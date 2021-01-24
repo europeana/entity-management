@@ -3,14 +3,23 @@ package eu.europeana.entitymanagement.definitions.model.impl;
 import java.util.List;
 import java.util.Map;
 
-import eu.europeana.entitymanagement.definitions.model.Timespan;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
+import eu.europeana.entitymanagement.definitions.model.Timespan;
+import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityFields;
+import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
+
+@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class BaseTimespan extends BaseEntity implements Timespan, eu.europeana.corelib.definitions.edm.entity.Timespan {
 
     private String[] isNextInSequence;
     private String begin;
     private String end;
 
+    @JsonProperty(WebEntityFields.IS_NEXT_IN_SEQUENCE)
+    @JacksonXmlProperty(localName = XmlFields.XML_EDM_IS_NEXT_IN_SEQUENCE)
     public String[] getIsNextInSequence() {
 	return isNextInSequence;
     }
@@ -29,11 +38,15 @@ public class BaseTimespan extends BaseEntity implements Timespan, eu.europeana.c
 
     
     @Override
+    @JsonProperty(WebEntityFields.BEGIN)
+    @JacksonXmlProperty(localName = XmlFields.XML_EDM_BEGIN)
     public String getBeginString() {
 	return begin;
     }
 
     @Override
+    @JsonProperty(WebEntityFields.END)
+    @JacksonXmlProperty(localName = XmlFields.XML_EDM_END)
     public String getEndString() {
 	return end;
     }
@@ -91,5 +104,5 @@ public class BaseTimespan extends BaseEntity implements Timespan, eu.europeana.c
     public void setEnd(Map<String, List<String>> arg0) {
 	// TODO Auto-generated method stub
 	
-    }    
+    }
 }

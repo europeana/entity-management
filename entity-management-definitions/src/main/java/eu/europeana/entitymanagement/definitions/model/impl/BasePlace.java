@@ -5,8 +5,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import eu.europeana.entitymanagement.definitions.model.Place;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
+import eu.europeana.entitymanagement.definitions.model.Place;
+import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityFields;
+import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
+
+@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class BasePlace extends BaseEntity implements Place, eu.europeana.corelib.definitions.edm.entity.Place {
 
 	private String[] isNextInSequence;
@@ -17,6 +24,8 @@ public class BasePlace extends BaseEntity implements Place, eu.europeana.corelib
 	private Map<String, List<String>> tmpHasPart;	
 	
 	@Override
+	@JsonProperty(WebEntityFields.IS_NEXT_IN_SEQUENCE)
+	@JacksonXmlProperty(localName = XmlFields.XML_EDM_IS_NEXT_IN_SEQUENCE)
 	public String[] getIsNextInSequence() {
 		return isNextInSequence;
 	}
@@ -27,6 +36,8 @@ public class BasePlace extends BaseEntity implements Place, eu.europeana.corelib
 	}
 
 	@Override
+	@JsonProperty(WebEntityFields.LATITUDE)
+	@JacksonXmlProperty(localName = XmlFields.XML_WGS84_POS_LAT)
 	public Float getLatitude() {
 		return latitude;
 	}
@@ -37,6 +48,8 @@ public class BasePlace extends BaseEntity implements Place, eu.europeana.corelib
 	}
 
 	@Override
+	@JsonProperty(WebEntityFields.LONGITUDE)
+	@JacksonXmlProperty(localName = XmlFields.XML_WGS84_POS_LONG)
 	public Float getLongitude() {
 		return longitude;
 	}
@@ -47,6 +60,8 @@ public class BasePlace extends BaseEntity implements Place, eu.europeana.corelib
 	}
 
 	@Override
+	@JsonProperty(WebEntityFields.ALTITUDE)
+	@JacksonXmlProperty(localName = XmlFields.XML_WGS84_POS_ALT)
 	public Float getAltitude() {
 		return altitude;
 	}
@@ -98,6 +113,8 @@ public class BasePlace extends BaseEntity implements Place, eu.europeana.corelib
 	}
 
 	@Override
+	@JsonProperty(WebEntityFields.HAS_PART)
+	@JacksonXmlProperty(localName = XmlFields.XML_DCTERMS_HAS_PART)
 	public Map<String, List<String>> getDcTermsHasPart() {
 		//if not available
 		if (getHasPart() == null)
@@ -110,6 +127,8 @@ public class BasePlace extends BaseEntity implements Place, eu.europeana.corelib
 	}
 
 	@Override
+	@JsonProperty(WebEntityFields.IS_PART_OF)
+	@JacksonXmlProperty(localName  = XmlFields.XML_DCTERMS_IS_PART_OF)
 	public Map<String, List<String>> getIsPartOf() {
 		//if not available
 		if (getIsPartOfArray() == null)

@@ -9,6 +9,7 @@ import eu.europeana.entitymanagement.definitions.formats.FormatTypes;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityManagementRuntimeException;
 import eu.europeana.entitymanagement.serialization.EntityXmlSerializer;
+import eu.europeana.entitymanagement.serialization.JsonLdSerializer;
 import eu.europeana.entitymanagement.web.service.authorization.AuthorizationService;
 import eu.europeana.entitymanagement.web.service.authorization.AuthorizationServiceImpl;
 
@@ -20,6 +21,9 @@ public abstract class BaseRest extends BaseRestController {
 
     @Autowired
     EntityXmlSerializer entityXmlSerializer;
+    
+    @Autowired
+    JsonLdSerializer jsonLdSerializer;
 
     Logger logger = LogManager.getLogger(getClass());
 
@@ -59,8 +63,7 @@ public abstract class BaseRest extends BaseRestController {
 	String responseBody = null;
 
 	if (FormatTypes.jsonld.equals(format)) {
-//	    EuropeanaEntityLd entityLd = new EuropeanaEntityLd(entityRecord.getEntity());
-//	    return entityLd.toString(4);
+	    responseBody = jsonLdSerializer.serialize(entityRecord, profile);
 	} else if (FormatTypes.schema.equals(format)) {
 //	    responseBody = (new EntitySchemaOrgSerializer()).serializeEntity(entityRecord.getEntity());
 	} else if (FormatTypes.xml.equals(format)) {

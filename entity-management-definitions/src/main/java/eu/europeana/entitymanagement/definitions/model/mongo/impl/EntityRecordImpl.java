@@ -2,6 +2,8 @@ package eu.europeana.entitymanagement.definitions.model.mongo.impl;
 
 import org.bson.types.ObjectId;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Field;
 import dev.morphia.annotations.Id;
@@ -18,7 +20,7 @@ public class EntityRecordImpl extends BaseEntityRecord {
 	@Id
     ObjectId dbId;
 
-    
+    @JsonIgnore
     public ObjectId getDbId() {
         return dbId;
     }

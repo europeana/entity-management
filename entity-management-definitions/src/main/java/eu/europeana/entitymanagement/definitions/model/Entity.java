@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.definitions.model;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import dev.morphia.annotations.Embedded;
@@ -52,4 +53,10 @@ public interface Entity extends ContextualClass {
 	Date getModified();
 
 	void setModified(Date modified);
+	
+	WebResource getReferencedWebResource();
+	
+	String getIsShownBy();
+	
+	void setIsShownBy (WebResource webResource);
 }

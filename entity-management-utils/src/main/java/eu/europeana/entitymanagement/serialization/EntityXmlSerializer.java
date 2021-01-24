@@ -14,9 +14,8 @@ import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.exception.EntityManagementRuntimeException;
-import eu.europeana.entitymanagement.utils.xml.model.XmlEntityProxyImpl;
-import eu.europeana.entitymanagement.utils.xml.model.XmlEntityRecordImpl;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 
 @Component
@@ -103,22 +102,21 @@ public class EntityXmlSerializer {
 		objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 
 		String output = "";
-		XmlEntityRecordImpl xmlElement;
 		
 		Aggregation tmpAggregation = entityRecord.getIsAggregatedBy();
 		List<EntityProxy> tmpProxies = entityRecord.getProxies();
 		try {
 			entityRecord.setIsAggregatedBy(null);
 			entityRecord.setProxies(null);
-			xmlElement = new XmlEntityRecordImpl(entityRecord);
+			
     		StringBuilder strBuilder = new StringBuilder();
-		    strBuilder.append(objectMapper.writeValueAsString(xmlElement));
+		    strBuilder.append(objectMapper.writeValueAsString(entityRecord));    		
 
-		    //add related elements to be serialized outside of the given xmlElement
-		    List<Object> additionalElementsToSerialize = xmlElement.getXmlBaseEntity().getReferencedWebResources();
-		    for (Object elem : additionalElementsToSerialize)
+		    //add referenced web resources
+		    WebResource webResource = entityRecord.getEntity().getReferencedWebResource();
+		    if (webResource!=null)
 		    {
-		    	strBuilder.append(objectMapper.writeValueAsString(elem));
+		    	strBuilder.append(objectMapper.writeValueAsString(webResource));
 		    }
 
 		    strBuilder.append(XML_END_TAG);
@@ -147,23 +145,21 @@ public class EntityXmlSerializer {
 		objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 
 		String output = "";
-		XmlEntityRecordImpl xmlElement;
 		
 		Entity tmpEntity = entityRecord.getEntity();
 		try {
 			entityRecord.setEntity(null);
-			xmlElement = new XmlEntityRecordImpl(entityRecord);
 
 			StringBuilder strBuilder = new StringBuilder();
-		    strBuilder.append(objectMapper.writeValueAsString(xmlElement));
+		    strBuilder.append(objectMapper.writeValueAsString(entityRecord));
 		    
 		    //adding the referenced web resources for the proxy entities
-		    List<XmlEntityProxyImpl> entityRecordProxies = xmlElement.getXmlEntityProxies();
-		    for (XmlEntityProxyImpl xmlProxy : entityRecordProxies) {
-		    	List<Object> additionalElementsToSerialize = xmlProxy.getXmlBaseEntity().getReferencedWebResources();
-			    for (Object elem : additionalElementsToSerialize)
+		    List<EntityProxy> entityRecordProxies = entityRecord.getProxies();
+		    for (EntityProxy proxy : entityRecordProxies) {
+		    	WebResource webResource = proxy.getEntity().getReferencedWebResource();
+		    	if (webResource!=null)
 			    {
-			    	strBuilder.append(objectMapper.writeValueAsString(elem));
+			    	strBuilder.append(objectMapper.writeValueAsString(webResource));
 			    }
 		    }
 		    

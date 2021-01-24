@@ -1,6 +1,6 @@
-package eu.europeana.entitymanagement.utils.xml.model;
+package eu.europeana.entitymanagement.definitions.model.vocabulary;
 
-public final class XmlConstants {
+public final class XmlFields {
 
     public static final String XML_RDF_ABOUT = "rdf:about";
     public static final String XML_RDF_RESOURCE = "rdf:resource";

@@ -1,9 +1,16 @@
 package eu.europeana.entitymanagement.definitions.model.impl;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
+import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityFields;
+import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
 
+@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class BaseEntityProxy implements EntityProxy {
 
     String proxyId;
@@ -12,6 +19,8 @@ public class BaseEntityProxy implements EntityProxy {
     Aggregation proxyIn;
     String type;
     
+    @JsonProperty(WebEntityFields.TYPE)
+    @JacksonXmlProperty(localName = XmlFields.XML_RDF_TYPE)
     public String getType() {
 		return type;
 	}
@@ -20,6 +29,8 @@ public class BaseEntityProxy implements EntityProxy {
 		this.type = type;
 	}
 
+	@JsonProperty(WebEntityFields.ID)
+	@JacksonXmlProperty(isAttribute= true, localName = XmlFields.XML_RDF_ABOUT)
 	public String getProxyId() {
 		return proxyId;
 	}
@@ -28,6 +39,8 @@ public class BaseEntityProxy implements EntityProxy {
 		this.proxyId = proxyId;
 	}	
     
+	@JsonProperty
+	@JacksonXmlProperty
     public Entity getEntity() {
 		return entity;
 	}
@@ -36,6 +49,8 @@ public class BaseEntityProxy implements EntityProxy {
 		this.entity = entity;
 	}	
     
+	@JsonProperty(WebEntityFields.PROXY_FOR)
+	@JacksonXmlProperty(localName = XmlFields.XML_ORE_PROXY_FOR)
     public String getProxyFor() {
 		return proxyFor;
 	}
@@ -44,6 +59,8 @@ public class BaseEntityProxy implements EntityProxy {
 		this.proxyFor = proxyFor;
 	}
 
+	@JsonProperty(WebEntityFields.PROXY_IN)
+	@JacksonXmlProperty(localName = XmlFields.XML_ORE_PROXY_IN)
 	public Aggregation getProxyIn() {
 		return proxyIn;
 	}

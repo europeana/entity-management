@@ -1,12 +1,23 @@
 package eu.europeana.entitymanagement.definitions.model.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import eu.europeana.entitymanagement.definitions.model.Agent;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
+import eu.europeana.entitymanagement.definitions.model.Agent;
+import eu.europeana.entitymanagement.definitions.model.WebResource;
+import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityFields;
+import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
+
+@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
+@JacksonXmlRootElement(localName = XmlFields.XML_EDM_AGENT)
 public class BaseAgent extends BaseEntity implements Agent, eu.europeana.corelib.definitions.edm.entity.Agent {
 
     //TODO: fix cardinality, change to list 
@@ -37,7 +48,6 @@ public class BaseAgent extends BaseEntity implements Agent, eu.europeana.corelib
 	private Map<String, List<String>> tmpDateOfTermination;
 	private Map<String, List<String>> tmpName;
 	private Map<String, List<String>> tmpIdentifier;
-	
 
 	public Date getDate() {
 		return date;
@@ -47,6 +57,8 @@ public class BaseAgent extends BaseEntity implements Agent, eu.europeana.corelib
 		this.date = date;
 	}
 
+	@JsonProperty(WebEntityFields.BEGIN)
+	@JacksonXmlProperty(localName = XmlFields.XML_EDM_BEGIN)
 	public String[] getBeginArray() {
 		return begin;
 	}
@@ -55,6 +67,8 @@ public class BaseAgent extends BaseEntity implements Agent, eu.europeana.corelib
 		this.begin = begin;
 	}
 
+	@JsonProperty(WebEntityFields.END)
+	@JacksonXmlProperty(localName = XmlFields.XML_EDM_END)
 	public String[] getEndArray() {
 		return end;
 	}
@@ -63,6 +77,8 @@ public class BaseAgent extends BaseEntity implements Agent, eu.europeana.corelib
 		this.end = end;
 	}
 
+	@JsonProperty(WebEntityFields.HAS_MET)
+	@JacksonXmlProperty(localName = XmlFields.XML_EDM_HASMET)
 	public String[] getHasMet() {
 		return hasMet;
 	}
@@ -71,6 +87,8 @@ public class BaseAgent extends BaseEntity implements Agent, eu.europeana.corelib
 		this.hasMet = hasMet;
 	}
 
+	@JsonProperty(WebEntityFields.NAME)
+	@JacksonXmlProperty(localName = XmlFields.XML_FOAF_NAME)
 	public Map<String, String> getName() {
 		return name;
 	}
@@ -79,6 +97,8 @@ public class BaseAgent extends BaseEntity implements Agent, eu.europeana.corelib
 		this.name = name;
 	}
 
+	@JsonProperty(WebEntityFields.BIOGRAPHICAL_INFORMATION)
+	@JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_BIOGRAPHICAL_INFORMATION)
 	public Map<String, List<String>> getBiographicalInformation() {
 		return biographicalInformation;
 	}
@@ -87,6 +107,8 @@ public class BaseAgent extends BaseEntity implements Agent, eu.europeana.corelib
 		this.biographicalInformation = biographicalInformation;
 	}
 
+	@JsonProperty(WebEntityFields.DATE_OF_BIRTH)
+	@JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_DATE_OF_BIRTH)
 	public String[] getDateOfBirth() {
 		return dateOfBirth;
 	}
@@ -95,6 +117,8 @@ public class BaseAgent extends BaseEntity implements Agent, eu.europeana.corelib
 		this.dateOfBirth = dateOfBirth;
 	}
 
+	@JsonProperty(WebEntityFields.DATE_OF_DEATH)
+	@JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_DATE_OF_DEATH)
 	public String[] getDateOfDeath() {
 		return dateOfDeath;
 	}
@@ -103,6 +127,8 @@ public class BaseAgent extends BaseEntity implements Agent, eu.europeana.corelib
 		this.dateOfDeath = dateOfDeath;
 	}
 
+	@JsonProperty(WebEntityFields.PLACE_OF_BIRTH)
+	@JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_PLACE_OF_BIRTH)
 	public Map<String, List<String>> getPlaceOfBirth() {
 		return placeOfBirth;
 	}
@@ -111,6 +137,8 @@ public class BaseAgent extends BaseEntity implements Agent, eu.europeana.corelib
 		this.placeOfBirth = placeOfBirth;
 	}
 
+	@JsonProperty(WebEntityFields.PLACE_OF_DEATH)
+	@JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_PLACE_OF_DEATH)
 	public Map<String, List<String>> getPlaceOfDeath() {
 		return placeOfDeath;
 	}
@@ -119,6 +147,8 @@ public class BaseAgent extends BaseEntity implements Agent, eu.europeana.corelib
 		this.placeOfDeath = placeOfDeath;
 	}
 
+	@JsonProperty(WebEntityFields.DATE_OF_ESTABLISHMENT)
+	@JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_DATE_OF_ESTABLISHMENT)
 	public String getDateOfEstablishment() {
 		return dateOfEstablishment;
 	}
@@ -127,6 +157,8 @@ public class BaseAgent extends BaseEntity implements Agent, eu.europeana.corelib
 		this.dateOfEstablishment = dateOfEstablishment;
 	}
 
+	@JsonProperty(WebEntityFields.DATE_OF_TERMINATION)
+	@JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_DATE_OF_TERMINATION)
 	public String getDateOfTermination() {
 		return dateOfTermination;
 	}
@@ -135,6 +167,8 @@ public class BaseAgent extends BaseEntity implements Agent, eu.europeana.corelib
 		this.dateOfTermination = dateOfTermination;
 	}
 
+	@JsonProperty(WebEntityFields.GENDER)
+	@JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_GENDER)
 	public String getGender() {
 		return gender;
 	}
@@ -143,6 +177,8 @@ public class BaseAgent extends BaseEntity implements Agent, eu.europeana.corelib
 		this.gender = gender;
 	}
 
+	@JsonProperty(WebEntityFields.PROFESSION_OR_OCCUPATION)
+	@JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_PROFESSION_OR_OCCUPATION)
 	public Map<String, List<String>> getProfessionOrOccupation() {
 		return professionOrOccupation;
 	}

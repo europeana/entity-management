@@ -5,14 +5,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+
 import eu.europeana.corelib.definitions.edm.entity.Address;
 import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityFields;
+import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
 
 /**
  * This class defines base organization type of an entity.
  * @author GrafR
  *
  */
+
+@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class BaseOrganization extends BaseEntity 
 		implements Organization, eu.europeana.corelib.definitions.edm.entity.Organization {
 
@@ -41,6 +50,8 @@ public class BaseOrganization extends BaseEntity
 	private Address address;
 	
 	@Override
+	@JsonProperty(WebEntityFields.DESCRIPTION)
+	@JacksonXmlProperty(localName = XmlFields.XML_DC_DESCRIPTION)
 	public Map<String, String> getDescription() {
 		return description;
 	}
@@ -51,6 +62,8 @@ public class BaseOrganization extends BaseEntity
 	}
 	
 	@Override
+	@JsonProperty(WebEntityFields.ACRONYM)
+	@JacksonXmlProperty(localName = XmlFields.XML_EDM_ACRONYM)
 	public Map<String, List<String>> getAcronym() {
 		return acronym;
 	}
@@ -61,6 +74,8 @@ public class BaseOrganization extends BaseEntity
 	}
 	
 	@Override
+	@JsonProperty(WebEntityFields.EUROPEANA_ROLE)
+	@JacksonXmlProperty(localName = XmlFields.XML_EDM_EUROPEANA_ROLE)
 	public Map<String, List<String>> getEuropeanaRole() {
 		return europeanaRole;
 	}
@@ -71,6 +86,8 @@ public class BaseOrganization extends BaseEntity
 	}
 	
 	@Override
+	@JsonProperty(WebEntityFields.FOAF_PHONE)
+	@JacksonXmlProperty(localName = XmlFields.XML_FOAF_PHONE)
 	public List<String> getPhone() {
 		return phone;
 	}
@@ -81,6 +98,8 @@ public class BaseOrganization extends BaseEntity
 	}
 
 	@Override
+	@JsonProperty(WebEntityFields.FOAF_MBOX)
+	@JacksonXmlProperty(localName = XmlFields.XML_FOAF_MBOX)
 	public List<String> getMbox() {
 		return mbox;
 	}
@@ -91,6 +110,9 @@ public class BaseOrganization extends BaseEntity
 	}
 
 	@Override
+	@JacksonXmlElementWrapper(localName = XmlFields.XML_VCARD_HAS_ADDRESS)
+	@JacksonXmlProperty(localName = XmlFields.XML_VCARD_ADDRESS)
+	@JsonProperty(WebEntityFields.ADDRESS_TYPE)
 	public String getHasAddress() {
 		return hasAddress;
 	}
@@ -151,6 +173,8 @@ public class BaseOrganization extends BaseEntity
 	}
 
 	@Override
+	@JsonProperty(WebEntityFields.COUNTRY)
+	@JacksonXmlProperty(localName = XmlFields.XML_EDM_COUNTRY)
 	public String getCountry() {
 		return country;
 	}
@@ -171,6 +195,8 @@ public class BaseOrganization extends BaseEntity
 	}
 
 	@Override
+	@JsonProperty(WebEntityFields.GEOGRAPHIC_LEVEL)
+	@JacksonXmlProperty(localName = XmlFields.XML_EDM_GEOGRAPHIC_LEVEL)
 	public Map<String, String> getGeographicLevel() {
 		return geographicLevel;
 	}
@@ -182,6 +208,8 @@ public class BaseOrganization extends BaseEntity
 	}
 
 	@Override
+	@JsonProperty(WebEntityFields.ORGANIZATION_DOMAIN)
+	@JacksonXmlProperty(localName = XmlFields.XML_EDM_ORGANIZATION_DOMAIN)
 	public Map<String, List<String>> getOrganizationDomain() {
 		return organizationDomain;
 	}
@@ -192,6 +220,8 @@ public class BaseOrganization extends BaseEntity
 	}
 
 	@Override
+	@JsonProperty(WebEntityFields.FOAF_HOMEPAGE)
+	@JacksonXmlProperty(localName = XmlFields.XML_FOAF_HOMEPAGE)
 	public String getHomepage() {
 		return homepage;
 	}
@@ -202,6 +232,8 @@ public class BaseOrganization extends BaseEntity
 	}
 
 	@Override
+	@JsonProperty(WebEntityFields.FOAF_LOGO)
+	@JacksonXmlProperty(localName = XmlFields.XML_FOAF_LOGO)
 	public String getLogo() {
 		return logo;
 	}
@@ -417,6 +449,9 @@ public class BaseOrganization extends BaseEntity
 	}
 
 	@Override
+	
+	@JsonProperty(WebEntityFields.IDENTIFIER)
+	@JacksonXmlProperty(localName = XmlFields.XML_DC_IDENTIFIER)
 	public Map<String, List<String>> getDcIdentifier() {
 		//if not available
 		if (getIdentifier() == null)

@@ -17,6 +17,7 @@ import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseAggregation;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseEntityProxy;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseTimespan;
+import eu.europeana.entitymanagement.definitions.model.impl.BaseWebResource;
 import eu.europeana.entitymanagement.definitions.model.mongo.impl.EntityRecordImpl;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 
@@ -36,6 +37,8 @@ public class EntityRecrodRepositoryTest {
 		BaseTimespan entity = new BaseTimespan();
     	entity.setEntityId("http://data.europeana.eu/timespan/base/1");
     	entity.setInternalType("Timespan");
+    	entity.setBeginString("0001-01-01");
+    	entity.setEndString("0100-12-31");
     	Map<String, String> prefLabelTest = new HashMap<String, String>();
     	/*
     	 * putting the "." in the name of the field like prefLabelTest.put("perfLabel.pl", "I wiek") causes problems during saving to the mongodb
@@ -43,7 +46,11 @@ public class EntityRecrodRepositoryTest {
     	prefLabelTest.put("perfLabel_pl", "I wiek");
     	prefLabelTest.put("perfLabel_da", "1. århundrede");	
     	entity.setPrefLabelStringMap(prefLabelTest);
-    	
+    	BaseWebResource webResource = new BaseWebResource();
+    	webResource.setId("http://www.sbc.org.pl/Timespan/16573/doc.pdf");
+    	webResource.setSource("http://data.europeana.eu/item/7284673/_nnd7fT5");
+    	webResource.setThumbnail("https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri=http%3A%2F%2Fwww.sbc.org.pl%2FTimespan%2F79368%2Fdoc.pdf&type=TEXT");
+    	entity.setIsShownBy(webResource);
     	Aggregation aggregation = new BaseAggregation();
     	aggregation.setCreated(new Date());
     	aggregation.setRecordCount(1);
