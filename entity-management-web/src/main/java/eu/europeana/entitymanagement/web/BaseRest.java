@@ -40,9 +40,9 @@ public abstract class BaseRest extends BaseRestController {
     /**
      * @return
      */
-    protected String getDefaultUserToken() {
-	return getAuthorizationService().getConfiguration().getUserToken();
-    }
+//    protected String getDefaultUserToken() {
+//	return getAuthorizationService().getConfiguration().getUserToken();
+//    }
 
     public String getApiVersion() {
 	return getAuthorizationService().getConfiguration().getApiVersion();

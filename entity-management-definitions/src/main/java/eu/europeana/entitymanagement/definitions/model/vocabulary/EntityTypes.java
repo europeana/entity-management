@@ -45,8 +45,6 @@ public enum EntityTypes implements EntityKeyword{
 	    return false;
 	}	
 	
-	
-
 	/**
 	 * Check if an array of EntityTypes contains an Entity type
 	 * @param entityTypes Array of EntityTypes 
@@ -91,6 +89,20 @@ public enum EntityTypes implements EntityKeyword{
 		}
 		throw new UnsupportedEntityTypeException(internalType);
 	}	
+	
+	
+	public static EntityTypes getByEntityId(String entityId) throws UnsupportedEntityTypeException {
+
+	    
+	    for (EntityTypes field : EntityTypes.values()) {
+	        if (entityId.contains(String.format("/%s/", field.getInternalType().toLowerCase()))) {
+	            return field;
+	        }
+	    }
+
+	    throw new UnsupportedEntityTypeException(entityId);
+	}
+	
 	
 	@Override
 	public String getJsonValue() {

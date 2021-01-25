@@ -1,0 +1,37 @@
+<metrics>
+	<maxValues>
+		<enrichmentCount>31734</enrichmentCount>
+		<hitCount>2297502</hitCount>
+		<pageRank>1204</pageRank>
+		<entityId>Agent</entityId>
+		<entityType>Agent</entityType>
+	</maxValues>
+	<maxValues>
+		<enrichmentCount>3065416</enrichmentCount>
+		<hitCount>24576199</hitCount>
+		<pageRank>24772</pageRank>
+		<entityId>Place</entityId>
+		<entityType>Place</entityType>
+	</maxValues>
+	<maxValues>
+		<enrichmentCount>1448506</enrichmentCount>
+		<hitCount>8106790</hitCount>
+		<pageRank>4055</pageRank>
+		<entityId>Concept</entityId>
+		<entityType>Concept</entityType>
+	</maxValues>
+	<maxValues>
+		<enrichmentCount>1</enrichmentCount>
+		<hitCount>8977503</hitCount>
+		<pageRank>244</pageRank>
+		<entityId>Organization</entityId>
+		<entityType>Organization</entityType>
+	</maxValues>
+	<maxValues>
+		<enrichmentCount>1</enrichmentCount>
+		<hitCount>8977503</hitCount>
+		<pageRank>3912</pageRank>
+		<entityId>Timespan</entityId>
+		<entityType>Timespan</entityType>
+	</maxValues>
+</metrics>
