@@ -13,6 +13,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
+    public static final  String MEDIA_TYPE_JSONLD         = "application/ld+json";
     /**
      * Setup CORS for all GET, HEAD and OPTIONS, requests.
      */
@@ -37,7 +38,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
         // releases
         configurer.favorPathExtension(true);
 
-        // set json as default answer, even if no accept header or extension was provided
-        configurer.defaultContentType(MediaType.valueOf(MediaType.APPLICATION_JSON_VALUE), MediaType.APPLICATION_JSON);
+        // application/ld+json should take precedence over application/json
+        configurer.defaultContentType(MediaType.valueOf(MEDIA_TYPE_JSONLD), MediaType.APPLICATION_JSON);
     }
 }

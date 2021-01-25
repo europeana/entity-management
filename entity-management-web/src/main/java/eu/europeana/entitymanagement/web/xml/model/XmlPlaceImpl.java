@@ -13,10 +13,10 @@ import eu.europeana.entitymanagement.definitions.model.Place;
 
 @JacksonXmlRootElement(localName = XmlConstants.XML_EDM_PLACE)
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({XmlConstants.XML_FOAF_DEPICTION, XmlConstants.XML_SKOS_PREF_LABEL, XmlConstants.XML_SKOS_ALT_LABEL, XmlConstants.XML_SKOS_HIDDEN_LABEL,
-    	XmlConstants.XML_WGS84_POS_LAT, XmlConstants.XML_WGS84_POS_LONG, XmlConstants.XML_WGS84_POS_ALT, XmlConstants.XML_SKOS_NOTE, 
+@JsonPropertyOrder({XmlConstants.DEPICTION, XmlConstants.PREF_LABEL, XmlConstants.ALT_LABEL, XmlConstants.XML_SKOS_HIDDEN_LABEL,
+    	XmlConstants.XML_WGS84_POS_LAT, XmlConstants.XML_WGS84_POS_LONG, XmlConstants.XML_WGS84_POS_ALT, XmlConstants.NOTE,
     	XmlConstants.XML_DCTERMS_HAS_PART, XmlConstants.XML_DCTERMS_IS_PART_OF, XmlConstants.XML_EDM_IS_NEXT_IN_SEQUENCE, 
-    	XmlConstants.XML_OWL_SAME_AS, XmlConstants.XML_ORE_IS_AGGREGATED_BY})
+    	XmlConstants.XML_OWL_SAME_AS, XmlConstants.IS_AGGREGATED_BY})
 public class XmlPlaceImpl extends XmlBaseEntityImpl {
     
     	public XmlPlaceImpl(Place place) {
@@ -45,7 +45,7 @@ public class XmlPlaceImpl extends XmlBaseEntityImpl {
 	}
 	
 	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_SKOS_NOTE)
+	@JacksonXmlProperty(localName = XmlConstants.NOTE)
 	public List<XmlMultilingualString> getNote() {
 		return RdfXmlUtils.convertToXmlMultilingualString(getPlace().getNote());
 	}

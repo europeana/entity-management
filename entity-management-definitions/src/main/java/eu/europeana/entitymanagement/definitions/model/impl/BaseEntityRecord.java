@@ -7,7 +7,7 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 
-public class BaseEntityRecord implements EntityRecord{
+public abstract class BaseEntityRecord implements EntityRecord{
 
     private String entityId;
 

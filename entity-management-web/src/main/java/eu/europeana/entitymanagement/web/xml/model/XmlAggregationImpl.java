@@ -25,7 +25,7 @@ public class XmlAggregationImpl {
     	    id = entity.getAbout() + AGGREGATION_TAG;
     	}
     	
-	@JacksonXmlProperty(isAttribute= true, localName = XmlConstants.XML_RDF_ABOUT)
+	@JacksonXmlProperty(isAttribute= true, localName = XmlConstants.ABOUT)
 	public String getAbout() {
 		return id;
 	}

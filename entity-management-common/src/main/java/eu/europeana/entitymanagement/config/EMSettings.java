@@ -6,14 +6,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
@@ -51,10 +50,12 @@ public class EMSettings {
 
     @Value("${entitymanagement.solr.searchapi.hits.query}")
     private String hitsQuery;
-    
+
     @Value("${authorization.api.name}")
     private String authorizationApiName;
 
+    @Value("${metis.baseUrl}")
+    private String metisBaseUrl;
 
     public String getEntitymanagementApiVersion() {
 	return entitymanagementApiVersion;
@@ -89,25 +90,24 @@ public class EMSettings {
 	}
     }
 
-    @PostConstruct
-    private void logImportantSettings() {
-	LOG.info("MyAPI settings:");
-
-    }
-
     public String getPrSolrUrl() {
-        return prSolrUrl;
+	return prSolrUrl;
     }
 
     public String getSearchApiSolrUrl() {
-        return searchApiSolrUrl;
+	return searchApiSolrUrl;
     }
 
     public String getEnrichmentsQuery() {
-        return enrichmentsQuery;
+	return enrichmentsQuery;
     }
 
     public String getHitsQuery() {
-        return hitsQuery;
+	return hitsQuery;
+    }
+
+    @Bean
+    public WebClient metisWebClient() {
+	return WebClient.builder().baseUrl(metisBaseUrl).build();
     }
 }

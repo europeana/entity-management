@@ -23,8 +23,8 @@ import eu.europeana.entitymanagement.config.EMSettings;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.exception.EntityRetrievalException;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
+import eu.europeana.entitymanagement.exception.ScoringComputationException;
 import eu.europeana.entitymanagement.scoring.model.EntityMetrics;
 import eu.europeana.entitymanagement.scoring.model.MaxEntityMetrics;
 import eu.europeana.entitymanagement.scoring.model.PageRank;
@@ -193,7 +193,7 @@ public class ScoringServiceImpl implements ScoringService {
 	    QueryResponse rsp = getSearchApiSolrClient().query(query);
 	    return (int) rsp.getResults().getNumFound();
 	} catch (Exception e) {
-	    throw new EntityRetrievalException("Unexpected exception occured when retrieving pagerank: " + entityId, e);
+	    throw new ScoringComputationException("Unexpected exception occured when retrieving pagerank: " + entityId, e);
 	}
     }
 
@@ -217,7 +217,7 @@ public class ScoringServiceImpl implements ScoringService {
 		return beans.get(0);
 	    }
 	} catch (Exception e) {
-	    throw new EntityRetrievalException("Unexpected exception occured when retrieving pagerank: " + wikidataUrl,
+	    throw new ScoringComputationException("Unexpected exception occured when retrieving pagerank: " + wikidataUrl,
 		    e);
 	}
     }

@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -19,6 +20,7 @@ import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 /**
  * JUnit tests to insert and retrieve the entities from the MongoDB
  */
+@Disabled("This requires a database connection to succeed, it should be configured as an Integration Test")
 public class InsertAndRetrieveEntityToAndFromMongoDB {
 
 	@Test
@@ -30,8 +32,7 @@ public class InsertAndRetrieveEntityToAndFromMongoDB {
 		EntityRecordRepository entityRecordRepository = context.getBean(EntityRecordRepository.class);
     	
 		BaseTimespan entity = new BaseTimespan();
-    	entity.setEntityId("http://data.europeana.eu/timespan/base/1");
-    	entity.setInternalType("Timespan");
+//    	entity.setEntityId("http://data.europeana.eu/timespan/base/1");
     	Map<String, String> prefLabelTest = new HashMap<String, String>();
     	/*
     	 * putting the "." in the name of the field like prefLabelTest.put("perfLabel.pl", "I wiek") causes problems during saving to the mongodb

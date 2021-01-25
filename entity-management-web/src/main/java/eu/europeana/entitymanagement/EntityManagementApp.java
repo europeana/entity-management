@@ -2,7 +2,9 @@ package eu.europeana.entitymanagement;
 
 import org.apache.logging.log4j.LogManager;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
@@ -12,7 +14,10 @@ import eu.europeana.entitymanagement.util.SocksProxyActivator;
 /**
  * Main application. Allows deploying as a war and logs instance data when deployed in Cloud Foundry
  */
-@SpringBootApplication(scanBasePackages = {"eu.europeana.entitymanagement", "eu.europeana.api.commons"})
+@SpringBootApplication(scanBasePackages = {"eu.europeana.entitymanagement", "eu.europeana.api.commons"},
+        // Remove these exclusions to re-enable security
+        exclude = { SecurityAutoConfiguration.class, ManagementWebSecurityAutoConfiguration.class }
+        )
 public class EntityManagementApp extends SpringBootServletInitializer {
 
     /**

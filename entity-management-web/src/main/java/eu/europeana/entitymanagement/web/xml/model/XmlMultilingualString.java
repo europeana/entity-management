@@ -10,25 +10,28 @@ import eu.europeana.entitymanagement.web.xml.XmlStringSerializer;
 
 public class XmlMultilingualString {
 
-    @JsonIgnore
     private String value;
-    @JsonIgnore
+
     private String language;
-    
+
+    public XmlMultilingualString() {
+        // default constructor
+    }
+
     public XmlMultilingualString(String value, String language) {
-	this.value = value;
-	this.language = language;
+        this.value = value;
+        this.language = language;
     }
-    
+
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    @JacksonXmlProperty(isAttribute=true, localName=XmlConstants.XML_LANG)
+    @JacksonXmlProperty(isAttribute = true, namespace = XmlConstants.XML, localName = XmlConstants.LANG)
     public String getLanguage() {
-	return language;
+        return language;
     }
-    
+
     @JacksonXmlText
-    @JsonSerialize(using= XmlStringSerializer.class)
+    @JsonSerialize(using = XmlStringSerializer.class)
     public String getValue() {
-	return value;
+        return value;
     }
 }

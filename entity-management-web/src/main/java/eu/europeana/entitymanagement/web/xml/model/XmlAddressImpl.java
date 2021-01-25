@@ -22,7 +22,7 @@ public class XmlAddressImpl {
     	    this.organization = organization;
     	}
     	
-	@JacksonXmlProperty(isAttribute= true, localName = XmlConstants.XML_RDF_ABOUT)
+	@JacksonXmlProperty(isAttribute= true, localName = XmlConstants.ABOUT)
 	public String getAbout() {
 		return organization.getHasAddress();
 	}

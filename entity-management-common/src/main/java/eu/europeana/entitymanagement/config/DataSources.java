@@ -17,4 +17,14 @@ public class DataSources {
 		return datasources;
 	}
 
+	/**
+	 * Checks if a datasource is configured for the given entity ID
+	 *
+	 * @param id id to match
+	 * @return true if a Datasource match is configured, false otherwise.
+	 */
+	public boolean checkSourceExists(String id) {
+		return datasources.stream().anyMatch(s -> id.contains(s.getUrl()));
+	}
+
 }
