@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.scoring;
+package eu.europeana.entitymanagement.web;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

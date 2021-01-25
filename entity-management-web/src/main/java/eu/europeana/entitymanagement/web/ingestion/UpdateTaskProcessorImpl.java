@@ -2,10 +2,12 @@ package eu.europeana.entitymanagement.web.ingestion;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseAggregation;
+import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.scoring.ScoringService;
@@ -94,14 +96,20 @@ public class UpdateTaskProcessorImpl implements UpdateTaskProcessor {
     }
 
     @Override
-    public void computeRakingMetrics(UpdateTask task) throws EntityUpdateException {
+    public void computeRakingMetrics(UpdateTask task) throws EntityUpdateException{
 	EntityRecord record = task.getRecord();
 	Entity entity = record.getEntity();
 	if (entity == null) {
 	    throw new EntityUpdateException(
 		    "An entity object needs to be available in EntityRecord in order to compute the scoring metrics!");
 	}
-	EntityMetrics metrics = scoringService.computeMetrics(entity);
+	EntityMetrics metrics;
+	try {
+	    metrics = scoringService.computeMetrics(entity);
+	} catch (FunctionalRuntimeException | UnsupportedEntityTypeException e) {
+	    throw new EntityUpdateException(
+		    "Cannot compute ranking metrics for entity: " + entity.getEntityId(), e);
+	}
 	Aggregation aggregation = record.getIsAggregatedBy();
 	if (aggregation == null) {
 	    aggregation = new BaseAggregation();
