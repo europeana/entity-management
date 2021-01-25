@@ -44,7 +44,5 @@ public interface ConceptScheme extends Entity{
 	int getTotal();
 
 	void setTotal(int total);
-	
-	public void setInternalType(String internalType);
 				
 }

@@ -13,19 +13,23 @@ import eu.europeana.entitymanagement.definitions.model.Agent;
 
 @JacksonXmlRootElement(localName = XmlConstants.XML_EDM_AGENT)
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({XmlConstants.XML_FOAF_DEPICTION, XmlConstants.XML_SKOS_PREF_LABEL, XmlConstants.XML_SKOS_ALT_LABEL, XmlConstants.XML_SKOS_HIDDEN_LABEL,
+@JsonPropertyOrder({XmlConstants.DEPICTION, XmlConstants.PREF_LABEL, XmlConstants.ALT_LABEL, XmlConstants.XML_SKOS_HIDDEN_LABEL,
     	XmlConstants.XML_FOAF_NAME, XmlConstants.XML_EDM_BEGIN, XmlConstants.XML_RDAGR2_DATE_OF_BIRTH, XmlConstants.XML_RDAGR2_DATE_OF_ESTABLISHMENT,
     	XmlConstants.XML_EDM_END, XmlConstants.XML_RDAGR2_DATE_OF_DEATH, XmlConstants.XML_RDAGR2_DATE_OF_TERMINATION, XmlConstants.XML_DC_DATE,
     	XmlConstants.XML_RDAGR2_PLACE_OF_BIRTH, XmlConstants.XML_RDAGR2_PLACE_OF_DEATH, XmlConstants.XML_RDAGR2_GENDER, 
-    	XmlConstants.XML_RDAGR2_PROFESSION_OR_OCCUPATION, XmlConstants.XML_RDAGR2_BIOGRAPHICAL_INFORMATION, XmlConstants.XML_SKOS_NOTE,
+    	XmlConstants.XML_RDAGR2_PROFESSION_OR_OCCUPATION, XmlConstants.XML_RDAGR2_BIOGRAPHICAL_INFORMATION, XmlConstants.NOTE,
     	XmlConstants.XML_DCTERMS_HAS_PART, XmlConstants.XML_DCTERMS_IS_PART_OF, XmlConstants.XML_EDM_HASMET, XmlConstants.XML_EDM_IS_RELATED_TO,
-    	XmlConstants.XML_DC_IDENTIFIER, XmlConstants.XML_OWL_SAME_AS, XmlConstants.XML_ORE_IS_AGGREGATED_BY})
+    	XmlConstants.XML_DC_IDENTIFIER, XmlConstants.XML_OWL_SAME_AS, XmlConstants.IS_AGGREGATED_BY})
 public class XmlAgentImpl extends XmlBaseEntityImpl {
     	
     	public XmlAgentImpl(Agent agent) {
     	    	super(agent);    	    	
     	}
-	
+
+	public XmlAgentImpl() {
+		// default constructor
+	}
+
 	@JacksonXmlElementWrapper(useWrapping=false)
 	@JacksonXmlProperty(localName = XmlConstants.XML_SKOS_HIDDEN_LABEL)
 	public List<XmlMultilingualString> getHiddenLabel() {
@@ -33,7 +37,7 @@ public class XmlAgentImpl extends XmlBaseEntityImpl {
 	}
 	
 	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_SKOS_NOTE)
+	@JacksonXmlProperty(localName = XmlConstants.NOTE)
 	public List<XmlMultilingualString> getNote() {
 		return RdfXmlUtils.convertToXmlMultilingualString(entity.getNote());
 	}

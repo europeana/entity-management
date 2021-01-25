@@ -3,46 +3,61 @@ package eu.europeana.entitymanagement.web.xml.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;;
+import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
 
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
 
-@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-public class XmlBaseEntityImpl {
+public abstract class XmlBaseEntityImpl {
 
-    	@JsonIgnore
+		@XmlTransient
     	Entity entity;
-    	@JsonIgnore
+		@XmlTransient
     	String aggregationId;
     	/**
     	 * relatedElementsToSerialize - this list is maintained by each serialized entity and contains the entities that
     	 * need to be serialized in addition, outside of the given entity
     	 */
-    	@JsonIgnore
+		@XmlTransient
     	List<Object> referencedWebResources;
-    	
-    	
-    	public List<Object> getReferencedWebResources() {
+
+
+    	private String about;
+		private List<XmlMultilingualString> altLabel = new ArrayList<>();
+		private List<XmlMultilingualString> prefLabel = new ArrayList<>();
+		private List<RdfResource> sameAs = new ArrayList<>();
+
+	public XmlBaseEntityImpl() {
+		// default constructor
+	}
+
+	public List<Object> getReferencedWebResources() {
 			return referencedWebResources;
 		}
 
 		public XmlBaseEntityImpl(Entity entity) {
     	    	this.entity = entity;
+    	    	this.about = entity.getAbout();
     	    	aggregationId = entity.getAbout() + "#aggregation";
     	    	referencedWebResources = new ArrayList<Object>();
+    	    	this.prefLabel = RdfXmlUtils.convertToXmlMultilingualString(entity.getPrefLabel());
+    	    	this.altLabel = RdfXmlUtils.convertToXmlMultilingualString(entity.getAltLabel());
+    	    	this.sameAs = RdfXmlUtils.convertToRdfResource(entity.getSameAs());
     	}
-    	
-	@JacksonXmlProperty(isAttribute= true, localName = XmlConstants.XML_RDF_ABOUT)
+
+	@XmlAttribute( namespace = XmlConstants.NAMESPACE_RDF, name = XmlConstants.ABOUT)
 	public String getAbout() {
-		return entity.getAbout();
+		return this.about;
 	}
-	
-	@JacksonXmlProperty(localName = XmlConstants.XML_ORE_IS_AGGREGATED_BY)
+
+	public void setAbout(String about) {
+		this.about = about;
+	}
+
+	@XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.IS_AGGREGATED_BY)
 	public XmlIsAggregatedByImpl getIsAggregatedBy() {
 	    	if(entity.getCreated() == null && entity.getModified() == null)
 	    	    return null;
@@ -55,33 +70,29 @@ public class XmlBaseEntityImpl {
 		return new XmlAggregationImpl(entity);
 	}
 	
-	@JacksonXmlProperty(localName = XmlConstants.XML_FOAF_DEPICTION)
+	@XmlElement(namespace = XmlConstants.NAMESPACE_FOAF, name = XmlConstants.DEPICTION)
 	public EdmWebResource getDepiction() {
 	    	if(entity.getDepiction() == null)
 	    	    return null;
 		return new EdmWebResource(entity.getDepiction());
 	}
 	
-	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_SKOS_PREF_LABEL)
+	@XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.PREF_LABEL)
 	public List<XmlMultilingualString> getPrefLabel() {		
-		return RdfXmlUtils.convertToXmlMultilingualString(entity.getPrefLabel());
+		return this.prefLabel;
 	}
-	
-	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_SKOS_ALT_LABEL)
+
+	@XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.ALT_LABEL)
 	public List<XmlMultilingualString> getAltLabel() {
-		return RdfXmlUtils.convertToXmlMultilingualString(entity.getAltLabel());
+		return this.altLabel;
 	}
-	
-	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_OWL_SAME_AS)
+
+	@XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.XML_OWL_SAME_AS)
 	public List<RdfResource> getSameAs(){
-	    	return RdfXmlUtils.convertToRdfResource(entity.getSameAs());
+	    	return this.sameAs;
 	}
-	
-	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_EDM_IS_SHOWN_BY)
+
+	@XmlElement(namespace = XmlConstants.NAMESPACE_EDM, name = XmlConstants.IS_SHOWN_BY)
 	public RdfResource getIsShownBy() {
 		if (((BaseEntity)entity).getIsShownById()!=null)
 		{

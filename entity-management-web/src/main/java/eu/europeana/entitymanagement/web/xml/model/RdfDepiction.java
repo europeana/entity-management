@@ -17,7 +17,7 @@ public class RdfDepiction {
 	resource = EntityUtils.createWikimediaResourceString(about);
     }
     
-    @JacksonXmlProperty(isAttribute=true, localName=XmlConstants.XML_RDF_ABOUT)
+    @JacksonXmlProperty(isAttribute=true, localName=XmlConstants.ABOUT)
     public String getAbout() {
 	return about;
     }
