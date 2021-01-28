@@ -7,10 +7,8 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
 
-  <groupId>eu.europeana.api</groupId>
   <artifactId>entity-management-mongo</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
-
+  
   <name>entity-management-mongo</name>
   <description>A simple entity-management-mongo.</description>
   <!-- FIXME change it to the project's website -->
@@ -23,11 +21,6 @@
   </properties>
 
   <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-    </dependency>
     
 	<dependency>
 		<groupId>eu.europeana.api</groupId>
@@ -52,7 +45,9 @@
 	<dependency>
 		<groupId>org.springframework</groupId>
 		<artifactId>spring-context</artifactId>
+		<!-- 
 		<version>${version.spring}</version>
+		 -->
 	</dependency>
    
             <!-- for search -->

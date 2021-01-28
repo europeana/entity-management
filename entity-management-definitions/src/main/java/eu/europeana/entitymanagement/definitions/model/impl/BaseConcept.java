@@ -136,4 +136,9 @@ public class BaseConcept extends BaseEntity implements Concept {
 		this.notation = notation;
 	}
 
+	@Override
+	public String getInternalType() {
+		return "Concept";
+	}
+
 }

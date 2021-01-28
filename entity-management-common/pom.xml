@@ -7,20 +7,12 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
 
-  <groupId>eu.europeana.api</groupId>
   <artifactId>entity-management-common</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
-
+  
   <name>entity-management-common</name>
   <description>A simple entity-management-common.</description>
   <!-- FIXME change it to the project's website -->
   <url>http://www.example.com</url>
-
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>1.7</maven.compiler.source>
-    <maven.compiler.target>1.7</maven.compiler.target>
-  </properties>
 
   <dependencies>
     <dependency>
@@ -45,6 +37,10 @@
 			</exclusion>
 		</exclusions>
 	</dependency>
+      <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-webflux</artifactId>
+      </dependency>
 	<dependency>
 		<groupId>org.springframework</groupId>
 		<artifactId>spring-context</artifactId>
@@ -67,8 +63,6 @@
     	<artifactId>log4j-api</artifactId>
     	<version>${version.log4j}</version>
 	</dependency>
-	
-	
   </dependencies>
 
 </project>

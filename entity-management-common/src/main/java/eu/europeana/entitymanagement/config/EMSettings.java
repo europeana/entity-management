@@ -15,12 +15,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
+import org.springframework.web.reactive.function.client.WebClient;
+
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 /**
- * Container for all settings that we load from the entitymanagement.properties file and optionally override from
- * myapi.user.properties file
+ * Container for all settings that we load from the entitymanagement.properties
+ * file and optionally override from myapi.user.properties file
  */
 @Configuration
 @PropertySources
@@ -28,40 +30,63 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 @PropertySource("classpath:entitymanagement.properties"),
 @PropertySource(value = "classpath:entitymanagement.user.properties", ignoreResourceNotFound = true)
 })
+
 public class EMSettings {
 
     private static final Logger LOG = LogManager.getLogger(EMSettings.class);
 
     @Value("${datasources.config}")
     private String datasourcesXMLConfig;
-    
+
     @Value("${entitymanagement.api.version}")
     private String entitymanagementApiVersion;
-    
-	public String getEntitymanagementApiVersion() {
-		return entitymanagementApiVersion;
-	}
 
-    @Value("${entity.environment}")
-    private String entityEnvironment;
-    
-    public String getEntityEnvironment() {
-		return entityEnvironment;
-	}
+//    @Value("${entity.environment}")
+//    private String entityEnvironment;
 
-	@Value("${europeana.apikey.jwttoken.siganturekey}")
+    @Value("${europeana.apikey.jwttoken.siganturekey}")
     private String europeanaApikeyJwttokenSiganturekey;
-    
-    public String getEuropeanaApikeyJwttokenSiganturekey() {
-		return europeanaApikeyJwttokenSiganturekey;
-	}
 
-	@Value("${authorization.api.name}")
+    @Value("${entitymanagement.solr.pr.url}")
+    private String prSolrUrl;
+
+    @Value("${entitymanagement.solr.searchapi.url}")
+    private String searchApiSolrUrl;
+
+    @Value("${entitymanagement.solr.searchapi.enrichments.query}")
+    private String enrichmentsQuery;
+
+    @Value("${entitymanagement.solr.searchapi.hits.query}")
+    private String hitsQuery;
+
+    @Value("${authorization.api.name}")
     private String authorizationApiName;
-    
+
+    @Value("${metis.baseUrl}")
+    private String metisBaseUrl;
+
+    public String getEntitymanagementApiVersion() {
+	return entitymanagementApiVersion;
+    }
+
+//    public String getEntityEnvironment() {
+//	return entityEnvironment;
+//    }
+
+    public String getEuropeanaApikeyJwttokenSiganturekey() {
+	return europeanaApikeyJwttokenSiganturekey;
+    }
+
     public String getAuthorizationApiName() {
-		return authorizationApiName;
-	}
+	return authorizationApiName;
+    }
+
+//    @Value("${default.user.token}")
+//    private String defaultUserToken;
+
+//    public String getDefaultUserToken() {
+//	return defaultUserToken;
+//    }
 
 	@Bean
 	public DataSources getDataSources() throws IOException {
@@ -77,6 +102,27 @@ public class EMSettings {
     @PostConstruct
     private void logImportantSettings() {
         LOG.info("MyAPI settings:");
+    }
 
+    public String getPrSolrUrl() {
+	return prSolrUrl;
+    }
+
+    public String getSearchApiSolrUrl() {
+	return searchApiSolrUrl;
+    }
+
+    public String getEnrichmentsQuery() {
+	return enrichmentsQuery;
+    }
+
+    public String getHitsQuery() {
+	return hitsQuery;
+    }
+
+
+    @Bean
+    public WebClient metisWebClient() {
+	return WebClient.builder().baseUrl(metisBaseUrl).build();
     }
 }

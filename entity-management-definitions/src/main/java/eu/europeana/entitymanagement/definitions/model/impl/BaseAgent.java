@@ -478,4 +478,8 @@ public class BaseAgent extends BaseEntity implements Agent, eu.europeana.corelib
 		return getBiographicalInformation();
 	}
 
+	@Override
+	public String getInternalType() {
+		return "Agent";
+	}
 }

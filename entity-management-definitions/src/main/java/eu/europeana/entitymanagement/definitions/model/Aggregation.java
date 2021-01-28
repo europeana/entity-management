@@ -20,9 +20,9 @@ public interface Aggregation {
 
     int getRecordCount();
 
-    void setPageRank(int pageRank);
+    void setPageRank(double pageRank);
 
-    int getPageRank();
+    double getPageRank();
 
     void setModified(Date modified);
 

@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
-import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.EntityRoot;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
@@ -24,13 +24,10 @@ import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
  * TODO: Define the Jackson annotations, both xml and json, in one place, meaning in this class here and the corresponding extended classes 
  */
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-public class BaseEntity implements Entity {
+public class BaseEntity implements EntityRoot {
 
 	protected String TMP_KEY = "def";
-	
-	// common functional fields
 	private String internalType;
-
 	private String entityId;
 	// depiction
 	private String depiction;
@@ -103,14 +100,11 @@ public class BaseEntity implements Entity {
 		this.note = note;
 	}
 
+
 	@JsonProperty(WebEntityFields.TYPE)
 	@JacksonXmlProperty(localName = XmlFields.XML_RDF_TYPE)
 	public String getInternalType() {
 		return internalType;
-	}
-
-	public void setInternalType(String internalType) {
-		this.internalType = internalType;
 	}
 
 //	public String[] getSameAs() {
@@ -332,6 +326,11 @@ public class BaseEntity implements Entity {
 	@Override
 	public void setIsShownBy(WebResource resource) {
 		referencedWebResource=resource;
+	}
+
+	@Override
+	public String setInternalType(String internalTypeParam) {
+		return internalType=internalTypeParam;
 	}
 
 }

@@ -16,9 +16,9 @@ import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseAggregation;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseEntityProxy;
+import eu.europeana.entitymanagement.definitions.model.impl.BaseEntityRecord;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseTimespan;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseWebResource;
-import eu.europeana.entitymanagement.definitions.model.mongo.impl.EntityRecordImpl;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 
 /**
@@ -70,7 +70,7 @@ public class EntityRecrodRepositoryTest {
     	proxy.setProxyIn(aggregation2);
     	proxies.add(proxy);
 	    	
-    	EntityRecordImpl entityRecordImpl = new EntityRecordImpl();
+    	EntityRecord entityRecordImpl = new BaseEntityRecord();
     	entityRecordImpl.setEntity(entity);
     	entityRecordImpl.setEntityId(entity.getEntityId());
     	entityRecordImpl.setIsAggregatedBy(aggregation);

@@ -1,6 +1,6 @@
 package eu.europeana.entitymanagement.definitions.model;
 
-public interface Place extends Entity {
+public interface Place extends EntityRoot {
 
 	void setAltitude(Float altitude);
 

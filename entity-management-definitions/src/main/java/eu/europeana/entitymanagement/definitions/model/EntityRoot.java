@@ -9,7 +9,7 @@ import eu.europeana.corelib.definitions.edm.entity.ContextualClass;
 
 //import eu.europeana.corelib.definitions.edm.entity.ContextualClass;
 @Embedded
-public interface Entity extends ContextualClass {
+public interface EntityRoot extends ContextualClass {
 
 	public String[] getIdentifier();
 
@@ -24,6 +24,8 @@ public interface Entity extends ContextualClass {
 	public void setEntityId(String enitityId);
 
 	public String getInternalType();
+	
+	public String setInternalType(String internalTypeParam);
 
 	public String[] getSameAs();
 

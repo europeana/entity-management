@@ -2,7 +2,12 @@ package eu.europeana.entitymanagement.definitions.model;
 
 import java.util.List;
 
+import org.bson.types.ObjectId;
+
 public interface EntityRecord {
+
+    void setDbId(ObjectId dbId);
+    ObjectId getDbId();
 
     void setProxies(List<EntityProxy> proxies);
 
@@ -16,8 +21,8 @@ public interface EntityRecord {
 
     String getEntityId();
 
-    void setEntity(Entity entity);
+    void setEntity(EntityRoot entity);
 
-    Entity getEntity();
+    EntityRoot getEntity();
 
 }

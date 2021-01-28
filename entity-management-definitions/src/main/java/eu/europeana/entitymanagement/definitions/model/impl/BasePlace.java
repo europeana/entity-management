@@ -139,5 +139,9 @@ public class BasePlace extends BaseEntity implements Place, eu.europeana.corelib
 
 		return tmpIsPartOf;
 	}
-	
+
+	@Override
+	public String getInternalType() {
+		return "Place";
+	}
 }

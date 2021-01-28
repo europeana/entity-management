@@ -10,9 +10,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
-import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.model.EntityRoot;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.exception.EntityManagementRuntimeException;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
@@ -83,7 +83,7 @@ public class JsonLdSerializer {
 
     private String serializeInternal(EntityRecord record) throws EntityManagementRuntimeException {
 		try {
-			Entity tmpEntity = record.getEntity();
+			EntityRoot tmpEntity = record.getEntity();
 			record.setEntity(null);
 
 			StringBuilder builder = new StringBuilder();

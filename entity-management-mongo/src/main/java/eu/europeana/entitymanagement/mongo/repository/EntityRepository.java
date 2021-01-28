@@ -1,14 +1,14 @@
 package eu.europeana.entitymanagement.mongo.repository;
 
 import static dev.morphia.query.experimental.filters.Filters.eq;
+import static eu.europeana.entitymanagement.mongo.repository.EntityRecordFields.ENTITY_ID;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_DELETE_OPTS;
-import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.Fields.ENTITY_ID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import dev.morphia.Datastore;
-import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.EntityRoot;
 
 
 /**
@@ -25,7 +25,7 @@ public class EntityRepository {
      * @return the total number of resources in the database
      */
     public long count() {
-        return datastore.find(Entity.class).count();
+        return datastore.find(EntityRoot.class).count();
     }
 
     /**
@@ -35,7 +35,7 @@ public class EntityRepository {
      * @return true if yes, otherwise false
      */
     public boolean existsByEntityId(String entityId) {
-        return datastore.find(Entity.class).filter(
+        return datastore.find(EntityRoot.class).filter(
                 eq(ENTITY_ID, entityId)
         ).count() > 0 ;
     }
@@ -45,8 +45,8 @@ public class EntityRepository {
      * @param entityId	ID of the dataset
      * @return Entity
      */
-    public Entity findByEntityId(String entityId) {
-        return datastore.find(Entity.class).filter(
+    public EntityRoot findByEntityId(String entityId) {
+        return datastore.find(EntityRoot.class).filter(
                 eq(ENTITY_ID, entityId))
                 .first();
     }
@@ -59,12 +59,12 @@ public class EntityRepository {
      */
     // TODO move this to the loader?
     public long deleteDataset(String entityId) {
-        return datastore.find(Entity.class).filter(
+        return datastore.find(EntityRoot.class).filter(
                 eq(ENTITY_ID,entityId))
                 .delete(MULTI_DELETE_OPTS).getDeletedCount();
     }
 
-    public void save(Entity entityRecord){
+    public void save(EntityRoot entityRecord){
         datastore.save(entityRecord);
     }
 

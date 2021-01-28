@@ -3,7 +3,7 @@ package eu.europeana.entitymanagement.definitions.model;
 import java.util.List;
 import java.util.Map;
 
-public interface Organization extends Entity {
+public interface Organization extends EntityRoot {
     
 	/**
 	 * Retrieves the acronym for an Organization Class (language,value)

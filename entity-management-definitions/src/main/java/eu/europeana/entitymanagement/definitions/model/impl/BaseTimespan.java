@@ -105,4 +105,9 @@ public class BaseTimespan extends BaseEntity implements Timespan, eu.europeana.c
 	// TODO Auto-generated method stub
 	
     }
+
+    @Override
+    public String getInternalType() {
+        return "Timespan";
+    }
 }

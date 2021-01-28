@@ -29,20 +29,20 @@ public class EntityManagementConfigurationImpl implements EntityManagementConfig
 		this.entityProperties = entityProperties;
 	}
 
-	@Override
-	public boolean isProductionEnvironment() {
-		return VALUE_ENVIRONMENT_PRODUCTION.equals(getEnvironment());
-	}
+//	@Override
+//	public boolean isProductionEnvironment() {
+//		return VALUE_ENVIRONMENT_PRODUCTION.equals(getEnvironment());
+//	}
 
-	@Override
-	public String getEnvironment() {
-		return getEntityProperties().getProperty(ENTITY_ENVIRONMENT);
-	}
+//	@Override
+//	public String getEnvironment() {
+//		return getEntityProperties().getProperty(ENTITY_ENVIRONMENT);
+//	}
 
-	@Override
-	public String getUserToken() {
-		return getEntityProperties().getProperty(DEFAULT_USER_TOKEN);
-	}
+//	@Override
+//	public String getUserToken() {
+//		return getEntityProperties().getProperty(DEFAULT_USER_TOKEN);
+//	}
 
 
 	@Override
@@ -67,7 +67,6 @@ public class EntityManagementConfigurationImpl implements EntityManagementConfig
     	entityProperties.setProperty(API_VERSION, emSetting.getEntitymanagementApiVersion());
     	entityProperties.setProperty(AUTHORIZATION_API_NAME, emSetting.getAuthorizationApiName());
     	entityProperties.setProperty(KEY_APIKEY_JWTTOKEN_SIGNATUREKEY, emSetting.getEuropeanaApikeyJwttokenSiganturekey());
-    	entityProperties.setProperty(ENTITY_ENVIRONMENT, emSetting.getEntityEnvironment());
     }
 
 }

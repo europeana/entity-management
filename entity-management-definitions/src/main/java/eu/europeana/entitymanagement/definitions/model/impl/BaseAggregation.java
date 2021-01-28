@@ -18,7 +18,8 @@ public class BaseAggregation implements Aggregation{
 
     String id, type, rights, source;
     Date created, modified;
-    int pageRank, recordCount, score;
+    int score, recordCount;
+    double pageRank;
     List<String> aggregates;
     
     @Override
@@ -83,11 +84,12 @@ public class BaseAggregation implements Aggregation{
     @Override
     @JsonProperty
     @JacksonXmlProperty
-    public int getPageRank() {
+    public double getPageRank() {
         return pageRank;
     }
+    
     @Override
-    public void setPageRank(int pageRank) {
+    public void setPageRank(double pageRank) {
         this.pageRank = pageRank;
     }
     @Override

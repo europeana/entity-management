@@ -55,6 +55,25 @@
         </dependency>
 
 
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.3.0-b170201.1204</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/javax.activation/activation -->
+        <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+            <version>1.1</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.glassfish.jaxb/jaxb-runtime -->
+        <dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+            <version>2.3.0-b170127.1453</version>
+        </dependency>
         
 		<dependency>
 			<groupId>eu.europeana.api.commons</groupId>
@@ -118,6 +137,27 @@
 			<version>${version.corelib}</version>
 		</dependency>
 		       
+		<!-- spring batch dependencies  -->
+	    <!-- 
+    	 <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-batch</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.batch</groupId>
+            <artifactId>spring-batch-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+ -->
 
         <!-- for securing (error) output -->
         <dependency>
@@ -147,36 +187,23 @@
         </dependency>
                    
 
-        <!-- For testing error response contents (not possible with MockMvc)-->
-        <!-- This issue https://github.com/rest-assured/rest-assured/issues/1175 prevent us from upgrading to 4.3.1 -->
-        <dependency>
-            <groupId>io.rest-assured</groupId>
-            <artifactId>rest-assured</artifactId>
-            <version>4.2.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.rest-assured</groupId>
-            <artifactId>json-path</artifactId>
-            <version>4.2.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.rest-assured</groupId>
-            <artifactId>xml-path</artifactId>
-            <version>4.2.0</version>
-            <scope>test</scope>
-        </dependency>
-        
+
         <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
 		<dependency>
 		    <groupId>org.junit.jupiter</groupId>
 		    <artifactId>junit-jupiter-api</artifactId>
+		    <!-- 
 		    <version>${junit.version}</version>
+		     -->
 		    <scope>test</scope>
 		</dependency>
-		
-        
+
+        <dependency>
+            <groupId>eu.europeana.api.commons</groupId>
+            <artifactId>commons-error</artifactId>
+            <version>${api.commons.version}</version>
+        </dependency>
+
 
     </dependencies>
     <build>
