@@ -15,8 +15,6 @@ import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.util.BaseEntityFactory;
 import eu.europeana.entitymanagement.web.model.EntityCreationRequest;
-import eu.europeana.entitymanagement.web.xml.model.RdfResource;
-import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 
 @Service
 public class EntityRecordService {
@@ -45,7 +43,7 @@ public class EntityRecordService {
      * @return Saved Entity record
      * @throws EntityCreationException if an error occurs
      */
-    public EntityRecord createEntityFromRequest(EntityCreationRequest entityCreationRequest, XmlBaseEntityImpl metisResponse) throws EntityCreationException {
+    public EntityRecord createEntityFromRequest(EntityCreationRequest entityCreationRequest, BaseEntity metisResponse) throws EntityCreationException {
         BaseEntity entity = BaseEntityFactory.createEntityFromXmlType(metisResponse.getClass());
 
         entity.setPrefLabelStringMap(entityCreationRequest.getPrefLabel());
@@ -65,9 +63,9 @@ public class EntityRecordService {
      * @param rdfResources list of SameAs resources
      * @return Optional containing EntityRecord, or empty Optional if none found
      */
-    public Optional<EntityRecord> retrieveMetisCoreferenceSameAs(List<RdfResource> rdfResources) {
-        for (RdfResource resource : rdfResources) {
-            Optional<EntityRecord> entityRecordOptional = retrieveEntityRecordByUri(resource.getValue());
+    public Optional<EntityRecord> retrieveMetisCoreferenceSameAs(String[] rdfResources) {
+        for (String resource : rdfResources) {
+            Optional<EntityRecord> entityRecordOptional = retrieveEntityRecordByUri(resource);
             if(entityRecordOptional.isPresent()){
                 return entityRecordOptional;
             }

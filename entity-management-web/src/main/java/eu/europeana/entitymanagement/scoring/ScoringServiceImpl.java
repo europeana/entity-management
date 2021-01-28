@@ -21,7 +21,7 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import eu.europeana.entitymanagement.config.EMSettings;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
-import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.EntityRoot;
 import eu.europeana.entitymanagement.definitions.model.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.exception.ScoringComputationException;
@@ -54,7 +54,7 @@ public class ScoringServiceImpl implements ScoringService {
     public static final String WIKIDATA_DBPEDIA_PREFIX = "http://wikidata.dbpedia.org/resource/";
 
     @Override
-    public EntityMetrics computeMetrics(Entity entity) throws FunctionalRuntimeException, UnsupportedEntityTypeException{
+    public EntityMetrics computeMetrics(EntityRoot entity) throws FunctionalRuntimeException, UnsupportedEntityTypeException{
 	EntityMetrics metrics = new EntityMetrics(entity.getEntityId());
 	if(entity.getInternalType() != null) {
 	    metrics.setEntityType(entity.getInternalType());   
@@ -74,7 +74,7 @@ public class ScoringServiceImpl implements ScoringService {
 	return metrics;
     }
 
-    private Integer getHitCount(Entity entity) {
+    private Integer getHitCount(EntityRoot entity) {
 	if (entity.getPrefLabelStringMap() == null || entity.getPrefLabelStringMap().isEmpty()) {
 	    return 0;
 	}
@@ -179,7 +179,7 @@ public class ScoringServiceImpl implements ScoringService {
 	return maxOverallMetrics;	
     }
 
-    private Integer getEnrichmentCount(Entity entity) {
+    private Integer getEnrichmentCount(EntityRoot entity) {
 	String queryStr = emSettings.getEnrichmentsQuery();
 	queryStr = String.format(queryStr, entity.getEntityId());
 	SolrQuery query = new SolrQuery(queryStr);
@@ -197,7 +197,7 @@ public class ScoringServiceImpl implements ScoringService {
 	}
     }
 
-    private PageRank getPageRank(Entity entity) {
+    private PageRank getPageRank(EntityRoot entity) {
 	SolrQuery query = new SolrQuery();
 	String wikidataUrl = getWikidataUrl(entity);
 
@@ -222,7 +222,7 @@ public class ScoringServiceImpl implements ScoringService {
 	}
     }
 
-    private String getWikidataUrl(Entity entity) {
+    private String getWikidataUrl(EntityRoot entity) {
 	if (entity.getSameAs() == null) {
 	    return null;
 	}

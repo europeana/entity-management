@@ -2,12 +2,10 @@ package eu.europeana.entitymanagement.definitions.model;
 
 import java.util.List;
 
-import org.bson.types.ObjectId;
-
 public interface EntityRecord {
 
-    void setDbId(ObjectId dbId);
-    ObjectId getDbId();
+    void setDbId(long dbId);
+    long getDbId();
 
     void setProxies(List<EntityProxy> proxies);
 

@@ -1,9 +1,5 @@
 package eu.europeana.entitymanagement.web.service.impl;
 
-import eu.europeana.api.commons.error.EuropeanaApiException;
-import eu.europeana.entitymanagement.exception.HttpBadRequestException;
-import eu.europeana.entitymanagement.web.model.metis.EnrichmentResultList;
-import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +8,10 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.Optional;
+import eu.europeana.api.commons.error.EuropeanaApiException;
+import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
+import eu.europeana.entitymanagement.exception.HttpBadRequestException;
+import eu.europeana.entitymanagement.web.model.metis.EnrichmentResultList;
 
 /**
  * Handles de-referencing entities from Metis.
@@ -35,7 +34,7 @@ public class MetisDereferenceService {
      * @param id external ID for entity
      * @return An optional containing the de-referenced entity, or an empty optional if no match found.
      */
-    public XmlBaseEntityImpl dereferenceEntityById(String id) throws HttpBadRequestException {
+    public BaseEntity dereferenceEntityById(String id) throws HttpBadRequestException {
         logger.info("De-referencing entity {} with Metis", id);
 
         EnrichmentResultList metisResponse = webClient.get()
@@ -64,7 +63,7 @@ public class MetisDereferenceService {
         }
 
         // see test/resources/metis-deref/response.xml for XML structure of metis response.
-        XmlBaseEntityImpl xmlBaseEntity = metisResponse
+        BaseEntity xmlBaseEntity = metisResponse
                 .getEnrichmentBaseResultWrapperList()
                 .get(0)
                 .getEnrichmentBaseList()

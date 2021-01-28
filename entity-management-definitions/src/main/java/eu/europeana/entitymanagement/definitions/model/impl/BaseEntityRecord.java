@@ -31,7 +31,7 @@ public class BaseEntityRecord implements EntityRecord{
 
     @Id
     @JsonIgnore
-    private ObjectId dbId;
+    private long dbId;
 
     private String entityId;
 
@@ -91,12 +91,12 @@ public class BaseEntityRecord implements EntityRecord{
     }
 
 	@Override
-	public void setDbId(ObjectId dbId_param) {
+	public void setDbId(long dbId_param) {
 		this.dbId=dbId_param;
 	}
 
 	@Override
-	public ObjectId getDbId() {
+	public long getDbId() {
 		return dbId;
 	}
 }

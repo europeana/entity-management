@@ -34,6 +34,7 @@ import eu.europeana.entitymanagement.definitions.formats.FormatTypes;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.EntityRoot;
+import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
 import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.ParamValidationException;
@@ -41,7 +42,6 @@ import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.web.model.EntityCreationRequest;
 import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
 import eu.europeana.entitymanagement.web.service.impl.MetisDereferenceService;
-import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import io.swagger.annotations.ApiOperation;
 
 /**
@@ -116,7 +116,7 @@ public class EMController extends BaseRest {
         }
 
         // dereference using Metis. return HTTP 400 for HTTP4XX responses and HTTP 504 for other error responses
-        XmlBaseEntityImpl metisResponse = dereferenceService.dereferenceEntityById(entityCreationRequest.getId());
+        BaseEntity metisResponse = dereferenceService.dereferenceEntityById(entityCreationRequest.getId());
         existingEntity = entityRecordService.retrieveMetisCoreferenceSameAs(metisResponse.getSameAs());
 
         if (existingEntity.isPresent()) {
