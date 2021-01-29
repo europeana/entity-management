@@ -116,7 +116,7 @@ public class BaseConcept extends BaseEntity implements Concept {
 		this.closeMatch = closeMatch;
 	}
 
-	@JsonProperty(WebEntityFields.IN_SCHEMA)
+	@JsonProperty(WebEntityFields.IN_SCHEME)
 	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_IN_SCHEMA)
 	public String[] getInScheme() {
 		return inScheme;

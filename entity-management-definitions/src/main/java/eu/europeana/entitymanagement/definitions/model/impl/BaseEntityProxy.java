@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
-import eu.europeana.entitymanagement.definitions.model.EntityRoot;
+import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
@@ -14,7 +14,7 @@ import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
 public class BaseEntityProxy implements EntityProxy {
 
     String proxyId;
-    EntityRoot entity;
+    Entity entity;
     String proxyFor;
     Aggregation proxyIn;
     String type;
@@ -41,11 +41,11 @@ public class BaseEntityProxy implements EntityProxy {
     
 	@JsonProperty
 	@JacksonXmlProperty
-    public EntityRoot getEntity() {
+    public Entity getEntity() {
 		return entity;
 	}
 
-	public void setEntity(EntityRoot entity) {
+	public void setEntity(Entity entity) {
 		this.entity = entity;
 	}	
     

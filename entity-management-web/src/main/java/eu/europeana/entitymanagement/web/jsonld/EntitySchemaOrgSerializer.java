@@ -8,7 +8,7 @@ import eu.europeana.corelib.edm.utils.JsonLdSerializer;
 import eu.europeana.corelib.edm.utils.SchemaOrgTypeFactory;
 import eu.europeana.corelib.edm.utils.SchemaOrgUtils;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
-import eu.europeana.entitymanagement.definitions.model.EntityRoot;
+import eu.europeana.entitymanagement.definitions.model.Entity;
 
 /**
  * This class supports serialization of Entity object applying 
@@ -31,7 +31,7 @@ public class EntitySchemaOrgSerializer extends JsonLdSerializer {
 	 * @return The serialized entity in json-ld string format
 	 * @throws UnsupportedEntityTypeException
 	 */
-	public String serializeEntity(EntityRoot entity) 
+	public String serializeEntity(Entity entity) 
 		throws HttpException, UnsupportedEntityTypeException {
 	    
 	        String jsonLd;

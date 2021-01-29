@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
-import eu.europeana.entitymanagement.definitions.model.EntityRoot;
+import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
@@ -24,7 +24,7 @@ import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
  * TODO: Define the Jackson annotations, both xml and json, in one place, meaning in this class here and the corresponding extended classes 
  */
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-public class BaseEntity implements EntityRoot {
+public class BaseEntity implements Entity {
 
 	protected String TMP_KEY = "def";
 	private String internalType;

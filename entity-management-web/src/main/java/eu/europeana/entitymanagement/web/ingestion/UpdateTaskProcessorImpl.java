@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.EntityRoot;
+import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseAggregation;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
@@ -98,7 +98,7 @@ public class UpdateTaskProcessorImpl implements UpdateTaskProcessor {
     @Override
     public void computeRakingMetrics(UpdateTask task) throws EntityUpdateException{
 	EntityRecord record = task.getRecord();
-	EntityRoot entity = record.getEntity();
+	Entity entity = record.getEntity();
 	if (entity == null) {
 	    throw new EntityUpdateException(
 		    "An entity object needs to be available in EntityRecord in order to compute the scoring metrics!");

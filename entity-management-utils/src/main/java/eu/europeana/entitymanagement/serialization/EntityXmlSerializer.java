@@ -13,7 +13,7 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.EntityRoot;
+import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.exception.EntityManagementRuntimeException;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
@@ -146,7 +146,7 @@ public class EntityXmlSerializer {
 
 		String output = "";
 		
-		EntityRoot tmpEntity = entityRecord.getEntity();
+		Entity tmpEntity = entityRecord.getEntity();
 		try {
 			entityRecord.setEntity(null);
 

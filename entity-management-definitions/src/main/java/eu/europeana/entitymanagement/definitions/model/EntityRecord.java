@@ -19,8 +19,8 @@ public interface EntityRecord {
 
     String getEntityId();
 
-    void setEntity(EntityRoot entity);
+    void setEntity(Entity entity);
 
-    EntityRoot getEntity();
+    Entity getEntity();
 
 }

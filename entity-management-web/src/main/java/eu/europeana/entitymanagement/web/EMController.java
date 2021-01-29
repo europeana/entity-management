@@ -33,7 +33,7 @@ import eu.europeana.entitymanagement.config.I18nConstants;
 import eu.europeana.entitymanagement.definitions.formats.FormatTypes;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.EntityRoot;
+import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
 import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
@@ -162,7 +162,7 @@ public class EMController extends BaseRest {
                 throw new EntityNotFoundException(entityUri);
             }
 
-	    	EntityRoot tmpBaseEntity= entityRecord.getEntity();
+	    	Entity tmpBaseEntity= entityRecord.getEntity();
 	    	Date timestamp = (tmpBaseEntity != null) ? tmpBaseEntity.getCreated() : null;
 	    	Date etagDate = (timestamp != null)? timestamp : new Date();
 	    	String etag = generateETag(etagDate

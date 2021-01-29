@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import dev.morphia.Datastore;
-import eu.europeana.entitymanagement.definitions.model.EntityRoot;
+import eu.europeana.entitymanagement.definitions.model.Entity;
 
 
 /**
@@ -25,7 +25,7 @@ public class EntityRepository {
      * @return the total number of resources in the database
      */
     public long count() {
-        return datastore.find(EntityRoot.class).count();
+        return datastore.find(Entity.class).count();
     }
 
     /**
@@ -35,7 +35,7 @@ public class EntityRepository {
      * @return true if yes, otherwise false
      */
     public boolean existsByEntityId(String entityId) {
-        return datastore.find(EntityRoot.class).filter(
+        return datastore.find(Entity.class).filter(
                 eq(ENTITY_ID, entityId)
         ).count() > 0 ;
     }
@@ -45,8 +45,8 @@ public class EntityRepository {
      * @param entityId	ID of the dataset
      * @return Entity
      */
-    public EntityRoot findByEntityId(String entityId) {
-        return datastore.find(EntityRoot.class).filter(
+    public Entity findByEntityId(String entityId) {
+        return datastore.find(Entity.class).filter(
                 eq(ENTITY_ID, entityId))
                 .first();
     }
@@ -59,12 +59,12 @@ public class EntityRepository {
      */
     // TODO move this to the loader?
     public long deleteDataset(String entityId) {
-        return datastore.find(EntityRoot.class).filter(
+        return datastore.find(Entity.class).filter(
                 eq(ENTITY_ID,entityId))
                 .delete(MULTI_DELETE_OPTS).getDeletedCount();
     }
 
-    public void save(EntityRoot entityRecord){
+    public void save(Entity entityRecord){
         datastore.save(entityRecord);
     }
 

@@ -46,7 +46,7 @@ public interface WebEntityFields {
 	public static final String BROAD_MATCH = "broadMatch";
 	public static final String NARROW_MATCH = "narrowMatch";
 	public static final String RELATED_MATCH = "relatedMatch";
-	public static final String IN_SCHEMA = "inSchema";
+	public static final String IN_SCHEME = "inScheme";
 
 	// Agent fields
 	public static final String DATE = "date";

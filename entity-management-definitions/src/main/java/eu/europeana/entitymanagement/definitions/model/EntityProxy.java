@@ -9,9 +9,9 @@ public interface EntityProxy {
 
 	public void setProxyId(String proxyId);
 
-    public EntityRoot getEntity();
+    public Entity getEntity();
     
-	public void setEntity(EntityRoot entity);
+	public void setEntity(Entity entity);
 
     public String getProxyFor();
 

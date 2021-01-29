@@ -4,7 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public interface Agent extends EntityRoot {
+public interface Agent extends Entity {
 
 	public Date getDate();
 
