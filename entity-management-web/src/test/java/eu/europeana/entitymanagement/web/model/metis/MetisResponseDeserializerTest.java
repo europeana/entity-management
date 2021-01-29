@@ -1,20 +1,20 @@
 package eu.europeana.entitymanagement.web.model.metis;
 
-import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
-import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
-import org.junit.jupiter.api.Test;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+
+import org.junit.jupiter.api.Test;
+
+import eu.europeana.entitymanagement.definitions.model.impl.BaseConcept;
+import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
 
 class MetisResponseDeserializerTest {
 
@@ -32,8 +32,8 @@ class MetisResponseDeserializerTest {
         assertEquals(1, resultList.getEnrichmentBaseResultWrapperList().size());
 
         // get unmarshalled object
-        XmlBaseEntityImpl entity = resultList.getEnrichmentBaseResultWrapperList().get(0).getEnrichmentBaseList().get(0);
-        assertTrue(entity instanceof XmlConceptImpl);
+        BaseEntity entity = resultList.getEnrichmentBaseResultWrapperList().get(0).getEnrichmentBaseList().get(0);
+        assertTrue(entity instanceof BaseConcept);
 
         // value should match rdf:About in xml file
         assertEquals("http://www.wikidata.org/entity/Q152095", entity.getAbout());

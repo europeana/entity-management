@@ -4,8 +4,8 @@ import java.util.List;
 
 public interface EntityRecord {
 
-    void setDbId(Long dbId);
-    Long getDbId();
+    void setDbId(long dbId);
+    long getDbId();
 
     void setProxies(List<EntityProxy> proxies);
 

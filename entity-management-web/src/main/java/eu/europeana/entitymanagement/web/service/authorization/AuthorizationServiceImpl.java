@@ -11,7 +11,6 @@ import eu.europeana.api.commons.oauth2.service.impl.EuropeanaClientDetailsServic
 import eu.europeana.api.commons.service.authorization.BaseAuthorizationService;
 import eu.europeana.entitymanagement.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.EntityManagementConfigurationImpl;
-import eu.europeana.entitymanagement.web.model.vocabulary.UserRoles;
 
 @Component
 public class AuthorizationServiceImpl extends BaseAuthorizationService implements AuthorizationService {
@@ -46,14 +45,16 @@ public class AuthorizationServiceImpl extends BaseAuthorizationService implement
 	return getConfiguration().getJwtTokenSignatureKey();
     }
 
-    @Override
-    protected Role getRoleByName(String name) {
-	return UserRoles.getRoleByName(name);
-    }
 
     @Override
     protected String getApiName() {
 	return getConfiguration().getAuthorizationApiName();
     }
+
+	@Override
+	protected Role getRoleByName(String arg0) {
+		// TODO Auto-generated method stub
+		return null;
+	}
     
 }

@@ -70,5 +70,7 @@ public interface Agent extends Entity {
 	public String[] getIsPartOfArray();
 
 	public void setIsPartOfArray(String[] isPartOf);
+	
+	public void setIsShownBy (WebResource resource);
 
 }

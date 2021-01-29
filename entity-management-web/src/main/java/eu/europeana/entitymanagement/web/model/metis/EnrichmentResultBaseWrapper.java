@@ -1,12 +1,21 @@
 package eu.europeana.entitymanagement.web.model.metis;
 
-import eu.europeana.entitymanagement.web.xml.model.*;
-
-import javax.xml.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElements;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import eu.europeana.entitymanagement.definitions.model.impl.BaseAgent;
+import eu.europeana.entitymanagement.definitions.model.impl.BaseConcept;
+import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
+import eu.europeana.entitymanagement.definitions.model.impl.BasePlace;
+import eu.europeana.entitymanagement.definitions.model.impl.BaseTimespan;
 
 /**
  * Root element for Metis de-reference response
@@ -16,11 +25,11 @@ import java.util.stream.Collectors;
 public class EnrichmentResultBaseWrapper {
 
     @XmlElements(value = {
-            @XmlElement(name = "Concept", namespace = "http://www.w3.org/2004/02/skos/core#", type = XmlConceptImpl.class),
-            @XmlElement(name = "Agent", namespace = "http://www.europeana.eu/schemas/edm/", type = XmlAgentImpl.class),
-            @XmlElement(name = "Place", namespace = "http://www.europeana.eu/schemas/edm/", type = XmlPlaceImpl.class),
-            @XmlElement(name = "Timespan", namespace = "http://www.europeana.eu/schemas/edm/", type = XmlTimespanImpl.class)})
-    private List<XmlBaseEntityImpl> xmlEntities = new ArrayList<>();
+            @XmlElement(name = "Concept", namespace = "http://www.w3.org/2004/02/skos/core#", type = BaseConcept.class),
+            @XmlElement(name = "Agent", namespace = "http://www.europeana.eu/schemas/edm/", type = BaseAgent.class),
+            @XmlElement(name = "Place", namespace = "http://www.europeana.eu/schemas/edm/", type = BasePlace.class),
+            @XmlElement(name = "Timespan", namespace = "http://www.europeana.eu/schemas/edm/", type = BaseTimespan.class)})
+    private List<BaseEntity> xmlEntities = new ArrayList<>();
 
 
     public EnrichmentResultBaseWrapper() {
@@ -31,11 +40,11 @@ public class EnrichmentResultBaseWrapper {
      *
      * @param enrichmentBase the enrichment information class generated
      */
-    public EnrichmentResultBaseWrapper(List<XmlBaseEntityImpl> enrichmentBase) {
+    public EnrichmentResultBaseWrapper(List<BaseEntity> enrichmentBase) {
         this.xmlEntities = new ArrayList<>(enrichmentBase);
     }
 
-    public List<XmlBaseEntityImpl> getEnrichmentBaseList() {
+    public List<BaseEntity> getEnrichmentBaseList() {
         return new ArrayList<>(xmlEntities);
     }
 
@@ -48,7 +57,7 @@ public class EnrichmentResultBaseWrapper {
      * @return the converted list
      */
     public static List<EnrichmentResultBaseWrapper> createEnrichmentResultBaseWrapperList(
-            Collection<List<XmlBaseEntityImpl>> resultList) {
+            Collection<List<BaseEntity>> resultList) {
         return resultList.stream().map(EnrichmentResultBaseWrapper::new).collect(Collectors.toList());
     }
 }

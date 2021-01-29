@@ -6,13 +6,17 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.PropertySources;
 import org.springframework.web.reactive.function.client.WebClient;
+
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
@@ -21,8 +25,12 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
  * file and optionally override from myapi.user.properties file
  */
 @Configuration
-@PropertySource("classpath:entitymanagement.properties")
+@PropertySources
+({
+@PropertySource("classpath:entitymanagement.properties"),
 @PropertySource(value = "classpath:entitymanagement.user.properties", ignoreResourceNotFound = true)
+})
+
 public class EMSettings {
 
     private static final Logger LOG = LogManager.getLogger(EMSettings.class);
@@ -80,14 +88,20 @@ public class EMSettings {
 //	return defaultUserToken;
 //    }
 
-//    @Bean
-    public DataSources getDataSources() throws IOException {
-	XmlMapper xmlMapper = new XmlMapper();
-	try (InputStream inputStream = getClass().getResourceAsStream(datasourcesXMLConfig);
-		BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-	    String contents = reader.lines().collect(Collectors.joining(System.lineSeparator()));
-	    return xmlMapper.readValue(contents, DataSources.class);
+	@Bean
+	public DataSources getDataSources() throws IOException {
+    	XmlMapper xmlMapper = new XmlMapper();
+    	try (InputStream inputStream = getClass().getResourceAsStream(datasourcesXMLConfig);
+    		    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {    		    
+    		    String contents = reader.lines()
+    		      .collect(Collectors.joining(System.lineSeparator()));
+    		    return xmlMapper.readValue(contents, DataSources.class);	
+    		}    	         
 	}
+    
+    @PostConstruct
+    private void logImportantSettings() {
+        LOG.info("MyAPI settings:");
     }
 
     public String getPrSolrUrl() {
@@ -105,6 +119,7 @@ public class EMSettings {
     public String getHitsQuery() {
 	return hitsQuery;
     }
+
 
     @Bean
     public WebClient metisWebClient() {

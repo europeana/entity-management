@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
-import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseAggregation;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;

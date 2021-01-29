@@ -27,6 +27,7 @@ public interface WebEntityFields {
 	//common administrative information
 	public static final String CREATED = "created";
 	public static final String MODIFIED = "modified";
+	public static final String RIGHTS = "rights";
 	public static final String AGGREGATION = "Aggregation";
 	public static final String IS_AGGREGATED_BY = "isAggregatedBy";
 	public static final String AGGREGATES = "aggregates";
@@ -107,5 +108,10 @@ public interface WebEntityFields {
 
 	// Type
 	public static final String WEB_RESOURCE = "WebResource";
+	
+	//Proxy Fields
+	public static final String PROXY_FOR = "proxyFor";
+	public static final String PROXY_IN = "proxyIn";
+	
 
 }

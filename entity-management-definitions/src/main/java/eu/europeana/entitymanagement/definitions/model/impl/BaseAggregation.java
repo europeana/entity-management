@@ -3,8 +3,17 @@ package eu.europeana.entitymanagement.definitions.model.impl;
 import java.util.Date;
 import java.util.List;
 
-import eu.europeana.entitymanagement.definitions.model.Aggregation;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
+import eu.europeana.entitymanagement.definitions.model.Aggregation;
+import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityFields;
+import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
+
+@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
+@JacksonXmlRootElement(localName = XmlFields.XML_ORE_AGGREGATION)
 public class BaseAggregation implements Aggregation{
 
     String id, type, rights, source;
@@ -14,6 +23,8 @@ public class BaseAggregation implements Aggregation{
     List<String> aggregates;
     
     @Override
+    @JsonProperty(WebEntityFields.ID)
+	@JacksonXmlProperty(isAttribute= true, localName = XmlFields.XML_RDF_ABOUT)
     public String getId() {
         return id;
     }
@@ -22,6 +33,8 @@ public class BaseAggregation implements Aggregation{
         this.id = id;
     }
     @Override
+    @JsonProperty(WebEntityFields.TYPE)
+    @JacksonXmlProperty(localName = XmlFields.XML_RDF_TYPE)
     public String getType() {
         return type;
     }
@@ -29,6 +42,8 @@ public class BaseAggregation implements Aggregation{
         this.type = type;
     }
     @Override
+    @JsonProperty(WebEntityFields.RIGHTS)
+    @JacksonXmlProperty(localName = XmlFields.XML_EDM_RIGHTS)
     public String getRights() {
         return rights;
     }
@@ -37,6 +52,8 @@ public class BaseAggregation implements Aggregation{
         this.rights = rights;
     }
     @Override
+    @JsonProperty(WebEntityFields.SOURCE)
+    @JacksonXmlProperty(localName = XmlFields.XML_DC_SOURCE)
     public String getSource() {
         return source;
     }
@@ -45,6 +62,8 @@ public class BaseAggregation implements Aggregation{
         this.source = source;
     }
     @Override
+    @JsonProperty(WebEntityFields.CREATED)
+    @JacksonXmlProperty(localName = XmlFields.XML_DCTERMS_CREATED)
     public Date getCreated() {
         return created;
     }
@@ -53,6 +72,8 @@ public class BaseAggregation implements Aggregation{
         this.created = created;
     }
     @Override
+    @JsonProperty(WebEntityFields.MODIFIED)
+    @JacksonXmlProperty(localName = XmlFields.XML_DCTERMS_MODIFIED)
     public Date getModified() {
         return modified;
     }
@@ -61,14 +82,19 @@ public class BaseAggregation implements Aggregation{
         this.modified = modified;
     }
     @Override
+    @JsonProperty
+    @JacksonXmlProperty
     public double getPageRank() {
         return pageRank;
     }
+    
     @Override
     public void setPageRank(double pageRank) {
         this.pageRank = pageRank;
     }
     @Override
+    @JsonProperty
+    @JacksonXmlProperty
     public int getRecordCount() {
         return recordCount;
     }
@@ -77,6 +103,8 @@ public class BaseAggregation implements Aggregation{
         this.recordCount = recordCount;
     }
     @Override
+    @JsonProperty
+    @JacksonXmlProperty
     public int getScore() {
         return score;
     }
@@ -85,6 +113,8 @@ public class BaseAggregation implements Aggregation{
         this.score = score;
     }
     @Override
+    @JsonProperty(WebEntityFields.AGGREGATES)
+    @JacksonXmlProperty(localName = XmlFields.XML_ORE_AGGREGATES)
     public List<String> getAggregates() {
         return aggregates;
     }

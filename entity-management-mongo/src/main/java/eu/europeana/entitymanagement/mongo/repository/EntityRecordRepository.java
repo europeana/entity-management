@@ -1,18 +1,19 @@
 package eu.europeana.entitymanagement.mongo.repository;
 
 import static dev.morphia.query.experimental.filters.Filters.eq;
-import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_DELETE_OPTS;
 import static eu.europeana.entitymanagement.mongo.repository.EntityRecordFields.ENTITY_ID;
+import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_DELETE_OPTS;
 
-import com.mongodb.client.model.ReturnDocument;
-import dev.morphia.ModifyOptions;
-import dev.morphia.query.experimental.updates.UpdateOperators;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.mongodb.client.model.ReturnDocument;
+
 import dev.morphia.Datastore;
+import dev.morphia.ModifyOptions;
+import dev.morphia.query.experimental.updates.UpdateOperators;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.mongo.impl.EntityRecordImpl;
+import eu.europeana.entitymanagement.definitions.model.impl.BaseEntityRecord;
 
 
 /**
@@ -29,7 +30,7 @@ public class EntityRecordRepository {
      * @return the total number of resources in the database
      */
     public long count() {
-        return datastore.find(EntityRecordImpl.class).count();
+        return datastore.find(BaseEntityRecord.class).count();
     }
 
     /**
@@ -39,7 +40,7 @@ public class EntityRecordRepository {
      * @return true if yes, otherwise false
      */
     public boolean existsByEntityId(String entityId) {
-        return datastore.find(EntityRecordImpl.class).filter(
+        return datastore.find(BaseEntityRecord.class).filter(
                 eq(EntityRecordFields.ENTITY_ID, entityId)
         ).count() > 0 ;
     }
@@ -50,7 +51,7 @@ public class EntityRecordRepository {
      * @return EntityRecord
      */
     public EntityRecord findByEntityId(String entityId) {
-        return datastore.find(EntityRecordImpl.class).filter(
+        return datastore.find(BaseEntityRecord.class).filter(
                 eq(ENTITY_ID, entityId))
                 .first();
     }
@@ -63,7 +64,7 @@ public class EntityRecordRepository {
      */
     // TODO move this to the loader?
     public long deleteDataset(String entityId) {
-        return datastore.find(EntityRecordImpl.class).filter(
+        return datastore.find(BaseEntityRecord.class).filter(
                 eq(ENTITY_ID,entityId))
                 .delete(MULTI_DELETE_OPTS).getDeletedCount();
     }

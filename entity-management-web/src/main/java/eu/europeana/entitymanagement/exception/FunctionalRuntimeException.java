@@ -1,7 +1,6 @@
 package eu.europeana.entitymanagement.exception;
 
 public class FunctionalRuntimeException extends RuntimeException{
-
 	/**
 	 * 
 	 */

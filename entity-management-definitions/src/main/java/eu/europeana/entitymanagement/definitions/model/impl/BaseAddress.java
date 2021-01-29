@@ -1,5 +1,15 @@
 package eu.europeana.entitymanagement.definitions.model.impl;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+
+import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityFields;
+import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
+
+@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
+@JacksonXmlRootElement(localName = XmlFields.XML_VCARD_ADDRESS)
 public class BaseAddress implements eu.europeana.corelib.definitions.edm.entity.Address {
 
     private String about;
@@ -17,6 +27,8 @@ public class BaseAddress implements eu.europeana.corelib.definitions.edm.entity.
     }
 
     @Override
+    @JsonProperty(WebEntityFields.POST_OFFICE_BOX)
+    @JacksonXmlProperty(localName = XmlFields.XML_VCARD_POST_OFFICE_BOX)
     public String getVcardPostOfficeBox() {
 	return postBox;
     }
@@ -27,6 +39,8 @@ public class BaseAddress implements eu.europeana.corelib.definitions.edm.entity.
     }
 
     @Override
+    @JsonProperty(WebEntityFields.COUNTRY_NAME)
+    @JacksonXmlProperty(localName = XmlFields.XML_VCARD_COUNTRY_NAME)
     public String getVcardCountryName() {
 	return countryName;
     }
@@ -37,6 +51,8 @@ public class BaseAddress implements eu.europeana.corelib.definitions.edm.entity.
     }
 
     @Override
+    @JsonProperty(WebEntityFields.POSTAL_CODE)
+    @JacksonXmlProperty(localName = XmlFields.XML_VCARD_POSTAL_CODE)
     public String getVcardPostalCode() {
 	return postalCode;
     }
@@ -47,6 +63,8 @@ public class BaseAddress implements eu.europeana.corelib.definitions.edm.entity.
     }
 
     @Override
+    @JsonProperty(WebEntityFields.LOCALITY)
+    @JacksonXmlProperty(localName = XmlFields.XML_VCARD_LOCALITY)
     public String getVcardLocality() {
 	return locality;
     }
@@ -57,6 +75,8 @@ public class BaseAddress implements eu.europeana.corelib.definitions.edm.entity.
     }
 
     @Override
+    @JsonProperty(WebEntityFields.STREET_ADDRESS)
+    @JacksonXmlProperty(localName = XmlFields.XML_VCARD_STREET_ADDRESS)
     public String getVcardStreetAddress() {
 	return streetAddress;
     }
@@ -68,11 +88,15 @@ public class BaseAddress implements eu.europeana.corelib.definitions.edm.entity.
     }
 
     @Override
+    @JsonProperty(WebEntityFields.ID)
+    @JacksonXmlProperty(isAttribute= true, localName = XmlFields.XML_RDF_ABOUT)
     public String getAbout() {
 	return about;
     }
 
     @Override
+    @JsonProperty(WebEntityFields.HAS_GEO)
+    @JacksonXmlProperty(localName = XmlFields.XML_VCARD_HAS_GEO)
     public String getVcardHasGeo() {
 	return hasGeo;
     }

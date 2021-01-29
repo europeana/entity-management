@@ -1,8 +1,12 @@
 package eu.europeana.entitymanagement.util;
 
+import eu.europeana.entitymanagement.definitions.model.Agent;
+import eu.europeana.entitymanagement.definitions.model.Concept;
+import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.definitions.model.Place;
+import eu.europeana.entitymanagement.definitions.model.Timespan;
 import eu.europeana.entitymanagement.definitions.model.impl.*;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
-import eu.europeana.entitymanagement.web.xml.model.*;
 
 /**
  * Instantiates a {@link eu.europeana.entitymanagement.definitions.model.impl.BaseEntity} instance, based on
@@ -10,24 +14,24 @@ import eu.europeana.entitymanagement.web.xml.model.*;
  */
 public class BaseEntityFactory {
 
-    public static BaseEntity createEntityFromXmlType(Class<? extends XmlBaseEntityImpl> xmlBaseEntityClass) throws EntityCreationException {
-        if (xmlBaseEntityClass.isAssignableFrom(XmlConceptImpl.class)) {
+    public static BaseEntity createEntityFromXmlType(Class<? extends BaseEntity> xmlBaseEntityClass) throws EntityCreationException {
+        if (xmlBaseEntityClass.isAssignableFrom(Concept.class)) {
             return new BaseConcept();
         }
 
-        if (xmlBaseEntityClass.isAssignableFrom(XmlTimespanImpl.class)) {
+        if (xmlBaseEntityClass.isAssignableFrom(Timespan.class)) {
             return new BaseTimespan();
         }
 
-        if (xmlBaseEntityClass.isAssignableFrom(XmlPlaceImpl.class)) {
+        if (xmlBaseEntityClass.isAssignableFrom(Place.class)) {
             return new BasePlace();
         }
 
-        if (xmlBaseEntityClass.isAssignableFrom(XmlAgentImpl.class)) {
+        if (xmlBaseEntityClass.isAssignableFrom(Agent.class)) {
             return new BaseAgent();
         }
 
-        if (xmlBaseEntityClass.isAssignableFrom(XmlOrganizationImpl.class)) {
+        if (xmlBaseEntityClass.isAssignableFrom(Organization.class)) {
             return new BaseOrganization();
         }
 

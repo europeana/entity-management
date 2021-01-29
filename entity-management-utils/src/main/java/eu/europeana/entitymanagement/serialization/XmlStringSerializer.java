@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.web.xml;
+package eu.europeana.entitymanagement.serialization;
 
 import java.io.IOException;
 

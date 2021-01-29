@@ -9,13 +9,25 @@ import java.util.stream.Collectors;
 
 import org.bson.types.ObjectId;
 
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.RankedEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
-public abstract class BaseEntity implements Entity, RankedEntity {
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.WebResource;
+import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityFields;
+import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
+
+
+/*
+ * TODO: Define the Jackson annotations, both xml and json, in one place, meaning in this class here and the corresponding extended classes 
+ */
+@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
+public class BaseEntity implements Entity {
 
 	protected String TMP_KEY = "def";
-
+	private String internalType;
 	private String entityId;
 	// depiction
 	private String depiction;
@@ -34,24 +46,22 @@ public abstract class BaseEntity implements Entity, RankedEntity {
 	private String[] hasPart;
 	private String[] isPartOf;
 
-	// technical fields
-	private Date timestamp;
-	private int wikipediaClicks;
-	private int europeanaDocCount;
-	private float derivedScore;
-
 	// The time at which the Set was created by the user. 
 	private Date created;
 
 	// The time at which the Set was modified, after creation. 
 	private Date modified;
 	
-        // isShownBy fields
-	private String isShownById;
-	private String isShownBySource;
-	private String isShownByThumbnail;
+	protected WebResource referencedWebResource;
 	
-
+	@Override
+	@JsonIgnore
+	public WebResource getReferencedWebResource() {
+		return referencedWebResource;
+	}
+	
+	@JsonProperty(WebEntityFields.PREF_LABEL)
+	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_PREF_LABEL)
 	public Map<String, String> getPrefLabelStringMap() {
 		return prefLabel;
 	}
@@ -60,6 +70,8 @@ public abstract class BaseEntity implements Entity, RankedEntity {
 		this.prefLabel = prefLabel;
 	}
 
+	@JsonProperty(WebEntityFields.ALT_LABEL)
+	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_ALT_LABEL)
 	public Map<String, List<String>> getAltLabel() {
 		return altLabel;
 	}
@@ -68,6 +80,8 @@ public abstract class BaseEntity implements Entity, RankedEntity {
 		this.altLabel = altLabel;
 	}
 
+	@JsonProperty(WebEntityFields.HIDDEN_LABEL)
+	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_HIDDEN_LABEL)
 	public Map<String, List<String>> getHiddenLabel() {
 		return hiddenLabel;
 	}
@@ -76,6 +90,8 @@ public abstract class BaseEntity implements Entity, RankedEntity {
 		this.hiddenLabel = hiddenLabel;
 	}
 
+	@JsonProperty(WebEntityFields.NOTE)
+	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_NOTE)
 	public Map<String, List<String>> getNote() {
 		return note;
 	}
@@ -84,8 +100,12 @@ public abstract class BaseEntity implements Entity, RankedEntity {
 		this.note = note;
 	}
 
-	abstract public String getInternalType();
 
+	@JsonProperty(WebEntityFields.TYPE)
+	@JacksonXmlProperty(localName = XmlFields.XML_RDF_TYPE)
+	public String getInternalType() {
+		return internalType;
+	}
 
 //	public String[] getSameAs() {
 //		return sameAs;
@@ -95,6 +115,7 @@ public abstract class BaseEntity implements Entity, RankedEntity {
 //		this.sameAs = sameAs;
 //	}
 
+	
 	public String getEntityId() {
 		return entityId;
 	}
@@ -103,6 +124,8 @@ public abstract class BaseEntity implements Entity, RankedEntity {
 		this.entityId = entityId;
 	}
 
+	@JsonProperty(WebEntityFields.IDENTIFIER)
+	@JacksonXmlProperty(localName = XmlFields.XML_DC_IDENTIFIER)
 	public String[] getIdentifier() {
 		return identifier;
 	}
@@ -111,6 +134,8 @@ public abstract class BaseEntity implements Entity, RankedEntity {
 		this.identifier = identifier;
 	}
 
+	@JsonProperty(WebEntityFields.ID)
+	@JacksonXmlProperty(isAttribute= true, localName = XmlFields.XML_RDF_ABOUT)
 	public String getAbout() {
 		return getEntityId();
 	}
@@ -119,46 +144,8 @@ public abstract class BaseEntity implements Entity, RankedEntity {
 		setEntityId(about);
 	}
 
-	@Override
-	public Date getTimestamp() {
-		return timestamp;
-	}
-
-	@Override
-	public void setTimestamp(Date timestamp) {
-		this.timestamp = timestamp;
-	}
-
-	@Override
-	public int getWikipediaClicks() {
-		return wikipediaClicks;
-	}
-
-	@Override
-	public void setWikipediaClicks(int wikipediaClicks) {
-		this.wikipediaClicks = wikipediaClicks;
-	}
-
-	@Override
-	public int getEuropeanaDocCount() {
-		return europeanaDocCount;
-	}
-
-	@Override
-	public void setEuropeanaDocCount(int europeanaDocCount) {
-		this.europeanaDocCount = europeanaDocCount;
-	}
-
-	@Override
-	public float getDerivedScore() {
-		return derivedScore;
-	}
-
-	@Override
-	public void setDerivedScore(float derivedScore) {
-		this.derivedScore = derivedScore;
-	}
-
+	@JsonProperty(WebEntityFields.IS_RELATED_TO)
+	@JacksonXmlProperty(localName = XmlFields.XML_EDM_IS_RELATED_TO)
 	public String[] getIsRelatedTo() {
 		return isRelatedTo;
 	}
@@ -179,6 +166,8 @@ public abstract class BaseEntity implements Entity, RankedEntity {
 //
 //	}
 
+	@JsonProperty(WebEntityFields.HAS_PART)
+	@JacksonXmlProperty(localName = XmlFields.XML_DCTERMS_HAS_PART)
 	public String[] getHasPart() {
 		return hasPart;
 	}
@@ -187,6 +176,8 @@ public abstract class BaseEntity implements Entity, RankedEntity {
 		this.hasPart = hasPart;
 	}
 
+	@JsonProperty(WebEntityFields.IS_PART_OF)
+	@JacksonXmlProperty(localName = XmlFields.XML_DCTERMS_IS_PART_OF)
 	public String[] getIsPartOfArray() {
 		return isPartOf;
 	}
@@ -195,6 +186,8 @@ public abstract class BaseEntity implements Entity, RankedEntity {
 		this.isPartOf = isPartOf;
 	}
 
+	@JsonProperty(WebEntityFields.DEPICTION)
+	@JacksonXmlProperty(localName = XmlFields.XML_FOAF_DEPICTION)
 	public String getDepiction() {
 		return depiction;
 	}
@@ -204,6 +197,8 @@ public abstract class BaseEntity implements Entity, RankedEntity {
 	}
 
 	@Override
+	@JsonProperty(WebEntityFields.SAME_AS)
+	@JacksonXmlProperty(localName = XmlFields.XML_OWL_SAME_AS)
 	public String[] getSameAs() {
 		return sameAs;
 	}
@@ -317,28 +312,25 @@ public abstract class BaseEntity implements Entity, RankedEntity {
 		this.modified = modified;
 	}
 
-	public String getIsShownById() {
-		return isShownById;
-	}
-	
-	public void setIsShownById(String isShownById) {
-		this.isShownById = isShownById;
-	}
-
-	public String getIsShownBySource() {
-		return isShownBySource;
-	}
-	
-	public void setIsShownBySource(String isShownBySource) {
-		this.isShownBySource = isShownBySource;
+	@Override
+	@JsonProperty(WebEntityFields.IS_SHOWN_BY)
+	@JacksonXmlProperty(localName = XmlFields.XML_EDM_IS_SHOWN_BY)
+	public String getIsShownBy() {
+		if (referencedWebResource!=null)
+		{
+			return referencedWebResource.getId();
+		}
+		return null;
 	}
 
-	public String getIsShownByThumbnail() {
-		return isShownByThumbnail;
+	@Override
+	public void setIsShownBy(WebResource resource) {
+		referencedWebResource=resource;
 	}
-	
-	public void setIsShownByThumbnail(String isShownByThumbnail) {
-		this.isShownByThumbnail = isShownByThumbnail;
+
+	@Override
+	public String setInternalType(String internalTypeParam) {
+		return internalType=internalTypeParam;
 	}
 
 }

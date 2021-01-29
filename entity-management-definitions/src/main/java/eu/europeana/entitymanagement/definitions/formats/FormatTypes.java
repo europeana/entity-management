@@ -8,6 +8,11 @@ import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedFormatTyp
  * @author GrafR
  *
  */
+/**
+ * TODO: move the class to the api-commons definitions
+ * @author StevaneticS
+ *
+ */
 public enum FormatTypes {
 	jsonld("jsonld"), // default format
 	schema("schema.jsonld"), // a schema.org format
