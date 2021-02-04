@@ -61,4 +61,6 @@ public interface Entity extends ContextualClass {
 	String getIsShownBy();
 	
 	void setIsShownBy (WebResource webResource);
+	
+	void mergeEntity (Entity copy);
 }

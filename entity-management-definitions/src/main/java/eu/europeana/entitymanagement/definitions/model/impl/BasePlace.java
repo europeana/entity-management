@@ -16,12 +16,12 @@ import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class BasePlace extends BaseEntity implements Place, eu.europeana.corelib.definitions.edm.entity.Place {
 
-	private String[] isNextInSequence;
-	private Float latitude, longitude, altitude;
-	private String[] exactMatch;
+	protected String[] isNextInSequence;
+	protected Float latitude, longitude, altitude;
+	protected String[] exactMatch;
 
-	private Map<String, List<String>> tmpIsPartOf;	
-	private Map<String, List<String>> tmpHasPart;	
+	protected Map<String, List<String>> tmpIsPartOf;	
+	protected Map<String, List<String>> tmpHasPart;	
 	
 	@Override
 	@JsonProperty(WebEntityFields.IS_NEXT_IN_SEQUENCE)

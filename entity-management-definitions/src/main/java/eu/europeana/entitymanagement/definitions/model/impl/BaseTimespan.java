@@ -14,9 +14,9 @@ import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class BaseTimespan extends BaseEntity implements Timespan, eu.europeana.corelib.definitions.edm.entity.Timespan {
 
-    private String[] isNextInSequence;
-    private String begin;
-    private String end;
+	protected String[] isNextInSequence;
+	protected String begin;
+	protected String end;
 
     @JsonProperty(WebEntityFields.IS_NEXT_IN_SEQUENCE)
     @JacksonXmlProperty(localName = XmlFields.XML_EDM_IS_NEXT_IN_SEQUENCE)

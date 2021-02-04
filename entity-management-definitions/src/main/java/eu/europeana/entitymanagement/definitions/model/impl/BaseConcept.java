@@ -16,17 +16,17 @@ import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
 @JacksonXmlRootElement(localName= XmlFields.XML_SKOS_CONCEPT)
 public class BaseConcept extends BaseEntity implements Concept {
 
-	private String[] broader;
-	private String[] narrower;
-	private String[] related;
-	private String[] broadMatch;
-	private String[] narrowMatch;
-	private String[] exactMatch;
-	private String[] coref;
-	private String[] relatedMatch;
-	private String[] closeMatch;
-	private String[] inScheme;
-	private Map<String, List<String>> notation;
+	protected String[] broader;
+	protected String[] narrower;
+	protected String[] related;
+	protected String[] broadMatch;
+	protected String[] narrowMatch;
+	protected String[] exactMatch;
+	protected String[] coref;
+	protected String[] relatedMatch;
+	protected String[] closeMatch;
+	protected String[] inScheme;
+	protected Map<String, List<String>> notation;
 
 	@JsonProperty(WebEntityFields.BROADER)
 	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_BROADER)

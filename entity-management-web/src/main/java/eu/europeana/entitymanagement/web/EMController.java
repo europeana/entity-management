@@ -31,9 +31,8 @@ import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.config.I18nConstants;
 import eu.europeana.entitymanagement.definitions.formats.FormatTypes;
-import eu.europeana.entitymanagement.definitions.model.Aggregation;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
 import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
@@ -115,8 +114,14 @@ public class EMController extends BaseRest {
             return ResponseEntity.badRequest().build();
         }
 
+        /*
+         * deferefence using Europeana 
+         * TODO: call the Europeana service to get the entity
+         */
+        BaseEntity europeanaResponse = null;
         // dereference using Metis. return HTTP 400 for HTTP4XX responses and HTTP 504 for other error responses
         BaseEntity metisResponse = dereferenceService.dereferenceEntityById(entityCreationRequest.getId());
+        
         existingEntity = entityRecordService.retrieveMetisCoreferenceSameAs(metisResponse.getSameAs());
 
         if (existingEntity.isPresent()) {

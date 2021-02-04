@@ -16,11 +16,11 @@ import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
 @JacksonXmlRootElement(localName = XmlFields.XML_ORE_AGGREGATION)
 public class BaseAggregation implements Aggregation{
 
-    String id, type, rights, source;
-    Date created, modified;
-    int score, recordCount;
-    double pageRank;
-    List<String> aggregates;
+	String id, type, rights, source;
+	Date created, modified;
+	int score, recordCount;
+	double pageRank;
+	List<String> aggregates;
     
     @Override
     @JsonProperty(WebEntityFields.ID)

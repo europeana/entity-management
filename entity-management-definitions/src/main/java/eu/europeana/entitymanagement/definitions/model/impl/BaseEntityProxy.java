@@ -13,7 +13,7 @@ import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class BaseEntityProxy implements EntityProxy {
 
-    String proxyId;
+	String proxyId;
     Entity entity;
     String proxyFor;
     Aggregation proxyIn;

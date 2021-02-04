@@ -25,29 +25,29 @@ import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
 public class BaseOrganization extends BaseEntity 
 		implements Organization, eu.europeana.corelib.definitions.edm.entity.Organization {
 
-	private Map<String, String> description;
-	private Map<String, List<String>> acronym;	
-	private String logo;
-	private String homepage;
-	private List<String> phone;
-	private List<String> mbox;
-	private Map<String, List<String>> europeanaRole;	
-	private Map<String, List<String>> organizationDomain;
-	private Map<String, String> geographicLevel;
-	private String country;
-	private Map<String, String> countryMap;
-	private Map<String, List<String>> tmpIdentifier;
+	protected Map<String, String> description;
+	protected Map<String, List<String>> acronym;	
+	protected String logo;
+	protected String homepage;
+	protected List<String> phone;
+	protected List<String> mbox;
+	protected Map<String, List<String>> europeanaRole;	
+	protected Map<String, List<String>> organizationDomain;
+	protected Map<String, String> geographicLevel;
+	protected String country;
+	protected Map<String, String> countryMap;
+	protected Map<String, List<String>> tmpIdentifier;
 	
 	//address fields
-	private String hasAddress;
-	private String streetAddress;
-	private String locality;
-	private String region;
-	private String postalCode;
-	private String countryName;
-	private String postBox;
-	private String hasGeo;
-	private Address address;
+	protected String hasAddress;
+	protected String streetAddress;
+	protected String locality;
+	protected String region;
+	protected String postalCode;
+	protected String countryName;
+	protected String postBox;
+	protected String hasGeo;
+	protected Address address;
 	
 	@Override
 	@JsonProperty(WebEntityFields.DESCRIPTION)

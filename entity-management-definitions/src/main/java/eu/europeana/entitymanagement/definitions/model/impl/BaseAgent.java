@@ -21,34 +21,35 @@ import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
 public class BaseAgent extends BaseEntity implements Agent, eu.europeana.corelib.definitions.edm.entity.Agent {
 
     //TODO: fix cardinality, change to list 
-	private Date date; // format "YYYY"
-	private String[] begin; // format "YYYY-MM-DD"
-	private String[] end; // format "YYYY-MM-DD"
-	private String[] dateOfBirth; // format "YYYY-MM-DD"
-	private String[] dateOfDeath; // format "YYYY"
-	private String[] hasMet;
-	private Map<String, String> name;
-	private Map<String, List<String>> biographicalInformation;
-	private Map<String, List<String>> professionOrOccupation;
-	private Map<String, List<String>> placeOfBirth;
-	private Map<String, List<String>> placeOfDeath;
+	protected Date date; // format "YYYY"
+	protected String[] begin; // format "YYYY-MM-DD"
+	protected String[] end; // format "YYYY-MM-DD"
+	protected String[] dateOfBirth; // format "YYYY-MM-DD"
+	protected String[] dateOfDeath; // format "YYYY"
+	protected String[] hasMet;
+	protected Map<String, String> name;
+	protected Map<String, List<String>> biographicalInformation;
+	protected Map<String, List<String>> professionOrOccupation;
+	protected Map<String, List<String>> placeOfBirth;
+	protected Map<String, List<String>> placeOfDeath;
 
-	private String dateOfEstablishment; // format "YYYY"
-	private String dateOfTermination; // format "YYYY"
-	private String gender;
+	protected String dateOfEstablishment; // format "YYYY"
+	protected String dateOfTermination; // format "YYYY"
+	protected String gender;
 	
-	private String[] exactMatch;
+	protected String[] exactMatch;
 
-	private Map<String, List<String>> tmpBegin;
-	private Map<String, List<String>> tmpEnd;
-	private Map<String, List<String>> tmpDateOfBirth;
-	private Map<String, List<String>> tmpDateOfDeath;
-	private Map<String, List<String>> tmpGender;
-	private Map<String, List<String>> tmpDateOfEstablishment;
-	private Map<String, List<String>> tmpDateOfTermination;
-	private Map<String, List<String>> tmpName;
-	private Map<String, List<String>> tmpIdentifier;
+	protected Map<String, List<String>> tmpBegin;
+	protected Map<String, List<String>> tmpEnd;
+	protected Map<String, List<String>> tmpDateOfBirth;
+	protected Map<String, List<String>> tmpDateOfDeath;
+	protected Map<String, List<String>> tmpGender;
+	protected Map<String, List<String>> tmpDateOfEstablishment;
+	protected Map<String, List<String>> tmpDateOfTermination;
+	protected Map<String, List<String>> tmpName;
+	protected Map<String, List<String>> tmpIdentifier;
 
+	
 	public Date getDate() {
 		return date;
 	}
