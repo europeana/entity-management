@@ -24,19 +24,15 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.api.commons.error.EuropeanaApiException;
-import eu.europeana.api.commons.web.exception.HttpException;
-import eu.europeana.api.commons.web.exception.InternalServerException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.entitymanagement.config.DataSources;
-import eu.europeana.entitymanagement.config.I18nConstants;
 import eu.europeana.entitymanagement.definitions.formats.FormatTypes;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
 import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityConstants;
-import eu.europeana.entitymanagement.exception.EntityNotFoundException;
-import eu.europeana.entitymanagement.exception.ParamValidationException;
+import eu.europeana.entitymanagement.exception.EntityCreationException;
+import eu.europeana.entitymanagement.exception.HttpBadRequestException;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.web.model.EntityCreationRequest;
 import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
@@ -45,6 +41,7 @@ import io.swagger.annotations.ApiOperation;
 
 /**
  * Example Rest Controller class with input validation
+ * TODO: catch the exceptions from the used functions and return the adequate response to the user
  */
 @RestController
 @Validated
@@ -72,7 +69,7 @@ public class EMController extends BaseRest {
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_NAMESPACE) String namespace,
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 			HttpServletRequest request
-			) throws HttpException  {
+			) {
 	    return createResponse(profile, type, namespace, identifier, FormatTypes.jsonld, null, request);	
 	    
 	}
@@ -87,14 +84,14 @@ public class EMController extends BaseRest {
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_NAMESPACE) String namespace,
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 			HttpServletRequest request
-			) throws HttpException  {
+			) {
 	    return createResponse(profile, type, namespace, identifier, FormatTypes.xml, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML, request);
 	}
 
 
     @ApiOperation(value = "Create a new entity", nickname = "createEntity", response = java.lang.Void.class)
     @PostMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<EntityRecord> createEntity(@RequestBody EntityCreationRequest entityCreationRequest) throws EuropeanaApiException {
+    public ResponseEntity<EntityRecord> createEntity(@RequestBody EntityCreationRequest entityCreationRequest) {
         // check if id is already being used, if so return a 301
         Optional<EntityRecord> existingEntity = entityRecordService.retrieveEntityRecordByUri(entityCreationRequest.getId());
         if (existingEntity.isPresent()) {
@@ -120,7 +117,12 @@ public class EMController extends BaseRest {
          */
         BaseEntity europeanaResponse = null;
         // dereference using Metis. return HTTP 400 for HTTP4XX responses and HTTP 504 for other error responses
-        BaseEntity metisResponse = dereferenceService.dereferenceEntityById(entityCreationRequest.getId());
+        BaseEntity metisResponse;
+		try {
+			metisResponse = dereferenceService.dereferenceEntityById(entityCreationRequest.getId());
+		} catch (HttpBadRequestException e) {
+			return ResponseEntity.badRequest().header("info:", e.getMessage()).build();
+		}
         
         existingEntity = entityRecordService.retrieveMetisCoreferenceSameAs(metisResponse.getSameAs());
 
@@ -136,70 +138,68 @@ public class EMController extends BaseRest {
 
         }
 
-        EntityRecord savedEntity = entityRecordService.createEntityFromRequest(entityCreationRequest, metisResponse);
+        EntityRecord savedEntity;
+		try {
+			savedEntity = entityRecordService.createEntityFromRequest(entityCreationRequest, metisResponse);
+		} catch (EntityCreationException e) {
+			//TODO: maybe here return the unprocessable entity instead of bad request 
+			return ResponseEntity.badRequest().header("info:", e.getMessage()).build();
+		}
         return ResponseEntity.accepted().body(savedEntity);
     }
 
-    private ResponseEntity<String> createResponse(String profile, String type, String namespace, String identifier, FormatTypes outFormat,  String contentType, HttpServletRequest request) throws HttpException{
-	    try {
-	    	//TODO: Re-enable authentication
-	    	//verifyReadAccess(request);
-	    	
-            String entityUri = getEntityUri(type, identifier);
-            Optional<EntityRecord> entityRecordOptional = entityRecordService.retrieveEntityRecordByUri(entityUri);
-            EntityRecord entityRecord = entityRecordOptional.get();	    	
-	    	
-	    	/*
-	    	 * verify the parameters
-	    	 */
-	    	boolean valid_profile = false;
-	    	for (EntityProfile ep : EntityProfile.values()) {
-	            if (ep.name().equals(profile)) {
-	            	valid_profile = true;
-	            	break;
-	            }
-	        }
-	    	if (!valid_profile) {
-	    		throw new ParamValidationException(I18nConstants.INVALID_PARAM_VALUE, WebEntityConstants.QUERY_PARAM_PROFILE, profile);
-	    	}
+    private ResponseEntity<String> createResponse(String profile, String type, String namespace, String identifier, FormatTypes outFormat,  String contentType, HttpServletRequest request) {
+       	//TODO: Re-enable authentication
+    	//verifyReadAccess(request);
 
-            if (entityRecordOptional.isEmpty()) {
-                throw new EntityNotFoundException(entityUri);
+    	MultiValueMap<String, String> headers;
+    	ResponseEntity<String> response;
+    	
+    	/*
+    	 * verify the parameters
+    	 */    	
+    	boolean valid_profile = false;
+    	for (EntityProfile ep : EntityProfile.values()) {
+            if (ep.name().equals(profile)) {
+            	valid_profile = true;
+            	break;
             }
+        }
+    	if (!valid_profile) {
+    		return ResponseEntity.badRequest().header("info:", "The profile parameter is invalid.").build();
+    	}
 
-	    	Entity tmpBaseEntity= entityRecord.getEntity();
-	    	Date timestamp = (tmpBaseEntity != null) ? tmpBaseEntity.getCreated() : null;
-	    	Date etagDate = (timestamp != null)? timestamp : new Date();
-	    	String etag = generateETag(etagDate
-	    		, outFormat.name()
-	        , getApiVersion()
-	        );
-	    	
-	    	MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>(5);
-	    	headers.add(HttpHeaders.ETAG, "" + etag);
-	    	headers.add(HttpHeaders.ALLOW, HttpHeaders.ALLOW_GET);
-	    	if(!outFormat.equals(FormatTypes.schema)) {
-	    		headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
-	    		headers.add(HttpHeaders.LINK, HttpHeaders.VALUE_LDP_RESOURCE);
-	    	}
-	    	if(contentType != null && !contentType.isEmpty())
-	    	    headers.add(HttpHeaders.CONTENT_TYPE, contentType);
+        String entityUri = getEntityUri(type, identifier);
+        Optional<EntityRecord> entityRecordOptional = entityRecordService.retrieveEntityRecordByUri(entityUri);
+        if (entityRecordOptional.isEmpty()) {
+        	return ResponseEntity.notFound().header("info:", "The entity with the required parameters does not exist.").build();
+        }
+        
+        EntityRecord entityRecord = entityRecordOptional.get();	    	           
 
-            
-            String body = serialize(entityRecord, outFormat, profile);
+    	Entity tmpBaseEntity= entityRecord.getEntity();
+    	Date timestamp = (tmpBaseEntity != null) ? tmpBaseEntity.getCreated() : null;
+    	Date etagDate = (timestamp != null)? timestamp : new Date();
+    	String etag = generateETag(etagDate
+    		, outFormat.name()
+        , getApiVersion()
+        );
+    	
+    	headers = new LinkedMultiValueMap<String, String>(5);
+    	headers.add(HttpHeaders.ETAG, "" + etag);
+    	headers.add(HttpHeaders.ALLOW, HttpHeaders.ALLOW_GET);
+    	if(!outFormat.equals(FormatTypes.schema)) {
+    		headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
+    		headers.add(HttpHeaders.LINK, HttpHeaders.VALUE_LDP_RESOURCE);
+    	}
+    	if(contentType != null && !contentType.isEmpty())
+    	    headers.add(HttpHeaders.CONTENT_TYPE, contentType);
 
-	    	ResponseEntity<String> response = new ResponseEntity<String>(body, headers, HttpStatus.OK);
-    	    return response;
-	    } catch (RuntimeException e) {
-	    	//not found .. 
-	    	throw new InternalServerException(e);
-	    } catch (HttpException e) {
-	    	//avoid wrapping http exception
-	    	throw e;
-	    } catch (Exception e) {
-	    	throw new InternalServerException(e);
-	    }
+        
+        String body = serialize(entityRecord, outFormat, profile);
 
+    	response = new ResponseEntity<String>(body, headers, HttpStatus.OK);
+	    return response;	    
 	}
 
 
