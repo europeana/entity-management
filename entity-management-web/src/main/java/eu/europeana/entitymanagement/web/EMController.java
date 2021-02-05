@@ -59,8 +59,27 @@ public class EMController extends BaseRest {
     @Autowired
     private DataSources datasources;
     
+    @ApiOperation(value = "Delete an entity", nickname = "deleteEntity", response = java.lang.Void.class)
+    @RequestMapping(value = "/{type}/{identifier}", method = RequestMethod.DELETE,	produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> deleteEntity(
+			@RequestParam(value = CommonApiConstants.PARAM_WSKEY, required=false) String wskey,
+			@PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
+			@PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
+			HttpServletRequest request
+			) {
+    	String entityUri = getEntityUri(type, identifier.toLowerCase());
+	    long numberDeletedEntities = entityRecordService.deleteEntityRecordByEntityId(entityUri);
+	    if (numberDeletedEntities==0) {
+	    	return ResponseEntity.notFound().header("info:", "There is no entity with the given identifier to be deleted.").build();
+	    }
+	    else {
+	    	String response = "The request is executed successfully. The number of deleted entites is: " + String.valueOf(numberDeletedEntities);
+	    	return ResponseEntity.noContent().header("info:", response).build();
+	    }
+	}
+    
 	@ApiOperation(value = "Retrieve a known entity", nickname = "getEntityJsonLd", response = java.lang.Void.class)
-	@RequestMapping(value = {"/entity/{type}/{namespace}/{identifier}.jsonld"}, method = RequestMethod.GET,
+	@RequestMapping(value = {"/{type}/{namespace}/{identifier}.jsonld"}, method = RequestMethod.GET,
 			produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<String> getJsonLdEntity(
 			@RequestParam(value = CommonApiConstants.PARAM_WSKEY, required=false) String wskey,
@@ -75,7 +94,7 @@ public class EMController extends BaseRest {
 	}
 	
 	@ApiOperation(value = "Retrieve a known entity", nickname = "getEntityXml", response = java.lang.Void.class)
-	@RequestMapping(value = {"/entity/{type}/{namespace}/{identifier}.xml"}, method = RequestMethod.GET, 
+	@RequestMapping(value = {"/{type}/{namespace}/{identifier}.xml"}, method = RequestMethod.GET, 
 		produces = {HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML, HttpHeaders.CONTENT_TYPE_RDF_XML, MediaType.APPLICATION_XML_VALUE})
 	public ResponseEntity<String> getXmlEntity(
 			@RequestParam(value = CommonApiConstants.PARAM_WSKEY, required=false) String wskey,

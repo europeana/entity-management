@@ -1,6 +1,5 @@
 package eu.europeana.entitymanagement.web.service.impl;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
@@ -28,8 +27,8 @@ public class EntityRecordService {
         return Optional.ofNullable(entityRecordRepository.findByEntityId(entityUri));
     }
 
-    public void deleteEntityRecordByEntityId(String entityId) {
-        entityRecordRepository.deleteDataset(entityId);
+    public long deleteEntityRecordByEntityId(String entityId) {
+        return entityRecordRepository.deleteDataset(entityId);
     }
 
     public EntityRecord saveEntityRecord(EntityRecord er) {
