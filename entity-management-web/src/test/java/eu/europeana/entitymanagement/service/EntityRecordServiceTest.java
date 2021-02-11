@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.util;
+package eu.europeana.entitymanagement.service;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -8,20 +8,29 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import eu.europeana.entitymanagement.definitions.model.impl.BaseTimespan;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseWebResource;
+import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
+import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
 import eu.europeana.entitymanagement.web.service.impl.MetisDereferenceService;
 
 /**
  * JUnit tests to merge the data from a different entity (a so called entity proxy) into the given entity
  */
-public class EntityDataReconceliationTest {
+public class EntityRecordServiceTest {
 
 	private static final Logger logger = LogManager.getLogger(MetisDereferenceService.class);
 	
 	@Test
 	public void mergeEntities() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.scan("eu.europeana.entitymanagement");
+		context.refresh();
+		System.out.println("Refreshing the spring context");
+		EntityRecordService entityRecordService = context.getBean(EntityRecordService.class);
+
 		//creating the first entity
 		BaseTimespan entity = new BaseTimespan();
     	entity.setEntityId("http://data.europeana.eu/timespan/base/1");
@@ -83,7 +92,7 @@ public class EntityDataReconceliationTest {
     	webResourceProxy.setThumbnail("https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri=http%3A%2F%2Fwww.sbc.org.pl%2FTimespan%2F79368%2Fdoc.pdf&type=TEXT");
     	entityProxy.setIsShownBy(webResourceProxy);
     	
-    	entity.mergeEntity(entityProxy);
+    	entityRecordService.mergeEntity(entity,entityProxy);
     	
     	logger.info("Reconceliated entity: {}", entity);
 	}

@@ -1,6 +1,5 @@
 package eu.europeana.entitymanagement.definitions.model.impl;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
@@ -13,13 +12,13 @@ import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
 @JacksonXmlRootElement(localName = XmlFields.XML_VCARD_ADDRESS)
 public class BaseAddress implements eu.europeana.corelib.definitions.edm.entity.Address {
 
-    protected String about;
-    protected String streetAddress;
-    protected String postalCode;
-    protected String postBox;
-    protected String locality;
-    protected String countryName;
-    protected String hasGeo;
+    private String about;
+    private String streetAddress;
+    private String postalCode;
+    private String postBox;
+    private String locality;
+    private String countryName;
+    private String hasGeo;
     
     @Override
     public void setVcardPostOfficeBox(String vcardPostOfficeBox) {
@@ -105,5 +104,7 @@ public class BaseAddress implements eu.europeana.corelib.definitions.edm.entity.
     public void setVcardHasGeo(String hasGeo) {
 	this.hasGeo = hasGeo;
     }
+    
+
 
 }

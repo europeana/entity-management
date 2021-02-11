@@ -27,12 +27,7 @@
       <version>3.8.1</version>
     </dependency>
     
-	<dependency>
-		<groupId>eu.europeana.api</groupId>
-		<artifactId>entity-management-definitions</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
-	</dependency>
-	
+
 			<dependency>
 		    <groupId>com.fasterxml.jackson.dataformat</groupId>
 		    <artifactId>jackson-dataformat-xml</artifactId>
@@ -72,6 +67,37 @@
 			<version>${version.corelib}</version>
 		</dependency>
 		
+	<dependency>
+		<groupId>eu.europeana.api.commons</groupId>
+		<artifactId>commons-definitions</artifactId>
+		<version>${api.commons.version}</version>
+		<exclusions>	
+			<exclusion>
+					<groupId>org.mongodb</groupId>
+					<artifactId>mongo-java-driver</artifactId>
+			</exclusion>
+		</exclusions>
+	</dependency>
+	<dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-webflux</artifactId>
+    </dependency>
+    	<dependency>
+	    <groupId>javax.annotation</groupId>
+	    <artifactId>javax.annotation-api</artifactId>
+	    <version>${version.javax.annotation}</version>
+	</dependency>
+    <dependency>
+    	<groupId>org.apache.logging.log4j</groupId>
+    	<artifactId>log4j-api</artifactId>
+    	<version>${version.log4j}</version>
+	</dependency>   
+	<dependency>
+		<groupId>eu.europeana.api</groupId>
+		<artifactId>entity-management-definitions</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</dependency> 
+
   </dependencies>
 
 </project>

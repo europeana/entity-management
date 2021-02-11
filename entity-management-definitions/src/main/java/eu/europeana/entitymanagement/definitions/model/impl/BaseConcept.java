@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.definitions.model.impl;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 
@@ -16,17 +17,17 @@ import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
 @JacksonXmlRootElement(localName= XmlFields.XML_SKOS_CONCEPT)
 public class BaseConcept extends BaseEntity implements Concept {
 
-	protected String[] broader;
-	protected String[] narrower;
-	protected String[] related;
-	protected String[] broadMatch;
-	protected String[] narrowMatch;
-	protected String[] exactMatch;
-	protected String[] coref;
-	protected String[] relatedMatch;
-	protected String[] closeMatch;
-	protected String[] inScheme;
-	protected Map<String, List<String>> notation;
+	private String[] broader;
+	private String[] narrower;
+	private String[] related;
+	private String[] broadMatch;
+	private String[] narrowMatch;
+	private String[] exactMatch;
+	private String[] coref;
+	private String[] relatedMatch;
+	private String[] closeMatch;
+	private String[] inScheme;
+	private Map<String, List<String>> notation;
 
 	@JsonProperty(WebEntityFields.BROADER)
 	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_BROADER)
@@ -140,5 +141,18 @@ public class BaseConcept extends BaseEntity implements Concept {
 	public String getInternalType() {
 		return "Concept";
 	}
+	
+	@Override
+	public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
+		//TODO:in case of the performance overhead cause by using the reflecion code, change this method to call the getters for each field individually
+		return field.get(this);
+	}
+
+	@Override
+	public void setFieldValue(Field field, Object value) throws IllegalArgumentException, IllegalAccessException {
+		//TODO:in case of the performance overhead cause by using the reflecion code, change this method to call the setter for each field individually
+		field.set(this, value);
+	}
+
 
 }

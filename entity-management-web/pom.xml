@@ -104,12 +104,6 @@
 			<artifactId>entity-management-utils</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-
-		<dependency>
-			<groupId>eu.europeana.api</groupId>
-			<artifactId>entity-management-common</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>		
 		
 		<dependency>
 			<groupId>eu.europeana.corelib</groupId>

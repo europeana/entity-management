@@ -27,12 +27,12 @@ import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.formats.FormatTypes;
-import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
 import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
+import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.web.model.EntityCreationRequest;
 import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
@@ -52,6 +52,9 @@ public class EMController extends BaseRest {
 
     @Autowired
     private EntityRecordService entityRecordService;
+    
+    @Autowired
+    private EntityRecordRepository entityRecordRepository;
 
     @Autowired
     private MetisDereferenceService dereferenceService;
@@ -60,15 +63,16 @@ public class EMController extends BaseRest {
     private DataSources datasources;
     
     @ApiOperation(value = "Delete an entity", nickname = "deleteEntity", response = java.lang.Void.class)
-    @RequestMapping(value = "/{type}/{identifier}", method = RequestMethod.DELETE,	produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/{type}/{namespace}/{identifier}", method = RequestMethod.DELETE,	produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> deleteEntity(
 			@RequestParam(value = CommonApiConstants.PARAM_WSKEY, required=false) String wskey,
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
+			@PathVariable(value = WebEntityConstants.PATH_PARAM_NAMESPACE) String namespace,
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 			HttpServletRequest request
 			) {
-    	String entityUri = getEntityUri(type, identifier.toLowerCase());
-	    long numberDeletedEntities = entityRecordService.deleteEntityRecordByEntityId(entityUri);
+    	String entityUri = getEntityUri(type,namespace,identifier.toLowerCase());
+	    long numberDeletedEntities = entityRecordRepository.deleteDataset(entityUri);
 	    if (numberDeletedEntities==0) {
 	    	return ResponseEntity.notFound().header("info:", "There is no entity with the given identifier to be deleted.").build();
 	    }
@@ -173,7 +177,7 @@ public class EMController extends BaseRest {
 
     	MultiValueMap<String, String> headers;
     	ResponseEntity<String> response;
-    	
+   	
     	/*
     	 * verify the parameters
     	 */    	
@@ -188,7 +192,7 @@ public class EMController extends BaseRest {
     		return ResponseEntity.badRequest().header("info:", "The profile parameter is invalid.").build();
     	}
 
-        String entityUri = getEntityUri(type, identifier);
+        String entityUri = getEntityUri(type, namespace, identifier);
         Optional<EntityRecord> entityRecordOptional = entityRecordService.retrieveEntityRecordByUri(entityUri);
         if (entityRecordOptional.isEmpty()) {
         	return ResponseEntity.notFound().header("info:", "The entity with the required parameters does not exist.").build();
@@ -196,8 +200,7 @@ public class EMController extends BaseRest {
         
         EntityRecord entityRecord = entityRecordOptional.get();	    	           
 
-    	Entity tmpBaseEntity= entityRecord.getEntity();
-    	Date timestamp = (tmpBaseEntity != null) ? tmpBaseEntity.getCreated() : null;
+    	Date timestamp = (entityRecord != null) ? entityRecord.getIsAggregatedBy().getModified() : null;
     	Date etagDate = (timestamp != null)? timestamp : new Date();
     	String etag = generateETag(etagDate
     		, outFormat.name()
@@ -222,12 +225,14 @@ public class EMController extends BaseRest {
 	}
 
 
-    private String getEntityUri(String type, String identifier) {
+    private String getEntityUri(String type, String namespace, String identifier) {
         StringBuilder stringBuilder = new StringBuilder();
 
         stringBuilder.append(BASE_URI_DATA);
         if (StringUtils.isNotEmpty(type))
             stringBuilder.append(type.toLowerCase()).append("/");
+        if (StringUtils.isNotEmpty(namespace))
+            stringBuilder.append(namespace.toLowerCase()).append("/");
         if (StringUtils.isNotEmpty(identifier))
             stringBuilder.append(identifier);
 
