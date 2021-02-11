@@ -4,6 +4,15 @@ import static dev.morphia.query.experimental.filters.Filters.eq;
 import static eu.europeana.entitymanagement.mongo.repository.EntityRecordFields.ENTITY_ID;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_DELETE_OPTS;
 
+import java.util.Set;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -12,9 +21,9 @@ import com.mongodb.client.model.ReturnDocument;
 import dev.morphia.Datastore;
 import dev.morphia.ModifyOptions;
 import dev.morphia.query.experimental.updates.UpdateOperators;
+import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseEntityRecord;
-
 
 /**
  * Repository for retrieving the EntityRecord objects.
@@ -22,9 +31,13 @@ import eu.europeana.entitymanagement.definitions.model.impl.BaseEntityRecord;
 @Repository
 public class EntityRecordRepository {
 
+    private static final Logger logger = LogManager.getLogger(EntityRecordRepository.class);
 
     @Autowired
     private Datastore datastore;
+    
+    private static ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+    private static Validator validator = factory.getValidator();
 
     /**
      * @return the total number of resources in the database
@@ -76,13 +89,25 @@ public class EntityRecordRepository {
      * @return saved entity
      */
     public EntityRecord save(EntityRecord entityRecord){
-        // first get ID from database before saving
-        long dbId = generateAutoIncrement(entityRecord.getEntity().getInternalType());
-        String entityId = "http://data.europeana.eu/" + entityRecord.getEntity().getInternalType().toLowerCase() + "/" + dbId;
-        entityRecord.setDbId(dbId);
-        entityRecord.getEntity().setEntityId(entityId);
-        entityRecord.setEntityId(entityId);
+        //if the id of the entity is null, get it from the database before saving  
+    	long dbId = generateAutoIncrement(entityRecord.getEntity().getInternalType());
+    	if (Long.valueOf(entityRecord.getDbId()) == null)
+    	{   		
+    		entityRecord.setDbId(dbId);    		
+    	}
+    	if (entityRecord.getEntity().getEntityId() == null)
+        {
+	        String entityId = "http://data.europeana.eu/" + entityRecord.getEntity().getInternalType().toLowerCase() + "/" + dbId;
+	        entityRecord.getEntity().setEntityId(entityId);
+	        entityRecord.setEntityId(entityId);
+        }
 
+        //check the validation of the entity fields
+        Set<ConstraintViolation<Entity>> violations = validator.validate(entityRecord.getEntity());
+        for (ConstraintViolation<Entity> violation : violations) {
+            logger.error(violation.getMessage()); 
+        }
+        
         return datastore.save(entityRecord);
     }
 

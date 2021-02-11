@@ -20,7 +20,6 @@ public class BaseAddress implements eu.europeana.corelib.definitions.edm.entity.
     private String countryName;
     private String hasGeo;
     
-    
     @Override
     public void setVcardPostOfficeBox(String vcardPostOfficeBox) {
 	this.postBox = vcardPostOfficeBox;
@@ -105,5 +104,7 @@ public class BaseAddress implements eu.europeana.corelib.definitions.edm.entity.
     public void setVcardHasGeo(String hasGeo) {
 	this.hasGeo = hasGeo;
     }
+    
+
 
 }

@@ -1,11 +1,14 @@
 package eu.europeana.entitymanagement.definitions.model.impl;
 
+import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import javax.validation.groups.Default;
 
 import org.bson.types.ObjectId;
 
@@ -18,39 +21,40 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
-
+import eu.europeana.entitymanagement.normalization.ValidEntityFields;
 
 /*
  * TODO: Define the Jackson annotations, both xml and json, in one place, meaning in this class here and the corresponding extended classes 
  */
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
+@ValidEntityFields(groups = {Default.class})
 public class BaseEntity implements Entity {
-
-	protected String TMP_KEY = "def";
-	private String internalType;
-	private String entityId;
-	// depiction
-	private String depiction;
-	private Map<String, List<String>> note;
-	private Map<String, String> prefLabel;
-	private Map<String, List<String>> altLabel;
-	private Map<String, List<String>> hiddenLabel;
-	private Map<String, List<String>> tmpPrefLabel;
 	
-	private String identifier[];
-	private String[] sameAs;
-	private String[] isRelatedTo;
+	protected String TMP_KEY = "def";
+	protected String internalType;
+	protected String entityId;
+	// depiction
+	protected String depiction;
+	protected Map<String, List<String>> note;
+	protected Map<String, String> prefLabel;
+	protected Map<String, List<String>> altLabel;
+	protected Map<String, List<String>> hiddenLabel;
+	protected Map<String, List<String>> tmpPrefLabel;
+	
+	protected String identifier[];
+	protected String[] sameAs;
+	protected String[] isRelatedTo;
 
 	// hierarchical structure available only for a part of entities. Add set/get
 	// methods to the appropriate interfaces
-	private String[] hasPart;
-	private String[] isPartOf;
+	protected String[] hasPart;
+	protected String[] isPartOf;
 
 	// The time at which the Set was created by the user. 
-	private Date created;
+	protected Date created;
 
 	// The time at which the Set was modified, after creation. 
-	private Date modified;
+	protected Date modified;
 	
 	protected WebResource referencedWebResource;
 	
@@ -331,6 +335,20 @@ public class BaseEntity implements Entity {
 	@Override
 	public String setInternalType(String internalTypeParam) {
 		return internalType=internalTypeParam;
+	}
+
+
+
+	@Override
+	public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
+		//TODO:in case of the performance overhead cause by using the reflecion code, change this method to call the getters for each field individually
+		return field.get(this);
+	}
+
+	@Override
+	public void setFieldValue(Field field, Object value) throws IllegalArgumentException, IllegalAccessException {
+		//TODO:in case of the performance overhead cause by using the reflecion code, change this method to call the setter for each field individually
+		field.set(this, value);
 	}
 
 }

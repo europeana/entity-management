@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.definitions.model;
 
+import java.lang.reflect.Field;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 import dev.morphia.annotations.Embedded;
@@ -61,4 +61,9 @@ public interface Entity extends ContextualClass {
 	String getIsShownBy();
 	
 	void setIsShownBy (WebResource webResource);
+	
+	Object getFieldValue (Field field) throws IllegalArgumentException, IllegalAccessException;
+	
+	void setFieldValue (Field field, Object value) throws IllegalArgumentException, IllegalAccessException;
+
 }

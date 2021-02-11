@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.definitions.model.impl;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -144,4 +145,17 @@ public class BasePlace extends BaseEntity implements Place, eu.europeana.corelib
 	public String getInternalType() {
 		return "Place";
 	}
+	
+	@Override
+	public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
+		//TODO:in case of the performance overhead cause by using the reflecion code, change this method to call the getters for each field individually
+		return field.get(this);
+	}
+
+	@Override
+	public void setFieldValue(Field field, Object value) throws IllegalArgumentException, IllegalAccessException {
+		//TODO:in case of the performance overhead cause by using the reflecion code, change this method to call the setter for each field individually
+		field.set(this, value);
+	}
+
 }
