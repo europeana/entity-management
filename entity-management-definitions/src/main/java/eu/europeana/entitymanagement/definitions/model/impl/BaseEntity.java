@@ -57,7 +57,7 @@ public class BaseEntity implements Entity {
 	protected Date modified;
 	
 	protected WebResource referencedWebResource;
-	
+
 	@Override
 	@JsonIgnore
 	public WebResource getReferencedWebResource() {

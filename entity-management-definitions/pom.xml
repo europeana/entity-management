@@ -77,6 +77,12 @@
 	    <artifactId>javax.annotation-api</artifactId>
 	    <version>${version.javax.annotation}</version>
 	</dependency>
+	
+	<dependency>
+		<groupId>eu.europeana.api</groupId>
+		<artifactId>entity-management-config</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</dependency> 
         
         <!-- https://mvnrepository.com/artifact/org.mongodb/bson -->
 

@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import eu.europeana.entitymanagement.config.EMSettings;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
@@ -31,6 +32,9 @@ public class EntityRecordService {
 
     @Autowired
     private EntityRecordRepository entityRecordRepository;
+    
+    @Autowired
+    private EMSettings emSettings;
 
     public Optional<EntityRecord> retrieveEntityRecordByUri(String entityUri) {
         return Optional.ofNullable(entityRecordRepository.findByEntityId(entityUri));
@@ -82,12 +86,9 @@ public class EntityRecordService {
 	 * This function merges the data from the secondary entity to the primary entity
 	 */
 	public void mergeEntity(Entity primary, Entity secondary) {
-		/*
-		 * TODO: pick up the 2 variables below from the corresponding place where the conventions are defined
-		 * (the name of the alternative label field would be "altLabel_<language>", where the "language" is the abbreviation for the language, e.g. en, de, ru, pl, etc.)
-		 */
-		final String altLabelFieldNamePrefix = "altLabel";
-		final String altLabelCharacterSeparator = "_";
+
+		String altLabelFieldNamePrefix = emSettings.getAltLabelFieldNamePrefix();
+		String altLabelCharacterSeparator = emSettings.getLanguageSeparator();
 		
 		try {
 			//store the preferred label in the secondary entity that is different from the preferred label in the primary entity to the alternative labels of the primary entity
