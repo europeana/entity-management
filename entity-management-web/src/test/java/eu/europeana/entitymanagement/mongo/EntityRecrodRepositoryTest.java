@@ -35,7 +35,7 @@ public class EntityRecrodRepositoryTest {
 		EntityRecordRepository entityRecordRepository = context.getBean(EntityRecordRepository.class);
     	
 		BaseTimespan entity = new BaseTimespan();
-    	entity.setEntityId("http://data.europeana.eu/timespan/base/3");
+    	entity.setEntityId("http://data.europeana.eu/timespan/base/ 3");
     	entity.setInternalType("Timespan");
     	entity.setBeginString("0001-01-01");
     	entity.setEndString("0100-12-31");

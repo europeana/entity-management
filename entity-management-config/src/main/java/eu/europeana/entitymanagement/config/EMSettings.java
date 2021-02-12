@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.reactive.function.client.WebClient;
 
 
@@ -38,7 +39,31 @@ public class EMSettings {
     @Value("${datasources.config}")
     private String datasourcesXMLConfig;
 
-    @Value("${entitymanagement.api.version}")
+    @Value("${languagecodes.config}")
+    private String languagecodesXMLConfig;
+    
+    @Value("${altLabelFieldNamePrefix}")
+    private String altLabelFieldNamePrefix;
+
+    public String getAltLabelFieldNamePrefix() {
+		return altLabelFieldNamePrefix;
+	}
+
+	@Value("${prefLabelFieldNamePrefix}")
+    private String prefLabelFieldNamePrefix;
+
+    public String getPrefLabelFieldNamePrefix() {
+		return prefLabelFieldNamePrefix;
+	}
+
+	@Value("${languageSeparator}")
+    private String languageSeparator;
+
+    public String getLanguageSeparator() {
+		return languageSeparator;
+	}
+
+	@Value("${entitymanagement.api.version}")
     private String entitymanagementApiVersion;
 
 //    @Value("${entity.environment}")
@@ -98,6 +123,23 @@ public class EMSettings {
     		    return xmlMapper.readValue(contents, DataSources.class);	
     		}    	         
 	}
+	
+	@Bean
+	public LanguageCodes getLanguageCodes() throws IOException {
+    	XmlMapper xmlMapper = new XmlMapper();
+    	try (InputStream inputStream = getClass().getResourceAsStream(languagecodesXMLConfig);
+    		    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {    		    
+    		    String contents = reader.lines()
+    		      .collect(Collectors.joining(System.lineSeparator()));
+    		    return xmlMapper.readValue(contents, LanguageCodes.class);	
+    		}    	         
+	}
+	
+	@Bean
+	public javax.validation.Validator localValidatorFactoryBean() {
+	   return new LocalValidatorFactoryBean();
+	}
+
     
     @PostConstruct
     private void logImportantSettings() {

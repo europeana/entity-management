@@ -21,6 +21,7 @@ import com.mongodb.client.model.ReturnDocument;
 import dev.morphia.Datastore;
 import dev.morphia.ModifyOptions;
 import dev.morphia.query.experimental.updates.UpdateOperators;
+import eu.europeana.entitymanagement.config.EMSettings;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseEntityRecord;
@@ -36,9 +37,8 @@ public class EntityRecordRepository {
     @Autowired
     private Datastore datastore;
     
-    private static ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-    private static Validator validator = factory.getValidator();
-
+    @Autowired
+    private EMSettings emSettings;
     /**
      * @return the total number of resources in the database
      */
@@ -103,7 +103,7 @@ public class EntityRecordRepository {
         }
 
         //check the validation of the entity fields
-        Set<ConstraintViolation<Entity>> violations = validator.validate(entityRecord.getEntity());
+        Set<ConstraintViolation<Entity>> violations = emSettings.localValidatorFactoryBean().validate(entityRecord.getEntity());
         for (ConstraintViolation<Entity> violation : violations) {
             logger.error(violation.getMessage()); 
         }

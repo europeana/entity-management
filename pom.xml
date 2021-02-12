@@ -6,6 +6,9 @@
         <module>entity-management-web</module>
         <module>entity-management-mongo</module>
         <module>entity-management-utils</module>
+        <module>
+        	entity-management-configentity-management-config
+        </module>
     </modules>
 
     <parent>
