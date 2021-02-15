@@ -49,7 +49,7 @@ public class ValidEntityFieldsValidator implements ConstraintValidator<ValidEnti
 				if (fieldValue==null) continue;
 				Class<?> fieldType = field.getType();
 				String fieldName = field.getName();
-				// remove spaces from the fields values
+				//remove spaces from the String fields
 				if (fieldType.isAssignableFrom(String.class)) {					
 					if (((String)fieldValue).contains(" ")) {
 						addConstraint(returnValue, context, "The entity field: "+field.getName()+" contains not allowed spaces.");
@@ -59,7 +59,28 @@ public class ValidEntityFieldsValidator implements ConstraintValidator<ValidEnti
 						entity.setFieldValue(field, newFieldValue);
 					}
 				}
+				//remove spaces from the keys in the Map fields 
+				else if (fieldType.isAssignableFrom(Map.class)) {
+					Map<Object,Object> oldFieldValue = (Map<Object,Object>)fieldValue;
+					Map<Object,Object> newFieldValue = new HashMap<>();
+					boolean changedValues = false;
+					for (Map.Entry oldFieldValueElem : oldFieldValue.entrySet()) 
+					{
+						String newKey = (String) oldFieldValueElem.getKey();
+						if (((String)oldFieldValueElem.getKey()).contains(" ")) {
+							addConstraint(returnValue, context, "The entity field: "+field.getName()+" contains not allowed spaces in the key: "+(String)oldFieldValueElem.getKey());
+							returnValue=false;
+							if (changedValues == false) changedValues = true;
+							newKey = ((String)oldFieldValueElem.getKey()).replaceAll("\\s+","");
+						}
+						newFieldValue.put(newKey, oldFieldValueElem.getValue());						
+					}
+					if (changedValues == true) entity.setFieldValue(field, newFieldValue);					
+				}
+				
 				//check the language labels for the altLabel field to be in the predefined language labels
+				//getting the new, updated value with removed spaces
+				fieldValue = entity.getFieldValue(field);
 				if (fieldName.contains(emSettings.getAltLabelFieldNamePrefix())) {
 					Map<String, List<String>> newAltLabel = new HashMap<>();
 					Map<String,List<String>> oldAltLabel = (Map<String,List<String>>) fieldValue;
@@ -77,7 +98,7 @@ public class ValidEntityFieldsValidator implements ConstraintValidator<ValidEnti
 							}
 							if (language.getAlternativeLanguages()==null) continue;
 							for (AlternativeLanguage alternativeLanguage : language.getAlternativeLanguages()) {
-								if (alternativeLanguage.getCode()!=null && alternativeLanguage.getCode().contains(altLabelEnding)) {
+								if (alternativeLanguage.getCode().contains(altLabelEnding)) {
 									if (foundAlternativeCodes == false) foundAlternativeCodes = true;
 									List<String> newAltLabelValue = new ArrayList<>(altLabel.getValue());
 									newAltLabel.put(emSettings.getAltLabelFieldNamePrefix()+emSettings.getLanguageSeparator()+language.getCode(), newAltLabelValue);
@@ -89,9 +110,8 @@ public class ValidEntityFieldsValidator implements ConstraintValidator<ValidEnti
 						}
 						if (foundKnownCode==false) {
 							newAltLabel.put(altLabel.getKey(), altLabel.getValue());
-							addConstraint(returnValue, context, "The alternative label field: "+ altLabel.getKey() +" contain the language code that does not belong to the Europena languge codes.");
+							addConstraint(returnValue, context, "The alternative label field: "+ altLabel.getKey() +" contains the language code that does not belong to the Europena languge codes.");
 							returnValue=false;
-
 						}
 						
 					}

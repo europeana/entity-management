@@ -11,6 +11,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import eu.europeana.entitymanagement.config.EMSettings;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -33,9 +34,10 @@ public class EntityRecrodRepositoryTest {
 		context.refresh();
 		System.out.println("Refreshing the spring context");
 		EntityRecordRepository entityRecordRepository = context.getBean(EntityRecordRepository.class);
+		EMSettings emSettings = context.getBean(EMSettings.class);
     	
 		BaseTimespan entity = new BaseTimespan();
-    	entity.setEntityId("http://data.europeana.eu/timespan/base/ 3");
+    	entity.setEntityId("http://data.europeana.eu/timespan/base/3");
     	entity.setInternalType("Timespan");
     	entity.setBeginString("0001-01-01");
     	entity.setEndString("0100-12-31");
@@ -43,9 +45,24 @@ public class EntityRecrodRepositoryTest {
     	/*
     	 * putting the "." in the name of the field like prefLabelTest.put("perfLabel.pl", "I wiek") causes problems during saving to the mongodb
     	 */
-    	prefLabelTest.put("perfLabel_pl", "I wiek");
-    	prefLabelTest.put("perfLabel_da", "1. århundrede");	
+    	//note the not allowed space added in the prefLabel key, for the validation puroposes
+    	prefLabelTest.put("perfLabel "+emSettings.getLanguageSeparator()+"pl", "I wiek");
+    	prefLabelTest.put("perfLabel"+emSettings.getLanguageSeparator()+"da", "1. århundrede");	
     	entity.setPrefLabelStringMap(prefLabelTest);
+    	Map<String,List<String>> altLabel = new HashMap<String, List<String>>();
+    	List<String> altLabelValue1 = new ArrayList<String>();
+    	altLabelValue1.add("1st century");
+    	altLabelValue1.add("1st century AD");
+    	//note the not allowed space added in the altLabel key, for the validation puroposes
+    	altLabel.put("altLabel "+emSettings.getLanguageSeparator()+"en", altLabelValue1);
+    	List<String> altLabelValue2 = new ArrayList<String>();
+    	altLabelValue2.add("1. Jahrhundert AD");
+    	altLabel.put("altLabel"+emSettings.getLanguageSeparator()+"deu", altLabelValue2);
+    	List<String> altLabelValue3 = new ArrayList<String>();
+    	altLabelValue3.add("1. vek AD");
+    	altLabel.put("altLabel"+emSettings.getLanguageSeparator()+"sr", altLabelValue3);
+    	entity.setAltLabel(altLabel);    	
+    	
     	BaseWebResource webResource = new BaseWebResource();
     	webResource.setId("http://www.sbc.org.pl/Timespan/16573/doc.pdf");
     	webResource.setSource("http://data.europeana.eu/item/7284673/_nnd7fT5");
