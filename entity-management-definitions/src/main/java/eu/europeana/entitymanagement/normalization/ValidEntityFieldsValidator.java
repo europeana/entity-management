@@ -14,9 +14,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import eu.europeana.entitymanagement.config.EMSettings;
-import eu.europeana.entitymanagement.config.LanguageCodes.Language;
-import eu.europeana.entitymanagement.config.LanguageCodes.Language.AlternativeLanguage;
+import eu.europeana.entitymanagement.common.config.EMSettings;
+import eu.europeana.entitymanagement.common.config.LanguageCodes.Language;
+import eu.europeana.entitymanagement.common.config.LanguageCodes.Language.AlternativeLanguage;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
 import eu.europeana.entitymanagement.utils.EntityUtils;

@@ -6,6 +6,9 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import eu.europeana.entitymanagement.common.config.DataSource;
+import eu.europeana.entitymanagement.common.config.DataSources;
+
 /**
  * JUnit test to check if DataSources are properly deserialized from XML
  */

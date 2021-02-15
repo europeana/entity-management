@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.config;
+package eu.europeana.entitymanagement.common.config;
 
 public interface EntityManagementConfiguration {
 

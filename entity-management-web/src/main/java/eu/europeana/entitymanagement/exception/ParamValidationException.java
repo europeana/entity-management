@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 
 
 import eu.europeana.api.commons.web.exception.HttpException;
-import eu.europeana.entitymanagement.config.I18nConstants;
+import eu.europeana.entitymanagement.common.config.I18nConstants;
 
 
 public class ParamValidationException extends HttpException{

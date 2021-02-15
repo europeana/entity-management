@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.config;
+package eu.europeana.entitymanagement.common.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;

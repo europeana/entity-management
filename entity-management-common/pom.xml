@@ -7,12 +7,10 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
 
-  <artifactId>entity-management-config</artifactId>
+  <artifactId>entity-management-common</artifactId>
   
-  <name>entity-management-config</name>
-  <description>A simple entity-management-config.</description>
-  <!-- FIXME change it to the project's website -->
-  <url>http://www.example.com</url>
+  <name>entity-management-common</name>
+  <description>Common functionality to be reused by individual Entity Management Modules</description>
   <dependencies>
    <dependency>
 		<groupId>org.springframework</groupId>

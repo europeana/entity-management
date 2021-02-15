@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.config;
+package eu.europeana.entitymanagement.common.config;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;

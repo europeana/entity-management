@@ -79,7 +79,7 @@
 	
 	<dependency>
 		<groupId>eu.europeana.api</groupId>
-		<artifactId>entity-management-config</artifactId>
+		<artifactId>entity-management-common</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</dependency> 
         

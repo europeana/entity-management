@@ -23,6 +23,12 @@
 	</dependency>
 	
 	<dependency>
+		<groupId>eu.europeana.api</groupId>
+		<artifactId>entity-management-common</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</dependency> 
+	
+	<dependency>
 		<groupId>eu.europeana.api.commons</groupId>
 		<version>${api.commons.version}</version>
 		<artifactId>commons-nosql</artifactId>

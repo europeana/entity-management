@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
-import eu.europeana.entitymanagement.config.SocksProxyConfig;
+import eu.europeana.entitymanagement.common.config.SocksProxyConfig;
 import eu.europeana.entitymanagement.util.SocksProxyActivator;
 
 /**

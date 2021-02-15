@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 import eu.europeana.api.commons.definitions.vocabulary.Role;
 import eu.europeana.api.commons.oauth2.service.impl.EuropeanaClientDetailsService;
 import eu.europeana.api.commons.service.authorization.BaseAuthorizationService;
-import eu.europeana.entitymanagement.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.config.EntityManagementConfigurationImpl;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfigurationImpl;
 
 @Component
 public class AuthorizationServiceImpl extends BaseAuthorizationService implements AuthorizationService {

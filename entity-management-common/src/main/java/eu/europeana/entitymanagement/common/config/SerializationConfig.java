@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.config;
+package eu.europeana.entitymanagement.common.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;

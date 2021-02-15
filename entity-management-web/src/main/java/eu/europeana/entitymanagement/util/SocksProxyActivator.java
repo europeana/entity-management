@@ -6,7 +6,7 @@ import java.net.PasswordAuthentication;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import eu.europeana.entitymanagement.config.SocksProxyConfig;
+import eu.europeana.entitymanagement.common.config.SocksProxyConfig;
 import io.micrometer.core.instrument.util.StringUtils;
 
 /**
