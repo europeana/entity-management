@@ -5,11 +5,11 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import eu.europeana.api.commons.web.controller.BaseRestController;
-import eu.europeana.entitymanagement.definitions.formats.FormatTypes;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityManagementRuntimeException;
 import eu.europeana.entitymanagement.serialization.EntityXmlSerializer;
 import eu.europeana.entitymanagement.serialization.JsonLdSerializer;
+import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.web.service.authorization.AuthorizationService;
 import eu.europeana.entitymanagement.web.service.authorization.AuthorizationServiceImpl;
 

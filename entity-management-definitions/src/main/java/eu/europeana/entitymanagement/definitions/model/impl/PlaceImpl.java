@@ -11,11 +11,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 import eu.europeana.entitymanagement.definitions.model.Place;
-import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityFields;
-import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
+import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-public class BasePlace extends BaseEntity implements Place, eu.europeana.corelib.definitions.edm.entity.Place {
+public class PlaceImpl extends BaseEntity implements Place, eu.europeana.corelib.definitions.edm.entity.Place {
 
 	private String[] isNextInSequence;
 	private Float latitude, longitude, altitude;

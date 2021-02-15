@@ -26,14 +26,14 @@ import org.springframework.web.util.UriComponentsBuilder;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.entitymanagement.config.DataSources;
-import eu.europeana.entitymanagement.definitions.formats.FormatTypes;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
-import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
+import eu.europeana.entitymanagement.vocabulary.FormatTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.web.model.EntityCreationRequest;
 import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
 import eu.europeana.entitymanagement.web.service.impl.MetisDereferenceService;
@@ -138,7 +138,7 @@ public class EMController extends BaseRest {
          * deferefence using Europeana 
          * TODO: call the Europeana service to get the entity
          */
-        BaseEntity europeanaResponse = null;
+//        BaseEntity europeanaResponse = null;
         // dereference using Metis. return HTTP 400 for HTTP4XX responses and HTTP 504 for other error responses
         BaseEntity metisResponse;
 		try {
@@ -200,7 +200,7 @@ public class EMController extends BaseRest {
         
         EntityRecord entityRecord = entityRecordOptional.get();	    	           
 
-    	Date timestamp = (entityRecord != null) ? entityRecord.getIsAggregatedBy().getModified() : null;
+    	Date timestamp = (entityRecord != null) ? entityRecord.getEntity().getIsAggregatedBy().getModified() : null;
     	Date etagDate = (timestamp != null)? timestamp : new Date();
     	String etag = generateETag(etagDate
     		, outFormat.name()

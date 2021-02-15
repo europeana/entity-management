@@ -10,12 +10,12 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 import eu.europeana.entitymanagement.definitions.model.Concept;
-import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityFields;
-import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
+import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JacksonXmlRootElement(localName= XmlFields.XML_SKOS_CONCEPT)
-public class BaseConcept extends BaseEntity implements Concept {
+public class ConceptImpl extends BaseEntity implements Concept {
 
 	private String[] broader;
 	private String[] narrower;

@@ -22,12 +22,12 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import eu.europeana.entitymanagement.config.EMSettings;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.exception.ScoringComputationException;
 import eu.europeana.entitymanagement.scoring.model.EntityMetrics;
 import eu.europeana.entitymanagement.scoring.model.MaxEntityMetrics;
 import eu.europeana.entitymanagement.scoring.model.PageRank;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @Component("scoringService")
 public class ScoringServiceImpl implements ScoringService {

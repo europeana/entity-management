@@ -13,18 +13,17 @@ import dev.morphia.annotations.Id;
 import dev.morphia.annotations.Index;
 import dev.morphia.annotations.IndexOptions;
 import dev.morphia.annotations.Indexes;
-import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityFields;
-import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
+import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @dev.morphia.annotations.Entity(value = "EntityRecord")
 @Indexes(@Index(fields = { @Field("dbId") }, options = @IndexOptions(unique = true)))
-public class BaseEntityRecord implements EntityRecord{
+public class EntityRecordImpl implements EntityRecord{
 
     @Id
     @JsonIgnore
@@ -33,8 +32,6 @@ public class BaseEntityRecord implements EntityRecord{
     private String entityId;
 
     private Entity entity;
-
-    private Aggregation isAggregatedBy;
 
     private List<EntityProxy> proxies; 
     
@@ -61,18 +58,6 @@ public class BaseEntityRecord implements EntityRecord{
     @Override
     public void setEntityId(String entityId) {
         this.entityId = entityId;
-    }
-
-    @Override
-    @JsonProperty(WebEntityFields.IS_AGGREGATED_BY)
-    @JacksonXmlProperty(localName = XmlFields.XML_ORE_IS_AGGREGATED_BY)
-    public Aggregation getIsAggregatedBy() {
-        return isAggregatedBy;
-    }
-
-    @Override
-    public void setIsAggregatedBy(Aggregation isAggregatedBy) {
-        this.isAggregatedBy = isAggregatedBy;
     }
 
     @Override

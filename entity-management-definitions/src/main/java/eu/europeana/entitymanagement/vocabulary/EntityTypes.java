@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.definitions.model.vocabulary;
+package eu.europeana.entitymanagement.vocabulary;
 
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 

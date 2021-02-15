@@ -16,23 +16,23 @@ public class BaseEntityFactory {
 
     public static BaseEntity createEntityFromXmlType(Class<? extends BaseEntity> xmlBaseEntityClass) throws EntityCreationException {
         if (xmlBaseEntityClass.isAssignableFrom(Concept.class)) {
-            return new BaseConcept();
+            return new ConceptImpl();
         }
 
         if (xmlBaseEntityClass.isAssignableFrom(Timespan.class)) {
-            return new BaseTimespan();
+            return new TimespanImpl();
         }
 
         if (xmlBaseEntityClass.isAssignableFrom(Place.class)) {
-            return new BasePlace();
+            return new PlaceImpl();
         }
 
         if (xmlBaseEntityClass.isAssignableFrom(Agent.class)) {
-            return new BaseAgent();
+            return new AgentImpl();
         }
 
         if (xmlBaseEntityClass.isAssignableFrom(Organization.class)) {
-            return new BaseOrganization();
+            return new OrganizationImpl();
         }
 
         //TODO: add other types

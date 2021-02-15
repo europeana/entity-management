@@ -7,11 +7,11 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
-import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityFields;
-import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
+import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-public class BaseEntityProxy implements EntityProxy {
+public class EntityProxyImpl implements EntityProxy {
 
 	String proxyId;
     Entity entity;

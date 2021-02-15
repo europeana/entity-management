@@ -9,11 +9,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 import eu.europeana.entitymanagement.definitions.model.Timespan;
-import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityFields;
-import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
+import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-public class BaseTimespan extends BaseEntity implements Timespan, eu.europeana.corelib.definitions.edm.entity.Timespan {
+public class TimespanImpl extends BaseEntity implements Timespan, eu.europeana.corelib.definitions.edm.entity.Timespan {
 
 	private String[] isNextInSequence;
 	private String begin;

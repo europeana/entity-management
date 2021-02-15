@@ -1,13 +1,7 @@
 package eu.europeana.entitymanagement.scoring;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
@@ -16,9 +10,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
-import eu.europeana.entitymanagement.definitions.model.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.scoring.model.EntityMetrics;
 import eu.europeana.entitymanagement.scoring.model.MaxEntityMetrics;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 /**
  * JUnit test for testing the EMControllerTest class

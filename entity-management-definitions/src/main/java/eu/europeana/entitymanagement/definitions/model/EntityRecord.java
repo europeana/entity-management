@@ -11,10 +11,6 @@ public interface EntityRecord {
 
     List<EntityProxy> getProxies();
 
-    void setIsAggregatedBy(Aggregation isAggregatedBy);
-
-    Aggregation getIsAggregatedBy();
-
     void setEntityId(String entityId);
 
     String getEntityId();

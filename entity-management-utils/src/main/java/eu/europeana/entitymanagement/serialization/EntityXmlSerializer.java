@@ -10,10 +10,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
-import eu.europeana.entitymanagement.definitions.model.Aggregation;
+import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.exception.EntityManagementRuntimeException;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
@@ -21,7 +20,7 @@ import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 @Component
 public class EntityXmlSerializer {
 
-	private final String XML_HEADER_TAG_CONCEPT = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n" + 
+	final String XML_HEADER_TAG_CONCEPT = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n" + 
     	    	" <rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\r\n" +  
     	    	"         xmlns:foaf=\"http://xmlns.com/foaf/0.1/\"\r\n" + 
     	    	"         xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\r\n" + 
@@ -29,7 +28,7 @@ public class EntityXmlSerializer {
     	    	"	  xmlns:ore=\"http://www.openarchives.org/ore/terms/\"\r\n" +
     	    	"         xmlns:skos=\"http://www.w3.org/2004/02/skos/core#\"\r\n " +
 		"         xmlns:dcterms=\"http://purl.org/dc/terms/\" >";
-    	private final String XML_HEADER_TAG_AGENT = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n" + 
+    	final String XML_HEADER_TAG_AGENT = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n" + 
 		" <rdf:RDF xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n" + 
 		"         xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\r\n" + 
 		"         xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\r\n" + 
@@ -40,7 +39,7 @@ public class EntityXmlSerializer {
 		"	  xmlns:ore=\"http://www.openarchives.org/ore/terms/\"\r\n" +
 		"         xmlns:skos=\"http://www.w3.org/2004/02/skos/core#\"\r\n" + 
 		"         xmlns:dcterms=\"http://purl.org/dc/terms/\" >";
-    	private final String XML_HEADER_TAG_PLACE = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n" + 
+    	final String XML_HEADER_TAG_PLACE = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n" + 
 	    	" <rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\r\n" + 
 	    	"         xmlns:foaf=\"http://xmlns.com/foaf/0.1/\"\r\n" + 
 	    	"         xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\r\n" + 
@@ -50,7 +49,7 @@ public class EntityXmlSerializer {
 	    	"         xmlns:skos=\"http://www.w3.org/2004/02/skos/core#\"\r\n" + 
 	    	"	  xmlns:ore=\"http://www.openarchives.org/ore/terms/\"\r\n" +
 	    	"         xmlns:dcterms=\"http://purl.org/dc/terms/\" >";
-    	private final String XML_HEADER_TAG_ORGANIZATION = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n" + 
+    	final String XML_HEADER_TAG_ORGANIZATION = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n" + 
 	    	" <rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\r\n" + 
 	    	"         xmlns:foaf=\"http://xmlns.com/foaf/0.1/\"\r\n" + 
 	    	"         xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\r\n" + 
@@ -60,8 +59,8 @@ public class EntityXmlSerializer {
 	    	"	  xmlns:ore=\"http://www.openarchives.org/ore/terms/\"\r\n" +
 	    	"         xmlns:skos=\"http://www.w3.org/2004/02/skos/core#\"\r\n " +
 		"         xmlns:dcterms=\"http://purl.org/dc/terms/\" >";
-    	private final String XML_END_TAG = "</rdf:RDF>";
-    	private final String XML_HEADER_TAG_TIMESPAN = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n" + 
+    	final String XML_END_TAG = "</rdf:RDF>";
+    	final String XML_HEADER_TAG_TIMESPAN = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n" + 
 		" <rdf:RDF xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n" + 
 		"         xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\r\n" + 
 		"         xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\r\n" + 
@@ -102,31 +101,36 @@ public class EntityXmlSerializer {
 		objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 
 		String output = "";
-		
-		Aggregation tmpAggregation = entityRecord.getIsAggregatedBy();
-		List<EntityProxy> tmpProxies = entityRecord.getProxies();
 		try {
-			entityRecord.setIsAggregatedBy(null);
-			entityRecord.setProxies(null);
-			
-    		StringBuilder strBuilder = new StringBuilder();
-		    strBuilder.append(objectMapper.writeValueAsString(entityRecord));    		
-
-		    //add referenced web resources
-		    WebResource webResource = entityRecord.getEntity().getReferencedWebResource();
-		    if (webResource!=null)
-		    {
-		    	strBuilder.append(objectMapper.writeValueAsString(webResource));
-		    }
-
-		    strBuilder.append(XML_END_TAG);
-		    output = strBuilder.toString();
+		    output = objectMapper.writeValueAsString(entityRecord.getEntity());
 		} catch (JsonProcessingException e) {
 		    throw new EntityManagementRuntimeException("Unexpected exception occured when serializing entity to external format!",e);
 		}
-		    
-		entityRecord.setIsAggregatedBy(tmpAggregation);
-		entityRecord.setProxies(tmpProxies);
+//		
+//		Aggregation tmpAggregation = entityRecord.getEntity().getIsAggregatedBy();
+//		List<EntityProxy> tmpProxies = entityRecord.getProxies();
+//		try {
+////			entityRecord.setIsAggregatedBy(null);
+////			entityRecord.setProxies(null);
+//			
+//    		StringBuilder strBuilder = new StringBuilder();
+//		    strBuilder.append(objectMapper.writeValueAsString(entityRecord.getEntity()));    		
+//
+//		    //add referenced web resources
+//		    WebResource webResource = entityRecord.getEntity().getReferencedWebResource();
+//		    if (webResource!=null)
+//		    {
+//		    	strBuilder.append(objectMapper.writeValueAsString(webResource));
+//		    }
+//
+//		    strBuilder.append(XML_END_TAG);
+//		    output = strBuilder.toString();
+//		} catch (JsonProcessingException e) {
+//		    throw new EntityManagementRuntimeException("Unexpected exception occured when serializing entity to external format!",e);
+//		}
+//		    
+////		entityRecord.setIsAggregatedBy(tmpAggregation);
+//		entityRecord.setProxies(tmpProxies);
 		return output;
 	}
 	

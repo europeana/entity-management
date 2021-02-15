@@ -32,6 +32,12 @@ public class ValidEntityFieldsValidator implements ConstraintValidator<ValidEnti
 	}
 	
 	@Override
+	@Deprecated
+	/**
+	 * @deprecated required refactoring and proper exception handling 
+	 * consider moving this class to a more appropriate module
+	 *
+	 */
 	public boolean isValid(Entity entity, ConstraintValidatorContext context) {		
 		
 		if (entity==null) {

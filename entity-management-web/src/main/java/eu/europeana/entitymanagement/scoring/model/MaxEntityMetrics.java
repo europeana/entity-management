@@ -7,7 +7,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
-import eu.europeana.entitymanagement.definitions.model.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @JacksonXmlRootElement(localName = "metrics")
 public class MaxEntityMetrics {

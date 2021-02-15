@@ -18,7 +18,7 @@ import eu.europeana.entitymanagement.config.EMSettings;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
-import eu.europeana.entitymanagement.definitions.model.impl.BaseEntityRecord;
+import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.util.BaseEntityFactory;
@@ -59,7 +59,7 @@ public class EntityRecordService {
 
         // TODO: add proxies and aggregations
 
-        EntityRecord entityRecord = new BaseEntityRecord();
+        EntityRecord entityRecord = new EntityRecordImpl();
         entityRecord.setEntity(entity);
 
         return entityRecordRepository.save(entityRecord);
@@ -85,6 +85,7 @@ public class EntityRecordService {
 	/**
 	 * This function merges the data from the secondary entity to the primary entity
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void mergeEntity(Entity primary, Entity secondary) {
 
 		String altLabelFieldNamePrefix = emSettings.getAltLabelFieldNamePrefix();

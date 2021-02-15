@@ -13,8 +13,8 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 import eu.europeana.corelib.definitions.edm.entity.Address;
 import eu.europeana.entitymanagement.definitions.model.Organization;
-import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityFields;
-import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
+import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 /**
  * This class defines base organization type of an entity.
@@ -23,7 +23,7 @@ import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
  */
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-public class BaseOrganization extends BaseEntity 
+public class OrganizationImpl extends BaseEntity 
 		implements Organization, eu.europeana.corelib.definitions.edm.entity.Organization {
 
 	private Map<String, String> description;
@@ -431,7 +431,7 @@ public class BaseOrganization extends BaseEntity
 	@Override
 	public Address getAddress() {
 	    	if(address == null) {
-	    	    address = new BaseAddress();
+	    	    address = new AddressImpl();
 	    	    address.setAbout(hasAddress);
 	    	    address.setVcardStreetAddress(streetAddress);
 	    	    address.setVcardPostalCode(postalCode);

@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.scoring;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
@@ -11,13 +11,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.web.servlet.MockMvc;
 
-import eu.europeana.entitymanagement.definitions.model.impl.BaseAgent;
-import eu.europeana.entitymanagement.definitions.model.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.scoring.ScoringService;
+import eu.europeana.entitymanagement.definitions.model.impl.AgentImpl;
 import eu.europeana.entitymanagement.scoring.model.EntityMetrics;
 import eu.europeana.entitymanagement.scoring.model.MaxEntityMetrics;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 /**
  * JUnit test for testing the EMControllerTest class
@@ -28,8 +26,8 @@ import eu.europeana.entitymanagement.scoring.model.MaxEntityMetrics;
 //@MockBean()
 public class ScoringServiceTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+//    @Autowired
+//    private MockMvc mockMvc;
 
     @Autowired
     ScoringService scoringService;
@@ -37,7 +35,7 @@ public class ScoringServiceTest {
     @Test
     public void testComputeMetrics() throws Exception {
 
-	BaseAgent agent = new BaseAgent();
+	AgentImpl agent = new AgentImpl();
 	String entityId = "http://data.europeana.eu/agent/base/146741";
 	agent.setEntityId(entityId);
 	String[] sameAs = new String[] { "http://wikidata.dbpedia.org/resource/Q762",
