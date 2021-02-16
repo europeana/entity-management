@@ -37,6 +37,7 @@ public class AppConfig {
     public static final String BEAN_EM_DATA_SOURCES = "emDataSources";
     public static final String BEAN_EM_LANGUAGE_CODES = "emLanguageCodes";
     public static final String BEAN_EM_VALIDATOR_FACTORY = "emValidatorFactory";
+    public static final String BEAN_EM_SCORING_SERVICE = "emScoringService";
     public static final String BEAN_CLIENT_DETAILS_SERVICE = "clientDetailsService";
     
     @Resource(name=BEAN_EM_CONFIGURATION)

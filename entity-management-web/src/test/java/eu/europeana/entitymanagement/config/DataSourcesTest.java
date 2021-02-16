@@ -16,7 +16,7 @@ import eu.europeana.entitymanagement.common.config.DataSources;
 /**
  * JUnit test to check if DataSources are properly deserialized from XML
  */
-@ContextConfiguration(classes = { EntityManagementApp.class, AppConfig.class })
+@ContextConfiguration(classes = { EntityManagementApp.class})
 @ExtendWith(SpringExtension.class)
 public class DataSourcesTest {
 

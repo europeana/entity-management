@@ -14,6 +14,7 @@ import javax.annotation.Resource;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrRequest.METHOD;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import eu.europeana.entitymanagement.common.config.EMSettings;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
@@ -32,7 +34,7 @@ import eu.europeana.entitymanagement.scoring.model.MaxEntityMetrics;
 import eu.europeana.entitymanagement.scoring.model.PageRank;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
-@Component("scoringService")
+@Component(AppConfig.BEAN_EM_SCORING_SERVICE)
 public class ScoringServiceImpl implements ScoringService {
 
     SolrClient prSolrClient;
@@ -194,7 +196,7 @@ public class ScoringServiceImpl implements ScoringService {
 	query.setRows(0);
 
 	try {
-	    QueryResponse rsp = getSearchApiSolrClient().query(query);
+	    QueryResponse rsp = getSearchApiSolrClient().query(query, METHOD.POST);
 	    return (int) rsp.getResults().getNumFound();
 	} catch (Exception e) {
 	    throw new ScoringComputationException("Unexpected exception occured when retrieving pagerank: " + entityId, e);
