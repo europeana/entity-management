@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.annotation.Resource;
+
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import eu.europeana.entitymanagement.common.config.EMSettings;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
@@ -47,9 +50,10 @@ public class ScoringServiceImpl implements ScoringService {
     //
     private static final int RANGE_EXTENSION_FACTOR = 100;
 
-    @Autowired
-    private EMSettings emSettings;
-
+    @Resource(name="emConfiguration")
+    private EntityManagementConfiguration emConfiguration; 
+    
+    
     public static final String WIKIDATA_PREFFIX = "http://www.wikidata.org/entity/";
     public static final String WIKIDATA_DBPEDIA_PREFIX = "http://wikidata.dbpedia.org/resource/";
 
@@ -180,7 +184,7 @@ public class ScoringServiceImpl implements ScoringService {
     }
 
     private Integer getEnrichmentCount(Entity entity) {
-	String queryStr = emSettings.getEnrichmentsQuery();
+	String queryStr = emConfiguration.getEnrichmentsQuery();
 	queryStr = String.format(queryStr, entity.getEntityId());
 	SolrQuery query = new SolrQuery(queryStr);
 	return getCountBySolrQuery(query, entity.getEntityId());
@@ -235,14 +239,14 @@ public class ScoringServiceImpl implements ScoringService {
 
     public SolrClient getPrSolrClient() {
 	if (prSolrClient == null) {
-	    prSolrClient = new HttpSolrClient.Builder(emSettings.getPrSolrUrl()).build();
+	    prSolrClient = new HttpSolrClient.Builder(emConfiguration.getPrSolrUrl()).build();
 	}
 	return prSolrClient;
     }
 
     public SolrClient getSearchApiSolrClient() {
 	if (searchApiSolrClient == null) {
-	    searchApiSolrClient = new HttpSolrClient.Builder(emSettings.getSearchApiSolrUrl()).build();
+	    searchApiSolrClient = new HttpSolrClient.Builder(emConfiguration.getSearchApiSolrUrl()).build();
 	}
 	return searchApiSolrClient;
     }

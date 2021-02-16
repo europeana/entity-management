@@ -130,7 +130,7 @@ public class EMController extends BaseRest {
 
 
         // return 400 error if ID does not match a configured datasource
-        if (!datasources.checkSourceExists(entityCreationRequest.getId())) {
+        if (!datasources.hasDataSource(entityCreationRequest.getId())) {
             return ResponseEntity.badRequest().build();
         }
 

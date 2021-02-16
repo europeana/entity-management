@@ -1,10 +1,13 @@
 package eu.europeana.entitymanagement.web;
 
+import javax.annotation.Resource;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import eu.europeana.api.commons.web.controller.BaseRestController;
+import eu.europeana.entitymanagement.common.config.BuildInfo;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityManagementRuntimeException;
 import eu.europeana.entitymanagement.serialization.EntityXmlSerializer;
@@ -16,9 +19,12 @@ import eu.europeana.entitymanagement.web.service.authorization.AuthorizationServ
 
 public abstract class BaseRest extends BaseRestController {
 
-    @Autowired
-    AuthorizationServiceImpl authorizationService;
+    @Resource(name="emAuthorizationService")
+    AuthorizationServiceImpl emAuthorizationService;
 
+    @Resource(name="emBuildInfo")
+    BuildInfo emBuildInfo;
+    
     @Autowired
     EntityXmlSerializer entityXmlSerializer;
     
@@ -32,7 +38,7 @@ public abstract class BaseRest extends BaseRestController {
     }
 
     public AuthorizationService getAuthorizationService() {
-	return authorizationService;
+	return emAuthorizationService;
     }
 
     public Logger getLogger() {
@@ -47,7 +53,7 @@ public abstract class BaseRest extends BaseRestController {
 //    }
 
     public String getApiVersion() {
-	return getAuthorizationService().getConfiguration().getApiVersion();
+	return emBuildInfo.getAppVersion();
     }
 
     /**

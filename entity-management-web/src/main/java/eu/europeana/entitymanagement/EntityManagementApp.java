@@ -14,7 +14,8 @@ import eu.europeana.entitymanagement.util.SocksProxyActivator;
 /**
  * Main application. Allows deploying as a war and logs instance data when deployed in Cloud Foundry
  */
-@SpringBootApplication(scanBasePackages = {"eu.europeana.entitymanagement", "eu.europeana.api.commons"},
+//@SpringBootApplication(scanBasePackages = {"eu.europeana.entitymanagement", "eu.europeana.api.commons"},
+@SpringBootApplication(scanBasePackages = {"eu.europeana.entitymanagement"},
         // Remove these exclusions to re-enable security
         exclude = { SecurityAutoConfiguration.class, ManagementWebSecurityAutoConfiguration.class }
         )

@@ -23,7 +23,7 @@ public class DataSources {
 	 * @param id id to match
 	 * @return true if a Datasource match is configured, false otherwise.
 	 */
-	public boolean checkSourceExists(String id) {
+	public boolean hasDataSource(String id) {
 		return datasources.stream().anyMatch(s -> id.contains(s.getUrl()));
 	}
 

@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.common.config;
+package eu.europeana.entitymanagement.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,8 +11,10 @@ import java.text.SimpleDateFormat;
 
 /**
  * Configure Jackson serialization output.
+ * @deprecated not sure if the DateFormat is the correct one and if the global configurations are correct for both xml and json serializations
  */
 @Configuration
+@Deprecated
 public class SerializationConfig {
 
     @Bean

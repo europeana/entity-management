@@ -6,7 +6,9 @@ import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_DELET
 
 import java.util.Set;
 
+import javax.annotation.Resource;
 import javax.validation.ConstraintViolation;
+import javax.validation.ValidatorFactory;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,7 +20,6 @@ import com.mongodb.client.model.ReturnDocument;
 import dev.morphia.Datastore;
 import dev.morphia.ModifyOptions;
 import dev.morphia.query.experimental.updates.UpdateOperators;
-import eu.europeana.entitymanagement.common.config.EMSettings;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
@@ -34,8 +35,11 @@ public class EntityRecordRepository {
     @Autowired
     private Datastore datastore;
     
-    @Autowired
-    private EMSettings emSettings;
+//    @Autowired
+//    private EMSettings emSettings;
+    @Resource(name="emValidatorFactory")
+    ValidatorFactory emValidatorFactory;
+    
     /**
      * @return the total number of resources in the database
      */
@@ -100,7 +104,7 @@ public class EntityRecordRepository {
         }
 
         //check the validation of the entity fields
-        Set<ConstraintViolation<Entity>> violations = emSettings.localValidatorFactoryBean().validate(entityRecord.getEntity());
+        Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entityRecord.getEntity());
         for (ConstraintViolation<Entity> violation : violations) {
             logger.error(violation.getMessage()); 
         }

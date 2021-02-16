@@ -10,6 +10,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>entity-management-web</artifactId>
+	<description>The Web Module of the Entity Management API</description>
 	<packaging>war</packaging>
 
 	<dependencies>
@@ -52,6 +53,12 @@
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger-ui</artifactId>
 			<version>${swagger.version}</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
 		</dependency>
 
 
@@ -194,6 +201,26 @@
 		<finalName>${project.artifactId}</finalName>
 
 		<plugins>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<configuration>
+					<!-- 
+					<outputDirectory>output-resources</outputDirectory>
+					 -->
+					<resources>
+						<resource>
+							<directory>src/main/resources</directory>
+							<includes>
+								<include>*.properties</include>
+							</includes>
+							<filtering>true</filtering>
+						</resource>
+					</resources>
+				</configuration>	
+			</plugin>
+
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>

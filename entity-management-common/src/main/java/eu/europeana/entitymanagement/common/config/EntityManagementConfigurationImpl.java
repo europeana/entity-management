@@ -1,72 +1,108 @@
 package eu.europeana.entitymanagement.common.config;
 
-import java.util.Properties;
-
-import javax.annotation.PostConstruct;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.PropertySources;
 import org.springframework.stereotype.Component;
 
 @Component
+/**
+ * Container for all settings that we load from the entitymanagement.properties
+ * file and optionally override from myapi.user.properties file
+ */
+@Configuration("emConfiguration")
+@PropertySources({ @PropertySource("classpath:entitymanagement.properties"),
+	@PropertySource(value = "classpath:entitymanagement.user.properties", ignoreResourceNotFound = true) })
 public class EntityManagementConfigurationImpl implements EntityManagementConfiguration {
 
-	@Autowired
-	private EMSettings emSetting;
-	
-	private Properties entityProperties;
-	
-	@Override
-	public String getComponentName() {
-		return "entitymanagement";
-	}
+    private static final Logger LOG = LogManager.getLogger(EMSettings.class);
 
+    @Value("${datasources.config}")
+    private String datasourcesXMLConfig;
 
-	public Properties getEntityProperties() {
-		return entityProperties;
-	}
+    @Value("${languagecodes.config}")
+    private String languagecodesXMLConfig;
 
-	public void setEntityPropertiesConfig(Properties entityProperties) {
-		this.entityProperties = entityProperties;
-	}
+//    @Value("${altLabelFieldNamePrefix}")
+//    private String altLabelFieldNamePrefix;
+//
+//    @Value("${prefLabelFieldNamePrefix}")
+//    private String prefLabelFieldNamePrefix;
+//
+//    @Value("${languageSeparator}")
+//    private String languageSeparator;
 
-//	@Override
-//	public boolean isProductionEnvironment() {
-//		return VALUE_ENVIRONMENT_PRODUCTION.equals(getEnvironment());
-//	}
+    @Value("${europeana.apikey.jwttoken.siganturekey}")
+    private String europeanaApikeyJwttokenSiganturekey;
 
-//	@Override
-//	public String getEnvironment() {
-//		return getEntityProperties().getProperty(ENTITY_ENVIRONMENT);
-//	}
+    @Value("${entitymanagement.solr.pr.url}")
+    private String prSolrUrl;
 
-//	@Override
-//	public String getUserToken() {
-//		return getEntityProperties().getProperty(DEFAULT_USER_TOKEN);
-//	}
+    @Value("${entitymanagement.solr.searchapi.url}")
+    private String searchApiSolrUrl;
 
+    @Value("${entitymanagement.solr.searchapi.enrichments.query}")
+    private String enrichmentsQuery;
 
-	@Override
-	public String getJwtTokenSignatureKey() {
-	    return getEntityProperties().getProperty(KEY_APIKEY_JWTTOKEN_SIGNATUREKEY);
-	}
+    @Value("${entitymanagement.solr.searchapi.hits.query}")
+    private String hitsQuery;
 
-	@Override
-	public String getAuthorizationApiName() {
-	    return getEntityProperties().getProperty(AUTHORIZATION_API_NAME);
-	}
-	
-	
-	@Override
-	public String getApiVersion() {
-	    return getEntityProperties().getProperty(API_VERSION);
-	}	
-	
-    @PostConstruct
-    public void init() {
-    	entityProperties = new Properties();
-    	entityProperties.setProperty(API_VERSION, emSetting.getEntitymanagementApiVersion());
-    	entityProperties.setProperty(AUTHORIZATION_API_NAME, emSetting.getAuthorizationApiName());
-    	entityProperties.setProperty(KEY_APIKEY_JWTTOKEN_SIGNATUREKEY, emSetting.getEuropeanaApikeyJwttokenSiganturekey());
+    @Value("${authorization.api.name}")
+    private String authorizationApiName;
+
+    @Value("${metis.baseUrl}")
+    private String metisBaseUrl;
+
+    public EntityManagementConfigurationImpl() {
+	LOG.info("Initializing EntityManagementConfiguration bean as: configuration");
+    }
+
+    @Override
+    public String getPrSolrUrl() {
+	return prSolrUrl;
+    }
+
+    @Override
+    public String getSearchApiSolrUrl() {
+	return searchApiSolrUrl;
+    }
+
+    @Override
+    public String getEnrichmentsQuery() {
+	return enrichmentsQuery;
+    }
+
+    @Override
+    public String getHitsQuery() {
+	return hitsQuery;
+    }
+
+    @Override
+    public String getJwtTokenSignatureKey() {
+	return europeanaApikeyJwttokenSiganturekey;
+    }
+
+    @Override
+    public String getAuthorizationApiName() {
+	return authorizationApiName;
+    }
+
+    @Override
+    public String getMetisBaseUrl() {
+	return metisBaseUrl;
+    }
+
+    @Override
+    public String getDatasourcesXMLConfig() {
+	return datasourcesXMLConfig;
+    }
+
+    @Override
+    public String getLanguagecodesXMLConfig() {
+	return languagecodesXMLConfig;
     }
 
 }
