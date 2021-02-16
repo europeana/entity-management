@@ -30,7 +30,7 @@ public class DataSourcesTest {
     @Test
     public void getDataSources() {
 	assertNotNull(dataSources);
-	assertTrue(dataSources.getDatasources().size() >= 0);
+	assertTrue(dataSources.getDatasources().size() >= 7);
 	assertTrue(dataSources.hasDataSource(WIKIDATA));
 	assertTrue(dataSources.hasDataSource(GEONAMES));
 	assertTrue(dataSources.hasDataSource(EUROPEANA_FASHION));

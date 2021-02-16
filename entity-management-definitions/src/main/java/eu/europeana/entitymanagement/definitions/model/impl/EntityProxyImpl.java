@@ -13,59 +13,59 @@ import eu.europeana.entitymanagement.vocabulary.XmlFields;
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class EntityProxyImpl implements EntityProxy {
 
-	String proxyId;
+    String proxyId;
     Entity entity;
     String proxyFor;
     Aggregation proxyIn;
     String type;
-    
+
     @JsonProperty(WebEntityFields.TYPE)
     @JacksonXmlProperty(localName = XmlFields.XML_RDF_TYPE)
     public String getType() {
-		return type;
-	}
+	return type;
+    }
 
-	public void setType(String type) {
-		this.type = type;
-	}
+    public void setType(String type) {
+	this.type = type;
+    }
 
-	@JsonProperty(WebEntityFields.ID)
-	@JacksonXmlProperty(isAttribute= true, localName = XmlFields.XML_RDF_ABOUT)
-	public String getProxyId() {
-		return proxyId;
-	}
+    @JsonProperty(WebEntityFields.ID)
+    @JacksonXmlProperty(isAttribute = true, localName = XmlFields.XML_RDF_ABOUT)
+    public String getProxyId() {
+	return proxyId;
+    }
 
-	public void setProxyId(String proxyId) {
-		this.proxyId = proxyId;
-	}	
-    
-	@JsonProperty
-	@JacksonXmlProperty
+    public void setProxyId(String proxyId) {
+	this.proxyId = proxyId;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty
     public Entity getEntity() {
-		return entity;
-	}
+	return entity;
+    }
 
-	public void setEntity(Entity entity) {
-		this.entity = entity;
-	}	
-    
-	@JsonProperty(WebEntityFields.PROXY_FOR)
-	@JacksonXmlProperty(localName = XmlFields.XML_ORE_PROXY_FOR)
+    public void setEntity(Entity entity) {
+	this.entity = entity;
+    }
+
+    @JsonProperty(WebEntityFields.PROXY_FOR)
+    @JacksonXmlProperty(localName = XmlFields.XML_ORE_PROXY_FOR)
     public String getProxyFor() {
-		return proxyFor;
-	}
+	return proxyFor;
+    }
 
-	public void setProxyFor(String proxyFor) {
-		this.proxyFor = proxyFor;
-	}
+    public void setProxyFor(String proxyFor) {
+	this.proxyFor = proxyFor;
+    }
 
-	@JsonProperty(WebEntityFields.PROXY_IN)
-	@JacksonXmlProperty(localName = XmlFields.XML_ORE_PROXY_IN)
-	public Aggregation getProxyIn() {
-		return proxyIn;
-	}
+    @JsonProperty(WebEntityFields.PROXY_IN)
+    @JacksonXmlProperty(localName = XmlFields.XML_ORE_PROXY_IN)
+    public Aggregation getProxyIn() {
+	return proxyIn;
+    }
 
-	public void setProxyIn(Aggregation proxyIn) {
-		this.proxyIn = proxyIn;
-	}
+    public void setProxyIn(Aggregation proxyIn) {
+	this.proxyIn = proxyIn;
+    }
 }
