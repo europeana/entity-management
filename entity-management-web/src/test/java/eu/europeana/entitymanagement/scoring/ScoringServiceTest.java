@@ -17,9 +17,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import eu.europeana.entitymanagement.EntityManagementApp;
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.model.impl.AgentImpl;
-import eu.europeana.entitymanagement.scoring.model.EntityMetrics;
-import eu.europeana.entitymanagement.scoring.model.MaxEntityMetrics;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.web.model.scoring.EntityMetrics;
+import eu.europeana.entitymanagement.web.model.scoring.MaxEntityMetrics;
+import eu.europeana.entitymanagement.web.service.ScoringService;
 
 /**
  * JUnit test for testing the EMControllerTest class

@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.scoring;
+package eu.europeana.entitymanagement.web.service.impl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,24 +17,23 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest.METHOD;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
-import eu.europeana.entitymanagement.common.config.EMSettings;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.exception.ScoringComputationException;
-import eu.europeana.entitymanagement.scoring.model.EntityMetrics;
-import eu.europeana.entitymanagement.scoring.model.MaxEntityMetrics;
-import eu.europeana.entitymanagement.scoring.model.PageRank;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.web.model.scoring.EntityMetrics;
+import eu.europeana.entitymanagement.web.model.scoring.MaxEntityMetrics;
+import eu.europeana.entitymanagement.web.model.scoring.PageRank;
+import eu.europeana.entitymanagement.web.service.ScoringService;
 
-@Component(AppConfig.BEAN_EM_SCORING_SERVICE)
+@Service(AppConfig.BEAN_EM_SCORING_SERVICE)
 public class ScoringServiceImpl implements ScoringService {
 
     SolrClient prSolrClient;
@@ -52,7 +51,7 @@ public class ScoringServiceImpl implements ScoringService {
     //
     private static final int RANGE_EXTENSION_FACTOR = 100;
 
-    @Resource(name="emConfiguration")
+    @Resource(name=AppConfig.BEAN_EM_CONFIGURATION)
     private EntityManagementConfiguration emConfiguration; 
     
     

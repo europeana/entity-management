@@ -4,10 +4,13 @@ import static dev.morphia.query.experimental.filters.Filters.eq;
 import static eu.europeana.entitymanagement.mongo.repository.EntityRecordFields.ENTITY_ID;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_DELETE_OPTS;
 
+import javax.annotation.Resource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import dev.morphia.Datastore;
+import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 
 
@@ -18,7 +21,7 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 public class EntityRepository {
 
 
-    @Autowired
+    @Resource(name=AppConfigConstants.BEAN_EM_DATA_STORE)
     private Datastore datastore;
 
     /**

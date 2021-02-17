@@ -10,9 +10,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
-import eu.europeana.entitymanagement.scoring.model.EntityMetrics;
-import eu.europeana.entitymanagement.scoring.model.MaxEntityMetrics;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.web.model.scoring.EntityMetrics;
+import eu.europeana.entitymanagement.web.model.scoring.MaxEntityMetrics;
 
 /**
  * JUnit test for testing the EMControllerTest class

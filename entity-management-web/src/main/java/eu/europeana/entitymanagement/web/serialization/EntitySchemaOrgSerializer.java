@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.web.jsonld;
+package eu.europeana.entitymanagement.web.serialization;
 
 import java.io.IOException;
 

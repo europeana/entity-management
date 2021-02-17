@@ -1,6 +1,6 @@
 package eu.europeana.entitymanagement.common.config;
 
-public interface I18nConstants extends eu.europeana.api.commons.definitions.config.i18n.I18nConstants{
+public abstract class I18nConstants implements eu.europeana.api.commons.definitions.config.i18n.I18nConstants{
 	
 	// shared error messages
 	

@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.scoring.model;
+package eu.europeana.entitymanagement.web.model.scoring;
 
 import java.util.ArrayList;
 import java.util.List;

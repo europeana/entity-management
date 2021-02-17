@@ -6,19 +6,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
-import org.springframework.stereotype.Component;
 
-@Component
 /**
  * Container for all settings that we load from the entitymanagement.properties
  * file and optionally override from myapi.user.properties file
  */
-@Configuration("emConfiguration")
+@Configuration(AppConfigConstants.BEAN_EM_CONFIGURATION)
 @PropertySources({ @PropertySource("classpath:entitymanagement.properties"),
 	@PropertySource(value = "classpath:entitymanagement.user.properties", ignoreResourceNotFound = true) })
 public class EntityManagementConfigurationImpl implements EntityManagementConfiguration {
 
-    private static final Logger LOG = LogManager.getLogger(EMSettings.class);
+    private static final Logger LOG = LogManager.getLogger(EntityManagementConfigurationImpl.class);
 
     @Value("${datasources.config}")
     private String datasourcesXMLConfig;

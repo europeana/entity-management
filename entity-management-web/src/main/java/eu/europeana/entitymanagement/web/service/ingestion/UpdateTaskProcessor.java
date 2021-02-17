@@ -1,7 +1,7 @@
-package eu.europeana.entitymanagement.web.ingestion;
+package eu.europeana.entitymanagement.web.service.ingestion;
 
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
-import eu.europeana.entitymanagement.web.ingestion.model.UpdateTask;
+import eu.europeana.entitymanagement.web.model.ingestion.UpdateTask;
 
 public interface UpdateTaskProcessor {
 

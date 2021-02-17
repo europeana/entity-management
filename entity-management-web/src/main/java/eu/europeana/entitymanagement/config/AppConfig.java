@@ -11,7 +11,6 @@ import javax.validation.ValidatorFactory;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -19,6 +18,7 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import eu.europeana.api.commons.oauth2.service.impl.EuropeanaClientDetailsService;
+import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.common.config.LanguageCodes;
@@ -29,16 +29,9 @@ import eu.europeana.entitymanagement.common.config.LanguageCodes;
  *
  */
 @Configuration
-public class AppConfig {
+public class AppConfig extends AppConfigConstants{
 
     private static final Logger LOG = LogManager.getLogger(AppConfig.class);
-    
-    public static final String BEAN_EM_CONFIGURATION = "emConfiguration";
-    public static final String BEAN_EM_DATA_SOURCES = "emDataSources";
-    public static final String BEAN_EM_LANGUAGE_CODES = "emLanguageCodes";
-    public static final String BEAN_EM_VALIDATOR_FACTORY = "emValidatorFactory";
-    public static final String BEAN_EM_SCORING_SERVICE = "emScoringService";
-    public static final String BEAN_CLIENT_DETAILS_SERVICE = "clientDetailsService";
     
     @Resource(name=BEAN_EM_CONFIGURATION)
     private EntityManagementConfiguration emConfiguration;

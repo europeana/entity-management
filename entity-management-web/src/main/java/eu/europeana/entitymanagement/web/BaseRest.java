@@ -8,8 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import eu.europeana.api.commons.web.controller.BaseRestController;
 import eu.europeana.entitymanagement.common.config.BuildInfo;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.exception.EntityManagementRuntimeException;
 import eu.europeana.entitymanagement.serialization.EntityXmlSerializer;
 import eu.europeana.entitymanagement.serialization.JsonLdSerializer;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;

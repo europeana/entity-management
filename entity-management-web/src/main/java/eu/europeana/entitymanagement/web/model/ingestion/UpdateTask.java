@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.web.ingestion.model;
+package eu.europeana.entitymanagement.web.model.ingestion;
 
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 

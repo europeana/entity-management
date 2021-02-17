@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.web.ingestion;
+package eu.europeana.entitymanagement.web.service.ingestion;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -10,9 +10,9 @@ import eu.europeana.entitymanagement.definitions.model.impl.AggregationImpl;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
-import eu.europeana.entitymanagement.scoring.ScoringService;
-import eu.europeana.entitymanagement.scoring.model.EntityMetrics;
-import eu.europeana.entitymanagement.web.ingestion.model.UpdateTask;
+import eu.europeana.entitymanagement.web.model.ingestion.UpdateTask;
+import eu.europeana.entitymanagement.web.model.scoring.EntityMetrics;
+import eu.europeana.entitymanagement.web.service.ScoringService;
 
 public class UpdateTaskProcessorImpl implements UpdateTaskProcessor {
 

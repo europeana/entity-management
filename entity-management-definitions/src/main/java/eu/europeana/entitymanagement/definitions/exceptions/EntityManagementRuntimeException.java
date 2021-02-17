@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.exception;
+package eu.europeana.entitymanagement.definitions.exceptions;
 
 public class EntityManagementRuntimeException extends RuntimeException {
 

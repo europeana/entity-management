@@ -12,7 +12,6 @@ import javax.validation.ValidatorFactory;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.mongodb.client.model.ReturnDocument;
@@ -20,6 +19,7 @@ import com.mongodb.client.model.ReturnDocument;
 import dev.morphia.Datastore;
 import dev.morphia.ModifyOptions;
 import dev.morphia.query.experimental.updates.UpdateOperators;
+import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
@@ -27,12 +27,12 @@ import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
 /**
  * Repository for retrieving the EntityRecord objects.
  */
-@Repository
+@Repository(AppConfigConstants.BEAN_ENTITY_RECORD_REPO)
 public class EntityRecordRepository {
 
     private static final Logger logger = LogManager.getLogger(EntityRecordRepository.class);
 
-    @Autowired
+    @Resource(name=AppConfigConstants.BEAN_EM_DATA_STORE)
     private Datastore datastore;
     
 //    @Autowired

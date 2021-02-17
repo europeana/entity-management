@@ -13,10 +13,10 @@ import javax.annotation.Resource;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
@@ -27,15 +27,15 @@ import eu.europeana.entitymanagement.util.BaseEntityFactory;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.web.model.EntityCreationRequest;
 
-@Service
+@Service(AppConfig.BEAN_ENTITY_RECORD_SERVICE)
 public class EntityRecordService {
 
     Logger logger = LogManager.getLogger(getClass());
 
-    @Autowired
+    @Resource(name = AppConfig.BEAN_ENTITY_RECORD_REPO)
     private EntityRecordRepository entityRecordRepository;
 
-    @Resource(name = "emConfiguration")
+    @Resource(name = AppConfig.BEAN_EM_CONFIGURATION)
     EntityManagementConfiguration emConfiguration;
 
 //    private EMSettings emSettings;

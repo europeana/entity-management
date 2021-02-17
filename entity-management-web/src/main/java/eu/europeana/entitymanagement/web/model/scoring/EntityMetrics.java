@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.scoring.model;
+package eu.europeana.entitymanagement.web.model.scoring;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
