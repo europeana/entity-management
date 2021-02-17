@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.util;
+package eu.europeana.entitymanagement.config;
 
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;

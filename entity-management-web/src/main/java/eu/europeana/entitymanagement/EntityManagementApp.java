@@ -9,7 +9,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
 import eu.europeana.entitymanagement.common.config.SocksProxyConfig;
-import eu.europeana.entitymanagement.util.SocksProxyActivator;
+import eu.europeana.entitymanagement.config.SocksProxyActivator;
 
 /**
  * Main application. Allows deploying as a war and logs instance data when deployed in Cloud Foundry

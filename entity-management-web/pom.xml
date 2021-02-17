@@ -120,26 +120,6 @@
 
 		<dependency>
 			<groupId>eu.europeana.corelib</groupId>
-			<artifactId>corelib-schemaorg</artifactId>
-			<version>${version.corelib}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.mongodb.morphia</groupId>
-					<artifactId>morphia</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>eu.europeana.corelib</groupId>
-					<artifactId>corelib-storage</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.mongodb</groupId>
-					<artifactId>mongodb-driver-core</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<dependency>
-			<groupId>eu.europeana.corelib</groupId>
 			<artifactId>corelib-utils</artifactId>
 			<version>${version.corelib}</version>
 		</dependency>

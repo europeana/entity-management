@@ -1,8 +1,7 @@
-package eu.europeana.entitymanagement.web.serialization;
+package eu.europeana.entitymanagement.serialization;
 
 import java.io.IOException;
 
-import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.corelib.edm.model.schemaorg.ContextualEntity;
 import eu.europeana.corelib.edm.utils.JsonLdSerializer;
 import eu.europeana.corelib.edm.utils.SchemaOrgTypeFactory;
@@ -32,7 +31,7 @@ public class EntitySchemaOrgSerializer extends JsonLdSerializer {
 	 * @throws UnsupportedEntityTypeException
 	 */
 	public String serializeEntity(Entity entity) 
-		throws HttpException, UnsupportedEntityTypeException {
+		throws UnsupportedEntityTypeException {
 	    
 	        String jsonLd;
 	        ContextualEntity thingObject = SchemaOrgTypeFactory.createContextualEntity(entity);

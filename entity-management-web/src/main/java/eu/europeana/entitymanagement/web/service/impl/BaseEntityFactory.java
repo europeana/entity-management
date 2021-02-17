@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.util;
+package eu.europeana.entitymanagement.web.service.impl;
 
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Concept;
