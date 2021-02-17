@@ -4,7 +4,6 @@ import javax.annotation.Resource;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.stereotype.Component;
 
@@ -13,8 +12,9 @@ import eu.europeana.api.commons.oauth2.service.impl.EuropeanaClientDetailsServic
 import eu.europeana.api.commons.service.authorization.BaseAuthorizationService;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfigurationImpl;
+import eu.europeana.entitymanagement.config.AppConfig;
 
-@Component("emAuthorizationService")
+@Component(AppConfig.BEAN_AUTHORIZATION_SERVICE)
 public class AuthorizationServiceImpl extends BaseAuthorizationService implements AuthorizationService {
 
     protected final Logger logger = LogManager.getLogger(getClass());

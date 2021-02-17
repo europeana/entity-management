@@ -4,10 +4,10 @@ package eu.europeana.entitymanagement.web;
 import java.util.Date;
 import java.util.Optional;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +26,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.entitymanagement.common.config.DataSources;
+import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
@@ -50,16 +51,16 @@ public class EMController extends BaseRest {
 	
     public static final String BASE_URI_DATA = "http://data.europeana.eu/";
 
-    @Autowired
+    @Resource(name=AppConfig.BEAN_ENTITY_RECORD_SERVICE)
     private EntityRecordService entityRecordService;
     
-    @Autowired
+    @Resource(name=AppConfig.BEAN_ENTITY_RECORD_REPO)
     private EntityRecordRepository entityRecordRepository;
 
-    @Autowired
+    @Resource(name=AppConfig.BEAN_METIS_DEREF_SERVICE)
     private MetisDereferenceService dereferenceService;
 
-    @Autowired
+    @Resource(name=AppConfig.BEAN_EM_DATA_SOURCES)
     private DataSources datasources;
     
     @ApiOperation(value = "Delete an entity", nickname = "deleteEntity", response = java.lang.Void.class)
@@ -112,9 +113,9 @@ public class EMController extends BaseRest {
 	}
 
 
-    @ApiOperation(value = "Create a new entity", nickname = "createEntity", response = java.lang.Void.class)
+    @ApiOperation(value = "Register a new entity", nickname = "registerEntity", response = java.lang.Void.class)
     @PostMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<EntityRecord> createEntity(@RequestBody EntityCreationRequest entityCreationRequest) {
+    public ResponseEntity<EntityRecord> registerEntity(@RequestBody EntityCreationRequest entityCreationRequest) {
         // check if id is already being used, if so return a 301
         Optional<EntityRecord> existingEntity = entityRecordService.retrieveEntityRecordByUri(entityCreationRequest.getId());
         if (existingEntity.isPresent()) {

@@ -19,7 +19,7 @@ import eu.europeana.entitymanagement.web.model.metis.EnrichmentResultList;
 /**
  * Handles de-referencing entities from Metis.
  */
-@Service
+@Service(AppConfig.BEAN_METIS_DEREF_SERVICE)
 public class MetisDereferenceService {
     private static final Logger logger = LogManager.getLogger(MetisDereferenceService.class);
 

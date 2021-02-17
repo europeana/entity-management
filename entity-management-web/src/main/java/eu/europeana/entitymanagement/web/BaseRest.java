@@ -4,10 +4,11 @@ import javax.annotation.Resource;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import eu.europeana.api.commons.web.controller.BaseRestController;
+import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.BuildInfo;
+import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.serialization.EntityXmlSerializer;
@@ -19,16 +20,16 @@ import eu.europeana.entitymanagement.web.service.authorization.AuthorizationServ
 
 public abstract class BaseRest extends BaseRestController {
 
-    @Resource(name="emAuthorizationService")
+    @Resource(name=AppConfig.BEAN_AUTHORIZATION_SERVICE)
     AuthorizationServiceImpl emAuthorizationService;
 
-    @Resource(name="emBuildInfo")
+    @Resource(name=AppConfig.BEAN_EM_BUILD_INFO)
     BuildInfo emBuildInfo;
     
-    @Autowired
+    @Resource(name=AppConfigConstants.BEAN_EM_XML_SERIALIZER)
     EntityXmlSerializer entityXmlSerializer;
     
-    @Autowired
+    @Resource(name=AppConfigConstants.BEAN_EM_JSONLD_SERIALIZER)
     JsonLdSerializer jsonLdSerializer;
 
     Logger logger = LogManager.getLogger(getClass());
