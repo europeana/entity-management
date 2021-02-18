@@ -1,7 +1,6 @@
 package eu.europeana.entitymanagement.definitions.model;
 
 import java.lang.reflect.Field;
-import java.util.Date;
 import java.util.Map;
 
 import dev.morphia.annotations.Embedded;
@@ -42,20 +41,6 @@ public interface Entity extends ContextualClass {
 	 */
 	public Map<String, String> getPrefLabelStringMap();
 	
-	/**
-	 * @return
-	 */
-	Date getCreated();
-
-	void setCreated(Date created);
-
-	/**
-	 * @return
-	 */
-	Date getModified();
-
-	void setModified(Date modified);
-	
 	WebResource getReferencedWebResource();
 	
 	String getIsShownBy();
@@ -65,5 +50,9 @@ public interface Entity extends ContextualClass {
 	Object getFieldValue (Field field) throws IllegalArgumentException, IllegalAccessException;
 	
 	void setFieldValue (Field field, Object value) throws IllegalArgumentException, IllegalAccessException;
+
+	void setIsAggregatedBy(Aggregation isAggregatedBy);
+
+	Aggregation getIsAggregatedBy();
 
 }

@@ -13,7 +13,7 @@ import javax.xml.bind.Unmarshaller;
 
 import org.junit.jupiter.api.Test;
 
-import eu.europeana.entitymanagement.definitions.model.impl.BaseConcept;
+import eu.europeana.entitymanagement.definitions.model.impl.ConceptImpl;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
 
 class MetisResponseDeserializerTest {
@@ -33,7 +33,7 @@ class MetisResponseDeserializerTest {
 
         // get unmarshalled object
         BaseEntity entity = resultList.getEnrichmentBaseResultWrapperList().get(0).getEnrichmentBaseList().get(0);
-        assertTrue(entity instanceof BaseConcept);
+        assertTrue(entity instanceof ConceptImpl);
 
         // value should match rdf:About in xml file
         assertEquals("http://www.wikidata.org/entity/Q152095", entity.getAbout());

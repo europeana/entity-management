@@ -11,11 +11,11 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import eu.europeana.entitymanagement.definitions.model.impl.BaseAgent;
-import eu.europeana.entitymanagement.definitions.model.impl.BaseConcept;
+import eu.europeana.entitymanagement.definitions.model.impl.AgentImpl;
+import eu.europeana.entitymanagement.definitions.model.impl.ConceptImpl;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
-import eu.europeana.entitymanagement.definitions.model.impl.BasePlace;
-import eu.europeana.entitymanagement.definitions.model.impl.BaseTimespan;
+import eu.europeana.entitymanagement.definitions.model.impl.PlaceImpl;
+import eu.europeana.entitymanagement.definitions.model.impl.TimespanImpl;
 
 /**
  * Root element for Metis de-reference response
@@ -25,10 +25,10 @@ import eu.europeana.entitymanagement.definitions.model.impl.BaseTimespan;
 public class EnrichmentResultBaseWrapper {
 
     @XmlElements(value = {
-            @XmlElement(name = "Concept", namespace = "http://www.w3.org/2004/02/skos/core#", type = BaseConcept.class),
-            @XmlElement(name = "Agent", namespace = "http://www.europeana.eu/schemas/edm/", type = BaseAgent.class),
-            @XmlElement(name = "Place", namespace = "http://www.europeana.eu/schemas/edm/", type = BasePlace.class),
-            @XmlElement(name = "Timespan", namespace = "http://www.europeana.eu/schemas/edm/", type = BaseTimespan.class)})
+            @XmlElement(name = "Concept", namespace = "http://www.w3.org/2004/02/skos/core#", type = ConceptImpl.class),
+            @XmlElement(name = "Agent", namespace = "http://www.europeana.eu/schemas/edm/", type = AgentImpl.class),
+            @XmlElement(name = "Place", namespace = "http://www.europeana.eu/schemas/edm/", type = PlaceImpl.class),
+            @XmlElement(name = "Timespan", namespace = "http://www.europeana.eu/schemas/edm/", type = TimespanImpl.class)})
     private List<BaseEntity> xmlEntities = new ArrayList<>();
 
 

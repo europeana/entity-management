@@ -2,7 +2,6 @@ package eu.europeana.entitymanagement.definitions.model.impl;
 
 import java.lang.reflect.Field;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,18 +16,19 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
+import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
-import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityFields;
-import eu.europeana.entitymanagement.definitions.model.vocabulary.XmlFields;
 import eu.europeana.entitymanagement.normalization.ValidEntityFields;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
+import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 /*
  * TODO: Define the Jackson annotations, both xml and json, in one place, meaning in this class here and the corresponding extended classes 
  */
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @ValidEntityFields(groups = {Default.class})
-public class BaseEntity implements Entity {
+public abstract class BaseEntity implements Entity {
 	
 	protected String TMP_KEY = "def";
 	protected String internalType;
@@ -51,11 +51,11 @@ public class BaseEntity implements Entity {
 	protected String[] isPartOf;
 
 	// The time at which the Set was created by the user. 
-	protected Date created;
+//	protected Date created;
 
 	// The time at which the Set was modified, after creation. 
-	protected Date modified;
-	
+//	protected Date modified;
+	private Aggregation isAggregatedBy;
 	protected WebResource referencedWebResource;
 
 	@Override
@@ -294,28 +294,7 @@ public class BaseEntity implements Entity {
 		String[] splitArray = this.getAbout().split("/");
 		return splitArray[splitArray.length-1];
 	}
-
 	
-	@Override
-	public Date getCreated() {
-		return created;
-	}
-
-	@Override
-	public void setCreated(Date created) {
-		this.created = created;
-	}
-
-	@Override
-	public Date getModified() {
-		return modified;
-	}
-
-	@Override
-	public void setModified(Date modified) {
-		this.modified = modified;
-	}
-
 	@Override
 	@JsonProperty(WebEntityFields.IS_SHOWN_BY)
 	@JacksonXmlProperty(localName = XmlFields.XML_EDM_IS_SHOWN_BY)
@@ -349,6 +328,20 @@ public class BaseEntity implements Entity {
 	public void setFieldValue(Field field, Object value) throws IllegalArgumentException, IllegalAccessException {
 		//TODO:in case of the performance overhead cause by using the reflecion code, change this method to call the setter for each field individually
 		field.set(this, value);
+	}
+
+	
+	 
+	@Override    
+	@JsonProperty(WebEntityFields.IS_AGGREGATED_BY)
+	@JacksonXmlProperty(localName = XmlFields.XML_ORE_IS_AGGREGATED_BY)
+	public Aggregation getIsAggregatedBy() {
+	    return isAggregatedBy;
+	}
+
+	@Override
+	public void setIsAggregatedBy(Aggregation isAggregatedBy) {
+	    this.isAggregatedBy = isAggregatedBy;
 	}
 
 }

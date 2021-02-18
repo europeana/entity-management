@@ -9,15 +9,15 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import eu.europeana.entitymanagement.definitions.model.Aggregation;
+import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
+import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
-import eu.europeana.entitymanagement.exception.EntityManagementRuntimeException;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 
-@Component
+@Component(AppConfigConstants.BEAN_EM_JSONLD_SERIALIZER)
 public class JsonLdSerializer {
 
     ObjectMapper mapper;
@@ -52,29 +52,30 @@ public class JsonLdSerializer {
 
     private String serializeExternal(EntityRecord record) throws EntityManagementRuntimeException {
 	try {
-		Aggregation tmpAggregation=record.getIsAggregatedBy();
-		List<EntityProxy> proxies=record.getProxies();
-		record.setIsAggregatedBy(null);
-		record.setProxies(null);
-				
-		StringBuilder builder = new StringBuilder();
-		builder.append("{");
-		builder.append("\"entityRecord\":");
-		builder.append(mapper.writeValueAsString(record));    		
-
-	    //adding the referenced web resource
-	    WebResource additionalElementsToSerialize = record.getEntity().getReferencedWebResource();
-		if (additionalElementsToSerialize!=null)
-		{
-	    	builder.append(",");
-	    	builder.append("\"webResource\":");
-			builder.append(mapper.writeValueAsString(additionalElementsToSerialize));
-		}
-		builder.append("}");
-	    
-		record.setIsAggregatedBy(tmpAggregation);
-		record.setProxies(proxies);
-	    return builder.toString();
+	    return mapper.writeValueAsString(record.getEntity());
+//		Aggregation tmpAggregation=record.getIsAggregatedBy();
+//		List<EntityProxy> proxies=record.getProxies();
+//		record.setIsAggregatedBy(null);
+//		record.setProxies(null);
+//				
+//		StringBuilder builder = new StringBuilder();
+//		builder.append("{");
+//		builder.append("\"entityRecord\":");
+//		builder.append(mapper.writeValueAsString(record));    		
+//
+//	    //adding the referenced web resource
+//	    WebResource additionalElementsToSerialize = record.getEntity().getReferencedWebResource();
+//		if (additionalElementsToSerialize!=null)
+//		{
+//	    	builder.append(",");
+//	    	builder.append("\"webResource\":");
+//			builder.append(mapper.writeValueAsString(additionalElementsToSerialize));
+//		}
+//		builder.append("}");
+//	    
+//		record.setIsAggregatedBy(tmpAggregation);
+//		record.setProxies(proxies);
+//	    return builder.toString();
 	    
 	} catch (JsonProcessingException e) {
 	    throw new EntityManagementRuntimeException("Unexpected exception occured when serializing entity to external format!",e);

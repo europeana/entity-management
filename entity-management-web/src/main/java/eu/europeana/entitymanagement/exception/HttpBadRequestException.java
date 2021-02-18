@@ -11,6 +11,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class HttpBadRequestException extends EuropeanaApiException {
 
     /**
+     * 
+     */
+    private static final long serialVersionUID = -4536642651964523519L;
+
+    /**
      * Initialise a new exception for which there is no root cause
      *
      * @param msg error message

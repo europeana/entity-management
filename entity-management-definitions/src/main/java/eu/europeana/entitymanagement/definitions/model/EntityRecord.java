@@ -4,16 +4,22 @@ import java.util.List;
 
 public interface EntityRecord {
 
+    @Deprecated
+    /**
+     * should be moved to a different interface
+     * @param dbId
+     */
     void setDbId(long dbId);
+    @Deprecated
+    /**
+     * should be moved to a different interface
+     * @param dbId
+     */
     long getDbId();
 
     void setProxies(List<EntityProxy> proxies);
 
     List<EntityProxy> getProxies();
-
-    void setIsAggregatedBy(Aggregation isAggregatedBy);
-
-    Aggregation getIsAggregatedBy();
 
     void setEntityId(String entityId);
 

@@ -2,6 +2,8 @@ package eu.europeana.entitymanagement.config;
 
 import org.junit.jupiter.api.Test;
 
+import eu.europeana.entitymanagement.common.config.SocksProxyConfig;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**

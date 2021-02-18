@@ -4,7 +4,7 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 
-import eu.europeana.entitymanagement.definitions.model.vocabulary.WebEntityConstants;
+import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 
 public class EntityUtils {
 

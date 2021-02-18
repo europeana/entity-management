@@ -1,6 +1,8 @@
 package eu.europeana.entitymanagement.util;
 
-import eu.europeana.entitymanagement.config.SocksProxyConfig;
+import eu.europeana.entitymanagement.common.config.SocksProxyConfig;
+import eu.europeana.entitymanagement.config.SocksProxyActivator;
+
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;

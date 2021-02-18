@@ -1,28 +1,35 @@
 package eu.europeana.entitymanagement.web;
 
+import javax.annotation.Resource;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import eu.europeana.api.commons.web.controller.BaseRestController;
-import eu.europeana.entitymanagement.definitions.formats.FormatTypes;
+import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.common.config.BuildInfo;
+import eu.europeana.entitymanagement.config.AppConfig;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.exception.EntityManagementRuntimeException;
 import eu.europeana.entitymanagement.serialization.EntityXmlSerializer;
 import eu.europeana.entitymanagement.serialization.JsonLdSerializer;
+import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.web.service.authorization.AuthorizationService;
 import eu.europeana.entitymanagement.web.service.authorization.AuthorizationServiceImpl;
 
 
 public abstract class BaseRest extends BaseRestController {
 
-    @Autowired
-    AuthorizationServiceImpl authorizationService;
+    @Resource(name=AppConfig.BEAN_AUTHORIZATION_SERVICE)
+    AuthorizationServiceImpl emAuthorizationService;
 
-    @Autowired
+    @Resource(name=AppConfig.BEAN_EM_BUILD_INFO)
+    BuildInfo emBuildInfo;
+    
+    @Resource(name=AppConfigConstants.BEAN_EM_XML_SERIALIZER)
     EntityXmlSerializer entityXmlSerializer;
     
-    @Autowired
+    @Resource(name=AppConfigConstants.BEAN_EM_JSONLD_SERIALIZER)
     JsonLdSerializer jsonLdSerializer;
 
     Logger logger = LogManager.getLogger(getClass());
@@ -32,7 +39,7 @@ public abstract class BaseRest extends BaseRestController {
     }
 
     public AuthorizationService getAuthorizationService() {
-	return authorizationService;
+	return emAuthorizationService;
     }
 
     public Logger getLogger() {
@@ -47,7 +54,7 @@ public abstract class BaseRest extends BaseRestController {
 //    }
 
     public String getApiVersion() {
-	return getAuthorizationService().getConfiguration().getApiVersion();
+	return emBuildInfo.getAppVersion();
     }
 
     /**
