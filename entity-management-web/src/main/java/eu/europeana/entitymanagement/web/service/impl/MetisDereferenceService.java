@@ -14,7 +14,8 @@ import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
-import eu.europeana.entitymanagement.web.model.metis.EnrichmentResultList;
+import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
+import eu.europeana.entitymanagement.web.xml.model.metis.EnrichmentResultList;
 
 /**
  * Handles de-referencing entities from Metis.
@@ -69,7 +70,7 @@ public class MetisDereferenceService {
         }
 
         // see test/resources/metis-deref/response.xml for XML structure of metis response.
-        BaseEntity xmlBaseEntity = metisResponse
+        XmlBaseEntityImpl xmlBaseEntity = metisResponse
                 .getEnrichmentBaseResultWrapperList()
                 .get(0)
                 .getEnrichmentBaseList()
@@ -77,7 +78,7 @@ public class MetisDereferenceService {
 
         logger.info("Metis dereference response for entity {}: {} ", id, xmlBaseEntity);
 
-        return xmlBaseEntity;
+        return null;
     }
     
 //    @Bean
