@@ -1,18 +1,29 @@
 package eu.europeana.entitymanagement.service;
 
+import static org.junit.Assert.assertNotNull;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+
+import eu.europeana.entitymanagement.definitions.model.impl.BaseAgent;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseTimespan;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseWebResource;
-import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
 import eu.europeana.entitymanagement.web.service.impl.MetisDereferenceService;
 
@@ -22,6 +33,23 @@ import eu.europeana.entitymanagement.web.service.impl.MetisDereferenceService;
 public class EntityRecordServiceTest {
 
 	private static final Logger logger = LogManager.getLogger(MetisDereferenceService.class);
+	
+	@Test void mergeEntitiesFromXml() {
+		XmlMapper xmlMapper = new XmlMapper();
+    	try (InputStream inputStream = getClass().getResourceAsStream("/entityAPI-output-xmls/agents.xml");
+		    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {    		    
+		    String contents = reader.lines()
+		      .collect(Collectors.joining(System.lineSeparator()));
+		    BaseAgent agent = xmlMapper.readValue(contents, BaseAgent.class);
+		    assertNotNull(agent);
+		} catch (JsonMappingException e) {
+			logger.error("Exeption occured: ",e);
+		} catch (JsonProcessingException e) {
+			logger.error("Exeption occured: ",e);
+		} catch (IOException e) {
+			logger.error("Exeption occured: ",e);
+		}
+	}
 	
 	@Test
 	public void mergeEntities() {

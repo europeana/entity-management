@@ -1,7 +1,8 @@
 package eu.europeana.entitymanagement.definitions.model.impl;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 import eu.europeana.entitymanagement.definitions.model.WebResource;
@@ -16,47 +17,51 @@ public class BaseWebResource implements WebResource{
 	String thumbnail;
 	String type;
 
-	@JsonProperty(WebEntityFields.ID)
+	@JsonGetter(WebEntityFields.ID)
 	@JacksonXmlProperty(isAttribute= true, localName = XmlFields.XML_RDF_ABOUT)
 	public String getId() {
 		return id;
 	}
 	
-	@JsonProperty(WebEntityFields.SOURCE)
+	@JsonGetter(WebEntityFields.SOURCE)
 	@JacksonXmlProperty(localName = XmlFields.XML_DC_SOURCE)
 	public String getSource() {
 		return source;
 	}
 	
-	@JsonProperty(WebEntityFields.THUMBNAIL)
+	@JsonGetter(WebEntityFields.THUMBNAIL)
 	@JacksonXmlProperty(localName = XmlFields.XML_FOAF_THUMBNAIL)
 	public String getThumbnail() {
 		return thumbnail;
 	}
 	
 	@Override
-	@JsonProperty(WebEntityFields.TYPE)
+	@JsonGetter(WebEntityFields.TYPE)
 	@JacksonXmlProperty(localName = XmlFields.XML_RDF_TYPE)
 	public String getType() {
 		return type;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.THUMBNAIL)
 	public void setThumbnail(String thumbnailParam) {
 		thumbnail=thumbnailParam;		
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.SOURCE)
 	public void setSource(String sourceParam) {
 		source=sourceParam;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.TYPE)
 	public void setType(String typeParam) {
 		type=typeParam;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.ID)
 	public void setId(String idParam) {
 		id=idParam;
 	}

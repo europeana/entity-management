@@ -2,9 +2,10 @@ package eu.europeana.entitymanagement.definitions.model.impl;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
@@ -40,49 +41,53 @@ public class BaseEntityRecord implements EntityRecord{
     
 
     @Override
-    @JsonProperty
+    @JsonGetter
     @JacksonXmlProperty
     public Entity getEntity() {
         return entity;
     }
 
     @Override
+    @JsonSetter
     public void setEntity(Entity entity) {
         this.entity = entity;
     }
 
     @Override
-    @JsonProperty(WebEntityFields.ID)
+    @JsonGetter(WebEntityFields.ID)
     @JacksonXmlProperty(isAttribute= true, localName = XmlFields.XML_RDF_ABOUT)
     public String getEntityId() {
         return entityId;
     }
 
     @Override
+    @JsonSetter(WebEntityFields.ID)
     public void setEntityId(String entityId) {
         this.entityId = entityId;
     }
 
     @Override
-    @JsonProperty(WebEntityFields.IS_AGGREGATED_BY)
+    @JsonGetter(WebEntityFields.IS_AGGREGATED_BY)
     @JacksonXmlProperty(localName = XmlFields.XML_ORE_IS_AGGREGATED_BY)
     public Aggregation getIsAggregatedBy() {
         return isAggregatedBy;
     }
 
     @Override
+    @JsonSetter(WebEntityFields.IS_AGGREGATED_BY)
     public void setIsAggregatedBy(Aggregation isAggregatedBy) {
         this.isAggregatedBy = isAggregatedBy;
     }
 
     @Override
-    @JsonProperty
+    @JsonGetter
     @JacksonXmlElementWrapper(useWrapping=false)
     public List<EntityProxy> getProxies() {
         return proxies;
     }
 
     @Override
+    @JsonSetter
     public void setProxies(List<EntityProxy> proxies) {
         this.proxies = proxies;
     }

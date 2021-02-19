@@ -6,8 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
@@ -51,61 +52,66 @@ public class BaseOrganization extends BaseEntity
 	private Address address;
 	
 	@Override
-	@JsonProperty(WebEntityFields.DESCRIPTION)
+	@JsonGetter(WebEntityFields.DESCRIPTION)
 	@JacksonXmlProperty(localName = XmlFields.XML_DC_DESCRIPTION)
 	public Map<String, String> getDescription() {
 		return description;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.DESCRIPTION)
 	public void setDescription(Map<String, String> dcDescription) {
 	    	this.description = dcDescription;
 	}
 	
 	@Override
-	@JsonProperty(WebEntityFields.ACRONYM)
+	@JsonGetter(WebEntityFields.ACRONYM)
 	@JacksonXmlProperty(localName = XmlFields.XML_EDM_ACRONYM)
 	public Map<String, List<String>> getAcronym() {
 		return acronym;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.ACRONYM)
 	public void setAcronym(Map<String, List<String>> acronym) {
 	    	this.acronym = acronym;
 	}
 	
 	@Override
-	@JsonProperty(WebEntityFields.EUROPEANA_ROLE)
+	@JsonGetter(WebEntityFields.EUROPEANA_ROLE)
 	@JacksonXmlProperty(localName = XmlFields.XML_EDM_EUROPEANA_ROLE)
 	public Map<String, List<String>> getEuropeanaRole() {
 		return europeanaRole;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.EUROPEANA_ROLE)
 	public void setEuropeanaRole(Map<String, List<String>> europeanaRole) {
 	    	this.europeanaRole = europeanaRole;
 	}
 	
 	@Override
-	@JsonProperty(WebEntityFields.FOAF_PHONE)
+	@JsonGetter(WebEntityFields.FOAF_PHONE)
 	@JacksonXmlProperty(localName = XmlFields.XML_FOAF_PHONE)
 	public List<String> getPhone() {
 		return phone;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.FOAF_PHONE)
 	public void setPhone(List<String> phone) {
 		this.phone = phone;
 	}
 
 	@Override
-	@JsonProperty(WebEntityFields.FOAF_MBOX)
+	@JsonGetter(WebEntityFields.FOAF_MBOX)
 	@JacksonXmlProperty(localName = XmlFields.XML_FOAF_MBOX)
 	public List<String> getMbox() {
 		return mbox;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.FOAF_MBOX)
 	public void setMbox(List<String> mbox) {
 		this.mbox = mbox;
 	}
@@ -113,12 +119,13 @@ public class BaseOrganization extends BaseEntity
 	@Override
 	@JacksonXmlElementWrapper(localName = XmlFields.XML_VCARD_HAS_ADDRESS)
 	@JacksonXmlProperty(localName = XmlFields.XML_VCARD_ADDRESS)
-	@JsonProperty(WebEntityFields.ADDRESS_TYPE)
+	@JsonGetter(WebEntityFields.ADDRESS_TYPE)
 	public String getHasAddress() {
 		return hasAddress;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.ADDRESS_TYPE)
 	public void setHasAddress(String hasAddress) {
 		this.hasAddress = hasAddress;
 	}
@@ -174,13 +181,14 @@ public class BaseOrganization extends BaseEntity
 	}
 
 	@Override
-	@JsonProperty(WebEntityFields.COUNTRY)
+	@JsonGetter(WebEntityFields.COUNTRY)
 	@JacksonXmlProperty(localName = XmlFields.XML_EDM_COUNTRY)
 	public String getCountry() {
 		return country;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.COUNTRY)
 	public void setCountry(String country) {
 		this.country = country;
 	}
@@ -196,50 +204,53 @@ public class BaseOrganization extends BaseEntity
 	}
 
 	@Override
-	@JsonProperty(WebEntityFields.GEOGRAPHIC_LEVEL)
+	@JsonGetter(WebEntityFields.GEOGRAPHIC_LEVEL)
 	@JacksonXmlProperty(localName = XmlFields.XML_EDM_GEOGRAPHIC_LEVEL)
 	public Map<String, String> getGeographicLevel() {
 		return geographicLevel;
 	}
-
+	
 	@Override
-	@Deprecated
+	@JsonSetter(WebEntityFields.GEOGRAPHIC_LEVEL)
 	public void setGeographicLevel(Map<String, String> geographicLevel) {
 		this.geographicLevel = geographicLevel;
 	}
 
 	@Override
-	@JsonProperty(WebEntityFields.ORGANIZATION_DOMAIN)
+	@JsonGetter(WebEntityFields.ORGANIZATION_DOMAIN)
 	@JacksonXmlProperty(localName = XmlFields.XML_EDM_ORGANIZATION_DOMAIN)
 	public Map<String, List<String>> getOrganizationDomain() {
 		return organizationDomain;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.ORGANIZATION_DOMAIN)
 	public void setOrganizationDomain(Map<String, List<String>> organizationDomain) {
 		this.organizationDomain = organizationDomain;
 	}
 
 	@Override
-	@JsonProperty(WebEntityFields.FOAF_HOMEPAGE)
+	@JsonGetter(WebEntityFields.FOAF_HOMEPAGE)
 	@JacksonXmlProperty(localName = XmlFields.XML_FOAF_HOMEPAGE)
 	public String getHomepage() {
 		return homepage;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.FOAF_HOMEPAGE)
 	public void setHomepage(String homepage) {
 		this.homepage = homepage;
 	}
 
 	@Override
-	@JsonProperty(WebEntityFields.FOAF_LOGO)
+	@JsonGetter(WebEntityFields.FOAF_LOGO)
 	@JacksonXmlProperty(localName = XmlFields.XML_FOAF_LOGO)
 	public String getLogo() {
 		return logo;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.FOAF_LOGO)
 	public void setLogo(String logo) {
 		this.logo = logo;
 	}
@@ -451,7 +462,7 @@ public class BaseOrganization extends BaseEntity
 
 	@Override
 	
-	@JsonProperty(WebEntityFields.IDENTIFIER)
+	@JsonGetter(WebEntityFields.IDENTIFIER)
 	@JacksonXmlProperty(localName = XmlFields.XML_DC_IDENTIFIER)
 	public Map<String, List<String>> getDcIdentifier() {
 		//if not available
