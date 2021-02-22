@@ -1,20 +1,28 @@
 package eu.europeana.entitymanagement.batch.repository;
 
+import com.mongodb.client.result.UpdateResult;
 import dev.morphia.Datastore;
+import dev.morphia.query.FindOptions;
 import dev.morphia.query.experimental.updates.UpdateOperators;
 import eu.europeana.entitymanagement.batch.entity.JobExecutionEntity;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.repository.dao.JobExecutionDao;
 import org.springframework.batch.core.repository.dao.NoSuchObjectException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import static dev.morphia.query.Sort.descending;
 import static dev.morphia.query.experimental.filters.Filters.eq;
+import static dev.morphia.query.experimental.filters.Filters.in;
 import static eu.europeana.entitymanagement.batch.BatchConstants.*;
 
 @Repository
@@ -23,87 +31,135 @@ public class JobExecutionRepository extends AbstractRepository implements JobExe
     @Autowired
     private Datastore datastore;
 
+    private final FindOptions DESCENDING_JOB_EXECUTION = new FindOptions()
+            .sort(descending(JOB_EXECUTION_ID_KEY));
+
 
     @Override
     public void saveJobExecution(JobExecution jobExecution) {
         validateJobExecution(jobExecution);
         jobExecution.incrementVersion();
+        jobExecution.setId(generateSequence(JobExecutionEntity.class.getSimpleName()));
 
-        long id = generateSequence(JobExecution.class.getSimpleName());
-        save(jobExecution, id);
-    }
-
-    private void save(JobExecution jobExecution, long id) {
-        jobExecution.setId(id);
         JobExecutionEntity jobExecutionEntity = JobExecutionEntity.toEntity(jobExecution);
         getDataStore().save(jobExecutionEntity);
     }
 
 
-    private JobExecutionEntity findJobExecutionEntity(long jobExecutionId) {
-        return getDataStore().find(JobExecutionEntity.class)
-                .filter(eq(JOB_EXECUTION_ID_KEY, jobExecutionId))
-                .first();
-    }
-
+    /**
+     * Update given JobExecution. The JobExecution
+     * is first checked to ensure all fields are not null, and that it has an
+     * ID. The database is then queried to ensure that the ID exists, which
+     * ensures that it is valid.
+     *
+     * @see JobExecutionDao#updateJobExecution(JobExecution)
+     */
     @Override
-    public synchronized void updateJobExecution(JobExecution jobExecution) {
+    public void updateJobExecution(JobExecution jobExecution) {
         validateJobExecution(jobExecution);
 
         Long jobExecutionId = jobExecution.getId();
         Assert.notNull(jobExecutionId, "JobExecution ID cannot be null. JobExecution must be saved before it can be updated");
         Assert.notNull(jobExecution.getVersion(), "JobExecution version cannot be null. JobExecution must be saved before it can be updated");
 
-        int nextVersion = jobExecution.getVersion() + 1;
+        synchronized (jobExecution) {
+            int nextVersion = jobExecution.getVersion() + 1;
 
-        if (findJobExecutionEntity(jobExecutionId) == null) {
-            throw new NoSuchObjectException(String.format("Invalid JobExecution, ID %s not found.", jobExecutionId));
+            // Check if given JobExecution's Id already exists, if none is found
+            // it is invalid and
+            // an exception should be thrown.
+            if (getJobExecutionWithId(jobExecutionId) == null) {
+                throw new NoSuchObjectException("Invalid JobExecution, ID " + jobExecution.getId() + " not found.");
+            }
+
+            UpdateResult result = getDataStore().find(JobExecutionEntity.class)
+                    .filter(
+                            eq(JOB_EXECUTION_ID_KEY, jobExecutionId),
+                            eq(VERSION_KEY, jobExecution.getVersion())
+                    )
+                    .update(
+                            UpdateOperators.set(JOB_EXECUTION_ID_KEY, jobExecutionId),
+                            UpdateOperators.set(VERSION_KEY, nextVersion),
+                            UpdateOperators.set(JOB_INSTANCE_ID_KEY, jobExecution.getJobInstance()),
+                            UpdateOperators.set(START_TIME_KEY, jobExecution.getStartTime()),
+                            UpdateOperators.set(END_TIME_KEY, jobExecution.getEndTime()),
+                            UpdateOperators.set(STATUS_KEY, jobExecution.getStatus().toString()),
+                            UpdateOperators.set(EXIT_CODE_KEY, jobExecution.getExitStatus().getExitCode()),
+                            UpdateOperators.set(EXIT_MESSAGE_KEY, jobExecution.getExitStatus().getExitDescription()),
+                            UpdateOperators.set(CREATE_TIME_KEY, jobExecution.getCreateTime()),
+                            UpdateOperators.set(LAST_UPDATED_KEY, jobExecution.getLastUpdated())
+                    ).execute();
+
+            // Avoid concurrent modifications
+            if (result.getModifiedCount() == 0) {
+                int currentVersion = getJobExecutionVersion(jobExecutionId);
+                throw new OptimisticLockingFailureException("Attempt to update job execution id="
+                        + jobExecution.getId() + " with wrong version (" + jobExecution.getVersion()
+                        + "), where current version is " + currentVersion);
+            }
         }
-
-        getDataStore().find(JobExecutionEntity.class)
-                .filter(
-                        eq(JOB_EXECUTION_ID_KEY, jobExecutionId),
-                        eq(VERSION_KEY, jobExecution.getVersion())
-                )
-                .update(
-                        UpdateOperators.set(JOB_EXECUTION_ID_KEY, jobExecutionId),
-                        UpdateOperators.set(VERSION_KEY, nextVersion),
-                        UpdateOperators.set(JOB_INSTANCE_ID_KEY, jobExecution.getJobInstance()),
-                        UpdateOperators.set(START_TIME_KEY, jobExecution.getStartTime()),
-                        UpdateOperators.set(END_TIME_KEY, jobExecution.getEndTime()),
-                        UpdateOperators.set(STATUS_KEY, jobExecution.getStatus().toString()),
-                        UpdateOperators.set(EXIT_CODE_KEY, jobExecution.getExitStatus().getExitCode()),
-                        UpdateOperators.set(EXIT_MESSAGE_KEY, jobExecution.getExitStatus().getExitDescription()),
-                        UpdateOperators.set(CREATE_TIME_KEY, jobExecution.getCreateTime()),
-                        UpdateOperators.set(LAST_UPDATED_KEY, jobExecution.getLastUpdated())
-                ).execute();
     }
 
     @Override
-    public List<JobExecution> findJobExecutions(JobInstance jobInstance) {
-        return null;
+    public List<JobExecution> findJobExecutions(final JobInstance job) {
+        Assert.notNull(job, "Job cannot be null.");
+        Assert.notNull(job.getId(), "Job Id cannot be null.");
+
+        return getJobExecutions(job.getId()).stream()
+                .map(JobExecutionEntity::fromEntity).collect(Collectors.toList());
     }
 
+    @Nullable
     @Override
     public JobExecution getLastJobExecution(JobInstance jobInstance) {
-        return null;
+        long id = jobInstance.getId();
+        JobExecutionEntity executionEntity = getLastJobExecutionForInstance(id);
+
+        if (executionEntity == null) {
+            return null;
+        }
+
+        return JobExecutionEntity.fromEntity(executionEntity);
+
     }
+
 
     @Override
-    public Set<JobExecution> findRunningJobExecutions(String s) {
-        return null;
+    public Set<JobExecution> findRunningJobExecutions(String jobName) {
+        List<Long> ids = getJobInstanceIdsWithName(jobName);
+        List<JobExecutionEntity> jobExecutions = getRunningJobExecutions(ids);
+
+        return jobExecutions.stream().map(JobExecutionEntity::fromEntity).collect(Collectors.toSet());
     }
 
+    @Nullable
     @Override
     public JobExecution getJobExecution(Long jobExecutionId) {
-        return JobExecutionEntity.fromEntity(findJobExecutionEntity(jobExecutionId));
+        return JobExecutionEntity.fromEntity(getJobExecutionWithId(jobExecutionId));
     }
 
     @Override
     public void synchronizeStatus(JobExecution jobExecution) {
+        int currentVersion = getJobExecutionVersion(jobExecution.getId());
 
+        if (currentVersion != jobExecution.getVersion().intValue()) {
+            String status = getJobExecutionStatus(jobExecution.getId());
+            jobExecution.upgradeStatus(BatchStatus.valueOf(status));
+            jobExecution.setVersion(currentVersion);
+        }
     }
 
+    @Override
+    Datastore getDataStore() {
+        return this.datastore;
+    }
+
+    /**
+     * Validate JobExecution. At a minimum, JobId, Status, CreateTime cannot be null.
+     *
+     * @param jobExecution
+     * @throws IllegalArgumentException
+     */
     private void validateJobExecution(JobExecution jobExecution) {
         Assert.notNull(jobExecution, "JobExecution cannot be null.");
         Assert.notNull(jobExecution.getJobId(), "JobExecution Job-Id cannot be null.");
@@ -111,8 +167,58 @@ public class JobExecutionRepository extends AbstractRepository implements JobExe
         Assert.notNull(jobExecution.getCreateTime(), "JobExecution create time cannot be null");
     }
 
-    @Override
-    Datastore getDataStore() {
-        return this.datastore;
+
+    /**
+     * Gets the JobExecution version saved in the database.
+     *
+     * @param jobExecutionId
+     * @return
+     */
+    private int getJobExecutionVersion(long jobExecutionId) {
+        return
+                getDataStore().find(JobExecutionEntity.class)
+                        .filter(eq(JOB_EXECUTION_ID_KEY, jobExecutionId))
+                        .iterator(new FindOptions()
+                                .projection().include(VERSION_KEY)
+                                .limit(1))
+                        .next().getVersion();
+    }
+
+
+    private String getJobExecutionStatus(long jobExecutionId) {
+        return
+                getDataStore().find(JobExecutionEntity.class)
+                        .filter(eq(JOB_EXECUTION_ID_KEY, jobExecutionId))
+                        .iterator(new FindOptions()
+                                .projection().include(STATUS_KEY)
+                                .limit(1))
+                        .next().getStatus();
+    }
+
+
+    private JobExecutionEntity getLastJobExecutionForInstance(long jobInstanceId) {
+        return getDataStore().find(JobExecutionEntity.class)
+                .filter(eq(JOB_INSTANCE_ID_KEY, jobInstanceId))
+                .iterator(new FindOptions()
+                        .sort(descending(CREATE_TIME_KEY))
+                        .limit(1))
+                .tryNext();
+
+    }
+
+    private List<JobExecutionEntity> getRunningJobExecutions(final List<Long> jobInstanceIds) {
+        return getDataStore().find(JobExecutionEntity.class)
+                .filter(
+                        eq(END_TIME_KEY, null),
+                        in(JOB_INSTANCE_ID_KEY, jobInstanceIds)
+                )
+                .iterator(DESCENDING_JOB_EXECUTION).toList();
+    }
+
+    //TODO: similar to getRunningJobExecutions. Refactor
+    private List<JobExecutionEntity> getJobExecutions(long jobInstanceId) {
+        return getDataStore().find(JobExecutionEntity.class)
+                .filter(eq(JOB_INSTANCE_ID_KEY, jobInstanceId))
+                .iterator(DESCENDING_JOB_EXECUTION).toList();
     }
 }

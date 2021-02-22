@@ -2,7 +2,6 @@ package eu.europeana.entitymanagement.batch.entity;
 
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
-import dev.morphia.annotations.Version;
 import org.bson.types.ObjectId;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;

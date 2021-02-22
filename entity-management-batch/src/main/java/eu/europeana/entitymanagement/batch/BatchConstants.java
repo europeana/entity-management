@@ -1,5 +1,10 @@
 package eu.europeana.entitymanagement.batch;
 
+import dev.morphia.InsertManyOptions;
+import org.springframework.batch.core.DefaultJobKeyGenerator;
+import org.springframework.batch.core.JobKeyGenerator;
+import org.springframework.batch.core.JobParameters;
+
 public class BatchConstants {
 
 
@@ -21,6 +26,9 @@ public class BatchConstants {
     public static final String JOB_KEY_KEY = "jobKey";
     public static final String JOB_PARAMETERS_KEY = "jobParameters";
 
+    public static final String DOT_ESCAPE_STRING = "\\-";
+    public static final String DOT_STRING = "\\.";
+
     // Job Execution Constants
     public static final String JOB_EXECUTION_ID_KEY = "jobExecutionId";
     public static final String CREATE_TIME_KEY = "createTime";
@@ -40,4 +48,8 @@ public class BatchConstants {
     public static final String PROCESS_SKIP_COUT_KEY = "processSkipCout";
     public static final String ROLLBACK_COUNT_KEY = "rollbackCount";
 
+
+
+    public static final JobKeyGenerator<JobParameters> JOB_KEY_GENERATOR = new DefaultJobKeyGenerator();
+    public static final InsertManyOptions BATCH_INSERT_OPTIONS = new InsertManyOptions().ordered(true);
 }
