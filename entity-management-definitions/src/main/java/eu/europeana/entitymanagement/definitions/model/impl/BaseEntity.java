@@ -70,6 +70,7 @@ public abstract class BaseEntity implements Entity {
 		return prefLabel;
 	}
 
+	@Override
 	public void setPrefLabelStringMap(Map<String, String> prefLabel) {
 		this.prefLabel = prefLabel;
 	}
@@ -80,6 +81,7 @@ public abstract class BaseEntity implements Entity {
 		return altLabel;
 	}
 
+	@Override
 	public void setAltLabel(Map<String, List<String>> altLabel) {
 		this.altLabel = altLabel;
 	}
@@ -90,6 +92,7 @@ public abstract class BaseEntity implements Entity {
 		return hiddenLabel;
 	}
 
+	@Override
 	public void setHiddenLabel(Map<String, List<String>> hiddenLabel) {
 		this.hiddenLabel = hiddenLabel;
 	}
@@ -100,6 +103,7 @@ public abstract class BaseEntity implements Entity {
 		return note;
 	}
 
+	@Override
 	public void setNote(Map<String, List<String>> note) {
 		this.note = note;
 	}
@@ -107,7 +111,7 @@ public abstract class BaseEntity implements Entity {
 
 	@JsonProperty(WebEntityFields.TYPE)
 	@JacksonXmlProperty(localName = XmlFields.XML_RDF_TYPE)
-	public String getInternalType() {
+	public String getType() {
 		return internalType;
 	}
 
@@ -124,6 +128,7 @@ public abstract class BaseEntity implements Entity {
 		return entityId;
 	}
 
+	@Override
 	public void setEntityId(String entityId) {
 		this.entityId = entityId;
 	}
@@ -134,6 +139,7 @@ public abstract class BaseEntity implements Entity {
 		return identifier;
 	}
 
+	@Override
 	public void setIdentifier(String[] identifier) {
 		this.identifier = identifier;
 	}
@@ -154,6 +160,7 @@ public abstract class BaseEntity implements Entity {
 		return isRelatedTo;
 	}
 
+	@Override
 	public void setIsRelatedTo(String[] isRelatedTo) {
 		this.isRelatedTo = isRelatedTo;
 	}
@@ -176,6 +183,7 @@ public abstract class BaseEntity implements Entity {
 		return hasPart;
 	}
 
+	@Override
 	public void setHasPart(String[] hasPart) {
 		this.hasPart = hasPart;
 	}
@@ -186,6 +194,7 @@ public abstract class BaseEntity implements Entity {
 		return isPartOf;
 	}
 
+	@Override
 	public void setIsPartOfArray(String[] isPartOf) {
 		this.isPartOf = isPartOf;
 	}
@@ -196,6 +205,7 @@ public abstract class BaseEntity implements Entity {
 		return depiction;
 	}
 	
+	@Override
 	public void setDepiction(String depiction) {
 		this.depiction = depiction;
 	}
@@ -207,6 +217,7 @@ public abstract class BaseEntity implements Entity {
 		return sameAs;
 	}
 
+	@Override
 	public void setSameAs(String[] sameAs) {
 		this.sameAs = sameAs;
 	}
@@ -312,7 +323,7 @@ public abstract class BaseEntity implements Entity {
 	}
 
 	@Override
-	public String setInternalType(String internalTypeParam) {
+	public String setType(String internalTypeParam) {
 		return internalType=internalTypeParam;
 	}
 

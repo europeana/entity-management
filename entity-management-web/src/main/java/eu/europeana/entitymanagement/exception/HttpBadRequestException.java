@@ -1,8 +1,9 @@
 package eu.europeana.entitymanagement.exception;
 
-import eu.europeana.api.commons.error.EuropeanaApiException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import eu.europeana.api.commons.error.EuropeanaApiException;
 
 /**
  * Exception thrown when a web request cannot be properly handled.
@@ -24,6 +25,16 @@ public class HttpBadRequestException extends EuropeanaApiException {
         super(msg);
     }
 
+    /**
+     * Initialise a new exception with the message and root cause
+     *
+     * @param msg error message
+     */
+    public HttpBadRequestException(String msg, Throwable th) {
+        super(msg, th);
+    }
+    
+    
     /**
      * Initialise a new exception for which there is no root cause
      *

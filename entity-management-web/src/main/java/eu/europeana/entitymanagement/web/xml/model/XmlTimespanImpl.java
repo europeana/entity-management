@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement.web.xml.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
@@ -9,6 +10,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 import eu.europeana.entitymanagement.definitions.model.Timespan;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 
 
@@ -51,6 +53,12 @@ public class XmlTimespanImpl extends XmlBaseEntityImpl {
 	@JacksonXmlProperty(localName = XmlConstants.XML_EDM_IS_NEXT_IN_SEQUENCE)
 	public List<RdfResource> getIsNextInSequence() {
 	    	return RdfXmlUtils.convertToRdfResource(((Timespan)entity).getIsNextInSequence());
+	}
+
+	@Override
+	@JsonIgnore
+	protected EntityTypes getTypeEnum() {
+	    return EntityTypes.Timespan;
 	}
 
 	

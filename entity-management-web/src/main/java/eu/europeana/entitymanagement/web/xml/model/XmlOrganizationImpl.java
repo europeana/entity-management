@@ -9,7 +9,8 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
-import eu.europeana.entitymanagement.definitions.model.Organization;;
+import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;;
 
 @JacksonXmlRootElement(localName = XmlConstants.XML_EDM_ORGANIZATION)
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
@@ -112,5 +113,11 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl {
 	public XmlAddressImpl[] getHasAddress() {
 	    	XmlAddressImpl[] tmp = {new XmlAddressImpl(getOrganization())};
 	    	return tmp;
+	}
+
+	@Override
+	@JsonIgnore
+	protected EntityTypes getTypeEnum() {
+	    return EntityTypes.Organization;
 	}
 }

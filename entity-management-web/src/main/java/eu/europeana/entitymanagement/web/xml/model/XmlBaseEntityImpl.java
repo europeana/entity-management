@@ -8,6 +8,9 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 
 import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.exception.EntityCreationException;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.web.service.impl.EntityObjectFactory;
 
 public abstract class XmlBaseEntityImpl {
 
@@ -21,7 +24,7 @@ public abstract class XmlBaseEntityImpl {
      * outside of the given entity
      */
     @XmlTransient
-    List<Object> referencedWebResources;
+    List<XmlWebResourceImpl> referencedWebResources;
 
     private String about;
     private List<XmlMultilingualString> altLabel = new ArrayList<>();
@@ -32,19 +35,41 @@ public abstract class XmlBaseEntityImpl {
 	// default constructor
     }
 
-    public List<Object> getReferencedWebResources() {
+    public List<XmlWebResourceImpl> getReferencedWebResources() {
 	return referencedWebResources;
     }
 
     public XmlBaseEntityImpl(Entity entity) {
 	this.entity = entity;
 	this.about = entity.getAbout();
-	aggregationId = entity.getAbout() + "#aggregation";
-	referencedWebResources = new ArrayList<Object>();
 	this.prefLabel = RdfXmlUtils.convertToXmlMultilingualString(entity.getPrefLabel());
 	this.altLabel = RdfXmlUtils.convertToXmlMultilingualString(entity.getAltLabel());
 	this.sameAs = RdfXmlUtils.convertToRdfResource(entity.getSameAs());
+	
+	aggregationId = entity.getAbout() + "#aggregation";
+	referencedWebResources = new ArrayList<XmlWebResourceImpl>();
     }
+
+    public Entity toEntityModel() throws EntityCreationException {
+	if(getEntity() == null) {
+	    this.entity = EntityObjectFactory.createEntityObject(getTypeEnum());
+	}
+	entity.setType(getTypeEnum().getEntityType());
+	
+//	this.about = entity.getAbout();
+	getEntity().setEntityId(getAbout());
+//	this.prefLabel = RdfXmlUtils.convertToXmlMultilingualString(entity.getPrefLabel());
+	getEntity().setPrefLabelStringMap(RdfXmlUtils.toLanguageMap(getPrefLabel()));
+//	this.altLabel = RdfXmlUtils.convertToXmlMultilingualString(entity.getAltLabel());
+	getEntity().setAltLabel(RdfXmlUtils.toLanguageMapList(getAltLabel()));
+	getEntity().setSameAs(RdfXmlUtils.toStringArray(getSameAs()));
+	
+	//Metis is not setting the isAggregatedBy, but it might use it in the future
+//	getEntity().setIsAggregatedBy(null);
+	return getEntity();
+    }
+
+    protected abstract EntityTypes getTypeEnum();
 
     @XmlAttribute(namespace = XmlConstants.NAMESPACE_RDF, name = XmlConstants.ABOUT)
     public String getAbout() {
@@ -107,6 +132,10 @@ public abstract class XmlBaseEntityImpl {
 	} else {
 	    return null;
 	}
+    }
+
+    public Entity getEntity() {
+	return entity;
     }
 
 }

@@ -142,7 +142,7 @@ public class PlaceImpl extends BaseEntity implements Place, eu.europeana.corelib
 	}
 
 	@Override
-	public String getInternalType() {
+	public String getType() {
 		return "Place";
 	}
 	

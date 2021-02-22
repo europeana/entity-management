@@ -36,13 +36,18 @@ public class BaseMvcTestUtils {
 	    return out.toString();
 	}
     }
-    
+
     protected String getEntityIdentifier(String result) throws JSONException {
-   	assertNotNull(result);
-   	JSONObject json = new JSONObject(result);
-   	String id = json.getString("id");
-   	assertNotNull(id);
-   	String identifier = id.replace(BASE_ENTITY_URL, "");
-   	return identifier;
-       }
+	String id = getEntityId(result);
+	String identifier = id.replace(BASE_ENTITY_URL, "");
+	return identifier;
+    }
+
+    protected String getEntityId(String result) throws JSONException {
+	assertNotNull(result);
+	JSONObject json = new JSONObject(result);
+	String id = json.getString("id");
+	assertNotNull(id);
+	return id;
+    }
 }

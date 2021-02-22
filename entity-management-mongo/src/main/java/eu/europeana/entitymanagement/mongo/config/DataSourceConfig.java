@@ -17,7 +17,6 @@ import dev.morphia.Morphia;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 
 @Configuration
-//@PropertySource("classpath:entitymanagement.properties")
 @PropertySource(value = {"classpath:entitymanagement.properties", "classpath:entitymanagement.user.properties"}, ignoreResourceNotFound = true)
 public class DataSourceConfig {
 

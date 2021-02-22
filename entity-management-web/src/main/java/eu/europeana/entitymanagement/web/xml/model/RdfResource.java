@@ -2,7 +2,6 @@ package eu.europeana.entitymanagement.web.xml.model;
 
 import javax.xml.bind.annotation.XmlAttribute;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 public class RdfResource {

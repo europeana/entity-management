@@ -19,12 +19,11 @@ import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
 import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.utils.EntityUtils;
-import eu.europeana.entitymanagement.web.model.EntityCreationRequest;
+import eu.europeana.entitymanagement.web.model.EntityPreview;
 
 @Service(AppConfig.BEAN_ENTITY_RECORD_SERVICE)
 public class EntityRecordService {
@@ -48,17 +47,17 @@ public class EntityRecordService {
     }
 
     /**
-     * Creates an {@link EntityRecord} from an {@link EntityCreationRequest}, which
+     * Creates an {@link EntityRecord} from an {@link EntityPreview}, which
      * is then persisted.
      * 
      * @param entityCreationRequest entity request object
-     * @param metisResponse         de-referenced XML response instance from Metis
+     * @param entity         de-referenced XML response instance from Metis
      * @return Saved Entity record
      * @throws EntityCreationException if an error occurs
      */
-    public EntityRecord createEntityFromRequest(EntityCreationRequest entityCreationRequest, BaseEntity metisResponse)
+    public EntityRecord createEntityFromRequest(EntityPreview entityCreationRequest, Entity externalEntity)
 	    throws EntityCreationException {
-	BaseEntity entity = BaseEntityFactory.createEntityFromXmlType(metisResponse.getClass());
+	Entity entity = EntityObjectFactory.createEntityObject(externalEntity.getType());
 
 	entity.setPrefLabelStringMap(entityCreationRequest.getPrefLabel());
 	entity.setAltLabel(entityCreationRequest.getAltLabel());

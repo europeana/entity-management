@@ -17,7 +17,6 @@ import eu.europeana.entitymanagement.common.config.LanguageCodes;
 import eu.europeana.entitymanagement.common.config.LanguageCodes.Language;
 import eu.europeana.entitymanagement.common.config.LanguageCodes.Language.AlternativeLanguage;
 import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 
 public class ValidEntityFieldsValidator implements ConstraintValidator<ValidEntityFields, Entity> {
@@ -51,7 +50,7 @@ public class ValidEntityFieldsValidator implements ConstraintValidator<ValidEnti
     public static final String languageSeparator = "_";
 
     
-    private static final Logger logger = LogManager.getLogger(BaseEntity.class);
+    private static final Logger logger = LogManager.getLogger(Entity.class);
 
     public void initialize(ValidEntityFields constraint) {
     }

@@ -1,8 +1,9 @@
 package eu.europeana.entitymanagement.exception;
 
 
-import eu.europeana.api.commons.error.EuropeanaApiException;
 import org.springframework.http.HttpStatus;
+
+import eu.europeana.api.commons.error.EuropeanaApiException;
 
 /**
  * Exception thrown when a requested entity isn't found

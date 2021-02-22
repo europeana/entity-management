@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.scoring;
+package eu.europeana.entitymanagement.web.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -23,7 +23,7 @@ import eu.europeana.entitymanagement.web.model.scoring.MaxEntityMetrics;
 import eu.europeana.entitymanagement.web.service.ScoringService;
 
 /**
- * JUnit test for testing the EMControllerTest class
+ * Integration test for testing the ScoringService
  */
 //@SpringBootTest
 //@AutoConfigureMockMvc

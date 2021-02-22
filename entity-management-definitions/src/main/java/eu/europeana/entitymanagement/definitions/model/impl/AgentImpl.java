@@ -479,7 +479,7 @@ public class AgentImpl extends BaseEntity implements Agent, eu.europeana.corelib
 	}
 
 	@Override
-	public String getInternalType() {
+	public String getType() {
 		return "Agent";
 	}
 	

@@ -20,7 +20,7 @@ import eu.europeana.entitymanagement.web.xml.model.XmlTimespanImpl;
 /**
  * Root element for Metis de-reference response
  */
-@XmlRootElement(namespace = "http://www.europeana.eu/schemas/metis", name = "result")
+//@XmlRootElement(namespace = "http://www.europeana.eu/schemas/metis", name = "result")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class EnrichmentResultBaseWrapper {
 

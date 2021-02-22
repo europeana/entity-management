@@ -3,7 +3,6 @@ package eu.europeana.entitymanagement.exception;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 
-
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.entitymanagement.common.config.I18nConstants;
 
