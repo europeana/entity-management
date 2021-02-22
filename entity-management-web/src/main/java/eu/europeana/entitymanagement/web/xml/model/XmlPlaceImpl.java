@@ -10,6 +10,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 import eu.europeana.entitymanagement.definitions.model.Place;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @JacksonXmlRootElement(localName = XmlConstants.XML_EDM_PLACE)
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
@@ -77,6 +78,12 @@ public class XmlPlaceImpl extends XmlBaseEntityImpl {
 	@JsonIgnore
 	private Place getPlace() {
 	    return (Place)entity;
+	}
+
+	@Override
+	@JsonIgnore
+	protected EntityTypes getTypeEnum() {
+	    return EntityTypes.Place;
 	}
     	
 }

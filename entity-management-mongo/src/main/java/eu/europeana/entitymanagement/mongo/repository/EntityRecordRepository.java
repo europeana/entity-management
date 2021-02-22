@@ -77,7 +77,7 @@ public class EntityRecordRepository {
      * @return the number of deleted objects
      */
     // TODO move this to the loader?
-    public long deleteDataset(String entityId) {
+    public long deleteForGood(String entityId) {
         return datastore.find(EntityRecordImpl.class).filter(
                 eq(ENTITY_ID,entityId))
                 .delete(MULTI_DELETE_OPTS).getDeletedCount();
@@ -91,14 +91,14 @@ public class EntityRecordRepository {
      */
     public EntityRecord save(EntityRecord entityRecord){
         //if the id of the entity is null, get it from the database before saving  
-    	long dbId = generateAutoIncrement(entityRecord.getEntity().getInternalType());
+    	long dbId = generateAutoIncrement(entityRecord.getEntity().getType());
     	if (Long.valueOf(entityRecord.getDbId()) == null)
     	{   		
     		entityRecord.setDbId(dbId);    		
     	}
     	if (entityRecord.getEntity().getEntityId() == null)
         {
-	        String entityId = "http://data.europeana.eu/" + entityRecord.getEntity().getInternalType().toLowerCase() + "/" + dbId;
+	        String entityId = "http://data.europeana.eu/" + entityRecord.getEntity().getType().toLowerCase() + "/" + dbId;
 	        entityRecord.getEntity().setEntityId(entityId);
 	        entityRecord.setEntityId(entityId);
         }

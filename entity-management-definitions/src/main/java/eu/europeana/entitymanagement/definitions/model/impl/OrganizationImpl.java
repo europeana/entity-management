@@ -465,7 +465,7 @@ public class OrganizationImpl extends BaseEntity
 	}
 
 	@Override
-	public String getInternalType() {
+	public String getType() {
 		return "Organization";
 	}
 	

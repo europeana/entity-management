@@ -61,8 +61,8 @@ public class ScoringServiceImpl implements ScoringService {
     @Override
     public EntityMetrics computeMetrics(Entity entity) throws FunctionalRuntimeException, UnsupportedEntityTypeException{
 	EntityMetrics metrics = new EntityMetrics(entity.getEntityId());
-	if(entity.getInternalType() != null) {
-	    metrics.setEntityType(entity.getInternalType());   
+	if(entity.getType() != null) {
+	    metrics.setEntityType(entity.getType());   
 	}else {
 	    metrics.setEntityType(EntityTypes.getByEntityId(entity.getEntityId()).name());    
 	}

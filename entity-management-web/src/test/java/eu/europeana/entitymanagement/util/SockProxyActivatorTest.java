@@ -1,12 +1,12 @@
 package eu.europeana.entitymanagement.util;
 
-import eu.europeana.entitymanagement.common.config.SocksProxyConfig;
-import eu.europeana.entitymanagement.config.SocksProxyActivator;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import eu.europeana.entitymanagement.common.config.SocksProxyConfig;
+import eu.europeana.entitymanagement.config.SocksProxyActivator;
 
 /**
  * Test if activating usage of a sock proxy works fine

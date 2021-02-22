@@ -108,7 +108,7 @@ public class TimespanImpl extends BaseEntity implements Timespan, eu.europeana.c
     }
 
     @Override
-    public String getInternalType() {
+    public String getType() {
         return "Timespan";
     }
     

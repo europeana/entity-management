@@ -1,7 +1,8 @@
 package eu.europeana.entitymanagement.web;
 
-import eu.europeana.api.commons.error.EuropeanaGlobalExceptionHandler;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+
+import eu.europeana.api.commons.error.EuropeanaGlobalExceptionHandler;
 
 @ControllerAdvice
 public class EMExceptionHandler extends EuropeanaGlobalExceptionHandler {

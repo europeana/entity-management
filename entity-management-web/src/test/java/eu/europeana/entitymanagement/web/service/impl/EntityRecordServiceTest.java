@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.service;
+package eu.europeana.entitymanagement.web.service.impl;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -33,7 +33,7 @@ public class EntityRecordServiceTest {
 		    //creating the first entity
 		    TimespanImpl entity = new TimespanImpl();
   	entity.setEntityId("http://data.europeana.eu/timespan/base/1");
-  	entity.setInternalType("Timespan");
+  	entity.setType("Timespan");
   	entity.setBeginString("0001-01-01");
   	entity.setEndString("0100-12-31");
 		    entity.setIsNextInSequence(new String[]{"http://data.europeana.eu/timespan/3"});
@@ -64,7 +64,7 @@ public class EntityRecordServiceTest {
   	//creating the second entity to merge into the first one
 		    TimespanImpl entityProxy = new TimespanImpl();
 		    entityProxy.setEntityId("http://data.europeana.eu/timespan/base/1-1");
-		    entityProxy.setInternalType("Timespan");
+		    entityProxy.setType("Timespan");
 		    entityProxy.setBeginString("0001-01-01");
 		    entityProxy.setEndString("0100-12-31");
 		    entityProxy.setIsNextInSequence(new String[]{"http://data.europeana.eu/timespan/2"});

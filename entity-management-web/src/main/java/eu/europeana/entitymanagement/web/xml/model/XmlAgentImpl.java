@@ -10,6 +10,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 import eu.europeana.entitymanagement.definitions.model.Agent;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @JacksonXmlRootElement(localName = XmlConstants.XML_EDM_AGENT)
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
@@ -161,6 +162,12 @@ public class XmlAgentImpl extends XmlBaseEntityImpl {
 	@JsonIgnore
 	private Agent getAgent() {
 	    return (Agent)entity;
+	}
+
+	@Override
+	@JsonIgnore
+	protected EntityTypes getTypeEnum() {
+	    return EntityTypes.Agent;
 	}
 	
 }

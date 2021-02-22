@@ -4,40 +4,38 @@ import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTyp
 
 public enum EntityTypes implements EntityKeyword{
 
-	Organization("edm", "Organization", "http://www.europeana.eu/schemas/edm/Organization"), 
-	Concept("skos", "Concept", "https://www.w3.org/2009/08/skos-reference/skos.html#Concept"), 
-	Agent("edm", "Agent", "http://www.europeana.eu/schemas/edm/Agent"), 
-	Place("edm", "Place", "http://www.europeana.eu/schemas/edm/Place"), 
-	Timespan("edm", "Timespan", "http://www.europeana.eu/schemas/edm/Timespan"), 
-	ConceptScheme("edm", "ConceptScheme", "http://www.europeana.eu/schemas/edm/ConceptScheme"), 
-	All("*", "All", "http://www.europeana.eu/schemas/edm/Entity");
+	Organization("Organization", "http://www.europeana.eu/schemas/edm/Organization"), 
+	Concept("Concept", "https://www.w3.org/2009/08/skos-reference/skos.html#Concept"), 
+	Agent("Agent", "http://www.europeana.eu/schemas/edm/Agent"), 
+	Place("Place", "http://www.europeana.eu/schemas/edm/Place"), 
+	Timespan("Timespan", "http://www.europeana.eu/schemas/edm/Timespan"), 
+//	ConceptScheme("edm", "ConceptScheme", "http://www.europeana.eu/schemas/edm/ConceptScheme"), 
+	All("All", "http://www.europeana.eu/schemas/edm/Entity");
 	
 	
-	private String modelNameSpace;
-	private String internalType;
+	private String entityType;
 	private String httpUri;
 	
 	
-	public String getModelNameSpace() {
-		return modelNameSpace;
+	public String getEntityType() {
+		return entityType;
 	}
 
-	
-	public String getInternalType() {
-		return internalType;
-	}
-
-	EntityTypes(String modelNameSpace, String internalType, String uri){
-		this.modelNameSpace = modelNameSpace;
-		this.internalType = internalType;
+	EntityTypes(String entityType, String uri){
+		this.entityType = entityType;
 		this.httpUri = uri;
 	}
 	
-	
-	public static boolean contains(String modelType) {
+	@Deprecated
+	/**
+	 * refactor to use value of 
+	 * @param entityType
+	 * @return
+	 */
+	public static boolean contains(String entityType) {
 
 	    for (EntityTypes field : EntityTypes.values()) {
-	        if (field.getInternalType().equalsIgnoreCase(modelType)) {
+	        if (field.getEntityType().equalsIgnoreCase(entityType)) {
 	            return true;
 	        }
 	    }
@@ -60,34 +58,14 @@ public enum EntityTypes implements EntityKeyword{
 	    return false;
 	}
 	
-	
-	/**
-	 * Identifying agent type by the json value.
-	 * For user friendliness the the comparison is case insensitive  
-	 * @param jsonValue
-	 * @return
-	 * @throws UnsupportedEntityTypeException 
-	 */
-	static EntityTypes getByJsonValue(String jsonValue) throws UnsupportedEntityTypeException{
-		
-		String[] values = jsonValue.split(":", 2);
-		//last token
-		String ignoreNamespace  = values[values.length -1];
-		
-		for(EntityTypes agentType : EntityTypes.values()){
-			if(agentType.getJsonValue().equalsIgnoreCase(ignoreNamespace))
-				return agentType;
-		}
-		throw new UnsupportedEntityTypeException(jsonValue);
-	}
 			
-	public static EntityTypes getByInternalType(String internalType) throws UnsupportedEntityTypeException{
+	public static EntityTypes getByEntityType(String entityType) throws UnsupportedEntityTypeException{
 
-		for(EntityTypes entityType : EntityTypes.values()){
-			if(entityType.getInternalType().equalsIgnoreCase(internalType))
-				return entityType;
+		for(EntityTypes entityTypeEnum : EntityTypes.values()){
+			if(entityTypeEnum.getEntityType().equalsIgnoreCase(entityType))
+				return entityTypeEnum;
 		}
-		throw new UnsupportedEntityTypeException(internalType);
+		throw new UnsupportedEntityTypeException(entityType);
 	}	
 	
 	
@@ -95,23 +73,22 @@ public enum EntityTypes implements EntityKeyword{
 
 	    
 	    for (EntityTypes field : EntityTypes.values()) {
-	        if (entityId.contains(String.format("/%s/", field.getInternalType().toLowerCase()))) {
+	        if (entityId.contains(String.format("/%s/", field.getEntityType().toLowerCase()))) {
 	            return field;
 	        }
 	    }
 
 	    throw new UnsupportedEntityTypeException(entityId);
 	}
-	
-	
-	@Override
-	public String getJsonValue() {
-		return getModelNameSpace() + ":" + getInternalType();
-	}
 
 
 	public String getHttpUri() {
 		return httpUri;
+	}
+
+	@Override
+	public String getJsonValue() {
+	    return getEntityType();
 	}
 	
 	

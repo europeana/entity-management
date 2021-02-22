@@ -1,14 +1,14 @@
 package eu.europeana.entitymanagement.web.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Represents the body for Entity creation POST requests.
  */
-public class EntityCreationRequest {
+public class EntityPreview {
     private String id;
 
     @JsonProperty("@context")
@@ -19,11 +19,11 @@ public class EntityCreationRequest {
     private Map<String, List<String>> altLabel;
     private String depiction;
 
-    public EntityCreationRequest() {
+    public EntityPreview() {
         // create explicit empty constructor
     }
 
-    public EntityCreationRequest(String id, String context, Map<String, String> prefLabel, Map<String, List<String>> altLabel, String depiction) {
+    public EntityPreview(String id, String context, Map<String, String> prefLabel, Map<String, List<String>> altLabel, String depiction) {
         this.id = id;
         this.context = context;
         this.prefLabel = prefLabel;

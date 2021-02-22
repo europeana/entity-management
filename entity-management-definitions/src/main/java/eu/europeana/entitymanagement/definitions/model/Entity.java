@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.definitions.model;
 
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.Map;
 
 import dev.morphia.annotations.Embedded;
@@ -22,9 +23,9 @@ public interface Entity extends ContextualClass {
 
 	public void setEntityId(String enitityId);
 
-	public String getInternalType();
+	public String getType();
 	
-	public String setInternalType(String internalTypeParam);
+	public String setType(String type);
 
 	public String[] getSameAs();
 
@@ -54,5 +55,21 @@ public interface Entity extends ContextualClass {
 	void setIsAggregatedBy(Aggregation isAggregatedBy);
 
 	Aggregation getIsAggregatedBy();
+
+	void setFoafDepiction(String foafDepiction);
+
+	void setSameAs(String[] sameAs);
+
+	void setIsPartOfArray(String[] isPartOf);
+
+	void setHasPart(String[] hasPart);
+
+	void setNote(Map<String, List<String>> note);
+
+	void setHiddenLabel(Map<String, List<String>> hiddenLabel);
+
+	void setAltLabel(Map<String, List<String>> altLabel);
+
+	void setPrefLabelStringMap(Map<String, String> prefLabel);
 
 }

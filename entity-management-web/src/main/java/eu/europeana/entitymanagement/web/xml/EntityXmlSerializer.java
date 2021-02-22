@@ -2,8 +2,6 @@ package eu.europeana.entitymanagement.web.xml;
 
 import java.util.List;
 
-import org.springframework.stereotype.Component;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -24,6 +22,7 @@ import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlOrganizationImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlPlaceImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlTimespanImpl;
+import eu.europeana.entitymanagement.web.xml.model.XmlWebResourceImpl;
 
 @Deprecated
 /**
@@ -129,10 +128,10 @@ public class EntityXmlSerializer {
 		    strBuilder.append(objectMapper.writeValueAsString(xmlElement));
 
 		    //add related elements to be serialized outside of the given xmlElement
-		    List<Object> additionalElementsToSerialize = xmlElement.getReferencedWebResources();
-		    for (Object elem : additionalElementsToSerialize)
+		    List<XmlWebResourceImpl> additionalElementsToSerialize = xmlElement.getReferencedWebResources();
+		    for (Object resource : additionalElementsToSerialize)
 		    {
-		    	strBuilder.append(objectMapper.writeValueAsString(elem));
+		    	strBuilder.append(objectMapper.writeValueAsString(resource));
 		    }
 
 		    XmlAggregationImpl xmlAggregation = xmlElement.createXmlAggregation();

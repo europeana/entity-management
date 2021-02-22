@@ -14,4 +14,8 @@ public class EntityCreationException extends EuropeanaApiException {
     public EntityCreationException(String msg) {
         super(msg);
     }
+    
+    public EntityCreationException(String msg, Throwable th) {
+        super(msg);
+    }
 }

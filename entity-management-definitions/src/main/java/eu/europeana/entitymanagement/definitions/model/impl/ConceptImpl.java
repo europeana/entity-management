@@ -35,6 +35,7 @@ public class ConceptImpl extends BaseEntity implements Concept {
 		return broader;
 	}
 
+	@Override
 	public void setBroader(String[] broader) {
 		this.broader = broader;
 	}
@@ -45,6 +46,7 @@ public class ConceptImpl extends BaseEntity implements Concept {
 		return narrower;
 	}
 
+	@Override
 	public void setNarrower(String[] narrower) {
 		this.narrower = narrower;
 	}
@@ -55,6 +57,7 @@ public class ConceptImpl extends BaseEntity implements Concept {
 		return related;
 	}
 
+	@Override
 	public void setRelated(String[] related) {
 		this.related = related;
 	}
@@ -65,6 +68,7 @@ public class ConceptImpl extends BaseEntity implements Concept {
 		return broadMatch;
 	}
 
+	@Override
 	public void setBroadMatch(String[] broadMatch) {
 		this.broadMatch = broadMatch;
 	}
@@ -75,6 +79,7 @@ public class ConceptImpl extends BaseEntity implements Concept {
 		return narrowMatch;
 	}
 
+	@Override
 	public void setNarrowMatch(String[] narrowMatch) {
 		this.narrowMatch = narrowMatch;
 	}
@@ -85,6 +90,7 @@ public class ConceptImpl extends BaseEntity implements Concept {
 		return exactMatch;
 	}
 
+	@Override
 	public void setExactMatch(String[] exactMatch) {
 		this.exactMatch = exactMatch;
 	}
@@ -93,6 +99,7 @@ public class ConceptImpl extends BaseEntity implements Concept {
 		return coref;
 	}
 
+	@Override
 	public void setCoref(String[] coref) {
 		this.coref = coref;
 	}
@@ -103,6 +110,7 @@ public class ConceptImpl extends BaseEntity implements Concept {
 		return relatedMatch;
 	}
 
+	@Override
 	public void setRelatedMatch(String[] relatedMatch) {
 		this.relatedMatch = relatedMatch;
 	}
@@ -113,6 +121,7 @@ public class ConceptImpl extends BaseEntity implements Concept {
 		return closeMatch;
 	}
 
+	@Override
 	public void setCloseMatch(String[] closeMatch) {
 		this.closeMatch = closeMatch;
 	}
@@ -123,6 +132,7 @@ public class ConceptImpl extends BaseEntity implements Concept {
 		return inScheme;
 	}
 
+	@Override
 	public void setInScheme(String[] inScheme) {
 		this.inScheme = inScheme;
 	}
@@ -133,12 +143,13 @@ public class ConceptImpl extends BaseEntity implements Concept {
 		return notation;
 	}
 
+	@Override
 	public void setNotation(Map<String, List<String>> notation) {
 		this.notation = notation;
 	}
 
 	@Override
-	public String getInternalType() {
+	public String getType() {
 		return "Concept";
 	}
 	
