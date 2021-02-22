@@ -6,14 +6,12 @@ import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_DELET
 
 import java.util.Set;
 
+import javax.annotation.Resource;
 import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.mongodb.client.model.ReturnDocument;
@@ -21,29 +19,32 @@ import com.mongodb.client.model.ReturnDocument;
 import dev.morphia.Datastore;
 import dev.morphia.ModifyOptions;
 import dev.morphia.query.experimental.updates.UpdateOperators;
-import eu.europeana.entitymanagement.config.EMSettings;
+import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.impl.BaseEntityRecord;
+import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
 
 /**
  * Repository for retrieving the EntityRecord objects.
  */
-@Repository
+@Repository(AppConfigConstants.BEAN_ENTITY_RECORD_REPO)
 public class EntityRecordRepository {
 
     private static final Logger logger = LogManager.getLogger(EntityRecordRepository.class);
 
-    @Autowired
+    @Resource(name=AppConfigConstants.BEAN_EM_DATA_STORE)
     private Datastore datastore;
     
-    @Autowired
-    private EMSettings emSettings;
+//    @Autowired
+//    private EMSettings emSettings;
+    @Resource(name="emValidatorFactory")
+    ValidatorFactory emValidatorFactory;
+    
     /**
      * @return the total number of resources in the database
      */
     public long count() {
-        return datastore.find(BaseEntityRecord.class).count();
+        return datastore.find(EntityRecordImpl.class).count();
     }
 
     /**
@@ -53,7 +54,7 @@ public class EntityRecordRepository {
      * @return true if yes, otherwise false
      */
     public boolean existsByEntityId(String entityId) {
-        return datastore.find(BaseEntityRecord.class).filter(
+        return datastore.find(EntityRecordImpl.class).filter(
                 eq(EntityRecordFields.ENTITY_ID, entityId)
         ).count() > 0 ;
     }
@@ -64,7 +65,7 @@ public class EntityRecordRepository {
      * @return EntityRecord
      */
     public EntityRecord findByEntityId(String entityId) {
-        return datastore.find(BaseEntityRecord.class).filter(
+        return datastore.find(EntityRecordImpl.class).filter(
                 eq(ENTITY_ID, entityId))
                 .first();
     }
@@ -77,7 +78,7 @@ public class EntityRecordRepository {
      */
     // TODO move this to the loader?
     public long deleteDataset(String entityId) {
-        return datastore.find(BaseEntityRecord.class).filter(
+        return datastore.find(EntityRecordImpl.class).filter(
                 eq(ENTITY_ID,entityId))
                 .delete(MULTI_DELETE_OPTS).getDeletedCount();
     }
@@ -103,7 +104,7 @@ public class EntityRecordRepository {
         }
 
         //check the validation of the entity fields
-        Set<ConstraintViolation<Entity>> violations = emSettings.localValidatorFactoryBean().validate(entityRecord.getEntity());
+        Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entityRecord.getEntity());
         for (ConstraintViolation<Entity> violation : violations) {
             logger.error(violation.getMessage()); 
         }

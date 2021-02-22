@@ -8,13 +8,14 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
-import eu.europeana.entitymanagement.config.SocksProxyConfig;
-import eu.europeana.entitymanagement.util.SocksProxyActivator;
+import eu.europeana.entitymanagement.common.config.SocksProxyConfig;
+import eu.europeana.entitymanagement.web.service.impl.SocksProxyActivator;
 
 /**
  * Main application. Allows deploying as a war and logs instance data when deployed in Cloud Foundry
  */
-@SpringBootApplication(scanBasePackages = {"eu.europeana.entitymanagement", "eu.europeana.api.commons"},
+//@SpringBootApplication(scanBasePackages = {"eu.europeana.entitymanagement", "eu.europeana.api.commons"},
+@SpringBootApplication(scanBasePackages = {"eu.europeana.entitymanagement"},
         // Remove these exclusions to re-enable security
         exclude = { SecurityAutoConfiguration.class, ManagementWebSecurityAutoConfiguration.class }
         )

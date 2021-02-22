@@ -1,37 +1,66 @@
 package eu.europeana.entitymanagement.normalization;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import eu.europeana.entitymanagement.config.EMSettings;
-import eu.europeana.entitymanagement.config.LanguageCodes.Language;
-import eu.europeana.entitymanagement.config.LanguageCodes.Language.AlternativeLanguage;
+import eu.europeana.entitymanagement.common.config.LanguageCodes;
+import eu.europeana.entitymanagement.common.config.LanguageCodes.Language;
+import eu.europeana.entitymanagement.common.config.LanguageCodes.Language.AlternativeLanguage;
 import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
+import eu.europeana.entitymanagement.definitions.model.impl.EntityImpl;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 
-public class ValidEntityFieldsValidator implements ConstraintValidator<ValidEntityFields, Entity>{
+@Component
+public class ValidEntityFieldsValidator implements ConstraintValidator<ValidEntityFields, Entity> {
 
-    @Autowired
-    private EMSettings emSettings;
+    @Resource(name="emLanguageCodes")
+    @Deprecated
+    /**
+     * @deprecated data model must not access any beans
+     */
+    LanguageCodes emLanguageCodes;
     
-	private static final Logger logger = LogManager.getLogger(BaseEntity.class);
-	
-	public void initialize(ValidEntityFields constraint) {
-	}
-	
-	@Override
+    @Deprecated
+    /**
+     * @deprecated verify if needed and use the name according to the naming conventions
+     */
+    public static final String altLabelFieldNamePrefix = "altLabel";
+    @Deprecated
+    /**
+     * @deprecated verify if needed and use the name according to the naming conventions
+     */
+    public static final String altLabelCharacterSeparator = "_";
+
+    @Deprecated
+    /**
+     * @deprecated verify if needed and use the name according to the naming conventions
+     */
+    public static final String languageSeparator = "_";
+
+    
+    private static final Logger logger = LogManager.getLogger(EntityImpl.class);
+
+    public void initialize(ValidEntityFields constraint) {
+    }
+
+    @Override
+    @Deprecated
+    /**
+     * @deprecated required refactoring and proper exception handling consider
+     *             moving this class to a more appropriate module
+     *
+     */
 	public boolean isValid(Entity entity, ConstraintValidatorContext context) {		
 		
 		if (entity==null) {
@@ -81,15 +110,15 @@ public class ValidEntityFieldsValidator implements ConstraintValidator<ValidEnti
 				//check the language labels for the altLabel field to be in the predefined language labels
 				//getting the new, updated value with removed spaces
 				fieldValue = entity.getFieldValue(field);
-				if (fieldName.contains(emSettings.getAltLabelFieldNamePrefix())) {
+				if (fieldName.contains(altLabelFieldNamePrefix)) {
 					Map<String, List<String>> newAltLabel = new HashMap<>();
 					Map<String,List<String>> oldAltLabel = (Map<String,List<String>>) fieldValue;
 					boolean foundAlternativeCodes = false;
 					for (Map.Entry<String, List<String>> altLabel : oldAltLabel.entrySet()) {
 						boolean foundKnownCode = false;
-						if (emSettings.getLanguageCodes()==null) break;
-						if (emSettings.getLanguageCodes().getLanguages()==null) break;
-						for (Language language : emSettings.getLanguageCodes().getLanguages()) {
+						if (emLanguageCodes==null) break;
+						if (emLanguageCodes.getLanguages()==null) break;
+						for (Language language : emLanguageCodes.getLanguages()) {
 							String altLabelEnding = altLabel.getKey().substring(altLabel.getKey().lastIndexOf("_") + 1);
 							if (language.getCode().contains(altLabelEnding)) {
 								foundKnownCode = true;
@@ -101,7 +130,7 @@ public class ValidEntityFieldsValidator implements ConstraintValidator<ValidEnti
 								if (alternativeLanguage.getCode().contains(altLabelEnding)) {
 									if (foundAlternativeCodes == false) foundAlternativeCodes = true;
 									List<String> newAltLabelValue = new ArrayList<>(altLabel.getValue());
-									newAltLabel.put(emSettings.getAltLabelFieldNamePrefix()+emSettings.getLanguageSeparator()+language.getCode(), newAltLabelValue);
+									newAltLabel.put(altLabelFieldNamePrefix+altLabelCharacterSeparator+language.getCode(), newAltLabelValue);
 									foundKnownCode=true;
 									break;
 								}
@@ -116,31 +145,30 @@ public class ValidEntityFieldsValidator implements ConstraintValidator<ValidEnti
 						
 					}
 					if (foundAlternativeCodes==true) entity.setFieldValue(field, newAltLabel);
-				}
-			}
 		}
-		catch (IllegalArgumentException e) {
-			logger.error("During the reconceliation of the entity data from different sources a method has been passed an illegal or inappropriate argument.", e);
-		} catch (IllegalAccessException e) {
-			logger.error("During the reconceliation of the entity data from different sources an illegal access to some method or field has happened.", e);
-		} catch (IOException e) {
-			logger.error("An IOException happended during the validation of the entity fields",e);
-		}
-		
-		return returnValue;
+	    }
+	} catch (IllegalArgumentException e) {
+	    logger.error(
+		    "During the reconceliation of the entity data from different sources a method has been passed an illegal or inappropriate argument.",
+		    e);
+	} catch (IllegalAccessException e) {
+	    logger.error(
+		    "During the reconceliation of the entity data from different sources an illegal access to some method or field has happened.",
+		    e);
+	} 
+	return returnValue;
+    }
+
+    private void addConstraint(boolean returnValue, ConstraintValidatorContext context, String messageTemplate) {
+	if (returnValue) {
+	    // disable existing violation message
+	    context.disableDefaultConstraintViolation();
+	    // build new violation message and add it
+	    context.buildConstraintViolationWithTemplate(messageTemplate).addConstraintViolation();
+	} else {
+	    // build new violation message and add it
+	    context.buildConstraintViolationWithTemplate(messageTemplate).addConstraintViolation();
 	}
-	
-	private void addConstraint (boolean returnValue, ConstraintValidatorContext context, String messageTemplate) {
-		if (returnValue) {
-			//disable existing violation message
-		    context.disableDefaultConstraintViolation();
-		    //build new violation message and add it
-			context.buildConstraintViolationWithTemplate(messageTemplate).addConstraintViolation();
-		}
-		else {
-		    //build new violation message and add it
-			context.buildConstraintViolationWithTemplate(messageTemplate).addConstraintViolation();
-		}
-	}
-	
+    }
+
 }

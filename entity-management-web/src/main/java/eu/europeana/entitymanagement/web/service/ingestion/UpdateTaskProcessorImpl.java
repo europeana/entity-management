@@ -2,12 +2,11 @@ package eu.europeana.entitymanagement.web.service.ingestion;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import dev.morphia.aggregation.experimental.AggregationImpl;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.impl.BaseAggregation;
+import eu.europeana.entitymanagement.definitions.model.impl.AggregationImpl;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
@@ -111,10 +110,10 @@ public class UpdateTaskProcessorImpl implements UpdateTaskProcessor {
 	    throw new EntityUpdateException(
 		    "Cannot compute ranking metrics for entity: " + entity.getEntityId(), e);
 	}
-	Aggregation aggregation = record.getIsAggregatedBy();
+	Aggregation aggregation = entity.getIsAggregatedBy();
 	if (aggregation == null) {
-	    aggregation = new BaseAggregation();
-	    record.setIsAggregatedBy(aggregation);
+	    aggregation = new AggregationImpl();
+	    entity.setIsAggregatedBy(aggregation);
 	}
 
 	aggregation.setPageRank(metrics.getPageRank());

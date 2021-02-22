@@ -59,13 +59,10 @@
 	<dependency>
     	<groupId>javax.validation</groupId>
     	<artifactId>validation-api</artifactId>
+    	<!-- 
     	<version>${version.javax.validation}</version>
+    	 -->
 	</dependency>
-	<dependency>
-    	<groupId>org.apache.logging.log4j</groupId>
-    	<artifactId>log4j-api</artifactId>
-    	<version>${version.log4j}</version>
-	</dependency> 
 	
 	<!-- dependency>
 		<groupId>eu.europeana.api</groupId>
@@ -75,12 +72,14 @@
 	<dependency>
 	    <groupId>javax.annotation</groupId>
 	    <artifactId>javax.annotation-api</artifactId>
+	    <!-- 
 	    <version>${version.javax.annotation}</version>
+	     -->
 	</dependency>
 	
 	<dependency>
 		<groupId>eu.europeana.api</groupId>
-		<artifactId>entity-management-config</artifactId>
+		<artifactId>entity-management-common</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</dependency> 
         

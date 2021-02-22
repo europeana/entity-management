@@ -7,26 +7,13 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
 
-  <groupId>eu.europeana.api</groupId>
   <artifactId>entity-management-utils</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
-
   <name>entity-management-utils</name>
   <description>A simple entity-management-utils.</description>
   <!-- FIXME change it to the project's website -->
   <url>http://www.example.com</url>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
-
   <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-    </dependency>
-    
 	<dependency>
 	    <groupId>com.fasterxml.jackson.dataformat</groupId>
 	    <artifactId>jackson-dataformat-xml</artifactId>
@@ -38,7 +25,9 @@
 	<dependency>
 		<groupId>org.springframework</groupId>
 		<artifactId>spring-context</artifactId>
+		<!-- 
 		<version>${version.spring}</version>
+		 -->
 	</dependency>
 	
   
@@ -47,6 +36,26 @@
 		<artifactId>entity-management-definitions</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</dependency> 
+	
+	<dependency>
+			<groupId>eu.europeana.corelib</groupId>
+			<artifactId>corelib-schemaorg</artifactId>
+			<version>${version.corelib}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.mongodb.morphia</groupId>
+					<artifactId>morphia</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>eu.europeana.corelib</groupId>
+					<artifactId>corelib-storage</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.mongodb</groupId>
+					<artifactId>mongodb-driver-core</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 
   </dependencies>
 

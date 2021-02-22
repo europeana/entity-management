@@ -2,6 +2,8 @@ package eu.europeana.entitymanagement.vocabulary;
 
 public final class XmlFields {
 
+	public static final String LANG = "lang";
+	
     public static final String XML_RDF_ABOUT = "rdf:about";
     public static final String XML_RDF_RESOURCE = "rdf:resource";
     public static final String XML_LANG = "xml:lang";

@@ -1,32 +1,38 @@
 package eu.europeana.entitymanagement.web.service.impl;
 
+import javax.annotation.Resource;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import eu.europeana.api.commons.error.EuropeanaApiException;
-import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.config.AppConfig;
+import eu.europeana.entitymanagement.definitions.model.impl.EntityImpl;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
-import eu.europeana.entitymanagement.web.model.metis.EnrichmentResultList;
+import eu.europeana.entitymanagement.web.xml.model.metis.EnrichmentResultList;
 
 /**
  * Handles de-referencing entities from Metis.
  */
-@Service
+@Service(AppConfig.BEAN_METIS_DEREF_SERVICE)
 public class MetisDereferenceService {
     private static final Logger logger = LogManager.getLogger(MetisDereferenceService.class);
 
-    private final WebClient webClient;
+    private WebClient metisWebClient;
+    
+    @Resource(name = AppConfig.BEAN_EM_CONFIGURATION)
+    private EntityManagementConfiguration configuration;
 
 
-    @Autowired
-    public MetisDereferenceService(WebClient webClient) {
-        this.webClient = webClient;
-    }
+//    @Autowired
+//    public MetisDereferenceService(WebClient webClient) {
+//        this.metisWebClient = webClient;
+//    }
 
     /**
      * Dereferences the entity with the given id value.
@@ -34,10 +40,10 @@ public class MetisDereferenceService {
      * @param id external ID for entity
      * @return An optional containing the de-referenced entity, or an empty optional if no match found.
      */
-    public BaseEntity dereferenceEntityById(String id) throws HttpBadRequestException {
+    public EntityImpl dereferenceEntityById(String id) throws HttpBadRequestException {
         logger.info("De-referencing entity {} with Metis", id);
 
-        EnrichmentResultList metisResponse = webClient.get()
+        EnrichmentResultList metisResponse = getMetisWebClient().get()
                 .uri(uriBuilder ->
                         uriBuilder.path("/dereference")
                                 .queryParam("uri", id).build())
@@ -63,7 +69,7 @@ public class MetisDereferenceService {
         }
 
         // see test/resources/metis-deref/response.xml for XML structure of metis response.
-        BaseEntity xmlBaseEntity = metisResponse
+        EntityImpl xmlBaseEntity = metisResponse
                 .getEnrichmentBaseResultWrapperList()
                 .get(0)
                 .getEnrichmentBaseList()
@@ -71,6 +77,14 @@ public class MetisDereferenceService {
 
         logger.info("Metis dereference response for entity {}: {} ", id, xmlBaseEntity);
 
-        return xmlBaseEntity;
+        return null;
+    }
+    
+//    @Bean
+    public WebClient getMetisWebClient() {
+	if(metisWebClient == null) {
+	    metisWebClient = WebClient.builder().baseUrl(configuration.getMetisBaseUrl()).build();
+	}
+	return metisWebClient;
     }
 }

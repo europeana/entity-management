@@ -9,6 +9,11 @@ import com.fasterxml.jackson.databind.ser.std.StdScalarSerializer;
 public class XmlStringSerializer extends StdScalarSerializer<String>{
 
     
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 8856366116432314400L;
+
     protected XmlStringSerializer() {
 	super(String.class);
 	// TODO Auto-generated constructor stub
