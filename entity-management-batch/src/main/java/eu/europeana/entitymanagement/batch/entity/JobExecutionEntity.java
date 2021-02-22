@@ -99,7 +99,7 @@ public class JobExecutionEntity {
 
         JobExecution jobExecution = new JobExecution(jobExecutionEntity.getJobExecutionId());
         jobExecution.setStartTime(jobExecutionEntity.getStartTime());
-        jobExecution.setEndTime(jobExecutionEntity.getStartTime());
+        jobExecution.setEndTime(jobExecutionEntity.getEndTime());
         jobExecution.setStatus(BatchStatus.valueOf(jobExecutionEntity.getStatus()));
         jobExecution.setExitStatus(new ExitStatus(jobExecutionEntity.getExitCode()));
 

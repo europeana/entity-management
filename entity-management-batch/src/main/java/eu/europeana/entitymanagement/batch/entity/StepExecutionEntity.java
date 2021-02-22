@@ -149,7 +149,7 @@ public class StepExecutionEntity {
         stepExecution.setWriteSkipCount(entity.getWriteSkipCount());
         stepExecution.setProcessSkipCount(entity.getProcessSkipCount());
         stepExecution.setRollbackCount(entity.getRollbackCount());
-        stepExecution.setLastUpdated(entity.lastUpdated);
+        stepExecution.setLastUpdated(entity.getLastUpdated());
         stepExecution.setVersion(entity.getVersion());
         return stepExecution;
     }

@@ -72,27 +72,11 @@ public class JobExecutionRepository extends AbstractRepository implements JobExe
                 throw new NoSuchObjectException("Invalid JobExecution, ID " + jobExecution.getId() + " not found.");
             }
 
-            UpdateResult result = getDataStore().find(JobExecutionEntity.class)
-                    .filter(
-                            eq(JOB_EXECUTION_ID_KEY, jobExecutionId),
-                            eq(VERSION_KEY, jobExecution.getVersion())
-                    )
-                    .update(
-                            UpdateOperators.set(JOB_EXECUTION_ID_KEY, jobExecutionId),
-                            UpdateOperators.set(VERSION_KEY, nextVersion),
-                            UpdateOperators.set(JOB_INSTANCE_ID_KEY, jobExecution.getJobInstance()),
-                            UpdateOperators.set(START_TIME_KEY, jobExecution.getStartTime()),
-                            UpdateOperators.set(END_TIME_KEY, jobExecution.getEndTime()),
-                            UpdateOperators.set(STATUS_KEY, jobExecution.getStatus().toString()),
-                            UpdateOperators.set(EXIT_CODE_KEY, jobExecution.getExitStatus().getExitCode()),
-                            UpdateOperators.set(EXIT_MESSAGE_KEY, jobExecution.getExitStatus().getExitDescription()),
-                            UpdateOperators.set(CREATE_TIME_KEY, jobExecution.getCreateTime()),
-                            UpdateOperators.set(LAST_UPDATED_KEY, jobExecution.getLastUpdated())
-                    ).execute();
+            UpdateResult result = queryUpdateJobExecution(jobExecution, jobExecutionId, nextVersion);
 
             // Avoid concurrent modifications
             if (result.getModifiedCount() == 0) {
-                int currentVersion = getJobExecutionVersion(jobExecutionId);
+                int currentVersion = queryGetJobExecutionVersion(jobExecutionId);
                 throw new OptimisticLockingFailureException("Attempt to update job execution id="
                         + jobExecution.getId() + " with wrong version (" + jobExecution.getVersion()
                         + "), where current version is " + currentVersion);
@@ -100,12 +84,13 @@ public class JobExecutionRepository extends AbstractRepository implements JobExe
         }
     }
 
+
     @Override
     public List<JobExecution> findJobExecutions(final JobInstance job) {
         Assert.notNull(job, "Job cannot be null.");
         Assert.notNull(job.getId(), "Job Id cannot be null.");
 
-        return getJobExecutions(job.getId()).stream()
+        return queryGetJobExecutions(job.getId()).stream()
                 .map(JobExecutionEntity::fromEntity).collect(Collectors.toList());
     }
 
@@ -113,7 +98,7 @@ public class JobExecutionRepository extends AbstractRepository implements JobExe
     @Override
     public JobExecution getLastJobExecution(JobInstance jobInstance) {
         long id = jobInstance.getId();
-        JobExecutionEntity executionEntity = getLastJobExecutionForInstance(id);
+        JobExecutionEntity executionEntity = queryGetLastJobExecutionForInstance(id);
 
         if (executionEntity == null) {
             return null;
@@ -127,7 +112,7 @@ public class JobExecutionRepository extends AbstractRepository implements JobExe
     @Override
     public Set<JobExecution> findRunningJobExecutions(String jobName) {
         List<Long> ids = getJobInstanceIdsWithName(jobName);
-        List<JobExecutionEntity> jobExecutions = getRunningJobExecutions(ids);
+        List<JobExecutionEntity> jobExecutions = queryGetRunningJobExecutions(ids);
 
         return jobExecutions.stream().map(JobExecutionEntity::fromEntity).collect(Collectors.toSet());
     }
@@ -140,10 +125,10 @@ public class JobExecutionRepository extends AbstractRepository implements JobExe
 
     @Override
     public void synchronizeStatus(JobExecution jobExecution) {
-        int currentVersion = getJobExecutionVersion(jobExecution.getId());
+        int currentVersion = queryGetJobExecutionVersion(jobExecution.getId());
 
-        if (currentVersion != jobExecution.getVersion().intValue()) {
-            String status = getJobExecutionStatus(jobExecution.getId());
+        if (currentVersion != jobExecution.getVersion()) {
+            String status = queryGetJobExecutionStatus(jobExecution.getId());
             jobExecution.upgradeStatus(BatchStatus.valueOf(status));
             jobExecution.setVersion(currentVersion);
         }
@@ -174,7 +159,7 @@ public class JobExecutionRepository extends AbstractRepository implements JobExe
      * @param jobExecutionId
      * @return
      */
-    private int getJobExecutionVersion(long jobExecutionId) {
+    private int queryGetJobExecutionVersion(long jobExecutionId) {
         return
                 getDataStore().find(JobExecutionEntity.class)
                         .filter(eq(JOB_EXECUTION_ID_KEY, jobExecutionId))
@@ -184,8 +169,27 @@ public class JobExecutionRepository extends AbstractRepository implements JobExe
                         .next().getVersion();
     }
 
+    private UpdateResult queryUpdateJobExecution(JobExecution jobExecution, Long jobExecutionId, int nextVersion) {
+        return getDataStore().find(JobExecutionEntity.class)
+                .filter(
+                        eq(JOB_EXECUTION_ID_KEY, jobExecutionId),
+                        eq(VERSION_KEY, jobExecution.getVersion())
+                )
+                .update(
+                        UpdateOperators.set(JOB_EXECUTION_ID_KEY, jobExecutionId),
+                        UpdateOperators.set(VERSION_KEY, nextVersion),
+                        UpdateOperators.set(JOB_INSTANCE_ID_KEY, jobExecution.getJobInstance()),
+                        UpdateOperators.set(START_TIME_KEY, jobExecution.getStartTime()),
+                        UpdateOperators.set(END_TIME_KEY, jobExecution.getEndTime()),
+                        UpdateOperators.set(STATUS_KEY, jobExecution.getStatus().toString()),
+                        UpdateOperators.set(EXIT_CODE_KEY, jobExecution.getExitStatus().getExitCode()),
+                        UpdateOperators.set(EXIT_MESSAGE_KEY, jobExecution.getExitStatus().getExitDescription()),
+                        UpdateOperators.set(CREATE_TIME_KEY, jobExecution.getCreateTime()),
+                        UpdateOperators.set(LAST_UPDATED_KEY, jobExecution.getLastUpdated())
+                ).execute();
+    }
 
-    private String getJobExecutionStatus(long jobExecutionId) {
+    private String queryGetJobExecutionStatus(long jobExecutionId) {
         return
                 getDataStore().find(JobExecutionEntity.class)
                         .filter(eq(JOB_EXECUTION_ID_KEY, jobExecutionId))
@@ -196,17 +200,16 @@ public class JobExecutionRepository extends AbstractRepository implements JobExe
     }
 
 
-    private JobExecutionEntity getLastJobExecutionForInstance(long jobInstanceId) {
+    private JobExecutionEntity queryGetLastJobExecutionForInstance(long jobInstanceId) {
         return getDataStore().find(JobExecutionEntity.class)
                 .filter(eq(JOB_INSTANCE_ID_KEY, jobInstanceId))
                 .iterator(new FindOptions()
                         .sort(descending(CREATE_TIME_KEY))
                         .limit(1))
                 .tryNext();
-
     }
 
-    private List<JobExecutionEntity> getRunningJobExecutions(final List<Long> jobInstanceIds) {
+    private List<JobExecutionEntity> queryGetRunningJobExecutions(final List<Long> jobInstanceIds) {
         return getDataStore().find(JobExecutionEntity.class)
                 .filter(
                         eq(END_TIME_KEY, null),
@@ -215,8 +218,7 @@ public class JobExecutionRepository extends AbstractRepository implements JobExe
                 .iterator(DESCENDING_JOB_EXECUTION).toList();
     }
 
-    //TODO: similar to getRunningJobExecutions. Refactor
-    private List<JobExecutionEntity> getJobExecutions(long jobInstanceId) {
+    private List<JobExecutionEntity> queryGetJobExecutions(long jobInstanceId) {
         return getDataStore().find(JobExecutionEntity.class)
                 .filter(eq(JOB_INSTANCE_ID_KEY, jobInstanceId))
                 .iterator(DESCENDING_JOB_EXECUTION).toList();

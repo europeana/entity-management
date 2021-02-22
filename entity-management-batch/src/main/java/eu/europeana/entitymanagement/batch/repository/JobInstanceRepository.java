@@ -12,6 +12,7 @@ import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.repository.dao.JobInstanceDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
+import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -22,6 +23,7 @@ import static dev.morphia.query.Sort.descending;
 import static dev.morphia.query.experimental.filters.Filters.*;
 import static eu.europeana.entitymanagement.batch.BatchConstants.*;
 
+@Repository
 public class JobInstanceRepository extends AbstractRepository implements JobInstanceDao {
 
     @Autowired
@@ -53,7 +55,7 @@ public class JobInstanceRepository extends AbstractRepository implements JobInst
         Assert.notNull(jobParameters, "JobParameters must not be null.");
 
         String jobKey = JOB_KEY_GENERATOR.generateKey(jobParameters);
-        List<JobInstanceEntity> instances = getJobInstanceFromDb(jobName, jobKey);
+        List<JobInstanceEntity> instances = queryGetJobInstances(jobName, jobKey);
 
         Assert.state(instances.size() == 1, "instance count must be 1 but was " + instances.size());
         return JobInstanceEntity.fromEntity(instances.get(0));
@@ -62,7 +64,7 @@ public class JobInstanceRepository extends AbstractRepository implements JobInst
     @Nullable
     @Override
     public JobInstance getJobInstance(Long instanceId) {
-        return JobInstanceEntity.fromEntity(getJobFromId(instanceId));
+        return JobInstanceEntity.fromEntity(queryGetJobInstance(instanceId));
     }
 
     @Override
@@ -83,7 +85,7 @@ public class JobInstanceRepository extends AbstractRepository implements JobInst
      */
     @Override
     public List<JobInstance> getJobInstances(String jobName, int start, int count) {
-        return queryJobInstances(eq(JOB_NAME_KEY, jobName), start, count)
+        return queryGetJobInstances(eq(JOB_NAME_KEY, jobName), start, count)
                 .stream()
                 .map(JobInstanceEntity::fromEntity)
                 .collect(Collectors.toList());
@@ -107,7 +109,7 @@ public class JobInstanceRepository extends AbstractRepository implements JobInst
     @Override
     public List<JobInstance> findJobInstancesByName(String jobName, final int start, final int count) {
         // create a regex pattern to match on *jobname*;
-        return queryJobInstances(regex(JOB_NAME_KEY).pattern(".*" + jobName + ".*"), start, count)
+        return queryGetJobInstances(regex(JOB_NAME_KEY).pattern(".*" + jobName + ".*"), start, count)
                 .stream()
                 .map(JobInstanceEntity::fromEntity)
                 .collect(Collectors.toList());
@@ -115,7 +117,7 @@ public class JobInstanceRepository extends AbstractRepository implements JobInst
 
     @Override
     public int getJobInstanceCount(String jobName) throws NoSuchJobException {
-        long count = queryJobInstanceCount(jobName);
+        long count = queryCountJobInstances(jobName);
 
         if (count == 0) {
             throw new NoSuchJobException("No job instances were found for job name " + jobName);
@@ -129,7 +131,7 @@ public class JobInstanceRepository extends AbstractRepository implements JobInst
         return this.datastore;
     }
 
-    private JobInstanceEntity getJobFromId(long jobInstanceId) {
+    private JobInstanceEntity queryGetJobInstance(long jobInstanceId) {
         return getDataStore().find(JobInstanceEntity.class)
                 .filter(eq(JOB_INSTANCE_ID_KEY, jobInstanceId))
                 .first();
@@ -139,12 +141,13 @@ public class JobInstanceRepository extends AbstractRepository implements JobInst
     /**
      * Gets JobInstanceEntities matching the provided query parameters.
      * Results are sorted with most recent first.
+     *
      * @param jobNameFilter Filter to use in query
-     * @param start number of records to skip
-     * @param count limit
+     * @param start         number of records to skip
+     * @param count         limit
      * @return List containing JobInstanceEntities
      */
-    private List<JobInstanceEntity> queryJobInstances(Filter jobNameFilter, int start, int count) {
+    private List<JobInstanceEntity> queryGetJobInstances(Filter jobNameFilter, int start, int count) {
         return getDataStore().find(JobInstanceEntity.class).
                 filter(jobNameFilter)
                 .iterator(new FindOptions()
@@ -153,7 +156,8 @@ public class JobInstanceRepository extends AbstractRepository implements JobInst
                         .limit(count)).toList();
     }
 
-    private List<JobInstanceEntity> getJobInstanceFromDb(String jobName, String jobKey) {
+
+    private List<JobInstanceEntity> queryGetJobInstances(String jobName, String jobKey) {
         final Query<JobInstanceEntity> query = getDataStore().find(JobInstanceEntity.class);
 
         // if jobKey is empty, then return only jobs with an empty key
@@ -166,7 +170,6 @@ public class JobInstanceRepository extends AbstractRepository implements JobInst
                     )
             );
         }
-
         return query.filter(eq(JOB_NAME_KEY, jobName)).iterator().toList();
     }
 
@@ -179,24 +182,11 @@ public class JobInstanceRepository extends AbstractRepository implements JobInst
      * @return
      */
     private List<String> queryDistinctJobNames() {
-
-//        Set<String> result = new HashSet<>();
-//        MorphiaCursor<JobInstanceEntity> iterator = getDataStore().find(JobInstanceEntity.class)
-//                .iterator(new FindOptions()
-//                        .projection().include(JOB_NAME_KEY)
-//                );
-//
-//        while (iterator.hasNext()) {
-//            result.add(iterator.next().getJobName());
-//        }
-//
-//        return new ArrayList<>(result);
-
         return queryDistinctStringValues(JobInstanceEntity.class, JOB_NAME_KEY);
     }
 
 
-    private long queryJobInstanceCount(String jobName) {
+    private long queryCountJobInstances(String jobName) {
         return getDataStore().find(JobInstanceEntity.class)
                 .filter(eq(JOB_NAME_KEY, jobName))
                 .count();

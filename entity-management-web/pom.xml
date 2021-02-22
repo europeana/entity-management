@@ -60,7 +60,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webflux</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>eu.europeana.api</groupId>
+			<artifactId>entity-management-batch</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 
 		<dependency>
 			<groupId>javax.xml.bind</groupId>
@@ -118,20 +122,18 @@
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 
+
+
 		<dependency>
 			<groupId>eu.europeana.corelib</groupId>
 			<artifactId>corelib-utils</artifactId>
 			<version>${version.corelib}</version>
 		</dependency>
 
-		<!-- spring batch dependencies -->
-		<!-- <dependency> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-starter-batch</artifactId> 
-			</dependency> <dependency> <groupId>mysql</groupId> <artifactId>mysql-connector-java</artifactId> 
-			</dependency> <dependency> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-starter-test</artifactId> 
-			<scope>test</scope> </dependency> <dependency> <groupId>org.springframework.batch</groupId> 
-			<artifactId>spring-batch-test</artifactId> <scope>test</scope> </dependency> -->
-
-		<!-- for securing (error) output -->
+		<dependency>
+			<groupId>org.springframework.batch</groupId>
+			<artifactId>spring-batch-core</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.owasp.encoder</groupId>
 			<artifactId>encoder</artifactId>
@@ -173,6 +175,7 @@
 			<artifactId>commons-error</artifactId>
 			<version>${api.commons.version}</version>
 		</dependency>
+
 
 
 	</dependencies>

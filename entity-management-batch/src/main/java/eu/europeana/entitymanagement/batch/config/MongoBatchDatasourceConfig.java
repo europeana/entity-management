@@ -12,9 +12,9 @@ import org.springframework.context.annotation.PropertySource;
 
 @Configuration
 @PropertySource(value = {"classpath:entitymanagement.properties", "classpath:entitymanagement.user.properties"}, ignoreResourceNotFound = true)
-public class BatchDatasourceConfig {
+public class MongoBatchDatasourceConfig {
 
-    private static final Logger logger = LogManager.getLogger(BatchDatasourceConfig.class);
+    private static final Logger logger = LogManager.getLogger(MongoBatchDatasourceConfig.class);
 
     @Value("${mongo.batch.database}")
     private String batchDatabase;
@@ -30,16 +30,6 @@ public class BatchDatasourceConfig {
     @Bean
     public Datastore batchDataStore(MongoClient mongoClient) {
         logger.info("Connecting to Batch database {}", batchDatabase);
-
-
-        Datastore datastore = Morphia.createDatastore(mongoClient, batchDatabase);
-
-        // map Spring Batch entities to Morphia @Embedded entities
-        // see: https://github.com/MorphiaOrg/morphia/issues/1520#issuecomment-727014617
-//        datastore.getMapper().mapExternal(null, JobExecution.class);
-//        datastore.getMapper().mapExternal(null, StepExecution.class);
-//        datastore.getMapper().mapExternal(null, ExecutionContext.class);
-//        datastore.getMapper().mapExternal(null, JobInstance.class);
-        return datastore;
+        return Morphia.createDatastore(mongoClient, batchDatabase);
     }
 }

@@ -11,6 +11,7 @@ import org.springframework.batch.core.repository.dao.StepExecutionDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.lang.Nullable;
+import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
 
 import java.util.Collection;
@@ -21,6 +22,7 @@ import static dev.morphia.query.Sort.ascending;
 import static dev.morphia.query.experimental.filters.Filters.eq;
 import static eu.europeana.entitymanagement.batch.BatchConstants.*;
 
+@Repository
 public class StepExecutionRepository extends AbstractRepository implements StepExecutionDao {
 
     @Autowired
@@ -63,35 +65,12 @@ public class StepExecutionRepository extends AbstractRepository implements StepE
             int nextVersion = stepExecution.getVersion() + 1;
             stepExecution.setVersion(nextVersion);
 
-            UpdateResult result = getDataStore().find(StepExecutionEntity.class)
-                    .filter(
-                            eq(STEP_EXECUTION_ID_KEY, stepExecution.getId()),
-                            eq(VERSION_KEY, stepExecution.getVersion())
-                    )
-                    .update(
-                            UpdateOperators.set(STEP_EXECUTION_ID_KEY, stepExecution.getId()),
-                            UpdateOperators.set(STEP_NAME_KEY, stepExecution.getStepName()),
-                            UpdateOperators.set(JOB_EXECUTION_ID_KEY, stepExecution.getJobExecutionId()),
-                            UpdateOperators.set(START_TIME_KEY, stepExecution.getStartTime()),
-                            UpdateOperators.set(END_TIME_KEY, stepExecution.getEndTime()),
-                            UpdateOperators.set(STATUS_KEY, stepExecution.getStatus().toString()),
-                            UpdateOperators.set(COMMIT_COUNT_KEY, stepExecution.getCommitCount()),
-                            UpdateOperators.set(READ_COUNT_KEY, stepExecution.getReadCount()),
-                            UpdateOperators.set(FILTER_COUT_KEY, stepExecution.getFilterCount()),
-                            UpdateOperators.set(WRITE_COUNT_KEY, stepExecution.getWriteCount()),
-                            UpdateOperators.set(EXIT_CODE_KEY, stepExecution.getExitStatus().getExitCode()),
-                            UpdateOperators.set(EXIT_MESSAGE_KEY, stepExecution.getExitStatus().getExitDescription()),
-                            UpdateOperators.set(READ_SKIP_COUNT_KEY, stepExecution.getReadSkipCount()),
-                            UpdateOperators.set(WRITE_SKIP_COUNT_KEY, stepExecution.getWriteSkipCount()),
-                            UpdateOperators.set(PROCESS_SKIP_COUT_KEY, stepExecution.getProcessSkipCount()),
-                            UpdateOperators.set(ROLLBACK_COUNT_KEY, stepExecution.getRollbackCount()),
-                            UpdateOperators.set(LAST_UPDATED_KEY, stepExecution.getLastUpdated())
-                    ).execute();
+            UpdateResult result = queryUpdateStepExecution(stepExecution);
 
 
             // Avoid concurrent modifications
             if (result.getModifiedCount() == 0) {
-                int currentVersion = getStepExecutionVersion(stepExecution.getId());
+                int currentVersion = queryGetStepExecutionVersion(stepExecution.getId());
                 throw new OptimisticLockingFailureException("Attempt to update step execution id="
                         + stepExecution.getId() + " with wrong version (" + stepExecution.getVersion()
                         + "), where current version is " + currentVersion);
@@ -104,7 +83,7 @@ public class StepExecutionRepository extends AbstractRepository implements StepE
     @Nullable
     @Override
     public StepExecution getStepExecution(JobExecution jobExecution, Long stepExecutionId) {
-        List<StepExecutionEntity> instances = getStepExecutions(jobExecution.getId(), stepExecutionId);
+        List<StepExecutionEntity> instances = queryGetStepExecutions(jobExecution.getId(), stepExecutionId);
         Assert.state(instances.size() <= 1,
                 "There can be at most one step execution with given name for single job execution");
 
@@ -113,7 +92,7 @@ public class StepExecutionRepository extends AbstractRepository implements StepE
 
     @Override
     public void addStepExecutions(JobExecution jobExecution) {
-        List<StepExecutionEntity> results = getStepExecutions(jobExecution.getId());
+        List<StepExecutionEntity> results = queryGetStepExecutionsWithJobExecutionId(jobExecution.getId());
 
         for (StepExecutionEntity entity : results) {
             // this calls the constructor of StepExecution, which adds it to the jobExecution
@@ -149,12 +128,12 @@ public class StepExecutionRepository extends AbstractRepository implements StepE
     /**
      * Gets the StepExecution version saved in the database.
      * <p>
-     * TODO: similar to JobExecutionRepository.getJobExecutionVersion(). Refactor
+     * TODO: similar to JobExecutionRepository.queryGetJobExecutionVersion(). Refactor
      *
      * @param stepExecutionId
      * @return
      */
-    private int getStepExecutionVersion(long stepExecutionId) {
+    private int queryGetStepExecutionVersion(long stepExecutionId) {
         return
                 getDataStore().find(StepExecutionEntity.class)
                         .filter(eq(JOB_EXECUTION_ID_KEY, stepExecutionId))
@@ -164,7 +143,7 @@ public class StepExecutionRepository extends AbstractRepository implements StepE
                         .next().getVersion();
     }
 
-    private List<StepExecutionEntity> getStepExecutions(long jobExecutionId, long stepExecutionId) {
+    private List<StepExecutionEntity> queryGetStepExecutions(long jobExecutionId, long stepExecutionId) {
         return getDataStore().find(StepExecutionEntity.class)
                 .filter(
                         eq(STEP_EXECUTION_ID_KEY, stepExecutionId),
@@ -172,11 +151,37 @@ public class StepExecutionRepository extends AbstractRepository implements StepE
                 ).iterator().toList();
     }
 
-    private List<StepExecutionEntity> getStepExecutions(long jobExecutionId) {
+    private List<StepExecutionEntity> queryGetStepExecutionsWithJobExecutionId(long jobExecutionId) {
         return getDataStore().find(StepExecutionEntity.class)
                 .filter(
                         eq(JOB_EXECUTION_ID_KEY, jobExecutionId)
                 ).iterator(new FindOptions().sort(ascending(STEP_EXECUTION_ID_KEY))).toList();
     }
 
+    private UpdateResult queryUpdateStepExecution(StepExecution stepExecution) {
+        return getDataStore().find(StepExecutionEntity.class)
+                .filter(
+                        eq(STEP_EXECUTION_ID_KEY, stepExecution.getId()),
+                        eq(VERSION_KEY, stepExecution.getVersion())
+                )
+                .update(
+                        UpdateOperators.set(STEP_EXECUTION_ID_KEY, stepExecution.getId()),
+                        UpdateOperators.set(STEP_NAME_KEY, stepExecution.getStepName()),
+                        UpdateOperators.set(JOB_EXECUTION_ID_KEY, stepExecution.getJobExecutionId()),
+                        UpdateOperators.set(START_TIME_KEY, stepExecution.getStartTime()),
+                        UpdateOperators.set(END_TIME_KEY, stepExecution.getEndTime()),
+                        UpdateOperators.set(STATUS_KEY, stepExecution.getStatus().toString()),
+                        UpdateOperators.set(COMMIT_COUNT_KEY, stepExecution.getCommitCount()),
+                        UpdateOperators.set(READ_COUNT_KEY, stepExecution.getReadCount()),
+                        UpdateOperators.set(FILTER_COUT_KEY, stepExecution.getFilterCount()),
+                        UpdateOperators.set(WRITE_COUNT_KEY, stepExecution.getWriteCount()),
+                        UpdateOperators.set(EXIT_CODE_KEY, stepExecution.getExitStatus().getExitCode()),
+                        UpdateOperators.set(EXIT_MESSAGE_KEY, stepExecution.getExitStatus().getExitDescription()),
+                        UpdateOperators.set(READ_SKIP_COUNT_KEY, stepExecution.getReadSkipCount()),
+                        UpdateOperators.set(WRITE_SKIP_COUNT_KEY, stepExecution.getWriteSkipCount()),
+                        UpdateOperators.set(PROCESS_SKIP_COUT_KEY, stepExecution.getProcessSkipCount()),
+                        UpdateOperators.set(ROLLBACK_COUNT_KEY, stepExecution.getRollbackCount()),
+                        UpdateOperators.set(LAST_UPDATED_KEY, stepExecution.getLastUpdated())
+                ).execute();
+    }
 }

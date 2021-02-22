@@ -1,10 +1,9 @@
 package eu.europeana.entitymanagement.batch.repository;
 
 import dev.morphia.Datastore;
-import eu.europeana.entitymanagement.batch.entity.AbstractExecutionContextEntity;
-import eu.europeana.entitymanagement.batch.entity.JobExecutionContextEntity;
-import eu.europeana.entitymanagement.batch.entity.JobExecutionEntity;
-import eu.europeana.entitymanagement.batch.entity.StepExecutionEntity;
+import dev.morphia.query.experimental.updates.UpdateOperators;
+import eu.europeana.entitymanagement.batch.entity.ExecutionContextEntity;
+import eu.europeana.entitymanagement.batch.entity.ExecutionContextEntityType;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.repository.ExecutionContextSerializer;
@@ -20,7 +19,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import static eu.europeana.entitymanagement.batch.BatchConstants.BATCH_INSERT_OPTIONS;
+import static dev.morphia.query.experimental.filters.Filters.eq;
+import static eu.europeana.entitymanagement.batch.BatchConstants.*;
 
 @Repository
 public class ExecutionContextRepository extends AbstractRepository implements ExecutionContextDao {
@@ -33,7 +33,11 @@ public class ExecutionContextRepository extends AbstractRepository implements Ex
 
     @Override
     public ExecutionContext getExecutionContext(JobExecution jobExecution) {
-        return null;
+        Long executionId = jobExecution.getId();
+        Assert.notNull(executionId, "ExecutionId must not be null.");
+
+        ExecutionContextEntity ctxEntity = queryFindExecutionContext(ExecutionContextEntityType.JOB, executionId);
+        return ExecutionContextEntity.fromEntity(ctxEntity, serializer);
     }
 
     @Override
@@ -41,14 +45,15 @@ public class ExecutionContextRepository extends AbstractRepository implements Ex
         Long executionId = stepExecution.getId();
         Assert.notNull(executionId, "ExecutionId must not be null.");
 
-
+        ExecutionContextEntity ctxEntity = queryFindExecutionContext(ExecutionContextEntityType.STEP, executionId);
+        return ExecutionContextEntity.fromEntity(ctxEntity, serializer);
     }
 
     @Override
     public void saveExecutionContext(JobExecution jobExecution) {
         Long executionId = jobExecution.getId();
         ExecutionContext executionContext = jobExecution.getExecutionContext();
-        persistExecutionContext(JobExecutionEntity.class, executionId, executionContext);
+        querySaveExecutionContext(ExecutionContextEntityType.JOB, executionId, executionContext);
     }
 
 
@@ -56,32 +61,35 @@ public class ExecutionContextRepository extends AbstractRepository implements Ex
     public void saveExecutionContext(StepExecution stepExecution) {
         Long executionId = stepExecution.getId();
         ExecutionContext executionContext = stepExecution.getExecutionContext();
-        persistExecutionContext(StepExecutionEntity.class, executionId, executionContext);
+        querySaveExecutionContext(ExecutionContextEntityType.STEP, executionId, executionContext);
     }
 
     @Override
     public void saveExecutionContexts(Collection<StepExecution> stepExecutions) {
         Assert.notNull(stepExecutions, "Attempt to save an null collection of step executions");
-        List<JobExecutionContextEntity> ctxEntities = new ArrayList<>(stepExecutions.size());
+        List<ExecutionContextEntity> ctxEntities = new ArrayList<>(stepExecutions.size());
         for (StepExecution stepExecution : stepExecutions) {
             Long executionId = stepExecution.getId();
             ExecutionContext executionContext = stepExecution.getExecutionContext();
             Assert.notNull(executionId, "ExecutionId must not be null.");
             Assert.notNull(executionContext, "The ExecutionContext must not be null.");
 
-            ctxEntities.add(new JobExecutionContextEntity(executionId, serializeContext(executionContext)));
+            ctxEntities.add(new ExecutionContextEntity(ExecutionContextEntityType.STEP, executionId, serializeContext(executionContext)));
         }
 
         getDataStore().save(ctxEntities, BATCH_INSERT_OPTIONS);
-
-
     }
 
     @Override
     public void updateExecutionContext(final JobExecution jobExecution) {
         Long executionId = jobExecution.getId();
         ExecutionContext executionContext = jobExecution.getExecutionContext();
-        clazz(JobExecutionEntity.class, executionId, executionContext);
+        Assert.notNull(executionId, "ExecutionId must not be null.");
+        Assert.notNull(executionContext, "The ExecutionContext must not be null.");
+
+        String serializedContext = serializeContext(executionContext);
+        queryUpdateExecutionContext(ExecutionContextEntityType.JOB, executionId, serializedContext);
+
     }
 
     @Override
@@ -89,7 +97,11 @@ public class ExecutionContextRepository extends AbstractRepository implements Ex
         synchronized (stepExecution) {
             Long executionId = stepExecution.getId();
             ExecutionContext executionContext = stepExecution.getExecutionContext();
-            clazz(JobExecutionEntity.class, executionId, executionContext);
+            Assert.notNull(executionId, "ExecutionId must not be null.");
+            Assert.notNull(executionContext, "The ExecutionContext must not be null.");
+
+            String serializedContext = serializeContext(executionContext);
+            queryUpdateExecutionContext(ExecutionContextEntityType.STEP, executionId, serializedContext);
         }
     }
 
@@ -100,21 +112,37 @@ public class ExecutionContextRepository extends AbstractRepository implements Ex
     }
 
 
-    private JobExecutionContextEntity findStepExecutionContext(long stepExecutionId){
 
+    private void queryUpdateExecutionContext(ExecutionContextEntityType type, Long executionId, String serializedContext) {
+        getDataStore().find(ExecutionContextEntity.class)
+                .filter(
+                        eq(EXECUTION_CTX_ID_KEY, executionId),
+                        eq(EXECUTION_CTX_TYPE_KEY, type.toString())
+                )
+                .update(
+                        UpdateOperators.set(EXECUTION_CTX_SERIALIZED_KEY, serializedContext)
+                ).execute();
     }
 
-    private <T extends AbstractExecutionContextEntity> void persistExecutionContext(Class<T> type, Long executionId, ExecutionContext executionContext) {
+
+
+    private ExecutionContextEntity queryFindExecutionContext(ExecutionContextEntityType type, long executionId) {
+        return getDataStore().find(ExecutionContextEntity.class)
+                .filter(
+                        eq(EXECUTION_CTX_TYPE_KEY, type.toString()),
+                        eq(EXECUTION_CTX_ID_KEY, executionId)
+                ).first();
+    }
+
+    private void querySaveExecutionContext(ExecutionContextEntityType type, Long executionId, ExecutionContext executionContext) {
         Assert.notNull(executionId, "ExecutionId must not be null.");
         Assert.notNull(executionContext, "The ExecutionContext must not be null.");
-
         String serializedContext = serializeContext(executionContext);
-
-
-        getDataStore().save(AbstractExecutionContextEntity.toEntity(type, executionId, serializedContext));
+        getDataStore().save(ExecutionContextEntity.toEntity(type, executionId, serializedContext));
     }
 
     /**
+     * Serializes the ExecutionContext
      * Reproduced from {@link org.springframework.batch.core.repository.dao.JdbcExecutionContextDao}
      */
     private String serializeContext(ExecutionContext ctx) {

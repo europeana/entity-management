@@ -72,7 +72,15 @@ public class JobInstanceEntity {
             return null;
         }
 
-        return new JobInstance(jobInstanceEntity.getJobInstanceId(), jobInstanceEntity.getJobName());
+        JobInstance jobInstance = new JobInstance(jobInstanceEntity.getJobInstanceId(), jobInstanceEntity.getJobName());
 
+        /*
+         * Instance version is incremented here in Spring Batch {@link org.springframework.batch.core.repository.dao.JdbcJobInstanceDao}
+         * Not sure why though.
+         */
+
+        jobInstance.incrementVersion();
+
+        return jobInstance;
     }
 }

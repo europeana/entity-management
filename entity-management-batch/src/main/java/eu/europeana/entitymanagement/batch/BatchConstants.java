@@ -10,8 +10,6 @@ public class BatchConstants {
 
     public static final String VERSION_KEY = "version";
 
-
-
     public static final String START_TIME_KEY = "startTime";
     public static final String END_TIME_KEY = "endTime";
     public static final String EXIT_CODE_KEY = "exitCode";
@@ -24,7 +22,6 @@ public class BatchConstants {
     public static final String JOB_NAME_KEY = "jobName";
     public static final String JOB_INSTANCE_ID_KEY = "jobInstanceId";
     public static final String JOB_KEY_KEY = "jobKey";
-    public static final String JOB_PARAMETERS_KEY = "jobParameters";
 
     public static final String DOT_ESCAPE_STRING = "\\-";
     public static final String DOT_STRING = "\\.";
@@ -35,7 +32,10 @@ public class BatchConstants {
 
     // Job Execution Contexts Constants
     public static final String STEP_EXECUTION_ID_KEY = "stepExecutionId";
-    public static final String TYPE_SUFFIX = "_TYPE";
+
+    public static final String EXECUTION_CTX_ID_KEY = "executionId";
+    public static final String EXECUTION_CTX_TYPE_KEY = "type";
+    public static final String EXECUTION_CTX_SERIALIZED_KEY = "serializedContext";
 
     // Step Execution Constants
     public static final String STEP_NAME_KEY = "stepName";
