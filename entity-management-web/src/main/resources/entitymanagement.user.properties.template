@@ -1,6 +1,7 @@
 # mongodb
-spring.data.mongodb.repositories.enabled = true
-spring.data.mongodb.uri=mongodb://localhost:27017/entity-management
+mongo.connectionUrl = mongodb://localhost:27017
+mongo.em.database = entity-management
+mongo.batch.database = job-repository
 
 # Socks proxy configuration
 socks.enabled=false
@@ -16,4 +17,4 @@ europeana.apikey.jwttoken.siganturekey=
 entitymanagement.solr.pr.url=
 #url for the search api solr
 entitymanagement.solr.searchapi.url=
-    
+

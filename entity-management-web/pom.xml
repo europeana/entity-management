@@ -39,6 +39,11 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.springframework.batch</groupId>
+			<artifactId>spring-batch-core</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-boot-starter</artifactId>
 			<version>${swagger.version}</version>
@@ -115,6 +120,12 @@
 		<dependency>
 			<groupId>eu.europeana.api</groupId>
 			<artifactId>entity-management-utils</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>eu.europeana.api</groupId>
+			<artifactId>entity-management-batch</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 
