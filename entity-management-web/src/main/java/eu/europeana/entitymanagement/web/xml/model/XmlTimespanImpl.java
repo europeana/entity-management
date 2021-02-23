@@ -14,11 +14,11 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 
 
-@JacksonXmlRootElement(localName = XmlConstants.XML_EDM_TIMESPAN)
+@JacksonXmlRootElement(localName = XmlConstants.XML_TIMESPAN)
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({XmlConstants.DEPICTION, XmlConstants.PREF_LABEL, XmlConstants.ALT_LABEL, XmlConstants.XML_SKOS_HIDDEN_LABEL,
-    	XmlConstants.XML_EDM_BEGIN,XmlConstants.XML_EDM_END,XmlConstants.XML_DCTERMS_IS_PART_OF,XmlConstants.XML_OWL_SAME_AS,
-    	XmlConstants.XML_EDM_WEB_RESOURCE, XmlConstants.XML_EDM_IS_NEXT_IN_SEQUENCE})
+    	XmlConstants.XML_BEGIN,XmlConstants.XML_END,XmlConstants.XML_IS_PART_OF,XmlConstants.XML_SAME_AS,
+    	XmlConstants.XML_EDM_WEB_RESOURCE, XmlConstants.XML_IS_NEXT_IN_SEQUENCE})
 public class XmlTimespanImpl extends XmlBaseEntityImpl {
     	
     	public XmlTimespanImpl(Timespan timespan) {
@@ -26,19 +26,19 @@ public class XmlTimespanImpl extends XmlBaseEntityImpl {
     	}
 
 	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_DCTERMS_IS_PART_OF)
+	@JacksonXmlProperty(localName = XmlConstants.XML_IS_PART_OF)
 	public List<RdfResource> getIsPartOf() {
 	    	return RdfXmlUtils.convertToRdfResource(((Timespan)entity).getIsPartOfArray());
 	}
 	
 	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_EDM_BEGIN)
+	@JacksonXmlProperty(localName = XmlConstants.XML_BEGIN)
 	public String getBegin() {
 	    	return ((Timespan)entity).getBeginString();
 	}
 
 	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_EDM_END)
+	@JacksonXmlProperty(localName = XmlConstants.XML_END)
 	public String getEnd() {
 	    	return ((Timespan)entity).getEndString();
 	}
@@ -50,7 +50,7 @@ public class XmlTimespanImpl extends XmlBaseEntityImpl {
 	}
 
 	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_EDM_IS_NEXT_IN_SEQUENCE)
+	@JacksonXmlProperty(localName = XmlConstants.XML_IS_NEXT_IN_SEQUENCE)
 	public List<RdfResource> getIsNextInSequence() {
 	    	return RdfXmlUtils.convertToRdfResource(((Timespan)entity).getIsNextInSequence());
 	}

@@ -5,7 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 import eu.europeana.entitymanagement.definitions.model.Timespan;
@@ -19,34 +20,37 @@ public class TimespanImpl extends BaseEntity implements Timespan, eu.europeana.c
 	private String begin;
 	private String end;
 
-    @JsonProperty(WebEntityFields.IS_NEXT_IN_SEQUENCE)
+    @JsonGetter(WebEntityFields.IS_NEXT_IN_SEQUENCE)
     @JacksonXmlProperty(localName = XmlFields.XML_EDM_IS_NEXT_IN_SEQUENCE)
     public String[] getIsNextInSequence() {
 	return isNextInSequence;
     }
 
+    @JsonSetter(WebEntityFields.IS_NEXT_IN_SEQUENCE)
     public void setIsNextInSequence(String[] isNextInSequence) {
 	this.isNextInSequence = isNextInSequence;
     }
 
+    @JsonSetter(WebEntityFields.BEGIN)
     public void setBeginString(String begin) {
         this.begin = begin;
     }
 
+    @JsonSetter(WebEntityFields.END)
     public void setEndString(String end) {
         this.end = end;
     }
 
     
     @Override
-    @JsonProperty(WebEntityFields.BEGIN)
+    @JsonGetter(WebEntityFields.BEGIN)
     @JacksonXmlProperty(localName = XmlFields.XML_EDM_BEGIN)
     public String getBeginString() {
 	return begin;
     }
 
     @Override
-    @JsonProperty(WebEntityFields.END)
+    @JsonGetter(WebEntityFields.END)
     @JacksonXmlProperty(localName = XmlFields.XML_EDM_END)
     public String getEndString() {
 	return end;

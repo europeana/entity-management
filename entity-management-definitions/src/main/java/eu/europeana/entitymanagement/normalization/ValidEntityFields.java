@@ -8,6 +8,8 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
+import eu.europeana.entitymanagement.normalization.ValidEntityFieldsValidator;
+
 /**
  * Check that the entity fields values are valid.
  * @author StevaneticS
