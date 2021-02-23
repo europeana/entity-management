@@ -12,13 +12,13 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;;
 
-@JacksonXmlRootElement(localName = XmlConstants.XML_EDM_ORGANIZATION)
+@JacksonXmlRootElement(localName = XmlConstants.XML_ORGANIZATION)
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({XmlConstants.DEPICTION, XmlConstants.PREF_LABEL, XmlConstants.XML_EDM_ACRONYM, XmlConstants.ALT_LABEL,
-    	XmlConstants.XML_DC_DESCRIPTION, XmlConstants.XML_FOAF_LOGO, XmlConstants.XML_EDM_EUROPEANA_ROLE, XmlConstants.XML_EDM_ORGANIZATION_DOMAIN,
-    	XmlConstants.XML_EDM_GEOGRAPHIC_LEVEL, XmlConstants.XML_EDM_COUNTRY, XmlConstants.XML_FOAF_HOMEPAGE, XmlConstants.XML_FOAF_PHONE,
-    	XmlConstants.XML_FOAF_MBOX, XmlConstants.XML_VCARD_HAS_ADDRESS, XmlConstants.XML_VCARD_ADDRESS, XmlConstants.XML_DC_IDENTIFIER, 
-    	XmlConstants.XML_OWL_SAME_AS, XmlConstants.IS_AGGREGATED_BY})
+@JsonPropertyOrder({XmlConstants.DEPICTION, XmlConstants.PREF_LABEL, XmlConstants.XML_ACRONYM, XmlConstants.ALT_LABEL,
+    	XmlConstants.XML_DESCRIPTION, XmlConstants.XML_LOGO, XmlConstants.XML_EUROPEANA_ROLE, XmlConstants.XML_ORGANIZATION_DOMAIN,
+    	XmlConstants.XML_GEOGRAPHIC_LEVEL, XmlConstants.XML_COUNTRY, XmlConstants.XML_HOMEPAGE, XmlConstants.XML_PHONE,
+    	XmlConstants.XML_MBOX, XmlConstants.XML_HAS_ADDRESS, XmlConstants.XML_ADDRESS, XmlConstants.XML_IDENTIFIER, 
+    	XmlConstants.XML_SAME_AS, XmlConstants.IS_AGGREGATED_BY})
 public class XmlOrganizationImpl extends XmlBaseEntityImpl {
 
 	public XmlOrganizationImpl(Organization organization) {
@@ -26,18 +26,18 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl {
 	}
 	
 	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_EDM_ACRONYM)
+	@JacksonXmlProperty(localName = XmlConstants.XML_ACRONYM)
 	public List<XmlMultilingualString> getAcronym() {		
 		return RdfXmlUtils.convertToXmlMultilingualString(getOrganization().getAcronym());
 	}
 	
 	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_DC_DESCRIPTION)
+	@JacksonXmlProperty(localName = XmlConstants.XML_DESCRIPTION)
 	public List<XmlMultilingualString> getDescription() {
 		return RdfXmlUtils.convertMapToXmlMultilingualString(getOrganization().getDescription());
 	}
 	
-	@JacksonXmlProperty(localName = XmlConstants.XML_FOAF_LOGO)
+	@JacksonXmlProperty(localName = XmlConstants.XML_LOGO)
 	public EdmWebResource getLogo() {
 	    	if(getOrganization().getLogo() == null)
 	    	    return null;
@@ -45,31 +45,31 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl {
 	}
 	
 	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_EDM_EUROPEANA_ROLE)
+	@JacksonXmlProperty(localName = XmlConstants.XML_EUROPEANA_ROLE)
 	public List<XmlMultilingualString> getEuropeanaRole() {
 		return RdfXmlUtils.convertToXmlMultilingualString(getOrganization().getEuropeanaRole());
 	}
 	
 	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_EDM_ORGANIZATION_DOMAIN)
+	@JacksonXmlProperty(localName = XmlConstants.XML_ORGANIZATION_DOMAIN)
 	public List<XmlMultilingualString> getOrganizationDomain() {
 		return RdfXmlUtils.convertToXmlMultilingualString(getOrganization().getOrganizationDomain());
 	}
 	
 	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_EDM_GEOGRAPHIC_LEVEL)
+	@JacksonXmlProperty(localName = XmlConstants.XML_GEOGRAPHIC_LEVEL)
 	public List<XmlMultilingualString> getGeographicLevel() {
 		return RdfXmlUtils.convertMapToXmlMultilingualString(getOrganization().getGeographicLevel());
 	}
 	
-	@JacksonXmlProperty(localName = XmlConstants.XML_EDM_COUNTRY)
+	@JacksonXmlProperty(localName = XmlConstants.XML_COUNTRY)
 	public String getCountry() {
 	    	if(getOrganization().getCountry() == null || getOrganization().getCountry().isEmpty())
 	    	    return null;
 		return getOrganization().getCountry();
 	}
 	
-	@JacksonXmlProperty(localName = XmlConstants.XML_FOAF_HOMEPAGE)
+	@JacksonXmlProperty(localName = XmlConstants.XML_HOMEPAGE)
 	public RdfResource getHomepage() {
 	    	if(getOrganization().getHomepage() == null)
 	    	    return null;
@@ -77,7 +77,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl {
 	}
 	
 	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_FOAF_PHONE)
+	@JacksonXmlProperty(localName = XmlConstants.XML_PHONE)
 	public List<String> getPhone() {
 	    	if(getOrganization().getPhone() == null || getOrganization().getPhone().size() == 0)
 	    	    return null;
@@ -85,7 +85,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl {
 	}
 	
 	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_FOAF_MBOX)
+	@JacksonXmlProperty(localName = XmlConstants.XML_MBOX)
 	public List<String> getMbox() {
 	    	if(getOrganization().getMbox() == null || getOrganization().getMbox().size() == 0)
 	    	    return null;
@@ -93,7 +93,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl {
 	}
 	
 	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_DC_IDENTIFIER)
+	@JacksonXmlProperty(localName = XmlConstants.XML_IDENTIFIER)
 	public String[] getIdentifier() {
 	    	return getOrganization().getIdentifier();
 	}
@@ -108,8 +108,8 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl {
 	 *  This conversion is needed, because we have a two level object 
 	 *  <vcard:hasAddress><vcard:Address>....</vcard:hasAddress></vcard:Address>
 	 */
-	@JacksonXmlElementWrapper(localName = XmlConstants.XML_VCARD_HAS_ADDRESS)
-	@JacksonXmlProperty(localName = XmlConstants.XML_VCARD_ADDRESS)
+	@JacksonXmlElementWrapper(localName = XmlConstants.XML_HAS_ADDRESS)
+	@JacksonXmlProperty(localName = XmlConstants.XML_ADDRESS)
 	public XmlAddressImpl[] getHasAddress() {
 	    	XmlAddressImpl[] tmp = {new XmlAddressImpl(getOrganization())};
 	    	return tmp;
