@@ -35,7 +35,7 @@ public class EntityRecordRepositoryTest {
 		EntityRecordRepository entityRecordRepository = context.getBean(EntityRecordRepository.class);
     	
 		TimespanImpl entity = new TimespanImpl();
-    	entity.setEntityId("http://data.europeana.eu/timespan/base/ 3");
+    	entity.setEntityId("http://data.europeana.eu/timespan/base/3");
     	entity.setType("Timespan");
     	entity.setBeginString("0001-01-01");
     	entity.setEndString("0100-12-31");
@@ -75,6 +75,7 @@ public class EntityRecordRepositoryTest {
     	entityRecordImpl.setEntityId(entity.getEntityId());
     	entityRecordImpl.getEntity().setIsAggregatedBy(aggregation);
     	entityRecordImpl.setProxies(proxies);
+    	entityRecordImpl.setDisabled(false);
     	
     	entityRecordRepository.save(entityRecordImpl);
     	

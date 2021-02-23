@@ -35,6 +35,8 @@ public class EntityRecordImpl implements EntityRecord{
 
     private List<EntityProxy> proxies; 
     
+    private boolean disabled;
+    
 
     @Override
     @JsonProperty
@@ -80,5 +82,15 @@ public class EntityRecordImpl implements EntityRecord{
 	@Override
 	public long getDbId() {
 		return dbId;
+	}
+
+	@Override
+	public boolean getDisabled() {
+		return this.disabled;
+	}
+
+	@Override
+	public void setDisabled(boolean disabledParam) {
+		this.disabled = disabledParam;
 	}
 }

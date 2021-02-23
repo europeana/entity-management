@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.config.AppConfig;
@@ -30,7 +31,6 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
-import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
@@ -60,27 +60,36 @@ public class EMController extends BaseRest {
     @Resource(name = AppConfig.BEAN_EM_DATA_SOURCES)
     private DataSources datasources;
 
-    @ApiOperation(value = "Delete an entity", nickname = "deleteEntity", response = java.lang.Void.class)
+    @ApiOperation(value = "Disable an entity", nickname = "disableEntity", response = java.lang.Void.class)
     @RequestMapping(value = "/{type}/{namespace}/{identifier}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> deleteEntity(
+    public ResponseEntity<String> disableEntity(
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_NAMESPACE) String namespace,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
-	    HttpServletRequest request) {
-	String entityUri = getEntityUri(type, namespace, identifier.toLowerCase());
-	
-	//TODO create disable entity method in EntityRecordService and implement it accordign to the specs.
-//	long numberDeletedEntities = entityRecordRepository.deleteForGood(entityUri);
-	long numberDeletedEntities = 0;
-	if (numberDeletedEntities == 0) {
-	    return ResponseEntity.notFound()
-		    .header("info:", "There is no entity with the given identifier to be deleted.").build();
-	} else {
-	    String response = "The request is executed successfully. The number of deleted entites is: "
-		    + String.valueOf(numberDeletedEntities);
-	    return ResponseEntity.noContent().header("info:", response).build();
-	}
+	    HttpServletRequest request) throws HttpException {
+    	
+    	String entityUri = getEntityUri(type, namespace, identifier.toLowerCase());
+    	Optional<EntityRecord> existingEntity = entityRecordService.retrieveEntityRecordByUri(entityUri);
+    	if (existingEntity.isPresent()) {
+    		
+			Date timestamp = (existingEntity.get().getEntity().getIsAggregatedBy() != null) ? existingEntity.get().getEntity().getIsAggregatedBy().getModified() : null;
+			Date etagDate = (timestamp != null)? timestamp : new Date();
+			String etag = generateETag(etagDate, FormatTypes.jsonld.name(), getApiVersion());
+			
+			checkIfMatchHeader(etag, request);
+			
+			/*
+			 * TODO: disable the record in the index, too
+			 */
+			entityRecordService.disableEntityRecord(existingEntity.get());
+			
+		    return ResponseEntity.status(HttpStatus.ACCEPTED).header("info:", "The request is executed successfully.").build();
+    	}
+    	else {
+    		return ResponseEntity.notFound().header("info:", "There is no entity with the given identifier to be disabled.").build();
+    	}
+
     }
 
     @ApiOperation(value = "Retrieve a known entity", nickname = "getEntityJsonLd", response = java.lang.Void.class)
