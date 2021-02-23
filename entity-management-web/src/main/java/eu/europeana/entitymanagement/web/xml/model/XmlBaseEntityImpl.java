@@ -110,7 +110,7 @@ public abstract class XmlBaseEntityImpl {
 	return this.altLabel;
     }
 
-    @XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.XML_OWL_SAME_AS)
+    @XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.XML_SAME_AS)
     public List<RdfResource> getSameAs() {
 	return this.sameAs;
     }

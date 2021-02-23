@@ -55,7 +55,7 @@ public abstract class BaseEntity implements Entity {
 
 	// The time at which the Set was modified, after creation. 
 //	protected Date modified;
-	private Aggregation isAggregatedBy;
+	protected Aggregation isAggregatedBy;
 	protected WebResource referencedWebResource;
 
 	@Override

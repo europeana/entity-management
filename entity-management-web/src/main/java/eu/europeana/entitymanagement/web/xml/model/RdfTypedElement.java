@@ -22,7 +22,7 @@ public class RdfTypedElement {
 	this.type = DATA_TYPE_DATETIME;
     }
     
-    @JacksonXmlProperty(isAttribute= true, localName= XmlConstants.XML_RDF_DATATYPE)
+    @JacksonXmlProperty(isAttribute= true, localName= XmlConstants.XML_DATATYPE)
     public String getType() {
 	return type;
     }

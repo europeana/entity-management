@@ -4,8 +4,9 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
@@ -29,68 +30,74 @@ public class ConceptImpl extends BaseEntity implements Concept {
 	private String[] inScheme;
 	private Map<String, List<String>> notation;
 
-	@JsonProperty(WebEntityFields.BROADER)
+	@JsonGetter(WebEntityFields.BROADER)
 	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_BROADER)
 	public String[] getBroader() {
 		return broader;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.BROADER)
 	public void setBroader(String[] broader) {
 		this.broader = broader;
 	}
 
-	@JsonProperty(WebEntityFields.NARROWER)
+	@JsonGetter(WebEntityFields.NARROWER)
 	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_NARROWER)
 	public String[] getNarrower() {
 		return narrower;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.NARROWER)
 	public void setNarrower(String[] narrower) {
 		this.narrower = narrower;
 	}
 
-	@JsonProperty(WebEntityFields.RELATED)
+	@JsonGetter(WebEntityFields.RELATED)
 	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_RELATED)
 	public String[] getRelated() {
 		return related;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.RELATED)
 	public void setRelated(String[] related) {
 		this.related = related;
 	}
 
-	@JsonProperty(WebEntityFields.BROAD_MATCH)
+	@JsonGetter(WebEntityFields.BROAD_MATCH)
 	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_BROAD_MATCH)
 	public String[] getBroadMatch() {
 		return broadMatch;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.BROAD_MATCH)
 	public void setBroadMatch(String[] broadMatch) {
 		this.broadMatch = broadMatch;
 	}
 
-	@JsonProperty(WebEntityFields.NARROW_MATCH)
+	@JsonGetter(WebEntityFields.NARROW_MATCH)
 	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_NARROW_MATCH)
 	public String[] getNarrowMatch() {
 		return narrowMatch;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.NARROW_MATCH)
 	public void setNarrowMatch(String[] narrowMatch) {
 		this.narrowMatch = narrowMatch;
 	}
 
-	@JsonProperty(WebEntityFields.EXACT_MATCH)
+	@JsonGetter(WebEntityFields.EXACT_MATCH)
 	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_EXACT_MATCH)
 	public String[] getExactMatch() {
 		return exactMatch;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.EXACT_MATCH)
 	public void setExactMatch(String[] exactMatch) {
 		this.exactMatch = exactMatch;
 	}
@@ -104,46 +111,50 @@ public class ConceptImpl extends BaseEntity implements Concept {
 		this.coref = coref;
 	}
 
-	@JsonProperty(WebEntityFields.RELATED_MATCH)
+	@JsonGetter(WebEntityFields.RELATED_MATCH)
 	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_RELATED_MATCH)
 	public String[] getRelatedMatch() {
 		return relatedMatch;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.RELATED_MATCH)
 	public void setRelatedMatch(String[] relatedMatch) {
 		this.relatedMatch = relatedMatch;
 	}
 
-	@JsonProperty(WebEntityFields.CLOSE_MATCH)
+	@JsonGetter(WebEntityFields.CLOSE_MATCH)
 	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_CLOSE_MATCH)
 	public String[] getCloseMatch() {
 		return closeMatch;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.CLOSE_MATCH)
 	public void setCloseMatch(String[] closeMatch) {
 		this.closeMatch = closeMatch;
 	}
 
-	@JsonProperty(WebEntityFields.IN_SCHEME)
+	@JsonGetter(WebEntityFields.IN_SCHEME)
 	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_IN_SCHEMA)
 	public String[] getInScheme() {
 		return inScheme;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.IN_SCHEME)
 	public void setInScheme(String[] inScheme) {
 		this.inScheme = inScheme;
 	}
 
-	@JsonProperty(WebEntityFields.NOTATION)
+	@JsonGetter(WebEntityFields.NOTATION)
 	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_NOTATION)
 	public Map<String, List<String>> getNotation() {
 		return notation;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.NOTATION)
 	public void setNotation(Map<String, List<String>> notation) {
 		this.notation = notation;
 	}

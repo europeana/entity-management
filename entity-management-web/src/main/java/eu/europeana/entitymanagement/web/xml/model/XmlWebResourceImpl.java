@@ -8,7 +8,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 @JacksonXmlRootElement(localName = XmlConstants.XML_EDM_WEB_RESOURCE)
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({XmlConstants.ABOUT, XmlConstants.XML_DC_SOURCE, XmlConstants.XML_FOAF_THUMBNAIL})
+@JsonPropertyOrder({XmlConstants.ABOUT, XmlConstants.XML_DC_SOURCE, XmlConstants.XML_THUMBNAIL})
 public class XmlWebResourceImpl {
 
     	@JsonIgnore
@@ -34,7 +34,7 @@ public class XmlWebResourceImpl {
 		return new RdfResource(source);
 	}
 
-	@JacksonXmlProperty(localName = XmlConstants.XML_FOAF_THUMBNAIL)
+	@JacksonXmlProperty(localName = XmlConstants.XML_THUMBNAIL)
 	public RdfResource getThumbnail() {
 		return new RdfResource(thumbnail);
 	}
