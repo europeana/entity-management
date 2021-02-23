@@ -1,6 +1,8 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
-public final class XmlConstants {
+import eu.europeana.entitymanagement.vocabulary.XmlFields;
+
+public final class XmlConstants extends XmlFields{
 
     public static final String NAMESPACE_SKOS = "http://www.w3.org/2004/02/skos/core#";
     public static final String NAMESPACE_RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
