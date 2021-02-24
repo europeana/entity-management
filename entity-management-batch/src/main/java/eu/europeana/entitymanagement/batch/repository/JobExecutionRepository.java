@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.batch.repository;
 
 import com.mongodb.client.result.UpdateResult;
+import dev.morphia.Datastore;
 import dev.morphia.query.FindOptions;
 import dev.morphia.query.experimental.updates.UpdateOperators;
 import eu.europeana.entitymanagement.batch.entity.JobExecutionEntity;
@@ -25,6 +26,10 @@ import static eu.europeana.entitymanagement.batch.BatchConstants.*;
 
 @Repository
 public class JobExecutionRepository extends AbstractRepository implements JobExecutionDao {
+
+    public JobExecutionRepository(Datastore datastore) {
+        super(datastore);
+    }
 
     @Override
     public void saveJobExecution(JobExecution jobExecution) {

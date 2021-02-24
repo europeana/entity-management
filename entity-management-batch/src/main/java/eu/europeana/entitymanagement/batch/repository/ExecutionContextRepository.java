@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.batch.repository;
 
+import dev.morphia.Datastore;
 import dev.morphia.query.experimental.updates.UpdateOperators;
 import eu.europeana.entitymanagement.batch.entity.ExecutionContextEntity;
 import eu.europeana.entitymanagement.batch.entity.ExecutionContextEntityType;
@@ -20,8 +21,11 @@ import java.util.*;
 import static dev.morphia.query.experimental.filters.Filters.eq;
 import static eu.europeana.entitymanagement.batch.BatchConstants.*;
 
-@Repository
 public class ExecutionContextRepository extends AbstractRepository implements ExecutionContextDao {
+
+    public ExecutionContextRepository(Datastore datastore) {
+        super(datastore);
+    }
 
     private ExecutionContextSerializer serializer = new DefaultExecutionContextSerializer();
 
@@ -109,7 +113,6 @@ public class ExecutionContextRepository extends AbstractRepository implements Ex
                         UpdateOperators.set(EXECUTION_CTX_SERIALIZED_KEY, serializedContext)
                 ).execute();
     }
-
 
 
     private ExecutionContextEntity queryFindExecutionContext(ExecutionContextEntityType type, long executionId) {

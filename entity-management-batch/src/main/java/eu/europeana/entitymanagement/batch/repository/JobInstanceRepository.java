@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.batch.repository;
 
+import dev.morphia.Datastore;
 import dev.morphia.query.FindOptions;
 import dev.morphia.query.Query;
 import dev.morphia.query.experimental.filters.Filter;
@@ -21,8 +22,11 @@ import static dev.morphia.query.Sort.descending;
 import static dev.morphia.query.experimental.filters.Filters.*;
 import static eu.europeana.entitymanagement.batch.BatchConstants.*;
 
-@Repository
 public class JobInstanceRepository extends AbstractRepository implements JobInstanceDao {
+
+    public JobInstanceRepository(Datastore datastore) {
+        super(datastore);
+    }
 
     @Override
     public JobInstance createJobInstance(final String jobName, final JobParameters jobParameters) {

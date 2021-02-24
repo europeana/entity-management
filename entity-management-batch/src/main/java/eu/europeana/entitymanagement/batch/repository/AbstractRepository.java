@@ -22,10 +22,12 @@ import static dev.morphia.query.experimental.filters.Filters.eq;
 import static eu.europeana.entitymanagement.batch.BatchConstants.*;
 
 
-@Repository
 public abstract class AbstractRepository {
 
-    @Resource(name = DATA_STORE_BEAN_NAME)
+    public AbstractRepository(Datastore datastore) {
+        this.datastore = datastore;
+    }
+
     private Datastore datastore;
 
     protected Datastore getDataStore() {

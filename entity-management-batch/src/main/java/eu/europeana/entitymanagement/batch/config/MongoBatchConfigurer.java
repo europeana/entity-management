@@ -1,5 +1,10 @@
 package eu.europeana.entitymanagement.batch.config;
 
+import dev.morphia.Datastore;
+import eu.europeana.entitymanagement.batch.repository.ExecutionContextRepository;
+import eu.europeana.entitymanagement.batch.repository.JobExecutionRepository;
+import eu.europeana.entitymanagement.batch.repository.JobInstanceRepository;
+import eu.europeana.entitymanagement.batch.repository.StepExecutionRepository;
 import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.explore.support.SimpleJobExplorer;
@@ -12,31 +17,29 @@ import org.springframework.batch.core.repository.dao.JobInstanceDao;
 import org.springframework.batch.core.repository.dao.StepExecutionDao;
 import org.springframework.batch.core.repository.support.SimpleJobRepository;
 import org.springframework.batch.support.transaction.ResourcelessTransactionManager;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  * Configures Spring Batch to use Mongo DAO implementations
  */
-@Configuration
 public class MongoBatchConfigurer implements BatchConfigurer {
 
     private final ExecutionContextDao mongoExecutionContextDao;
-
     private final JobExecutionDao mongoJobExecutionDao;
-
     private final JobInstanceDao mongoJobInstanceDao;
-
     private final StepExecutionDao mongoStepExecutionDao;
 
-    @Autowired
-    public MongoBatchConfigurer(ExecutionContextDao mongoExecutionContextDao, JobExecutionDao mongoJobExecutionDao, JobInstanceDao mongoJobInstanceDao, StepExecutionDao mongoStepExecutionDao) {
-        this.mongoExecutionContextDao = mongoExecutionContextDao;
-        this.mongoJobExecutionDao = mongoJobExecutionDao;
-        this.mongoJobInstanceDao = mongoJobInstanceDao;
-        this.mongoStepExecutionDao = mongoStepExecutionDao;
+    /**
+     * Instantiates the Mongo DAO implementations with the provided datastore
+     *
+     * @param datastore Morphia datastore to use
+     */
+    public MongoBatchConfigurer(Datastore datastore) {
+        this.mongoExecutionContextDao = new ExecutionContextRepository(datastore);
+        this.mongoJobExecutionDao = new JobExecutionRepository(datastore);
+        this.mongoJobInstanceDao = new JobInstanceRepository(datastore);
+        this.mongoStepExecutionDao = new StepExecutionRepository(datastore);
     }
 
     @Override

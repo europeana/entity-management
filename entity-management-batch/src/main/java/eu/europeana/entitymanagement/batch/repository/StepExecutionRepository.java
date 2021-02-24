@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.batch.repository;
 
 import com.mongodb.client.result.UpdateResult;
+import dev.morphia.Datastore;
 import dev.morphia.query.FindOptions;
 import dev.morphia.query.experimental.updates.UpdateOperators;
 import eu.europeana.entitymanagement.batch.entity.JobExecutionEntity;
@@ -25,8 +26,11 @@ import static dev.morphia.query.experimental.filters.Filters.eq;
 import static dev.morphia.query.experimental.filters.Filters.in;
 import static eu.europeana.entitymanagement.batch.BatchConstants.*;
 
-@Repository
 public class StepExecutionRepository extends AbstractRepository implements StepExecutionDao {
+
+    public StepExecutionRepository(Datastore datastore) {
+        super(datastore);
+    }
 
     @Override
     public void saveStepExecution(StepExecution stepExecution) {

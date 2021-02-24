@@ -34,6 +34,9 @@ public class DataSourceConfig {
     @Value("${mongo.em.database}")
     private String emDatabase;
 
+    @Value("${mongo.batch.database}")
+    private String batchDatabase;
+
     @Bean
     public MongoClient mongoClient() {
         return MongoClients.create(hostUri);
@@ -44,5 +47,17 @@ public class DataSourceConfig {
     public Datastore emDataStore(MongoClient mongoClient) {
         logger.info("Connecting to Entity Management database {}", emDatabase);
         return Morphia.createDatastore(mongoClient, emDatabase);
+    }
+
+    /**
+     * Configures Morphia data store for the batch job repository
+     *
+     * @param mongoClient Mongo connection
+     * @return data store for Spring batch JobRepository
+     */
+    @Bean(name = AppConfigConstants.BEAN_BATCH_DATA_STORE)
+    public Datastore batchDataStore(MongoClient mongoClient) {
+        logger.info("Connecting to Batch database {}", batchDatabase);
+        return Morphia.createDatastore(mongoClient, batchDatabase);
     }
 }
