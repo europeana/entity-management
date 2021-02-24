@@ -55,19 +55,20 @@ public class EMControllerTest extends BaseMvcTestUtils{
 //	assertEquals(1, res);
 	
     }
-    
+
     @Test
     public void retrieveEntity() throws Exception {
     	MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add(CommonApiConstants.PARAM_WSKEY, "apidemo");
+        params.add(CommonApiConstants.QUERY_PARAM_PROFILE, "internal");
         String typePathParam = "Timespan";
         String namespacePathParam = "base";
         String identifierPathParam = "3";
 
         String result = mockMvc
-        		.perform(MockMvcRequestBuilders.delete(BASE_SERVICE_URL+"{type}/{namespace}/{identifier}",typePathParam,namespacePathParam,identifierPathParam).params(params).header(HttpHeaders.AUTHORIZATION, "enable_authorization")
+        		.perform(MockMvcRequestBuilders.get(BASE_SERVICE_URL+"{type}/{namespace}/{identifier}.xml",typePathParam,namespacePathParam,identifierPathParam).params(params).header(HttpHeaders.AUTHORIZATION, "enable_authorization")
         		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
-        		.andExpect(status().isAccepted()).andReturn().getResponse().getHeader("info:");
+        		.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 	
         System.out.println(result);
 	
