@@ -1,0 +1,53 @@
+version: "3.9"
+
+# use the following connection properties with docker-compose
+#
+#  mongo.connectionUrl = mongodb://api_user:password@db:27017
+#  mongo.em.database = entity-management
+#  mongo.batch.database = job-repository
+
+
+services:
+  db:
+    image: library/mongo:4.4.4
+    container_name: mongodb
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin-user
+      - MONGO_INITDB_ROOT_PASSWORD=admin-password
+      - MONGO_INITDB_DATABASE=admin
+      #  db credentials used to connect to db
+      - EM_DB_USER=api_user
+      - EM_DB_PASSWORD=password
+      # Databases for EM and Spring Batch
+      - EM_APP_DB=entity-management
+      - EM_BATCH_DB=job-repository
+    volumes:
+      # startup script creates user and databases
+      - ./docker-scripts/init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh:ro
+  app:
+    image: library/tomcat:9.0-jdk11
+    environment:
+      #Memory monitoring (JConsole connection possible via localhost:1099)
+      CATALINA_OPTS: '
+                        -Djava.rmi.server.hostname=0.0.0.0
+                        -Dcom.sun.management.jmxremote
+                        -Dcom.sun.management.jmxremote.port=1099
+                        -Dcom.sun.management.jmxremote.rmi.port=1099
+                        -Dcom.sun.management.jmxremote.local.only=false
+                        -Dcom.sun.management.jmxremote.authenticate=false
+                        -Dcom.sun.management.jmxremote.ssl=false
+                        '
+      JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8000
+    volumes:
+      - ./entity-management-web/target/entity-management-web.war:/usr/local/tomcat/webapps/ROOT.war
+    ports:
+      #Tomcat http port
+      - "8080:8080"
+      #Debug port
+      - "8000:8000"
+      #JMX Port
+      - "1099:1099"
+    depends_on:
+      - db
