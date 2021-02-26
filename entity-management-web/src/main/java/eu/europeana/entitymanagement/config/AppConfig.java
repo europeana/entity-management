@@ -9,8 +9,12 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.validation.ValidatorFactory;
 
+import dev.morphia.Datastore;
+import eu.europeana.entitymanagement.batch.config.MongoBatchConfigurer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -72,5 +76,15 @@ public class AppConfig extends AppConfigConstants{
     public EuropeanaClientDetailsService getClientDetailsService() {
 	return new EuropeanaClientDetailsService();
     }
-    
+
+
+    /**
+     * Configures Spring Batch to use Mongo
+     * @param datastore Morphia datastore for Spring Batch
+     * @return BatchConfigurer instance
+     */
+    @Bean
+    public BatchConfigurer mongoBatchConfigurer(@Qualifier(BEAN_BATCH_DATA_STORE) Datastore datastore){
+        return new MongoBatchConfigurer(datastore);
+    }
 }

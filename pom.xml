@@ -7,9 +7,7 @@
         <module>entity-management-web</module>
         <module>entity-management-mongo</module>
         <module>entity-management-utils</module>
-        <module>
-        	entity-management-configentity-management-config
-        </module>
+        <module>entity-management-batch</module>
     </modules>
 
     <parent>
@@ -55,7 +53,7 @@
         <version.annotationLd>1.1.6</version.annotationLd>
         <spring-boot.version>2.4.0</spring-boot.version>
         <swagger.version>3.0.0</swagger.version>
-        <morphia.version>2.0.0</morphia.version>
+        <morphia.version>2.1.4</morphia.version>
         <version.corelib>2.12.0-SNAPSHOT</version.corelib>
         <version.javax.annotation>1.3.2</version.javax.annotation>
         <version.log4j>2.13.3</version.log4j>
