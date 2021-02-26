@@ -7,10 +7,9 @@ import eu.europeana.entitymanagement.batch.entity.ExecutionContextEntityType;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.repository.ExecutionContextSerializer;
-import org.springframework.batch.core.repository.dao.DefaultExecutionContextSerializer;
 import org.springframework.batch.core.repository.dao.ExecutionContextDao;
+import org.springframework.batch.core.repository.dao.Jackson2ExecutionContextStringSerializer;
 import org.springframework.batch.item.ExecutionContext;
-import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
 
 import java.io.ByteArrayOutputStream;
@@ -27,7 +26,7 @@ public class ExecutionContextRepository extends AbstractRepository implements Ex
         super(datastore);
     }
 
-    private ExecutionContextSerializer serializer = new DefaultExecutionContextSerializer();
+    private final ExecutionContextSerializer serializer = new Jackson2ExecutionContextStringSerializer();
 
     @Override
     public ExecutionContext getExecutionContext(JobExecution jobExecution) {
@@ -145,7 +144,7 @@ public class ExecutionContextRepository extends AbstractRepository implements Ex
 
         try {
             serializer.serialize(m, out);
-            results = out.toString(StandardCharsets.ISO_8859_1);
+            results = out.toString(StandardCharsets.UTF_8);
         } catch (IOException ioe) {
             throw new IllegalArgumentException("Could not serialize the execution context", ioe);
         }
