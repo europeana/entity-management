@@ -1,6 +1,6 @@
 package eu.europeana.entitymanagement.web;
 
-import eu.europeana.entitymanagement.batch.DummyJobConfigurer;
+import eu.europeana.entitymanagement.batch.HelloJobConfigurer;
 import eu.europeana.entitymanagement.batch.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
@@ -22,12 +22,15 @@ import java.util.Date;
 @RequestMapping(path = "/jobs")
 public class JobLauncherController {
 
-    @Autowired
-    private DummyJobConfigurer dummyJobConfigurer;
+    private final HelloJobConfigurer helloJobConfigurer;
+
+    private final BatchConfigurer batchConfigurer;
 
     @Autowired
-    private BatchConfigurer batchConfigurer;
-
+    public JobLauncherController(HelloJobConfigurer helloJobConfigurer, BatchConfigurer batchConfigurer) {
+        this.helloJobConfigurer = helloJobConfigurer;
+        this.batchConfigurer = batchConfigurer;
+    }
 
     /**
      * Temporary endpoint to test Spring Batch integration
@@ -39,7 +42,7 @@ public class JobLauncherController {
         JobLauncher jobLauncher = batchConfigurer.getJobLauncher();
         JobParameters jobParameters = new JobParametersBuilder().addDate(JobParameter.RUN_ID.key(), new Date()).toJobParameters();
 
-        jobLauncher.run(dummyJobConfigurer.helloWorldJob(), jobParameters);
+        jobLauncher.run(helloJobConfigurer.helloWorldJob(), jobParameters);
 
         return ResponseEntity.ok("Job successfully triggered");
     }

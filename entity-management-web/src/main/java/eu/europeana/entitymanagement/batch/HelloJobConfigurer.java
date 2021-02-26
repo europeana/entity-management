@@ -15,19 +15,19 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 
 /**
- * Stub job configurer to test that Spring Batch integration works
+ * Temporary job configurer to test that Spring Batch integration works
  */
 @Component
-public class DummyJobConfigurer {
+public class HelloJobConfigurer {
 
-    private static final Logger logger = LogManager.getLogger(DummyJobConfigurer.class);
+    private static final Logger logger = LogManager.getLogger(HelloJobConfigurer.class);
 
     private final JobBuilderFactory jobBuilderFactory;
 
     private final StepBuilderFactory stepBuilderFactory;
 
     @Autowired
-    public DummyJobConfigurer(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory) {
+    public HelloJobConfigurer(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory) {
         this.jobBuilderFactory = jobBuilderFactory;
         this.stepBuilderFactory = stepBuilderFactory;
     }
