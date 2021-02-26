@@ -61,7 +61,7 @@ public class ExecutionContextEntity {
         // reproduced from JdbcExecutionContextDao (in Spring batch core)
         Map<String, Object> map;
         try {
-            ByteArrayInputStream in = new ByteArrayInputStream(serializedContext.getBytes(StandardCharsets.ISO_8859_1));
+            ByteArrayInputStream in = new ByteArrayInputStream(serializedContext.getBytes(StandardCharsets.UTF_8));
             map = serializer.deserialize(in);
         } catch (IOException ioe) {
             throw new IllegalArgumentException("Unable to deserialize the execution context", ioe);
