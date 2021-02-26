@@ -11,13 +11,13 @@ mongo -- "$MONGO_INITDB_DATABASE" <<EOF
         user: 'api_user',
         pwd: 'password',
         roles: [
-            { role: 'readWrite', db: 'EM_APP_DB' },
-            { role: 'readWrite', db: 'EM_BATCH_DB' }
+            { role: 'readWrite', db: '$EM_APP_DB' },
+            { role: 'readWrite', db: '$EM_BATCH_DB' }
             ],
     },
 );
 
-db.getSiblingDB('entity-management').createCollection('temp');
-db.getSiblingDB('job-repository').createCollection('temp');
+db.getSiblingDB('$EM_APP_DB').createCollection('temp');
+db.getSiblingDB('$EM_BATCH_DB').createCollection('temp');
 
 EOF

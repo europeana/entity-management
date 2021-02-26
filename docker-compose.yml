@@ -29,6 +29,9 @@ services:
   app:
     image: library/tomcat:9.0-jdk11
     environment:
+      mongo.connectionUrl: mongodb://api_user:password@db:27017
+      mongo.em.database: entity-management
+      mongo.batch.database: job-repository
       #Memory monitoring (JConsole connection possible via localhost:1099)
       CATALINA_OPTS: '
                         -Djava.rmi.server.hostname=0.0.0.0
