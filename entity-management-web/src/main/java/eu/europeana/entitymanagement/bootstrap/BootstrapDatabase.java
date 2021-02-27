@@ -50,6 +50,5 @@ public class BootstrapDatabase implements CommandLineRunner {
             logger.info("Clearing EntityRecord repository");
             entityRecordRepository.dropCollection();
         }
-
     }
 }
