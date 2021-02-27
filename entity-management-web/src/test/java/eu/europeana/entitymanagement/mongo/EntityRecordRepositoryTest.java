@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -24,6 +25,7 @@ import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 /**
  * JUnit tests to insert and retrieve the entities from the MongoDB
  */
+@Disabled("Excluded from automated runs as this requires Mongo")
 public class EntityRecordRepositoryTest {
 
 	@Test

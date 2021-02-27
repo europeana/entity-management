@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.ContextConfiguration;
@@ -35,6 +36,7 @@ public class ScoringServiceTest {
     ScoringService scoringService;
 
     @Test
+	@Disabled("Excluded from automated runs as this requires Solr")
     public void testComputeMetrics() throws Exception {
 
 	AgentImpl agent = new AgentImpl();
