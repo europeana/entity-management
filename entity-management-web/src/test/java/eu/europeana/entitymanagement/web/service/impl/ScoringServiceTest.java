@@ -30,6 +30,8 @@ import eu.europeana.entitymanagement.web.service.ScoringService;
 //@AutoConfigureMockMvc
 @ContextConfiguration(classes = { EntityManagementApp.class})
 @ExtendWith(SpringExtension.class)
+@Disabled("Excluded from automated runs as this requires Solr")
+//TODO: create a "proper" integration test with this
 public class ScoringServiceTest {
 
     @Resource(name=AppConfig.BEAN_EM_SCORING_SERVICE)
