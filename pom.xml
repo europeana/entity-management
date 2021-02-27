@@ -115,6 +115,15 @@
         </plugin>
       </plugins>
     </pluginManagement>
+          <!--  allow Maven to manipulate resource files as a part of the build process.
+                 build.properties by default is expanded by spring-boot-maven-plugin
+          -->
+          <resources>
+              <resource>
+                  <directory>src/main/resources</directory>
+                  <filtering>true</filtering>
+              </resource>
+          </resources>
   </build>
     <reporting>
     <plugins>
@@ -123,5 +132,23 @@
       </plugin>
     </plugins>
   </reporting>
-  
+
+    <!-- prod set by default so users have to explicitly trigger dev behaviour-->
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <properties>
+                <activeProfile>dev</activeProfile>
+            </properties>
+        </profile>
+        <profile>
+            <id>prod</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <activeProfile>prod</activeProfile>
+            </properties>
+        </profile>
+    </profiles>
 </project>

@@ -84,7 +84,7 @@ public class AppConfig extends AppConfigConstants{
      * @return BatchConfigurer instance
      */
     @Bean
-    public BatchConfigurer mongoBatchConfigurer(@Qualifier(BEAN_BATCH_DATA_STORE) Datastore datastore){
+    public MongoBatchConfigurer mongoBatchConfigurer(@Qualifier(BEAN_BATCH_DATA_STORE) Datastore datastore){
         return new MongoBatchConfigurer(datastore);
     }
 }

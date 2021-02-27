@@ -45,7 +45,7 @@ public class DataSourceConfig {
     @Primary
     @Bean(AppConfigConstants.BEAN_EM_DATA_STORE)
     public Datastore emDataStore(MongoClient mongoClient) {
-        logger.info("Connecting to Entity Management database {}", emDatabase);
+        logger.info("Configuring Entity Management database: {}", emDatabase);
         return Morphia.createDatastore(mongoClient, emDatabase);
     }
 
@@ -57,7 +57,7 @@ public class DataSourceConfig {
      */
     @Bean(name = AppConfigConstants.BEAN_BATCH_DATA_STORE)
     public Datastore batchDataStore(MongoClient mongoClient) {
-        logger.info("Connecting to Batch database {}", batchDatabase);
+        logger.info("Configuring Batch database: {}", batchDatabase);
         return Morphia.createDatastore(mongoClient, batchDatabase);
     }
 }
