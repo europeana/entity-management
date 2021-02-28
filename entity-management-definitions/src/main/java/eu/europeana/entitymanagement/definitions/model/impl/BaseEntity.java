@@ -29,7 +29,7 @@ import eu.europeana.entitymanagement.vocabulary.XmlFields;
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @ValidEntityFields(groups = {Default.class})
 public abstract class BaseEntity implements Entity {
-	
+
 	protected String TMP_KEY = "def";
 	protected String internalType;
 	protected String entityId;

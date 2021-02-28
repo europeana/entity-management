@@ -1,6 +1,5 @@
 package eu.europeana.entitymanagement.web;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -13,7 +12,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
+import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.entitymanagement.EntityManagementApp;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 
@@ -50,6 +53,29 @@ public class EMControllerTest extends BaseMvcTestUtils{
 	Long res = entityRecordRepository.deleteForGood(entityId);
 	System.out.println(res);
 //	assertEquals(1, res);
+	
+    }
+    
+    @Test
+    public void updateEntity() throws Exception {
+    	MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add(CommonApiConstants.PARAM_WSKEY, "apidemo");
+        params.add(CommonApiConstants.QUERY_PARAM_PROFILE, "external");
+        String typePathParam = "Timespan";
+        String namespacePathParam = "base";
+        String identifierPathParam = "4";
+
+    	String requestJson = getJsonStringInput(CONCEPT_BATHTUB);
+
+        String result = mockMvc
+        		.perform(MockMvcRequestBuilders.put(BASE_SERVICE_URL+"{type}/{namespace}/{identifier}",typePathParam,namespacePathParam,identifierPathParam)
+  				.content(requestJson)
+        		.params(params)
+        		.header(HttpHeaders.AUTHORIZATION, "enable_authorization")
+        		.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+        		.andExpect(status().isAccepted()).andReturn().getResponse().getContentAsString();
+	
+        System.out.println(result);
 	
     }
    

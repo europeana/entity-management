@@ -22,5 +22,6 @@ public interface EntityManagementConfiguration {
     String getSearchApiSolrUrl();
 
     String getPrSolrUrl();
-
+    
+    String getDateTimeFormat();
 }

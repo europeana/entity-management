@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Represents the body for Entity creation POST requests.
  */
 public class EntityPreview {
+	
     private String id;
 
     @JsonProperty("@context")

@@ -1,5 +1,7 @@
 package eu.europeana.entitymanagement.web;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
 
@@ -16,6 +18,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,8 +26,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.entitymanagement.common.config.DataSources;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -53,12 +58,18 @@ public class EMController extends BaseRest {
 
     @Resource(name = AppConfig.BEAN_ENTITY_RECORD_SERVICE)
     private EntityRecordService entityRecordService;
+    
+    @Resource(name = AppConfig.BEAN_ENTITY_RECORD_REPO)
+    private EntityRecordRepository entityRecordRepository;
 
     @Resource(name = AppConfig.BEAN_METIS_DEREF_SERVICE)
     private MetisDereferenceService dereferenceService;
 
     @Resource(name = AppConfig.BEAN_EM_DATA_SOURCES)
     private DataSources datasources;
+    
+    @Resource(name = AppConfig.BEAN_EM_CONFIGURATION)
+    EntityManagementConfiguration emConfiguration;
 
     @ApiOperation(value = "Delete an entity", nickname = "deleteEntity", response = java.lang.Void.class)
     @RequestMapping(value = "/{type}/{namespace}/{identifier}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -83,6 +94,70 @@ public class EMController extends BaseRest {
 	}
     }
 
+    @ApiOperation(value = "Update an entity", nickname = "updateEntity", response = java.lang.Void.class)
+    @RequestMapping(value = { "/{type}/{namespace}/{identifier}" },method = RequestMethod.PUT, produces = {
+	    HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<EntityRecord> updateEntity(
+    	@RequestHeader(value = "If-Match", required = false) String ifMatchHeader,
+	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
+	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = true, defaultValue = "external") String profile,
+	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
+	    @PathVariable(value = WebEntityConstants.PATH_PARAM_NAMESPACE) String namespace,
+	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
+	    @RequestBody EntityPreview entityCreationRequest,
+	    HttpServletRequest request) {
+    	
+    	// TODO: Re-enable authentication
+    	// verifyReadAccess(request);
+    	
+    	EntityRecord existingRecord = entityRecordRepository.findByEntityId(getEntityUri(type, namespace, identifier));
+    	if(existingRecord!=null) {
+    		
+    		Date timestamp = (existingRecord.getEntity().getIsAggregatedBy() != null) ? existingRecord.getEntity().getIsAggregatedBy().getModified() : null;
+			Date etagDate = (timestamp != null)? timestamp : new Date();
+			String etag = generateETag(etagDate, FormatTypes.jsonld.name(), getApiVersion());
+			
+			try {
+				checkIfMatchHeader(etag, request);
+			} catch (HttpException e) {
+				return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).header("info:", "The value of the If-Match HTTP header does not allign with the given ETag value generated from the timestamp.").build();
+			}
+			
+			//TODO: update the Europeana proxy and also call the UpdateTask for updating the entity if it is meant to be used for that
+			if(entityCreationRequest.getId()!=null) {
+				existingRecord.getEntity().setEntityId(entityCreationRequest.getId());
+			}
+			if(entityCreationRequest.getAltLabel()!=null) {
+				existingRecord.getEntity().setAltLabel(entityCreationRequest.getAltLabel());
+			}
+    		if(entityCreationRequest.getDepiction()!=null) {
+    			existingRecord.getEntity().setDepiction(entityCreationRequest.getDepiction());
+    		}
+    		if(entityCreationRequest.getPrefLabel()!=null) {
+    			existingRecord.getEntity().setPrefLabelStringMap(entityCreationRequest.getPrefLabel());
+    		}
+    		
+    		SimpleDateFormat format = new SimpleDateFormat(emConfiguration.getDateTimeFormat());
+    		String dateString = format.format(new Date());
+    		Date modificationDate = null;
+    		try {
+    			modificationDate = format.parse(dateString);
+			} catch (ParseException e) {
+				return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).header("info:", "A parsing exception occured during the generation of the modificaion date.").build();
+			}   
+    		if (modificationDate!=null && existingRecord.getEntity().getIsAggregatedBy()!=null) {
+    			existingRecord.getEntity().getIsAggregatedBy().setModified(modificationDate);
+    		}
+    		
+    		entityRecordRepository.update(existingRecord);
+    		
+    		return ResponseEntity.accepted().body(existingRecord);
+    	}
+    	
+    	return ResponseEntity.notFound().header("info:", "The given entity record does not exist.").build();
+    	
+    }
+    
     @ApiOperation(value = "Retrieve a known entity", nickname = "getEntityJsonLd", response = java.lang.Void.class)
     @RequestMapping(value = { "/{type}/{namespace}/{identifier}.jsonld" }, method = RequestMethod.GET, produces = {
 	    HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE })

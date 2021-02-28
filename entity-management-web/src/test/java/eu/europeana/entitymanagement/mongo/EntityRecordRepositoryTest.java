@@ -35,8 +35,8 @@ public class EntityRecordRepositoryTest {
 		EntityRecordRepository entityRecordRepository = context.getBean(EntityRecordRepository.class);
     	
 		TimespanImpl entity = new TimespanImpl();
-    	entity.setEntityId("http://data.europeana.eu/timespan/base/ 3");
-    	entity.setType("Timespan");
+    	entity.setEntityId("http://data.europeana.eu/timespan/base/5");
+    	entity.setType("Timespan2");
     	entity.setBeginString("0001-01-01");
     	entity.setEndString("0100-12-31");
     	Map<String, String> prefLabelTest = new HashMap<String, String>();

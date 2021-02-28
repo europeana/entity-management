@@ -17,6 +17,9 @@ import org.springframework.context.annotation.PropertySources;
 public class EntityManagementConfigurationImpl implements EntityManagementConfiguration {
 
     private static final Logger LOG = LogManager.getLogger(EntityManagementConfigurationImpl.class);
+ 
+    @Value("${datetime.format}")
+    private String dateTimeFormat;
 
     @Value("${datasources.config}")
     private String datasourcesXMLConfig;
@@ -102,5 +105,10 @@ public class EntityManagementConfigurationImpl implements EntityManagementConfig
     public String getLanguagecodesXMLConfig() {
 	return languagecodesXMLConfig;
     }
+
+    @Override
+	public String getDateTimeFormat() {
+		return dateTimeFormat;
+	}
 
 }
