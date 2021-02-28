@@ -20,7 +20,7 @@ public class ApplicationIT {
     private static String EM_BATCH_DB = "job-repository";
 
 
-    @Rule
+    @Container
     static final MongoContainer mongo = new MongoContainer()
             .withEnv("EM_DB_USER", EM_DB_USER)
             .withEnv("EM_DB_PASSWORD", EM_DB_PASSWORD)
