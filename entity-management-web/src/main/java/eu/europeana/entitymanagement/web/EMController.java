@@ -16,6 +16,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -63,6 +64,7 @@ public class EMController extends BaseRest {
     @ApiOperation(value = "Disable an entity", nickname = "disableEntity", response = java.lang.Void.class)
     @RequestMapping(value = "/{type}/{namespace}/{identifier}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> disableEntity(
+    	@RequestHeader(value = "If-Match", required = false) String ifMatchHeader,
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_NAMESPACE) String namespace,
@@ -71,7 +73,7 @@ public class EMController extends BaseRest {
     	
     	String entityUri = getEntityUri(type, namespace, identifier.toLowerCase());
     	Optional<EntityRecord> existingEntity = entityRecordService.retrieveEntityRecordByUri(entityUri);
-    	if (existingEntity.isPresent()) {
+    	if (existingEntity.isPresent() && !existingEntity.get().getDisabled()) {
     		
 			Date timestamp = (existingEntity.get().getEntity().getIsAggregatedBy() != null) ? existingEntity.get().getEntity().getIsAggregatedBy().getModified() : null;
 			Date etagDate = (timestamp != null)? timestamp : new Date();
@@ -85,6 +87,9 @@ public class EMController extends BaseRest {
 			entityRecordService.disableEntityRecord(existingEntity.get());
 			
 		    return ResponseEntity.status(HttpStatus.ACCEPTED).header("info:", "The request is executed successfully.").build();
+    	}
+    	else if (existingEntity.isPresent() && existingEntity.get().getDisabled()){
+    		return ResponseEntity.status(HttpStatus.ACCEPTED).header("info:", "The entity is already disabled.").build();
     	}
     	else {
     		return ResponseEntity.notFound().header("info:", "There is no entity with the given identifier to be disabled.").build();
