@@ -9,7 +9,10 @@ version: "3.9"
 
 services:
   db:
-    image: library/mongo:4.4.4
+#    image: library/mongo:4.4.4
+    build:
+      context: ./entity-management-web/src/integration-test/resources/mongo-docker
+      dockerfile: Dockerfile
     container_name: mongodb
     ports:
       - 27017:27017
@@ -23,9 +26,9 @@ services:
       # Databases for EM and Spring Batch
       - EM_APP_DB=entity-management
       - EM_BATCH_DB=job-repository
-    volumes:
-      # startup script creates user and databases
-      - ./docker-scripts/init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh:ro
+#    volumes:
+#      # startup script creates user and databases
+#      - ./docker-scripts/init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh:ro
   app:
     image: library/tomcat:9.0-jdk11
     environment:
