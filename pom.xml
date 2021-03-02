@@ -133,7 +133,7 @@
     </plugins>
   </reporting>
 
-    <!-- prod set by default so users have to explicitly trigger dev behaviour-->
+    <!-- release profile set by default so users have to explicitly trigger dev behaviour-->
     <profiles>
         <profile>
             <id>dev</id>
@@ -142,12 +142,12 @@
             </properties>
         </profile>
         <profile>
-            <id>prod</id>
+            <id>release</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <activeProfile>prod</activeProfile>
+                <activeProfile>release</activeProfile>
             </properties>
         </profile>
     </profiles>
