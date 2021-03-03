@@ -12,9 +12,7 @@ import dev.morphia.query.internal.MorphiaCursor;
 import eu.europeana.entitymanagement.batch.entity.JobExecutionEntity;
 import eu.europeana.entitymanagement.batch.entity.JobInstanceEntity;
 import eu.europeana.entitymanagement.batch.entity.SequenceGenerator;
-import org.springframework.stereotype.Repository;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -79,7 +77,6 @@ public abstract class AbstractRepository {
     }
 
 
-
     /**
      * Gets jobExecution IDs for the given job instance.
      *
@@ -116,7 +113,6 @@ public abstract class AbstractRepository {
     }
 
 
-
     protected JobExecutionEntity getJobExecutionWithId(long jobExecutionId) {
         return getDataStore().find(JobExecutionEntity.class)
                 .filter(eq(JOB_EXECUTION_ID_KEY, jobExecutionId))
@@ -137,7 +133,7 @@ public abstract class AbstractRepository {
     /**
      * Gets distinct values for a collection property
      *
-     * @param clazz     entity class
+     * @param clazz entity class
      * @return List containing distinct values
      */
     protected List<String> queryDistinctStringValues(final Class<?> clazz, final String fieldName) {
@@ -160,4 +156,15 @@ public abstract class AbstractRepository {
     protected UpdateOperator handleNullField(String fieldName, Object value) {
         return value == null ? UpdateOperators.unset(fieldName) : UpdateOperators.set(fieldName, value);
     }
+
+    /**
+     * Drops the Mongo collection for the specified Morphia entity
+     *
+     * @param clazz Morphia entity to clear collection for
+     */
+    protected void dropCollection(final Class<?> clazz) {
+        getDataStore().getMapper().getCollection(clazz).drop();
+    }
+
+    public abstract void drop();
 }

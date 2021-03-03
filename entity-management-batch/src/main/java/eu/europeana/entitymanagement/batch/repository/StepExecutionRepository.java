@@ -12,7 +12,6 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.repository.dao.StepExecutionDao;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.lang.Nullable;
-import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
 
 import java.util.Collection;
@@ -273,4 +272,8 @@ public class StepExecutionRepository extends AbstractRepository implements StepE
                 ).count();
     }
 
+    @Override
+    public void drop() {
+        dropCollection(StepExecutionEntity.class);
+    }
 }

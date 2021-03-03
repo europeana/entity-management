@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.ContextConfiguration;
@@ -29,12 +30,15 @@ import eu.europeana.entitymanagement.web.service.ScoringService;
 //@AutoConfigureMockMvc
 @ContextConfiguration(classes = { EntityManagementApp.class})
 @ExtendWith(SpringExtension.class)
+@Disabled("Excluded from automated runs as this requires Solr")
+//TODO: create a "proper" integration test with this
 public class ScoringServiceTest {
 
     @Resource(name=AppConfig.BEAN_EM_SCORING_SERVICE)
     ScoringService scoringService;
 
     @Test
+	@Disabled("Excluded from automated runs as this requires Solr")
     public void testComputeMetrics() throws Exception {
 
 	AgentImpl agent = new AgentImpl();

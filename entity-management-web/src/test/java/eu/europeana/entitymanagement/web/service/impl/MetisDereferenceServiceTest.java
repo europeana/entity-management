@@ -7,6 +7,7 @@ import java.io.FileWriter;
 
 import javax.annotation.Resource;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,7 @@ import eu.europeana.entitymanagement.exception.HttpBadRequestException;
  */
 @ContextConfiguration(classes = { EntityManagementApp.class})
 @ExtendWith(SpringExtension.class)
+@Disabled("Excluded from automated runs as this depends on Metis")
 public class MetisDereferenceServiceTest {
 
     @Resource(name=AppConfig.BEAN_METIS_DEREF_SERVICE)

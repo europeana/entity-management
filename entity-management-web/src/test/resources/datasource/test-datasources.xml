@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<config>
+    <source url="http://www.wikidata.org/"                         rights="https://creativecommons.org/publicdomain/zero/1.0/"/>
+    <source url="http://vocab.getty.edu/aat/"                      rights="http://opendatacommons.org/licenses/by/1-0/"/>
+    <source url="http://vocab.getty.edu/ulan/"                     rights="http://opendatacommons.org/licenses/by/1-0/"/>
+    <source url="http://viaf.org/viaf/"                            rights="http://opendatacommons.org/licenses/by/1.0/"/>
+    <source url="https://sws.geonames.org/"                        rights="https://creativecommons.org/licenses/by/4.0/"/>
+    <source url="http://www.mimo-db.eu/"                           rights=""/>
+    <source url="http://thesaurus.europeanafashion.eu/thesaurus/"  rights=""/>
+</config>

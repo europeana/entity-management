@@ -210,4 +210,9 @@ public class JobExecutionRepository extends AbstractRepository implements JobExe
                 .iterator(DESCENDING_JOB_EXECUTION).toList();
     }
 
+    @Override
+    public void drop() {
+        dropCollection(JobExecutionEntity.class);
+    }
+
 }

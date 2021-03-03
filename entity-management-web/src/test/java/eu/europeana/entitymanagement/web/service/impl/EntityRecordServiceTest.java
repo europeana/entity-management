@@ -1,23 +1,23 @@
 package eu.europeana.entitymanagement.web.service.impl;
 
+import eu.europeana.entitymanagement.definitions.model.impl.TimespanImpl;
+import eu.europeana.entitymanagement.definitions.model.impl.WebResourceImpl;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.junit.jupiter.api.Test;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-
-import eu.europeana.entitymanagement.definitions.model.impl.TimespanImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.WebResourceImpl;
-import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
-import eu.europeana.entitymanagement.web.service.impl.MetisDereferenceService;
-
 /**
  * JUnit tests to merge the data from a different entity (a so called entity proxy) into the given entity
  */
+@Disabled("No assertions in this test so it's excluded from automated runs")
+//TODO: "assert" that something happens
 public class EntityRecordServiceTest {
 
 	private static final Logger logger = LogManager.getLogger(MetisDereferenceService.class);

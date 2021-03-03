@@ -1,0 +1,11 @@
+{
+  "@context": "http://www.europeana.eu/schemas/context/entity.jsonld",
+  "id": "http://www.wikidata.org/entity/Q11019",
+  "prefLabel": {
+    "en": "bathtub"
+  },
+  "altLabel": {
+    "en": [ "bath", "tub" ]
+  },
+  "depiction": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/1rm60rt0t_rtbcwh.jpg/330px-1rm60rt0t_rtbcwh.jpg"
+}

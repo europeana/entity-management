@@ -1,10 +1,10 @@
 package eu.europeana.entitymanagement.batch.config;
 
 import dev.morphia.Datastore;
-import eu.europeana.entitymanagement.batch.repository.ExecutionContextRepository;
-import eu.europeana.entitymanagement.batch.repository.JobExecutionRepository;
-import eu.europeana.entitymanagement.batch.repository.JobInstanceRepository;
-import eu.europeana.entitymanagement.batch.repository.StepExecutionRepository;
+import eu.europeana.entitymanagement.batch.entity.SequenceGenerator;
+import eu.europeana.entitymanagement.batch.repository.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.explore.support.SimpleJobExplorer;
@@ -25,10 +25,14 @@ import org.springframework.transaction.PlatformTransactionManager;
  */
 public class MongoBatchConfigurer implements BatchConfigurer {
 
+    private static final Logger logger = LogManager.getLogger(MongoBatchConfigurer.class);
+
     private final ExecutionContextDao mongoExecutionContextDao;
     private final JobExecutionDao mongoJobExecutionDao;
     private final JobInstanceDao mongoJobInstanceDao;
     private final StepExecutionDao mongoStepExecutionDao;
+
+    private final SequenceRepository sequenceRepository;
 
     /**
      * Instantiates the Mongo DAO implementations with the provided datastore
@@ -40,6 +44,7 @@ public class MongoBatchConfigurer implements BatchConfigurer {
         this.mongoJobExecutionDao = new JobExecutionRepository(datastore);
         this.mongoJobInstanceDao = new JobInstanceRepository(datastore);
         this.mongoStepExecutionDao = new StepExecutionRepository(datastore);
+        this.sequenceRepository = new SequenceRepository(datastore);
     }
 
     @Override
@@ -68,5 +73,19 @@ public class MongoBatchConfigurer implements BatchConfigurer {
                 mongoJobExecutionDao,
                 mongoStepExecutionDao,
                 mongoExecutionContextDao);
+    }
+
+
+    public void clearRepository() {
+        logger.debug("Clearing Batch JobRepository...");
+
+        sequenceRepository.drop();
+        // casting is safe here, as we know from the constructor what these instances are
+        ((ExecutionContextRepository) mongoExecutionContextDao).drop();
+        ((JobExecutionRepository) mongoJobExecutionDao).drop();
+        ((JobInstanceRepository) mongoJobInstanceDao).drop();
+        ((StepExecutionRepository) mongoStepExecutionDao).drop();
+
+        logger.debug("Batch JobRepository cleared");
     }
 }
