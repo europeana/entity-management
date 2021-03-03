@@ -17,6 +17,9 @@ public abstract class AppConfigConstants {
     public static final String BEAN_METIS_DEREF_SERVICE = "metisDerefService";
     public static final String BEAN_EM_BUILD_INFO = "emBuildInfo";
     public static final String BEAN_AUTHORIZATION_SERVICE = "authorizationService";
- 
+
+    public static final String BEAN_XML_MAPPER = "emXmlMapper";
+    public static final String BEAN_JSON_MAPPER = "emJsonMapper";
+
     
 }

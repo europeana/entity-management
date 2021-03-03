@@ -1,15 +1,16 @@
 version: "3.9"
 
-# use the following connection properties with docker-compose
+# To only start mongo, run: docker-compose up db
+# Then use the following settings in entitymanagement.user.properties
 #
-#  mongo.connectionUrl = mongodb://api_user:password@db:27017
+#  mongo.connectionUrl = mongodb://admin-user:admin-password@localhost:27017
 #  mongo.em.database = entity-management
 #  mongo.batch.database = job-repository
+#
 
 
 services:
   db:
-#    image: library/mongo:4.4.4
     build:
       context: ./entity-management-web/src/integration-test/resources/mongo-docker
       dockerfile: Dockerfile
@@ -26,9 +27,7 @@ services:
       # Databases for EM and Spring Batch
       - EM_APP_DB=entity-management
       - EM_BATCH_DB=job-repository
-#    volumes:
-#      # startup script creates user and databases
-#      - ./docker-scripts/init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh:ro
+
   app:
     image: library/tomcat:9.0-jdk11
     environment:

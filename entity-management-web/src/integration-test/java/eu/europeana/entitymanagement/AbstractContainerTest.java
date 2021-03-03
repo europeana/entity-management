@@ -10,7 +10,6 @@ import org.testcontainers.containers.output.ToStringConsumer;
 import org.testcontainers.containers.output.WaitingConsumer;
 
 public abstract class AbstractContainerTest {
-    private static final Logger LOGGER = LogManager.getLogger(AbstractContainerTest.class);
 
     static final MongoContainer MONGO_CONTAINER;
     private static final WaitingConsumer wait = new WaitingConsumer();

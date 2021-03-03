@@ -6,28 +6,35 @@ import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.impl.*;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
-public class EntityRecordRepositoryIT extends AbstractContainerTest {
+class EntityRecordRepositoryIT extends AbstractContainerTest {
 
     @Autowired
     private EntityRecordRepository entityRecordRepository;
 
+    @BeforeEach
+    public void setup() {
+        entityRecordRepository.dropCollection();
+    }
+
     @Test
-    public void insertEntityToMongoDB() {
+    public void shouldCorrectlyInsertAndRetrieve() {
+
+        String entityId = "http://data.europeana.eu/timespan/base/1";
 
         TimespanImpl entity = new TimespanImpl();
-        entity.setEntityId("http://data.europeana.eu/timespan/base/1");
+        entity.setEntityId(entityId);
         entity.setType("Timespan");
         entity.setBeginString("0001-01-01");
         entity.setEndString("0100-12-31");
@@ -69,13 +76,8 @@ public class EntityRecordRepositoryIT extends AbstractContainerTest {
         entityRecordImpl.setProxies(proxies);
 
         entityRecordRepository.save(entityRecordImpl);
-    }
 
-    @Test
-    public void retrieveEntityFromMongoDB() {
-        String entityId = "http://data.europeana.eu/timespan/base/1";
         EntityRecord er = entityRecordRepository.findByEntityId(entityId);
         assertEquals(er.getEntityId(), entityId);
     }
-
 }

@@ -1,9 +1,11 @@
 package eu.europeana.entitymanagement.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.DataSources;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
@@ -19,7 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class DataSourcesTest {
 
     @Autowired
-    private ObjectMapper objectMapper;
+    @Qualifier(AppConfigConstants.BEAN_XML_MAPPER)
+    private XmlMapper xmlMapper;
 
 
     String WIKIDATA = "http://www.wikidata.org/";
@@ -32,7 +35,7 @@ public class DataSourcesTest {
         String DATASOURCES_XML = "/datasource/test-datasources.xml";
         InputStream is = getClass().getResourceAsStream(DATASOURCES_XML);
 
-        DataSources dataSources = objectMapper.readValue(is, DataSources.class);
+        DataSources dataSources = xmlMapper.readValue(is, DataSources.class);
         assertNotNull(dataSources);
         assertTrue(dataSources.getDatasources().size() >= 7);
         assertTrue(dataSources.hasDataSource(WIKIDATA));

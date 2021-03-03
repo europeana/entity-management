@@ -1,5 +1,5 @@
-# Mongo image for entity management
-FROM library/mongo:4.4.4
+# Use same version as CloudFoundry deployment
+FROM library/mongo:3.6.17
 
 EXPOSE 27017
 
