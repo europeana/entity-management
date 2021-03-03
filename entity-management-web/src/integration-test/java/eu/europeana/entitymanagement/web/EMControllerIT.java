@@ -1,6 +1,6 @@
 package eu.europeana.entitymanagement.web;
 
-import eu.europeana.entitymanagement.AbstractContainerTest;
+import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class EMControllerIT extends AbstractContainerTest {
+public class EMControllerIT extends AbstractIntegrationTest {
 
     @Autowired
     private WebApplicationContext webApplicationContext;

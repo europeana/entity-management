@@ -9,14 +9,14 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.output.ToStringConsumer;
 import org.testcontainers.containers.output.WaitingConsumer;
 
-public abstract class AbstractContainerTest {
+public abstract class AbstractIntegrationTest {
 
     static final MongoContainer MONGO_CONTAINER;
     private static final WaitingConsumer wait = new WaitingConsumer();
     private static final ToStringConsumer toString = new ToStringConsumer();
 
     static {
-        MONGO_CONTAINER = new MongoContainer("em_itest_user", "password1", "entity-management", "job-repository")
+        MONGO_CONTAINER = new MongoContainer("entity-management", "job-repository")
                 .withLogConsumer(wait.andThen(toString));
 
         MONGO_CONTAINER.start();

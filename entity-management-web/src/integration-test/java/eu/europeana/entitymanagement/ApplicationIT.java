@@ -6,7 +6,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class ApplicationIT extends AbstractContainerTest {
+public class ApplicationIT extends AbstractIntegrationTest {
 
     @Test
     public void contextLoads() {
