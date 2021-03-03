@@ -167,7 +167,7 @@ public class EMController extends BaseRest {
 	    // TODO: maybe here return the unprocessable entity instead of bad request
 	    return ResponseEntity.badRequest().header("info:", e.getMessage()).build();
 	}
-	return ResponseEntity.accepted().body(savedEntity);
+		return ResponseEntity.accepted().body(savedEntity);
     }
 
     private ResponseEntity<String> createResponse(String profile, String type, String namespace, String identifier,

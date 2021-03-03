@@ -1,30 +1,42 @@
 package eu.europeana.entitymanagement.config;
 
-import java.text.SimpleDateFormat;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
+import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 /**
  * Configure Jackson serialization output.
- * @deprecated not sure if the DateFormat is the correct one and if the global configurations are correct for both xml and json serializations
  */
 @Configuration
-@Deprecated
 public class SerializationConfig {
 
-    @Bean
+    //TODO: confirm date format with PO
+    private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXX");
+
+    @Primary
+    @Bean(AppConfigConstants.BEAN_JSON_MAPPER)
     public ObjectMapper mapper() {
         return new Jackson2ObjectMapperBuilder()
                 .defaultUseWrapper(false)
-                .dateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXX"))
+                .dateFormat(dateFormat)
                 .serializationInclusion(JsonInclude.Include.NON_NULL)
                 .build();
+    }
+
+    @Bean(AppConfigConstants.BEAN_XML_MAPPER)
+    public XmlMapper xmlMapper() {
+        XmlMapper xmlMapper = new XmlMapper();
+        xmlMapper.setDateFormat(dateFormat);
+        return xmlMapper;
     }
 
     @Bean

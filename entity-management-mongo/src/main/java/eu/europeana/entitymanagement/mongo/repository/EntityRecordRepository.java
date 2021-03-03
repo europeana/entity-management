@@ -135,4 +135,11 @@ public class EntityRecordRepository {
         return autoIncrement.getValue();
     }
 
+
+    /**
+     * Drops the EntityRecord collection.
+     */
+    public void dropCollection(){
+        datastore.getMapper().getCollection(EntityRecordImpl.class).drop();
+    }
 }

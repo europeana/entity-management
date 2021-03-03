@@ -152,4 +152,9 @@ public class ExecutionContextRepository extends AbstractRepository implements Ex
         return results;
     }
 
+
+    @Override
+    public void drop() {
+        dropCollection(ExecutionContextEntity.class);
+    }
 }

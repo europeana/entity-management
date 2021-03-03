@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import javax.annotation.Resource;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.ContextConfiguration;
@@ -19,6 +20,7 @@ import eu.europeana.entitymanagement.definitions.model.Concept;
  */
 @ContextConfiguration(classes = { EntityManagementApp.class})
 @ExtendWith(SpringExtension.class)
+@Disabled("Excluded from automated runs as this depends on Metis")
 public class MetisDereferenceServiceTest {
 
     @Resource(name=AppConfig.BEAN_METIS_DEREF_SERVICE)

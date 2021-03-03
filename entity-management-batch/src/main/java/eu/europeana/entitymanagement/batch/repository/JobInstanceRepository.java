@@ -11,7 +11,6 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.repository.dao.JobInstanceDao;
 import org.springframework.lang.Nullable;
-import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -189,5 +188,10 @@ public class JobInstanceRepository extends AbstractRepository implements JobInst
         return getDataStore().find(JobInstanceEntity.class)
                 .filter(eq(JOB_NAME_KEY, jobName))
                 .count();
+    }
+
+    @Override
+    public void drop() {
+        dropCollection(JobInstanceEntity.class);
     }
 }
