@@ -39,6 +39,9 @@ public class AppConfig extends AppConfigConstants{
     
     @Resource(name=BEAN_EM_CONFIGURATION)
     private EntityManagementConfiguration emConfiguration;
+
+    @Resource(name = BEAN_XML_MAPPER)
+    private XmlMapper xmlMapper;
     
     public AppConfig() {
 	LOG.info("Initializing EntityManagementConfiguration bean as: configuration");
@@ -46,7 +49,6 @@ public class AppConfig extends AppConfigConstants{
     
     @Bean(name=BEAN_EM_DATA_SOURCES)
     public DataSources getDataSources() throws IOException {
-	XmlMapper xmlMapper = new XmlMapper();
 	String datasourcesXMLConfigFile = emConfiguration.getDatasourcesXMLConfig();
 		
 	try (InputStream inputStream = getClass().getResourceAsStream(datasourcesXMLConfigFile);
@@ -58,7 +60,7 @@ public class AppConfig extends AppConfigConstants{
 
     @Bean(name=BEAN_EM_LANGUAGE_CODES)
     public LanguageCodes getLanguageCodes() throws IOException {
-	XmlMapper xmlMapper = new XmlMapper();
+
 	String languagecodesXMLConfig = emConfiguration.getLanguagecodesXMLConfig();
 	try (InputStream inputStream = getClass().getResourceAsStream(languagecodesXMLConfig);
 		BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {

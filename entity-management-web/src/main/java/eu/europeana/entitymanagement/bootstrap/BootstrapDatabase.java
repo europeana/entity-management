@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement.bootstrap;
 
 import eu.europeana.entitymanagement.batch.config.MongoBatchConfigurer;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
+import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,8 @@ public class BootstrapDatabase implements CommandLineRunner {
     private static final Logger logger = LogManager.getLogger(BootstrapDatabase.class);
 
     private final MongoBatchConfigurer batchConfigurer;
-    private final EntityRecordRepository entityRecordRepository;
+    private final EntityRecordService entityRecordService
+            ;
 
 
     @Value("${mongo.batch.database.reset}")
@@ -32,9 +34,9 @@ public class BootstrapDatabase implements CommandLineRunner {
 
 
     @Autowired
-    public BootstrapDatabase(MongoBatchConfigurer batchConfigurer, EntityRecordRepository entityRecordRepository) {
+    public BootstrapDatabase(MongoBatchConfigurer batchConfigurer, EntityRecordService entityRecordService) {
         this.batchConfigurer = batchConfigurer;
-        this.entityRecordRepository = entityRecordRepository;
+        this.entityRecordService = entityRecordService;
     }
 
 
@@ -48,7 +50,7 @@ public class BootstrapDatabase implements CommandLineRunner {
 
         if (resetEntityDatabase) {
             logger.info("Clearing EntityRecord repository");
-            entityRecordRepository.dropCollection();
+            entityRecordService.dropRepository();
         }
     }
 }
