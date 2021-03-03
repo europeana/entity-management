@@ -6,6 +6,7 @@ import java.util.Optional;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import eu.europeana.api.commons.error.EuropeanaApiException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -114,7 +115,7 @@ public class EMController extends BaseRest {
 
     @ApiOperation(value = "Register a new entity", nickname = "registerEntity", response = java.lang.Void.class)
     @PostMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<EntityRecord> registerEntity(@RequestBody EntityPreview entityCreationRequest) {
+    public ResponseEntity<EntityRecord> registerEntity(@RequestBody EntityPreview entityCreationRequest) throws EuropeanaApiException {
 	// check if id is already being used, if so return a 301
 	Optional<EntityRecord> existingEntity = entityRecordService
 		.retrieveEntityRecordByUri(entityCreationRequest.getId());
@@ -131,24 +132,8 @@ public class EMController extends BaseRest {
 	    return ResponseEntity.badRequest().build();
 	}
 
-	/*
-	 * deferefence using Europeana TODO: call the Europeana service to get the
-	 * entity
-	 */
-//        BaseEntity europeanaResponse = null;
-	// dereference using Metis. return HTTP 400 for HTTP4XX responses and HTTP 504
-	// for other error responses
-	Entity metisResponse;
-	try {
-	    metisResponse = dereferenceService.dereferenceEntityById(entityCreationRequest.getId());
-	} catch (HttpBadRequestException e) {
-	    return ResponseEntity.badRequest().header("info:", e.getMessage()).build();
-	}catch (EntityCreationException e) {
-	    // TODO: change to appropriate error message, sitch to the use of GlobalExceptionHandler
-	    return ResponseEntity.badRequest().header("info:", e.getMessage()).build();
-	    
-	}
 
+	Entity metisResponse = dereferenceService.dereferenceEntityById(entityCreationRequest.getId());
 	existingEntity = entityRecordService.retrieveMetisCoreferenceSameAs(metisResponse.getSameAs());
 
 	if (existingEntity.isPresent()) {
@@ -160,13 +145,7 @@ public class EMController extends BaseRest {
 
 	}
 
-	EntityRecord savedEntity;
-	try {
-	    savedEntity = entityRecordService.createEntityFromRequest(entityCreationRequest, metisResponse);
-	} catch (EntityCreationException e) {
-	    // TODO: maybe here return the unprocessable entity instead of bad request
-	    return ResponseEntity.badRequest().header("info:", e.getMessage()).build();
-	}
+	EntityRecord savedEntity = entityRecordService.createEntityFromRequest(entityCreationRequest, metisResponse);
 		return ResponseEntity.accepted().body(savedEntity);
     }
 

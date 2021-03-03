@@ -21,6 +21,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import java.io.StringReader;
 
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.METIS_DEREF_PATH;
+
 /**
  * Handles de-referencing entities from Metis.
  */
@@ -46,11 +48,11 @@ public class MetisDereferenceService {
      *         if no match found.
      * @throws EntityCreationException
      */
-    public Entity dereferenceEntityById(String id) throws HttpBadRequestException, EntityCreationException {
+    public Entity dereferenceEntityById(String id) throws EuropeanaApiException {
 	logger.trace("De-referencing entity {} with Metis", id);
 
 	String metisResponseBody = metisWebClient.get()
-		.uri(uriBuilder -> uriBuilder.path("/dereference").queryParam("uri", id).build())
+		.uri(uriBuilder -> uriBuilder.path(METIS_DEREF_PATH).queryParam("uri", id).build())
 		.accept(MediaType.APPLICATION_XML).retrieve()
 		// return 400 for 4xx responses from Metis
 		.onStatus(HttpStatus::is4xxClientError,
@@ -66,8 +68,8 @@ public class MetisDereferenceService {
 	try {
 	    derefResult = (EnrichmentResultList) getDeserializer().unmarshal(new StringReader(metisResponseBody));
 	} catch (JAXBException | RuntimeException e) {
-	    throw new HttpBadRequestException(
-		    "Unexpected exception occured when parsing metis dereference response for entity:  " + id, e);
+	    throw new EuropeanaApiException(
+		    "Unexpected exception occurred when parsing metis dereference response for entity:  " + id, e);
 	}
 
 	if (derefResult== null || derefResult.getEnrichmentBaseResultWrapperList().isEmpty()
@@ -76,11 +78,11 @@ public class MetisDereferenceService {
 	    // instead of throwing an error
 	    return null;
 	}
-	
-	XmlBaseEntityImpl xmlBaseEntity = derefResult.getEnrichmentBaseResultWrapperList().get(0)
-		.getEnrichmentBaseList().get(0);
 
-	return xmlBaseEntity.toEntityModel();
+		XmlBaseEntityImpl xmlBaseEntity = derefResult.getEnrichmentBaseResultWrapperList().get(0)
+				.getEnrichmentBaseList().get(0);
+
+		return xmlBaseEntity.toEntityModel();
     }
 
 
