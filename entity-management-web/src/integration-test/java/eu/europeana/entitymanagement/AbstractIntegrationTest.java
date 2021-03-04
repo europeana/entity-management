@@ -2,25 +2,22 @@ package eu.europeana.entitymanagement;
 
 
 import eu.europeana.entitymanagement.testutils.MongoContainer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.output.ToStringConsumer;
 import org.testcontainers.containers.output.WaitingConsumer;
 
-public abstract class AbstractContainerTest {
+public abstract class AbstractIntegrationTest {
 
     static final MongoContainer MONGO_CONTAINER;
-    private static final WaitingConsumer wait = new WaitingConsumer();
-    private static final ToStringConsumer toString = new ToStringConsumer();
 
     static {
-        MONGO_CONTAINER = new MongoContainer("em_itest_user", "password1", "entity-management", "job-repository")
-                .withLogConsumer(wait.andThen(toString));
+        MONGO_CONTAINER = new MongoContainer("entity-management", "job-repository")
+                .withLogConsumer(new WaitingConsumer().andThen(new ToStringConsumer()));
 
         MONGO_CONTAINER.start();
     }
+
 
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {

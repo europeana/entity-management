@@ -20,7 +20,7 @@ import java.text.SimpleDateFormat;
 public class SerializationConfig {
 
     //TODO: confirm date format with PO
-    private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXX");
+    private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXX");
 
     @Primary
     @Bean(AppConfigConstants.BEAN_JSON_MAPPER)

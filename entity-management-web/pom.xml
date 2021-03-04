@@ -135,6 +135,12 @@
 			<version>${version.corelib}</version>
 		</dependency>
 
+
+		<dependency>
+			<groupId>eu.europeana.api.commons</groupId>
+			<artifactId>commons-error</artifactId>
+			<version>${api.commons.version}</version>
+		</dependency>
 		<!-- spring batch dependencies -->
 		<!-- <dependency> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-starter-batch</artifactId> 
 			</dependency> <dependency> <groupId>mysql</groupId> <artifactId>mysql-connector-java</artifactId> 
@@ -189,10 +195,16 @@
 			<scope>test</scope>
 		</dependency>
 
+
 		<dependency>
-			<groupId>eu.europeana.api.commons</groupId>
-			<artifactId>commons-error</artifactId>
-			<version>${api.commons.version}</version>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>mockwebserver</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 

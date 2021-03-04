@@ -1,6 +1,6 @@
 package eu.europeana.entitymanagement.mongo;
 
-import eu.europeana.entitymanagement.AbstractContainerTest;
+import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -8,17 +8,15 @@ import eu.europeana.entitymanagement.definitions.model.impl.*;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
-class EntityRecordRepositoryIT extends AbstractContainerTest {
+class EntityRecordRepositoryIT extends AbstractIntegrationTest {
 
     @Autowired
     private EntityRecordRepository entityRecordRepository;
