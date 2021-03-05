@@ -1,37 +1,12 @@
 package eu.europeana.entitymanagement.web;
 
-import java.util.Date;
-import java.util.Optional;
-
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-
-import eu.europeana.api.commons.error.EuropeanaApiException;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.UriComponentsBuilder;
-
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.exception.EntityCreationException;
-import eu.europeana.entitymanagement.exception.HttpBadRequestException;
-import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
@@ -39,6 +14,20 @@ import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
 import eu.europeana.entitymanagement.web.service.impl.MetisDereferenceService;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
+import java.util.Optional;
 
 /**
  * Example Rest Controller class with input validation TODO: catch the
@@ -62,14 +51,13 @@ public class EMController extends BaseRest {
     private DataSources datasources;
 
     @ApiOperation(value = "Delete an entity", nickname = "deleteEntity", response = java.lang.Void.class)
-    @RequestMapping(value = "/{type}/{namespace}/{identifier}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = {"/{type}/base/{identifier}", "/{type}/{identifier}"}, method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> deleteEntity(
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
-	    @PathVariable(value = WebEntityConstants.PATH_PARAM_NAMESPACE) String namespace,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 	    HttpServletRequest request) {
-	String entityUri = getEntityUri(type, namespace, identifier.toLowerCase());
+	String entityUri = getEntityUri(type, identifier.toLowerCase());
 	
 	//TODO create disable entity method in EntityRecordService and implement it accordign to the specs.
 //	long numberDeletedEntities = entityRecordRepository.deleteForGood(entityUri);
@@ -85,31 +73,29 @@ public class EMController extends BaseRest {
     }
 
     @ApiOperation(value = "Retrieve a known entity", nickname = "getEntityJsonLd", response = java.lang.Void.class)
-    @RequestMapping(value = { "/{type}/{namespace}/{identifier}.jsonld" }, method = RequestMethod.GET, produces = {
+    @RequestMapping(value = { "/{type}/base/{identifier}.jsonld", "/{type}/{identifier}.jsonld" }, method = RequestMethod.GET, produces = {
 	    HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<String> getJsonLdEntity(
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
-	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = true) String profile,
+	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
-	    @PathVariable(value = WebEntityConstants.PATH_PARAM_NAMESPACE) String namespace,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 	    HttpServletRequest request) {
-	return createResponse(profile, type, namespace, identifier, FormatTypes.jsonld, null, request);
+	return createResponse(profile, type, identifier, FormatTypes.jsonld, null, request);
 
     }
 
     @ApiOperation(value = "Retrieve a known entity", nickname = "getEntityXml", response = java.lang.Void.class)
-    @RequestMapping(value = { "/{type}/{namespace}/{identifier}.xml" }, method = RequestMethod.GET, produces = {
+    @RequestMapping(value = { "/{type}/base/{identifier}.xml", "/{type}/{identifier}.xml" }, method = RequestMethod.GET, produces = {
 	    HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML, HttpHeaders.CONTENT_TYPE_RDF_XML,
 	    MediaType.APPLICATION_XML_VALUE })
     public ResponseEntity<String> getXmlEntity(
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
-	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = true) String profile,
+	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
-	    @PathVariable(value = WebEntityConstants.PATH_PARAM_NAMESPACE) String namespace,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 	    HttpServletRequest request) {
-	return createResponse(profile, type, namespace, identifier, FormatTypes.xml,
+	return createResponse(profile, type, identifier, FormatTypes.xml,
 		HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML, request);
     }
 
@@ -145,11 +131,11 @@ public class EMController extends BaseRest {
 
 	}
 
-	EntityRecord savedEntity = entityRecordService.createEntityFromRequest(entityCreationRequest, metisResponse);
+	EntityRecord savedEntity = entityRecordService.createEntityFromRequest(entityCreationRequest, metisResponse.getType());
 		return ResponseEntity.accepted().body(savedEntity);
     }
 
-    private ResponseEntity<String> createResponse(String profile, String type, String namespace, String identifier,
+    private ResponseEntity<String> createResponse(String profile, String type, String identifier,
 	    FormatTypes outFormat, String contentType, HttpServletRequest request) {
 	// TODO: Re-enable authentication
 	// verifyReadAccess(request);
@@ -171,7 +157,7 @@ public class EMController extends BaseRest {
 	    return ResponseEntity.badRequest().header("info:", "The profile parameter is invalid.").build();
 	}
 
-	String entityUri = getEntityUri(type, namespace, identifier);
+	String entityUri = getEntityUri(type, identifier);
 	Optional<EntityRecord> entityRecordOptional = entityRecordService.retrieveEntityRecordByUri(entityUri);
 	if (entityRecordOptional.isEmpty()) {
 	    return ResponseEntity.notFound().header("info:", "The entity with the required parameters does not exist.")
@@ -180,8 +166,8 @@ public class EMController extends BaseRest {
 
 	EntityRecord entityRecord = entityRecordOptional.get();
 
-	Date timestamp = (entityRecord != null) ? entityRecord.getEntity().getIsAggregatedBy().getModified() : null;
-	Date etagDate = (timestamp != null) ? timestamp : new Date();
+
+	Date etagDate = (entityRecord.getEntity().getIsAggregatedBy() == null ? new Date() : entityRecord.getEntity().getIsAggregatedBy().getModified());
 	String etag = generateETag(etagDate, outFormat.name(), getApiVersion());
 
 	headers = new LinkedMultiValueMap<String, String>(5);
@@ -200,14 +186,12 @@ public class EMController extends BaseRest {
 	return response;
     }
 
-    private String getEntityUri(String type, String namespace, String identifier) {
+    private String getEntityUri(String type, String identifier) {
 	StringBuilder stringBuilder = new StringBuilder();
 
 	stringBuilder.append(BASE_URI_DATA);
 	if (StringUtils.isNotEmpty(type))
 	    stringBuilder.append(type.toLowerCase()).append("/");
-	if (StringUtils.isNotEmpty(namespace))
-	    stringBuilder.append(namespace.toLowerCase()).append("/");
 	if (StringUtils.isNotEmpty(identifier))
 	    stringBuilder.append(identifier);
 
