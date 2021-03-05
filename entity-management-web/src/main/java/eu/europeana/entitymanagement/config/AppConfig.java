@@ -9,8 +9,12 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.validation.ValidatorFactory;
 
+import dev.morphia.Datastore;
+import eu.europeana.entitymanagement.batch.config.MongoBatchConfigurer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -35,6 +39,9 @@ public class AppConfig extends AppConfigConstants{
     
     @Resource(name=BEAN_EM_CONFIGURATION)
     private EntityManagementConfiguration emConfiguration;
+
+    @Resource(name = BEAN_XML_MAPPER)
+    private XmlMapper xmlMapper;
     
     public AppConfig() {
 	LOG.info("Initializing EntityManagementConfiguration bean as: configuration");
@@ -42,7 +49,6 @@ public class AppConfig extends AppConfigConstants{
     
     @Bean(name=BEAN_EM_DATA_SOURCES)
     public DataSources getDataSources() throws IOException {
-	XmlMapper xmlMapper = new XmlMapper();
 	String datasourcesXMLConfigFile = emConfiguration.getDatasourcesXMLConfig();
 		
 	try (InputStream inputStream = getClass().getResourceAsStream(datasourcesXMLConfigFile);
@@ -54,7 +60,7 @@ public class AppConfig extends AppConfigConstants{
 
     @Bean(name=BEAN_EM_LANGUAGE_CODES)
     public LanguageCodes getLanguageCodes() throws IOException {
-	XmlMapper xmlMapper = new XmlMapper();
+
 	String languagecodesXMLConfig = emConfiguration.getLanguagecodesXMLConfig();
 	try (InputStream inputStream = getClass().getResourceAsStream(languagecodesXMLConfig);
 		BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
@@ -72,5 +78,15 @@ public class AppConfig extends AppConfigConstants{
     public EuropeanaClientDetailsService getClientDetailsService() {
 	return new EuropeanaClientDetailsService();
     }
-    
+
+
+    /**
+     * Configures Spring Batch to use Mongo
+     * @param datastore Morphia datastore for Spring Batch
+     * @return BatchConfigurer instance
+     */
+    @Bean
+    public MongoBatchConfigurer mongoBatchConfigurer(@Qualifier(BEAN_BATCH_DATA_STORE) Datastore datastore){
+        return new MongoBatchConfigurer(datastore);
+    }
 }

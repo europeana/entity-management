@@ -1,6 +1,11 @@
 # mongodb
-spring.data.mongodb.repositories.enabled = true
-spring.data.mongodb.uri=mongodb://localhost:27017/entity-management
+mongo.connectionUrl = mongodb://<host>:<port>
+mongo.em.database = <entity-management-db>
+mongo.batch.database = <spring-batch-db>
+
+# when the "dev" profile is active, these set whether the database should be cleared on startup
+mongo.batch.database.reset=false
+mongo.em.database.reset=false
 
 # Socks proxy configuration
 socks.enabled=false
@@ -16,4 +21,4 @@ europeana.apikey.jwttoken.siganturekey=
 entitymanagement.solr.pr.url=
 #url for the search api solr
 entitymanagement.solr.searchapi.url=
-    
+

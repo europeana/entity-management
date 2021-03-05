@@ -294,4 +294,9 @@ public class EntityRecordService {
 		    e);
 	}
     }
+
+
+    public void dropRepository(){
+    	this.entityRecordRepository.dropCollection();
+	}
 }

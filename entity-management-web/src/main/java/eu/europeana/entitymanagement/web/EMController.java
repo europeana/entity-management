@@ -1,31 +1,7 @@
 package eu.europeana.entitymanagement.web;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Optional;
-
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.UriComponentsBuilder;
-
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.entitymanagement.common.config.DataSources;
@@ -33,8 +9,6 @@ import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.exception.EntityCreationException;
-import eu.europeana.entitymanagement.exception.HttpBadRequestException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
@@ -43,6 +17,22 @@ import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
 import eu.europeana.entitymanagement.web.service.impl.MetisDereferenceService;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Optional;
 
 /**
  * Example Rest Controller class with input validation TODO: catch the
@@ -189,7 +179,7 @@ public class EMController extends BaseRest {
 
     @ApiOperation(value = "Register a new entity", nickname = "registerEntity", response = java.lang.Void.class)
     @PostMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<EntityRecord> registerEntity(@RequestBody EntityPreview entityCreationRequest) {
+    public ResponseEntity<EntityRecord> registerEntity(@RequestBody EntityPreview entityCreationRequest) throws EuropeanaApiException {
 	// check if id is already being used, if so return a 301
 	Optional<EntityRecord> existingEntity = entityRecordService
 		.retrieveEntityRecordByUri(entityCreationRequest.getId());
@@ -206,24 +196,8 @@ public class EMController extends BaseRest {
 	    return ResponseEntity.badRequest().build();
 	}
 
-	/*
-	 * deferefence using Europeana TODO: call the Europeana service to get the
-	 * entity
-	 */
-//        BaseEntity europeanaResponse = null;
-	// dereference using Metis. return HTTP 400 for HTTP4XX responses and HTTP 504
-	// for other error responses
-	Entity metisResponse;
-	try {
-	    metisResponse = dereferenceService.dereferenceEntityById(entityCreationRequest.getId());
-	} catch (HttpBadRequestException e) {
-	    return ResponseEntity.badRequest().header("info:", e.getMessage()).build();
-	}catch (EntityCreationException e) {
-	    // TODO: change to appropriate error message, sitch to the use of GlobalExceptionHandler
-	    return ResponseEntity.badRequest().header("info:", e.getMessage()).build();
-	    
-	}
 
+	Entity metisResponse = dereferenceService.dereferenceEntityById(entityCreationRequest.getId());
 	existingEntity = entityRecordService.retrieveMetisCoreferenceSameAs(metisResponse.getSameAs());
 
 	if (existingEntity.isPresent()) {
@@ -235,14 +209,8 @@ public class EMController extends BaseRest {
 
 	}
 
-	EntityRecord savedEntity;
-	try {
-	    savedEntity = entityRecordService.createEntityFromRequest(entityCreationRequest, metisResponse);
-	} catch (EntityCreationException e) {
-	    // TODO: maybe here return the unprocessable entity instead of bad request
-	    return ResponseEntity.badRequest().header("info:", e.getMessage()).build();
-	}
-	return ResponseEntity.accepted().body(savedEntity);
+	EntityRecord savedEntity = entityRecordService.createEntityFromRequest(entityCreationRequest, metisResponse);
+		return ResponseEntity.accepted().body(savedEntity);
     }
 
     private ResponseEntity<String> createResponse(String profile, String type, String namespace, String identifier,

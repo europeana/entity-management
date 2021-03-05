@@ -1,0 +1,55 @@
+version: "3.9"
+
+# To only start mongo, run: docker-compose up db
+# Then use the following settings in entitymanagement.user.properties
+#
+#  mongo.connectionUrl = mongodb://admin-user:admin-password@localhost:27017
+#  mongo.em.database = entity-management
+#  mongo.batch.database = job-repository
+#
+
+
+services:
+  db:
+    build:
+      context: ./entity-management-web/src/integration-test/resources/mongo-docker
+      dockerfile: Dockerfile
+    container_name: mongodb
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin-user
+      - MONGO_INITDB_ROOT_PASSWORD=admin-password
+      - MONGO_INITDB_DATABASE=admin
+      # Databases for EM and Spring Batch
+      - EM_APP_DB=entity-management
+      - EM_BATCH_DB=job-repository
+
+  app:
+    image: library/tomcat:9.0-jdk11
+    environment:
+      mongo.connectionUrl: mongodb://api_user:password@db:27017
+      mongo.em.database: entity-management
+      mongo.batch.database: job-repository
+      #Memory monitoring (JConsole connection possible via localhost:1099)
+      CATALINA_OPTS: '
+                        -Djava.rmi.server.hostname=0.0.0.0
+                        -Dcom.sun.management.jmxremote
+                        -Dcom.sun.management.jmxremote.port=1099
+                        -Dcom.sun.management.jmxremote.rmi.port=1099
+                        -Dcom.sun.management.jmxremote.local.only=false
+                        -Dcom.sun.management.jmxremote.authenticate=false
+                        -Dcom.sun.management.jmxremote.ssl=false
+                        '
+      JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8000
+    volumes:
+      - ./entity-management-web/target/entity-management-web.war:/usr/local/tomcat/webapps/ROOT.war
+    ports:
+      #Tomcat http port
+      - "8080:8080"
+      #Debug port
+      - "8000:8000"
+      #JMX Port
+      - "1099:1099"
+    depends_on:
+      - db
