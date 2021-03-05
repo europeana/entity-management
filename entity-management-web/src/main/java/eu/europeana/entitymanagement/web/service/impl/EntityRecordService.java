@@ -56,14 +56,15 @@ public class EntityRecordService {
      * Creates an {@link EntityRecord} from an {@link EntityPreview}, which
      * is then persisted.
      * 
+     * @param entityCreationRequest         de-referenced XML response instance from Metis
      * @param entityCreationRequest entity request object
-     * @param entity         de-referenced XML response instance from Metis
-     * @return Saved Entity record
+     * @param externalEntityType
+	 * @return Saved Entity record
      * @throws EntityCreationException if an error occurs
      */
-    public EntityRecord createEntityFromRequest(EntityPreview entityCreationRequest, Entity externalEntity)
+    public EntityRecord createEntityFromRequest(EntityPreview entityCreationRequest, String externalEntityType)
 	    throws EntityCreationException {
-	Entity entity = EntityObjectFactory.createEntityObject(externalEntity.getType());
+	Entity entity = EntityObjectFactory.createEntityObject(externalEntityType);
 
 	entity.setPrefLabelStringMap(entityCreationRequest.getPrefLabel());
 	entity.setAltLabel(entityCreationRequest.getAltLabel());
@@ -300,4 +301,9 @@ public class EntityRecordService {
 		    e);
 	}
     }
+
+
+    public void dropRepository(){
+    	this.entityRecordRepository.dropCollection();
+	}
 }

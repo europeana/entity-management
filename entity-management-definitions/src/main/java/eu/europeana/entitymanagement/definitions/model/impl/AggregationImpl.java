@@ -3,8 +3,9 @@ package eu.europeana.entitymanagement.definitions.model.impl;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
@@ -23,102 +24,113 @@ public class AggregationImpl implements Aggregation{
 	List<String> aggregates;
     
     @Override
-    @JsonProperty(WebEntityFields.ID)
+    @JsonGetter(WebEntityFields.ID)
 	@JacksonXmlProperty(isAttribute= true, localName = XmlFields.XML_RDF_ABOUT)
     public String getId() {
         return id;
     }
     @Override
+    @JsonSetter(WebEntityFields.ID)
     public void setId(String id) {
         this.id = id;
     }
     @Override
-    @JsonProperty(WebEntityFields.TYPE)
+    @JsonGetter(WebEntityFields.TYPE)
     @JacksonXmlProperty(localName = XmlFields.XML_RDF_TYPE)
     public String getType() {
         return type;
     }
+    
+    @JsonSetter(WebEntityFields.TYPE)
     public void setType(String type) {
         this.type = type;
     }
     @Override
-    @JsonProperty(WebEntityFields.RIGHTS)
+    @JsonGetter(WebEntityFields.RIGHTS)
     @JacksonXmlProperty(localName = XmlFields.XML_EDM_RIGHTS)
     public String getRights() {
         return rights;
     }
     @Override
+    @JsonSetter(WebEntityFields.RIGHTS)
     public void setRights(String rights) {
         this.rights = rights;
     }
     @Override
-    @JsonProperty(WebEntityFields.SOURCE)
+    @JsonGetter(WebEntityFields.SOURCE)
     @JacksonXmlProperty(localName = XmlFields.XML_DC_SOURCE)
     public String getSource() {
         return source;
     }
     @Override
+    @JsonSetter(WebEntityFields.SOURCE)
     public void setSource(String source) {
         this.source = source;
     }
     @Override
-    @JsonProperty(WebEntityFields.CREATED)
+    @JsonGetter(WebEntityFields.CREATED)
     @JacksonXmlProperty(localName = XmlFields.XML_DCTERMS_CREATED)
     public Date getCreated() {
         return created;
     }
     @Override
+    @JsonSetter(WebEntityFields.CREATED)
     public void setCreated(Date created) {
         this.created = created;
     }
     @Override
-    @JsonProperty(WebEntityFields.MODIFIED)
+    @JsonGetter(WebEntityFields.MODIFIED)
     @JacksonXmlProperty(localName = XmlFields.XML_DCTERMS_MODIFIED)
     public Date getModified() {
         return modified;
     }
     @Override
+    @JsonSetter(WebEntityFields.MODIFIED)
     public void setModified(Date modified) {
         this.modified = modified;
     }
     @Override
-    @JsonProperty
+    @JsonGetter
     @JacksonXmlProperty
     public double getPageRank() {
         return pageRank;
     }
     
     @Override
+    @JsonSetter
     public void setPageRank(double pageRank) {
         this.pageRank = pageRank;
     }
     @Override
-    @JsonProperty
+    @JsonGetter
     @JacksonXmlProperty
     public int getRecordCount() {
         return recordCount;
     }
     @Override
+    @JsonSetter
     public void setRecordCount(int recordCount) {
         this.recordCount = recordCount;
     }
     @Override
-    @JsonProperty
+    @JsonGetter
     @JacksonXmlProperty
     public int getScore() {
         return score;
     }
     @Override
+    @JsonSetter
     public void setScore(int score) {
         this.score = score;
     }
     @Override
-    @JsonProperty(WebEntityFields.AGGREGATES)
+    @JsonGetter(WebEntityFields.AGGREGATES)
     @JacksonXmlProperty(localName = XmlFields.XML_ORE_AGGREGATES)
     public List<String> getAggregates() {
         return aggregates;
     }
     @Override
+    @JsonSetter(WebEntityFields.AGGREGATES)
     public void setAggregates(List<String> aggregates) {
         this.aggregates = aggregates;
     }

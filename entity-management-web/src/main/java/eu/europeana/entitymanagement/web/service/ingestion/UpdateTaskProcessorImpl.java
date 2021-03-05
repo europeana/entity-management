@@ -1,7 +1,10 @@
 package eu.europeana.entitymanagement.web.service.ingestion;
 
+import javax.annotation.Resource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
+import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
@@ -16,9 +19,13 @@ import eu.europeana.entitymanagement.web.service.ScoringService;
 
 public class UpdateTaskProcessorImpl implements UpdateTaskProcessor {
 
-    @Autowired
+    /**
+     * @deprecated task processor must not call the repository directly. The required methods must be accessed through the EntityRecordService
+     */
+    @Resource(name=AppConfig.BEAN_ENTITY_RECORD_REPO)
+    @Deprecated
     private EntityRecordRepository entityRecordRepository;
-    @Autowired
+    @Resource(name=AppConfig.BEAN_EM_SCORING_SERVICE)
     private ScoringService scoringService;
 
     public void executeTask(UpdateTask task) {

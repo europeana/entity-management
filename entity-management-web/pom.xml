@@ -39,6 +39,11 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.springframework.batch</groupId>
+			<artifactId>spring-batch-core</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-boot-starter</artifactId>
 			<version>${swagger.version}</version>
@@ -119,11 +124,23 @@
 		</dependency>
 
 		<dependency>
+			<groupId>eu.europeana.api</groupId>
+			<artifactId>entity-management-batch</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
 			<groupId>eu.europeana.corelib</groupId>
 			<artifactId>corelib-utils</artifactId>
 			<version>${version.corelib}</version>
 		</dependency>
 
+
+		<dependency>
+			<groupId>eu.europeana.api.commons</groupId>
+			<artifactId>commons-error</artifactId>
+			<version>${api.commons.version}</version>
+		</dependency>
 		<!-- spring batch dependencies -->
 		<!-- <dependency> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-starter-batch</artifactId> 
 			</dependency> <dependency> <groupId>mysql</groupId> <artifactId>mysql-connector-java</artifactId> 
@@ -158,7 +175,17 @@
 			</exclusions>
 		</dependency>
 
-
+		<!--testcontainers for integration testing-->
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
 		<dependency>
@@ -168,10 +195,16 @@
 			<scope>test</scope>
 		</dependency>
 
+
 		<dependency>
-			<groupId>eu.europeana.api.commons</groupId>
-			<artifactId>commons-error</artifactId>
-			<version>${api.commons.version}</version>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>mockwebserver</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 
@@ -181,26 +214,6 @@
 		<finalName>${project.artifactId}</finalName>
 
 		<plugins>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-				<configuration>
-					<!-- 
-					<outputDirectory>output-resources</outputDirectory>
-					 -->
-					<resources>
-						<resource>
-							<directory>src/main/resources</directory>
-							<includes>
-								<include>*.properties</include>
-							</includes>
-							<filtering>true</filtering>
-						</resource>
-					</resources>
-				</configuration>	
-			</plugin>
-
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>

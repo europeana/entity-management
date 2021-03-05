@@ -6,8 +6,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
@@ -57,132 +58,145 @@ public class AgentImpl extends BaseEntity implements Agent, eu.europeana.corelib
 		this.date = date;
 	}
 
-	@JsonProperty(WebEntityFields.BEGIN)
+	@JsonGetter(WebEntityFields.BEGIN)
 	@JacksonXmlProperty(localName = XmlFields.XML_EDM_BEGIN)
 	public String[] getBeginArray() {
 		return begin;
 	}
 
+	@JsonSetter(WebEntityFields.BEGIN)
 	public void setBegin(String[] begin) {
 		this.begin = begin;
 	}
 
-	@JsonProperty(WebEntityFields.END)
+	@JsonGetter(WebEntityFields.END)
 	@JacksonXmlProperty(localName = XmlFields.XML_EDM_END)
 	public String[] getEndArray() {
 		return end;
 	}
 
+	@JsonSetter(WebEntityFields.END)
 	public void setEnd(String[] end) {
 		this.end = end;
 	}
 
-	@JsonProperty(WebEntityFields.HAS_MET)
+	@JsonGetter(WebEntityFields.HAS_MET)
 	@JacksonXmlProperty(localName = XmlFields.XML_EDM_HASMET)
 	public String[] getHasMet() {
 		return hasMet;
 	}
 
+	@JsonSetter(WebEntityFields.HAS_MET)
 	public void setHasMet(String[] hasMet) {
 		this.hasMet = hasMet;
 	}
 
-	@JsonProperty(WebEntityFields.NAME)
+	@JsonGetter(WebEntityFields.NAME)
 	@JacksonXmlProperty(localName = XmlFields.XML_FOAF_NAME)
 	public Map<String, String> getName() {
 		return name;
 	}
 
+	@JsonSetter(WebEntityFields.NAME)
 	public void setName(Map<String, String> name) {
 		this.name = name;
 	}
 
-	@JsonProperty(WebEntityFields.BIOGRAPHICAL_INFORMATION)
+	@JsonGetter(WebEntityFields.BIOGRAPHICAL_INFORMATION)
 	@JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_BIOGRAPHICAL_INFORMATION)
 	public Map<String, List<String>> getBiographicalInformation() {
 		return biographicalInformation;
 	}
 
+	@JsonSetter(WebEntityFields.BIOGRAPHICAL_INFORMATION)
 	public void setBiographicalInformation(Map<String, List<String>> biographicalInformation) {
 		this.biographicalInformation = biographicalInformation;
 	}
 
-	@JsonProperty(WebEntityFields.DATE_OF_BIRTH)
+	@JsonGetter(WebEntityFields.DATE_OF_BIRTH)
 	@JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_DATE_OF_BIRTH)
 	public String[] getDateOfBirth() {
 		return dateOfBirth;
 	}
 
+	@JsonSetter(WebEntityFields.DATE_OF_BIRTH)
 	public void setDateOfBirth(String[] dateOfBirth) {
 		this.dateOfBirth = dateOfBirth;
 	}
 
-	@JsonProperty(WebEntityFields.DATE_OF_DEATH)
+	@JsonGetter(WebEntityFields.DATE_OF_DEATH)
 	@JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_DATE_OF_DEATH)
 	public String[] getDateOfDeath() {
 		return dateOfDeath;
 	}
 
+	@JsonSetter(WebEntityFields.DATE_OF_DEATH)
 	public void setDateOfDeath(String[] dateOfDeath) {
 		this.dateOfDeath = dateOfDeath;
 	}
 
-	@JsonProperty(WebEntityFields.PLACE_OF_BIRTH)
+	@JsonGetter(WebEntityFields.PLACE_OF_BIRTH)
 	@JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_PLACE_OF_BIRTH)
 	public Map<String, List<String>> getPlaceOfBirth() {
 		return placeOfBirth;
 	}
 
+	@JsonSetter(WebEntityFields.PLACE_OF_BIRTH)
 	public void setPlaceOfBirth(Map<String, List<String>> placeOfBirth) {
 		this.placeOfBirth = placeOfBirth;
 	}
 
-	@JsonProperty(WebEntityFields.PLACE_OF_DEATH)
+	@JsonGetter(WebEntityFields.PLACE_OF_DEATH)
 	@JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_PLACE_OF_DEATH)
 	public Map<String, List<String>> getPlaceOfDeath() {
 		return placeOfDeath;
 	}
 
+	@JsonSetter(WebEntityFields.PLACE_OF_DEATH)
 	public void setPlaceOfDeath(Map<String, List<String>> placeOfDeath) {
 		this.placeOfDeath = placeOfDeath;
 	}
 
-	@JsonProperty(WebEntityFields.DATE_OF_ESTABLISHMENT)
+	@JsonGetter(WebEntityFields.DATE_OF_ESTABLISHMENT)
 	@JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_DATE_OF_ESTABLISHMENT)
 	public String getDateOfEstablishment() {
 		return dateOfEstablishment;
 	}
 
+	@JsonSetter(WebEntityFields.DATE_OF_ESTABLISHMENT)
 	public void setDateOfEstablishment(String dateOfEstablishment) {
 		this.dateOfEstablishment = dateOfEstablishment;
 	}
 
-	@JsonProperty(WebEntityFields.DATE_OF_TERMINATION)
+	@JsonGetter(WebEntityFields.DATE_OF_TERMINATION)
 	@JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_DATE_OF_TERMINATION)
 	public String getDateOfTermination() {
 		return dateOfTermination;
 	}
 
+	@JsonSetter(WebEntityFields.DATE_OF_TERMINATION)
 	public void setDateOfTermination(String dateOfTermination) {
 		this.dateOfTermination = dateOfTermination;
 	}
 
-	@JsonProperty(WebEntityFields.GENDER)
+	@JsonGetter(WebEntityFields.GENDER)
 	@JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_GENDER)
 	public String getGender() {
 		return gender;
 	}
 
+	@JsonSetter(WebEntityFields.GENDER)
 	public void setGender(String gender) {
 		this.gender = gender;
 	}
 
-	@JsonProperty(WebEntityFields.PROFESSION_OR_OCCUPATION)
+	@JsonGetter(WebEntityFields.PROFESSION_OR_OCCUPATION)
 	@JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_PROFESSION_OR_OCCUPATION)
 	public Map<String, List<String>> getProfessionOrOccupation() {
 		return professionOrOccupation;
 	}
 
+	@JsonSetter(WebEntityFields.PROFESSION_OR_OCCUPATION)
 	public void setProfessionOrOccupation(Map<String, List<String>> professionOrOccupation) {
 		this.professionOrOccupation = professionOrOccupation;
 	}

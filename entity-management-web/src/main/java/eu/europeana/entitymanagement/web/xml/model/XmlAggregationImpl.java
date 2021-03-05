@@ -10,7 +10,7 @@ import eu.europeana.entitymanagement.definitions.model.Entity;;
 
 @JacksonXmlRootElement(localName = XmlConstants.XML_ORE_AGGREGATION)
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({XmlConstants.XML_DCTERMS_CREATED, XmlConstants.XML_DCTERMS_MODIFIED, XmlConstants.XML_ORE_AGGREGATES})
+@JsonPropertyOrder({XmlConstants.XML_CREATED, XmlConstants.XML_MODIFIED, XmlConstants.XML_AGGREGATES})
 public class XmlAggregationImpl {
 
     	@JsonIgnore
@@ -44,7 +44,7 @@ public class XmlAggregationImpl {
 //		return new RdfTypedElement(entity.getIsAggregatedBy());
 //	}
 	
-	@JacksonXmlProperty(localName = XmlConstants.XML_ORE_AGGREGATES)
+	@JacksonXmlProperty(localName = XmlConstants.XML_AGGREGATES)
 	public RdfResource getAggregates() {
 		return new RdfResource(entity.getAbout());
 	}
