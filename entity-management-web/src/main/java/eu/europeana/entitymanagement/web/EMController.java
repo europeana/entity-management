@@ -1,7 +1,31 @@
 package eu.europeana.entitymanagement.web;
 
+import java.util.Date;
+import java.util.Optional;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
+
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.error.EuropeanaApiException;
+import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.config.AppConfig;
@@ -14,20 +38,6 @@ import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
 import eu.europeana.entitymanagement.web.service.impl.MetisDereferenceService;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.UriComponentsBuilder;
-
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
-import java.util.Optional;
 
 /**
  * Example Rest Controller class with input validation TODO: catch the
@@ -50,31 +60,46 @@ public class EMController extends BaseRest {
     @Resource(name = AppConfig.BEAN_EM_DATA_SOURCES)
     private DataSources datasources;
 
-    @ApiOperation(value = "Delete an entity", nickname = "deleteEntity", response = java.lang.Void.class)
-    @RequestMapping(value = {"/{type}/base/{identifier}", "/{type}/{identifier}"}, method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> deleteEntity(
+    @ApiOperation(value = "Disable an entity", nickname = "disableEntity", response = java.lang.Void.class)
+    @RequestMapping(value = { "/{type}/base/{identifier}",
+	    "/{type}/{identifier}" }, method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> disableEntity(
+	    @RequestHeader(value = "If-Match", required = false) String ifMatchHeader,
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
-	    HttpServletRequest request) {
+	    HttpServletRequest request) throws HttpException {
+
 	String entityUri = getEntityUri(type, identifier.toLowerCase());
-	
-	//TODO create disable entity method in EntityRecordService and implement it accordign to the specs.
-//	long numberDeletedEntities = entityRecordRepository.deleteForGood(entityUri);
-	long numberDeletedEntities = 0;
-	if (numberDeletedEntities == 0) {
-	    return ResponseEntity.notFound()
-		    .header("info:", "There is no entity with the given identifier to be deleted.").build();
+	Optional<EntityRecord> entityRecord = entityRecordService.retrieveEntityRecordByUri(entityUri);
+	if (entityRecord.isPresent() && !entityRecord.get().getDisabled()) {
+
+	    Entity entity = entityRecord.get().getEntity();
+	    Date etagDate = (entity == null || entity.getIsAggregatedBy() == null ? new Date()
+		    : entity.getIsAggregatedBy().getModified());
+	    String etag = generateETag(etagDate, FormatTypes.jsonld.name(), getApiVersion());
+
+	    checkIfMatchHeader(etag, request);
+
+	    /*
+	     * TODO: disable the record in the index, too
+	     */
+	    entityRecordService.disableEntityRecord(entityRecord.get());
+
+	    return ResponseEntity.noContent().header("info:", "The entity was disabled successfully.").build();
+	} else if (entityRecord.isPresent() && entityRecord.get().getDisabled()) {
+	    return ResponseEntity.status(HttpStatus.GONE).header("info:", "The entity is already disabled.").build();
 	} else {
-	    String response = "The request is executed successfully. The number of deleted entites is: "
-		    + String.valueOf(numberDeletedEntities);
-	    return ResponseEntity.noContent().header("info:", response).build();
+	    return ResponseEntity.notFound()
+		    .header("info:", "There is no entity with the given identifier to be disabled.").build();
 	}
+
     }
 
     @ApiOperation(value = "Retrieve a known entity", nickname = "getEntityJsonLd", response = java.lang.Void.class)
-    @RequestMapping(value = { "/{type}/base/{identifier}.jsonld", "/{type}/{identifier}.jsonld" }, method = RequestMethod.GET, produces = {
-	    HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE })
+    @RequestMapping(value = { "/{type}/base/{identifier}.jsonld",
+	    "/{type}/{identifier}.jsonld" }, method = RequestMethod.GET, produces = { HttpHeaders.CONTENT_TYPE_JSONLD,
+		    MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<String> getJsonLdEntity(
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
 	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
@@ -86,22 +111,24 @@ public class EMController extends BaseRest {
     }
 
     @ApiOperation(value = "Retrieve a known entity", nickname = "getEntityXml", response = java.lang.Void.class)
-    @RequestMapping(value = { "/{type}/base/{identifier}.xml", "/{type}/{identifier}.xml" }, method = RequestMethod.GET, produces = {
-	    HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML, HttpHeaders.CONTENT_TYPE_RDF_XML,
-	    MediaType.APPLICATION_XML_VALUE })
+    @RequestMapping(value = { "/{type}/base/{identifier}.xml",
+	    "/{type}/{identifier}.xml" }, method = RequestMethod.GET, produces = {
+		    HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML, HttpHeaders.CONTENT_TYPE_RDF_XML,
+		    MediaType.APPLICATION_XML_VALUE })
     public ResponseEntity<String> getXmlEntity(
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
 	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 	    HttpServletRequest request) {
-	return createResponse(profile, type, identifier, FormatTypes.xml,
-		HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML, request);
+	return createResponse(profile, type, identifier, FormatTypes.xml, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML,
+		request);
     }
 
     @ApiOperation(value = "Register a new entity", nickname = "registerEntity", response = java.lang.Void.class)
     @PostMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<EntityRecord> registerEntity(@RequestBody EntityPreview entityCreationRequest) throws EuropeanaApiException {
+    public ResponseEntity<EntityRecord> registerEntity(@RequestBody EntityPreview entityCreationRequest)
+	    throws EuropeanaApiException {
 	// check if id is already being used, if so return a 301
 	Optional<EntityRecord> existingEntity = entityRecordService
 		.retrieveEntityRecordByUri(entityCreationRequest.getId());
@@ -118,7 +145,6 @@ public class EMController extends BaseRest {
 	    return ResponseEntity.badRequest().build();
 	}
 
-
 	Entity metisResponse = dereferenceService.dereferenceEntityById(entityCreationRequest.getId());
 	existingEntity = entityRecordService.retrieveMetisCoreferenceSameAs(metisResponse.getSameAs());
 
@@ -131,12 +157,13 @@ public class EMController extends BaseRest {
 
 	}
 
-	EntityRecord savedEntity = entityRecordService.createEntityFromRequest(entityCreationRequest, metisResponse.getType());
-		return ResponseEntity.accepted().body(savedEntity);
+	EntityRecord savedEntity = entityRecordService.createEntityFromRequest(entityCreationRequest,
+		metisResponse.getType());
+	return ResponseEntity.accepted().body(savedEntity);
     }
 
-    private ResponseEntity<String> createResponse(String profile, String type, String identifier,
-	    FormatTypes outFormat, String contentType, HttpServletRequest request) {
+    private ResponseEntity<String> createResponse(String profile, String type, String identifier, FormatTypes outFormat,
+	    String contentType, HttpServletRequest request) {
 	// TODO: Re-enable authentication
 	// verifyReadAccess(request);
 
@@ -166,8 +193,9 @@ public class EMController extends BaseRest {
 
 	EntityRecord entityRecord = entityRecordOptional.get();
 
-
-	Date etagDate = (entityRecord.getEntity().getIsAggregatedBy() == null ? new Date() : entityRecord.getEntity().getIsAggregatedBy().getModified());
+	Date etagDate = (entityRecord.getEntity() == null || entityRecord.getEntity().getIsAggregatedBy() == null
+		? new Date()
+		: entityRecord.getEntity().getIsAggregatedBy().getModified());
 	String etag = generateETag(etagDate, outFormat.name(), getApiVersion());
 
 	headers = new LinkedMultiValueMap<String, String>(5);

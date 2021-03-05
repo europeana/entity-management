@@ -45,6 +45,12 @@ public class EntityRecordService {
     public EntityRecord saveEntityRecord(EntityRecord er) {
 	return entityRecordRepository.save(er);
     }
+    
+    public EntityRecord disableEntityRecord(EntityRecord er) {
+    	er.setDisabled(true);
+		return saveEntityRecord(er);
+    }
+
 
     /**
      * Creates an {@link EntityRecord} from an {@link EntityPreview}, which
