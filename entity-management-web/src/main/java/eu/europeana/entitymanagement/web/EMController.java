@@ -75,8 +75,7 @@ public class EMController extends BaseRest {
 	if (entityRecord.isPresent() && !entityRecord.get().getDisabled()) {
 
 	    Entity entity = entityRecord.get().getEntity();
-	    Date etagDate = (entity == null || entity.getIsAggregatedBy() == null ? new Date()
-		    : entity.getIsAggregatedBy().getModified());
+	    Date etagDate = (entity == null || entity.getIsAggregatedBy() == null ? new Date() : entity.getIsAggregatedBy().getModified());
 	    String etag = generateETag(etagDate, FormatTypes.jsonld.name(), getApiVersion());
 
 	    checkIfMatchHeader(etag, request);

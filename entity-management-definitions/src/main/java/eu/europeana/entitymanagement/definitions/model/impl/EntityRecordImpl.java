@@ -26,7 +26,11 @@ import eu.europeana.entitymanagement.vocabulary.XmlFields;
 @Indexes(@Index(fields = { @Field("dbId") }, options = @IndexOptions(unique = true)))
 public class EntityRecordImpl implements EntityRecord{
 
-    @Id
+    public EntityRecordImpl() {
+		this.disabled=false;
+	}
+
+	@Id
     @JsonIgnore
     private long dbId;
 
@@ -36,6 +40,7 @@ public class EntityRecordImpl implements EntityRecord{
 
     private List<EntityProxy> proxies; 
     
+    @JsonIgnore
     private boolean disabled;
     
 
