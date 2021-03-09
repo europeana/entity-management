@@ -5,6 +5,7 @@ import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
 import okhttp3.HttpUrl;
@@ -123,17 +124,32 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
 
     @Test
-    void retrieveEntityShouldBeSuccessful() throws Exception {
+    void retrieveEntityJsonldShouldBeSuccessful() throws Exception {
         // directly insert test data in db
         EntityPreview entityRequest = objectMapper.readValue(loadFile(CONCEPT_BATHTUB), EntityPreview.class);
         EntityRecord dbRecord = entityRecordService.createEntityFromRequest(entityRequest, EntityTypes.Concept.name());
 
         String requestPath = getEntityRequestPath(dbRecord.getEntityId());
         mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".jsonld")
+        		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.entityId", is(dbRecord.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Concept.name())));
+    }
+    
+    @Test
+    void retrieveEntityXmlShouldBeSuccessful() throws Exception {
+        // directly insert test data in db
+        EntityPreview entityRequest = objectMapper.readValue(loadFile(CONCEPT_BATHTUB), EntityPreview.class);
+        EntityRecord dbRecord = entityRecordService.createEntityFromRequest(entityRequest, EntityTypes.Concept.name());
+
+        String requestPath = getEntityRequestPath(dbRecord.getEntityId());
+        mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".xml")
+        		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                .accept(MediaType.APPLICATION_XML))
+                .andExpect(status().isOk());
+
     }
 
     /**
