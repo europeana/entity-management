@@ -1,5 +1,30 @@
 package eu.europeana.entitymanagement.web;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Optional;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
+
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.api.commons.web.exception.HttpException;
@@ -9,7 +34,6 @@ import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
@@ -17,22 +41,6 @@ import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
 import eu.europeana.entitymanagement.web.service.impl.MetisDereferenceService;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.UriComponentsBuilder;
-
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Optional;
 
 /**
  * Example Rest Controller class with input validation TODO: catch the
@@ -48,9 +56,6 @@ public class EMController extends BaseRest {
 
     @Resource(name = AppConfig.BEAN_ENTITY_RECORD_SERVICE)
     private EntityRecordService entityRecordService;
-
-    @Resource(name = AppConfig.BEAN_ENTITY_RECORD_REPO)
-    private EntityRecordRepository entityRecordRepository;
 
     @Resource(name = AppConfig.BEAN_METIS_DEREF_SERVICE)
     private MetisDereferenceService dereferenceService;
@@ -112,10 +117,10 @@ public class EMController extends BaseRest {
     	// TODO: Re-enable authentication
     	// verifyReadAccess(request);
 
-    	EntityRecord existingRecord = entityRecordRepository.findByEntityId(getEntityUri(type, identifier));
-    	if(existingRecord!=null) {
+    	Optional<EntityRecord> existingRecord = entityRecordService.retrieveEntityRecordByUri(getEntityUri(type, identifier));
+    	if(existingRecord.isPresent() && existingRecord.get().getEuropeanaProxy()!=null) {
 
-    		Date timestamp = (existingRecord.getEntity().getIsAggregatedBy() != null) ? existingRecord.getEntity().getIsAggregatedBy().getModified() : null;
+    		Date timestamp = (existingRecord.get().getEntity().getIsAggregatedBy() != null) ? existingRecord.get().getEntity().getIsAggregatedBy().getModified() : null;
 			Date etagDate = (timestamp != null)? timestamp : new Date();
 			String etag = generateETag(etagDate, FormatTypes.jsonld.name(), getApiVersion());
 
@@ -125,35 +130,28 @@ public class EMController extends BaseRest {
 				return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).header("info:", "The value of the If-Match HTTP header does not allign with the given ETag value generated from the timestamp.").build();
 			}
 
-			//TODO: update the Europeana proxy and also call the UpdateTask for updating the entity if it is meant to be used for that
+			//TODO: call the UpdateTask for updating the entity if it is meant to be used for that
 			if(entityCreationRequest.getId()!=null) {
-				existingRecord.getEntity().setEntityId(entityCreationRequest.getId());
+				existingRecord.get().getEuropeanaProxy().getEntity().setEntityId(entityCreationRequest.getId());
 			}
 			if(entityCreationRequest.getAltLabel()!=null) {
-				existingRecord.getEntity().setAltLabel(entityCreationRequest.getAltLabel());
+				existingRecord.get().getEuropeanaProxy().getEntity().setAltLabel(entityCreationRequest.getAltLabel());
 			}
     		if(entityCreationRequest.getDepiction()!=null) {
-    			existingRecord.getEntity().setDepiction(entityCreationRequest.getDepiction());
+    			existingRecord.get().getEuropeanaProxy().getEntity().setDepiction(entityCreationRequest.getDepiction());
     		}
     		if(entityCreationRequest.getPrefLabel()!=null) {
-    			existingRecord.getEntity().setPrefLabelStringMap(entityCreationRequest.getPrefLabel());
+    			existingRecord.get().getEuropeanaProxy().getEntity().setPrefLabelStringMap(entityCreationRequest.getPrefLabel());
     		}
 
-    		SimpleDateFormat format = new SimpleDateFormat(emConfiguration.getDateTimeFormat());
-    		String dateString = format.format(new Date());
-    		Date modificationDate = null;
-    		try {
-    			modificationDate = format.parse(dateString);
-			} catch (ParseException e) {
-				return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).header("info:", "A parsing exception occured during the generation of the modificaion date.").build();
-			}
-    		if (modificationDate!=null && existingRecord.getEntity().getIsAggregatedBy()!=null) {
-    			existingRecord.getEntity().getIsAggregatedBy().setModified(modificationDate);
+    		Date modificationDate = new Date();
+    		if (existingRecord.get().getEuropeanaProxy().getProxyIn()!=null) {
+    			existingRecord.get().getEuropeanaProxy().getProxyIn().setModified(modificationDate);
     		}
 
-    		entityRecordRepository.update(existingRecord);
+    		entityRecordService.update(existingRecord.get());
 
-    		return ResponseEntity.accepted().body(existingRecord);
+    		return ResponseEntity.accepted().body(existingRecord.get());
     	}
 
     	return ResponseEntity.notFound().header("info:", "The given entity record does not exist.").build();

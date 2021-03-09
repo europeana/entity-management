@@ -51,6 +51,15 @@ public class EntityRecordService {
 		return saveEntityRecord(er);
     }
 
+    /**
+     * Updates an already existing entity record.
+     * @param entityRecord entity record to update
+     * @return updated entity
+     */
+    public EntityRecord update (EntityRecord entityRecord){
+    	return this.saveEntityRecord(entityRecord);
+    }
+
 
     /**
      * Creates an {@link EntityRecord} from an {@link EntityPreview}, which
