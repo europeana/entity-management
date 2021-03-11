@@ -9,10 +9,11 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
-import eu.europeana.corelib.definitions.edm.entity.Address;
+import eu.europeana.entitymanagement.definitions.model.Address;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
@@ -436,36 +437,14 @@ public class OrganizationImpl extends BaseEntity
 
 	@Override
 	@Deprecated
-	public void setAddress(Address address) {
-	    	// Not used
-	}
-
-	@Override
-	public Address getAddress() {
-	    	if(address == null) {
-	    	    address = new AddressImpl();
-	    	    address.setAbout(hasAddress);
-	    	    address.setVcardStreetAddress(streetAddress);
-	    	    address.setVcardPostalCode(postalCode);
-	    	    address.setVcardPostOfficeBox(postBox);
-	    	    address.setVcardLocality(locality);
-	    	    address.setVcardCountryName(countryName);
-	    	}
-		return this.address;
-	}
-
-	@Override
-	@Deprecated
-	@JsonSetter(WebEntityFields.IDENTIFIER)
+	@JsonIgnore
 	public void setDcIdentifier(Map<String, List<String>> dcIdentifier) {
 	    // Not used
 	    
 	}
 
 	@Override
-	
-	@JsonGetter(WebEntityFields.IDENTIFIER)
-	@JacksonXmlProperty(localName = XmlFields.XML_DC_IDENTIFIER)
+	@JsonIgnore
 	public Map<String, List<String>> getDcIdentifier() {
 		//if not available
 		if (getIdentifier() == null)
@@ -492,6 +471,20 @@ public class OrganizationImpl extends BaseEntity
 	public void setFieldValue(Field field, Object value) throws IllegalArgumentException, IllegalAccessException {
 		//TODO:in case of the performance overhead cause by using the reflecion code, change this method to call the setter for each field individually
 		field.set(this, value);
+	}
+
+	@Override
+	@JsonIgnore
+	public eu.europeana.corelib.definitions.edm.entity.Address getAddress() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	@JsonIgnore
+	public void setAddress(eu.europeana.corelib.definitions.edm.entity.Address arg0) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

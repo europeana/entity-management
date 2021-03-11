@@ -7,6 +7,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.api.commons.web.exception.HttpException;
@@ -31,10 +37,13 @@ import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
+import eu.europeana.entitymanagement.web.service.impl.EntityObjectFactory;
 import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
 import eu.europeana.entitymanagement.web.service.impl.MetisDereferenceService;
 import io.swagger.annotations.ApiOperation;
@@ -59,6 +68,9 @@ public class EMController extends BaseRest {
 
     @Resource(name = AppConfig.BEAN_EM_DATA_SOURCES)
     private DataSources datasources;
+    
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @ApiOperation(value = "Disable an entity", nickname = "disableEntity", response = java.lang.Void.class)
     @RequestMapping(value = { "/{type}/base/{identifier}",
@@ -125,41 +137,92 @@ public class EMController extends BaseRest {
 		request);
     }
 
+//    @ApiOperation(value = "Register a new entity", nickname = "registerEntity", response = java.lang.Void.class)
+//    @PostMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<EntityRecord> registerEntity(@RequestBody EntityPreview entityCreationRequest)
+//	    throws EuropeanaApiException {
+//	// check if id is already being used, if so return a 301
+//	Optional<EntityRecord> existingEntity = entityRecordService
+//		.retrieveEntityRecordByUri(entityCreationRequest.getId());
+//	if (existingEntity.isPresent()) {
+//	    // return 301 redirect
+//	    return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
+//		    .location(UriComponentsBuilder.newInstance().path("/{id}.{format}").buildAndExpand(
+//			    extractBaseUriFromEntityId(existingEntity.get().getEntityId()), FormatTypes.jsonld).toUri())
+//		    .build();
+//	}
+//
+//	// return 400 error if ID does not match a configured datasource
+//	if (!datasources.hasDataSource(entityCreationRequest.getId())) {
+//	    return ResponseEntity.badRequest().build();
+//	}
+//
+//	Entity metisResponse = dereferenceService.dereferenceEntityById(entityCreationRequest.getId());
+//	existingEntity = entityRecordService.retrieveMetisCoreferenceSameAs(metisResponse.getSameAs());
+//
+//	if (existingEntity.isPresent()) {
+//	    // return 301 redirect
+//	    return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
+//		    .location(UriComponentsBuilder.newInstance().path("/{id}.{format}").buildAndExpand(
+//			    extractBaseUriFromEntityId(existingEntity.get().getEntityId()), FormatTypes.jsonld).toUri())
+//		    .build();
+//
+//	}
+//
+//	EntityRecord savedEntity = entityRecordService.createEntityFromRequest(entityCreationRequest,
+//		metisResponse.getType());
+//	return ResponseEntity.accepted().body(savedEntity);
+//    }
+    
     @ApiOperation(value = "Register a new entity", nickname = "registerEntity", response = java.lang.Void.class)
     @PostMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<EntityRecord> registerEntity(@RequestBody EntityPreview entityCreationRequest)
-	    throws EuropeanaApiException {
-	// check if id is already being used, if so return a 301
-	Optional<EntityRecord> existingEntity = entityRecordService
-		.retrieveEntityRecordByUri(entityCreationRequest.getId());
-	if (existingEntity.isPresent()) {
-	    // return 301 redirect
-	    return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
-		    .location(UriComponentsBuilder.newInstance().path("/{id}.{format}").buildAndExpand(
-			    extractBaseUriFromEntityId(existingEntity.get().getEntityId()), FormatTypes.jsonld).toUri())
-		    .build();
-	}
+    public ResponseEntity<EntityRecord> registerEntity(@RequestBody String entityCreationRequest)
+	    throws EuropeanaApiException, JsonMappingException, JsonProcessingException {
+    	
+    	final ObjectNode node = new ObjectMapper().readValue(entityCreationRequest, ObjectNode.class);
+    	if (!node.has("type") || !node.has("id")) {
+    		return ResponseEntity.badRequest().header("info:", "Please ensure the type and the id fields are present in the input json string.").build();
+    	}
 
-	// return 400 error if ID does not match a configured datasource
-	if (!datasources.hasDataSource(entityCreationRequest.getId())) {
-	    return ResponseEntity.badRequest().build();
-	}
+        String entityIdWithoutNamespace = node.get("id").asText();
+        // namespace is always base
+        String entityId = entityIdWithoutNamespace.substring(0,entityIdWithoutNamespace.lastIndexOf("/")) + "/base/" + entityIdWithoutNamespace.substring(entityIdWithoutNamespace.lastIndexOf("/")+1);
+    	// check if id is already being used, if so return a 301
+    	Optional<EntityRecord> existingEntity = entityRecordService.retrieveEntityRecordByUri(entityId);
+    	if (existingEntity.isPresent()) {
+    	    // return 301 redirect
+    	    return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
+    		    .location(UriComponentsBuilder.newInstance().path("/{id}.{format}").buildAndExpand(
+    			    extractBaseUriFromEntityId(existingEntity.get().getEntityId()), FormatTypes.jsonld).toUri())
+    		    .build();
+    	}
+    	// return 400 error if ID does not match a configured datasource
+    	/*
+    	if (!datasources.hasDataSource(entityId)) {
+    	    return ResponseEntity.badRequest().build();
+    	}
+    	*/
 
-	Entity metisResponse = dereferenceService.dereferenceEntityById(entityCreationRequest.getId());
-	existingEntity = entityRecordService.retrieveMetisCoreferenceSameAs(metisResponse.getSameAs());
+    	Entity entity = objectMapper.readValue(entityCreationRequest, EntityObjectFactory.getClassForType(EntityTypes.valueOf(node.get("type").asText())));
 
-	if (existingEntity.isPresent()) {
-	    // return 301 redirect
-	    return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
-		    .location(UriComponentsBuilder.newInstance().path("/{id}.{format}").buildAndExpand(
-			    extractBaseUriFromEntityId(existingEntity.get().getEntityId()), FormatTypes.jsonld).toUri())
-		    .build();
-
-	}
-
-	EntityRecord savedEntity = entityRecordService.createEntityFromRequest(entityCreationRequest,
-		metisResponse.getType());
-	return ResponseEntity.accepted().body(savedEntity);
+		Entity metisResponse = dereferenceService.dereferenceEntityById(entityId);
+		if (metisResponse != null) {
+			existingEntity = entityRecordService.retrieveMetisCoreferenceSameAs(metisResponse.getSameAs());
+		}
+	
+		if (existingEntity.isPresent()) {
+		    // return 301 redirect
+		    return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
+			    .location(UriComponentsBuilder.newInstance().path("/{id}.{format}").buildAndExpand(
+				    extractBaseUriFromEntityId(existingEntity.get().getEntityId()), FormatTypes.jsonld).toUri())
+			    .build();
+	
+		}
+	
+		EntityRecord entityRecord = new EntityRecordImpl();
+		entityRecord.setEntity(entity);
+		entityRecord.setEntityId(entityId);
+		return ResponseEntity.accepted().body(entityRecordService.saveEntityRecord(entityRecord));
     }
 
     private ResponseEntity<String> createResponse(String profile, String type, String identifier, FormatTypes outFormat,

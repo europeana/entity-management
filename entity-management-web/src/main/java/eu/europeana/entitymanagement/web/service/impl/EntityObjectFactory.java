@@ -45,7 +45,7 @@ public class EntityObjectFactory {
 //	throw new EntityCreationException("No matching BaseEntityImplementation for XML type " + xmlBaseEntityClass);
 //    }
 
-    static Class<? extends Entity> getClassForType(EntityTypes modelType) {
+    public static Class<? extends Entity> getClassForType(EntityTypes modelType) {
 
 	Class<? extends Entity> ret = null;
 //	EntityTypes entityType = EntityTypes.valueOf(modelType.name());

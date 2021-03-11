@@ -4,11 +4,15 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import dev.morphia.annotations.Embedded;
 import eu.europeana.corelib.definitions.edm.entity.ContextualClass;
+import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
 
 //import eu.europeana.corelib.definitions.edm.entity.ContextualClass;
 @Embedded
+@JsonDeserialize(as = BaseEntity.class)
 public interface Entity extends ContextualClass {
 
 	public String[] getIdentifier();

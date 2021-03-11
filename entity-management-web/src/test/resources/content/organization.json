@@ -5,14 +5,14 @@
 "created":"2015-08-17T17:04:36Z",
 "description":
 {
-"be":["музей"],
-"en":["natural history museum and research center in the Netherlands"],
-"es":["museo de historia natural y centro de investigación neerlandés"],
-"fr":["musée et centre de recherche néerlandais"],
-"he":["מוזיאון בהולנד"],
-"nl":["museum en onderzoekscentrum in Leiden"],
-"ru":["музей в Голландии"],
-"uk":["Природничий музей в місті Лейден, Нідерланди"]
+"be":"музей",
+"en":"natural history museum and research center in the Netherlands",
+"es":"museo de historia natural y centro de investigación neerlandés",
+"fr":"musée et centre de recherche néerlandais",
+"he":"מוזיאון בהולנד",
+"nl":"museum en onderzoekscentrum in Leiden",
+"ru":"музей в Голландии",
+"uk":"Природничий музей в місті Лейден, Нідерланди"
 },
 "identifier":["1482250000000370517"],
 "derived_score":1.1737184E7,
@@ -34,7 +34,6 @@
 "phone":["+31-71-751-9600"],
 "hasGeo":"52.16472222,4.47333333",
 "id":"http://data.europeana.eu/organization/1482250000000370517",
-"identifier":["1482250000000370517"],
 "internal_type":"Organization",
 "label":
 {

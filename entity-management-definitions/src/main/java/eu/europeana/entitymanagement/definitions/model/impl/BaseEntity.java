@@ -28,7 +28,7 @@ import eu.europeana.entitymanagement.vocabulary.XmlFields;
  */
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @ValidEntityFields(groups = {Default.class})
-public abstract class BaseEntity implements Entity {
+public class BaseEntity implements Entity {
 	
 	protected String TMP_KEY = "def";
 	protected String internalType;
@@ -41,7 +41,7 @@ public abstract class BaseEntity implements Entity {
 	protected Map<String, List<String>> hiddenLabel;
 	protected Map<String, List<String>> tmpPrefLabel;
 	
-	protected String identifier[];
+	protected String[] identifier;
 	protected String[] sameAs;
 	protected String[] isRelatedTo;
 
@@ -224,6 +224,7 @@ public abstract class BaseEntity implements Entity {
 	
 	@Override
 	@Deprecated
+	@JsonIgnore
 	public void setFoafDepiction(String foafDepiction) {
 		setDepiction(foafDepiction);
 	}
@@ -242,6 +243,7 @@ public abstract class BaseEntity implements Entity {
 
 	@Override
 	@Deprecated
+	@JsonIgnore
 	public void setId(ObjectId id) {
 		// TODO Auto-generated method stub
 	}
@@ -286,11 +288,13 @@ public abstract class BaseEntity implements Entity {
 	
 	@Override
 	@Deprecated
+	@JsonIgnore
 	public void setPrefLabel(Map<String, List<String>> prefLabel) {
 		// TODO Auto-generated method stub
 	}
 	
 	@Deprecated
+	@JsonIgnore
 	public void setOwlSameAs(String[] owlSameAs) {
 		setSameAs(sameAs);
 		

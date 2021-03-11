@@ -6,12 +6,13 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
+import eu.europeana.entitymanagement.definitions.model.Address;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JacksonXmlRootElement(localName = XmlFields.XML_VCARD_ADDRESS)
-public class AddressImpl implements eu.europeana.corelib.definitions.edm.entity.Address {
+public class AddressImpl implements Address, eu.europeana.corelib.definitions.edm.entity.Address {
 
     private String about;
     private String streetAddress;

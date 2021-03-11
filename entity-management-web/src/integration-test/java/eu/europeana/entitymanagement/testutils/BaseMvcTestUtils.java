@@ -1,14 +1,9 @@
 package eu.europeana.entitymanagement.testutils;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.apache.commons.io.IOUtils;
 
 public class BaseMvcTestUtils {
 
@@ -16,6 +11,12 @@ public class BaseMvcTestUtils {
 
     public static final String CONCEPT_BATHTUB = "/content/concept_bathtube.json";
     public static final String BATHTUB_DEREF = "/content/deref_bathtub.xml";
+    
+    public static final String CONCEPT_JSON = "/content/concept.json";
+    public static final String AGENT_JSON = "/content/agent.json";
+    public static final String ORGANIZATION_JSON = "/content/organization.json";
+    public static final String PLACE_JSON = "/content/place.json";
+    public static final String TIMESPAN_JSON = "/content/timespan.json";    
 
     public static String loadFile(String resourcePath) throws IOException {
         return IOUtils.toString(BaseMvcTestUtils.class.getResourceAsStream(resourcePath), StandardCharsets.UTF_8).replace("\n", "");

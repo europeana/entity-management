@@ -9,6 +9,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 import eu.europeana.entitymanagement.definitions.model.Place;
@@ -88,7 +89,7 @@ public class PlaceImpl extends BaseEntity implements Place, eu.europeana.corelib
 	
 	@Override
 	@Deprecated
-	@JsonSetter(WebEntityFields.IS_PART_OF)
+	@JsonIgnore
 	public void setIsPartOf(Map<String, List<String>> isPartOf) {
 		// TODO Auto-generated method stub
 		
@@ -114,15 +115,14 @@ public class PlaceImpl extends BaseEntity implements Place, eu.europeana.corelib
 
 	@Override
 	@Deprecated
-	@JsonSetter(WebEntityFields.HAS_PART)
+	@JsonIgnore
 	public void setDcTermsHasPart(Map<String, List<String>> dcTermsHasPart) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	@JsonGetter(WebEntityFields.HAS_PART)
-	@JacksonXmlProperty(localName = XmlFields.XML_DCTERMS_HAS_PART)
+	@JsonIgnore
 	public Map<String, List<String>> getDcTermsHasPart() {
 		//if not available
 		if (getHasPart() == null)
@@ -135,8 +135,7 @@ public class PlaceImpl extends BaseEntity implements Place, eu.europeana.corelib
 	}
 
 	@Override
-	@JsonGetter(WebEntityFields.IS_PART_OF)
-	@JacksonXmlProperty(localName  = XmlFields.XML_DCTERMS_IS_PART_OF)
+	@JsonIgnore
 	public Map<String, List<String>> getIsPartOf() {
 		//if not available
 		if (getIsPartOfArray() == null)
