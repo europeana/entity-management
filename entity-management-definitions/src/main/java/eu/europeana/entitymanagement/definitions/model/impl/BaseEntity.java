@@ -310,6 +310,11 @@ public class BaseEntity implements Entity {
 		return splitArray[splitArray.length-1];
 	}
 	
+	/*
+	 * Warning: Please note that for the serialization of this field where the given getter is used, only the id is serialized
+	 * which makes it impossible to deserialize the object from its serialization, since for the deserialization the given setter
+	 * is used and it needs the whole object, not just the id
+	 */
 	@Override
 	@JsonProperty(WebEntityFields.IS_SHOWN_BY)
 	@JacksonXmlProperty(localName = XmlFields.XML_EDM_IS_SHOWN_BY)
