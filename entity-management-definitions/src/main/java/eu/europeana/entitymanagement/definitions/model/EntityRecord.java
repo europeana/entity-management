@@ -38,4 +38,7 @@ public interface EntityRecord {
     
     void setDisabled(boolean disabledParam);
 
+    public EntityProxy getEuropeanaProxy();
+    
+    public EntityProxy getExternalProxy();
 }

@@ -3,6 +3,7 @@ package eu.europeana.entitymanagement.definitions.model.impl;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +21,30 @@ import eu.europeana.entitymanagement.vocabulary.XmlFields;
 @JacksonXmlRootElement(localName = XmlFields.XML_EDM_AGENT)
 public class AgentImpl extends BaseEntity implements Agent, eu.europeana.corelib.definitions.edm.entity.Agent {
 
-    //TODO: fix cardinality, change to list 
+    public AgentImpl(Agent copy) {
+		super(copy);
+		this.date = copy.getDate()!=null ? new Date(copy.getDate().getTime()) : null;
+		this.begin = copy.getBeginArray()!=null ? Arrays.copyOf(copy.getBeginArray(), copy.getBeginArray().length) : null;
+		this.end = copy.getEndArray()!=null ? Arrays.copyOf(copy.getEndArray(), copy.getEndArray().length) : null;
+		this.dateOfBirth = copy.getDateOfBirth()!=null ? Arrays.copyOf(copy.getDateOfBirth(), copy.getDateOfBirth().length) : null;
+		this.dateOfDeath = copy.getDateOfDeath()!=null ? Arrays.copyOf(copy.getDateOfDeath(), copy.getDateOfDeath().length) : null;
+		this.hasMet = copy.getHasMet()!=null ? Arrays.copyOf(copy.getHasMet(), copy.getHasMet().length) : null;
+		this.name = copy.getName()!=null ? new HashMap<>(copy.getName()) : null;
+		this.biographicalInformation = copy.getBiographicalInformation()!=null ? new HashMap<>(copy.getBiographicalInformation()) : null;
+		this.professionOrOccupation = copy.getProfessionOrOccupation()!=null ? new HashMap<>(copy.getProfessionOrOccupation()) : null;
+		this.placeOfBirth = copy.getPlaceOfBirth()!=null ? new HashMap<>(copy.getPlaceOfBirth()) : null;
+		this.placeOfDeath = copy.getPlaceOfDeath()!=null ? new HashMap<>(copy.getPlaceOfDeath()) : null;
+		this.dateOfEstablishment = copy.getDateOfEstablishment();
+		this.dateOfTermination = copy.getDateOfTermination();
+		this.gender = copy.getGender();
+		this.exactMatch = copy.getExactMatch()!=null ? Arrays.copyOf(copy.getExactMatch(), copy.getExactMatch().length) : null;
+	}
+
+	public AgentImpl() {
+		super();
+	}
+
+	//TODO: fix cardinality, change to list 
 	private Date date; // format "YYYY"
 	private String[] begin; // format "YYYY-MM-DD"
 	private String[] end; // format "YYYY-MM-DD"

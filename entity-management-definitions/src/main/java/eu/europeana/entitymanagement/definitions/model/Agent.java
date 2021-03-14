@@ -46,6 +46,10 @@ public interface Agent extends Entity {
 	public String[] getEndArray();
 
 	public void setEnd(String[] end);
+	
+	public String [] getExactMatch();
+	
+	public void setExactMatch(String[] exactMatch);
 
 	public Map<String, List<String>> getPlaceOfBirth();
 

@@ -31,4 +31,8 @@ public interface Place extends Entity {
 	public String[] getIsPartOfArray();
 
 	public void setIsPartOfArray(String[] isPartOf);
+	
+	public String[] getExactMatch();
+	
+	public void setExactMatch(String[] exactMatch);
 }

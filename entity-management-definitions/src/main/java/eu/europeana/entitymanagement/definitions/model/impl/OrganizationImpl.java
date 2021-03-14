@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.definitions.model.impl;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +15,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 import eu.europeana.entitymanagement.definitions.model.Address;
+import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
@@ -27,6 +29,33 @@ import eu.europeana.entitymanagement.vocabulary.XmlFields;
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class OrganizationImpl extends BaseEntity 
 		implements Organization, eu.europeana.corelib.definitions.edm.entity.Organization {
+
+	public OrganizationImpl() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	public OrganizationImpl(Organization copy) {
+		super(copy);
+		this.description = copy.getDescription()!=null ? new HashMap<>(copy.getDescription()) : null;
+		this.acronym = copy.getAcronym()!=null ? new HashMap<>(copy.getAcronym()) : null;
+		this.logo = copy.getLogo();
+		this.homepage = copy.getHomepage();
+		this.phone = copy.getPhone()!=null ? new ArrayList<>(copy.getPhone()) : null;
+		this.mbox = copy.getMbox()!=null ? new ArrayList<>(copy.getMbox()) : null;
+		this.europeanaRole = copy.getEuropeanaRole()!=null ? new HashMap<>(copy.getEuropeanaRole()) : null;
+		this.organizationDomain = copy.getOrganizationDomain()!=null ? new HashMap<>(copy.getOrganizationDomain()) : null;
+		this.geographicLevel = copy.getGeographicLevel()!=null ? new HashMap<>(copy.getGeographicLevel()) : null;
+		this.country = copy.getCountry();
+		this.hasAddress = copy.getHasAddress();
+		this.streetAddress = copy.getStreetAddress();
+		this.locality = copy.getLocality();
+		this.region = copy.getRegion();
+		this.postalCode = copy.getPostalCode();
+		this.countryName = copy.getCountryName();
+		this.postBox = copy.getPostBox();
+		this.hasGeo = copy.getHasGeo();
+	}
 
 	private Map<String, String> description;
 	private Map<String, List<String>> acronym;	

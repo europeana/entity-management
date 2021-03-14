@@ -63,8 +63,12 @@ public interface Entity extends ContextualClass {
 	void setFoafDepiction(String foafDepiction);
 
 	void setSameAs(String[] sameAs);
+	
+	public String[] getIsPartOfArray();
 
 	void setIsPartOfArray(String[] isPartOf);
+	
+	public String[] getHasPart();
 
 	void setHasPart(String[] hasPart);
 

@@ -97,4 +97,27 @@ public class EntityRecordImpl implements EntityRecord{
 	public void setDisabled(boolean disabledParam) {
 		this.disabled = disabledParam;
 	}
+	
+	@Override
+	@JsonIgnore
+	public EntityProxy getEuropeanaProxy() {
+		for (EntityProxy proxy : proxies) {
+			if (proxy.getProxyId().contains("europeana")) {
+				return proxy;
+			}
+		}
+		return null;
+	}
+	
+	@Override
+	@JsonIgnore
+	public EntityProxy getExternalProxy() {
+		for (EntityProxy proxy : proxies) {
+			if (!proxy.getProxyId().contains("europeana")) {
+				return proxy;
+			}
+		}
+		return null;
+	}
+
 }
