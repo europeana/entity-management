@@ -12,6 +12,19 @@ import eu.europeana.entitymanagement.vocabulary.XmlFields;
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class WebResourceImpl implements WebResource{
 
+	public WebResourceImpl() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	public WebResourceImpl(WebResource copy) {
+		super();
+		this.source = copy.getSource();
+		this.id = copy.getId();
+		this.thumbnail = copy.getThumbnail();
+		this.type = copy.getType();
+	}
+
 	String source;
 	String id;
 	String thumbnail;

@@ -21,16 +21,10 @@
 "de":"Minimal Techno",
 "cs":"Minimal Techno"
 },
-"note":
-{
-"en":["minimalist subgenre of techno"]
-},
 "exactMatch":["http://es.dbpedia.org/resource/Minimal_techno","http://ro.dbpedia.org/resource/Minimal_techno","https://www.freebase.com/m/06953q","http://it.dbpedia.org/resource/Minimal_techno","http://da.dbpedia.org/resource/Minimal_techno","http://uk.dbpedia.org/resource/Мінімал-техно","http://cs.dbpedia.org/resource/Minimal_techno","http://fi.dbpedia.org/resource/Minimal_techno","http://www.wikidata.org/entity/Q1430587","http://ru.dbpedia.org/resource/Минимал-техно","http://pt.dbpedia.org/resource/Minimal_techno","http://dbpedia.org/resource/Minimal_techno","http://nl.dbpedia.org/resource/Minimal_techno","http://sv.dbpedia.org/resource/Minimal","https://g.co/kg/m/06953q","http://pl.dbpedia.org/resource/Minimal_techno","http://fr.dbpedia.org/resource/Techno_minimale","http://de.dbpedia.org/resource/Minimal_Techno","http://sk.dbpedia.org/resource/Minimal_techno"],
-"broader":["http://www.wikidata.org/entity/Q188451","http://data.europeana.eu/concept/base/1401"],
+"broader":["http://www.wikidata.org/entity/Q188451"],
 "altLabel":
 {
-"uk":["Minimal techno"],
-"sv":["Minimal techno"],
 "ro":["Muzică minimal"],
 "pt":["Minimal"],
 "nl":["Minimal","Mnml"],

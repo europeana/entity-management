@@ -1,14 +1,12 @@
 package eu.europeana.entitymanagement.web;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.error.EuropeanaApiException;
@@ -61,6 +61,9 @@ public class EMController extends BaseRest {
 
     @Resource(name = AppConfig.BEAN_EM_DATA_SOURCES)
     private DataSources datasources;
+    
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Resource(name = AppConfig.BEAN_EM_CONFIGURATION)
     EntityManagementConfiguration emConfiguration;
@@ -222,7 +225,8 @@ public class EMController extends BaseRest {
 		metisResponse.getType());
 	return ResponseEntity.accepted().body(savedEntity);
     }
-
+    
+  
     private ResponseEntity<String> createResponse(String profile, String type, String identifier, FormatTypes outFormat,
 	    String contentType, HttpServletRequest request) {
 	// TODO: Re-enable authentication

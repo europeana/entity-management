@@ -4,6 +4,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import eu.europeana.entitymanagement.definitions.model.impl.AgentImpl;
+
+@JsonDeserialize(as = AgentImpl.class)
 public interface Agent extends Entity {
 
 	public Date getDate();
@@ -41,6 +46,10 @@ public interface Agent extends Entity {
 	public String[] getEndArray();
 
 	public void setEnd(String[] end);
+	
+	public String [] getExactMatch();
+	
+	public void setExactMatch(String[] exactMatch);
 
 	public Map<String, List<String>> getPlaceOfBirth();
 

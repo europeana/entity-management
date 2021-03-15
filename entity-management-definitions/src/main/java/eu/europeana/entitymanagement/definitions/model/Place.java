@@ -1,5 +1,10 @@
 package eu.europeana.entitymanagement.definitions.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import eu.europeana.entitymanagement.definitions.model.impl.PlaceImpl;
+
+@JsonDeserialize(as = PlaceImpl.class)
 public interface Place extends Entity {
 
 	void setAltitude(Float altitude);
@@ -26,4 +31,8 @@ public interface Place extends Entity {
 	public String[] getIsPartOfArray();
 
 	public void setIsPartOfArray(String[] isPartOf);
+	
+	public String[] getExactMatch();
+	
+	public void setExactMatch(String[] exactMatch);
 }
