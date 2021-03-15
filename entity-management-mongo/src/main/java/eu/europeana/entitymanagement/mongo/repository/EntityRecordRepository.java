@@ -92,7 +92,7 @@ public class EntityRecordRepository {
     public EntityRecord save(EntityRecord entityRecord){
         //if the id of the entity is null, get it from the database before saving  
     	long dbId = generateAutoIncrement(entityRecord.getEntity().getType());
-    	if (Long.valueOf(entityRecord.getDbId()) == null)
+    	if (entityRecord.getDbId() == 0)
     	{   		
     		entityRecord.setDbId(dbId);    		
     	}

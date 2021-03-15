@@ -31,27 +31,6 @@ import eu.europeana.entitymanagement.vocabulary.XmlFields;
 @ValidEntityFields(groups = {Default.class})
 public class BaseEntity implements Entity {
 	
-	public BaseEntity(Entity copy) {
-		super();
-		this.internalType = copy.getType();
-		this.entityId = copy.getEntityId();
-		this.depiction = copy.getDepiction();
-		this.note = copy.getNote()!=null ? new HashMap<>(copy.getNote()) : null;
-		this.prefLabel = copy.getPrefLabelStringMap()!=null ? new HashMap<>(copy.getPrefLabelStringMap()) : null;
-		this.altLabel = copy.getAltLabel()!=null ? new HashMap<>(copy.getAltLabel()) : null;
-		this.hiddenLabel = copy.getHiddenLabel()!=null ? new HashMap<>(copy.getHiddenLabel()) : null;
-		this.identifier = copy.getIdentifier()!=null ? Arrays.copyOf(copy.getIdentifier(), copy.getIdentifier().length) : null;
-		this.sameAs = copy.getSameAs()!=null ? Arrays.copyOf(copy.getSameAs(), copy.getSameAs().length) : null;
-		this.isRelatedTo = copy.getIdentifier()!=null ? Arrays.copyOf(copy.getIdentifier(), copy.getIdentifier().length) : null;
-		this.hasPart = copy.getHasPart()!=null ? Arrays.copyOf(copy.getHasPart(), copy.getHasPart().length) : null;
-		this.isPartOf = copy.getIsPartOfArray()!=null ? Arrays.copyOf(copy.getIsPartOfArray(), copy.getIsPartOfArray().length) : null;
-		this.isAggregatedBy = copy.getIsAggregatedBy()!=null ? new AggregationImpl (copy.getIsAggregatedBy()) : null;
-		this.referencedWebResource = copy.getReferencedWebResource()!=null ? new WebResourceImpl(copy.getReferencedWebResource()) : null;
-	}
-
-	public BaseEntity() {
-		// TODO Auto-generated constructor stub
-	}
 
 	protected String TMP_KEY = "def";
 	protected String internalType;
@@ -80,7 +59,40 @@ public class BaseEntity implements Entity {
 //	protected Date modified;
 	protected Aggregation isAggregatedBy;
 	protected WebResource referencedWebResource;
+	
 
+	public BaseEntity(Entity copy) {
+	    super();
+	    this.internalType = copy.getType();
+	    this.entityId = copy.getEntityId();
+	    this.depiction = copy.getDepiction();
+	    this.note = copy.getNote() != null ? new HashMap<>(copy.getNote()) : null;
+	    this.prefLabel = copy.getPrefLabelStringMap() != null ? new HashMap<>(copy.getPrefLabelStringMap()) : null;
+	    this.altLabel = copy.getAltLabel() != null ? new HashMap<>(copy.getAltLabel()) : null;
+	    this.hiddenLabel = copy.getHiddenLabel() != null ? new HashMap<>(copy.getHiddenLabel()) : null;
+	    this.identifier = copy.getIdentifier() != null
+		    ? Arrays.copyOf(copy.getIdentifier(), copy.getIdentifier().length)
+		    : null;
+	    this.sameAs = copy.getSameAs() != null ? Arrays.copyOf(copy.getSameAs(), copy.getSameAs().length) : null;
+	    this.isRelatedTo = copy.getIdentifier() != null
+		    ? Arrays.copyOf(copy.getIdentifier(), copy.getIdentifier().length)
+		    : null;
+	    this.hasPart = copy.getHasPart() != null ? Arrays.copyOf(copy.getHasPart(), copy.getHasPart().length)
+		    : null;
+	    this.isPartOf = copy.getIsPartOfArray() != null
+		    ? Arrays.copyOf(copy.getIsPartOfArray(), copy.getIsPartOfArray().length)
+		    : null;
+	    this.isAggregatedBy = copy.getIsAggregatedBy() != null ? new AggregationImpl(copy.getIsAggregatedBy())
+		    : null;
+	    this.referencedWebResource = copy.getReferencedWebResource() != null
+		    ? new WebResourceImpl(copy.getReferencedWebResource())
+		    : null;
+	}
+
+	public BaseEntity() {
+	    // TODO Auto-generated constructor stub
+	}
+	
 	@Override
 	@JsonIgnore
 	public WebResource getReferencedWebResource() {
