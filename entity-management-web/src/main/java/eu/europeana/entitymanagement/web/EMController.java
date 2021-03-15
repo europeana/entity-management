@@ -1,14 +1,11 @@
 package eu.europeana.entitymanagement.web;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -229,60 +226,7 @@ public class EMController extends BaseRest {
 	return ResponseEntity.accepted().body(savedEntity);
     }
     
-    /*
-     * This method enables registering the entities with all its fields provided in the input json string
-     */
-//    @ApiOperation(value = "Register a new entity", nickname = "registerEntity", response = java.lang.Void.class)
-//    @PostMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<EntityRecord> registerEntity(@RequestBody String entityCreationRequest)
-//	    throws EuropeanaApiException, JsonMappingException, JsonProcessingException {
-//    	
-//    	final ObjectNode node = new ObjectMapper().readValue(entityCreationRequest, ObjectNode.class);
-//    	if (!node.has("type") || !node.has("id")) {
-//    		return ResponseEntity.badRequest().header("info:", "Please ensure the type and the id fields are present in the input json string.").build();
-//    	}
-//
-//        String entityId = node.get("id").asText();
-//        // namespace is always base
-//        //String entityId = entityIdWithoutNamespace.substring(0,entityIdWithoutNamespace.lastIndexOf("/")) + "/base/" + entityIdWithoutNamespace.substring(entityIdWithoutNamespace.lastIndexOf("/")+1);
-//    	// check if id is already being used, if so return a 301
-//    	Optional<EntityRecord> existingEntity = entityRecordService.retrieveEntityRecordByUri(entityId);
-//    	if (existingEntity.isPresent()) {
-//    	    // return 301 redirect
-//    	    return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
-//    		    .location(UriComponentsBuilder.newInstance().path("/{id}.{format}").buildAndExpand(
-//    			    extractBaseUriFromEntityId(existingEntity.get().getEntityId()), FormatTypes.jsonld).toUri())
-//    		    .build();
-//    	}
-//    	// return 400 error if ID does not match a configured datasource
-//    	/*
-//    	if (!datasources.hasDataSource(entityId)) {
-//    	    return ResponseEntity.badRequest().build();
-//    	}
-//    	*/
-//
-//    	Entity entity = objectMapper.readValue(entityCreationRequest, EntityObjectFactory.getClassForType(EntityTypes.valueOf(node.get("type").asText())));
-//
-//		Entity metisResponse = dereferenceService.dereferenceEntityById(entityId);
-//		if (metisResponse != null) {
-//			existingEntity = entityRecordService.retrieveMetisCoreferenceSameAs(metisResponse.getSameAs());
-//		}
-//	
-//		if (existingEntity.isPresent()) {
-//		    // return 301 redirect
-//		    return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
-//			    .location(UriComponentsBuilder.newInstance().path("/{id}.{format}").buildAndExpand(
-//				    extractBaseUriFromEntityId(existingEntity.get().getEntityId()), FormatTypes.jsonld).toUri())
-//			    .build();
-//	
-//		}
-//	
-//		EntityRecord entityRecord = new EntityRecordImpl();
-//		entityRecord.setEntity(entity);
-//		entityRecord.setEntityId(entityId);
-//		return ResponseEntity.accepted().body(entityRecordService.saveEntityRecord(entityRecord));
-//    }
-
+  
     private ResponseEntity<String> createResponse(String profile, String type, String identifier, FormatTypes outFormat,
 	    String contentType, HttpServletRequest request) {
 	// TODO: Re-enable authentication
