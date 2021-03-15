@@ -39,6 +39,7 @@ import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
+import eu.europeana.entitymanagement.web.service.impl.EntityRecordUtils;
 import eu.europeana.entitymanagement.web.service.impl.MetisDereferenceService;
 import io.swagger.annotations.ApiOperation;
 
@@ -51,8 +52,6 @@ import io.swagger.annotations.ApiOperation;
 @Validated
 @RequestMapping("/entity")
 public class EMController extends BaseRest {
-
-    public static final String BASE_URI_DATA = "http://data.europeana.eu/";
 
     @Resource(name = AppConfig.BEAN_ENTITY_RECORD_SERVICE)
     private EntityRecordService entityRecordService;
@@ -76,7 +75,7 @@ public class EMController extends BaseRest {
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 	    HttpServletRequest request) throws HttpException {
 
-	String entityUri = getEntityUri(type, identifier.toLowerCase());
+	String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier.toLowerCase());
 	Optional<EntityRecord> entityRecord = entityRecordService.retrieveEntityRecordByUri(entityUri);
 	if (entityRecord.isPresent() && !entityRecord.get().getDisabled()) {
 
@@ -117,7 +116,7 @@ public class EMController extends BaseRest {
     	// TODO: Re-enable authentication
     	// verifyReadAccess(request);
 
-    	Optional<EntityRecord> existingRecord = entityRecordService.retrieveEntityRecordByUri(getEntityUri(type, identifier));
+    	Optional<EntityRecord> existingRecord = entityRecordService.retrieveEntityRecordByUri(EntityRecordUtils.buildEntityIdUri(type, identifier));
     	if(existingRecord.isPresent() && existingRecord.get().getEuropeanaProxy()!=null) {
 
     		Date timestamp = (existingRecord.get().getEntity().getIsAggregatedBy() != null) ? existingRecord.get().getEntity().getIsAggregatedBy().getModified() : null;
@@ -198,7 +197,7 @@ public class EMController extends BaseRest {
 	    // return 301 redirect
 	    return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
 		    .location(UriComponentsBuilder.newInstance().path("/{id}.{format}").buildAndExpand(
-			    extractBaseUriFromEntityId(existingEntity.get().getEntityId()), FormatTypes.jsonld).toUri())
+			    EntityRecordUtils.extractIdentifierFromEntityId(existingEntity.get().getEntityId()), FormatTypes.jsonld).toUri())
 		    .build();
 	}
 
@@ -214,7 +213,7 @@ public class EMController extends BaseRest {
 	    // return 301 redirect
 	    return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
 		    .location(UriComponentsBuilder.newInstance().path("/{id}.{format}").buildAndExpand(
-			    extractBaseUriFromEntityId(existingEntity.get().getEntityId()), FormatTypes.jsonld).toUri())
+			    EntityRecordUtils.extractIdentifierFromEntityId(existingEntity.get().getEntityId()), FormatTypes.jsonld).toUri())
 		    .build();
 
 	}
@@ -246,7 +245,7 @@ public class EMController extends BaseRest {
 	    return ResponseEntity.badRequest().header("info:", "The profile parameter is invalid.").build();
 	}
 
-	String entityUri = getEntityUri(type, identifier);
+	String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
 	Optional<EntityRecord> entityRecordOptional = entityRecordService.retrieveEntityRecordByUri(entityUri);
 	if (entityRecordOptional.isEmpty()) {
 	    return ResponseEntity.notFound().header("info:", "The entity with the required parameters does not exist.")
@@ -275,20 +274,5 @@ public class EMController extends BaseRest {
 	response = new ResponseEntity<String>(body, headers, HttpStatus.OK);
 	return response;
     }
-
-    private String getEntityUri(String type, String identifier) {
-	StringBuilder stringBuilder = new StringBuilder();
-
-	stringBuilder.append(BASE_URI_DATA);
-	if (StringUtils.isNotEmpty(type))
-	    stringBuilder.append(type.toLowerCase()).append("/");
-	if (StringUtils.isNotEmpty(identifier))
-	    stringBuilder.append(identifier);
-
-	return stringBuilder.toString();
-    }
-
-    private String extractBaseUriFromEntityId(String entityId) {
-	return entityId.replace(BASE_URI_DATA, "");
-    }
+   
 }
