@@ -1,5 +1,7 @@
 package eu.europeana.entitymanagement.web;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
 
@@ -28,6 +30,7 @@ import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.entitymanagement.common.config.DataSources;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -59,6 +62,9 @@ public class EMController extends BaseRest {
 
     @Resource(name = AppConfig.BEAN_EM_DATA_SOURCES)
     private DataSources datasources;
+
+    @Resource(name = AppConfig.BEAN_EM_CONFIGURATION)
+    EntityManagementConfiguration emConfiguration;
 
     @ApiOperation(value = "Disable an entity", nickname = "disableEntity", response = java.lang.Void.class)
     @RequestMapping(value = { "/{type}/base/{identifier}",
@@ -93,6 +99,62 @@ public class EMController extends BaseRest {
 	    return ResponseEntity.notFound()
 		    .header("info:", "There is no entity with the given identifier to be disabled.").build();
 	}
+
+    }
+
+    @ApiOperation(value = "Update an entity", nickname = "updateEntity", response = java.lang.Void.class)
+    @RequestMapping(value = { "/{type}/base/{identifier}", "/{type}/{identifier}" },method = RequestMethod.PUT, produces = {
+	    HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<EntityRecord> updateEntity(
+    	@RequestHeader(value = "If-Match", required = false) String ifMatchHeader,
+	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
+	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = true, defaultValue = "external") String profile,
+	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
+	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
+	    @RequestBody EntityPreview entityCreationRequest,
+	    HttpServletRequest request) {
+
+    	// TODO: Re-enable authentication
+    	// verifyReadAccess(request);
+
+    	Optional<EntityRecord> existingRecord = entityRecordService.retrieveEntityRecordByUri(getEntityUri(type, identifier));
+    	if(existingRecord.isPresent() && existingRecord.get().getEuropeanaProxy()!=null) {
+
+    		Date timestamp = (existingRecord.get().getEntity().getIsAggregatedBy() != null) ? existingRecord.get().getEntity().getIsAggregatedBy().getModified() : null;
+			Date etagDate = (timestamp != null)? timestamp : new Date();
+			String etag = generateETag(etagDate, FormatTypes.jsonld.name(), getApiVersion());
+
+			try {
+				checkIfMatchHeader(etag, request);
+			} catch (HttpException e) {
+				return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).header("info:", "The value of the If-Match HTTP header does not allign with the given ETag value generated from the timestamp.").build();
+			}
+
+			//TODO: call the UpdateTask for updating the entity if it is meant to be used for that
+			if(entityCreationRequest.getId()!=null) {
+				existingRecord.get().getEuropeanaProxy().getEntity().setEntityId(entityCreationRequest.getId());
+			}
+			if(entityCreationRequest.getAltLabel()!=null) {
+				existingRecord.get().getEuropeanaProxy().getEntity().setAltLabel(entityCreationRequest.getAltLabel());
+			}
+    		if(entityCreationRequest.getDepiction()!=null) {
+    			existingRecord.get().getEuropeanaProxy().getEntity().setDepiction(entityCreationRequest.getDepiction());
+    		}
+    		if(entityCreationRequest.getPrefLabel()!=null) {
+    			existingRecord.get().getEuropeanaProxy().getEntity().setPrefLabelStringMap(entityCreationRequest.getPrefLabel());
+    		}
+
+    		Date modificationDate = new Date();
+    		if (existingRecord.get().getEuropeanaProxy().getProxyIn()!=null) {
+    			existingRecord.get().getEuropeanaProxy().getProxyIn().setModified(modificationDate);
+    		}
+
+    		entityRecordService.update(existingRecord.get());
+
+    		return ResponseEntity.accepted().body(existingRecord.get());
+    	}
+
+    	return ResponseEntity.notFound().header("info:", "The given entity record does not exist.").build();
 
     }
 

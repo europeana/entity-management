@@ -20,7 +20,7 @@ import eu.europeana.entitymanagement.vocabulary.XmlFields;
 @JacksonXmlRootElement(localName = XmlFields.XML_EDM_AGENT)
 public class AgentImpl extends BaseEntity implements Agent, eu.europeana.corelib.definitions.edm.entity.Agent {
 
-    //TODO: fix cardinality, change to list 
+	//TODO: fix cardinality, change to list 
 	private Date date; // format "YYYY"
 	private String[] begin; // format "YYYY-MM-DD"
 	private String[] end; // format "YYYY-MM-DD"
