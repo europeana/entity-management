@@ -39,6 +39,8 @@ import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
 import eu.europeana.entitymanagement.web.service.impl.MetisDereferenceService;
 import io.swagger.annotations.ApiOperation;
 
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BASE_URI_DATA;
+
 /**
  * Example Rest Controller class with input validation TODO: catch the
  * exceptions from the used functions and return the adequate response to the
@@ -48,8 +50,6 @@ import io.swagger.annotations.ApiOperation;
 @Validated
 @RequestMapping("/entity")
 public class EMController extends BaseRest {
-
-    public static final String BASE_URI_DATA = "http://data.europeana.eu/";
 
     @Resource(name = AppConfig.BEAN_ENTITY_RECORD_SERVICE)
     private EntityRecordService entityRecordService;

@@ -30,9 +30,7 @@ import java.io.IOException;
 
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.METIS_DEREF_PATH;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.*;
-import static eu.europeana.entitymanagement.web.EMController.BASE_URI_DATA;
-import static org.hamcrest.Matchers.any;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -114,7 +112,13 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .content(loadFile(CONCEPT_BATHTUB))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isAccepted())
-                .andExpect(jsonPath("$.id", any(String.class)));
+                .andExpect(jsonPath("$.id", any(String.class)))
+                .andExpect(jsonPath("$.entity").isNotEmpty())
+                .andExpect(jsonPath("$.entity.isAggregatedBy").isNotEmpty())
+                .andExpect(jsonPath("$.entity.isAggregatedBy.aggregates", hasSize(2)))
+                // should have Europeana and Datasource proxies
+                .andExpect(jsonPath("$.proxies", hasSize(2)));
+
         //TODO assert other important properties
 
         // matches id in JSON file

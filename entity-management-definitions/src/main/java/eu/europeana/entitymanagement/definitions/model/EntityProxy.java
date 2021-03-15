@@ -23,6 +23,4 @@ public interface EntityProxy {
 
     public String getType();
 
-    public void setType(String type);
-
 }

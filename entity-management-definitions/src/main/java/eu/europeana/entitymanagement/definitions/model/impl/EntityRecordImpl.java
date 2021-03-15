@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.definitions.model.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -9,11 +10,7 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
-import dev.morphia.annotations.Field;
-import dev.morphia.annotations.Id;
-import dev.morphia.annotations.Index;
-import dev.morphia.annotations.IndexOptions;
-import dev.morphia.annotations.Indexes;
+import dev.morphia.annotations.*;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -34,7 +31,7 @@ public class EntityRecordImpl implements EntityRecord{
 
     private Entity entity;
 
-    private List<EntityProxy> proxies; 
+    private List<EntityProxy> proxies = new ArrayList<>();
     
     private boolean disabled;
     
@@ -74,8 +71,8 @@ public class EntityRecordImpl implements EntityRecord{
 
     @Override
     @JsonSetter
-    public void setProxies(List<EntityProxy> proxies) {
-        this.proxies = proxies;
+    public void addProxy(EntityProxy proxy) {
+        this.proxies.add(proxy);
     }
 
 	@Override
