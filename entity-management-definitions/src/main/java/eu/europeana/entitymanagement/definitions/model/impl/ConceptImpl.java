@@ -1,6 +1,8 @@
 package eu.europeana.entitymanagement.definitions.model.impl;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,12 +13,32 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 import eu.europeana.entitymanagement.definitions.model.Concept;
+import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JacksonXmlRootElement(localName= XmlFields.XML_SKOS_CONCEPT)
 public class ConceptImpl extends BaseEntity implements Concept {
+
+	public ConceptImpl(Concept copy) {
+		super(copy);
+		this.broader = copy.getBroader()!=null ? Arrays.copyOf(copy.getBroader(), copy.getBroader().length) : null;
+		this.narrower = copy.getNarrower()!=null ? Arrays.copyOf(copy.getNarrower(), copy.getNarrower().length) : null;
+		this.related = copy.getRelated()!=null ? Arrays.copyOf(copy.getRelated(), copy.getRelated().length) : null;
+		this.broadMatch = copy.getBroadMatch()!=null ? Arrays.copyOf(copy.getBroadMatch(), copy.getBroadMatch().length) : null;
+		this.narrowMatch = copy.getNarrowMatch()!=null ? Arrays.copyOf(copy.getNarrowMatch(), copy.getNarrowMatch().length) : null;
+		this.exactMatch = copy.getExactMatch()!=null ? Arrays.copyOf(copy.getExactMatch(), copy.getExactMatch().length) : null;
+		this.coref = copy.getCoref()!=null ? Arrays.copyOf(copy.getCoref(), copy.getCoref().length) : null;
+		this.relatedMatch = copy.getRelatedMatch()!=null ? Arrays.copyOf(copy.getRelatedMatch(), copy.getRelatedMatch().length) : null;
+		this.closeMatch = copy.getCloseMatch()!=null ? Arrays.copyOf(copy.getCloseMatch(), copy.getCloseMatch().length) : null;
+		this.inScheme = copy.getInScheme()!=null ? Arrays.copyOf(copy.getInScheme(), copy.getInScheme().length) : null;
+		this.notation = copy.getNotation()!=null ? new HashMap<>(copy.getNotation()) : null;
+	}
+
+	public ConceptImpl() {
+		super();
+	}
 
 	private String[] broader;
 	private String[] narrower;

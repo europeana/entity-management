@@ -17,11 +17,10 @@ import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
-
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @dev.morphia.annotations.Entity(value = "EntityRecord")
 @Indexes(@Index(fields = { @Field("dbId") }, options = @IndexOptions(unique = true)))
-public class EntityRecordImpl implements EntityRecord{
+public class EntityRecordImpl implements EntityRecord {
 
     @Id
     @JsonIgnore
@@ -34,39 +33,38 @@ public class EntityRecordImpl implements EntityRecord{
     private List<EntityProxy> proxies = new ArrayList<>();
     
     private boolean disabled;
-    
 
     @Override
     @JsonGetter
     @JacksonXmlProperty
     public Entity getEntity() {
-        return entity;
+	return entity;
     }
 
     @Override
     @JsonSetter
     public void setEntity(Entity entity) {
-        this.entity = entity;
+	this.entity = entity;
     }
 
     @Override
     @JsonGetter(WebEntityFields.ID)
-    @JacksonXmlProperty(isAttribute= true, localName = XmlFields.XML_RDF_ABOUT)
+    @JacksonXmlProperty(isAttribute = true, localName = XmlFields.XML_RDF_ABOUT)
     public String getEntityId() {
-        return entityId;
+	return entityId;
     }
 
     @Override
     @JsonSetter(WebEntityFields.ID)
     public void setEntityId(String entityId) {
-        this.entityId = entityId;
+	this.entityId = entityId;
     }
 
     @Override
     @JsonGetter
-    @JacksonXmlElementWrapper(useWrapping=false)
+    @JacksonXmlElementWrapper(useWrapping = false)
     public List<EntityProxy> getProxies() {
-        return proxies;
+	return proxies;
     }
 
     @Override
@@ -75,23 +73,38 @@ public class EntityRecordImpl implements EntityRecord{
         this.proxies.add(proxy);
     }
 
-	@Override
-	public void setDbId(long dbId_param) {
-		this.dbId=dbId_param;
-	}
+    @Override
+    public void setDbId(long dbId_param) {
+	this.dbId = dbId_param;
+    }
 
-	@Override
-	public long getDbId() {
-		return dbId;
-	}
+    @Override
+    public long getDbId() {
+	return dbId;
+    }
 
-	@Override
-	public boolean getDisabled() {
-		return this.disabled;
-	}
+    @Override
+    public boolean getDisabled() {
+	return this.disabled;
+    }
 
-	@Override
-	public void setDisabled(boolean disabledParam) {
-		this.disabled = disabledParam;
-	}
+    @Override
+    public void setDisabled(boolean disabledParam) {
+	this.disabled = disabledParam;
+    }
+
+    @JsonIgnore
+    @Override
+    public EntityProxy getEuropeanaProxy() {
+	return (EntityProxy) proxies.stream()
+		.filter(s -> s.getProxyId().startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI));
+    }
+
+    @Override
+    @JsonIgnore
+    public EntityProxy getExternalProxy() {
+	return (EntityProxy) proxies.stream()
+		.filter(s -> !s.getProxyId().startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI));
+    }
+
 }

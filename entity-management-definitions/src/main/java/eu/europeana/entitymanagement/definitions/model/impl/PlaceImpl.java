@@ -9,14 +9,30 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
+import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class PlaceImpl extends BaseEntity implements Place, eu.europeana.corelib.definitions.edm.entity.Place {
+
+	public PlaceImpl() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	public PlaceImpl(Place copy) {
+		super(copy);
+		this.isNextInSequence = copy.getIsNextInSequence()!=null ? Arrays.copyOf(copy.getIsNextInSequence(), copy.getIsNextInSequence().length) : null;
+		this.latitude = copy.getLatitude();
+		this.longitude = copy.getLongitude();
+		this.altitude = copy.getAltitude();
+		this.exactMatch = copy.getExactMatch()!=null ? Arrays.copyOf(copy.getExactMatch(), copy.getExactMatch().length) : null;
+	}
 
 	private String[] isNextInSequence;
 	private Float latitude, longitude, altitude;
@@ -77,10 +93,12 @@ public class PlaceImpl extends BaseEntity implements Place, eu.europeana.corelib
 		this.altitude = altitude;
 	}
 
+	@Override
 	public String[] getExactMatch() {
 		return exactMatch;
 	}
 
+	@Override
 	public void setExactMatch(String[] exactMatch) {
 		this.exactMatch = exactMatch;
 	}
@@ -88,7 +106,7 @@ public class PlaceImpl extends BaseEntity implements Place, eu.europeana.corelib
 	
 	@Override
 	@Deprecated
-	@JsonSetter(WebEntityFields.IS_PART_OF)
+	@JsonIgnore
 	public void setIsPartOf(Map<String, List<String>> isPartOf) {
 		// TODO Auto-generated method stub
 		
@@ -114,15 +132,14 @@ public class PlaceImpl extends BaseEntity implements Place, eu.europeana.corelib
 
 	@Override
 	@Deprecated
-	@JsonSetter(WebEntityFields.HAS_PART)
+	@JsonIgnore
 	public void setDcTermsHasPart(Map<String, List<String>> dcTermsHasPart) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	@JsonGetter(WebEntityFields.HAS_PART)
-	@JacksonXmlProperty(localName = XmlFields.XML_DCTERMS_HAS_PART)
+	@JsonIgnore
 	public Map<String, List<String>> getDcTermsHasPart() {
 		//if not available
 		if (getHasPart() == null)
@@ -135,8 +152,7 @@ public class PlaceImpl extends BaseEntity implements Place, eu.europeana.corelib
 	}
 
 	@Override
-	@JsonGetter(WebEntityFields.IS_PART_OF)
-	@JacksonXmlProperty(localName  = XmlFields.XML_DCTERMS_IS_PART_OF)
+	@JsonIgnore
 	public Map<String, List<String>> getIsPartOf() {
 		//if not available
 		if (getIsPartOfArray() == null)

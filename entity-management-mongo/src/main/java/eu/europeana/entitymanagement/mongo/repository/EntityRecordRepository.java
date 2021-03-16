@@ -29,7 +29,7 @@ public class EntityRecordRepository {
 
     private static final Logger logger = LogManager.getLogger(EntityRecordRepository.class);
 
-    @Resource(name = AppConfigConstants.BEAN_EM_DATA_STORE)
+    @Resource(name=AppConfigConstants.BEAN_EM_DATA_STORE)
     private Datastore datastore;
 
     @Resource(name = "emValidatorFactory")

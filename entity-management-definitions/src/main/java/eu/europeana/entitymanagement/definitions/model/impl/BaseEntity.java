@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.definitions.model.impl;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -28,8 +29,9 @@ import eu.europeana.entitymanagement.vocabulary.XmlFields;
  */
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @ValidEntityFields(groups = {Default.class})
-public abstract class BaseEntity implements Entity {
+public class BaseEntity implements Entity {
 	
+
 	protected String TMP_KEY = "def";
 	protected String internalType;
 	protected String entityId;
@@ -41,7 +43,7 @@ public abstract class BaseEntity implements Entity {
 	protected Map<String, List<String>> hiddenLabel;
 	protected Map<String, List<String>> tmpPrefLabel;
 	
-	protected String identifier[];
+	protected String[] identifier;
 	protected String[] sameAs;
 	protected String[] isRelatedTo;
 
@@ -57,7 +59,40 @@ public abstract class BaseEntity implements Entity {
 //	protected Date modified;
 	protected Aggregation isAggregatedBy;
 	protected WebResource referencedWebResource;
+	
 
+	public BaseEntity(Entity copy) {
+	    super();
+	    this.internalType = copy.getType();
+	    this.entityId = copy.getEntityId();
+	    this.depiction = copy.getDepiction();
+	    this.note = copy.getNote() != null ? new HashMap<>(copy.getNote()) : null;
+	    this.prefLabel = copy.getPrefLabelStringMap() != null ? new HashMap<>(copy.getPrefLabelStringMap()) : null;
+	    this.altLabel = copy.getAltLabel() != null ? new HashMap<>(copy.getAltLabel()) : null;
+	    this.hiddenLabel = copy.getHiddenLabel() != null ? new HashMap<>(copy.getHiddenLabel()) : null;
+	    this.identifier = copy.getIdentifier() != null
+		    ? Arrays.copyOf(copy.getIdentifier(), copy.getIdentifier().length)
+		    : null;
+	    this.sameAs = copy.getSameAs() != null ? Arrays.copyOf(copy.getSameAs(), copy.getSameAs().length) : null;
+	    this.isRelatedTo = copy.getIdentifier() != null
+		    ? Arrays.copyOf(copy.getIdentifier(), copy.getIdentifier().length)
+		    : null;
+	    this.hasPart = copy.getHasPart() != null ? Arrays.copyOf(copy.getHasPart(), copy.getHasPart().length)
+		    : null;
+	    this.isPartOf = copy.getIsPartOfArray() != null
+		    ? Arrays.copyOf(copy.getIsPartOfArray(), copy.getIsPartOfArray().length)
+		    : null;
+	    this.isAggregatedBy = copy.getIsAggregatedBy() != null ? new AggregationImpl(copy.getIsAggregatedBy())
+		    : null;
+	    this.referencedWebResource = copy.getReferencedWebResource() != null
+		    ? new WebResourceImpl(copy.getReferencedWebResource())
+		    : null;
+	}
+
+	public BaseEntity() {
+	    // TODO Auto-generated constructor stub
+	}
+	
 	@Override
 	@JsonIgnore
 	public WebResource getReferencedWebResource() {
@@ -177,6 +212,7 @@ public abstract class BaseEntity implements Entity {
 //
 //	}
 
+	@Override
 	@JsonProperty(WebEntityFields.HAS_PART)
 	@JacksonXmlProperty(localName = XmlFields.XML_DCTERMS_HAS_PART)
 	public String[] getHasPart() {
@@ -188,6 +224,7 @@ public abstract class BaseEntity implements Entity {
 		this.hasPart = hasPart;
 	}
 
+	@Override
 	@JsonProperty(WebEntityFields.IS_PART_OF)
 	@JacksonXmlProperty(localName = XmlFields.XML_DCTERMS_IS_PART_OF)
 	public String[] getIsPartOfArray() {
@@ -224,6 +261,7 @@ public abstract class BaseEntity implements Entity {
 	
 	@Override
 	@Deprecated
+	@JsonIgnore
 	public void setFoafDepiction(String foafDepiction) {
 		setDepiction(foafDepiction);
 	}
@@ -242,6 +280,7 @@ public abstract class BaseEntity implements Entity {
 
 	@Override
 	@Deprecated
+	@JsonIgnore
 	public void setId(ObjectId id) {
 		// TODO Auto-generated method stub
 	}
@@ -286,11 +325,13 @@ public abstract class BaseEntity implements Entity {
 	
 	@Override
 	@Deprecated
+	@JsonIgnore
 	public void setPrefLabel(Map<String, List<String>> prefLabel) {
 		// TODO Auto-generated method stub
 	}
 	
 	@Deprecated
+	@JsonIgnore
 	public void setOwlSameAs(String[] owlSameAs) {
 		setSameAs(sameAs);
 		
@@ -306,6 +347,11 @@ public abstract class BaseEntity implements Entity {
 		return splitArray[splitArray.length-1];
 	}
 	
+	/*
+	 * Warning: Please note that for the serialization of this field where the given getter is used, only the id is serialized
+	 * which makes it impossible to deserialize the object from its serialization, since for the deserialization the given setter
+	 * is used and it needs the whole object, not just the id
+	 */
 	@Override
 	@JsonProperty(WebEntityFields.IS_SHOWN_BY)
 	@JacksonXmlProperty(localName = XmlFields.XML_EDM_IS_SHOWN_BY)

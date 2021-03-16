@@ -1,5 +1,10 @@
 package eu.europeana.entitymanagement.definitions.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import eu.europeana.entitymanagement.definitions.model.impl.TimespanImpl;
+
+@JsonDeserialize(as = TimespanImpl.class)
 public interface Timespan extends Entity {
 
     void setIsNextInSequence(String[] isNextInSequence);

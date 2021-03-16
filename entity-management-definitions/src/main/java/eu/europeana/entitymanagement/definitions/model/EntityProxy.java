@@ -1,8 +1,12 @@
 package eu.europeana.entitymanagement.definitions.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import dev.morphia.annotations.Embedded;
+import eu.europeana.entitymanagement.definitions.model.impl.EntityProxyImpl;
 
 @Embedded
+@JsonDeserialize(as = EntityProxyImpl.class)
 public interface EntityProxy {
 
     public String getProxyId();

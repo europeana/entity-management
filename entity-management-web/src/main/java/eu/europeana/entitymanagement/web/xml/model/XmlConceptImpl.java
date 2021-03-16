@@ -39,7 +39,7 @@ public class XmlConceptImpl extends XmlBaseEntityImpl {
 
     public XmlConceptImpl() {
         // default constructor required for deserialization
-	this.entity = new ConceptImpl();
+    	this.entity = new ConceptImpl();
     }
 
     public XmlConceptImpl(Concept concept) {

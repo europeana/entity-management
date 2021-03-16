@@ -2,6 +2,11 @@ package eu.europeana.entitymanagement.definitions.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
+
+@JsonDeserialize(as = EntityRecordImpl.class)
 public interface EntityRecord {
 
     @Deprecated
@@ -32,5 +37,8 @@ public interface EntityRecord {
     boolean getDisabled();
     
     void setDisabled(boolean disabledParam);
-
+    
+    EntityProxy getEuropeanaProxy();
+    
+    EntityProxy getExternalProxy();
 }

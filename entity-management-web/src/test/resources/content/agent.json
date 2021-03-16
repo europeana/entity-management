@@ -5,11 +5,14 @@
 "entity_uri":"http://data.europeana.eu/agent/base/100013",
 "europeana_doc_count":2,
 "europeana_term_hits":8,
-"id":"http://data.europeana.eu/agent/base/100013",
+"id":"http://data.europeana.eu/agent/100013",
 "internal_type":"Agent",
-"isShownBy":"http://www.collectiedeventermusea.nl/wwwwopacx/wwwopac.ashx?command=getcontent&server=images&value=Historie%5C3589A.jpg",
-"isShownBy.source":"http://data.europeana.eu/item/2021659/3589_a",
-"isShownBy.thumbnail":"https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri=http%3A%2F%2Fwww.collectiedeventermusea.nl%2Fwwwwopacx%2Fwwwopac.ashx%3Fcommand%3Dgetcontent%26server%3Dimages%26value%3DHistorie%255C3589A.jpg&type=IMAGE",
+"isShownBy":
+{
+"id":"http://www.collectiedeventermusea.nl/wwwwopacx/wwwopac.ashx?command=getcontent&server=images&value=Historie%5C3589A.jpg",
+"source":"http://data.europeana.eu/item/2021659/3589_a",
+"thumbnail":"https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri=http%3A%2F%2Fwww.collectiedeventermusea.nl%2Fwwwwopacx%2Fwwwopac.ashx%3Fcommand%3Dgetcontent%26server%3Dimages%26value%3DHistorie%255C3589A.jpg&type=IMAGE"
+},
 "label":["J.R. (musician)","J.R.","Peebles, Courtney O."],
 "label":
 {

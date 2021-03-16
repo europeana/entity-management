@@ -3,6 +3,10 @@ package eu.europeana.entitymanagement.definitions.model;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import eu.europeana.entitymanagement.definitions.model.impl.OrganizationImpl;
+@JsonDeserialize(as = OrganizationImpl.class)
 public interface Organization extends Entity {
     
 	/**

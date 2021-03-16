@@ -1,6 +1,11 @@
 package eu.europeana.entitymanagement.web.service.impl;
 
+import eu.europeana.entitymanagement.definitions.model.Agent;
+import eu.europeana.entitymanagement.definitions.model.Concept;
 import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.definitions.model.Place;
+import eu.europeana.entitymanagement.definitions.model.Timespan;
 import eu.europeana.entitymanagement.definitions.model.impl.AgentImpl;
 import eu.europeana.entitymanagement.definitions.model.impl.ConceptImpl;
 import eu.europeana.entitymanagement.definitions.model.impl.OrganizationImpl;
@@ -45,7 +50,7 @@ public class EntityObjectFactory {
 //	throw new EntityCreationException("No matching BaseEntityImplementation for XML type " + xmlBaseEntityClass);
 //    }
 
-    static Class<? extends Entity> getClassForType(EntityTypes modelType) {
+    public static Class<? extends Entity> getClassForType(EntityTypes modelType) {
 
 	Class<? extends Entity> ret = null;
 //	EntityTypes entityType = EntityTypes.valueOf(modelType.name());
@@ -71,6 +76,25 @@ public class EntityObjectFactory {
 	}
 
 	return ret;
+    }
+
+    public static Entity createEntityObjectFromCopy(Entity copy) throws EntityCreationException {
+	return createEntityObject(copy.getType());
+//    	switch (EntityTypes.valueOf(copy.getType())) {
+//    	case Organization:
+//    	    return new OrganizationImpl((Organization)copy);
+//    	case Concept:
+//    	    return new ConceptImpl((Concept)copy);
+//    	case Agent:
+//    	    return new AgentImpl((Agent)copy);
+//    	case Place:
+//    	    return new PlaceImpl((Place)copy);
+//    	case Timespan:
+//    	    return new TimespanImpl((Timespan)copy);
+//    	default:
+//    	    throw new RuntimeException("The given type is not supported by the web model");
+//    	}
+    	
     }
 
     public static Entity createEntityObject(EntityTypes entityType) throws EntityCreationException {
