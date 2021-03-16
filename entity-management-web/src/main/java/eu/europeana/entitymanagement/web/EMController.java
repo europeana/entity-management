@@ -43,7 +43,6 @@ import eu.europeana.entitymanagement.web.service.impl.EntityRecordUtils;
 import eu.europeana.entitymanagement.web.service.impl.MetisDereferenceService;
 import io.swagger.annotations.ApiOperation;
 
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BASE_URI_DATA;
 
 /**
  * Example Rest Controller class with input validation TODO: catch the
@@ -63,9 +62,6 @@ public class EMController extends BaseRest {
 
     @Resource(name = AppConfig.BEAN_EM_DATA_SOURCES)
     private DataSources datasources;
-    
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Resource(name = AppConfig.BEAN_EM_CONFIGURATION)
     EntityManagementConfiguration emConfiguration;
@@ -197,7 +193,7 @@ public class EMController extends BaseRest {
 	    throws EuropeanaApiException {
 	// check if id is already being used, if so return a 301
 	Optional<EntityRecord> existingEntity = entityRecordService
-		.retrieveEntityRecordByUri(entityCreationRequest.getId());
+		.findMatchingCoreference(entityCreationRequest.getId());
 	if (existingEntity.isPresent()) {
 	    // return 301 redirect
 	    return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
@@ -212,7 +208,9 @@ public class EMController extends BaseRest {
 	}
 
 	Entity metisResponse = dereferenceService.dereferenceEntityById(entityCreationRequest.getId());
-	existingEntity = entityRecordService.retrieveMetisCoreferenceSameAs(metisResponse.getSameAs());
+	if (metisResponse.getSameAs() != null) {
+		existingEntity = entityRecordService.retrieveMetisCoreferenceSameAs(metisResponse.getSameAs());
+	}
 
 	if (existingEntity.isPresent()) {
 	    // return 301 redirect

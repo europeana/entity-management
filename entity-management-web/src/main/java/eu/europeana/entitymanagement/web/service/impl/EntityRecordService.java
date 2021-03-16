@@ -4,7 +4,6 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.*;
 
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
@@ -19,13 +18,16 @@ import org.springframework.stereotype.Service;
 
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
+
+import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.EUROPEANA_URL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.RIGHTS_CREATIVE_COMMONS;
+import static eu.europeana.entitymanagement.web.service.impl.EntityRecordUtils.*;
 
 @Service(AppConfig.BEAN_ENTITY_RECORD_SERVICE)
 public class EntityRecordService {
@@ -38,7 +40,7 @@ public class EntityRecordService {
 
     private final DataSources datasources;
 
-    @Autowired
+	@Autowired
     public EntityRecordService(EntityRecordRepository entityRecordRepository, EntityManagementConfiguration emConfiguration, DataSources datasources) {
         this.entityRecordRepository = entityRecordRepository;
         this.emConfiguration = emConfiguration;
@@ -49,6 +51,15 @@ public class EntityRecordService {
     public Optional<EntityRecord> retrieveEntityRecordByUri(String entityUri) {
         return Optional.ofNullable(entityRecordRepository.findByEntityId(entityUri));
     }
+
+	/**
+	 * Gets coreferenced entity with the given id (sameAs or exactMatch value in the Consolidated version)
+	 * @param id co-reference id
+	 * @return Optional containing matching record, or empty optional if none found.
+	 */
+	public Optional<EntityRecord> findMatchingCoreference(String id) {
+		return entityRecordRepository.findMatchingEntitiesByCoreference(id);
+	}
 
     public EntityRecord saveEntityRecord(EntityRecord er) {
 	return entityRecordRepository.save(er);
@@ -81,35 +92,32 @@ public class EntityRecordService {
      */
     public EntityRecord createEntityFromRequest(EntityPreview entityCreationRequest, String externalEntityType)
             throws EntityCreationException {
-        // Fail quick if no datasource is configured
-        Optional<DataSource> externalDatasourceOptional = datasources.getDatasource(entityCreationRequest.getId());
-        if (externalDatasourceOptional.isEmpty()) {
-            throw new EntityCreationException("No configured datasource for entity " + entityCreationRequest.getId());
-        }
+		// Fail quick if no datasource is configured
+		Optional<DataSource> externalDatasourceOptional = datasources.getDatasource(entityCreationRequest.getId());
+		if (externalDatasourceOptional.isEmpty()) {
+			throw new EntityCreationException("No configured datasource for entity " + entityCreationRequest.getId());
+		}
 
-        Entity entity = EntityObjectFactory.createEntityObject(externalEntityType);
-        long dbId = entityRecordRepository.generateAutoIncrement(entity.getType());
+		Date timestamp = new Date();
+		Entity entity = EntityObjectFactory.createEntityObject(externalEntityType);
+		long dbId = entityRecordRepository.generateAutoIncrement(entity.getType());
 
+		EntityRecord entityRecord = new EntityRecordImpl();
+		entityRecord.setEntity(entity);
 
-        entity.setPrefLabelStringMap(entityCreationRequest.getPrefLabel());
-        entity.setAltLabel(entityCreationRequest.getAltLabel());
+		entityRecord.setDbId(dbId);
+		String entityId = EntityRecordUtils.buildEntityIdUri(entityRecord.getEntity().getType(), String.valueOf(dbId));
+		entityRecord.setEntityId(entityId);
+		entityRecord.getEntity().setEntityId(entityId);
 
-	EntityRecord entityRecord = new EntityRecordImpl();
-	entityRecord.setEntity(entity);
+		setEuropeanaMetadata(entityId, entityRecord, timestamp);
 
-        entityRecord.setDbId(dbId);
-        String entityId = AppConfigConstants.BASE_URI_DATA + entityRecord.getEntity().getType().toLowerCase() + "/" + dbId;
-        entityRecord.setEntityId(entityId);
-        entityRecord.getEntity().setEntityId(entityId);
-
-        setEuropeanaMetadata(entityId, entityRecord);
-
-        DataSource externalDatasource = externalDatasourceOptional.get();
-        setDatasourceMetadata(entityCreationRequest, entityId, externalDatasource, entityRecord);
+		DataSource externalDatasource = externalDatasourceOptional.get();
+		setDatasourceMetadata(entityCreationRequest, entityId, externalDatasource, entityRecord, timestamp);
 
 
-        setEntityAggregation(entityRecord, entityId);
-        return entityRecordRepository.save(entityRecord);
+		setEntityAggregation(entityRecord, entityId, timestamp);
+		return entityRecordRepository.save(entityRecord);
 
     }
 
@@ -369,45 +377,41 @@ public class EntityRecordService {
     	this.entityRecordRepository.dropCollection();
 	}
 
-    private void setEntityAggregation(EntityRecord entityRecord, String entityId) {
-        // set isAggregatedBy on Entity
+    private void setEntityAggregation(EntityRecord entityRecord, String entityId, Date timestamp) {
         Aggregation isAggregatedBy = new AggregationImpl();
-        isAggregatedBy.setId(entityId + "#aggregation");
-        isAggregatedBy.setCreated(new Date());
-        isAggregatedBy.setModified(new Date());
+        isAggregatedBy.setId(getIsAggregatedById(entityId));
+        isAggregatedBy.setCreated(timestamp);
+        isAggregatedBy.setModified(timestamp);
         isAggregatedBy.setRecordCount(1);
         isAggregatedBy.setAggregates(Arrays.asList(getEuropeanaAggregationId(entityId), getDatasourceAggregationId(entityId)));
 
         entityRecord.getEntity().setIsAggregatedBy(isAggregatedBy);
     }
 
-    private void setEuropeanaMetadata(String entityId, EntityRecord entityRecord) {
-        String europeanaProxyId = entityId + "#proxy_europeana";
-
+	private void setEuropeanaMetadata(String entityId, EntityRecord entityRecord, Date timestamp) {
         Aggregation europeanaAggr = new AggregationImpl();
         europeanaAggr.setId(getEuropeanaAggregationId(entityId));
-        //TODO: move to constants file
-        europeanaAggr.setRights("https://creativecommons.org/publicdomain/zero/1.0/");
-        europeanaAggr.setCreated(new Date());
-        europeanaAggr.setModified(new Date());
-        europeanaAggr.setSource("www.europeana.eu");
+		europeanaAggr.setRights(RIGHTS_CREATIVE_COMMONS);
+        europeanaAggr.setCreated(timestamp);
+        europeanaAggr.setModified(timestamp);
+        europeanaAggr.setSource(EUROPEANA_URL);
 
 
         EntityProxy europeanaProxy = new EntityProxyImpl();
-        europeanaProxy.setProxyId(europeanaProxyId);
+        europeanaProxy.setProxyId(getEuropeanaProxyId(entityId));
         europeanaProxy.setProxyFor(entityId);
         europeanaProxy.setProxyIn(europeanaAggr);
 
         entityRecord.addProxy(europeanaProxy);
     }
 
-    private void setDatasourceMetadata(EntityPreview entityCreationRequest, String entityId, DataSource externalDatasource, EntityRecord entityRecord) {
+    private void setDatasourceMetadata(EntityPreview entityCreationRequest, String entityId, DataSource externalDatasource, EntityRecord entityRecord, Date timestamp) {
         Aggregation datasourceAggr = new AggregationImpl();
         datasourceAggr.setId(getDatasourceAggregationId(entityId));
-        datasourceAggr.setRights(externalDatasource.getRights());
-        datasourceAggr.setCreated(new Date());
-        datasourceAggr.setModified(new Date());
-        datasourceAggr.setRights(externalDatasource.getUrl());
+        datasourceAggr.setCreated(timestamp);
+		datasourceAggr.setModified(timestamp);
+		datasourceAggr.setRights(externalDatasource.getRights());
+		datasourceAggr.setSource(externalDatasource.getUrl());
 
 
         EntityProxy datasourceProxy = new EntityProxyImpl();
@@ -416,14 +420,5 @@ public class EntityRecordService {
         datasourceProxy.setProxyIn(datasourceAggr);
 
         entityRecord.addProxy(datasourceProxy);
-    }
-
-
-    private String getEuropeanaAggregationId(String entityId) {
-        return entityId + "#aggr_europeana";
-    }
-
-    private String getDatasourceAggregationId(String entityId) {
-        return entityId + "#aggr_source_1";
     }
 }

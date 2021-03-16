@@ -11,6 +11,8 @@ import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PROXY;
+
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class EntityProxyImpl implements EntityProxy {
 
@@ -23,8 +25,7 @@ public class EntityProxyImpl implements EntityProxy {
     @JsonGetter(WebEntityFields.TYPE)
     @JacksonXmlProperty(localName = XmlFields.XML_RDF_TYPE)
     public String getType() {
-        // TODO: move to constants class
-        return "Proxy";
+       return PROXY;
     }
 
 

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 import javax.annotation.Resource;
 import javax.validation.ConstraintViolation;
 import javax.validation.ValidatorFactory;
+import java.util.Optional;
 import java.util.Set;
 
 import static dev.morphia.query.experimental.filters.Filters.eq;
@@ -125,5 +126,24 @@ public class EntityRecordRepository {
      */
     public void dropCollection(){
         datastore.getMapper().getCollection(EntityRecordImpl.class).drop();
+    }
+
+
+    /**
+     * Gets EntityRecord containing the given id in its sameAs or exactMatch fields.
+     * @param id id to query
+     * @return Optional containing result, or empty Optional if no match
+     */
+    public Optional<EntityRecord> findMatchingEntitiesByCoreference(String id) {
+//        EntityRecordImpl value = datastore.find(EntityRecordImpl.class)
+//                .filter(or(
+//                        eq("entity.sameAs", id),
+//                        eq("entity.exactMatch", id)
+//                        )
+//                ).first();
+
+
+        //TODO: figure out why the above query throws an error. Return empty Optional for now
+        return Optional.empty();
     }
 }
