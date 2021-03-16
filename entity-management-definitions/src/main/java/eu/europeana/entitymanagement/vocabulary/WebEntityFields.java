@@ -113,6 +113,7 @@ public interface WebEntityFields {
 	//Proxy Fields
 	public static final String PROXY_FOR = "proxyFor";
 	public static final String PROXY_IN = "proxyIn";
+	public static final String PROXY = "Proxy";
 	
 
 }

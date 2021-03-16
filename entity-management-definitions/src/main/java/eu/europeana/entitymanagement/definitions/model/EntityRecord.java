@@ -22,7 +22,7 @@ public interface EntityRecord {
      */
     long getDbId();
 
-    void setProxies(List<EntityProxy> proxies);
+    void addProxy(EntityProxy proxies);
 
     List<EntityProxy> getProxies();
 
