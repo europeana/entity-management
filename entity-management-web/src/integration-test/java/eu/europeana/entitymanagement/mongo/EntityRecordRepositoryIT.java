@@ -55,7 +55,6 @@ class EntityRecordRepositoryIT extends AbstractIntegrationTest {
         aggregartes.add("http://data.europeana.eu/timespan/base/1#aggr_europeana");
         aggregation.setAggregates(aggregartes);
 
-        List<EntityProxy> proxies = new ArrayList<>();
         EntityProxyImpl proxy = new EntityProxyImpl();
         proxy.setEntity(entity);
         Aggregation aggregation2 = new AggregationImpl();
@@ -65,13 +64,13 @@ class EntityRecordRepositoryIT extends AbstractIntegrationTest {
         aggregartes2.add("http://data.europeana.eu/proxy/base/1#aggr_europeana");
         aggregation2.setAggregates(aggregartes2);
         proxy.setProxyIn(aggregation2);
-        proxies.add(proxy);
+
 
         EntityRecord entityRecordImpl = new EntityRecordImpl();
         entityRecordImpl.setEntity(entity);
         entityRecordImpl.setEntityId(entity.getEntityId());
         entityRecordImpl.getEntity().setIsAggregatedBy(aggregation);
-        entityRecordImpl.setProxies(proxies);
+        entityRecordImpl.addProxy(proxy);
 
         entityRecordRepository.save(entityRecordImpl);
 

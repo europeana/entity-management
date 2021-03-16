@@ -23,13 +23,10 @@ public class EntityProxyImpl implements EntityProxy {
     @JsonGetter(WebEntityFields.TYPE)
     @JacksonXmlProperty(localName = XmlFields.XML_RDF_TYPE)
     public String getType() {
-	return type;
+        // TODO: move to constants class
+        return "Proxy";
     }
 
-    @JsonSetter(WebEntityFields.TYPE)
-    public void setType(String type) {
-	this.type = type;
-    }
 
     @JsonGetter(WebEntityFields.ID)
     @JacksonXmlProperty(isAttribute = true, localName = XmlFields.XML_RDF_ABOUT)

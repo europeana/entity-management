@@ -23,6 +23,7 @@ public class AppConfigConstants {
 
 
     public static final String METIS_DEREF_PATH = "/dereference";
+    public static final String BASE_URI_DATA = "http://data.europeana.eu/";
 
     
 }
