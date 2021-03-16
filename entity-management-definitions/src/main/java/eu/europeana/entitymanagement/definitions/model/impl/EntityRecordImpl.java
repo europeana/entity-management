@@ -97,6 +97,7 @@ public class EntityRecordImpl implements EntityRecord {
     }
 
     @Override
+    @JsonIgnore
     public EntityProxy getEuropeanaProxy() {
 	return (EntityProxy) proxies.stream()
 		.filter(s -> s.getProxyId().startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI));
