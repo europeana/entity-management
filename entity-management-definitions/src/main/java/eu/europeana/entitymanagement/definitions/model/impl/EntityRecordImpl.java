@@ -1,6 +1,5 @@
 package eu.europeana.entitymanagement.definitions.model.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -10,7 +9,11 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
-import dev.morphia.annotations.*;
+import dev.morphia.annotations.Field;
+import dev.morphia.annotations.Id;
+import dev.morphia.annotations.Index;
+import dev.morphia.annotations.IndexOptions;
+import dev.morphia.annotations.Indexes;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -30,8 +33,8 @@ public class EntityRecordImpl implements EntityRecord {
 
     private Entity entity;
 
-    private List<EntityProxy> proxies = new ArrayList<>();
-    
+    private List<EntityProxy> proxies;
+
     private boolean disabled;
 
     @Override
@@ -69,8 +72,8 @@ public class EntityRecordImpl implements EntityRecord {
 
     @Override
     @JsonSetter
-    public void addProxy(EntityProxy proxy) {
-        this.proxies.add(proxy);
+    public void setProxies(List<EntityProxy> proxies) {
+	this.proxies = proxies;
     }
 
     @Override
@@ -93,8 +96,8 @@ public class EntityRecordImpl implements EntityRecord {
 	this.disabled = disabledParam;
     }
 
-    @JsonIgnore
     @Override
+    @JsonIgnore
     public EntityProxy getEuropeanaProxy() {
 	return (EntityProxy) proxies.stream()
 		.filter(s -> s.getProxyId().startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI));

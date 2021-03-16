@@ -55,11 +55,13 @@ public class AggregationImpl implements Aggregation{
     @JsonGetter(WebEntityFields.TYPE)
     @JacksonXmlProperty(localName = XmlFields.XML_RDF_TYPE)
     public String getType() {
-        //TODO: move to constants class
-        return "Aggregation";
+        return type;
     }
-
-
+    
+    @JsonSetter(WebEntityFields.TYPE)
+    public void setType(String type) {
+        this.type = type;
+    }
     @Override
     @JsonGetter(WebEntityFields.RIGHTS)
     @JacksonXmlProperty(localName = XmlFields.XML_EDM_RIGHTS)

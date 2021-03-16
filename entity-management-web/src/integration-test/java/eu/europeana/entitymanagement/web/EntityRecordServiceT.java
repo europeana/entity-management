@@ -78,9 +78,10 @@ public class EntityRecordServiceT {
         EntityProxy externalProxy = new EntityProxyImpl ();
         externalProxy.setEntity(xmlEntity.toEntityModel());
         externalProxy.setProxyId("http://data.external.org/proxy1");
-        entityRecord.addProxy(internalProxy);
-        entityRecord.addProxy(externalProxy);
-
+        List<EntityProxy> proxies = new ArrayList<EntityProxy>();
+        proxies.add(internalProxy);
+        proxies.add(externalProxy);
+        entityRecord.setProxies(proxies);
         
         entityRecordService.mergeEntity(entityRecord);
         /*

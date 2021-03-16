@@ -43,8 +43,6 @@ import eu.europeana.entitymanagement.web.service.impl.EntityRecordUtils;
 import eu.europeana.entitymanagement.web.service.impl.MetisDereferenceService;
 import io.swagger.annotations.ApiOperation;
 
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BASE_URI_DATA;
-
 /**
  * Example Rest Controller class with input validation TODO: catch the
  * exceptions from the used functions and return the adequate response to the
