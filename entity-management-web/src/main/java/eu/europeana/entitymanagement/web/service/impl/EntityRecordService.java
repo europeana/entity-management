@@ -100,16 +100,13 @@ public class EntityRecordService {
 
 		Date timestamp = new Date();
 		Entity entity = EntityObjectFactory.createEntityObject(externalEntityType);
-		long dbId = entityRecordRepository.generateAutoIncrement(entity.getType());
-
+		
 		EntityRecord entityRecord = new EntityRecordImpl();
-		entityRecord.setEntity(entity);
-
-		entityRecord.setDbId(dbId);
-		String entityId = EntityRecordUtils.buildEntityIdUri(entityRecord.getEntity().getType(), String.valueOf(dbId));
+		String entityId = generateEntityId(entity.getType());
 		entityRecord.setEntityId(entityId);
-		entityRecord.getEntity().setEntityId(entityId);
-
+		entity.setEntityId(entityId);
+		entityRecord.setEntity(entity);
+		
 		setEuropeanaMetadata(entityId, entityRecord, timestamp);
 
 		DataSource externalDatasource = externalDatasourceOptional.get();
@@ -119,6 +116,12 @@ public class EntityRecordService {
 		setEntityAggregation(entityRecord, entityId, timestamp);
 		return entityRecordRepository.save(entityRecord);
 
+    }
+
+
+    private String generateEntityId(String entityType) {
+	long dbId = entityRecordRepository.generateAutoIncrement(entityType);
+	return EntityRecordUtils.buildEntityIdUri(entityType, String.valueOf(dbId));
     }
 
     /**

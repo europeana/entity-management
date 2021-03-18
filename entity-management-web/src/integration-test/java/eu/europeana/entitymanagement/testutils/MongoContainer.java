@@ -13,6 +13,7 @@ public class MongoContainer extends GenericContainer<MongoContainer> {
     private final String batchDb;
     private final String adminUsername = "admin_user";
     private final String adminPassword = "admin_password";
+    private boolean useFixedPorts = false;
 
 
     /**
@@ -35,8 +36,13 @@ public class MongoContainer extends GenericContainer<MongoContainer> {
     private MongoContainer(ImageFromDockerfile dockerImageName, String entityDb, String batchDb) {
         super(dockerImageName);
 
-        this.withExposedPorts(27017)
-                .withEnv("MONGO_INITDB_ROOT_USERNAME", adminUsername)
+        if(useFixedPorts){
+            this.addFixedExposedPort(27017,27017);     
+        }else{
+            this.withExposedPorts(27017);    
+        }
+        
+        this.withEnv("MONGO_INITDB_ROOT_USERNAME", adminUsername)
                 .withEnv("MONGO_INITDB_ROOT_PASSWORD", adminPassword)
                 .withEnv("EM_APP_DB", entityDb)
                 .withEnv("EM_BATCH_DB", batchDb);

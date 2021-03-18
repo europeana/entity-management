@@ -3,6 +3,8 @@ package eu.europeana.entitymanagement.definitions.model.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bson.types.ObjectId;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSetter;
@@ -24,7 +26,7 @@ public class EntityRecordImpl implements EntityRecord {
 
     @Id
     @JsonIgnore
-    private long dbId;
+    private ObjectId dbId;
 
     private String entityId;
 
@@ -73,13 +75,11 @@ public class EntityRecordImpl implements EntityRecord {
         this.proxies.add(proxy);
     }
 
-    @Override
-    public void setDbId(long dbId_param) {
+    public void setDbId(ObjectId dbId_param) {
 	this.dbId = dbId_param;
     }
 
-    @Override
-    public long getDbId() {
+    public ObjectId getDbId() {
 	return dbId;
     }
 
