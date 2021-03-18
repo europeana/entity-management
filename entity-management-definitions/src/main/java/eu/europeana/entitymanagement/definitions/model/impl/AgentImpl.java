@@ -516,10 +516,6 @@ public class AgentImpl extends BaseEntity implements Agent, eu.europeana.corelib
 		return getBiographicalInformation();
 	}
 
-	@Override
-	public String getType() {
-		return "Agent";
-	}
 	
 	@Override
 	public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {

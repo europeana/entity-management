@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.mongo.repository;
 
 import static dev.morphia.query.experimental.filters.Filters.eq;
+import static dev.morphia.query.experimental.filters.Filters.or;
 import static eu.europeana.entitymanagement.mongo.repository.EntityRecordFields.ENTITY_ID;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_DELETE_OPTS;
 
@@ -23,7 +24,6 @@ import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
-
 /**
  * Repository for retrieving the EntityRecord objects.
  */
@@ -35,6 +35,7 @@ public class EntityRecordRepository {
     @Resource(name=AppConfigConstants.BEAN_EM_DATA_STORE)
     private Datastore datastore;
     
+   
 //    @Autowired
 //    private EMSettings emSettings;
     @Resource(name="emValidatorFactory")
@@ -69,7 +70,16 @@ public class EntityRecordRepository {
                 eq(ENTITY_ID, entityId))
                 .first();
     }
-
+    
+    public EntityRecordImpl checkForTheReference(String reference) {
+    	EntityRecordImpl foundRecord = datastore.find(EntityRecordImpl.class).filter(
+    			or(
+    			eq("entity.sameAs", reference),
+    			eq("entity.exactMatch", reference)
+    			))
+    			.first();
+		return foundRecord;
+    }
 
     /**
      * Deletes all EntityRecord objects that contain the given entityId
@@ -91,8 +101,8 @@ public class EntityRecordRepository {
      */
     public EntityRecord save(EntityRecord entityRecord){
         //if the id of the entity is null, get it from the database before saving  
-    	long dbId = generateAutoIncrement(entityRecord.getEntity().getType());
-    	if (Long.valueOf(entityRecord.getDbId()) == null)
+    	long dbId = generateAutoIncrement(entityRecord.getClass().getInterfaces()[0].getSimpleName());
+    	if (entityRecord.getDbId() == 0)
     	{   		
     		entityRecord.setDbId(dbId);    		
     	}

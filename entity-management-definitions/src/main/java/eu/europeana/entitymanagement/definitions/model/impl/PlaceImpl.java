@@ -164,10 +164,6 @@ public class PlaceImpl extends BaseEntity implements Place, eu.europeana.corelib
 		return tmpIsPartOf;
 	}
 
-	@Override
-	public String getType() {
-		return "Place";
-	}
 	
 	@Override
 	public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {

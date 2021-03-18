@@ -10,7 +10,6 @@ import dev.morphia.annotations.Embedded;
 import eu.europeana.corelib.definitions.edm.entity.ContextualClass;
 import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
 
-//import eu.europeana.corelib.definitions.edm.entity.ContextualClass;
 @Embedded
 @JsonDeserialize(as = BaseEntity.class)
 public interface Entity extends ContextualClass {
@@ -29,7 +28,7 @@ public interface Entity extends ContextualClass {
 
 	public String getType();
 	
-	public String setType(String type);
+	public void setType(String type);
 
 	public String[] getSameAs();
 
@@ -79,5 +78,4 @@ public interface Entity extends ContextualClass {
 	void setAltLabel(Map<String, List<String>> altLabel);
 
 	void setPrefLabelStringMap(Map<String, String> prefLabel);
-
 }

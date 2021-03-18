@@ -77,7 +77,7 @@ public class EntityObjectFactory {
 
 	return ret;
     }
-
+    
     public static Entity createEntityObjectFromCopy(Entity copy) {
     	switch (EntityTypes.valueOf(copy.getType())) {
     	case Organization:

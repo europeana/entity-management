@@ -198,5 +198,4 @@ public class ConceptImpl extends BaseEntity implements Concept {
 		field.set(this, value);
 	}
 
-
 }

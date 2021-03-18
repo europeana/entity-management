@@ -1,0 +1,29 @@
+{
+  "@context": "http://www.europeana.eu/schemas/context/entity.jsonld",
+  "id": "http://data.europeana.eu/place/base/143914",
+  "type": "Place",
+  "prefLabel": {
+    "": "Provincia di Ferrara",
+    "fr": "Ferrare",
+    "it": "Ferrara"
+  },
+  "altLabel": {
+    "": [
+      "Ferrara",
+      "Provincia di Ferrara"
+    ],
+    "it": [
+      "Provincia di Ferrara"
+    ]
+  },
+  "lat": "44.8",
+  "long": "11.83333",
+  "isPartOf": [
+    "http://data.europeana.eu/place/base/92",
+    "http://data.europeana.eu/place/base/143931"
+  ],
+  "sameAs": [
+    "http://sws.geonames.org/3177088/",
+    "http://dbpedia.org/resource/Provincia_di_Ferrara"    
+  ]
+}

@@ -15,15 +15,23 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.AppConfig;
+import eu.europeana.entitymanagement.definitions.model.Agent;
+import eu.europeana.entitymanagement.definitions.model.Concept;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.model.Place;
+import eu.europeana.entitymanagement.definitions.model.Timespan;
 import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.utils.EntityUtils;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
 
 @Service(AppConfig.BEAN_ENTITY_RECORD_SERVICE)
@@ -80,6 +88,15 @@ public class EntityRecordService {
     }
 
     /**
+     * Updates an already existing entity record.
+     * @param entityRecord entity record to update
+     * @return updated entity
+     */
+    public EntityRecord update (EntityRecord entityRecord){
+    	return this.saveEntityRecord(entityRecord);
+    }
+    
+    /**
      * Checks if any of the resources in the SameAs field from Metis is alredy
      * known.
      * 
@@ -97,6 +114,133 @@ public class EntityRecordService {
 	return Optional.empty();
     }
 
+    public void performGlobalReferentialIntegrity(EntityRecord entityRecord) throws JsonMappingException, JsonProcessingException {
+    	/*
+    	 * the common fields for all entity types that are references 
+    	 */
+		List<String> newFieldValue = null;
+		//for the field hasPart
+		String [] hasPartField = entityRecord.getEntity().getHasPart();
+		if(hasPartField!=null)
+		{
+			newFieldValue = performReferentialIntegrityOnStringArray(hasPartField);
+			entityRecord.getEntity().setHasPart(newFieldValue.toArray(new String[newFieldValue.size()]));
+		}
+		//for the field isPartOf
+		String [] isPartOfField = entityRecord.getEntity().getIsPartOfArray();
+		if(isPartOfField!=null)
+		{
+			newFieldValue = performReferentialIntegrityOnStringArray(isPartOfField);
+			entityRecord.getEntity().setIsPartOfArray(newFieldValue.toArray(new String[newFieldValue.size()]));
+		}
+		//for the field isRelatedTo
+		String [] isRelatedToField = entityRecord.getEntity().getIsRelatedTo();
+		if(isRelatedToField!=null)
+		{			
+			newFieldValue = performReferentialIntegrityOnStringArray(isRelatedToField);
+			entityRecord.getEntity().setIsRelatedTo(newFieldValue.toArray(new String[newFieldValue.size()]));	
+		}
+		
+    	switch (EntityTypes.valueOf(entityRecord.getEntity().getType())) {
+    	case Concept:
+    		//for the field broader
+    		String [] broaderField = ((Concept)entityRecord.getEntity()).getBroader();
+    		if(broaderField!=null)
+    		{
+    			newFieldValue = performReferentialIntegrityOnStringArray(broaderField);
+    			((Concept)entityRecord.getEntity()).setBroader(newFieldValue.toArray(new String[newFieldValue.size()]));
+    		}
+    		//for the field narrower
+    		String [] narrowerField = ((Concept)entityRecord.getEntity()).getBroader();
+    		if(narrowerField!=null) {
+    			newFieldValue = performReferentialIntegrityOnStringArray(narrowerField);
+    			((Concept)entityRecord.getEntity()).setNarrower(newFieldValue.toArray(new String[newFieldValue.size()]));
+    		}
+    		//for the field related
+    		String [] relatedField = ((Concept)entityRecord.getEntity()).getRelated();
+    		if(relatedField!=null) {
+    			newFieldValue = performReferentialIntegrityOnStringArray(relatedField);
+    			((Concept)entityRecord.getEntity()).setRelated(newFieldValue.toArray(new String[newFieldValue.size()]));
+    		}
+    		break;
+    	case Agent:
+    		Map<String,List<String>> updatedField = null;
+    		//for the field placeOfBirth
+    		Map<String,List<String>> placeOfBirthField = ((Agent)entityRecord.getEntity()).getPlaceOfBirth();
+    		if(placeOfBirthField!=null) {
+    			updatedField=performReferentialIntegrityOnMapStringListString(placeOfBirthField);
+    			((Agent)entityRecord.getEntity()).setPlaceOfBirth(updatedField);
+    		}
+    		//for the field placeOfDeath
+    		Map<String,List<String>> placeOfDeathField = ((Agent)entityRecord.getEntity()).getPlaceOfDeath();
+    		if(placeOfDeathField!=null) {
+    			updatedField=performReferentialIntegrityOnMapStringListString(placeOfDeathField);
+    			((Agent)entityRecord.getEntity()).setPlaceOfDeath(updatedField);
+    		}
+    		//for the field professionOrOccupation
+    		Map<String,List<String>> professionOrOccupationField = ((Agent)entityRecord.getEntity()).getProfessionOrOccupation();
+    		if(professionOrOccupationField!=null) {
+    			updatedField=performReferentialIntegrityOnMapStringListString(professionOrOccupationField);
+    			((Agent)entityRecord.getEntity()).setProfessionOrOccupation(updatedField);
+    		}
+    		//for the field hasMet
+    		String[] hasMetField = ((Agent)entityRecord.getEntity()).getHasMet();
+    		if(hasMetField!=null) {
+    			newFieldValue = performReferentialIntegrityOnStringArray(hasMetField);
+    			((Agent)entityRecord.getEntity()).setHasMet(newFieldValue.toArray(new String[newFieldValue.size()]));
+    		}
+    		break;
+    	case Place:
+    		//for the field isNextInSequence
+    		String[] isNextInSequenceField = ((Place)entityRecord.getEntity()).getIsNextInSequence();
+    		if(isNextInSequenceField!=null) {
+    			newFieldValue = performReferentialIntegrityOnStringArray(isNextInSequenceField);
+    			((Place)entityRecord.getEntity()).setIsNextInSequence(newFieldValue.toArray(new String[newFieldValue.size()]));
+    		}
+    		break;
+    	case Timespan:
+    		//for the field isNextInSequence
+    		isNextInSequenceField = ((Timespan)entityRecord.getEntity()).getIsNextInSequence();
+    		if(isNextInSequenceField!=null) {
+    			newFieldValue = performReferentialIntegrityOnStringArray(isNextInSequenceField);
+    			((Timespan)entityRecord.getEntity()).setIsNextInSequence(newFieldValue.toArray(new String[newFieldValue.size()]));
+    		}
+    		break;
+		case Organization:
+			break;
+		default:
+			break;    	
+    	}
+    	
+    	this.saveEntityRecord(entityRecord);
+    }
+    
+	private Map<String,List<String>> performReferentialIntegrityOnMapStringListString (Map<String,List<String>> objectToPerformOn) {
+		Map<String,List<String>> updatedObject = new HashMap<String, List<String>>();
+		for (Map.Entry<String, List<String>> entry : objectToPerformOn.entrySet()) {
+			List<String> entryValue = entry.getValue();
+			List<String> newEntryValue = new ArrayList<String>();
+			for (int i=0; i<entryValue.size(); i++) {
+				EntityRecordImpl reference = entityRecordRepository.checkForTheReference(entryValue.get(i));
+				if(reference!=null) {
+					newEntryValue.add(reference.getEntityId());
+				}
+			}
+			updatedObject.put(entry.getKey(), newEntryValue);
+		}
+		return updatedObject;
+	}
+	
+	private List<String> performReferentialIntegrityOnStringArray (String[] objectToPerformOn) {
+		List<String> updatedObject = new ArrayList<String>();
+		for (String entry : objectToPerformOn) {
+			EntityRecordImpl reference = entityRecordRepository.checkForTheReference(entry);
+			if(reference!=null) {
+				updatedObject.add(reference.getEntityId());
+			}
+		}
+		return updatedObject;
+	}
     /**
      * This function merges the data from the entities of the entity record proxies to the consilidated entity.
      * TODO: see how to merge the Aggregation and WebResource objects (currently only the fields that are not of the Class type are merged)

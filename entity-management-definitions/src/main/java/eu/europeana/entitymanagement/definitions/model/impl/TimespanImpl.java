@@ -124,11 +124,6 @@ public class TimespanImpl extends BaseEntity implements Timespan, eu.europeana.c
 	// TODO Auto-generated method stub
 	
     }
-
-    @Override
-    public String getType() {
-        return "Timespan";
-    }
     
 	@Override
 	public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
