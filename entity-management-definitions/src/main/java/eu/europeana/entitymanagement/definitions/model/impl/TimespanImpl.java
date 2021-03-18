@@ -1,16 +1,14 @@
 package eu.europeana.entitymanagement.definitions.model.impl;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
-import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.Timespan;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
@@ -21,13 +19,6 @@ public class TimespanImpl extends BaseEntity implements Timespan, eu.europeana.c
 	public TimespanImpl() {
 		super();
 		// TODO Auto-generated constructor stub
-	}
-
-	public TimespanImpl(Timespan copy) {
-		super(copy);
-		this.isNextInSequence = copy.getIsNextInSequence()!=null ? Arrays.copyOf(copy.getIsNextInSequence(),copy.getIsNextInSequence().length) : null;
-		this.begin = copy.getBeginString();
-		this.end = copy.getEndString();
 	}
 
 	private String[] isNextInSequence;

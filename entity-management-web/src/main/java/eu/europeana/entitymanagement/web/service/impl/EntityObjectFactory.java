@@ -77,23 +77,6 @@ public class EntityObjectFactory {
 
 	return ret;
     }
-    
-    public static Entity createEntityObjectFromCopy(Entity copy) {
-    	switch (EntityTypes.valueOf(copy.getType())) {
-    	case Organization:
-    	    return new OrganizationImpl((Organization)copy);
-    	case Concept:
-    	    return new ConceptImpl((Concept)copy);
-    	case Agent:
-    	    return new AgentImpl((Agent)copy);
-    	case Place:
-    	    return new PlaceImpl((Place)copy);
-    	case Timespan:
-    	    return new TimespanImpl((Timespan)copy);
-    	default:
-    	    throw new RuntimeException("The given type is not supported by the web model");
-    	}    	
-    }
 
     public static Entity createEntityObject(EntityTypes entityType) throws EntityCreationException {
 

@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.definitions.model.impl;
 
-import java.util.ArrayList;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.AGGREGATION;
+
 import java.util.Date;
 import java.util.List;
 
@@ -14,25 +15,10 @@ import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.AGGREGATION;
-
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JacksonXmlRootElement(localName = XmlFields.XML_ORE_AGGREGATION)
 public class AggregationImpl implements Aggregation{
 
-	public AggregationImpl(Aggregation copy) {
-		super();
-		this.id = copy.getId();
-		this.type = copy.getType();
-		this.rights = copy.getRights();
-		this.source = copy.getSource();
-		this.created = new Date(copy.getCreated().getTime());
-		this.modified = new Date(copy.getModified().getTime());
-		this.score = copy.getScore();
-		this.recordCount = copy.getRecordCount();
-		this.pageRank = copy.getPageRank();
-		this.aggregates = copy.getAggregates()!=null ? new ArrayList<String>(copy.getAggregates()) : null;
-	}
 	public AggregationImpl() {
 		super();
 	}

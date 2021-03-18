@@ -6,13 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
-import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
@@ -23,15 +22,6 @@ public class PlaceImpl extends BaseEntity implements Place, eu.europeana.corelib
 	public PlaceImpl() {
 		super();
 		// TODO Auto-generated constructor stub
-	}
-
-	public PlaceImpl(Place copy) {
-		super(copy);
-		this.isNextInSequence = copy.getIsNextInSequence()!=null ? Arrays.copyOf(copy.getIsNextInSequence(), copy.getIsNextInSequence().length) : null;
-		this.latitude = copy.getLatitude();
-		this.longitude = copy.getLongitude();
-		this.altitude = copy.getAltitude();
-		this.exactMatch = copy.getExactMatch()!=null ? Arrays.copyOf(copy.getExactMatch(), copy.getExactMatch().length) : null;
 	}
 
 	private String[] isNextInSequence;
