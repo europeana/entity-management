@@ -1,6 +1,23 @@
 package eu.europeana.entitymanagement.mongo.repository;
 
+import static dev.morphia.query.experimental.filters.Filters.eq;
+import static dev.morphia.query.experimental.filters.Filters.or;
+import static eu.europeana.entitymanagement.mongo.repository.EntityRecordFields.ENTITY_ID;
+import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_DELETE_OPTS;
+
+import java.util.Optional;
+import java.util.Set;
+
+import javax.annotation.Resource;
+import javax.validation.ConstraintViolation;
+import javax.validation.ValidatorFactory;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Repository;
+
 import com.mongodb.client.model.ReturnDocument;
+
 import dev.morphia.Datastore;
 import dev.morphia.ModifyOptions;
 import dev.morphia.query.experimental.updates.UpdateOperators;
@@ -8,19 +25,6 @@ import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.stereotype.Repository;
-
-import javax.annotation.Resource;
-import javax.validation.ConstraintViolation;
-import javax.validation.ValidatorFactory;
-import java.util.Optional;
-import java.util.Set;
-
-import static dev.morphia.query.experimental.filters.Filters.eq;
-import static eu.europeana.entitymanagement.mongo.repository.EntityRecordFields.ENTITY_ID;
-import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_DELETE_OPTS;
 
 /**
  * Repository for retrieving the EntityRecord objects.
@@ -135,15 +139,14 @@ public class EntityRecordRepository {
      * @return Optional containing result, or empty Optional if no match
      */
     public Optional<EntityRecord> findMatchingEntitiesByCoreference(String id) {
-//        EntityRecordImpl value = datastore.find(EntityRecordImpl.class)
-//                .filter(or(
-//                        eq("entity.sameAs", id),
-//                        eq("entity.exactMatch", id)
-//                        )
-//                ).first();
+        EntityRecordImpl value = datastore.find(EntityRecordImpl.class).disableValidation()
+                .filter(or(
+                        eq("entity.sameAs", id),
+                        eq("entity.exactMatch", id)
+                        )
+                ).first();
+        
+        return Optional.ofNullable(value);
 
-
-        //TODO: figure out why the above query throws an error. Return empty Optional for now
-        return Optional.empty();
     }
 }

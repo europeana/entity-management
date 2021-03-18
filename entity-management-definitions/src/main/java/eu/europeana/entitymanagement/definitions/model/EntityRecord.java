@@ -9,18 +9,6 @@ import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
 @JsonDeserialize(as = EntityRecordImpl.class)
 public interface EntityRecord {
 
-    @Deprecated
-    /**
-     * should be moved to a different interface
-     * @param dbId
-     */
-    void setDbId(long dbId);
-    @Deprecated
-    /**
-     * should be moved to a different interface
-     * @param dbId
-     */
-    long getDbId();
 
     void addProxy(EntityProxy proxies);
 
