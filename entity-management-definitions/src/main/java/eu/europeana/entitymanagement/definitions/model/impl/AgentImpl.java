@@ -13,6 +13,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 import eu.europeana.entitymanagement.definitions.model.Agent;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
@@ -494,6 +495,10 @@ public class AgentImpl extends BaseEntity implements Agent, eu.europeana.corelib
 		return getBiographicalInformation();
 	}
 
+	@Override
+    public String getType() {
+		return EntityTypes.Agent.getEntityType();
+    }
 	
 	@Override
 	public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {

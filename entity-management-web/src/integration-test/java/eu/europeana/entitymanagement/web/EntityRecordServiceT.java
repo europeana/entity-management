@@ -119,9 +119,9 @@ public class EntityRecordServiceT {
         entityRecord3.setEntityId(place.getEntityId());
         entityRecordService.saveEntityRecord(entityRecord3);
 
-        entityRecordService.performGlobalReferentialIntegrity(entityRecordService.retrieveEntityRecordByUri(entityRecord1.getEntityId()).get());
-        entityRecordService.performGlobalReferentialIntegrity(entityRecordService.retrieveEntityRecordByUri(entityRecord2.getEntityId()).get());
-        entityRecordService.performGlobalReferentialIntegrity(entityRecordService.retrieveEntityRecordByUri(entityRecord3.getEntityId()).get());
+        entityRecordService.globalReferentialIntegrity(entityRecordService.retrieveEntityRecordByUri(entityRecord1.getEntityId()).get());
+        entityRecordService.globalReferentialIntegrity(entityRecordService.retrieveEntityRecordByUri(entityRecord2.getEntityId()).get());
+        entityRecordService.globalReferentialIntegrity(entityRecordService.retrieveEntityRecordByUri(entityRecord3.getEntityId()).get());
 
         /*
          * Assertions

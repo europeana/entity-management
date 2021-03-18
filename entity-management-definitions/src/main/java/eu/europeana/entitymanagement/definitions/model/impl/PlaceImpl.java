@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 import eu.europeana.entitymanagement.definitions.model.Place;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
@@ -153,6 +154,11 @@ public class PlaceImpl extends BaseEntity implements Place, eu.europeana.corelib
 
 		return tmpIsPartOf;
 	}
+
+	@Override
+    public String getType() {
+		return EntityTypes.Place.getEntityType();
+    }
 
 	
 	@Override

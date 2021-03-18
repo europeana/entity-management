@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 import eu.europeana.entitymanagement.definitions.model.Timespan;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
@@ -114,6 +115,11 @@ public class TimespanImpl extends BaseEntity implements Timespan, eu.europeana.c
     public void setEnd(Map<String, List<String>> arg0) {
 	// TODO Auto-generated method stub
 	
+    }
+    
+	@Override
+    public String getType() {
+		return EntityTypes.Timespan.getEntityType();
     }
     
 	@Override

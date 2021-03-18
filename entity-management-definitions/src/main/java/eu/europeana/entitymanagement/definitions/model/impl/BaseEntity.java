@@ -379,7 +379,7 @@ public class BaseEntity implements Entity {
 	}
 
 	@Override
-	@JsonGetter(WebEntityFields.IS_AGGREGATED_BY)
+	@JsonSetter(WebEntityFields.IS_AGGREGATED_BY)
 	public void setIsAggregatedBy(Aggregation isAggregatedBy) {
 	    this.isAggregatedBy = isAggregatedBy;
 	}

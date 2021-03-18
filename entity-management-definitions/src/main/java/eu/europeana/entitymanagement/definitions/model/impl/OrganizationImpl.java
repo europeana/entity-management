@@ -15,6 +15,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 import eu.europeana.entitymanagement.definitions.model.Address;
 import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
@@ -460,6 +461,12 @@ public class OrganizationImpl extends BaseEntity
 
 		return tmpIdentifier;
 	}
+	
+	@Override
+    public String getType() {
+		return EntityTypes.Organization.getEntityType();
+    }
+
 	
 	@Override
 	public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
