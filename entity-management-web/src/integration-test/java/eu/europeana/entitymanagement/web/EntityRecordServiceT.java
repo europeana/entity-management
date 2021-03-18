@@ -11,8 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import javax.xml.bind.JAXBContext;
@@ -85,10 +83,9 @@ public class EntityRecordServiceT {
         EntityProxy externalProxy = new EntityProxyImpl ();
         externalProxy.setEntity(xmlEntity.toEntityModel());
         externalProxy.setProxyId("http://data.external.org/proxy1");
-        List<EntityProxy> proxies = new ArrayList<EntityProxy>();
-        proxies.add(internalProxy);
-        proxies.add(externalProxy);
-        entityRecord.setProxies(proxies);
+        entityRecord.addProxy(internalProxy);
+        entityRecord.addProxy(externalProxy);
+
         
         entityRecordService.mergeEntity(entityRecord);
         /*

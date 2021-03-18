@@ -14,6 +14,8 @@ import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.AGGREGATION;
+
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JacksonXmlRootElement(localName = XmlFields.XML_ORE_AGGREGATION)
 public class AggregationImpl implements Aggregation{
@@ -55,13 +57,10 @@ public class AggregationImpl implements Aggregation{
     @JsonGetter(WebEntityFields.TYPE)
     @JacksonXmlProperty(localName = XmlFields.XML_RDF_TYPE)
     public String getType() {
-        return type;
+      return AGGREGATION;
     }
-    
-    @JsonSetter(WebEntityFields.TYPE)
-    public void setType(String type) {
-        this.type = type;
-    }
+
+
     @Override
     @JsonGetter(WebEntityFields.RIGHTS)
     @JacksonXmlProperty(localName = XmlFields.XML_EDM_RIGHTS)

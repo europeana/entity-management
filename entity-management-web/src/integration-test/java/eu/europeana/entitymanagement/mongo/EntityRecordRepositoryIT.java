@@ -1,19 +1,27 @@
 package eu.europeana.entitymanagement.mongo;
 
-import eu.europeana.entitymanagement.AbstractIntegrationTest;
-import eu.europeana.entitymanagement.definitions.model.Aggregation;
-import eu.europeana.entitymanagement.definitions.model.EntityProxy;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.impl.*;
-import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import eu.europeana.entitymanagement.AbstractIntegrationTest;
+import eu.europeana.entitymanagement.definitions.model.Aggregation;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.model.impl.AggregationImpl;
+import eu.europeana.entitymanagement.definitions.model.impl.EntityProxyImpl;
+import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
+import eu.europeana.entitymanagement.definitions.model.impl.TimespanImpl;
+import eu.europeana.entitymanagement.definitions.model.impl.WebResourceImpl;
+import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 
 @SpringBootTest
 class EntityRecordRepositoryIT extends AbstractIntegrationTest {
@@ -55,7 +63,6 @@ class EntityRecordRepositoryIT extends AbstractIntegrationTest {
         aggregartes.add("http://data.europeana.eu/timespan/base/1#aggr_europeana");
         aggregation.setAggregates(aggregartes);
 
-        List<EntityProxy> proxies = new ArrayList<>();
         EntityProxyImpl proxy = new EntityProxyImpl();
         proxy.setEntity(entity);
         Aggregation aggregation2 = new AggregationImpl();
@@ -65,13 +72,13 @@ class EntityRecordRepositoryIT extends AbstractIntegrationTest {
         aggregartes2.add("http://data.europeana.eu/proxy/base/1#aggr_europeana");
         aggregation2.setAggregates(aggregartes2);
         proxy.setProxyIn(aggregation2);
-        proxies.add(proxy);
+
 
         EntityRecord entityRecordImpl = new EntityRecordImpl();
         entityRecordImpl.setEntity(entity);
         entityRecordImpl.setEntityId(entity.getEntityId());
         entityRecordImpl.getEntity().setIsAggregatedBy(aggregation);
-        entityRecordImpl.setProxies(proxies);
+        entityRecordImpl.addProxy(proxy);
 
         entityRecordRepository.save(entityRecordImpl);
 
