@@ -6,19 +6,3 @@ mongo.batch.database = <spring-batch-db>
 # when the "dev" profile is active, these set whether the database should be cleared on startup
 mongo.batch.database.reset=false
 mongo.em.database.reset=false
-
-# Socks proxy configuration
-socks.enabled=false
-socks.host=
-socks.port=
-socks.user=
-socks.password=
-
-#string value representing the key used for JWT signature verification 
-europeana.apikey.jwttoken.siganturekey=
-
-#url for the page rank solr
-entitymanagement.solr.pr.url=
-#url for the search api solr
-entitymanagement.solr.searchapi.url=
-

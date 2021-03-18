@@ -60,7 +60,6 @@ public class EntityRecordService {
 		return saveEntityRecord(er);
     }
 
-
     /**
      * Creates an {@link EntityRecord} from an {@link EntityPreview}, which
      * is then persisted.

@@ -92,8 +92,7 @@ public class EntityObjectFactory {
     	    return new TimespanImpl((Timespan)copy);
     	default:
     	    throw new RuntimeException("The given type is not supported by the web model");
-    	}
-    	
+    	}    	
     }
 
     public static Entity createEntityObject(EntityTypes entityType) throws EntityCreationException {

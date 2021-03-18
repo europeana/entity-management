@@ -81,7 +81,7 @@ public class BaseEntity implements Entity {
 //	protected Date modified;
 	protected Aggregation isAggregatedBy;
 	protected WebResource referencedWebResource;
-
+	
 	@Override
 	@JsonIgnore
 	public WebResource getReferencedWebResource() {
