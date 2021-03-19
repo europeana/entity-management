@@ -1,7 +1,6 @@
 package eu.europeana.entitymanagement.definitions.model.impl;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -12,9 +11,10 @@ import javax.validation.groups.Default;
 
 import org.bson.types.ObjectId;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
@@ -31,9 +31,12 @@ import eu.europeana.entitymanagement.vocabulary.XmlFields;
 @ValidEntityFields(groups = {Default.class})
 public class BaseEntity implements Entity {
 	
+	public BaseEntity() {
+		// TODO Auto-generated constructor stub
+	}
 
 	protected String TMP_KEY = "def";
-	protected String internalType;
+	protected String type;
 	protected String entityId;
 	// depiction
 	protected String depiction;
@@ -60,95 +63,73 @@ public class BaseEntity implements Entity {
 	protected Aggregation isAggregatedBy;
 	protected WebResource referencedWebResource;
 	
-
-	public BaseEntity(Entity copy) {
-	    super();
-	    this.internalType = copy.getType();
-	    this.entityId = copy.getEntityId();
-	    this.depiction = copy.getDepiction();
-	    this.note = copy.getNote() != null ? new HashMap<>(copy.getNote()) : null;
-	    this.prefLabel = copy.getPrefLabelStringMap() != null ? new HashMap<>(copy.getPrefLabelStringMap()) : null;
-	    this.altLabel = copy.getAltLabel() != null ? new HashMap<>(copy.getAltLabel()) : null;
-	    this.hiddenLabel = copy.getHiddenLabel() != null ? new HashMap<>(copy.getHiddenLabel()) : null;
-	    this.identifier = copy.getIdentifier() != null
-		    ? Arrays.copyOf(copy.getIdentifier(), copy.getIdentifier().length)
-		    : null;
-	    this.sameAs = copy.getSameAs() != null ? Arrays.copyOf(copy.getSameAs(), copy.getSameAs().length) : null;
-	    this.isRelatedTo = copy.getIdentifier() != null
-		    ? Arrays.copyOf(copy.getIdentifier(), copy.getIdentifier().length)
-		    : null;
-	    this.hasPart = copy.getHasPart() != null ? Arrays.copyOf(copy.getHasPart(), copy.getHasPart().length)
-		    : null;
-	    this.isPartOf = copy.getIsPartOfArray() != null
-		    ? Arrays.copyOf(copy.getIsPartOfArray(), copy.getIsPartOfArray().length)
-		    : null;
-	    this.isAggregatedBy = copy.getIsAggregatedBy() != null ? new AggregationImpl(copy.getIsAggregatedBy())
-		    : null;
-	    this.referencedWebResource = copy.getReferencedWebResource() != null
-		    ? new WebResourceImpl(copy.getReferencedWebResource())
-		    : null;
-	}
-
-	public BaseEntity() {
-	    // TODO Auto-generated constructor stub
-	}
-	
 	@Override
 	@JsonIgnore
 	public WebResource getReferencedWebResource() {
 		return referencedWebResource;
 	}
 	
-	@JsonProperty(WebEntityFields.PREF_LABEL)
+	@JsonGetter(WebEntityFields.PREF_LABEL)
 	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_PREF_LABEL)
 	public Map<String, String> getPrefLabelStringMap() {
 		return prefLabel;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.PREF_LABEL)
 	public void setPrefLabelStringMap(Map<String, String> prefLabel) {
 		this.prefLabel = prefLabel;
 	}
 
-	@JsonProperty(WebEntityFields.ALT_LABEL)
+	@JsonGetter(WebEntityFields.ALT_LABEL)
 	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_ALT_LABEL)
 	public Map<String, List<String>> getAltLabel() {
 		return altLabel;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.ALT_LABEL)
 	public void setAltLabel(Map<String, List<String>> altLabel) {
 		this.altLabel = altLabel;
 	}
 
-	@JsonProperty(WebEntityFields.HIDDEN_LABEL)
+	@JsonGetter(WebEntityFields.HIDDEN_LABEL)
 	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_HIDDEN_LABEL)
 	public Map<String, List<String>> getHiddenLabel() {
 		return hiddenLabel;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.HIDDEN_LABEL)
 	public void setHiddenLabel(Map<String, List<String>> hiddenLabel) {
 		this.hiddenLabel = hiddenLabel;
 	}
 
-	@JsonProperty(WebEntityFields.NOTE)
+	@JsonGetter(WebEntityFields.NOTE)
 	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_NOTE)
 	public Map<String, List<String>> getNote() {
 		return note;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.NOTE)
 	public void setNote(Map<String, List<String>> note) {
 		this.note = note;
 	}
 
-
-	@JsonProperty(WebEntityFields.TYPE)
+	
+	@JsonGetter(WebEntityFields.TYPE)
 	@JacksonXmlProperty(localName = XmlFields.XML_RDF_TYPE)
 	public String getType() {
-		return internalType;
+		return type;
 	}
+
+	@Override
+	@JsonSetter(WebEntityFields.TYPE)
+	public void setType(String type) {
+		this.type=type;
+	}
+
 
 //	public String[] getSameAs() {
 //		return sameAs;
@@ -168,34 +149,37 @@ public class BaseEntity implements Entity {
 		this.entityId = entityId;
 	}
 
-	@JsonProperty(WebEntityFields.IDENTIFIER)
+	@JsonGetter(WebEntityFields.IDENTIFIER)
 	@JacksonXmlProperty(localName = XmlFields.XML_DC_IDENTIFIER)
 	public String[] getIdentifier() {
 		return identifier;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.IDENTIFIER)
 	public void setIdentifier(String[] identifier) {
 		this.identifier = identifier;
 	}
 
-	@JsonProperty(WebEntityFields.ID)
+	@JsonGetter(WebEntityFields.ID)
 	@JacksonXmlProperty(isAttribute= true, localName = XmlFields.XML_RDF_ABOUT)
 	public String getAbout() {
 		return getEntityId();
 	}
 
+	@JsonSetter(WebEntityFields.ID)
 	public void setAbout(String about) {
 		setEntityId(about);
 	}
 
-	@JsonProperty(WebEntityFields.IS_RELATED_TO)
+	@JsonGetter(WebEntityFields.IS_RELATED_TO)
 	@JacksonXmlProperty(localName = XmlFields.XML_EDM_IS_RELATED_TO)
 	public String[] getIsRelatedTo() {
 		return isRelatedTo;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.IS_RELATED_TO)
 	public void setIsRelatedTo(String[] isRelatedTo) {
 		this.isRelatedTo = isRelatedTo;
 	}
@@ -213,48 +197,52 @@ public class BaseEntity implements Entity {
 //	}
 
 	@Override
-	@JsonProperty(WebEntityFields.HAS_PART)
+	@JsonGetter(WebEntityFields.HAS_PART)
 	@JacksonXmlProperty(localName = XmlFields.XML_DCTERMS_HAS_PART)
 	public String[] getHasPart() {
 		return hasPart;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.HAS_PART)
 	public void setHasPart(String[] hasPart) {
 		this.hasPart = hasPart;
 	}
 
 	@Override
-	@JsonProperty(WebEntityFields.IS_PART_OF)
+	@JsonGetter(WebEntityFields.IS_PART_OF)
 	@JacksonXmlProperty(localName = XmlFields.XML_DCTERMS_IS_PART_OF)
 	public String[] getIsPartOfArray() {
 		return isPartOf;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.IS_PART_OF)
 	public void setIsPartOfArray(String[] isPartOf) {
 		this.isPartOf = isPartOf;
 	}
 
-	@JsonProperty(WebEntityFields.DEPICTION)
+	@JsonGetter(WebEntityFields.DEPICTION)
 	@JacksonXmlProperty(localName = XmlFields.XML_FOAF_DEPICTION)
 	public String getDepiction() {
 		return depiction;
 	}
 	
 	@Override
+	@JsonSetter(WebEntityFields.DEPICTION)
 	public void setDepiction(String depiction) {
 		this.depiction = depiction;
 	}
 
 	@Override
-	@JsonProperty(WebEntityFields.SAME_AS)
+	@JsonGetter(WebEntityFields.SAME_AS)
 	@JacksonXmlProperty(localName = XmlFields.XML_OWL_SAME_AS)
 	public String[] getSameAs() {
 		return sameAs;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.SAME_AS)
 	public void setSameAs(String[] sameAs) {
 		this.sameAs = sameAs;
 	}
@@ -353,7 +341,7 @@ public class BaseEntity implements Entity {
 	 * is used and it needs the whole object, not just the id
 	 */
 	@Override
-	@JsonProperty(WebEntityFields.IS_SHOWN_BY)
+	@JsonGetter(WebEntityFields.IS_SHOWN_BY)
 	@JacksonXmlProperty(localName = XmlFields.XML_EDM_IS_SHOWN_BY)
 	public String getIsShownBy() {
 		if (referencedWebResource!=null)
@@ -364,16 +352,10 @@ public class BaseEntity implements Entity {
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.IS_SHOWN_BY)
 	public void setIsShownBy(WebResource resource) {
 		referencedWebResource=resource;
 	}
-
-	@Override
-	public String setType(String internalTypeParam) {
-		return internalType=internalTypeParam;
-	}
-
-
 
 	@Override
 	public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
@@ -390,15 +372,16 @@ public class BaseEntity implements Entity {
 	
 	 
 	@Override    
-	@JsonProperty(WebEntityFields.IS_AGGREGATED_BY)
+	@JsonGetter(WebEntityFields.IS_AGGREGATED_BY)
 	@JacksonXmlProperty(localName = XmlFields.XML_ORE_IS_AGGREGATED_BY)
 	public Aggregation getIsAggregatedBy() {
 	    return isAggregatedBy;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.IS_AGGREGATED_BY)
 	public void setIsAggregatedBy(Aggregation isAggregatedBy) {
 	    this.isAggregatedBy = isAggregatedBy;
 	}
-
+	
 }

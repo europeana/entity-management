@@ -1,15 +1,17 @@
 package eu.europeana.entitymanagement.web;
 
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT1_REFERENTIAL_INTEGRITY_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT2_REFERENTIAL_INTEGRITY_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_REFERENTIAL_INTEGRITY_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
 import static eu.europeana.entitymanagement.web.BaseMvcTestUtils.CONCEPT_DATA_RECONCELIATION_XML;
-import static eu.europeana.entitymanagement.web.BaseMvcTestUtils.CONCEPT_JSON;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -26,12 +28,15 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Concept;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.model.impl.AgentImpl;
 import eu.europeana.entitymanagement.definitions.model.impl.ConceptImpl;
 import eu.europeana.entitymanagement.definitions.model.impl.EntityProxyImpl;
 import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
+import eu.europeana.entitymanagement.definitions.model.impl.PlaceImpl;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
 import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
@@ -92,6 +97,43 @@ public class EntityRecordServiceT {
         Assertions.assertNotNull(entityRecord.getEntity().getPrefLabel());        
 	}
 	
+	@Test
+	public void performGlobalReferentialIntegrity () throws JsonMappingException, JsonProcessingException, IOException {
+        entityRecordService.dropRepository();
+		// read the test data from the file
+        AgentImpl agent1 = objectMapper.readValue(loadFile(AGENT1_REFERENTIAL_INTEGRITY_JSON), AgentImpl.class);
+        EntityRecord entityRecord1 = new EntityRecordImpl();
+        entityRecord1.setEntity(agent1);
+        entityRecord1.setEntityId(agent1.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord1);
 
+        AgentImpl agent2 = objectMapper.readValue(loadFile(AGENT2_REFERENTIAL_INTEGRITY_JSON), AgentImpl.class);
+        EntityRecord entityRecord2 = new EntityRecordImpl();
+        entityRecord2.setEntity(agent2);
+        entityRecord2.setEntityId(agent2.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord2);
+
+        PlaceImpl place = objectMapper.readValue(loadFile(PLACE_REFERENTIAL_INTEGRITY_JSON), PlaceImpl.class);
+        EntityRecord entityRecord3 = new EntityRecordImpl();
+        entityRecord3.setEntity(place);
+        entityRecord3.setEntityId(place.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord3);
+
+        entityRecordService.globalReferentialIntegrity(entityRecordService.retrieveEntityRecordByUri(entityRecord1.getEntityId()).get());
+        entityRecordService.globalReferentialIntegrity(entityRecordService.retrieveEntityRecordByUri(entityRecord2.getEntityId()).get());
+        entityRecordService.globalReferentialIntegrity(entityRecordService.retrieveEntityRecordByUri(entityRecord3.getEntityId()).get());
+
+        /*
+         * Assertions
+         */
+        Optional<EntityRecord> agent1_updated = entityRecordService.retrieveEntityRecordByUri(agent1.getEntityId());
+        Assertions.assertTrue(((Agent)agent1_updated.get().getEntity()).getPlaceOfBirth().size()==1);
+        Assertions.assertTrue(((Agent)agent1_updated.get().getEntity()).getPlaceOfBirth().get("").contains("http://data.europeana.eu/place/base/143914"));
+        Assertions.assertTrue(((Agent)agent1_updated.get().getEntity()).getProfessionOrOccupation().get("").size()==0);
+        String[] isRelatedTo_agent1_updated = ((Agent)agent1_updated.get().getEntity()).getIsRelatedTo();
+        Assertions.assertTrue(isRelatedTo_agent1_updated.length==1);
+        Assertions.assertTrue(isRelatedTo_agent1_updated[0].contains("http://data.europeana.eu/agent/base/100013"));
+
+	}
 
 }

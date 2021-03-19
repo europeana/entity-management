@@ -3,7 +3,6 @@ package eu.europeana.entitymanagement.definitions.model.impl;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,42 +13,13 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 import eu.europeana.entitymanagement.definitions.model.Agent;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JacksonXmlRootElement(localName = XmlFields.XML_EDM_AGENT)
 public class AgentImpl extends BaseEntity implements Agent, eu.europeana.corelib.definitions.edm.entity.Agent {
-
-    public AgentImpl(Agent copy) {
-	super(copy);
-	this.date = copy.getDate() != null ? new Date(copy.getDate().getTime()) : null;
-	this.begin = copy.getBeginArray() != null ? Arrays.copyOf(copy.getBeginArray(), copy.getBeginArray().length)
-		: null;
-	this.end = copy.getEndArray() != null ? Arrays.copyOf(copy.getEndArray(), copy.getEndArray().length) : null;
-	this.dateOfBirth = copy.getDateOfBirth() != null
-		? Arrays.copyOf(copy.getDateOfBirth(), copy.getDateOfBirth().length)
-		: null;
-	this.dateOfDeath = copy.getDateOfDeath() != null
-		? Arrays.copyOf(copy.getDateOfDeath(), copy.getDateOfDeath().length)
-		: null;
-	this.hasMet = copy.getHasMet() != null ? Arrays.copyOf(copy.getHasMet(), copy.getHasMet().length) : null;
-	this.name = copy.getName() != null ? new HashMap<>(copy.getName()) : null;
-	this.biographicalInformation = copy.getBiographicalInformation() != null
-		? new HashMap<>(copy.getBiographicalInformation())
-		: null;
-	this.professionOrOccupation = copy.getProfessionOrOccupation() != null
-		? new HashMap<>(copy.getProfessionOrOccupation())
-		: null;
-	this.placeOfBirth = copy.getPlaceOfBirth() != null ? new HashMap<>(copy.getPlaceOfBirth()) : null;
-	this.placeOfDeath = copy.getPlaceOfDeath() != null ? new HashMap<>(copy.getPlaceOfDeath()) : null;
-	this.dateOfEstablishment = copy.getDateOfEstablishment();
-	this.dateOfTermination = copy.getDateOfTermination();
-	this.gender = copy.getGender();
-	this.exactMatch = copy.getExactMatch() != null
-		? Arrays.copyOf(copy.getExactMatch(), copy.getExactMatch().length)
-		: null;
-    }
 
     public AgentImpl() {
 	super();
@@ -410,138 +380,135 @@ public class AgentImpl extends BaseEntity implements Agent, eu.europeana.corelib
 	return getPlaceOfDeath();
     }
 
-    @Override
-    @Deprecated
-    public void setRdaGr2PlaceOfBirth(Map<String, List<String>> rdaGr2PlaceOfBirth) {
-	// TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public Map<String, List<String>> getRdaGr2PlaceOfBirth() {
-	return getPlaceOfBirth();
-    }
-
-    @Override
-    @Deprecated
-    public void setRdaGr2DateOfDeath(Map<String, List<String>> rdaGr2DateOfDeath) {
-	// TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public Map<String, List<String>> getRdaGr2DateOfDeath() {
-	// if not available
-	if (getDateOfDeath() == null)
-	    return null;
-	// if not transformed
-	if (tmpDateOfDeath == null)
-	    tmpDateOfDeath = fillTmpMap(Arrays.asList(getDateOfDeath()));
-
-	return tmpDateOfDeath;
-    }
-
-    @Override
-    @Deprecated
-    public void setRdaGr2DateOfEstablishment(Map<String, List<String>> rdaGr2DateOfEstablishment) {
-	// TODO Auto-generated method stub
-
-    }
-
-    @Override
-    @Deprecated
-    public Map<String, List<String>> getRdaGr2DateOfEstablishment() {
-	// if not available
-	if (getDateOfEstablishment() == null)
-	    return null;
-	// if not transformed
-	if (tmpDateOfEstablishment == null) {
-	    tmpDateOfEstablishment = fillTmpMap(Arrays.asList(getDateOfEstablishment()));
+	@Override
+	@Deprecated
+	public void setRdaGr2PlaceOfBirth(Map<String, List<String>> rdaGr2PlaceOfBirth) {
+		// TODO Auto-generated method stub
+		
 	}
 
-	return tmpDateOfEstablishment;
-    }
-
-    @Override
-    @Deprecated
-    public void setRdaGr2DateOfTermination(Map<String, List<String>> rdaGr2DateOfTermination) {
-	// TODO Auto-generated method stub
-
-    }
-
-    @Override
-    @Deprecated
-    public Map<String, List<String>> getRdaGr2DateOfTermination() {
-	// if not available
-	if (getDateOfTermination() == null)
-	    return null;
-	// if not transformed
-	if (tmpDateOfTermination == null) {
-	    tmpDateOfTermination = fillTmpMap(Arrays.asList(getDateOfTermination()));
+	@Override
+	public Map<String, List<String>> getRdaGr2PlaceOfBirth() {
+		return getPlaceOfBirth();
 	}
 
-	return tmpDateOfTermination;
-    }
+	@Override
+	@Deprecated
+	public void setRdaGr2DateOfDeath(Map<String, List<String>> rdaGr2DateOfDeath) {
+		// TODO Auto-generated method stub
+		
+	}
 
-    @Override
-    @Deprecated
-    public void setRdaGr2Gender(Map<String, List<String>> rdaGr2Gender) {
+	@Override
+	public Map<String, List<String>> getRdaGr2DateOfDeath() {
+		//if not available
+		if (getDateOfDeath() == null)
+			return null;
+		//if not transformed
+		if (tmpDateOfDeath == null) 
+			tmpDateOfDeath = fillTmpMap(Arrays.asList(getDateOfDeath()));
 
-    }
+		return tmpDateOfDeath;
+	}
 
-    @Override
-    public Map<String, List<String>> getRdaGr2Gender() {
-	// if not available
-	if (getGender() == null)
-	    return null;
-	// if not transformed
-	if (tmpGender == null)
-	    tmpGender = fillTmpMap(Arrays.asList(getGender()));
+	@Override
+	@Deprecated
+	public void setRdaGr2DateOfEstablishment(Map<String, List<String>> rdaGr2DateOfEstablishment) {
+		// TODO Auto-generated method stub
+		
+	}
 
-	return tmpGender;
-    }
+	@Override
+	@Deprecated
+	public Map<String, List<String>> getRdaGr2DateOfEstablishment() {
+		//if not available
+		if (getDateOfEstablishment() == null)
+			return null;
+		//if not transformed
+		if (tmpDateOfEstablishment == null) {
+			tmpDateOfEstablishment = fillTmpMap(Arrays.asList(getDateOfEstablishment()));
+		}
 
-    @Override
-    @Deprecated
-    public void setRdaGr2ProfessionOrOccupation(Map<String, List<String>> rdaGr2ProfessionOrOccupation) {
-	// TODO Auto-generated method stub
+		return tmpDateOfEstablishment;
+	}
 
-    }
+	@Override
+	@Deprecated
+	public void setRdaGr2DateOfTermination(Map<String, List<String>> rdaGr2DateOfTermination) {
+		// TODO Auto-generated method stub
+		
+	}
 
-    @Override
-    public Map<String, List<String>> getRdaGr2ProfessionOrOccupation() {
-	return getProfessionOrOccupation();
-    }
+	@Override
+	@Deprecated
+	public Map<String, List<String>> getRdaGr2DateOfTermination() {
+		//if not available
+		if (getDateOfTermination() == null)
+			return null;
+		//if not transformed
+		if (tmpDateOfTermination == null) {
+			tmpDateOfTermination = fillTmpMap(Arrays.asList(getDateOfTermination()));
+		}
 
-    @Override
-    @Deprecated
-    public void setRdaGr2BiographicalInformation(Map<String, List<String>> rdaGr2BiographicalInformation) {
-	// TODO Auto-generated method stub
+		return tmpDateOfTermination;
+	}
 
-    }
+	@Override
+	@Deprecated
+	public void setRdaGr2Gender(Map<String, List<String>> rdaGr2Gender) {
 
-    @Override
-    public Map<String, List<String>> getRdaGr2BiographicalInformation() {
-	return getBiographicalInformation();
-    }
+	}
 
-    @Override
+	@Override
+	public Map<String, List<String>> getRdaGr2Gender() {
+		//if not available
+		if (getGender() == null)
+			return null;
+		//if not transformed
+		if (tmpGender == null) 
+			tmpGender = fillTmpMap(Arrays.asList(getGender()));
+
+		return tmpGender;
+	}
+
+	@Override
+	@Deprecated
+	public void setRdaGr2ProfessionOrOccupation(Map<String, List<String>> rdaGr2ProfessionOrOccupation) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public Map<String, List<String>> getRdaGr2ProfessionOrOccupation() {
+		return getProfessionOrOccupation();
+	}
+
+	@Override
+	@Deprecated
+	public void setRdaGr2BiographicalInformation(Map<String, List<String>> rdaGr2BiographicalInformation) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public Map<String, List<String>> getRdaGr2BiographicalInformation() {
+		return getBiographicalInformation();
+	}
+
+	@Override
     public String getType() {
-	return "Agent";
+		return EntityTypes.Agent.getEntityType();
     }
+	
+	@Override
+	public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
+		//TODO:in case of the performance overhead cause by using the reflecion code, change this method to call the getters for each field individually
+		return field.get(this);
+	}
 
-    @Override
-    public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
-	// TODO:in case of the performance overhead cause by using the reflecion code,
-	// change this method to call the getters for each field individually
-	return field.get(this);
-    }
-
-    @Override
-    public void setFieldValue(Field field, Object value) throws IllegalArgumentException, IllegalAccessException {
-	// TODO:in case of the performance overhead cause by using the reflecion code,
-	// change this method to call the setter for each field individually
-	field.set(this, value);
-    }
-
+	@Override
+	public void setFieldValue(Field field, Object value) throws IllegalArgumentException, IllegalAccessException {
+		//TODO:in case of the performance overhead cause by using the reflecion code, change this method to call the setter for each field individually
+		field.set(this, value);
+	}
 }

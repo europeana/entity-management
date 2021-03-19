@@ -1,8 +1,8 @@
 package eu.europeana.entitymanagement.definitions.model.impl;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 import eu.europeana.entitymanagement.definitions.model.WebResource;
@@ -15,14 +15,6 @@ public class WebResourceImpl implements WebResource{
 	public WebResourceImpl() {
 		super();
 		// TODO Auto-generated constructor stub
-	}
-
-	public WebResourceImpl(WebResource copy) {
-		super();
-		this.source = copy.getSource();
-		this.id = copy.getId();
-		this.thumbnail = copy.getThumbnail();
-		this.type = copy.getType();
 	}
 
 	String source;

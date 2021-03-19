@@ -139,6 +139,7 @@ public class EntityRecordRepository {
      * @return Optional containing result, or empty Optional if no match
      */
     public Optional<EntityRecord> findMatchingEntitiesByCoreference(String id) {
+
         EntityRecordImpl value = datastore.find(EntityRecordImpl.class).disableValidation()
                 .filter(or(
                         eq("entity.sameAs", id),
@@ -150,3 +151,4 @@ public class EntityRecordRepository {
 
     }
 }
+
