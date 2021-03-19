@@ -170,10 +170,10 @@ public class EntityRecordService {
 	    performReferentialIntegrityAgent((Agent) entity);
 	    break;
 	case Place:
-	    globalReferentialIntegrityPlace((Place) entity);
+	    performReferentialIntegrityPlace((Place) entity);
 	    break;
 	case Timespan:
-	    globalReferentialIntegrityTimespan((Timespan) entity);
+	    performReferentialIntegrityTimespan((Timespan) entity);
 	    break;
 	case Organization:
 	    break;
@@ -241,13 +241,13 @@ public class EntityRecordService {
 	
     }
 
-    private void globalReferentialIntegrityPlace(Place entity) {
+    private void performReferentialIntegrityPlace(Place entity) {
 	// for the field isNextInSequence
 	String[] isNextInSequenceField = entity.getIsNextInSequence();
 	entity.setIsNextInSequence(replaceWithInternalReferences(isNextInSequenceField));
     }
 
-    private void globalReferentialIntegrityTimespan(Timespan entity) {
+    private void performReferentialIntegrityTimespan(Timespan entity) {
 	// for the field isNextInSequence
 	String[] isNextInSequenceField = entity.getIsNextInSequence();
 	entity.setIsNextInSequence(replaceWithInternalReferences(isNextInSequenceField));
