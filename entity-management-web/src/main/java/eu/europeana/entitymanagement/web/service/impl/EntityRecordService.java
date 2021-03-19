@@ -259,24 +259,24 @@ public class EntityRecordService {
 	    return null;
 	}
 	
-	Map<String, List<String>> updatedReferences = new HashMap<String, List<String>>();
+	Map<String, List<String>> updatedReferenceMap = new HashMap<String, List<String>>();
 	for (Map.Entry<String, List<String>> entry : originalReferences.entrySet()) {
-	    List<String> entryValue = entry.getValue();
-	    List<String> newEntryValue = new ArrayList<String>();
-	    for (int i = 0; i < entryValue.size(); i++) {
-		Optional<EntityRecord> reference = findMatchingCoreference(entryValue.get(i));
-		if (reference.isPresent()) {
-		    newEntryValue.add(reference.get().getEntityId());
-		}
+	    List<String> updatedReferences = new ArrayList<String>();
+	    
+	    for (String value : entry.getValue()) {
+		addInternalReference(updatedReferences, value);
 	    }
-	    updatedReferences.put(entry.getKey(), newEntryValue);
+	    
+	    if(!updatedReferences.isEmpty()) {
+		updatedReferenceMap.put(entry.getKey(), updatedReferences);
+	    }
 	}
 	
-	if(updatedReferences.isEmpty()) {
+	if(updatedReferenceMap.isEmpty()) {
 	    return null;
 	}
 	
-	return updatedReferences;
+	return updatedReferenceMap;
     }
 
     private String[] replaceWithInternalReferences(String[] originalReferences) {
@@ -285,16 +285,20 @@ public class EntityRecordService {
 	}
 	List<String> updatedReferences = new ArrayList<String>();
 	for (String entry : originalReferences) {
-	    Optional<EntityRecord> reference = findMatchingCoreference(entry);
-	    if (reference.isPresent()) {
-		updatedReferences.add(reference.get().getEntityId());
-	    }
+	    addInternalReference(updatedReferences, entry);
 	}
 
 	if (updatedReferences.isEmpty()) {
 	    return null;
 	}
 	return updatedReferences.toArray(new String[updatedReferences.size()]);
+    }
+
+    private void addInternalReference(List<String> updatedReferences, String externalUri) {
+	Optional<EntityRecord> record = findMatchingCoreference(externalUri);
+	if (record.isPresent()) {
+	    updatedReferences.add(record.get().getEntityId());
+	}
     }
 
     /**
