@@ -44,6 +44,7 @@ import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
 
 @Service(AppConfig.BEAN_ENTITY_RECORD_SERVICE)
@@ -181,7 +182,7 @@ public class EntityRecordService {
 	    break;
 	}
 
-//	this.saveEntityRecord(entityRecord);
+	//this.saveEntityRecord(entityRecord);
     }
 
     private void performCommonReferentialIntegrity(Entity entity) {
@@ -295,10 +296,13 @@ public class EntityRecordService {
     }
 
     private void addInternalReference(List<String> updatedReferences, String externalUri) {
-	Optional<EntityRecord> record = findMatchingCoreference(externalUri);
-	if (record.isPresent()) {
-	    updatedReferences.add(record.get().getEntityId());
-	}
+    	if(!(externalUri.startsWith("http://") || externalUri.startsWith("https://")) || externalUri.startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI)) {
+    		updatedReferences.add(externalUri);
+    	}
+		Optional<EntityRecord> record = findMatchingCoreference(externalUri);
+		if (record.isPresent()) {
+		    updatedReferences.add(record.get().getEntityId());
+		}
     }
 
     /**

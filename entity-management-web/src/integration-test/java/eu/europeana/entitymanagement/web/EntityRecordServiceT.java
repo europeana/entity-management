@@ -119,21 +119,19 @@ public class EntityRecordServiceT {
         entityRecord3.setEntityId(place.getEntityId());
         entityRecordService.saveEntityRecord(entityRecord3);
 
-        entityRecordService.performReferentialIntegrity(entityRecordService.retrieveEntityRecordByUri(entityRecord1.getEntityId()).get().getEntity());
-        entityRecordService.performReferentialIntegrity(entityRecordService.retrieveEntityRecordByUri(entityRecord2.getEntityId()).get().getEntity());
-        entityRecordService.performReferentialIntegrity(entityRecordService.retrieveEntityRecordByUri(entityRecord3.getEntityId()).get().getEntity());
+        entityRecordService.performReferentialIntegrity(agent1);
 
         /*
          * Assertions
          */
-        Optional<EntityRecord> agent1_updated = entityRecordService.retrieveEntityRecordByUri(agent1.getEntityId());
-        Assertions.assertTrue(((Agent)agent1_updated.get().getEntity()).getPlaceOfBirth().size()==1);
-        Assertions.assertTrue(((Agent)agent1_updated.get().getEntity()).getPlaceOfBirth().get("").contains("http://data.europeana.eu/place/base/143914"));
-        Assertions.assertTrue(((Agent)agent1_updated.get().getEntity()).getProfessionOrOccupation().get("").size()==0);
-        String[] isRelatedTo_agent1_updated = ((Agent)agent1_updated.get().getEntity()).getIsRelatedTo();
-        Assertions.assertTrue(isRelatedTo_agent1_updated.length==1);
-        Assertions.assertTrue(isRelatedTo_agent1_updated[0].contains("http://data.europeana.eu/agent/base/100013"));
-
+        //Optional<EntityRecord> agent1_updated = entityRecordService.retrieveEntityRecordByUri(agent1.getEntityId());
+        Assertions.assertTrue(agent1.getPlaceOfBirth().size()==1);
+        Assertions.assertTrue(agent1.getPlaceOfBirth().get("").contains("http://data.europeana.eu/place/base/143914"));
+        Assertions.assertNull(agent1.getProfessionOrOccupation());
+        String[] isRelatedTo_agent1 = agent1.getIsRelatedTo();
+        Assertions.assertTrue(isRelatedTo_agent1.length==3);
+        Assertions.assertTrue(String.join(",", isRelatedTo_agent1).contains("Leonardo_da_Vinci"));
+        Assertions.assertTrue(String.join(",", isRelatedTo_agent1).contains("http://data.europeana.eu/Leonardo_da_Vinci"));
 	}
 
 }
