@@ -285,32 +285,33 @@ public class EntityRecordService {
     }
     
     
-	private Map<String,List<String>> performReferentialIntegrityOnMapStringListString (Map<String,List<String>> objectToPerformOn) {
-		Map<String,List<String>> updatedObject = new HashMap<String, List<String>>();
-		for (Map.Entry<String, List<String>> entry : objectToPerformOn.entrySet()) {
-			List<String> entryValue = entry.getValue();
-			List<String> newEntryValue = new ArrayList<String>();
-			for (int i=0; i<entryValue.size(); i++) {
-				Optional<EntityRecord> reference = entityRecordRepository.findMatchingEntitiesByCoreference(entryValue.get(i));
-				if(reference.isPresent()) {
-					newEntryValue.add(reference.get().getEntityId());
-				}
-			}
-			updatedObject.put(entry.getKey(), newEntryValue);
+    private Map<String, List<String>> performReferentialIntegrityOnMapStringListString(
+	    Map<String, List<String>> objectToPerformOn) {
+	Map<String, List<String>> updatedObject = new HashMap<String, List<String>>();
+	for (Map.Entry<String, List<String>> entry : objectToPerformOn.entrySet()) {
+	    List<String> entryValue = entry.getValue();
+	    List<String> newEntryValue = new ArrayList<String>();
+	    for (int i = 0; i < entryValue.size(); i++) {
+		Optional<EntityRecord> reference = findMatchingCoreference(entryValue.get(i));
+		if (reference.isPresent()) {
+		    newEntryValue.add(reference.get().getEntityId());
 		}
-		return updatedObject;
+	    }
+	    updatedObject.put(entry.getKey(), newEntryValue);
 	}
-	
-	private List<String> performReferentialIntegrityOnStringArray (String[] objectToPerformOn) {
-		List<String> updatedObject = new ArrayList<String>();
-		for (String entry : objectToPerformOn) {
-			Optional<EntityRecord> reference = entityRecordRepository.findMatchingEntitiesByCoreference(entry);
-			if(reference.isPresent()) {
-				updatedObject.add(reference.get().getEntityId());
-			}
-		}
-		return updatedObject;
+	return updatedObject;
+    }
+
+    private List<String> performReferentialIntegrityOnStringArray(String[] objectToPerformOn) {
+	List<String> updatedObject = new ArrayList<String>();
+	for (String entry : objectToPerformOn) {
+	    Optional<EntityRecord> reference = findMatchingCoreference(entry);
+	    if (reference.isPresent()) {
+		updatedObject.add(reference.get().getEntityId());
+	    }
 	}
+	return updatedObject;
+    }
 
     /**
      * This function merges the data from the entities of the entity record proxies to the consilidated entity.
