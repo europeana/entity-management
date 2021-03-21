@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.definitions.model;
 
+import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -25,6 +26,10 @@ public interface EntityRecord {
     boolean getDisabled();
     
     void setDisabled(boolean disabledParam);
+
+    void setCreated(Date date);
+
+    void setModified(Date date);
     
     EntityProxy getEuropeanaProxy();
     

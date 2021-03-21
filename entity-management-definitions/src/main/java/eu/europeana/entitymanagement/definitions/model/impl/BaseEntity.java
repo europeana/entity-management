@@ -1,14 +1,13 @@
 package eu.europeana.entitymanagement.definitions.model.impl;
 
 import java.lang.reflect.Field;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.validation.groups.Default;
 
+import dev.morphia.annotations.Transient;
+import eu.europeana.entitymanagement.common.config.ComparisonUtils;
 import org.bson.types.ObjectId;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
@@ -35,9 +34,14 @@ public class BaseEntity implements Entity {
 		// TODO Auto-generated constructor stub
 	}
 
+
+
 	protected String TMP_KEY = "def";
 	protected String type;
 	protected String entityId;
+	// ID of entityRecord in database
+	@Transient
+	protected String entityIdentifier;
 	// depiction
 	protected String depiction;
 	protected Map<String, List<String>> note;
@@ -62,7 +66,7 @@ public class BaseEntity implements Entity {
 //	protected Date modified;
 	protected Aggregation isAggregatedBy;
 	protected WebResource referencedWebResource;
-	
+
 	@Override
 	@JsonIgnore
 	public WebResource getReferencedWebResource() {
@@ -117,7 +121,7 @@ public class BaseEntity implements Entity {
 		this.note = note;
 	}
 
-	
+
 	@JsonGetter(WebEntityFields.TYPE)
 	@JacksonXmlProperty(localName = XmlFields.XML_RDF_TYPE)
 	public String getType() {
@@ -170,6 +174,7 @@ public class BaseEntity implements Entity {
 	@JsonSetter(WebEntityFields.ID)
 	public void setAbout(String about) {
 		setEntityId(about);
+		setEntityIdentifier();
 	}
 
 	@JsonGetter(WebEntityFields.IS_RELATED_TO)
@@ -298,7 +303,7 @@ public class BaseEntity implements Entity {
 
 	/**
 	 * This method converts  Map<String, String> to Map<String, List<String>> 
-	 * @param map of strings
+	 * @param mapOfStrings map of strings
 	 */
 	protected Map<String, List<String>> fillTmpMapToMap(Map<String, String> mapOfStrings) {
 		
@@ -331,8 +336,7 @@ public class BaseEntity implements Entity {
 
 	@Override
 	public String getEntityIdentifier() {
-		String[] splitArray = this.getAbout().split("/");
-		return splitArray[splitArray.length-1];
+		return this.entityIdentifier;
 	}
 	
 	/*
@@ -383,5 +387,38 @@ public class BaseEntity implements Entity {
 	public void setIsAggregatedBy(Aggregation isAggregatedBy) {
 	    this.isAggregatedBy = isAggregatedBy;
 	}
-	
+
+	@Override
+	public void copyShellFrom(Entity original) {
+		this.entityId = original.getEntityId();
+		this.isAggregatedBy = original.getIsAggregatedBy();
+	}
+
+	private void setEntityIdentifier(){
+		String[] splitArray = this.getAbout().split("/");
+		this.entityIdentifier =  splitArray[splitArray.length-1];
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		BaseEntity that = (BaseEntity) o;
+		return Objects.equals(getDepiction(), that.getDepiction())
+				&& ComparisonUtils.areMapsEqual(getNote(), that.getNote())
+				&& ComparisonUtils.areMapsEqual(getPrefLabel(), that.getPrefLabel())
+				&& ComparisonUtils.areMapsEqual(getAltLabel(), that.getAltLabel())
+				&& ComparisonUtils.areMapsEqual(getHiddenLabel(), that.getHiddenLabel())
+				&& ComparisonUtils.areMapsEqual(tmpPrefLabel, that.tmpPrefLabel)
+				&& Arrays.equals(getIdentifier(), that.getIdentifier())
+				&& Objects.equals(getIsAggregatedBy(), that.getIsAggregatedBy())
+				&& Objects.equals(getReferencedWebResource(), that.getReferencedWebResource());
+	}
+
+	@Override
+	public int hashCode() {
+		int result = Objects.hash(getDepiction(), getNote(), getPrefLabel(), getAltLabel(), getHiddenLabel(), tmpPrefLabel, getIsAggregatedBy(), getReferencedWebResource());
+		result = 31 * result + Arrays.hashCode(getIdentifier());
+		return result;
+	}
 }

@@ -1,10 +1,12 @@
 package eu.europeana.entitymanagement.mongo.repository;
 
+import static dev.morphia.query.Sort.descending;
 import static dev.morphia.query.experimental.filters.Filters.eq;
 import static dev.morphia.query.experimental.filters.Filters.or;
-import static eu.europeana.entitymanagement.mongo.repository.EntityRecordFields.ENTITY_ID;
+import static eu.europeana.entitymanagement.mongo.repository.EntityRecordFields.*;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_DELETE_OPTS;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -12,6 +14,8 @@ import javax.annotation.Resource;
 import javax.validation.ConstraintViolation;
 import javax.validation.ValidatorFactory;
 
+import dev.morphia.query.FindOptions;
+import dev.morphia.query.experimental.filters.Filter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Repository;
@@ -49,7 +53,7 @@ public class EntityRecordRepository {
     }
 
     /**
-     * Check if an EntityRecord exists that matches the given parameters 
+     * Check if an EntityRecord exists that matches the given parameters
      * using DBCollection.count(). In ticket EA-1464 this method was tested as the best performing.
      * @param entityId	ID of the dataset
      * @return true if yes, otherwise false
@@ -94,7 +98,8 @@ public class EntityRecordRepository {
         //check the validation of the entity fields
         Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entityRecord.getEntity());
         for (ConstraintViolation<Entity> violation : violations) {
-            logger.error(violation.getMessage());
+            logger.warn(violation.getMessage());
+            //TODO: do something besides logging warning!
         }
 
         return datastore.save(entityRecord);
@@ -142,13 +147,34 @@ public class EntityRecordRepository {
 
         EntityRecordImpl value = datastore.find(EntityRecordImpl.class).disableValidation()
                 .filter(or(
-                        eq("entity.sameAs", id),
-                        eq("entity.exactMatch", id)
+                        eq(ENTITY_SAME_AS, id),
+                        eq(ENTITY_EXACT_MATCH, id)
                         )
                 ).first();
-        
+
         return Optional.ofNullable(value);
 
     }
-}
 
+    public List<EntityRecord> saveBulk(List<EntityRecord> entityRecords){
+        return datastore.save(entityRecords);
+    }
+
+    /**
+     * Queries the EntityRecord for records that match the given filter(s).
+     *
+     * Results are sorted in descending order of modified time.
+     *
+     * @param filters Query filters
+     * @return List with results
+     */
+    public List<? extends EntityRecord> findWithFilters(int start, int count, Filter[] filters) {
+        return datastore.find(EntityRecordImpl.class)
+                .filter(filters)
+                .iterator(new FindOptions()
+                        .skip(start)
+                        .sort(descending(ENTITY_MODIFIED))
+                        .limit(count)).toList();
+
+    }
+}
