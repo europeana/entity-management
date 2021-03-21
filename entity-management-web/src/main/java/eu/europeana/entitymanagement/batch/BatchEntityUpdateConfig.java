@@ -26,7 +26,6 @@ import java.util.Date;
 
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.ENTITY_RECORD_CTX_KEY;
 import static eu.europeana.entitymanagement.mongo.repository.EntityRecordFields.ENTITY_ID;
-import static eu.europeana.entitymanagement.mongo.repository.EntityRecordFields.ENTITY_MODIFIED;
 
 @Component
 public class BatchEntityUpdateConfig {
@@ -57,11 +56,9 @@ public class BatchEntityUpdateConfig {
 
     @Bean
     @StepScope
-    private EntityRecordDatabaseReader entityRecordReader(@Value("#{jobParameters[entityId]}") String entityId, @Value("#{jobParameters[runTime]}") Date runTime) {
+    private EntityRecordDatabaseReader entityRecordReader(@Value("#{jobParameters[entityId]}") String entityId) {
         return new EntityRecordDatabaseReader(entityRecordService, 1,
-                Filters.eq(ENTITY_ID, entityId),
-                // only update entities last modified before job starts
-                Filters.lte(ENTITY_MODIFIED, runTime)
+                Filters.eq(ENTITY_ID, entityId)
         );
     }
 

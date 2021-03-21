@@ -40,7 +40,6 @@ public class JobLauncherController {
         // launcher is async, so this is non-blocking
         JobLauncher jobLauncher = batchConfigurer.getJobLauncher();
         JobParameters jobParameters = new JobParametersBuilder()
-                .addDate(JobParameter.RUN_TIME.key(), new Date())
                 .addString(JobParameter.ENTITY_ID.key(), entityId)
                 .toJobParameters();
 
