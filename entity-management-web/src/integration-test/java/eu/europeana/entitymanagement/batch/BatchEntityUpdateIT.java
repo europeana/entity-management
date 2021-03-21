@@ -2,7 +2,8 @@ package eu.europeana.entitymanagement.batch;
 
 import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import eu.europeana.entitymanagement.batch.config.MongoBatchConfigurer;
-import org.junit.jupiter.api.AfterEach;
+import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
@@ -14,6 +15,7 @@ import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.util.StringUtils;
 
 import java.util.Date;
 
@@ -28,7 +30,19 @@ class BatchEntityUpdateIT extends AbstractIntegrationTest implements Initializin
     @Autowired
     private MongoBatchConfigurer batchConfigurer;
 
+
+    @Autowired
+    private EntityRecordService entityRecordService;
+
+
     private JobLauncher jobLauncher;
+
+    @BeforeEach
+    void setUp() {
+        //ensure a clean db between test runs
+        this.entityRecordService.dropRepository();
+        batchConfigurer.clearRepository();
+    }
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -36,31 +50,31 @@ class BatchEntityUpdateIT extends AbstractIntegrationTest implements Initializin
         this.jobLauncher = getSynchronousLauncher();
     }
 
-
-    @AfterEach
-    public void cleanUp() {
-        batchConfigurer.clearRepository();
-    }
-
-
     @Test
     void updateSingleEntityJobShouldRun() throws Exception {
-        // given
-        JobParameters jobParameters = createJobParameters("http://data.europeana.eu/agent/1", new Date());
-        // when
-        JobExecution jobExecution = jobLauncher.run(batchEntityUpdateConfig.updateSingleEntity(), jobParameters);
+        JobExecution jobExecution = jobLauncher.run(batchEntityUpdateConfig.updateSingleEntity(), createJobParameters("http://data.europeana.eu/agent/1", new Date()));
         // then
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
 
         //TODO: write assertions for EntityRecord
     }
 
+    @Test
+    void updateAllEntitiesShouldRun() throws Exception {
+        JobExecution jobExecution = jobLauncher.run(batchEntityUpdateConfig.updateAllEntities(), createJobParameters(null, new Date()));
+        assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
+        //TODO: write assertions for EntityRecords
+    }
 
     private JobParameters createJobParameters(String entityId, Date runTime) {
-        return new JobParametersBuilder()
-                .addString(JobParameter.ENTITY_ID.key(), entityId)
-                .addDate(JobParameter.RUN_TIME.key(), runTime)
-                .toJobParameters();
+        JobParametersBuilder paramBuilder = new JobParametersBuilder()
+                .addDate(JobParameter.RUN_TIME.key(), runTime);
+
+        if (StringUtils.hasLength(entityId)) {
+            paramBuilder
+                    .addString(JobParameter.ENTITY_ID.key(), entityId);
+        }
+        return paramBuilder.toJobParameters();
     }
 
 
