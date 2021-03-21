@@ -51,6 +51,8 @@ class BatchEntityUpdateIT extends AbstractIntegrationTest implements Initializin
         JobExecution jobExecution = jobLauncher.run(batchEntityUpdateConfig.updateSingleEntity(), jobParameters);
         // then
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
+
+        //TODO: write assertions for EntityRecord
     }
 
 

@@ -123,9 +123,4 @@ public class EntityRecordImpl implements EntityRecord {
 	return proxies.stream()
             .filter(s -> !s.getProxyId().startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI)).findFirst().orElse(null);
     }
-
-
-    void prePersist(EntityRecordImpl entityRecord){
-
-    }
 }
