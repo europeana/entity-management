@@ -46,7 +46,8 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
         logger.info("Validating constraints for entity {}", entityRecord.getEntityId());
         validateConstraints(entityRecord);
 
-        // TODO: fix referential integrity
+        logger.info("Checking referential integrity for entity {}", entityRecord.getEntityId());
+        entityRecordService.performReferentialIntegrity(entityRecord.getEntity());
 
 
         logger.info("Computing ranking metrics for entity {}", entityRecord.getEntityId());
