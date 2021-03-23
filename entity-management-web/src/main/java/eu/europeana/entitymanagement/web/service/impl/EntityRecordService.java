@@ -273,7 +273,7 @@ public class EntityRecordService {
 	    List<String> updatedReferences = new ArrayList<String>();
 	    
 	    for (String value : entry.getValue()) {
-		addInternalReference(updatedReferences, value);
+		addValueOrInternalReference(updatedReferences, value);
 	    }
 	    
 	    if(!updatedReferences.isEmpty()) {
@@ -294,7 +294,7 @@ public class EntityRecordService {
 	}
 	List<String> updatedReferences = new ArrayList<String>();
 	for (String entry : originalReferences) {
-	    addInternalReference(updatedReferences, entry);
+	    addValueOrInternalReference(updatedReferences, entry);
 	}
 
 	if (updatedReferences.isEmpty()) {
@@ -303,22 +303,18 @@ public class EntityRecordService {
 	return updatedReferences.toArray(new String[updatedReferences.size()]);
     }
 
-    private void addInternalReference(List<String> updatedReferences, String externalUri) {
-    	/*
-    	 * In case that an external reference we want to replace is not a URI 
-    	 * or if it is a Europeana URI, it does not need to be replaced
-    	 */
-    	if(!Utils.isUri(externalUri) || externalUri.startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI)) {
-    		updatedReferences.add(externalUri);
-    	}
-    	else
-    	{
-			Optional<EntityRecord> record = findMatchingCoreference(externalUri);
-			if (record.isPresent()) {
-			    updatedReferences.add(record.get().getEntityId());
-			}
-    	}
+    private void addValueOrInternalReference(List<String> updatedReferences, String value) {
+	if (!Utils.isUri(value) || value.startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI)) {
+	    //value is not a reference or it is an internal referece
+	    updatedReferences.add(value);
+	} else {
+	    //value is external URI, replace it with internal reference if they are accessible
+	    Optional<EntityRecord> record = findMatchingCoreference(value);
+	    if (record.isPresent()) {
+		updatedReferences.add(record.get().getEntityId());
+	    }
 	}
+    }
 
     /**
      * This function merges the data from the entities of the entity record proxies
