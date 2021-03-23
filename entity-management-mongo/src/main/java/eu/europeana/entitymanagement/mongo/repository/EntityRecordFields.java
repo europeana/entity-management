@@ -9,5 +9,9 @@ public class EntityRecordFields {
 
     public static final String CLASS = "objectClass";
     public static final String ENTITY_ID = "entityId";
+    public static final String ENTITY_MODIFIED = "modified";
+
+    public static final String ENTITY_SAME_AS = "entity.sameAs";
+    public static final String ENTITY_EXACT_MATCH = "entity.exactMatch";
 
 }

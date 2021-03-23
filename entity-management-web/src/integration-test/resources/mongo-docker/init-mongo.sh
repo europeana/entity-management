@@ -1,5 +1,4 @@
-# This script creates a mongo user, the entity database and the Spring Batch
-# JobRepository
+# This script creates the Entity database and the Spring Batch JobRepository
 mongo -- "$MONGO_INITDB_DATABASE" <<EOF
     var rootUser = '$MONGO_INITDB_ROOT_USERNAME';
     var rootPassword = '$MONGO_INITDB_ROOT_PASSWORD';

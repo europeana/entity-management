@@ -78,4 +78,6 @@ public interface Entity extends ContextualClass {
 	void setAltLabel(Map<String, List<String>> altLabel);
 
 	void setPrefLabelStringMap(Map<String, String> prefLabel);
+
+	void copyShellFrom(Entity entity);
 }
