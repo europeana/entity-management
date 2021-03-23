@@ -1,5 +1,7 @@
 package eu.europeana.entitymanagement.batch;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import eu.europeana.entitymanagement.batch.config.MongoBatchConfigurer;
 import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
@@ -14,11 +16,12 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.util.StringUtils;
 
 import java.util.Date;
 
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_JSON_MAPPER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
@@ -30,6 +33,9 @@ class BatchEntityUpdateIT extends AbstractIntegrationTest implements Initializin
     @Autowired
     private MongoBatchConfigurer batchConfigurer;
 
+    @Qualifier(BEAN_JSON_MAPPER)
+    @Autowired
+    private ObjectMapper mapper;
 
     @Autowired
     private EntityRecordService entityRecordService;
@@ -52,7 +58,7 @@ class BatchEntityUpdateIT extends AbstractIntegrationTest implements Initializin
 
     @Test
     void updateSingleEntityJobShouldRun() throws Exception {
-        JobExecution jobExecution = jobLauncher.run(batchEntityUpdateConfig.updateSingleEntity(), createJobParameters("http://data.europeana.eu/agent/1", new Date()));
+        JobExecution jobExecution = jobLauncher.run(batchEntityUpdateConfig.updateSpecificEntities(), createJobParameters(new String[]{"http://data.europeana.eu/agent/1"}, new Date()));
         // then
         assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
 
@@ -66,13 +72,14 @@ class BatchEntityUpdateIT extends AbstractIntegrationTest implements Initializin
         //TODO: write assertions for EntityRecords
     }
 
-    private JobParameters createJobParameters(String entityId, Date runTime) {
+    private JobParameters createJobParameters(String[] entityIds, Date runTime) throws JsonProcessingException {
         JobParametersBuilder paramBuilder = new JobParametersBuilder()
                 .addDate(JobParameter.RUN_TIME.key(), runTime);
 
-        if (StringUtils.hasLength(entityId)) {
-            paramBuilder
-                    .addString(JobParameter.ENTITY_ID.key(), entityId);
+        if (entityIds != null) {
+
+            paramBuilder.addString(JobParameter.ENTITY_ID.key(),
+                    mapper.writeValueAsString(entityIds));
         }
         return paramBuilder.toJobParameters();
     }

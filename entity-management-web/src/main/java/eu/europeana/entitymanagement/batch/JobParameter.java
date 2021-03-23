@@ -5,13 +5,14 @@ package eu.europeana.entitymanagement.batch;
  */
 public enum JobParameter {
     RUN_TIME("runTime"),
-    ENTITY_ID("entityId");
+    ENTITY_ID("entityIds");
 
     private final String key;
 
     JobParameter(String key) {
         this.key = key;
     }
+
     public String key() {
         return key;
     }

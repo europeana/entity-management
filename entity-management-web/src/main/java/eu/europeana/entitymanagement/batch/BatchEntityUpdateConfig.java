@@ -1,5 +1,7 @@
 package eu.europeana.entitymanagement.batch;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.morphia.query.experimental.filters.Filters;
 import eu.europeana.entitymanagement.batch.processor.EntityDereferenceProcessor;
 import eu.europeana.entitymanagement.batch.reader.EntityRecordDatabaseReader;
@@ -25,8 +27,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.Date;
 
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_JSON_MAPPER;
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.ENTITY_RECORD_CTX_KEY;
 import static eu.europeana.entitymanagement.mongo.repository.EntityRecordFields.ENTITY_ID;
 import static eu.europeana.entitymanagement.mongo.repository.EntityRecordFields.ENTITY_MODIFIED;
@@ -34,8 +38,8 @@ import static eu.europeana.entitymanagement.mongo.repository.EntityRecordFields.
 @Component
 public class BatchEntityUpdateConfig {
 
-    private static final String SINGLE_READER_BEAN = "singleItemReader";
-    private static final String MULTI_READER_BEAN = "multiItemReader";
+    private static final String SPECIFIC_ITEM_READER = "specificItemReader";
+    private static final String ALL_ITEM_READER = "allItemReader";
 
     private static final Logger logger = LogManager.getLogger(BatchEntityUpdateConfig.class);
     private final JobBuilderFactory jobBuilderFactory;
@@ -51,11 +55,13 @@ public class BatchEntityUpdateConfig {
     private final EntityRecordExecutionContextReader contextReader;
     private final EntityRecordExecutionContextWriter contextWriter;
 
+    private final ObjectMapper mapper;
+
     @Value("${batch.chunkSize: 10}")
     private int chunkSize;
 
     @Autowired
-    public BatchEntityUpdateConfig(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory, @Qualifier(SINGLE_READER_BEAN) ItemReader<EntityRecord> singleItemReader, @Qualifier(MULTI_READER_BEAN) ItemReader<EntityRecord> multipleItemReader, EntityDereferenceProcessor dereferenceProcessor, EntityRecordDatabaseWriter dbWriter, EntityRecordService entityRecordService, EntityRecordExecutionContextReader contextReader, EntityRecordExecutionContextWriter contextWriter) {
+    public BatchEntityUpdateConfig(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory, @Qualifier(SPECIFIC_ITEM_READER) ItemReader<EntityRecord> singleItemReader, @Qualifier(ALL_ITEM_READER) ItemReader<EntityRecord> multipleItemReader, EntityDereferenceProcessor dereferenceProcessor, EntityRecordDatabaseWriter dbWriter, EntityRecordService entityRecordService, EntityRecordExecutionContextReader contextReader, EntityRecordExecutionContextWriter contextWriter, @Qualifier(BEAN_JSON_MAPPER) ObjectMapper mapper) {
         this.jobBuilderFactory = jobBuilderFactory;
         this.stepBuilderFactory = stepBuilderFactory;
         this.singleItemReader = singleItemReader;
@@ -65,19 +71,21 @@ public class BatchEntityUpdateConfig {
         this.entityRecordService = entityRecordService;
         this.contextReader = contextReader;
         this.contextWriter = contextWriter;
+        this.mapper = mapper;
     }
 
-    @Bean(name = SINGLE_READER_BEAN)
+    @Bean(name = SPECIFIC_ITEM_READER)
     @StepScope
-    private ItemReader<EntityRecord> singleEntityRecordReader(@Value("#{jobParameters[entityId]}") String entityId) {
-        return new EntityRecordDatabaseReader(entityRecordService, 1,
-                Filters.eq(ENTITY_ID, entityId)
+    private EntityRecordDatabaseReader specificEntityRecordReader(@Value("#{jobParameters[entityIds]}") String entityIdString) throws JsonProcessingException {
+        String[] entityIds = mapper.readValue(entityIdString, String[].class);
+        return new EntityRecordDatabaseReader(entityRecordService, chunkSize,
+                Filters.in(ENTITY_ID, Arrays.asList(entityIds))
         );
     }
 
-    @Bean(name = MULTI_READER_BEAN)
+    @Bean(name = ALL_ITEM_READER)
     @StepScope
-    private ItemReader<EntityRecord> multipleItemReader(@Value("#{jobParameters[runTime]}") Date runTime) {
+    private SynchronizedItemStreamReader<EntityRecord> allEntityRecordReader(@Value("#{jobParameters[runTime]}") Date runTime) {
         EntityRecordDatabaseReader reader = new EntityRecordDatabaseReader(entityRecordService, chunkSize,
                 Filters.lte(ENTITY_MODIFIED, runTime));
 
@@ -126,9 +134,9 @@ public class BatchEntityUpdateConfig {
 
 
     @Bean
-    public Job updateSingleEntity() {
-        logger.info("Starting update job for single entity");
-        return this.jobBuilderFactory.get("singleEntityUpdateJob")
+    public Job updateSpecificEntities() {
+        logger.info("Starting update job for specific entities");
+        return this.jobBuilderFactory.get("specificEntityUpdateJob")
                 .incrementer(new RunIdIncrementer())
                 .start(metisStep(true))
                 .next(entityValidationStep())
@@ -137,7 +145,7 @@ public class BatchEntityUpdateConfig {
 
     public Job updateAllEntities() {
         logger.info("Starting update job for ALL entities");
-        return this.jobBuilderFactory.get("multiEntityUpdateJob")
+        return this.jobBuilderFactory.get("allEntityUpdateJob")
                 .incrementer(new RunIdIncrementer())
                 .start(metisStep(false))
                 .next(entityValidationStep())
