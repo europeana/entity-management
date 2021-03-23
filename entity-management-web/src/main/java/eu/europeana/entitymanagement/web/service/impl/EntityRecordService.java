@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import dev.morphia.query.experimental.filters.Filter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,6 +85,12 @@ public class EntityRecordService {
 	return entityRecordRepository.save(er);
     }
 
+	@SuppressWarnings("unchecked")
+	public List<? extends EntityRecord> saveBulkEntityRecords(List<? extends EntityRecord> records) {
+		// TODO: this is a code smell. Simplify EntityRecord vs EntityRecordImpl structure
+		return entityRecordRepository.saveBulk((List<EntityRecord>) records);
+	}
+
     public EntityRecord disableEntityRecord(EntityRecord er) {
 	er.setDisabled(true);
 	return saveEntityRecord(er);
@@ -122,11 +129,11 @@ public class EntityRecordService {
 
 	EntityRecord entityRecord = new EntityRecordImpl();
 	String entityId = generateEntityId(entity.getType());
-	entityRecord.setEntityId(entityId);
-	entity.setEntityId(entityId);
-	entityRecord.setEntity(entity);
+        entityRecord.setEntityId(entityId);
+        entity.setEntityId(entityId);
+        entityRecord.setEntity(entity);
 
-	setEuropeanaMetadata(entityId, entityRecord, timestamp);
+        setEuropeanaMetadata(entityId, entityRecord, timestamp);
 
 	DataSource externalDatasource = externalDatasourceOptional.get();
 	setDatasourceMetadata(entityCreationRequest, entityId, externalDatasource, entityRecord, timestamp);
@@ -537,12 +544,17 @@ public class EntityRecordService {
     }
 
     public void dropRepository() {
-	this.entityRecordRepository.dropCollection();
+        this.entityRecordRepository.dropCollection();
+    }
+
+
+    public List<? extends EntityRecord> findEntitiesWithFilter(int start, int count, Filter[] queryFilters) {
+        return this.entityRecordRepository.findWithFilters(start, count, queryFilters);
     }
 
     private void setEntityAggregation(EntityRecord entityRecord, String entityId, Date timestamp) {
-	Aggregation isAggregatedBy = new AggregationImpl();
-	isAggregatedBy.setId(getIsAggregatedById(entityId));
+        Aggregation isAggregatedBy = new AggregationImpl();
+        isAggregatedBy.setId(getIsAggregatedById(entityId));
 	isAggregatedBy.setCreated(timestamp);
 	isAggregatedBy.setModified(timestamp);
 	isAggregatedBy.setRecordCount(1);

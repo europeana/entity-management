@@ -84,7 +84,7 @@ public class EntityObjectFactory {
 	    return getClassForType(entityType).getDeclaredConstructor().newInstance();
 
 	} catch (Exception e) {
-	    throw new EntityCreationException(entityType.toString(), e);
+	    throw new EntityCreationException("Error creating instance for " + entityType.toString(), e);
 	}
     }
     
