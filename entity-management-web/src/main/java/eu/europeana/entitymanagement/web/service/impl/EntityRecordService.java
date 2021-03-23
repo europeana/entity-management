@@ -50,551 +50,550 @@ import eu.europeana.entitymanagement.web.model.EntityPreview;
 @Service(AppConfig.BEAN_ENTITY_RECORD_SERVICE)
 public class EntityRecordService {
 
-    Logger logger = LogManager.getLogger(getClass());
+	Logger logger = LogManager.getLogger(getClass());
 
-    private final EntityRecordRepository entityRecordRepository;
+	private final EntityRecordRepository entityRecordRepository;
 
-    final EntityManagementConfiguration emConfiguration;
+	final EntityManagementConfiguration emConfiguration;
 
-    private final DataSources datasources;
+	private final DataSources datasources;
 
-    @Autowired
-    public EntityRecordService(EntityRecordRepository entityRecordRepository,
-                               EntityManagementConfiguration emConfiguration, DataSources datasources) {
-        this.entityRecordRepository = entityRecordRepository;
-        this.emConfiguration = emConfiguration;
-        this.datasources = datasources;
-    }
+	@Autowired
+	public EntityRecordService(EntityRecordRepository entityRecordRepository,
+							   EntityManagementConfiguration emConfiguration, DataSources datasources) {
+		this.entityRecordRepository = entityRecordRepository;
+		this.emConfiguration = emConfiguration;
+		this.datasources = datasources;
+	}
 
-    public Optional<EntityRecord> retrieveEntityRecordByUri(String entityUri) {
-        return Optional.ofNullable(entityRecordRepository.findByEntityId(entityUri));
-    }
+	public Optional<EntityRecord> retrieveEntityRecordByUri(String entityUri) {
+		return Optional.ofNullable(entityRecordRepository.findByEntityId(entityUri));
+	}
 
-    /**
-     * Gets coreferenced entity with the given id (sameAs or exactMatch value in the
-     * Consolidated version)
-     *
-     * @param id co-reference id
-     * @return Optional containing matching record, or empty optional if none found.
-     */
-    public Optional<EntityRecord> findMatchingCoreference(String id) {
-        return entityRecordRepository.findMatchingEntitiesByCoreference(id);
-    }
+	/**
+	 * Gets coreferenced entity with the given id (sameAs or exactMatch value in the
+	 * Consolidated version)
+	 *
+	 * @param id co-reference id
+	 * @return Optional containing matching record, or empty optional if none found.
+	 */
+	public Optional<EntityRecord> findMatchingCoreference(String id) {
+		return entityRecordRepository.findMatchingEntitiesByCoreference(id);
+	}
 
-    public EntityRecord saveEntityRecord(EntityRecord er) {
-        return entityRecordRepository.save(er);
-    }
+	public EntityRecord saveEntityRecord(EntityRecord er) {
+		return entityRecordRepository.save(er);
+	}
 
-    public EntityRecord disableEntityRecord(EntityRecord er) {
-        er.setDisabled(true);
-        return saveEntityRecord(er);
-    }
+	@SuppressWarnings("unchecked")
+	public List<? extends EntityRecord> saveBulkEntityRecords(List<? extends EntityRecord> records) {
+		// TODO: this is a code smell. Simplify EntityRecord vs EntityRecordImpl structure
+		return entityRecordRepository.saveBulk((List<EntityRecord>) records);
+	}
 
-    @SuppressWarnings("unchecked")
-    public List<? extends EntityRecord> saveBulkEntityRecords(List<? extends EntityRecord> records) {
-        // TODO: this is a code smell. Simplify EntityRecord vs EntityRecordImpl structure
-        return entityRecordRepository.saveBulk((List<EntityRecord>) records);
-    }
+	public EntityRecord disableEntityRecord(EntityRecord er) {
+		er.setDisabled(true);
+		return saveEntityRecord(er);
+	}
 
-    /**
-     * Updates an already existing entity record.
-     *
-     * @param entityRecord entity record to update
-     * @return updated entity
-     */
-    public EntityRecord update(EntityRecord entityRecord) {
-        return this.saveEntityRecord(entityRecord);
-    }
+	/**
+	 * Updates an already existing entity record.
+	 *
+	 * @param entityRecord entity record to update
+	 * @return updated entity
+	 */
+	public EntityRecord update(EntityRecord entityRecord) {
+		return this.saveEntityRecord(entityRecord);
+	}
 
-    /**
-     * Creates an {@link EntityRecord} from an {@link EntityPreview}, which is then
-     * persisted.
-     *
-     * @param entityCreationRequest de-referenced XML response instance from Metis
-     * @param entityCreationRequest entity request object
-     * @param externalEntityType    entity type based on de-referencing response
-     * @return Saved Entity record
-     * @throws EntityCreationException if an error occurs
-     */
-    public EntityRecord createEntityFromRequest(EntityPreview entityCreationRequest, String externalEntityType)
-            throws EntityCreationException {
-        // Fail quick if no datasource is configured
-        Optional<DataSource> externalDatasourceOptional = datasources.getDatasource(entityCreationRequest.getId());
-        if (externalDatasourceOptional.isEmpty()) {
-            throw new EntityCreationException("No configured datasource for entity " + entityCreationRequest.getId());
-        }
+	public List<? extends EntityRecord> findEntitiesWithFilter(int start, int count, Filter[] queryFilters) {
+		return this.entityRecordRepository.findWithFilters(start, count, queryFilters);
+	}
 
-        Date timestamp = new Date();
-        Entity entity = EntityObjectFactory.createEntityObject(externalEntityType);
+	/**
+	 * Creates an {@link EntityRecord} from an {@link EntityPreview}, which is then
+	 * persisted.
+	 *
+	 * @param entityCreationRequest de-referenced XML response instance from Metis
+	 * @param entityCreationRequest entity request object
+	 * @param externalEntityType    entity type based on de-referencing response
+	 * @return Saved Entity record
+	 * @throws EntityCreationException if an error occurs
+	 */
+	public EntityRecord createEntityFromRequest(EntityPreview entityCreationRequest, String externalEntityType)
+			throws EntityCreationException {
+		// Fail quick if no datasource is configured
+		Optional<DataSource> externalDatasourceOptional = datasources.getDatasource(entityCreationRequest.getId());
+		if (externalDatasourceOptional.isEmpty()) {
+			throw new EntityCreationException("No configured datasource for entity " + entityCreationRequest.getId());
+		}
 
-        EntityRecord entityRecord = new EntityRecordImpl();
-        String entityId = generateEntityId(entity.getType());
-        entityRecord.setEntityId(entityId);
-        entity.setEntityId(entityId);
-        entityRecord.setEntity(entity);
-	entityRecord.setCreated(timestamp);
+		Date timestamp = new Date();
+		Entity entity = EntityObjectFactory.createEntityObject(externalEntityType);
 
-        setEuropeanaMetadata(entityId, entityRecord, timestamp);
+		EntityRecord entityRecord = new EntityRecordImpl();
+		String entityId = generateEntityId(entity.getType());
+		entityRecord.setEntityId(entityId);
+		entity.setEntityId(entityId);
+		entityRecord.setEntity(entity);
+		entityRecord.setCreated(timestamp);
 
-        DataSource externalDatasource = externalDatasourceOptional.get();
-        setDatasourceMetadata(entityCreationRequest, entityId, externalDatasource, entityRecord, timestamp);
+		setEuropeanaMetadata(entityId, entityRecord, timestamp);
 
-        setEntityAggregation(entityRecord, entityId, timestamp);
-        return entityRecordRepository.save(entityRecord);
+		DataSource externalDatasource = externalDatasourceOptional.get();
+		setDatasourceMetadata(entityCreationRequest, entityId, externalDatasource, entityRecord, timestamp);
 
-    }
+		setEntityAggregation(entityRecord, entityId, timestamp);
+		return entityRecordRepository.save(entityRecord);
 
-    private String generateEntityId(String entityType) {
-        long dbId = entityRecordRepository.generateAutoIncrement(entityType);
-        return EntityRecordUtils.buildEntityIdUri(entityType, String.valueOf(dbId));
-    }
+	}
 
-    /**
-     * Checks if any of the resources in the SameAs field from Metis is alredy
-     * known.
-     *
-     * @param rdfResources list of SameAs resources
-     * @return Optional containing EntityRecord, or empty Optional if none found
-     */
-    public Optional<EntityRecord> retrieveMetisCoreferenceSameAs(String[] rdfResources) {
-        for (String resource : rdfResources) {
-            Optional<EntityRecord> entityRecordOptional = retrieveEntityRecordByUri(resource);
-            if (entityRecordOptional.isPresent()) {
-                return entityRecordOptional;
-            }
-        }
+	private String generateEntityId(String entityType) {
+		long dbId = entityRecordRepository.generateAutoIncrement(entityType);
+		return EntityRecordUtils.buildEntityIdUri(entityType, String.valueOf(dbId));
+	}
 
-        return Optional.empty();
-    }
+	/**
+	 * Checks if any of the resources in the SameAs field from Metis is alredy
+	 * known.
+	 *
+	 * @param rdfResources list of SameAs resources
+	 * @return Optional containing EntityRecord, or empty Optional if none found
+	 */
+	public Optional<EntityRecord> retrieveMetisCoreferenceSameAs(String[] rdfResources) {
+		for (String resource : rdfResources) {
+			Optional<EntityRecord> entityRecordOptional = retrieveEntityRecordByUri(resource);
+			if (entityRecordOptional.isPresent()) {
+				return entityRecordOptional;
+			}
+		}
 
-    public void performReferentialIntegrity(Entity entity) throws JsonMappingException, JsonProcessingException {
+		return Optional.empty();
+	}
 
-        performCommonReferentialIntegrity(entity);
-        switch (EntityTypes.valueOf(entity.getType())) {
-            case Concept:
-                performReferentialIntegrityConcept((Concept) entity);
-                break;
-            case Agent:
-                performReferentialIntegrityAgent((Agent) entity);
-                break;
-            case Place:
-                performReferentialIntegrityPlace((Place) entity);
-                break;
-            case Timespan:
-                performReferentialIntegrityTimespan((Timespan) entity);
-                break;
-            case Organization:
-                break;
-            default:
-                break;
-        }
+	public void performReferentialIntegrity(Entity entity) throws JsonMappingException, JsonProcessingException {
+
+		performCommonReferentialIntegrity(entity);
+		switch (EntityTypes.valueOf(entity.getType())) {
+			case Concept:
+				performReferentialIntegrityConcept((Concept) entity);
+				break;
+			case Agent:
+				performReferentialIntegrityAgent((Agent) entity);
+				break;
+			case Place:
+				performReferentialIntegrityPlace((Place) entity);
+				break;
+			case Timespan:
+				performReferentialIntegrityTimespan((Timespan) entity);
+				break;
+			case Organization:
+				break;
+			default:
+				break;
+		}
 
 //	this.saveEntityRecord(entityRecord);
-    }
-
-    private void performCommonReferentialIntegrity(Entity entity) {
-        /*
-         * the common fields for all entity types that are references
-         */
-        // for the field hasPart
-        String[] hasPartField = entity.getHasPart();
-        entity.setHasPart(replaceWithInternalReferences(hasPartField));
-
-        // for the field isPartOf
-        String[] isPartOfField = entity.getIsPartOfArray();
-        entity.setIsPartOfArray(replaceWithInternalReferences(isPartOfField));
-
-        // for the field isRelatedTo
-        String[] isRelatedToField = entity.getIsRelatedTo();
-        entity.setIsRelatedTo(replaceWithInternalReferences(isRelatedToField));
-
-    }
-
-    private void performReferentialIntegrityConcept(Concept entity) {
-        // for the field broader
-        String[] broaderField = entity.getBroader();
-        entity.setBroader(replaceWithInternalReferences(broaderField));
-
-        // for the field narrower
-        String[] narrowerField = entity.getBroader();
-        entity.setNarrower(replaceWithInternalReferences(narrowerField));
-
-        // for the field related
-        String[] relatedField = entity.getRelated();
-        entity.setRelated(replaceWithInternalReferences(relatedField));
-
-    }
-
-    private void performReferentialIntegrityAgent(Agent entity) {
-        Map<String, List<String>> updatedField = null;
-        // for the field placeOfBirth
-        Map<String, List<String>> placeOfBirthField = entity.getPlaceOfBirth();
-        if (placeOfBirthField != null) {
-            updatedField = replaceWithInternalReferences(placeOfBirthField);
-            entity.setPlaceOfBirth(updatedField);
-        }
-        // for the field placeOfDeath
-        Map<String, List<String>> placeOfDeathField = entity.getPlaceOfDeath();
-        if (placeOfDeathField != null) {
-            updatedField = replaceWithInternalReferences(placeOfDeathField);
-            entity.setPlaceOfDeath(updatedField);
-        }
-        // for the field professionOrOccupation
-        Map<String, List<String>> professionOrOccupationField = entity.getProfessionOrOccupation();
-        entity.setProfessionOrOccupation(replaceWithInternalReferences(professionOrOccupationField));
-
-        // for the field hasMet
-        String[] hasMetField = entity.getHasMet();
-        entity.setHasMet(replaceWithInternalReferences(hasMetField));
-
-    }
-
-    private void performReferentialIntegrityPlace(Place entity) {
-        // for the field isNextInSequence
-        String[] isNextInSequenceField = entity.getIsNextInSequence();
-        entity.setIsNextInSequence(replaceWithInternalReferences(isNextInSequenceField));
-    }
-
-    private void performReferentialIntegrityTimespan(Timespan entity) {
-        // for the field isNextInSequence
-        String[] isNextInSequenceField = entity.getIsNextInSequence();
-        entity.setIsNextInSequence(replaceWithInternalReferences(isNextInSequenceField));
-
-    }
-
-    private Map<String, List<String>> replaceWithInternalReferences(Map<String, List<String>> originalReferences) {
-	if(originalReferences == null) {
-	    return null;
 	}
-	
-	Map<String, List<String>> updatedReferenceMap = new HashMap<String, List<String>>();
-        for (Map.Entry<String, List<String>> entry : originalReferences.entrySet()) {
-	    List<String> updatedReferences = new ArrayList<String>();
 
-	    for (String value : entry.getValue()) {
-		addInternalReference(updatedReferences, value);
-                }
+	private void performCommonReferentialIntegrity(Entity entity) {
+		/*
+		 * the common fields for all entity types that are references
+		 */
+		// for the field hasPart
+		String[] hasPartField = entity.getHasPart();
+		entity.setHasPart(replaceWithInternalReferences(hasPartField));
 
-	    if(!updatedReferences.isEmpty()) {
-		updatedReferenceMap.put(entry.getKey(), updatedReferences);
-	    }
+		// for the field isPartOf
+		String[] isPartOfField = entity.getIsPartOfArray();
+		entity.setIsPartOfArray(replaceWithInternalReferences(isPartOfField));
+
+		// for the field isRelatedTo
+		String[] isRelatedToField = entity.getIsRelatedTo();
+		entity.setIsRelatedTo(replaceWithInternalReferences(isRelatedToField));
+
 	}
-	
-	if(updatedReferenceMap.isEmpty()) {
-	    return null;
+
+	private void performReferentialIntegrityConcept(Concept entity) {
+		// for the field broader
+		String[] broaderField = entity.getBroader();
+		entity.setBroader(replaceWithInternalReferences(broaderField));
+
+		// for the field narrower
+		String[] narrowerField = entity.getBroader();
+		entity.setNarrower(replaceWithInternalReferences(narrowerField));
+
+		// for the field related
+		String[] relatedField = entity.getRelated();
+		entity.setRelated(replaceWithInternalReferences(relatedField));
+
 	}
-	
-	return updatedReferenceMap;
-    }
 
-    private String[] replaceWithInternalReferences(String[] originalReferences) {
-        if (originalReferences == null) {
-            return null;
-        }
-        List<String> updatedReferences = new ArrayList<String>();
-        for (String entry : originalReferences) {
-	    addInternalReference(updatedReferences, entry);
-        }
+	private void performReferentialIntegrityAgent(Agent entity) {
+		Map<String, List<String>> updatedField = null;
+		// for the field placeOfBirth
+		Map<String, List<String>> placeOfBirthField = entity.getPlaceOfBirth();
+		if (placeOfBirthField != null) {
+			updatedField = replaceWithInternalReferences(placeOfBirthField);
+			entity.setPlaceOfBirth(updatedField);
+		}
+		// for the field placeOfDeath
+		Map<String, List<String>> placeOfDeathField = entity.getPlaceOfDeath();
+		if (placeOfDeathField != null) {
+			updatedField = replaceWithInternalReferences(placeOfDeathField);
+			entity.setPlaceOfDeath(updatedField);
+		}
+		// for the field professionOrOccupation
+		Map<String, List<String>> professionOrOccupationField = entity.getProfessionOrOccupation();
+		entity.setProfessionOrOccupation(replaceWithInternalReferences(professionOrOccupationField));
 
-        if (updatedReferences.isEmpty()) {
-            return null;
-        }
-        return updatedReferences.toArray(new String[updatedReferences.size()]);
-    }
+		// for the field hasMet
+		String[] hasMetField = entity.getHasMet();
+		entity.setHasMet(replaceWithInternalReferences(hasMetField));
 
-    private void addInternalReference(List<String> updatedReferences, String externalUri) {
-	Optional<EntityRecord> record = findMatchingCoreference(externalUri);
-	if (record.isPresent()) {
-	    updatedReferences.add(record.get().getEntityId());
 	}
-    }
 
-    /**
-     * This function merges the data from the entities of the entity record proxies
-     * to the consilidated entity. TODO: see how to merge the Aggregation and
-     * WebResource objects (currently only the fields that are not of the Class type
-     * are merged)
-     * 
-     * @throws EntityCreationException
-     */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public void mergeEntity(EntityRecord entityRecord) throws EntityCreationException {
+	private void performReferentialIntegrityPlace(Place entity) {
+		// for the field isNextInSequence
+		String[] isNextInSequenceField = entity.getIsNextInSequence();
+		entity.setIsNextInSequence(replaceWithInternalReferences(isNextInSequenceField));
+	}
 
-	/*
-         * The primary entity corresponds to the entity in the Europeana proxy. The
-         * secondary entity corresponds to the entity in the external proxy.
-         */
-        EntityProxy europeanaProxy = entityRecord.getEuropeanaProxy();
-        EntityProxy externalProxy = entityRecord.getExternalProxy();
-        if (europeanaProxy == null || externalProxy == null) {
-            return;
-        }
+	private void performReferentialIntegrityTimespan(Timespan entity) {
+		// for the field isNextInSequence
+		String[] isNextInSequenceField = entity.getIsNextInSequence();
+		entity.setIsNextInSequence(replaceWithInternalReferences(isNextInSequenceField));
 
-        Entity consolidatedEntity = EntityObjectFactory.createEntityObject(europeanaProxy.getEntity().getType());
-        entityRecord.setEntity(consolidatedEntity);
+	}
 
-        Entity primary = europeanaProxy.getEntity();
-        Entity secondary = null;
-        for (EntityProxy entityProxy : entityRecord.getProxies()) {
-            if (entityProxy.getProxyId() == null
-                    || !entityProxy.getProxyId().equals(entityRecord.getEuropeanaProxy().getProxyId())) {
-                secondary = entityProxy.getEntity();
-                break;
-            }
-        }
+	private Map<String, List<String>> replaceWithInternalReferences(Map<String, List<String>> originalReferences) {
+		if(originalReferences == null) {
+			return null;
+		}
 
-        try {
-            /*
-             * store the preferred label in the secondary entity that is different from the
-             * preferred label in the primary entity to the alternative labels of the
-             * consolidated entity
-             */
-            Map<Object, Object> prefLabelsForAltLabels = new HashMap<>();
+		Map<String, List<String>> updatedReferenceMap = new HashMap<String, List<String>>();
+		for (Map.Entry<String, List<String>> entry : originalReferences.entrySet()) {
+			List<String> updatedReferences = new ArrayList<String>();
 
-            List<Field> allEntityFields = new ArrayList<>();
-            EntityUtils.getAllFields(allEntityFields, primary.getClass());
+			for (String value : entry.getValue()) {
+				addInternalReference(updatedReferences, value);
+			}
 
-            for (Field field : allEntityFields) {
+			if(!updatedReferences.isEmpty()) {
+				updatedReferenceMap.put(entry.getKey(), updatedReferences);
+			}
+		}
 
-                Class<?> fieldType = field.getType();
-                String fieldName = field.getName();
+		if(updatedReferenceMap.isEmpty()) {
+			return null;
+		}
 
-                if (fieldType.isArray()) {
-                    Object[] fieldValuePrimaryObjectArray = (Object[]) primary.getFieldValue(field);
-                    Object[] fieldValueSecondaryObjectArray = (Object[]) secondary.getFieldValue(field);
-                    List<Object> fieldValuePrimaryObject = null;
-                    List<Object> fieldValueSecondaryObject = null;
-                    if (fieldValuePrimaryObjectArray != null) {
-                        fieldValuePrimaryObject = new ArrayList<>(Arrays.asList(fieldValuePrimaryObjectArray));
-                    }
-                    if (fieldValueSecondaryObjectArray != null) {
-                        fieldValueSecondaryObject = new ArrayList<>(Arrays.asList(fieldValueSecondaryObjectArray));
-                    }
+		return updatedReferenceMap;
+	}
 
-                    if (fieldValuePrimaryObject == null && fieldValueSecondaryObject != null) {
-                        fieldValuePrimaryObject = new ArrayList<>();
-                        fieldValuePrimaryObject.addAll(fieldValueSecondaryObject);
-                    } else if (fieldValuePrimaryObject != null && fieldValueSecondaryObject != null) {
-                        // check the secondary object for new values that are not in the primary object
-                        for (Object secondaryElem : fieldValueSecondaryObject) {
-                            if (!fieldValuePrimaryObject.contains(secondaryElem)) {
-                                fieldValuePrimaryObject.add(secondaryElem);
-                            }
-                        }
-                    }
+	private String[] replaceWithInternalReferences(String[] originalReferences) {
+		if (originalReferences == null) {
+			return null;
+		}
+		List<String> updatedReferences = new ArrayList<String>();
+		for (String entry : originalReferences) {
+			addInternalReference(updatedReferences, entry);
+		}
 
-                    if (fieldValuePrimaryObject != null) {
-                        entityRecord.getEntity().setFieldValue(field, fieldValuePrimaryObject.toArray((Object[]) Array
-                                .newInstance(field.getType().getComponentType(), fieldValuePrimaryObject.size())));
-                    }
+		if (updatedReferences.isEmpty()) {
+			return null;
+		}
+		return updatedReferences.toArray(new String[updatedReferences.size()]);
+	}
 
-                } else if (Map.class.isAssignableFrom(fieldType)) {
-                    Map<Object, Object> fieldValuePrimaryObjectMap = (Map<Object, Object>) primary.getFieldValue(field);
-                    Map<Object, Object> fieldValueSecondaryObjectMap = (Map<Object, Object>) secondary
-                            .getFieldValue(field);
-                    Map<Object, Object> fieldValuePrimaryObject = null;
-                    Map<Object, Object> fieldValueSecondaryObject = null;
-                    if (fieldValuePrimaryObjectMap != null) {
-                        fieldValuePrimaryObject = new HashMap<>(fieldValuePrimaryObjectMap);
-                    }
-                    if (fieldValueSecondaryObjectMap != null) {
-                        fieldValueSecondaryObject = new HashMap<>(fieldValueSecondaryObjectMap);
-                    }
+	private void addInternalReference(List<String> updatedReferences, String externalUri) {
+		Optional<EntityRecord> record = findMatchingCoreference(externalUri);
+		if (record.isPresent()) {
+			updatedReferences.add(record.get().getEntityId());
+		}
+	}
 
-                    if (fieldValuePrimaryObject == null && fieldValueSecondaryObject != null) {
-                        fieldValuePrimaryObject = new HashMap<>();
-                        fieldValuePrimaryObject.putAll(fieldValueSecondaryObject);
-                    } else if (fieldValuePrimaryObject != null && fieldValueSecondaryObject != null) {
-                        for (Map.Entry elemSecondary : fieldValueSecondaryObject.entrySet()) {
-                            Object key = elemSecondary.getKey();
-                            /*
-                             * if the map value is a list, merge the lists of the primary and the secondary
-                             * object without duplicates
-                             */
-                            if (fieldValuePrimaryObject.containsKey(key)
-                                    && List.class.isAssignableFrom(elemSecondary.getValue().getClass())) {
-                                List<Object> listSecondaryObject = (List<Object>) elemSecondary.getValue();
-                                List<Object> listPrimaryObject = new ArrayList<>(
-                                        (List<Object>) fieldValuePrimaryObject.get(key));
-                                boolean listPrimaryObjectChanged = false;
-                                for (Object elemSecondaryList : listSecondaryObject) {
-                                    if (!listPrimaryObject.contains(elemSecondaryList)) {
-                                        listPrimaryObject.add(elemSecondaryList);
-                                        if (listPrimaryObjectChanged == false)
-                                            listPrimaryObjectChanged = true;
-                                    }
-                                }
+	/**
+	 * This function merges the data from the entities of the entity record proxies
+	 * to the consilidated entity. TODO: see how to merge the Aggregation and
+	 * WebResource objects (currently only the fields that are not of the Class type
+	 * are merged)
+	 *
+	 * @throws EntityCreationException
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void mergeEntity(EntityRecord entityRecord) throws EntityCreationException {
 
-                                if (listPrimaryObjectChanged) {
-                                    fieldValuePrimaryObject.put(key, listPrimaryObject);
-                                }
-                            }
-                            // keep the different preferred labels in the secondary object for the
-                            // alternative label in the consolidated object
-                            else if (fieldValuePrimaryObject.containsKey(key)
-                                    && fieldName.toLowerCase().contains("pref")
-                                    && fieldName.toLowerCase().contains("label")) {
-                                Object primaryObjectPrefLabel = fieldValuePrimaryObject.get(key);
-                                if (!primaryObjectPrefLabel.equals(elemSecondary.getValue())) {
-                                    prefLabelsForAltLabels.put(key, elemSecondary.getValue());
-                                }
-                            } else if (!fieldValuePrimaryObject.containsKey(key)) {
-                                fieldValuePrimaryObject.put(key, elemSecondary.getValue());
-                            }
+		/*
+		 * The primary entity corresponds to the entity in the Europeana proxy. The
+		 * secondary entity corresponds to the entity in the external proxy.
+		 */
+		EntityProxy europeanaProxy = entityRecord.getEuropeanaProxy();
+		EntityProxy externalProxy = entityRecord.getExternalProxy();
+		if (europeanaProxy == null || externalProxy == null) {
+			return;
+		}
 
-                        }
-                    }
+		Entity consolidatedEntity = EntityObjectFactory.createEntityObject(europeanaProxy.getEntity().getType());
+		entityRecord.setEntity(consolidatedEntity);
 
-                    if (fieldValuePrimaryObject != null) {
-                        entityRecord.getEntity().setFieldValue(field, fieldValuePrimaryObject);
-                    }
+		Entity primary = europeanaProxy.getEntity();
+		Entity secondary = null;
+		for (EntityProxy entityProxy : entityRecord.getProxies()) {
+			if (entityProxy.getProxyId() == null
+					|| !entityProxy.getProxyId().equals(entityRecord.getEuropeanaProxy().getProxyId())) {
+				secondary = entityProxy.getEntity();
+				break;
+			}
+		}
 
-                } else if (List.class.isAssignableFrom(fieldType)) {
+		try {
+			/*
+			 * store the preferred label in the secondary entity that is different from the
+			 * preferred label in the primary entity to the alternative labels of the
+			 * consolidated entity
+			 */
+			Map<Object, Object> prefLabelsForAltLabels = new HashMap<>();
 
-                    List<Object> fieldValuePrimaryObjectList = (List<Object>) primary.getFieldValue(field);
-                    List<Object> fieldValueSecondaryObjectList = (List<Object>) secondary.getFieldValue(field);
-                    List<Object> fieldValuePrimaryObject = null;
-                    List<Object> fieldValueSecondaryObject = null;
-                    if (fieldValuePrimaryObjectList != null) {
-                        fieldValuePrimaryObject = new ArrayList<Object>(fieldValuePrimaryObjectList);
-                    }
-                    if (fieldValueSecondaryObjectList != null) {
-                        fieldValueSecondaryObject = new ArrayList<Object>(fieldValueSecondaryObjectList);
-                    }
+			List<Field> allEntityFields = new ArrayList<>();
+			EntityUtils.getAllFields(allEntityFields, primary.getClass());
 
-                    if (fieldValuePrimaryObject == null && fieldValueSecondaryObject != null) {
-                        entityRecord.getEntity().setFieldValue(field, fieldValueSecondaryObject);
-                    } else if (fieldValuePrimaryObject != null && fieldValueSecondaryObject != null) {
+			for (Field field : allEntityFields) {
 
-                        for (Object secondaryObjectListObject : fieldValueSecondaryObject) {
-                            if (!fieldValuePrimaryObject.contains(secondaryObjectListObject)) {
-                                fieldValuePrimaryObject.add(secondaryObjectListObject);
-                            }
-                        }
+				Class<?> fieldType = field.getType();
+				String fieldName = field.getName();
 
-                        entityRecord.getEntity().setFieldValue(field, fieldValuePrimaryObject);
-                    }
+				if (fieldType.isArray()) {
+					Object[] fieldValuePrimaryObjectArray = (Object[]) primary.getFieldValue(field);
+					Object[] fieldValueSecondaryObjectArray = (Object[]) secondary.getFieldValue(field);
+					List<Object> fieldValuePrimaryObject = null;
+					List<Object> fieldValueSecondaryObject = null;
+					if (fieldValuePrimaryObjectArray != null) {
+						fieldValuePrimaryObject = new ArrayList<>(Arrays.asList(fieldValuePrimaryObjectArray));
+					}
+					if (fieldValueSecondaryObjectArray != null) {
+						fieldValueSecondaryObject = new ArrayList<>(Arrays.asList(fieldValueSecondaryObjectArray));
+					}
 
-                } else if (fieldType.isPrimitive()) {
-                    Object fieldValuePrimaryObject = primary.getFieldValue(field);
-                    Object fieldValueSecondaryObject = secondary.getFieldValue(field);
+					if (fieldValuePrimaryObject == null && fieldValueSecondaryObject != null) {
+						fieldValuePrimaryObject = new ArrayList<>();
+						fieldValuePrimaryObject.addAll(fieldValueSecondaryObject);
+					} else if (fieldValuePrimaryObject != null && fieldValueSecondaryObject != null) {
+						// check the secondary object for new values that are not in the primary object
+						for (Object secondaryElem : fieldValueSecondaryObject) {
+							if (!fieldValuePrimaryObject.contains(secondaryElem)) {
+								fieldValuePrimaryObject.add(secondaryElem);
+							}
+						}
+					}
 
-                    if (fieldValuePrimaryObject == null && fieldValueSecondaryObject != null) {
-                        entityRecord.getEntity().setFieldValue(field, fieldValueSecondaryObject);
-                    } else if (fieldValuePrimaryObject != null) {
-                        entityRecord.getEntity().setFieldValue(field, fieldValuePrimaryObject);
-                    }
-                }
+					if (fieldValuePrimaryObject != null) {
+						entityRecord.getEntity().setFieldValue(field, fieldValuePrimaryObject.toArray((Object[]) Array
+								.newInstance(field.getType().getComponentType(), fieldValuePrimaryObject.size())));
+					}
 
-            }
+				} else if (Map.class.isAssignableFrom(fieldType)) {
+					Map<Object, Object> fieldValuePrimaryObjectMap = (Map<Object, Object>) primary.getFieldValue(field);
+					Map<Object, Object> fieldValueSecondaryObjectMap = (Map<Object, Object>) secondary
+							.getFieldValue(field);
+					Map<Object, Object> fieldValuePrimaryObject = null;
+					Map<Object, Object> fieldValueSecondaryObject = null;
+					if (fieldValuePrimaryObjectMap != null) {
+						fieldValuePrimaryObject = new HashMap<>(fieldValuePrimaryObjectMap);
+					}
+					if (fieldValueSecondaryObjectMap != null) {
+						fieldValueSecondaryObject = new HashMap<>(fieldValueSecondaryObjectMap);
+					}
 
-            /*
-             * adding the preferred labels from the secondary object to the alternative
-             * labels of consolidated object
-             */
-            if (prefLabelsForAltLabels.size() > 0) {
-                for (Field field : allEntityFields) {
-                    String fieldName = field.getName();
-                    if (fieldName.toLowerCase().contains("alt") && fieldName.toLowerCase().contains("label")) {
-                        Map<Object, Object> altLabelPrimaryObjectMap = (Map<Object, Object>) primary
-                                .getFieldValue(field);
-                        Map<Object, Object> altLabelPrimaryObject = null;
-                        if (altLabelPrimaryObjectMap != null)
-                            altLabelPrimaryObject = new HashMap<>(altLabelPrimaryObjectMap);
-                        else
-                            altLabelPrimaryObject = new HashMap<>();
+					if (fieldValuePrimaryObject == null && fieldValueSecondaryObject != null) {
+						fieldValuePrimaryObject = new HashMap<>();
+						fieldValuePrimaryObject.putAll(fieldValueSecondaryObject);
+					} else if (fieldValuePrimaryObject != null && fieldValueSecondaryObject != null) {
+						for (Map.Entry elemSecondary : fieldValueSecondaryObject.entrySet()) {
+							Object key = elemSecondary.getKey();
+							/*
+							 * if the map value is a list, merge the lists of the primary and the secondary
+							 * object without duplicates
+							 */
+							if (fieldValuePrimaryObject.containsKey(key)
+									&& List.class.isAssignableFrom(elemSecondary.getValue().getClass())) {
+								List<Object> listSecondaryObject = (List<Object>) elemSecondary.getValue();
+								List<Object> listPrimaryObject = new ArrayList<>(
+										(List<Object>) fieldValuePrimaryObject.get(key));
+								boolean listPrimaryObjectChanged = false;
+								for (Object elemSecondaryList : listSecondaryObject) {
+									if (!listPrimaryObject.contains(elemSecondaryList)) {
+										listPrimaryObject.add(elemSecondaryList);
+										if (listPrimaryObjectChanged == false)
+											listPrimaryObjectChanged = true;
+									}
+								}
 
-                        boolean altLabelPrimaryValueChanged = false;
-                        for (Map.Entry prefLabel : prefLabelsForAltLabels.entrySet()) {
-                            String keyPrefLabel = (String) prefLabel.getKey();
-                            List<Object> altLabelPrimaryObjectList = (List<Object>) altLabelPrimaryObject
-                                    .get(keyPrefLabel);
-                            List<Object> altLabelPrimaryValue = null;
-                            if (altLabelPrimaryObjectList != null) {
-                                altLabelPrimaryValue = new ArrayList<>(altLabelPrimaryObjectList);
-                            } else {
-                                altLabelPrimaryValue = new ArrayList<>();
-                            }
+								if (listPrimaryObjectChanged) {
+									fieldValuePrimaryObject.put(key, listPrimaryObject);
+								}
+							}
+							// keep the different preferred labels in the secondary object for the
+							// alternative label in the consolidated object
+							else if (fieldValuePrimaryObject.containsKey(key)
+									&& fieldName.toLowerCase().contains("pref")
+									&& fieldName.toLowerCase().contains("label")) {
+								Object primaryObjectPrefLabel = fieldValuePrimaryObject.get(key);
+								if (!primaryObjectPrefLabel.equals(elemSecondary.getValue())) {
+									prefLabelsForAltLabels.put(key, elemSecondary.getValue());
+								}
+							} else if (!fieldValuePrimaryObject.containsKey(key)) {
+								fieldValuePrimaryObject.put(key, elemSecondary.getValue());
+							}
 
-                            if (altLabelPrimaryValue.size() == 0 || (altLabelPrimaryValue.size() > 0
-                                    && !altLabelPrimaryValue.contains(prefLabel.getValue()))) {
-                                altLabelPrimaryValue.add(prefLabel.getValue());
-                                if (altLabelPrimaryValueChanged == false) {
-                                    altLabelPrimaryValueChanged = true;
-                                }
+						}
+					}
 
-                                altLabelPrimaryObject.put(keyPrefLabel, altLabelPrimaryValue);
-                            }
-                        }
-                        if (altLabelPrimaryValueChanged) {
-                            entityRecord.getEntity().setFieldValue(field, altLabelPrimaryObject);
-                        }
-                        break;
-                    }
-                }
-            }
-        } catch (IllegalArgumentException e) {
-            logger.error(
-                    "During the reconceliation of the entity data from different sources a method has been passed an illegal or inappropriate argument.",
-                    e);
-        } catch (IllegalAccessException e) {
-            logger.error(
-                    "During the reconceliation of the entity data from different sources an illegal access to some method or field has happened.",
-                    e);
-        }
-    }
+					if (fieldValuePrimaryObject != null) {
+						entityRecord.getEntity().setFieldValue(field, fieldValuePrimaryObject);
+					}
 
-    public void dropRepository() {
-        this.entityRecordRepository.dropCollection();
-    }
+				} else if (List.class.isAssignableFrom(fieldType)) {
 
+					List<Object> fieldValuePrimaryObjectList = (List<Object>) primary.getFieldValue(field);
+					List<Object> fieldValueSecondaryObjectList = (List<Object>) secondary.getFieldValue(field);
+					List<Object> fieldValuePrimaryObject = null;
+					List<Object> fieldValueSecondaryObject = null;
+					if (fieldValuePrimaryObjectList != null) {
+						fieldValuePrimaryObject = new ArrayList<Object>(fieldValuePrimaryObjectList);
+					}
+					if (fieldValueSecondaryObjectList != null) {
+						fieldValueSecondaryObject = new ArrayList<Object>(fieldValueSecondaryObjectList);
+					}
 
-    public List<? extends EntityRecord> findEntitiesWithFilter(int start, int count, Filter[] queryFilters) {
-        return this.entityRecordRepository.findWithFilters(start, count, queryFilters);
-    }
+					if (fieldValuePrimaryObject == null && fieldValueSecondaryObject != null) {
+						entityRecord.getEntity().setFieldValue(field, fieldValueSecondaryObject);
+					} else if (fieldValuePrimaryObject != null && fieldValueSecondaryObject != null) {
 
-    private void setEntityAggregation(EntityRecord entityRecord, String entityId, Date timestamp) {
-        Aggregation isAggregatedBy = new AggregationImpl();
-        isAggregatedBy.setId(getIsAggregatedById(entityId));
-        isAggregatedBy.setCreated(timestamp);
-        isAggregatedBy.setModified(timestamp);
-        isAggregatedBy.setRecordCount(1);
-        isAggregatedBy.setAggregates(
-                Arrays.asList(getEuropeanaAggregationId(entityId), getDatasourceAggregationId(entityId)));
+						for (Object secondaryObjectListObject : fieldValueSecondaryObject) {
+							if (!fieldValuePrimaryObject.contains(secondaryObjectListObject)) {
+								fieldValuePrimaryObject.add(secondaryObjectListObject);
+							}
+						}
 
-        entityRecord.getEntity().setIsAggregatedBy(isAggregatedBy);
-    }
+						entityRecord.getEntity().setFieldValue(field, fieldValuePrimaryObject);
+					}
 
-    private void setEuropeanaMetadata(String entityId, EntityRecord entityRecord, Date timestamp) {
-        Aggregation europeanaAggr = new AggregationImpl();
-        europeanaAggr.setId(getEuropeanaAggregationId(entityId));
-        europeanaAggr.setRights(RIGHTS_CREATIVE_COMMONS);
-        europeanaAggr.setCreated(timestamp);
-        europeanaAggr.setModified(timestamp);
-        europeanaAggr.setSource(EUROPEANA_URL);
+				} else if (fieldType.isPrimitive()) {
+					Object fieldValuePrimaryObject = primary.getFieldValue(field);
+					Object fieldValueSecondaryObject = secondary.getFieldValue(field);
 
-        EntityProxy europeanaProxy = new EntityProxyImpl();
-        europeanaProxy.setProxyId(getEuropeanaProxyId(entityId));
-        europeanaProxy.setProxyFor(entityId);
-        europeanaProxy.setProxyIn(europeanaAggr);
+					if (fieldValuePrimaryObject == null && fieldValueSecondaryObject != null) {
+						entityRecord.getEntity().setFieldValue(field, fieldValueSecondaryObject);
+					} else if (fieldValuePrimaryObject != null) {
+						entityRecord.getEntity().setFieldValue(field, fieldValuePrimaryObject);
+					}
+				}
 
-	entityRecord.addProxy(europeanaProxy);
-    }
+			}
 
-    private void setDatasourceMetadata(EntityPreview entityCreationRequest, String entityId,
-	    DataSource externalDatasource, EntityRecord entityRecord, Date timestamp) {
-	Aggregation datasourceAggr = new AggregationImpl();
-        datasourceAggr.setId(getDatasourceAggregationId(entityId));
-        datasourceAggr.setCreated(timestamp);
-        datasourceAggr.setModified(timestamp);
-        datasourceAggr.setRights(externalDatasource.getRights());
-        datasourceAggr.setSource(externalDatasource.getUrl());
+			/*
+			 * adding the preferred labels from the secondary object to the alternative
+			 * labels of consolidated object
+			 */
+			if (prefLabelsForAltLabels.size() > 0) {
+				for (Field field : allEntityFields) {
+					String fieldName = field.getName();
+					if (fieldName.toLowerCase().contains("alt") && fieldName.toLowerCase().contains("label")) {
+						Map<Object, Object> altLabelPrimaryObjectMap = (Map<Object, Object>) primary
+								.getFieldValue(field);
+						Map<Object, Object> altLabelPrimaryObject = null;
+						if (altLabelPrimaryObjectMap != null)
+							altLabelPrimaryObject = new HashMap<>(altLabelPrimaryObjectMap);
+						else
+							altLabelPrimaryObject = new HashMap<>();
 
-        EntityProxy datasourceProxy = new EntityProxyImpl();
-        datasourceProxy.setProxyId(entityCreationRequest.getId());
-        datasourceProxy.setProxyFor(entityId);
-        datasourceProxy.setProxyIn(datasourceAggr);
+						boolean altLabelPrimaryValueChanged = false;
+						for (Map.Entry prefLabel : prefLabelsForAltLabels.entrySet()) {
+							String keyPrefLabel = (String) prefLabel.getKey();
+							List<Object> altLabelPrimaryObjectList = (List<Object>) altLabelPrimaryObject
+									.get(keyPrefLabel);
+							List<Object> altLabelPrimaryValue = null;
+							if (altLabelPrimaryObjectList != null) {
+								altLabelPrimaryValue = new ArrayList<>(altLabelPrimaryObjectList);
+							} else {
+								altLabelPrimaryValue = new ArrayList<>();
+							}
 
-	entityRecord.addProxy(datasourceProxy);
-    }
+							if (altLabelPrimaryValue.size() == 0 || (altLabelPrimaryValue.size() > 0
+									&& !altLabelPrimaryValue.contains(prefLabel.getValue()))) {
+								altLabelPrimaryValue.add(prefLabel.getValue());
+								if (altLabelPrimaryValueChanged == false) {
+									altLabelPrimaryValueChanged = true;
+								}
+
+								altLabelPrimaryObject.put(keyPrefLabel, altLabelPrimaryValue);
+							}
+						}
+						if (altLabelPrimaryValueChanged) {
+							entityRecord.getEntity().setFieldValue(field, altLabelPrimaryObject);
+						}
+						break;
+					}
+				}
+			}
+		} catch (IllegalArgumentException e) {
+			logger.error(
+					"During the reconceliation of the entity data from different sources a method has been passed an illegal or inappropriate argument.",
+					e);
+		} catch (IllegalAccessException e) {
+			logger.error(
+					"During the reconceliation of the entity data from different sources an illegal access to some method or field has happened.",
+					e);
+		}
+	}
+
+	public void dropRepository() {
+		this.entityRecordRepository.dropCollection();
+	}
+
+	private void setEntityAggregation(EntityRecord entityRecord, String entityId, Date timestamp) {
+		Aggregation isAggregatedBy = new AggregationImpl();
+		isAggregatedBy.setId(getIsAggregatedById(entityId));
+		isAggregatedBy.setCreated(timestamp);
+		isAggregatedBy.setModified(timestamp);
+		isAggregatedBy.setRecordCount(1);
+		isAggregatedBy.setAggregates(
+				Arrays.asList(getEuropeanaAggregationId(entityId), getDatasourceAggregationId(entityId)));
+
+		entityRecord.getEntity().setIsAggregatedBy(isAggregatedBy);
+	}
+
+	private void setEuropeanaMetadata(String entityId, EntityRecord entityRecord, Date timestamp) {
+		Aggregation europeanaAggr = new AggregationImpl();
+		europeanaAggr.setId(getEuropeanaAggregationId(entityId));
+		europeanaAggr.setRights(RIGHTS_CREATIVE_COMMONS);
+		europeanaAggr.setCreated(timestamp);
+		europeanaAggr.setModified(timestamp);
+		europeanaAggr.setSource(EUROPEANA_URL);
+
+		EntityProxy europeanaProxy = new EntityProxyImpl();
+		europeanaProxy.setProxyId(getEuropeanaProxyId(entityId));
+		europeanaProxy.setProxyFor(entityId);
+		europeanaProxy.setProxyIn(europeanaAggr);
+
+		entityRecord.addProxy(europeanaProxy);
+	}
+
+	private void setDatasourceMetadata(EntityPreview entityCreationRequest, String entityId,
+									   DataSource externalDatasource, EntityRecord entityRecord, Date timestamp) {
+		Aggregation datasourceAggr = new AggregationImpl();
+		datasourceAggr.setId(getDatasourceAggregationId(entityId));
+		datasourceAggr.setCreated(timestamp);
+		datasourceAggr.setModified(timestamp);
+		datasourceAggr.setRights(externalDatasource.getRights());
+		datasourceAggr.setSource(externalDatasource.getUrl());
+
+		EntityProxy datasourceProxy = new EntityProxyImpl();
+		datasourceProxy.setProxyId(entityCreationRequest.getId());
+		datasourceProxy.setProxyFor(entityId);
+		datasourceProxy.setProxyIn(datasourceAggr);
+
+		entityRecord.addProxy(datasourceProxy);
+	}
 }
