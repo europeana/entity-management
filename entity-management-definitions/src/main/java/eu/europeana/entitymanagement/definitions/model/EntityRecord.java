@@ -29,7 +29,11 @@ public interface EntityRecord {
 
     void setCreated(Date date);
 
+    Date getCreated();
+
     void setModified(Date date);
+
+    Date getModified();
     
     EntityProxy getEuropeanaProxy();
     

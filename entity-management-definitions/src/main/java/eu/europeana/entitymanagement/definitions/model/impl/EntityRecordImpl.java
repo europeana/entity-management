@@ -106,8 +106,18 @@ public class EntityRecordImpl implements EntityRecord {
     }
 
     @Override
+    public Date getCreated() {
+        return this.created;
+    }
+
+    @Override
     public void setModified(Date modified) {
         this.modified = modified;
+    }
+
+    @Override
+    public Date getModified() {
+        return this.modified;
     }
 
     @JsonIgnore

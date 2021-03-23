@@ -132,7 +132,6 @@ public class EntityRecordService {
         entityRecord.setEntityId(entityId);
         entity.setEntityId(entityId);
         entityRecord.setEntity(entity);
-	    entityRecord.setCreated(timestamp);
 
         setEuropeanaMetadata(entityId, entityRecord, timestamp);
 

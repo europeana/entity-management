@@ -19,7 +19,13 @@ public class EntityRecordWatcher {
      */
     @PrePersist
     void prePersist(EntityRecord record) {
-        record.setModified(new Date());
+        Date now = new Date();
+
+        if (record.getCreated() == null) {
+            record.setCreated(now);
+        }
+
+        record.setModified(now);
     }
 
 }
