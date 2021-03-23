@@ -85,6 +85,12 @@ public class EntityRecordService {
 	return entityRecordRepository.save(er);
     }
 
+	@SuppressWarnings("unchecked")
+	public List<? extends EntityRecord> saveBulkEntityRecords(List<? extends EntityRecord> records) {
+		// TODO: this is a code smell. Simplify EntityRecord vs EntityRecordImpl structure
+		return entityRecordRepository.saveBulk((List<EntityRecord>) records);
+	}
+
     public EntityRecord disableEntityRecord(EntityRecord er) {
 	er.setDisabled(true);
 	return saveEntityRecord(er);
