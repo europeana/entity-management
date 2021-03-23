@@ -44,7 +44,9 @@ import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.utils.EntityUtils;
+import eu.europeana.entitymanagement.utils.Utils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
 
 @Service(AppConfig.BEAN_ENTITY_RECORD_SERVICE)
@@ -188,7 +190,7 @@ public class EntityRecordService {
 	    break;
 	}
 
-//	this.saveEntityRecord(entityRecord);
+	//this.saveEntityRecord(entityRecord);
     }
 
     private void performCommonReferentialIntegrity(Entity entity) {
@@ -302,11 +304,21 @@ public class EntityRecordService {
     }
 
     private void addInternalReference(List<String> updatedReferences, String externalUri) {
-	Optional<EntityRecord> record = findMatchingCoreference(externalUri);
-	if (record.isPresent()) {
-	    updatedReferences.add(record.get().getEntityId());
+    	/*
+    	 * In case that an external reference we want to replace is not a URI 
+    	 * or if it is a Europeana URI, it does not need to be replaced
+    	 */
+    	if(!Utils.isUri(externalUri) || externalUri.startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI)) {
+    		updatedReferences.add(externalUri);
+    	}
+    	else
+    	{
+			Optional<EntityRecord> record = findMatchingCoreference(externalUri);
+			if (record.isPresent()) {
+			    updatedReferences.add(record.get().getEntityId());
+			}
+    	}
 	}
-    }
 
     /**
      * This function merges the data from the entities of the entity record proxies

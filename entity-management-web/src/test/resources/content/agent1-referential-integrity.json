@@ -68,7 +68,9 @@
     },
   "isRelatedTo":[
     "http://wikidata.dbpedia.org/resource/Q6104322",
-    "http://es.dbpedia.org/resource/Leonardo_da_Vinci"
+    "http://es.dbpedia.org/resource/Leonardo_da_Vinci",
+    "Leonardo_da_Vinci",
+    "http://data.europeana.eu/Leonardo_da_Vinci"
   ],
   "sameAs":[
     "http://pl.dbpedia.org/resource/Paris_Hilton",
