@@ -25,6 +25,10 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl {
 	    	super(organization);
 	}
 	
+	public XmlOrganizationImpl() {
+		// default constructor
+	}
+	
 	@JacksonXmlElementWrapper(useWrapping=false)
 	@JacksonXmlProperty(localName = XmlConstants.XML_ACRONYM)
 	public List<XmlMultilingualString> getAcronym() {		

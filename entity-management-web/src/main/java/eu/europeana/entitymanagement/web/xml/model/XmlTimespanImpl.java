@@ -25,6 +25,10 @@ public class XmlTimespanImpl extends XmlBaseEntityImpl {
     	    	super(timespan);
     	}
 
+	public XmlTimespanImpl() {
+		// default constructor
+	}
+
 	@JacksonXmlElementWrapper(useWrapping=false)
 	@JacksonXmlProperty(localName = XmlConstants.XML_IS_PART_OF)
 	public List<RdfResource> getIsPartOf() {

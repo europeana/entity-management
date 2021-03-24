@@ -128,7 +128,7 @@ public class EntityRecordService {
 	entity.setEntityId(entityId);
 	entityRecord.setEntity(entity);
 
-	setEuropeanaMetadata(entityId, entityRecord, timestamp);
+	setEuropeanaDataAndMetadata(entityId, entityRecord, timestamp, entityCreationRequest);
 
 	DataSource externalDatasource = externalDatasourceOptional.get();
 	setDatasourceMetadata(entityCreationRequest, entityId, externalDatasource, entityRecord, timestamp);
@@ -564,7 +564,7 @@ public class EntityRecordService {
 	entityRecord.getEntity().setIsAggregatedBy(isAggregatedBy);
     }
 
-    private void setEuropeanaMetadata(String entityId, EntityRecord entityRecord, Date timestamp) {
+    private void setEuropeanaDataAndMetadata(String entityId, EntityRecord entityRecord, Date timestamp, EntityPreview entityCreationRequest) throws EntityCreationException {
 	Aggregation europeanaAggr = new AggregationImpl();
 	europeanaAggr.setId(getEuropeanaAggregationId(entityId));
 	europeanaAggr.setRights(RIGHTS_CREATIVE_COMMONS);
@@ -576,6 +576,15 @@ public class EntityRecordService {
 	europeanaProxy.setProxyId(getEuropeanaProxyId(entityId));
 	europeanaProxy.setProxyFor(entityId);
 	europeanaProxy.setProxyIn(europeanaAggr);
+	Entity europeanaProxyEntity = EntityObjectFactory.createEntityObject(entityRecord.getEntity().getType());
+	europeanaProxyEntity.setEntityId(entityId);
+	europeanaProxyEntity.setAltLabel(entityCreationRequest.getAltLabel());
+	europeanaProxyEntity.setPrefLabelStringMap(entityCreationRequest.getPrefLabel());
+	europeanaProxyEntity.setDepiction(entityCreationRequest.getDepiction());
+	String[] europeanaProxyEntitySameAs = new String [1];
+	europeanaProxyEntitySameAs[0] = entityCreationRequest.getId();
+	europeanaProxyEntity.setSameAs(europeanaProxyEntitySameAs);
+	europeanaProxy.setEntity(europeanaProxyEntity);
 
 	entityRecord.addProxy(europeanaProxy);
     }

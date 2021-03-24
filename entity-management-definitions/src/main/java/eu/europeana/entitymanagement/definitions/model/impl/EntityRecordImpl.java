@@ -100,15 +100,23 @@ public class EntityRecordImpl implements EntityRecord {
     @JsonIgnore
     @Override
     public EntityProxy getEuropeanaProxy() {
-	return (EntityProxy) proxies.stream()
-		.filter(s -> s.getProxyId().startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI));
+    	for (EntityProxy proxy : proxies) {
+    		if (proxy.getProxyId().startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI)) {
+    			return proxy;
+    		}
+    	}
+    	return null;	
     }
 
     @Override
     @JsonIgnore
     public EntityProxy getExternalProxy() {
-	return (EntityProxy) proxies.stream()
-		.filter(s -> !s.getProxyId().startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI));
+    	for (EntityProxy proxy : proxies) {
+    		if (!proxy.getProxyId().startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI)) {
+    			return proxy;
+    		}
+    	}
+    	return null;
     }
 
 }

@@ -1,85 +1,114 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <metis:results xmlns:dcterms="http://purl.org/dc/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:edm="http://www.europeana.eu/schemas/edm/" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema" xmlns:cc="http://creativecommons.org/ns" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdaGr2="http://rdvocab.info/ElementsGr2/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:wgs84_pos="http://www.w3.org/2003/01/geo/wgs84_pos#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:metis="http://www.europeana.eu/schemas/metis">
-	<metis:result>
- <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-         xmlns:foaf="http://xmlns.com/foaf/0.1/"
-         xmlns:dc="http://purl.org/dc/elements/1.1/"
-         xmlns:edm="http://www.europeana.eu/schemas/edm/"
-         xmlns:vcard="https://www.w3.org/2006/vcard/"
-         xmlns:owl="http://www.w3.org/2002/07/owl#"
-	  xmlns:ore="http://www.openarchives.org/ore/terms/"
-         xmlns:skos="http://www.w3.org/2004/02/skos/core#"
-          xmlns:dcterms="http://purl.org/dc/terms/" >
-<edm:Organization rdf:about="http://data.europeana.eu/organization/1482250000000370517">
-  <foaf:depiction>
-    <edm:WebResource rdf:about="http://commons.wikimedia.org/wiki/Special:FilePath/WLANL%20-%20thedogg%20-%20Mammoet%20%282%29.jpg">
-      <dc:source rdf:resource="http://commons.wikimedia.org/wiki/File:WLANL%20-%20thedogg%20-%20Mammoet%20%282%29.jpg"/>
-    </edm:WebResource>
-  </foaf:depiction>
-  <skos:prefLabel xml:lang="de">Naturalis</skos:prefLabel>
-  <skos:prefLabel xml:lang="be">Натураліс</skos:prefLabel>
-  <skos:prefLabel xml:lang="ru">Натуралис</skos:prefLabel>
-  <skos:prefLabel xml:lang="pt">Museu de História Natural de Leiden</skos:prefLabel>
-  <skos:prefLabel xml:lang="en">Naturalis Biodiversity Center</skos:prefLabel>
-  <skos:prefLabel xml:lang="it">Naturalis Biodiversity Center</skos:prefLabel>
-  <skos:prefLabel xml:lang="fr">Naturalis</skos:prefLabel>
-  <skos:prefLabel xml:lang="es">Centro de Biodiversidad Naturalis</skos:prefLabel>
-  <skos:prefLabel xml:lang="zh">Naturalis</skos:prefLabel>
-  <skos:prefLabel xml:lang="uk">Центр біорізноманіття «Натураліс»</skos:prefLabel>
-  <skos:prefLabel xml:lang="ja">オランダ国立自然史博物館</skos:prefLabel>
-  <skos:prefLabel xml:lang="pl">Muzeum Historii Naturalnej w Lejdzie</skos:prefLabel>
-  <skos:prefLabel xml:lang="nl">Naturalis Biodiversity Center</skos:prefLabel>
-  <skos:prefLabel xml:lang="ca">Naturalis</skos:prefLabel>
-  <edm:acronym xml:lang="de">RMNH</edm:acronym>
-  <edm:acronym xml:lang="gl">NBC</edm:acronym>
-  <edm:acronym xml:lang="en">RMNH</edm:acronym>
-  <edm:acronym xml:lang="en">NBC</edm:acronym>
-  <edm:acronym xml:lang="ca">NBC</edm:acronym>
-  <edm:acronym xml:lang="es">NBC</edm:acronym>
-  <edm:acronym xml:lang="nl">RMNH</edm:acronym>
-  <skos:altLabel xml:lang="ru">Naturalis</skos:altLabel>
-  <skos:altLabel xml:lang="uk">Натураліс</skos:altLabel>
-  <skos:altLabel xml:lang="uk">Naturalis</skos:altLabel>
-  <skos:altLabel xml:lang="en">Naturalis Biodiversity Center</skos:altLabel>
-  <skos:altLabel xml:lang="en">Naturalis</skos:altLabel>
-  <skos:altLabel xml:lang="en">Naturalis Bio Center</skos:altLabel>
-  <skos:altLabel xml:lang="nl">Nederlands Centrum voor Biodiversiteit Naturalis</skos:altLabel>
-  <skos:altLabel xml:lang="nl">Naturalis</skos:altLabel>
-  <skos:altLabel xml:lang="nl">Nationaal Natuurhistorisch Museum</skos:altLabel>
-  <dc:description xml:lang="ru">музей в Голландии</dc:description>
-  <dc:description xml:lang="be">музей</dc:description>
-  <dc:description xml:lang="uk">Природничий музей в місті Лейден, Нідерланди</dc:description>
-  <dc:description xml:lang="en">natural history museum and research center in the Netherlands</dc:description>
-  <dc:description xml:lang="fr">musée et centre de recherche néerlandais</dc:description>
-  <dc:description xml:lang="he">מוזיאון בהולנד</dc:description>
-  <dc:description xml:lang="nl">museum en onderzoekscentrum in Leiden</dc:description>
-  <dc:description xml:lang="es">museo de historia natural y centro de investigación neerlandés</dc:description>
-  <edm:europeanaRole xml:lang="en">Data Provider</edm:europeanaRole>
-  <edm:organizationDomain xml:lang="en">GLAM</edm:organizationDomain>
-  <edm:country>NL</edm:country>
-  <foaf:homepage rdf:resource="https://www.naturalis.nl/nl/"/>
-  <foaf:phone>+31-71-751-9600</foaf:phone>
-  <vcard:hasAddress>
-    <vcard:Address rdf:about="http://data.europeana.eu/organization/1482250000000370517#address">
-      <vcard:country-name>Netherlands</vcard:country-name>
-      <vcard:hasGeo rdf:resource="geo:52.16472222,4.47333333"/>
-    </vcard:Address>
-  </vcard:hasAddress>
-  <dc:identifier>1482250000000370517</dc:identifier>
-  <owl:sameAs rdf:resource="http://isni.org/isni/000000012159802X"/>
-  <owl:sameAs rdf:resource="https://www.freebase.com/m/08jgn7"/>
-  <owl:sameAs rdf:resource="http://www.wikidata.org/entity/Q641676"/>
-  <owl:sameAs rdf:resource="http://id.loc.gov/authorities/names/n92025427"/>
-  <owl:sameAs rdf:resource="http://d-nb.info/gnd/5025979-9"/>
-  <owl:sameAs rdf:resource="https://g.co/kg/m/08jgn7"/>
-  <owl:sameAs rdf:resource="http://viaf.org/viaf/132063008"/>
-  <ore:isAggregatedBy rdf:resource="http://data.europeana.eu/organization/1482250000000370517#aggregation"/>
-</edm:Organization>
-<ore:Aggregation rdf:about="http://data.europeana.eu/organization/1482250000000370517#aggregation">
-  <dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2015-08-17T17:04:36Z</dcterms:created>
-  <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2018-09-14T14:23:20Z</dcterms:modified>
-  <ore:aggregates rdf:resource="http://data.europeana.eu/organization/1482250000000370517"/>
-</ore:Aggregation>
-  </rdf:RDF>
+  <metis:result>
+    <edm:Organization rdf:about="http://www.wikidata.org/entity/Q193563">
+      <skos:altLabel xml:lang="pl">BnF</skos:altLabel>
+      <skos:altLabel xml:lang="pl">Bibliothèque nationale de France</skos:altLabel>
+      <skos:altLabel xml:lang="fr">Bibliothèque Nationale de Paris</skos:altLabel>
+      <skos:altLabel xml:lang="fr">Bibliothèque royale</skos:altLabel>
+      <skos:altLabel xml:lang="fr">BnF</skos:altLabel>
+      <skos:altLabel xml:lang="fr">BNF</skos:altLabel>
+      <skos:altLabel xml:lang="fr">Très Grande Bibliothèque</skos:altLabel>
+      <skos:altLabel xml:lang="fr">Bibliothèque de France</skos:altLabel>
+      <skos:altLabel xml:lang="es">Bibliotheque Nationale</skos:altLabel>
+      <skos:altLabel xml:lang="es">BnF</skos:altLabel>
+      <skos:altLabel xml:lang="es">Bibliotheque Nationale de France</skos:altLabel>
+      <skos:altLabel xml:lang="es">Bibliothèque Nationale de France</skos:altLabel>
+      <skos:altLabel xml:lang="es">Biblioteca Nacional de París</skos:altLabel>
+      <skos:altLabel xml:lang="es">Bibliothèque nationale</skos:altLabel>
+      <skos:altLabel xml:lang="es">Biblioteca Nacional de Paris</skos:altLabel>
+      <skos:altLabel xml:lang="it">Biblioteca Nazionale di Francia</skos:altLabel>
+      <skos:altLabel xml:lang="it">Bibliothèque National</skos:altLabel>
+      <skos:altLabel xml:lang="it">Bibliothèque nationale</skos:altLabel>
+      <skos:altLabel xml:lang="it">Biblioteca nazionale di Parigi</skos:altLabel>
+      <skos:altLabel xml:lang="it">Bibliothèque Nationale di Parigi</skos:altLabel>
+      <skos:altLabel xml:lang="it">Biblioteca nazionale francese</skos:altLabel>
+      <skos:altLabel xml:lang="it">BNF</skos:altLabel>
+      <skos:altLabel xml:lang="de">Bibliothèque de l'Arsenal</skos:altLabel>
+      <skos:altLabel xml:lang="de">BnF</skos:altLabel>
+      <skos:altLabel xml:lang="de">Französische Nationalbibliothek</skos:altLabel>
+      <skos:altLabel xml:lang="nl">Bibliothèque François Mitterrand</skos:altLabel>
+      <skos:altLabel xml:lang="nl">Bibliotheque Francois Mitterrand</skos:altLabel>
+      <skos:altLabel xml:lang="nl">Bibliotheque Nationale</skos:altLabel>
+      <skos:altLabel xml:lang="nl">Bibliotheque nationale de France</skos:altLabel>
+      <skos:altLabel xml:lang="nl">Bibliothèque nationale</skos:altLabel>
+      <skos:altLabel xml:lang="nl">Nationale Bibliotheek van Frankrijk</skos:altLabel>
+      <skos:altLabel xml:lang="nl">BnF</skos:altLabel>
+      <skos:altLabel xml:lang="sv">Bibliothèque nationale</skos:altLabel>
+      <skos:altLabel xml:lang="sv">Nationalbiblioteket</skos:altLabel>
+      <skos:altLabel xml:lang="sv">Frankrikes nationalbibliotek</skos:altLabel>
+      <skos:altLabel xml:lang="sv">BnF</skos:altLabel>
+      <skos:altLabel xml:lang="pt">Gallica</skos:altLabel>
+      <skos:altLabel xml:lang="pt">BnF</skos:altLabel>
+      <skos:altLabel xml:lang="pt">Bibliothèque Nationale de France</skos:altLabel>
+      <skos:altLabel xml:lang="pt">Biblioteca Nacional de França</skos:altLabel>
+      <skos:altLabel xml:lang="pt">Bibliothèque Nationale</skos:altLabel>
+      <skos:altLabel xml:lang="pt">Biblioteca Nacional de Paris</skos:altLabel>
+      <skos:altLabel xml:lang="sk">Francúzska národná knižnica</skos:altLabel>
+      <skos:altLabel xml:lang="sk">BnF</skos:altLabel>
+      <skos:altLabel xml:lang="ru">Королевская библиотека Франции</skos:altLabel>
+      <skos:altLabel xml:lang="ru">Библиотека Парижа</skos:altLabel>
+      <skos:altLabel xml:lang="ru">Французская национальная библиотека</skos:altLabel>
+      <skos:altLabel xml:lang="ru">Парижская библиотека</skos:altLabel>
+      <skos:altLabel xml:lang="ru">Парижская национальная библиотека</skos:altLabel>
+      <skos:altLabel xml:lang="ca">Bibliothèque Nationale de France</skos:altLabel>
+      <skos:altLabel xml:lang="ca">Biblioteca Nacional de París</skos:altLabel>
+      <skos:altLabel xml:lang="ca">Biblioteca Nacional de Paris</skos:altLabel>
+      <skos:altLabel xml:lang="fi">BnF</skos:altLabel>
+      <skos:altLabel xml:lang="fi">Bibliothèque nationale de France</skos:altLabel>
+      <skos:altLabel xml:lang="cs">Bibliotheque François Mitterrand</skos:altLabel>
+      <skos:altLabel xml:lang="cs">Bibliothèque nationale de France</skos:altLabel>
+      <skos:altLabel xml:lang="cs">Bibliotheque nationale de France</skos:altLabel>
+      <skos:altLabel xml:lang="cs">Bibliothéque nationale de France</skos:altLabel>
+      <skos:altLabel xml:lang="bg">Национална библиотека „Франсоа Митеран“</skos:altLabel>
+      <skos:altLabel xml:lang="en">BnF</skos:altLabel>
+      <skos:altLabel xml:lang="en">Bibliotheque nationale de France</skos:altLabel>
+      <skos:altLabel xml:lang="en">National library of France</skos:altLabel>
+      <skos:altLabel xml:lang="en">National Library of France</skos:altLabel>
+      <skos:altLabel xml:lang="hu">BnF</skos:altLabel>
+      <skos:altLabel xml:lang="ro">BnF</skos:altLabel>
+      <skos:altLabel xml:lang="da">BnF</skos:altLabel>
+      <skos:altLabel xml:lang="ga">BnF</skos:altLabel>
+      <skos:altLabel xml:lang="hr">BnF</skos:altLabel>
+      <skos:altLabel xml:lang="sl">BnF</skos:altLabel>
+      <skos:altLabel xml:lang="lv">Francijas nacionālā bibliotēka</skos:altLabel>
+      <skos:altLabel xml:lang="lv">Bibliothèque nationale de France</skos:altLabel>
+      <skos:altLabel xml:lang="lv">BnF</skos:altLabel>
+      <skos:prefLabel xml:lang="pl">Francuska Biblioteka Narodowa</skos:prefLabel>
+      <skos:prefLabel xml:lang="fr">Bibliothèque nationale de France</skos:prefLabel>
+      <skos:prefLabel xml:lang="es">Biblioteca Nacional de Francia</skos:prefLabel>
+      <skos:prefLabel xml:lang="hu">Francia Nemzeti Könyvtár</skos:prefLabel>
+      <skos:prefLabel xml:lang="it">Bibliothèque nationale de France</skos:prefLabel>
+      <skos:prefLabel xml:lang="de">Bibliothèque nationale de France</skos:prefLabel>
+      <skos:prefLabel xml:lang="el">Εθνική Βιβλιοθήκη της Γαλλίας</skos:prefLabel>
+      <skos:prefLabel xml:lang="en">Bibliothèque nationale de France</skos:prefLabel>
+      <skos:prefLabel xml:lang="nl">Bibliothèque nationale de France</skos:prefLabel>
+      <skos:prefLabel xml:lang="sv">Bibliothèque nationale de France</skos:prefLabel>
+      <skos:prefLabel xml:lang="pt">Biblioteca Nacional da França</skos:prefLabel>
+      <skos:prefLabel xml:lang="sk">Bibliothèque nationale de France</skos:prefLabel>
+      <skos:prefLabel xml:lang="ru">Национальная библиотека Франции</skos:prefLabel>
+      <skos:prefLabel xml:lang="ca">Biblioteca Nacional de França</skos:prefLabel>
+      <skos:prefLabel xml:lang="fi">Ranskan kansalliskirjasto</skos:prefLabel>
+      <skos:prefLabel xml:lang="cs">Francouzská národní knihovna</skos:prefLabel>
+      <skos:prefLabel xml:lang="bg">Национална библиотека на Франция</skos:prefLabel>
+      <skos:prefLabel xml:lang="da">Bibliothèque nationale de France</skos:prefLabel>
+      <skos:prefLabel xml:lang="ro">Bibliothèque nationale de France</skos:prefLabel>
+      <skos:prefLabel xml:lang="sl">Francoska narodna knjižnica</skos:prefLabel>
+      <skos:prefLabel xml:lang="ga">Leabharlann Náisiúnta na Fraince</skos:prefLabel>
+      <skos:prefLabel xml:lang="hr">Nacionalna knjižnica Francuske</skos:prefLabel>
+      <skos:prefLabel xml:lang="lv">Francijas Nacionālā bibliotēka</skos:prefLabel>
+      <skos:note xml:lang="en">National Library of France</skos:note>
+      <skos:note xml:lang="cs">knihovna ve Francii</skos:note>
+      <skos:note xml:lang="fr">bibliothèque nationale</skos:note>
+      <skos:note xml:lang="nl">nationale bibliotheek in Parijs</skos:note>
+      <skos:note xml:lang="it">biblioteca francese</skos:note>
+      <skos:note xml:lang="de">französische Nationalbibliothek in Paris</skos:note>
+      <skos:note xml:lang="es">biblioteca nacional</skos:note>
+      <skos:note xml:lang="pl">francuska biblioteka narodowa (siedziba: Paryż)</skos:note>
+      <skos:note xml:lang="sv">Frankrikes nationalbibliotek</skos:note>
+      <skos:note xml:lang="fi">Ranskan keskuskirjasto</skos:note>
+      <skos:note xml:lang="lv">bibliotēka Francijā, Parīzē</skos:note>
+      <skos:note xml:lang="ca">Biblioteca de París, França</skos:note>
+    </edm:Organization>
   </metis:result>
 </metis:results>
