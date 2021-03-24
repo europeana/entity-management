@@ -1,12 +1,16 @@
 version: "3.9"
 
-# To only start mongo, run: docker-compose up db
+# To only start mongo, run: docker-compose up -d db
 # Then use the following settings in entitymanagement.user.properties
 #
+#  ###############
 #  mongo.connectionUrl = mongodb://admin-user:admin-password@localhost:27017
 #  mongo.em.database = entity-management
 #  mongo.batch.database = job-repository
-#
+#  ###############
+
+#  To stop it afterwards, run docker-compose down
+
 
 
 services:

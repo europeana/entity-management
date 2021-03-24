@@ -1,6 +1,5 @@
 package eu.europeana.entitymanagement.web;
 
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.METIS_DEREF_PATH;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_REGISTER_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_XML;
@@ -100,39 +99,12 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
     private MockMvc mockMvc;
 
-    /**
-     * MockWebServer needs to be static, so we can inject it's port into the Spring context.
-     * <p>
-     * Since the WebServer is re-used across tests, every test interacting with Metis NEEDS to call assertMetisRequest()
-     * to clear its queue!
-     * <p>
-     * See: https://github.com/spring-projects/spring-framework/issues/24825
-     */
-
-    private static MockWebServer mockMetis;
-
-    @DynamicPropertySource
-    static void setProperties(DynamicPropertyRegistry registry) {
-        registry.add("metis.baseUrl", () -> String.format("http://%s:%s", mockMetis.getHostName(), mockMetis.getPort()));
-    }
-
     @BeforeEach
     public void setup() throws Exception {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
 
         //ensure a clean db between test runs
         this.entityRecordService.dropRepository();
-    }
-
-
-    @BeforeAll
-    static void setupAll() {
-        mockMetis = new MockWebServer();
-    }
-
-    @AfterAll
-    static void teardownAll() throws IOException {
-        mockMetis.shutdown();
     }
 
     /**
@@ -425,19 +397,5 @@ public class EMControllerIT extends AbstractIntegrationTest {
         		.andExpect(status().isOk())
         		.andReturn();
         return resultXml.getResponse().getContentAsString(StandardCharsets.UTF_8);
-    }
-
-    /**
-     * Asserts that a de-reference request was actually made to the mock Metis server
-     *
-     * @param uri uri param in request
-     * @throws InterruptedException
-     */
-    private void assertMetisRequest(String uri) throws InterruptedException {
-        // check that app actually sent request
-        HttpUrl requestedUrl = mockMetis.takeRequest().getRequestUrl();
-        assert requestedUrl != null;
-        Assertions.assertEquals(METIS_DEREF_PATH, requestedUrl.encodedPath());
-        Assertions.assertEquals(uri, requestedUrl.queryParameter("uri"));
     }
 }

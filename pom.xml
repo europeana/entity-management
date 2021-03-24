@@ -47,8 +47,6 @@
         <corelib.version>2.11.0</corelib.version>
         <junit.version>5.7.0</junit.version>
         <jackson.version>2.11.4</jackson.version>
-        <springCore.version>5.2.7.RELEASE</springCore.version>
-        <version.spring>5.2.7.RELEASE</version.spring>
         <version.commonsLang3>3.0</version.commonsLang3>
         <version.annotationLd>1.1.6</version.annotationLd>
         <spring-boot.version>2.4.0</spring-boot.version>

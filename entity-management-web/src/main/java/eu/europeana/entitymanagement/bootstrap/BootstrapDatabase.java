@@ -22,14 +22,13 @@ public class BootstrapDatabase implements CommandLineRunner {
     private static final Logger logger = LogManager.getLogger(BootstrapDatabase.class);
 
     private final MongoBatchConfigurer batchConfigurer;
-    private final EntityRecordService entityRecordService
-            ;
+    private final EntityRecordService entityRecordService;
 
 
-    @Value("${mongo.batch.database.reset}")
+    @Value("${mongo.batch.database.reset:false}")
     private boolean resetBatchDatabase;
 
-    @Value("${mongo.em.database.reset}")
+    @Value("${mongo.em.database.reset:false}")
     private boolean resetEntityDatabase;
 
 

@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import dev.morphia.query.experimental.filters.Filter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +87,12 @@ public class EntityRecordService {
 	return entityRecordRepository.save(er);
     }
 
+	@SuppressWarnings("unchecked")
+	public List<? extends EntityRecord> saveBulkEntityRecords(List<? extends EntityRecord> records) {
+		// TODO: this is a code smell. Simplify EntityRecord vs EntityRecordImpl structure
+		return entityRecordRepository.saveBulk((List<EntityRecord>) records);
+	}
+
     public EntityRecord disableEntityRecord(EntityRecord er) {
 	er.setDisabled(true);
 	return saveEntityRecord(er);
@@ -124,11 +131,13 @@ public class EntityRecordService {
 
 	EntityRecord entityRecord = new EntityRecordImpl();
 	String entityId = generateEntityId(entity.getType());
-	entityRecord.setEntityId(entityId);
-	entity.setEntityId(entityId);
-	entityRecord.setEntity(entity);
+        entityRecord.setEntityId(entityId);
+        entity.setEntityId(entityId);
+        entityRecord.setEntity(entity);
+
 
 	setEuropeanaDataAndMetadata(entityId, entityRecord, timestamp, entityCreationRequest);
+
 
 	DataSource externalDatasource = externalDatasourceOptional.get();
 	setDatasourceMetadata(entityCreationRequest, entityId, externalDatasource, entityRecord, timestamp);
@@ -266,7 +275,7 @@ public class EntityRecordService {
 	    List<String> updatedReferences = new ArrayList<String>();
 	    
 	    for (String value : entry.getValue()) {
-		addInternalReference(updatedReferences, value);
+		addValueOrInternalReference(updatedReferences, value);
 	    }
 	    
 	    if(!updatedReferences.isEmpty()) {
@@ -287,7 +296,7 @@ public class EntityRecordService {
 	}
 	List<String> updatedReferences = new ArrayList<String>();
 	for (String entry : originalReferences) {
-	    addInternalReference(updatedReferences, entry);
+	    addValueOrInternalReference(updatedReferences, entry);
 	}
 
 	if (updatedReferences.isEmpty()) {
@@ -296,22 +305,18 @@ public class EntityRecordService {
 	return updatedReferences.toArray(new String[updatedReferences.size()]);
     }
 
-    private void addInternalReference(List<String> updatedReferences, String externalUri) {
-    	/*
-    	 * In case that an external reference we want to replace is not a URI 
-    	 * or if it is a Europeana URI, it does not need to be replaced
-    	 */
-    	if(!Utils.isUri(externalUri) || externalUri.startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI)) {
-    		updatedReferences.add(externalUri);
-    	}
-    	else
-    	{
-			Optional<EntityRecord> record = findMatchingCoreference(externalUri);
-			if (record.isPresent()) {
-			    updatedReferences.add(record.get().getEntityId());
-			}
-    	}
+    private void addValueOrInternalReference(List<String> updatedReferences, String value) {
+	if (!Utils.isUri(value) || value.startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI)) {
+	    //value is not a reference or it is an internal referece
+	    updatedReferences.add(value);
+	} else {
+	    //value is external URI, replace it with internal reference if they are accessible
+	    Optional<EntityRecord> record = findMatchingCoreference(value);
+	    if (record.isPresent()) {
+		updatedReferences.add(record.get().getEntityId());
+	    }
 	}
+    }
 
     /**
      * This function merges the data from the entities of the entity record proxies
@@ -549,12 +554,17 @@ public class EntityRecordService {
     }
 
     public void dropRepository() {
-	this.entityRecordRepository.dropCollection();
+        this.entityRecordRepository.dropCollection();
+    }
+
+
+    public List<? extends EntityRecord> findEntitiesWithFilter(int start, int count, Filter[] queryFilters) {
+        return this.entityRecordRepository.findWithFilters(start, count, queryFilters);
     }
 
     private void setEntityAggregation(EntityRecord entityRecord, String entityId, Date timestamp) {
-	Aggregation isAggregatedBy = new AggregationImpl();
-	isAggregatedBy.setId(getIsAggregatedById(entityId));
+        Aggregation isAggregatedBy = new AggregationImpl();
+        isAggregatedBy.setId(getIsAggregatedById(entityId));
 	isAggregatedBy.setCreated(timestamp);
 	isAggregatedBy.setModified(timestamp);
 	isAggregatedBy.setRecordCount(1);
