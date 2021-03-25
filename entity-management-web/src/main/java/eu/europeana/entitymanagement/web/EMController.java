@@ -106,32 +106,32 @@ public class EMController extends BaseRest {
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
-	    HttpServletRequest request) throws HttpException {
+	    HttpServletRequest request) throws HttpException, EuropeanaApiException {
 
 	String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier.toLowerCase());
-	Optional<EntityRecord> entityRecord = entityRecordService.retrieveEntityRecordByUri(entityUri);
-	if (entityRecord.isPresent() && !entityRecord.get().getDisabled()) {
+	Optional<EntityRecord> entityRecordOptional = entityRecordService.retrieveEntityRecordByUri(entityUri);
 
-	    Entity entity = entityRecord.get().getEntity();
+	if (entityRecordOptional.isEmpty()){
+		throw new EntityNotFoundException(entityUri);
+	}
+
+	EntityRecord entityRecord = entityRecordOptional.get();
+
+	if(entityRecord.getDisabled()){
+		throw new EntityRemovedException(entityUri);
+	}
+
+
+	    Entity entity = entityRecord.getEntity();
 	    Date etagDate = (entity == null || entity.getIsAggregatedBy() == null ? new Date()
 		    : entity.getIsAggregatedBy().getModified());
 	    String etag = generateETag(etagDate, FormatTypes.jsonld.name(), getApiVersion());
 
 	    checkIfMatchHeader(etag, request);
 
-	    /*
-	     * TODO: disable the record in the index, too
-	     */
-	    entityRecordService.disableEntityRecord(entityRecord.get());
+	    entityRecordService.disableEntityRecord(entityRecord);
 
-	    return ResponseEntity.noContent().header("info:", "The entity was disabled successfully.").build();
-	} else if (entityRecord.isPresent() && entityRecord.get().getDisabled()) {
-	    return ResponseEntity.status(HttpStatus.GONE).header("info:", "The entity is already disabled.").build();
-	} else {
-	    return ResponseEntity.notFound()
-		    .header("info:", "There is no entity with the given identifier to be disabled.").build();
-	}
-
+	    return ResponseEntity.noContent().build();
     }
 
     @ApiOperation(value = "Update an entity", nickname = "updateEntity", response = java.lang.Void.class)
