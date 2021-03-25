@@ -59,6 +59,7 @@
         <version.javax.annotation>1.3.2</version.javax.annotation>
         <version.log4j>2.13.3</version.log4j>
         <version.javax.validation>2.0.1.Final</version.javax.validation>
+        <git-code-format.version>3.0</git-code-format.version>
     </properties>
 
     <dependencyManagement>
@@ -166,13 +167,23 @@
           </resources>
           <plugins>
               <plugin>
-                  <groupId>org.apache.maven.plugins</groupId>
-                  <artifactId>maven-failsafe-plugin</artifactId>
+                  <groupId>com.cosium.code</groupId>
+                  <artifactId>git-code-format-maven-plugin</artifactId>
+                  <version>${git-code-format.version}</version>
                   <executions>
+                      <!-- On commit, format the modified java files -->
                       <execution>
+                          <id>install-formatter-hook</id>
                           <goals>
-                              <goal>integration-test</goal>
-                              <goal>verify</goal>
+                              <goal>install-hooks</goal>
+                          </goals>
+                      </execution>
+                      <!-- On Maven verify phase, fail if any file
+                      (including unmodified) is badly formatted -->
+                      <execution>
+                          <id>validate-code-format</id>
+                          <goals>
+                              <goal>validate-code-format</goal>
                           </goals>
                       </execution>
                   </executions>
