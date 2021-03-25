@@ -35,7 +35,7 @@ public class BaseMvcTestUtils {
         String[] parts = entityId.split("/");
 
         // namespace is always base
-        return parts[parts.length - 2] + "/base/" + parts[parts.length - 1];
+        return parts[parts.length - 2] + "/" + parts[parts.length - 1];
     }
 
 }
