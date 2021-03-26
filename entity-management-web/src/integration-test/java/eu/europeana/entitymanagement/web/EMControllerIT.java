@@ -24,10 +24,10 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -36,7 +36,6 @@ import java.util.Optional;
 import javax.servlet.ServletContext;
 
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -75,9 +74,7 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
 import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
-import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
 
 /**
  * Integration test for the main Entity Management controller
@@ -141,7 +138,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
         // matches id in JSON file
         assertMetisRequest("http://www.wikidata.org/entity/Q11019");
     }
-    
+
     @Test
     public void registerAgentShouldBeSuccessful() throws Exception {
         // set mock Metis response
@@ -163,7 +160,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
         // matches id in JSON file
         assertMetisRequest("http://www.wikidata.org/entity/Q762");
     }
-    
+
     @Test
     public void registerOrganizationShouldBeSuccessful() throws Exception {
         // set mock Metis response
@@ -185,7 +182,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
         // matches id in JSON file
         assertMetisRequest("http://www.wikidata.org/entity/Q193563");
     }
-    
+
     @Test
     public void registerPlaceShouldBeSuccessful() throws Exception {
         // set mock Metis response
@@ -207,7 +204,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
         // matches id in JSON file
         assertMetisRequest("https://sws.geonames.org/2988507/");
     }
-    
+
     @Test
     public void registerTimespanShouldBeSuccessful() throws Exception {
         // set mock Metis response
@@ -229,7 +226,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
         // matches id in JSON file
         assertMetisRequest("http://www.wikidata.org/entity/Q8106");
     }
-    
+
     @Test
     public void updateConceptShouldBeSuccessful() throws Exception {
         // set mock Metis response
@@ -240,15 +237,15 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isAccepted())
                 .andReturn();
-    	
+
         // matches the id in the JSON file (also used to remove the queued Metis request)
         assertMetisRequest("http://www.wikidata.org/entity/Q11019");
-    	
+
         final ObjectNode registeredEntityNode = new ObjectMapper().readValue(resultRegisterEntity.getResponse().getContentAsString(StandardCharsets.UTF_8), ObjectNode.class);
 
         String requestPath = getEntityRequestPath(registeredEntityNode.path("id").asText());
         mockMvc.perform(MockMvcRequestBuilders.put(BASE_SERVICE_URL + "/" + requestPath)
-        		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")		    
+        		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
         		.content(loadFile(CONCEPT_UPDATE_JSON))
         		.contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isAccepted())
@@ -268,7 +265,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
         	Assertions.assertTrue(prefLabelUpdated.containsKey(prefLabelEntry.getKey()));
         	Assertions.assertTrue(prefLabelUpdated.containsValue(prefLabelEntry.getValue()));
         }
-        
+
     }
 
 
@@ -292,7 +289,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
         String contentXml = getRetrieveEntityXmlResponse(requestPath);
         assertSomeEntityFields(contentXml, resultActions, concept);
     }
-    
+
     @Test
     void retrieveAgentShouldBeSuccessful() throws Exception {
         // read the test data for the Agent entity from the file
@@ -315,7 +312,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void retrieveOrganizationShouldBeSuccessful() throws Exception {    
+    void retrieveOrganizationShouldBeSuccessful() throws Exception {
         // read the test data for the Organization entity from the file
         OrganizationImpl organization = objectMapper.readValue(loadFile(ORGANIZATION_JSON), OrganizationImpl.class);
         EntityRecord entityRecord =  new EntityRecordImpl();
@@ -336,7 +333,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void retrievePlaceShouldBeSuccessful() throws Exception {    
+    void retrievePlaceShouldBeSuccessful() throws Exception {
         // read the test data for the Place entity from the file
         PlaceImpl place = objectMapper.readValue(loadFile(PLACE_JSON), PlaceImpl.class);
         EntityRecord entityRecord =  new EntityRecordImpl();
@@ -355,9 +352,9 @@ public class EMControllerIT extends AbstractIntegrationTest {
         String contentXml = getRetrieveEntityXmlResponse(requestPath);
         assertSomeEntityFields(contentXml, resultActions, place);
     }
-    
+
     @Test
-    void retrieveTimespanShouldBeSuccessful() throws Exception {    
+    void retrieveTimespanShouldBeSuccessful() throws Exception {
         // read the test data for the Timespan entity from the file
         TimespanImpl timespan = objectMapper.readValue(loadFile(TIMESPAN_JSON), TimespanImpl.class);
         EntityRecord entityRecord =  new EntityRecordImpl();
@@ -376,6 +373,47 @@ public class EMControllerIT extends AbstractIntegrationTest {
         String contentXml = getRetrieveEntityXmlResponse(requestPath);
         assertSomeEntityFields(contentXml, resultActions, timespan);
     }
+
+    @Test
+    void updateFromExternalDatasourceShouldRunSuccessfully() throws Exception {
+        // create entity in DB
+        ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_JSON), ConceptImpl.class);
+        EntityRecord entityRecord = new EntityRecordImpl();
+        entityRecord.setEntity(concept);
+        entityRecord.setEntityId(concept.getEntityId());
+        EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
+
+        String requestPath = getEntityRequestPath(record.getEntityId());
+
+        mockMvc.perform(post(BASE_SERVICE_URL + "/" + requestPath + "/management/update")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isAccepted());
+
+        //TODO: test error flows
+    }
+
+    @Test
+    void deletionShouldBeSuccessful() throws Exception {
+        // create entity in DB
+        ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_JSON), ConceptImpl.class);
+        EntityRecord entityRecord = new EntityRecordImpl();
+        entityRecord.setEntity(concept);
+        entityRecord.setEntityId(concept.getEntityId());
+        EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
+
+        String requestPath = getEntityRequestPath(record.getEntityId());
+
+        mockMvc.perform(delete(BASE_SERVICE_URL + "/" + requestPath)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+
+        // check that record was disabled
+        Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveEntityRecordByUri(record.getEntityId());
+
+        assert dbRecordOptional.isPresent();
+        Assertions.assertTrue(dbRecordOptional.get().getDisabled());
+    }
+
 
     private void assertSomeEntityFields(String contentXml, ResultActions resultActions, Entity entity) throws Exception {
         Assertions.assertTrue(contentXml.contains(XmlFields.XML_SKOS_PREF_LABEL));
