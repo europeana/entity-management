@@ -69,14 +69,14 @@ import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEA
 @RequestMapping("/entity")
 public class EMController extends BaseRest {
 
-    @Resource(name = AppConfig.BEAN_ENTITY_RECORD_SERVICE)
-    private EntityRecordService entityRecordService;
+  @Resource(name = AppConfig.BEAN_ENTITY_RECORD_SERVICE)
+  private EntityRecordService entityRecordService;
 
-    @Resource(name = AppConfig.BEAN_METIS_DEREF_SERVICE)
-    private MetisDereferenceService dereferenceService;
+  @Resource(name = AppConfig.BEAN_METIS_DEREF_SERVICE)
+  private MetisDereferenceService dereferenceService;
 
-    @Resource(name = AppConfig.BEAN_EM_DATA_SOURCES)
-    private DataSources datasources;
+  @Resource(name = AppConfig.BEAN_EM_DATA_SOURCES)
+  private DataSources datasources;
 
     @Resource(name = AppConfig.BEAN_EM_CONFIGURATION)
     EntityManagementConfiguration emConfiguration;
@@ -144,12 +144,13 @@ public class EMController extends BaseRest {
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 	    @RequestBody EntityPreview entityCreationRequest,
-	    HttpServletRequest request) {
+	    HttpServletRequest request) throws Exception {
 
     	// TODO: Re-enable authentication
     	// verifyReadAccess(request);
 
-    	Optional<EntityRecord> existingRecord = entityRecordService.retrieveEntityRecordByUri(EntityRecordUtils.buildEntityIdUri(type, identifier));
+		String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
+		Optional<EntityRecord> existingRecord = entityRecordService.retrieveEntityRecordByUri(entityUri);
     	if(existingRecord.isPresent() && existingRecord.get().getEuropeanaProxy()!=null) {
 
     		Date timestamp = (existingRecord.get().getEntity().getIsAggregatedBy() != null) ? existingRecord.get().getEntity().getIsAggregatedBy().getModified() : null;
@@ -182,6 +183,7 @@ public class EMController extends BaseRest {
     		}
 
     		entityRecordService.update(existingRecord.get());
+    		launchUpdateTask(entityUri);
 
     		return ResponseEntity.accepted().body(existingRecord.get());
     	}
@@ -205,20 +207,15 @@ public class EMController extends BaseRest {
 			throw new EntityNotFoundException(entityUri);
 		}
 
-		EntityRecord entityRecord = entityRecordOptional.get();
+    EntityRecord entityRecord = entityRecordOptional.get();
 
-		if (entityRecord.getDisabled()) {
-			throw new EntityRemovedException(entityUri);
-		}
+    if (entityRecord.getDisabled()) {
+      throw new EntityRemovedException(entityUri);
+    }
 
-		logger.info("Launching update task for {}", entityUri);
-
-		// trigger update task
-		JobParameters jobParameters = BatchUtils.createJobParameters(new String[]{entityUri}, new Date(), mapper);
-		jobLauncher.run(batchEntityUpdateConfig.updateSpecificEntities(), jobParameters);
-
-		return ResponseEntity.accepted().body(entityRecord);
-	}
+    launchUpdateTask(entityUri);
+    return ResponseEntity.accepted().body(entityRecord);
+  }
 
     @ApiOperation(value = "Retrieve a known entity", nickname = "getEntityJsonLd", response = java.lang.Void.class)
     @RequestMapping(value = { "/{type}/base/{identifier}.jsonld",
@@ -338,7 +335,15 @@ public class EMController extends BaseRest {
 	String body = serialize(entityRecord, outFormat, profile);
 
 	response = new ResponseEntity<String>(body, headers, HttpStatus.OK);
-	return response;
-    }
-   
+    return response;
+  }
+
+
+  private void launchUpdateTask(String entityUri)
+      throws Exception {
+    logger.info("Launching update task for {}", entityUri);
+    jobLauncher.run(
+        batchEntityUpdateConfig.updateSpecificEntities(),
+        BatchUtils.createJobParameters(new String[] {entityUri}, new Date(), mapper));
+  }
 }
