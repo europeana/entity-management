@@ -15,6 +15,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -65,9 +66,7 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
 import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
-import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
 
 /**
  * Integration test for the main Entity Management controller
@@ -255,6 +254,46 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
         contentXml = getRetrieveEntityXmlResponse(requestPath);
         assertSomeEntityFields(contentXml, resultActions, timespan);
+    }
+
+    @Test
+    void updateFromExternalDatasourceShouldRunSuccessfully() throws Exception {
+        // create entity in DB
+        ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_JSON), ConceptImpl.class);
+        EntityRecord entityRecord = new EntityRecordImpl();
+        entityRecord.setEntity(concept);
+        entityRecord.setEntityId(concept.getEntityId());
+        EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
+
+        String requestPath = getEntityRequestPath(record.getEntityId());
+
+        mockMvc.perform(post(BASE_SERVICE_URL + "/" + requestPath + "/management/update")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isAccepted());
+
+        //TODO: test error flows
+    }
+
+    @Test
+    void deletionShouldBeSuccessful() throws Exception {
+        // create entity in DB
+        ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_JSON), ConceptImpl.class);
+        EntityRecord entityRecord = new EntityRecordImpl();
+        entityRecord.setEntity(concept);
+        entityRecord.setEntityId(concept.getEntityId());
+        EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
+
+        String requestPath = getEntityRequestPath(record.getEntityId());
+
+        mockMvc.perform(delete(BASE_SERVICE_URL + "/" + requestPath)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+
+        // check that record was disabled
+        Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveEntityRecordByUri(record.getEntityId());
+
+        assert dbRecordOptional.isPresent();
+        Assertions.assertTrue(dbRecordOptional.get().getDisabled());
     }
 
     private void assertEntityExists(MvcResult result) throws JsonMappingException, JsonProcessingException, UnsupportedEncodingException {

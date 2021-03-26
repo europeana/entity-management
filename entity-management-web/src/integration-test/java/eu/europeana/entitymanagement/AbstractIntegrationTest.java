@@ -51,8 +51,8 @@ public abstract class AbstractIntegrationTest {
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
         registry.add("mongo.connectionUrl", MONGO_CONTAINER::getConnectionUrl);
-        registry.add("mongo.em.database", MONGO_CONTAINER::getBatchDb);
-        registry.add("mongo.batch.database", MONGO_CONTAINER::getEntityDb);
+        registry.add("mongo.em.database", MONGO_CONTAINER::getEntityDb);
+        registry.add("mongo.batch.database", MONGO_CONTAINER::getBatchDb);
         registry.add("metis.baseUrl", () -> String.format("http://%s:%s", mockMetis.getHostName(), mockMetis.getPort()));
     }
 

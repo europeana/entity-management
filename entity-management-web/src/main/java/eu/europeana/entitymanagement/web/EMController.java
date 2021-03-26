@@ -1,11 +1,27 @@
 package eu.europeana.entitymanagement.web;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.europeana.entitymanagement.batch.BatchEntityUpdateConfig;
+import eu.europeana.entitymanagement.batch.BatchUtils;
+import eu.europeana.entitymanagement.exception.EntityNotFoundException;
+import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import java.util.Date;
 import java.util.Optional;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersInvalidException;
+import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
+import org.springframework.batch.core.repository.JobRestartException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -40,6 +56,8 @@ import eu.europeana.entitymanagement.web.service.impl.EntityRecordUtils;
 import eu.europeana.entitymanagement.web.service.impl.MetisDereferenceService;
 import io.swagger.annotations.ApiOperation;
 
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_JSON_MAPPER;
+
 
 /**
  * Example Rest Controller class with input validation TODO: catch the
@@ -63,6 +81,23 @@ public class EMController extends BaseRest {
     @Resource(name = AppConfig.BEAN_EM_CONFIGURATION)
     EntityManagementConfiguration emConfiguration;
 
+    @Resource
+	private BatchConfigurer batchConfigurer;
+
+	@Resource
+	private BatchEntityUpdateConfig batchEntityUpdateConfig;
+
+	@Resource(name=BEAN_JSON_MAPPER)
+	private ObjectMapper mapper;
+
+	private JobLauncher jobLauncher;
+
+	@PostConstruct
+	void setup() throws Exception {
+		// launcher is async, so this is non-blocking
+		jobLauncher = batchConfigurer.getJobLauncher();
+	}
+
     @ApiOperation(value = "Disable an entity", nickname = "disableEntity", response = java.lang.Void.class)
     @RequestMapping(value = { "/{type}/base/{identifier}",
 	    "/{type}/{identifier}" }, method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -71,32 +106,32 @@ public class EMController extends BaseRest {
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
-	    HttpServletRequest request) throws HttpException {
+	    HttpServletRequest request) throws HttpException, EuropeanaApiException {
 
 	String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier.toLowerCase());
-	Optional<EntityRecord> entityRecord = entityRecordService.retrieveEntityRecordByUri(entityUri);
-	if (entityRecord.isPresent() && !entityRecord.get().getDisabled()) {
+	Optional<EntityRecord> entityRecordOptional = entityRecordService.retrieveEntityRecordByUri(entityUri);
 
-	    Entity entity = entityRecord.get().getEntity();
+	if (entityRecordOptional.isEmpty()){
+		throw new EntityNotFoundException(entityUri);
+	}
+
+	EntityRecord entityRecord = entityRecordOptional.get();
+
+	if(entityRecord.getDisabled()){
+		throw new EntityRemovedException(entityUri);
+	}
+
+
+	    Entity entity = entityRecord.getEntity();
 	    Date etagDate = (entity == null || entity.getIsAggregatedBy() == null ? new Date()
 		    : entity.getIsAggregatedBy().getModified());
 	    String etag = generateETag(etagDate, FormatTypes.jsonld.name(), getApiVersion());
 
 	    checkIfMatchHeader(etag, request);
 
-	    /*
-	     * TODO: disable the record in the index, too
-	     */
-	    entityRecordService.disableEntityRecord(entityRecord.get());
+	    entityRecordService.disableEntityRecord(entityRecord);
 
-	    return ResponseEntity.noContent().header("info:", "The entity was disabled successfully.").build();
-	} else if (entityRecord.isPresent() && entityRecord.get().getDisabled()) {
-	    return ResponseEntity.status(HttpStatus.GONE).header("info:", "The entity is already disabled.").build();
-	} else {
-	    return ResponseEntity.notFound()
-		    .header("info:", "There is no entity with the given identifier to be disabled.").build();
-	}
-
+	    return ResponseEntity.noContent().build();
     }
 
     @ApiOperation(value = "Update an entity", nickname = "updateEntity", response = java.lang.Void.class)
@@ -154,6 +189,36 @@ public class EMController extends BaseRest {
     	return ResponseEntity.notFound().header("info:", "The given entity record does not exist.").build();
 
     }
+
+
+	@ApiOperation(value = "Update an entity from external data source", nickname = "updateEntityFromDatasource", response = java.lang.Void.class)
+	@PostMapping(value = "/{type}/{identifier}/management/update", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<EntityRecord> updateFromExternalSource(
+			@PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
+			@PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier
+	) throws Exception {
+		// check that entity exists, if not return 404
+		String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
+		Optional<EntityRecord> entityRecordOptional = entityRecordService
+				.retrieveEntityRecordByUri(entityUri);
+		if (entityRecordOptional.isEmpty()) {
+			throw new EntityNotFoundException(entityUri);
+		}
+
+		EntityRecord entityRecord = entityRecordOptional.get();
+
+		if (entityRecord.getDisabled()) {
+			throw new EntityRemovedException(entityUri);
+		}
+
+		logger.info("Launching update task for {}", entityUri);
+
+		// trigger update task
+		JobParameters jobParameters = BatchUtils.createJobParameters(new String[]{entityUri}, new Date(), mapper);
+		jobLauncher.run(batchEntityUpdateConfig.updateSpecificEntities(), jobParameters);
+
+		return ResponseEntity.accepted().body(entityRecord);
+	}
 
     @ApiOperation(value = "Retrieve a known entity", nickname = "getEntityJsonLd", response = java.lang.Void.class)
     @RequestMapping(value = { "/{type}/base/{identifier}.jsonld",
@@ -222,8 +287,8 @@ public class EMController extends BaseRest {
 		metisResponse.getType());
 	return ResponseEntity.accepted().body(savedEntity);
     }
-    
-  
+
+
     private ResponseEntity<String> createResponse(String profile, String type, String identifier, FormatTypes outFormat,
 	    String contentType, HttpServletRequest request) {
 	// TODO: Re-enable authentication
