@@ -283,7 +283,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
         		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.entityId", is(concept.getEntityId())))
+                .andExpect(jsonPath("$.id", is(concept.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Concept.name())));
 
         String contentXml = getRetrieveEntityXmlResponse(requestPath);
@@ -304,7 +304,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
         		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.entityId", is(agent.getEntityId())))
+                .andExpect(jsonPath("$.id", is(agent.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())));
 
         String contentXml = getRetrieveEntityXmlResponse(requestPath);
@@ -325,7 +325,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
         		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.entityId", is(organization.getEntityId())))
+                .andExpect(jsonPath("$.id", is(organization.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())));
 
         String contentXml = getRetrieveEntityXmlResponse(requestPath);
@@ -346,7 +346,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
         		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.entityId", is(place.getEntityId())))
+                .andExpect(jsonPath("$.id", is(place.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Place.name())));
 
         String contentXml = getRetrieveEntityXmlResponse(requestPath);
@@ -367,7 +367,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
         		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.entityId", is(timespan.getEntityId())))
+                .andExpect(jsonPath("$.id", is(timespan.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Timespan.name())));
 
         String contentXml = getRetrieveEntityXmlResponse(requestPath);

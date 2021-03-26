@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement.definitions.model.impl;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
@@ -10,6 +11,7 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
+@JsonPropertyOrder({WebEntityFields.ID, WebEntityFields.SOURCE, WebEntityFields.THUMBNAIL})
 public class WebResourceImpl implements WebResource{
 
 	public WebResourceImpl() {

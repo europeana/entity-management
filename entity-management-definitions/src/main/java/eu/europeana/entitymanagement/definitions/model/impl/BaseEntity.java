@@ -141,12 +141,14 @@ public class BaseEntity implements Entity {
 //		this.sameAs = sameAs;
 //	}
 
-	
+	@Override
+	@JsonGetter(WebEntityFields.ID)
 	public String getEntityId() {
 		return entityId;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.ID)
 	public void setEntityId(String entityId) {
 		this.entityId = entityId;
 	}
@@ -163,13 +165,12 @@ public class BaseEntity implements Entity {
 		this.identifier = identifier;
 	}
 
-	@JsonGetter(WebEntityFields.ID)
+	@JsonIgnore
 	@JacksonXmlProperty(isAttribute= true, localName = XmlFields.XML_RDF_ABOUT)
 	public String getAbout() {
 		return getEntityId();
 	}
 
-	@JsonSetter(WebEntityFields.ID)
 	public void setAbout(String about) {
 		setEntityId(about);
 		setEntityIdentifier();

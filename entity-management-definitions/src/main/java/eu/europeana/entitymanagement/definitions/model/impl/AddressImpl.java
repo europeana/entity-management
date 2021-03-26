@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.definitions.model.impl;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
@@ -12,6 +13,10 @@ import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JacksonXmlRootElement(localName = XmlFields.XML_VCARD_ADDRESS)
+
+@JsonPropertyOrder({WebEntityFields.STREET_ADDRESS, WebEntityFields.POSTAL_CODE, WebEntityFields.POST_OFFICE_BOX,
+	WebEntityFields.LOCALITY, WebEntityFields.REGION, WebEntityFields.COUNTRY_NAME, WebEntityFields.HAS_GEO})
+
 public class AddressImpl implements Address, eu.europeana.corelib.definitions.edm.entity.Address {
 
     public AddressImpl() {
