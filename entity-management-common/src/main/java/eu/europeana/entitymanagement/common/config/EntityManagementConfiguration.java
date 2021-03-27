@@ -1,25 +1,106 @@
 package eu.europeana.entitymanagement.common.config;
 
-public interface EntityManagementConfiguration {
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.PropertySources;
 
-    /**
-     * uses entity.environment property
-     */
-    public String getJwtTokenSignatureKey();
+/**
+ * Container for all settings that we load from the entitymanagement.properties
+ * file and optionally override from entitymanagement.user.properties file
+ */
+@Configuration
+@PropertySources({ @PropertySource("classpath:entitymanagement.properties"),
+	@PropertySource(value = "classpath:entitymanagement.user.properties", ignoreResourceNotFound = true) })
+public class EntityManagementConfiguration  {
 
-    public String getAuthorizationApiName();
+    private static final Logger LOG = LogManager.getLogger(EntityManagementConfiguration.class);
 
-    String getDatasourcesXMLConfig();
+    @Value("${datasources.config}")
+    private String datasourcesXMLConfig;
 
-    String getMetisBaseUrl();
+    @Value("${languagecodes.config}")
+    private String languagecodesXMLConfig;
 
-    String getLanguagecodesXMLConfig();
+//    @Value("${altLabelFieldNamePrefix}")
+//    private String altLabelFieldNamePrefix;
+//
+//    @Value("${prefLabelFieldNamePrefix}")
+//    private String prefLabelFieldNamePrefix;
+//
+//    @Value("${languageSeparato§r}")
+//    private String languageSeparator;
 
-    String getHitsQuery();
+    @Value("${europeana.apikey.jwttoken.siganturekey}")
+    private String europeanaApikeyJwttokenSiganturekey;
 
-    String getEnrichmentsQuery();
+    @Value("${entitymanagement.solr.pr.url}")
+    private String prSolrUrl;
 
-    String getSearchApiSolrUrl();
+    @Value("${entitymanagement.solr.searchapi.url}")
+    private String searchApiSolrUrl;
 
-    String getPrSolrUrl();
+    @Value("${entitymanagement.solr.searchapi.enrichments.query}")
+    private String enrichmentsQuery;
+
+    @Value("${entitymanagement.solr.searchapi.hits.query}")
+    private String hitsQuery;
+
+    @Value("${authorization.api.name}")
+    private String authorizationApiName;
+
+    @Value("${metis.baseUrl}")
+    private String metisBaseUrl;
+
+    public EntityManagementConfiguration() {
+	LOG.info("Initializing EntityManagementConfiguration bean as: configuration");
+    }
+
+    
+    public String getPrSolrUrl() {
+	return prSolrUrl;
+    }
+
+    
+    public String getSearchApiSolrUrl() {
+	return searchApiSolrUrl;
+    }
+
+    
+    public String getEnrichmentsQuery() {
+	return enrichmentsQuery;
+    }
+
+    
+    public String getHitsQuery() {
+	return hitsQuery;
+    }
+
+    
+    public String getJwtTokenSignatureKey() {
+	return europeanaApikeyJwttokenSiganturekey;
+    }
+
+    
+    public String getAuthorizationApiName() {
+	return authorizationApiName;
+    }
+
+    
+    public String getMetisBaseUrl() {
+	return metisBaseUrl;
+    }
+
+    
+    public String getDatasourcesXMLConfig() {
+	return datasourcesXMLConfig;
+    }
+
+    
+    public String getLanguagecodesXMLConfig() {
+	return languagecodesXMLConfig;
+    }
+
 }

@@ -78,7 +78,7 @@ public class EMController extends BaseRest {
   @Resource(name = AppConfig.BEAN_EM_DATA_SOURCES)
   private DataSources datasources;
 
-    @Resource(name = AppConfig.BEAN_EM_CONFIGURATION)
+    @Resource
     EntityManagementConfiguration emConfiguration;
 
     @Resource

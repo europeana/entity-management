@@ -4,7 +4,6 @@ public class AppConfigConstants {
 
     public static final String BEAN_EM_XML_SERIALIZER = "emXmlSerializer";
     public static final String BEAN_EM_JSONLD_SERIALIZER = "emJsonldSerializer";
-    public static final String BEAN_EM_CONFIGURATION = "emConfiguration";
     public static final String BEAN_EM_DATA_SOURCES = "emDataSources";
     public static final String BEAN_EM_LANGUAGE_CODES = "emLanguageCodes";
     public static final String BEAN_EM_VALIDATOR_FACTORY = "emValidatorFactory";
