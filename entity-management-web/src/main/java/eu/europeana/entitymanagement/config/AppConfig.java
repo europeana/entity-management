@@ -42,6 +42,10 @@ public class AppConfig extends AppConfigConstants{
 
     @Resource(name = BEAN_XML_MAPPER)
     private XmlMapper xmlMapper;
+
+    @Resource(name= BEAN_JOB_EXECUTOR)
+    private TaskExecutor jobLauncherExecutor;
+
     
     public AppConfig() {
 	LOG.info("Initializing EntityManagementConfiguration bean as: configuration");
@@ -87,6 +91,6 @@ public class AppConfig extends AppConfigConstants{
      */
     @Bean
     public MongoBatchConfigurer mongoBatchConfigurer(@Qualifier(BEAN_BATCH_DATA_STORE) Datastore datastore){
-        return new MongoBatchConfigurer(datastore);
+        return new MongoBatchConfigurer(datastore, jobLauncherExecutor);
     }
 }
