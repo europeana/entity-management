@@ -71,6 +71,12 @@ public class BaseEntity implements Entity {
 		return referencedWebResource;
 	}
 	
+	@Override
+	@JsonSetter
+	public void setReferencedWebResource(WebResource resource) {
+		this.referencedWebResource = resource;
+	}
+	
 	@JsonGetter(WebEntityFields.PREF_LABEL)
 	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_PREF_LABEL)
 	public Map<String, String> getPrefLabelStringMap() {
@@ -420,4 +426,5 @@ public class BaseEntity implements Entity {
 		result = 31 * result + Arrays.hashCode(getIdentifier());
 		return result;
 	}
+
 }
