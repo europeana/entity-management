@@ -36,12 +36,16 @@ public class EntityRecordImpl implements EntityRecord {
     private Entity entity;
 
     private List<EntityProxy> proxies = new ArrayList<>();
-    
+
+    @JsonIgnore
     private boolean disabled;
 
+    @JsonIgnore
+    private Date created;
+
+    @JsonIgnore
     private Date modified;
 
-    private Date created;
 
     @Override
     @JsonGetter

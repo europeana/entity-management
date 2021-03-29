@@ -249,7 +249,7 @@ public class EMController extends BaseRest {
     @ApiOperation(value = "Register a new entity", nickname = "registerEntity", response = java.lang.Void.class)
     @PostMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<EntityRecord> registerEntity(@RequestBody EntityPreview entityCreationRequest)
-	    throws EuropeanaApiException {
+				throws Exception {
 	// check if id is already being used, if so return a 301
 	Optional<EntityRecord> existingEntity = entityRecordService
 		.findMatchingCoreference(entityCreationRequest.getId());
@@ -280,9 +280,11 @@ public class EMController extends BaseRest {
 
 	}
 
-	EntityRecord savedEntity = entityRecordService.createEntityFromRequest(entityCreationRequest,
-		metisResponse.getType());
-	return ResponseEntity.accepted().body(savedEntity);
+	EntityRecord savedEntityRecord = entityRecordService.createEntityFromRequest(entityCreationRequest,
+		metisResponse);
+
+	launchUpdateTask(savedEntityRecord.getEntityId());
+	return ResponseEntity.accepted().body(savedEntityRecord);
     }
 
 
