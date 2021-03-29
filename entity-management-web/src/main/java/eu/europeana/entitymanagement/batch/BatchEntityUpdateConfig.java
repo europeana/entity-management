@@ -1,17 +1,23 @@
 package eu.europeana.entitymanagement.batch;
 
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_JSON_MAPPER;
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_STEP_EXECUTOR;
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.SYNC_TASK_EXECUTOR;
+import static eu.europeana.entitymanagement.mongo.repository.EntityRecordFields.ENTITY_ID;
+import static eu.europeana.entitymanagement.mongo.repository.EntityRecordFields.ENTITY_MODIFIED;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.morphia.query.experimental.filters.Filters;
 import eu.europeana.entitymanagement.batch.processor.EntityDereferenceProcessor;
 import eu.europeana.entitymanagement.batch.processor.EntityUpdateProcessor;
 import eu.europeana.entitymanagement.batch.reader.EntityRecordDatabaseReader;
-import eu.europeana.entitymanagement.batch.reader.EntityRecordExecutionContextReader;
 import eu.europeana.entitymanagement.batch.writer.EntityRecordDatabaseWriter;
-import eu.europeana.entitymanagement.batch.writer.EntityRecordExecutionContextWriter;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
+import java.util.Arrays;
+import java.util.Date;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.Job;
@@ -20,8 +26,9 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
+import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
+import org.springframework.batch.item.support.CompositeItemProcessor;
 import org.springframework.batch.item.support.SynchronizedItemStreamReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -29,16 +36,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
-
-import java.util.Arrays;
-import java.util.Date;
-
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_JSON_MAPPER;
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_STEP_EXECUTOR;
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.ENTITY_RECORD_CTX_KEY;
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.SYNC_TASK_EXECUTOR;
-import static eu.europeana.entitymanagement.mongo.repository.EntityRecordFields.ENTITY_ID;
-import static eu.europeana.entitymanagement.mongo.repository.EntityRecordFields.ENTITY_MODIFIED;
 
 @Component
 public class BatchEntityUpdateConfig {
@@ -58,9 +55,6 @@ public class BatchEntityUpdateConfig {
     private final EntityRecordDatabaseWriter dbWriter;
     private final EntityRecordService entityRecordService;
 
-    private final EntityRecordExecutionContextReader contextReader;
-    private final EntityRecordExecutionContextWriter contextWriter;
-
     private final TaskExecutor stepThreadPoolExecutor;
     private final TaskExecutor synchronousTaskExecutor;
 
@@ -77,8 +71,7 @@ public class BatchEntityUpdateConfig {
         EntityDereferenceProcessor dereferenceProcessor,
         EntityUpdateProcessor entityUpdateProcessor,
         EntityRecordDatabaseWriter dbWriter,
-        EntityRecordService entityRecordService, EntityRecordExecutionContextReader contextReader,
-        EntityRecordExecutionContextWriter contextWriter,
+        EntityRecordService entityRecordService,
         @Qualifier(BEAN_STEP_EXECUTOR) TaskExecutor stepThreadPoolExecutor,
         @Qualifier(SYNC_TASK_EXECUTOR)TaskExecutor synchronousTaskExecutor,
         @Qualifier(BEAN_JSON_MAPPER) ObjectMapper mapper,
@@ -91,8 +84,6 @@ public class BatchEntityUpdateConfig {
         this.entityUpdateProcessor = entityUpdateProcessor;
         this.dbWriter = dbWriter;
         this.entityRecordService = entityRecordService;
-        this.contextReader = contextReader;
-        this.contextWriter = contextWriter;
         this.stepThreadPoolExecutor = stepThreadPoolExecutor;
         this.synchronousTaskExecutor = synchronousTaskExecutor;
         this.mapper = mapper;
@@ -117,47 +108,30 @@ public class BatchEntityUpdateConfig {
         // Make ItemReader thread-safe
         final SynchronizedItemStreamReader<EntityRecord> synchronizedItemStreamReader = new SynchronizedItemStreamReader<>();
         synchronizedItemStreamReader.setDelegate(reader);
-
         return synchronizedItemStreamReader;
     }
 
 
-    private Step metisStep(boolean singleEntity) {
-        return this.stepBuilderFactory.get("metisDerefStep")
-                .<EntityRecord, EntityRecord>chunk(chunkSize)
-                .reader(singleEntity ? singleItemReader : multipleItemReader)
-                .processor(dereferenceProcessor)
-                .writer(contextWriter)
-                .taskExecutor(singleEntity ? synchronousTaskExecutor : stepThreadPoolExecutor)
-                .listener(promotionListener())
-                .build();
-    }
-
-
-    private Step entityValidationStep(boolean singleEntity) {
-        return this.stepBuilderFactory.get("entityValidationStep")
-                .<EntityRecord, EntityRecord>chunk(chunkSize)
-                .reader(contextReader)
-                .processor(entityUpdateProcessor)
-                .writer(dbWriter)
-                .taskExecutor(singleEntity ? synchronousTaskExecutor : stepThreadPoolExecutor)
-                .listener(promotionListener())
-                .build();
-    }
-
-
-
     /**
-     * Promotes variables in a StepExecutionContext (only available within a Step) to
-     * the JobExecutionContext (available for the entire Job).
-     * <p>
-     * This mechanism is needed to pass data between Steps
+     * Creates a Composite ItemProcessor to perform Metis de-referencing and Entity update in a single
+     * step.
      */
     @Bean
-    private ExecutionContextPromotionListener promotionListener() {
-        ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
-        listener.setKeys(new String[]{ENTITY_RECORD_CTX_KEY});
-        return listener;
+    private ItemProcessor<EntityRecord, EntityRecord> compositeItemProcessor() {
+        CompositeItemProcessor<EntityRecord, EntityRecord> compositeItemProcessor = new CompositeItemProcessor<>();
+        compositeItemProcessor.setDelegates(Arrays.asList(dereferenceProcessor, entityUpdateProcessor));
+        return compositeItemProcessor;
+    }
+
+
+    private Step updateEntityStep(boolean singleEntity){
+        return this.stepBuilderFactory.get("updateEntityStep")
+            .<EntityRecord, EntityRecord>chunk(chunkSize)
+            .reader(singleEntity ? singleItemReader : multipleItemReader)
+            .processor(compositeItemProcessor())
+            .writer(dbWriter)
+            .taskExecutor(singleEntity ? synchronousTaskExecutor : stepThreadPoolExecutor)
+            .build();
     }
 
 
@@ -165,8 +139,7 @@ public class BatchEntityUpdateConfig {
         logger.info("Starting update job for specific entities");
         return this.jobBuilderFactory.get("specificEntityUpdateJob")
                 .incrementer(new RunIdIncrementer())
-                .start(metisStep(true))
-                .next(entityValidationStep(true))
+                .start(updateEntityStep(true))
                 .build();
     }
 
@@ -174,8 +147,7 @@ public class BatchEntityUpdateConfig {
         logger.info("Starting update job for ALL entities");
         return this.jobBuilderFactory.get("allEntityUpdateJob")
                 .incrementer(new RunIdIncrementer())
-                .start(metisStep(false))
-                .next(entityValidationStep(false))
+                .start(updateEntityStep(false))
                 .build();
     }
 }
