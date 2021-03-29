@@ -52,7 +52,7 @@ public class JobLauncherController {
      * This triggers a simple job that logs to the console
      */
     @PostMapping("/run")
-    public ResponseEntity<String> handle(@RequestBody String entityId) throws Exception {
+    public ResponseEntity<String> handle(@RequestBody(required = false) String entityId) throws Exception {
         if (StringUtils.hasLength(entityId)) {
             launchSingleEntityUpdate(entityId);
         } else {
@@ -68,9 +68,7 @@ public class JobLauncherController {
     }
 
     private void launchMultiEntityUpdate() throws Exception {
-        JobParameters jobParameters = new JobParametersBuilder()
-                .toJobParameters();
-
+        JobParameters jobParameters = BatchUtils.createJobParameters(null, new Date(), mapper);
         jobLauncher.run(batchEntityUpdateConfig.updateAllEntities(), jobParameters);
     }
 }

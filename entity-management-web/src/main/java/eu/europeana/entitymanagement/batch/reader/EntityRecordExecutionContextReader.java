@@ -1,6 +1,9 @@
 package eu.europeana.entitymanagement.batch.reader;
 
+import eu.europeana.entitymanagement.batch.processor.EntityDereferenceProcessor;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.annotation.BeforeStep;
@@ -19,6 +22,8 @@ import static eu.europeana.entitymanagement.common.config.AppConfigConstants.ENT
  */
 @Component
 public class EntityRecordExecutionContextReader implements ItemReader<EntityRecord> {
+    private static final Logger logger = LogManager.getLogger(EntityRecordExecutionContextReader.class);
+
     private Iterator<EntityRecord> entityRecordList;
 
     @BeforeStep
@@ -28,7 +33,9 @@ public class EntityRecordExecutionContextReader implements ItemReader<EntityReco
         ExecutionContext jobContext = jobExecution.getExecutionContext();
         List<EntityRecord> savedRecords = (List<EntityRecord>) jobContext.get(ENTITY_RECORD_CTX_KEY);
 
+
         if (savedRecords != null) {
+            logger.debug("Retrieved {} EntityRecords from JobExecutionContext", savedRecords.size());
             this.entityRecordList = savedRecords.iterator();
         }
     }

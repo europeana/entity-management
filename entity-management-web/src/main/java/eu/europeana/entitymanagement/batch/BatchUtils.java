@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Date;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.lang.Nullable;
 
 public class BatchUtils {
 
@@ -18,10 +19,10 @@ public class BatchUtils {
    * @return JobParameters with trigger time and entityIds
    * @throws JsonProcessingException
    */
-  public static JobParameters createJobParameters(String[] entityIds, Date runTime,
+  public static JobParameters createJobParameters(@Nullable String[] entityIds, Date runTime,
       ObjectMapper mapper) throws JsonProcessingException {
     JobParametersBuilder paramBuilder = new JobParametersBuilder()
-        .addDate(JobParameter.RUN_TIME.key(), runTime);
+        .addDate(JobParameter.CURRENT_START_TIME.key(), runTime);
 
     if (entityIds != null) {
 

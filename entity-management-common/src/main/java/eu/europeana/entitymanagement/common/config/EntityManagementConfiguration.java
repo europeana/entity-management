@@ -24,15 +24,6 @@ public class EntityManagementConfiguration  {
     @Value("${languagecodes.config}")
     private String languagecodesXMLConfig;
 
-//    @Value("${altLabelFieldNamePrefix}")
-//    private String altLabelFieldNamePrefix;
-//
-//    @Value("${prefLabelFieldNamePrefix}")
-//    private String prefLabelFieldNamePrefix;
-//
-//    @Value("${languageSeparato§r}")
-//    private String languageSeparator;
-
     @Value("${europeana.apikey.jwttoken.siganturekey}")
     private String europeanaApikeyJwttokenSiganturekey;
 
@@ -54,7 +45,30 @@ public class EntityManagementConfiguration  {
     @Value("${metis.baseUrl}")
     private String metisBaseUrl;
 
-    public EntityManagementConfiguration() {
+    @Value("${batch.chunkSize: 10}")
+    private int batchChunkSize;
+
+    @Value("${batch.job.executor.corePool: 10}")
+    private int batchJobExecutorCorePool;
+
+    @Value("${batch.job.executor.maxPool: 100}")
+    private int batchJobExecutorMaxPool;
+
+    @Value("${batch.job.executor.queueSize: 50}")
+    private int batchJobExecutorQueueSize;
+
+  @Value("${batch.step.executor.corePool: 10}")
+  private int batchStepExecutorCorePool;
+
+  @Value("${batch.step.executor.maxPool: 100}")
+  private int batchStepExecutorMaxPool;
+
+  @Value("${batch.step.executor.queueSize: 50}")
+  private int batchStepExecutorQueueSize;
+
+
+
+  public EntityManagementConfiguration() {
 	LOG.info("Initializing EntityManagementConfiguration bean as: configuration");
     }
 
@@ -103,4 +117,32 @@ public class EntityManagementConfiguration  {
 	return languagecodesXMLConfig;
     }
 
+
+  public int getBatchChunkSize() {
+    return batchChunkSize;
+  }
+
+  public int getBatchJobExecutorCorePool() {
+    return batchJobExecutorCorePool;
+  }
+
+  public int getBatchJobExecutorMaxPool() {
+    return batchJobExecutorMaxPool;
+  }
+
+  public int getBatchJobExecutorQueueSize() {
+    return batchJobExecutorQueueSize;
+  }
+
+  public int getBatchStepExecutorCorePool() {
+    return batchStepExecutorCorePool;
+  }
+
+  public int getBatchStepExecutorMaxPool() {
+    return batchStepExecutorMaxPool;
+  }
+
+  public int getBatchStepExecutorQueueSize() {
+    return batchStepExecutorQueueSize;
+  }
 }

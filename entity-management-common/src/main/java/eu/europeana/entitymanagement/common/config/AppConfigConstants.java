@@ -17,6 +17,8 @@ public class AppConfigConstants {
     public static final String BEAN_EM_BUILD_INFO = "emBuildInfo";
     public static final String BEAN_AUTHORIZATION_SERVICE = "authorizationService";
     public static final String BEAN_JOB_EXECUTOR = "jobTaskExecutor";
+    public static final String BEAN_STEP_EXECUTOR = "stepTaskExecutor";
+    public static final String SYNC_TASK_EXECUTOR = "syncTaskExecutor";
 
     public static final String BEAN_XML_MAPPER = "emXmlMapper";
     public static final String BEAN_JSON_MAPPER = "emJsonMapper";

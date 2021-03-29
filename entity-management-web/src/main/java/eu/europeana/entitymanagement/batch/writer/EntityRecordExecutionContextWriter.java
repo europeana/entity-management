@@ -1,6 +1,9 @@
 package eu.europeana.entitymanagement.batch.writer;
 
+import eu.europeana.entitymanagement.batch.processor.EntityDereferenceProcessor;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.annotation.BeforeStep;
 import org.springframework.batch.item.ExecutionContext;
@@ -19,12 +22,15 @@ import static eu.europeana.entitymanagement.common.config.AppConfigConstants.ENT
  */
 @Component
 public class EntityRecordExecutionContextWriter implements ItemWriter<EntityRecord> {
+    private static final Logger logger = LogManager.getLogger(EntityRecordExecutionContextWriter.class);
     private StepExecution stepExecution;
 
     public void write(@NonNull List<? extends EntityRecord> items) throws Exception {
         ExecutionContext stepContext = this.stepExecution.getExecutionContext();
         List<EntityRecord> e = new ArrayList<>(items);
         stepContext.put(ENTITY_RECORD_CTX_KEY, e);
+
+        logger.debug("Saved {} EntityRecords in StepExecutionContext with key={}", e.size(), ENTITY_RECORD_CTX_KEY);
     }
 
     @BeforeStep
