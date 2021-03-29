@@ -1,20 +1,22 @@
 package eu.europeana.entitymanagement.mongo.config;
 
-import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MAPPER_OPTIONS;
+import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
+import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
-import com.mongodb.client.MongoClients;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.codecs.pojo.PojoCodecProvider;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.mongo.MongoProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
 
-import com.mongodb.MongoClientURI;
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 
 import dev.morphia.Datastore;
 import dev.morphia.Morphia;
@@ -39,7 +41,11 @@ public class DataSourceConfig {
 
     @Bean
     public MongoClient mongoClient() {
-        return MongoClients.create(hostUri);
+//        return MongoClients.create(hostUri);
+	CodecRegistry pojoCodecRegistry = fromProviders(PojoCodecProvider.builder().automatic(true).build());
+	CodecRegistry codecRegistry = fromRegistries(MongoClientSettings.getDefaultCodecRegistry(), pojoCodecRegistry);
+	return MongoClients.create(MongoClientSettings.builder()
+		.applyConnectionString(new ConnectionString(hostUri)).codecRegistry(codecRegistry).build());
     }
 
     @Primary
