@@ -113,12 +113,11 @@ public class EntityRecordService {
      * persisted.
      *
      * @param entityCreationRequest de-referenced XML response instance from Metis
-     * @param entityCreationRequest entity request object
-     * @param externalEntityType    entity type based on de-referencing response
+     * @param metisResponse    Metis de-referencing response
      * @return Saved Entity record
      * @throws EntityCreationException if an error occurs
      */
-    public EntityRecord createEntityFromRequest(EntityPreview entityCreationRequest, String externalEntityType)
+    public EntityRecord createEntityFromRequest(EntityPreview entityCreationRequest, Entity metisResponse)
 	    throws EntityCreationException {
 	// Fail quick if no datasource is configured
 	Optional<DataSource> externalDatasourceOptional = datasources.getDatasource(entityCreationRequest.getId());
@@ -127,7 +126,7 @@ public class EntityRecordService {
 	}
 
 	Date timestamp = new Date();
-	Entity entity = EntityObjectFactory.createEntityObject(externalEntityType);
+	Entity entity = EntityObjectFactory.createEntityObject(metisResponse.getType());
 
 	EntityRecord entityRecord = new EntityRecordImpl();
 	String entityId = generateEntityId(entity.getType());
@@ -135,17 +134,32 @@ public class EntityRecordService {
         entity.setEntityId(entityId);
         entityRecord.setEntity(entity);
 
-        setEuropeanaMetadata(entityId, entityRecord, timestamp);
+        Entity europeanaProxyMetadata = EntityObjectFactory.createEntityObject(metisResponse.getType());
+				// copy metadata from request into entity
+				copyPreviewMetadata(europeanaProxyMetadata, entityCreationRequest);
+        setEuropeanaMetadata(europeanaProxyMetadata, entityId, entityRecord, timestamp);
 
 	DataSource externalDatasource = externalDatasourceOptional.get();
-	setDatasourceMetadata(entityCreationRequest, entityId, externalDatasource, entityRecord, timestamp);
+	setDatasourceMetadata(metisResponse, entityCreationRequest, entityId, externalDatasource, entityRecord, timestamp);
 
 	setEntityAggregation(entityRecord, entityId, timestamp);
 	return entityRecordRepository.save(entityRecord);
 
     }
 
-    private String generateEntityId(String entityType) {
+	/**
+	 * Copies metadata provided during Entity creation, into the created Entity
+	 * @param entity entity
+	 * @param entityCreationRequest entity creation request
+	 */
+	private void copyPreviewMetadata(Entity entity, EntityPreview entityCreationRequest) {
+			entity.setSameAs(new String[]{entityCreationRequest.getId()});
+			entity.setPrefLabelStringMap(entityCreationRequest.getPrefLabel());
+			entity.setAltLabel(entityCreationRequest.getAltLabel());
+			entity.setDepiction(entityCreationRequest.getDepiction());
+	}
+
+	private String generateEntityId(String entityType) {
 	long dbId = entityRecordRepository.generateAutoIncrement(entityType);
 	return EntityRecordUtils.buildEntityIdUri(entityType, String.valueOf(dbId));
     }
@@ -572,7 +586,9 @@ public class EntityRecordService {
 	entityRecord.getEntity().setIsAggregatedBy(isAggregatedBy);
     }
 
-    private void setEuropeanaMetadata(String entityId, EntityRecord entityRecord, Date timestamp) {
+    private void setEuropeanaMetadata(
+				Entity europeanaProxyMetadata,
+				String entityId, EntityRecord entityRecord, Date timestamp) {
 	Aggregation europeanaAggr = new AggregationImpl();
 	europeanaAggr.setId(getEuropeanaAggregationId(entityId));
 	europeanaAggr.setRights(RIGHTS_CREATIVE_COMMONS);
@@ -584,12 +600,15 @@ public class EntityRecordService {
 	europeanaProxy.setProxyId(getEuropeanaProxyId(entityId));
 	europeanaProxy.setProxyFor(entityId);
 	europeanaProxy.setProxyIn(europeanaAggr);
+	europeanaProxy.setEntity(europeanaProxyMetadata);
 
 	entityRecord.addProxy(europeanaProxy);
     }
 
-    private void setDatasourceMetadata(EntityPreview entityCreationRequest, String entityId,
-	    DataSource externalDatasource, EntityRecord entityRecord, Date timestamp) {
+    private void setDatasourceMetadata(
+				Entity metisResponse,
+				EntityPreview entityCreationRequest, String entityId,
+				DataSource externalDatasource, EntityRecord entityRecord, Date timestamp) {
 	Aggregation datasourceAggr = new AggregationImpl();
 	datasourceAggr.setId(getDatasourceAggregationId(entityId));
 	datasourceAggr.setCreated(timestamp);
@@ -601,6 +620,7 @@ public class EntityRecordService {
 	datasourceProxy.setProxyId(entityCreationRequest.getId());
 	datasourceProxy.setProxyFor(entityId);
 	datasourceProxy.setProxyIn(datasourceAggr);
+	datasourceProxy.setEntity(metisResponse);
 
 	entityRecord.addProxy(datasourceProxy);
     }
