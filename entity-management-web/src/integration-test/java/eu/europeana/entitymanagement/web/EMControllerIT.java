@@ -34,6 +34,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -59,7 +60,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -460,28 +463,6 @@ public class EMControllerIT extends AbstractIntegrationTest {
         entityRecord.setEntityId(concept.getEntityId());
         EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
 
-<<<<<<< HEAD
-        String requestPath = getEntityRequestPath(record.getEntityId());
-
-        mockMvc.perform(delete(BASE_SERVICE_URL + "/" + requestPath).header(HttpHeaders.IF_MATCH, "wrong_etag_value")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isPreconditionFailed());
-
-        // check that record was disabled
-        Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveEntityRecordByUri(record.getEntityId());
-
-        assert dbRecordOptional.isPresent();
-        Assertions.assertFalse(dbRecordOptional.get().getDisabled());
-=======
-    @Test
-    void deletionFailsIfMatch() throws Exception {
-        // create entity in DB
-        ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_JSON), ConceptImpl.class);
-        EntityRecord entityRecord = new EntityRecordImpl();
-        entityRecord.setEntity(concept);
-        entityRecord.setEntityId(concept.getEntityId());
-        EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
-
         String requestPath = getEntityRequestPath(record.getEntityId());
 
         mockMvc.perform(delete(BASE_SERVICE_URL + "/" + requestPath).header(HttpHeaders.IF_MATCH, "wrong_etag_value")
@@ -500,7 +481,6 @@ public class EMControllerIT extends AbstractIntegrationTest {
     	final ObjectNode node = new ObjectMapper().readValue(result.getResponse().getContentAsString(StandardCharsets.UTF_8), ObjectNode.class);
     	Optional<EntityRecord> dbRecord = entityRecordService.retrieveEntityRecordByUri(node.get("id").asText());
         Assertions.assertTrue(dbRecord.isPresent());
->>>>>>> refs/remotes/origin/develop
     }
     
     
