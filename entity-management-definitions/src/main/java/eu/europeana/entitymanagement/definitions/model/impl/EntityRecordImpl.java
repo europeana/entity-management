@@ -36,12 +36,16 @@ public class EntityRecordImpl implements EntityRecord {
     private Entity entity;
 
     private List<EntityProxy> proxies = new ArrayList<>();
-    
+
+    @JsonIgnore
     private boolean disabled;
 
+    @JsonIgnore
+    private Date created;
+
+    @JsonIgnore
     private Date modified;
 
-    private Date created;
 
     @Override
     @JsonGetter
@@ -123,22 +127,14 @@ public class EntityRecordImpl implements EntityRecord {
     @JsonIgnore
     @Override
     public EntityProxy getEuropeanaProxy() {
-    	for (EntityProxy proxy : proxies) {
-    		if (proxy.getProxyId().startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI)) {
-    			return proxy;
-    		}
-    	}
-    	return null;
+	return proxies.stream()
+		.filter(s -> s.getProxyId().startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI)).findFirst().orElse(null);
     }
 
     @Override
     @JsonIgnore
     public EntityProxy getExternalProxy() {
-    	for (EntityProxy proxy : proxies) {
-    		if (!proxy.getProxyId().startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI)) {
-    			return proxy;
-    		}
-    	}
-    	return null;
+	return proxies.stream()
+            .filter(s -> !s.getProxyId().startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI)).findFirst().orElse(null);
     }
 }

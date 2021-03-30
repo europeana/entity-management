@@ -17,14 +17,20 @@ import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_XML
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_REGISTER_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_XML;
+//import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BASE_SERVICE_URL;
+//import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BATHTUB_DEREF;
+//import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_JSON;
+//import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_JSON;
+//import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_JSON;
+//import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.getEntityRequestPath;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
 import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -37,17 +43,15 @@ import javax.servlet.ServletContext;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockServletContext;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
@@ -445,7 +449,31 @@ public class EMControllerIT extends AbstractIntegrationTest {
         assert dbRecordOptional.isPresent();
         Assertions.assertTrue(dbRecordOptional.get().getDisabled());
     }
+    
+    
+    @Test
+    void deletionFailsIfMatch() throws Exception {
+        // create entity in DB
+        ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_JSON), ConceptImpl.class);
+        EntityRecord entityRecord = new EntityRecordImpl();
+        entityRecord.setEntity(concept);
+        entityRecord.setEntityId(concept.getEntityId());
+        EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
 
+        String requestPath = getEntityRequestPath(record.getEntityId());
+
+        mockMvc.perform(delete(BASE_SERVICE_URL + "/" + requestPath).header(HttpHeaders.IF_MATCH, "wrong_etag_value")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isPreconditionFailed());
+
+        // check that record was disabled
+        Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveEntityRecordByUri(record.getEntityId());
+
+        assert dbRecordOptional.isPresent();
+        Assertions.assertFalse(dbRecordOptional.get().getDisabled());
+    }
+    
+    
 
     private void assertRetrieveAPIResultsExternalProfile(String contentXml, ResultActions resultActions, Entity entity) throws Exception {
         Assertions.assertTrue(contentXml.contains(XmlFields.XML_SKOS_PREF_LABEL));

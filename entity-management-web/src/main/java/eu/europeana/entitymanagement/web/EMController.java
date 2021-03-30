@@ -281,7 +281,7 @@ public class EMController extends BaseRest {
 	}
 
 	EntityRecord savedEntity = entityRecordService.createEntityFromRequest(entityCreationRequest,
-		metisResponse.getType());
+		metisResponse);
 	return ResponseEntity.accepted().body(savedEntity);
     }
 
