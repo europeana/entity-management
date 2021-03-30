@@ -3,6 +3,7 @@ package eu.europeana.entitymanagement.mongo.config;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
+import dev.morphia.mapping.MapperOptions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -52,7 +53,10 @@ public class DataSourceConfig {
     @Bean(AppConfigConstants.BEAN_EM_DATA_STORE)
     public Datastore emDataStore(MongoClient mongoClient) {
         logger.info("Configuring Entity Management database: {}", emDatabase);
-        return Morphia.createDatastore(mongoClient, emDatabase);
+        Datastore datastore = Morphia.createDatastore(mongoClient, emDatabase, MapperOptions.builder().mapSubPackages(true).build());
+        // EA-2520: explicit package mapping required to prevent EntityDecoder error
+        datastore.getMapper().mapPackage("eu.europeana.entitymanagement.definitions.model");
+        return datastore;
     }
 
     /**
