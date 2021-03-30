@@ -1,20 +1,16 @@
 package eu.europeana.entitymanagement.mongo.config;
 
-import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MAPPER_OPTIONS;
-
-import com.mongodb.client.MongoClients;
-import org.apache.commons.lang3.StringUtils;
+import dev.morphia.mapping.MapperOptions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.mongo.MongoProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
 
-import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 
 import dev.morphia.Datastore;
 import dev.morphia.Morphia;
@@ -46,7 +42,10 @@ public class DataSourceConfig {
     @Bean(AppConfigConstants.BEAN_EM_DATA_STORE)
     public Datastore emDataStore(MongoClient mongoClient) {
         logger.info("Configuring Entity Management database: {}", emDatabase);
-        return Morphia.createDatastore(mongoClient, emDatabase);
+        Datastore datastore = Morphia.createDatastore(mongoClient, emDatabase, MapperOptions.builder().mapSubPackages(true).build());
+        // EA-2520: explicit package mapping required to prevent EntityDecoder error
+        datastore.getMapper().mapPackage("eu.europeana.entitymanagement.definitions.model");
+        return datastore;
     }
 
     /**
