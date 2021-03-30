@@ -134,11 +134,13 @@ public class EntityRecordService {
         entity.setEntityId(entityId);
         entityRecord.setEntity(entity);
 
+
         Entity europeanaProxyMetadata = EntityObjectFactory.createEntityObject(metisResponse.getType());
 				// copy metadata from request into entity
 				copyPreviewMetadata(europeanaProxyMetadata, entityCreationRequest);
         setEuropeanaMetadata(europeanaProxyMetadata, entityId, entityRecord, timestamp);
 
+       
 	DataSource externalDatasource = externalDatasourceOptional.get();
 	setDatasourceMetadata(metisResponse, entityCreationRequest, entityId, externalDatasource, entityRecord, timestamp);
 
@@ -586,6 +588,7 @@ public class EntityRecordService {
 	entityRecord.getEntity().setIsAggregatedBy(isAggregatedBy);
     }
 
+//    private void setEuropeanaDataAndMetadata(String entityId, EntityRecord entityRecord, Date timestamp, EntityPreview entityCreationRequest) throws EntityCreationException {
     private void setEuropeanaMetadata(
 				Entity europeanaProxyMetadata,
 				String entityId, EntityRecord entityRecord, Date timestamp) {
@@ -600,6 +603,17 @@ public class EntityRecordService {
 	europeanaProxy.setProxyId(getEuropeanaProxyId(entityId));
 	europeanaProxy.setProxyFor(entityId);
 	europeanaProxy.setProxyIn(europeanaAggr);
+//	Entity europeanaProxyEntity = EntityObjectFactory.createEntityObject(entityRecord.getEntity().getType());
+//	europeanaProxyEntity.setEntityId(entityId);
+//	europeanaProxyEntity.setAltLabel(entityCreationRequest.getAltLabel());
+//	europeanaProxyEntity.setPrefLabelStringMap(entityCreationRequest.getPrefLabel());
+//	europeanaProxyEntity.setDepiction(entityCreationRequest.getDepiction());
+//	String[] europeanaProxyEntitySameAs = new String [1];
+//	europeanaProxyEntitySameAs[0] = entityCreationRequest.getId();
+//	europeanaProxyEntity.setSameAs(europeanaProxyEntitySameAs);
+//	europeanaProxy.setEntity(europeanaProxyEntity);
+//	europeanaProxy.setEntity(europeanaProxyMetadata);
+//	europeanaProxy.setEntity(europeanaProxyMetadata);
 	europeanaProxy.setEntity(europeanaProxyMetadata);
 
 	entityRecord.addProxy(europeanaProxy);

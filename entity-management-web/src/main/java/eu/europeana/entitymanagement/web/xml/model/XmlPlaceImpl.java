@@ -20,10 +20,14 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
     	XmlConstants.XML_SAME_AS, XmlConstants.IS_AGGREGATED_BY})
 public class XmlPlaceImpl extends XmlBaseEntityImpl {
     
-    	public XmlPlaceImpl(Place place) {
-    	    	super(place);
-    	}
+	public XmlPlaceImpl(Place place) {
+	    	super(place);
+	}
 	
+	public XmlPlaceImpl() {
+		// default constructor
+	}
+
 	@JacksonXmlProperty(localName = XmlConstants.XML_WGS84_POS_LAT)
 	public Float getLatitude() {
 		return getPlace().getLatitude();

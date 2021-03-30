@@ -1,8 +1,5 @@
 package eu.europeana.entitymanagement.batch.config;
 
-import dev.morphia.Datastore;
-import eu.europeana.entitymanagement.batch.entity.SequenceGenerator;
-import eu.europeana.entitymanagement.batch.repository.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
@@ -19,6 +16,13 @@ import org.springframework.batch.core.repository.support.SimpleJobRepository;
 import org.springframework.batch.support.transaction.ResourcelessTransactionManager;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
+
+import dev.morphia.Datastore;
+import eu.europeana.entitymanagement.batch.repository.ExecutionContextRepository;
+import eu.europeana.entitymanagement.batch.repository.JobExecutionRepository;
+import eu.europeana.entitymanagement.batch.repository.JobInstanceRepository;
+import eu.europeana.entitymanagement.batch.repository.SequenceRepository;
+import eu.europeana.entitymanagement.batch.repository.StepExecutionRepository;
 
 /**
  * Configures Spring Batch to use Mongo DAO implementations

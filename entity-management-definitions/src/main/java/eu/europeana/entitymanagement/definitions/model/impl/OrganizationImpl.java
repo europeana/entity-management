@@ -9,6 +9,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
@@ -26,6 +27,11 @@ import eu.europeana.entitymanagement.vocabulary.XmlFields;
  */
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
+@JsonPropertyOrder({WebEntityFields.DEPICTION, WebEntityFields.PREF_LABEL, WebEntityFields.ACRONYM, WebEntityFields.ALT_LABEL,
+	WebEntityFields.DESCRIPTION, WebEntityFields.FOAF_LOGO, WebEntityFields.EUROPEANA_ROLE, WebEntityFields.ORGANIZATION_DOMAIN,
+	WebEntityFields.GEOGRAPHIC_LEVEL, WebEntityFields.COUNTRY, WebEntityFields.FOAF_HOMEPAGE, WebEntityFields.FOAF_PHONE,
+	WebEntityFields.FOAF_MBOX, WebEntityFields.HAS_ADDRESS, WebEntityFields.IDENTIFIER, WebEntityFields.SAME_AS, 
+	WebEntityFields.IS_AGGREGATED_BY})
 public class OrganizationImpl extends BaseEntity 
 		implements Organization, eu.europeana.corelib.definitions.edm.entity.Organization {
 

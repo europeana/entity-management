@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
@@ -15,6 +16,9 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
+@JsonPropertyOrder({WebEntityFields.DEPICTION, WebEntityFields.PREF_LABEL, WebEntityFields.ALT_LABEL, WebEntityFields.HIDDEN_LABEL,
+	WebEntityFields.BEGIN, WebEntityFields.END, WebEntityFields.IS_PART_OF, WebEntityFields.SAME_AS,
+	WebEntityFields.WEB_RESOURCE, WebEntityFields.IS_NEXT_IN_SEQUENCE})
 public class TimespanImpl extends BaseEntity implements Timespan, eu.europeana.corelib.definitions.edm.entity.Timespan {
 
 	public TimespanImpl() {

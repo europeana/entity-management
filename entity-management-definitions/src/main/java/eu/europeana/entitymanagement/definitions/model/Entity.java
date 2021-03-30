@@ -47,6 +47,8 @@ public interface Entity extends ContextualClass {
 	
 	WebResource getReferencedWebResource();
 	
+	void setReferencedWebResource(WebResource resource);
+	
 	String getIsShownBy();
 	
 	void setIsShownBy (WebResource webResource);

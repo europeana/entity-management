@@ -24,6 +24,7 @@ public interface WebEntityFields {
 	public static final String SOURCE = "source";
 	public static final String THUMBNAIL = "thumbnail";
 	public static final String IS_SHOWN_BY = "isShownBy";
+	public static final String ENTITY = "entity";
 	
 	//common administrative information
 	public static final String CREATED = "created";
