@@ -140,6 +140,7 @@ public class EntityRecordService {
 				copyPreviewMetadata(europeanaProxyMetadata, entityCreationRequest);
         setEuropeanaMetadata(europeanaProxyMetadata, entityId, entityRecord, timestamp);
 
+       
 	DataSource externalDatasource = externalDatasourceOptional.get();
 	setDatasourceMetadata(metisResponse, entityCreationRequest, entityId, externalDatasource, entityRecord, timestamp);
 
@@ -611,6 +612,7 @@ public class EntityRecordService {
 //	europeanaProxyEntitySameAs[0] = entityCreationRequest.getId();
 //	europeanaProxyEntity.setSameAs(europeanaProxyEntitySameAs);
 //	europeanaProxy.setEntity(europeanaProxyEntity);
+//	europeanaProxy.setEntity(europeanaProxyMetadata);
 //	europeanaProxy.setEntity(europeanaProxyMetadata);
 	europeanaProxy.setEntity(europeanaProxyMetadata);
 

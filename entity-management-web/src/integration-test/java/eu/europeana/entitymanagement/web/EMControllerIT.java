@@ -460,6 +460,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
         entityRecord.setEntityId(concept.getEntityId());
         EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
 
+<<<<<<< HEAD
         String requestPath = getEntityRequestPath(record.getEntityId());
 
         mockMvc.perform(delete(BASE_SERVICE_URL + "/" + requestPath).header(HttpHeaders.IF_MATCH, "wrong_etag_value")
@@ -471,6 +472,35 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
         assert dbRecordOptional.isPresent();
         Assertions.assertFalse(dbRecordOptional.get().getDisabled());
+=======
+    @Test
+    void deletionFailsIfMatch() throws Exception {
+        // create entity in DB
+        ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_JSON), ConceptImpl.class);
+        EntityRecord entityRecord = new EntityRecordImpl();
+        entityRecord.setEntity(concept);
+        entityRecord.setEntityId(concept.getEntityId());
+        EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
+
+        String requestPath = getEntityRequestPath(record.getEntityId());
+
+        mockMvc.perform(delete(BASE_SERVICE_URL + "/" + requestPath).header(HttpHeaders.IF_MATCH, "wrong_etag_value")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isPreconditionFailed());
+
+        // check that record was disabled
+        Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveEntityRecordByUri(record.getEntityId());
+
+        assert dbRecordOptional.isPresent();
+        Assertions.assertFalse(dbRecordOptional.get().getDisabled());
+    }
+    
+    
+    private void assertEntityExists(MvcResult result) throws JsonMappingException, JsonProcessingException, UnsupportedEncodingException {
+    	final ObjectNode node = new ObjectMapper().readValue(result.getResponse().getContentAsString(StandardCharsets.UTF_8), ObjectNode.class);
+    	Optional<EntityRecord> dbRecord = entityRecordService.retrieveEntityRecordByUri(node.get("id").asText());
+        Assertions.assertTrue(dbRecord.isPresent());
+>>>>>>> refs/remotes/origin/develop
     }
     
     

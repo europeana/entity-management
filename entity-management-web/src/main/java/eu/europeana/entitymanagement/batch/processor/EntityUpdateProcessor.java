@@ -51,7 +51,8 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
 
 
         logger.info("Computing ranking metrics for entity {}", entityRecord.getEntityId());
-        computeRankingMetrics(entityRecord);
+        //TODO: re-enable when Solr is configured
+        //computeRankingMetrics(entityRecord);
         return entityRecord;
     }
 

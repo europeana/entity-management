@@ -280,9 +280,11 @@ public class EMController extends BaseRest {
 
 	}
 
-	EntityRecord savedEntity = entityRecordService.createEntityFromRequest(entityCreationRequest,
+	EntityRecord savedEntityRecord = entityRecordService.createEntityFromRequest(entityCreationRequest,
 		metisResponse);
-	return ResponseEntity.accepted().body(savedEntity);
+
+	launchUpdateTask(savedEntityRecord.getEntityId());
+	return ResponseEntity.accepted().body(savedEntityRecord);
     }
 
 
