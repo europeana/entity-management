@@ -18,6 +18,8 @@ public class BaseMvcTestUtils {
     public static final String TIMESPAN_JSON = "/content/timespan.json"; 
     
     public static final String CONCEPT_REGISTER_JSON = "/content/concept_register.json";
+    public static final String CONCEPT_REGISTER_ERROR_CHECK_1_JSON = "/content/concept_register_error_check_1.json";
+    public static final String CONCEPT_REGISTER_ERROR_CHECK_2_JSON = "/content/concept_register_error_check_2.json";
     public static final String AGENT_REGISTER_JSON = "/content/agent_register.json";
     public static final String ORGANIZATION_REGISTER_JSON = "/content/organization_register.json";
     public static final String PLACE_REGISTER_JSON = "/content/place_register.json";
@@ -28,6 +30,8 @@ public class BaseMvcTestUtils {
     public static final String CONCEPT_VALIDATE_FIELDS_JSON = "/content/concept-validate-fields.json";
     
     public static final String CONCEPT_XML = "/metis-deref/concept.xml";
+    public static final String CONCEPT_ERROR_CHECK_1_XML = "/metis-deref/concept-error-check-1.xml";
+    
     public static final String AGENT_XML = "/metis-deref/agent.xml";
     public static final String ORGANIZATION_XML = "/metis-deref/organization.xml";
     public static final String PLACE_XML = "/metis-deref/place.xml";
