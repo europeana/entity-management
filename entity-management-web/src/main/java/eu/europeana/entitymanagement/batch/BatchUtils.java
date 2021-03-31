@@ -9,6 +9,10 @@ import org.springframework.lang.Nullable;
 
 public class BatchUtils {
 
+  public static String JOB_UPDATE_ALL_ENTITIES = "allEntityUpdateJob";
+  public static String JOB_UPDATE_SPECIFIC_ENTITIES = "specificEntityUpdateJob";
+
+  public static String STEP_UPDATE_ENTITY = "updateEntityStep";
 
   /**
    * Creates JobParameters for triggering the Spring Batch update job for specific entities

@@ -13,12 +13,16 @@ import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
 import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isA;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import eu.europeana.entitymanagement.batch.BatchService;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
@@ -33,10 +37,15 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockServletContext;
@@ -346,5 +355,21 @@ public class EMControllerIT extends AbstractIntegrationTest {
         		.andExpect(status().isOk())
         		.andReturn();
         return resultXml.getResponse().getContentAsString(StandardCharsets.UTF_8);
+    }
+
+
+    @TestConfiguration
+    public static class TestConfig {
+
+        /**
+         * Do not trigger batch jobs in this test.
+         */
+        @Bean
+        @Primary
+        public BatchService batchServiceBean() throws Exception {
+            BatchService batchService = Mockito.mock(BatchService.class);
+            doNothing().when(batchService).launchSingleEntityUpdate(anyString());
+            return batchService;
+        }
     }
 }

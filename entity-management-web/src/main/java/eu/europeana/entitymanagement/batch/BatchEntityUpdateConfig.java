@@ -1,5 +1,8 @@
 package eu.europeana.entitymanagement.batch;
 
+import static eu.europeana.entitymanagement.batch.BatchUtils.JOB_UPDATE_ALL_ENTITIES;
+import static eu.europeana.entitymanagement.batch.BatchUtils.JOB_UPDATE_SPECIFIC_ENTITIES;
+import static eu.europeana.entitymanagement.batch.BatchUtils.STEP_UPDATE_ENTITY;
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_JSON_MAPPER;
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_STEP_EXECUTOR;
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.SYNC_TASK_EXECUTOR;
@@ -22,14 +25,18 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.scope.context.ChunkContext;
+import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.support.CompositeItemProcessor;
 import org.springframework.batch.item.support.SynchronizedItemStreamReader;
+import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -125,7 +132,7 @@ public class BatchEntityUpdateConfig {
 
 
     private Step updateEntityStep(boolean singleEntity){
-        return this.stepBuilderFactory.get("updateEntityStep")
+        return this.stepBuilderFactory.get(STEP_UPDATE_ENTITY)
             .<EntityRecord, EntityRecord>chunk(chunkSize)
             .reader(singleEntity ? singleItemReader : multipleItemReader)
             .processor(compositeItemProcessor())
@@ -134,19 +141,19 @@ public class BatchEntityUpdateConfig {
             .build();
     }
 
-
-    public Job updateSpecificEntities() {
+    @Bean
+    Job updateSpecificEntities() {
         logger.info("Starting update job for specific entities");
-        return this.jobBuilderFactory.get("specificEntityUpdateJob")
+        return this.jobBuilderFactory.get(JOB_UPDATE_SPECIFIC_ENTITIES)
                 .incrementer(new RunIdIncrementer())
                 .start(updateEntityStep(true))
                 .build();
     }
 
-    public Job updateAllEntities() {
+    @Bean
+    Job updateAllEntities() {
         logger.info("Starting update job for ALL entities");
-        return this.jobBuilderFactory.get("allEntityUpdateJob")
-                .incrementer(new RunIdIncrementer())
+        return this.jobBuilderFactory.get(JOB_UPDATE_ALL_ENTITIES)
                 .start(updateEntityStep(false))
                 .build();
     }

@@ -3,6 +3,7 @@ package eu.europeana.entitymanagement.web;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europeana.entitymanagement.batch.BatchEntityUpdateConfig;
+import eu.europeana.entitymanagement.batch.BatchService;
 import eu.europeana.entitymanagement.batch.BatchUtils;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
@@ -69,36 +70,22 @@ import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEA
 @RequestMapping("/entity")
 public class EMController extends BaseRest {
 
-  @Resource(name = AppConfig.BEAN_ENTITY_RECORD_SERVICE)
-  private EntityRecordService entityRecordService;
+  private final EntityRecordService entityRecordService;
+  private final MetisDereferenceService dereferenceService;
+  private final DataSources datasources;
+  private final BatchService batchService;
 
-  @Resource(name = AppConfig.BEAN_METIS_DEREF_SERVICE)
-  private MetisDereferenceService dereferenceService;
-
-  @Resource(name = AppConfig.BEAN_EM_DATA_SOURCES)
-  private DataSources datasources;
-
-    @Resource
-    EntityManagementConfiguration emConfiguration;
-
-    @Resource
-	private BatchConfigurer batchConfigurer;
-
-	@Resource
-	private BatchEntityUpdateConfig batchEntityUpdateConfig;
-
-	@Resource(name=BEAN_JSON_MAPPER)
-	private ObjectMapper mapper;
-
-	private JobLauncher jobLauncher;
-
-	@PostConstruct
-	void setup() throws Exception {
-		// launcher is async, so this is non-blocking
-		jobLauncher = batchConfigurer.getJobLauncher();
+  @Autowired
+	public EMController(EntityRecordService entityRecordService,
+			MetisDereferenceService dereferenceService, DataSources datasources,
+			BatchService batchService) {
+		this.entityRecordService = entityRecordService;
+		this.dereferenceService = dereferenceService;
+		this.datasources = datasources;
+		this.batchService = batchService;
 	}
 
-    @ApiOperation(value = "Disable an entity", nickname = "disableEntity", response = java.lang.Void.class)
+	@ApiOperation(value = "Disable an entity", nickname = "disableEntity", response = java.lang.Void.class)
     @RequestMapping(value = { "/{type}/base/{identifier}",
 	    "/{type}/{identifier}" }, method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> disableEntity(
@@ -344,8 +331,6 @@ public class EMController extends BaseRest {
   private void launchUpdateTask(String entityUri)
       throws Exception {
     logger.info("Launching update task for {}", entityUri);
-    jobLauncher.run(
-        batchEntityUpdateConfig.updateSpecificEntities(),
-        BatchUtils.createJobParameters(new String[] {entityUri}, new Date(), mapper));
+    batchService.launchSingleEntityUpdate(entityUri);
   }
 }
