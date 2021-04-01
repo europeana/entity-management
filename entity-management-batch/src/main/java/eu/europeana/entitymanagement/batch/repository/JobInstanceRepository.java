@@ -10,6 +10,7 @@ import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.repository.dao.JobInstanceDao;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -171,6 +172,23 @@ public class JobInstanceRepository extends AbstractRepository implements JobInst
         return query.filter(eq(JOB_NAME_KEY, jobName)).iterator().toList();
     }
 
+    /**
+     * Fetch the last job instance by Id for the given job.
+     * @param jobName name of the job
+     * @return the last job instance by Id if any or null otherwise
+     *
+     */
+    @Override
+    @Nullable
+    public JobInstance getLastJobInstance(@NonNull String jobName) {
+        List<JobInstanceEntity> instances = queryGetJobInstances(eq(JOB_NAME_KEY, jobName), 0, 1);
+
+        if(instances == null || instances.isEmpty()){
+            return null;
+        }
+
+        return JobInstanceEntity.fromEntity(instances.get(0));
+    }
 
     /**
      * Gets all unique job names in database.

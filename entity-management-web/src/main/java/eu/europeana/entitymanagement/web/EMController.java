@@ -1,16 +1,27 @@
 package eu.europeana.entitymanagement.web;
 
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_JSON_MAPPER;
-
+import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons.error.EuropeanaApiException;
+import eu.europeana.api.commons.web.exception.HttpException;
+import eu.europeana.api.commons.web.http.HttpHeaders;
+import eu.europeana.entitymanagement.batch.BatchService;
+import eu.europeana.entitymanagement.common.config.DataSources;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.exception.EntityNotFoundException;
+import eu.europeana.entitymanagement.exception.EntityRemovedException;
+import eu.europeana.entitymanagement.vocabulary.EntityProfile;
+import eu.europeana.entitymanagement.vocabulary.FormatTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
+import eu.europeana.entitymanagement.web.model.EntityPreview;
+import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
+import eu.europeana.entitymanagement.web.service.impl.EntityRecordUtils;
+import eu.europeana.entitymanagement.web.service.impl.MetisDereferenceService;
+import io.swagger.annotations.ApiOperation;
 import java.util.Date;
 import java.util.Optional;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-
-import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
-import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,30 +38,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.api.commons.error.EuropeanaApiException;
-import eu.europeana.api.commons.web.exception.HttpException;
-import eu.europeana.api.commons.web.http.HttpHeaders;
-import eu.europeana.entitymanagement.batch.BatchEntityUpdateConfig;
-import eu.europeana.entitymanagement.batch.BatchUtils;
-import eu.europeana.entitymanagement.common.config.DataSources;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.config.AppConfig;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.exception.EntityNotFoundException;
-import eu.europeana.entitymanagement.exception.EntityRemovedException;
-import eu.europeana.entitymanagement.vocabulary.EntityProfile;
-import eu.europeana.entitymanagement.vocabulary.FormatTypes;
-import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
-import eu.europeana.entitymanagement.web.model.EntityPreview;
-import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
-import eu.europeana.entitymanagement.web.service.impl.EntityRecordUtils;
-import eu.europeana.entitymanagement.web.service.impl.MetisDereferenceService;
-import io.swagger.annotations.ApiOperation;
-
 
 /**
  * Example Rest Controller class with input validation TODO: catch the
@@ -62,36 +49,22 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/entity")
 public class EMController extends BaseRest {
 
-  @Resource(name = AppConfig.BEAN_ENTITY_RECORD_SERVICE)
-  private EntityRecordService entityRecordService;
+  private final EntityRecordService entityRecordService;
+  private final MetisDereferenceService dereferenceService;
+  private final DataSources datasources;
+  private final BatchService batchService;
 
-  @Resource(name = AppConfig.BEAN_METIS_DEREF_SERVICE)
-  private MetisDereferenceService dereferenceService;
-
-  @Resource(name = AppConfig.BEAN_EM_DATA_SOURCES)
-  private DataSources datasources;
-
-    @Resource(name = AppConfig.BEAN_EM_CONFIGURATION)
-    EntityManagementConfiguration emConfiguration;
-
-    @Resource
-	private BatchConfigurer batchConfigurer;
-
-	@Resource
-	private BatchEntityUpdateConfig batchEntityUpdateConfig;
-
-	@Resource(name=BEAN_JSON_MAPPER)
-	private ObjectMapper mapper;
-
-	private JobLauncher jobLauncher;
-
-	@PostConstruct
-	void setup() throws Exception {
-		// launcher is async, so this is non-blocking
-		jobLauncher = batchConfigurer.getJobLauncher();
+  @Autowired
+	public EMController(EntityRecordService entityRecordService,
+			MetisDereferenceService dereferenceService, DataSources datasources,
+			BatchService batchService) {
+		this.entityRecordService = entityRecordService;
+		this.dereferenceService = dereferenceService;
+		this.datasources = datasources;
+		this.batchService = batchService;
 	}
 
-    @ApiOperation(value = "Disable an entity", nickname = "disableEntity", response = java.lang.Void.class)
+	@ApiOperation(value = "Disable an entity", nickname = "disableEntity", response = java.lang.Void.class)
     @RequestMapping(value = { "/{type}/base/{identifier}",
 	    "/{type}/{identifier}" }, method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> disableEntity(
@@ -337,8 +310,6 @@ public class EMController extends BaseRest {
   private void launchUpdateTask(String entityUri)
       throws Exception {
     logger.info("Launching update task for {}", entityUri);
-    jobLauncher.run(
-        batchEntityUpdateConfig.updateSpecificEntities(),
-        BatchUtils.createJobParameters(new String[] {entityUri}, new Date(), mapper));
+    batchService.launchSingleEntityUpdate(entityUri);
   }
 }

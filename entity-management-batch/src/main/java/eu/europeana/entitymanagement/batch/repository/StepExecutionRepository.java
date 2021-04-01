@@ -11,6 +11,7 @@ import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.repository.dao.StepExecutionDao;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -137,7 +138,7 @@ public class StepExecutionRepository extends AbstractRepository implements StepE
 
     @Nullable
     @Override
-    public StepExecution getStepExecution(JobExecution jobExecution, Long stepExecutionId) {
+    public StepExecution getStepExecution(JobExecution jobExecution, @NonNull Long stepExecutionId) {
         List<StepExecutionEntity> instances = queryGetStepExecutions(jobExecution.getId(), stepExecutionId);
         Assert.state(instances.size() <= 1,
                 "There can be at most one step execution with given name for single job execution");
