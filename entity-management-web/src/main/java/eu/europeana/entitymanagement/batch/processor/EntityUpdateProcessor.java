@@ -40,17 +40,17 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
 
     @Override
     public EntityRecord process(@NonNull EntityRecord entityRecord) throws Exception {
-        logger.info("Creating consolidated proxy for entity {} ", entityRecord.getEntityId());
+        logger.debug("Creating consolidated proxy for entity {} ", entityRecord.getEntityId());
         entityRecordService.mergeEntity(entityRecord);
 
-        logger.info("Validating constraints for entity {}", entityRecord.getEntityId());
+        logger.debug("Validating constraints for entity {}", entityRecord.getEntityId());
         validateConstraints(entityRecord);
 
-        logger.info("Checking referential integrity for entity {}", entityRecord.getEntityId());
+        logger.debug("Checking referential integrity for entity {}", entityRecord.getEntityId());
         entityRecordService.performReferentialIntegrity(entityRecord.getEntity());
 
 
-        logger.info("Computing ranking metrics for entity {}", entityRecord.getEntityId());
+        logger.debug("Computing ranking metrics for entity {}", entityRecord.getEntityId());
         //TODO: re-enable when Solr is configured
         //computeRankingMetrics(entityRecord);
         return entityRecord;

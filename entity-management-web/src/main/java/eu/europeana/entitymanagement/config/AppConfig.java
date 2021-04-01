@@ -17,6 +17,7 @@ import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -37,11 +38,15 @@ public class AppConfig extends AppConfigConstants{
 
     private static final Logger LOG = LogManager.getLogger(AppConfig.class);
     
-    @Resource(name=BEAN_EM_CONFIGURATION)
+    @Resource
     private EntityManagementConfiguration emConfiguration;
 
     @Resource(name = BEAN_XML_MAPPER)
     private XmlMapper xmlMapper;
+
+    @Resource(name= BEAN_JOB_EXECUTOR)
+    private TaskExecutor jobLauncherExecutor;
+
     
     public AppConfig() {
 	LOG.info("Initializing EntityManagementConfiguration bean as: configuration");
@@ -87,6 +92,6 @@ public class AppConfig extends AppConfigConstants{
      */
     @Bean
     public MongoBatchConfigurer mongoBatchConfigurer(@Qualifier(BEAN_BATCH_DATA_STORE) Datastore datastore){
-        return new MongoBatchConfigurer(datastore);
+        return new MongoBatchConfigurer(datastore, jobLauncherExecutor);
     }
 }

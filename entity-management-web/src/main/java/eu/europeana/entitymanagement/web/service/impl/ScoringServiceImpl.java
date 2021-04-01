@@ -51,7 +51,7 @@ public class ScoringServiceImpl implements ScoringService {
     //
     private static final int RANGE_EXTENSION_FACTOR = 100;
 
-    @Resource(name=AppConfig.BEAN_EM_CONFIGURATION)
+    @Resource
     private EntityManagementConfiguration emConfiguration; 
     
     
