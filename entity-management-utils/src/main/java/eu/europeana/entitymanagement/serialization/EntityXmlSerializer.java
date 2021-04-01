@@ -161,7 +161,10 @@ public class EntityXmlSerializer {
 		    //adding the referenced web resources for the proxy entities
 		    List<EntityProxy> entityRecordProxies = entityRecord.getProxies();
 		    for (EntityProxy proxy : entityRecordProxies) {
-		    	WebResource webResource = proxy.getEntity().getReferencedWebResource();
+		    	WebResource webResource = null;
+		    	if (proxy.getEntity()!=null) {
+		    		webResource= proxy.getEntity().getReferencedWebResource();
+		    	}
 		    	if (webResource!=null)
 			    {
 			    	strBuilder.append(objectMapper.writeValueAsString(webResource));

@@ -71,6 +71,12 @@ public class BaseEntity implements Entity {
 		return referencedWebResource;
 	}
 	
+	@Override
+	@JsonSetter
+	public void setReferencedWebResource(WebResource resource) {
+		this.referencedWebResource = resource;
+	}
+	
 	@JsonGetter(WebEntityFields.PREF_LABEL)
 	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_PREF_LABEL)
 	public Map<String, String> getPrefLabelStringMap() {
@@ -141,12 +147,14 @@ public class BaseEntity implements Entity {
 //		this.sameAs = sameAs;
 //	}
 
-	
+	@Override
+	@JsonGetter(WebEntityFields.ID)
 	public String getEntityId() {
 		return entityId;
 	}
 
 	@Override
+	@JsonSetter(WebEntityFields.ID)
 	public void setEntityId(String entityId) {
 		this.entityId = entityId;
 	}
@@ -163,13 +171,12 @@ public class BaseEntity implements Entity {
 		this.identifier = identifier;
 	}
 
-	@JsonGetter(WebEntityFields.ID)
+	@JsonIgnore
 	@JacksonXmlProperty(isAttribute= true, localName = XmlFields.XML_RDF_ABOUT)
 	public String getAbout() {
 		return getEntityId();
 	}
 
-	@JsonSetter(WebEntityFields.ID)
 	public void setAbout(String about) {
 		setEntityId(about);
 		setEntityIdentifier();
@@ -419,4 +426,5 @@ public class BaseEntity implements Entity {
 		result = 31 * result + Arrays.hashCode(getIdentifier());
 		return result;
 	}
+
 }

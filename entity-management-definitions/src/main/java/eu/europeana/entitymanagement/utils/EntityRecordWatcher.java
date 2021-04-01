@@ -1,10 +1,9 @@
 package eu.europeana.entitymanagement.utils;
 
+import java.util.Date;
+
 import dev.morphia.annotations.PrePersist;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
-
-import java.util.Date;
 
 /**
  * Watches for Database operations on the EntityRecord collection

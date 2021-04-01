@@ -14,6 +14,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import eu.europeana.entitymanagement.web.xml.model.XmlAgentImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
+import eu.europeana.entitymanagement.web.xml.model.XmlOrganizationImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlPlaceImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlTimespanImpl;
 
@@ -28,6 +29,7 @@ public class EnrichmentResultBaseWrapper {
             @XmlElement(name = "Concept", namespace = "http://www.w3.org/2004/02/skos/core#", type = XmlConceptImpl.class),
             @XmlElement(name = "Agent", namespace = "http://www.europeana.eu/schemas/edm/", type = XmlAgentImpl.class),
             @XmlElement(name = "Place", namespace = "http://www.europeana.eu/schemas/edm/", type = XmlPlaceImpl.class),
+            @XmlElement(name = "Organization", namespace = "http://www.europeana.eu/schemas/edm/", type = XmlOrganizationImpl.class),
             @XmlElement(name = "Timespan", namespace = "http://www.europeana.eu/schemas/edm/", type = XmlTimespanImpl.class)})
     private List<XmlBaseEntityImpl> xmlEntities = new ArrayList<>();
 

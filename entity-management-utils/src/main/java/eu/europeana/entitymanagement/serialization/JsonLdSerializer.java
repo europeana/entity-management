@@ -95,7 +95,10 @@ public class JsonLdSerializer {
 		    //adding the referenced web resources for the proxy entities
 			List<EntityProxy> entityRecordProxies = record.getProxies();		    
 		    for (EntityProxy proxy : entityRecordProxies) {
-		    	WebResource additionalElementsToSerialize = proxy.getEntity().getReferencedWebResource();
+		    	WebResource additionalElementsToSerialize = null;
+		    	if (proxy.getEntity()!=null) {
+		    		additionalElementsToSerialize = proxy.getEntity().getReferencedWebResource();
+		    	}
 			    if (additionalElementsToSerialize!=null)
 			    {
 			    	builder.append(",");
