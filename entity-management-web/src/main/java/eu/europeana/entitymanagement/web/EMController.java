@@ -223,6 +223,31 @@ public class EMController extends BaseRest {
 	return createResponse(profile, type, identifier, FormatTypes.jsonld, null, request);
 
     }
+    
+    @ApiOperation(value = "Retrieve a known entity", nickname = "getEntity", response = java.lang.Void.class)
+    @RequestMapping(value = { "/{type}/base/{identifier}","/{type}/{identifier}" }, 
+    method = RequestMethod.GET, produces = { HttpHeaders.CONTENT_TYPE_JSONLD,
+		    MediaType.APPLICATION_JSON_VALUE, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML, HttpHeaders.CONTENT_TYPE_RDF_XML,
+		    MediaType.APPLICATION_XML_VALUE })
+    public ResponseEntity<String> getEntity(
+    	@RequestHeader(value = "Accept", required = true) String acceptHeader,
+	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
+	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
+	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
+	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
+	    HttpServletRequest request) {
+    	
+    	if (acceptHeader.contains("application/json")) {
+    		return createResponse(profile, type, identifier, FormatTypes.jsonld, null, request);
+    	}
+    	else if (acceptHeader.contains("application/xml")) {
+    		return createResponse(profile, type, identifier, FormatTypes.xml, null, request);
+    	}
+    	else {    		
+		    return ResponseEntity.badRequest().header("info:", "Please specify the Accept header (application/xml or application/xml)").build();
+    	}
+
+    }
 
     @ApiOperation(value = "Retrieve a known entity", nickname = "getEntityXml", response = java.lang.Void.class)
     @RequestMapping(value = { "/{type}/base/{identifier}.xml",
