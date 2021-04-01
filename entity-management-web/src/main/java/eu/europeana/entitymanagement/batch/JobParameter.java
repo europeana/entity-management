@@ -4,7 +4,8 @@ package eu.europeana.entitymanagement.batch;
  * Parameters for triggering jobs
  */
 public enum JobParameter {
-    RUN_TIME("runTime"),
+    CURRENT_START_TIME("currentStartTime"),
+    PREVIOUS_START_TIME("previousStartTime"),
     ENTITY_ID("entityIds");
 
     private final String key;

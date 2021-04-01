@@ -31,6 +31,7 @@ public class MetisDereferenceService {
     private static final Logger logger = LogManager.getLogger(MetisDereferenceService.class);
 
     private Unmarshaller jaxbDeserializer;
+    private final Object deserializerLock = new Object();
 
 
 	private final WebClient metisWebClient;
@@ -65,11 +66,16 @@ public class MetisDereferenceService {
 	logger.debug("Metis dereference response for entity {}: {} ", id, metisResponseBody);
 	
 	EnrichmentResultList derefResult;
-	try {
-	    derefResult = (EnrichmentResultList) getDeserializer().unmarshal(new StringReader(metisResponseBody));
-	} catch (JAXBException | RuntimeException e) {
-	    throw new EuropeanaApiException(
-		    "Unexpected exception occurred when parsing metis dereference response for entity:  " + id, e);
+	// Prevent "FWK005 parse may not be called while parsing" error when this method is called by multiple threads
+	synchronized (deserializerLock) {
+		try {
+			derefResult = (EnrichmentResultList) getDeserializer()
+					.unmarshal(new StringReader(metisResponseBody));
+		} catch (JAXBException | RuntimeException e) {
+			throw new EuropeanaApiException(
+					"Unexpected exception occurred when parsing metis dereference response for entity:  "
+							+ id, e);
+		}
 	}
 
 	if (derefResult== null || derefResult.getEnrichmentBaseResultWrapperList().isEmpty()
