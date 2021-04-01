@@ -5,7 +5,7 @@ import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT2_RE
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_REFERENTIAL_INTEGRITY_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
-import static eu.europeana.entitymanagement.web.BaseMvcTestUtils.CONCEPT_DATA_RECONCELIATION_XML;
+import static eu.europeana.entitymanagement.web.BaseMvcTestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -51,48 +51,99 @@ public class EntityRecordServiceT {
     private ObjectMapper objectMapper;
 
 	@Test
-	public void mergeEntities() throws JAXBException, JsonMappingException, JsonProcessingException, IOException, EntityCreationException {
-		/*
-		 * metis deserializer -> get the entity for the external proxy
-		 */
-		InputStream is = getClass().getResourceAsStream(CONCEPT_DATA_RECONCELIATION_XML);
-		JAXBContext jaxbContext = JAXBContext.newInstance(EnrichmentResultList.class);
-		Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-		EnrichmentResultList resultList = (EnrichmentResultList) unmarshaller.unmarshal(is);
+	public void mergeEntities() throws JAXBException, JsonMappingException, JsonProcessingException, IOException,
+		EntityCreationException {
+	    /*
+	     * metis deserializer -> get the entity for the external proxy
+	     */
+	    String metisResponse = CONCEPT_DATA_RECONCELIATION_XML;
+	    XmlConceptImpl xmlEntity = getMetisResponse(metisResponse);
 
-		assertNotNull(resultList);
-		assertEquals(1, resultList.getEnrichmentBaseResultWrapperList().size());
+	    /*
+	     * read the test data from the json file -> get the entity for the internal
+	     * proxy
+	     */
+	    ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_JSON), ConceptImpl.class);
 
-		// get unmarshalled object
-		XmlConceptImpl xmlEntity = (XmlConceptImpl) resultList.getEnrichmentBaseResultWrapperList().get(0).getEnrichmentBaseList().get(0);
-		
-		/*
-		 * read the test data from the json file -> get the entity for the internal proxy
-		 */
-        ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_JSON), ConceptImpl.class);
-        
-        /*
-         * creating the entity record
-         */
-        EntityRecord entityRecord = new EntityRecordImpl();
-        EntityProxy internalProxy = new EntityProxyImpl ();
-        internalProxy.setEntity(concept);
-        internalProxy.setProxyId("http://data.europeana.eu/proxy1");
-        EntityProxy externalProxy = new EntityProxyImpl ();
-        externalProxy.setEntity(xmlEntity.toEntityModel());
-        externalProxy.setProxyId("http://data.external.org/proxy1");
-        entityRecord.addProxy(internalProxy);
-        entityRecord.addProxy(externalProxy);
+	    /*
+	     * creating the entity record
+	     */
+	    EntityRecord entityRecord = new EntityRecordImpl();
+	    EntityProxy internalProxy = new EntityProxyImpl();
+	    internalProxy.setEntity(concept);
+	    internalProxy.setProxyId("http://data.europeana.eu/proxy1");
+	    EntityProxy externalProxy = new EntityProxyImpl();
+	    externalProxy.setEntity(xmlEntity.toEntityModel());
+	    externalProxy.setProxyId("http://data.external.org/proxy1");
+	    entityRecord.addProxy(internalProxy);
+	    entityRecord.addProxy(externalProxy);
 
-        
-        entityRecordService.mergeEntity(entityRecord);
-        /*
-         * here the assertions are manual and are defined based on what is in put in the corresponsing proxy's entity objects
-         */
-        Assertions.assertNotNull(entityRecord.getEntity().getNote());
-        Assertions.assertNotNull(entityRecord.getEntity().getSameAs());
-        Assertions.assertTrue(((Concept)entityRecord.getEntity()).getBroader().length>1);
-        Assertions.assertNotNull(entityRecord.getEntity().getPrefLabel());        
+	    entityRecordService.mergeEntity(entityRecord);
+	    /*
+	     * here the assertions are manual and are defined based on what is in put in the
+	     * corresponsing proxy's entity objects
+	     */
+	    Assertions.assertNotNull(entityRecord.getEntity().getNote());
+	    Assertions.assertNotNull(entityRecord.getEntity().getSameAs());
+	    Assertions.assertTrue(((Concept) entityRecord.getEntity()).getBroader().length > 1);
+	    Assertions.assertNotNull(entityRecord.getEntity().getPrefLabel());
+	}
+
+	
+	@Test
+	public void mergeEntitiesBathtub() throws JAXBException, JsonMappingException, JsonProcessingException, IOException,
+		EntityCreationException {
+	    /*
+	     * metis deserializer -> get the entity for the external proxy
+	     */
+	    String metisResponse = CONCEPT_METIS_BATHTUB;
+	    XmlConceptImpl xmlEntity = getMetisResponse(metisResponse);
+
+	    /*
+	     * read the test data from the json file -> get the entity for the internal
+	     * proxy
+	     */
+	    ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_BATHTUB), ConceptImpl.class);
+
+	    /*
+	     * creating the entity record
+	     */
+	    EntityRecord entityRecord = new EntityRecordImpl();
+	    EntityProxy internalProxy = new EntityProxyImpl();
+	    internalProxy.setEntity(concept);
+	    internalProxy.setProxyId("http://data.europeana.eu/concept/1#proxy_europeana");
+	    EntityProxy externalProxy = new EntityProxyImpl();
+	    externalProxy.setEntity(xmlEntity.toEntityModel());
+	    externalProxy.setProxyId("http://www.wikidata.org/entity/Q1101933");
+	    entityRecord.addProxy(internalProxy);
+	    entityRecord.addProxy(externalProxy);
+
+	    entityRecordService.mergeEntity(entityRecord);
+	    /*
+	     * here the assertions are manual and are defined based on what is in put in the
+	     * corresponsing proxy's entity objects
+	     */
+	    
+	    //TODO: verify correctness of all properties aganst the "consolidated/concept-consolidated-bathtub.json" file
+	    
+	    Assertions.assertNotNull(entityRecord.getEntity().getNote());
+	    Assertions.assertNotNull(entityRecord.getEntity().getSameAs());
+	    Assertions.assertTrue(((Concept) entityRecord.getEntity()).getBroader().length > 1);
+	    Assertions.assertNotNull(entityRecord.getEntity().getPrefLabel());
+	}
+	
+	private XmlConceptImpl getMetisResponse(String metisResponse) throws JAXBException {
+	    InputStream is = getClass().getResourceAsStream(metisResponse);
+	    JAXBContext jaxbContext = JAXBContext.newInstance(EnrichmentResultList.class);
+	    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+	    EnrichmentResultList resultList = (EnrichmentResultList) unmarshaller.unmarshal(is);
+
+	    assertNotNull(resultList);
+	    assertEquals(1, resultList.getEnrichmentBaseResultWrapperList().size());
+
+	    // get unmarshalled object
+	    XmlConceptImpl xmlEntity = (XmlConceptImpl) resultList.getEnrichmentBaseResultWrapperList().get(0).getEnrichmentBaseList().get(0);
+	    return xmlEntity;
 	}
 	
 	@Test
