@@ -142,7 +142,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
         //TODO assert other important properties
 
         // matches id in JSON file
-        assertMetisRequest("http://www.wikidata.org/entity/Q11019");
+        assertMetisRequest("http://www.wikidata.org/entity/Q152095");
 
         return results;
     }
@@ -255,7 +255,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andReturn();
 
         // matches the id in the JSON file (also used to remove the queued Metis request)
-        assertMetisRequest("http://www.wikidata.org/entity/Q11019");
+        assertMetisRequest("http://www.wikidata.org/entity/Q152095");
 
         final ObjectNode registeredEntityNode = new ObjectMapper().readValue(resultRegisterEntity.getResponse().getContentAsString(StandardCharsets.UTF_8), ObjectNode.class);
 
