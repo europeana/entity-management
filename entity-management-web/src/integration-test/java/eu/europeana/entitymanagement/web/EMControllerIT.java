@@ -447,7 +447,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
         Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveEntityRecordByUri(record.getEntityId());
 
         assert dbRecordOptional.isPresent();
-        Assertions.assertTrue(dbRecordOptional.get().getDisabled());
+        Assertions.assertTrue(dbRecordOptional.get().isDisabled());
     }
 
 
@@ -470,7 +470,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
         Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveEntityRecordByUri(record.getEntityId());
 
         assert dbRecordOptional.isPresent();
-        Assertions.assertFalse(dbRecordOptional.get().getDisabled());
+        Assertions.assertFalse(dbRecordOptional.get().isDisabled());
     }
     
     

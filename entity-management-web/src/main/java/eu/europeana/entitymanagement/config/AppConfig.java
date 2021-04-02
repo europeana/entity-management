@@ -13,7 +13,6 @@ import dev.morphia.Datastore;
 import eu.europeana.entitymanagement.batch.config.MongoBatchConfigurer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
