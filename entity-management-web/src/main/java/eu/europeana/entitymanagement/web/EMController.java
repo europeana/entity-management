@@ -1,5 +1,27 @@
 package eu.europeana.entitymanagement.web;
 
+import java.util.Date;
+import java.util.Optional;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
+
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.api.commons.web.exception.HttpException;
@@ -18,25 +40,6 @@ import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
 import eu.europeana.entitymanagement.web.service.impl.EntityRecordUtils;
 import eu.europeana.entitymanagement.web.service.impl.MetisDereferenceService;
 import io.swagger.annotations.ApiOperation;
-import java.util.Date;
-import java.util.Optional;
-import javax.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.UriComponentsBuilder;
 
 
 /**
@@ -199,25 +202,24 @@ public class EMController extends BaseRest {
     
     @ApiOperation(value = "Retrieve a known entity", nickname = "getEntity", response = java.lang.Void.class)
     @RequestMapping(value = { "/{type}/base/{identifier}","/{type}/{identifier}" }, 
-    method = RequestMethod.GET, produces = { HttpHeaders.CONTENT_TYPE_JSONLD,
-		    MediaType.APPLICATION_JSON_VALUE, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML, HttpHeaders.CONTENT_TYPE_RDF_XML,
-		    MediaType.APPLICATION_XML_VALUE })
+    method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
     public ResponseEntity<String> getEntity(
-    	@RequestHeader(value = "Accept", required = true) String acceptHeader,
+    	@RequestHeader(value = "Accept-header", defaultValue = "application/json") String acceptHeader,
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
 	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 	    HttpServletRequest request) {
     	
-    	if (acceptHeader.contains("application/json")) {
+    	if (acceptHeader.contains(MediaType.APPLICATION_JSON_VALUE)) {
     		return createResponse(profile, type, identifier, FormatTypes.jsonld, null, request);
     	}
-    	else if (acceptHeader.contains("application/xml")) {
-    		return createResponse(profile, type, identifier, FormatTypes.xml, null, request);
+    	else if (acceptHeader.contains(MediaType.APPLICATION_XML_VALUE)) {
+    		return createResponse(profile, type, identifier, FormatTypes.xml, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML,
+    				request);
     	}
     	else {    		
-		    return ResponseEntity.badRequest().header("info:", "Please specify the Accept header (application/xml or application/xml)").build();
+		    return ResponseEntity.badRequest().header("info:", "Please specify the Accept-header value (application/json or application/xml)").build();
     	}
 
     }
