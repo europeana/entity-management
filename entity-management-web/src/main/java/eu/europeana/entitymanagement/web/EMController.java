@@ -10,6 +10,8 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
+import eu.europeana.entitymanagement.exception.EtagMismatchException;
+import eu.europeana.entitymanagement.exception.HttpBadRequestException;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
@@ -54,6 +56,9 @@ public class EMController extends BaseRest {
   private final DataSources datasources;
   private final BatchService batchService;
 
+	private static final String ENTITY_ID_REMOVED_MSG = "Entity '%s' has already been removed";
+	private static final String EXTERNAL_ID_REMOVED_MSG = "Entity id '%s' already exists as '%s', which has been removed";
+
   @Autowired
 	public EMController(EntityRecordService entityRecordService,
 			MetisDereferenceService dereferenceService, DataSources datasources,
@@ -74,21 +79,9 @@ public class EMController extends BaseRest {
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 	    HttpServletRequest request) throws HttpException, EuropeanaApiException {
 
-	String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier.toLowerCase());
-	Optional<EntityRecord> entityRecordOptional = entityRecordService.retrieveEntityRecordByUri(entityUri);
+		EntityRecord entityRecord = retrieveEntityRecord(type, identifier.toLowerCase());
 
-	if (entityRecordOptional.isEmpty()){
-		throw new EntityNotFoundException(entityUri);
-	}
-
-	EntityRecord entityRecord = entityRecordOptional.get();
-
-	if(entityRecord.getDisabled()){
-		throw new EntityRemovedException(entityUri);
-	}
-
-
-	    Entity entity = entityRecord.getEntity();
+		Entity entity = entityRecord.getEntity();
 	    Date etagDate = (entity == null || entity.getIsAggregatedBy() == null ? new Date()
 		    : entity.getIsAggregatedBy().getModified());
 	    String etag = generateETag(etagDate, FormatTypes.jsonld.name(), getApiVersion());
@@ -115,47 +108,40 @@ public class EMController extends BaseRest {
     	// TODO: Re-enable authentication
     	// verifyReadAccess(request);
 
-		String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
-		Optional<EntityRecord> existingRecord = entityRecordService.retrieveEntityRecordByUri(entityUri);
-    	if(existingRecord.isPresent() && existingRecord.get().getEuropeanaProxy()!=null) {
+		 EntityRecord entityRecord = retrieveEntityRecord(type, identifier);
 
-    		Date timestamp = (existingRecord.get().getEntity().getIsAggregatedBy() != null) ? existingRecord.get().getEntity().getIsAggregatedBy().getModified() : null;
+		 Date timestamp = (entityRecord.getEntity().getIsAggregatedBy() != null) ? entityRecord.getEntity().getIsAggregatedBy().getModified() : null;
 			Date etagDate = (timestamp != null)? timestamp : new Date();
 			String etag = generateETag(etagDate, FormatTypes.jsonld.name(), getApiVersion());
 
 			try {
 				checkIfMatchHeader(etag, request);
 			} catch (HttpException e) {
-				return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).header("info:", "The value of the If-Match HTTP header does not allign with the given ETag value generated from the timestamp.").build();
+				throw new EtagMismatchException("If-Match header value does not match generated ETag for entity");
 			}
 
-			//TODO: call the UpdateTask for updating the entity if it is meant to be used for that
 			if(entityCreationRequest.getId()!=null) {
-				existingRecord.get().getEuropeanaProxy().getEntity().setEntityId(entityCreationRequest.getId());
+				entityRecord.getEuropeanaProxy().getEntity().setEntityId(entityCreationRequest.getId());
 			}
 			if(entityCreationRequest.getAltLabel()!=null) {
-				existingRecord.get().getEuropeanaProxy().getEntity().setAltLabel(entityCreationRequest.getAltLabel());
+				entityRecord.getEuropeanaProxy().getEntity().setAltLabel(entityCreationRequest.getAltLabel());
 			}
     		if(entityCreationRequest.getDepiction()!=null) {
-    			existingRecord.get().getEuropeanaProxy().getEntity().setDepiction(entityCreationRequest.getDepiction());
+					entityRecord.getEuropeanaProxy().getEntity().setDepiction(entityCreationRequest.getDepiction());
     		}
     		if(entityCreationRequest.getPrefLabel()!=null) {
-    			existingRecord.get().getEuropeanaProxy().getEntity().setPrefLabelStringMap(entityCreationRequest.getPrefLabel());
+					entityRecord.getEuropeanaProxy().getEntity().setPrefLabelStringMap(entityCreationRequest.getPrefLabel());
     		}
 
     		Date modificationDate = new Date();
-    		if (existingRecord.get().getEuropeanaProxy().getProxyIn()!=null) {
-    			existingRecord.get().getEuropeanaProxy().getProxyIn().setModified(modificationDate);
+    		if (entityRecord.getEuropeanaProxy().getProxyIn()!=null) {
+					entityRecord.getEuropeanaProxy().getProxyIn().setModified(modificationDate);
     		}
 
-    		entityRecordService.update(existingRecord.get());
-    		launchUpdateTask(entityUri);
+    		entityRecordService.update(entityRecord);
+    		launchUpdateTask(entityRecord.getEntityId());
 
-    		return ResponseEntity.accepted().body(existingRecord.get());
-    	}
-
-    	return ResponseEntity.notFound().header("info:", "The given entity record does not exist.").build();
-
+    		return ResponseEntity.accepted().body(entityRecord);
     }
 
 
@@ -166,20 +152,9 @@ public class EMController extends BaseRest {
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier
 	) throws Exception {
 		// check that entity exists, if not return 404
-		String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
-		Optional<EntityRecord> entityRecordOptional = entityRecordService
-				.retrieveEntityRecordByUri(entityUri);
-		if (entityRecordOptional.isEmpty()) {
-			throw new EntityNotFoundException(entityUri);
-		}
+		EntityRecord entityRecord = retrieveEntityRecord(type, identifier);
 
-    EntityRecord entityRecord = entityRecordOptional.get();
-
-    if (entityRecord.getDisabled()) {
-      throw new EntityRemovedException(entityUri);
-    }
-
-    launchUpdateTask(entityUri);
+		launchUpdateTask(entityRecord.getEntityId());
     return ResponseEntity.accepted().body(entityRecord);
   }
 
@@ -191,9 +166,9 @@ public class EMController extends BaseRest {
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
 	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
-	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
-	    HttpServletRequest request) {
-	return createResponse(profile, type, identifier, FormatTypes.jsonld, null, request);
+	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier)
+				throws EuropeanaApiException {
+	return createResponse(profile, type, identifier, FormatTypes.jsonld, null);
 
     }
 
@@ -206,63 +181,62 @@ public class EMController extends BaseRest {
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
 	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
-	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
-	    HttpServletRequest request) {
-	return createResponse(profile, type, identifier, FormatTypes.xml, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML,
-		request);
+	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier)
+				throws EuropeanaApiException {
+	return createResponse(profile, type, identifier, FormatTypes.xml, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML);
     }
 
     @ApiOperation(value = "Register a new entity", nickname = "registerEntity", response = java.lang.Void.class)
     @PostMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<EntityRecord> registerEntity(@RequestBody EntityPreview entityCreationRequest)
-	    throws Exception {
-	// check if id is already being used, if so return a 301
-	Optional<EntityRecord> existingEntity = entityRecordService
-		.findMatchingCoreference(entityCreationRequest.getId());
-	if (existingEntity.isPresent()) {
-	    // return 301 redirect
-	    return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
-		    .location(UriComponentsBuilder.newInstance().path("/{id}.{format}").buildAndExpand(
-			    EntityRecordUtils.extractIdentifierFromEntityId(existingEntity.get().getEntityId()), FormatTypes.jsonld).toUri())
-		    .build();
-	}
+		public ResponseEntity<EntityRecord> registerEntity(
+				@RequestBody EntityPreview entityCreationRequest)
+				throws Exception {
+			// check if id is already being used, if so return a 301
+			Optional<EntityRecord> existingEntity = entityRecordService
+					.findMatchingCoreference(entityCreationRequest.getId());
+			ResponseEntity<EntityRecord> response = checkExistingEntity(existingEntity,
+					entityCreationRequest.getId());
 
-	// return 400 error if ID does not match a configured datasource
-	if (!datasources.hasDataSource(entityCreationRequest.getId())) {
-	    return ResponseEntity.badRequest().build();
-	}
+			if (response != null) {
+				return response;
+			}
 
-	Entity metisResponse = dereferenceService.dereferenceEntityById(entityCreationRequest.getId());
-	if (metisResponse.getSameAs() != null) {
-		existingEntity = entityRecordService.retrieveMetisCoreferenceSameAs(metisResponse.getSameAs());
-	}
+			// return 400 error if ID does not match a configured datasource
+			if (!datasources.hasDataSource(entityCreationRequest.getId())) {
+				logger.debug("Entity registration id={} - no matching datasource configured",
+						entityCreationRequest.getId());
+				throw new HttpBadRequestException(String
+						.format("id %s does not match a configured datasource", entityCreationRequest.getId()));
+			}
 
-	if (existingEntity.isPresent()) {
-	    // return 301 redirect
-	    return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
-		    .location(UriComponentsBuilder.newInstance().path("/{id}.{format}").buildAndExpand(
-			    EntityRecordUtils.extractIdentifierFromEntityId(existingEntity.get().getEntityId()), FormatTypes.jsonld).toUri())
-		    .build();
+			Entity metisResponse = dereferenceService
+					.dereferenceEntityById(entityCreationRequest.getId());
+			if (metisResponse.getSameAs() != null) {
+				existingEntity = entityRecordService
+						.retrieveMetisCoreferenceSameAs(metisResponse.getSameAs());
+				response = checkExistingEntity(existingEntity, entityCreationRequest.getId());
+				if (response != null) {
+					return response;
+				}
+			}
 
-	}
+			EntityRecord savedEntityRecord = entityRecordService
+					.createEntityFromRequest(entityCreationRequest,
+							metisResponse);
 
-	EntityRecord savedEntityRecord = entityRecordService.createEntityFromRequest(entityCreationRequest,
-		metisResponse);
-
-	launchUpdateTask(savedEntityRecord.getEntityId());
-	return ResponseEntity.accepted().body(savedEntityRecord);
-    }
+			launchUpdateTask(savedEntityRecord.getEntityId());
+			return ResponseEntity.accepted().body(savedEntityRecord);
+		}
 
 
     private ResponseEntity<String> createResponse(String profile, String type, String identifier, FormatTypes outFormat,
-	    String contentType, HttpServletRequest request) {
+	    String contentType) throws EuropeanaApiException {
 	// TODO: Re-enable authentication
 	// verifyReadAccess(request);
 
 	MultiValueMap<String, String> headers;
-	ResponseEntity<String> response;
 
-	/*
+			/*
 	 * verify the parameters
 	 */
 	boolean valid_profile = false;
@@ -273,19 +247,12 @@ public class EMController extends BaseRest {
 	    }
 	}
 	if (!valid_profile) {
-	    return ResponseEntity.badRequest().header("info:", "The profile parameter is invalid.").build();
+	    throw new HttpBadRequestException("Invalid profile");
 	}
 
-	String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
-	Optional<EntityRecord> entityRecordOptional = entityRecordService.retrieveEntityRecordByUri(entityUri);
-	if (entityRecordOptional.isEmpty()) {
-	    return ResponseEntity.notFound().header("info:", "The entity with the required parameters does not exist.")
-		    .build();
-	}
+			EntityRecord entityRecord = retrieveEntityRecord(type, identifier);
 
-	EntityRecord entityRecord = entityRecordOptional.get();
-
-	Date etagDate = (entityRecord.getEntity() == null || entityRecord.getEntity().getIsAggregatedBy() == null
+			Date etagDate = (entityRecord.getEntity() == null || entityRecord.getEntity().getIsAggregatedBy() == null
 		? new Date()
 		: entityRecord.getEntity().getIsAggregatedBy().getModified());
 	String etag = generateETag(etagDate, outFormat.name(), getApiVersion());
@@ -302,12 +269,50 @@ public class EMController extends BaseRest {
 
 	String body = serialize(entityRecord, outFormat, profile);
 
-	response = new ResponseEntity<String>(body, headers, HttpStatus.OK);
-    return response;
+			return new ResponseEntity<>(body, headers, HttpStatus.OK);
   }
 
+	private EntityRecord retrieveEntityRecord(String type, String identifier)
+			throws EuropeanaApiException {
+		String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
+		Optional<EntityRecord> entityRecordOptional = entityRecordService
+				.retrieveEntityRecordByUri(entityUri);
+		if (entityRecordOptional.isEmpty()) {
+			throw new EntityNotFoundException(entityUri);
+		}
 
-  private void launchUpdateTask(String entityUri)
+		EntityRecord entityRecord = entityRecordOptional.get();
+		if (entityRecord.isDisabled()) {
+			throw new EntityRemovedException(String.format(ENTITY_ID_REMOVED_MSG, entityUri));
+		}
+		return entityRecord;
+	}
+
+	private ResponseEntity<EntityRecord> checkExistingEntity(Optional<EntityRecord> existingEntity,
+			String entityCreationId)
+			throws EntityRemovedException {
+
+		if (existingEntity.isPresent()) {
+			logger.debug("Entity registration id={} - matching coreference found; entityId={}",
+					entityCreationId, existingEntity.get().getEntityId());
+			if (existingEntity.get().isDisabled()) {
+				logger.debug("Entity registration - entityId={} is disabled",
+						existingEntity.get().getEntityId());
+				throw new EntityRemovedException(String
+						.format(EXTERNAL_ID_REMOVED_MSG, entityCreationId, existingEntity.get().getEntityId()));
+			}
+
+			// return 301 redirect
+			return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
+					.location(UriComponentsBuilder.newInstance().path("/entity/{id}.{format}").buildAndExpand(
+							EntityRecordUtils.extractIdentifierFromEntityId(existingEntity.get().getEntityId()),
+							FormatTypes.jsonld).toUri())
+					.build();
+		}
+		return null;
+	}
+
+	private void launchUpdateTask(String entityUri)
       throws Exception {
     logger.info("Launching update task for {}", entityUri);
     batchService.launchSingleEntityUpdate(entityUri);
