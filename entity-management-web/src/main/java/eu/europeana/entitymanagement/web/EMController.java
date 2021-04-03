@@ -96,10 +96,10 @@ public class EMController extends BaseRest {
     @ApiOperation(value = "Update an entity", nickname = "updateEntity", response = java.lang.Void.class)
     @RequestMapping(value = { "/{type}/base/{identifier}", "/{type}/{identifier}" },method = RequestMethod.PUT, produces = {
 	    HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<EntityRecord> updateEntity(
+    public ResponseEntity<String> updateEntity(
     	@RequestHeader(value = "If-Match", required = false) String ifMatchHeader,
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
-	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = true, defaultValue = "external") String profile,
+	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "internal") String profile,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 	    @RequestBody EntityPreview entityCreationRequest,
@@ -139,26 +139,25 @@ public class EMController extends BaseRest {
     		}
 
     		entityRecordService.update(entityRecord);
-    		launchUpdateTask(entityRecord.getEntityId());
-
-    		return ResponseEntity.accepted().body(entityRecord);
+				return launchTaskAndRetrieveEntity(type, identifier, entityRecord, profile);
     }
 
 
 	@ApiOperation(value = "Update an entity from external data source", nickname = "updateEntityFromDatasource", response = java.lang.Void.class)
 	@PostMapping(value = "/{type}/{identifier}/management/update", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<EntityRecord> updateFromExternalSource(
+	public ResponseEntity<String> updateFromExternalSource(
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
-			@PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier
+			@PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
+			@RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "internal") String profile
 	) throws Exception {
-		// check that entity exists, if not return 404
 		EntityRecord entityRecord = retrieveEntityRecord(type, identifier);
 
-		launchUpdateTask(entityRecord.getEntityId());
-    return ResponseEntity.accepted().body(entityRecord);
-  }
+		return launchTaskAndRetrieveEntity(type, identifier, entityRecord, profile);
+	}
 
-    @ApiOperation(value = "Retrieve a known entity", nickname = "getEntityJsonLd", response = java.lang.Void.class)
+
+
+	@ApiOperation(value = "Retrieve a known entity", nickname = "getEntityJsonLd", response = java.lang.Void.class)
     @RequestMapping(value = { "/{type}/base/{identifier}.jsonld",
 	    "/{type}/{identifier}.jsonld" }, method = RequestMethod.GET, produces = { HttpHeaders.CONTENT_TYPE_JSONLD,
 		    MediaType.APPLICATION_JSON_VALUE })
@@ -224,7 +223,7 @@ public class EMController extends BaseRest {
 					.createEntityFromRequest(entityCreationRequest,
 							metisResponse);
 
-			launchUpdateTask(savedEntityRecord.getEntityId());
+			launchUpdateTask(savedEntityRecord.getEntityId(), true);
 			return ResponseEntity.accepted().body(savedEntityRecord);
 		}
 
@@ -288,6 +287,15 @@ public class EMController extends BaseRest {
 		return entityRecord;
 	}
 
+	private ResponseEntity<String> launchTaskAndRetrieveEntity(String type, String identifier,
+			EntityRecord entityRecord, String profile) throws Exception {
+		// launch synchronous update, then retrieve entity from DB afterwards
+		launchUpdateTask(entityRecord.getEntityId(), false);
+		entityRecord = retrieveEntityRecord(type, identifier);
+
+		return ResponseEntity.accepted().body(jsonLdSerializer.serialize(entityRecord, profile));
+	}
+
 	private ResponseEntity<EntityRecord> checkExistingEntity(Optional<EntityRecord> existingEntity,
 			String entityCreationId)
 			throws EntityRemovedException {
@@ -312,9 +320,9 @@ public class EMController extends BaseRest {
 		return null;
 	}
 
-	private void launchUpdateTask(String entityUri)
+	private void launchUpdateTask(String entityUri, boolean runAsynchronously)
       throws Exception {
-    logger.info("Launching update task for {}", entityUri);
-    batchService.launchSingleEntityUpdate(entityUri);
+    logger.info("Launching update task for entityId={}. async={}", entityUri, runAsynchronously);
+    batchService.launchSingleEntityUpdate(entityUri, runAsynchronously);
   }
 }

@@ -22,6 +22,7 @@ import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
 import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -532,7 +533,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
         @Primary
         public BatchService batchServiceBean() throws Exception {
             BatchService batchService = Mockito.mock(BatchService.class);
-            doNothing().when(batchService).launchSingleEntityUpdate(anyString());
+            doNothing().when(batchService).launchSingleEntityUpdate(anyString(), anyBoolean());
             return batchService;
         }
     }
