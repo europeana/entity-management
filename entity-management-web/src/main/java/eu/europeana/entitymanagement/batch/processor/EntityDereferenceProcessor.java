@@ -31,7 +31,7 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
         Entity metisResponse = dereferenceService.dereferenceEntityById(entityRecord.getExternalProxy().getProxyId());
 
         if (entityRecord.getEntity().equals(metisResponse)) {
-            logger.debug("Existing for entityId={} matches Metis response. Stopping processing", entityRecord.getEntityId());
+            logger.debug("Existing metadata for entityId={} matches Metis response. Stopping processing", entityRecord.getEntityId());
             // stop processing
             return null;
         }
