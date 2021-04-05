@@ -30,7 +30,7 @@ public class JobLauncherController {
     @PostMapping("/run")
     public ResponseEntity<String> handle(@RequestBody(required = false) String entityId) throws Exception {
         if (StringUtils.hasLength(entityId)) {
-            batchService.launchSingleEntityUpdate(entityId);
+            batchService.launchSingleEntityUpdate(entityId, true);
         } else {
             batchService.launchMultiEntityUpdate();
         }
