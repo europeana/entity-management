@@ -17,48 +17,19 @@ import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_XML
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_REGISTER_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_XML;
-//import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BASE_SERVICE_URL;
-//import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BATHTUB_DEREF;
-//import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_JSON;
-//import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_JSON;
-//import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_JSON;
-//import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.getEntityRequestPath;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
 import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-
-import javax.servlet.ServletContext;
-
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockServletContext;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -66,8 +37,8 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import eu.europeana.entitymanagement.AbstractIntegrationTest;
+import eu.europeana.entitymanagement.batch.BatchService;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -83,7 +54,34 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import javax.servlet.ServletContext;
 import okhttp3.mockwebserver.MockResponse;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockServletContext;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Integration test for the main Entity Management controller
@@ -146,7 +144,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
         // matches id in JSON file
         assertMetisRequest("http://www.wikidata.org/entity/Q152095");
-        
+
         return results;
     }
 
@@ -170,7 +168,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
         // matches id in JSON file
         assertMetisRequest("http://www.wikidata.org/entity/Q762");
-        
+
         return results;
     }
 
@@ -194,7 +192,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
         // matches id in JSON file
         assertMetisRequest("http://www.wikidata.org/entity/Q193563");
-        
+
         return results;
     }
 
@@ -218,7 +216,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
         // matches id in JSON file
         assertMetisRequest("https://sws.geonames.org/2988507/");
-        
+
         return results;
     }
 
@@ -242,7 +240,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
         // matches id in JSON file
         assertMetisRequest("http://www.wikidata.org/entity/Q8106");
-        
+
         return results;
     }
 
@@ -308,7 +306,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
         String contentXml = getRetrieveEntityXmlResponse(requestPath, "external");
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, concept);
     }
-    
+
     @Test
     void retrieveAgentExternalShouldBeSuccessful() throws Exception {
         // read the test data for the Agent entity from the file
@@ -392,15 +390,15 @@ public class EMControllerIT extends AbstractIntegrationTest {
         String contentXml = getRetrieveEntityXmlResponse(requestPath, "external");
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, timespan);
     }
-    
+
     @Test
     void retrieveEntityInternalShouldBeSuccessful() throws Exception {
-    	
+
     	// read the test data for the entity from the file
         EntityPreview entityPreview = objectMapper.readValue(loadFile(CONCEPT_REGISTER_JSON), EntityPreview.class);
-        
+
     	ResultActions registeredEntityResults = registerConceptShouldBeSuccessful();
-    	
+
         final ObjectNode registeredEntityNode = new ObjectMapper().readValue(registeredEntityResults.andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8), ObjectNode.class);
 
         String requestPath = getEntityRequestPath(registeredEntityNode.path("id").asText());
@@ -450,10 +448,10 @@ public class EMControllerIT extends AbstractIntegrationTest {
         Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveEntityRecordByUri(record.getEntityId());
 
         assert dbRecordOptional.isPresent();
-        Assertions.assertTrue(dbRecordOptional.get().getDisabled());
+        Assertions.assertTrue(dbRecordOptional.get().isDisabled());
     }
-    
-    
+
+
     @Test
     void deletionFailsIfMatch() throws Exception {
         // create entity in DB
@@ -473,7 +471,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
         Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveEntityRecordByUri(record.getEntityId());
 
         assert dbRecordOptional.isPresent();
-        Assertions.assertFalse(dbRecordOptional.get().getDisabled());
+        Assertions.assertFalse(dbRecordOptional.get().isDisabled());
     }
     
     
@@ -482,8 +480,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
     	Optional<EntityRecord> dbRecord = entityRecordService.retrieveEntityRecordByUri(node.get("id").asText());
         Assertions.assertTrue(dbRecord.isPresent());
     }
-    
-    
+
+
 
     private void assertRetrieveAPIResultsExternalProfile(String contentXml, ResultActions resultActions, Entity entity) throws Exception {
         Assertions.assertTrue(contentXml.contains(XmlFields.XML_SKOS_PREF_LABEL));
@@ -497,9 +495,9 @@ public class EMControllerIT extends AbstractIntegrationTest {
         	Assertions.assertTrue(contentXml.contains(sameAsElem));
         }
     }
-    
+
     private void assertRetrieveAPIResultsInternalProfile(String contentXml, ResultActions resultActions, EntityPreview entity) throws Exception {
-    	
+
     	resultActions.andExpect(jsonPath("$.entityRecord.proxies[0].entity.sameAs", Matchers.hasItem(entity.getId())));
     	resultActions.andExpect(jsonPath("$.entityRecord.proxies[1].id", Matchers.is(entity.getId())));
     	resultActions.andExpect(jsonPath("$.entityRecord.proxies[0].proxyFor", Matchers.containsString(WebEntityFields.BASE_DATA_EUROPEANA_URI)));
@@ -522,5 +520,21 @@ public class EMControllerIT extends AbstractIntegrationTest {
         		.andExpect(status().isOk())
         		.andReturn();
         return resultXml.getResponse().getContentAsString(StandardCharsets.UTF_8);
+    }
+
+
+    @TestConfiguration
+    public static class TestConfig {
+
+        /**
+         * Do not trigger batch jobs in this test.
+         */
+        @Bean
+        @Primary
+        public BatchService batchServiceBean() throws Exception {
+            BatchService batchService = Mockito.mock(BatchService.class);
+            doNothing().when(batchService).launchSingleEntityUpdate(anyString(), anyBoolean());
+            return batchService;
+        }
     }
 }

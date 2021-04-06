@@ -11,7 +11,6 @@ import eu.europeana.api.commons.definitions.vocabulary.Role;
 import eu.europeana.api.commons.oauth2.service.impl.EuropeanaClientDetailsService;
 import eu.europeana.api.commons.service.authorization.BaseAuthorizationService;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfigurationImpl;
 import eu.europeana.entitymanagement.config.AppConfig;
 
 @Component(AppConfig.BEAN_AUTHORIZATION_SERVICE)
@@ -19,8 +18,7 @@ public class AuthorizationServiceImpl extends BaseAuthorizationService implement
 
     protected final Logger logger = LogManager.getLogger(getClass());
 
-    @Resource(name="emConfiguration")
-    EntityManagementConfigurationImpl emConfiguration;
+    EntityManagementConfiguration emConfiguration;
 
     @Resource(name="clientDetailsService")
     EuropeanaClientDetailsService clientDetailsService;
@@ -33,7 +31,7 @@ public class AuthorizationServiceImpl extends BaseAuthorizationService implement
 	return emConfiguration;
     }
 
-    public void setConfiguration(EntityManagementConfigurationImpl configuration) {
+    public void setConfiguration(EntityManagementConfiguration configuration) {
 	this.emConfiguration = configuration;
     }
 

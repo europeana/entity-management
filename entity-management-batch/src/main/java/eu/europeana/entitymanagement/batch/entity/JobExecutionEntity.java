@@ -79,7 +79,7 @@ public class JobExecutionEntity {
         JobExecutionEntity jobExecutionEntity = new JobExecutionEntity();
 
         jobExecutionEntity.version = jobExecution.getVersion();
-        jobExecutionEntity.jobExecutionId = jobExecution.getJobId();
+        jobExecutionEntity.jobExecutionId = jobExecution.getId();
         jobExecutionEntity.startTime = jobExecution.getStartTime();
         jobExecutionEntity.endTime = jobExecution.getEndTime();
         jobExecutionEntity.status = jobExecution.getStatus().toString();
