@@ -5,7 +5,10 @@ import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT2_RE
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_REFERENTIAL_INTEGRITY_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
-import static eu.europeana.entitymanagement.web.BaseMvcTestUtils.*;
+import static eu.europeana.entitymanagement.web.BaseMvcTestUtils.CONCEPT_BATHTUB;
+import static eu.europeana.entitymanagement.web.BaseMvcTestUtils.CONCEPT_CONSOLIDATED_BATHTUB;
+import static eu.europeana.entitymanagement.web.BaseMvcTestUtils.CONCEPT_DATA_RECONCELIATION_XML;
+import static eu.europeana.entitymanagement.web.BaseMvcTestUtils.CONCEPT_METIS_BATHTUB;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -36,6 +39,7 @@ import eu.europeana.entitymanagement.definitions.model.impl.EntityProxyImpl;
 import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
 import eu.europeana.entitymanagement.definitions.model.impl.PlaceImpl;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
+import eu.europeana.entitymanagement.utils.EntityComparator;
 import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
 import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
 import eu.europeana.entitymanagement.web.xml.model.metis.EnrichmentResultList;
@@ -125,11 +129,10 @@ public class EntityRecordServiceT {
 	     */
 	    
 	    //TODO: verify correctness of all properties aganst the "consolidated/concept-consolidated-bathtub.json" file
+	    ConceptImpl concept_consolidated = objectMapper.readValue(loadFile(CONCEPT_CONSOLIDATED_BATHTUB), ConceptImpl.class);
+	    EntityComparator entityComparator = new EntityComparator();
+	    Assertions.assertTrue(entityComparator.compare(concept_consolidated, entityRecord.getEntity())==0);    
 	    
-	    Assertions.assertNotNull(entityRecord.getEntity().getNote());
-	    Assertions.assertNotNull(entityRecord.getEntity().getSameAs());
-	    Assertions.assertTrue(((Concept) entityRecord.getEntity()).getBroader().length > 1);
-	    Assertions.assertNotNull(entityRecord.getEntity().getPrefLabel());
 	}
 	
 	private XmlConceptImpl getMetisResponse(String metisResponse) throws JAXBException {

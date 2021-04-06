@@ -44,7 +44,6 @@ import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.utils.EntityUtils;
-import eu.europeana.entitymanagement.utils.Utils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
@@ -320,7 +319,7 @@ public class EntityRecordService {
     }
 
     private void addValueOrInternalReference(List<String> updatedReferences, String value) {
-	if (!Utils.isUri(value) || value.startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI)) {
+	if (!EntityUtils.isUri(value) || value.startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI)) {
 	    //value is not a reference or it is an internal referece
 	    updatedReferences.add(value);
 	} else {
@@ -498,15 +497,26 @@ public class EntityRecordService {
 			entityRecord.getEntity().setFieldValue(field, fieldValuePrimaryObject);
 		    }
 
-		} else if (fieldType.isPrimitive()) {
-		    Object fieldValuePrimaryObject = primary.getFieldValue(field);
-		    Object fieldValueSecondaryObject = secondary.getFieldValue(field);
+		} else if (fieldType.isPrimitive() || String.class.isAssignableFrom(fieldType)) {
+		    Object fieldValuePrimaryObjectPrimitiveOrString = primary.getFieldValue(field);
+		    Object fieldValueSecondaryObjectPrimitiveOrString = secondary.getFieldValue(field);
 
-		    if (fieldValuePrimaryObject == null && fieldValueSecondaryObject != null) {
-			entityRecord.getEntity().setFieldValue(field, fieldValueSecondaryObject);
-		    } else if (fieldValuePrimaryObject != null) {
-			entityRecord.getEntity().setFieldValue(field, fieldValuePrimaryObject);
+		    if (fieldValuePrimaryObjectPrimitiveOrString == null && fieldValueSecondaryObjectPrimitiveOrString != null) {
+			entityRecord.getEntity().setFieldValue(field, fieldValueSecondaryObjectPrimitiveOrString);
+		    } else if (fieldValuePrimaryObjectPrimitiveOrString != null) {
+			entityRecord.getEntity().setFieldValue(field, fieldValuePrimaryObjectPrimitiveOrString);
 		    }
+		    
+		} else if (Date.class.isAssignableFrom(fieldType)) {
+		    Object fieldValuePrimaryObjectDate = primary.getFieldValue(field);
+		    Object fieldValueSecondaryObjectDate = secondary.getFieldValue(field);
+
+		    if (fieldValuePrimaryObjectDate == null && fieldValueSecondaryObjectDate != null) {
+			entityRecord.getEntity().setFieldValue(field, new Date (((Date)fieldValueSecondaryObjectDate).getTime()));
+		    } else if (fieldValuePrimaryObjectDate != null) {
+			entityRecord.getEntity().setFieldValue(field, new Date (((Date)fieldValuePrimaryObjectDate).getTime()));
+		    }
+
 		}
 
 	    }
@@ -519,11 +529,10 @@ public class EntityRecordService {
 		for (Field field : allEntityFields) {
 		    String fieldName = field.getName();
 		    if (fieldName.toLowerCase().contains("alt") && fieldName.toLowerCase().contains("label")) {
-			Map<Object, Object> altLabelPrimaryObjectMap = (Map<Object, Object>) primary
-				.getFieldValue(field);
+			Map<Object, Object> altLabelConsolidatedMap = (Map<Object, Object>) entityRecord.getEntity().getFieldValue(field);
 			Map<Object, Object> altLabelPrimaryObject = null;
-			if (altLabelPrimaryObjectMap != null)
-			    altLabelPrimaryObject = new HashMap<>(altLabelPrimaryObjectMap);
+			if (altLabelConsolidatedMap != null)
+			    altLabelPrimaryObject = new HashMap<>(altLabelConsolidatedMap);
 			else
 			    altLabelPrimaryObject = new HashMap<>();
 
