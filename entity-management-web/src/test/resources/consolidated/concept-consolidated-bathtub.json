@@ -28,13 +28,12 @@
 	"ca": "banyera"
 },
   "altLabel": {
-    "en": [ "alternative bathtub - europeana", "tub-update", "bathtub" ],
+    "en": [ "alternative bathtub - europeana", "tub-update", "bathtub", "bath", "tub" ],
     "de": [ "badefass-europeana", "Oder Badewanne - europeana", "Nocheine Badewanne - europeana", "Badewanne", "Wannenbad"],
-    "en": [ "bath", "tub", "bathtub" ],
 	"ro": [ "Cada de facut baie - europeana", "Inca o cada de baie", "Cadă" ],
     "sv": [ "karbad" ],
 	"fi": [ "amme" ],
-	"fr":[ "ofuro", "furo", "o-furo", "baignoire en bois"],
+	"fr": [ "ofuro", "furo", "o-furo", "baignoire en bois"],
     "hu": ["kád"],
 	"es": ["Banadera","Bañadera","Banera"],
 	"nl": ["Ligbad"]
@@ -60,6 +59,9 @@
 				],
 				"es": [
 					"recipiente"
+				],
+				"sv": [
+					"större behållare avsedd för vatten där person kan bada"
 				]
 	},
   "depiction": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/1rm60rt0t_rtbcwh.jpg/330px-1rm60rt0t_rtbcwh.jpg",

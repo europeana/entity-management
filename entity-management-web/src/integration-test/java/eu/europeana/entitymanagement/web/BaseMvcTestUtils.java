@@ -14,6 +14,7 @@ public class BaseMvcTestUtils {
     public static final String BASE_SERVICE_URL = "/entity/";
     public static final String BASE_ENTITY_URL = null;
     public static final String CONCEPT_BATHTUB = "/content/concept-bathtub.json";
+    public static final String CONCEPT_CONSOLIDATED_BATHTUB = "/consolidated/concept-consolidated-bathtub.json";
     public static final String CONCEPT_JSON = "/content/concept.json";
     public static final String CONCEPT_DATA_RECONCELIATION_XML = "/metis-deref/concept-data-reconceliation.xml";
     public static final String CONCEPT_METIS_BATHTUB = "/metis-deref/concept-metis-bathtub.xml";
