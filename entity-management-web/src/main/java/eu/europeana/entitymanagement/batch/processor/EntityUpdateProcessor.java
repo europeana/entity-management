@@ -40,17 +40,17 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
 
     @Override
     public EntityRecord process(@NonNull EntityRecord entityRecord) throws Exception {
-        logger.debug("Creating consolidated proxy for entity {} ", entityRecord.getEntityId());
+        logger.debug("Creating consolidated proxy for entityId={} ", entityRecord.getEntityId());
         entityRecordService.mergeEntity(entityRecord);
 
-        logger.debug("Validating constraints for entity {}", entityRecord.getEntityId());
+        logger.debug("Validating constraints for entityId={}", entityRecord.getEntityId());
         validateConstraints(entityRecord);
 
-        logger.debug("Checking referential integrity for entity {}", entityRecord.getEntityId());
+        logger.debug("Checking referential integrity for entityId={}", entityRecord.getEntityId());
         entityRecordService.performReferentialIntegrity(entityRecord.getEntity());
 
 
-        logger.debug("Computing ranking metrics for entity {}", entityRecord.getEntityId());
+        logger.debug("Computing ranking metrics for entityId={}", entityRecord.getEntityId());
         //TODO: re-enable when Solr is configured
         //computeRankingMetrics(entityRecord);
         return entityRecord;
@@ -59,9 +59,9 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
     private void validateConstraints(EntityRecord entityRecord) {
         Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entityRecord.getEntity());
         if (!violations.isEmpty()) {
-            logger.warn("Entity validation failed for {}", entityRecord.getEntityId());
+            logger.warn("Entity validation failed for entityId={}", entityRecord.getEntityId());
             for (ConstraintViolation<Entity> violation : violations) {
-                logger.warn("{} - {}", entityRecord.getEntity(), violation.getMessage());
+                logger.warn("entityId={} - {}", entityRecord.getEntity(), violation.getMessage());
             }
             //TODO: throw here
         }
@@ -81,7 +81,7 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
             metrics = scoringService.computeMetrics(entity);
         } catch (FunctionalRuntimeException | UnsupportedEntityTypeException e) {
             throw new EntityUpdateException(
-                    "Cannot compute ranking metrics for entity: " + entity.getEntityId(), e);
+                    "Cannot compute ranking metrics for entityId=" + entity.getEntityId(), e);
         }
 
         Aggregation aggregation = entity.getIsAggregatedBy();
