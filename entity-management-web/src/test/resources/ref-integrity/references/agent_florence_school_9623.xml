@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <rdf:RDF xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:dc="http://purl.org/dc/elements/1.1/"
+         xmlns:edm="http://www.europeana.eu/schemas/edm/"
+         xmlns:foaf="http://xmlns.com/foaf/0.1/"
+         xmlns:rdaGr2="http://rdvocab.info/ElementsGr2/"
+         xmlns:owl="http://www.w3.org/2002/07/owl#"
+	  xmlns:ore="http://www.openarchives.org/ore/terms/"
+         xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+
+         xmlns:dcterms="http://purl.org/dc/terms/" >
+<edm:Agent rdf:about="http://data.europeana.eu/agent/base/58185">
+  <skos:prefLabel xml:lang="de">Salaj (Maler)</skos:prefLabel>
+  <skos:prefLabel xml:lang="no">Giacomo Caprotti</skos:prefLabel>
+  <skos:prefLabel xml:lang="ru">Салаи</skos:prefLabel>
+  <skos:prefLabel xml:lang="en">Salaì</skos:prefLabel>
+  <skos:prefLabel xml:lang="it">Gian Giacomo Caprotti</skos:prefLabel>
+  <skos:prefLabel xml:lang="pl">Giacomo Caprotti</skos:prefLabel>
+  <skos:prefLabel xml:lang="fr">Salai</skos:prefLabel>
+  <skos:prefLabel xml:lang="zh">吉安·贾可蒙·卡坡蒂·达奥伦诺</skos:prefLabel>
+  <skos:prefLabel xml:lang="es">Salaì</skos:prefLabel>
+  <skos:prefLabel xml:lang="nl">Gian Giacomo Caprotti da Oreno</skos:prefLabel>
+  <skos:prefLabel xml:lang="ca">Salai</skos:prefLabel>
+  <skos:altLabel xml:lang="en">Salai</skos:altLabel>
+  <rdaGr2:dateOfBirth>1480</rdaGr2:dateOfBirth>
+  <edm:end>1524</edm:end>
+  <rdaGr2:dateOfDeath>1524</rdaGr2:dateOfDeath>
+  <rdaGr2:placeOfBirth rdf:resource="http://dbpedia.org/resource/Italy"/>
+  <rdaGr2:placeOfBirth rdf:resource="http://dbpedia.org/resource/Vimercate"/>
+  <rdaGr2:placeOfBirth xml:lang="en">Oreno, Vimercate, Italy</rdaGr2:placeOfBirth>
+  <rdaGr2:placeOfDeath rdf:resource="http://dbpedia.org/resource/Italy"/>
+  <rdaGr2:placeOfDeath rdf:resource="http://dbpedia.org/resource/Milan"/>
+  <rdaGr2:placeOfDeath xml:lang="en">Milan, Italy</rdaGr2:placeOfDeath>
+  <rdaGr2:biographicalInformation xml:lang="de">Salaj (* um 1480 in Mailand; † vor dem 10. März 1524 ebenda; eigentlicher Name Gian Giacomo Caprotti) war ein italienischer Maler der lombardischen Schule aus dem direkten Umkreis des Leonardo da Vinci.</rdaGr2:biographicalInformation>
+  <rdaGr2:biographicalInformation xml:lang="no">Gian Giacomo Caprotti da Oreno (født 1480, død 19. januar 1524), kalt il Salaìno (den lille djevelen) eller Andrea Salai, var en modell og kunstner fra Firenze. Han studerte under Leonardo da Vinci fra tiårsalderen, fikk kallenavnet av ham senest i 14-årsalderen og fungerte som hans modell og assistent.Etter Leonardos død arvet Caprotti hans vingård ved Milan.</rdaGr2:biographicalInformation>
+  <rdaGr2:biographicalInformation xml:lang="ru">Салаи (Салаино; итал. Salai, Il Salaino — «дьяволёнок»; 1480-19 января 1524), настоящее имя Джан Джакомо Капротти да Орено (Gian Giacomo Caprotti da Oreno) — ученик Леонардо да Винчи, второй из двух юношей, помимо Франческо Мельци, с которым художника связывали длительные — более 25 лет — и, возможно, интимные отношения.</rdaGr2:biographicalInformation>
+  <rdaGr2:biographicalInformation xml:lang="en">Gian Giacomo Caprotti da Oreno, better known as Salaì (&quot;The Devil&quot;, lit. &quot;The little unclean one&quot;) (1480 – before 10 March 1524), was an Italian artist and pupil of Leonardo da Vinci from 1490 to 1518. Salai entered Leonardo&apos;s household at the age of 10. He created paintings under the name of Andrea Salai. He was described as one of Leonardo&apos;s students and lifelong servant and is the presumed model for Leonardo&apos;s paintings St. John the Baptist and Bacchus.</rdaGr2:biographicalInformation>
+  <rdaGr2:biographicalInformation xml:lang="it">Gian Giacomo Caprotti, detto il Salaì (da &quot;Sala[d]ino&quot; ovvero &quot;diavolo&quot;) (Oreno, 1480 – 1524), è stato un pittore italiano, allievo prediletto di Leonardo da Vinci.Figura emblematica, ebbe col maestro un rapporto controverso, come testimonia il suo curioso soprannome, finendo per essere una delle persone a lui più vicine. Forse giovane amante, forse solo allievo, venne spesso usato come modello, rappresentando il suo volto androgino probabilmente anche in soggetti femminili. Ebbe una carriera indipendente nell&apos;ambito dei cosiddetti leonardeschi.</rdaGr2:biographicalInformation>
+  <rdaGr2:biographicalInformation xml:lang="fr">Gian Giacomo Caprotti ou Giacomo Caprotti da Oreno, dit Salai, Salaï, Salaij, Andrea Salai ou Salaì en italien (de Salaino : petit diable) (Milan, ~1480 - Milan, avant le 10 mars 1524) est un peintre italien de l&apos;école lombarde de l&apos;entourage de Léonard de Vinci, son élève, son disciple dès ses 15 ans.</rdaGr2:biographicalInformation>
+  <rdaGr2:biographicalInformation xml:lang="pl">Giacomo Caprotti (znany również pod imieniem Andrea Salaino lub Salai) - ur. w 1480 r., zm. w 1524 r. florencki artysta i uczeń Leonarda da Vinci.Giacomo Caprotti pochodził z ubogiej rolniczej rodziny. W wieku 10 lat został oddany pod opiekę Leonarda da Vinci stając się jego uczniem. Według niektórych źródeł uważa się go za przybranego syna mistrza. Inne źródła mówią, iż był kochankiem Leonarda. Giacomo Caprotti był dzieckiem niesfornym i sprawiającym kłopoty. Wielki malarz nadał mu imię Sale, co oznaczało Mały Diabeł lub Potomek Diabła. Wielokrotnie dzięki urodzie i falowanym włosom był modelem dla Leonarda da Vinci. Pozostał przy swym mistrzu aż do jego śmierci w 1519 r. i odziedziczył po nim winnicę w Mediolanie.</rdaGr2:biographicalInformation>
+  <rdaGr2:biographicalInformation xml:lang="ca">Gian Giacomo Caprotti o Giacomo Caprotti da Oreno, conegut com a Salai, Salaï, Salaij, Andrea Salai o Salaì en italià (de Salaino: petit diable) (Milà, ~1480 - 10 de març de 1524) va ser un pintor italià de l&apos;escola llombarda del cercle de Leonardo da Vinci, el seu alumne i deixeble des dels seus 15 anys.</rdaGr2:biographicalInformation>
+  <rdaGr2:biographicalInformation xml:lang="nl">Gian Giacomo Caprotti da Oreno, bijgenaamd il Salaino (&quot;Het duiveltje&quot;) (Oreno da Vimercate, 1480 - ?, 1524) was een Italiaanse assistent van de Italiaanse kunstenaar en wetenschapper Leonardo da Vinci. Door Vasari werd hij beschreven als &quot;een charmante en mooie jongeling met fijn krullend haar, wat Leonardo erg mooi vond.&quot; Salaino begon bij Leonardo toen hij tien jaar oud was. Ze konden niet altijd even goed met elkaar opschieten. Een jaar later maakte Leonardo een lijst van alle streken die de jongen had uitgehaald, en noemde hem daarbij &quot;een dief, een leugenaar, koppig, en een gulzigaard.&quot; Het &apos;duiveltje&apos; stal ten minste vijf keer geld en waardevolle spullen en kocht er veel dure kleding van, waaronder vierentwintig paar schoenen. Toch bleef Salaino dertig jaar Leonardo&apos;s gezel, bediende en assistent, en in Leonardo&apos;s notities zijn schetsen te vinden van een knappe puber met krulhaar.Zijn naam komt ook doorgestreept voor op de achterkant van een erotische afbeelding (uit ongeveer 1513) van de artiest: De vleesgeworden engel. Dit wordt gezien als een geestige en onthullende parodie op zijn belangrijke werk Johannes de Doper, dat volgens kunstcritici zoals Martin Kemp en James Saslow ook doortrokken is van homo-erotiek. Een ander erotisch werk van Leonardo da Vinci dat gevonden is op de achterkant van een blad in de Atlantische Codex laat Salaino&apos;s achterwerk zien waar een paar penissen op twee benen naar toe lopen (Augusto Marinoni, in &quot;Io Leonardo&quot;, Mondadori, Milano 1974, pp.288, 310). Het is dan ook in te denken dat Leonardo da Vinci en Salaino wellicht een seksuele relatie hadden.</rdaGr2:biographicalInformation>
+  <rdaGr2:biographicalInformation xml:lang="zh">吉安·贾可蒙·卡坡蒂·达奥伦诺（Gian Giacomo Caprotti da Oreno），亦称沙莱（Salaì）或依尔·沙莱诺（il Salaino）（1480年–1524年）是一位文艺复兴时期的意大利艺术家。他在10岁时进入达·芬奇家，在1490年至1518年这段时间为达·芬奇的学生。他在作品上署名Andrea Salai。他一般被描述成达·芬奇的学生及终身仆人。有人认为他是达·芬奇画作《施洗者圣约翰》及《巴克斯》中人物的模特。</rdaGr2:biographicalInformation>
+  <rdaGr2:biographicalInformation xml:lang="es">Gian Giacomo Caprotti da Oreno, llamado Salai o Salaino (nacido hacia 1480-Milán, 19 de enero de 1524), fue un pintor renacentista italiano, discípulo y ayudante de Leonardo da Vinci.</rdaGr2:biographicalInformation>
+  <owl:sameAs rdf:resource="http://ca.dbpedia.org/resource/Salai"/>
+  <owl:sameAs rdf:resource="http://www.wikidata.org/entity/Q954126"/>
+  <owl:sameAs rdf:resource="http://de.dbpedia.org/resource/Salaj_(Maler)"/>
+  <owl:sameAs rdf:resource="http://fr.dbpedia.org/resource/Salai"/>
+  <owl:sameAs rdf:resource="http://rdf.freebase.com/ns/m.0gj90gx"/>
+  <owl:sameAs rdf:resource="http://it.dbpedia.org/resource/Gian_Giacomo_Caprotti"/>
+  <owl:sameAs rdf:resource="http://zh.dbpedia.org/resource/吉安·贾可蒙·卡坡蒂·达奥伦诺"/>
+  <owl:sameAs rdf:resource="http://es.dbpedia.org/resource/Salaì"/>
+  <owl:sameAs rdf:resource="http://pl.dbpedia.org/resource/Giacomo_Caprotti"/>
+  <owl:sameAs rdf:resource="http://nl.dbpedia.org/resource/Gian_Giacomo_Caprotti_da_Oreno"/>
+  <owl:sameAs rdf:resource="http://no.dbpedia.org/resource/Giacomo_Caprotti"/>
+  <owl:sameAs rdf:resource="http://ru.dbpedia.org/resource/Салаи"/>
+  <owl:sameAs rdf:resource="http://wikidata.dbpedia.org/resource/Q954126"/>
+  <owl:sameAs rdf:resource="http://dbpedia.org/resource/Salaì"/>
+</edm:Agent>
+  </rdf:RDF>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:foaf="http://xmlns.com/foaf/0.1/"
+         xmlns:dc="http://purl.org/dc/elements/1.1/"
+         xmlns:edm="http://www.europeana.eu/schemas/edm/"
+         xmlns:wgs84_pos="http://www.w3.org/2003/01/geo/wgs84_pos#"
+         xmlns:owl="http://www.w3.org/2002/07/owl#"
+         xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+	  xmlns:ore="http://www.openarchives.org/ore/terms/"
+         xmlns:dcterms="http://purl.org/dc/terms/" >
+<edm:Place rdf:about="http://data.europeana.eu/place/base/42996">
+  <skos:prefLabel>Amboise</skos:prefLabel>
+  <skos:prefLabel xml:lang="de">Amboise</skos:prefLabel>
+  <skos:prefLabel xml:lang="sv">Amboise</skos:prefLabel>
+  <skos:prefLabel xml:lang="ru">Амбуаз</skos:prefLabel>
+  <skos:prefLabel xml:lang="be">Горад Амбуаз</skos:prefLabel>
+  <skos:prefLabel xml:lang="pt">Amboise</skos:prefLabel>
+  <skos:prefLabel xml:lang="gl">Amboise</skos:prefLabel>
+  <skos:prefLabel xml:lang="bg">Амбоаз</skos:prefLabel>
+  <skos:prefLabel xml:lang="lt">Ambuazas</skos:prefLabel>
+  <skos:prefLabel xml:lang="en">Amboise</skos:prefLabel>
+  <skos:prefLabel xml:lang="it">Amboise</skos:prefLabel>
+  <skos:prefLabel xml:lang="fr">Amboise</skos:prefLabel>
+  <skos:prefLabel xml:lang="zh">昂布瓦斯</skos:prefLabel>
+  <skos:prefLabel xml:lang="hy">Ամբուազ</skos:prefLabel>
+  <skos:prefLabel xml:lang="la">Ambacia</skos:prefLabel>
+  <skos:prefLabel xml:lang="uk">Амбуаз</skos:prefLabel>
+  <skos:prefLabel xml:lang="ja">アンボワーズ</skos:prefLabel>
+  <skos:prefLabel xml:lang="fa">امبوز</skos:prefLabel>
+  <skos:prefLabel xml:lang="pl">Amboise</skos:prefLabel>
+  <skos:prefLabel xml:lang="nl">Amboise</skos:prefLabel>
+  <skos:prefLabel xml:lang="sr">Амбоаз</skos:prefLabel>
+  <skos:altLabel>Amboise</skos:altLabel>
+  <wgs84_pos:lat>47.41249</wgs84_pos:lat>
+  <wgs84_pos:long>0.98266</wgs84_pos:long>
+  <dcterms:isPartOf rdf:resource="http://data.europeana.eu/place/base/85"/>
+  <owl:sameAs rdf:resource="http://sws.geonames.org/3037902/"/>
+</edm:Place>
+  </rdf:RDF>

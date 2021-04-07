@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:foaf="http://xmlns.com/foaf/0.1/"
+         xmlns:dc="http://purl.org/dc/elements/1.1/"
+         xmlns:edm="http://www.europeana.eu/schemas/edm/"
+         xmlns:wgs84_pos="http://www.w3.org/2003/01/geo/wgs84_pos#"
+         xmlns:owl="http://www.w3.org/2002/07/owl#"
+         xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+	  xmlns:ore="http://www.openarchives.org/ore/terms/"
+         xmlns:dcterms="http://purl.org/dc/terms/" >
+<edm:Place rdf:about="http://data.europeana.eu/place/base/143289">
+  <skos:prefLabel>Castello Sforzesco</skos:prefLabel>
+  <skos:prefLabel xml:lang="mn">Сфорцеско цайз</skos:prefLabel>
+  <skos:prefLabel xml:lang="de">Castello Sforzesco</skos:prefLabel>
+  <skos:prefLabel xml:lang="fi">Castello Sforzesco</skos:prefLabel>
+  <skos:prefLabel xml:lang="ru">Замок Сфорца</skos:prefLabel>
+  <skos:prefLabel xml:lang="ko">스포르체스코 성</skos:prefLabel>
+  <skos:prefLabel xml:lang="bg">Замък на Сфорците</skos:prefLabel>
+  <skos:prefLabel xml:lang="el">Κάστρο των Σφόρτσα</skos:prefLabel>
+  <skos:prefLabel xml:lang="lt">Sforcų pilis</skos:prefLabel>
+  <skos:prefLabel xml:lang="en">Sforza Castle</skos:prefLabel>
+  <skos:prefLabel xml:lang="it">Castello Sforzesco</skos:prefLabel>
+  <skos:prefLabel xml:lang="fr">Château des Sforza</skos:prefLabel>
+  <skos:prefLabel xml:lang="es">Castillo Sforzesco</skos:prefLabel>
+  <skos:prefLabel xml:lang="zh">斯福尔扎城堡</skos:prefLabel>
+  <skos:prefLabel xml:lang="et">Castello Sforzesco</skos:prefLabel>
+  <skos:prefLabel xml:lang="ar">قلعة سفورزيسكو</skos:prefLabel>
+  <skos:prefLabel xml:lang="uk">Замок Сфорца</skos:prefLabel>
+  <skos:prefLabel xml:lang="ja">スフォルツェスコ城</skos:prefLabel>
+  <skos:prefLabel xml:lang="az">Kastello Sforçesko</skos:prefLabel>
+  <skos:prefLabel xml:lang="pl">Castello Sforzesco</skos:prefLabel>
+  <skos:prefLabel xml:lang="ro">Castelul Sforza</skos:prefLabel>
+  <skos:prefLabel xml:lang="tr">Sforzesco Şatosu</skos:prefLabel>
+  <skos:prefLabel xml:lang="ca">Castell Sforzesco</skos:prefLabel>
+  <skos:prefLabel xml:lang="sq">Kështjella Sforcesko</skos:prefLabel>
+  <skos:altLabel xml:lang="it">Castello Sforzesco di Milano</skos:altLabel>
+  <wgs84_pos:lat>45.46987</wgs84_pos:lat>
+  <wgs84_pos:long>9.18003</wgs84_pos:long>
+  <dcterms:isPartOf rdf:resource="http://data.europeana.eu/place/base/92"/>
+  <owl:sameAs rdf:resource="http://sws.geonames.org/3166568/"/>
+</edm:Place>
+  </rdf:RDF>

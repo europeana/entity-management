@@ -183,4 +183,12 @@ public class EntityRecordServiceT {
         Assertions.assertTrue(String.join(",", isRelatedTo_agent1).contains("http://data.europeana.eu/Leonardo_da_Vinci"));
 	}
 
+	public void performReferentialIntegrity_DaVinci () throws JsonMappingException, JsonProcessingException, IOException {
+	    //TODO: implement the following
+	    //1. create record for agent-davinci-referential-integrity.json
+	    //2. create records for all references entities, xml files available in resources/ref-integrity/references
+	    //3. perform referential integrity processing for da vinci record
+	    //4. compare (all fields) the updated da vinci entity against the expected result available in agent-davinci-integrity-performed.json
+	}
+	       
 }
