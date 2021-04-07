@@ -1,12 +1,11 @@
-package eu.europeana.entitymanagement.utils;
+package eu.europeana.entitymanagement.serialization;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Iterator;
 
-public class Utils {
+public class JsonUtils {
 	/**
 	 * Combines two JsonNodes. The second node is nested within the first, with the specified field name.
 	 */

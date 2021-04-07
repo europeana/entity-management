@@ -3,8 +3,6 @@ package eu.europeana.entitymanagement.serialization;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
-import eu.europeana.entitymanagement.utils.Utils;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -83,11 +81,12 @@ public class JsonLdSerializer {
 				proxyEntityNode.remove(WebEntityFields.ID);
 
 				ObjectNode embeddedProxyNode = mapper.valueToTree(proxy);
-				JsonNode mergedNode = Utils.mergeNode(mapper, embeddedProxyNode, proxyEntityNode);
+				JsonNode mergedNode = JsonUtils.mergeNode(mapper, embeddedProxyNode, proxyEntityNode);
 				proxyNode.add(mergedNode.deepCopy());
 			}
 
-			JsonNode combinedEntityAndProxies = Utils.combineNestedNode(mapper, entityNode, proxyNode, "proxies");
+			JsonNode combinedEntityAndProxies = JsonUtils
+					.combineNestedNode(mapper, entityNode, proxyNode, "proxies");
 
 			//TODO: clarify WebResource fields (not currently in spec)
 		return mapper.writeValueAsString(combinedEntityAndProxies);
