@@ -59,7 +59,7 @@ public class EnrichmentService {
                 enrichmentTerm.setCreated(new Date());
                 enrichmentTerm.setUpdated(new Date());
             } else {
-                LOG.info("Enrichment already exist for entity {}", entityRecord.getEntity().getAbout());
+                LOG.info("Enrichment already exist for entity {}. Updating the Enrichment", entityRecord.getEntity().getAbout());
                 enrichmentTerm.setCreated(existingEnrichment.get().getCreated());
                 enrichmentTerm.setUpdated(new Date());
                 // To update - set the existing ID in the enrichment term and save
