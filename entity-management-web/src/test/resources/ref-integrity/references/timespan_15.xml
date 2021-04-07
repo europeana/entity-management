@@ -1,15 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
- <rdf:RDF xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-         xmlns:dc="http://purl.org/dc/elements/1.1/"
-         xmlns:edm="http://www.europeana.eu/schemas/edm/"
-         xmlns:foaf="http://xmlns.com/foaf/0.1/"
-         xmlns:rdaGr2="http://rdvocab.info/ElementsGr2/"
-         xmlns:owl="http://www.w3.org/2002/07/owl#"
-	  xmlns:ore="http://www.openarchives.org/ore/terms/"
-         xmlns:skos="http://www.w3.org/2004/02/skos/core#"
-
-         xmlns:dcterms="http://purl.org/dc/terms/" >
+<metis:results xmlns:dcterms="http://purl.org/dc/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:edm="http://www.europeana.eu/schemas/edm/" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema" xmlns:cc="http://creativecommons.org/ns" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdaGr2="http://rdvocab.info/ElementsGr2/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:wgs84_pos="http://www.w3.org/2003/01/geo/wgs84_pos#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:metis="http://www.europeana.eu/schemas/metis">
+<metis:result>
 <edm:Timespan rdf:about="http://data.europeana.eu/timespan/15">
   <edm:isShownBy rdf:resource="http://tools.yoolib.net/i/s4/inha/files/7001-8000/7885/media/7891/1041_bensba_est007497_4/WID800/HEI900.jpg"/>
   <skos:prefLabel xml:lang="de">15. Jahrhundert</skos:prefLabel>
@@ -69,4 +60,5 @@
   <dc:source rdf:resource="http://data.europeana.eu/item/9200495/yoolib_inha_7885"/>
   <foaf:thumbnail rdf:resource="https://api.europeana.eu/thumbnail/v2/url.json?uri=http%3A%2F%2Ftools.yoolib.net%2Fi%2Fs4%2Finha%2Ffiles%2F7001-8000%2F7885%2Fmedia%2F7891%2F1041_bensba_est007497_4%2FWID800%2FHEI900.jpg&amp;type=IMAGE"/>
 </edm:WebResource>
-  </rdf:RDF>
+</metis:result>
+</metis:results>

@@ -2,6 +2,17 @@ package eu.europeana.entitymanagement.web;
 
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT1_REFERENTIAL_INTEGRITY_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT2_REFERENTIAL_INTEGRITY_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_DA_VINCI_REFERENTIAL_INTEGRITY_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_DA_VINCI_REFERENTIAL_INTEGRTITY_PERFORMED_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_FLORENCE_REFERENTIAL_INTEGRTITY;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_SALAI_REFERENTIAL_INTEGRTITY;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_ENGINEERING_REFERENTIAL_INTEGRTITY;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_AMBOISE_REFERENTIAL_INTEGRTITY;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_FLORENCE_REFERENTIAL_INTEGRTITY;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_FRANCE_REFERENTIAL_INTEGRTITY;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_SFORZA_CASTLE_REFERENTIAL_INTEGRTITY;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_15_REFERENTIAL_INTEGRTITY;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_16_REFERENTIAL_INTEGRTITY;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_REFERENTIAL_INTEGRITY_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
@@ -31,6 +42,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.Concept;
+import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.impl.AgentImpl;
@@ -41,6 +53,7 @@ import eu.europeana.entitymanagement.definitions.model.impl.PlaceImpl;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.utils.EntityComparator;
 import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
+import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
 import eu.europeana.entitymanagement.web.xml.model.metis.EnrichmentResultList;
 
@@ -61,7 +74,7 @@ public class EntityRecordServiceT {
 	     * metis deserializer -> get the entity for the external proxy
 	     */
 	    String metisResponse = CONCEPT_DATA_RECONCELIATION_XML;
-	    XmlConceptImpl xmlEntity = getMetisResponse(metisResponse);
+	    XmlConceptImpl xmlEntity = (XmlConceptImpl) getMetisResponse(metisResponse);
 
 	    /*
 	     * read the test data from the json file -> get the entity for the internal
@@ -101,7 +114,7 @@ public class EntityRecordServiceT {
 	     * metis deserializer -> get the entity for the external proxy
 	     */
 	    String metisResponse = CONCEPT_METIS_BATHTUB;
-	    XmlConceptImpl xmlEntity = getMetisResponse(metisResponse);
+	    XmlConceptImpl xmlEntity = (XmlConceptImpl) getMetisResponse(metisResponse);
 
 	    /*
 	     * read the test data from the json file -> get the entity for the internal
@@ -135,7 +148,7 @@ public class EntityRecordServiceT {
 	    
 	}
 	
-	private XmlConceptImpl getMetisResponse(String metisResponse) throws JAXBException {
+	private XmlBaseEntityImpl getMetisResponse(String metisResponse) throws JAXBException {
 	    InputStream is = getClass().getResourceAsStream(metisResponse);
 	    JAXBContext jaxbContext = JAXBContext.newInstance(EnrichmentResultList.class);
 	    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
@@ -145,8 +158,7 @@ public class EntityRecordServiceT {
 	    assertEquals(1, resultList.getEnrichmentBaseResultWrapperList().size());
 
 	    // get unmarshalled object
-	    XmlConceptImpl xmlEntity = (XmlConceptImpl) resultList.getEnrichmentBaseResultWrapperList().get(0).getEnrichmentBaseList().get(0);
-	    return xmlEntity;
+	    return resultList.getEnrichmentBaseResultWrapperList().get(0).getEnrichmentBaseList().get(0);
 	}
 	
 	@Test
@@ -186,12 +198,84 @@ public class EntityRecordServiceT {
         Assertions.assertTrue(String.join(",", isRelatedTo_agent1).contains("http://data.europeana.eu/Leonardo_da_Vinci"));
 	}
 
-	public void performReferentialIntegrity_DaVinci () throws JsonMappingException, JsonProcessingException, IOException {
+	@Test
+	public void performReferentialIntegrity_DaVinci () throws JsonMappingException, JsonProcessingException, IOException, JAXBException, EntityCreationException {
 	    //TODO: implement the following
 	    //1. create record for agent-davinci-referential-integrity.json
 	    //2. create records for all references entities, xml files available in resources/ref-integrity/references
 	    //3. perform referential integrity processing for da vinci record
 	    //4. compare (all fields) the updated da vinci entity against the expected result available in agent-davinci-integrity-performed.json
+        
+		entityRecordService.dropRepository();
+		// create record for agent-davinci-referential-integrity.json
+        AgentImpl agentDaVinci = objectMapper.readValue(loadFile(AGENT_DA_VINCI_REFERENTIAL_INTEGRITY_JSON), AgentImpl.class);
+        EntityRecord entityRecord = new EntityRecordImpl();
+        entityRecord.setEntity(agentDaVinci);
+        entityRecord.setEntityId(agentDaVinci.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord);
+
+        // create records for all references entities, xml files available in resources/ref-integrity/references
+	    String metisResponse = AGENT_FLORENCE_REFERENTIAL_INTEGRTITY;
+	    Entity entityFromMetisResponse = getMetisResponse(metisResponse).toEntityModel();
+        entityRecord.setEntity(entityFromMetisResponse);
+        entityRecord.setEntityId(entityFromMetisResponse.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord);
+        
+	    metisResponse = AGENT_SALAI_REFERENTIAL_INTEGRTITY;
+	    entityFromMetisResponse = getMetisResponse(metisResponse).toEntityModel();
+        entityRecord.setEntity(entityFromMetisResponse);
+        entityRecord.setEntityId(entityFromMetisResponse.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord);
+        
+	    metisResponse = CONCEPT_ENGINEERING_REFERENTIAL_INTEGRTITY;
+	    entityFromMetisResponse = getMetisResponse(metisResponse).toEntityModel();
+        entityRecord.setEntity(entityFromMetisResponse);
+        entityRecord.setEntityId(entityFromMetisResponse.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord);
+
+	    metisResponse = PLACE_AMBOISE_REFERENTIAL_INTEGRTITY;
+	    entityFromMetisResponse = getMetisResponse(metisResponse).toEntityModel();
+        entityRecord.setEntity(entityFromMetisResponse);
+        entityRecord.setEntityId(entityFromMetisResponse.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord);
+
+	    metisResponse = PLACE_FLORENCE_REFERENTIAL_INTEGRTITY;
+	    entityFromMetisResponse = getMetisResponse(metisResponse).toEntityModel();
+        entityRecord.setEntity(entityFromMetisResponse);
+        entityRecord.setEntityId(entityFromMetisResponse.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord);
+
+	    metisResponse = PLACE_FRANCE_REFERENTIAL_INTEGRTITY;
+	    entityFromMetisResponse = getMetisResponse(metisResponse).toEntityModel();
+        entityRecord.setEntity(entityFromMetisResponse);
+        entityRecord.setEntityId(entityFromMetisResponse.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord);
+
+	    metisResponse = PLACE_SFORZA_CASTLE_REFERENTIAL_INTEGRTITY;
+	    entityFromMetisResponse = getMetisResponse(metisResponse).toEntityModel();
+        entityRecord.setEntity(entityFromMetisResponse);
+        entityRecord.setEntityId(entityFromMetisResponse.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord);
+
+	    metisResponse = TIMESPAN_15_REFERENTIAL_INTEGRTITY;
+	    entityFromMetisResponse = getMetisResponse(metisResponse).toEntityModel();
+        entityRecord.setEntity(entityFromMetisResponse);
+        entityRecord.setEntityId(entityFromMetisResponse.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord);
+        
+	    metisResponse = TIMESPAN_16_REFERENTIAL_INTEGRTITY;
+	    entityFromMetisResponse = getMetisResponse(metisResponse).toEntityModel();
+        entityRecord.setEntity(entityFromMetisResponse);
+        entityRecord.setEntityId(entityFromMetisResponse.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord);
+
+        // perform referential integrity processing for da vinci record
+        entityRecordService.performReferentialIntegrity(agentDaVinci);
+        
+        //compare (all fields) of the updated da vinci entity against the expected result available in given file
+        AgentImpl agentDaVinciForChecking = objectMapper.readValue(loadFile(AGENT_DA_VINCI_REFERENTIAL_INTEGRTITY_PERFORMED_JSON), AgentImpl.class);
+	    EntityComparator entityComparator = new EntityComparator();
+	    Assertions.assertTrue(entityComparator.compare(agentDaVinciForChecking, agentDaVinci)==0);
 	}
 	       
 }

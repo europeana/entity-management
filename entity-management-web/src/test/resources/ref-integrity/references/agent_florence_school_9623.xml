@@ -1,15 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
- <rdf:RDF xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-         xmlns:dc="http://purl.org/dc/elements/1.1/"
-         xmlns:edm="http://www.europeana.eu/schemas/edm/"
-         xmlns:foaf="http://xmlns.com/foaf/0.1/"
-         xmlns:rdaGr2="http://rdvocab.info/ElementsGr2/"
-         xmlns:owl="http://www.w3.org/2002/07/owl#"
-	  xmlns:ore="http://www.openarchives.org/ore/terms/"
-         xmlns:skos="http://www.w3.org/2004/02/skos/core#"
-
-         xmlns:dcterms="http://purl.org/dc/terms/" >
+<metis:results xmlns:dcterms="http://purl.org/dc/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:edm="http://www.europeana.eu/schemas/edm/" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema" xmlns:cc="http://creativecommons.org/ns" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdaGr2="http://rdvocab.info/ElementsGr2/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:wgs84_pos="http://www.w3.org/2003/01/geo/wgs84_pos#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:metis="http://www.europeana.eu/schemas/metis">
+<metis:result>
 <edm:Agent rdf:about="http://data.europeana.eu/agent/base/58185">
   <skos:prefLabel xml:lang="de">Salaj (Maler)</skos:prefLabel>
   <skos:prefLabel xml:lang="no">Giacomo Caprotti</skos:prefLabel>
@@ -58,4 +49,5 @@
   <owl:sameAs rdf:resource="http://wikidata.dbpedia.org/resource/Q954126"/>
   <owl:sameAs rdf:resource="http://dbpedia.org/resource/Salaì"/>
 </edm:Agent>
-  </rdf:RDF>
+</metis:result>
+</metis:results>

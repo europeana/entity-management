@@ -211,33 +211,55 @@ public class EntityRecordService {
 	/*
 	 * the common fields for all entity types that are references
 	 */
+    String[] updatedField = null;
 	// for the field hasPart
 	String[] hasPartField = entity.getHasPart();
-	entity.setHasPart(replaceWithInternalReferences(hasPartField));
+	if(hasPartField!=null) {
+		updatedField=replaceWithInternalReferences(hasPartField);
+		entity.setHasPart(updatedField);
+	}
 
 	// for the field isPartOf
 	String[] isPartOfField = entity.getIsPartOfArray();
-	entity.setIsPartOfArray(replaceWithInternalReferences(isPartOfField));
+	if(isPartOfField!=null)
+	{
+		updatedField=replaceWithInternalReferences(isPartOfField);
+		entity.setIsPartOfArray(updatedField);
+	}
 
 	// for the field isRelatedTo
 	String[] isRelatedToField = entity.getIsRelatedTo();
-	entity.setIsRelatedTo(replaceWithInternalReferences(isRelatedToField));
+	if(isRelatedToField!=null) {
+		updatedField=replaceWithInternalReferences(isRelatedToField);
+		entity.setIsRelatedTo(updatedField);
+	}
+	
 
     }
 
     private void performReferentialIntegrityConcept(Concept entity) {
+    String[] updatedField = null;
 	// for the field broader
 	String[] broaderField = entity.getBroader();
-	entity.setBroader(replaceWithInternalReferences(broaderField));
+	if(broaderField!=null) {
+		updatedField=replaceWithInternalReferences(broaderField);
+		entity.setBroader(updatedField);
+	}
 
 	// for the field narrower
 	String[] narrowerField = entity.getNarrower();
-	entity.setNarrower(replaceWithInternalReferences(narrowerField));
+	if(narrowerField!=null) {
+		updatedField=replaceWithInternalReferences(narrowerField);
+		entity.setNarrower(updatedField);
+	}	
 
 	// for the field related
 	String[] relatedField = entity.getRelated();
-	entity.setRelated(replaceWithInternalReferences(relatedField));
-
+	if(relatedField!=null)
+	{
+		updatedField=replaceWithInternalReferences(relatedField);
+		entity.setRelated(updatedField);
+	}
     }
 
     private void performReferentialIntegrityAgent(Agent entity) {
@@ -254,26 +276,56 @@ public class EntityRecordService {
 	    updatedField = replaceWithInternalReferences(placeOfDeathField);
 	    entity.setPlaceOfDeath(updatedField);
 	}
+		
 	// for the field professionOrOccupation
 	Map<String, List<String>> professionOrOccupationField = entity.getProfessionOrOccupation();
-	entity.setProfessionOrOccupation(replaceWithInternalReferences(professionOrOccupationField));
+	if(professionOrOccupationField!=null) {
+		updatedField=replaceWithInternalReferences(professionOrOccupationField);
+		entity.setProfessionOrOccupation(updatedField);
+	}
 	
+	String[] updatedField2 = null;
 	// for the field hasMet
 	String[] hasMetField = entity.getHasMet();
-	entity.setHasMet(replaceWithInternalReferences(hasMetField));
+	if(hasMetField!=null) {
+		updatedField2=replaceWithInternalReferences(hasMetField);
+		entity.setHasMet(updatedField2);
+	}	
 	
+	// for the field date
+	String[] dateField = entity.getDate();
+	if(dateField!=null) {
+		updatedField2=replaceWithInternalReferences(dateField);
+		entity.setDate(updatedField2);
+	}
+
+	// for the field wasPresentAt
+	String[] wasPresentAtField = entity.getWasPresentAt();
+	if(wasPresentAtField!=null) {
+		updatedField2=replaceWithInternalReferences(wasPresentAtField);
+		entity.setWasPresentAt(updatedField2);
+	}
+
     }
 
     private void performReferentialIntegrityPlace(Place entity) {
+    String[] updatedField = null;
 	// for the field isNextInSequence
 	String[] isNextInSequenceField = entity.getIsNextInSequence();
-	entity.setIsNextInSequence(replaceWithInternalReferences(isNextInSequenceField));
+	if(isNextInSequenceField!=null) {
+		updatedField=replaceWithInternalReferences(isNextInSequenceField);
+		entity.setIsNextInSequence(updatedField);
+	}
     }
 
     private void performReferentialIntegrityTimespan(Timespan entity) {
+    String[] updatedField = null;
 	// for the field isNextInSequence
 	String[] isNextInSequenceField = entity.getIsNextInSequence();
-	entity.setIsNextInSequence(replaceWithInternalReferences(isNextInSequenceField));
+	if(isNextInSequenceField!=null) {
+		updatedField=replaceWithInternalReferences(isNextInSequenceField);
+		entity.setIsNextInSequence(updatedField);
+	}
 
     }
 

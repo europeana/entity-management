@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
- <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-         xmlns:foaf="http://xmlns.com/foaf/0.1/"
-         xmlns:dc="http://purl.org/dc/elements/1.1/"
-         xmlns:edm="http://www.europeana.eu/schemas/edm/"
-	  xmlns:ore="http://www.openarchives.org/ore/terms/"
-         xmlns:skos="http://www.w3.org/2004/02/skos/core#"
-          xmlns:dcterms="http://purl.org/dc/terms/" >
+<metis:results xmlns:dcterms="http://purl.org/dc/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:edm="http://www.europeana.eu/schemas/edm/" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema" xmlns:cc="http://creativecommons.org/ns" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdaGr2="http://rdvocab.info/ElementsGr2/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:wgs84_pos="http://www.w3.org/2003/01/geo/wgs84_pos#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:metis="http://www.europeana.eu/schemas/metis">
+<metis:result>
 <skos:Concept rdf:about="http://data.europeana.eu/concept/base/178">
   <skos:prefLabel xml:lang="hi">अभियान्त्रिकी</skos:prefLabel>
   <skos:prefLabel xml:lang="de">Ingenieurwissenschaften</skos:prefLabel>
@@ -214,4 +209,5 @@
   <dc:source rdf:resource="http://data.europeana.eu/item/07931/diglit_cockerell1860"/>
   <foaf:thumbnail rdf:resource="https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri=http%3A%2F%2Fdiglit.ub.uni-heidelberg.de%2Fimage%2Fcockerell1860%2F0.jpg%2Ffull%2Ffull%2F0%2Fdefault.jpg&amp;type=TEXT"/>
 </edm:WebResource>
-  </rdf:RDF>
+</metis:result>
+</metis:results>
