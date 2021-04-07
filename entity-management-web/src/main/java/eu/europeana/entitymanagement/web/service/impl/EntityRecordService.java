@@ -7,7 +7,6 @@ import static eu.europeana.entitymanagement.web.service.impl.EntityRecordUtils.g
 import static eu.europeana.entitymanagement.web.service.impl.EntityRecordUtils.getEuropeanaProxyId;
 import static eu.europeana.entitymanagement.web.service.impl.EntityRecordUtils.getIsAggregatedById;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,8 +15,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 
-import dev.morphia.query.experimental.filters.Filter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
+import dev.morphia.query.experimental.filters.Filter;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
@@ -185,6 +186,7 @@ public class EntityRecordService {
 
     public void performReferentialIntegrity(Entity entity) throws JsonMappingException, JsonProcessingException {
 
+	//TODO: consider refactoring the implementation of this method by creating a new class (e.g. ReferentialIntegrityProcessor) 
 	performCommonReferentialIntegrity(entity);
 	switch (EntityTypes.valueOf(entity.getType())) {
 	case Concept:
@@ -342,6 +344,7 @@ public class EntityRecordService {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void mergeEntity(EntityRecord entityRecord) throws EntityCreationException {
 
+	//TODO: consider refactoring of this implemeentation by creating a new class EntityReconciliator
 	/*
 	 * The primary entity corresponds to the entity in the Europeana proxy. The
 	 * secondary entity corresponds to the entity in the external proxy.
@@ -356,14 +359,7 @@ public class EntityRecordService {
 	entityRecord.setEntity(consolidatedEntity);
 
 	Entity primary = europeanaProxy.getEntity();
-	Entity secondary = null;
-	for (EntityProxy entityProxy : entityRecord.getProxies()) {
-	    if (entityProxy.getProxyId() == null
-		    || !entityProxy.getProxyId().equals(entityRecord.getEuropeanaProxy().getProxyId())) {
-		secondary = entityProxy.getEntity();
-		break;
-	    }
-	}
+	Entity secondary = externalProxy.getEntity();
 
 	try {
 	    /*
@@ -376,135 +372,35 @@ public class EntityRecordService {
 	    List<Field> allEntityFields = new ArrayList<>();
 	    EntityUtils.getAllFields(allEntityFields, primary.getClass());
 
+	    Entity consilidatedEntity = entityRecord.getEntity();
 	    for (Field field : allEntityFields) {
 
 		Class<?> fieldType = field.getType();
 		String fieldName = field.getName();
 
 		if (fieldType.isArray()) {
-		    Object[] fieldValuePrimaryObjectArray = (Object[]) primary.getFieldValue(field);
-		    Object[] fieldValueSecondaryObjectArray = (Object[]) secondary.getFieldValue(field);
-		    List<Object> fieldValuePrimaryObject = null;
-		    List<Object> fieldValueSecondaryObject = null;
-		    if (fieldValuePrimaryObjectArray != null) {
-			fieldValuePrimaryObject = new ArrayList<>(Arrays.asList(fieldValuePrimaryObjectArray));
-		    }
-		    if (fieldValueSecondaryObjectArray != null) {
-			fieldValueSecondaryObject = new ArrayList<>(Arrays.asList(fieldValueSecondaryObjectArray));
-		    }
-
-		    if (fieldValuePrimaryObject == null && fieldValueSecondaryObject != null) {
-			fieldValuePrimaryObject = new ArrayList<>();
-			fieldValuePrimaryObject.addAll(fieldValueSecondaryObject);
-		    } else if (fieldValuePrimaryObject != null && fieldValueSecondaryObject != null) {
-			// check the secondary object for new values that are not in the primary object
-			for (Object secondaryElem : fieldValueSecondaryObject) {
-			    if (!fieldValuePrimaryObject.contains(secondaryElem)) {
-				fieldValuePrimaryObject.add(secondaryElem);
-			    }
-			}
-		    }
-
-		    if (fieldValuePrimaryObject != null) {
-			entityRecord.getEntity().setFieldValue(field, fieldValuePrimaryObject.toArray((Object[]) Array
-				.newInstance(field.getType().getComponentType(), fieldValuePrimaryObject.size())));
-		    }
-
-		} else if (Map.class.isAssignableFrom(fieldType)) {
-		    Map<Object, Object> fieldValuePrimaryObjectMap = (Map<Object, Object>) primary.getFieldValue(field);
-		    Map<Object, Object> fieldValueSecondaryObjectMap = (Map<Object, Object>) secondary
-			    .getFieldValue(field);
-		    Map<Object, Object> fieldValuePrimaryObject = null;
-		    Map<Object, Object> fieldValueSecondaryObject = null;
-		    if (fieldValuePrimaryObjectMap != null) {
-			fieldValuePrimaryObject = new HashMap<>(fieldValuePrimaryObjectMap);
-		    }
-		    if (fieldValueSecondaryObjectMap != null) {
-			fieldValueSecondaryObject = new HashMap<>(fieldValueSecondaryObjectMap);
-		    }
-
-		    if (fieldValuePrimaryObject == null && fieldValueSecondaryObject != null) {
-			fieldValuePrimaryObject = new HashMap<>();
-			fieldValuePrimaryObject.putAll(fieldValueSecondaryObject);
-		    } else if (fieldValuePrimaryObject != null && fieldValueSecondaryObject != null) {
-			for (Map.Entry elemSecondary : fieldValueSecondaryObject.entrySet()) {
-			    Object key = elemSecondary.getKey();
-			    /*
-			     * if the map value is a list, merge the lists of the primary and the secondary
-			     * object without duplicates
-			     */
-			    if (fieldValuePrimaryObject.containsKey(key)
-				    && List.class.isAssignableFrom(elemSecondary.getValue().getClass())) {
-				List<Object> listSecondaryObject = (List<Object>) elemSecondary.getValue();
-				List<Object> listPrimaryObject = new ArrayList<>(
-					(List<Object>) fieldValuePrimaryObject.get(key));
-				boolean listPrimaryObjectChanged = false;
-				for (Object elemSecondaryList : listSecondaryObject) {
-				    if (!listPrimaryObject.contains(elemSecondaryList)) {
-					listPrimaryObject.add(elemSecondaryList);
-					if (listPrimaryObjectChanged == false)
-					    listPrimaryObjectChanged = true;
-				    }
-				}
-
-				if (listPrimaryObjectChanged) {
-				    fieldValuePrimaryObject.put(key, listPrimaryObject);
-				}
-			    }
-			    // keep the different preferred labels in the secondary object for the
-			    // alternative label in the consolidated object
-			    else if (fieldValuePrimaryObject.containsKey(key)
-				    && fieldName.toLowerCase().contains("pref")
-				    && fieldName.toLowerCase().contains("label")) {
-				Object primaryObjectPrefLabel = fieldValuePrimaryObject.get(key);
-				if (!primaryObjectPrefLabel.equals(elemSecondary.getValue())) {
-				    prefLabelsForAltLabels.put(key, elemSecondary.getValue());
-				}
-			    } else if (!fieldValuePrimaryObject.containsKey(key)) {
-				fieldValuePrimaryObject.put(key, elemSecondary.getValue());
-			    }
-
-			}
-		    }
-
-		    if (fieldValuePrimaryObject != null) {
-			entityRecord.getEntity().setFieldValue(field, fieldValuePrimaryObject);
-		    }
+		    Object[] mergedArray = mergeArrays(primary, secondary, field);
+		    consilidatedEntity.setFieldValue(field, mergedArray);
+			    
+//		    if (fieldValuePrimaryObject != null) {
+//			entityRecord.getEntity().setFieldValue(field, fieldValuePrimaryObject.toArray((Object[]) Array
+//				.newInstance(field.getType().getComponentType(), fieldValuePrimaryObject.size())));
+//		    }
 
 		} else if (List.class.isAssignableFrom(fieldType)) {
 
 		    List<Object> fieldValuePrimaryObjectList = (List<Object>) primary.getFieldValue(field);
 		    List<Object> fieldValueSecondaryObjectList = (List<Object>) secondary.getFieldValue(field);
-		    List<Object> fieldValuePrimaryObject = null;
-		    List<Object> fieldValueSecondaryObject = null;
-		    if (fieldValuePrimaryObjectList != null) {
-			fieldValuePrimaryObject = new ArrayList<Object>(fieldValuePrimaryObjectList);
-		    }
-		    if (fieldValueSecondaryObjectList != null) {
-			fieldValueSecondaryObject = new ArrayList<Object>(fieldValueSecondaryObjectList);
-		    }
-
-		    if (fieldValuePrimaryObject == null && fieldValueSecondaryObject != null) {
-			entityRecord.getEntity().setFieldValue(field, fieldValueSecondaryObject);
-		    } else if (fieldValuePrimaryObject != null && fieldValueSecondaryObject != null) {
-
-			for (Object secondaryObjectListObject : fieldValueSecondaryObject) {
-			    if (!fieldValuePrimaryObject.contains(secondaryObjectListObject)) {
-				fieldValuePrimaryObject.add(secondaryObjectListObject);
-			    }
-			}
-
-			entityRecord.getEntity().setFieldValue(field, fieldValuePrimaryObject);
-		    }
+		    megeList(consilidatedEntity, fieldValuePrimaryObjectList, fieldValueSecondaryObjectList, field);
 
 		} else if (fieldType.isPrimitive() || String.class.isAssignableFrom(fieldType)) {
 		    Object fieldValuePrimaryObjectPrimitiveOrString = primary.getFieldValue(field);
 		    Object fieldValueSecondaryObjectPrimitiveOrString = secondary.getFieldValue(field);
 
 		    if (fieldValuePrimaryObjectPrimitiveOrString == null && fieldValueSecondaryObjectPrimitiveOrString != null) {
-			entityRecord.getEntity().setFieldValue(field, fieldValueSecondaryObjectPrimitiveOrString);
+			consilidatedEntity.setFieldValue(field, fieldValueSecondaryObjectPrimitiveOrString);
 		    } else if (fieldValuePrimaryObjectPrimitiveOrString != null) {
-			entityRecord.getEntity().setFieldValue(field, fieldValuePrimaryObjectPrimitiveOrString);
+			consilidatedEntity.setFieldValue(field, fieldValuePrimaryObjectPrimitiveOrString);
 		    }
 		    
 		} else if (Date.class.isAssignableFrom(fieldType)) {
@@ -512,59 +408,19 @@ public class EntityRecordService {
 		    Object fieldValueSecondaryObjectDate = secondary.getFieldValue(field);
 
 		    if (fieldValuePrimaryObjectDate == null && fieldValueSecondaryObjectDate != null) {
-			entityRecord.getEntity().setFieldValue(field, new Date (((Date)fieldValueSecondaryObjectDate).getTime()));
+			consilidatedEntity.setFieldValue(field, new Date (((Date)fieldValueSecondaryObjectDate).getTime()));
 		    } else if (fieldValuePrimaryObjectDate != null) {
-			entityRecord.getEntity().setFieldValue(field, new Date (((Date)fieldValuePrimaryObjectDate).getTime()));
+			consilidatedEntity.setFieldValue(field, new Date (((Date)fieldValuePrimaryObjectDate).getTime()));
 		    }
 
-		}
+		} else if (Map.class.isAssignableFrom(fieldType)) {
+		    extracted(consilidatedEntity, primary, secondary, prefLabelsForAltLabels, field, fieldName);
+
+		} 
 
 	    }
 
-	    /*
-	     * adding the preferred labels from the secondary object to the alternative
-	     * labels of consolidated object
-	     */
-	    if (prefLabelsForAltLabels.size() > 0) {
-		for (Field field : allEntityFields) {
-		    String fieldName = field.getName();
-		    if (fieldName.toLowerCase().contains("alt") && fieldName.toLowerCase().contains("label")) {
-			Map<Object, Object> altLabelConsolidatedMap = (Map<Object, Object>) entityRecord.getEntity().getFieldValue(field);
-			Map<Object, Object> altLabelPrimaryObject = null;
-			if (altLabelConsolidatedMap != null)
-			    altLabelPrimaryObject = new HashMap<>(altLabelConsolidatedMap);
-			else
-			    altLabelPrimaryObject = new HashMap<>();
-
-			boolean altLabelPrimaryValueChanged = false;
-			for (Map.Entry prefLabel : prefLabelsForAltLabels.entrySet()) {
-			    String keyPrefLabel = (String) prefLabel.getKey();
-			    List<Object> altLabelPrimaryObjectList = (List<Object>) altLabelPrimaryObject
-				    .get(keyPrefLabel);
-			    List<Object> altLabelPrimaryValue = null;
-			    if (altLabelPrimaryObjectList != null) {
-				altLabelPrimaryValue = new ArrayList<>(altLabelPrimaryObjectList);
-			    } else {
-				altLabelPrimaryValue = new ArrayList<>();
-			    }
-
-			    if (altLabelPrimaryValue.size() == 0 || (altLabelPrimaryValue.size() > 0
-				    && !altLabelPrimaryValue.contains(prefLabel.getValue()))) {
-				altLabelPrimaryValue.add(prefLabel.getValue());
-				if (altLabelPrimaryValueChanged == false) {
-				    altLabelPrimaryValueChanged = true;
-				}
-
-				altLabelPrimaryObject.put(keyPrefLabel, altLabelPrimaryValue);
-			    }
-			}
-			if (altLabelPrimaryValueChanged) {
-			    entityRecord.getEntity().setFieldValue(field, altLabelPrimaryObject);
-			}
-			break;
-		    }
-		}
-	    }
+	    mergeSkippedPrefLabels(consilidatedEntity, prefLabelsForAltLabels, allEntityFields);
 	} catch (IllegalArgumentException e) {
 	    logger.error(
 		    "During the reconceliation of the entity data from different sources a method has been passed an illegal or inappropriate argument.",
@@ -574,6 +430,169 @@ public class EntityRecordService {
 		    "During the reconceliation of the entity data from different sources an illegal access to some method or field has happened.",
 		    e);
 	}
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    void extracted(Entity consilidatedEntity, Entity primary, Entity secondary,
+	    Map<Object, Object> prefLabelsForAltLabels, Field field, String fieldName) throws IllegalAccessException {
+	//TODO: refactor implemetation
+	
+	Map<Object, Object> fieldValuePrimaryObjectMap = (Map<Object, Object>) primary.getFieldValue(field);
+	Map<Object, Object> fieldValueSecondaryObjectMap = (Map<Object, Object>) secondary
+	    .getFieldValue(field);
+	Map<Object, Object> fieldValuePrimaryObject = null;
+	Map<Object, Object> fieldValueSecondaryObject = null;
+	if (fieldValuePrimaryObjectMap != null) {
+	fieldValuePrimaryObject = new HashMap<>(fieldValuePrimaryObjectMap);
+	}
+	if (fieldValueSecondaryObjectMap != null) {
+	fieldValueSecondaryObject = new HashMap<>(fieldValueSecondaryObjectMap);
+	}
+
+	if (fieldValuePrimaryObject == null && fieldValueSecondaryObject != null) {
+	fieldValuePrimaryObject = new HashMap<>();
+	fieldValuePrimaryObject.putAll(fieldValueSecondaryObject);
+	} else if (fieldValuePrimaryObject != null && fieldValueSecondaryObject != null) {
+	for (Map.Entry elemSecondary : fieldValueSecondaryObject.entrySet()) {
+	    Object key = elemSecondary.getKey();
+	    /*
+	     * if the map value is a list, merge the lists of the primary and the secondary
+	     * object without duplicates
+	     */
+	    if (fieldValuePrimaryObject.containsKey(key)
+		    && List.class.isAssignableFrom(elemSecondary.getValue().getClass())) {
+		List<Object> listSecondaryObject = (List<Object>) elemSecondary.getValue();
+		List<Object> listPrimaryObject = new ArrayList<>(
+			(List<Object>) fieldValuePrimaryObject.get(key));
+		boolean listPrimaryObjectChanged = false;
+		for (Object elemSecondaryList : listSecondaryObject) {
+		    if (!listPrimaryObject.contains(elemSecondaryList)) {
+			listPrimaryObject.add(elemSecondaryList);
+			if (listPrimaryObjectChanged == false)
+			    listPrimaryObjectChanged = true;
+		    }
+		}
+
+		if (listPrimaryObjectChanged) {
+		    fieldValuePrimaryObject.put(key, listPrimaryObject);
+		}
+	    }
+	    // keep the different preferred labels in the secondary object for the
+	    // alternative label in the consolidated object
+	    else if (fieldValuePrimaryObject.containsKey(key)
+		    && fieldName.toLowerCase().contains("pref")
+		    && fieldName.toLowerCase().contains("label")) {
+		Object primaryObjectPrefLabel = fieldValuePrimaryObject.get(key);
+		if (!primaryObjectPrefLabel.equals(elemSecondary.getValue())) {
+		    prefLabelsForAltLabels.put(key, elemSecondary.getValue());
+		}
+	    } else if (!fieldValuePrimaryObject.containsKey(key)) {
+		fieldValuePrimaryObject.put(key, elemSecondary.getValue());
+	    }
+
+	}
+	}
+
+	if (fieldValuePrimaryObject != null) {
+	consilidatedEntity.setFieldValue(field, fieldValuePrimaryObject);
+	}
+    }
+
+    @SuppressWarnings("unchecked")
+    void mergeSkippedPrefLabels(Entity consilidatedEntity, Map<Object, Object> prefLabelsForAltLabels,
+	    List<Field> allEntityFields) throws IllegalAccessException {
+	/*
+	 * adding the preferred labels from the secondary object to the alternative
+	 * labels of consolidated object
+	 */
+	if (prefLabelsForAltLabels.size() > 0) {
+	for (Field field : allEntityFields) {
+	    String fieldName = field.getName();
+	    if (fieldName.toLowerCase().contains("alt") && fieldName.toLowerCase().contains("label")) {
+		Map<Object, Object> altLabelConsolidatedMap = (Map<Object, Object>) consilidatedEntity.getFieldValue(field);
+		Map<Object, Object> altLabelPrimaryObject = null;
+		if (altLabelConsolidatedMap != null)
+		    altLabelPrimaryObject = new HashMap<>(altLabelConsolidatedMap);
+		else
+		    altLabelPrimaryObject = new HashMap<>();
+
+		boolean altLabelPrimaryValueChanged = false;
+		for (Map.Entry<Object, Object> prefLabel : prefLabelsForAltLabels.entrySet()) {
+		    String keyPrefLabel = (String) prefLabel.getKey();
+		    List<Object> altLabelPrimaryObjectList = (List<Object>) altLabelPrimaryObject
+			    .get(keyPrefLabel);
+		    List<Object> altLabelPrimaryValue = null;
+		    if (altLabelPrimaryObjectList != null) {
+			altLabelPrimaryValue = new ArrayList<>(altLabelPrimaryObjectList);
+		    } else {
+			altLabelPrimaryValue = new ArrayList<>();
+		    }
+
+		    if (altLabelPrimaryValue.size() == 0 || (altLabelPrimaryValue.size() > 0
+			    && !altLabelPrimaryValue.contains(prefLabel.getValue()))) {
+			altLabelPrimaryValue.add(prefLabel.getValue());
+			if (altLabelPrimaryValueChanged == false) {
+			    altLabelPrimaryValueChanged = true;
+			}
+
+			altLabelPrimaryObject.put(keyPrefLabel, altLabelPrimaryValue);
+		    }
+		}
+		if (altLabelPrimaryValueChanged) {
+		    consilidatedEntity.setFieldValue(field, altLabelPrimaryObject);
+		}
+		break;
+	    }
+	}
+	}
+    }
+
+    void megeList(Entity consilidatedEntity, List<Object> fieldValuePrimaryObjectList,
+	    List<Object> fieldValueSecondaryObjectList, Field field) throws IllegalAccessException {
+	List<Object> fieldValuePrimaryObject = null;
+	List<Object> fieldValueSecondaryObject = null;
+	if (fieldValuePrimaryObjectList != null) {
+	fieldValuePrimaryObject = new ArrayList<Object>(fieldValuePrimaryObjectList);
+	}
+	if (fieldValueSecondaryObjectList != null) {
+	fieldValueSecondaryObject = new ArrayList<Object>(fieldValueSecondaryObjectList);
+	}
+
+	if (fieldValuePrimaryObject == null && fieldValueSecondaryObject != null) {
+	consilidatedEntity.setFieldValue(field, fieldValueSecondaryObject);
+	} else if (fieldValuePrimaryObject != null && fieldValueSecondaryObject != null) {
+
+	for (Object secondaryObjectListObject : fieldValueSecondaryObject) {
+	    if (!fieldValuePrimaryObject.contains(secondaryObjectListObject)) {
+		fieldValuePrimaryObject.add(secondaryObjectListObject);
+	    }
+	}
+
+	consilidatedEntity.setFieldValue(field, fieldValuePrimaryObject);
+	}
+    }
+
+    Object[] mergeArrays(Entity primary, Entity secondary, Field field) throws IllegalAccessException {
+	Object[] primaryArray = (Object[]) primary.getFieldValue(field);
+	Object[] secondaryArray = (Object[]) secondary.getFieldValue(field);
+	
+	if(primaryArray == null && secondaryArray == null) {
+	    return null;
+	}else if(primaryArray == null) {
+	    //return a clone of the secondary
+	    return secondaryArray.clone();
+	}else if(secondaryArray == null) {
+	    //return a clone of the primary
+	    return primaryArray.clone();
+	}
+	
+	//merge arrays
+	Set<Object> mergedAndOrdered= new TreeSet<>(Arrays.asList(primaryArray));
+	mergedAndOrdered.addAll(Arrays.asList(secondaryArray));
+	
+	return mergedAndOrdered.toArray(
+		Arrays.copyOf(primaryArray, 0));
+	
     }
 
     public void dropRepository() {
