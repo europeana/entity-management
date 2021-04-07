@@ -206,7 +206,6 @@ public class EntityRecordService {
 	    break;
 	}
 
-	//this.saveEntityRecord(entityRecord);
     }
 
     private void performCommonReferentialIntegrity(Entity entity) {
@@ -352,9 +351,6 @@ public class EntityRecordService {
 	if (europeanaProxy == null || externalProxy == null) {
 	    return;
 	}
-
-	Entity consolidatedEntity = EntityObjectFactory.createEntityObject(europeanaProxy.getEntity().getType());
-	entityRecord.setEntity(consolidatedEntity);
 
 	Entity primary = europeanaProxy.getEntity();
 	Entity secondary = null;
@@ -588,7 +584,7 @@ public class EntityRecordService {
 	entityRecord.getEntity().setIsAggregatedBy(isAggregatedBy);
     }
 
-//    private void setEuropeanaDataAndMetadata(String entityId, EntityRecord entityRecord, Date timestamp, EntityPreview entityCreationRequest) throws EntityCreationException {
+
     private void setEuropeanaMetadata(
 				Entity europeanaProxyMetadata,
 				String entityId, EntityRecord entityRecord, Date timestamp) {
@@ -603,17 +599,7 @@ public class EntityRecordService {
 	europeanaProxy.setProxyId(getEuropeanaProxyId(entityId));
 	europeanaProxy.setProxyFor(entityId);
 	europeanaProxy.setProxyIn(europeanaAggr);
-//	Entity europeanaProxyEntity = EntityObjectFactory.createEntityObject(entityRecord.getEntity().getType());
-//	europeanaProxyEntity.setEntityId(entityId);
-//	europeanaProxyEntity.setAltLabel(entityCreationRequest.getAltLabel());
-//	europeanaProxyEntity.setPrefLabelStringMap(entityCreationRequest.getPrefLabel());
-//	europeanaProxyEntity.setDepiction(entityCreationRequest.getDepiction());
-//	String[] europeanaProxyEntitySameAs = new String [1];
-//	europeanaProxyEntitySameAs[0] = entityCreationRequest.getId();
-//	europeanaProxyEntity.setSameAs(europeanaProxyEntitySameAs);
-//	europeanaProxy.setEntity(europeanaProxyEntity);
-//	europeanaProxy.setEntity(europeanaProxyMetadata);
-//	europeanaProxy.setEntity(europeanaProxyMetadata);
+
 	europeanaProxy.setEntity(europeanaProxyMetadata);
 
 	entityRecord.addProxy(europeanaProxy);
