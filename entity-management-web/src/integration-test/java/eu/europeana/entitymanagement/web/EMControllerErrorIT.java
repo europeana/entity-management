@@ -18,6 +18,7 @@ import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.getEntity
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
 import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -52,6 +53,7 @@ import eu.europeana.entitymanagement.definitions.model.impl.ConceptImpl;
 import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
+import eu.europeana.entitymanagement.exception.HttpBadRequestException;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import okhttp3.mockwebserver.MockResponse;
 
@@ -123,7 +125,7 @@ public class EMControllerErrorIT extends AbstractEmControllerTest {
         mockMvc.perform(post(BASE_SERVICE_URL)
                 .content(loadFile(CONCEPT_REGISTER_ERROR_CHECK_2_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isBadRequest());
+        .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof HttpBadRequestException));
         
     }
 
@@ -213,7 +215,7 @@ public class EMControllerErrorIT extends AbstractEmControllerTest {
         mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".jsonld")
         		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "wrong-profile-parameter")
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+        .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof HttpBadRequestException));
 
         /*
     	 * check the error if the entity does not exist
@@ -264,10 +266,9 @@ public class EMControllerErrorIT extends AbstractEmControllerTest {
         @Primary
         public BatchService batchServiceBean() throws Exception {
             BatchService batchService = Mockito.mock(BatchService.class);
-            doNothing().when(batchService).launchSingleEntityUpdate(anyString());
+            doNothing().when(batchService).launchSingleEntityUpdate(anyString(), anyBoolean());
             return batchService;
         }
     }
-
 
 }
