@@ -187,13 +187,13 @@ public class EMController extends BaseRest {
 
     @ApiOperation(value = "Register a new entity", nickname = "registerEntity", response = java.lang.Void.class)
     @PostMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
-		public ResponseEntity<EntityRecord> registerEntity(
+		public ResponseEntity<String> registerEntity(
 				@RequestBody EntityPreview entityCreationRequest)
 				throws Exception {
 			// check if id is already being used, if so return a 301
 			Optional<EntityRecord> existingEntity = entityRecordService
 					.findMatchingCoreference(entityCreationRequest.getId());
-			ResponseEntity<EntityRecord> response = checkExistingEntity(existingEntity,
+			ResponseEntity<String> response = checkExistingEntity(existingEntity,
 					entityCreationRequest.getId());
 
 			if (response != null) {
@@ -224,7 +224,8 @@ public class EMController extends BaseRest {
 							metisResponse);
 
 			launchUpdateTask(savedEntityRecord.getEntityId(), true);
-			return ResponseEntity.accepted().body(savedEntityRecord);
+			return ResponseEntity.accepted().body(jsonLdSerializer.serialize(savedEntityRecord,
+					EntityProfile.internal));
 		}
 
 
@@ -296,7 +297,7 @@ public class EMController extends BaseRest {
 		return ResponseEntity.accepted().body(jsonLdSerializer.serialize(entityRecord, profile));
 	}
 
-	private ResponseEntity<EntityRecord> checkExistingEntity(Optional<EntityRecord> existingEntity,
+	private ResponseEntity<String> checkExistingEntity(Optional<EntityRecord> existingEntity,
 			String entityCreationId)
 			throws EntityRemovedException {
 

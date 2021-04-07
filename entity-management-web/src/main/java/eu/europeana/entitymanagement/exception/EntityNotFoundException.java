@@ -20,4 +20,10 @@ public class EntityNotFoundException extends EuropeanaApiException {
     public HttpStatus getResponseStatus() {
         return HttpStatus.NOT_FOUND;
     }
+
+
+    @Override
+    public boolean doLogStacktrace() {
+        return false;
+    }
 }
