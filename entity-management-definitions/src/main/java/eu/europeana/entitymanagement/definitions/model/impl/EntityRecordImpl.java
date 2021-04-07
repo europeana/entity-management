@@ -95,7 +95,7 @@ public class EntityRecordImpl implements EntityRecord {
     }
 
     @Override
-    public boolean getDisabled() {
+    public boolean isDisabled() {
 	return this.disabled;
     }
 

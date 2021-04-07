@@ -23,7 +23,7 @@ public interface EntityRecord {
 
     Entity getEntity();
     
-    boolean getDisabled();
+    boolean isDisabled();
     
     void setDisabled(boolean disabledParam);
 

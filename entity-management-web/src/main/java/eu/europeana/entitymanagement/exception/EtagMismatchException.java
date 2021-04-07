@@ -3,10 +3,11 @@ package eu.europeana.entitymanagement.exception;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import org.springframework.http.HttpStatus;
 
-public class EntityRemovedException extends EuropeanaApiException {
 
-  public EntityRemovedException(String message) {
-    super(message);
+public class EtagMismatchException extends EuropeanaApiException {
+
+  public EtagMismatchException(String msg) {
+    super(msg);
   }
 
   @Override
@@ -21,6 +22,6 @@ public class EntityRemovedException extends EuropeanaApiException {
 
   @Override
   public HttpStatus getResponseStatus() {
-    return HttpStatus.GONE;
+    return HttpStatus.PRECONDITION_FAILED;
   }
 }
