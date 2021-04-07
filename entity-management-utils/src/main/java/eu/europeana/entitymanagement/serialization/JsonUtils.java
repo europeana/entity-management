@@ -7,16 +7,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Iterator;
 
 public class Utils {
-
-	public static boolean isUri (String value) {
-		if(value.startsWith("http://") || value.startsWith("https://")) {
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-
 	/**
 	 * Combines two JsonNodes. The second node is nested within the first, with the specified field name.
 	 */
