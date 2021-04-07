@@ -232,7 +232,7 @@ public class EntityRecordService {
 	entity.setBroader(replaceWithInternalReferences(broaderField));
 
 	// for the field narrower
-	String[] narrowerField = entity.getBroader();
+	String[] narrowerField = entity.getNarrower();
 	entity.setNarrower(replaceWithInternalReferences(narrowerField));
 
 	// for the field related
