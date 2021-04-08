@@ -21,7 +21,7 @@ public abstract class AbstractIntegrationTest {
     static final MongoContainer MONGO_CONTAINER;
 
     static {
-        MONGO_CONTAINER = new MongoContainer("entity-management", "job-repository")
+        MONGO_CONTAINER = new MongoContainer("entity-management", "job-repository", "enrichment")
                 .withLogConsumer(new WaitingConsumer().andThen(new ToStringConsumer()));
 
         MONGO_CONTAINER.start();
@@ -53,6 +53,8 @@ public abstract class AbstractIntegrationTest {
         registry.add("mongo.connectionUrl", MONGO_CONTAINER::getConnectionUrl);
         registry.add("mongo.em.database", MONGO_CONTAINER::getEntityDb);
         registry.add("mongo.batch.database", MONGO_CONTAINER::getBatchDb);
+        registry.add("mongo.enrichment.connectionUrl", MONGO_CONTAINER::getEnrichmentDb);
+        registry.add("mongo.enrichment.database", MONGO_CONTAINER::getEnrichmentDb);
         registry.add("metis.baseUrl", () -> String.format("http://%s:%s", mockMetis.getHostName(), mockMetis.getPort()));
     }
 
