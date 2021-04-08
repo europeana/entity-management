@@ -1,6 +1,5 @@
 package eu.europeana.entitymanagement.definitions.model;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -11,9 +10,9 @@ import eu.europeana.entitymanagement.definitions.model.impl.AgentImpl;
 @JsonDeserialize(as = AgentImpl.class)
 public interface Agent extends Entity {
 
-	public Date getDate();
+	public String[] getDate();
 
-	public void setDate(Date date);
+	public void setDate(String[] date);
 
 	public String[] getHasMet();
 
@@ -81,5 +80,10 @@ public interface Agent extends Entity {
 	public void setIsPartOfArray(String[] isPartOf);
 	
 	public void setIsShownBy (WebResource resource);
+	
+	public String[] getWasPresentAt();
+
+	public void setWasPresentAt(String[] wasPresentAt);
+
 
 }

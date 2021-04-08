@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metis:results xmlns:dcterms="http://purl.org/dc/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:edm="http://www.europeana.eu/schemas/edm/" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema" xmlns:cc="http://creativecommons.org/ns" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdaGr2="http://rdvocab.info/ElementsGr2/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:wgs84_pos="http://www.w3.org/2003/01/geo/wgs84_pos#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:metis="http://www.europeana.eu/schemas/metis">
+<metis:result>
+<edm:Timespan rdf:about="http://data.europeana.eu/timespan/16">
+  <edm:isShownBy rdf:resource="http://purl.pt/4662/service/media/cover/max"/>
+  <skos:prefLabel xml:lang="de">16. Jahrhundert</skos:prefLabel>
+  <skos:prefLabel xml:lang="fi">1500-luku</skos:prefLabel>
+  <skos:prefLabel xml:lang="ru">XVI век</skos:prefLabel>
+  <skos:prefLabel xml:lang="pt">século XVI</skos:prefLabel>
+  <skos:prefLabel xml:lang="bg">16 век</skos:prefLabel>
+  <skos:prefLabel xml:lang="lt">XVI amžius</skos:prefLabel>
+  <skos:prefLabel xml:lang="lv">16. gadsimts</skos:prefLabel>
+  <skos:prefLabel xml:lang="hr">16. stoljeće</skos:prefLabel>
+  <skos:prefLabel xml:lang="fr">XVIe siècle</skos:prefLabel>
+  <skos:prefLabel xml:lang="hu">16. század</skos:prefLabel>
+  <skos:prefLabel xml:lang="sk">16. storočie</skos:prefLabel>
+  <skos:prefLabel xml:lang="sl">16. stoletje</skos:prefLabel>
+  <skos:prefLabel xml:lang="ga">16ú haois</skos:prefLabel>
+  <skos:prefLabel xml:lang="ca">segle XVI</skos:prefLabel>
+  <skos:prefLabel xml:lang="sv">1500-talet</skos:prefLabel>
+  <skos:prefLabel xml:lang="el">16ος αιώνας</skos:prefLabel>
+  <skos:prefLabel xml:lang="en">16th century</skos:prefLabel>
+  <skos:prefLabel xml:lang="it">XVI secolo</skos:prefLabel>
+  <skos:prefLabel xml:lang="es">siglo XVI</skos:prefLabel>
+  <skos:prefLabel xml:lang="et">16. sajand</skos:prefLabel>
+  <skos:prefLabel xml:lang="cs">16. století</skos:prefLabel>
+  <skos:prefLabel xml:lang="pl">XVI wiek</skos:prefLabel>
+  <skos:prefLabel xml:lang="ro">Secolul al XVI-lea</skos:prefLabel>
+  <skos:prefLabel xml:lang="da">16. århundrede</skos:prefLabel>
+  <skos:prefLabel xml:lang="nl">16e eeuw</skos:prefLabel>
+  <skos:altLabel xml:lang="sv">1500-talet (århundrade)</skos:altLabel>
+  <skos:altLabel xml:lang="sv">16:e århundradet</skos:altLabel>
+  <skos:altLabel xml:lang="sv">1500-tal</skos:altLabel>
+  <skos:altLabel xml:lang="sv">1500-talet (sekel)</skos:altLabel>
+  <skos:altLabel xml:lang="sv">16:e seklet</skos:altLabel>
+  <skos:altLabel xml:lang="ru">16 век</skos:altLabel>
+  <skos:altLabel xml:lang="en">16th-century</skos:altLabel>
+  <skos:altLabel xml:lang="it">Cinquecento</skos:altLabel>
+  <skos:altLabel xml:lang="it">Secolo XVI</skos:altLabel>
+  <skos:altLabel xml:lang="it">XVI Secolo</skos:altLabel>
+  <skos:altLabel xml:lang="it">&apos;500</skos:altLabel>
+  <skos:altLabel xml:lang="it">Sedicesimo secolo</skos:altLabel>
+  <skos:altLabel xml:lang="it">16° secolo</skos:altLabel>
+  <skos:altLabel xml:lang="fr">16e siècle</skos:altLabel>
+  <skos:hiddenLabel>16??</skos:hiddenLabel>
+  <skos:hiddenLabel>16e</skos:hiddenLabel>
+  <skos:hiddenLabel>16..</skos:hiddenLabel>
+  <edm:begin>1501-01-01</edm:begin>
+  <edm:end>1600-12-31</edm:end>
+  <dcterms:isPartOf rdf:resource="http://semium.org/time/AD2xxx"/>
+  <edm:isNextInSequence rdf:resource="http://data.europeana.eu/timespan/15"/>
+  <owl:sameAs rdf:resource="http://vocab.getty.edu/aat/300404510"/>
+  <owl:sameAs rdf:resource="http://babelnet.org/rdf/s02814512n"/>
+  <owl:sameAs rdf:resource="http://id.nlm.nih.gov/mesh/D049669"/>
+  <owl:sameAs rdf:resource="http://semium.org/time/15xx"/>
+  <owl:sameAs rdf:resource="http://id.loc.gov/authorities/names/sh85123070"/>
+  <owl:sameAs rdf:resource="http://www.wikidata.org/entity/Q7017"/>
+</edm:Timespan>
+<edm:WebResource rdf:about="http://purl.pt/4662/service/media/cover/max">
+  <dc:source rdf:resource="http://data.europeana.eu/item/10501/bib_rnod_31386"/>
+  <foaf:thumbnail rdf:resource="https://api.europeana.eu/thumbnail/v2/url.json?uri=http%3A%2F%2Fpurl.pt%2F4662%2Fservice%2Fmedia%2Fcover%2Fmax&amp;type=IMAGE"/>
+</edm:WebResource>
+</metis:result>
+</metis:results>

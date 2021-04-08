@@ -32,11 +32,12 @@ public class AgentImpl extends BaseEntity implements Agent, eu.europeana.corelib
     }
     
     // TODO: fix cardinality, change to list
-    private Date date; // format "YYYY"
+    private String[] date; // format "YYYY"
     private String[] begin; // format "YYYY-MM-DD"
     private String[] end; // format "YYYY-MM-DD"
     private String[] dateOfBirth; // format "YYYY-MM-DD"
     private String[] dateOfDeath; // format "YYYY"
+    private String[] wasPresentAt;
     private String[] hasMet;
     private Map<String, String> name;
     private Map<String, List<String>> biographicalInformation;
@@ -60,11 +61,27 @@ public class AgentImpl extends BaseEntity implements Agent, eu.europeana.corelib
     private Map<String, List<String>> tmpName;
     private Map<String, List<String>> tmpIdentifier;
 
-    public Date getDate() {
+	@Override
+    @JsonGetter(WebEntityFields.WAS_PRESENT_AT)
+    @JacksonXmlProperty(localName = XmlFields.XML_WAS_PRESENT_AT)
+	public String[] getWasPresentAt() {
+		return this.wasPresentAt;
+	}
+
+	@Override
+	@JsonSetter(WebEntityFields.WAS_PRESENT_AT)
+	public void setWasPresentAt(String[] wasPresentAt) {
+		this.wasPresentAt=wasPresentAt;
+	}
+
+    @JsonGetter(WebEntityFields.DATE)
+    @JacksonXmlProperty(localName = XmlFields.XML_DC_DATE)
+    public String[] getDate() {
 	return date;
     }
 
-    public void setDate(Date date) {
+    @JsonSetter(WebEntityFields.DATE)
+    public void setDate(String[] date) {
 	this.date = date;
     }
 
@@ -517,4 +534,5 @@ public class AgentImpl extends BaseEntity implements Agent, eu.europeana.corelib
 		//TODO:in case of the performance overhead cause by using the reflecion code, change this method to call the setter for each field individually
 		field.set(this, value);
 	}
+
 }

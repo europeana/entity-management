@@ -153,11 +153,11 @@ public class XmlAgentImpl extends XmlBaseEntityImpl {
 	    	return RdfXmlUtils.convertToXmlMultilingualStringOrRdfResource(getAgent().getProfessionOrOccupation());
 	}
 	
-	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_SAME_AS)
-	public List<RdfResource> getSameAs(){
-	    	return RdfXmlUtils.convertToRdfResource(getAgent().getSameAs());
-	}
+//	@JacksonXmlElementWrapper(useWrapping=false)
+//	@JacksonXmlProperty(localName = XmlConstants.XML_SAME_AS)
+//	public List<RdfResource> getSameAs(){
+//	    	return RdfXmlUtils.convertToRdfResource(getAgent().getSameAs());
+//	}
 
 	@JsonIgnore
 	private Agent getAgent() {
