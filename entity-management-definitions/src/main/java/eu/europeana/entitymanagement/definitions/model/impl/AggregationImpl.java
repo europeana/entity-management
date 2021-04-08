@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement.definitions.model.impl;
 
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.AGGREGATION;
 
+import eu.europeana.entitymanagement.serialization.PositiveNumberFilter;
 import java.util.Date;
 import java.util.List;
 
@@ -18,7 +19,6 @@ import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JacksonXmlRootElement(localName = XmlFields.XML_ORE_AGGREGATION)
-@JsonPropertyOrder({WebEntityFields.CREATED, WebEntityFields.MODIFIED, WebEntityFields.AGGREGATES})
 public class AggregationImpl implements Aggregation{
 
 	public AggregationImpl() {
@@ -96,12 +96,14 @@ public class AggregationImpl implements Aggregation{
     @Override
     @JsonGetter
     @JacksonXmlProperty
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = PositiveNumberFilter.class)
     public double getPageRank() {
         return pageRank;
     }
     
     @Override
     @JsonSetter
+
     public void setPageRank(double pageRank) {
         this.pageRank = pageRank;
     }
@@ -119,6 +121,7 @@ public class AggregationImpl implements Aggregation{
     @Override
     @JsonGetter
     @JacksonXmlProperty
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = PositiveNumberFilter.class)
     public int getScore() {
         return score;
     }
