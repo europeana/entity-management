@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
+
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -17,7 +19,6 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import eu.europeana.entitymanagement.definitions.model.Address;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 /**
@@ -27,7 +28,9 @@ import eu.europeana.entitymanagement.vocabulary.XmlFields;
  */
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-public class OrganizationImpl extends BaseEntity 
+@JsonPropertyOrder({CONTEXT, ID, TYPE, DEPICTION, PREF_LABEL, ACRONYM, ALT_LABEL, DESCRIPTION, FOAF_LOGO, EUROPEANA_ROLE,
+ORGANIZATION_DOMAIN, GEOGRAPHIC_LEVEL, COUNTRY, FOAF_HOMEPAGE, FOAF_PHONE, FOAF_MBOX, HAS_ADDRESS, IDENTIFIER, SAME_AS})
+public class OrganizationImpl extends BaseEntity
 		implements Organization, eu.europeana.corelib.definitions.edm.entity.Organization {
 
 	public OrganizationImpl() {
@@ -60,66 +63,66 @@ public class OrganizationImpl extends BaseEntity
 	private Address address;
 	
 	@Override
-	@JsonGetter(WebEntityFields.DESCRIPTION)
+	@JsonGetter(DESCRIPTION)
 	@JacksonXmlProperty(localName = XmlFields.XML_DC_DESCRIPTION)
 	public Map<String, String> getDescription() {
 		return description;
 	}
 
 	@Override
-	@JsonSetter(WebEntityFields.DESCRIPTION)
+	@JsonSetter(DESCRIPTION)
 	public void setDescription(Map<String, String> dcDescription) {
 	    	this.description = dcDescription;
 	}
 	
 	@Override
-	@JsonGetter(WebEntityFields.ACRONYM)
+	@JsonGetter(ACRONYM)
 	@JacksonXmlProperty(localName = XmlFields.XML_EDM_ACRONYM)
 	public Map<String, List<String>> getAcronym() {
 		return acronym;
 	}
 
 	@Override
-	@JsonSetter(WebEntityFields.ACRONYM)
+	@JsonSetter(ACRONYM)
 	public void setAcronym(Map<String, List<String>> acronym) {
 	    	this.acronym = acronym;
 	}
 	
 	@Override
-	@JsonGetter(WebEntityFields.EUROPEANA_ROLE)
+	@JsonGetter(EUROPEANA_ROLE)
 	@JacksonXmlProperty(localName = XmlFields.XML_EDM_EUROPEANA_ROLE)
 	public Map<String, List<String>> getEuropeanaRole() {
 		return europeanaRole;
 	}
 
 	@Override
-	@JsonSetter(WebEntityFields.EUROPEANA_ROLE)
+	@JsonSetter(EUROPEANA_ROLE)
 	public void setEuropeanaRole(Map<String, List<String>> europeanaRole) {
 	    	this.europeanaRole = europeanaRole;
 	}
 	
 	@Override
-	@JsonGetter(WebEntityFields.FOAF_PHONE)
+	@JsonGetter(FOAF_PHONE)
 	@JacksonXmlProperty(localName = XmlFields.XML_FOAF_PHONE)
 	public List<String> getPhone() {
 		return phone;
 	}
 
 	@Override
-	@JsonSetter(WebEntityFields.FOAF_PHONE)
+	@JsonSetter(FOAF_PHONE)
 	public void setPhone(List<String> phone) {
 		this.phone = phone;
 	}
 
 	@Override
-	@JsonGetter(WebEntityFields.FOAF_MBOX)
+	@JsonGetter(FOAF_MBOX)
 	@JacksonXmlProperty(localName = XmlFields.XML_FOAF_MBOX)
 	public List<String> getMbox() {
 		return mbox;
 	}
 
 	@Override
-	@JsonSetter(WebEntityFields.FOAF_MBOX)
+	@JsonSetter(FOAF_MBOX)
 	public void setMbox(List<String> mbox) {
 		this.mbox = mbox;
 	}
@@ -127,13 +130,13 @@ public class OrganizationImpl extends BaseEntity
 	@Override
 	@JacksonXmlElementWrapper(localName = XmlFields.XML_VCARD_HAS_ADDRESS)
 	@JacksonXmlProperty(localName = XmlFields.XML_VCARD_ADDRESS)
-	@JsonGetter(WebEntityFields.ADDRESS_TYPE)
+	@JsonGetter(ADDRESS_TYPE)
 	public String getHasAddress() {
 		return hasAddress;
 	}
 
 	@Override
-	@JsonSetter(WebEntityFields.ADDRESS_TYPE)
+	@JsonSetter(ADDRESS_TYPE)
 	public void setHasAddress(String hasAddress) {
 		this.hasAddress = hasAddress;
 	}
@@ -189,14 +192,14 @@ public class OrganizationImpl extends BaseEntity
 	}
 
 	@Override
-	@JsonGetter(WebEntityFields.COUNTRY)
+	@JsonGetter(COUNTRY)
 	@JacksonXmlProperty(localName = XmlFields.XML_EDM_COUNTRY)
 	public String getCountry() {
 		return country;
 	}
 
 	@Override
-	@JsonSetter(WebEntityFields.COUNTRY)
+	@JsonSetter(COUNTRY)
 	public void setCountry(String country) {
 		this.country = country;
 	}
@@ -212,7 +215,7 @@ public class OrganizationImpl extends BaseEntity
 	}
 
 	@Override
-	@JsonGetter(WebEntityFields.GEOGRAPHIC_LEVEL)
+	@JsonGetter(GEOGRAPHIC_LEVEL)
 	@JacksonXmlProperty(localName = XmlFields.XML_EDM_GEOGRAPHIC_LEVEL)
 	public Map<String, String> getGeographicLevel() {
 		return geographicLevel;
@@ -220,46 +223,46 @@ public class OrganizationImpl extends BaseEntity
 
 	@Override
 	@Deprecated
-	@JsonSetter(WebEntityFields.GEOGRAPHIC_LEVEL)
+	@JsonSetter(GEOGRAPHIC_LEVEL)
 	public void setGeographicLevel(Map<String, String> geographicLevel) {
 		this.geographicLevel = geographicLevel;
 	}
 
 	@Override
-	@JsonGetter(WebEntityFields.ORGANIZATION_DOMAIN)
+	@JsonGetter(ORGANIZATION_DOMAIN)
 	@JacksonXmlProperty(localName = XmlFields.XML_EDM_ORGANIZATION_DOMAIN)
 	public Map<String, List<String>> getOrganizationDomain() {
 		return organizationDomain;
 	}
 
 	@Override
-	@JsonSetter(WebEntityFields.ORGANIZATION_DOMAIN)
+	@JsonSetter(ORGANIZATION_DOMAIN)
 	public void setOrganizationDomain(Map<String, List<String>> organizationDomain) {
 		this.organizationDomain = organizationDomain;
 	}
 
 	@Override
-	@JsonGetter(WebEntityFields.FOAF_HOMEPAGE)
+	@JsonGetter(FOAF_HOMEPAGE)
 	@JacksonXmlProperty(localName = XmlFields.XML_FOAF_HOMEPAGE)
 	public String getHomepage() {
 		return homepage;
 	}
 
 	@Override
-	@JsonSetter(WebEntityFields.FOAF_HOMEPAGE)
+	@JsonSetter(FOAF_HOMEPAGE)
 	public void setHomepage(String homepage) {
 		this.homepage = homepage;
 	}
 
 	@Override
-	@JsonGetter(WebEntityFields.FOAF_LOGO)
+	@JsonGetter(FOAF_LOGO)
 	@JacksonXmlProperty(localName = XmlFields.XML_FOAF_LOGO)
 	public String getLogo() {
 		return logo;
 	}
 
 	@Override
-	@JsonSetter(WebEntityFields.FOAF_LOGO)
+	@JsonSetter(FOAF_LOGO)
 	public void setLogo(String logo) {
 		this.logo = logo;
 	}

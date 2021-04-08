@@ -1,5 +1,7 @@
 package eu.europeana.entitymanagement.definitions.model.impl;
 
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
+
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -19,6 +21,8 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
+@JsonPropertyOrder({CONTEXT, ID, TYPE, DEPICTION, IS_SHOWN_BY, PREF_LABEL, ALT_LABEL, HIDDEN_LABEL, LATITUDE, LONGITUDE,
+ALTITUDE, LATITUDE_LONGITUDE, NOTE, HAS_PART, IS_PART_OF, IS_NEXT_IN_SEQUENCE, SAME_AS})
 public class PlaceImpl extends BaseEntity implements Place, eu.europeana.corelib.definitions.edm.entity.Place {
 
 	public PlaceImpl() {
@@ -34,53 +38,53 @@ public class PlaceImpl extends BaseEntity implements Place, eu.europeana.corelib
 	private Map<String, List<String>> tmpHasPart;	
 	
 	@Override
-	@JsonGetter(WebEntityFields.IS_NEXT_IN_SEQUENCE)
+	@JsonGetter(IS_NEXT_IN_SEQUENCE)
 	@JacksonXmlProperty(localName = XmlFields.XML_EDM_IS_NEXT_IN_SEQUENCE)
 	public String[] getIsNextInSequence() {
 		return isNextInSequence;
 	}
 
 	@Override
-	@JsonSetter(WebEntityFields.IS_NEXT_IN_SEQUENCE)
+	@JsonSetter(IS_NEXT_IN_SEQUENCE)
 	public void setIsNextInSequence(String[] isNextInSequence) {
 		this.isNextInSequence = isNextInSequence;
 	}
 
 	@Override
-	@JsonGetter(WebEntityFields.LATITUDE)
+	@JsonGetter(LATITUDE)
 	@JacksonXmlProperty(localName = XmlFields.XML_WGS84_POS_LAT)
 	public Float getLatitude() {
 		return latitude;
 	}
 
 	@Override
-	@JsonSetter(WebEntityFields.LATITUDE)
+	@JsonSetter(LATITUDE)
 	public void setLatitude(Float latitude) {
 		this.latitude = latitude;
 	}
 
 	@Override
-	@JsonGetter(WebEntityFields.LONGITUDE)
+	@JsonGetter(LONGITUDE)
 	@JacksonXmlProperty(localName = XmlFields.XML_WGS84_POS_LONG)
 	public Float getLongitude() {
 		return longitude;
 	}
 
 	@Override
-	@JsonSetter(WebEntityFields.LONGITUDE)
+	@JsonSetter(LONGITUDE)
 	public void setLongitude(Float longitude) {
 		this.longitude = longitude;
 	}
 
 	@Override
-	@JsonGetter(WebEntityFields.ALTITUDE)
+	@JsonGetter(ALTITUDE)
 	@JacksonXmlProperty(localName = XmlFields.XML_WGS84_POS_ALT)
 	public Float getAltitude() {
 		return altitude;
 	}
 
 	@Override
-	@JsonSetter(WebEntityFields.ALTITUDE)
+	@JsonSetter(ALTITUDE)
 	public void setAltitude(Float altitude) {
 		this.altitude = altitude;
 	}

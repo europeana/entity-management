@@ -3,6 +3,7 @@ package eu.europeana.entitymanagement.serialization;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import java.util.Iterator;
 
 public class JsonUtils {
@@ -17,24 +18,20 @@ public class JsonUtils {
 	}
 
 	/**
-	 * Merges two JsonNodes. Expects all field names to be unique
+	 * Merges the fields of an EntityProxy and its Entity metadata. Expects all field names to be unique
 	 * @return
 	 * */
 
-	public static JsonNode mergeNode(ObjectMapper mapper, ObjectNode firstNode, ObjectNode secondNode) {
+	public static JsonNode mergeProxyAndEntity(ObjectMapper mapper, ObjectNode proxyNode, ObjectNode entityNode) {
 		ObjectNode result = mapper.createObjectNode();
-		result.setAll(firstNode);
+		// manually add fields based on order in Spec
+		result.set(WebEntityFields.ID, proxyNode.get(WebEntityFields.ID));
+		result.set(WebEntityFields.TYPE, proxyNode.get(WebEntityFields.TYPE));
 
-		Iterator<String> secondNodeFieldNames = secondNode.fieldNames();
-		while (secondNodeFieldNames.hasNext()) {
-			String key = secondNodeFieldNames.next();
-			JsonNode value = secondNode.get(key);
+		result.setAll(entityNode);
 
-			// overwrites any matching keys in firstNode
-			result.set(key, value);
-			}
-
-
+		result.set(WebEntityFields.PROXY_FOR, proxyNode.get(WebEntityFields.PROXY_FOR));
+		result.set(WebEntityFields.PROXY_IN, proxyNode.get(WebEntityFields.PROXY_IN));
 		return result;
 	}
 

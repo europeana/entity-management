@@ -33,7 +33,12 @@ public interface WebEntityFields {
 	public static final String AGGREGATION = "Aggregation";
 	public static final String IS_AGGREGATED_BY = "isAggregatedBy";
 	public static final String AGGREGATES = "aggregates";
-	
+
+	// additional fields for aggregations
+	public static final String PAGE_RANK = "pageRank";
+	public static final String RECORD_COUNT = "recordCount";
+	public static final String SCORE = "score";
+
 
 	// concept fields
 	public static final String NOTATION = "notation";

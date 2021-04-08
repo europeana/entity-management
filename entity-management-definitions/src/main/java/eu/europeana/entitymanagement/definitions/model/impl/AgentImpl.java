@@ -1,5 +1,7 @@
 package eu.europeana.entitymanagement.definitions.model.impl;
 
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
+
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Date;
@@ -20,6 +22,9 @@ import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JacksonXmlRootElement(localName = XmlFields.XML_EDM_AGENT)
+@JsonPropertyOrder({CONTEXT, ID, TYPE, DEPICTION, IS_SHOWN_BY, PREF_LABEL, ALT_LABEL, HIDDEN_LABEL, NAME, BEGIN, DATE_OF_BIRTH, DATE_OF_ESTABLISHMENT,
+END, DATE_OF_DEATH, DATE_OF_TERMINATION, DATE, PLACE_OF_BIRTH, PLACE_OF_DEATH, GENDER, PROFESSION_OR_OCCUPATION, BIOGRAPHICAL_INFORMATION, NOTE,
+HAS_PART, IS_PART_OF, HAS_MET, IS_RELATED_TO, WAS_PRESENT_AT, IDENTIFIER, SAME_AS})
 public class AgentImpl extends BaseEntity implements Agent, eu.europeana.corelib.definitions.edm.entity.Agent {
 
     public AgentImpl() {
@@ -69,139 +74,139 @@ public class AgentImpl extends BaseEntity implements Agent, eu.europeana.corelib
 	return begin;
     }
 
-    @JsonSetter(WebEntityFields.BEGIN)
+    @JsonSetter(BEGIN)
     public void setBegin(String[] begin) {
 	this.begin = begin;
     }
 
-    @JsonGetter(WebEntityFields.END)
+    @JsonGetter(END)
     @JacksonXmlProperty(localName = XmlFields.XML_EDM_END)
     public String[] getEndArray() {
 	return end;
     }
 
-    @JsonSetter(WebEntityFields.END)
+    @JsonSetter(END)
     public void setEnd(String[] end) {
 	this.end = end;
     }
 
-    @JsonGetter(WebEntityFields.HAS_MET)
+    @JsonGetter(HAS_MET)
     @JacksonXmlProperty(localName = XmlFields.XML_EDM_HASMET)
     public String[] getHasMet() {
 	return hasMet;
     }
 
-    @JsonSetter(WebEntityFields.HAS_MET)
+    @JsonSetter(HAS_MET)
     public void setHasMet(String[] hasMet) {
 	this.hasMet = hasMet;
     }
 
-    @JsonGetter(WebEntityFields.NAME)
+    @JsonGetter(NAME)
     @JacksonXmlProperty(localName = XmlFields.XML_FOAF_NAME)
     public Map<String, String> getName() {
 	return name;
     }
 
-    @JsonSetter(WebEntityFields.NAME)
+    @JsonSetter(NAME)
     public void setName(Map<String, String> name) {
 	this.name = name;
     }
 
-    @JsonGetter(WebEntityFields.BIOGRAPHICAL_INFORMATION)
+    @JsonGetter(BIOGRAPHICAL_INFORMATION)
     @JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_BIOGRAPHICAL_INFORMATION)
     public Map<String, List<String>> getBiographicalInformation() {
 	return biographicalInformation;
     }
 
-    @JsonSetter(WebEntityFields.BIOGRAPHICAL_INFORMATION)
+    @JsonSetter(BIOGRAPHICAL_INFORMATION)
     public void setBiographicalInformation(Map<String, List<String>> biographicalInformation) {
 	this.biographicalInformation = biographicalInformation;
     }
 
-    @JsonGetter(WebEntityFields.DATE_OF_BIRTH)
+    @JsonGetter(DATE_OF_BIRTH)
     @JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_DATE_OF_BIRTH)
     public String[] getDateOfBirth() {
 	return dateOfBirth;
     }
 
-    @JsonSetter(WebEntityFields.DATE_OF_BIRTH)
+    @JsonSetter(DATE_OF_BIRTH)
     public void setDateOfBirth(String[] dateOfBirth) {
 	this.dateOfBirth = dateOfBirth;
     }
 
-    @JsonGetter(WebEntityFields.DATE_OF_DEATH)
+    @JsonGetter(DATE_OF_DEATH)
     @JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_DATE_OF_DEATH)
     public String[] getDateOfDeath() {
 	return dateOfDeath;
     }
 
-    @JsonSetter(WebEntityFields.DATE_OF_DEATH)
+    @JsonSetter(DATE_OF_DEATH)
     public void setDateOfDeath(String[] dateOfDeath) {
 	this.dateOfDeath = dateOfDeath;
     }
 
-    @JsonGetter(WebEntityFields.PLACE_OF_BIRTH)
+    @JsonGetter(PLACE_OF_BIRTH)
     @JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_PLACE_OF_BIRTH)
     public Map<String, List<String>> getPlaceOfBirth() {
 	return placeOfBirth;
     }
 
-    @JsonSetter(WebEntityFields.PLACE_OF_BIRTH)
+    @JsonSetter(PLACE_OF_BIRTH)
     public void setPlaceOfBirth(Map<String, List<String>> placeOfBirth) {
 	this.placeOfBirth = placeOfBirth;
     }
 
-    @JsonGetter(WebEntityFields.PLACE_OF_DEATH)
+    @JsonGetter(PLACE_OF_DEATH)
     @JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_PLACE_OF_DEATH)
     public Map<String, List<String>> getPlaceOfDeath() {
 	return placeOfDeath;
     }
 
-    @JsonSetter(WebEntityFields.PLACE_OF_DEATH)
+    @JsonSetter(PLACE_OF_DEATH)
     public void setPlaceOfDeath(Map<String, List<String>> placeOfDeath) {
 	this.placeOfDeath = placeOfDeath;
     }
 
-    @JsonGetter(WebEntityFields.DATE_OF_ESTABLISHMENT)
+    @JsonGetter(DATE_OF_ESTABLISHMENT)
     @JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_DATE_OF_ESTABLISHMENT)
     public String getDateOfEstablishment() {
 	return dateOfEstablishment;
     }
 
-    @JsonSetter(WebEntityFields.DATE_OF_ESTABLISHMENT)
+    @JsonSetter(DATE_OF_ESTABLISHMENT)
     public void setDateOfEstablishment(String dateOfEstablishment) {
 	this.dateOfEstablishment = dateOfEstablishment;
     }
 
-    @JsonGetter(WebEntityFields.DATE_OF_TERMINATION)
+    @JsonGetter(DATE_OF_TERMINATION)
     @JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_DATE_OF_TERMINATION)
     public String getDateOfTermination() {
 	return dateOfTermination;
     }
 
-    @JsonSetter(WebEntityFields.DATE_OF_TERMINATION)
+    @JsonSetter(DATE_OF_TERMINATION)
     public void setDateOfTermination(String dateOfTermination) {
 	this.dateOfTermination = dateOfTermination;
     }
 
-    @JsonGetter(WebEntityFields.GENDER)
+    @JsonGetter(GENDER)
     @JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_GENDER)
     public String getGender() {
 	return gender;
     }
 
-    @JsonSetter(WebEntityFields.GENDER)
+    @JsonSetter(GENDER)
     public void setGender(String gender) {
 	this.gender = gender;
     }
 
-    @JsonGetter(WebEntityFields.PROFESSION_OR_OCCUPATION)
+    @JsonGetter(PROFESSION_OR_OCCUPATION)
     @JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_PROFESSION_OR_OCCUPATION)
     public Map<String, List<String>> getProfessionOrOccupation() {
 	return professionOrOccupation;
     }
 
-    @JsonSetter(WebEntityFields.PROFESSION_OR_OCCUPATION)
+    @JsonSetter(PROFESSION_OR_OCCUPATION)
     public void setProfessionOrOccupation(Map<String, List<String>> professionOrOccupation) {
 	this.professionOrOccupation = professionOrOccupation;
     }

@@ -14,7 +14,6 @@ import javax.validation.groups.Default;
 
 import dev.morphia.annotations.Transient;
 import eu.europeana.entitymanagement.common.config.ComparisonUtils;
-import javax.xml.bind.annotation.XmlTransient;
 import org.bson.types.ObjectId;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
@@ -34,7 +33,6 @@ import eu.europeana.entitymanagement.vocabulary.XmlFields;
  * TODO: Define the Jackson annotations, both xml and json, in one place, meaning in this class here and the corresponding extended classes 
  */
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({CONTEXT, ID, TYPE})
 @ValidEntityFields(groups = {Default.class})
 public class BaseEntity implements Entity {
 	

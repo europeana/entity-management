@@ -76,12 +76,11 @@ public class JsonLdSerializer {
 
 				// Entity @context shouldn't appear in proxy metadata
 				proxyEntityNode.remove(WebEntityFields.CONTEXT);
-
 				// Entity ID shouldn't overwrite proxyId
 				proxyEntityNode.remove(WebEntityFields.ID);
 
 				ObjectNode embeddedProxyNode = mapper.valueToTree(proxy);
-				JsonNode mergedNode = JsonUtils.mergeNode(mapper, embeddedProxyNode, proxyEntityNode);
+				JsonNode mergedNode = JsonUtils.mergeProxyAndEntity(mapper, embeddedProxyNode, proxyEntityNode);
 				proxyNode.add(mergedNode.deepCopy());
 			}
 

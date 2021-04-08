@@ -1,6 +1,6 @@
 package eu.europeana.entitymanagement.definitions.model.impl;
 
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.AGGREGATION;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 
 import eu.europeana.entitymanagement.serialization.PositiveNumberFilter;
 import java.util.Date;
@@ -19,6 +19,7 @@ import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JacksonXmlRootElement(localName = XmlFields.XML_ORE_AGGREGATION)
+@JsonPropertyOrder({ID, TYPE, CREATED, MODIFIED, PAGE_RANK, RECORD_COUNT, SCORE, AGGREGATES})
 public class AggregationImpl implements Aggregation{
 
 	public AggregationImpl() {
@@ -31,18 +32,18 @@ public class AggregationImpl implements Aggregation{
 	List<String> aggregates;
     
     @Override
-    @JsonGetter(WebEntityFields.ID)
+    @JsonGetter(ID)
 	@JacksonXmlProperty(isAttribute= true, localName = XmlFields.XML_RDF_ABOUT)
     public String getId() {
         return id;
     }
     @Override
-    @JsonSetter(WebEntityFields.ID)
+    @JsonSetter(ID)
     public void setId(String id) {
         this.id = id;
     }
     @Override
-    @JsonGetter(WebEntityFields.TYPE)
+    @JsonGetter(TYPE)
     @JacksonXmlProperty(localName = XmlFields.XML_RDF_TYPE)
     public String getType() {
       return AGGREGATION;
@@ -50,46 +51,46 @@ public class AggregationImpl implements Aggregation{
 
 
     @Override
-    @JsonGetter(WebEntityFields.RIGHTS)
+    @JsonGetter(RIGHTS)
     @JacksonXmlProperty(localName = XmlFields.XML_EDM_RIGHTS)
     public String getRights() {
         return rights;
     }
     @Override
-    @JsonSetter(WebEntityFields.RIGHTS)
+    @JsonSetter(RIGHTS)
     public void setRights(String rights) {
         this.rights = rights;
     }
     @Override
-    @JsonGetter(WebEntityFields.SOURCE)
+    @JsonGetter(SOURCE)
     @JacksonXmlProperty(localName = XmlFields.XML_DC_SOURCE)
     public String getSource() {
         return source;
     }
     @Override
-    @JsonSetter(WebEntityFields.SOURCE)
+    @JsonSetter(SOURCE)
     public void setSource(String source) {
         this.source = source;
     }
     @Override
-    @JsonGetter(WebEntityFields.CREATED)
+    @JsonGetter(CREATED)
     @JacksonXmlProperty(localName = XmlFields.XML_DCTERMS_CREATED)
     public Date getCreated() {
         return created;
     }
     @Override
-    @JsonSetter(WebEntityFields.CREATED)
+    @JsonSetter(CREATED)
     public void setCreated(Date created) {
         this.created = created;
     }
     @Override
-    @JsonGetter(WebEntityFields.MODIFIED)
+    @JsonGetter(MODIFIED)
     @JacksonXmlProperty(localName = XmlFields.XML_DCTERMS_MODIFIED)
     public Date getModified() {
         return modified;
     }
     @Override
-    @JsonSetter(WebEntityFields.MODIFIED)
+    @JsonSetter(MODIFIED)
     public void setModified(Date modified) {
         this.modified = modified;
     }
@@ -131,13 +132,13 @@ public class AggregationImpl implements Aggregation{
         this.score = score;
     }
     @Override
-    @JsonGetter(WebEntityFields.AGGREGATES)
+    @JsonGetter(AGGREGATES)
     @JacksonXmlProperty(localName = XmlFields.XML_ORE_AGGREGATES)
     public List<String> getAggregates() {
         return aggregates;
     }
     @Override
-    @JsonSetter(WebEntityFields.AGGREGATES)
+    @JsonSetter(AGGREGATES)
     public void setAggregates(List<String> aggregates) {
         this.aggregates = aggregates;
     }
