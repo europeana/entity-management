@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.web.service.impl;
+package eu.europeana.entitymanagement.web;
 
 import org.apache.commons.lang3.StringUtils;
 

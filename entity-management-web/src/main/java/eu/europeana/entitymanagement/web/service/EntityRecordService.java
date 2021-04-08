@@ -1,12 +1,13 @@
-package eu.europeana.entitymanagement.web.service.impl;
+package eu.europeana.entitymanagement.web.service;
 
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.EUROPEANA_URL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.RIGHTS_CREATIVE_COMMONS;
-import static eu.europeana.entitymanagement.web.service.impl.EntityRecordUtils.getDatasourceAggregationId;
-import static eu.europeana.entitymanagement.web.service.impl.EntityRecordUtils.getEuropeanaAggregationId;
-import static eu.europeana.entitymanagement.web.service.impl.EntityRecordUtils.getEuropeanaProxyId;
-import static eu.europeana.entitymanagement.web.service.impl.EntityRecordUtils.getIsAggregatedById;
+import static eu.europeana.entitymanagement.web.EntityRecordUtils.getDatasourceAggregationId;
+import static eu.europeana.entitymanagement.web.EntityRecordUtils.getEuropeanaAggregationId;
+import static eu.europeana.entitymanagement.web.EntityRecordUtils.getEuropeanaProxyId;
+import static eu.europeana.entitymanagement.web.EntityRecordUtils.getIsAggregatedById;
 
+import eu.europeana.entitymanagement.web.EntityRecordUtils;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;

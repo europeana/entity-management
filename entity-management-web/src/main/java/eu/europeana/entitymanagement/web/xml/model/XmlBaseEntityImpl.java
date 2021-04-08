@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.web.service.impl.EntityObjectFactory;
+import eu.europeana.entitymanagement.web.service.EntityObjectFactory;
 
 public abstract class XmlBaseEntityImpl {
 
