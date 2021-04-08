@@ -133,7 +133,8 @@
             "nl" : ["Leonardo da Vinci (Vinci, 15 april 1452 - Amboise, 2 mei 1519) was een architect, uitvinder, ingenieur, filosoof, natuurkundige, scheikundige, anatomist, beeldhouwer, schrijver, schilder en componist uit de Florentijnse Republiek, tijdens de renaissance. Hij wordt gezien als het schoolvoorbeeld van het renaissance-ideaal van de homo universalis en als genie."]
     },
     "professionOrOccupation": {
-        "" : ["mathematician", "engineering", "http://www.wikidata.org/entity/Q11023"]
+        "en" : ["mathematician", "engineering"],
+        "" : ["http://www.wikidata.org/entity/Q11023"]
     },
     "hasMet": [
         "Salai", "http://wikidata.dbpedia.org/resource/Q954126"

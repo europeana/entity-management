@@ -209,65 +209,74 @@ public class EntityRecordServiceT {
 		entityRecordService.dropRepository();
 		// create record for agent-davinci-referential-integrity.json
         AgentImpl agentDaVinci = objectMapper.readValue(loadFile(AGENT_DA_VINCI_REFERENTIAL_INTEGRITY_JSON), AgentImpl.class);
-        EntityRecord entityRecord = new EntityRecordImpl();
-        entityRecord.setEntity(agentDaVinci);
-        entityRecord.setEntityId(agentDaVinci.getEntityId());
-        entityRecordService.saveEntityRecord(entityRecord);
+        EntityRecord entityRecord1 = new EntityRecordImpl();
+        entityRecord1.setEntity(agentDaVinci);
+        entityRecord1.setEntityId(agentDaVinci.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord1);
 
         // create records for all references entities, xml files available in resources/ref-integrity/references
 	    String metisResponse = AGENT_FLORENCE_REFERENTIAL_INTEGRTITY;
 	    Entity entityFromMetisResponse = getMetisResponse(metisResponse).toEntityModel();
-        entityRecord.setEntity(entityFromMetisResponse);
-        entityRecord.setEntityId(entityFromMetisResponse.getEntityId());
-        entityRecordService.saveEntityRecord(entityRecord);
+	    EntityRecord entityRecord2 = new EntityRecordImpl();
+	    entityRecord2.setEntity(entityFromMetisResponse);
+        entityRecord2.setEntityId(entityFromMetisResponse.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord2);
         
 	    metisResponse = AGENT_SALAI_REFERENTIAL_INTEGRTITY;
 	    entityFromMetisResponse = getMetisResponse(metisResponse).toEntityModel();
-        entityRecord.setEntity(entityFromMetisResponse);
-        entityRecord.setEntityId(entityFromMetisResponse.getEntityId());
-        entityRecordService.saveEntityRecord(entityRecord);
+	    EntityRecord entityRecord3 = new EntityRecordImpl();
+        entityRecord3.setEntity(entityFromMetisResponse);
+        entityRecord3.setEntityId(entityFromMetisResponse.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord3);
         
 	    metisResponse = CONCEPT_ENGINEERING_REFERENTIAL_INTEGRTITY;
 	    entityFromMetisResponse = getMetisResponse(metisResponse).toEntityModel();
-        entityRecord.setEntity(entityFromMetisResponse);
-        entityRecord.setEntityId(entityFromMetisResponse.getEntityId());
-        entityRecordService.saveEntityRecord(entityRecord);
+	    EntityRecord entityRecord4 = new EntityRecordImpl();
+        entityRecord4.setEntity(entityFromMetisResponse);
+        entityRecord4.setEntityId(entityFromMetisResponse.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord4);
 
 	    metisResponse = PLACE_AMBOISE_REFERENTIAL_INTEGRTITY;
 	    entityFromMetisResponse = getMetisResponse(metisResponse).toEntityModel();
-        entityRecord.setEntity(entityFromMetisResponse);
-        entityRecord.setEntityId(entityFromMetisResponse.getEntityId());
-        entityRecordService.saveEntityRecord(entityRecord);
+	    EntityRecord entityRecord5 = new EntityRecordImpl();
+        entityRecord5.setEntity(entityFromMetisResponse);
+        entityRecord5.setEntityId(entityFromMetisResponse.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord5);
 
 	    metisResponse = PLACE_FLORENCE_REFERENTIAL_INTEGRTITY;
 	    entityFromMetisResponse = getMetisResponse(metisResponse).toEntityModel();
-        entityRecord.setEntity(entityFromMetisResponse);
-        entityRecord.setEntityId(entityFromMetisResponse.getEntityId());
-        entityRecordService.saveEntityRecord(entityRecord);
+	    EntityRecord entityRecord6 = new EntityRecordImpl();
+        entityRecord6.setEntity(entityFromMetisResponse);
+        entityRecord6.setEntityId(entityFromMetisResponse.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord6);
 
 	    metisResponse = PLACE_FRANCE_REFERENTIAL_INTEGRTITY;
 	    entityFromMetisResponse = getMetisResponse(metisResponse).toEntityModel();
-        entityRecord.setEntity(entityFromMetisResponse);
-        entityRecord.setEntityId(entityFromMetisResponse.getEntityId());
-        entityRecordService.saveEntityRecord(entityRecord);
+	    EntityRecord entityRecord7 = new EntityRecordImpl();
+        entityRecord7.setEntity(entityFromMetisResponse);
+        entityRecord7.setEntityId(entityFromMetisResponse.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord7);
 
 	    metisResponse = PLACE_SFORZA_CASTLE_REFERENTIAL_INTEGRTITY;
 	    entityFromMetisResponse = getMetisResponse(metisResponse).toEntityModel();
-        entityRecord.setEntity(entityFromMetisResponse);
-        entityRecord.setEntityId(entityFromMetisResponse.getEntityId());
-        entityRecordService.saveEntityRecord(entityRecord);
+	    EntityRecord entityRecord8 = new EntityRecordImpl();
+        entityRecord8.setEntity(entityFromMetisResponse);
+        entityRecord8.setEntityId(entityFromMetisResponse.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord8);
 
 	    metisResponse = TIMESPAN_15_REFERENTIAL_INTEGRTITY;
 	    entityFromMetisResponse = getMetisResponse(metisResponse).toEntityModel();
-        entityRecord.setEntity(entityFromMetisResponse);
-        entityRecord.setEntityId(entityFromMetisResponse.getEntityId());
-        entityRecordService.saveEntityRecord(entityRecord);
+	    EntityRecord entityRecord9 = new EntityRecordImpl();
+        entityRecord9.setEntity(entityFromMetisResponse);
+        entityRecord9.setEntityId(entityFromMetisResponse.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord9);
         
 	    metisResponse = TIMESPAN_16_REFERENTIAL_INTEGRTITY;
 	    entityFromMetisResponse = getMetisResponse(metisResponse).toEntityModel();
-        entityRecord.setEntity(entityFromMetisResponse);
-        entityRecord.setEntityId(entityFromMetisResponse.getEntityId());
-        entityRecordService.saveEntityRecord(entityRecord);
+	    EntityRecord entityRecord10 = new EntityRecordImpl();
+        entityRecord10.setEntity(entityFromMetisResponse);
+        entityRecord10.setEntityId(entityFromMetisResponse.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord10);
 
         // perform referential integrity processing for da vinci record
         entityRecordService.performReferentialIntegrity(agentDaVinci);

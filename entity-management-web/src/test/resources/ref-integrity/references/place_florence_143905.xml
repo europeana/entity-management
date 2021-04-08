@@ -2,14 +2,12 @@
 <metis:results xmlns:dcterms="http://purl.org/dc/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:edm="http://www.europeana.eu/schemas/edm/" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema" xmlns:cc="http://creativecommons.org/ns" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdaGr2="http://rdvocab.info/ElementsGr2/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:wgs84_pos="http://www.w3.org/2003/01/geo/wgs84_pos#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:metis="http://www.europeana.eu/schemas/metis">
 <metis:result>
 <edm:Place rdf:about="http://data.europeana.eu/place/base/143905">
-  <skos:prefLabel>Province of Florence</skos:prefLabel>
   <skos:prefLabel xml:lang="de">Florenz</skos:prefLabel>
   <skos:prefLabel xml:lang="pt">Florença</skos:prefLabel>
   <skos:prefLabel xml:lang="en">Florence</skos:prefLabel>
   <skos:prefLabel xml:lang="it">Firenze</skos:prefLabel>
   <skos:prefLabel xml:lang="fr">Florence</skos:prefLabel>
   <skos:prefLabel xml:lang="es">Florencia</skos:prefLabel>
-  <skos:altLabel>Firenze</skos:altLabel>
   <skos:altLabel xml:lang="de">Provinz Florenz</skos:altLabel>
   <skos:altLabel xml:lang="pt">Província de Florença</skos:altLabel>
   <skos:altLabel xml:lang="en">Province of Florence</skos:altLabel>

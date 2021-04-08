@@ -64,6 +64,9 @@
             "da Vinci, Leonardo"
         ]
     },
+    "date": [
+    	"1452-04-15", "http://data.europeana.eu/timespan/15", "1519-05-02", "http://data.europeana.eu/timespan/16"
+    ],
     "dateOfBirth": [
         "1452-04-15", "http://semium.org/time/14xx"
     ],
@@ -78,7 +81,7 @@
         "" : ["http://data.europeana.eu/place/base/143905"]
     },
     "placeOfDeath": {
-        "": ["http://data.europeana.eu/place/base/85", "http://data.europeana.eu/place/base/42996"]
+        "": ["http://data.europeana.eu/place/base/42996"]
     },
     "biographicalInformation": {
             "de" : ["Leonardo da Vinci [ˌleoˈnardo da ˈvintʃi] (* 15. April 1452 in Anchiano bei Vinci; † 2. Mai 1519 auf Schloss Clos Lucé, Amboise; eigentlich Leonardo di ser Piero, toskanisch auch Lionardo) war ein italienischer Maler, Bildhauer, Architekt, Anatom, Mechaniker, Ingenieur und Naturphilosoph. Er gilt als einer der berühmtesten Universalgelehrten aller Zeiten.Sein Namenszusatz da Vinci ist kein Familien-, sondern ein Herkunftsname und bedeutet „aus Vinci“. Der Geburtsort Vinci ist ein Kastell bzw. befestigtes Hügeldorf und liegt in der Nähe der Stadt Empoli (ca. 30 km westlich von Florenz) in der heutigen Provinz Florenz, Region Toskana."],
@@ -129,17 +132,18 @@
             "tr" : ["Leonardo di ser Piero da Vinci (Ses bağlantısına git telaffuz ) (15 Nisan 1452 - 2 Mayıs 1519), Rönesans döneminde yaşamış İtalyan hezârfen. Döneminin önemli bir düşünürü, mimarı, mühendisi, mucidi, matematikçisi, anatomisti, müzisyeni, heykeltıraşı, botanisti, jeoloğu, kartografı, yazarı ve ressamıdır. En tanınmış yapıtları Mona Lisa (1503-1507) ve Son Akşam Yemeği'dir (1495-1497). Rönesans sanatını doruğuna ulaştırmış, yalnız sanat yapısına değil, çeşitli alanlardaki araştırmaları ve buluşlarıyla da tanınan, dünyanın gelmiş geçmiş en büyük sanatçılarından ve dehalarından biri kabul edilir. 2. milenyumun adamı seçilmiştir."],
             "nl" : ["Leonardo da Vinci (Vinci, 15 april 1452 - Amboise, 2 mei 1519) was een architect, uitvinder, ingenieur, filosoof, natuurkundige, scheikundige, anatomist, beeldhouwer, schrijver, schilder en componist uit de Florentijnse Republiek, tijdens de renaissance. Hij wordt gezien als het schoolvoorbeeld van het renaissance-ideaal van de homo universalis en als genie."]
     },
-    "professionOrOccupation": [
-        "mathematician", "engineering", "http://data.europeana.eu/concept/base/178"
-    ],
+    "professionOrOccupation": {
+        "en" : ["mathematician", "engineering"], 
+        "" : ["http://data.europeana.eu/concept/base/178"]
+    },
     "hasMet": [
         "Salai", "http://data.europeana.eu/agent/base/58185"
     ],
     "isRelatedTo": [
-        "florentine school", "http://data.europeana.eu/agent/base/9623"
+        "florentine school"
     ],
     "wasPresentAt": [
-        "Sforza Castle", " http://data.europeana.eu/place/base/143289"
+        "Sforza Castle", "http://data.europeana.eu/place/base/143289"
     ],
     "identifier": [
         "24604287"

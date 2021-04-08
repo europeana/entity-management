@@ -2,7 +2,6 @@
 <metis:results xmlns:dcterms="http://purl.org/dc/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:edm="http://www.europeana.eu/schemas/edm/" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema" xmlns:cc="http://creativecommons.org/ns" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdaGr2="http://rdvocab.info/ElementsGr2/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:wgs84_pos="http://www.w3.org/2003/01/geo/wgs84_pos#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:metis="http://www.europeana.eu/schemas/metis">
 <metis:result>
 <edm:Place rdf:about="http://data.europeana.eu/place/base/85">
-  <skos:prefLabel>Republic of France</skos:prefLabel>
   <skos:prefLabel xml:lang="hi">फ़्राँस</skos:prefLabel>
   <skos:prefLabel xml:lang="ps">فرانسه</skos:prefLabel>
   <skos:prefLabel xml:lang="pt">França</skos:prefLabel>
@@ -137,9 +136,6 @@
   <skos:prefLabel xml:lang="ha">Faransa</skos:prefLabel>
   <skos:prefLabel xml:lang="pl">Francja</skos:prefLabel>
   <skos:prefLabel xml:lang="he">צרפת</skos:prefLabel>
-  <skos:altLabel>FR</skos:altLabel>
-  <skos:altLabel>France</skos:altLabel>
-  <skos:altLabel>Republic of France</skos:altLabel>
   <skos:altLabel xml:lang="hi">फ़्रांस</skos:altLabel>
   <skos:altLabel xml:lang="hi">फ्रांस</skos:altLabel>
   <skos:altLabel xml:lang="mn">Франц улс</skos:altLabel>
