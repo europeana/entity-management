@@ -183,7 +183,8 @@ public class EMController extends BaseRest {
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 	    HttpServletRequest request) throws EuropeanaApiException {
-    	
+	
+	logger.debug("Retrieve entity with content negotiation:{}/{}, with accept header {}", type, identifier, acceptHeader);
 	if (acceptHeader.contains(HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML)) {
 	    //if rdf/XML is explicitly requested
 	    return createResponse(profile, type, identifier, FormatTypes.xml, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML);
@@ -216,6 +217,8 @@ public class EMController extends BaseRest {
 		public ResponseEntity<String> registerEntity(
 				@RequestBody EntityPreview entityCreationRequest)
 				throws Exception {
+			logger.trace("Register new entity:{}", entityCreationRequest.getId());
+	
 			// check if id is already being used, if so return a 301
 			Optional<EntityRecord> existingEntity = entityRecordService
 					.findMatchingCoreference(entityCreationRequest.getId());
@@ -250,6 +253,7 @@ public class EMController extends BaseRest {
 							metisResponse);
 
 			launchUpdateTask(savedEntityRecord.getEntityId(), true);
+			logger.debug("Created Entity record with id:{}", savedEntityRecord.getEntityId());
 			return ResponseEntity.accepted().body(jsonLdSerializer.serialize(savedEntityRecord,
 					EntityProfile.internal));
 		}
@@ -294,7 +298,8 @@ public class EMController extends BaseRest {
 	    headers.add(HttpHeaders.CONTENT_TYPE, contentType);
 
 	String body = serialize(entityRecord, outFormat, profile);
-
+	logger.debug("Entity retrieved :{}, using {} format", entityRecord.getEntityId(), outFormat);
+	
 			return new ResponseEntity<>(body, headers, HttpStatus.OK);
   }
 

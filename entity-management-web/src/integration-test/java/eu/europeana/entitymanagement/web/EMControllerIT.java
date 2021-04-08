@@ -340,7 +340,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
         
         resultActions.andExpect(status().isOk())
         	.andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_XML));
- //TODO: enable when the XML Serialiaztion is fixed
+ //TODO: enable when the XML Serialization is fixed
 //                .andExpect(xpath("//Concept/id", namespaces).string(entityId))
 //                .andExpect(xpath("//Concept/type", namespaces).string(EntityTypes.Concept.name()));
 
