@@ -29,6 +29,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -54,6 +56,8 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
+
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -61,6 +65,8 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import javax.servlet.ServletContext;
 import okhttp3.mockwebserver.MockResponse;
+
+import org.assertj.core.util.Maps;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -80,6 +86,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -245,14 +252,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
     @Test
     public void updateConceptShouldBeSuccessful() throws Exception {
-        // set mock Metis response
-        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(CONCEPT_XML)));
-
-    	MvcResult resultRegisterEntity = mockMvc.perform(post(BASE_SERVICE_URL)
-                .content(loadFile(CONCEPT_REGISTER_JSON))
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isAccepted())
-                .andReturn();
+        MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
 
         // matches the id in the JSON file (also used to remove the queued Metis request)
         assertMetisRequest("http://www.wikidata.org/entity/Q152095");
@@ -284,11 +284,25 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
     }
 
+    MvcResult createTestEntityRecord(String europeanaMetadataFile, String metisResponseFile)
+	    throws IOException, Exception {
+	// set mock Metis response
+        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(metisResponseFile)));
+
+    	MvcResult resultRegisterEntity = mockMvc.perform(post(BASE_SERVICE_URL)
+                .content(loadFile(europeanaMetadataFile))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isAccepted())
+                .andReturn();
+	return resultRegisterEntity;
+    }
+
 
     @Test
     void retrieveConceptExternalShouldBeSuccessful() throws Exception {
         // read the test data for the Concept entity from the file
-        ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_JSON), ConceptImpl.class);
+	//TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
+	ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_JSON), ConceptImpl.class);
         EntityRecord entityRecord = new EntityRecordImpl();
         entityRecord.setEntity(concept);
         entityRecord.setEntityId(concept.getEntityId());
@@ -306,9 +320,61 @@ public class EMControllerIT extends AbstractIntegrationTest {
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, concept);
     }
 
+    
+    @SuppressWarnings("unused")
+    @Test
+    void retrieveWithContentNegotiationInMozillaShouldBeSuccessful() throws Exception {
+        // read the test data for the Concept entity from the file
+	MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
+	final ObjectNode registeredEntityNode = new ObjectMapper().readValue(resultRegisterEntity.getResponse().getContentAsString(StandardCharsets.UTF_8), ObjectNode.class);
+	String entityId = registeredEntityNode.get("id").asText();
+	String defaultMozillaAcceptHeader = "ext/html,application/xhtml+xml,application/xml;q=0.9,*/*";
+	String requestPath = getEntityRequestPath(entityId);
+	logger.debug("Retrieving entity record /{} with accept header: ", requestPath, defaultMozillaAcceptHeader);
+	ResultActions resultActions = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath)
+        		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                .accept(defaultMozillaAcceptHeader));
+        
+        Map<String, String> namespaces = Maps.newHashMap("skos", "http://www.w3.org/2004/02/skos/core#");
+        namespaces.put("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+        
+        logger.debug("Retrieve entity resonse: {}", resultActions.andReturn().getResponse().getContentAsString());
+        resultActions.andExpect(status().isOk())
+        	.andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_XML));
+ //TODO: enable when the XML Serialization is fixed
+//                .andExpect(xpath("//Concept/id", namespaces).string(entityId))
+//                .andExpect(xpath("//Concept/type", namespaces).string(EntityTypes.Concept.name()));
+
+    }
+    
+    @SuppressWarnings("unused")
+    @Test
+    void retrieveWithContentNegotiationShouldBeSuccessful() throws Exception {
+        // read the test data for the Concept entity from the file
+	MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
+	String response = resultRegisterEntity.getResponse().getContentAsString();
+	//TODO read the id from response, for the time being we can assume the id is 1
+	final ObjectNode registeredEntityNode = new ObjectMapper().readValue(resultRegisterEntity.getResponse().getContentAsString(StandardCharsets.UTF_8), ObjectNode.class);
+	String entityId = registeredEntityNode.get("id").asText();
+	String anyFormat = "*/*";
+	String requestPath = getEntityRequestPath(entityId);
+        ResultActions resultActions = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath)
+        		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                .accept(anyFormat));
+        
+        Map<String, String> namespaces = Maps.newHashMap("skos", "http://www.w3.org/2004/02/skos/core#");
+        namespaces.put("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+        
+        resultActions.andExpect(status().isOk())
+        	.andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+        	.andExpect(jsonPath("$.id", is(entityId)))
+                .andExpect(jsonPath("$.type", is(EntityTypes.Concept.name())));
+    }
+    
     @Test
     void retrieveAgentExternalShouldBeSuccessful() throws Exception {
-        // read the test data for the Agent entity from the file
+        //TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
+	// read the test data for the Agent entity from the file
         AgentImpl agent = objectMapper.readValue(loadFile(AGENT_JSON), AgentImpl.class);
         EntityRecord entityRecord = new EntityRecordImpl();
         entityRecord.setEntity(agent);
@@ -329,7 +395,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
     @Test
     void retrieveOrganizationExternalShouldBeSuccessful() throws Exception {
-        // read the test data for the Organization entity from the file
+	//TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
+	// read the test data for the Organization entity from the file
         OrganizationImpl organization = objectMapper.readValue(loadFile(ORGANIZATION_JSON), OrganizationImpl.class);
         EntityRecord entityRecord =  new EntityRecordImpl();
         entityRecord.setEntity(organization);
@@ -350,7 +417,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
     @Test
     void retrievePlaceExternalShouldBeSuccessful() throws Exception {
-        // read the test data for the Place entity from the file
+	//TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
+	// read the test data for the Place entity from the file
         PlaceImpl place = objectMapper.readValue(loadFile(PLACE_JSON), PlaceImpl.class);
         EntityRecord entityRecord =  new EntityRecordImpl();
         entityRecord.setEntity(place);
@@ -371,7 +439,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
     @Test
     void retrieveTimespanExternalShouldBeSuccessful() throws Exception {
-        // read the test data for the Timespan entity from the file
+	//TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
+	// read the test data for the Timespan entity from the file
         TimespanImpl timespan = objectMapper.readValue(loadFile(TIMESPAN_JSON), TimespanImpl.class);
         EntityRecord entityRecord =  new EntityRecordImpl();
         entityRecord.setEntity(timespan);
@@ -393,7 +462,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
     @Test
     void retrieveEntityInternalShouldBeSuccessful() throws Exception {
 
-    	// read the test data for the entity from the file
+	//TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
+	// read the test data for the entity from the file
         EntityPreview entityPreview = objectMapper.readValue(loadFile(CONCEPT_REGISTER_JSON), EntityPreview.class);
 
     	ResultActions registeredEntityResults = registerConceptShouldBeSuccessful();

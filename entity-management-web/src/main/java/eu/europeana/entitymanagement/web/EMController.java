@@ -1,5 +1,27 @@
 package eu.europeana.entitymanagement.web;
 
+import java.util.Date;
+import java.util.Optional;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
+
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.api.commons.web.exception.HttpException;
@@ -19,25 +41,6 @@ import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.web.service.MetisDereferenceService;
 import io.swagger.annotations.ApiOperation;
-import java.util.Date;
-import java.util.Optional;
-import javax.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.UriComponentsBuilder;
 
 
 /**
@@ -169,6 +172,31 @@ public class EMController extends BaseRest {
 	return createResponse(profile, type, identifier, FormatTypes.jsonld, null);
 
     }
+    
+    @ApiOperation(value = "Retrieve a known entity", nickname = "getEntity", response = java.lang.Void.class)
+    @RequestMapping(value = { "/{type}/base/{identifier}","/{type}/{identifier}" }, 
+    method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
+    public ResponseEntity<String> getEntity(
+    	@RequestHeader(value = HttpHeaders.ACCEPT, defaultValue = "application/json") String acceptHeader,
+	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
+	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
+	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
+	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
+	    HttpServletRequest request) throws EuropeanaApiException {
+	
+	logger.debug("Retrieve entity with content negotiation:{}/{}, with accept header {}", type, identifier, acceptHeader);
+	if (acceptHeader.contains(HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML)) {
+	    //if rdf/XML is explicitly requested
+	    return createResponse(profile, type, identifier, FormatTypes.xml, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML);
+	}
+	if (acceptHeader.contains(MediaType.APPLICATION_XML_VALUE)) {
+	    //if XML is explicitly requested
+	    return createResponse(profile, type, identifier, FormatTypes.xml, MediaType.APPLICATION_XML_VALUE);
+	} else {	
+	    //otherwise return default
+	    return createResponse(profile, type, identifier, FormatTypes.jsonld, null);
+	}
+    }
 
     @ApiOperation(value = "Retrieve a known entity", nickname = "getEntityXml", response = java.lang.Void.class)
     @RequestMapping(value = { "/{type}/base/{identifier}.xml",
@@ -189,6 +217,8 @@ public class EMController extends BaseRest {
 		public ResponseEntity<String> registerEntity(
 				@RequestBody EntityPreview entityCreationRequest)
 				throws Exception {
+			logger.trace("Register new entity:{}", entityCreationRequest.getId());
+	
 			// check if id is already being used, if so return a 301
 			Optional<EntityRecord> existingEntity = entityRecordService
 					.findMatchingCoreference(entityCreationRequest.getId());
@@ -223,6 +253,7 @@ public class EMController extends BaseRest {
 							metisResponse);
 
 			launchUpdateTask(savedEntityRecord.getEntityId(), true);
+			logger.debug("Created Entity record with id:{}", savedEntityRecord.getEntityId());
 			return ResponseEntity.accepted().body(jsonLdSerializer.serialize(savedEntityRecord,
 					EntityProfile.internal));
 		}
@@ -267,7 +298,8 @@ public class EMController extends BaseRest {
 	    headers.add(HttpHeaders.CONTENT_TYPE, contentType);
 
 	String body = serialize(entityRecord, outFormat, profile);
-
+	logger.debug("Entity retrieved :{}, using {} format", entityRecord.getEntityId(), outFormat);
+	
 			return new ResponseEntity<>(body, headers, HttpStatus.OK);
   }
 
