@@ -1,6 +1,5 @@
 package eu.europeana.entitymanagement.serialization;
 
-import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -101,7 +100,6 @@ public class EntityXmlSerializer {
 		xmlModule.setDefaultUseWrapper(true);
 		ObjectMapper objectMapper = new XmlMapper(xmlModule);
 		objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-		objectMapper.addMixIn(BaseEntity.class, EntityContextIgnoreMixin.class);
 
 		String output = "";
 		try {
@@ -109,6 +107,31 @@ public class EntityXmlSerializer {
 		} catch (JsonProcessingException e) {
 		    throw new EntityManagementRuntimeException("Unexpected exception occured when serializing entity to external format!",e);
 		}
+//		
+//		Aggregation tmpAggregation = entityRecord.getEntity().getIsAggregatedBy();
+//		List<EntityProxy> tmpProxies = entityRecord.getProxies();
+//		try {
+////			entityRecord.setIsAggregatedBy(null);
+////			entityRecord.setProxies(null);
+//			
+//    		StringBuilder strBuilder = new StringBuilder();
+//		    strBuilder.append(objectMapper.writeValueAsString(entityRecord.getEntity()));    		
+//
+//		    //add referenced web resources
+//		    WebResource webResource = entityRecord.getEntity().getReferencedWebResource();
+//		    if (webResource!=null)
+//		    {
+//		    	strBuilder.append(objectMapper.writeValueAsString(webResource));
+//		    }
+//
+//		    strBuilder.append(XML_END_TAG);
+//		    output = strBuilder.toString();
+//		} catch (JsonProcessingException e) {
+//		    throw new EntityManagementRuntimeException("Unexpected exception occured when serializing entity to external format!",e);
+//		}
+//		    
+////		entityRecord.setIsAggregatedBy(tmpAggregation);
+//		entityRecord.setProxies(tmpProxies);
 		return output;
 	}
 	
@@ -125,7 +148,6 @@ public class EntityXmlSerializer {
 		xmlModule.setDefaultUseWrapper(true);
 		ObjectMapper objectMapper = new XmlMapper(xmlModule);
 		objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-		objectMapper.addMixIn(BaseEntity.class, EntityContextIgnoreMixin.class);
 
 		String output = "";
 		

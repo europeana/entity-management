@@ -17,6 +17,10 @@ import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JacksonXmlRootElement(localName= XmlFields.XML_SKOS_CONCEPT)
+@JsonPropertyOrder({WebEntityFields.ID, WebEntityFields.DEPICTION, WebEntityFields.PREF_LABEL, WebEntityFields.ALT_LABEL, WebEntityFields.HIDDEN_LABEL,
+	WebEntityFields.NOTE, WebEntityFields.NOTATION, WebEntityFields.BROADER, WebEntityFields.NARROWER, WebEntityFields.RELATED,
+	WebEntityFields.BROAD_MATCH, WebEntityFields.NARROW_MATCH, WebEntityFields.RELATED_MATCH, WebEntityFields.CLOSE_MATCH,
+	WebEntityFields.EXACT_MATCH, WebEntityFields.IN_SCHEME, WebEntityFields.SAME_AS, WebEntityFields.IS_AGGREGATED_BY})
 public class ConceptImpl extends BaseEntity implements Concept {
 
 	public ConceptImpl() {

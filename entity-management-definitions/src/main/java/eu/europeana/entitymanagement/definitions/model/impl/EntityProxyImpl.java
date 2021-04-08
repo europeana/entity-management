@@ -3,7 +3,6 @@ package eu.europeana.entitymanagement.definitions.model.impl;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PROXY;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
@@ -43,12 +42,13 @@ public class EntityProxyImpl implements EntityProxy {
 	this.proxyId = proxyId;
     }
 
-    @JsonIgnore
+    @JsonGetter
     @JacksonXmlProperty
     public Entity getEntity() {
 	return entity;
     }
 
+    @JsonSetter
     public void setEntity(Entity entity) {
 	this.entity = entity;
     }

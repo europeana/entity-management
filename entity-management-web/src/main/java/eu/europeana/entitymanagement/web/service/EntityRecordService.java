@@ -1,12 +1,13 @@
-package eu.europeana.entitymanagement.web.service.impl;
+package eu.europeana.entitymanagement.web.service;
 
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.EUROPEANA_URL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.RIGHTS_CREATIVE_COMMONS;
-import static eu.europeana.entitymanagement.web.service.impl.EntityRecordUtils.getDatasourceAggregationId;
-import static eu.europeana.entitymanagement.web.service.impl.EntityRecordUtils.getEuropeanaAggregationId;
-import static eu.europeana.entitymanagement.web.service.impl.EntityRecordUtils.getEuropeanaProxyId;
-import static eu.europeana.entitymanagement.web.service.impl.EntityRecordUtils.getIsAggregatedById;
+import static eu.europeana.entitymanagement.web.EntityRecordUtils.getDatasourceAggregationId;
+import static eu.europeana.entitymanagement.web.EntityRecordUtils.getEuropeanaAggregationId;
+import static eu.europeana.entitymanagement.web.EntityRecordUtils.getEuropeanaProxyId;
+import static eu.europeana.entitymanagement.web.EntityRecordUtils.getIsAggregatedById;
 
+import eu.europeana.entitymanagement.web.EntityRecordUtils;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -620,7 +621,6 @@ public class EntityRecordService {
 	europeanaAggr.setId(getEuropeanaAggregationId(entityId));
 	europeanaAggr.setRights(RIGHTS_CREATIVE_COMMONS);
 	europeanaAggr.setCreated(timestamp);
-	europeanaAggr.setRecordCount(1);
 	europeanaAggr.setModified(timestamp);
 	europeanaAggr.setSource(EUROPEANA_URL);
 
@@ -643,7 +643,6 @@ public class EntityRecordService {
 	datasourceAggr.setCreated(timestamp);
 	datasourceAggr.setModified(timestamp);
 	datasourceAggr.setRights(externalDatasource.getRights());
-	datasourceAggr.setRecordCount(1);
 	datasourceAggr.setSource(externalDatasource.getUrl());
 
 	EntityProxy datasourceProxy = new EntityProxyImpl();

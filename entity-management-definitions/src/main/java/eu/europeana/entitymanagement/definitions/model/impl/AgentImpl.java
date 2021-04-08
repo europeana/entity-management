@@ -20,6 +20,13 @@ import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JacksonXmlRootElement(localName = XmlFields.XML_EDM_AGENT)
+@JsonPropertyOrder({WebEntityFields.DEPICTION, WebEntityFields.PREF_LABEL, WebEntityFields.ALT_LABEL, WebEntityFields.HIDDEN_LABEL,
+	WebEntityFields.NAME, WebEntityFields.BEGIN, WebEntityFields.DATE_OF_BIRTH, WebEntityFields.DATE_OF_ESTABLISHMENT,
+	WebEntityFields.END, WebEntityFields.DATE_OF_DEATH, WebEntityFields.DATE_OF_TERMINATION, WebEntityFields.DATE,
+	WebEntityFields.PLACE_OF_BIRTH, WebEntityFields.PLACE_OF_DEATH, WebEntityFields.GENDER,
+	WebEntityFields.PROFESSION_OR_OCCUPATION, WebEntityFields.BIOGRAPHICAL_INFORMATION, WebEntityFields.NOTE,
+	WebEntityFields.HAS_PART, WebEntityFields.IS_PART_OF, WebEntityFields.HAS_MET, WebEntityFields.IS_RELATED_TO,
+	WebEntityFields.IDENTIFIER, WebEntityFields.SAME_AS, WebEntityFields.IS_AGGREGATED_BY})
 public class AgentImpl extends BaseEntity implements Agent, eu.europeana.corelib.definitions.edm.entity.Agent {
 
     public AgentImpl() {

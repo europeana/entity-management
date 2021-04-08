@@ -16,9 +16,8 @@ import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
-import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
-import eu.europeana.entitymanagement.web.service.impl.EntityRecordUtils;
-import eu.europeana.entitymanagement.web.service.impl.MetisDereferenceService;
+import eu.europeana.entitymanagement.web.service.EntityRecordService;
+import eu.europeana.entitymanagement.web.service.MetisDereferenceService;
 import io.swagger.annotations.ApiOperation;
 import java.util.Date;
 import java.util.Optional;
@@ -187,13 +186,13 @@ public class EMController extends BaseRest {
 
     @ApiOperation(value = "Register a new entity", nickname = "registerEntity", response = java.lang.Void.class)
     @PostMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
-		public ResponseEntity<String> registerEntity(
+		public ResponseEntity<EntityRecord> registerEntity(
 				@RequestBody EntityPreview entityCreationRequest)
 				throws Exception {
 			// check if id is already being used, if so return a 301
 			Optional<EntityRecord> existingEntity = entityRecordService
 					.findMatchingCoreference(entityCreationRequest.getId());
-			ResponseEntity<String> response = checkExistingEntity(existingEntity,
+			ResponseEntity<EntityRecord> response = checkExistingEntity(existingEntity,
 					entityCreationRequest.getId());
 
 			if (response != null) {
@@ -224,8 +223,7 @@ public class EMController extends BaseRest {
 							metisResponse);
 
 			launchUpdateTask(savedEntityRecord.getEntityId(), true);
-			return ResponseEntity.accepted().body(jsonLdSerializer.serialize(savedEntityRecord,
-					EntityProfile.internal));
+			return ResponseEntity.accepted().body(savedEntityRecord);
 		}
 
 
@@ -297,7 +295,7 @@ public class EMController extends BaseRest {
 		return ResponseEntity.accepted().body(jsonLdSerializer.serialize(entityRecord, profile));
 	}
 
-	private ResponseEntity<String> checkExistingEntity(Optional<EntityRecord> existingEntity,
+	private ResponseEntity<EntityRecord> checkExistingEntity(Optional<EntityRecord> existingEntity,
 			String entityCreationId)
 			throws EntityRemovedException {
 
