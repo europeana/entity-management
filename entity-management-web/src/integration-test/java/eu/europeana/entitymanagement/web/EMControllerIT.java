@@ -323,21 +323,22 @@ public class EMControllerIT extends AbstractIntegrationTest {
     
     @SuppressWarnings("unused")
     @Test
-    void retrieveWithContentNegociationInMozillaShouldBeSuccessful() throws Exception {
+    void retrieveWithContentNegotiationInMozillaShouldBeSuccessful() throws Exception {
         // read the test data for the Concept entity from the file
 	MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
-//	String response = resultRegisterEntity.getResponse().getContentAsString();
-	//TODO read the id from response, for the time being we can assume the id is 1
-	String entityId = "http://data.europeana.eu/concept/1";
+	final ObjectNode registeredEntityNode = new ObjectMapper().readValue(resultRegisterEntity.getResponse().getContentAsString(StandardCharsets.UTF_8), ObjectNode.class);
+	String entityId = registeredEntityNode.get("id").asText();
 	String defaultMozillaAcceptHeader = "ext/html,application/xhtml+xml,application/xml;q=0.9,*/*";
 	String requestPath = getEntityRequestPath(entityId);
-        ResultActions resultActions = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath)
+	logger.debug("Retrieving entity record /{} with accept header: ", requestPath, defaultMozillaAcceptHeader);
+	ResultActions resultActions = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath)
         		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
                 .accept(defaultMozillaAcceptHeader));
         
         Map<String, String> namespaces = Maps.newHashMap("skos", "http://www.w3.org/2004/02/skos/core#");
         namespaces.put("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
         
+        logger.debug("Retrieve entity resonse: {}", resultActions.andReturn().getResponse().getContentAsString());
         resultActions.andExpect(status().isOk())
         	.andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_XML));
  //TODO: enable when the XML Serialization is fixed
@@ -348,17 +349,18 @@ public class EMControllerIT extends AbstractIntegrationTest {
     
     @SuppressWarnings("unused")
     @Test
-    void retrieveWithContentNegociationShouldBeSuccessful() throws Exception {
+    void retrieveWithContentNegotiationShouldBeSuccessful() throws Exception {
         // read the test data for the Concept entity from the file
 	MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
-//	String response = resultRegisterEntity.getResponse().getContentAsString();
+	String response = resultRegisterEntity.getResponse().getContentAsString();
 	//TODO read the id from response, for the time being we can assume the id is 1
-	String entityId = "http://data.europeana.eu/concept/1";
-	String defaultMozillaAcceptHeader = "*/*";
+	final ObjectNode registeredEntityNode = new ObjectMapper().readValue(resultRegisterEntity.getResponse().getContentAsString(StandardCharsets.UTF_8), ObjectNode.class);
+	String entityId = registeredEntityNode.get("id").asText();
+	String anyFormat = "*/*";
 	String requestPath = getEntityRequestPath(entityId);
         ResultActions resultActions = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath)
         		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
-                .accept(defaultMozillaAcceptHeader));
+                .accept(anyFormat));
         
         Map<String, String> namespaces = Maps.newHashMap("skos", "http://www.w3.org/2004/02/skos/core#");
         namespaces.put("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
