@@ -177,23 +177,24 @@ public class EMController extends BaseRest {
     @RequestMapping(value = { "/{type}/base/{identifier}","/{type}/{identifier}" }, 
     method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
     public ResponseEntity<String> getEntity(
-    	@RequestHeader(value = "Accept-header", defaultValue = "application/json") String acceptHeader,
+    	@RequestHeader(value = HttpHeaders.ACCEPT, defaultValue = "application/json") String acceptHeader,
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
 	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 	    HttpServletRequest request) throws EuropeanaApiException {
     	
-    	if (acceptHeader.contains(MediaType.APPLICATION_JSON_VALUE)) {
-    		return createResponse(profile, type, identifier, FormatTypes.jsonld, null);
-    	}
-    	else if (acceptHeader.contains(MediaType.APPLICATION_XML_VALUE)) {
-    		return createResponse(profile, type, identifier, FormatTypes.xml, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML);
-    	}
-    	else {    		
-		return ResponseEntity.badRequest().header("info:", "Please specify the Accept-header value (application/json or application/xml)").build();
-    	}
-
+	if (acceptHeader.contains(HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML)) {
+	    //if rdf/XML is explicitly requested
+	    return createResponse(profile, type, identifier, FormatTypes.xml, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML);
+	}
+	if (acceptHeader.contains(MediaType.APPLICATION_XML_VALUE)) {
+	    //if XML is explicitly requested
+	    return createResponse(profile, type, identifier, FormatTypes.xml, MediaType.APPLICATION_XML_VALUE);
+	} else {	
+	    //otherwise return default
+	    return createResponse(profile, type, identifier, FormatTypes.jsonld, null);
+	}
     }
 
     @ApiOperation(value = "Retrieve a known entity", nickname = "getEntityXml", response = java.lang.Void.class)
