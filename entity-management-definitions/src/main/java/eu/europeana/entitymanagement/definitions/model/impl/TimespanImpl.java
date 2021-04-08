@@ -1,5 +1,7 @@
 package eu.europeana.entitymanagement.definitions.model.impl;
 
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
+
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
@@ -16,9 +18,8 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({WebEntityFields.DEPICTION, WebEntityFields.PREF_LABEL, WebEntityFields.ALT_LABEL, WebEntityFields.HIDDEN_LABEL,
-	WebEntityFields.BEGIN, WebEntityFields.END, WebEntityFields.IS_PART_OF, WebEntityFields.SAME_AS,
-	WebEntityFields.WEB_RESOURCE, WebEntityFields.IS_NEXT_IN_SEQUENCE})
+@JsonPropertyOrder({CONTEXT, ID, TYPE, DEPICTION, IS_SHOWN_BY, PREF_LABEL, ALT_LABEL, BEGIN, END, NOTE, HAS_PART,
+IS_PART_OF, IS_NEXT_IN_SEQUENCE, SAME_AS})
 public class TimespanImpl extends BaseEntity implements Timespan, eu.europeana.corelib.definitions.edm.entity.Timespan {
 
 	public TimespanImpl() {
@@ -30,37 +31,37 @@ public class TimespanImpl extends BaseEntity implements Timespan, eu.europeana.c
 	private String begin;
 	private String end;
 
-    @JsonGetter(WebEntityFields.IS_NEXT_IN_SEQUENCE)
+    @JsonGetter(IS_NEXT_IN_SEQUENCE)
     @JacksonXmlProperty(localName = XmlFields.XML_EDM_IS_NEXT_IN_SEQUENCE)
     public String[] getIsNextInSequence() {
 	return isNextInSequence;
     }
 
-    @JsonSetter(WebEntityFields.IS_NEXT_IN_SEQUENCE)
+    @JsonSetter(IS_NEXT_IN_SEQUENCE)
     public void setIsNextInSequence(String[] isNextInSequence) {
 	this.isNextInSequence = isNextInSequence;
     }
 
-    @JsonSetter(WebEntityFields.BEGIN)
+    @JsonSetter(BEGIN)
     public void setBeginString(String begin) {
         this.begin = begin;
     }
 
-    @JsonSetter(WebEntityFields.END)
+    @JsonSetter(END)
     public void setEndString(String end) {
         this.end = end;
     }
 
     
     @Override
-    @JsonGetter(WebEntityFields.BEGIN)
+    @JsonGetter(BEGIN)
     @JacksonXmlProperty(localName = XmlFields.XML_EDM_BEGIN)
     public String getBeginString() {
 	return begin;
     }
 
     @Override
-    @JsonGetter(WebEntityFields.END)
+    @JsonGetter(END)
     @JacksonXmlProperty(localName = XmlFields.XML_EDM_END)
     public String getEndString() {
 	return end;

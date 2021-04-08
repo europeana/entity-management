@@ -621,6 +621,7 @@ public class EntityRecordService {
 	europeanaAggr.setId(getEuropeanaAggregationId(entityId));
 	europeanaAggr.setRights(RIGHTS_CREATIVE_COMMONS);
 	europeanaAggr.setCreated(timestamp);
+	europeanaAggr.setRecordCount(1);
 	europeanaAggr.setModified(timestamp);
 	europeanaAggr.setSource(EUROPEANA_URL);
 
@@ -643,6 +644,7 @@ public class EntityRecordService {
 	datasourceAggr.setCreated(timestamp);
 	datasourceAggr.setModified(timestamp);
 	datasourceAggr.setRights(externalDatasource.getRights());
+	datasourceAggr.setRecordCount(1);
 	datasourceAggr.setSource(externalDatasource.getUrl());
 
 	EntityProxy datasourceProxy = new EntityProxyImpl();

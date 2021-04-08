@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.definitions.model;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
