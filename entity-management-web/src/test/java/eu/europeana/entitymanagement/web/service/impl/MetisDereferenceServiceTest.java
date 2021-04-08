@@ -3,6 +3,7 @@ package eu.europeana.entitymanagement.web.service.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import eu.europeana.entitymanagement.web.service.MetisDereferenceService;
 import javax.annotation.Resource;
 
 import org.junit.jupiter.api.Disabled;

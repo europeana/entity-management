@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.web.service.impl;
+package eu.europeana.entitymanagement.web.service;
 
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;

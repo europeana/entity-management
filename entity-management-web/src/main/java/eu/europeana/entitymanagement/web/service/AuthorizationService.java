@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.web.service.authorization;
+package eu.europeana.entitymanagement.web.service;
 
 import javax.annotation.Resource;
 
@@ -14,7 +14,7 @@ import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration
 import eu.europeana.entitymanagement.config.AppConfig;
 
 @Component(AppConfig.BEAN_AUTHORIZATION_SERVICE)
-public class AuthorizationServiceImpl extends BaseAuthorizationService implements AuthorizationService {
+public class AuthorizationService extends BaseAuthorizationService implements eu.europeana.api.commons.service.authorization.AuthorizationService {
 
     protected final Logger logger = LogManager.getLogger(getClass());
 
@@ -23,7 +23,7 @@ public class AuthorizationServiceImpl extends BaseAuthorizationService implement
     @Resource(name="clientDetailsService")
     EuropeanaClientDetailsService clientDetailsService;
 
-    public AuthorizationServiceImpl() {
+    public AuthorizationService() {
 
     }
 

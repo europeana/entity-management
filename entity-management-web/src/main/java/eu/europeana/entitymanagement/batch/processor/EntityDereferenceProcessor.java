@@ -2,7 +2,7 @@ package eu.europeana.entitymanagement.batch.processor;
 
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.web.service.impl.MetisDereferenceService;
+import eu.europeana.entitymanagement.web.service.MetisDereferenceService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.item.ItemProcessor;
