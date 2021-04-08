@@ -1,5 +1,9 @@
 package eu.europeana.entitymanagement.serialization;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
@@ -14,7 +18,6 @@ import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRunt
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 
 @Component(AppConfigConstants.BEAN_EM_JSONLD_SERIALIZER)
@@ -53,30 +56,6 @@ public class JsonLdSerializer {
     private String serializeExternal(EntityRecord record) throws EntityManagementRuntimeException {
 	try {
 	    return mapper.writeValueAsString(record.getEntity());
-//		Aggregation tmpAggregation=record.getIsAggregatedBy();
-//		List<EntityProxy> proxies=record.getProxies();
-//		record.setIsAggregatedBy(null);
-//		record.setProxies(null);
-//				
-//		StringBuilder builder = new StringBuilder();
-//		builder.append("{");
-//		builder.append("\"entityRecord\":");
-//		builder.append(mapper.writeValueAsString(record));    		
-//
-//	    //adding the referenced web resource
-//	    WebResource additionalElementsToSerialize = record.getEntity().getReferencedWebResource();
-//		if (additionalElementsToSerialize!=null)
-//		{
-//	    	builder.append(",");
-//	    	builder.append("\"webResource\":");
-//			builder.append(mapper.writeValueAsString(additionalElementsToSerialize));
-//		}
-//		builder.append("}");
-//	    
-//		record.setIsAggregatedBy(tmpAggregation);
-//		record.setProxies(proxies);
-//	    return builder.toString();
-	    
 	} catch (JsonProcessingException e) {
 	    throw new EntityManagementRuntimeException("Unexpected exception occured when serializing entity to external format!",e);
 	}
@@ -84,32 +63,32 @@ public class JsonLdSerializer {
 
     private String serializeInternal(EntityRecord record) throws EntityManagementRuntimeException {
 		try {
-			Entity tmpEntity = record.getEntity();
-			record.setEntity(null);
+			Entity recordEntity = record.getEntity();
+			List<EntityProxy> recordProxies = record.getProxies();
+			ObjectNode entityNode = mapper.valueToTree(recordEntity);
 
-			StringBuilder builder = new StringBuilder();
-			builder.append("{");
-			builder.append("\"entityRecord\":");
-			builder.append(mapper.writeValueAsString(record));
-			
-		    //adding the referenced web resources for the proxy entities
-			List<EntityProxy> entityRecordProxies = record.getProxies();		    
-		    for (EntityProxy proxy : entityRecordProxies) {
-		    	WebResource additionalElementsToSerialize = null;
-		    	if (proxy.getEntity()!=null) {
-		    		additionalElementsToSerialize = proxy.getEntity().getReferencedWebResource();
-		    	}
-			    if (additionalElementsToSerialize!=null)
-			    {
-			    	builder.append(",");
-			    	builder.append("\"webResource\":");
-			    	builder.append(mapper.writeValueAsString(additionalElementsToSerialize));
-			    }
-		    }
-		    builder.append("}");
-		    
-		    record.setEntity(tmpEntity);
-			return builder.toString();
+			ArrayNode proxyNode = mapper.createArrayNode();
+
+
+			for(EntityProxy proxy: recordProxies){
+				Entity proxyEntity = proxy.getEntity();
+				ObjectNode proxyEntityNode = mapper.valueToTree(proxyEntity);
+
+				// Entity @context shouldn't appear in proxy metadata
+				proxyEntityNode.remove(WebEntityFields.CONTEXT);
+				// Entity ID shouldn't overwrite proxyId
+				proxyEntityNode.remove(WebEntityFields.ID);
+
+				ObjectNode embeddedProxyNode = mapper.valueToTree(proxy);
+				JsonNode mergedNode = JsonUtils.mergeProxyAndEntity(mapper, embeddedProxyNode, proxyEntityNode);
+				proxyNode.add(mergedNode.deepCopy());
+			}
+
+			JsonNode combinedEntityAndProxies = JsonUtils
+					.combineNestedNode(mapper, entityNode, proxyNode, "proxies");
+
+			//TODO: clarify WebResource fields (not currently in spec)
+		return mapper.writeValueAsString(combinedEntityAndProxies);
 			
 		} catch (JsonProcessingException e) {
 		    throw new EntityManagementRuntimeException("Unexpected exception occured when serializing entity to external format!",e);

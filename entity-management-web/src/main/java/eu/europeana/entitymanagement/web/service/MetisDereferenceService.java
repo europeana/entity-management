@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.web.service.impl;
+package eu.europeana.entitymanagement.web.service;
 
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
@@ -31,6 +31,7 @@ public class MetisDereferenceService {
     private static final Logger logger = LogManager.getLogger(MetisDereferenceService.class);
 
     private Unmarshaller jaxbDeserializer;
+    private final Object deserializerLock = new Object();
 
 
 	private final WebClient metisWebClient;
@@ -49,7 +50,7 @@ public class MetisDereferenceService {
      * @throws EntityCreationException
      */
     public Entity dereferenceEntityById(String id) throws EuropeanaApiException {
-	logger.trace("De-referencing entity {} with Metis", id);
+	logger.debug("De-referencing entityId={} from Metis", id);
 
 	String metisResponseBody = metisWebClient.get()
 		.uri(uriBuilder -> uriBuilder.path(METIS_DEREF_PATH).queryParam("uri", id).build())
@@ -62,14 +63,19 @@ public class MetisDereferenceService {
 			response -> response.bodyToMono(String.class).map(EuropeanaApiException::new))
 		.bodyToMono(String.class).block();
 
-	logger.debug("Metis dereference response for entity {}: {} ", id, metisResponseBody);
+	logger.debug("Metis dereference response for entityId={} - {} ", id, metisResponseBody);
 	
 	EnrichmentResultList derefResult;
-	try {
-	    derefResult = (EnrichmentResultList) getDeserializer().unmarshal(new StringReader(metisResponseBody));
-	} catch (JAXBException | RuntimeException e) {
-	    throw new EuropeanaApiException(
-		    "Unexpected exception occurred when parsing metis dereference response for entity:  " + id, e);
+	// Prevent "FWK005 parse may not be called while parsing" error when this method is called by multiple threads
+	synchronized (deserializerLock) {
+		try {
+			derefResult = (EnrichmentResultList) getDeserializer()
+					.unmarshal(new StringReader(metisResponseBody));
+		} catch (JAXBException | RuntimeException e) {
+			throw new EuropeanaApiException(
+					"Unexpected exception occurred when parsing metis dereference response for entity:  "
+							+ id, e);
+		}
 	}
 
 	if (derefResult== null || derefResult.getEnrichmentBaseResultWrapperList().isEmpty()
