@@ -94,6 +94,7 @@ public class ValidEntityFieldsValidator implements ConstraintValidator<ValidEnti
 				//remove spaces from the keys in the Map fields 
 				else if (fieldType.isAssignableFrom(Map.class)) {
 					Map<Object,Object> oldFieldValue = (Map<Object,Object>)fieldValue;
+					if (oldFieldValue.size()<1) continue;
 					Map<Object,Object> newFieldValue = new HashMap<>();
 					boolean changedValues = false;
 					for (Map.Entry oldFieldValueElem : oldFieldValue.entrySet()) 

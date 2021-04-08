@@ -5,8 +5,18 @@ import org.springframework.http.HttpStatus;
 
 public class EntityRemovedException extends EuropeanaApiException {
 
-  public EntityRemovedException(String entityUri) {
-    super(String.format("Entity %s has been removed", entityUri));
+  public EntityRemovedException(String message) {
+    super(message);
+  }
+
+  @Override
+  public boolean doLog() {
+    return false;
+  }
+
+  @Override
+  public boolean doLogStacktrace() {
+    return false;
   }
 
   @Override

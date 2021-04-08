@@ -1,5 +1,7 @@
 package eu.europeana.entitymanagement.definitions.model.impl;
 
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
+
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
@@ -17,10 +19,8 @@ import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JacksonXmlRootElement(localName= XmlFields.XML_SKOS_CONCEPT)
-@JsonPropertyOrder({WebEntityFields.ID, WebEntityFields.DEPICTION, WebEntityFields.PREF_LABEL, WebEntityFields.ALT_LABEL, WebEntityFields.HIDDEN_LABEL,
-	WebEntityFields.NOTE, WebEntityFields.NOTATION, WebEntityFields.BROADER, WebEntityFields.NARROWER, WebEntityFields.RELATED,
-	WebEntityFields.BROAD_MATCH, WebEntityFields.NARROW_MATCH, WebEntityFields.RELATED_MATCH, WebEntityFields.CLOSE_MATCH,
-	WebEntityFields.EXACT_MATCH, WebEntityFields.IN_SCHEME, WebEntityFields.SAME_AS, WebEntityFields.IS_AGGREGATED_BY})
+@JsonPropertyOrder({CONTEXT, ID, TYPE, DEPICTION, IS_SHOWN_BY, PREF_LABEL, ALT_LABEL, HIDDEN_LABEL,NOTE,
+NOTATION, BROADER, NARROWER, RELATED, BROAD_MATCH, NARROW_MATCH, RELATED_MATCH,CLOSE_MATCH,EXACT_MATCH,IN_SCHEME})
 public class ConceptImpl extends BaseEntity implements Concept {
 
 	public ConceptImpl() {
@@ -39,74 +39,74 @@ public class ConceptImpl extends BaseEntity implements Concept {
 	private String[] inScheme;
 	private Map<String, List<String>> notation;
 
-	@JsonGetter(WebEntityFields.BROADER)
+	@JsonGetter(BROADER)
 	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_BROADER)
 	public String[] getBroader() {
 		return broader;
 	}
 
 	@Override
-	@JsonSetter(WebEntityFields.BROADER)
+	@JsonSetter(BROADER)
 	public void setBroader(String[] broader) {
 		this.broader = broader;
 	}
 
-	@JsonGetter(WebEntityFields.NARROWER)
+	@JsonGetter(NARROWER)
 	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_NARROWER)
 	public String[] getNarrower() {
 		return narrower;
 	}
 
 	@Override
-	@JsonSetter(WebEntityFields.NARROWER)
+	@JsonSetter(NARROWER)
 	public void setNarrower(String[] narrower) {
 		this.narrower = narrower;
 	}
 
-	@JsonGetter(WebEntityFields.RELATED)
+	@JsonGetter(RELATED)
 	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_RELATED)
 	public String[] getRelated() {
 		return related;
 	}
 
 	@Override
-	@JsonSetter(WebEntityFields.RELATED)
+	@JsonSetter(RELATED)
 	public void setRelated(String[] related) {
 		this.related = related;
 	}
 
-	@JsonGetter(WebEntityFields.BROAD_MATCH)
+	@JsonGetter(BROAD_MATCH)
 	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_BROAD_MATCH)
 	public String[] getBroadMatch() {
 		return broadMatch;
 	}
 
 	@Override
-	@JsonSetter(WebEntityFields.BROAD_MATCH)
+	@JsonSetter(BROAD_MATCH)
 	public void setBroadMatch(String[] broadMatch) {
 		this.broadMatch = broadMatch;
 	}
 
-	@JsonGetter(WebEntityFields.NARROW_MATCH)
+	@JsonGetter(NARROW_MATCH)
 	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_NARROW_MATCH)
 	public String[] getNarrowMatch() {
 		return narrowMatch;
 	}
 
 	@Override
-	@JsonSetter(WebEntityFields.NARROW_MATCH)
+	@JsonSetter(NARROW_MATCH)
 	public void setNarrowMatch(String[] narrowMatch) {
 		this.narrowMatch = narrowMatch;
 	}
 
-	@JsonGetter(WebEntityFields.EXACT_MATCH)
+	@JsonGetter(EXACT_MATCH)
 	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_EXACT_MATCH)
 	public String[] getExactMatch() {
 		return exactMatch;
 	}
 
 	@Override
-	@JsonSetter(WebEntityFields.EXACT_MATCH)
+	@JsonSetter(EXACT_MATCH)
 	public void setExactMatch(String[] exactMatch) {
 		this.exactMatch = exactMatch;
 	}
@@ -120,50 +120,50 @@ public class ConceptImpl extends BaseEntity implements Concept {
 		this.coref = coref;
 	}
 
-	@JsonGetter(WebEntityFields.RELATED_MATCH)
+	@JsonGetter(RELATED_MATCH)
 	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_RELATED_MATCH)
 	public String[] getRelatedMatch() {
 		return relatedMatch;
 	}
 
 	@Override
-	@JsonSetter(WebEntityFields.RELATED_MATCH)
+	@JsonSetter(RELATED_MATCH)
 	public void setRelatedMatch(String[] relatedMatch) {
 		this.relatedMatch = relatedMatch;
 	}
 
-	@JsonGetter(WebEntityFields.CLOSE_MATCH)
+	@JsonGetter(CLOSE_MATCH)
 	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_CLOSE_MATCH)
 	public String[] getCloseMatch() {
 		return closeMatch;
 	}
 
 	@Override
-	@JsonSetter(WebEntityFields.CLOSE_MATCH)
+	@JsonSetter(CLOSE_MATCH)
 	public void setCloseMatch(String[] closeMatch) {
 		this.closeMatch = closeMatch;
 	}
 
-	@JsonGetter(WebEntityFields.IN_SCHEME)
+	@JsonGetter(IN_SCHEME)
 	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_IN_SCHEMA)
 	public String[] getInScheme() {
 		return inScheme;
 	}
 
 	@Override
-	@JsonSetter(WebEntityFields.IN_SCHEME)
+	@JsonSetter(IN_SCHEME)
 	public void setInScheme(String[] inScheme) {
 		this.inScheme = inScheme;
 	}
 
-	@JsonGetter(WebEntityFields.NOTATION)
+	@JsonGetter(NOTATION)
 	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_NOTATION)
 	public Map<String, List<String>> getNotation() {
 		return notation;
 	}
 
 	@Override
-	@JsonSetter(WebEntityFields.NOTATION)
+	@JsonSetter(NOTATION)
 	public void setNotation(Map<String, List<String>> notation) {
 		this.notation = notation;
 	}

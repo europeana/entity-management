@@ -2,7 +2,7 @@ package eu.europeana.entitymanagement.batch.processor;
 
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.web.service.impl.MetisDereferenceService;
+import eu.europeana.entitymanagement.web.service.MetisDereferenceService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.item.ItemProcessor;
@@ -27,16 +27,16 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
 
     @Override
     public EntityRecord process(@NonNull EntityRecord entityRecord) throws Exception {
-        logger.debug("Calling Metis dereference service for EntityRecord {}", entityRecord.getEntityId());
+        logger.debug("Calling Metis dereference service for entityId={}", entityRecord.getEntityId());
         Entity metisResponse = dereferenceService.dereferenceEntityById(entityRecord.getExternalProxy().getProxyId());
 
         if (entityRecord.getEntity().equals(metisResponse)) {
-            logger.debug("Metadata for EntityRecord {} matches Metis response. Stopping processing", entityRecord.getEntityId());
+            logger.debug("Existing metadata for entityId={} matches Metis response. Stopping processing", entityRecord.getEntityId());
             // stop processing
             return null;
         }
 
-        logger.debug("Storing de-referenced metadata for entity {}", entityRecord.getEntityId());
+        logger.debug("Storing de-referenced metadata for entityId={}", entityRecord.getEntityId());
 
         // copy over entityID and isAggregatedBy, and then save the de-referenced version
         metisResponse.copyShellFrom(entityRecord.getEntity());

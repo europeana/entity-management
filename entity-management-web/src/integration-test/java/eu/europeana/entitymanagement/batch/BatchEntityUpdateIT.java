@@ -3,7 +3,7 @@ package eu.europeana.entitymanagement.batch;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import eu.europeana.entitymanagement.batch.config.MongoBatchConfigurer;
-import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
+import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.ExitStatus;

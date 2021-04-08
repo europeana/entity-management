@@ -73,11 +73,11 @@ public class XmlPlaceImpl extends XmlBaseEntityImpl {
 		return RdfXmlUtils.convertToRdfResource(getPlace().getIsNextInSequence());
 	}
 	
-	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_SAME_AS)
-	public List<RdfResource> getSameAs(){
-	    	return RdfXmlUtils.convertToRdfResource(getPlace().getSameAs());
-	}
+//	@JacksonXmlElementWrapper(useWrapping=false)
+//	@JacksonXmlProperty(localName = XmlConstants.XML_SAME_AS)
+//	public List<RdfResource> getSameAs(){
+//	    	return RdfXmlUtils.convertToRdfResource(getPlace().getSameAs());
+//	}
 
 	@JsonIgnore
 	private Place getPlace() {

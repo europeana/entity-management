@@ -14,14 +14,13 @@ import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.serialization.EntityXmlSerializer;
 import eu.europeana.entitymanagement.serialization.JsonLdSerializer;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
-import eu.europeana.entitymanagement.web.service.authorization.AuthorizationService;
-import eu.europeana.entitymanagement.web.service.authorization.AuthorizationServiceImpl;
+import eu.europeana.entitymanagement.web.service.AuthorizationService;
 
 
 public abstract class BaseRest extends BaseRestController {
 
     @Resource(name=AppConfig.BEAN_AUTHORIZATION_SERVICE)
-    AuthorizationServiceImpl emAuthorizationService;
+    AuthorizationService emAuthorizationService;
 
     @Resource(name=AppConfig.BEAN_EM_BUILD_INFO)
     BuildInfo emBuildInfo;

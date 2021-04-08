@@ -1,5 +1,8 @@
 package eu.europeana.entitymanagement.bootstrap;
 
+
+import eu.europeana.entitymanagement.batch.config.MongoBatchConfigurer;
+import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,9 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-
-import eu.europeana.entitymanagement.batch.config.MongoBatchConfigurer;
-import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
 
 /**
  * This class bootstraps the databases for the application. It is only triggered when the "dev" profile

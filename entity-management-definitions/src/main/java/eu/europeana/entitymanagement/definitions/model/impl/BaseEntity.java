@@ -1,5 +1,11 @@
 package eu.europeana.entitymanagement.definitions.model.impl;
 
+import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.ENTITY_CONTEXT;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
+
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -57,11 +63,6 @@ public class BaseEntity implements Entity {
 	protected String[] hasPart;
 	protected String[] isPartOf;
 
-	// The time at which the Set was created by the user. 
-//	protected Date created;
-
-	// The time at which the Set was modified, after creation. 
-//	protected Date modified;
 	protected Aggregation isAggregatedBy;
 	protected WebResource referencedWebResource;
 
@@ -139,13 +140,6 @@ public class BaseEntity implements Entity {
 	}
 
 
-//	public String[] getSameAs() {
-//		return sameAs;
-//	}
-//
-//	public void setSameAs(String[] sameAs) {
-//		this.sameAs = sameAs;
-//	}
 
 	@Override
 	@JsonGetter(WebEntityFields.ID)
@@ -194,17 +188,6 @@ public class BaseEntity implements Entity {
 		this.isRelatedTo = isRelatedTo;
 	}
 
-//	@Override
-//	public ObjectId getId() {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-//
-//	@Override
-//	public void setId(ObjectId id) {
-//		// TODO Auto-generated method stub
-//
-//	}
 
 	@Override
 	@JsonGetter(WebEntityFields.HAS_PART)
@@ -385,6 +368,14 @@ public class BaseEntity implements Entity {
 	@JacksonXmlProperty(localName = XmlFields.XML_ORE_IS_AGGREGATED_BY)
 	public Aggregation getIsAggregatedBy() {
 	    return isAggregatedBy;
+	}
+
+	/**
+	 * Not included in XML responses
+	 */
+	@JsonGetter(WebEntityFields.CONTEXT)
+	public String getContext() {
+		return ENTITY_CONTEXT;
 	}
 
 	@Override
