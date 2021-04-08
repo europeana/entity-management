@@ -1,12 +1,13 @@
-package eu.europeana.entitymanagement.web.service.impl;
+package eu.europeana.entitymanagement.web.service;
 
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.EUROPEANA_URL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.RIGHTS_CREATIVE_COMMONS;
-import static eu.europeana.entitymanagement.web.service.impl.EntityRecordUtils.getDatasourceAggregationId;
-import static eu.europeana.entitymanagement.web.service.impl.EntityRecordUtils.getEuropeanaAggregationId;
-import static eu.europeana.entitymanagement.web.service.impl.EntityRecordUtils.getEuropeanaProxyId;
-import static eu.europeana.entitymanagement.web.service.impl.EntityRecordUtils.getIsAggregatedById;
+import static eu.europeana.entitymanagement.web.EntityRecordUtils.getDatasourceAggregationId;
+import static eu.europeana.entitymanagement.web.EntityRecordUtils.getEuropeanaAggregationId;
+import static eu.europeana.entitymanagement.web.EntityRecordUtils.getEuropeanaProxyId;
+import static eu.europeana.entitymanagement.web.EntityRecordUtils.getIsAggregatedById;
 
+import eu.europeana.entitymanagement.web.EntityRecordUtils;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -213,55 +214,33 @@ public class EntityRecordService {
 	/*
 	 * the common fields for all entity types that are references
 	 */
-    String[] updatedField = null;
 	// for the field hasPart
 	String[] hasPartField = entity.getHasPart();
-	if(hasPartField!=null) {
-		updatedField=replaceWithInternalReferences(hasPartField);
-		entity.setHasPart(updatedField);
-	}
+	entity.setHasPart(replaceWithInternalReferences(hasPartField));
 
 	// for the field isPartOf
 	String[] isPartOfField = entity.getIsPartOfArray();
-	if(isPartOfField!=null)
-	{
-		updatedField=replaceWithInternalReferences(isPartOfField);
-		entity.setIsPartOfArray(updatedField);
-	}
+	entity.setIsPartOfArray(replaceWithInternalReferences(isPartOfField));
 
 	// for the field isRelatedTo
 	String[] isRelatedToField = entity.getIsRelatedTo();
-	if(isRelatedToField!=null) {
-		updatedField=replaceWithInternalReferences(isRelatedToField);
-		entity.setIsRelatedTo(updatedField);
-	}
-	
+	entity.setIsRelatedTo(replaceWithInternalReferences(isRelatedToField));
 
     }
 
     private void performReferentialIntegrityConcept(Concept entity) {
-    String[] updatedField = null;
 	// for the field broader
 	String[] broaderField = entity.getBroader();
-	if(broaderField!=null) {
-		updatedField=replaceWithInternalReferences(broaderField);
-		entity.setBroader(updatedField);
-	}
+	entity.setBroader(replaceWithInternalReferences(broaderField));
 
 	// for the field narrower
-	String[] narrowerField = entity.getNarrower();
-	if(narrowerField!=null) {
-		updatedField=replaceWithInternalReferences(narrowerField);
-		entity.setNarrower(updatedField);
-	}	
+	String[] narrowerField = entity.getBroader();
+	entity.setNarrower(replaceWithInternalReferences(narrowerField));
 
 	// for the field related
 	String[] relatedField = entity.getRelated();
-	if(relatedField!=null)
-	{
-		updatedField=replaceWithInternalReferences(relatedField);
-		entity.setRelated(updatedField);
-	}
+	entity.setRelated(replaceWithInternalReferences(relatedField));
+
     }
 
     private void performReferentialIntegrityAgent(Agent entity) {
@@ -278,56 +257,26 @@ public class EntityRecordService {
 	    updatedField = replaceWithInternalReferences(placeOfDeathField);
 	    entity.setPlaceOfDeath(updatedField);
 	}
-		
 	// for the field professionOrOccupation
 	Map<String, List<String>> professionOrOccupationField = entity.getProfessionOrOccupation();
-	if(professionOrOccupationField!=null) {
-		updatedField=replaceWithInternalReferences(professionOrOccupationField);
-		entity.setProfessionOrOccupation(updatedField);
-	}
+	entity.setProfessionOrOccupation(replaceWithInternalReferences(professionOrOccupationField));
 	
-	String[] updatedField2 = null;
 	// for the field hasMet
 	String[] hasMetField = entity.getHasMet();
-	if(hasMetField!=null) {
-		updatedField2=replaceWithInternalReferences(hasMetField);
-		entity.setHasMet(updatedField2);
-	}	
+	entity.setHasMet(replaceWithInternalReferences(hasMetField));
 	
-	// for the field date
-	String[] dateField = entity.getDate();
-	if(dateField!=null) {
-		updatedField2=replaceWithInternalReferences(dateField);
-		entity.setDate(updatedField2);
-	}
-
-	// for the field wasPresentAt
-	String[] wasPresentAtField = entity.getWasPresentAt();
-	if(wasPresentAtField!=null) {
-		updatedField2=replaceWithInternalReferences(wasPresentAtField);
-		entity.setWasPresentAt(updatedField2);
-	}
-
     }
 
     private void performReferentialIntegrityPlace(Place entity) {
-    String[] updatedField = null;
 	// for the field isNextInSequence
 	String[] isNextInSequenceField = entity.getIsNextInSequence();
-	if(isNextInSequenceField!=null) {
-		updatedField=replaceWithInternalReferences(isNextInSequenceField);
-		entity.setIsNextInSequence(updatedField);
-	}
+	entity.setIsNextInSequence(replaceWithInternalReferences(isNextInSequenceField));
     }
 
     private void performReferentialIntegrityTimespan(Timespan entity) {
-    String[] updatedField = null;
 	// for the field isNextInSequence
 	String[] isNextInSequenceField = entity.getIsNextInSequence();
-	if(isNextInSequenceField!=null) {
-		updatedField=replaceWithInternalReferences(isNextInSequenceField);
-		entity.setIsNextInSequence(updatedField);
-	}
+	entity.setIsNextInSequence(replaceWithInternalReferences(isNextInSequenceField));
 
     }
 

@@ -52,8 +52,8 @@ import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
 import eu.europeana.entitymanagement.definitions.model.impl.PlaceImpl;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.utils.EntityComparator;
-import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
+import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
 import eu.europeana.entitymanagement.web.xml.model.metis.EnrichmentResultList;
 

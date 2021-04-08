@@ -53,7 +53,7 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
-import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
+import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
