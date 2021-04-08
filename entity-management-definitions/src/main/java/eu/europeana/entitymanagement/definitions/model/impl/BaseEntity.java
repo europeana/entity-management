@@ -165,7 +165,6 @@ public class BaseEntity implements Entity {
 		this.identifier = identifier;
 	}
 
-	@JsonIgnore
 	@JacksonXmlProperty(isAttribute= true, localName = XmlFields.XML_RDF_ABOUT)
 	public String getAbout() {
 		return getEntityId();

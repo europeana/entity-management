@@ -1,22 +1,18 @@
 package eu.europeana.entitymanagement.serialization;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
+import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
+import eu.europeana.entitymanagement.serialization.mixins.JsonIgnoreFieldsMixin;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.text.SimpleDateFormat;
-import java.util.List;
 import java.util.Locale;
 
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 
@@ -29,6 +25,7 @@ public class JsonLdSerializer {
     public JsonLdSerializer() {
 	mapper = new ObjectMapper();
 	SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH);
+			mapper.addMixIn(BaseEntity.class, JsonIgnoreFieldsMixin.class);
 	mapper.setDateFormat(df);
     }
     
@@ -53,46 +50,25 @@ public class JsonLdSerializer {
     }
 
 
-    private String serializeExternal(EntityRecord record) throws EntityManagementRuntimeException {
-	try {
-	    return mapper.writeValueAsString(record.getEntity());
-	} catch (JsonProcessingException e) {
-	    throw new EntityManagementRuntimeException("Unexpected exception occured when serializing entity to external format!",e);
+	private String serializeExternal(EntityRecord record) throws EntityManagementRuntimeException {
+		final StringWriter buffer = new StringWriter();
+		try {
+			SerializationUtils.serializeExternalJson(buffer, mapper, record);
+		} catch (IOException e) {
+			throw new EntityManagementRuntimeException("Unexpected exception occurred when serializing entity to external format",e);
+		}
+		return buffer.toString();
 	}
-    }
 
     private String serializeInternal(EntityRecord record) throws EntityManagementRuntimeException {
-		try {
-			Entity recordEntity = record.getEntity();
-			List<EntityProxy> recordProxies = record.getProxies();
-			ObjectNode entityNode = mapper.valueToTree(recordEntity);
+			final StringWriter buffer = new StringWriter();
+			try {
+				SerializationUtils.serializeInternalJson(buffer, mapper, record);
+			} catch (IOException e) {
+				throw new EntityManagementRuntimeException("Unexpected exception occurred when serializing entity to internal format!",e);
 
-			ArrayNode proxyNode = mapper.createArrayNode();
-
-
-			for(EntityProxy proxy: recordProxies){
-				Entity proxyEntity = proxy.getEntity();
-				ObjectNode proxyEntityNode = mapper.valueToTree(proxyEntity);
-
-				// Entity @context shouldn't appear in proxy metadata
-				proxyEntityNode.remove(WebEntityFields.CONTEXT);
-				// Entity ID shouldn't overwrite proxyId
-				proxyEntityNode.remove(WebEntityFields.ID);
-
-				ObjectNode embeddedProxyNode = mapper.valueToTree(proxy);
-				JsonNode mergedNode = JsonUtils.mergeProxyAndEntity(mapper, embeddedProxyNode, proxyEntityNode);
-				proxyNode.add(mergedNode.deepCopy());
 			}
-
-			JsonNode combinedEntityAndProxies = JsonUtils
-					.combineNestedNode(mapper, entityNode, proxyNode, "proxies");
-
-			//TODO: clarify WebResource fields (not currently in spec)
-		return mapper.writeValueAsString(combinedEntityAndProxies);
-			
-		} catch (JsonProcessingException e) {
-		    throw new EntityManagementRuntimeException("Unexpected exception occured when serializing entity to external format!",e);
-		}
+			return buffer.toString();
     }
 
 }

@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlTransient;
 /**
  * Ignores the context field during serialization
  */
-abstract class EntityContextIgnoreMixin {
+public abstract class EntityContextIgnoreMixin {
   @JsonIgnore
-  abstract String getContext();
+  public abstract String getContext();
 }
