@@ -1,5 +1,7 @@
 package eu.europeana.entitymanagement;
 
+import eu.europeana.entitymanagement.common.config.SocksProxyConfig;
+import eu.europeana.entitymanagement.config.SocksProxyActivator;
 import org.apache.logging.log4j.LogManager;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.boot.SpringApplication;
@@ -37,6 +39,9 @@ public class EntityManagementApp extends SpringBootServletInitializer {
                     System.getenv("CF_INSTANCE_INDEX"),
                     System.getenv("CF_INSTANCE_GUID"),
                     System.getenv("CF_INSTANCE_IP"));
+
+        // Activate socks proxy (if your application requires it)
+        SocksProxyActivator.activate(new SocksProxyConfig("entitymanagement.properties", "entitymanagement.user.properties"));
 
         SpringApplication.run(EntityManagementApp.class, args);
     }
