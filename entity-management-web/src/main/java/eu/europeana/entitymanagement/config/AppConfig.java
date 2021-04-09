@@ -62,21 +62,7 @@ public class AppConfig extends AppConfigConstants{
 	}
     }
 
-    @Bean(name=BEAN_EM_LANGUAGE_CODES)
-    public LanguageCodes getLanguageCodes() throws IOException {
 
-	String languagecodesXMLConfig = emConfiguration.getLanguagecodesXMLConfig();
-	try (InputStream inputStream = getClass().getResourceAsStream(languagecodesXMLConfig);
-		BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-	    String contents = reader.lines().collect(Collectors.joining(System.lineSeparator()));
-	    return xmlMapper.readValue(contents, LanguageCodes.class);
-	}
-    }
-
-    @Bean(name=BEAN_EM_VALIDATOR_FACTORY)
-    public ValidatorFactory getValidatorFactoryBean() {
-	return new LocalValidatorFactoryBean();
-    }
 
     @Bean(name=BEAN_CLIENT_DETAILS_SERVICE)
     public EuropeanaClientDetailsService getClientDetailsService() {

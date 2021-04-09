@@ -4,7 +4,6 @@ package eu.europeana.entitymanagement;
 import eu.europeana.entitymanagement.testutils.MongoContainer;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockWebServer;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.AfterAll;
@@ -26,8 +25,8 @@ public abstract class AbstractIntegrationTest {
     protected Logger logger = LogManager.getLogger(getClass());
 
     static {
-        MONGO_CONTAINER = new MongoContainer("entity-management", "job-repository")
-                .withLogConsumer(new WaitingConsumer().andThen(new ToStringConsumer()));
+        MONGO_CONTAINER = new MongoContainer("entity-management", "job-repository", "enrichment")
+            .withLogConsumer(new WaitingConsumer().andThen(new ToStringConsumer()));
 
         MONGO_CONTAINER.start();
     }
@@ -58,6 +57,9 @@ public abstract class AbstractIntegrationTest {
         registry.add("mongo.connectionUrl", MONGO_CONTAINER::getConnectionUrl);
         registry.add("mongo.em.database", MONGO_CONTAINER::getEntityDb);
         registry.add("mongo.batch.database", MONGO_CONTAINER::getBatchDb);
+        // enrichment database on the same test Mongo instance
+        registry.add("mongo.enrichment.connectionUrl", MONGO_CONTAINER::getConnectionUrl);
+        registry.add("mongo.enrichment.database", MONGO_CONTAINER::getEnrichmentDb);
         registry.add("metis.baseUrl", () -> String.format("http://%s:%s", mockMetis.getHostName(), mockMetis.getPort()));
     }
 
