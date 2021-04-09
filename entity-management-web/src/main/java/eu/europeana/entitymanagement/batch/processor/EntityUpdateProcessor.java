@@ -8,6 +8,7 @@ import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.impl.AggregationImpl;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
+import eu.europeana.entitymanagement.exception.ingestion.EntityValidationException;
 import eu.europeana.entitymanagement.web.model.scoring.EntityMetrics;
 import eu.europeana.entitymanagement.web.service.ScoringService;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
@@ -66,14 +67,10 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
         return entityRecord;
     }
 
-    private void validateConstraints(EntityRecord entityRecord) {
+    private void validateConstraints(EntityRecord entityRecord) throws EntityValidationException {
         Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entityRecord.getEntity());
         if (!violations.isEmpty()) {
-            logger.warn("Entity validation failed for entityId={}", entityRecord.getEntityId());
-            for (ConstraintViolation<Entity> violation : violations) {
-                logger.warn("entityId={} - {}", entityRecord.getEntity(), violation.getMessage());
-            }
-            //TODO: throw here
+            throw new EntityValidationException(null, violations);    
         }
     }
 

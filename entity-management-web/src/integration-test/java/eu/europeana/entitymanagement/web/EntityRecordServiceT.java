@@ -141,7 +141,7 @@ public class EntityRecordServiceT {
 	     * corresponsing proxy's entity objects
 	     */
 	    
-	    //TODO: verify correctness of all properties aganst the "consolidated/concept-consolidated-bathtub.json" file
+	    //TODO: verify correctness of all properties against the "consolidated/concept-consolidated-bathtub.json" file
 	    ConceptImpl concept_consolidated = objectMapper.readValue(loadFile(CONCEPT_CONSOLIDATED_BATHTUB), ConceptImpl.class);
 	    EntityComparator entityComparator = new EntityComparator();
 	    Assertions.assertTrue(entityComparator.compare(concept_consolidated, entityRecord.getEntity())==0);    
