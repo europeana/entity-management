@@ -131,10 +131,11 @@ public class EntityRecordRepository {
 
 
     /**
-     * Drops the EntityRecord collection.
+     * Drops the EntityRecord and Entity ID generator collections.
      */
     public void dropCollection(){
         datastore.getMapper().getCollection(EntityRecordImpl.class).drop();
+        datastore.getMapper().getCollection(EntityIdGenerator.class).drop();
     }
 
 
