@@ -27,9 +27,9 @@ public abstract class XmlBaseEntityImpl {
     List<XmlWebResourceImpl> referencedWebResources;
 
     private String about;
-    private List<XmlMultilingualString> altLabel = new ArrayList<>();
-    private List<XmlMultilingualString> prefLabel = new ArrayList<>();
-    private List<RdfResource> sameAs = new ArrayList<>();
+    private List<LabelResource> altLabel = new ArrayList<>();
+    private List<LabelResource> prefLabel = new ArrayList<>();
+    private List<LabelResource> sameAs = new ArrayList<>();
 
     public XmlBaseEntityImpl() {
 	// default constructor
@@ -101,17 +101,17 @@ public abstract class XmlBaseEntityImpl {
     }
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.PREF_LABEL)
-    public List<XmlMultilingualString> getPrefLabel() {
+    public List<LabelResource> getPrefLabel() {
 	return this.prefLabel;
     }
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.ALT_LABEL)
-    public List<XmlMultilingualString> getAltLabel() {
+    public List<LabelResource> getAltLabel() {
 	return this.altLabel;
     }
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.XML_SAME_AS)
-    public List<RdfResource> getSameAs() {
+    public List<LabelResource> getSameAs() {
 	return this.sameAs;
     }
 
@@ -121,14 +121,14 @@ public abstract class XmlBaseEntityImpl {
      * 
      * @deprecated
      */
-    public RdfResource getIsShownBy() {
+    public LabelResource getIsShownBy() {
 
 	if (entity.getReferencedWebResource() != null) {
 //		    referencedWebResources.add(new XmlWebResourceImpl(((BaseEntity)entity).getIsShownById(),((BaseEntity)entity).getIsShownBySource(), ((BaseEntity)entity).getIsShownByThumbnail()));
 //	        return new RdfResource(((BaseEntity)entity).getIsShownById());
 	    referencedWebResources.add(new XmlWebResourceImpl(entity.getReferencedWebResource().getId(),
 		    entity.getReferencedWebResource().getSource(), entity.getReferencedWebResource().getThumbnail()));
-	    return new RdfResource(entity.getReferencedWebResource().getId());
+	    return new LabelResource(entity.getReferencedWebResource().getId());
 	} else {
 	    return null;
 	}

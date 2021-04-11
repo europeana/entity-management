@@ -3,18 +3,15 @@ package eu.europeana.entitymanagement.web.model.metis;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import eu.europeana.entitymanagement.web.xml.model.LabelResource;
+import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
+import eu.europeana.entitymanagement.web.xml.model.metis.EnrichmentResultList;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-
 import org.junit.jupiter.api.Test;
-
-import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
-import eu.europeana.entitymanagement.web.xml.model.XmlMultilingualString;
-import eu.europeana.entitymanagement.web.xml.model.metis.EnrichmentResultList;
 
 class MetisResponseDeserializerTest {
 
@@ -39,24 +36,24 @@ class MetisResponseDeserializerTest {
 	//check prefLabels
 	assertNotNull(xmlEntity.getPrefLabel());
 	assertEquals(23, xmlEntity.getPrefLabel().size());
-	XmlMultilingualString enLabel = xmlEntity.getPrefLabel().stream()
-		.filter(label -> label.getLanguage().equals("en")).findFirst().get();
+	LabelResource enLabel = xmlEntity.getPrefLabel().stream()
+		.filter(label -> label.getLang().equals("en")).findFirst().get();
 	assertEquals("bathtub", enLabel.getValue());
 
 	//check altLabels
 	assertNotNull(xmlEntity.getAltLabel());
 	assertEquals(14, xmlEntity.getAltLabel().size());
-	XmlMultilingualString deAltLabel = xmlEntity.getAltLabel().stream()
-		.filter(altLabel -> altLabel.getLanguage().equals("de")).findFirst().get();
+	LabelResource deAltLabel = xmlEntity.getAltLabel().stream()
+		.filter(altLabel -> altLabel.getLang().equals("de")).findFirst().get();
 	assertEquals("Wannenbad", deAltLabel.getValue());
 
 	
-	String broader = xmlEntity.getBroader().get(0).getValue();
+	String broader = xmlEntity.getBroader().get(0).getResource();
 	assertEquals("http://www.wikidata.org/entity/Q987767", broader);
 	
 	assertEquals(7, xmlEntity.getNote().size());
-		
-//	System.out.println(xmlEntity.getPrefLabel());
+
+	//TODO: Add tests for other entity types
 	
     }
 

@@ -1,46 +1,81 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
-import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.HIDDEN_LABEL;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_EDM;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_SKOS;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NOTE;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_AGENT;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_BEGIN;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_END;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_HAS_PART;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IDENTIFIER;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IS_PART_OF;
 
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import java.util.ArrayList;
+import java.util.List;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
-@JacksonXmlRootElement(localName = XmlConstants.XML_EDM_AGENT)
-@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({XmlConstants.DEPICTION, XmlConstants.PREF_LABEL, XmlConstants.ALT_LABEL, XmlConstants.XML_SKOS_HIDDEN_LABEL,
-    	XmlConstants.XML_NAME, XmlConstants.XML_BEGIN, XmlConstants.XML_DATE_OF_BIRTH, XmlConstants.XML_DATE_OF_ESTABLISHMENT,
-    	XmlConstants.XML_END, XmlConstants.XML_DATE_OF_DEATH, XmlConstants.XML_DATE_OF_TERMINATION, XmlConstants.XML_DATE,
-    	XmlConstants.XML_PLACE_OF_BIRTH, XmlConstants.XML_PLACE_OF_DEATH, XmlConstants.XML_GENDER, 
-    	XmlConstants.XML_PROFESSION_OR_OCCUPATION, XmlConstants.XML_BIOGRAPHICAL_INFORMATION, XmlConstants.NOTE,
-    	XmlConstants.XML_HAS_PART, XmlConstants.XML_IS_PART_OF, XmlConstants.XML_HASMET, XmlConstants.XML_IS_RELATED_TO,
-    	XmlConstants.XML_IDENTIFIER, XmlConstants.XML_SAME_AS, XmlConstants.IS_AGGREGATED_BY})
+@XmlRootElement(namespace = NAMESPACE_EDM, name = XML_AGENT)
 public class XmlAgentImpl extends XmlBaseEntityImpl {
-    	
-    	public XmlAgentImpl(Agent agent) {
-    	    	super(agent);    	    	
-    	}
+
+	private List<LabelResource> isPartOf = new ArrayList<>();
+	private String[] identifier;
+	private List<LabelResource> note = new ArrayList<>();
+	private List<LabelResource> hasPart = new ArrayList<>();
+	private List<LabelResource> hasMet = new ArrayList<>();
+	private List<LabelResource> hiddenLabel = new ArrayList<>();
+	private List<LabelResource> biographicalInformation = new ArrayList<>();
+	private  String[] begin;
+	private String[] end;
+	private List<LabelResource> isRelatedTo = new ArrayList<>();
+	private List<LabelResource> name = new ArrayList<>();
+	private String[] dateOfBirth;
+	private String[] dateOfDeath;
+	private String dateOfEstablishment;
+	private String dateOfTermination;
+	private String gender;
+	private List<LabelResource> placeOfBirth = new ArrayList<>();
+	private List<LabelResource> placeOfDeath = new ArrayList<>();
+	private List<LabelResource> professionOrOccupation = new ArrayList<>();
+
+	public XmlAgentImpl(Agent agent) {
+    	    	super(agent);
+    	    	this.hiddenLabel = RdfXmlUtils.convertToXmlMultilingualString(agent.getHiddenLabel());
+    	    	this.note = RdfXmlUtils.convertToXmlMultilingualString(agent.getNote());
+    	    	this.identifier = agent.getIdentifier();
+    	    	this.hasPart = RdfXmlUtils.convertToRdfResource(agent.getHasPart());
+    	    	this.isPartOf = RdfXmlUtils.convertToRdfResource(agent.getIsPartOfArray());
+    	    	this.begin = agent.getBeginArray();
+    	    	this.end = agent.getEndArray();
+    	    	this.hasMet = RdfXmlUtils.convertToRdfResource(agent.getHasMet());
+    	    	this.isRelatedTo = RdfXmlUtils.convertToRdfResource(agent.getIsRelatedTo());
+    	    	this.name = RdfXmlUtils.convertMapToXmlMultilingualString(agent.getName());
+						this.biographicalInformation = RdfXmlUtils.convertToXmlMultilingualString(agent.getBiographicalInformation());
+						this.dateOfBirth = agent.getDateOfBirth();
+						this.dateOfDeath = agent.getDateOfDeath();
+						this.dateOfEstablishment = agent.getDateOfEstablishment();
+						this.dateOfTermination = agent.getDateOfTermination();
+						this.gender = agent.getGender();
+						this.placeOfBirth = RdfXmlUtils.convertToXmlMultilingualStringOrRdfResource(agent.getPlaceOfBirth());
+						this.placeOfDeath = RdfXmlUtils.convertToXmlMultilingualStringOrRdfResource(agent.getPlaceOfDeath());
+						this.professionOrOccupation = RdfXmlUtils.convertToXmlMultilingualStringOrRdfResource(agent.getProfessionOrOccupation());
+					}
 
 	public XmlAgentImpl() {
 		// default constructor
 	}
 
-	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_SKOS_HIDDEN_LABEL)
-	public List<XmlMultilingualString> getHiddenLabel() {
-		return RdfXmlUtils.convertToXmlMultilingualString(entity.getHiddenLabel());
+	@XmlElement(name = HIDDEN_LABEL, namespace = NAMESPACE_SKOS)
+	public List<LabelResource> getHiddenLabel() {
+		return hiddenLabel;
 	}
-	
-	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.NOTE)
-	public List<XmlMultilingualString> getNote() {
-		return RdfXmlUtils.convertToXmlMultilingualString(entity.getNote());
+
+	@XmlElement(name = NOTE, namespace = NAMESPACE_SKOS)
+	public List<LabelResource> getNote() {
+		return note;
 	}
     	
 //	@JacksonXmlElementWrapper(useWrapping=false)
@@ -50,107 +85,90 @@ public class XmlAgentImpl extends XmlBaseEntityImpl {
 //	    	return null;
 //		//return XmlMultilingualString.convertToXmlMultilingualStringOrRdfResource(agent.getDcDate());
 //	}
-	
-	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_IDENTIFIER)
+
+	@XmlElement(name = XML_IDENTIFIER)
 	public String[] getIdentifier() {
-	    	return entity.getIdentifier();
-	}
-	
-	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_HAS_PART)
-	public List<RdfResource> getHasPart() {
-	    	return RdfXmlUtils.convertToRdfResource(getAgent().getHasPart());
+	    	return identifier;
 	}
 
-	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_IS_PART_OF)
-	public List<RdfResource> getIsPartOf() {
-	    	return RdfXmlUtils.convertToRdfResource(getAgent().getIsPartOfArray());
+	@XmlElement(name = XML_HAS_PART)
+	public List<LabelResource> getHasPart() {
+	    	return hasPart;
 	}
-	
-	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_BEGIN)
+
+	@XmlElement(name = XML_IS_PART_OF)
+	public List<LabelResource> getIsPartOf() {
+	    	return isPartOf;
+	}
+
+	@XmlElement(name = XML_BEGIN)
 	public String[] getBegin() {
-	    	return getAgent().getBeginArray();
+	    	return begin;
 	}
 
-	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_END)
+	@XmlElement(name = XML_END)
 	public String[] getEnd() {
-	    	return getAgent().getEndArray();
+	    	return end;
+	}
+
+	@XmlElement(name = XmlConstants.XML_HASMET)
+	public List<LabelResource> getHasMet() {
+	    	return hasMet;
 	}
 	
-	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_HASMET)
-	public List<RdfResource> getHasMet() {
-	    	return RdfXmlUtils.convertToRdfResource(getAgent().getHasMet());
+	@XmlElement(name = XmlConstants.XML_IS_RELATED_TO)
+	public List<LabelResource> getIsRelatedTo() {
+	    	return isRelatedTo;
 	}
 	
-	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_IS_RELATED_TO)
-	public List<RdfResource> getIsRelatedTo() {
-	    	return RdfXmlUtils.convertToRdfResource(getAgent().getIsRelatedTo());
+	@XmlElement(name = XmlConstants.XML_NAME)
+	public List<LabelResource> getName(){
+	    	return name;
 	}
 	
-	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_NAME)
-	public List<XmlMultilingualString> getName(){
-	    	return RdfXmlUtils.convertMapToXmlMultilingualString(getAgent().getName());
+	@XmlElement(name = XmlConstants.XML_BIOGRAPHICAL_INFORMATION)
+	public List<LabelResource> getBiographicalInformation(){
+	    	return biographicalInformation;
 	}
 	
-	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_BIOGRAPHICAL_INFORMATION)
-	public List<XmlMultilingualString> getBiographicalInformation(){
-	    	return RdfXmlUtils.convertToXmlMultilingualString(getAgent().getBiographicalInformation());
-	}
-	
-	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_DATE_OF_BIRTH)
+	@XmlElement(name = XmlConstants.XML_DATE_OF_BIRTH)
 	public String[] getDateOfBirth() {
-	    	return getAgent().getDateOfBirth();
+	    	return dateOfBirth;
 	}
 	
-	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_DATE_OF_DEATH)
+	@XmlElement(name = XmlConstants.XML_DATE_OF_DEATH)
 	public String[] getDateOfDeath() {
-	    	return getAgent().getDateOfDeath();
+	    	return dateOfDeath;
 	}
 	
-	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_DATE_OF_ESTABLISHMENT)
+	@XmlElement(name = XmlConstants.XML_DATE_OF_ESTABLISHMENT)
 	public String getDateOfEstablishment() {
-	    	return getAgent().getDateOfEstablishment();
+	    	return dateOfEstablishment;
 	}
 	
-	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_DATE_OF_TERMINATION)
+	@XmlElement(name = XmlConstants.XML_DATE_OF_TERMINATION)
 	public String getDateOfTermination() {
-	    	return getAgent().getDateOfTermination();
+	    	return dateOfTermination;
 	}
 	
-	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_GENDER)
+	@XmlElement(name = XmlConstants.XML_GENDER)
 	public String getGender() {
-	    	return getAgent().getGender();
+	    	return gender;
 	}
 	
-	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_PLACE_OF_BIRTH)
-	public List<Object> getPlaceOfBirth(){
-	    	return RdfXmlUtils.convertToXmlMultilingualStringOrRdfResource(getAgent().getPlaceOfBirth());
+	@XmlElement(name = XmlConstants.XML_PLACE_OF_BIRTH)
+	public List<LabelResource> getPlaceOfBirth(){
+	    	return placeOfBirth;
 	}
 	
-	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_PLACE_OF_DEATH)
-	public List<Object> getPlaceOfDeath(){
-	    	return RdfXmlUtils.convertToXmlMultilingualStringOrRdfResource(getAgent().getPlaceOfDeath());
+	@XmlElement(name = XmlConstants.XML_PLACE_OF_DEATH)
+	public List<LabelResource> getPlaceOfDeath(){
+	    	return placeOfDeath;
 	}
 	
-	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_PROFESSION_OR_OCCUPATION)
-	public List<Object> getProfessionOrOccupation(){
-	    	return RdfXmlUtils.convertToXmlMultilingualStringOrRdfResource(getAgent().getProfessionOrOccupation());
+	@XmlElement(name = XmlConstants.XML_PROFESSION_OR_OCCUPATION, namespace = "http://rdvocab.info/ElementsGr2/")
+	public List<LabelResource> getProfessionOrOccupation(){
+	    	return professionOrOccupation;
 	}
 	
 //	@JacksonXmlElementWrapper(useWrapping=false)
@@ -159,13 +177,8 @@ public class XmlAgentImpl extends XmlBaseEntityImpl {
 //	    	return RdfXmlUtils.convertToRdfResource(getAgent().getSameAs());
 //	}
 
-	@JsonIgnore
-	private Agent getAgent() {
-	    return (Agent)entity;
-	}
 
 	@Override
-	@JsonIgnore
 	protected EntityTypes getTypeEnum() {
 	    return EntityTypes.Agent;
 	}

@@ -31,13 +31,13 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl {
 	
 	@JacksonXmlElementWrapper(useWrapping=false)
 	@JacksonXmlProperty(localName = XmlConstants.XML_ACRONYM)
-	public List<XmlMultilingualString> getAcronym() {		
+	public List<LabelResource> getAcronym() {
 		return RdfXmlUtils.convertToXmlMultilingualString(getOrganization().getAcronym());
 	}
 	
 	@JacksonXmlElementWrapper(useWrapping=false)
 	@JacksonXmlProperty(localName = XmlConstants.XML_DESCRIPTION)
-	public List<XmlMultilingualString> getDescription() {
+	public List<LabelResource> getDescription() {
 		return RdfXmlUtils.convertMapToXmlMultilingualString(getOrganization().getDescription());
 	}
 	
@@ -50,19 +50,19 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl {
 	
 	@JacksonXmlElementWrapper(useWrapping=false)
 	@JacksonXmlProperty(localName = XmlConstants.XML_EUROPEANA_ROLE)
-	public List<XmlMultilingualString> getEuropeanaRole() {
+	public List<LabelResource> getEuropeanaRole() {
 		return RdfXmlUtils.convertToXmlMultilingualString(getOrganization().getEuropeanaRole());
 	}
 	
 	@JacksonXmlElementWrapper(useWrapping=false)
 	@JacksonXmlProperty(localName = XmlConstants.XML_ORGANIZATION_DOMAIN)
-	public List<XmlMultilingualString> getOrganizationDomain() {
+	public List<LabelResource> getOrganizationDomain() {
 		return RdfXmlUtils.convertToXmlMultilingualString(getOrganization().getOrganizationDomain());
 	}
 	
 	@JacksonXmlElementWrapper(useWrapping=false)
 	@JacksonXmlProperty(localName = XmlConstants.XML_GEOGRAPHIC_LEVEL)
-	public List<XmlMultilingualString> getGeographicLevel() {
+	public List<LabelResource> getGeographicLevel() {
 		return RdfXmlUtils.convertMapToXmlMultilingualString(getOrganization().getGeographicLevel());
 	}
 	
@@ -74,10 +74,10 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl {
 	}
 	
 	@JacksonXmlProperty(localName = XmlConstants.XML_HOMEPAGE)
-	public RdfResource getHomepage() {
+	public LabelResource getHomepage() {
 	    	if(getOrganization().getHomepage() == null)
 	    	    return null;
-		return new RdfResource(getOrganization().getHomepage());
+		return new LabelResource(getOrganization().getHomepage());
 	}
 	
 	@JacksonXmlElementWrapper(useWrapping=false)

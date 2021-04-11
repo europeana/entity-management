@@ -18,24 +18,24 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @JacksonXmlRootElement(localName = XmlConstants.XML_SKOS_CONCEPT)
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({XmlConstants.ABOUT, XmlConstants.DEPICTION, XmlConstants.PREF_LABEL, XmlConstants.ALT_LABEL, XmlConstants.XML_SKOS_HIDDEN_LABEL,
+@JsonPropertyOrder({XmlConstants.ABOUT, XmlConstants.DEPICTION, XmlConstants.PREF_LABEL, XmlConstants.ALT_LABEL, XmlConstants.HIDDEN_LABEL,
         XmlConstants.NOTE, XmlConstants.NOTATION, XmlConstants.BROADER, XmlConstants.NARROWER, XmlConstants.RELATED,
         XmlConstants.BROAD_MATCH, XmlConstants.NARROW_MATCH, XmlConstants.RELATED_MATCH, XmlConstants.CLOSE_MATCH,
         XmlConstants.EXACT_MATCH, XmlConstants.IN_SCHEMA, XmlConstants.XML_SAME_AS, XmlConstants.IS_AGGREGATED_BY})
 public class XmlConceptImpl extends XmlBaseEntityImpl {
 
-    private List<RdfResource> narrower = new ArrayList<>();
-    private List<RdfResource> related = new ArrayList<>();
-    private List<RdfResource> broader = new ArrayList<>();
-    private List<XmlMultilingualString> note = new ArrayList<>();
-    private List<RdfResource> broadMatch = new ArrayList<>();
-    private List<RdfResource> narrowMatch = new ArrayList<>();
-    private List<RdfResource> exactMatch = new ArrayList<>();
-    private List<RdfResource> relatedMatch = new ArrayList<>();
-    private List<RdfResource> closeMatch = new ArrayList<>();
-    private List<XmlMultilingualString> notation;
-    private List<XmlMultilingualString> hiddenLabel;
-    private List<RdfResource> inScheme;
+    private List<LabelResource> narrower = new ArrayList<>();
+    private List<LabelResource> related = new ArrayList<>();
+    private List<LabelResource> broader = new ArrayList<>();
+    private List<LabelResource> note = new ArrayList<>();
+    private List<LabelResource> broadMatch = new ArrayList<>();
+    private List<LabelResource> narrowMatch = new ArrayList<>();
+    private List<LabelResource> exactMatch = new ArrayList<>();
+    private List<LabelResource> relatedMatch = new ArrayList<>();
+    private List<LabelResource> closeMatch = new ArrayList<>();
+    private List<LabelResource> notation;
+    private List<LabelResource> hiddenLabel;
+    private List<LabelResource> inScheme;
 
     public XmlConceptImpl() {
         // default constructor required for deserialization
@@ -79,55 +79,55 @@ public class XmlConceptImpl extends XmlBaseEntityImpl {
     }
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.BROADER)
-    public List<RdfResource> getBroader() {
+    public List<LabelResource> getBroader() {
         return this.broader;
     }
 
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.NARROWER)
-    public List<RdfResource> getNarrower() {
+    public List<LabelResource> getNarrower() {
         return this.narrower;
     }
 
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.RELATED)
-    public List<RdfResource> getRelated() {
+    public List<LabelResource> getRelated() {
         return this.related;
     }
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.BROAD_MATCH)
-    public List<RdfResource> getBroadMatch() {
+    public List<LabelResource> getBroadMatch() {
         return this.broadMatch;
     }
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.NARROW_MATCH)
-    public List<RdfResource> getNarrowMatch() {
+    public List<LabelResource> getNarrowMatch() {
         return this.narrowMatch;
     }
 
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.EXACT_MATCH)
-    public List<RdfResource> getExactMatch() {
+    public List<LabelResource> getExactMatch() {
         return this.exactMatch;
     }
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.RELATED_MATCH)
-    public List<RdfResource> getRelatedMatch() {
+    public List<LabelResource> getRelatedMatch() {
         return this.relatedMatch;
     }
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.CLOSE_MATCH)
-    public List<RdfResource> getCloseMatch() {
+    public List<LabelResource> getCloseMatch() {
         return this.closeMatch;
     }
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.NOTATION)
-    public List<XmlMultilingualString> getNotation() {
+    public List<LabelResource> getNotation() {
         return this.notation;
     }
 
-    @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.XML_SKOS_HIDDEN_LABEL)
-    public List<XmlMultilingualString> getHiddenLabel() {
+    @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.HIDDEN_LABEL)
+    public List<LabelResource> getHiddenLabel() {
         return this.hiddenLabel;
     }
 
@@ -138,13 +138,13 @@ public class XmlConceptImpl extends XmlBaseEntityImpl {
 
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.NOTE)
-    public List<XmlMultilingualString> getNote() {
+    public List<LabelResource> getNote() {
         return note;
     }
 
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.IN_SCHEMA)
-    public List<RdfResource> getInScheme() {
+    public List<LabelResource> getInScheme() {
         return this.inScheme;
     }
 

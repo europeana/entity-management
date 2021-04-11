@@ -16,7 +16,7 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @JacksonXmlRootElement(localName = XmlConstants.XML_TIMESPAN)
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({XmlConstants.DEPICTION, XmlConstants.PREF_LABEL, XmlConstants.ALT_LABEL, XmlConstants.XML_SKOS_HIDDEN_LABEL,
+@JsonPropertyOrder({XmlConstants.DEPICTION, XmlConstants.PREF_LABEL, XmlConstants.ALT_LABEL, XmlConstants.HIDDEN_LABEL,
     	XmlConstants.XML_BEGIN,XmlConstants.XML_END,XmlConstants.XML_IS_PART_OF,XmlConstants.XML_SAME_AS,
     	XmlConstants.XML_EDM_WEB_RESOURCE, XmlConstants.XML_IS_NEXT_IN_SEQUENCE})
 public class XmlTimespanImpl extends XmlBaseEntityImpl {
@@ -31,7 +31,7 @@ public class XmlTimespanImpl extends XmlBaseEntityImpl {
 
 	@JacksonXmlElementWrapper(useWrapping=false)
 	@JacksonXmlProperty(localName = XmlConstants.XML_IS_PART_OF)
-	public List<RdfResource> getIsPartOf() {
+	public List<LabelResource> getIsPartOf() {
 	    	return RdfXmlUtils.convertToRdfResource(((Timespan)entity).getIsPartOfArray());
 	}
 	
@@ -48,14 +48,14 @@ public class XmlTimespanImpl extends XmlBaseEntityImpl {
 	}
 	
 	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_SKOS_HIDDEN_LABEL)
-	public List<XmlMultilingualString> getHiddenLabel() {
+	@JacksonXmlProperty(localName = XmlConstants.HIDDEN_LABEL)
+	public List<LabelResource> getHiddenLabel() {
 		return RdfXmlUtils.convertToXmlMultilingualString(entity.getHiddenLabel());
 	}
 
 	@JacksonXmlElementWrapper(useWrapping=false)
 	@JacksonXmlProperty(localName = XmlConstants.XML_IS_NEXT_IN_SEQUENCE)
-	public List<RdfResource> getIsNextInSequence() {
+	public List<LabelResource> getIsNextInSequence() {
 	    	return RdfXmlUtils.convertToRdfResource(((Timespan)entity).getIsNextInSequence());
 	}
 
