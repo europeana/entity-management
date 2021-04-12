@@ -138,6 +138,7 @@ public class EntityRecordService {
 
         Entity europeanaProxyMetadata = EntityObjectFactory.createEntityObject(metisResponse.getType());
 				// copy metadata from request into entity
+				europeanaProxyMetadata.setEntityId(entityId);
 				copyPreviewMetadata(europeanaProxyMetadata, entityCreationRequest);
         setEuropeanaMetadata(europeanaProxyMetadata, entityId, entityRecord, timestamp);
 
