@@ -1,7 +1,5 @@
 package eu.europeana.entitymanagement.serialization;
 
-import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
-import eu.europeana.entitymanagement.serialization.mixins.JsonIgnoreFieldsMixin;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
@@ -25,7 +23,6 @@ public class JsonLdSerializer {
     public JsonLdSerializer() {
 	mapper = new ObjectMapper();
 	SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH);
-			mapper.addMixIn(BaseEntity.class, JsonIgnoreFieldsMixin.class);
 	mapper.setDateFormat(df);
     }
     

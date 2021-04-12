@@ -55,7 +55,7 @@ public class EntityXmlSerializer {
 		"	  xmlns:ore=\"http://www.openarchives.org/ore/terms/\"\r\n" +
 		"         xmlns:skos=\"http://www.w3.org/2004/02/skos/core#\"\r\n" + 
 		"         xmlns:dcterms=\"http://purl.org/dc/terms/\" >";
-    	final String XML_HEADER_TAG_PLACE = "?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n" +
+    	final String XML_HEADER_TAG_PLACE = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n" +
 	    	" <rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\r\n" + 
 	    	"         xmlns:foaf=\"http://xmlns.com/foaf/0.1/\"\r\n" + 
 	    	"         xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\r\n" + 
@@ -64,7 +64,7 @@ public class EntityXmlSerializer {
 	    	"         xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\r\n" + 
 	    	"         xmlns:skos=\"http://www.w3.org/2004/02/skos/core#\"\r\n" + 
 	    	"	  xmlns:ore=\"http://www.openarchives.org/ore/terms/\"\r\n" +
-	    	"         xmlns:dcterms=\"http://purl.org/dc/terms/\"";
+	    	"         xmlns:dcterms=\"http://purl.org/dc/terms/\" >";
     	final String XML_HEADER_TAG_ORGANIZATION = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n" + 
 	    	" <rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\r\n" + 
 	    	"         xmlns:foaf=\"http://xmlns.com/foaf/0.1/\"\r\n" + 
