@@ -1,8 +1,13 @@
 package eu.europeana.entitymanagement.serialization;
 
 import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
-import java.util.List;
+import eu.europeana.entitymanagement.serialization.mixins.XmlIgnoreFieldsMixin;
+import java.io.IOException;
+import java.io.StringWriter;
 
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -13,16 +18,25 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 
 @Component(AppConfigConstants.BEAN_EM_XML_SERIALIZER)
 public class EntityXmlSerializer {
 
-	final String XML_HEADER_TAG_CONCEPT = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n" + 
+	private final static XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newFactory();
+
+	private final XmlMapper xmlMapper;
+
+	public EntityXmlSerializer() {
+		JacksonXmlModule xmlModule = new JacksonXmlModule();
+		xmlModule.setDefaultUseWrapper(false);
+		xmlMapper = new XmlMapper(xmlModule);
+		xmlMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+		xmlMapper.addMixIn(BaseEntity.class, XmlIgnoreFieldsMixin.class);
+	}
+
+	final String XML_HEADER_TAG_CONCEPT = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n" +
     	    	" <rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\r\n" +  
     	    	"         xmlns:foaf=\"http://xmlns.com/foaf/0.1/\"\r\n" + 
     	    	"         xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\r\n" + 
@@ -41,7 +55,7 @@ public class EntityXmlSerializer {
 		"	  xmlns:ore=\"http://www.openarchives.org/ore/terms/\"\r\n" +
 		"         xmlns:skos=\"http://www.w3.org/2004/02/skos/core#\"\r\n" + 
 		"         xmlns:dcterms=\"http://purl.org/dc/terms/\" >";
-    	final String XML_HEADER_TAG_PLACE = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n" + 
+    	final String XML_HEADER_TAG_PLACE = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n" +
 	    	" <rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\r\n" + 
 	    	"         xmlns:foaf=\"http://xmlns.com/foaf/0.1/\"\r\n" + 
 	    	"         xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\r\n" + 
@@ -97,65 +111,36 @@ public class EntityXmlSerializer {
      * @throws EntityManagementRuntimeException 
 	 */
 	public String serializeXmlExternal(EntityRecord entityRecord) throws EntityManagementRuntimeException {
-		JacksonXmlModule xmlModule = new JacksonXmlModule();
-		xmlModule.setDefaultUseWrapper(true);
-		ObjectMapper objectMapper = new XmlMapper(xmlModule);
-		objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-		objectMapper.addMixIn(BaseEntity.class, EntityContextIgnoreMixin.class);
-
-		String output = "";
+		StringWriter stringWriter = new StringWriter();
 		try {
-		    output = objectMapper.writeValueAsString(entityRecord.getEntity());
-		} catch (JsonProcessingException e) {
-		    throw new EntityManagementRuntimeException("Unexpected exception occured when serializing entity to external format!",e);
+			XMLStreamWriter sw = xmlOutputFactory.createXMLStreamWriter(stringWriter);
+
+			sw.writeStartDocument();
+			SerializationUtils.serializeExternalXml(sw, xmlMapper, entityRecord);
+			sw.writeEndDocument();
+			return stringWriter.toString();
+		} catch (IOException | XMLStreamException e) {
+			throw new EntityManagementRuntimeException("Unexpected exception occured when serializing entity to external format!",e);
 		}
-		return output;
 	}
-	
-	
-	
-    /**
+
+
+
+	/**
 	 * This method serializes EntityRecord object to xml formats for the internal profile.
 	 * @param entityRecord The EntityRecord object
 	 * @return The serialized entityRecord in the xml string format
 	 * @throws EntityManagementRuntimeException
 	 */
-	public String serializeXmlInternal(EntityRecord entityRecord) throws EntityManagementRuntimeException {
-		JacksonXmlModule xmlModule = new JacksonXmlModule();
-		xmlModule.setDefaultUseWrapper(true);
-		ObjectMapper objectMapper = new XmlMapper(xmlModule);
-		objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-		objectMapper.addMixIn(BaseEntity.class, EntityContextIgnoreMixin.class);
-
-		String output = "";
-		
-		Entity tmpEntity = entityRecord.getEntity();
+	public String serializeXmlInternal(EntityRecord entityRecord)
+			throws EntityManagementRuntimeException {
+		StringWriter stringWriter = new StringWriter();
 		try {
-			entityRecord.setEntity(null);
-
-			StringBuilder strBuilder = new StringBuilder();
-		    strBuilder.append(objectMapper.writeValueAsString(entityRecord));
-		    
-		    //adding the referenced web resources for the proxy entities
-		    List<EntityProxy> entityRecordProxies = entityRecord.getProxies();
-		    for (EntityProxy proxy : entityRecordProxies) {
-		    	WebResource webResource = null;
-		    	if (proxy.getEntity()!=null) {
-		    		webResource= proxy.getEntity().getReferencedWebResource();
-		    	}
-		    	if (webResource!=null)
-			    {
-			    	strBuilder.append(objectMapper.writeValueAsString(webResource));
-			    }
-		    }
-		    
-		    strBuilder.append(XML_END_TAG);
-		    output = strBuilder.toString();
-		} catch (JsonProcessingException e) {
+		XMLStreamWriter sw = xmlOutputFactory.createXMLStreamWriter(stringWriter);
+		SerializationUtils.serializeInternalXml(sw, xmlMapper, entityRecord);
+			return stringWriter.toString();
+		} catch (IOException | XMLStreamException e) {
 		    throw new EntityManagementRuntimeException("Unexpected exception occured when serializing entity to external format!",e);
 		}
-		    
-		entityRecord.setEntity(tmpEntity);		
-		return output;
 	}	
 }
