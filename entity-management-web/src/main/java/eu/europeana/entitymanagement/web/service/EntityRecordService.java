@@ -607,7 +607,6 @@ public class EntityRecordService {
         isAggregatedBy.setId(getIsAggregatedById(entityId));
 	isAggregatedBy.setCreated(timestamp);
 	isAggregatedBy.setModified(timestamp);
-	isAggregatedBy.setRecordCount(1);
 	isAggregatedBy.setAggregates(
 		Arrays.asList(getEuropeanaAggregationId(entityId), getDatasourceAggregationId(entityId)));
 
