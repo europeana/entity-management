@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import eu.europeana.entitymanagement.definitions.model.impl.AgentImpl;
 import eu.europeana.entitymanagement.definitions.model.impl.ConceptImpl;
 import eu.europeana.entitymanagement.definitions.model.impl.OrganizationImpl;
@@ -22,7 +23,7 @@ import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
 @Embedded
 @JsonDeserialize(as = BaseEntity.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = As.EXISTING_PROPERTY, property = "type")
 @JsonSubTypes({
 		@JsonSubTypes.Type(value = AgentImpl.class, name = "Agent"),
 		@JsonSubTypes.Type(value = ConceptImpl.class, name = "Concept"),
