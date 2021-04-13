@@ -83,6 +83,12 @@ public abstract class BaseEntity implements Entity {
 		return referencedWebResource;
 	}
 	
+	@Override
+	@JsonSetter
+	public void setReferencedWebResource(WebResource resource) {
+		this.referencedWebResource = resource;
+	}
+
 	@JsonGetter(WebEntityFields.PREF_LABEL)
 	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_PREF_LABEL)
 	public Map<String, String> getPrefLabelStringMap() {
@@ -148,6 +154,7 @@ public abstract class BaseEntity implements Entity {
 
 	@Override
 	@JsonGetter(WebEntityFields.ID)
+	@JacksonXmlProperty(isAttribute= true, localName = XmlFields.XML_RDF_ABOUT)
 	public String getEntityId() {
 		return entityId;
 	}
@@ -171,7 +178,6 @@ public abstract class BaseEntity implements Entity {
 	}
 
 	@JsonIgnore
-	@JacksonXmlProperty(isAttribute= true, localName = XmlFields.XML_RDF_ABOUT)
 	public String getAbout() {
 		return getEntityId();
 	}
@@ -422,4 +428,5 @@ public abstract class BaseEntity implements Entity {
 		result = 31 * result + Arrays.hashCode(getIdentifier());
 		return result;
 	}
+
 }
