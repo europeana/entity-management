@@ -11,7 +11,6 @@ import eu.europeana.entitymanagement.web.EntityRecordUtils;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +19,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
+import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -367,8 +367,11 @@ public class EntityRecordService {
 	Entity primary = europeanaProxy.getEntity();
 	Entity secondary = externalProxy.getEntity();
 
+			List<Field> fieldsToCombine = new ArrayList<>();
+			EntityUtils.getAllFields(fieldsToCombine, primary.getClass());
+
 			try {
-				Entity consolidatedEntity = combineEntities(primary, secondary, Collections.emptyList());
+				Entity consolidatedEntity = combineEntities(primary, secondary, fieldsToCombine);
 				entityRecord.setEntity(consolidatedEntity);
 			} catch (IllegalArgumentException | IllegalAccessException e) {
 				logger.error(
@@ -387,9 +390,27 @@ public class EntityRecordService {
 		throws Exception {
 	EntityProxy europeanaProxy = entityRecord.getEuropeanaProxy();
 
-// update metadata take precedence over existing ones
-	Entity updatedEntity = combineEntities(updateEntity, europeanaProxy.getEntity(),
-			UPDATE_FIELDS_TO_IGNORE);
+		List<Field> allFields = new ArrayList<>();
+		EntityUtils.getAllFields(allFields, updateEntity.getClass());
+
+		List<Field> filteredList = allFields.stream()
+				.filter(field -> !UPDATE_FIELDS_TO_IGNORE.contains(field.getName()))
+				.collect(Collectors.toUnmodifiableList());
+
+		Entity europeanaProxyEntity = europeanaProxy.getEntity();
+		// updateEntity considered as "primary", since its values take precedence over existing metadata.
+		Entity updatedEntity = combineEntities(updateEntity, europeanaProxyEntity,
+				filteredList);
+
+		// finally copy over ignored fields from the existing metadata
+		List<Field> ignoredFields = allFields.stream()
+				.filter(field -> UPDATE_FIELDS_TO_IGNORE.contains(field.getName()))
+				.collect(Collectors.toUnmodifiableList());
+
+		for (Field field : ignoredFields) {
+			updatedEntity.setFieldValue(field, europeanaProxyEntity.getFieldValue(field));
+		}
+
     	europeanaProxy.setEntity(updatedEntity);
 
 	if (europeanaProxy.getProxyIn()!=null) {
@@ -397,7 +418,7 @@ public class EntityRecordService {
 	}
 }
 
-	private Entity combineEntities(Entity primary, Entity secondary, List<String> fieldsToIgnore)
+	private Entity combineEntities(Entity primary, Entity secondary, List<Field> fieldsToCombine)
 			throws EntityCreationException, IllegalAccessException {
 		Entity consolidatedEntity = EntityObjectFactory.createEntityObject(primary.getType());
 
@@ -408,13 +429,8 @@ public class EntityRecordService {
 				 */
 				Map<Object, Object> prefLabelsForAltLabels = new HashMap<>();
 
-				List<Field> allEntityFields = new ArrayList<>();
-				EntityUtils.getAllFields(allEntityFields, primary.getClass());
 
-				for (Field field : allEntityFields) {
-					if (fieldsToIgnore.contains(field.getName())) {
-						continue;
-					}
+				for (Field field : fieldsToCombine) {
 
 			Class<?> fieldType = field.getType();
 			String fieldName = field.getName();
@@ -456,7 +472,7 @@ public class EntityRecordService {
 
 				}
 
-				mergeSkippedPrefLabels(consolidatedEntity, prefLabelsForAltLabels, allEntityFields);
+				mergeSkippedPrefLabels(consolidatedEntity, prefLabelsForAltLabels, fieldsToCombine);
 
 
 		return consolidatedEntity;

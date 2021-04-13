@@ -35,16 +35,6 @@ import org.bson.types.ObjectId;
  */
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @ValidEntityFields(groups = {Default.class})
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
-@JsonSubTypes({
-		@JsonSubTypes.Type(value = AgentImpl.class, name = "Agent"),
-		@JsonSubTypes.Type(value = ConceptImpl.class, name = "Concept"),
-		@JsonSubTypes.Type(value = OrganizationImpl.class, name = "Organization") ,
-		@JsonSubTypes.Type(value = PlaceImpl.class, name = "Place"),
-		@JsonSubTypes.Type(value = TimespanImpl.class, name = "Timespan")
-}
-)
 public abstract class BaseEntity implements Entity {
 	
 	public BaseEntity() {
