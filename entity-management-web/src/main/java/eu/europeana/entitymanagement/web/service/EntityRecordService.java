@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
+import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +62,14 @@ public class EntityRecordService {
 
     private final DataSources datasources;
 
-    @Autowired
+	/**
+	 * Fields to ignore when updating entities from user request
+	 */
+	private final List<String> UPDATE_FIELDS_TO_IGNORE = List
+			.of(WebEntityFields.ID, WebEntityFields.IDENTIFIER, WebEntityFields.TYPE,
+					WebEntityFields.IS_AGGREGATED_BY);
+
+	@Autowired
     public EntityRecordService(EntityRecordRepository entityRecordRepository,
 	    EntityManagementConfiguration emConfiguration, DataSources datasources) {
 	this.entityRecordRepository = entityRecordRepository;
@@ -359,79 +367,119 @@ public class EntityRecordService {
 	Entity primary = europeanaProxy.getEntity();
 	Entity secondary = externalProxy.getEntity();
 
-	try {
-	    /*
-	     * store the preferred label in the secondary entity that is different from the
-	     * preferred label in the primary entity to the alternative labels of the
-	     * consolidated entity
-	     */
-	    Map<Object, Object> prefLabelsForAltLabels = new HashMap<>();
+			List<Field> fieldsToCombine = new ArrayList<>();
+			EntityUtils.getAllFields(fieldsToCombine, primary.getClass());
 
-	    List<Field> allEntityFields = new ArrayList<>();
-	    EntityUtils.getAllFields(allEntityFields, primary.getClass());
+			try {
+				Entity consolidatedEntity = combineEntities(primary, secondary, fieldsToCombine);
+				entityRecord.setEntity(consolidatedEntity);
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				logger.error(
+						"Error while reconciling entity data", e);
+			}
+		}
 
-	    Entity consilidatedEntity = entityRecord.getEntity();
-	    for (Field field : allEntityFields) {
+	/**
+	 * Updates Europeana proxy metadata with the provided entity metadata.
+	 *
+	 * @param updateEntity entity to copy metadata from
+	 * @param entityRecord entity record
+	 * @throws Exception if error occurs
+	 */
+	public void updateEuropeanaProxy(Entity updateEntity, EntityRecord entityRecord)
+		throws Exception {
+	EntityProxy europeanaProxy = entityRecord.getEuropeanaProxy();
 
-		Class<?> fieldType = field.getType();
-		String fieldName = field.getName();
+		List<Field> allFields = new ArrayList<>();
+		EntityUtils.getAllFields(allFields, updateEntity.getClass());
 
-		if (fieldType.isArray()) {
-		    Object[] mergedArray = mergeArrays(primary, secondary, field);
-		    consilidatedEntity.setFieldValue(field, mergedArray);
-			    
-//		    if (fieldValuePrimaryObject != null) {
-//			entityRecord.getEntity().setFieldValue(field, fieldValuePrimaryObject.toArray((Object[]) Array
-//				.newInstance(field.getType().getComponentType(), fieldValuePrimaryObject.size())));
-//		    }
+		List<Field> filteredList = allFields.stream()
+				.filter(field -> !UPDATE_FIELDS_TO_IGNORE.contains(field.getName()))
+				.collect(Collectors.toUnmodifiableList());
 
-		} else if (List.class.isAssignableFrom(fieldType)) {
+		Entity europeanaProxyEntity = europeanaProxy.getEntity();
+		// updateEntity considered as "primary", since its values take precedence over existing metadata.
+		Entity updatedEntity = combineEntities(updateEntity, europeanaProxyEntity,
+				filteredList);
 
-		    List<Object> fieldValuePrimaryObjectList = (List<Object>) primary.getFieldValue(field);
-		    List<Object> fieldValueSecondaryObjectList = (List<Object>) secondary.getFieldValue(field);
-		    megeList(consilidatedEntity, fieldValuePrimaryObjectList, fieldValueSecondaryObjectList, field);
+		// finally copy over ignored fields from the existing metadata
+		List<Field> ignoredFields = allFields.stream()
+				.filter(field -> UPDATE_FIELDS_TO_IGNORE.contains(field.getName()))
+				.collect(Collectors.toUnmodifiableList());
 
-		} else if (fieldType.isPrimitive() || String.class.isAssignableFrom(fieldType)) {
-		    Object fieldValuePrimaryObjectPrimitiveOrString = primary.getFieldValue(field);
-		    Object fieldValueSecondaryObjectPrimitiveOrString = secondary.getFieldValue(field);
+		for (Field field : ignoredFields) {
+			updatedEntity.setFieldValue(field, europeanaProxyEntity.getFieldValue(field));
+		}
 
-		    if (fieldValuePrimaryObjectPrimitiveOrString == null && fieldValueSecondaryObjectPrimitiveOrString != null) {
-			consilidatedEntity.setFieldValue(field, fieldValueSecondaryObjectPrimitiveOrString);
-		    } else if (fieldValuePrimaryObjectPrimitiveOrString != null) {
-			consilidatedEntity.setFieldValue(field, fieldValuePrimaryObjectPrimitiveOrString);
-		    }
-		    
-		} else if (Date.class.isAssignableFrom(fieldType)) {
-		    Object fieldValuePrimaryObjectDate = primary.getFieldValue(field);
-		    Object fieldValueSecondaryObjectDate = secondary.getFieldValue(field);
+    	europeanaProxy.setEntity(updatedEntity);
 
-		    if (fieldValuePrimaryObjectDate == null && fieldValueSecondaryObjectDate != null) {
-			consilidatedEntity.setFieldValue(field, new Date (((Date)fieldValueSecondaryObjectDate).getTime()));
-		    } else if (fieldValuePrimaryObjectDate != null) {
-			consilidatedEntity.setFieldValue(field, new Date (((Date)fieldValuePrimaryObjectDate).getTime()));
-		    }
-
-		} else if (Map.class.isAssignableFrom(fieldType)) {
-		    extracted(consilidatedEntity, primary, secondary, prefLabelsForAltLabels, field, fieldName);
-
-		} 
-
-	    }
-
-	    mergeSkippedPrefLabels(consilidatedEntity, prefLabelsForAltLabels, allEntityFields);
-	} catch (IllegalArgumentException e) {
-	    logger.error(
-		    "During the reconceliation of the entity data from different sources a method has been passed an illegal or inappropriate argument.",
-		    e);
-	} catch (IllegalAccessException e) {
-	    logger.error(
-		    "During the reconceliation of the entity data from different sources an illegal access to some method or field has happened.",
-		    e);
+	if (europeanaProxy.getProxyIn()!=null) {
+		europeanaProxy.getProxyIn().setModified(new Date());
 	}
-    }
+}
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    void extracted(Entity consilidatedEntity, Entity primary, Entity secondary,
+	private Entity combineEntities(Entity primary, Entity secondary, List<Field> fieldsToCombine)
+			throws EntityCreationException, IllegalAccessException {
+		Entity consolidatedEntity = EntityObjectFactory.createEntityObject(primary.getType());
+
+				/*
+				 * store the preferred label in the secondary entity that is different from the
+				 * preferred label in the primary entity to the alternative labels of the
+				 * consolidated entity
+				 */
+				Map<Object, Object> prefLabelsForAltLabels = new HashMap<>();
+
+
+				for (Field field : fieldsToCombine) {
+
+			Class<?> fieldType = field.getType();
+			String fieldName = field.getName();
+
+			if (fieldType.isArray()) {
+					Object[] mergedArray = mergeArrays(primary, secondary, field);
+				consolidatedEntity.setFieldValue(field, mergedArray);
+
+			} else if (List.class.isAssignableFrom(fieldType)) {
+
+					List<Object> fieldValuePrimaryObjectList = (List<Object>) primary.getFieldValue(field);
+					List<Object> fieldValueSecondaryObjectList = (List<Object>) secondary.getFieldValue(field);
+					megeList(consolidatedEntity, fieldValuePrimaryObjectList, fieldValueSecondaryObjectList, field);
+
+			} else if (fieldType.isPrimitive() || String.class.isAssignableFrom(fieldType)) {
+					Object fieldValuePrimaryObjectPrimitiveOrString = primary.getFieldValue(field);
+					Object fieldValueSecondaryObjectPrimitiveOrString = secondary.getFieldValue(field);
+
+					if (fieldValuePrimaryObjectPrimitiveOrString == null && fieldValueSecondaryObjectPrimitiveOrString != null) {
+						consolidatedEntity.setFieldValue(field, fieldValueSecondaryObjectPrimitiveOrString);
+					} else if (fieldValuePrimaryObjectPrimitiveOrString != null) {
+						consolidatedEntity.setFieldValue(field, fieldValuePrimaryObjectPrimitiveOrString);
+					}
+
+			} else if (Date.class.isAssignableFrom(fieldType)) {
+					Object fieldValuePrimaryObjectDate = primary.getFieldValue(field);
+					Object fieldValueSecondaryObjectDate = secondary.getFieldValue(field);
+
+					if (fieldValuePrimaryObjectDate == null && fieldValueSecondaryObjectDate != null) {
+						consolidatedEntity.setFieldValue(field, new Date (((Date)fieldValueSecondaryObjectDate).getTime()));
+					} else if (fieldValuePrimaryObjectDate != null) {
+						consolidatedEntity.setFieldValue(field, new Date (((Date)fieldValuePrimaryObjectDate).getTime()));
+					}
+
+			} else if (Map.class.isAssignableFrom(fieldType)) {
+					combineEntities(consolidatedEntity, primary, secondary, prefLabelsForAltLabels, field, fieldName);
+
+			}
+
+				}
+
+				mergeSkippedPrefLabels(consolidatedEntity, prefLabelsForAltLabels, fieldsToCombine);
+
+
+		return consolidatedEntity;
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+    void combineEntities(Entity consilidatedEntity, Entity primary, Entity secondary,
 	    Map<Object, Object> prefLabelsForAltLabels, Field field, String fieldName) throws IllegalAccessException {
 	//TODO: refactor implemetation
 	

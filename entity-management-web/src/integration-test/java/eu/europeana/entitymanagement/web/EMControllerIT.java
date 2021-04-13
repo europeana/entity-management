@@ -272,7 +272,10 @@ public class EMControllerIT extends AbstractIntegrationTest {
         final ObjectNode nodeReference = new ObjectMapper().readValue(loadFile(CONCEPT_UPDATE_JSON), ObjectNode.class);
         Optional<EntityRecord> entityRecordUpdated = entityRecordService.retrieveEntityRecordByUri(registeredEntityNode.path("id").asText());
         Assertions.assertTrue(entityRecordUpdated.isPresent());
-        Assertions.assertTrue(entityRecordUpdated.get().getEuropeanaProxy().getEntity().getDepiction().equals(nodeReference.path("depiction").asText()));
+        Assertions.assertEquals(nodeReference.path("depiction").asText(),
+            entityRecordUpdated.get().getEuropeanaProxy().getEntity().getDepiction());
+        Assertions.assertEquals(nodeReference.path("note").path("en").path(0).asText(),
+            entityRecordUpdated.get().getEuropeanaProxy().getEntity().getNote().get("en").get(0));
         // acquire the reader for the right type
         ObjectReader reader = objectMapper.readerFor(new TypeReference<Map<String,String>>() {});
         Map<String,String> prefLabelToCheck = reader.readValue(nodeReference.path("prefLabel"));

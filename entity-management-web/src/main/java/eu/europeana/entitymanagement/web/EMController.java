@@ -104,7 +104,7 @@ public class EMController extends BaseRest {
 	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "internal") String profile,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
-	    @RequestBody EntityPreview entityCreationRequest,
+	    @RequestBody Entity updateRequestEntity,
 	    HttpServletRequest request) throws Exception {
 
     	// TODO: Re-enable authentication
@@ -122,26 +122,9 @@ public class EMController extends BaseRest {
 				throw new EtagMismatchException("If-Match header value does not match generated ETag for entity");
 			}
 
-			if(entityCreationRequest.getId()!=null) {
-				entityRecord.getEuropeanaProxy().getEntity().setEntityId(entityCreationRequest.getId());
-			}
-			if(entityCreationRequest.getAltLabel()!=null) {
-				entityRecord.getEuropeanaProxy().getEntity().setAltLabel(entityCreationRequest.getAltLabel());
-			}
-    		if(entityCreationRequest.getDepiction()!=null) {
-					entityRecord.getEuropeanaProxy().getEntity().setDepiction(entityCreationRequest.getDepiction());
-    		}
-    		if(entityCreationRequest.getPrefLabel()!=null) {
-					entityRecord.getEuropeanaProxy().getEntity().setPrefLabelStringMap(entityCreationRequest.getPrefLabel());
-    		}
-
-    		Date modificationDate = new Date();
-    		if (entityRecord.getEuropeanaProxy().getProxyIn()!=null) {
-					entityRecord.getEuropeanaProxy().getProxyIn().setModified(modificationDate);
-    		}
-
-    		entityRecordService.update(entityRecord);
-				return launchTaskAndRetrieveEntity(type, identifier, entityRecord, profile);
+			entityRecordService.updateEuropeanaProxy(updateRequestEntity, entityRecord);
+			entityRecordService.update(entityRecord);
+			return launchTaskAndRetrieveEntity(type, identifier, entityRecord, profile);
     }
 
 

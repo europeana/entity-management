@@ -1,9 +1,12 @@
 package eu.europeana.entitymanagement.web;
 
+import eu.europeana.api.commons.error.EuropeanaApiErrorResponse.Builder;
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -36,5 +39,14 @@ public class EMExceptionHandler extends EuropeanaGlobalExceptionHandler {
                 .status(e.getStatus())
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(response);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<EuropeanaApiErrorResponse> handleException(HttpMessageNotReadableException e, HttpServletRequest httpRequest) {
+        EuropeanaApiErrorResponse response = new EuropeanaApiErrorResponse.Builder(httpRequest, e, stackTraceEnabled())
+            .setStatus(HttpStatus.BAD_REQUEST.value())
+            .setMessage("'type' property is required for updates. Valid values are 'Agent', 'Concept', 'Organization', 'Place' and 'Timespan'")
+            .build();
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 }
