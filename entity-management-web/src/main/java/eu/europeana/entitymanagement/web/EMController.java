@@ -1,6 +1,5 @@
 package eu.europeana.entitymanagement.web;
 
-import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
 import java.util.Date;
 import java.util.Optional;
 
@@ -105,7 +104,7 @@ public class EMController extends BaseRest {
 	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "internal") String profile,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
-	    @RequestBody BaseEntity updateRequestEntity,
+	    @RequestBody Entity updateRequestEntity,
 	    HttpServletRequest request) throws Exception {
 
     	// TODO: Re-enable authentication
