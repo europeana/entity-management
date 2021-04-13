@@ -45,7 +45,8 @@ public class EMExceptionHandler extends EuropeanaGlobalExceptionHandler {
     public ResponseEntity<EuropeanaApiErrorResponse> handleException(HttpMessageNotReadableException e, HttpServletRequest httpRequest) {
         EuropeanaApiErrorResponse response = new EuropeanaApiErrorResponse.Builder(httpRequest, e, stackTraceEnabled())
             .setStatus(HttpStatus.BAD_REQUEST.value())
-            .setMessage("'type' property is required for updates. Valid values are 'Agent', 'Concept', 'Organization', 'Place' and 'Timespan'")
+            .setError("Error parsing request body")
+            .setMessage("JSON is either malformed or missing required 'type' property")
             .build();
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
