@@ -1,40 +1,51 @@
 package eu.europeana.entitymanagement.definitions.model.impl;
 
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.ENTITY_CONTEXT;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
-
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import java.lang.reflect.Field;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import javax.validation.groups.Default;
-
-import dev.morphia.annotations.Transient;
-import eu.europeana.entitymanagement.common.config.ComparisonUtils;
-import org.bson.types.ObjectId;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-
+import dev.morphia.annotations.Transient;
+import eu.europeana.entitymanagement.common.config.ComparisonUtils;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.Timespan;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.normalization.ValidEntityFields;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import javax.validation.groups.Default;
+import org.bson.types.ObjectId;
 
 /*
  * TODO: Define the Jackson annotations, both xml and json, in one place, meaning in this class here and the corresponding extended classes 
  */
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @ValidEntityFields(groups = {Default.class})
-public class BaseEntity implements Entity {
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
+@JsonSubTypes({
+		@JsonSubTypes.Type(value = AgentImpl.class, name = "Agent"),
+		@JsonSubTypes.Type(value = ConceptImpl.class, name = "Concept"),
+		@JsonSubTypes.Type(value = OrganizationImpl.class, name = "Organization") ,
+		@JsonSubTypes.Type(value = PlaceImpl.class, name = "Place"),
+		@JsonSubTypes.Type(value = TimespanImpl.class, name = "Timespan")
+}
+)
+public abstract class BaseEntity implements Entity {
 	
 	public BaseEntity() {
 		// TODO Auto-generated constructor stub
@@ -70,12 +81,6 @@ public class BaseEntity implements Entity {
 	@JsonIgnore
 	public WebResource getReferencedWebResource() {
 		return referencedWebResource;
-	}
-	
-	@Override
-	@JsonSetter
-	public void setReferencedWebResource(WebResource resource) {
-		this.referencedWebResource = resource;
 	}
 	
 	@JsonGetter(WebEntityFields.PREF_LABEL)
@@ -143,7 +148,6 @@ public class BaseEntity implements Entity {
 
 	@Override
 	@JsonGetter(WebEntityFields.ID)
-	@JacksonXmlProperty(isAttribute= true, localName = XmlFields.XML_RDF_ABOUT)
 	public String getEntityId() {
 		return entityId;
 	}
@@ -167,6 +171,7 @@ public class BaseEntity implements Entity {
 	}
 
 	@JsonIgnore
+	@JacksonXmlProperty(isAttribute= true, localName = XmlFields.XML_RDF_ABOUT)
 	public String getAbout() {
 		return getEntityId();
 	}
@@ -417,5 +422,4 @@ public class BaseEntity implements Entity {
 		result = 31 * result + Arrays.hashCode(getIdentifier());
 		return result;
 	}
-
 }
