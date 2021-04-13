@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.serialization;
+package eu.europeana.entitymanagement.serialization.mixins;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlTransient;
 /**
  * Ignores the context field during serialization
  */
-abstract class EntityContextIgnoreMixin {
+public abstract class XmlIgnoreFieldsMixin {
   @JsonIgnore
-  abstract String getContext();
+  public abstract String getContext();
 }

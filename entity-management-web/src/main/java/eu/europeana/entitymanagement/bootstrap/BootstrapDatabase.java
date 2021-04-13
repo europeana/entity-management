@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.bootstrap;
 
+
 import eu.europeana.entitymanagement.batch.config.MongoBatchConfigurer;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import org.apache.logging.log4j.LogManager;

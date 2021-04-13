@@ -143,6 +143,7 @@ public class BaseEntity implements Entity {
 
 	@Override
 	@JsonGetter(WebEntityFields.ID)
+	@JacksonXmlProperty(isAttribute= true, localName = XmlFields.XML_RDF_ABOUT)
 	public String getEntityId() {
 		return entityId;
 	}
@@ -166,7 +167,6 @@ public class BaseEntity implements Entity {
 	}
 
 	@JsonIgnore
-	@JacksonXmlProperty(isAttribute= true, localName = XmlFields.XML_RDF_ABOUT)
 	public String getAbout() {
 		return getEntityId();
 	}
