@@ -27,9 +27,9 @@ public abstract class XmlBaseEntityImpl {
     List<XmlWebResourceImpl> referencedWebResources;
 
     private String about;
-    private List<LabelResource> altLabel = new ArrayList<>();
-    private List<LabelResource> prefLabel = new ArrayList<>();
-    private List<LabelResource> sameAs = new ArrayList<>();
+    private List<LabelledResource> altLabel = new ArrayList<>();
+    private List<LabelledResource> prefLabel = new ArrayList<>();
+    private List<LabelledResource> sameAs = new ArrayList<>();
 
     public XmlBaseEntityImpl() {
 	// default constructor
@@ -101,17 +101,17 @@ public abstract class XmlBaseEntityImpl {
     }
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.PREF_LABEL)
-    public List<LabelResource> getPrefLabel() {
+    public List<LabelledResource> getPrefLabel() {
 	return this.prefLabel;
     }
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.ALT_LABEL)
-    public List<LabelResource> getAltLabel() {
+    public List<LabelledResource> getAltLabel() {
 	return this.altLabel;
     }
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.XML_SAME_AS)
-    public List<LabelResource> getSameAs() {
+    public List<LabelledResource> getSameAs() {
 	return this.sameAs;
     }
 
@@ -121,14 +121,14 @@ public abstract class XmlBaseEntityImpl {
      * 
      * @deprecated
      */
-    public LabelResource getIsShownBy() {
+    public LabelledResource getIsShownBy() {
 
 	if (entity.getReferencedWebResource() != null) {
 //		    referencedWebResources.add(new XmlWebResourceImpl(((BaseEntity)entity).getIsShownById(),((BaseEntity)entity).getIsShownBySource(), ((BaseEntity)entity).getIsShownByThumbnail()));
 //	        return new RdfResource(((BaseEntity)entity).getIsShownById());
 	    referencedWebResources.add(new XmlWebResourceImpl(entity.getReferencedWebResource().getId(),
 		    entity.getReferencedWebResource().getSource(), entity.getReferencedWebResource().getThumbnail()));
-	    return new LabelResource(entity.getReferencedWebResource().getId());
+	    return new LabelledResource(entity.getReferencedWebResource().getId());
 	} else {
 	    return null;
 	}

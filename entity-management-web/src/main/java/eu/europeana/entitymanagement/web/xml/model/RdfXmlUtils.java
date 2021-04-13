@@ -13,76 +13,76 @@ import eu.europeana.corelib.utils.EuropeanaUriUtils;
 
 public class RdfXmlUtils {
 
-    public static List<LabelResource> convertToRdfResource(String[] elements) {
+    public static List<LabelledResource> convertToRdfResource(String[] elements) {
 	if (elements == null)
 	    return null;
-	List<LabelResource> res = new ArrayList<>();
+	List<LabelledResource> res = new ArrayList<>();
 	for (int index = 0; index < elements.length; index++) {
-	    res.add(new LabelResource(elements[index]));
+	    res.add(new LabelledResource(elements[index]));
 	}
 	return res;
     }
 
-	public static List<LabelResource> convertToXmlMultilingualString(Map<String, List<String>> values) {
+	public static List<LabelledResource> convertToXmlMultilingualString(Map<String, List<String>> values) {
 	if (values == null)
 	    return null;
-	List<LabelResource> res = new ArrayList<>();
+	List<LabelledResource> res = new ArrayList<>();
 	for (String language : values.keySet()) {
 	    List<String> entryValues = values.get(language);
 	    for (String entryValue : entryValues) {
-				res.add(new LabelResource(StringEscapeUtils.escapeXml11(entryValue), language));
+				res.add(new LabelledResource(StringEscapeUtils.escapeXml11(entryValue), language));
 	    }
 	}
 	return res;
     }
 
-    public static List<LabelResource> convertToXmlMultilingualStringOrRdfResource(Map<String, List<String>> values) {
+    public static List<LabelledResource> convertToXmlMultilingualStringOrRdfResource(Map<String, List<String>> values) {
 	if (values == null)
 	    return null;
-	List<LabelResource> res = new ArrayList<>();
+	List<LabelledResource> res = new ArrayList<>();
 	for (String language : values.keySet()) {
 	    List<String> entryValues = values.get(language);
 	    for (String entryValue : entryValues) {
 		if (EuropeanaUriUtils.isUri(entryValue))
-		    res.add(new LabelResource(entryValue));
+		    res.add(new LabelledResource(entryValue));
 		else
-			res.add(new LabelResource(StringEscapeUtils.escapeXml11(entryValue), language));
+			res.add(new LabelledResource(StringEscapeUtils.escapeXml11(entryValue), language));
 	    }
 	}
 	return res;
     }
 
-    public static List<LabelResource> convertMapToXmlMultilingualString(Map<String, String> values) {
+    public static List<LabelledResource> convertMapToXmlMultilingualString(Map<String, String> values) {
 	if (values == null) {
 	    return null;
 	}
-	List<LabelResource> res = new ArrayList<>();
+	List<LabelledResource> res = new ArrayList<>();
 	for (String language : values.keySet()) {
 		res.add(
-				new LabelResource(StringEscapeUtils.escapeXml11(values.get(language)), language));
+				new LabelledResource(StringEscapeUtils.escapeXml11(values.get(language)), language));
 	}
 	return res;
     }
 
-    public static Map<String, String> toLanguageMap(List<LabelResource> multilingualStrings) {
+    public static Map<String, String> toLanguageMap(List<LabelledResource> multilingualStrings) {
 	if (multilingualStrings == null) {
 	    return null;
 	}
 
 	Map<String, String> res = new HashMap<String, String>(multilingualStrings.size());
-	for (LabelResource xmlMultilingualString : multilingualStrings) {
+	for (LabelledResource xmlMultilingualString : multilingualStrings) {
 	    res.putIfAbsent(xmlMultilingualString.getLang(), xmlMultilingualString.getValue());
 	}
 	return res;
     }
 
-    public static Map<String, List<String>> toLanguageMapList(List<LabelResource> multilingualStrings) {
+    public static Map<String, List<String>> toLanguageMapList(List<LabelledResource> multilingualStrings) {
 	if (multilingualStrings == null) {
 	    return null;
 	}
 
 	Map<String, List<String>> res = new HashMap<String, List<String>>(multilingualStrings.size());
-	for (LabelResource xmlMultilingualString : multilingualStrings) {
+	for (LabelledResource xmlMultilingualString : multilingualStrings) {
 	    if (res.containsKey(xmlMultilingualString.getLang())) {
 		res.get(xmlMultilingualString.getLang()).add(xmlMultilingualString.getValue());
 	    } else {
@@ -94,15 +94,15 @@ public class RdfXmlUtils {
 	return res;
     }
 
-    public static String[] toStringArray(List<LabelResource> resources) {
+    public static String[] toStringArray(List<LabelledResource> resources) {
 	if (resources == null) {
 	    return null;
 	}
 
 	String[] res = new String[resources.size()];
 	int i = 0;
-	for (LabelResource labelResource : resources) {
-	    res[i++] = labelResource.getValue();
+	for (LabelledResource labelledResource : resources) {
+	    res[i++] = labelledResource.getValue();
 	}
 
 	return res;

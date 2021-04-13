@@ -21,25 +21,25 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(namespace = NAMESPACE_EDM, name = XML_AGENT)
 public class XmlAgentImpl extends XmlBaseEntityImpl {
 
-	private List<LabelResource> isPartOf = new ArrayList<>();
+	private List<LabelledResource> isPartOf = new ArrayList<>();
 	private String[] identifier;
-	private List<LabelResource> note = new ArrayList<>();
-	private List<LabelResource> hasPart = new ArrayList<>();
-	private List<LabelResource> hasMet = new ArrayList<>();
-	private List<LabelResource> hiddenLabel = new ArrayList<>();
-	private List<LabelResource> biographicalInformation = new ArrayList<>();
+	private List<LabelledResource> note = new ArrayList<>();
+	private List<LabelledResource> hasPart = new ArrayList<>();
+	private List<LabelledResource> hasMet = new ArrayList<>();
+	private List<LabelledResource> hiddenLabel = new ArrayList<>();
+	private List<LabelledResource> biographicalInformation = new ArrayList<>();
 	private  String[] begin;
 	private String[] end;
-	private List<LabelResource> isRelatedTo = new ArrayList<>();
-	private List<LabelResource> name = new ArrayList<>();
+	private List<LabelledResource> isRelatedTo = new ArrayList<>();
+	private List<LabelledResource> name = new ArrayList<>();
 	private String[] dateOfBirth;
 	private String[] dateOfDeath;
 	private String dateOfEstablishment;
 	private String dateOfTermination;
 	private String gender;
-	private List<LabelResource> placeOfBirth = new ArrayList<>();
-	private List<LabelResource> placeOfDeath = new ArrayList<>();
-	private List<LabelResource> professionOrOccupation = new ArrayList<>();
+	private List<LabelledResource> placeOfBirth = new ArrayList<>();
+	private List<LabelledResource> placeOfDeath = new ArrayList<>();
+	private List<LabelledResource> professionOrOccupation = new ArrayList<>();
 
 	public XmlAgentImpl(Agent agent) {
     	    	super(agent);
@@ -69,12 +69,12 @@ public class XmlAgentImpl extends XmlBaseEntityImpl {
 	}
 
 	@XmlElement(name = HIDDEN_LABEL, namespace = NAMESPACE_SKOS)
-	public List<LabelResource> getHiddenLabel() {
+	public List<LabelledResource> getHiddenLabel() {
 		return hiddenLabel;
 	}
 
 	@XmlElement(name = NOTE, namespace = NAMESPACE_SKOS)
-	public List<LabelResource> getNote() {
+	public List<LabelledResource> getNote() {
 		return note;
 	}
     	
@@ -92,12 +92,12 @@ public class XmlAgentImpl extends XmlBaseEntityImpl {
 	}
 
 	@XmlElement(name = XML_HAS_PART)
-	public List<LabelResource> getHasPart() {
+	public List<LabelledResource> getHasPart() {
 	    	return hasPart;
 	}
 
 	@XmlElement(name = XML_IS_PART_OF)
-	public List<LabelResource> getIsPartOf() {
+	public List<LabelledResource> getIsPartOf() {
 	    	return isPartOf;
 	}
 
@@ -112,22 +112,22 @@ public class XmlAgentImpl extends XmlBaseEntityImpl {
 	}
 
 	@XmlElement(name = XmlConstants.XML_HASMET)
-	public List<LabelResource> getHasMet() {
+	public List<LabelledResource> getHasMet() {
 	    	return hasMet;
 	}
 	
 	@XmlElement(name = XmlConstants.XML_IS_RELATED_TO)
-	public List<LabelResource> getIsRelatedTo() {
+	public List<LabelledResource> getIsRelatedTo() {
 	    	return isRelatedTo;
 	}
 	
 	@XmlElement(name = XmlConstants.XML_NAME)
-	public List<LabelResource> getName(){
+	public List<LabelledResource> getName(){
 	    	return name;
 	}
 	
 	@XmlElement(name = XmlConstants.XML_BIOGRAPHICAL_INFORMATION)
-	public List<LabelResource> getBiographicalInformation(){
+	public List<LabelledResource> getBiographicalInformation(){
 	    	return biographicalInformation;
 	}
 	
@@ -157,17 +157,17 @@ public class XmlAgentImpl extends XmlBaseEntityImpl {
 	}
 	
 	@XmlElement(name = XmlConstants.XML_PLACE_OF_BIRTH)
-	public List<LabelResource> getPlaceOfBirth(){
+	public List<LabelledResource> getPlaceOfBirth(){
 	    	return placeOfBirth;
 	}
 	
 	@XmlElement(name = XmlConstants.XML_PLACE_OF_DEATH)
-	public List<LabelResource> getPlaceOfDeath(){
+	public List<LabelledResource> getPlaceOfDeath(){
 	    	return placeOfDeath;
 	}
 	
 	@XmlElement(name = XmlConstants.XML_PROFESSION_OR_OCCUPATION, namespace = "http://rdvocab.info/ElementsGr2/")
-	public List<LabelResource> getProfessionOrOccupation(){
+	public List<LabelledResource> getProfessionOrOccupation(){
 	    	return professionOrOccupation;
 	}
 	

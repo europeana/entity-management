@@ -30,13 +30,13 @@ public class XmlWebResourceImpl {
 	}
 
 	@JacksonXmlProperty(localName = XmlConstants.XML_DC_SOURCE)
-	public LabelResource getSource() {
-		return new LabelResource(source);
+	public LabelledResource getSource() {
+		return new LabelledResource(source);
 	}
 
 	@JacksonXmlProperty(localName = XmlConstants.XML_THUMBNAIL)
-	public LabelResource getThumbnail() {
-		return new LabelResource(thumbnail);
+	public LabelledResource getThumbnail() {
+		return new LabelledResource(thumbnail);
 	}
 
 }

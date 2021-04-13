@@ -31,13 +31,13 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl {
 	
 	@JacksonXmlElementWrapper(useWrapping=false)
 	@JacksonXmlProperty(localName = XmlConstants.XML_ACRONYM)
-	public List<LabelResource> getAcronym() {
+	public List<LabelledResource> getAcronym() {
 		return RdfXmlUtils.convertToXmlMultilingualString(getOrganization().getAcronym());
 	}
 	
 	@JacksonXmlElementWrapper(useWrapping=false)
 	@JacksonXmlProperty(localName = XmlConstants.XML_DESCRIPTION)
-	public List<LabelResource> getDescription() {
+	public List<LabelledResource> getDescription() {
 		return RdfXmlUtils.convertMapToXmlMultilingualString(getOrganization().getDescription());
 	}
 	
@@ -50,19 +50,19 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl {
 	
 	@JacksonXmlElementWrapper(useWrapping=false)
 	@JacksonXmlProperty(localName = XmlConstants.XML_EUROPEANA_ROLE)
-	public List<LabelResource> getEuropeanaRole() {
+	public List<LabelledResource> getEuropeanaRole() {
 		return RdfXmlUtils.convertToXmlMultilingualString(getOrganization().getEuropeanaRole());
 	}
 	
 	@JacksonXmlElementWrapper(useWrapping=false)
 	@JacksonXmlProperty(localName = XmlConstants.XML_ORGANIZATION_DOMAIN)
-	public List<LabelResource> getOrganizationDomain() {
+	public List<LabelledResource> getOrganizationDomain() {
 		return RdfXmlUtils.convertToXmlMultilingualString(getOrganization().getOrganizationDomain());
 	}
 	
 	@JacksonXmlElementWrapper(useWrapping=false)
 	@JacksonXmlProperty(localName = XmlConstants.XML_GEOGRAPHIC_LEVEL)
-	public List<LabelResource> getGeographicLevel() {
+	public List<LabelledResource> getGeographicLevel() {
 		return RdfXmlUtils.convertMapToXmlMultilingualString(getOrganization().getGeographicLevel());
 	}
 	
@@ -74,10 +74,10 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl {
 	}
 	
 	@JacksonXmlProperty(localName = XmlConstants.XML_HOMEPAGE)
-	public LabelResource getHomepage() {
+	public LabelledResource getHomepage() {
 	    	if(getOrganization().getHomepage() == null)
 	    	    return null;
-		return new LabelResource(getOrganization().getHomepage());
+		return new LabelledResource(getOrganization().getHomepage());
 	}
 	
 	@JacksonXmlElementWrapper(useWrapping=false)

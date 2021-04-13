@@ -31,7 +31,7 @@ public class XmlTimespanImpl extends XmlBaseEntityImpl {
 
 	@JacksonXmlElementWrapper(useWrapping=false)
 	@JacksonXmlProperty(localName = XmlConstants.XML_IS_PART_OF)
-	public List<LabelResource> getIsPartOf() {
+	public List<LabelledResource> getIsPartOf() {
 	    	return RdfXmlUtils.convertToRdfResource(((Timespan)entity).getIsPartOfArray());
 	}
 	
@@ -49,13 +49,13 @@ public class XmlTimespanImpl extends XmlBaseEntityImpl {
 	
 	@JacksonXmlElementWrapper(useWrapping=false)
 	@JacksonXmlProperty(localName = XmlConstants.HIDDEN_LABEL)
-	public List<LabelResource> getHiddenLabel() {
+	public List<LabelledResource> getHiddenLabel() {
 		return RdfXmlUtils.convertToXmlMultilingualString(entity.getHiddenLabel());
 	}
 
 	@JacksonXmlElementWrapper(useWrapping=false)
 	@JacksonXmlProperty(localName = XmlConstants.XML_IS_NEXT_IN_SEQUENCE)
-	public List<LabelResource> getIsNextInSequence() {
+	public List<LabelledResource> getIsNextInSequence() {
 	    	return RdfXmlUtils.convertToRdfResource(((Timespan)entity).getIsNextInSequence());
 	}
 

@@ -23,7 +23,7 @@ public class RdfDepiction {
     }
     
     @JacksonXmlProperty(localName=XmlConstants.XML_DC_SOURCE)
-    public LabelResource getResource() {
-	return new LabelResource(resource);
+    public LabelledResource getResource() {
+	return new LabelledResource(resource);
     }
 }

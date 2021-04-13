@@ -3,7 +3,7 @@ package eu.europeana.entitymanagement.web.model.metis;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import eu.europeana.entitymanagement.web.xml.model.LabelResource;
+import eu.europeana.entitymanagement.web.xml.model.LabelledResource;
 import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
 import eu.europeana.entitymanagement.web.xml.model.metis.EnrichmentResultList;
 import java.io.FileNotFoundException;
@@ -36,14 +36,14 @@ class MetisResponseDeserializerTest {
 	//check prefLabels
 	assertNotNull(xmlEntity.getPrefLabel());
 	assertEquals(23, xmlEntity.getPrefLabel().size());
-	LabelResource enLabel = xmlEntity.getPrefLabel().stream()
+	LabelledResource enLabel = xmlEntity.getPrefLabel().stream()
 		.filter(label -> label.getLang().equals("en")).findFirst().get();
 	assertEquals("bathtub", enLabel.getValue());
 
 	//check altLabels
 	assertNotNull(xmlEntity.getAltLabel());
 	assertEquals(14, xmlEntity.getAltLabel().size());
-	LabelResource deAltLabel = xmlEntity.getAltLabel().stream()
+	LabelledResource deAltLabel = xmlEntity.getAltLabel().stream()
 		.filter(altLabel -> altLabel.getLang().equals("de")).findFirst().get();
 	assertEquals("Wannenbad", deAltLabel.getValue());
 

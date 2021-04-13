@@ -45,31 +45,31 @@ public class XmlPlaceImpl extends XmlBaseEntityImpl {
 	
 	@JacksonXmlElementWrapper(useWrapping=false)
 	@JacksonXmlProperty(localName = XmlConstants.HIDDEN_LABEL)
-	public List<LabelResource> getHiddenLabel() {
+	public List<LabelledResource> getHiddenLabel() {
 		return RdfXmlUtils.convertToXmlMultilingualString(getPlace().getHiddenLabel());
 	}
 	
 	@JacksonXmlElementWrapper(useWrapping=false)
 	@JacksonXmlProperty(localName = XmlConstants.NOTE)
-	public List<LabelResource> getNote() {
+	public List<LabelledResource> getNote() {
 		return RdfXmlUtils.convertToXmlMultilingualString(getPlace().getNote());
 	}
 	
 	@JacksonXmlElementWrapper(useWrapping=false)
 	@JacksonXmlProperty(localName = XmlConstants.XML_HAS_PART)
-	public List<LabelResource> getHasPart() {
+	public List<LabelledResource> getHasPart() {
 	    	return RdfXmlUtils.convertToRdfResource(getPlace().getHasPart());
 	}
 
 	@JacksonXmlElementWrapper(useWrapping=false)
 	@JacksonXmlProperty(localName  = XmlConstants.XML_IS_PART_OF)
-	public List<LabelResource> getIsPartOf() {
+	public List<LabelledResource> getIsPartOf() {
 	    	return RdfXmlUtils.convertToRdfResource(getPlace().getIsPartOfArray());
 	}
 	
 	@JacksonXmlElementWrapper(useWrapping=false)
 	@JacksonXmlProperty(localName = XmlConstants.XML_IS_NEXT_IN_SEQUENCE)
-	public List<LabelResource> getIsNextInSequence() {
+	public List<LabelledResource> getIsNextInSequence() {
 		return RdfXmlUtils.convertToRdfResource(getPlace().getIsNextInSequence());
 	}
 	

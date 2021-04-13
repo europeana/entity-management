@@ -24,18 +24,18 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
         XmlConstants.EXACT_MATCH, XmlConstants.IN_SCHEMA, XmlConstants.XML_SAME_AS, XmlConstants.IS_AGGREGATED_BY})
 public class XmlConceptImpl extends XmlBaseEntityImpl {
 
-    private List<LabelResource> narrower = new ArrayList<>();
-    private List<LabelResource> related = new ArrayList<>();
-    private List<LabelResource> broader = new ArrayList<>();
-    private List<LabelResource> note = new ArrayList<>();
-    private List<LabelResource> broadMatch = new ArrayList<>();
-    private List<LabelResource> narrowMatch = new ArrayList<>();
-    private List<LabelResource> exactMatch = new ArrayList<>();
-    private List<LabelResource> relatedMatch = new ArrayList<>();
-    private List<LabelResource> closeMatch = new ArrayList<>();
-    private List<LabelResource> notation;
-    private List<LabelResource> hiddenLabel;
-    private List<LabelResource> inScheme;
+    private List<LabelledResource> narrower = new ArrayList<>();
+    private List<LabelledResource> related = new ArrayList<>();
+    private List<LabelledResource> broader = new ArrayList<>();
+    private List<LabelledResource> note = new ArrayList<>();
+    private List<LabelledResource> broadMatch = new ArrayList<>();
+    private List<LabelledResource> narrowMatch = new ArrayList<>();
+    private List<LabelledResource> exactMatch = new ArrayList<>();
+    private List<LabelledResource> relatedMatch = new ArrayList<>();
+    private List<LabelledResource> closeMatch = new ArrayList<>();
+    private List<LabelledResource> notation;
+    private List<LabelledResource> hiddenLabel;
+    private List<LabelledResource> inScheme;
 
     public XmlConceptImpl() {
         // default constructor required for deserialization
@@ -79,55 +79,55 @@ public class XmlConceptImpl extends XmlBaseEntityImpl {
     }
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.BROADER)
-    public List<LabelResource> getBroader() {
+    public List<LabelledResource> getBroader() {
         return this.broader;
     }
 
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.NARROWER)
-    public List<LabelResource> getNarrower() {
+    public List<LabelledResource> getNarrower() {
         return this.narrower;
     }
 
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.RELATED)
-    public List<LabelResource> getRelated() {
+    public List<LabelledResource> getRelated() {
         return this.related;
     }
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.BROAD_MATCH)
-    public List<LabelResource> getBroadMatch() {
+    public List<LabelledResource> getBroadMatch() {
         return this.broadMatch;
     }
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.NARROW_MATCH)
-    public List<LabelResource> getNarrowMatch() {
+    public List<LabelledResource> getNarrowMatch() {
         return this.narrowMatch;
     }
 
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.EXACT_MATCH)
-    public List<LabelResource> getExactMatch() {
+    public List<LabelledResource> getExactMatch() {
         return this.exactMatch;
     }
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.RELATED_MATCH)
-    public List<LabelResource> getRelatedMatch() {
+    public List<LabelledResource> getRelatedMatch() {
         return this.relatedMatch;
     }
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.CLOSE_MATCH)
-    public List<LabelResource> getCloseMatch() {
+    public List<LabelledResource> getCloseMatch() {
         return this.closeMatch;
     }
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.NOTATION)
-    public List<LabelResource> getNotation() {
+    public List<LabelledResource> getNotation() {
         return this.notation;
     }
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.HIDDEN_LABEL)
-    public List<LabelResource> getHiddenLabel() {
+    public List<LabelledResource> getHiddenLabel() {
         return this.hiddenLabel;
     }
 
@@ -138,13 +138,13 @@ public class XmlConceptImpl extends XmlBaseEntityImpl {
 
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.NOTE)
-    public List<LabelResource> getNote() {
+    public List<LabelledResource> getNote() {
         return note;
     }
 
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.IN_SCHEMA)
-    public List<LabelResource> getInScheme() {
+    public List<LabelledResource> getInScheme() {
         return this.inScheme;
     }
 
