@@ -50,10 +50,42 @@ public class MetisDereferenceService {
      * @throws EntityCreationException
      */
     public Entity dereferenceEntityById(String id) throws EuropeanaApiException {
-	logger.debug("De-referencing entityId={} from Metis", id);
+	String metisResponseBody = fetchMetisResponse(id);
+	return parseMetisResponse(id, metisResponseBody);
+    }
+
+    public Entity parseMetisResponse(String id, String metisResponseBody)
+	    throws EuropeanaApiException, EntityCreationException {
+	EnrichmentResultList derefResult;
+	// Prevent "FWK005 parse may not be called while parsing" error when this method
+	// is called by multiple threads
+	synchronized (deserializerLock) {
+	    try {
+		derefResult = (EnrichmentResultList) getDeserializer().unmarshal(new StringReader(metisResponseBody));
+	    } catch (JAXBException | RuntimeException e) {
+		throw new EuropeanaApiException(
+			"Unexpected exception occurred when parsing metis dereference response for entity:  " + id, e);
+	    }
+	}
+
+	if (derefResult == null || derefResult.getEnrichmentBaseResultWrapperList().isEmpty()
+		|| derefResult.getEnrichmentBaseResultWrapperList().get(0).getEnrichmentBaseList().isEmpty()) {
+	    // Metis returns an empty XML response if de-referencing is unsuccessful,
+	    // instead of throwing an error
+	    return null;
+	}
+
+	XmlBaseEntityImpl xmlBaseEntity = derefResult.getEnrichmentBaseResultWrapperList().get(0)
+		.getEnrichmentBaseList().get(0);
+
+	return xmlBaseEntity.toEntityModel();
+    }
+
+    String fetchMetisResponse(String entityId) {
+	logger.debug("De-referencing entityId={} from Metis", entityId);
 
 	String metisResponseBody = metisWebClient.get()
-		.uri(uriBuilder -> uriBuilder.path(METIS_DEREF_PATH).queryParam("uri", id).build())
+		.uri(uriBuilder -> uriBuilder.path(METIS_DEREF_PATH).queryParam("uri", entityId).build())
 		.accept(MediaType.APPLICATION_XML).retrieve()
 		// return 400 for 4xx responses from Metis
 		.onStatus(HttpStatus::is4xxClientError,
@@ -63,32 +95,8 @@ public class MetisDereferenceService {
 			response -> response.bodyToMono(String.class).map(EuropeanaApiException::new))
 		.bodyToMono(String.class).block();
 
-	logger.debug("Metis dereference response for entityId={} - {} ", id, metisResponseBody);
-	
-	EnrichmentResultList derefResult;
-	// Prevent "FWK005 parse may not be called while parsing" error when this method is called by multiple threads
-	synchronized (deserializerLock) {
-		try {
-			derefResult = (EnrichmentResultList) getDeserializer()
-					.unmarshal(new StringReader(metisResponseBody));
-		} catch (JAXBException | RuntimeException e) {
-			throw new EuropeanaApiException(
-					"Unexpected exception occurred when parsing metis dereference response for entity:  "
-							+ id, e);
-		}
-	}
-
-	if (derefResult== null || derefResult.getEnrichmentBaseResultWrapperList().isEmpty()
-		|| derefResult.getEnrichmentBaseResultWrapperList().get(0).getEnrichmentBaseList().isEmpty()) {
-	    // Metis returns an empty XML response if de-referencing is unsuccessful,
-	    // instead of throwing an error
-	    return null;
-	}
-
-		XmlBaseEntityImpl xmlBaseEntity = derefResult.getEnrichmentBaseResultWrapperList().get(0)
-				.getEnrichmentBaseList().get(0);
-
-		return xmlBaseEntity.toEntityModel();
+	logger.debug("Metis dereference response for entityId={} - {} ", entityId, metisResponseBody);
+	return metisResponseBody;
     }
 
 

@@ -70,7 +70,10 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
     private void validateConstraints(EntityRecord entityRecord) throws EntityValidationException {
         Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entityRecord.getEntity());
         if (!violations.isEmpty()) {
-            throw new EntityValidationException(null, violations);    
+            //TODO: enable when the implementation is stable and correct
+//            throw new EntityValidationException(null, violations);
+            EntityValidationException e = new EntityValidationException("Consolidated entity has constraint violations.", violations);
+            logger.debug("The record with the following id has constraint validation errors: " + entityRecord.getEntityId(), e);
         }
     }
 

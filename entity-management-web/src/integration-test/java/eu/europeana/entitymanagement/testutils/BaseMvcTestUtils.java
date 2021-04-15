@@ -29,6 +29,7 @@ public class BaseMvcTestUtils {
     
     public static final String CONCEPT_XML = "/metis-deref/concept.xml";
     public static final String AGENT_XML = "/metis-deref/agent.xml";
+    public static final String AGENT_STALIN_XML = "/metis-deref/agent_stalin.xml";
     public static final String ORGANIZATION_XML = "/metis-deref/organization.xml";
     public static final String PLACE_XML = "/metis-deref/place.xml";
     public static final String TIMESPAN_XML = "/metis-deref/timespan.xml";  
