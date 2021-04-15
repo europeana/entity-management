@@ -86,6 +86,13 @@ public class RdfXmlUtils {
 
 	Map<String, List<String>> res = new HashMap<String, List<String>>(multilingualStrings.size());
 	for (XmlMultilingualString xmlMultilingualString : multilingualStrings) {
+		if(xmlMultilingualString.getLanguage() == null){
+			/*
+			 * Temporary workaround for missing lang value in Metis response.
+			 * Ignore this label
+ 			 */
+			continue;
+		}
 	    if (res.containsKey(xmlMultilingualString.getLanguage())) {
 		res.get(xmlMultilingualString.getLanguage()).add(xmlMultilingualString.getValue());
 	    } else {

@@ -58,7 +58,7 @@ public class EMController extends BaseRest {
   private final DataSources datasources;
   private final BatchService batchService;
 
-	private static final String ENTITY_ID_REMOVED_MSG = "Entity '%s' has already been removed";
+	private static final String ENTITY_ID_REMOVED_MSG = "Entity '%s' has been removed";
 	private static final String EXTERNAL_ID_REMOVED_MSG = "Entity id '%s' already exists as '%s', which has been removed";
 
   @Autowired
@@ -104,7 +104,7 @@ public class EMController extends BaseRest {
 	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "internal") String profile,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
-	    @RequestBody EntityPreview entityCreationRequest,
+	    @RequestBody Entity updateRequestEntity,
 	    HttpServletRequest request) throws Exception {
 
     	// TODO: Re-enable authentication
@@ -122,26 +122,9 @@ public class EMController extends BaseRest {
 				throw new EtagMismatchException("If-Match header value does not match generated ETag for entity");
 			}
 
-			if(entityCreationRequest.getId()!=null) {
-				entityRecord.getEuropeanaProxy().getEntity().setEntityId(entityCreationRequest.getId());
-			}
-			if(entityCreationRequest.getAltLabel()!=null) {
-				entityRecord.getEuropeanaProxy().getEntity().setAltLabel(entityCreationRequest.getAltLabel());
-			}
-    		if(entityCreationRequest.getDepiction()!=null) {
-					entityRecord.getEuropeanaProxy().getEntity().setDepiction(entityCreationRequest.getDepiction());
-    		}
-    		if(entityCreationRequest.getPrefLabel()!=null) {
-					entityRecord.getEuropeanaProxy().getEntity().setPrefLabelStringMap(entityCreationRequest.getPrefLabel());
-    		}
-
-    		Date modificationDate = new Date();
-    		if (entityRecord.getEuropeanaProxy().getProxyIn()!=null) {
-					entityRecord.getEuropeanaProxy().getProxyIn().setModified(modificationDate);
-    		}
-
-    		entityRecordService.update(entityRecord);
-				return launchTaskAndRetrieveEntity(type, identifier, entityRecord, profile);
+			entityRecordService.updateEuropeanaProxy(updateRequestEntity, entityRecord);
+			entityRecordService.update(entityRecord);
+			return launchTaskAndRetrieveEntity(type, identifier, entityRecord, profile);
     }
 
 
@@ -217,7 +200,7 @@ public class EMController extends BaseRest {
 		public ResponseEntity<String> registerEntity(
 				@RequestBody EntityPreview entityCreationRequest)
 				throws Exception {
-			logger.trace("Register new entity:{}", entityCreationRequest.getId());
+			logger.debug("Registering new entity: {}", entityCreationRequest.getId());
 	
 			// check if id is already being used, if so return a 301
 			Optional<EntityRecord> existingEntity = entityRecordService
@@ -231,7 +214,7 @@ public class EMController extends BaseRest {
 
 			// return 400 error if ID does not match a configured datasource
 			if (!datasources.hasDataSource(entityCreationRequest.getId())) {
-				logger.debug("Entity registration id={} - no matching datasource configured",
+				logger.debug("Entity registration: {} - no matching datasource configured",
 						entityCreationRequest.getId());
 				throw new HttpBadRequestException(String
 						.format("id %s does not match a configured datasource", entityCreationRequest.getId()));
@@ -248,14 +231,16 @@ public class EMController extends BaseRest {
 				}
 			}
 
-			EntityRecord savedEntityRecord = entityRecordService
-					.createEntityFromRequest(entityCreationRequest,
-							metisResponse);
+			logger.debug("Saving record for {}", entityCreationRequest.getId());
 
-			launchUpdateTask(savedEntityRecord.getEntityId(), true);
-			logger.debug("Created Entity record with id:{}", savedEntityRecord.getEntityId());
-			return ResponseEntity.accepted().body(jsonLdSerializer.serialize(savedEntityRecord,
-					EntityProfile.internal));
+			EntityRecord savedEntityRecord = entityRecordService
+					.createEntityFromRequest(entityCreationRequest, metisResponse);
+
+			logger.debug("Created Entity record for {}; entityId={}", entityCreationRequest.getId(), savedEntityRecord.getEntityId());
+
+			return launchTaskAndRetrieveEntity(savedEntityRecord.getEntity().getType(),
+					getDatabaseIdentifier(savedEntityRecord.getEntityId()), savedEntityRecord,
+					EntityProfile.internal.toString());
 		}
 
 
@@ -357,4 +342,12 @@ public class EMController extends BaseRest {
     logger.info("Launching update task for entityId={}. async={}", entityUri, runAsynchronously);
     batchService.launchSingleEntityUpdate(entityUri, runAsynchronously);
   }
+
+	/**
+	 * Gets the database identifier from an EntityId string
+	 */
+	private String getDatabaseIdentifier(String entityId) {
+		//entity id is "http://data.europeana.eu/{type}/{identifier}"
+		return entityId.substring(entityId.lastIndexOf("/") + 1);
+	}
 }

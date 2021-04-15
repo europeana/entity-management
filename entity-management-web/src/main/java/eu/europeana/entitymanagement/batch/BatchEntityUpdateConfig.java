@@ -21,6 +21,8 @@ import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import java.util.Arrays;
 import java.util.Date;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -44,6 +46,7 @@ public class BatchEntityUpdateConfig {
     private static final String SPECIFIC_ITEM_READER = "specificItemReader";
     private static final String ALL_ITEM_READER = "allItemReader";
 
+    private static final Logger logger = LogManager.getLogger(BatchEntityUpdateConfig.class);
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
 
@@ -134,16 +137,18 @@ public class BatchEntityUpdateConfig {
             .build();
     }
 
-    @Bean
+
     Job updateSpecificEntities() {
+        logger.info("Starting update job for specific entities");
         return this.jobBuilderFactory.get(JOB_UPDATE_SPECIFIC_ENTITIES)
                 .incrementer(new RunIdIncrementer())
                 .start(updateEntityStep(true))
                 .build();
     }
 
-    @Bean
+
     Job updateAllEntities() {
+        logger.info("Starting update job for ALL entities");
         return this.jobBuilderFactory.get(JOB_UPDATE_ALL_ENTITIES)
                 .start(updateEntityStep(false))
                 .build();
