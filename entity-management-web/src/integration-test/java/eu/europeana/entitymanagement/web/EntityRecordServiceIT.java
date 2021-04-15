@@ -40,6 +40,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.Concept;
 import eu.europeana.entitymanagement.definitions.model.Entity;
@@ -58,7 +59,7 @@ import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
 import eu.europeana.entitymanagement.web.xml.model.metis.EnrichmentResultList;
 
 @SpringBootTest
-public class EntityRecordServiceT {
+public class EntityRecordServiceIT extends AbstractIntegrationTest{
 
     @Autowired
     private EntityRecordService entityRecordService;

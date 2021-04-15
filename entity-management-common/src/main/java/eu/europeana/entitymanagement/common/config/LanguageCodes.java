@@ -65,6 +65,11 @@ public class LanguageCodes {
 
 		public List<Language> getAlternativeLanguages() {
 			return alternativeLanguages;		}
+		
+		@Override
+		public String toString() {
+		    return getCode(); 
+		}
 
 	}
 

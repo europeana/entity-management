@@ -275,6 +275,14 @@ public class EntityRecordService {
 	String[] hasMetField = entity.getHasMet();
 	entity.setHasMet(replaceWithInternalReferences(hasMetField));
 	
+	// for the field hasMet
+	String[] wasPresentField = entity.getWasPresentAt();
+	entity.setWasPresentAt(replaceWithInternalReferences(wasPresentField));
+	
+	// for the field date
+	String[] dateField = entity.getDate();
+	entity.setDate(replaceWithInternalReferences(dateField));
+	
     }
 
     private void performReferentialIntegrityPlace(Place entity) {
