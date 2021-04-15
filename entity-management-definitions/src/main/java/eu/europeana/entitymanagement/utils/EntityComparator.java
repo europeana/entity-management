@@ -64,6 +64,11 @@ public class EntityComparator implements Comparator<Entity> {
 
 	for (Field field : allObjectFieldsE1) {
 
+	    if(field.getName().startsWith("tmp")) {
+		//ignore corelib adapter fields
+		continue;
+	    }
+		
 	    Class<?> fieldType = field.getType();
 //	    	String fieldNameE1 = fieldE1.getName();
 
