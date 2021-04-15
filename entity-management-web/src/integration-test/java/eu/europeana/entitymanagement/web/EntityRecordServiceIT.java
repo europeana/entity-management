@@ -141,8 +141,6 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
 	     * here the assertions are manual and are defined based on what is in put in the
 	     * corresponsing proxy's entity objects
 	     */
-	    
-	    //TODO: verify correctness of all properties against the "consolidated/concept-consolidated-bathtub.json" file
 	    ConceptImpl concept_consolidated = objectMapper.readValue(loadFile(CONCEPT_CONSOLIDATED_BATHTUB), ConceptImpl.class);
 	    //TODO: temporary fix untill the merge entities is stable see EntityRecordService.UPDARTE_FIELDS_TO_IGNORE
 	    concept_consolidated.setType(entityRecord.getEntity().getType());
