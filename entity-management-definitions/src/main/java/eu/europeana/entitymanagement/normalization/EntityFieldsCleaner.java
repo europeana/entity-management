@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -19,26 +20,6 @@ import eu.europeana.entitymanagement.utils.EntityUtils;
 
 public class EntityFieldsCleaner {
 
-    @Deprecated
-    /**
-     * @deprecated verify if needed and use the name according to the naming
-     *             conventions
-     */
-    public static final String altLabelFieldNamePrefix = "altLabel";
-    @Deprecated
-    /**
-     * @deprecated verify if needed and use the name according to the naming
-     *             conventions
-     */
-    public static final String altLabelCharacterSeparator = "_";
-
-    @Deprecated
-    /**
-     * @deprecated verify if needed and use the name according to the naming
-     *             conventions
-     */
-    public static final String languageSeparator = "_";
-
     private static final Logger logger = LogManager.getLogger(EntityFieldsCleaner.class);
 
     LanguageCodes emLanguageCodes;
@@ -50,8 +31,9 @@ public class EntityFieldsCleaner {
     public void initialize(ValidEntityFields constraint) {
     }
 
+    @SuppressWarnings("unchecked")
     public void cleanAndNormalize(Entity entity) {
-	
+
 	List<Field> entityFields = new ArrayList<>();
 	EntityUtils.getAllFields(entityFields, entity.getClass());
 
@@ -65,31 +47,25 @@ public class EntityFieldsCleaner {
 		    // remove spaces from the String fields
 		    normalizeTextField(field, (String) fieldValue, entity);
 		} else if (fieldType.isAssignableFrom(String[].class)) {
-		    String[] normalized = normalizeStringArrayField(field, (String[]) fieldValue, entity);
-		    entity.setFieldValue(field, normalized);  
+		    // remove spaces from the String[] fields
+		    List<String> normalizedList = normalizeValues(Arrays.asList((String[]) fieldValue));
+		    String[] normalized = normalizedList.toArray(new String[normalizedList.size()]);
+		    entity.setFieldValue(field, normalized);
 		} else if (fieldType.isAssignableFrom(List.class)) {
-		    List<String> normalized = normalizeStringListField(field, (List<String>) fieldValue, entity);
-		    entity.setFieldValue(field, normalized);  
+		 // remove spaces from the List<String> fields
+		    entity.setFieldValue(field, normalizeValues((List<String>) fieldValue));
 		} else if (fieldType.isAssignableFrom(Map.class)) {
 		    @SuppressWarnings("rawtypes")
 		    Map normalized = normalizeMapField(field, (Map) fieldValue, entity);
-		    entity.setFieldValue(field, normalized);  
+		    entity.setFieldValue(field, normalized);
 		}
 
-			    }
-	} catch (IllegalArgumentException | IllegalAccessException | NoSuchMethodException | InvocationTargetException | InstantiationException e) {
-	    throw new EntityManagementRuntimeException("Unexpected exception occured during the normalization and cleaning of entity metadata ", e);
-	} 
-    }
-
-    private List<String> normalizeStringListField(Field field, List<String> fieldValue, Entity entity) {
-	// TODO Auto-generated method stub
-	return fieldValue;
-    }
-
-    private String[] normalizeStringArrayField(Field field, String[] fieldValue, Entity entity) {
-	// TODO Auto-generated method stub
-	return fieldValue;
+	    }
+	} catch (IllegalArgumentException | IllegalAccessException | NoSuchMethodException | InvocationTargetException
+		| InstantiationException e) {
+	    throw new EntityManagementRuntimeException(
+		    "Unexpected exception occured during the normalization and cleaning of entity metadata ", e);
+	}
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -108,10 +84,11 @@ public class EntityFieldsCleaner {
 	}
     }
 
-    @SuppressWarnings({ "unchecked"})
+    @SuppressWarnings({ "unchecked" })
     Map<String, String> normalizeSingleValueMap(Map<String, String> singleValueMap)
 	    throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-	// remove spaces from the keys in the Map fields, normalize and remove trailing spaces for the value, apply language normalization and filtering
+	// remove spaces from the keys in the Map fields, normalize and remove trailing
+	// spaces for the value, apply language normalization and filtering
 	// value must be restricted to the 24 language codes that Europeana supports
 	Map<String, String> normalizedMap = ConstructorUtils.invokeConstructor(singleValueMap.getClass(),
 		singleValueMap.size());
@@ -127,7 +104,7 @@ public class EntityFieldsCleaner {
 	return normalizedMap;
     }
 
-    @SuppressWarnings({ "unchecked"})
+    @SuppressWarnings({ "unchecked" })
     private Map<String, List<String>> normalizeMultipleValueMap(Map<String, List<String>> singleValueMap)
 	    throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 	// remove spaces from the keys in the Map fields
@@ -137,7 +114,7 @@ public class EntityFieldsCleaner {
 	Map<String, List<String>> normalizedMap = ConstructorUtils.invokeConstructor(singleValueMap.getClass(),
 		singleValueMap.size());
 	for (Map.Entry<String, List<String>> mapEntry : singleValueMap.entrySet()) {
-	   
+
 	    String normalizedKey = normalizeMapKey(mapEntry.getKey());
 	    if (normalizedKey == null) {
 		// skip invalid language codes
@@ -208,9 +185,9 @@ public class EntityFieldsCleaner {
 	    if (fieldValue != normalizedValue) {
 		return normalizedValue;
 	    }
-	    
-	    //TODO: clean fields that are URI or URLS
-	    //TODO clean fields that contain dates
+
+	    // TODO: clean fields that are URI or URLS
+	    // TODO clean fields that contain dates
 	}
 	return fieldValue;
     }

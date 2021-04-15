@@ -26,6 +26,7 @@ import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.common.config.LanguageCodes;
+import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
 
 /**
  * 
@@ -77,7 +78,12 @@ public class AppConfig extends AppConfigConstants{
     public ValidatorFactory getValidatorFactoryBean() {
 	return new LocalValidatorFactoryBean();
     }
-
+    
+    @Bean(name=BEAN_EM_ENTITY_FIELD_CLEANER)
+    public EntityFieldsCleaner getEntityFieldsCleanerBean() throws IOException {
+	return new EntityFieldsCleaner(getLanguageCodes());
+    }
+    
     @Bean(name=BEAN_CLIENT_DETAILS_SERVICE)
     public EuropeanaClientDetailsService getClientDetailsService() {
 	return new EuropeanaClientDetailsService();

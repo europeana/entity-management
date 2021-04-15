@@ -9,6 +9,7 @@ import eu.europeana.entitymanagement.definitions.model.impl.AggregationImpl;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityValidationException;
+import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
 import eu.europeana.entitymanagement.web.model.scoring.EntityMetrics;
 import eu.europeana.entitymanagement.web.service.ScoringService;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
@@ -32,21 +33,29 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
     private final ValidatorFactory emValidatorFactory;
     private final ScoringService scoringService;
     private final EntityManagementConfiguration entityManagementConfiguration;
+    private final EntityFieldsCleaner emEntityFieldCleaner;
 
     private static final Logger logger = LogManager.getLogger(EntityUpdateProcessor.class);
 
     public EntityUpdateProcessor(EntityRecordService entityRecordService,
-        ValidatorFactory emValidatorFactory, ScoringService scoringService,
+        ValidatorFactory emValidatorFactory, 
+        EntityFieldsCleaner emEntityFieldCleaner,
+        ScoringService scoringService,
         EntityManagementConfiguration entityManagementConfiguration) {
         this.entityRecordService = entityRecordService;
         this.emValidatorFactory = emValidatorFactory;
+        this.emEntityFieldCleaner = emEntityFieldCleaner;
         this.scoringService = scoringService;
         this.entityManagementConfiguration = entityManagementConfiguration;
     }
 
     @Override
     public EntityRecord process(@NonNull EntityRecord entityRecord) throws Exception {
-        logger.debug("Creating consolidated proxy for entityId={} ", entityRecord.getEntityId());
+        //TODO: Validate entity metadata from Proxy Data Source
+	logger.debug("Creating consolidated proxy for entityId={} ", entityRecord.getEntityId());
+        emEntityFieldCleaner.cleanAndNormalize(entityRecord.getExternalProxy().getEntity());
+        
+	logger.debug("Perform cleaning and normalization of metadata from external proxy for record {}", entityRecord.getEntityId());
         entityRecordService.mergeEntity(entityRecord);
 
         logger.debug("Validating constraints for entityId={}", entityRecord.getEntityId());
