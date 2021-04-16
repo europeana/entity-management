@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.validation;
 
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 
@@ -39,13 +40,17 @@ public class EntityFieldsCleanerTest {
     MetisDereferenceService metisDerefService;
     
     @Test
-    public void validateEntityFields() throws JsonMappingException, JsonProcessingException, IOException, EntityCreationException, EuropeanaApiException {
+    public void shoudCleanEntityFields() throws JsonMappingException, JsonProcessingException, IOException, EntityCreationException, EuropeanaApiException {
         // read the test data for the Concept entity from the file
 //        ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_VALIDATE_FIELDS_JSON), ConceptImpl.class);
 	Agent agent = (Agent) metisDerefService.parseMetisResponse("http://www.wikidata.org/entity/Q855", loadFile(BaseMvcTestUtils.AGENT_STALIN_XML)); 
 	
         EntityFieldsCleaner fieldCleaner = new EntityFieldsCleaner(emLanguageCodes);
         fieldCleaner.cleanAndNormalize(agent);
+        
+        assertEquals(24, agent.getPrefLabel().size());
+        assertEquals(12, agent.getAltLabel().size());
+        //TODO: perform more robust testing
         
     }
 

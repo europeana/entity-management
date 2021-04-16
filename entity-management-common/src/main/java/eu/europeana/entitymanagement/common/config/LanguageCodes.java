@@ -37,7 +37,8 @@ public class LanguageCodes {
 	    if(lang == null) {
 		return false;
 	    }
-	    return getLanguages().stream().filter(language -> language.code == lang).findFirst().isEmpty();
+	    return  getLanguages().stream()
+		    .anyMatch(language -> language.getCode().equals(lang));
 	}
 	
 	public String getByAlternativeCode(String altLang) {

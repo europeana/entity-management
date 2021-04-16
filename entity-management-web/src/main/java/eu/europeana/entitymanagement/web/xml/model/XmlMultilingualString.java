@@ -25,7 +25,12 @@ public class XmlMultilingualString {
 
     public XmlMultilingualString(String value, String language) {
         this.value = value;
-        this.language = language;
+        if(language != null) {
+            this.language = language;
+        } else {
+            //fix for #EA-2325, missing language attributions changed to ""
+	    this.language = "";  
+        }
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -46,4 +51,8 @@ public class XmlMultilingualString {
     public String toString() {
         return String.format("{lang: %s, value: %s}", getLanguage(), getValue());
     }
+
+//    public void setLanguage(String language) {
+//        this.language = language;
+//    }
 }
