@@ -266,27 +266,32 @@ public class EMController extends BaseRest {
 	}
 
 			EntityRecord entityRecord = retrieveEntityRecord(type, identifier);
+			logger.debug("Entity retrieved entityId={}, using {} format", entityRecord.getEntityId(), outFormat);
+			return generateResponseEntity(profile, outFormat, contentType, entityRecord, HttpStatus.OK);
+		}
 
-			Date etagDate = (entityRecord.getEntity() == null || entityRecord.getEntity().getIsAggregatedBy() == null
-		? new Date()
-		: entityRecord.getEntity().getIsAggregatedBy().getModified());
-	String etag = generateETag(etagDate, outFormat.name(), getApiVersion());
+	private ResponseEntity<String> generateResponseEntity(String profile, FormatTypes outFormat,
+			String contentType, EntityRecord entityRecord, HttpStatus status) {
+		MultiValueMap<String, String> headers;
+		Date etagDate = (
+				entityRecord.getEntity() == null || entityRecord.getEntity().getIsAggregatedBy() == null
+						? new Date()
+						: entityRecord.getEntity().getIsAggregatedBy().getModified());
+		String etag = generateETag(etagDate, outFormat.name(), getApiVersion());
 
-	headers = new LinkedMultiValueMap<String, String>(5);
-	headers.add(HttpHeaders.ETAG, "" + etag);
-	headers.add(HttpHeaders.ALLOW, HttpHeaders.ALLOW_GET);
-	if (!outFormat.equals(FormatTypes.schema)) {
-	    headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
-	    headers.add(HttpHeaders.LINK, HttpHeaders.VALUE_LDP_RESOURCE);
+		headers = new LinkedMultiValueMap<String, String>(5);
+		headers.add(HttpHeaders.ETAG, "" + etag);
+		headers.add(HttpHeaders.ALLOW, HttpHeaders.ALLOW_GET);
+		if (!outFormat.equals(FormatTypes.schema)) {
+			headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
+			headers.add(HttpHeaders.LINK, HttpHeaders.VALUE_LDP_RESOURCE);
+		}
+		if (contentType != null && !contentType.isEmpty())
+			headers.add(HttpHeaders.CONTENT_TYPE, contentType);
+
+		String body = serialize(entityRecord, outFormat, profile);
+		return new ResponseEntity<>(body, headers, status);
 	}
-	if (contentType != null && !contentType.isEmpty())
-	    headers.add(HttpHeaders.CONTENT_TYPE, contentType);
-
-	String body = serialize(entityRecord, outFormat, profile);
-	logger.debug("Entity retrieved :{}, using {} format", entityRecord.getEntityId(), outFormat);
-	
-			return new ResponseEntity<>(body, headers, HttpStatus.OK);
-  }
 
 	private EntityRecord retrieveEntityRecord(String type, String identifier)
 			throws EuropeanaApiException {
@@ -310,7 +315,7 @@ public class EMController extends BaseRest {
 		launchUpdateTask(entityRecord.getEntityId(), false);
 		entityRecord = retrieveEntityRecord(type, identifier);
 
-		return ResponseEntity.accepted().body(jsonLdSerializer.serialize(entityRecord, profile));
+		return generateResponseEntity(profile, FormatTypes.jsonld, null, entityRecord, HttpStatus.ACCEPTED);
 	}
 
 	private ResponseEntity<String> checkExistingEntity(Optional<EntityRecord> existingEntity,
