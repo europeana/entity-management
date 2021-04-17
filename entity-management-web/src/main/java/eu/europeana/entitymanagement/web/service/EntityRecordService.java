@@ -380,7 +380,9 @@ public class EntityRecordService {
 				 * isAggregatedBy isn't set on Europeana Proxy, so it won't be copied to the consolidatedEntity
 				 * We add it separately here
  				 */
-				consolidatedEntity.setIsAggregatedBy(entityRecord.getEntity().getIsAggregatedBy());
+				Aggregation aggregation = entityRecord.getEntity().getIsAggregatedBy();
+				aggregation.setModified(new Date());
+				consolidatedEntity.setIsAggregatedBy(aggregation);
 
 				entityRecord.setEntity(consolidatedEntity);
 			} catch (IllegalArgumentException | IllegalAccessException e) {

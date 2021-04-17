@@ -1,15 +1,16 @@
 package eu.europeana.entitymanagement.web;
 
+import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import java.util.Date;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,11 +44,6 @@ import eu.europeana.entitymanagement.web.service.MetisDereferenceService;
 import io.swagger.annotations.ApiOperation;
 
 
-/**
- * Example Rest Controller class with input validation TODO: catch the
- * exceptions from the used functions and return the adequate response to the
- * user
- */
 @RestController
 @Validated
 @RequestMapping("/entity")
@@ -83,15 +79,14 @@ public class EMController extends BaseRest {
 
 		EntityRecord entityRecord = retrieveEntityRecord(type, identifier.toLowerCase());
 
-		Entity entity = entityRecord.getEntity();
-	    Date etagDate = (entity == null || entity.getIsAggregatedBy() == null ? new Date()
-		    : entity.getIsAggregatedBy().getModified());
-	    String etag = generateETag(etagDate, FormatTypes.jsonld.name(), getApiVersion());
+		Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
+		long timestamp = isAggregatedBy != null ?
+				isAggregatedBy.getModified().getTime() :
+				0L;
 
+	    String etag = computeEtag(timestamp, FormatTypes.jsonld.name(), getApiVersion());
 	    checkIfMatchHeader(etag, request);
-
 	    entityRecordService.disableEntityRecord(entityRecord);
-
 	    return ResponseEntity.noContent().build();
     }
 
@@ -112,9 +107,12 @@ public class EMController extends BaseRest {
 
 		 EntityRecord entityRecord = retrieveEntityRecord(type, identifier);
 
-		 Date timestamp = (entityRecord.getEntity().getIsAggregatedBy() != null) ? entityRecord.getEntity().getIsAggregatedBy().getModified() : null;
-			Date etagDate = (timestamp != null)? timestamp : new Date();
-			String etag = generateETag(etagDate, FormatTypes.jsonld.name(), getApiVersion());
+			Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
+			long timestamp = isAggregatedBy != null ?
+					isAggregatedBy.getModified().getTime() :
+					0L;
+
+		 String etag = computeEtag(timestamp, FormatTypes.jsonld.name(), getApiVersion());
 
 			try {
 				checkIfMatchHeader(etag, request);
@@ -272,15 +270,16 @@ public class EMController extends BaseRest {
 
 	private ResponseEntity<String> generateResponseEntity(String profile, FormatTypes outFormat,
 			String contentType, EntityRecord entityRecord, HttpStatus status) {
-		MultiValueMap<String, String> headers;
-		Date etagDate = (
-				entityRecord.getEntity() == null || entityRecord.getEntity().getIsAggregatedBy() == null
-						? new Date()
-						: entityRecord.getEntity().getIsAggregatedBy().getModified());
-		String etag = generateETag(etagDate, outFormat.name(), getApiVersion());
 
-		headers = new LinkedMultiValueMap<String, String>(5);
-		headers.add(HttpHeaders.ETAG, "" + etag);
+		Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
+
+		long timestamp = isAggregatedBy != null ?
+				isAggregatedBy.getModified().getTime() :
+				0L;
+
+		String etag = computeEtag(timestamp, outFormat.name(), getApiVersion());
+
+		org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
 		headers.add(HttpHeaders.ALLOW, HttpHeaders.ALLOW_GET);
 		if (!outFormat.equals(FormatTypes.schema)) {
 			headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
@@ -290,7 +289,7 @@ public class EMController extends BaseRest {
 			headers.add(HttpHeaders.CONTENT_TYPE, contentType);
 
 		String body = serialize(entityRecord, outFormat, profile);
-		return new ResponseEntity<>(body, headers, status);
+		return ResponseEntity.status(status).headers(headers).eTag(etag).body(body);
 	}
 
 	private EntityRecord retrieveEntityRecord(String type, String identifier)
@@ -354,5 +353,13 @@ public class EMController extends BaseRest {
 	private String getDatabaseIdentifier(String entityId) {
 		//entity id is "http://data.europeana.eu/{type}/{identifier}"
 		return entityId.substring(entityId.lastIndexOf("/") + 1);
+	}
+
+	/**
+	 * Generates a unique hex string based on the input params
+	 * TODO: move logic to {@link eu.europeana.api.commons.web.controller.BaseRestController#generateETag(Date, String, String)}
+	 */
+	private String computeEtag(long timestamp, String format, String version){
+		return DigestUtils.md5Hex(String.format("%s:%s:%s", timestamp, format, version));
 	}
 }
