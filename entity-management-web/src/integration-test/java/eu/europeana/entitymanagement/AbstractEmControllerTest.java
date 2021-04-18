@@ -8,7 +8,7 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
-import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
+import eu.europeana.entitymanagement.web.service.EntityRecordService;
 
 public abstract class AbstractEmControllerTest extends AbstractIntegrationTest {
     @Autowired

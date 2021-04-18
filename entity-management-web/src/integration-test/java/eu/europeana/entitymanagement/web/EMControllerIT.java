@@ -78,6 +78,13 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
+import eu.europeana.entitymanagement.web.service.EntityRecordService;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import javax.servlet.ServletContext;
 import okhttp3.mockwebserver.MockResponse;
 
 /**
@@ -119,9 +126,8 @@ public class EMControllerIT extends AbstractEmControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isAccepted())
                 .andExpect(jsonPath("$.id", any(String.class)))
-                .andExpect(jsonPath("$.entity").isNotEmpty())
-                .andExpect(jsonPath("$.entity.isAggregatedBy").isNotEmpty())
-                .andExpect(jsonPath("$.entity.isAggregatedBy.aggregates", hasSize(2)))
+                .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
+                .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
                 // should have Europeana and Datasource proxies
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
 
@@ -483,17 +489,17 @@ public class EMControllerIT extends AbstractEmControllerTest {
 
     private void assertRetrieveAPIResultsInternalProfile(String contentXml, ResultActions resultActions, EntityPreview entity) throws Exception {
 
-    	resultActions.andExpect(jsonPath("$.entityRecord.proxies[0].entity.sameAs", Matchers.hasItem(entity.getId())));
-    	resultActions.andExpect(jsonPath("$.entityRecord.proxies[1].id", Matchers.is(entity.getId())));
-    	resultActions.andExpect(jsonPath("$.entityRecord.proxies[0].proxyFor", Matchers.containsString(WebEntityFields.BASE_DATA_EUROPEANA_URI)));
-    	resultActions.andExpect(jsonPath("$.entityRecord.proxies[1].proxyFor", Matchers.containsString(WebEntityFields.BASE_DATA_EUROPEANA_URI)));
+    	resultActions.andExpect(jsonPath("$.proxies[0].sameAs", Matchers.hasItem(entity.getId())));
+    	resultActions.andExpect(jsonPath("$.proxies[1].id", Matchers.is(entity.getId())));
+    	resultActions.andExpect(jsonPath("$.proxies[0].proxyFor", Matchers.containsString(WebEntityFields.BASE_DATA_EUROPEANA_URI)));
+    	resultActions.andExpect(jsonPath("$.proxies[1].proxyFor", Matchers.containsString(WebEntityFields.BASE_DATA_EUROPEANA_URI)));
     	Assertions.assertTrue(contentXml.contains(entity.getId()));
     	Assertions.assertTrue(contentXml.contains("proxies"));
     	Assertions.assertTrue(contentXml.contains("proxyFor"));
     	Assertions.assertTrue(contentXml.contains(WebEntityFields.BASE_DATA_EUROPEANA_URI));
 
         for (Entry<String, String> prefLabel : entity.getPrefLabel().entrySet()) {
-            resultActions.andExpect(jsonPath("$.entityRecord.proxies[0].entity.prefLabel", Matchers.hasKey(prefLabel.getKey())));
+            resultActions.andExpect(jsonPath("$.proxies[0].prefLabel", Matchers.hasKey(prefLabel.getKey())));
             Assertions.assertTrue(contentXml.contains(prefLabel.getKey()));
         }
     }

@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.batch.writer;
 
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
+import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;

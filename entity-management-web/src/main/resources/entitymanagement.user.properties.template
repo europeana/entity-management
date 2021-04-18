@@ -9,3 +9,7 @@ mongo.em.database.reset=false
 
 # number of EntityRecords to process in one commit-interval (before writing to the database)
 batch.chunkSize=10
+
+# Whether entity metrics should be computed. This requires access to the Pagerank and
+# Search API Solr servers.
+batch.computeMetrics=false

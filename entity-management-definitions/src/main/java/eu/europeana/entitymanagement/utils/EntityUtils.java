@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 
+import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 
 public class EntityUtils {
@@ -28,6 +29,15 @@ public class EntityUtils {
 	    }
 
 	    return fields;
+	}
+
+	public static boolean isUri (String value) {
+		if(value.startsWith("http://") || value.startsWith("https://")) {
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 
 }

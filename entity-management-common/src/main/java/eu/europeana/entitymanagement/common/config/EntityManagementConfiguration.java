@@ -66,6 +66,9 @@ public class EntityManagementConfiguration  {
   @Value("${batch.step.executor.queueSize: 50}")
   private int batchStepExecutorQueueSize;
 
+  @Value("${batch.computeMetrics: false}")
+  private boolean batchComputeMetrics;
+
 
 
   public EntityManagementConfiguration() {
@@ -144,5 +147,9 @@ public class EntityManagementConfiguration  {
 
   public int getBatchStepExecutorQueueSize() {
     return batchStepExecutorQueueSize;
+  }
+
+  public boolean shouldComputeMetrics() {
+    return batchComputeMetrics;
   }
 }

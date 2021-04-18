@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.web.service.impl;
+package eu.europeana.entitymanagement.web.service;
 
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
@@ -50,7 +50,7 @@ public class MetisDereferenceService {
      * @throws EntityCreationException
      */
     public Entity dereferenceEntityById(String id) throws EuropeanaApiException {
-	logger.trace("De-referencing entity {} with Metis", id);
+	logger.debug("De-referencing entityId={} from Metis", id);
 
 	String metisResponseBody = metisWebClient.get()
 		.uri(uriBuilder -> uriBuilder.path(METIS_DEREF_PATH).queryParam("uri", id).build())
@@ -61,9 +61,11 @@ public class MetisDereferenceService {
 		// return 500 for everything else
 		.onStatus(HttpStatus::isError,
 			response -> response.bodyToMono(String.class).map(EuropeanaApiException::new))
+		.onStatus(HttpStatus::is5xxServerError,
+				response -> response.bodyToMono(String.class).map(EuropeanaApiException::new))
 		.bodyToMono(String.class).block();
 
-	logger.debug("Metis dereference response for entity {}: {} ", id, metisResponseBody);
+	logger.debug("Metis dereference response for entityId={} - {} ", id, metisResponseBody);
 	
 	EnrichmentResultList derefResult;
 	// Prevent "FWK005 parse may not be called while parsing" error when this method is called by multiple threads

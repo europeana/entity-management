@@ -16,9 +16,8 @@ import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
-import eu.europeana.entitymanagement.web.service.impl.EntityRecordService;
-import eu.europeana.entitymanagement.web.service.impl.EntityRecordUtils;
-import eu.europeana.entitymanagement.web.service.impl.MetisDereferenceService;
+import eu.europeana.entitymanagement.web.service.EntityRecordService;
+import eu.europeana.entitymanagement.web.service.MetisDereferenceService;
 import io.swagger.annotations.ApiOperation;
 import java.util.Date;
 import java.util.Optional;
@@ -106,7 +105,7 @@ public class EMController extends BaseRest {
 	    HttpServletRequest request) throws Exception {
 
     	// TODO: Re-enable authentication
-    	// verifyReadAccess(request);
+    	//verifyReadAccess(request);
 
 		 EntityRecord entityRecord = retrieveEntityRecord(type, identifier);
 
@@ -187,13 +186,13 @@ public class EMController extends BaseRest {
 
     @ApiOperation(value = "Register a new entity", nickname = "registerEntity", response = java.lang.Void.class)
     @PostMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
-		public ResponseEntity<EntityRecord> registerEntity(
+		public ResponseEntity<String> registerEntity(
 				@RequestBody EntityPreview entityCreationRequest)
 				throws Exception {
 			// check if id is already being used, if so return a 301
 			Optional<EntityRecord> existingEntity = entityRecordService
 					.findMatchingCoreference(entityCreationRequest.getId());
-			ResponseEntity<EntityRecord> response = checkExistingEntity(existingEntity,
+			ResponseEntity<String> response = checkExistingEntity(existingEntity,
 					entityCreationRequest.getId());
 
 			if (response != null) {
@@ -208,8 +207,7 @@ public class EMController extends BaseRest {
 						.format("id %s does not match a configured datasource", entityCreationRequest.getId()));
 			}
 
-			Entity metisResponse = dereferenceService
-					.dereferenceEntityById(entityCreationRequest.getId());
+			Entity metisResponse = dereferenceService.dereferenceEntityById(entityCreationRequest.getId());
 			if (metisResponse.getSameAs() != null) {
 				existingEntity = entityRecordService
 						.retrieveMetisCoreferenceSameAs(metisResponse.getSameAs());
@@ -224,7 +222,8 @@ public class EMController extends BaseRest {
 							metisResponse);
 
 			launchUpdateTask(savedEntityRecord.getEntityId(), true);
-			return ResponseEntity.accepted().body(savedEntityRecord);
+			return ResponseEntity.accepted().body(jsonLdSerializer.serialize(savedEntityRecord,
+					EntityProfile.internal));
 		}
 
 
@@ -296,7 +295,7 @@ public class EMController extends BaseRest {
 		return ResponseEntity.accepted().body(jsonLdSerializer.serialize(entityRecord, profile));
 	}
 
-	private ResponseEntity<EntityRecord> checkExistingEntity(Optional<EntityRecord> existingEntity,
+	private ResponseEntity<String> checkExistingEntity(Optional<EntityRecord> existingEntity,
 			String entityCreationId)
 			throws EntityRemovedException {
 
