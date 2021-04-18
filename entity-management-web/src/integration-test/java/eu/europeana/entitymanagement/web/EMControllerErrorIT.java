@@ -294,9 +294,9 @@ public class EMControllerErrorIT extends AbstractEmControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.put(BASE_SERVICE_URL + "/" + requestPath)
         		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
-        		.content(loadFile(TIMESPAN_UPDATE_JSON))
+        		.content(loadFile(TIMESPAN_JSON))
         		.contentType(MediaType.APPLICATION_JSON))
-                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof EntityRemovedException));
+        		.andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof EntityRemovedException));
     }
 
     @Test

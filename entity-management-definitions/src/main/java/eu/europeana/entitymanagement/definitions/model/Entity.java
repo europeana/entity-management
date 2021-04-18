@@ -1,6 +1,15 @@
 package eu.europeana.entitymanagement.definitions.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import eu.europeana.entitymanagement.definitions.model.impl.AgentImpl;
+import eu.europeana.entitymanagement.definitions.model.impl.ConceptImpl;
+import eu.europeana.entitymanagement.definitions.model.impl.OrganizationImpl;
+import eu.europeana.entitymanagement.definitions.model.impl.PlaceImpl;
+import eu.europeana.entitymanagement.definitions.model.impl.TimespanImpl;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +22,16 @@ import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
 
 @Embedded
 @JsonDeserialize(as = BaseEntity.class)
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = As.EXISTING_PROPERTY, property = "type")
+@JsonSubTypes({
+		@JsonSubTypes.Type(value = AgentImpl.class, name = "Agent"),
+		@JsonSubTypes.Type(value = ConceptImpl.class, name = "Concept"),
+		@JsonSubTypes.Type(value = OrganizationImpl.class, name = "Organization"),
+		@JsonSubTypes.Type(value = PlaceImpl.class, name = "Place"),
+		@JsonSubTypes.Type(value = TimespanImpl.class, name = "Timespan")
+}
+)
 public interface Entity extends ContextualClass {
 
 	public String[] getIdentifier();
@@ -49,7 +68,7 @@ public interface Entity extends ContextualClass {
 	WebResource getReferencedWebResource();
 	
 	void setReferencedWebResource(WebResource resource);
-	
+
 	String getIsShownBy();
 	
 	void setIsShownBy (WebResource webResource);

@@ -4,6 +4,9 @@ package eu.europeana.entitymanagement;
 import eu.europeana.entitymanagement.testutils.MongoContainer;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockWebServer;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -19,6 +22,8 @@ import static eu.europeana.entitymanagement.common.config.AppConfigConstants.MET
 public abstract class AbstractIntegrationTest {
 
     static final MongoContainer MONGO_CONTAINER;
+
+    protected Logger logger = LogManager.getLogger(getClass());
 
     static {
         MONGO_CONTAINER = new MongoContainer("entity-management", "job-repository")
