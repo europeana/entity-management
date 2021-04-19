@@ -440,14 +440,14 @@ public class EntityRecordService {
 	 * @param secondary Secondary entity. Metadata from this entity is only used if no matching field
 	 *                  is contained within the primary entity.
 	 * @param fieldsToCombine metadata fields to reconcile
-	 * @param combineCollections if true, metadata from the secondary entity are added to the matching collection (eg. maps, lists and sets)
-	 *               within the primary . If combineCollections is false, the "primary"
+	 * @param accumulate if true, metadata from the secondary entity are added to the matching collection (eg. maps, lists and arrays)
+	 *               within the primary . If accumulate is false, the "primary"
 	 *               content overwrites the "secondary"
 	 * @return
 	 * @throws EntityCreationException
 	 * @throws IllegalAccessException
 	 */
-	private Entity combineEntities(Entity primary, Entity secondary, List<Field> fieldsToCombine, boolean combineCollections)
+	private Entity combineEntities(Entity primary, Entity secondary, List<Field> fieldsToCombine, boolean accumulate)
 			throws EntityCreationException, IllegalAccessException {
 		Entity consolidatedEntity = EntityObjectFactory.createEntityObject(primary.getType());
 
@@ -465,14 +465,14 @@ public class EntityRecordService {
 			String fieldName = field.getName();
 
 			if (fieldType.isArray()) {
-					Object[] mergedArray = mergeArrays(primary, secondary, field, combineCollections);
+					Object[] mergedArray = mergeArrays(primary, secondary, field, accumulate);
 				consolidatedEntity.setFieldValue(field, mergedArray);
 
 			} else if (List.class.isAssignableFrom(fieldType)) {
 
 					List<Object> fieldValuePrimaryObjectList = (List<Object>) primary.getFieldValue(field);
 					List<Object> fieldValueSecondaryObjectList = (List<Object>) secondary.getFieldValue(field);
-					mergeList(consolidatedEntity, fieldValuePrimaryObjectList, fieldValueSecondaryObjectList, field, combineCollections);
+					mergeList(consolidatedEntity, fieldValuePrimaryObjectList, fieldValueSecondaryObjectList, field, accumulate);
 
 			} else if (fieldType.isPrimitive() || String.class.isAssignableFrom(fieldType)) {
 					Object fieldValuePrimaryObjectPrimitiveOrString = primary.getFieldValue(field);
@@ -495,7 +495,7 @@ public class EntityRecordService {
 					}
 
 			} else if (Map.class.isAssignableFrom(fieldType)) {
-					combineEntities(consolidatedEntity, primary, secondary, prefLabelsForAltLabels, field, fieldName, combineCollections);
+					combineEntities(consolidatedEntity, primary, secondary, prefLabelsForAltLabels, field, fieldName, accumulate);
 
 			}
 
@@ -510,7 +510,7 @@ public class EntityRecordService {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
     void combineEntities(Entity consolidatedEntity, Entity primary, Entity secondary,
 			Map<Object, Object> prefLabelsForAltLabels, Field field, String fieldName,
-			boolean combineCollections) throws IllegalAccessException {
+			boolean accumulate) throws IllegalAccessException {
 	//TODO: refactor implemetation
 	
 	Map<Object, Object> fieldValuePrimaryObjectMap = (Map<Object, Object>) primary.getFieldValue(field);
@@ -528,7 +528,7 @@ public class EntityRecordService {
 	if (fieldValuePrimaryObject == null && fieldValueSecondaryObject != null) {
 	fieldValuePrimaryObject = new HashMap<>();
 	fieldValuePrimaryObject.putAll(fieldValueSecondaryObject);
-	} else if (fieldValuePrimaryObject != null && fieldValueSecondaryObject != null && combineCollections) {
+	} else if (fieldValuePrimaryObject != null && fieldValueSecondaryObject != null && accumulate) {
 	for (Map.Entry elemSecondary : fieldValueSecondaryObject.entrySet()) {
 	    Object key = elemSecondary.getKey();
 	    /*
@@ -624,7 +624,7 @@ public class EntityRecordService {
     }
 
     void mergeList(Entity consolidatedEntity, List<Object> fieldValuePrimaryObjectList,
-				List<Object> fieldValueSecondaryObjectList, Field field, boolean combineCollections) throws IllegalAccessException {
+				List<Object> fieldValueSecondaryObjectList, Field field, boolean accumulate) throws IllegalAccessException {
 	List<Object> fieldValuePrimaryObject = null;
 	List<Object> fieldValueSecondaryObject = null;
 	if (fieldValuePrimaryObjectList != null) {
@@ -634,7 +634,7 @@ public class EntityRecordService {
 	fieldValueSecondaryObject = new ArrayList<Object>(fieldValueSecondaryObjectList);
 	}
 
-	if(fieldValuePrimaryObject != null && !combineCollections){
+	if(fieldValuePrimaryObject != null && !accumulate){
 		// we're not appending items, so just return the primary field value
 		consolidatedEntity.setFieldValue(field, fieldValuePrimaryObject);
 		return;
@@ -664,7 +664,7 @@ public class EntityRecordService {
 	    //return a clone of the secondary
 	    return secondaryArray.clone();
 	}else if(secondaryArray == null || !append) {
-	    //overwrite the primary if we're not appending
+	    //return a clone of the primary if we're not appending
 	    return primaryArray.clone();
 	}
 	
