@@ -384,15 +384,20 @@ public class EntityRecordService {
 			try {
 
 				Entity consolidatedEntity = combineEntities(primary, secondary, fieldsToCombine, true);
+				entityRecord.setEntity(consolidatedEntity);
 				/*
 				 * isAggregatedBy isn't set on Europeana Proxy, so it won't be copied to the consolidatedEntity
 				 * We add it separately here
  				 */
-				Aggregation aggregation = entityRecord.getEntity().getIsAggregatedBy();
-				aggregation.setModified(new Date());
-				consolidatedEntity.setIsAggregatedBy(aggregation);
-
-				entityRecord.setEntity(consolidatedEntity);
+				if(entityRecord.getEntity().getIsAggregatedBy() == null) {
+				   setEntityAggregation(entityRecord, entityRecord.getEntityId(), new Date()); 
+				}else {
+				    Aggregation aggregation = entityRecord.getEntity().getIsAggregatedBy();
+				    aggregation.setModified(new Date());
+				    consolidatedEntity.setIsAggregatedBy(aggregation);
+				}
+				
+				
 			} catch (IllegalArgumentException | IllegalAccessException e) {
 				logger.error(
 						"Error while reconciling entity data", e);
