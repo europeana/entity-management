@@ -51,6 +51,7 @@ public class EntityFieldsCleanerTest {
         assertEquals(24, agent.getPrefLabel().size());
         assertEquals(12, agent.getAltLabel().size());
         //TODO: perform more robust testing
+        //TODO: create json file with expected output and use entity comparator
         
     }
 

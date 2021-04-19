@@ -20,7 +20,7 @@ import eu.europeana.entitymanagement.common.config.LanguageCodes;
 /**
  * JUnit test to check if DataSources are properly deserialized from XML
  */
-@SpringBootTest()
+@SpringBootTest(classes = SerializationConfig.class)
 public class LanguageCodesTest {
 
     @Autowired
