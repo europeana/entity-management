@@ -27,6 +27,7 @@ import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.common.config.LanguageCodes;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
+import org.springframework.web.filter.ShallowEtagHeaderFilter;
 
 /**
  * 
@@ -99,4 +100,9 @@ public class AppConfig extends AppConfigConstants{
     public MongoBatchConfigurer mongoBatchConfigurer(@Qualifier(BEAN_BATCH_DATA_STORE) Datastore datastore){
         return new MongoBatchConfigurer(datastore, jobLauncherExecutor);
     }
+
+  @Bean
+  public ShallowEtagHeaderFilter shallowEtagHeaderFilter() {
+    return new ShallowEtagHeaderFilter();
+  }
 }

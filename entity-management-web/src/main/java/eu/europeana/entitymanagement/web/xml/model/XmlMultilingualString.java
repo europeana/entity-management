@@ -16,7 +16,7 @@ public class XmlMultilingualString {
     private String value;
 
     @XmlAttribute(name= XmlConstants.LANG, namespace=javax.xml.XMLConstants.XML_NS_URI)
-    private String language;
+    private String language = "";
 
     public XmlMultilingualString() {
         // default constructor
@@ -37,12 +37,15 @@ public class XmlMultilingualString {
 //    @JacksonXmlProperty(isAttribute = true, namespace = XmlConstants.XML, localName = XmlConstants.LANG)
 //    @XmlAttribute(name = XmlConstants.LANG, namespace = "@XmlAttribute(name=\"lang\", namespace=\"http://www.w3.org/XML/1998/namespace\")")
     public String getLanguage() {
-        return language;
+        if(language == null) {
+            //fix for #EA-2325, missing language attributions changed to ""
+	    return "";
+        }
+	return language;
     }
 
     @JacksonXmlText
     @JsonSerialize(using = XmlStringSerializer.class)
-//    @XmlElement(namespace = XmlConstants.NAMESPACE_FOAF, name = XmlConstants.DEPICTION)
     public String getValue() {
         return value;
     }
@@ -52,7 +55,4 @@ public class XmlMultilingualString {
         return String.format("{lang: %s, value: %s}", getLanguage(), getValue());
     }
 
-//    public void setLanguage(String language) {
-//        this.language = language;
-//    }
 }

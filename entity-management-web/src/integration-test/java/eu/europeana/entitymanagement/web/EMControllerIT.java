@@ -2,6 +2,8 @@ package eu.europeana.entitymanagement.web;
 
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_REGISTER_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_REGISTER_STALIN_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_STALIN_XML;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_XML;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BASE_SERVICE_URL;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_JSON;
@@ -29,33 +31,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import eu.europeana.entitymanagement.AbstractIntegrationTest;
-import eu.europeana.entitymanagement.batch.BatchService;
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.impl.AgentImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.ConceptImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.OrganizationImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.PlaceImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.TimespanImpl;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
-import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
-import eu.europeana.entitymanagement.vocabulary.XmlFields;
-import eu.europeana.entitymanagement.web.model.EntityPreview;
-import eu.europeana.entitymanagement.web.service.EntityRecordService;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -63,8 +39,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+
 import javax.servlet.ServletContext;
-import okhttp3.mockwebserver.MockResponse;
 
 import org.assertj.core.util.Maps;
 import org.hamcrest.Matchers;
@@ -89,6 +65,32 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import eu.europeana.entitymanagement.AbstractIntegrationTest;
+import eu.europeana.entitymanagement.batch.BatchService;
+import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.model.impl.AgentImpl;
+import eu.europeana.entitymanagement.definitions.model.impl.ConceptImpl;
+import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
+import eu.europeana.entitymanagement.definitions.model.impl.OrganizationImpl;
+import eu.europeana.entitymanagement.definitions.model.impl.PlaceImpl;
+import eu.europeana.entitymanagement.definitions.model.impl.TimespanImpl;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
+import eu.europeana.entitymanagement.vocabulary.XmlFields;
+import eu.europeana.entitymanagement.web.model.EntityPreview;
+import eu.europeana.entitymanagement.web.service.EntityRecordService;
+import okhttp3.mockwebserver.MockResponse;
 
 /**
  * Integration test for the main Entity Management controller
@@ -132,14 +134,18 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
 
     @Test
-    public ResultActions registerConceptShouldBeSuccessful() throws Exception {
+    public void registerConceptShouldBeSuccessful() throws Exception {
         // set mock Metis response
         mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(CONCEPT_XML)));
+        //second enqueue for the update task
+        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(CONCEPT_XML)));
+        
 
         ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
                 .content(loadFile(CONCEPT_REGISTER_JSON))
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isAccepted())
+                .contentType(MediaType.APPLICATION_JSON_VALUE));
+        
+        results.andExpect(status().isAccepted())
                 .andExpect(jsonPath("$.id", any(String.class)))
                 .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
                 .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
@@ -150,23 +156,24 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
         // matches id in JSON file
         assertMetisRequest("http://www.wikidata.org/entity/Q152095");
-
-        return results;
     }
 
     @Test
-    public ResultActions registerAgentShouldBeSuccessful() throws Exception {
+    void registerAgentShouldBeSuccessful() throws Exception {
         // set mock Metis response
+        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(AGENT_XML)));
+        //second enqueue for the update task
         mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(AGENT_XML)));
 
         ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
                 .content(loadFile(AGENT_REGISTER_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isAccepted())
-                .andExpect(jsonPath("$.id", any(String.class)))
-                .andExpect(jsonPath("$.entity").isNotEmpty())
-                .andExpect(jsonPath("$.entity.isAggregatedBy").isNotEmpty())
-                .andExpect(jsonPath("$.entity.isAggregatedBy.aggregates", hasSize(2)))
+                .andExpect(status().isAccepted());
+        
+        results.andExpect(jsonPath("$.id", any(String.class)))
+//        	.andExpect(jsonPath("$.entity").isNotEmpty())
+        	.andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
+                .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
                 // should have Europeana and Datasource proxies
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
 
@@ -174,23 +181,53 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
         // matches id in JSON file
         assertMetisRequest("http://www.wikidata.org/entity/Q762");
-
-        return results;
     }
 
+    
     @Test
-    public ResultActions registerOrganizationShouldBeSuccessful() throws Exception {
+    void registerAgentStalinShouldBeSuccessful() throws Exception {
+        // set mock Metis response
+        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(AGENT_STALIN_XML)));
+        //second enqueue for the update task
+        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(AGENT_STALIN_XML)));
+
+        ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
+                .content(loadFile(AGENT_REGISTER_STALIN_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isAccepted());
+                
+                results.andExpect(jsonPath("$.id", any(String.class)))
+//                .andExpect(jsonPath("$.entity").isNotEmpty())
+//                .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
+//                .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
+                // should have Europeana and Datasource proxies
+                .andExpect(jsonPath("$.proxies", hasSize(2)));
+        	//
+        	results.andExpect(jsonPath("$.prefLabel", hasSize(24)))
+        		.andExpect(jsonPath("$.altLabel", hasSize(12)));
+        		
+        //TODO assert other important properties
+
+        // matches id in JSON file
+//        assertMetisRequest("http://www.wikidata.org/entity/Q855");        
+    }
+    
+    @Test
+    public void registerOrganizationShouldBeSuccessful() throws Exception {
         // set mock Metis response
         mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(ORGANIZATION_XML)));
-
+        //second enqueue for the update task
+        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(ORGANIZATION_XML)));
+        
         ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
                 .content(loadFile(ORGANIZATION_REGISTER_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isAccepted())
-                .andExpect(jsonPath("$.id", any(String.class)))
-                .andExpect(jsonPath("$.entity").isNotEmpty())
-                .andExpect(jsonPath("$.entity.isAggregatedBy").isNotEmpty())
-                .andExpect(jsonPath("$.entity.isAggregatedBy.aggregates", hasSize(2)))
+                .andExpect(status().isAccepted());
+        
+        results.andExpect(jsonPath("$.id", any(String.class)))
+//                .andExpect(jsonPath("$.entity").isNotEmpty())
+                .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
+                .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
                 // should have Europeana and Datasource proxies
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
 
@@ -199,22 +236,23 @@ public class EMControllerIT extends AbstractIntegrationTest {
         // matches id in JSON file
         assertMetisRequest("http://www.wikidata.org/entity/Q193563");
 
-        return results;
+//        return results;
     }
 
     @Test
-    public ResultActions registerPlaceShouldBeSuccessful() throws Exception {
+    void registerPlaceShouldBeSuccessful() throws Exception {
         // set mock Metis response
         mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(PLACE_XML)));
 
         ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
                 .content(loadFile(PLACE_REGISTER_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isAccepted())
-                .andExpect(jsonPath("$.id", any(String.class)))
-                .andExpect(jsonPath("$.entity").isNotEmpty())
-                .andExpect(jsonPath("$.entity.isAggregatedBy").isNotEmpty())
-                .andExpect(jsonPath("$.entity.isAggregatedBy.aggregates", hasSize(2)))
+                .andExpect(status().isAccepted());
+        
+        results.andExpect(jsonPath("$.id", any(String.class)))
+//                .andExpect(jsonPath("$.entity").isNotEmpty())
+                .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
+                .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
                 // should have Europeana and Datasource proxies
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
 
@@ -222,23 +260,23 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
         // matches id in JSON file
         assertMetisRequest("https://sws.geonames.org/2988507/");
-
-        return results;
+    
     }
 
     @Test
-    public ResultActions registerTimespanShouldBeSuccessful() throws Exception {
+    void registerTimespanShouldBeSuccessful() throws Exception {
         // set mock Metis response
         mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(TIMESPAN_XML)));
 
         ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
                 .content(loadFile(TIMESPAN_REGISTER_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isAccepted())
-                .andExpect(jsonPath("$.id", any(String.class)))
-                .andExpect(jsonPath("$.entity").isNotEmpty())
-                .andExpect(jsonPath("$.entity.isAggregatedBy").isNotEmpty())
-                .andExpect(jsonPath("$.entity.isAggregatedBy.aggregates", hasSize(2)))
+                .andExpect(status().isAccepted());
+        
+        results.andExpect(jsonPath("$.id", any(String.class)))
+//                .andExpect(jsonPath("$.entity").isNotEmpty())
+                .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
+                .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
                 // should have Europeana and Datasource proxies
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
 
@@ -246,8 +284,6 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
         // matches id in JSON file
         assertMetisRequest("http://www.wikidata.org/entity/Q8106");
-
-        return results;
     }
 
     @Test
@@ -326,7 +362,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
     
     @SuppressWarnings("unused")
     @Test
-    void retrieveWithContentNegotiationInMozillaShouldBeSuccessful() throws Exception {
+    public void retrieveWithContentNegotiationInMozillaShouldBeSuccessful() throws Exception {
         // read the test data for the Concept entity from the file
 	MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
 	final ObjectNode registeredEntityNode = new ObjectMapper().readValue(resultRegisterEntity.getResponse().getContentAsString(StandardCharsets.UTF_8), ObjectNode.class);
@@ -352,7 +388,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
     
     @SuppressWarnings("unused")
     @Test
-    void retrieveWithContentNegotiationShouldBeSuccessful() throws Exception {
+    public void retrieveWithContentNegotiationShouldBeSuccessful() throws Exception {
         // read the test data for the Concept entity from the file
 	MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
 	String response = resultRegisterEntity.getResponse().getContentAsString();
@@ -375,7 +411,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
     }
     
     @Test
-    void retrieveAgentExternalShouldBeSuccessful() throws Exception {
+    public void retrieveAgentExternalShouldBeSuccessful() throws Exception {
         //TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
 	// read the test data for the Agent entity from the file
         AgentImpl agent = objectMapper.readValue(loadFile(AGENT_JSON), AgentImpl.class);
@@ -397,7 +433,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void retrieveOrganizationExternalShouldBeSuccessful() throws Exception {
+    public void retrieveOrganizationExternalShouldBeSuccessful() throws Exception {
 	//TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
 	// read the test data for the Organization entity from the file
         OrganizationImpl organization = objectMapper.readValue(loadFile(ORGANIZATION_JSON), OrganizationImpl.class);
@@ -419,7 +455,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void retrievePlaceExternalShouldBeSuccessful() throws Exception {
+    public void retrievePlaceExternalShouldBeSuccessful() throws Exception {
 	//TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
 	// read the test data for the Place entity from the file
         PlaceImpl place = objectMapper.readValue(loadFile(PLACE_JSON), PlaceImpl.class);
@@ -441,7 +477,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void retrieveTimespanExternalShouldBeSuccessful() throws Exception {
+    public void retrieveTimespanExternalShouldBeSuccessful() throws Exception {
 	//TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
 	// read the test data for the Timespan entity from the file
         TimespanImpl timespan = objectMapper.readValue(loadFile(TIMESPAN_JSON), TimespanImpl.class);
@@ -463,13 +499,18 @@ public class EMControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void retrieveEntityInternalShouldBeSuccessful() throws Exception {
+    public void retrieveEntityInternalShouldBeSuccessful() throws Exception {
 
 	//TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
 	// read the test data for the entity from the file
         EntityPreview entityPreview = objectMapper.readValue(loadFile(CONCEPT_REGISTER_JSON), EntityPreview.class);
 
-    	ResultActions registeredEntityResults = registerConceptShouldBeSuccessful();
+//    	ResultActions registeredEntityResults = registerConceptShouldBeSuccessful();
+        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(CONCEPT_XML)));
+
+        ResultActions registeredEntityResults = mockMvc.perform(post(BASE_SERVICE_URL)
+                .content(loadFile(CONCEPT_REGISTER_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE));
 
         final ObjectNode registeredEntityNode = new ObjectMapper().readValue(registeredEntityResults.andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8), ObjectNode.class);
 
@@ -593,20 +634,5 @@ public class EMControllerIT extends AbstractIntegrationTest {
         		.andReturn();
         return resultXml.getResponse().getContentAsString(StandardCharsets.UTF_8);
     }
-
-
-    @TestConfiguration
-    public static class TestConfig {
-
-        /**
-         * Do not trigger batch jobs in this test.
-         */
-        @Bean
-        @Primary
-        public BatchService batchServiceBean() throws Exception {
-            BatchService batchService = Mockito.mock(BatchService.class);
-            doNothing().when(batchService).launchSingleEntityUpdate(anyString(), anyBoolean());
-            return batchService;
-        }
-    }
+   
 }

@@ -19,6 +19,7 @@ public class BaseMvcTestUtils {
     
     public static final String CONCEPT_REGISTER_JSON = "/content/concept_register.json";
     public static final String AGENT_REGISTER_JSON = "/content/agent_register.json";
+    public static final String AGENT_REGISTER_STALIN_JSON = "/content/agent_register_stalin.json";
     public static final String ORGANIZATION_REGISTER_JSON = "/content/organization_register.json";
     public static final String PLACE_REGISTER_JSON = "/content/place_register.json";
     public static final String TIMESPAN_REGISTER_JSON = "/content/timespan_register.json";  
