@@ -1,6 +1,7 @@
 {
   "@context": "http://www.europeana.eu/schemas/context/entity.jsonld",
   "id": "http://www.wikidata.org/entity/Q152095",
+  "type": "Concept",
   "prefLabel": {
     "en": "bathtub - europeana",
     "de": "Badewanne - europeana",

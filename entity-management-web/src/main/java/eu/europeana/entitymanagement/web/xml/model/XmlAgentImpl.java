@@ -43,13 +43,13 @@ public class XmlAgentImpl extends XmlBaseEntityImpl {
 		return RdfXmlUtils.convertToXmlMultilingualString(entity.getNote());
 	}
     	
-//	@JacksonXmlElementWrapper(useWrapping=false)
-//	@JacksonXmlProperty(localName = XmlConstants.XML_DC_DATE)
-//	public List<Object> getDcDate() {
-//	    	// TODO: GetDcDate from Agent currently not implemented
-//	    	return null;
-//		//return XmlMultilingualString.convertToXmlMultilingualStringOrRdfResource(agent.getDcDate());
-//	}
+	@JacksonXmlElementWrapper(useWrapping=false)
+	@JacksonXmlProperty(localName = XmlConstants.XML_DC_DATE)
+	public List<Object> getDcDate() {
+	    	// TODO: GetDcDate from Agent currently not implemented
+	    	return null;
+		//return XmlMultilingualString.convertToXmlMultilingualStringOrRdfResource(agent.getDcDate());
+	}
 	
 	@JacksonXmlElementWrapper(useWrapping=false)
 	@JacksonXmlProperty(localName = XmlConstants.XML_IDENTIFIER)
