@@ -11,6 +11,12 @@ public class LabelledResource {
 
   public LabelledResource(String lang, String value) {
     this.lang = lang;
+    if(lang != null) {
+        this.lang = lang;
+    } else {
+        //fix for #EA-2325, missing language attributions changed to ""
+	this.lang = "";  
+    }
     this.value = value;
   }
 
@@ -41,7 +47,11 @@ public class LabelledResource {
 
   @XmlAttribute(name= XmlConstants.LANG, namespace=javax.xml.XMLConstants.XML_NS_URI)
   public String getLang() {
-    return lang;
+      if (lang == null && getValue() != null) {
+	  // fix for #EA-2325, missing language attributions changed to ""
+	  return "";
+      }
+      return lang;
   }
 
   public void setLang(String lang) {

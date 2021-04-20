@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 
 import eu.europeana.entitymanagement.common.config.LanguageCodes;
 import eu.europeana.entitymanagement.common.config.LanguageCodes.Language;
-import eu.europeana.entitymanagement.common.config.LanguageCodes.Language.AlternativeLanguage;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 
@@ -83,13 +82,8 @@ public class ValidEntityFieldsValidator implements ConstraintValidator<ValidEnti
 				String fieldName = field.getName();
 				//remove spaces from the String fields
 				if (fieldType.isAssignableFrom(String.class)) {					
-					if (((String)fieldValue).contains(" ")) {
-						addConstraint(returnValue, context, "The entity field: "+field.getName()+" contains not allowed spaces.");
-						returnValue=false;
-						String newFieldValue = ((String)fieldValue).replaceAll("\\s+","");
-						//improving the situation and removing the spaces
-						entity.setFieldValue(field, newFieldValue);
-					}
+					returnValue = validateStringField(context, field, fieldValue, entity,
+						returnValue);
 				}
 				//remove spaces from the keys in the Map fields 
 				else if (fieldType.isAssignableFrom(Map.class)) {
@@ -130,7 +124,7 @@ public class ValidEntityFieldsValidator implements ConstraintValidator<ValidEnti
 								break;
 							}
 							if (language.getAlternativeLanguages()==null) continue;
-							for (AlternativeLanguage alternativeLanguage : language.getAlternativeLanguages()) {
+							for (Language alternativeLanguage : language.getAlternativeLanguages()) {
 								if (alternativeLanguage.getCode().contains(altLabelEnding)) {
 									if (foundAlternativeCodes == false) foundAlternativeCodes = true;
 									List<String> newAltLabelValue = new ArrayList<>(altLabel.getValue());
@@ -160,6 +154,18 @@ public class ValidEntityFieldsValidator implements ConstraintValidator<ValidEnti
 		    "During the reconceliation of the entity data from different sources an illegal access to some method or field has happened.",
 		    e);
 	} 
+	return returnValue;
+    }
+
+    boolean validateStringField(ConstraintValidatorContext context, Field field, Object fieldValue, Entity entity,
+	    boolean returnValue) throws IllegalAccessException {
+	if (((String)fieldValue).contains(" ")) {
+		addConstraint(returnValue, context, "The entity field: "+field.getName()+" contains not allowed spaces.");
+		returnValue=false;
+		String newFieldValue = ((String)fieldValue).replaceAll("\\s+","");
+		//improving the situation and removing the spaces
+		entity.setFieldValue(field, newFieldValue);
+	}
 	return returnValue;
     }
 
