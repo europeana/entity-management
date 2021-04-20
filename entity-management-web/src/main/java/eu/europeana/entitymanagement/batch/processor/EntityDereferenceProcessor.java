@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement.batch.processor;
 
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.utils.EntityComparator;
 import eu.europeana.entitymanagement.web.service.MetisDereferenceService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,10 +20,12 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
 
     private static final Logger logger = LogManager.getLogger(EntityDereferenceProcessor.class);
     private final MetisDereferenceService dereferenceService;
+    private final EntityComparator entityComparator;
 
     @Autowired
     public EntityDereferenceProcessor(MetisDereferenceService dereferenceService) {
         this.dereferenceService = dereferenceService;
+        this.entityComparator = new EntityComparator();
     }
 
     @Override
@@ -30,7 +33,7 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
         logger.debug("Calling Metis dereference service for entityId={}", entityRecord.getEntityId());
         Entity metisResponse = dereferenceService.dereferenceEntityById(entityRecord.getExternalProxy().getProxyId());
 
-        if (entityRecord.getEntity().equals(metisResponse)) {
+        if (entityComparator.compare(entityRecord.getEntity(), metisResponse) == 0) {
             logger.debug("Existing metadata for entityId={} matches Metis response. Stopping processing", entityRecord.getEntityId());
             // stop processing
             return null;
