@@ -11,12 +11,16 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_HAS_P
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IDENTIFIER;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IS_PART_OF;
 
-import eu.europeana.entitymanagement.definitions.model.Agent;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import eu.europeana.entitymanagement.definitions.model.Agent;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.exception.EntityCreationException;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @XmlRootElement(namespace = NAMESPACE_EDM, name = XML_AGENT)
 public class XmlAgentImpl extends XmlBaseEntityImpl {
@@ -36,7 +40,8 @@ public class XmlAgentImpl extends XmlBaseEntityImpl {
 	private String[] dateOfDeath;
 	private String dateOfEstablishment;
 	private String dateOfTermination;
-	private String gender;
+	private String[] dcDate;
+        private String gender;
 	private List<LabelledResource> placeOfBirth = new ArrayList<>();
 	private List<LabelledResource> placeOfDeath = new ArrayList<>();
 	private List<LabelledResource> professionOrOccupation = new ArrayList<>();
@@ -58,6 +63,7 @@ public class XmlAgentImpl extends XmlBaseEntityImpl {
 						this.dateOfDeath = agent.getDateOfDeath();
 						this.dateOfEstablishment = agent.getDateOfEstablishment();
 						this.dateOfTermination = agent.getDateOfTermination();
+						this.dcDate = agent.getDate();
 						this.gender = agent.getGender();
 						this.placeOfBirth = RdfXmlUtils.convertToXmlMultilingualStringOrRdfResource(agent.getPlaceOfBirth());
 						this.placeOfDeath = RdfXmlUtils.convertToXmlMultilingualStringOrRdfResource(agent.getPlaceOfDeath());
@@ -68,6 +74,34 @@ public class XmlAgentImpl extends XmlBaseEntityImpl {
 		// default constructor
 	}
 
+	public Entity toEntityModel() throws EntityCreationException {
+	        super.toEntityModel();
+	        Agent agent = (Agent) getEntity(); 
+	        
+	        agent.setHiddenLabel(RdfXmlUtils.toLanguageMapList(getHiddenLabel()));
+                agent.setNote(RdfXmlUtils.toLanguageMapList(getNote()));
+                agent.setIdentifier(getIdentifier());
+                agent.setHasPart(RdfXmlUtils.toStringArray(getHasPart()));
+                agent.setIsPartOfArray(RdfXmlUtils.toStringArray(getIsPartOf()));
+                agent.setBegin(getBegin());
+                agent.setEnd(getEnd());
+                agent.setHasMet(RdfXmlUtils.toStringArray(getHasMet()));
+                agent.setIsRelatedTo(RdfXmlUtils.toStringArray(getIsRelatedTo()));
+                agent.setName(RdfXmlUtils.toLanguageMap(getName()));
+                agent.setBiographicalInformation(RdfXmlUtils.toLanguageMapList(getBiographicalInformation()));
+                agent.setDateOfBirth(getDateOfBirth());
+                agent.setDateOfDeath(getDateOfDeath());
+                agent.setDateOfEstablishment(getDateOfEstablishment());
+                agent.setDateOfTermination(getDateOfTermination());
+                agent.setDate(getDcDate());
+                agent.setGender(getGender());
+                agent.setPlaceOfBirth(RdfXmlUtils.toLanguageMapList(getPlaceOfBirth()));
+                agent.setPlaceOfDeath(RdfXmlUtils.toLanguageMapList(getPlaceOfDeath()));
+                agent.setProfessionOrOccupation(RdfXmlUtils.toLanguageMapList(getProfessionOrOccupation()));
+	        
+	        return agent;
+	    }
+	
 	@XmlElement(name = HIDDEN_LABEL, namespace = NAMESPACE_SKOS)
 	public List<LabelledResource> getHiddenLabel() {
 		return hiddenLabel;
@@ -78,13 +112,10 @@ public class XmlAgentImpl extends XmlBaseEntityImpl {
 		return note;
 	}
     	
-//	@JacksonXmlElementWrapper(useWrapping=false)
-//	@JacksonXmlProperty(localName = XmlConstants.XML_DC_DATE)
-//	public List<Object> getDcDate() {
-//	    	// TODO: GetDcDate from Agent currently not implemented
-//	    	return null;
-//		//return XmlMultilingualString.convertToXmlMultilingualStringOrRdfResource(agent.getDcDate());
-//	}
+	@XmlElement(name = XmlConstants.XML_DC_DATE)
+	public String[] getDcDate() {
+	    	return dcDate;
+	}
 
 	@XmlElement(name = XML_IDENTIFIER)
 	public String[] getIdentifier() {
@@ -171,13 +202,6 @@ public class XmlAgentImpl extends XmlBaseEntityImpl {
 	    	return professionOrOccupation;
 	}
 	
-//	@JacksonXmlElementWrapper(useWrapping=false)
-//	@JacksonXmlProperty(localName = XmlConstants.XML_SAME_AS)
-//	public List<RdfResource> getSameAs(){
-//	    	return RdfXmlUtils.convertToRdfResource(getAgent().getSameAs());
-//	}
-
-
 	@Override
 	protected EntityTypes getTypeEnum() {
 	    return EntityTypes.Agent;
