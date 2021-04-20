@@ -391,28 +391,4 @@ public abstract class BaseEntity implements Entity {
 		String[] splitArray = this.getAbout().split("/");
 		this.entityIdentifier =  splitArray[splitArray.length-1];
 	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		BaseEntity that = (BaseEntity) o;
-		return Objects.equals(getDepiction(), that.getDepiction())
-				&& ComparisonUtils.areMapsEqual(getNote(), that.getNote())
-				&& ComparisonUtils.areMapsEqual(getPrefLabel(), that.getPrefLabel())
-				&& ComparisonUtils.areMapsEqual(getAltLabel(), that.getAltLabel())
-				&& ComparisonUtils.areMapsEqual(getHiddenLabel(), that.getHiddenLabel())
-				&& ComparisonUtils.areMapsEqual(tmpPrefLabel, that.tmpPrefLabel)
-				&& Arrays.equals(getIdentifier(), that.getIdentifier())
-				&& Objects.equals(getIsAggregatedBy(), that.getIsAggregatedBy())
-				&& Objects.equals(getReferencedWebResource(), that.getReferencedWebResource());
-	}
-
-	@Override
-	public int hashCode() {
-		int result = Objects.hash(getDepiction(), getNote(), getPrefLabel(), getAltLabel(), getHiddenLabel(), tmpPrefLabel, getIsAggregatedBy(), getReferencedWebResource());
-		result = 31 * result + Arrays.hashCode(getIdentifier());
-		return result;
-	}
-
 }
