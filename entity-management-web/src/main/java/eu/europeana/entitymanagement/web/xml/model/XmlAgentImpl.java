@@ -1,15 +1,28 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
+import static eu.europeana.entitymanagement.vocabulary.XmlFields.XML_DC_DATE;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.HIDDEN_LABEL;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_EDM;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_SKOS;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NOTE;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_AGENT;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_BEGIN;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_BIOGRAPHICAL_INFORMATION;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_DATE_OF_BIRTH;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_DATE_OF_DEATH;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_DATE_OF_ESTABLISHMENT;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_DATE_OF_TERMINATION;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_END;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_GENDER;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_HASMET;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_HAS_PART;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IDENTIFIER;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IS_PART_OF;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IS_RELATED_TO;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_NAME;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PLACE_OF_BIRTH;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PLACE_OF_DEATH;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PROFESSION_OR_OCCUPATION;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -114,7 +127,7 @@ public class XmlAgentImpl extends XmlBaseEntityImpl {
 		return note;
 	}
     	
-	@XmlElement(name = XmlConstants.XML_DC_DATE)
+	@XmlElement(name = XML_DC_DATE)
 	public String[] getDcDate() {
 	    	return dcDate;
 	}
@@ -144,62 +157,62 @@ public class XmlAgentImpl extends XmlBaseEntityImpl {
 	    	return end;
 	}
 
-	@XmlElement(name = XmlConstants.XML_HASMET)
+	@XmlElement(name = XML_HASMET)
 	public List<LabelledResource> getHasMet() {
 	    	return hasMet;
 	}
 	
-	@XmlElement(name = XmlConstants.XML_IS_RELATED_TO)
+	@XmlElement(name = XML_IS_RELATED_TO)
 	public List<LabelledResource> getIsRelatedTo() {
 	    	return isRelatedTo;
 	}
 	
-	@XmlElement(name = XmlConstants.XML_NAME)
+	@XmlElement(name = XML_NAME)
 	public List<LabelledResource> getName(){
 	    	return name;
 	}
 	
-	@XmlElement(name = XmlConstants.XML_BIOGRAPHICAL_INFORMATION)
+	@XmlElement(name = XML_BIOGRAPHICAL_INFORMATION)
 	public List<LabelledResource> getBiographicalInformation(){
 	    	return biographicalInformation;
 	}
 	
-	@XmlElement(name = XmlConstants.XML_DATE_OF_BIRTH)
+	@XmlElement(name = XML_DATE_OF_BIRTH)
 	public String[] getDateOfBirth() {
 	    	return dateOfBirth;
 	}
 	
-	@XmlElement(name = XmlConstants.XML_DATE_OF_DEATH)
+	@XmlElement(name = XML_DATE_OF_DEATH)
 	public String[] getDateOfDeath() {
 	    	return dateOfDeath;
 	}
 	
-	@XmlElement(name = XmlConstants.XML_DATE_OF_ESTABLISHMENT)
+	@XmlElement(name = XML_DATE_OF_ESTABLISHMENT)
 	public String getDateOfEstablishment() {
 	    	return dateOfEstablishment;
 	}
 	
-	@XmlElement(name = XmlConstants.XML_DATE_OF_TERMINATION)
+	@XmlElement(name = XML_DATE_OF_TERMINATION)
 	public String getDateOfTermination() {
 	    	return dateOfTermination;
 	}
 	
-	@XmlElement(name = XmlConstants.XML_GENDER)
+	@XmlElement(name = XML_GENDER)
 	public String getGender() {
 	    	return gender;
 	}
 	
-	@XmlElement(name = XmlConstants.XML_PLACE_OF_BIRTH)
+	@XmlElement(name = XML_PLACE_OF_BIRTH)
 	public List<LabelledResource> getPlaceOfBirth(){
 	    	return placeOfBirth;
 	}
 	
-	@XmlElement(name = XmlConstants.XML_PLACE_OF_DEATH)
+	@XmlElement(name = XML_PLACE_OF_DEATH)
 	public List<LabelledResource> getPlaceOfDeath(){
 	    	return placeOfDeath;
 	}
 	
-	@XmlElement(name = XmlConstants.XML_PROFESSION_OR_OCCUPATION, namespace = "http://rdvocab.info/ElementsGr2/")
+	@XmlElement(name = XML_PROFESSION_OR_OCCUPATION, namespace = "http://rdvocab.info/ElementsGr2/")
 	public List<LabelledResource> getProfessionOrOccupation(){
 	    	return professionOrOccupation;
 	}

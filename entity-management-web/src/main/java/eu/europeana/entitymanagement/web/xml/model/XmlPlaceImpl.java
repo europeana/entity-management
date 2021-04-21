@@ -1,7 +1,19 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.ALT_LABEL;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.DEPICTION;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.HIDDEN_LABEL;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.IS_AGGREGATED_BY;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NOTE;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.PREF_LABEL;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_HAS_PART;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IS_NEXT_IN_SEQUENCE;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IS_PART_OF;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PLACE;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_SAME_AS;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_WGS84_POS_ALT;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_WGS84_POS_LAT;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_WGS84_POS_LONG;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,12 +30,10 @@ import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
-@JacksonXmlRootElement(localName = XmlConstants.XML_PLACE)
+@JacksonXmlRootElement(localName = XML_PLACE)
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({XmlConstants.DEPICTION, XmlConstants.PREF_LABEL, XmlConstants.ALT_LABEL, XmlConstants.HIDDEN_LABEL,
-    	XmlConstants.XML_WGS84_POS_LAT, XmlConstants.XML_WGS84_POS_LONG, XmlConstants.XML_WGS84_POS_ALT, XmlConstants.NOTE,
-    	XmlConstants.XML_HAS_PART, XmlConstants.XML_IS_PART_OF, XmlConstants.XML_IS_NEXT_IN_SEQUENCE, 
-    	XmlConstants.XML_SAME_AS, XmlConstants.IS_AGGREGATED_BY})
+@JsonPropertyOrder({ DEPICTION, PREF_LABEL, ALT_LABEL, HIDDEN_LABEL, XML_WGS84_POS_LAT, XML_WGS84_POS_LONG,
+        XML_WGS84_POS_ALT, NOTE, XML_HAS_PART, XML_IS_PART_OF, XML_IS_NEXT_IN_SEQUENCE, XML_SAME_AS, IS_AGGREGATED_BY })
 public class XmlPlaceImpl extends XmlBaseEntityImpl {
     
     
@@ -67,27 +77,27 @@ public class XmlPlaceImpl extends XmlBaseEntityImpl {
             return place;
         }
 
-	@XmlElement(name = XmlConstants.XML_WGS84_POS_LAT)
+	@XmlElement(name = XML_WGS84_POS_LAT)
 	public Float getLatitude() {
 		return latitude;
 	}
 
-	@XmlElement(name = XmlConstants.XML_WGS84_POS_LONG)
+	@XmlElement(name = XML_WGS84_POS_LONG)
 	public Float getLongitude() {
 		return longitude;
 	}
 
-	@XmlElement(name = XmlConstants.XML_WGS84_POS_ALT)
+	@XmlElement(name = XML_WGS84_POS_ALT)
 	public Float getAltitude() {
 		return altitude;
 	}
 	
-	@XmlElement(name = XmlConstants.HIDDEN_LABEL)
+	@XmlElement(name = HIDDEN_LABEL)
 	public List<LabelledResource> getHiddenLabel() {
 		return hiddenLabel;
 	}
 	
-	@XmlElement(name = XmlConstants.NOTE)
+	@XmlElement(name = NOTE)
 	public List<LabelledResource> getNote() {
 		return note;
 	}
@@ -103,7 +113,7 @@ public class XmlPlaceImpl extends XmlBaseEntityImpl {
 	    	return isPartOf;
 	}
 
-	@XmlElement(name =  XmlConstants.XML_IS_NEXT_IN_SEQUENCE)
+	@XmlElement(name =  XML_IS_NEXT_IN_SEQUENCE)
 	public String[] getIsNextInSequence() {
 		return isNextInSequence;
 	}

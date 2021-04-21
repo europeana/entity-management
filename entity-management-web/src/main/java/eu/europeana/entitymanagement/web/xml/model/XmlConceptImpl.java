@@ -1,5 +1,26 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.ABOUT;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.ALT_LABEL;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.BROADER;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.BROAD_MATCH;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.CLOSE_MATCH;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.DEPICTION;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.EXACT_MATCH;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.HIDDEN_LABEL;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.IN_SCHEMA;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.IS_AGGREGATED_BY;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_SKOS;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NARROWER;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NARROW_MATCH;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NOTATION;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NOTE;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.PREF_LABEL;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.RELATED;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.RELATED_MATCH;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_SAME_AS;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_SKOS_CONCEPT;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,12 +37,10 @@ import eu.europeana.entitymanagement.definitions.model.impl.ConceptImpl;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
-@JacksonXmlRootElement(localName = XmlConstants.XML_SKOS_CONCEPT)
+@JacksonXmlRootElement(localName = XML_SKOS_CONCEPT)
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({XmlConstants.ABOUT, XmlConstants.DEPICTION, XmlConstants.PREF_LABEL, XmlConstants.ALT_LABEL, XmlConstants.HIDDEN_LABEL,
-        XmlConstants.NOTE, XmlConstants.NOTATION, XmlConstants.BROADER, XmlConstants.NARROWER, XmlConstants.RELATED,
-        XmlConstants.BROAD_MATCH, XmlConstants.NARROW_MATCH, XmlConstants.RELATED_MATCH, XmlConstants.CLOSE_MATCH,
-        XmlConstants.EXACT_MATCH, XmlConstants.IN_SCHEMA, XmlConstants.XML_SAME_AS, XmlConstants.IS_AGGREGATED_BY})
+@JsonPropertyOrder({ ABOUT, DEPICTION, PREF_LABEL, ALT_LABEL, HIDDEN_LABEL, NOTE, NOTATION, BROADER, NARROWER, RELATED,
+        BROAD_MATCH, NARROW_MATCH, RELATED_MATCH, CLOSE_MATCH, EXACT_MATCH, IN_SCHEMA, XML_SAME_AS, IS_AGGREGATED_BY })
 public class XmlConceptImpl extends XmlBaseEntityImpl {
 
     private List<LabelledResource> narrower = new ArrayList<>();
@@ -78,55 +97,55 @@ public class XmlConceptImpl extends XmlBaseEntityImpl {
         return getEntity();
     }
 
-    @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.BROADER)
+    @XmlElement(namespace = NAMESPACE_SKOS, name = BROADER)
     public List<LabelledResource> getBroader() {
         return this.broader;
     }
 
 
-    @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.NARROWER)
+    @XmlElement(namespace = NAMESPACE_SKOS, name = NARROWER)
     public List<LabelledResource> getNarrower() {
         return this.narrower;
     }
 
 
-    @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.RELATED)
+    @XmlElement(namespace = NAMESPACE_SKOS, name = RELATED)
     public List<LabelledResource> getRelated() {
         return this.related;
     }
 
-    @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.BROAD_MATCH)
+    @XmlElement(namespace = NAMESPACE_SKOS, name = BROAD_MATCH)
     public List<LabelledResource> getBroadMatch() {
         return this.broadMatch;
     }
 
-    @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.NARROW_MATCH)
+    @XmlElement(namespace = NAMESPACE_SKOS, name = NARROW_MATCH)
     public List<LabelledResource> getNarrowMatch() {
         return this.narrowMatch;
     }
 
 
-    @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.EXACT_MATCH)
+    @XmlElement(namespace = NAMESPACE_SKOS, name = EXACT_MATCH)
     public List<LabelledResource> getExactMatch() {
         return this.exactMatch;
     }
 
-    @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.RELATED_MATCH)
+    @XmlElement(namespace = NAMESPACE_SKOS, name = RELATED_MATCH)
     public List<LabelledResource> getRelatedMatch() {
         return this.relatedMatch;
     }
 
-    @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.CLOSE_MATCH)
+    @XmlElement(namespace = NAMESPACE_SKOS, name = CLOSE_MATCH)
     public List<LabelledResource> getCloseMatch() {
         return this.closeMatch;
     }
 
-    @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.NOTATION)
+    @XmlElement(namespace = NAMESPACE_SKOS, name = NOTATION)
     public List<LabelledResource> getNotation() {
         return this.notation;
     }
 
-    @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.HIDDEN_LABEL)
+    @XmlElement(namespace = NAMESPACE_SKOS, name = HIDDEN_LABEL)
     public List<LabelledResource> getHiddenLabel() {
         return this.hiddenLabel;
     }
@@ -137,13 +156,13 @@ public class XmlConceptImpl extends XmlBaseEntityImpl {
     }
 
 
-    @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.NOTE)
+    @XmlElement(namespace = NAMESPACE_SKOS, name = NOTE)
     public List<LabelledResource> getNote() {
         return note;
     }
 
 
-    @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.IN_SCHEMA)
+    @XmlElement(namespace = NAMESPACE_SKOS, name = IN_SCHEMA)
     public List<LabelledResource> getInScheme() {
         return this.inScheme;
     }
