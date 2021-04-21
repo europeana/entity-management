@@ -1,9 +1,9 @@
 package eu.europeana.entitymanagement.web.service;
 
-import javax.annotation.Resource;
-
+import eu.europeana.entitymanagement.web.auth.Roles;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.stereotype.Component;
 
@@ -18,22 +18,18 @@ public class AuthorizationService extends BaseAuthorizationService implements eu
 
     protected final Logger logger = LogManager.getLogger(getClass());
 
-    EntityManagementConfiguration emConfiguration;
+    private final EntityManagementConfiguration emConfiguration;
+    private  final EuropeanaClientDetailsService clientDetailsService;
 
-    @Resource(name="clientDetailsService")
-    EuropeanaClientDetailsService clientDetailsService;
+    @Autowired
+    public AuthorizationService(
+        EntityManagementConfiguration emConfiguration,
+        EuropeanaClientDetailsService clientDetailsService) {
+      this.emConfiguration = emConfiguration;
 
-    public AuthorizationService() {
-
+      this.clientDetailsService = clientDetailsService;
     }
 
-    public EntityManagementConfiguration getConfiguration() {
-	return emConfiguration;
-    }
-
-    public void setConfiguration(EntityManagementConfiguration configuration) {
-	this.emConfiguration = configuration;
-    }
 
     @Override
     protected ClientDetailsService getClientDetailsService() {
@@ -42,19 +38,18 @@ public class AuthorizationService extends BaseAuthorizationService implements eu
 
     @Override
     protected String getSignatureKey() {
-	return getConfiguration().getJwtTokenSignatureKey();
+	return emConfiguration.getApiKeyPublicKey();
     }
 
 
     @Override
     protected String getApiName() {
-	return getConfiguration().getAuthorizationApiName();
+	return emConfiguration.getAuthorizationApiName();
     }
 
 	@Override
-	protected Role getRoleByName(String arg0) {
-		// TODO Auto-generated method stub
-		return null;
+	protected Role getRoleByName(String name) {
+    return Roles.getRoleByName(name);
 	}
     
 }
