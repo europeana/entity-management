@@ -1,15 +1,21 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_HAS_PART;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IS_PART_OF;
+
+import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.bind.annotation.XmlElement;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
+import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.Place;
+import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @JacksonXmlRootElement(localName = XmlConstants.XML_PLACE)
@@ -20,65 +26,89 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
     	XmlConstants.XML_SAME_AS, XmlConstants.IS_AGGREGATED_BY})
 public class XmlPlaceImpl extends XmlBaseEntityImpl {
     
-	public XmlPlaceImpl(Place place) {
+    
+    	Float latitude, longitude, altitude;
+	
+    	private List<LabelledResource> hiddenLabel = new ArrayList<>();
+    	private List<LabelledResource> note = new ArrayList<>();
+    	private List<LabelledResource> hasPart = new ArrayList<>();
+	private List<LabelledResource> isRelatedTo = new ArrayList<>();
+	private List<LabelledResource> isPartOf = new ArrayList<>();
+	private String[] isNextInSequence;
+	
+    	public XmlPlaceImpl(Place place) {
 	    	super(place);
+	    	this.latitude = place.getLatitude();
+	    	this.longitude = place.getLongitude();
+	    	this.altitude = place.getAltitude();
+	    	this.hiddenLabel = RdfXmlUtils.convertToXmlMultilingualString(place.getHiddenLabel());
+    	    	this.note = RdfXmlUtils.convertToXmlMultilingualString(place.getNote());
+    	    	this.hasPart = RdfXmlUtils.convertToRdfResource(place.getHasPart());
+    	    	this.isPartOf = RdfXmlUtils.convertToRdfResource(place.getIsPartOfArray());
+    	    	this.isNextInSequence = place.getIsNextInSequence();
 	}
 	
 	public XmlPlaceImpl() {
 		// default constructor
 	}
+	
+	public Entity toEntityModel() throws EntityCreationException {
+            super.toEntityModel();
+            Place place = (Place) getEntity(); 
+            
+            place.setLatitude(getLatitude());
+            place.setLongitude(getLongitude());
+            place.setAltitude(getAltitude());
+            place.setHiddenLabel(RdfXmlUtils.toLanguageMapList(getHiddenLabel()));
+            place.setNote(RdfXmlUtils.toLanguageMapList(getNote()));
+            place.setHasPart(RdfXmlUtils.toStringArray(getHasPart()));
+            place.setIsPartOfArray(RdfXmlUtils.toStringArray(getIsPartOf()));
+            place.setIsNextInSequence(getIsNextInSequence());
+            
+            return place;
+        }
 
-	@JacksonXmlProperty(localName = XmlConstants.XML_WGS84_POS_LAT)
+	@XmlElement(name = XmlConstants.XML_WGS84_POS_LAT)
 	public Float getLatitude() {
-		return getPlace().getLatitude();
+		return latitude;
 	}
 
-	@JacksonXmlProperty(localName = XmlConstants.XML_WGS84_POS_LONG)
+	@XmlElement(name = XmlConstants.XML_WGS84_POS_LONG)
 	public Float getLongitude() {
-		return getPlace().getLongitude();
+		return longitude;
 	}
 
-	@JacksonXmlProperty(localName = XmlConstants.XML_WGS84_POS_ALT)
+	@XmlElement(name = XmlConstants.XML_WGS84_POS_ALT)
 	public Float getAltitude() {
-		return getPlace().getAltitude();
+		return altitude;
 	}
 	
-	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.HIDDEN_LABEL)
+	@XmlElement(name = XmlConstants.HIDDEN_LABEL)
 	public List<LabelledResource> getHiddenLabel() {
-		return RdfXmlUtils.convertToXmlMultilingualString(getPlace().getHiddenLabel());
+		return hiddenLabel;
 	}
 	
-	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.NOTE)
+	@XmlElement(name = XmlConstants.NOTE)
 	public List<LabelledResource> getNote() {
-		return RdfXmlUtils.convertToXmlMultilingualString(getPlace().getNote());
+		return note;
 	}
 	
-	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_HAS_PART)
+	
+	@XmlElement(name = XML_HAS_PART)
 	public List<LabelledResource> getHasPart() {
-	    	return RdfXmlUtils.convertToRdfResource(getPlace().getHasPart());
+	    	return hasPart;
 	}
 
-	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName  = XmlConstants.XML_IS_PART_OF)
+	@XmlElement(name = XML_IS_PART_OF)
 	public List<LabelledResource> getIsPartOf() {
-	    	return RdfXmlUtils.convertToRdfResource(getPlace().getIsPartOfArray());
+	    	return isPartOf;
 	}
-	
-	@JacksonXmlElementWrapper(useWrapping=false)
-	@JacksonXmlProperty(localName = XmlConstants.XML_IS_NEXT_IN_SEQUENCE)
-	public List<LabelledResource> getIsNextInSequence() {
-		return RdfXmlUtils.convertToRdfResource(getPlace().getIsNextInSequence());
-	}
-	
-//	@JacksonXmlElementWrapper(useWrapping=false)
-//	@JacksonXmlProperty(localName = XmlConstants.XML_SAME_AS)
-//	public List<RdfResource> getSameAs(){
-//	    	return RdfXmlUtils.convertToRdfResource(getPlace().getSameAs());
-//	}
 
+	@XmlElement(name =  XmlConstants.XML_IS_NEXT_IN_SEQUENCE)
+	public String[] getIsNextInSequence() {
+		return isNextInSequence;
+	}
+	
 	@JsonIgnore
 	private Place getPlace() {
 	    return (Place)entity;
@@ -88,6 +118,11 @@ public class XmlPlaceImpl extends XmlBaseEntityImpl {
 	@JsonIgnore
 	protected EntityTypes getTypeEnum() {
 	    return EntityTypes.Place;
+	}
+
+	@XmlElement(name =  XmlConstants.XML_IS_RELATED_TO)
+	public List<LabelledResource> getIsRelatedTo() {
+	    return isRelatedTo;
 	}
     	
 }
