@@ -102,7 +102,11 @@ public class RdfXmlUtils {
 	String[] res = new String[resources.size()];
 	int i = 0;
 	for (LabelledResource labelledResource : resources) {
-	    res[i++] = labelledResource.getValue();
+	    if(labelledResource.getResource() != null) {
+	        res[i++] = labelledResource.getResource();
+	    } else {
+	        res[i++] = labelledResource.getValue();
+	    }
 	}
 
 	return res;
