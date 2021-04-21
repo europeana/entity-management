@@ -76,18 +76,21 @@ public class EntityComparator implements Comparator<Entity> {
 		Object[] array1 = (Object[]) e1.getFieldValue(field);
 		Object[] array2 = (Object[]) e2.getFieldValue(field);
 		if (compareArrays(array1, array2) > 0) {
+		    logger.trace("The values of the field {} are not equal!", field.getName());
 		    return 1;
 		}
 	    } else if (Map.class.isAssignableFrom(fieldType)) {
 		Map<Object, Object> map1 = (Map<Object, Object>) e1.getFieldValue(field);
 		Map<Object, Object> map2 = (Map<Object, Object>) e2.getFieldValue(field);
 		if (compareMaps(map1, map2) > 0) {
+		    logger.trace("The values of the field {} are not equal!", field.getName());
 		    return 1;
 		}
 	    } else if (List.class.isAssignableFrom(fieldType)) {
 		List<Object> list1 = (List<Object>) e1.getFieldValue(field);
 		List<Object> list2 = (List<Object>) e2.getFieldValue(field);
 		if (compareLists(list1, list2) > 0) {
+		    logger.trace("The values of the field {} are not equal!", field.getName());
 		    return 1;
 		}
 	    } else {
@@ -95,8 +98,10 @@ public class EntityComparator implements Comparator<Entity> {
 		Object obj2 = e2.getFieldValue(field);
 		if (compareClass(obj1, obj2) > 0) {
 		    // verify for null values or different class
+		    logger.trace("The values of the field {} are not equal!", field.getName());
 		    return 1;
 		} else if (obj1 != null && !obj1.equals(obj2)) {
+		    logger.trace("The values of the field {} are not equal!", field.getName());
 		    return 1;
 		}
 	    }
@@ -127,12 +132,14 @@ public class EntityComparator implements Comparator<Entity> {
 	}
 
 	if (l1.size() != l2.size()) {
+	    logger.trace("List size is not equal l1 size:{}, l2 size;{}!", l1.size(), l2.size());
 	    return 1;
 	}
 
 	for (Object l1Elem : l1) {
 	    if (!l2.contains(l1Elem)) {
-		return 1;
+	        logger.trace("List doesn't contain element:{}", l1Elem);
+	        return 1;
 	    }
 	}
 
@@ -151,7 +158,8 @@ public class EntityComparator implements Comparator<Entity> {
 
 	if (m1.size() != m2.size()) {
 	    // not same size
-	    return 1;
+	    logger.trace("Map size is not equal m1 size:{}, m2 size;{}!", m1.size(), m2.size());
+            return 1;
 	}
 
 	for (Map.Entry<Object, Object> m1Elem : m1.entrySet()) {
@@ -161,16 +169,19 @@ public class EntityComparator implements Comparator<Entity> {
 		if (List.class.isAssignableFrom(val1.getClass())) {
 		    //value is a list
 		    if (compareLists((List<Object>) val1, (List<Object>) val2) > 0) {
-			return 1;
+		        logger.trace("Map 2 contains different values for key {}!", m1Elem.getKey());     
+                        return 1;
 		    }
 		} else {
 		    //value is an object
 		    if (!val1.equals(val2)) {
-			return 1;
+		        logger.trace("Map 2 contains different values for key {}!", m1Elem.getKey());     
+	                return 1;
 		    }
 		}
 	    } else {
-		return 1;
+	        logger.trace("Map 2 doesn't contain key {}!", m1Elem.getKey());     
+	        return 1;
 	    }
 	}
 

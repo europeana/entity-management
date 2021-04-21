@@ -15,5 +15,7 @@
         </Root>
         <Logger name="org.apache.http" level="INFO"/>
         <Logger name="eu.europeana.entitymanagement" level="DEBUG"/>
+        <Logger name="eu.europeana.entitymanagement.utils" level="TRACE"/>
+        
     </Loggers>
 </Configuration>
