@@ -32,21 +32,20 @@ public class XmlPlaceImpl extends XmlBaseEntityImpl {
     	private List<LabelledResource> hiddenLabel = new ArrayList<>();
     	private List<LabelledResource> note = new ArrayList<>();
     	private List<LabelledResource> hasPart = new ArrayList<>();
-	private List<LabelledResource> isRelatedTo = new ArrayList<>();
-	private List<LabelledResource> isPartOf = new ArrayList<>();
-	private String[] isNextInSequence;
+    	private List<LabelledResource> isPartOf = new ArrayList<>();
+        private String[] isNextInSequence;
 	
-    	public XmlPlaceImpl(Place place) {
-	    	super(place);
-	    	this.latitude = place.getLatitude();
-	    	this.longitude = place.getLongitude();
-	    	this.altitude = place.getAltitude();
-	    	this.hiddenLabel = RdfXmlUtils.convertToXmlMultilingualString(place.getHiddenLabel());
-    	    	this.note = RdfXmlUtils.convertToXmlMultilingualString(place.getNote());
-    	    	this.hasPart = RdfXmlUtils.convertToRdfResource(place.getHasPart());
-    	    	this.isPartOf = RdfXmlUtils.convertToRdfResource(place.getIsPartOfArray());
-    	    	this.isNextInSequence = place.getIsNextInSequence();
-	}
+        public XmlPlaceImpl(Place place) {
+            super(place);
+            this.latitude = place.getLatitude();
+            this.longitude = place.getLongitude();
+            this.altitude = place.getAltitude();
+            this.hiddenLabel = RdfXmlUtils.convertToXmlMultilingualString(place.getHiddenLabel());
+            this.note = RdfXmlUtils.convertToXmlMultilingualString(place.getNote());
+            this.hasPart = RdfXmlUtils.convertToRdfResource(place.getHasPart());
+            this.isPartOf = RdfXmlUtils.convertToRdfResource(place.getIsPartOfArray());
+            this.isNextInSequence = place.getIsNextInSequence();
+        }
 	
 	public XmlPlaceImpl() {
 		// default constructor
@@ -118,11 +117,6 @@ public class XmlPlaceImpl extends XmlBaseEntityImpl {
 	@JsonIgnore
 	protected EntityTypes getTypeEnum() {
 	    return EntityTypes.Place;
-	}
-
-	@XmlElement(name =  XmlConstants.XML_IS_RELATED_TO)
-	public List<LabelledResource> getIsRelatedTo() {
-	    return isRelatedTo;
 	}
     	
 }

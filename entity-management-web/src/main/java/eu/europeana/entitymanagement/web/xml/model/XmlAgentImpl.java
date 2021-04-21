@@ -46,61 +46,63 @@ public class XmlAgentImpl extends XmlBaseEntityImpl {
 	private List<LabelledResource> placeOfDeath = new ArrayList<>();
 	private List<LabelledResource> professionOrOccupation = new ArrayList<>();
 
-	public XmlAgentImpl(Agent agent) {
-    	    	super(agent);
-    	    	this.hiddenLabel = RdfXmlUtils.convertToXmlMultilingualString(agent.getHiddenLabel());
-    	    	this.note = RdfXmlUtils.convertToXmlMultilingualString(agent.getNote());
-    	    	this.identifier = agent.getIdentifier();
-    	    	this.hasPart = RdfXmlUtils.convertToRdfResource(agent.getHasPart());
-    	    	this.isPartOf = RdfXmlUtils.convertToRdfResource(agent.getIsPartOfArray());
-    	    	this.begin = agent.getBeginArray();
-    	    	this.end = agent.getEndArray();
-    	    	this.hasMet = RdfXmlUtils.convertToRdfResource(agent.getHasMet());
-    	    	this.isRelatedTo = RdfXmlUtils.convertToRdfResource(agent.getIsRelatedTo());
-    	    	this.name = RdfXmlUtils.convertMapToXmlMultilingualString(agent.getName());
-						this.biographicalInformation = RdfXmlUtils.convertToXmlMultilingualString(agent.getBiographicalInformation());
-						this.dateOfBirth = agent.getDateOfBirth();
-						this.dateOfDeath = agent.getDateOfDeath();
-						this.dateOfEstablishment = agent.getDateOfEstablishment();
-						this.dateOfTermination = agent.getDateOfTermination();
-						this.dcDate = agent.getDate();
-						this.gender = agent.getGender();
-						this.placeOfBirth = RdfXmlUtils.convertToXmlMultilingualStringOrRdfResource(agent.getPlaceOfBirth());
-						this.placeOfDeath = RdfXmlUtils.convertToXmlMultilingualStringOrRdfResource(agent.getPlaceOfDeath());
-						this.professionOrOccupation = RdfXmlUtils.convertToXmlMultilingualStringOrRdfResource(agent.getProfessionOrOccupation());
-					}
+        public XmlAgentImpl(Agent agent) {
+            super(agent);
+            this.hiddenLabel = RdfXmlUtils.convertToXmlMultilingualString(agent.getHiddenLabel());
+            this.note = RdfXmlUtils.convertToXmlMultilingualString(agent.getNote());
+            this.identifier = agent.getIdentifier();
+            this.hasPart = RdfXmlUtils.convertToRdfResource(agent.getHasPart());
+            this.isPartOf = RdfXmlUtils.convertToRdfResource(agent.getIsPartOfArray());
+            this.begin = agent.getBeginArray();
+            this.end = agent.getEndArray();
+            this.hasMet = RdfXmlUtils.convertToRdfResource(agent.getHasMet());
+            this.isRelatedTo = RdfXmlUtils.convertToRdfResource(agent.getIsRelatedTo());
+            this.name = RdfXmlUtils.convertMapToXmlMultilingualString(agent.getName());
+            this.biographicalInformation = RdfXmlUtils
+                    .convertToXmlMultilingualString(agent.getBiographicalInformation());
+            this.dateOfBirth = agent.getDateOfBirth();
+            this.dateOfDeath = agent.getDateOfDeath();
+            this.dateOfEstablishment = agent.getDateOfEstablishment();
+            this.dateOfTermination = agent.getDateOfTermination();
+            this.dcDate = agent.getDate();
+            this.gender = agent.getGender();
+            this.placeOfBirth = RdfXmlUtils.convertToXmlMultilingualStringOrRdfResource(agent.getPlaceOfBirth());
+            this.placeOfDeath = RdfXmlUtils.convertToXmlMultilingualStringOrRdfResource(agent.getPlaceOfDeath());
+            this.professionOrOccupation = RdfXmlUtils
+                    .convertToXmlMultilingualStringOrRdfResource(agent.getProfessionOrOccupation());
+        }
 
 	public XmlAgentImpl() {
 		// default constructor
 	}
 
-	public Entity toEntityModel() throws EntityCreationException {
-	        super.toEntityModel();
-	        Agent agent = (Agent) getEntity(); 
-	        
-	        agent.setHiddenLabel(RdfXmlUtils.toLanguageMapList(getHiddenLabel()));
-                agent.setNote(RdfXmlUtils.toLanguageMapList(getNote()));
-                agent.setIdentifier(getIdentifier());
-                agent.setHasPart(RdfXmlUtils.toStringArray(getHasPart()));
-                agent.setIsPartOfArray(RdfXmlUtils.toStringArray(getIsPartOf()));
-                agent.setBegin(getBegin());
-                agent.setEnd(getEnd());
-                agent.setHasMet(RdfXmlUtils.toStringArray(getHasMet()));
-                agent.setIsRelatedTo(RdfXmlUtils.toStringArray(getIsRelatedTo()));
-                agent.setName(RdfXmlUtils.toLanguageMap(getName()));
-                agent.setBiographicalInformation(RdfXmlUtils.toLanguageMapList(getBiographicalInformation()));
-                agent.setDateOfBirth(getDateOfBirth());
-                agent.setDateOfDeath(getDateOfDeath());
-                agent.setDateOfEstablishment(getDateOfEstablishment());
-                agent.setDateOfTermination(getDateOfTermination());
-                agent.setDate(getDcDate());
-                agent.setGender(getGender());
-                agent.setPlaceOfBirth(RdfXmlUtils.toLanguageMapList(getPlaceOfBirth()));
-                agent.setPlaceOfDeath(RdfXmlUtils.toLanguageMapList(getPlaceOfDeath()));
-                agent.setProfessionOrOccupation(RdfXmlUtils.toLanguageMapList(getProfessionOrOccupation()));
-	        
-	        return agent;
-	    }
+        public Entity toEntityModel() throws EntityCreationException {
+            super.toEntityModel();
+            Agent agent = (Agent) getEntity();
+
+            agent.setHiddenLabel(RdfXmlUtils.toLanguageMapList(getHiddenLabel()));
+            agent.setNote(RdfXmlUtils.toLanguageMapList(getNote()));
+            agent.setIdentifier(getIdentifier());
+            agent.setHasPart(RdfXmlUtils.toStringArray(getHasPart()));
+            agent.setIsPartOfArray(RdfXmlUtils.toStringArray(getIsPartOf()));
+            agent.setBegin(getBegin());
+            agent.setEnd(getEnd());
+            agent.setHasMet(RdfXmlUtils.toStringArray(getHasMet()));
+            agent.setIsRelatedTo(RdfXmlUtils.toStringArray(getIsRelatedTo()));
+            agent.setName(RdfXmlUtils.toLanguageMap(getName()));
+            agent.setBiographicalInformation(RdfXmlUtils.toLanguageMapList(getBiographicalInformation()));
+            agent.setDateOfBirth(getDateOfBirth());
+            agent.setDateOfDeath(getDateOfDeath());
+            agent.setDateOfEstablishment(getDateOfEstablishment());
+            agent.setDateOfTermination(getDateOfTermination());
+            agent.setDate(getDcDate());
+            agent.setGender(getGender());
+            agent.setPlaceOfBirth(RdfXmlUtils.toLanguageMapList(getPlaceOfBirth()));
+            agent.setPlaceOfDeath(RdfXmlUtils.toLanguageMapList(getPlaceOfDeath()));
+            agent.setProfessionOrOccupation(RdfXmlUtils.toLanguageMapList(getProfessionOrOccupation()));
+
+            return agent;
+        }
 	
 	@XmlElement(name = HIDDEN_LABEL, namespace = NAMESPACE_SKOS)
 	public List<LabelledResource> getHiddenLabel() {
