@@ -12,6 +12,7 @@ import static eu.europeana.entitymanagement.mongo.repository.EntityRecordFields.
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.morphia.query.experimental.filters.Filters;
+import eu.europeana.entitymanagement.batch.listener.EntityUpdateListener;
 import eu.europeana.entitymanagement.batch.processor.EntityDereferenceProcessor;
 import eu.europeana.entitymanagement.batch.processor.EntityUpdateProcessor;
 import eu.europeana.entitymanagement.batch.reader.EntityRecordDatabaseReader;
@@ -23,6 +24,7 @@ import java.util.Arrays;
 import java.util.Date;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.batch.core.ItemProcessListener;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -58,6 +60,8 @@ public class BatchEntityUpdateConfig {
     private final EntityRecordDatabaseWriter dbWriter;
     private final EntityRecordService entityRecordService;
 
+    private final EntityUpdateListener entityUpdateListener;
+
     private final TaskExecutor stepThreadPoolExecutor;
     private final TaskExecutor synchronousTaskExecutor;
 
@@ -75,8 +79,9 @@ public class BatchEntityUpdateConfig {
         EntityUpdateProcessor entityUpdateProcessor,
         EntityRecordDatabaseWriter dbWriter,
         EntityRecordService entityRecordService,
+        EntityUpdateListener entityUpdateListener,
         @Qualifier(BEAN_STEP_EXECUTOR) TaskExecutor stepThreadPoolExecutor,
-        @Qualifier(SYNC_TASK_EXECUTOR)TaskExecutor synchronousTaskExecutor,
+        @Qualifier(SYNC_TASK_EXECUTOR) TaskExecutor synchronousTaskExecutor,
         @Qualifier(BEAN_JSON_MAPPER) ObjectMapper mapper,
         EntityManagementConfiguration emConfig) {
         this.jobBuilderFactory = jobBuilderFactory;
@@ -87,6 +92,7 @@ public class BatchEntityUpdateConfig {
         this.entityUpdateProcessor = entityUpdateProcessor;
         this.dbWriter = dbWriter;
         this.entityRecordService = entityRecordService;
+        this.entityUpdateListener = entityUpdateListener;
         this.stepThreadPoolExecutor = stepThreadPoolExecutor;
         this.synchronousTaskExecutor = synchronousTaskExecutor;
         this.mapper = mapper;
@@ -130,6 +136,9 @@ public class BatchEntityUpdateConfig {
     private Step updateEntityStep(boolean singleEntity){
         return this.stepBuilderFactory.get(STEP_UPDATE_ENTITY)
             .<EntityRecord, EntityRecord>chunk(chunkSize)
+            // setting up listener for Read/Process/Write
+            .listener(
+                (ItemProcessListener<? super EntityRecord, ? super EntityRecord>) entityUpdateListener)
             .reader(singleEntity ? singleItemReader : multipleItemReader)
             .processor(compositeItemProcessor())
             .writer(dbWriter)
