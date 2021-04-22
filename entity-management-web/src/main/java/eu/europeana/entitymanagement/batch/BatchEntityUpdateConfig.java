@@ -137,7 +137,7 @@ public class BatchEntityUpdateConfig {
             .build();
     }
 
-    @Bean
+
     Job updateSpecificEntities() {
         logger.info("Starting update job for specific entities");
         return this.jobBuilderFactory.get(JOB_UPDATE_SPECIFIC_ENTITIES)
@@ -146,7 +146,7 @@ public class BatchEntityUpdateConfig {
                 .build();
     }
 
-    @Bean
+
     Job updateAllEntities() {
         logger.info("Starting update job for ALL entities");
         return this.jobBuilderFactory.get(JOB_UPDATE_ALL_ENTITIES)

@@ -10,6 +10,10 @@ public final class XmlConstants extends XmlFields{
     public static final String NAMESPACE_EDM = "http://www.europeana.eu/schemas/edm/";
     public static final String NAMESPACE_RDAGR2 = "http://rdvocab.info/ElementsGr2/";
     public static final String NAMESPACE_OWL = "http://www.w3.org/2002/07/owl#";
+    public static final String NAMESPACE_DC = "http://purl.org/dc/elements/1.1/";
+    public static final String NAMESPACE_DC_TERMS = "http://purl.org/dc/terms/";
+    public static final String NAMESPACE_XML = "http://www.w3.org/XML/1998/namespace";
+
 
 
     public static final String RDF = "rdf";
@@ -25,7 +29,7 @@ public final class XmlConstants extends XmlFields{
     public static final String DEPICTION = "depiction";
     public static final String PREF_LABEL = "prefLabel";
     public static final String ALT_LABEL = "altLabel";
-    public static final String XML_SKOS_HIDDEN_LABEL = "hiddenLabel";
+    public static final String HIDDEN_LABEL = "hiddenLabel";
     public static final String BROADER = "broader";
     public static final String NARROWER = "narrower";
     public static final String RELATED = "related";
