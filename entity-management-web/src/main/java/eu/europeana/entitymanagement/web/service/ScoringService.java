@@ -5,12 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
-
-import javax.annotation.Resource;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -22,6 +18,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.common.config.LanguageCodes;
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
@@ -31,7 +28,6 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.model.scoring.EntityMetrics;
 import eu.europeana.entitymanagement.web.model.scoring.MaxEntityMetrics;
 import eu.europeana.entitymanagement.web.model.scoring.PageRank;
-import eu.europeana.entitymanagement.web.service.ScoringService;
 
 @Service(AppConfig.BEAN_EM_SCORING_SERVICE)
 public class ScoringService {
@@ -40,25 +36,35 @@ public class ScoringService {
 
     SolrClient searchApiSolrClient;
 
-    private static final String[] LANGUAGE_CODES = { "bg", "ca", "cs", "da", "de", "el", "en", "es", "et", "fi", "fr",
-	    "ga", "gd", "hr", "hu", "ie", "is", "it", "lt", "lv", "mt", "mul", "nl", "no", "pl", "pt", "ro", "ru", "sk",
-	    "sl", "sr", "sv", "tr", "yi", "cy" };
+//    private static final String[] LANGUAGE_CODES = { "bg", "ca", "cs", "da", "de", "el", "en", "es", "et", "fi", "fr",
+//	    "ga", "gd", "hr", "hu", "ie", "is", "it", "lt", "lv", "mt", "mul", "nl", "no", "pl", "pt", "ro", "ru", "sk",
+//	    "sl", "sr", "sv", "tr", "yi", "cy" };
 
-    private Set<String> supportedLangCodes;
+//    private Set<String> supportedLangCodes;
 
     private static MaxEntityMetrics maxEntityMetrics;
     private static EntityMetrics maxOverallMetrics;
     //
     private static final int RANGE_EXTENSION_FACTOR = 100;
 
-    @Resource
+//    @Resource
     private EntityManagementConfiguration emConfiguration; 
+    
+//    @Resource(name = AppConfig.BEAN_EM_LANGUAGE_CODES)
+    private LanguageCodes emLanguageCodes; 
     
     
     public static final String WIKIDATA_PREFFIX = "http://www.wikidata.org/entity/";
     public static final String WIKIDATA_DBPEDIA_PREFIX = "http://wikidata.dbpedia.org/resource/";
 
 
+    public ScoringService(EntityManagementConfiguration emConfiguration, LanguageCodes emLanguageCodes){
+        this.emConfiguration = emConfiguration;
+        this.emLanguageCodes = emLanguageCodes;
+    }
+    
+    
+    
     public EntityMetrics computeMetrics(Entity entity) throws FunctionalRuntimeException, UnsupportedEntityTypeException{
 	EntityMetrics metrics = new EntityMetrics(entity.getEntityId());
 	if(entity.getType() != null) {
@@ -86,7 +92,7 @@ public class ScoringService {
 
 	// filter pref labels for supported values only
 	List<String> labels = entity.getPrefLabelStringMap().entrySet().stream()
-		.filter(entry -> getSupportedLangCodes().contains(entry.getKey())).map(map -> map.getValue())
+		.filter(entry -> emLanguageCodes.isValidLanguageCode(entry.getKey())).map(map -> map.getValue())
 		.collect(Collectors.toList());
 
 	if (labels == null || labels.isEmpty()) {
@@ -252,12 +258,7 @@ public class ScoringService {
 	return searchApiSolrClient;
     }
 
-    protected Set<String> getSupportedLangCodes() {
-	if (supportedLangCodes == null) {
-	    supportedLangCodes = new HashSet<String>(Arrays.asList(LANGUAGE_CODES));
-	}
-	return supportedLangCodes;
-    }
+    
 
     public MaxEntityMetrics getMaxEntityMetrics() throws IOException {
 	if (maxEntityMetrics == null) {

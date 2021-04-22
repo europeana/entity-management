@@ -63,6 +63,9 @@ public abstract class XmlBaseEntityImpl {
 //	this.altLabel = RdfXmlUtils.convertToXmlMultilingualString(entity.getAltLabel());
 	getEntity().setAltLabel(RdfXmlUtils.toLanguageMapList(getAltLabel()));
 	getEntity().setSameAs(RdfXmlUtils.toStringArray(getSameAs()));
+	if(getDepiction() != null) {
+	    getEntity().setDepiction(getDepiction().getResource().getAbout());
+	}
 	
 	//Metis is not setting the isAggregatedBy, but it might use it in the future
 //	getEntity().setIsAggregatedBy(null);

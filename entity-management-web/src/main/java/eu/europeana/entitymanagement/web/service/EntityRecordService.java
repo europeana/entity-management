@@ -487,7 +487,7 @@ public class EntityRecordService {
 					List<Object> fieldValueSecondaryObjectList = (List<Object>) secondary.getFieldValue(field);
 					mergeList(consolidatedEntity, fieldValuePrimaryObjectList, fieldValueSecondaryObjectList, field, accumulate);
 
-			} else if (fieldType.isPrimitive() || String.class.isAssignableFrom(fieldType)) {
+			} else if (isStringOrPrimitive(fieldType)) {
 					Object fieldValuePrimaryObjectPrimitiveOrString = primary.getFieldValue(field);
 					Object fieldValueSecondaryObjectPrimitiveOrString = secondary.getFieldValue(field);
 
@@ -519,6 +519,12 @@ public class EntityRecordService {
 
 		return consolidatedEntity;
 	}
+
+    boolean isStringOrPrimitive(Class<?> fieldType) {
+//        System.out.println(fieldType + " is primitive: " + fieldType.isPrimitive());
+        return String.class.isAssignableFrom(fieldType) || fieldType.isPrimitive() || Float.class.isAssignableFrom(fieldType) 
+                || Integer.class.isAssignableFrom(fieldType) || Integer.class.isAssignableFrom(fieldType);
+    }
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
     void combineEntities(Entity consolidatedEntity, Entity primary, Entity secondary,

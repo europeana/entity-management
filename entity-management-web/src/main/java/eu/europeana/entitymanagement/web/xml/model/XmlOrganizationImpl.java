@@ -3,6 +3,7 @@ package eu.europeana.entitymanagement.web.xml.model;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.ALT_LABEL;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.DEPICTION;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.IS_AGGREGATED_BY;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_EDM;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.PREF_LABEL;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ACRONYM;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ADDRESS;
@@ -18,17 +19,17 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_MBOX;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ORGANIZATION;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ORGANIZATION_DOMAIN;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PHONE;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_SAME_AS;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.Organization;
@@ -36,7 +37,8 @@ import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 
-@JacksonXmlRootElement(localName = XML_ORGANIZATION)
+//@JacksonXmlRootElement(localName = XML_ORGANIZATION)
+@XmlRootElement(namespace = NAMESPACE_EDM, name = XML_ORGANIZATION)
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({ DEPICTION, PREF_LABEL, XML_ACRONYM, ALT_LABEL, XML_DESCRIPTION, XML_LOGO, XML_EUROPEANA_ROLE,
         XML_ORGANIZATION_DOMAIN, XML_GEOGRAPHIC_LEVEL, XML_COUNTRY, XML_HOMEPAGE, XML_PHONE, XML_MBOX, XML_HAS_ADDRESS,
@@ -102,17 +104,17 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl {
 		// default constructor
 	}
 	
-	@XmlElement(name = XML_ACRONYM)
+	@XmlElement(namespace = NAMESPACE_EDM, name = XML_ACRONYM)
 	public List<LabelledResource> getAcronym() {
 		return acronym;
 	}
 	
-	@XmlElement(name =  XML_DESCRIPTION)
+	@XmlElement(namespace = NAMESPACE_DC, name =  XML_DESCRIPTION)
 	public List<LabelledResource> getDescription() {
 		return description;
 	}
 
-	@XmlElement(name =  XML_LOGO)
+	@XmlElement(namespace = NAMESPACE_FOAF,name =  XML_LOGO)
         public String getLogo() {
                 return logo;            
         }
@@ -126,42 +128,42 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl {
 		return new EdmWebResource(getLogo());
 	}
 	
-	@XmlElement(name = XML_EUROPEANA_ROLE)
+	@XmlElement(namespace = NAMESPACE_EDM, name = XML_EUROPEANA_ROLE)
 	public List<LabelledResource> getEuropeanaRole() {
 		return europeanaRole;
 	}
 	
-	@XmlElement(name = XML_ORGANIZATION_DOMAIN)
+	@XmlElement(namespace = NAMESPACE_EDM, name = XML_ORGANIZATION_DOMAIN)
 	public List<LabelledResource> getOrganizationDomain() {
 		return organizationDomain;
 	}
 	
-	@XmlElement(name = XML_GEOGRAPHIC_LEVEL)
+	@XmlElement(namespace = NAMESPACE_EDM, name = XML_GEOGRAPHIC_LEVEL)
 	public List<LabelledResource> getGeographicLevel() {
 		return geographicLevel;
 	}
 	
-	@XmlElement(name = XML_COUNTRY)
+	@XmlElement(namespace = NAMESPACE_EDM, name = XML_COUNTRY)
 	public String getCountry() {
 	    	return country;
 	}
 	
-	@XmlElement(name = XML_HOMEPAGE)
+	@XmlElement(namespace = NAMESPACE_FOAF, name = XML_HOMEPAGE)
 	public LabelledResource getHomepage() {
 	    	return homepage;		
 	}
 	
-	@XmlElement(name = XML_PHONE)
+	@XmlElement(namespace = NAMESPACE_FOAF, name = XML_PHONE)
 	public List<String> getPhone() {
 	    	return phone;
 	}
 	
-	@XmlElement(name =  XML_MBOX)
+	@XmlElement(namespace = NAMESPACE_FOAF, name =  XML_MBOX)
 	public List<String> getMbox() {
 	    	return mbox;
 	}
 	
-	@XmlElement(name =  XML_IDENTIFIER)
+	@XmlElement(namespace = NAMESPACE_DC, name =  XML_IDENTIFIER)
 	public String[] getIdentifier() {
 	    	return identifier;
 	}
@@ -183,7 +185,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl {
 //	    	return tmp;
 //	}
 	
-	@XmlElement(name =  XML_ADDRESS)
+	@XmlElement(namespace = NAMESPACE_VCARD, name =  XML_ADDRESS)
 	public String getHasAddress() {
           return hasAddress;
 	}

@@ -22,6 +22,8 @@ import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.getEntityRequestPath;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
 import static org.hamcrest.Matchers.any;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -45,7 +47,6 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.internal.creation.bytebuddy.MockMethodAdvice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -172,6 +173,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isAccepted());
         
         results.andExpect(jsonPath("$.id", any(String.class)))
+                .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())))
         	.andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
                 .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
                 // should have Europeana and Datasource proxies
@@ -196,7 +198,10 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isAccepted());
                 
+        
+//        System.out.println(results);
                 results.andExpect(jsonPath("$.id", any(String.class)))
+                .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())))
                 .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
                 .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
                 // should have Europeana and Datasource proxies
@@ -204,6 +209,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
         	//
         	results.andExpect(jsonPath("$.prefLabel[*]", hasSize(24)))
         		.andExpect(jsonPath("$.altLabel[*]", hasSize(12)));
+        	        
         		
         //TODO assert other important properties
     }
@@ -221,6 +227,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isAccepted());
         
         results.andExpect(jsonPath("$.id", any(String.class)))
+        //TODO Enable when working propertly
+//                .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())))
                 .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
                 .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
                 // should have Europeana and Datasource proxies
@@ -241,21 +249,29 @@ public class EMControllerIT extends AbstractIntegrationTest {
         mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(PLACE_XML)));
         //second enqueue for the update task
         mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(PLACE_XML)));
+//        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(PLACE_XML)));
         
         ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
                 .content(loadFile(PLACE_REGISTER_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isAccepted());
         
+        System.out.println(results.andReturn().getResponse().getContentAsString());
         results.andExpect(jsonPath("$.id", any(String.class)))
-//                .andExpect(jsonPath("$.entity").isNotEmpty())
+                .andExpect(jsonPath("$.type", is(EntityTypes.Place.name())))
                 .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
                 .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
                 // should have Europeana and Datasource proxies
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
 
+//        System.out.println(((MockMvc)results).val);
         //TODO assert other important properties
-
+        results.andExpect(jsonPath("$.prefLabel[*]", hasSize(5)))
+        .andExpect(jsonPath("$.lat", greaterThan(48.0)))
+        .andExpect(jsonPath("$.long", greaterThan(2.0)));
+//        .andExpect(jsonPath("$.lat", is(48.85341)))
+//        .andExpect(jsonPath("$.long", is(2.3488)));
+        
         // matches id in JSON file
         assertMetisRequest("https://sws.geonames.org/2988507/");
     
@@ -274,6 +290,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isAccepted());
         
         results.andExpect(jsonPath("$.id", any(String.class)))
+        //enable when working propertly
+                .andExpect(jsonPath("$.type", is(EntityTypes.Timespan.name())))
 //                .andExpect(jsonPath("$.entity").isNotEmpty())
                 .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
                 .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
