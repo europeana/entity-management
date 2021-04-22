@@ -3,6 +3,7 @@ package eu.europeana.entitymanagement.web.xml.model;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.ALT_LABEL;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.DEPICTION;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.IS_AGGREGATED_BY;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_EDM;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.PREF_LABEL;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ACRONYM;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ADDRESS;
@@ -24,11 +25,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.Organization;
@@ -36,7 +37,8 @@ import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 
-@JacksonXmlRootElement(localName = XML_ORGANIZATION)
+//@JacksonXmlRootElement(localName = XML_ORGANIZATION)
+@XmlRootElement(namespace = NAMESPACE_EDM, name = XML_ORGANIZATION)
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({ DEPICTION, PREF_LABEL, XML_ACRONYM, ALT_LABEL, XML_DESCRIPTION, XML_LOGO, XML_EUROPEANA_ROLE,
         XML_ORGANIZATION_DOMAIN, XML_GEOGRAPHIC_LEVEL, XML_COUNTRY, XML_HOMEPAGE, XML_PHONE, XML_MBOX, XML_HAS_ADDRESS,

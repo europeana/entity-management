@@ -4,6 +4,7 @@ import static eu.europeana.entitymanagement.vocabulary.XmlFields.XML_SKOS_NOTE;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.ALT_LABEL;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.DEPICTION;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.HIDDEN_LABEL;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_DC_TERMS;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_EDM;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_SKOS;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NOTE;
@@ -87,38 +88,38 @@ public class XmlTimespanImpl extends XmlBaseEntityImpl {
             return timespan;
         }
 
-	@XmlElement(name =  HIDDEN_LABEL)
+	@XmlElement(namespace = NAMESPACE_SKOS, name =  HIDDEN_LABEL)
         public List<LabelledResource> getHiddenLabel() {
                 return hiddenLabel;
         }
 	
-	@XmlElement(name = XML_IS_PART_OF)
+	@XmlElement(namespace = NAMESPACE_DC_TERMS, name = XML_IS_PART_OF)
 	public List<LabelledResource> getIsPartOf() {
 	    	return isPartOf;
 	}
 	
-	@XmlElement(name =  XML_BEGIN)
+	@XmlElement(namespace = NAMESPACE_EDM, name =  XML_BEGIN)
 	public String[] getBegin() {
 	    	return begin;
 	}
 
-	@XmlElement(name =  XML_END)
+	@XmlElement(namespace = NAMESPACE_EDM, name =  XML_END)
 	public String[] getEnd() {
 	    	return end;
 	}
 	
-	@XmlElement(name = NOTE, namespace = NAMESPACE_SKOS)
+	@XmlElement(namespace = NAMESPACE_SKOS, name = NOTE)
         public List<LabelledResource> getNote() {
                 return note;
         }
 	
-	@XmlElement(name = XML_HAS_PART)
+	@XmlElement(namespace = NAMESPACE_DC_TERMS, name = XML_HAS_PART)
         public List<LabelledResource> getHasPart() {
                 return hasPart;
         }
 	
 
-	@XmlElement(name =  XML_IS_NEXT_IN_SEQUENCE)
+	@XmlElement(namespace = NAMESPACE_EDM, name =  XML_IS_NEXT_IN_SEQUENCE)
 	public String[] getIsNextInSequence() {
 	    	return isNextInSequence;
 	}
