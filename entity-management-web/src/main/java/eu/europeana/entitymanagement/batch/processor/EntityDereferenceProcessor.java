@@ -4,6 +4,7 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.utils.EntityComparator;
 import eu.europeana.entitymanagement.web.service.MetisDereferenceService;
+import java.util.Date;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.item.ItemProcessor;
@@ -32,18 +33,50 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
     public EntityRecord process(@NonNull EntityRecord entityRecord) throws Exception {
         logger.debug("Calling Metis dereference service for entityId={}", entityRecord.getEntityId());
         Entity metisResponse = dereferenceService.dereferenceEntityById(entityRecord.getExternalProxy().getProxyId());
+        Entity entity = entityRecord.getEntity();
 
-        if (entityComparator.compare(entityRecord.getEntity(), metisResponse) == 0) {
-            logger.debug("Existing metadata for entityId={} matches Metis response. Stopping processing", entityRecord.getEntityId());
-            // stop processing
-            return null;
+        /*
+         * Entity is newly created if its isAggregatedBy creation and last modified time are the same
+         * It needs to be processed at least once, which would update the last modified time.
+         * See EntityRecordService.mergeEntities()
+         */
+        boolean isEntityNew = entity.getIsAggregatedBy().getCreated().equals(entity.getIsAggregatedBy().getModified());
+
+        if(isEntityNew || !metisResponseMatchesExternalProxy(entityRecord, metisResponse)){
+            logger.debug("Storing de-referenced metadata in external proxy for entityId={}", entityRecord.getEntityId());
+            // replace external proxy with MetisResponse
+            entityRecord.getExternalProxy().setEntity(metisResponse);
+            entityRecord.getExternalProxy().getProxyIn().setModified(new Date());
+            return entityRecord;
         }
 
-        logger.debug("Storing de-referenced metadata for entityId={}", entityRecord.getEntityId());
+        // Update could also be triggered after changes to Europeana proxy.
+        if(isEuropeanaProxyUpdated(entityRecord)){
+          return entityRecord;
+        }
 
-        // copy over entityID and isAggregatedBy, and then save the de-referenced version
-        metisResponse.copyShellFrom(entityRecord.getEntity());
-        entityRecord.setEntity(metisResponse);
-        return entityRecord;
+        // Otherwise stop processing
+        return null;
+    }
+
+
+  /**
+   * Checks if the Europeana proxy has been updated since the last time entity consolidation occurred.
+   * This is the case when the update task is triggered after Europeana metadata is updated.
+   *
+   * See {@link eu.europeana.entitymanagement.web.service.EntityRecordService#updateEuropeanaProxy(Entity, EntityRecord)}
+   */
+  private boolean isEuropeanaProxyUpdated(EntityRecord entityRecord){
+      return
+          entityRecord.getEuropeanaProxy().getProxyIn().getModified()
+              .after(entityRecord.getEntity().getIsAggregatedBy().getModified());
+    }
+
+
+  /**
+   * Checks if Metis response matches metadata in external proxy
+   */
+  private boolean metisResponseMatchesExternalProxy(EntityRecord entityRecord, Entity metisResponse){
+      return entityComparator.compare(entityRecord.getExternalProxy().getEntity(), metisResponse) == 0;
     }
 }

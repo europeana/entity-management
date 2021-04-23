@@ -52,11 +52,11 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
     @Override
     public EntityRecord process(@NonNull EntityRecord entityRecord) throws Exception {
         //TODO: Validate entity metadata from Proxy Data Source
-	logger.debug("Creating consolidated proxy for entityId={} ", entityRecord.getEntityId());
+        logger.debug("Perform cleaning and normalization of metadata from external proxy for record {}", entityRecord.getEntityId());
         emEntityFieldCleaner.cleanAndNormalize(entityRecord.getExternalProxy().getEntity());
         
-	logger.debug("Perform cleaning and normalization of metadata from external proxy for record {}", entityRecord.getEntityId());
-        entityRecordService.mergeEntity(entityRecord);
+        logger.debug("Creating consolidated proxy for entityId={} ", entityRecord.getEntityId());
+	      entityRecordService.mergeEntity(entityRecord);
 
         logger.debug("Validating constraints for entityId={}", entityRecord.getEntityId());
         validateConstraints(entityRecord);
@@ -79,10 +79,8 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
     private void validateConstraints(EntityRecord entityRecord) throws EntityValidationException {
         Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entityRecord.getEntity());
         if (!violations.isEmpty()) {
-            //TODO: enable when the implementation is stable and correct
-//            throw new EntityValidationException(null, violations);
-            EntityValidationException e = new EntityValidationException("Consolidated entity has constraint violations.", violations);
-            logger.debug("The record with the following id has constraint validation errors: " + entityRecord.getEntityId(), e);
+            //TODO: throw exception here when the implementation is stable and correct
+            logger.debug("The record with the following id has constraint validation errors: " + entityRecord.getEntityId());
         }
     }
 
