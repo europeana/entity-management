@@ -18,11 +18,12 @@ public class EntityUpdateFailureRepository {
     this.datastore = datastore;
   }
 
-  public void save(EntityUpdateFailure failure) {
-    datastore.save(failure);
+  public EntityUpdateFailure save(EntityUpdateFailure failure) {
+    return datastore.save(failure);
   }
 
-  public void saveBulk(List<EntityUpdateFailure> entityUpdateFailureList) {
-    datastore.save(entityUpdateFailureList);
+  public List<EntityUpdateFailure> saveBulk(List<EntityUpdateFailure> failures){
+    return datastore.save(failures);
   }
+
 }
