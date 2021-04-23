@@ -48,13 +48,16 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.impl.AgentImpl;
+import eu.europeana.entitymanagement.definitions.model.impl.AggregationImpl;
 import eu.europeana.entitymanagement.definitions.model.impl.ConceptImpl;
 import eu.europeana.entitymanagement.definitions.model.impl.EntityProxyImpl;
 import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
 import eu.europeana.entitymanagement.definitions.model.impl.PlaceImpl;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.utils.EntityComparator;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
+import eu.europeana.entitymanagement.web.service.EntityObjectFactory;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
 import eu.europeana.entitymanagement.web.xml.model.metis.EnrichmentResultList;
@@ -70,7 +73,6 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
     private ObjectMapper objectMapper;
 
 	@Test
-	@Disabled("Excluded from automated runs as test needs to be updated")
 	public void mergeEntities() throws JAXBException, JsonMappingException, JsonProcessingException, IOException,
 		EntityCreationException {
 	    /*
@@ -84,7 +86,7 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
 	     * proxy
 	     */
 	    ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_JSON), ConceptImpl.class);
-
+	    
 	    /*
 	     * creating the entity record
 	     */
@@ -98,6 +100,12 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
 	    externalProxy.setProxyId("http://data.external.org/proxy1");
 	    entityRecord.addProxy(internalProxy);
 	    entityRecord.addProxy(externalProxy);
+	    
+	    //aggregation is reused from consolidated version
+	    ConceptImpl notConsolidated = (ConceptImpl) EntityObjectFactory.createEntityObject(EntityTypes.Concept);
+	    notConsolidated.setIsAggregatedBy(new AggregationImpl());
+	    entityRecord.setEntity(notConsolidated);
+	    
 
 	    entityRecordService.mergeEntity(entityRecord);
 	    /*
@@ -112,7 +120,6 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
 
 	
 	@Test
-	@Disabled("Excluded from automated runs as test needs to be updated")
 	public void mergeEntitiesBathtub() throws JAXBException, JsonMappingException, JsonProcessingException, IOException,
 		EntityCreationException {
 	    /*
@@ -140,6 +147,12 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
 	    externalProxy.setProxyId("http://www.wikidata.org/entity/Q1101933");
 	    entityRecord.addProxy(internalProxy);
 	    entityRecord.addProxy(externalProxy);
+	    
+	   //aggregation is reused from consolidated version
+            ConceptImpl notConsolidated = (ConceptImpl) EntityObjectFactory.createEntityObject(EntityTypes.Concept);
+            notConsolidated.setIsAggregatedBy(new AggregationImpl());
+            entityRecord.setEntity(notConsolidated);
+            
 
 	    entityRecordService.mergeEntity(entityRecord);
 	    /*
