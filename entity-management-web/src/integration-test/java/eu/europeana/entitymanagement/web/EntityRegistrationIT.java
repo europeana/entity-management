@@ -1,5 +1,7 @@
 package eu.europeana.entitymanagement.web;
 
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_REGISTER_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_XML;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BASE_SERVICE_URL;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_ERROR_CHECK_1_XML;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_JSON;
@@ -9,7 +11,12 @@ import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_R
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_REGISTER_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_UPDATE_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_UPDATE_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_XML;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_XML;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_REGISTER_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_XML;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_REGISTER_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_XML;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_REGISTER_JSON;
 //import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BASE_SERVICE_URL;
@@ -79,7 +86,7 @@ import okhttp3.mockwebserver.MockResponse;
  */
 
 @SpringBootTest
-public class EMControllerErrorIT extends AbstractEmControllerTest {
+public class EntityRegistrationIT extends AbstractEmControllerTest {
 
     @BeforeEach
     public void setup() throws Exception {
@@ -235,190 +242,124 @@ public class EMControllerErrorIT extends AbstractEmControllerTest {
         		.andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ApplicationAuthenticationException));      
     }
 
+
     @Test
-    public void updateEntityErrorCheck_wrongIfMatchHeader() throws Exception {
-    	/*
-    	 * check the error if the If-Match header does not comply
-    	 */
+    public ResultActions registerConceptShouldBeSuccessful() throws Exception {
         // set mock Metis response
         mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(CONCEPT_XML)));
 
-    	MvcResult resultRegisterEntity = mockMvc.perform(post(BASE_SERVICE_URL)
+        ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
                 .content(loadFile(CONCEPT_REGISTER_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isAccepted())
-                .andReturn();
+                .andExpect(jsonPath("$.id", any(String.class)))
+                .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
+                .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
+                // should have Europeana and Datasource proxies
+                .andExpect(jsonPath("$.proxies", hasSize(2)));
 
-        // matches the id in the JSON file (also used to remove the queued Metis request)
+        //TODO assert other important properties
+
+        // matches id in JSON file
         assertMetisRequest("http://www.wikidata.org/entity/Q152095");
 
-        final ObjectNode registeredEntityNode = new ObjectMapper().readValue(resultRegisterEntity.getResponse().getContentAsString(StandardCharsets.UTF_8), ObjectNode.class);
-
-        String requestPath = getEntityRequestPath(registeredEntityNode.path("id").asText());
-        mockMvc.perform(MockMvcRequestBuilders.put(BASE_SERVICE_URL + "/" + requestPath)
-        		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
-        		.header(HttpHeaders.IF_MATCH, "wrong-if-match-header")
-        		.content(loadFile(CONCEPT_UPDATE_JSON))
-        		.contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isPreconditionFailed());
-    }
-    
-    @Test
-    public void updateEntityErrorCheck_entityDoesNotExist() throws Exception { 
-        /*
-         * check the error if the entity does not exist prior to its update
-         */
-        mockMvc.perform(MockMvcRequestBuilders.put(BASE_SERVICE_URL + "/" + "concept/1")
-        		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
-        		.content(loadFile(CONCEPT_UPDATE_JSON))
-        		.contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());        
-    }
-    
-    @Test
-    public void updateEntityErrorCheck_entityDisabled() throws Exception {
-    	/*
-    	 * check the error if the entity is removed/disabled
-    	 */
-        TimespanImpl timespan = objectMapper.readValue(loadFile(TIMESPAN_JSON), TimespanImpl.class);
-        EntityRecord entityRecord =  new EntityRecordImpl();
-        entityRecord.setEntity(timespan);
-        entityRecord.setEntityId(timespan.getEntityId());
-        entityRecordService.saveEntityRecord(entityRecord);
-        
-        String requestPath = getEntityRequestPath(entityRecord.getEntityId());
-
-        mockMvc.perform(delete(BASE_SERVICE_URL + "/" + requestPath)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
-
-        mockMvc.perform(MockMvcRequestBuilders.put(BASE_SERVICE_URL + "/" + requestPath)
-        		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
-        		.content(loadFile(TIMESPAN_JSON))
-        		.contentType(MediaType.APPLICATION_JSON))
-        		.andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof EntityRemovedException));
+        return results;
     }
 
     @Test
-    public void updateEntityFromExternalSourceErrorCheck_entityDoesNotExist() throws Exception {
-    	/*
-    	 * check the error if the entity does not exist
-    	 */
-    	mockMvc.perform(post(BASE_SERVICE_URL+"/"+"wrong-type/wrong-identifier/management/update")
-    			.contentType(MediaType.APPLICATION_JSON))
-                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof EntityNotFoundException));
+    public ResultActions registerAgentShouldBeSuccessful() throws Exception {
+        // set mock Metis response
+        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(AGENT_XML)));
+
+        ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
+                .content(loadFile(AGENT_REGISTER_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.id", any(String.class)))
+                .andExpect(jsonPath("$.entity").isNotEmpty())
+                .andExpect(jsonPath("$.entity.isAggregatedBy").isNotEmpty())
+                .andExpect(jsonPath("$.entity.isAggregatedBy.aggregates", hasSize(2)))
+                // should have Europeana and Datasource proxies
+                .andExpect(jsonPath("$.proxies", hasSize(2)));
+
+        //TODO assert other important properties
+
+        // matches id in JSON file
+        assertMetisRequest("http://www.wikidata.org/entity/Q762");
+
+        return results;
     }
 
     @Test
-    public void updateEntityFromExternalSourceErrorCheck_entityDisabled() throws Exception {
-    	/*
-    	 * check the error if the entity is removed/disabled
-    	 */
-        // create entity in the DB
-        ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_JSON), ConceptImpl.class);
-        EntityRecord entityRecord = new EntityRecordImpl();
-        entityRecord.setEntity(concept);
-        entityRecord.setEntityId(concept.getEntityId());
-        EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
+    public ResultActions registerOrganizationShouldBeSuccessful() throws Exception {
+        // set mock Metis response
+        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(ORGANIZATION_XML)));
 
-        String requestPath = getEntityRequestPath(record.getEntityId());
+        ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
+                .content(loadFile(ORGANIZATION_REGISTER_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.id", any(String.class)))
+                .andExpect(jsonPath("$.entity").isNotEmpty())
+                .andExpect(jsonPath("$.entity.isAggregatedBy").isNotEmpty())
+                .andExpect(jsonPath("$.entity.isAggregatedBy.aggregates", hasSize(2)))
+                // should have Europeana and Datasource proxies
+                .andExpect(jsonPath("$.proxies", hasSize(2)));
 
-        mockMvc.perform(delete(BASE_SERVICE_URL + "/" + requestPath)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
+        //TODO assert other important properties
 
-        mockMvc.perform(post(BASE_SERVICE_URL + "/" + requestPath + "/management/update")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof EntityRemovedException));
-       
-    }
-    
-    @Test
-    void retrieveEntityErrorCheck_wrongProfileParameter() throws Exception {
-    	/*
-    	 * check the error if the profile parameter is wrong
-    	 */
-        // read the test data for the Concept entity from the file
-        ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_JSON), ConceptImpl.class);
-        EntityRecord entityRecord = new EntityRecordImpl();
-        entityRecord.setEntity(concept);
-        entityRecord.setEntityId(concept.getEntityId());
-        entityRecordService.saveEntityRecord(entityRecord);
+        // matches id in JSON file
+        assertMetisRequest("http://www.wikidata.org/entity/Q193563");
 
-        String requestPath = getEntityRequestPath(concept.getEntityId());
-        mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".jsonld")
-        		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "wrong-profile-parameter")
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof HttpBadRequestException));
-    }
-    
-    @Test
-    void retrieveEntityErrorCheck_entityDoesNotExist() throws Exception {
-        /*
-    	 * check the error if the entity does not exist
-    	 */
-        mockMvc.perform(get(BASE_SERVICE_URL + "/" + "wrong-type/wrong-identifier" + ".jsonld")
-        		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());   
-    }
-    
-    @Test
-    void retrieveEntityErrorCheck_entityDisabled() throws Exception {    
-        /*
-    	 * check the error if the entity is disabled
-    	 */
-        // read the test data for the Concept entity from the file
-        ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_JSON), ConceptImpl.class);
-        EntityRecord entityRecord = new EntityRecordImpl();
-        entityRecord.setEntity(concept);
-        entityRecord.setEntityId(concept.getEntityId());
-        entityRecordService.saveEntityRecord(entityRecord);
-        
-        String requestPath = getEntityRequestPath(concept.getEntityId());
-        
-        mockMvc.perform(delete(BASE_SERVICE_URL + "/" + requestPath)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
-
-        mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".jsonld")
-        		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
-                .accept(MediaType.APPLICATION_JSON))
-        		.andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof EntityRemovedException));   
-
-    }
-   
-    @Test
-    void disableEntityErrorCheck_entityDoesNotExist() throws Exception {
-    	/*
-    	 * check the error if the entity does not exist
-    	 */
-        mockMvc.perform(delete(BASE_SERVICE_URL + "/" + "wrong-type/wrong-identifier")
-                .accept(MediaType.APPLICATION_JSON))
-        		.andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof EntityNotFoundException));
+        return results;
     }
 
     @Test
-    void disableEntityErrorCheck_entityDisabled() throws Exception {
-    	/*
-    	 * check the error if the entity is removed/disabled
-    	 */
-        // create entity in the DB
-        ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_JSON), ConceptImpl.class);
-        EntityRecord entityRecord = new EntityRecordImpl();
-        entityRecord.setEntity(concept);
-        entityRecord.setEntityId(concept.getEntityId());
-        EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
+    public ResultActions registerPlaceShouldBeSuccessful() throws Exception {
+        // set mock Metis response
+        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(PLACE_XML)));
 
-        String requestPath = getEntityRequestPath(record.getEntityId());
+        ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
+                .content(loadFile(PLACE_REGISTER_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.id", any(String.class)))
+                .andExpect(jsonPath("$.entity").isNotEmpty())
+                .andExpect(jsonPath("$.entity.isAggregatedBy").isNotEmpty())
+                .andExpect(jsonPath("$.entity.isAggregatedBy.aggregates", hasSize(2)))
+                // should have Europeana and Datasource proxies
+                .andExpect(jsonPath("$.proxies", hasSize(2)));
 
-        mockMvc.perform(delete(BASE_SERVICE_URL + "/" + requestPath)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
+        //TODO assert other important properties
 
-        mockMvc.perform(delete(BASE_SERVICE_URL + "/" + requestPath)
-                .accept(MediaType.APPLICATION_JSON))
-        		.andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof EntityRemovedException));
+        // matches id in JSON file
+        assertMetisRequest("https://sws.geonames.org/2988507/");
+
+        return results;
+    }
+
+    @Test
+    public ResultActions registerTimespanShouldBeSuccessful() throws Exception {
+        // set mock Metis response
+        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(TIMESPAN_XML)));
+
+        ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
+                .content(loadFile(TIMESPAN_REGISTER_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.id", any(String.class)))
+                .andExpect(jsonPath("$.entity").isNotEmpty())
+                .andExpect(jsonPath("$.entity.isAggregatedBy").isNotEmpty())
+                .andExpect(jsonPath("$.entity.isAggregatedBy.aggregates", hasSize(2)))
+                // should have Europeana and Datasource proxies
+                .andExpect(jsonPath("$.proxies", hasSize(2)));
+
+        //TODO assert other important properties
+
+        // matches id in JSON file
+        assertMetisRequest("http://www.wikidata.org/entity/Q8106");
+
+        return results;
     }
     
     @TestConfiguration
