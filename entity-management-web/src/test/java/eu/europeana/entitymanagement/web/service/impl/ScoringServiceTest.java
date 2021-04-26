@@ -11,13 +11,14 @@ import javax.annotation.Resource;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.boot.test.context.SpringBootTest;
 
-import eu.europeana.entitymanagement.EntityManagementApp;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.AppConfig;
+import eu.europeana.entitymanagement.config.SerializationConfig;
+import eu.europeana.entitymanagement.config.ValidatorConfig;
 import eu.europeana.entitymanagement.definitions.model.impl.AgentImpl;
+import eu.europeana.entitymanagement.definitions.model.impl.PlaceImpl;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.model.scoring.EntityMetrics;
 import eu.europeana.entitymanagement.web.model.scoring.MaxEntityMetrics;
@@ -26,19 +27,16 @@ import eu.europeana.entitymanagement.web.service.ScoringService;
 /**
  * Integration test for testing the ScoringService
  */
-//@SpringBootTest
-//@AutoConfigureMockMvc
-@ContextConfiguration(classes = { EntityManagementApp.class})
-@ExtendWith(SpringExtension.class)
-@Disabled("Excluded from automated runs as this requires Solr")
 //TODO: create a "proper" integration test with this
+@SpringBootTest(classes = {ValidatorConfig.class,
+        SerializationConfig.class, EntityManagementConfiguration.class, ScoringService.class})
 public class ScoringServiceTest {
 
     @Resource(name=AppConfig.BEAN_EM_SCORING_SERVICE)
     ScoringService scoringService;
 
     @Test
-	@Disabled("Excluded from automated runs as this requires Solr")
+    @Disabled("Excluded from automated runs as this requires Solr")
     public void testComputeMetrics() throws Exception {
 
 	AgentImpl agent = new AgentImpl();
@@ -68,6 +66,38 @@ public class ScoringServiceTest {
 	assertTrue(metrics.getHitCount() > 1000);
 
 	assertTrue(metrics.getScore() > 975000);
+    }
+    
+    @Test
+    @Disabled("Excluded from automated runs as this requires Solr")
+    public void testComputeMetricsForPlaces() throws Exception {
+
+        PlaceImpl agent = new PlaceImpl();
+        String entityId = "http://data.europeana.eu/place/base/41488";
+        agent.setEntityId(entityId);
+        String[] sameAs = new String[] { "https://sws.geonames.org/2988507/"};
+        agent.setSameAs(sameAs);
+        
+        Map<String, String> prefLabels = new HashMap<String, String>();
+        prefLabels.put("en", "Paris");
+        prefLabels.put("it", "Parigi");
+        // not supported language to be filtered out
+        prefLabels.put("ru", "Паріж");
+        agent.setPrefLabelStringMap(prefLabels);
+
+        EntityMetrics metrics = scoringService.computeMetrics(agent);
+
+        assertEquals(entityId, metrics.getEntityId());
+        assertEquals("Place", metrics.getEntityType());
+//      actual value = 304.6025939567319
+        assertTrue(metrics.getPageRank() == 0);
+        // value may increase in time, currently  
+        //before last reindexing was 750, let's see if the reindexing is complete 
+        assertTrue(metrics.getEnrichmentCount() >= 52000);
+        // value may increase in time, for provided labelts it is currently 2555
+        assertTrue(metrics.getHitCount() > 2000000);
+
+        assertTrue(metrics.getScore() > 1085);
     }
     
     @Test

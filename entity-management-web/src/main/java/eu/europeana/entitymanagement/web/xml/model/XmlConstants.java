@@ -10,7 +10,11 @@ public final class XmlConstants extends XmlFields{
     public static final String NAMESPACE_EDM = "http://www.europeana.eu/schemas/edm/";
     public static final String NAMESPACE_RDAGR2 = "http://rdvocab.info/ElementsGr2/";
     public static final String NAMESPACE_OWL = "http://www.w3.org/2002/07/owl#";
-
+    public static final String NAMESPACE_DC = "http://purl.org/dc/elements/1.1/";
+    public static final String NAMESPACE_DC_TERMS = "http://purl.org/dc/terms/";
+    public static final String NAMESPACE_XML = "http://www.w3.org/XML/1998/namespace";
+    public static final String NAMESPACE_WGS84_POS = "http://www.w3.org/2003/01/geo/wgs84_pos#";
+    public static final String NAMESPACE_VCARD = "https://www.w3.org/2006/vcard/";
 
     public static final String RDF = "rdf";
     public static final String XML = "xml";
@@ -25,7 +29,7 @@ public final class XmlConstants extends XmlFields{
     public static final String DEPICTION = "depiction";
     public static final String PREF_LABEL = "prefLabel";
     public static final String ALT_LABEL = "altLabel";
-    public static final String XML_SKOS_HIDDEN_LABEL = "hiddenLabel";
+    public static final String HIDDEN_LABEL = "hiddenLabel";
     public static final String BROADER = "broader";
     public static final String NARROWER = "narrower";
     public static final String RELATED = "related";
@@ -36,7 +40,7 @@ public final class XmlConstants extends XmlFields{
     public static final String CLOSE_MATCH = "closeMatch";
     public static final String NOTE = "note";
     public static final String NOTATION = "notation";
-    public static final String IN_SCHEMA = "inSchema";
+    public static final String IN_SCHEMA = "inScheme";
     
     public static final String XML_TIMESPAN = "Timespan";
 
@@ -64,9 +68,9 @@ public final class XmlConstants extends XmlFields{
     public static final String XML_SAME_AS = "sameAs";
     
     public static final String XML_PLACE = "Place";
-    public static final String XML_WGS84_POS_LAT = "wgs84_pos:lat";
-    public static final String XML_WGS84_POS_LONG = "wgs84_pos:long";
-    public static final String XML_WGS84_POS_ALT = "wgs84_pos:alt";
+    public static final String XML_WGS84_POS_LAT = "lat";
+    public static final String XML_WGS84_POS_LONG = "long";
+    public static final String XML_WGS84_POS_ALT = "alt";
     public static final String XML_IS_NEXT_IN_SEQUENCE = "isNextInSequence";
     
     public static final String XML_ORGANIZATION = "Organization";

@@ -8,6 +8,8 @@ import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.impl.AggregationImpl;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
+import eu.europeana.entitymanagement.exception.ingestion.EntityValidationException;
+import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
 import eu.europeana.entitymanagement.web.model.scoring.EntityMetrics;
 import eu.europeana.entitymanagement.web.service.ScoringService;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
@@ -31,22 +33,30 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
     private final ValidatorFactory emValidatorFactory;
     private final ScoringService scoringService;
     private final EntityManagementConfiguration entityManagementConfiguration;
+    private final EntityFieldsCleaner emEntityFieldCleaner;
 
     private static final Logger logger = LogManager.getLogger(EntityUpdateProcessor.class);
 
     public EntityUpdateProcessor(EntityRecordService entityRecordService,
-        ValidatorFactory emValidatorFactory, ScoringService scoringService,
+        ValidatorFactory emValidatorFactory, 
+        EntityFieldsCleaner emEntityFieldCleaner,
+        ScoringService scoringService,
         EntityManagementConfiguration entityManagementConfiguration) {
         this.entityRecordService = entityRecordService;
         this.emValidatorFactory = emValidatorFactory;
+        this.emEntityFieldCleaner = emEntityFieldCleaner;
         this.scoringService = scoringService;
         this.entityManagementConfiguration = entityManagementConfiguration;
     }
 
     @Override
     public EntityRecord process(@NonNull EntityRecord entityRecord) throws Exception {
+        //TODO: Validate entity metadata from Proxy Data Source
+        logger.debug("Perform cleaning and normalization of metadata from external proxy for record {}", entityRecord.getEntityId());
+        emEntityFieldCleaner.cleanAndNormalize(entityRecord.getExternalProxy().getEntity());
+        
         logger.debug("Creating consolidated proxy for entityId={} ", entityRecord.getEntityId());
-        entityRecordService.mergeEntity(entityRecord);
+	      entityRecordService.mergeEntity(entityRecord);
 
         logger.debug("Validating constraints for entityId={}", entityRecord.getEntityId());
         validateConstraints(entityRecord);
@@ -66,14 +76,11 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
         return entityRecord;
     }
 
-    private void validateConstraints(EntityRecord entityRecord) {
+    private void validateConstraints(EntityRecord entityRecord) throws EntityValidationException {
         Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entityRecord.getEntity());
         if (!violations.isEmpty()) {
-            logger.warn("Entity validation failed for entityId={}", entityRecord.getEntityId());
-            for (ConstraintViolation<Entity> violation : violations) {
-                logger.warn("entityId={} - {}", entityRecord.getEntity(), violation.getMessage());
-            }
-            //TODO: throw here
+            //TODO: throw exception here when the implementation is stable and correct
+            logger.debug("The record with the following id has constraint validation errors: " + entityRecord.getEntityId());
         }
     }
 

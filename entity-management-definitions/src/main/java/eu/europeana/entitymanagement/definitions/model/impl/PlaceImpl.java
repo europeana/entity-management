@@ -117,7 +117,8 @@ public class PlaceImpl extends BaseEntity implements Place, eu.europeana.corelib
 
 	@Override
 	@Deprecated
-	public Map<String, Float> getPosition() {
+	@JsonIgnore
+        public Map<String, Float> getPosition() {
 		Map<String, Float> positionMap = new HashMap<String,Float>();	
 		if (getLatitude() != null)
 			positionMap.put("LATITUDE", getLatitude());

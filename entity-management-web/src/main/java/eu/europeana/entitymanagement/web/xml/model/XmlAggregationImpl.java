@@ -45,8 +45,8 @@ public class XmlAggregationImpl {
 //	}
 	
 	@JacksonXmlProperty(localName = XmlConstants.XML_AGGREGATES)
-	public RdfResource getAggregates() {
-		return new RdfResource(entity.getAbout());
+	public LabelledResource getAggregates() {
+		return new LabelledResource(entity.getAbout());
 	}
 	
 }

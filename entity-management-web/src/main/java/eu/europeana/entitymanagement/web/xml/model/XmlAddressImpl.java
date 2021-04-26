@@ -70,10 +70,10 @@ public class XmlAddressImpl {
 	}
 	
 	@JacksonXmlProperty(localName = XmlConstants.XML_HAS_GEO)
-	public RdfResource getHasGeo() {
+	public LabelledResource getHasGeo() {
 	    	if(organization.getHasGeo() == null || organization.getHasGeo().isEmpty())
 	    	    return null;
-		return new RdfResource(EntityUtils.toGeoUri(organization.getHasGeo()));
+		return new LabelledResource(EntityUtils.toGeoUri(organization.getHasGeo()));
 	}
 	
 }

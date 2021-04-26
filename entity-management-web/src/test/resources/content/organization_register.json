@@ -1,10 +1,10 @@
 {
   "id": "http://www.wikidata.org/entity/Q193563",
   "prefLabel": {
-    "en": "Naturalis Biodiversity Center"
+    "fr": "Bibliothèque nationale de France"
   },
   "altLabel": {
-    "en": [ "Naturalis Bio Center", "Naturalis" ]
+    "fr": [ "bibliothèque nationale FR"]
   },
-  "depiction": "https://commons.wikimedia.org/wiki/Commons:Naturalis_Biodiversity_Center#/media/File:Naturalis1.JPG"
+  "depiction": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Biblioth%C3%A8que_nationale_de_France_%28site_Richelieu%29%2C_Paris_-_Salle_Ovale.jpg"
 }

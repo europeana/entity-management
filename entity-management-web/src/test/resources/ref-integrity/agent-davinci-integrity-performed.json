@@ -78,10 +78,10 @@
     ],
     "placeOfBirth": {
         "en" : ["Vinci, Republic of Florence"],
-        "" : ["http://data.europeana.eu/place/base/143905"]
+        "mt" : ["http://data.europeana.eu/place/base/143905"]
     },
     "placeOfDeath": {
-        "": ["http://data.europeana.eu/place/base/42996"]
+        "mt": ["http://data.europeana.eu/place/base/42996"]
     },
     "biographicalInformation": {
             "de" : ["Leonardo da Vinci [ˌleoˈnardo da ˈvintʃi] (* 15. April 1452 in Anchiano bei Vinci; † 2. Mai 1519 auf Schloss Clos Lucé, Amboise; eigentlich Leonardo di ser Piero, toskanisch auch Lionardo) war ein italienischer Maler, Bildhauer, Architekt, Anatom, Mechaniker, Ingenieur und Naturphilosoph. Er gilt als einer der berühmtesten Universalgelehrten aller Zeiten.Sein Namenszusatz da Vinci ist kein Familien-, sondern ein Herkunftsname und bedeutet „aus Vinci“. Der Geburtsort Vinci ist ein Kastell bzw. befestigtes Hügeldorf und liegt in der Nähe der Stadt Empoli (ca. 30 km westlich von Florenz) in der heutigen Provinz Florenz, Region Toskana."],
@@ -134,7 +134,7 @@
     },
     "professionOrOccupation": {
         "en" : ["mathematician", "engineering"], 
-        "" : ["http://data.europeana.eu/concept/base/178"]
+        "mt" : ["http://data.europeana.eu/concept/base/178"]
     },
     "hasMet": [
         "Salai", "http://data.europeana.eu/agent/base/58185"

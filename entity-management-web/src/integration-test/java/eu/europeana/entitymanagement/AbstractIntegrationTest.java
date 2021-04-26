@@ -59,6 +59,7 @@ public abstract class AbstractIntegrationTest {
         registry.add("mongo.em.database", MONGO_CONTAINER::getEntityDb);
         registry.add("mongo.batch.database", MONGO_CONTAINER::getBatchDb);
         registry.add("metis.baseUrl", () -> String.format("http://%s:%s", mockMetis.getHostName(), mockMetis.getPort()));
+        registry.add("batch.computeMetrics", () -> "false");
     }
 
 

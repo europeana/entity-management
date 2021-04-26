@@ -2,6 +2,8 @@ package eu.europeana.entitymanagement.web.service;
 
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.EUROPEANA_URL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.RIGHTS_CREATIVE_COMMONS;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_ID;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_IDENTIFIER;
 import static eu.europeana.entitymanagement.web.EntityRecordUtils.getDatasourceAggregationId;
 import static eu.europeana.entitymanagement.web.EntityRecordUtils.getEuropeanaAggregationId;
 import static eu.europeana.entitymanagement.web.EntityRecordUtils.getEuropeanaProxyId;
@@ -66,7 +68,7 @@ public class EntityRecordService {
 	 * Fields to ignore when updating entities from user request
 	 */
 	private final List<String> UPDATE_FIELDS_TO_IGNORE = List
-			.of(WebEntityFields.ID, WebEntityFields.IDENTIFIER, WebEntityFields.TYPE,
+			.of(WebEntityFields.ID, WebEntityFields.IDENTIFIER, WebEntityFields.TYPE, ENTITY_ID, ENTITY_IDENTIFIER,
 					WebEntityFields.IS_AGGREGATED_BY);
 
 	@Autowired
@@ -153,7 +155,7 @@ public class EntityRecordService {
 
        
 	DataSource externalDatasource = externalDatasourceOptional.get();
-	setDatasourceMetadata(metisResponse, entityCreationRequest, entityId, externalDatasource, entityRecord, timestamp);
+	setExternalProxyMetadata(metisResponse, entityCreationRequest, entityId, externalDatasource, entityRecord, timestamp);
 
 	setEntityAggregation(entityRecord, entityId, timestamp);
 	return entityRecordRepository.save(entityRecord);
@@ -275,6 +277,14 @@ public class EntityRecordService {
 	String[] hasMetField = entity.getHasMet();
 	entity.setHasMet(replaceWithInternalReferences(hasMetField));
 	
+	// for the field hasMet
+	String[] wasPresentField = entity.getWasPresentAt();
+	entity.setWasPresentAt(replaceWithInternalReferences(wasPresentField));
+	
+	// for the field date
+	String[] dateField = entity.getDate();
+	entity.setDate(replaceWithInternalReferences(dateField));
+	
     }
 
     private void performReferentialIntegrityPlace(Place entity) {
@@ -372,8 +382,18 @@ public class EntityRecordService {
 			EntityUtils.getAllFields(fieldsToCombine, primary.getClass());
 
 			try {
-				Entity consolidatedEntity = combineEntities(primary, secondary, fieldsToCombine);
-				entityRecord.setEntity(consolidatedEntity);
+
+				Entity consolidatedEntity = combineEntities(primary, secondary, fieldsToCombine, true);
+
+				/*
+				 * isAggregatedBy isn't set on Europeana Proxy, so it won't be copied to the consolidatedEntity
+				 * We add it separately here
+ 				 */
+				    Aggregation aggregation = entityRecord.getEntity().getIsAggregatedBy();
+				    aggregation.setModified(new Date());
+				    consolidatedEntity.setIsAggregatedBy(aggregation);
+						entityRecord.setEntity(consolidatedEntity);
+
 			} catch (IllegalArgumentException | IllegalAccessException e) {
 				logger.error(
 						"Error while reconciling entity data", e);
@@ -399,9 +419,13 @@ public class EntityRecordService {
 				.collect(Collectors.toUnmodifiableList());
 
 		Entity europeanaProxyEntity = europeanaProxy.getEntity();
-		// updateEntity considered as "primary", since its values take precedence over existing metadata.
+		/**
+		 * updateEntity considered as "primary", since its values take precedence over existing metadata.
+		 * We also overwrite collection fields, instead of concatenating them
+ 		 */
+
 		Entity updatedEntity = combineEntities(updateEntity, europeanaProxyEntity,
-				filteredList);
+				filteredList, false);
 
 		// finally copy over ignored fields from the existing metadata
 		List<Field> ignoredFields = allFields.stream()
@@ -419,7 +443,20 @@ public class EntityRecordService {
 	}
 }
 
-	private Entity combineEntities(Entity primary, Entity secondary, List<Field> fieldsToCombine)
+	/**
+	 * Reconciles metadata between two entities.
+	 * @param primary Primary entity. Metadata from this entity takes precedence
+	 * @param secondary Secondary entity. Metadata from this entity is only used if no matching field
+	 *                  is contained within the primary entity.
+	 * @param fieldsToCombine metadata fields to reconcile
+	 * @param accumulate if true, metadata from the secondary entity are added to the matching collection (eg. maps, lists and arrays)
+	 *               within the primary . If accumulate is false, the "primary"
+	 *               content overwrites the "secondary"
+	 * @return
+	 * @throws EntityCreationException
+	 * @throws IllegalAccessException
+	 */
+	private Entity combineEntities(Entity primary, Entity secondary, List<Field> fieldsToCombine, boolean accumulate)
 			throws EntityCreationException, IllegalAccessException {
 		Entity consolidatedEntity = EntityObjectFactory.createEntityObject(primary.getType());
 
@@ -437,16 +474,16 @@ public class EntityRecordService {
 			String fieldName = field.getName();
 
 			if (fieldType.isArray()) {
-					Object[] mergedArray = mergeArrays(primary, secondary, field);
+					Object[] mergedArray = mergeArrays(primary, secondary, field, accumulate);
 				consolidatedEntity.setFieldValue(field, mergedArray);
 
 			} else if (List.class.isAssignableFrom(fieldType)) {
 
 					List<Object> fieldValuePrimaryObjectList = (List<Object>) primary.getFieldValue(field);
 					List<Object> fieldValueSecondaryObjectList = (List<Object>) secondary.getFieldValue(field);
-					megeList(consolidatedEntity, fieldValuePrimaryObjectList, fieldValueSecondaryObjectList, field);
+					mergeList(consolidatedEntity, fieldValuePrimaryObjectList, fieldValueSecondaryObjectList, field, accumulate);
 
-			} else if (fieldType.isPrimitive() || String.class.isAssignableFrom(fieldType)) {
+			} else if (isStringOrPrimitive(fieldType)) {
 					Object fieldValuePrimaryObjectPrimitiveOrString = primary.getFieldValue(field);
 					Object fieldValueSecondaryObjectPrimitiveOrString = secondary.getFieldValue(field);
 
@@ -467,7 +504,7 @@ public class EntityRecordService {
 					}
 
 			} else if (Map.class.isAssignableFrom(fieldType)) {
-					combineEntities(consolidatedEntity, primary, secondary, prefLabelsForAltLabels, field, fieldName);
+					combineEntities(consolidatedEntity, primary, secondary, prefLabelsForAltLabels, field, fieldName, accumulate);
 
 			}
 
@@ -479,9 +516,16 @@ public class EntityRecordService {
 		return consolidatedEntity;
 	}
 
+    boolean isStringOrPrimitive(Class<?> fieldType) {
+//        System.out.println(fieldType + " is primitive: " + fieldType.isPrimitive());
+        return String.class.isAssignableFrom(fieldType) || fieldType.isPrimitive() || Float.class.isAssignableFrom(fieldType) 
+                || Integer.class.isAssignableFrom(fieldType) || Integer.class.isAssignableFrom(fieldType);
+    }
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-    void combineEntities(Entity consilidatedEntity, Entity primary, Entity secondary,
-	    Map<Object, Object> prefLabelsForAltLabels, Field field, String fieldName) throws IllegalAccessException {
+    void combineEntities(Entity consolidatedEntity, Entity primary, Entity secondary,
+			Map<Object, Object> prefLabelsForAltLabels, Field field, String fieldName,
+			boolean accumulate) throws IllegalAccessException {
 	//TODO: refactor implemetation
 	
 	Map<Object, Object> fieldValuePrimaryObjectMap = (Map<Object, Object>) primary.getFieldValue(field);
@@ -499,7 +543,7 @@ public class EntityRecordService {
 	if (fieldValuePrimaryObject == null && fieldValueSecondaryObject != null) {
 	fieldValuePrimaryObject = new HashMap<>();
 	fieldValuePrimaryObject.putAll(fieldValueSecondaryObject);
-	} else if (fieldValuePrimaryObject != null && fieldValueSecondaryObject != null) {
+	} else if (fieldValuePrimaryObject != null && fieldValueSecondaryObject != null && accumulate) {
 	for (Map.Entry elemSecondary : fieldValueSecondaryObject.entrySet()) {
 	    Object key = elemSecondary.getKey();
 	    /*
@@ -541,7 +585,7 @@ public class EntityRecordService {
 	}
 
 	if (fieldValuePrimaryObject != null) {
-	consilidatedEntity.setFieldValue(field, fieldValuePrimaryObject);
+	consolidatedEntity.setFieldValue(field, fieldValuePrimaryObject);
 	}
     }
 
@@ -594,8 +638,8 @@ public class EntityRecordService {
 	}
     }
 
-    void megeList(Entity consilidatedEntity, List<Object> fieldValuePrimaryObjectList,
-	    List<Object> fieldValueSecondaryObjectList, Field field) throws IllegalAccessException {
+    void mergeList(Entity consolidatedEntity, List<Object> fieldValuePrimaryObjectList,
+				List<Object> fieldValueSecondaryObjectList, Field field, boolean accumulate) throws IllegalAccessException {
 	List<Object> fieldValuePrimaryObject = null;
 	List<Object> fieldValueSecondaryObject = null;
 	if (fieldValuePrimaryObjectList != null) {
@@ -605,8 +649,14 @@ public class EntityRecordService {
 	fieldValueSecondaryObject = new ArrayList<Object>(fieldValueSecondaryObjectList);
 	}
 
+	if(fieldValuePrimaryObject != null && !accumulate){
+		// we're not appending items, so just return the primary field value
+		consolidatedEntity.setFieldValue(field, fieldValuePrimaryObject);
+		return;
+	}
+
 	if (fieldValuePrimaryObject == null && fieldValueSecondaryObject != null) {
-	consilidatedEntity.setFieldValue(field, fieldValueSecondaryObject);
+	consolidatedEntity.setFieldValue(field, fieldValueSecondaryObject);
 	} else if (fieldValuePrimaryObject != null && fieldValueSecondaryObject != null) {
 
 	for (Object secondaryObjectListObject : fieldValueSecondaryObject) {
@@ -615,11 +665,11 @@ public class EntityRecordService {
 	    }
 	}
 
-	consilidatedEntity.setFieldValue(field, fieldValuePrimaryObject);
+	consolidatedEntity.setFieldValue(field, fieldValuePrimaryObject);
 	}
     }
 
-    Object[] mergeArrays(Entity primary, Entity secondary, Field field) throws IllegalAccessException {
+    Object[] mergeArrays(Entity primary, Entity secondary, Field field, boolean append) throws IllegalAccessException {
 	Object[] primaryArray = (Object[]) primary.getFieldValue(field);
 	Object[] secondaryArray = (Object[]) secondary.getFieldValue(field);
 	
@@ -628,8 +678,8 @@ public class EntityRecordService {
 	}else if(primaryArray == null) {
 	    //return a clone of the secondary
 	    return secondaryArray.clone();
-	}else if(secondaryArray == null) {
-	    //return a clone of the primary
+	}else if(secondaryArray == null || !append) {
+	    //return a clone of the primary if we're not appending
 	    return primaryArray.clone();
 	}
 	
@@ -683,7 +733,7 @@ public class EntityRecordService {
 	entityRecord.addProxy(europeanaProxy);
     }
 
-    private void setDatasourceMetadata(
+    private void setExternalProxyMetadata(
 				Entity metisResponse,
 				EntityPreview entityCreationRequest, String entityId,
 				DataSource externalDatasource, EntityRecord entityRecord, Date timestamp) {

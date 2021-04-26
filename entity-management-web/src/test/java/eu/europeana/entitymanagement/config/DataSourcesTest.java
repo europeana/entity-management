@@ -22,7 +22,7 @@ public class DataSourcesTest {
 
     @Autowired
     @Qualifier(AppConfigConstants.BEAN_XML_MAPPER)
-    private XmlMapper xmlMapper;
+    private XmlMapper xmlMapper = new com.fasterxml.jackson.dataformat.xml.XmlMapper();
 
 
     String WIKIDATA = "http://www.wikidata.org/";

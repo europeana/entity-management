@@ -48,6 +48,10 @@ public class EMExceptionHandler extends EuropeanaGlobalExceptionHandler {
             .setError("Error parsing request body")
             .setMessage("JSON is either malformed or missing required 'type' property")
             .build();
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST.value())
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(response);
     }
 }
