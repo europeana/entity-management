@@ -1,0 +1,92 @@
+{
+"_version_":1685721580875808768,
+"coref":["http://isni.org/isni/000000012159802X","https://www.freebase.com/m/08jgn7","http://www.wikidata.org/entity/Q641676","http://id.loc.gov/authorities/names/n92025427","http://d-nb.info/gnd/5025979-9","https://g.co/kg/m/08jgn7","http://viaf.org/viaf/132063008"],
+"country":"http://NL",
+"created":"2015-08-17T17:04:36Z",
+"description":
+{
+"be":"музей",
+"en":"natural history museum and research center in the Netherlands",
+"es":"museo de historia natural y centro de investigación neerlandés",
+"fr":"musée et centre de recherche néerlandais",
+"he":"מוזיאון בהולנד",
+"nl":"museum en onderzoekscentrum in Leiden",
+"ru":"музей в Голландии",
+"uk":"Природничий музей в місті Лейден, Нідерланди"
+},
+"identifier":["1482250000000370517"],
+"derived_score":1.1737184E7,
+"acronym":
+{
+"ca":["NBC"],
+"de":["RMNH"],
+"en":["RMNH","NBC"],
+"es":["NBC"],
+"gl":["NBC"],
+"nl":["RMNH"]
+},
+"entity_uri":"http://data.europeana.eu/organization/1482250000000370517",
+"europeanaRole.en":["Data Provider"],
+"europeana_doc_count":1,
+"europeana_term_hits":4533945,
+"depiction":"http://commons.wikimedia.org/wiki/Special:FilePath/WLANL%20-%20thedogg%20-%20Mammoet%20%282%29.jpg",
+"homepage":"https://www.naturalis.nl/nl/",
+"phone":["+31-71-751-9600"],
+"hasGeo":"52.16472222,4.47333333",
+"id":"http://data.europeana.eu/organization/1482250000000370517",
+"internal_type":"Organization",
+"label":
+{
+"be":["Натураліс"],
+"ca":["NBC","Naturalis"],
+"de":["RMNH","Naturalis"],
+"en":["RMNH","NBC","Naturalis Biodiversity Center","Naturalis Biodiversity Center","Naturalis","Naturalis Bio Center"],
+"es":["Centro de Biodiversidad Naturalis","NBC"],
+"fr":["Naturalis"],
+"gl":["NBC"],
+"it":["Naturalis Biodiversity Center"],
+"ja":["オランダ国立自然史博物館"],
+"nl":["Naturalis Biodiversity Center","Nederlands Centrum voor Biodiversiteit Naturalis","Naturalis","Nationaal Natuurhistorisch Museum","RMNH"],
+"pl":["Muzeum Historii Naturalnej w Lejdzie"],
+"pt":["Museu de História Natural de Leiden"],
+"ru":["Naturalis","Натуралис"],
+"uk":["Центр біорізноманіття «Натураліс»","Натураліс","Naturalis"],
+"zh":["Naturalis"]
+},
+"modified":"2018-09-14T14:23:20Z",
+"organizationDomain.en":["GLAM"],
+"sameAs":["http://isni.org/isni/000000012159802X","https://www.freebase.com/m/08jgn7","http://www.wikidata.org/entity/Q641676","http://id.loc.gov/authorities/names/n92025427","http://d-nb.info/gnd/5025979-9","https://g.co/kg/m/08jgn7","http://viaf.org/viaf/132063008"],
+"pagerank":7.7743397,
+"payload":"{\"id\": \"http://data.europeana.eu/organization/1482250000000370517\", \"type\": \"Organization\", \"prefLabel\": {\"de\": \"Naturalis\", \"be\": \"\\u041d\\u0430\\u0442\\u0443\\u0440\\u0430\\u043b\\u0456\\u0441\", \"ru\": \"\\u041d\\u0430\\u0442\\u0443\\u0440\\u0430\\u043b\\u0438\\u0441\", \"pt\": \"Museu de Hist\\u00f3ria Natural de Leiden\", \"en\": \"Naturalis Biodiversity Center\", \"it\": \"Naturalis Biodiversity Center\", \"fr\": \"Naturalis\", \"es\": \"Centro de Biodiversidad Naturalis\", \"zh\": \"Naturalis\", \"uk\": \"\\u0426\\u0435\\u043d\\u0442\\u0440 \\u0431\\u0456\\u043e\\u0440\\u0456\\u0437\\u043d\\u043e\\u043c\\u0430\\u043d\\u0456\\u0442\\u0442\\u044f \\u00ab\\u041d\\u0430\\u0442\\u0443\\u0440\\u0430\\u043b\\u0456\\u0441\\u00bb\", \"ja\": \"\\u30aa\\u30e9\\u30f3\\u30c0\\u56fd\\u7acb\\u81ea\\u7136\\u53f2\\u535a\\u7269\\u9928\", \"pl\": \"Muzeum Historii Naturalnej w Lejdzie\", \"nl\": \"Naturalis Biodiversity Center\", \"ca\": \"Naturalis\"}, \"altLabel\": {\"ru\": [\"Naturalis\"], \"uk\": [\"\\u041d\\u0430\\u0442\\u0443\\u0440\\u0430\\u043b\\u0456\\u0441\", \"Naturalis\"], \"en\": [\"Naturalis Biodiversity Center\", \"Naturalis\", \"Naturalis Bio Center\"], \"nl\": [\"Nederlands Centrum voor Biodiversiteit Naturalis\", \"Naturalis\", \"Nationaal Natuurhistorisch Museum\"]}, \"acronym\": {\"de\": [\"RMNH\"], \"gl\": [\"NBC\"], \"en\": [\"RMNH\", \"NBC\"], \"nl\": [\"RMNH\"], \"es\": [\"NBC\"], \"ca\": [\"NBC\"]}, \"country\": \"NL\", \"organizationDomain\": \"GLAM\"}",
+"altLabel":
+{
+"en":["Naturalis Biodiversity Center","Naturalis","Naturalis Bio Center"],
+"nl":["Nederlands Centrum voor Biodiversiteit Naturalis","Naturalis","Nationaal Natuurhistorisch Museum"],
+"ru":["Naturalis"],
+"uk":["Натураліс","Naturalis"]
+},
+"prefLabel":
+{
+"be":"Натураліс",
+"ca":"Naturalis",
+"de":"Naturalis",
+"en":"Naturalis Biodiversity Center",
+"es":"Centro de Biodiversidad Naturalis",
+"fr":"Naturalis",
+"it":"Naturalis Biodiversity Center",
+"ja":"オランダ国立自然史博物館",
+"nl":"Naturalis Biodiversity Center",
+"pl":"Muzeum Historii Naturalnej w Lejdzie",
+"pt":"Museu de História Natural de Leiden",
+"ru":"Натуралис",
+"uk":"Центр біорізноманіття «Натураліс»",
+"zh":"Naturalis",
+"wrong-test":"wrong-test"
+},
+"suggest_filters":["Organization","in_europeana"],
+"text":["NBC","Muzeum Historii Naturalnej w Lejdzie","RMNH","Naturalis","Naturalis","Museu de História Natural de Leiden","מוזיאון בהולנד","Центр біорізноманіття «Натураліс»","NBC","RMNH","NBC","Naturalis Biodiversity Center","natural history museum and research center in the Netherlands","Naturalis Biodiversity Center","Centro de Biodiversidad Naturalis","Naturalis","GLAM","Naturalis Biodiversity Center","Naturalis","Naturalis Bio Center","NBC","Природничий музей в місті Лейден, Нідерланди","Naturalis Biodiversity Center","Nederlands Centrum voor Biodiversiteit Naturalis","Naturalis","Nationaal Natuurhistorisch Museum","オランダ国立自然史博物館","RMNH","musée et centre de recherche néerlandais","Naturalis","Натураліс","Натуралис","museum en onderzoekscentrum in Leiden","музей в Голландии","музей","Натураліс","Naturalis","Naturalis","museo de historia natural y centro de investigación neerlandés","Data Provider"],
+"timestamp":"2020-12-10T19:42:56.308Z",
+"type":"Organization",
+"vcard_countryName.1":"Netherlands",
+"vcard_hasAddress.1":"http://data.europeana.eu/organization/1482250000000370517#address"
+}
