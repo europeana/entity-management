@@ -20,15 +20,15 @@ public class EntityUpdateFailure {
     // default constructor
   }
 
-  public EntityUpdateFailure(String entityId, Instant created, String errorMessage,
+  public EntityUpdateFailure(String entityId, Instant timestamp, String errorMessage,
       String stackTrace) {
     this.entityId = entityId;
-    this.created = created;
+    this.timestamp = timestamp;
     this.errorMessage = errorMessage;
     this.stackTrace = stackTrace;
   }
 
-  private Instant created;
+  private Instant timestamp;
   private String errorMessage;
   private String stackTrace;
 
@@ -38,8 +38,8 @@ public class EntityUpdateFailure {
   }
 
 
-  public Instant getCreated() {
-    return created;
+  public Instant getTimestamp() {
+    return timestamp;
   }
 
 
@@ -55,9 +55,9 @@ public class EntityUpdateFailure {
 
   public static class Builder {
 
-    private String entityId;
+    private final String entityId;
 
-    private Instant created;
+    private Instant timestamp;
     private String errorMessage;
     private String stackTrace;
 
@@ -66,8 +66,8 @@ public class EntityUpdateFailure {
     }
 
 
-    public Builder created(Instant created) {
-      this.created = created;
+    public Builder timestamp(Instant timestamp) {
+      this.timestamp = timestamp;
       return this;
     }
 
@@ -82,7 +82,7 @@ public class EntityUpdateFailure {
     }
 
     public EntityUpdateFailure build() {
-      return new EntityUpdateFailure(entityId, created, errorMessage, stackTrace);
+      return new EntityUpdateFailure(entityId, timestamp, errorMessage, stackTrace);
     }
   }
 
@@ -91,7 +91,7 @@ public class EntityUpdateFailure {
     return "EntityUpdateFailure{" +
         "dbId=" + dbId +
         ", entityId='" + entityId + '\'' +
-        ", created=" + created +
+        ", timestamp=" + timestamp +
         ", errorMessage='" + errorMessage + '\'' +
         ", stackTrace='" + stackTrace + '\'' +
         '}';

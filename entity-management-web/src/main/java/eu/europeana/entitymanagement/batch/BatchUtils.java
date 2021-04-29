@@ -2,7 +2,9 @@ package eu.europeana.entitymanagement.batch;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import java.util.Date;
+import java.util.List;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.lang.Nullable;
@@ -36,4 +38,9 @@ public class BatchUtils {
     return paramBuilder.toJobParameters();
   }
 
+
+  public static String[] getEntityIds(List<? extends EntityRecord> entityRecords) {
+    return entityRecords.stream().map(EntityRecord::getEntityId)
+        .toArray(String[]::new);
+  }
 }
