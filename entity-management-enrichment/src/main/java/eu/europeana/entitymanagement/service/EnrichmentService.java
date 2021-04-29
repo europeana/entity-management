@@ -40,12 +40,14 @@ public class EnrichmentService {
             EnrichmentEntity enrichmentEntity = new EnrichmentEntity();
 
             // set entity
-            enrichmentEntity.setAbout(entityRecord.getEntity().getAbout());
+            enrichmentEntity.setAbout(entityRecord.getEntityId());
             enrichmentEntity.setPrefLabel(entityRecord.getEntity().getPrefLabel());
             enrichmentEntity.setAltLabel(entityRecord.getEntity().getAltLabel());
             enrichmentEntity.setHiddenLabel(entityRecord.getEntity().getHiddenLabel());
             enrichmentEntity.setNote(entityRecord.getEntity().getNote());
-            enrichmentEntity.setOwlSameAs(Arrays.asList(entityRecord.getEntity().getSameAs()));
+            if(entityRecord.getEntity().getSameAs() != null && entityRecord.getEntity().getSameAs().length > 0) {
+                enrichmentEntity.setOwlSameAs(Arrays.asList(entityRecord.getEntity().getSameAs()));
+            }
             enrichmentEntity.setIsPartOf(String.valueOf(entityRecord.getEntity().getIsPartOfArray()));
             enrichmentEntity.setFoafDepiction(entityRecord.getEntity().getFoafDepiction());
 
@@ -54,12 +56,12 @@ public class EnrichmentService {
             // check if it already exists
             Optional<EnrichmentTerm> existingEnrichment = enrichmentDao.getEnrichmentTermByField(
                 EnrichmentConstants.ENRICHMENT_ABOUT,
-                                                                                 entityRecord.getEntity().getAbout());
+                                                                                 entityRecord.getEntityId());
             if (existingEnrichment.isEmpty()) {
                 enrichmentTerm.setCreated(new Date());
                 enrichmentTerm.setUpdated(new Date());
             } else {
-                LOG.info("Enrichment already exist for entity {}. Updating the Enrichment", entityRecord.getEntity().getAbout());
+                LOG.info("Enrichment already exist for entity {}. Updating the Enrichment", entityRecord.getEntityId());
                 enrichmentTerm.setCreated(existingEnrichment.get().getCreated());
                 enrichmentTerm.setUpdated(new Date());
                 // To update - set the existing ID in the enrichment term and save

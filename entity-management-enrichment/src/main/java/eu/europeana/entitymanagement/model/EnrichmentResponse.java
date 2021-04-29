@@ -8,24 +8,30 @@ import java.util.Date;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class EnrichmentResponse {
 
-    private String success;
-    private int status;
+    private EnrichmentPublished successful;
+    private EnrichmentPublished failed;
     private String timestamp;
-    private long entitiesPublished;
 
-    public EnrichmentResponse(Long entitiesPublished, int status) {
-        this.success = EnrichmentConstants.STATUS_SUCCESS;
+    public EnrichmentResponse(EnrichmentPublished successful, EnrichmentPublished failed) {
+        this.successful = successful;
+        this.failed = failed;
         this.timestamp = new SimpleDateFormat(EnrichmentConstants.DATE_FORMAT).format(new Date());
-        this.status = status;
-        this.entitiesPublished = entitiesPublished;
     }
 
-    public String getSuccess() {
-        return success;
+    public EnrichmentPublished getSuccessful() {
+        return successful;
     }
 
-    public void setSuccess(String success) {
-        this.success = success;
+    public void setSuccessful(EnrichmentPublished successful) {
+        this.successful = successful;
+    }
+
+    public EnrichmentPublished getFailed() {
+        return failed;
+    }
+
+    public void setFailed(EnrichmentPublished failed) {
+        this.failed = failed;
     }
 
     public String getTimestamp() {
@@ -34,21 +40,5 @@ public class EnrichmentResponse {
 
     public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
-    }
-
-    public int getStatus() {
-        return status;
-    }
-
-    public void setStatus(int status) {
-        this.status = status;
-    }
-
-    public long getEntitiesPublished() {
-        return entitiesPublished;
-    }
-
-    public void setEntitiesPublished(long entitiesPublished) {
-        this.entitiesPublished = entitiesPublished;
     }
 }

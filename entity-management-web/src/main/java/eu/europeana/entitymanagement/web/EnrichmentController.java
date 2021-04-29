@@ -6,6 +6,7 @@ import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
+import eu.europeana.entitymanagement.model.EnrichmentPublished;
 import eu.europeana.entitymanagement.model.EnrichmentResponse;
 import eu.europeana.entitymanagement.service.EnrichmentService;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
@@ -20,6 +21,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,10 +49,10 @@ public class EnrichmentController extends BaseRest{
    */
   @ApiOperation(value = "Publish to enrichment", nickname = "publishEnrichment", response = java.lang.Void.class)
   @PostMapping(value = "/enrichment",produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<EnrichmentResponse> disableEntity(
+  public ResponseEntity<EnrichmentResponse> publishEnrichment(
       @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
       @RequestBody List<String> entityList,
-      HttpServletRequest request) throws HttpException {
+      HttpServletRequest request) {
 
     // TODO: Re-enable authentication
     //verifyWriteAccess(Operations.CREATE, request);
@@ -66,6 +68,7 @@ public class EnrichmentController extends BaseRest{
    */
   private ResponseEntity<EnrichmentResponse> publishToEnrichment(List<String> entityList) {
     long entitiesPublished = 0;
+    List<String> entityPublished = new ArrayList<>();
     for (String entityUri: entityList) {
       Optional<EntityRecord> entityRecordOptional = entityRecordService.retrieveEntityRecordByUri(entityUri);
       try {
@@ -79,10 +82,25 @@ public class EnrichmentController extends BaseRest{
         }
         entityEnrichmentService.saveEnrichment(entityRecord);
         entitiesPublished++;
+        entityPublished.add(entityUri);
       } catch (EntityNotFoundException | EntityRemovedException  e) {
         LOG.error("Error publishing the enrichment for entity. {} ", e.getMessage());
       }
     }
-    return new ResponseEntity<>(new EnrichmentResponse(entitiesPublished, HttpStatus.OK.value()), HttpStatus.OK);
+    return new ResponseEntity<>(prepareEnrichmentResponse(entityList, entityPublished, entitiesPublished), HttpStatus.OK);
   }
+
+    private EnrichmentResponse prepareEnrichmentResponse(List<String> entityList, List<String> entitiesPublished, long count ) {
+      EnrichmentPublished successful = null;
+      EnrichmentPublished failed = null;
+      if(entitiesPublished.size() > 0 && count > 0) {
+          successful = new EnrichmentPublished(count, entitiesPublished);
+      }
+      long failedEntities = entityList.size() - count;
+      entityList.removeAll(entitiesPublished);
+      if(entityList.size() > 0 && failedEntities >0) {
+          failed = new EnrichmentPublished(failedEntities, entityList);
+      }
+      return  new EnrichmentResponse(successful, failed);
+    }
 }
