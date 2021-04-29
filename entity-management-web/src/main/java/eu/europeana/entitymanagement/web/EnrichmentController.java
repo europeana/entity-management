@@ -93,12 +93,12 @@ public class EnrichmentController extends BaseRest{
     private EnrichmentResponse prepareEnrichmentResponse(List<String> entityList, List<String> entitiesPublished, long count ) {
       EnrichmentPublished successful = null;
       EnrichmentPublished failed = null;
-      if(entitiesPublished.size() > 0 && count > 0) {
+      if (!entitiesPublished.isEmpty() && count > 0) {
           successful = new EnrichmentPublished(count, entitiesPublished);
       }
       long failedEntities = entityList.size() - count;
       entityList.removeAll(entitiesPublished);
-      if(entityList.size() > 0 && failedEntities >0) {
+      if (!entityList.isEmpty() && failedEntities > 0) {
           failed = new EnrichmentPublished(failedEntities, entityList);
       }
       return  new EnrichmentResponse(successful, failed);
