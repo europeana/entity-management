@@ -27,6 +27,7 @@ public class BaseMvcTestUtils {
     public static final String CONCEPT_UPDATE_JSON = "/content/concept_update.json";
     
     public static final String ORGANIZATION_VALIDATE_FIELDS_JSON = "/content/organization-validation.json";
+    public static final String AGENT_VALIDATE_FIELDS_JSON = "/content/agent-validation.json";
     
     public static final String CONCEPT_XML = "/metis-deref/concept.xml";
     public static final String AGENT_XML = "/metis-deref/agent.xml";

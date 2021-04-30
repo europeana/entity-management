@@ -50,7 +50,7 @@ public enum EntityFieldsTypes {
     europeanaRole(EntityFieldsTypes.FIELD_TYPE_KEYWORD, true, EntityFieldsTypes.FIELD_CARDINALITY_1_INFINITE),
     organizationDomain(EntityFieldsTypes.FIELD_TYPE_KEYWORD, true, EntityFieldsTypes.FIELD_CARDINALITY_1_INFINITE),
     geographicLevel(EntityFieldsTypes.FIELD_TYPE_KEYWORD, true, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
-    coutry(EntityFieldsTypes.FIELD_TYPE_TEXT, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
+    country(EntityFieldsTypes.FIELD_TYPE_TEXT, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
     homepage(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
     phone(EntityFieldsTypes.FIELD_TYPE_KEYWORD, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
     mbox(EntityFieldsTypes.FIELD_TYPE_EMAIL, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
