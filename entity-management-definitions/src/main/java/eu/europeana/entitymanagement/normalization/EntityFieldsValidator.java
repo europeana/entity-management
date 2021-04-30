@@ -110,8 +110,8 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
     }
 
     boolean validateStringField(ConstraintValidatorContext context, Field field, Object fieldValue, boolean returnValue) throws IllegalAccessException {
-	if (!((String)fieldValue).trim().equals((String)fieldValue)) {
-		addConstraint(returnValue, context, "The entity field: "+field.getName()+" contains leading and/or trailing spaces.");
+	if (!fieldValue.toString().trim().equals(fieldValue.toString())) {
+		addConstraint(returnValue, context, "The entity field: "+field.getName()+", contains leading and/or trailing spaces: "+fieldValue.toString());
 		return false;
 	}
 	else {
@@ -120,6 +120,28 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
     }
     
     boolean validateEmailField(ConstraintValidatorContext context, Field field, Object fieldValue, boolean returnValue) {
+    	if (field.getType().isArray()) {
+			Object[] fieldValueArray = (Object[])fieldValue;    			
+			if (fieldValueArray.length==0) return returnValue;			
+			for (Object fieldValueElem : fieldValueArray) {
+				returnValue = checkEmailFormat(context, field, fieldValueElem, returnValue);
+			}
+		}
+        else if (field.getType().isAssignableFrom(List.class)) {
+			@SuppressWarnings("unchecked")
+			List<Object> fieldValueList = (List<Object>)fieldValue;
+			if (fieldValueList.size()==0) return returnValue;
+			for (Object fieldValueElem : fieldValueList) {
+				returnValue = checkEmailFormat(context, field, fieldValueElem, returnValue);
+			}
+		}
+        else if (field.getType().isAssignableFrom(String.class)){
+	        returnValue = checkEmailFormat(context, field, fieldValue, returnValue);
+        }
+        return returnValue;
+    }
+    
+    boolean checkEmailFormat(ConstraintValidatorContext context, Field field, Object fieldValue, boolean returnValue) {
         String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\."+
                             "[a-zA-Z0-9_+&*-]+)*@" +
                             "(?:[a-zA-Z0-9-]+\\.)+[a-z" +
@@ -131,35 +153,43 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
         }
         else
         {
-    		addConstraint(returnValue, context, "The entity field: "+field.getName()+" is of type Email and contains inappropriate characters.");
+    		addConstraint(returnValue, context, "The entity field: "+field.getName()+" is of type Email and contains inappropriate characters: "+fieldValue.toString());
     		return false;
         }
     }
     
     boolean validateDateField(ConstraintValidatorContext context, Field field, Object fieldValue, boolean returnValue) {
-        boolean valid = false;
-        try {
-        	LocalDate.parse(fieldValue.toString(), DateTimeFormatter.ofPattern(java.time.format.DateTimeFormatter.ISO_DATE.toString()).withResolverStyle(ResolverStyle.STRICT));
-            valid = true;
-        } catch (DateTimeParseException e) {
-    		addConstraint(returnValue, context, "The entity field: "+field.getName()+" is of type Date and does not comply with the ISO-8601 format.");
-            valid = false;
+        if (field.getType().isArray()) {
+			Object[] fieldValueArray = (Object[])fieldValue;    			
+			if (fieldValueArray.length==0) return returnValue;			
+			for (Object fieldValueElem : fieldValueArray) {
+				returnValue = checkDateFormatISO8601(context, field, fieldValueElem, returnValue);
+			}
+		}
+        else if (field.getType().isAssignableFrom(List.class)) {
+			@SuppressWarnings("unchecked")
+			List<Object> fieldValueList = (List<Object>)fieldValue;
+			if (fieldValueList.size()==0) return returnValue;
+			for (Object fieldValueElem : fieldValueList) {
+				returnValue = checkDateFormatISO8601(context, field, fieldValueElem, returnValue);
+			}
+		}
+        else if (field.getType().isAssignableFrom(String.class)){
+	        returnValue = checkDateFormatISO8601(context, field, fieldValue, returnValue);
         }
-        return valid;
-    }
-
-    private void addConstraint(boolean returnValue, ConstraintValidatorContext context, String messageTemplate) {
-	if (returnValue) {
-	    // disable existing violation message
-	    context.disableDefaultConstraintViolation();
-	    // build new violation message and add it
-	    context.buildConstraintViolationWithTemplate(messageTemplate).addConstraintViolation();
-	} else {
-	    // build new violation message and add it
-	    context.buildConstraintViolationWithTemplate(messageTemplate).addConstraintViolation();
-	}
+        return returnValue;
     }
     
+    boolean checkDateFormatISO8601(ConstraintValidatorContext context, Field field, Object fieldValue, boolean returnValue) {
+    	try {
+        	LocalDate.parse(fieldValue.toString(), DateTimeFormatter.ofPattern(java.time.format.DateTimeFormatter.ISO_DATE.toString()).withResolverStyle(ResolverStyle.STRICT));
+        } catch (DateTimeParseException e) {
+    		addConstraint(returnValue, context, "The entity field: "+field.getName()+" is of type Date and does not comply with the ISO-8601 format: "+fieldValue.toString());
+            returnValue = false;
+        }
+    	return returnValue;
+    }
+   
     boolean validateTextField (ConstraintValidatorContext context, Field field, Object fieldValue, boolean returnValue) {
     	//non-multilingual fields are not of type Map, but they can be of type String[], List<String>, or String
     	if (!EntityFieldsTypes.valueOf(field.getName()).getFieldIsmultilingual()) {
@@ -176,11 +206,10 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
     	//if the field is an array
 		if (field.getType().isArray()) {
 			Object[] fieldValueArray = (Object[])fieldValue;    			
-			if (fieldValueArray.length==0) return returnValue;
-			if (!String.class.isInstance(fieldValueArray[0])) return returnValue;    			
+			if (fieldValueArray.length==0) return returnValue;   			
 			for (Object fieldValueElem : fieldValueArray) {
 				if (EntityUtils.isUri(fieldValueElem.toString())) {
-					addConstraint(returnValue, context, "The entity field: "+field.getName()+" is of type Text and has the URI form (it should be a String not a URI).");
+					addConstraint(returnValue, context, "The entity field: "+field.getName()+" is of type Text and has an element of the URI form: "+fieldValueElem.toString()+" (it should be a String not a URI).");
 					returnValue = false;
 				}
 			}
@@ -190,10 +219,9 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
 			@SuppressWarnings("unchecked")
 			List<Object> fieldValueList = (List<Object>)fieldValue;
 			if (fieldValueList.size()==0) return returnValue;
-			if (!String.class.isInstance(fieldValueList.get(0))) return returnValue;
 			for (Object fieldValueElem : fieldValueList) {
 				if (EntityUtils.isUri(fieldValueElem.toString())) {
-					addConstraint(returnValue, context, "The entity field: "+field.getName()+" is of type Text and has the URI form (it should be a String not a URI).");
+					addConstraint(returnValue, context, "The entity field: "+field.getName()+" is of type Text and has an element of the URI form: "+fieldValueElem.toString()+" (it should be a String not a URI).");
 					returnValue = false;
 				}
 			}
@@ -201,7 +229,7 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
 		//if the field is String
 		else if (field.getType().isAssignableFrom(String.class)) {
 			if (EntityUtils.isUri(fieldValue.toString())) {
-				addConstraint(returnValue, context, "The entity field: "+field.getName()+" is of type Text and has the URI form (it should be a String not a URI).");
+				addConstraint(returnValue, context, "The entity field: "+field.getName()+" is of type Text and has the URI form: "+fieldValue.toString()+" (it should be a String not a URI).");
 				returnValue = false;
 			}
 		}
@@ -218,14 +246,14 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
 			if (fieldValueMapElem.getValue().getClass().isAssignableFrom(List.class)) {
 				for (Object fieldValueMapElemValue : (List<Object>)(fieldValueMapElem.getValue())) {
 					if (EntityUtils.isUri(fieldValueMapElemValue.toString())) {
-						addConstraint(returnValue, context, "The entity field: "+field.getName()+" is of type Text and has the URI form (it should be a String not a URI).");
+						addConstraint(returnValue, context, "The entity field: "+field.getName()+" is of type Text and has the URI form: "+fieldValueMapElemValue.toString()+", for the key: "+fieldValueMapElem.getKey().toString()+" (it should be a String not a URI).");
 						returnValue = false;
 					}
 				}
 			}
 			else {
 				if (EntityUtils.isUri(fieldValueMapElem.getValue().toString())) {
-					addConstraint(returnValue, context, "The entity field: "+field.getName()+" is of type Text and has the URI form (it should be a String not a URI).");
+					addConstraint(returnValue, context, "The entity field: "+field.getName()+" is of type Text and has the URI form: "+fieldValueMapElem.getValue().toString()+", for the key: "+fieldValueMapElem.getKey().toString()+" (it should be a String not a URI).");
 					returnValue = false;
 				}				
 			}
@@ -264,4 +292,17 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
 		}
 		return returnValue;		
     }
+    
+    private void addConstraint(boolean returnValue, ConstraintValidatorContext context, String messageTemplate) {
+	if (returnValue) {
+	    // disable existing violation message
+	    context.disableDefaultConstraintViolation();
+	    // build new violation message and add it
+	    context.buildConstraintViolationWithTemplate(messageTemplate).addConstraintViolation();
+	} else {
+	    // build new violation message and add it
+	    context.buildConstraintViolationWithTemplate(messageTemplate).addConstraintViolation();
+	}
+    }
+
 }

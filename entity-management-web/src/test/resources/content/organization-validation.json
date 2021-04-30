@@ -12,7 +12,8 @@
 "he":"מוזיאון בהולנד",
 "nl":"museum en onderzoekscentrum in Leiden",
 "ru":"музей в Голландии",
-"uk":"Природничий музей в місті Лейден, Нідерланди"
+"uk":"http://Природничий музей в місті Лейден, Нідерланди",
+"wrong-for-testing":"http://"
 },
 "identifier":["1482250000000370517"],
 "derived_score":1.1737184E7,
@@ -23,15 +24,20 @@
 "en":["RMNH","NBC"],
 "es":["NBC"],
 "gl":["NBC"],
-"nl":["RMNH"]
+"nl":["RMNH","http://wrong-for-testing"]
 },
 "entity_uri":"http://data.europeana.eu/organization/1482250000000370517",
-"europeanaRole.en":["Data Provider"],
+"europeanaRole":
+{
+"en":["Data Provider"],
+"de":["http://wrong-for-testing"]
+},
 "europeana_doc_count":1,
 "europeana_term_hits":4533945,
 "depiction":"http://commons.wikimedia.org/wiki/Special:FilePath/WLANL%20-%20thedogg%20-%20Mammoet%20%282%29.jpg",
-"homepage":"https://www.naturalis.nl/nl/",
+"homepage":"wrong-for-testing",
 "phone":["+31-71-751-9600"],
+"mbox":["test.mail@gmail.com"],
 "hasGeo":"52.16472222,4.47333333",
 "id":"http://data.europeana.eu/organization/1482250000000370517",
 "internal_type":"Organization",
@@ -81,7 +87,7 @@
 "ru":"Натуралис",
 "uk":"Центр біорізноманіття «Натураліс»",
 "zh":"Naturalis",
-"wrong-test":"wrong-test"
+"wrong-for-testing":"wrong-for-testing"
 },
 "suggest_filters":["Organization","in_europeana"],
 "text":["NBC","Muzeum Historii Naturalnej w Lejdzie","RMNH","Naturalis","Naturalis","Museu de História Natural de Leiden","מוזיאון בהולנד","Центр біорізноманіття «Натураліс»","NBC","RMNH","NBC","Naturalis Biodiversity Center","natural history museum and research center in the Netherlands","Naturalis Biodiversity Center","Centro de Biodiversidad Naturalis","Naturalis","GLAM","Naturalis Biodiversity Center","Naturalis","Naturalis Bio Center","NBC","Природничий музей в місті Лейден, Нідерланди","Naturalis Biodiversity Center","Nederlands Centrum voor Biodiversiteit Naturalis","Naturalis","Nationaal Natuurhistorisch Museum","オランダ国立自然史博物館","RMNH","musée et centre de recherche néerlandais","Naturalis","Натураліс","Натуралис","museum en onderzoekscentrum in Leiden","музей в Голландии","музей","Натураліс","Naturalis","Naturalis","museo de historia natural y centro de investigación neerlandés","Data Provider"],

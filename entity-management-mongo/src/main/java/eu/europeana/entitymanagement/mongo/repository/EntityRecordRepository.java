@@ -97,11 +97,11 @@ public class EntityRecordRepository {
     public EntityRecord save(EntityRecord entityRecord){
         //check the validation of the entity fields
     	//Temporarily disabled until the implementation is complete and correct
-        Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entityRecord.getEntity());
-        for (ConstraintViolation<Entity> violation : violations) {
-            logger.error(violation.getMessage());
-            //TODO: do something besides logging warning!
-        }
+//        Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entityRecord.getEntity());
+//        for (ConstraintViolation<Entity> violation : violations) {
+//            logger.error(violation.getMessage());
+//            //TODO: do something besides logging warning!
+//        }
 
         return datastore.save(entityRecord);
     }

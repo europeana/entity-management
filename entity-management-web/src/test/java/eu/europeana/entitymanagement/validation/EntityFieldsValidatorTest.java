@@ -1,6 +1,6 @@
 package eu.europeana.entitymanagement.validation;
 
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_VALIDATE_FIELDS_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_VALIDATE_FIELDS_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
 
 import java.io.IOException;
@@ -22,7 +22,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.impl.ConceptImpl;
+import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
+import eu.europeana.entitymanagement.definitions.model.impl.OrganizationImpl;
 
 @SpringBootTest
 public class EntityFieldsValidatorTest {
@@ -36,13 +39,16 @@ public class EntityFieldsValidatorTest {
 
     @Test
     public void validateEntityFields() throws JsonMappingException, JsonProcessingException, IOException {
-        // read the test data for the Concept entity from the file
-        ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_VALIDATE_FIELDS_JSON), ConceptImpl.class);
-
-        //check the validation of the entity fields
-        Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(concept);
-        Assertions.assertTrue(violations.size()==3);
-        Assertions.assertTrue(!concept.getEntityId().contains(" "));        
+	
+        OrganizationImpl organization = objectMapper.readValue(loadFile(ORGANIZATION_VALIDATE_FIELDS_JSON), OrganizationImpl.class);
+        EntityRecord entityRecord1 = new EntityRecordImpl();
+        entityRecord1.setEntity(organization);
+        entityRecord1.setEntityId(organization.getEntityId());
+        
+        Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entityRecord1.getEntity());
+        for (ConstraintViolation<Entity> violation : violations) {
+            System.out.print(violation.getConstraintDescriptor().getMessageTemplate());
+        }       
     }
 
 }
