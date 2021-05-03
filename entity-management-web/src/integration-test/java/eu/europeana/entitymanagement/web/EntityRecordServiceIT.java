@@ -48,13 +48,16 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.impl.AgentImpl;
+import eu.europeana.entitymanagement.definitions.model.impl.AggregationImpl;
 import eu.europeana.entitymanagement.definitions.model.impl.ConceptImpl;
 import eu.europeana.entitymanagement.definitions.model.impl.EntityProxyImpl;
 import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
 import eu.europeana.entitymanagement.definitions.model.impl.PlaceImpl;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.utils.EntityComparator;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
+import eu.europeana.entitymanagement.web.service.EntityObjectFactory;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
 import eu.europeana.entitymanagement.web.xml.model.metis.EnrichmentResultList;
@@ -94,6 +97,7 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
 	     */
 	    EntityRecord entityRecord = new EntityRecordImpl();
 	    EntityProxy internalProxy = new EntityProxyImpl();
+	    //TODO: set shell entity on EntityRecord
 	    internalProxy.setEntity(concept);
 	    internalProxy.setProxyId("http://data.europeana.eu/proxy1");
 	    EntityProxy externalProxy = new EntityProxyImpl();
@@ -101,6 +105,12 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
 	    externalProxy.setProxyId("http://data.external.org/proxy1");
 	    entityRecord.addProxy(internalProxy);
 	    entityRecord.addProxy(externalProxy);
+
+	    //aggregation is reused from consolidated version
+	    ConceptImpl notConsolidated = (ConceptImpl) EntityObjectFactory.createEntityObject(EntityTypes.Concept);
+	    notConsolidated.setIsAggregatedBy(new AggregationImpl());
+	    entityRecord.setEntity(notConsolidated);
+
 
 	    entityRecordService.mergeEntity(entityRecord);
 	    /*
@@ -134,6 +144,7 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
 	     */
 	    EntityRecord entityRecord = new EntityRecordImpl();
 	    EntityProxy internalProxy = new EntityProxyImpl();
+		//TODO: set shell entity on EntityRecord
 	    internalProxy.setEntity(concept);
 	    internalProxy.setProxyId("http://data.europeana.eu/concept/1#proxy_europeana");
 	    EntityProxy externalProxy = new EntityProxyImpl();
@@ -141,6 +152,12 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
 	    externalProxy.setProxyId("http://www.wikidata.org/entity/Q1101933");
 	    entityRecord.addProxy(internalProxy);
 	    entityRecord.addProxy(externalProxy);
+
+	   //aggregation is reused from consolidated version
+            ConceptImpl notConsolidated = (ConceptImpl) EntityObjectFactory.createEntityObject(EntityTypes.Concept);
+            notConsolidated.setIsAggregatedBy(new AggregationImpl());
+            entityRecord.setEntity(notConsolidated);
+
 
 	    entityRecordService.mergeEntity(entityRecord);
 	    /*

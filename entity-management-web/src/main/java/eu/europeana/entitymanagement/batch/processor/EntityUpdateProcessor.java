@@ -53,7 +53,7 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
     public EntityRecord process(@NonNull EntityRecord entityRecord) throws Exception {
         //TODO: Validate entity metadata from Proxy Data Source
         emEntityFieldCleaner.cleanAndNormalize(entityRecord.getExternalProxy().getEntity());
-        entityRecordService.mergeEntity(entityRecord);
+	      entityRecordService.mergeEntity(entityRecord);
         validateConstraints(entityRecord);
         entityRecordService.performReferentialIntegrity(entityRecord.getEntity());
 
@@ -62,6 +62,7 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
        *  Solr servers. To prevent Jobs from failing, we make this conditional.
        */
         if(entityManagementConfiguration.shouldComputeMetrics()){
+            logger.debug("Computing ranking metrics for entityId={}", entityRecord.getEntityId());
             computeRankingMetrics(entityRecord);
         }
 
@@ -71,10 +72,8 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
     private void validateConstraints(EntityRecord entityRecord) throws EntityValidationException {
         Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entityRecord.getEntity());
         if (!violations.isEmpty()) {
-            //TODO: enable when the implementation is stable and correct
-//            throw new EntityValidationException(null, violations);
-            EntityValidationException e = new EntityValidationException("Consolidated entity has constraint violations.", violations);
-            logger.debug("The record with the following id has constraint validation errors: " + entityRecord.getEntityId(), e);
+            //TODO: throw exception here when the implementation is stable and correct
+            logger.debug("The record with the following id has constraint validation errors: " + entityRecord.getEntityId());
         }
     }
 
