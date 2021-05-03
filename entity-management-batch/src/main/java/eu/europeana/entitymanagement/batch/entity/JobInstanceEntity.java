@@ -2,9 +2,9 @@ package eu.europeana.entitymanagement.batch.entity;
 
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
+import eu.europeana.entitymanagement.batch.BatchRepositoryUtils;
 import org.bson.types.ObjectId;
 import org.springframework.batch.core.JobInstance;
-import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 
 import java.util.HashMap;
@@ -49,12 +49,7 @@ public class JobInstanceEntity {
 
     public static JobInstanceEntity toEntity(JobInstance jobInstance, final JobParameters jobParameters) {
 
-        // first clean the parameters, as we can't have "." within mongo field names
-        Map<String, JobParameter> jobParams = jobParameters.getParameters();
-        Map<String, Object> paramMap = new HashMap<>(jobParams.size());
-        for (Map.Entry<String, JobParameter> entry : jobParams.entrySet()) {
-            paramMap.put(entry.getKey().replaceAll(DOT_STRING, DOT_ESCAPE_STRING), entry.getValue().getValue());
-        }
+        Map<String, Object> paramMap = BatchRepositoryUtils.convertToMap(jobParameters);
 
         JobInstanceEntity jobInstanceEntity = new JobInstanceEntity();
 
