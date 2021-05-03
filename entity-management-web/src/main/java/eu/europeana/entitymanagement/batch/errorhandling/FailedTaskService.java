@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement.batch.errorhandling;
 
 import com.mongodb.bulk.BulkWriteResult;
 import com.mongodb.client.result.UpdateResult;
+import dev.morphia.query.experimental.filters.Filter;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import java.time.Instant;
 import java.util.List;
@@ -13,19 +14,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class EntityUpdateFailureService {
+public class FailedTaskService {
 
-  private final EntityUpdateFailureRepository failureRepository;
-  private static final Logger logger = LogManager.getLogger(EntityUpdateFailureService.class);
+  private final FailedTaskRepository failureRepository;
+  private static final Logger logger = LogManager.getLogger(FailedTaskService.class);
 
   @Autowired
-  public EntityUpdateFailureService(
-      EntityUpdateFailureRepository failureRepository) {
+  public FailedTaskService(
+      FailedTaskRepository failureRepository) {
     this.failureRepository = failureRepository;
   }
 
   /**
-   * Creates a {@link EntityUpdateFailure} instance for this entity, and then persists it
+   * Creates a {@link FailedTask} instance for this entity, and then persists it
    *
    * @param entityId entityId
    * @param e        exception
@@ -40,7 +41,7 @@ public class EntityUpdateFailureService {
   }
 
   /**
-   * Creates {@link EntityUpdateFailure} instances for all entities, and then saves them to the
+   * Creates {@link FailedTask} instances for all entities, and then saves them to the
    * database
    *
    * @param entityRecords list of entity records to be saved
@@ -51,8 +52,8 @@ public class EntityUpdateFailureService {
     String stackTrace = ExceptionUtils.getStackTrace(e);
     Instant now = Instant.now();
 
-    // create EntityUpdateFailure instance for each entityRecord
-    List<EntityUpdateFailure> failures = entityRecords.stream()
+    // create FailedTask instance for each entityRecord
+    List<FailedTask> failures = entityRecords.stream()
         .map(r -> createUpdateFailure(r.getEntityId(), now, message, stackTrace)).collect(
             Collectors.toList());
 
@@ -72,15 +73,22 @@ public class EntityUpdateFailureService {
     logger.debug("Removed update failures from db: count={}", removeCount);
   }
 
+  public List<? extends EntityRecord> getEntityRecordsForFailures(int start, int count, Filter[] queryFilters) {
+    return failureRepository.getEntityRecordsForFailures(start, count, queryFilters);
+  }
+
+
   /**
-   * Helper method to instantiate {@link EntityUpdateFailure} instances
+   * Helper method to instantiate {@link FailedTask} instances
    */
-  private EntityUpdateFailure createUpdateFailure(String entityId, Instant time, String message,
+  private FailedTask createUpdateFailure(String entityId, Instant modified, String message,
       String stacktrace) {
-    return new EntityUpdateFailure.Builder(entityId)
-        .timestamp(time)
+    return new FailedTask.Builder(entityId)
+        .modified(modified)
         .message(message)
         .stackTrace(stacktrace)
         .build();
   }
+
+
 }

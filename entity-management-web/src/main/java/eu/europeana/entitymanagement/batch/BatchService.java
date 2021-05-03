@@ -6,6 +6,7 @@ import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEA
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.DEFAULT_JOB_LAUNCHER;
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.SYNC_JOB_LAUNCHER;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Date;
 import org.apache.logging.log4j.LogManager;
@@ -48,7 +49,6 @@ public class BatchService {
     this.jobExplorer = jobExplorer;
   }
 
-
   /**
    * Launches the update job for a single entity.
    *
@@ -71,43 +71,17 @@ public class BatchService {
    * @throws Exception on error
    */
   public void launchMultiEntityUpdate() throws Exception {
-    // first check if any failed or stopped executions exist for job
-
-    JobParameters jobParameters;
-    JobExecution jobExecution = getLastExecution(JOB_UPDATE_ALL_ENTITIES);
-    if (jobExecution != null) {
-      logger
-          .debug("Found {} execution for jobId={}; jobExecutionId={}", jobExecution.getStatus(),
-              JOB_UPDATE_ALL_ENTITIES, jobExecution.getId());
-
-      if (jobExecution.getStatus().isGreaterThan(BatchStatus.STOPPING)) {
-        jobParameters = jobExecution.getJobParameters();
-        logger
-            .info("Restarting {} job instance for jobName={}", jobExecution.getStatus(),
-                JOB_UPDATE_ALL_ENTITIES);
-
-        defaultJobLauncher.run(batchUpdateConfig.updateAllEntities(), jobParameters);
-        return;
-      }
-    }
-
-    logger.info("No failed or stopped execution found for jobName={}. Creating a new instance",
-        JOB_UPDATE_SPECIFIC_ENTITIES);
 
     defaultJobLauncher.run(batchUpdateConfig.updateAllEntities(),
         BatchUtils.createJobParameters(null, new Date(), mapper));
   }
 
-
-  private JobExecution getLastExecution(String jobIdentifier) {
-    JobInstance lastJobInstance = jobExplorer.getLastJobInstance(jobIdentifier);
-
-    if (lastJobInstance == null) {
-      logger.debug("No jobInstance found for jobId={}", jobIdentifier);
-      return null;
-    }
-
-    // get the last execution of the latest instance (results already sorted by most-recent-first)
-    return jobExplorer.getLastJobExecution(lastJobInstance);
+  /**
+   * Launches the update job for retrying failed tasks
+   * @throws Exception on error
+   */
+  public void launchEntityFailureRetryJob() throws Exception {
+    defaultJobLauncher.run(batchUpdateConfig.retryFailedTasks(),
+        BatchUtils.createJobParameters(null, new Date(), mapper));
   }
 }

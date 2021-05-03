@@ -23,7 +23,9 @@ import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @dev.morphia.annotations.Entity(value = "EntityRecord")
-@Indexes(@Index(fields = { @Field("dbId") }, options = @IndexOptions(unique = true)))
+@Indexes({
+    @Index(fields = {@Field("entityId")}, options = @IndexOptions(unique = true))
+})
 @EntityListeners(EntityRecordWatcher.class)
 public class EntityRecordImpl implements EntityRecord {
 

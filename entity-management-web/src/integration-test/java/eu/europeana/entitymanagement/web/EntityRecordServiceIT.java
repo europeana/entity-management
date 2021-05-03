@@ -31,6 +31,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -67,6 +68,11 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
     @Qualifier(AppConfigConstants.BEAN_JSON_MAPPER)
     @Autowired
     private ObjectMapper objectMapper;
+
+	@BeforeEach
+	void setUp() {
+		entityRecordService.dropRepository();
+	}
 
 	@Test
 	public void mergeEntities() throws JAXBException, JsonMappingException, JsonProcessingException, IOException,

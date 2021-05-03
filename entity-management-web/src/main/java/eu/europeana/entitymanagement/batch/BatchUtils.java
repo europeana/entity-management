@@ -11,10 +11,13 @@ import org.springframework.lang.Nullable;
 
 public class BatchUtils {
 
-  public static String JOB_UPDATE_ALL_ENTITIES = "allEntityUpdateJob";
-  public static String JOB_UPDATE_SPECIFIC_ENTITIES = "specificEntityUpdateJob";
+  // Batch jobs and steps
+  public static String JOB_UPDATE_ALL_ENTITIES = "update-all-entities-job";
+  public static String JOB_UPDATE_SPECIFIC_ENTITIES = "update-specific-entities-job";
+  public static String JOB_RETRY_FAILED_ENTITIES = "retry-failed-entities-job";
+  public static String STEP_UPDATE_ENTITY = "update-entity-step";
+  public static String STEP_RETRY_FAILED_ENTITIES = "retry-failed-entities-step";
 
-  public static String STEP_UPDATE_ENTITY = "updateEntityStep";
 
   /**
    * Creates JobParameters for triggering the Spring Batch update job for specific entities

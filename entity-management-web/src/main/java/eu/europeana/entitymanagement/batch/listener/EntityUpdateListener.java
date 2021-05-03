@@ -2,7 +2,7 @@ package eu.europeana.entitymanagement.batch.listener;
 
 import static eu.europeana.entitymanagement.batch.BatchUtils.getEntityIds;
 
-import eu.europeana.entitymanagement.batch.errorhandling.EntityUpdateFailureService;
+import eu.europeana.entitymanagement.batch.errorhandling.FailedTaskService;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import java.util.Arrays;
 import java.util.List;
@@ -21,17 +21,17 @@ public class EntityUpdateListener extends ItemListenerSupport<EntityRecord, Enti
 
   private static final Logger logger = LogManager.getLogger(EntityUpdateListener.class);
 
-  private final EntityUpdateFailureService entityUpdateFailureService;
+  private final FailedTaskService failedTaskService;
 
   @Autowired
   public EntityUpdateListener(
-      EntityUpdateFailureService entityUpdateFailureService) {
-    this.entityUpdateFailureService = entityUpdateFailureService;
+      FailedTaskService failedTaskService) {
+    this.failedTaskService = failedTaskService;
   }
 
   @Override
   public void beforeRead() {
-    logger.debug("beforeRead");
+    logger.trace("beforeRead");
   }
 
   @Override
@@ -63,7 +63,7 @@ public class EntityUpdateListener extends ItemListenerSupport<EntityRecord, Enti
     logger.debug("afterWrite: entityIds={}, count={}", Arrays.toString(entityIds), entityIds.length);
 
     // Remove entries from the FailedTask collection if exists
-    entityUpdateFailureService.removeFailures(Arrays.asList(entityIds));
+    failedTaskService.removeFailures(Arrays.asList(entityIds));
   }
 
   @Override
@@ -74,8 +74,8 @@ public class EntityUpdateListener extends ItemListenerSupport<EntityRecord, Enti
 
   @Override
   public void onProcessError(@NonNull EntityRecord entityRecord, @NonNull Exception e) {
-    logger.warn("onProcessError: entityId={}", entityRecord, e);
-    entityUpdateFailureService.persistFailure(entityRecord.getEntityId(), e);
+    logger.warn("onProcessError: entityId={}", entityRecord.getEntityId(), e);
+    failedTaskService.persistFailure(entityRecord.getEntityId(), e);
   }
 
 
@@ -84,6 +84,6 @@ public class EntityUpdateListener extends ItemListenerSupport<EntityRecord, Enti
     String[] entityIds = getEntityIds(entityRecords);
 
     logger.warn("onWriteError: entityIds={}", entityIds, e);
-    entityUpdateFailureService.persistFailureBulk(entityRecords, e);
+    failedTaskService.persistFailureBulk(entityRecords, e);
   }
 }

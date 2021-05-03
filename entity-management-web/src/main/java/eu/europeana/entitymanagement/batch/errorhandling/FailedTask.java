@@ -8,7 +8,7 @@ import java.time.Instant;
 import org.bson.types.ObjectId;
 
 @Entity("FailedTasks")
-public class EntityUpdateFailure {
+public class FailedTask {
 
   @Id
   private ObjectId dbId;
@@ -16,21 +16,26 @@ public class EntityUpdateFailure {
   @Indexed
   private String entityId;
 
-  private EntityUpdateFailure() {
+  private String errorMessage;
+  private String stackTrace;
+
+  /* Created is not explicitly set on instantiation.
+   * During upserts, we use the "modified" value if the record doesn't already exist.
+   */
+  private Instant created;
+  private Instant modified;
+
+  private FailedTask() {
     // default constructor
   }
 
-  public EntityUpdateFailure(String entityId, Instant timestamp, String errorMessage,
+  public FailedTask(String entityId, Instant modified, String errorMessage,
       String stackTrace) {
     this.entityId = entityId;
-    this.timestamp = timestamp;
+    this.modified = modified;
     this.errorMessage = errorMessage;
     this.stackTrace = stackTrace;
   }
-
-  private Instant timestamp;
-  private String errorMessage;
-  private String stackTrace;
 
 
   public String getEntityId() {
@@ -38,8 +43,8 @@ public class EntityUpdateFailure {
   }
 
 
-  public Instant getTimestamp() {
-    return timestamp;
+  public Instant getCreated() {
+    return created;
   }
 
 
@@ -52,12 +57,16 @@ public class EntityUpdateFailure {
     return stackTrace;
   }
 
+  public Instant getModified() {
+    return modified;
+  }
+
 
   public static class Builder {
 
     private final String entityId;
 
-    private Instant timestamp;
+    private Instant modified;
     private String errorMessage;
     private String stackTrace;
 
@@ -66,8 +75,8 @@ public class EntityUpdateFailure {
     }
 
 
-    public Builder timestamp(Instant timestamp) {
-      this.timestamp = timestamp;
+    public Builder modified(Instant modified) {
+      this.modified = modified;
       return this;
     }
 
@@ -81,17 +90,18 @@ public class EntityUpdateFailure {
       return this;
     }
 
-    public EntityUpdateFailure build() {
-      return new EntityUpdateFailure(entityId, timestamp, errorMessage, stackTrace);
+    public FailedTask build() {
+      return new FailedTask(entityId, modified, errorMessage, stackTrace);
     }
   }
 
   @Override
   public String toString() {
-    return "EntityUpdateFailure{" +
+    return "FailedTask{" +
         "dbId=" + dbId +
         ", entityId='" + entityId + '\'' +
-        ", timestamp=" + timestamp +
+        ", created=" + created +
+        ", modified=" + modified +
         ", errorMessage='" + errorMessage + '\'' +
         ", stackTrace='" + stackTrace + '\'' +
         '}';

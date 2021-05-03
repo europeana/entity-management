@@ -39,8 +39,6 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
             return null;
         }
 
-        logger.debug("Storing de-referenced metadata for entityId={}", entityRecord.getEntityId());
-
         // copy over entityID and isAggregatedBy, and then save the de-referenced version
         metisResponse.copyShellFrom(entityRecord.getEntity());
         entityRecord.setEntity(metisResponse);
