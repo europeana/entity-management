@@ -6,7 +6,6 @@ import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
-import eu.europeana.entitymanagement.model.EnrichmentPublished;
 import eu.europeana.entitymanagement.model.EnrichmentResponse;
 import eu.europeana.entitymanagement.service.EnrichmentService;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
@@ -67,7 +66,6 @@ public class EnrichmentController extends BaseRest{
    * @return
    */
   private ResponseEntity<EnrichmentResponse> publishToEnrichment(List<String> entityList) {
-    long entitiesPublished = 0;
     List<String> entityPublished = new ArrayList<>();
     for (String entityUri: entityList) {
       Optional<EntityRecord> entityRecordOptional = entityRecordService.retrieveEntityRecordByUri(entityUri);
@@ -81,26 +79,25 @@ public class EnrichmentController extends BaseRest{
           throw new EntityRemovedException(entityUri);
         }
         entityEnrichmentService.saveEnrichment(entityRecord);
-        entitiesPublished++;
         entityPublished.add(entityUri);
       } catch (EntityNotFoundException | EntityRemovedException  e) {
         LOG.error("Error publishing the enrichment for entity. {} ", e.getMessage());
       }
     }
-    return new ResponseEntity<>(prepareEnrichmentResponse(entityList, entityPublished, entitiesPublished), HttpStatus.OK);
+    return new ResponseEntity<>(prepareEnrichmentResponse(entityList, entityPublished), HttpStatus.OK);
   }
 
-    private EnrichmentResponse prepareEnrichmentResponse(List<String> entityList, List<String> entitiesPublished, long count ) {
-      EnrichmentPublished successful = null;
-      EnrichmentPublished failed = null;
-      if (!entitiesPublished.isEmpty() && count > 0) {
-          successful = new EnrichmentPublished(count, entitiesPublished);
+    private EnrichmentResponse prepareEnrichmentResponse(List<String> entityList, List<String> entitiesPublished) {
+     List<String> successful = null;
+     List<String> failed = null;
+     long expected = entityList.size();
+     if (!entitiesPublished.isEmpty()) {
+          successful = entitiesPublished;
       }
-      long failedEntities = entityList.size() - count;
       entityList.removeAll(entitiesPublished);
-      if (!entityList.isEmpty() && failedEntities > 0) {
-          failed = new EnrichmentPublished(failedEntities, entityList);
+      if (!entityList.isEmpty()) {
+          failed = entityList;
       }
-      return  new EnrichmentResponse(successful, failed);
+      return  new EnrichmentResponse(expected, successful, failed);
     }
 }
