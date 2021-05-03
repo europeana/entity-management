@@ -3,6 +3,9 @@ package eu.europeana.entitymanagement.validation;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_VALIDATE_FIELDS_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
 
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.config.SerializationConfig;
+import eu.europeana.entitymanagement.config.ValidatorConfig;
 import java.io.IOException;
 import java.util.Set;
 
@@ -24,7 +27,8 @@ import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.impl.ConceptImpl;
 
-@SpringBootTest
+@SpringBootTest(classes = {ValidatorConfig.class,
+    SerializationConfig.class, EntityManagementConfiguration.class})
 public class EntityFieldsValidatorTest {
 
     @Qualifier(AppConfigConstants.BEAN_JSON_MAPPER)
