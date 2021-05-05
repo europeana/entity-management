@@ -60,7 +60,7 @@ public class AppConfig extends AppConfigConstants{
 	}
     }
 
-    
+
     @Bean(name=BEAN_CLIENT_DETAILS_SERVICE)
     public EuropeanaClientDetailsService getClientDetailsService() {
       EuropeanaClientDetailsService clientDetailsService = new EuropeanaClientDetailsService();
