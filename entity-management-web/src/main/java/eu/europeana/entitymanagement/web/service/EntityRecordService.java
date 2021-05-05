@@ -155,7 +155,7 @@ public class EntityRecordService {
 
        
 	DataSource externalDatasource = externalDatasourceOptional.get();
-	setDatasourceMetadata(metisResponse, entityCreationRequest, entityId, externalDatasource, entityRecord, timestamp);
+	setExternalProxyMetadata(metisResponse, entityCreationRequest, entityId, externalDatasource, entityRecord, timestamp);
 
 	setEntityAggregation(entityRecord, entityId, timestamp);
 	return entityRecordRepository.save(entityRecord);
@@ -384,20 +384,16 @@ public class EntityRecordService {
 			try {
 
 				Entity consolidatedEntity = combineEntities(primary, secondary, fieldsToCombine, true);
-				entityRecord.setEntity(consolidatedEntity);
+
 				/*
 				 * isAggregatedBy isn't set on Europeana Proxy, so it won't be copied to the consolidatedEntity
 				 * We add it separately here
  				 */
-				if(entityRecord.getEntity().getIsAggregatedBy() == null) {
-				   setEntityAggregation(entityRecord, entityRecord.getEntityId(), new Date()); 
-				}else {
 				    Aggregation aggregation = entityRecord.getEntity().getIsAggregatedBy();
 				    aggregation.setModified(new Date());
 				    consolidatedEntity.setIsAggregatedBy(aggregation);
-				}
-				
-				
+						entityRecord.setEntity(consolidatedEntity);
+
 			} catch (IllegalArgumentException | IllegalAccessException e) {
 				logger.error(
 						"Error while reconciling entity data", e);
@@ -487,7 +483,7 @@ public class EntityRecordService {
 					List<Object> fieldValueSecondaryObjectList = (List<Object>) secondary.getFieldValue(field);
 					mergeList(consolidatedEntity, fieldValuePrimaryObjectList, fieldValueSecondaryObjectList, field, accumulate);
 
-			} else if (fieldType.isPrimitive() || String.class.isAssignableFrom(fieldType)) {
+			} else if (isStringOrPrimitive(fieldType)) {
 					Object fieldValuePrimaryObjectPrimitiveOrString = primary.getFieldValue(field);
 					Object fieldValueSecondaryObjectPrimitiveOrString = secondary.getFieldValue(field);
 
@@ -519,6 +515,12 @@ public class EntityRecordService {
 
 		return consolidatedEntity;
 	}
+
+    boolean isStringOrPrimitive(Class<?> fieldType) {
+//        System.out.println(fieldType + " is primitive: " + fieldType.isPrimitive());
+        return String.class.isAssignableFrom(fieldType) || fieldType.isPrimitive() || Float.class.isAssignableFrom(fieldType) 
+                || Integer.class.isAssignableFrom(fieldType) || Integer.class.isAssignableFrom(fieldType);
+    }
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
     void combineEntities(Entity consolidatedEntity, Entity primary, Entity secondary,
@@ -731,7 +733,7 @@ public class EntityRecordService {
 	entityRecord.addProxy(europeanaProxy);
     }
 
-    private void setDatasourceMetadata(
+    private void setExternalProxyMetadata(
 				Entity metisResponse,
 				EntityPreview entityCreationRequest, String entityId,
 				DataSource externalDatasource, EntityRecord entityRecord, Date timestamp) {

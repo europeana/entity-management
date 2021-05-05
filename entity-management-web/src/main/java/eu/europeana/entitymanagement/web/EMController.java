@@ -1,5 +1,7 @@
 package eu.europeana.entitymanagement.web;
 
+import eu.europeana.api.commons.web.model.vocabulary.Operations;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import java.util.Date;
 import java.util.Optional;
@@ -11,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.MultiValueMap;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -53,6 +54,7 @@ public class EMController extends BaseRest {
   private final MetisDereferenceService dereferenceService;
   private final DataSources datasources;
   private final BatchService batchService;
+  private final EntityManagementConfiguration emConfig;
 
 	private static final String ENTITY_ID_REMOVED_MSG = "Entity '%s' has been removed";
 	private static final String EXTERNAL_ID_REMOVED_MSG = "Entity id '%s' already exists as '%s', which has been removed";
@@ -60,11 +62,13 @@ public class EMController extends BaseRest {
   @Autowired
 	public EMController(EntityRecordService entityRecordService,
 			MetisDereferenceService dereferenceService, DataSources datasources,
-			BatchService batchService) {
+			BatchService batchService,
+			EntityManagementConfiguration emConfig) {
 		this.entityRecordService = entityRecordService;
 		this.dereferenceService = dereferenceService;
 		this.datasources = datasources;
 		this.batchService = batchService;
+		this.emConfig = emConfig;
 	}
 
 	@ApiOperation(value = "Disable an entity", nickname = "disableEntity", response = java.lang.Void.class)
@@ -76,7 +80,9 @@ public class EMController extends BaseRest {
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 	    HttpServletRequest request) throws HttpException, EuropeanaApiException {
-
+		if (emConfig.isAuthEnabled()) {
+			verifyWriteAccess(Operations.DELETE, request);
+		}
 		EntityRecord entityRecord = retrieveEntityRecord(type, identifier.toLowerCase());
 
 		Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
@@ -101,10 +107,9 @@ public class EMController extends BaseRest {
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 	    @RequestBody Entity updateRequestEntity,
 	    HttpServletRequest request) throws Exception {
-
-    	// TODO: Re-enable authentication
-    	// verifyReadAccess(request);
-
+			if (emConfig.isAuthEnabled()) {
+				verifyWriteAccess(Operations.UPDATE, request);
+			}
 		 EntityRecord entityRecord = retrieveEntityRecord(type, identifier);
 
 			Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
@@ -131,10 +136,13 @@ public class EMController extends BaseRest {
 	public ResponseEntity<String> updateFromExternalSource(
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
-			@RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "internal") String profile
+			@RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "internal") String profile,
+			HttpServletRequest request
 	) throws Exception {
+		if (emConfig.isAuthEnabled()) {
+			verifyWriteAccess(Operations.UPDATE, request);
+		}
 		EntityRecord entityRecord = retrieveEntityRecord(type, identifier);
-
 		return launchTaskAndRetrieveEntity(type, identifier, entityRecord, profile);
 	}
 
@@ -148,8 +156,12 @@ public class EMController extends BaseRest {
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
 	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
-	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier)
-				throws EuropeanaApiException {
+	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
+			HttpServletRequest request)
+				throws EuropeanaApiException, HttpException {
+		if (emConfig.isAuthEnabled()) {
+			verifyReadAccess(request);
+		}
 	return createResponse(profile, type, identifier, FormatTypes.jsonld, null);
 
     }
@@ -157,14 +169,16 @@ public class EMController extends BaseRest {
     @ApiOperation(value = "Retrieve a known entity", nickname = "getEntity", response = java.lang.Void.class)
     @RequestMapping(value = { "/{type}/base/{identifier}","/{type}/{identifier}" }, 
     method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
-    public ResponseEntity<String> getEntity(
+    public ResponseEntity<String> getXmlEntity(
     	@RequestHeader(value = HttpHeaders.ACCEPT, defaultValue = "application/json") String acceptHeader,
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
 	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
-	    HttpServletRequest request) throws EuropeanaApiException {
-	
+	    HttpServletRequest request) throws EuropeanaApiException, HttpException{
+			if (emConfig.isAuthEnabled()) {
+				verifyReadAccess(request);
+			}
 	logger.debug("Retrieve entity with content negotiation:{}/{}, with accept header {}", type, identifier, acceptHeader);
 	if (acceptHeader.contains(HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML)) {
 	    //if rdf/XML is explicitly requested
@@ -188,16 +202,23 @@ public class EMController extends BaseRest {
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
 	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
-	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier)
-				throws EuropeanaApiException {
+	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
+				HttpServletRequest request)
+				throws EuropeanaApiException, HttpException {
+			if (emConfig.isAuthEnabled()) {
+				verifyReadAccess(request);
+			}
 	return createResponse(profile, type, identifier, FormatTypes.xml, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML);
     }
 
     @ApiOperation(value = "Register a new entity", nickname = "registerEntity", response = java.lang.Void.class)
     @PostMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
 		public ResponseEntity<String> registerEntity(
-				@RequestBody EntityPreview entityCreationRequest)
+				@RequestBody EntityPreview entityCreationRequest, HttpServletRequest request)
 				throws Exception {
+			if (emConfig.isAuthEnabled()) {
+				verifyWriteAccess(Operations.CREATE, request);
+			}
 			logger.debug("Registering new entity: {}", entityCreationRequest.getId());
 	
 			// check if id is already being used, if so return a 301
@@ -244,11 +265,6 @@ public class EMController extends BaseRest {
 
     private ResponseEntity<String> createResponse(String profile, String type, String identifier, FormatTypes outFormat,
 	    String contentType) throws EuropeanaApiException {
-	// TODO: Re-enable authentication
-	// verifyReadAccess(request);
-
-	MultiValueMap<String, String> headers;
-
 			/*
 	 * verify the parameters
 	 */

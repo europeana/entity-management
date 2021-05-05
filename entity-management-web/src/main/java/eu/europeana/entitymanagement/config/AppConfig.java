@@ -63,7 +63,9 @@ public class AppConfig extends AppConfigConstants{
 
     @Bean(name=BEAN_CLIENT_DETAILS_SERVICE)
     public EuropeanaClientDetailsService getClientDetailsService() {
-	return new EuropeanaClientDetailsService();
+      EuropeanaClientDetailsService clientDetailsService = new EuropeanaClientDetailsService();
+      clientDetailsService.setApiKeyServiceUrl(emConfiguration.getApiKeyUrl());
+      return clientDetailsService;
     }
 
 

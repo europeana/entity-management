@@ -8,7 +8,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 @JacksonXmlRootElement(localName = "metrics")
 public class EntityMetrics {
 
-    Integer enrichmentCount, hitCount, score, pageRank;
+    int enrichmentCount, hitCount, score, pageRank;
     String entityId, entityType;
 
     public EntityMetrics() {
@@ -19,7 +19,7 @@ public class EntityMetrics {
 	this.entityId = entityId;
     }
 
-    public Integer getEnrichmentCount() {
+    public int getEnrichmentCount() {
 	return enrichmentCount;
     }
 
@@ -27,7 +27,7 @@ public class EntityMetrics {
 	this.enrichmentCount = enrichmentCount;
     }
 
-    public Integer getHitCount() {
+    public int getHitCount() {
 	return hitCount;
     }
 
@@ -35,7 +35,7 @@ public class EntityMetrics {
 	this.hitCount = hitCount;
     }
 
-    public Integer getScore() {
+    public int getScore() {
 	return score;
     }
 
@@ -43,7 +43,7 @@ public class EntityMetrics {
 	this.score = score;
     }
 
-    public Integer getPageRank() {
+    public int getPageRank() {
 	return pageRank;
     }
 
