@@ -13,6 +13,7 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,6 +23,7 @@ public class EnrichmentService {
 
     private EnrichmentDao enrichmentDao ;
 
+    @Lazy
     @Autowired
     public EnrichmentService(EnrichmentDao enrichmentDao) {
         this.enrichmentDao = enrichmentDao;

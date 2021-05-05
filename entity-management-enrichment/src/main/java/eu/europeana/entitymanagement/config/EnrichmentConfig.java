@@ -1,6 +1,5 @@
 package eu.europeana.entitymanagement.config;
 
-import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import eu.europeana.enrichment.service.dao.EnrichmentDao;
 import org.apache.logging.log4j.LogManager;
@@ -8,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.PropertySource;
 
 @Configuration
@@ -27,6 +27,7 @@ public class EnrichmentConfig {
     }
 
     @Bean
+    @Lazy
     EnrichmentDao getEnrichmentDao() {
         LOG.info("Creating EnrichmentDao bean with Mongo client - {}, database - {} ", enrichmenthostUri, enrichmentDatabase);
         return new EnrichmentDao(MongoClients.create(enrichmenthostUri), enrichmentDatabase);
