@@ -1,8 +1,11 @@
 package eu.europeana.entitymanagement.web;
 
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 
+import eu.europeana.api.commons.web.model.vocabulary.Operations;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
@@ -37,6 +40,9 @@ public class EnrichmentController extends BaseRest{
  @Autowired
   private EntityRecordService entityRecordService;
 
+ @Autowired
+  private EntityManagementConfiguration emConfig;
+
   /**
    * Method to publish to Enrichment
    *
@@ -51,10 +57,11 @@ public class EnrichmentController extends BaseRest{
   public ResponseEntity<EnrichmentResponse> publishEnrichment(
       @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
       @RequestBody List<String> entityList,
-      HttpServletRequest request) {
+      HttpServletRequest request) throws ApplicationAuthenticationException {
 
-    // TODO: Re-enable authentication
-    //verifyWriteAccess(Operations.CREATE, request);
+    if (emConfig.isAuthEnabled()) {
+      verifyWriteAccess(Operations.CREATE, request);
+    }
     return publishToEnrichment(entityList);
   }
 
