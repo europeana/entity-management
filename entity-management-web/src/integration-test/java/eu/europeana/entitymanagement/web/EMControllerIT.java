@@ -32,6 +32,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import eu.europeana.entitymanagement.definitions.model.Agent;
+import eu.europeana.entitymanagement.definitions.model.Concept;
+import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.definitions.model.Place;
+import eu.europeana.entitymanagement.definitions.model.Timespan;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
@@ -73,12 +78,6 @@ import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.impl.AgentImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.ConceptImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.OrganizationImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.PlaceImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.TimespanImpl;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
@@ -365,8 +364,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
     void retrieveConceptExternalShouldBeSuccessful() throws Exception {
         // read the test data for the Concept entity from the file
 	//TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
-	ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_JSON), ConceptImpl.class);
-        EntityRecord entityRecord = new EntityRecordImpl();
+	Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
+        EntityRecord entityRecord = new EntityRecord();
         entityRecord.setEntity(concept);
         entityRecord.setEntityId(concept.getEntityId());
         entityRecordService.saveEntityRecord(entityRecord);
@@ -438,8 +437,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
     public void retrieveAgentExternalShouldBeSuccessful() throws Exception {
         //TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
 	// read the test data for the Agent entity from the file
-        AgentImpl agent = objectMapper.readValue(loadFile(AGENT_JSON), AgentImpl.class);
-        EntityRecord entityRecord = new EntityRecordImpl();
+        Agent agent = objectMapper.readValue(loadFile(AGENT_JSON), Agent.class);
+        EntityRecord entityRecord = new EntityRecord();
         entityRecord.setEntity(agent);
         entityRecord.setEntityId(agent.getEntityId());
         entityRecordService.saveEntityRecord(entityRecord);
@@ -460,8 +459,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
     public void retrieveOrganizationExternalShouldBeSuccessful() throws Exception {
 	//TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
 	// read the test data for the Organization entity from the file
-        OrganizationImpl organization = objectMapper.readValue(loadFile(ORGANIZATION_JSON), OrganizationImpl.class);
-        EntityRecord entityRecord =  new EntityRecordImpl();
+        Organization organization = objectMapper.readValue(loadFile(ORGANIZATION_JSON), Organization.class);
+        EntityRecord entityRecord =  new EntityRecord();
         entityRecord.setEntity(organization);
         entityRecord.setEntityId(organization.getEntityId());
         entityRecordService.saveEntityRecord(entityRecord);
@@ -482,8 +481,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
     public void retrievePlaceExternalShouldBeSuccessful() throws Exception {
 	//TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
 	// read the test data for the Place entity from the file
-        PlaceImpl place = objectMapper.readValue(loadFile(PLACE_JSON), PlaceImpl.class);
-        EntityRecord entityRecord =  new EntityRecordImpl();
+        Place place = objectMapper.readValue(loadFile(PLACE_JSON), Place.class);
+        EntityRecord entityRecord =  new EntityRecord();
         entityRecord.setEntity(place);
         entityRecord.setEntityId(place.getEntityId());
         entityRecordService.saveEntityRecord(entityRecord);
@@ -504,8 +503,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
     public void retrieveTimespanExternalShouldBeSuccessful() throws Exception {
 	//TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
 	// read the test data for the Timespan entity from the file
-        TimespanImpl timespan = objectMapper.readValue(loadFile(TIMESPAN_JSON), TimespanImpl.class);
-        EntityRecord entityRecord =  new EntityRecordImpl();
+        Timespan timespan = objectMapper.readValue(loadFile(TIMESPAN_JSON), Timespan.class);
+        EntityRecord entityRecord =  new EntityRecord();
         entityRecord.setEntity(timespan);
         entityRecord.setEntityId(timespan.getEntityId());
         entityRecordService.saveEntityRecord(entityRecord);
@@ -553,8 +552,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
     @Test
     void updateFromExternalDatasourceShouldRunSuccessfully() throws Exception {
         // create entity in DB
-        ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_JSON), ConceptImpl.class);
-        EntityRecord entityRecord = new EntityRecordImpl();
+        Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
+        EntityRecord entityRecord = new EntityRecord();
         entityRecord.setEntity(concept);
         entityRecord.setEntityId(concept.getEntityId());
         EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
@@ -571,8 +570,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
     @Test
     void deletionShouldBeSuccessful() throws Exception {
         // create entity in DB
-        ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_JSON), ConceptImpl.class);
-        EntityRecord entityRecord = new EntityRecordImpl();
+        Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
+        EntityRecord entityRecord = new EntityRecord();
         entityRecord.setEntity(concept);
         entityRecord.setEntityId(concept.getEntityId());
         EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
@@ -594,8 +593,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
     @Test
     void deletionFailsIfMatch() throws Exception {
         // create entity in DB
-        ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_JSON), ConceptImpl.class);
-        EntityRecord entityRecord = new EntityRecordImpl();
+        Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
+        EntityRecord entityRecord = new EntityRecord();
         entityRecord.setEntity(concept);
         entityRecord.setEntityId(concept.getEntityId());
         EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);

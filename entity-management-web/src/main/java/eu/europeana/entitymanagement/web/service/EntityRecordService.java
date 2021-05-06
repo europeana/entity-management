@@ -43,9 +43,6 @@ import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.definitions.model.Timespan;
-import eu.europeana.entitymanagement.definitions.model.impl.AggregationImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.EntityProxyImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.utils.EntityUtils;
@@ -139,7 +136,7 @@ public class EntityRecordService {
 	Date timestamp = new Date();
 	Entity entity = EntityObjectFactory.createEntityObject(metisResponse.getType());
 
-	EntityRecord entityRecord = new EntityRecordImpl();
+	EntityRecord entityRecord = new EntityRecord();
 	String entityId = generateEntityId(entity.getType());
         entityRecord.setEntityId(entityId);
         entity.setEntityId(entityId);
@@ -702,7 +699,7 @@ public class EntityRecordService {
     }
 
     private void setEntityAggregation(EntityRecord entityRecord, String entityId, Date timestamp) {
-        Aggregation isAggregatedBy = new AggregationImpl();
+        Aggregation isAggregatedBy = new Aggregation();
         isAggregatedBy.setId(getIsAggregatedById(entityId));
 	isAggregatedBy.setCreated(timestamp);
 	isAggregatedBy.setModified(timestamp);
@@ -716,14 +713,14 @@ public class EntityRecordService {
     private void setEuropeanaMetadata(
 				Entity europeanaProxyMetadata,
 				String entityId, EntityRecord entityRecord, Date timestamp) {
-	Aggregation europeanaAggr = new AggregationImpl();
+	Aggregation europeanaAggr = new Aggregation();
 	europeanaAggr.setId(getEuropeanaAggregationId(entityId));
 	europeanaAggr.setRights(RIGHTS_CREATIVE_COMMONS);
 	europeanaAggr.setCreated(timestamp);
 	europeanaAggr.setModified(timestamp);
 	europeanaAggr.setSource(EUROPEANA_URL);
 
-	EntityProxy europeanaProxy = new EntityProxyImpl();
+	EntityProxy europeanaProxy = new EntityProxy();
 	europeanaProxy.setProxyId(getEuropeanaProxyId(entityId));
 	europeanaProxy.setProxyFor(entityId);
 	europeanaProxy.setProxyIn(europeanaAggr);
@@ -737,14 +734,14 @@ public class EntityRecordService {
 				Entity metisResponse,
 				EntityPreview entityCreationRequest, String entityId,
 				DataSource externalDatasource, EntityRecord entityRecord, Date timestamp) {
-	Aggregation datasourceAggr = new AggregationImpl();
+	Aggregation datasourceAggr = new Aggregation();
 	datasourceAggr.setId(getDatasourceAggregationId(entityId));
 	datasourceAggr.setCreated(timestamp);
 	datasourceAggr.setModified(timestamp);
 	datasourceAggr.setRights(externalDatasource.getRights());
 	datasourceAggr.setSource(externalDatasource.getUrl());
 
-	EntityProxy datasourceProxy = new EntityProxyImpl();
+	EntityProxy datasourceProxy = new EntityProxy();
 	datasourceProxy.setProxyId(entityCreationRequest.getId());
 	datasourceProxy.setProxyFor(entityId);
 	datasourceProxy.setProxyIn(datasourceAggr);

@@ -70,8 +70,6 @@ public abstract class BaseRest extends BaseRestController {
 
 	if (FormatTypes.jsonld.equals(format)) {
 	    responseBody = jsonLdSerializer.serialize(entityRecord, profile);
-	} else if (FormatTypes.schema.equals(format)) {
-//	    responseBody = (new EntitySchemaOrgSerializer()).serializeEntity(entityRecord.getEntity());
 	} else if (FormatTypes.xml.equals(format)) {
 	    responseBody = entityXmlSerializer.serializeXml(entityRecord, profile);
 	}

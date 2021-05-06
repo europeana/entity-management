@@ -33,7 +33,6 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 import eu.europeana.entitymanagement.definitions.model.Concept;
 import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.impl.ConceptImpl;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
@@ -58,7 +57,7 @@ public class XmlConceptImpl extends XmlBaseEntityImpl {
 
     public XmlConceptImpl() {
         // default constructor required for deserialization
-    	this.entity = new ConceptImpl();
+    	this.entity = new Concept();
     }
 
     public XmlConceptImpl(Concept concept) {

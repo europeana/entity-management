@@ -6,6 +6,7 @@ import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.SerializationConfig;
 import eu.europeana.entitymanagement.config.ValidatorConfig;
+import eu.europeana.entitymanagement.definitions.model.Concept;
 import java.io.IOException;
 import java.util.Set;
 
@@ -25,7 +26,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.impl.ConceptImpl;
 
 @SpringBootTest(classes = {ValidatorConfig.class, EntityManagementConfiguration.class,
     SerializationConfig.class})
@@ -41,7 +41,7 @@ public class EntityFieldsValidatorTest {
     @Test
     public void validateEntityFields() throws JsonMappingException, JsonProcessingException, IOException {
         // read the test data for the Concept entity from the file
-        ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_VALIDATE_FIELDS_JSON), ConceptImpl.class);
+        Concept concept = objectMapper.readValue(loadFile(CONCEPT_VALIDATE_FIELDS_JSON), Concept.class);
 
         //check the validation of the entity fields
         Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(concept);

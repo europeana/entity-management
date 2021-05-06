@@ -2,26 +2,22 @@ package eu.europeana.entitymanagement.mongo;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import eu.europeana.entitymanagement.AbstractIntegrationTest;
+import eu.europeana.entitymanagement.definitions.model.Aggregation;
+import eu.europeana.entitymanagement.definitions.model.EntityProxy;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.model.Timespan;
+import eu.europeana.entitymanagement.definitions.model.WebResource;
+import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import eu.europeana.entitymanagement.AbstractIntegrationTest;
-import eu.europeana.entitymanagement.definitions.model.Aggregation;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.impl.AggregationImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.EntityProxyImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.TimespanImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.WebResourceImpl;
-import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 
 @SpringBootTest
 class EntityRecordRepositoryIT extends AbstractIntegrationTest {
@@ -39,7 +35,7 @@ class EntityRecordRepositoryIT extends AbstractIntegrationTest {
 
         String entityId = "http://data.europeana.eu/timespan/base/1";
 
-        TimespanImpl entity = new TimespanImpl();
+        Timespan entity = new Timespan();
         entity.setEntityId(entityId);
         entity.setType("Timespan");
         entity.setBeginString("0001-01-01");
@@ -51,21 +47,21 @@ class EntityRecordRepositoryIT extends AbstractIntegrationTest {
         prefLabelTest.put("perfLabel_pl", "I wiek");
         prefLabelTest.put("perfLabel_da", "1. århundrede");
         entity.setPrefLabelStringMap(prefLabelTest);
-        WebResourceImpl webResource = new WebResourceImpl();
+        WebResource webResource = new WebResource();
         webResource.setId("http://www.sbc.org.pl/Timespan/16573/doc.pdf");
         webResource.setSource("http://data.europeana.eu/item/7284673/_nnd7fT5");
         webResource.setThumbnail("https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri=http%3A%2F%2Fwww.sbc.org.pl%2FTimespan%2F79368%2Fdoc.pdf&type=TEXT");
         entity.setIsShownBy(webResource);
-        Aggregation aggregation = new AggregationImpl();
+        Aggregation aggregation = new Aggregation();
         aggregation.setCreated(new Date());
         aggregation.setRecordCount(1);
         List<String> aggregartes = new ArrayList<>();
         aggregartes.add("http://data.europeana.eu/timespan/base/1#aggr_europeana");
         aggregation.setAggregates(aggregartes);
 
-        EntityProxyImpl proxy = new EntityProxyImpl();
+        EntityProxy proxy = new EntityProxy();
         proxy.setEntity(entity);
-        Aggregation aggregation2 = new AggregationImpl();
+        Aggregation aggregation2 = new Aggregation();
         aggregation2.setCreated(new Date());
         aggregation2.setRecordCount(1);
         List<String> aggregartes2 = new ArrayList<>();
@@ -74,7 +70,7 @@ class EntityRecordRepositoryIT extends AbstractIntegrationTest {
         proxy.setProxyIn(aggregation2);
 
 
-        EntityRecord entityRecordImpl = new EntityRecordImpl();
+        EntityRecord entityRecordImpl = new EntityRecord();
         entityRecordImpl.setEntity(entity);
         entityRecordImpl.setEntityId(entity.getEntityId());
         entityRecordImpl.getEntity().setIsAggregatedBy(aggregation);

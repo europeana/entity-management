@@ -1,17 +1,17 @@
 package eu.europeana.entitymanagement.web.service;
 
+import eu.europeana.entitymanagement.definitions.model.Agent;
+import eu.europeana.entitymanagement.definitions.model.Concept;
 import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.impl.AgentImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.ConceptImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.OrganizationImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.PlaceImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.TimespanImpl;
+import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.definitions.model.Place;
+import eu.europeana.entitymanagement.definitions.model.Timespan;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 /**
  * Instantiates a
- * {@link eu.europeana.entitymanagement.definitions.model.impl.Entity} instance,
+ * {@link eu.europeana.entitymanagement.definitions.model.Entity} instance,
  * based on the
  * {@link eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl}
  * instance
@@ -52,19 +52,19 @@ public class EntityObjectFactory {
 
 	switch (modelType) {
 	case Organization:
-	    ret = OrganizationImpl.class;
+	    ret = Organization.class;
 	    break;
 	case Concept:
-	    ret = ConceptImpl.class;
+	    ret = Concept.class;
 	    break;
 	case Agent:
-	    ret = AgentImpl.class;
+	    ret = Agent.class;
 	    break;
 	case Place:
-	    ret = PlaceImpl.class;
+	    ret = Place.class;
 	    break;
 	case Timespan:
-	    ret = TimespanImpl.class;
+	    ret = Timespan.class;
 	    break;
 	default:
 	    throw new RuntimeException("The given type is not supported by the web model");

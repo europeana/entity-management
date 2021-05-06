@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import eu.europeana.entitymanagement.definitions.model.Agent;
+import eu.europeana.entitymanagement.definitions.model.Place;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,8 +19,6 @@ import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.config.SerializationConfig;
 import eu.europeana.entitymanagement.config.ValidatorConfig;
-import eu.europeana.entitymanagement.definitions.model.impl.AgentImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.PlaceImpl;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.model.scoring.EntityMetrics;
 import eu.europeana.entitymanagement.web.model.scoring.MaxEntityMetrics;
@@ -39,7 +39,7 @@ public class ScoringServiceTest {
     @Disabled("Excluded from automated runs as this requires Solr")
     public void testComputeMetrics() throws Exception {
 
-	AgentImpl agent = new AgentImpl();
+	Agent agent = new Agent();
 	String entityId = "http://data.europeana.eu/agent/base/146741";
 	agent.setEntityId(entityId);
 	String[] sameAs = new String[] { "http://wikidata.dbpedia.org/resource/Q762",
@@ -72,7 +72,7 @@ public class ScoringServiceTest {
     @Disabled("Excluded from automated runs as this requires Solr")
     public void testComputeMetricsForPlaces() throws Exception {
 
-        PlaceImpl agent = new PlaceImpl();
+        Place agent = new Place();
         String entityId = "http://data.europeana.eu/place/base/41488";
         agent.setEntityId(entityId);
         String[] sameAs = new String[] { "https://sws.geonames.org/2988507/"};
