@@ -32,12 +32,11 @@ import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
-//@JacksonXmlRootElement(localName = XML_PLACE)
 @XmlRootElement(namespace = NAMESPACE_EDM, name = XML_PLACE)
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({ DEPICTION, PREF_LABEL, ALT_LABEL, HIDDEN_LABEL, XML_WGS84_POS_LAT, XML_WGS84_POS_LONG,
         XML_WGS84_POS_ALT, NOTE, XML_HAS_PART, XML_IS_PART_OF, XML_IS_NEXT_IN_SEQUENCE, XML_SAME_AS, IS_AGGREGATED_BY })
-public class XmlPlaceImpl extends XmlBaseEntityImpl {
+public class XmlPlaceImpl extends XmlBaseEntityImpl<Place> {
     
     
     	Float latitude, longitude, altitude;
@@ -62,23 +61,21 @@ public class XmlPlaceImpl extends XmlBaseEntityImpl {
 	
 	public XmlPlaceImpl() {
 		// default constructor
-	    System.out.println();
 	}
 	
-	public Entity toEntityModel() throws EntityCreationException {
+	public Place toEntityModel() throws EntityCreationException {
             super.toEntityModel();
-            Place place = (Place) getEntity(); 
+
+            entity.setLatitude(getLatitude());
+            entity.setLongitude(getLongitude());
+            entity.setAltitude(getAltitude());
+            entity.setHiddenLabel(RdfXmlUtils.toLanguageMapList(getHiddenLabel()));
+            entity.setNote(RdfXmlUtils.toLanguageMapList(getNote()));
+            entity.setHasPart(RdfXmlUtils.toStringArray(getHasPart()));
+            entity.setIsPartOfArray(RdfXmlUtils.toStringArray(getIsPartOf()));
+            entity.setIsNextInSequence(getIsNextInSequence());
             
-            place.setLatitude(getLatitude());
-            place.setLongitude(getLongitude());
-            place.setAltitude(getAltitude());
-            place.setHiddenLabel(RdfXmlUtils.toLanguageMapList(getHiddenLabel()));
-            place.setNote(RdfXmlUtils.toLanguageMapList(getNote()));
-            place.setHasPart(RdfXmlUtils.toStringArray(getHasPart()));
-            place.setIsPartOfArray(RdfXmlUtils.toStringArray(getIsPartOf()));
-            place.setIsNextInSequence(getIsNextInSequence());
-            
-            return place;
+            return entity;
         }
 
 	@XmlElement(namespace = NAMESPACE_WGS84_POS, name = XML_WGS84_POS_LAT)
@@ -120,11 +117,6 @@ public class XmlPlaceImpl extends XmlBaseEntityImpl {
 	@XmlElement(namespace = NAMESPACE_EDM, name =  XML_IS_NEXT_IN_SEQUENCE)
 	public String[] getIsNextInSequence() {
 		return isNextInSequence;
-	}
-	
-	@JsonIgnore
-	private Place getPlace() {
-	    return (Place)entity;
 	}
 
 	@Override

@@ -43,7 +43,7 @@ public class MetisDereferenceUtils {
       return null;
     }
 
-    XmlBaseEntityImpl xmlBaseEntity = derefResult.getEnrichmentBaseResultWrapperList().get(0)
+    XmlBaseEntityImpl<?> xmlBaseEntity = derefResult.getEnrichmentBaseResultWrapperList().get(0)
         .getEnrichmentBaseList().get(0);
 
     return xmlBaseEntity.toEntityModel();

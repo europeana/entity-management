@@ -8,6 +8,7 @@ import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.definitions.model.Timespan;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import java.util.Map;
 
 /**
  * Instantiates a
@@ -18,65 +19,21 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
  */
 public class EntityObjectFactory {
 
-//    @Deprecated
-//    public static Entity createEntityFromXmlType(Class<? extends Entity> xmlBaseEntityClass)
-//	    throws EntityCreationException {
-//	if (xmlBaseEntityClass.isAssignableFrom(Concept.class)) {
-//	    return new ConceptImpl();
-//	}
-//
-//	if (xmlBaseEntityClass.isAssignableFrom(Timespan.class)) {
-//	    return new TimespanImpl();
-//	}
-//
-//	if (xmlBaseEntityClass.isAssignableFrom(Place.class)) {
-//	    return new PlaceImpl();
-//	}
-//
-//	if (xmlBaseEntityClass.isAssignableFrom(Agent.class)) {
-//	    return new AgentImpl();
-//	}
-//
-//	if (xmlBaseEntityClass.isAssignableFrom(Organization.class)) {
-//	    return new OrganizationImpl();
-//	}
-//
-//	// TODO: add other types
-//	throw new EntityCreationException("No matching BaseEntityImplementation for XML type " + xmlBaseEntityClass);
-//    }
+	private static final Map<EntityTypes, Class<? extends Entity>> entityTypesClassMap = Map.of(
+			EntityTypes.Agent, Agent.class,
+			EntityTypes.Concept, Concept.class,
+			EntityTypes.Organization, Organization.class,
+			EntityTypes.Place, Place.class,
+			EntityTypes.Timespan, Timespan.class
+	);
 
-    public static Class<? extends Entity> getClassForType(EntityTypes modelType) {
-
-	Class<? extends Entity> ret = null;
-//	EntityTypes entityType = EntityTypes.valueOf(modelType.name());
-
-	switch (modelType) {
-	case Organization:
-	    ret = Organization.class;
-	    break;
-	case Concept:
-	    ret = Concept.class;
-	    break;
-	case Agent:
-	    ret = Agent.class;
-	    break;
-	case Place:
-	    ret = Place.class;
-	    break;
-	case Timespan:
-	    ret = Timespan.class;
-	    break;
-	default:
-	    throw new RuntimeException("The given type is not supported by the web model");
-	}
-
-	return ret;
-    }
-
-    public static Entity createEntityObject(EntityTypes entityType) throws EntityCreationException {
+	@SuppressWarnings("unchecked")
+    public static <T extends Entity> T createEntityObject(EntityTypes entityType) throws EntityCreationException {
 
 	try {
-	    return getClassForType(entityType).getDeclaredConstructor().newInstance();
+		Class<T> entityClass = (Class<T>) entityTypesClassMap.get(entityType);
+		// entityClass cannot be null here as map contains all possible types
+		return entityClass.getDeclaredConstructor().newInstance();
 
 	} catch (Exception e) {
 	    throw new EntityCreationException("Error creating instance for " + entityType.toString(), e);

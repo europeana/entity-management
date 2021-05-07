@@ -32,7 +32,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 import eu.europeana.entitymanagement.definitions.model.Concept;
-import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
@@ -40,7 +39,7 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({ ABOUT, DEPICTION, PREF_LABEL, ALT_LABEL, HIDDEN_LABEL, NOTE, NOTATION, BROADER, NARROWER, RELATED,
         BROAD_MATCH, NARROW_MATCH, RELATED_MATCH, CLOSE_MATCH, EXACT_MATCH, IN_SCHEMA, XML_SAME_AS, IS_AGGREGATED_BY })
-public class XmlConceptImpl extends XmlBaseEntityImpl {
+public class XmlConceptImpl extends XmlBaseEntityImpl<Concept> {
 
     private List<LabelledResource> narrower = new ArrayList<>();
     private List<LabelledResource> related = new ArrayList<>();
@@ -76,24 +75,24 @@ public class XmlConceptImpl extends XmlBaseEntityImpl {
         this.inScheme = RdfXmlUtils.convertToRdfResource(concept.getInScheme());
     }
 
-    public Entity toEntityModel() throws EntityCreationException {
+    public Concept toEntityModel() throws EntityCreationException {
 	super.toEntityModel();
-	Concept concept = (Concept) getEntity(); 
-	concept.setRelated(RdfXmlUtils.toStringArray(getRelated()));
-        concept.setNarrower(RdfXmlUtils.toStringArray(getNarrower()));
-        concept.setBroader(RdfXmlUtils.toStringArray(getBroader()));
-        concept.setBroadMatch(RdfXmlUtils.toStringArray(getBroadMatch()));
-        concept.setNarrowMatch(RdfXmlUtils.toStringArray(getNarrowMatch()));
-        concept.setExactMatch(RdfXmlUtils.toStringArray(getExactMatch()));
-        concept.setRelatedMatch(RdfXmlUtils.toStringArray(getRelatedMatch()));
-        concept.setCloseMatch(RdfXmlUtils.toStringArray(getCloseMatch()));
-        concept.setInScheme(RdfXmlUtils.toStringArray(getInScheme()));
-        concept.setNote(RdfXmlUtils.toLanguageMapList(getNote()));
-        concept.setNotation(RdfXmlUtils.toLanguageMapList(getNotation()));
-        concept.setHiddenLabel(RdfXmlUtils.toLanguageMapList(getHiddenLabel()));
-        this.inScheme = RdfXmlUtils.convertToRdfResource(concept.getInScheme());
+
+	entity.setRelated(RdfXmlUtils.toStringArray(getRelated()));
+        entity.setNarrower(RdfXmlUtils.toStringArray(getNarrower()));
+        entity.setBroader(RdfXmlUtils.toStringArray(getBroader()));
+        entity.setBroadMatch(RdfXmlUtils.toStringArray(getBroadMatch()));
+        entity.setNarrowMatch(RdfXmlUtils.toStringArray(getNarrowMatch()));
+        entity.setExactMatch(RdfXmlUtils.toStringArray(getExactMatch()));
+        entity.setRelatedMatch(RdfXmlUtils.toStringArray(getRelatedMatch()));
+        entity.setCloseMatch(RdfXmlUtils.toStringArray(getCloseMatch()));
+        entity.setInScheme(RdfXmlUtils.toStringArray(getInScheme()));
+        entity.setNote(RdfXmlUtils.toLanguageMapList(getNote()));
+        entity.setNotation(RdfXmlUtils.toLanguageMapList(getNotation()));
+        entity.setHiddenLabel(RdfXmlUtils.toLanguageMapList(getHiddenLabel()));
+        this.inScheme = RdfXmlUtils.convertToRdfResource(entity.getInScheme());
         
-        return getEntity();
+        return entity;
     }
 
     @XmlElement(namespace = NAMESPACE_SKOS, name = BROADER)
@@ -148,12 +147,6 @@ public class XmlConceptImpl extends XmlBaseEntityImpl {
     public List<LabelledResource> getHiddenLabel() {
         return this.hiddenLabel;
     }
-
-    @JsonIgnore
-    private Concept getConcept() {
-        return (Concept) entity;
-    }
-
 
     @XmlElement(namespace = NAMESPACE_SKOS, name = NOTE)
     public List<LabelledResource> getNote() {

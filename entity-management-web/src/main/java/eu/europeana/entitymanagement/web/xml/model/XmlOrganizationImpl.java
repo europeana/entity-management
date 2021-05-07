@@ -36,14 +36,12 @@ import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
-
-//@JacksonXmlRootElement(localName = XML_ORGANIZATION)
 @XmlRootElement(namespace = NAMESPACE_EDM, name = XML_ORGANIZATION)
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({ DEPICTION, PREF_LABEL, XML_ACRONYM, ALT_LABEL, XML_DESCRIPTION, XML_LOGO, XML_EUROPEANA_ROLE,
         XML_ORGANIZATION_DOMAIN, XML_GEOGRAPHIC_LEVEL, XML_COUNTRY, XML_HOMEPAGE, XML_PHONE, XML_MBOX, XML_HAS_ADDRESS,
         XML_ADDRESS, XML_IDENTIFIER, XML_SAME_AS, IS_AGGREGATED_BY })
-public class XmlOrganizationImpl extends XmlBaseEntityImpl {
+public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
 
         
         private List<LabelledResource> acronym = new ArrayList<>();
@@ -59,7 +57,6 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl {
         private String hasAddress;
         private String[] identifier;
         //TODO: implement support for address when available in Metis
-//        private Address address;
         
 	public XmlOrganizationImpl(Organization organization) {
 	    	super(organization);
@@ -79,24 +76,23 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl {
 	    	this.identifier = organization.getIdentifier();
 	}
 	
-	public Entity toEntityModel() throws EntityCreationException {
+	public Organization toEntityModel() throws EntityCreationException {
             super.toEntityModel();
-            Organization organization = (Organization) getEntity(); 
-            organization.setAcronym(RdfXmlUtils.toLanguageMapList(getAcronym()));
-            organization.setDescription(RdfXmlUtils.toLanguageMap(getDescription()));
-            organization.setLogo(getLogo());
-            organization.setEuropeanaRole(RdfXmlUtils.toLanguageMapList(getEuropeanaRole()));
-            organization.setOrganizationDomain(RdfXmlUtils.toLanguageMapList(getOrganizationDomain()));
-            organization.setGeographicLevel(RdfXmlUtils.toLanguageMap(getGeographicLevel()));
-            organization.setCountry(getCountry());
+            entity.setAcronym(RdfXmlUtils.toLanguageMapList(getAcronym()));
+            entity.setDescription(RdfXmlUtils.toLanguageMap(getDescription()));
+            entity.setLogo(getLogo());
+            entity.setEuropeanaRole(RdfXmlUtils.toLanguageMapList(getEuropeanaRole()));
+            entity.setOrganizationDomain(RdfXmlUtils.toLanguageMapList(getOrganizationDomain()));
+            entity.setGeographicLevel(RdfXmlUtils.toLanguageMap(getGeographicLevel()));
+            entity.setCountry(getCountry());
             if(getHomepage() != null) {
-                organization.setHomepage(getHomepage().getResource());
+                entity.setHomepage(getHomepage().getResource());
             }
-            organization.setPhone(getPhone());
-            organization.setMbox(getMbox());
-            organization.setHasAddress(getHasAddress());
-            organization.setIdentifier(getIdentifier());
-            return organization;
+            entity.setPhone(getPhone());
+            entity.setMbox(getMbox());
+            entity.setHasAddress(getHasAddress());
+            entity.setIdentifier(getIdentifier());
+            return entity;
         }
 	
 	
@@ -119,8 +115,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl {
                 return logo;            
         }
 
-        
-//	@XmlElement(name =  XML_LOGO)
+
 	//TODO: update implementation when test data is available 
 	public EdmWebResource getLogoAsWebResource() {
 	    	if(getLogo() == null)
@@ -168,23 +163,6 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl {
 	    	return identifier;
 	}
 
-//	@JsonIgnore
-//	private Organization getOrganization() {
-//	    return (Organization)entity;
-//	}
-	
-	/*
-	 *  ElementWrapper works only on lists and maps.
-	 *  This conversion is needed, because we have a two level object 
-	 *  <vcard:hasAddress><vcard:Address>....</vcard:hasAddress></vcard:Address>
-	 */
-//	@JacksonXmlElementWrapper(localName = XML_HAS_ADDRESS)
-//	@JacksonXmlProperty(localName = XML_ADDRESS)
-//	public XmlAddressImpl[] getHasAddress() {
-//	    	XmlAddressImpl[] tmp = {new XmlAddressImpl(getOrganization())};
-//	    	return tmp;
-//	}
-	
 	@XmlElement(namespace = NAMESPACE_VCARD, name =  XML_ADDRESS)
 	public String getHasAddress() {
           return hasAddress;

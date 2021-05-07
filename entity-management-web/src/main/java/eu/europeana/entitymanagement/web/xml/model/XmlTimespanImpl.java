@@ -33,12 +33,11 @@ import eu.europeana.entitymanagement.definitions.model.Timespan;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
-//@JacksonXmlRootElement(localName = XML_TIMESPAN)
 @XmlRootElement(namespace = NAMESPACE_EDM, name = XML_TIMESPAN)
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({ DEPICTION, PREF_LABEL, ALT_LABEL, HIDDEN_LABEL, XML_BEGIN, XML_END, XML_SKOS_NOTE, XML_HAS_PART,
         XML_IS_PART_OF, XML_IS_NEXT_IN_SEQUENCE, XML_SAME_AS, XML_EDM_WEB_RESOURCE })
-public class XmlTimespanImpl extends XmlBaseEntityImpl {
+public class XmlTimespanImpl extends XmlBaseEntityImpl<Timespan> {
         
         private List<LabelledResource> hiddenLabel = new ArrayList<>();
         private String[] begin;
@@ -69,23 +68,21 @@ public class XmlTimespanImpl extends XmlBaseEntityImpl {
 		// default constructor
 	}
 	
-	public Entity toEntityModel() throws EntityCreationException {
+	public Timespan toEntityModel() throws EntityCreationException {
             super.toEntityModel();
-            Timespan timespan = (Timespan) getEntity(); 
-            
-            timespan.setHiddenLabel(RdfXmlUtils.toLanguageMapList(getHiddenLabel()));
+            entity.setHiddenLabel(RdfXmlUtils.toLanguageMapList(getHiddenLabel()));
             if(getBegin() != null && getBegin().length > 0) {
-                timespan.setBeginString(getBegin()[0]);
+                entity.setBeginString(getBegin()[0]);
             }
             if(getEnd() != null && getEnd().length > 0) {
-                timespan.setEndString(getEnd()[0]);
+                entity.setEndString(getEnd()[0]);
             }
             
-            timespan.setNote(RdfXmlUtils.toLanguageMapList(getNote()));
-            timespan.setHasPart(RdfXmlUtils.toStringArray(getHasPart()));
-            timespan.setIsPartOfArray(RdfXmlUtils.toStringArray(getIsPartOf()));
-            timespan.setIsNextInSequence(getIsNextInSequence());
-            return timespan;
+            entity.setNote(RdfXmlUtils.toLanguageMapList(getNote()));
+            entity.setHasPart(RdfXmlUtils.toStringArray(getHasPart()));
+            entity.setIsPartOfArray(RdfXmlUtils.toStringArray(getIsPartOf()));
+            entity.setIsNextInSequence(getIsNextInSequence());
+            return entity;
         }
 
 	@XmlElement(namespace = NAMESPACE_SKOS, name =  HIDDEN_LABEL)

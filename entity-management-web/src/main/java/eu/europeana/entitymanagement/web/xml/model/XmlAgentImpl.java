@@ -3,6 +3,7 @@ package eu.europeana.entitymanagement.web.xml.model;
 import static eu.europeana.entitymanagement.vocabulary.XmlFields.XML_DC_DATE;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.HIDDEN_LABEL;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_EDM;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_RDAGR2;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_SKOS;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NOTE;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_AGENT;
@@ -36,7 +37,7 @@ import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @XmlRootElement(namespace = NAMESPACE_EDM, name = XML_AGENT)
-public class XmlAgentImpl extends XmlBaseEntityImpl {
+public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
 
 	private List<LabelledResource> isPartOf = new ArrayList<>();
 	private String[] identifier;
@@ -89,32 +90,31 @@ public class XmlAgentImpl extends XmlBaseEntityImpl {
 		// default constructor
 	}
 
-        public Entity toEntityModel() throws EntityCreationException {
+        public Agent toEntityModel() throws EntityCreationException {
             super.toEntityModel();
-            Agent agent = (Agent) getEntity();
 
-            agent.setHiddenLabel(RdfXmlUtils.toLanguageMapList(getHiddenLabel()));
-            agent.setNote(RdfXmlUtils.toLanguageMapList(getNote()));
-            agent.setIdentifier(getIdentifier());
-            agent.setHasPart(RdfXmlUtils.toStringArray(getHasPart()));
-            agent.setIsPartOfArray(RdfXmlUtils.toStringArray(getIsPartOf()));
-            agent.setBegin(getBegin());
-            agent.setEnd(getEnd());
-            agent.setHasMet(RdfXmlUtils.toStringArray(getHasMet()));
-            agent.setIsRelatedTo(RdfXmlUtils.toStringArray(getIsRelatedTo()));
-            agent.setName(RdfXmlUtils.toLanguageMap(getName()));
-            agent.setBiographicalInformation(RdfXmlUtils.toLanguageMapList(getBiographicalInformation()));
-            agent.setDateOfBirth(getDateOfBirth());
-            agent.setDateOfDeath(getDateOfDeath());
-            agent.setDateOfEstablishment(getDateOfEstablishment());
-            agent.setDateOfTermination(getDateOfTermination());
-            agent.setDate(getDcDate());
-            agent.setGender(getGender());
-            agent.setPlaceOfBirth(RdfXmlUtils.toLanguageMapList(getPlaceOfBirth()));
-            agent.setPlaceOfDeath(RdfXmlUtils.toLanguageMapList(getPlaceOfDeath()));
-            agent.setProfessionOrOccupation(RdfXmlUtils.toLanguageMapList(getProfessionOrOccupation()));
+            entity.setHiddenLabel(RdfXmlUtils.toLanguageMapList(getHiddenLabel()));
+            entity.setNote(RdfXmlUtils.toLanguageMapList(getNote()));
+            entity.setIdentifier(getIdentifier());
+            entity.setHasPart(RdfXmlUtils.toStringArray(getHasPart()));
+            entity.setIsPartOfArray(RdfXmlUtils.toStringArray(getIsPartOf()));
+            entity.setBegin(getBegin());
+            entity.setEnd(getEnd());
+            entity.setHasMet(RdfXmlUtils.toStringArray(getHasMet()));
+            entity.setIsRelatedTo(RdfXmlUtils.toStringArray(getIsRelatedTo()));
+            entity.setName(RdfXmlUtils.toLanguageMap(getName()));
+            entity.setBiographicalInformation(RdfXmlUtils.toLanguageMapList(getBiographicalInformation()));
+            entity.setDateOfBirth(getDateOfBirth());
+            entity.setDateOfDeath(getDateOfDeath());
+            entity.setDateOfEstablishment(getDateOfEstablishment());
+            entity.setDateOfTermination(getDateOfTermination());
+            entity.setDate(getDcDate());
+            entity.setGender(getGender());
+            entity.setPlaceOfBirth(RdfXmlUtils.toLanguageMapList(getPlaceOfBirth()));
+            entity.setPlaceOfDeath(RdfXmlUtils.toLanguageMapList(getPlaceOfDeath()));
+            entity.setProfessionOrOccupation(RdfXmlUtils.toLanguageMapList(getProfessionOrOccupation()));
 
-            return agent;
+            return entity;
         }
 	
 	@XmlElement(name = HIDDEN_LABEL, namespace = NAMESPACE_SKOS)
@@ -212,7 +212,7 @@ public class XmlAgentImpl extends XmlBaseEntityImpl {
 	    	return placeOfDeath;
 	}
 	
-	@XmlElement(name = XML_PROFESSION_OR_OCCUPATION, namespace = "http://rdvocab.info/ElementsGr2/")
+	@XmlElement(name = XML_PROFESSION_OR_OCCUPATION, namespace = NAMESPACE_RDAGR2)
 	public List<LabelledResource> getProfessionOrOccupation(){
 	    	return professionOrOccupation;
 	}

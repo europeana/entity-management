@@ -12,10 +12,10 @@ import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.service.EntityObjectFactory;
 
-public abstract class XmlBaseEntityImpl {
+public abstract class XmlBaseEntityImpl<T extends Entity> {
 
     @XmlTransient
-    Entity entity;
+    T entity;
     @XmlTransient
     String aggregationId;
     /**
@@ -39,7 +39,7 @@ public abstract class XmlBaseEntityImpl {
 	return referencedWebResources;
     }
 
-    public XmlBaseEntityImpl(Entity entity) {
+    public XmlBaseEntityImpl(T entity) {
 	this.entity = entity;
 	this.about = entity.getAbout();
 	this.prefLabel = RdfXmlUtils.convertToXmlMultilingualString(entity.getPrefLabel());
@@ -47,29 +47,23 @@ public abstract class XmlBaseEntityImpl {
 	this.sameAs = RdfXmlUtils.convertToRdfResource(entity.getSameAs());
 	
 	aggregationId = entity.getAbout() + "#aggregation";
-	referencedWebResources = new ArrayList<XmlWebResourceImpl>();
+	referencedWebResources = new ArrayList<>();
     }
 
-    public Entity toEntityModel() throws EntityCreationException {
-	if(getEntity() == null) {
+    public T toEntityModel() throws EntityCreationException {
+	if(entity == null) {
 	    this.entity = EntityObjectFactory.createEntityObject(getTypeEnum());
 	}
 	entity.setType(getTypeEnum().getEntityType());
 	
-//	this.about = entity.getAbout();
-	getEntity().setEntityId(getAbout());
-//	this.prefLabel = RdfXmlUtils.convertToXmlMultilingualString(entity.getPrefLabel());
-	getEntity().setPrefLabelStringMap(RdfXmlUtils.toLanguageMap(getPrefLabel()));
-//	this.altLabel = RdfXmlUtils.convertToXmlMultilingualString(entity.getAltLabel());
-	getEntity().setAltLabel(RdfXmlUtils.toLanguageMapList(getAltLabel()));
-	getEntity().setSameAs(RdfXmlUtils.toStringArray(getSameAs()));
+	entity.setEntityId(getAbout());
+	entity.setPrefLabelStringMap(RdfXmlUtils.toLanguageMap(getPrefLabel()));
+	entity.setAltLabel(RdfXmlUtils.toLanguageMapList(getAltLabel()));
+	entity.setSameAs(RdfXmlUtils.toStringArray(getSameAs()));
 	if(getDepiction() != null) {
-	    getEntity().setDepiction(getDepiction().getResource().getAbout());
+	    entity.setDepiction(getDepiction().getResource().getAbout());
 	}
-	
-	//Metis is not setting the isAggregatedBy, but it might use it in the future
-//	getEntity().setIsAggregatedBy(null);
-	return getEntity();
+	return entity;
     }
 
     protected abstract EntityTypes getTypeEnum();
@@ -83,23 +77,16 @@ public abstract class XmlBaseEntityImpl {
 	this.about = about;
     }
 
-//	@XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.IS_AGGREGATED_BY)
-//	public XmlIsAggregatedByImpl getIsAggregatedBy() {
-//	    	if(entity.getCreated() == null && entity.getModified() == null)
-//	    	    return null;
-//		return new XmlIsAggregatedByImpl(aggregationId);
-//	}
-//	
+
     public XmlAggregationImpl createXmlAggregation() {
-//	    	if(entity.getCreated() == null && entity.getModified() == null)
-//	    	    return null;
 	return new XmlAggregationImpl(entity);
     }
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_FOAF, name = XmlConstants.DEPICTION)
     public EdmWebResource getDepiction() {
-	if (entity.getDepiction() == null)
-	    return null;
+	if (entity.getDepiction() == null) {
+    return null;
+  }
 	return new EdmWebResource(entity.getDepiction());
     }
 
@@ -127,8 +114,6 @@ public abstract class XmlBaseEntityImpl {
     public LabelledResource getIsShownBy() {
 
 	if (entity.getReferencedWebResource() != null) {
-//		    referencedWebResources.add(new XmlWebResourceImpl(((BaseEntity)entity).getIsShownById(),((BaseEntity)entity).getIsShownBySource(), ((BaseEntity)entity).getIsShownByThumbnail()));
-//	        return new RdfResource(((BaseEntity)entity).getIsShownById());
 	    referencedWebResources.add(new XmlWebResourceImpl(entity.getReferencedWebResource().getId(),
 		    entity.getReferencedWebResource().getSource(), entity.getReferencedWebResource().getThumbnail()));
 	    return new LabelledResource(entity.getReferencedWebResource().getId());
@@ -137,7 +122,7 @@ public abstract class XmlBaseEntityImpl {
 	}
     }
 
-    public Entity getEntity() {
+    public T getEntity() {
 	return entity;
     }
 
