@@ -3,32 +3,28 @@ package eu.europeana.entitymanagement.validation;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_VALIDATE_FIELDS_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.SerializationConfig;
 import eu.europeana.entitymanagement.config.ValidatorConfig;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.impl.ConceptImpl;
 import java.io.IOException;
 import java.util.Set;
-
 import javax.annotation.Resource;
 import javax.validation.ConstraintViolation;
 import javax.validation.ValidatorFactory;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.impl.ConceptImpl;
-
-@SpringBootTest(classes = {ValidatorConfig.class,
-    SerializationConfig.class, EntityManagementConfiguration.class})
+@SpringBootTest(classes = {ValidatorConfig.class, EntityManagementConfiguration.class,
+    SerializationConfig.class})
 public class EntityFieldsValidatorTest {
 
     @Qualifier(AppConfigConstants.BEAN_JSON_MAPPER)

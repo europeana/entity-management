@@ -24,8 +24,12 @@ public class EntityManagementConfiguration  {
     @Value("${languagecodes.config}")
     private String languagecodesXMLConfig;
 
-    @Value("${europeana.apikey.jwttoken.siganturekey}")
-    private String europeanaApikeyJwttokenSiganturekey;
+    @Value("${europeana.apikey.jwttoken.signaturekey}")
+    private String apiKeyPublicKey;
+
+
+  @Value("${europeana.apikey.serviceurl}")
+    private String apiKeyUrl;
 
     @Value("${entitymanagement.solr.pr.url}")
     private String prSolrUrl;
@@ -69,6 +73,8 @@ public class EntityManagementConfiguration  {
   @Value("${batch.computeMetrics: false}")
   private boolean batchComputeMetrics;
 
+  @Value("${auth.enabled: true}")
+  private boolean authEnabled;
 
 
   public EntityManagementConfiguration() {
@@ -95,10 +101,15 @@ public class EntityManagementConfiguration  {
 	return hitsQuery;
     }
 
-    
-    public String getJwtTokenSignatureKey() {
-	return europeanaApikeyJwttokenSiganturekey;
-    }
+
+  public String getApiKeyPublicKey() {
+    return apiKeyPublicKey;
+  }
+
+
+  public String getApiKeyUrl() {
+    return apiKeyUrl;
+  }
 
     
     public String getAuthorizationApiName() {
@@ -151,5 +162,9 @@ public class EntityManagementConfiguration  {
 
   public boolean shouldComputeMetrics() {
     return batchComputeMetrics;
+  }
+
+  public boolean isAuthEnabled() {
+    return authEnabled;
   }
 }
