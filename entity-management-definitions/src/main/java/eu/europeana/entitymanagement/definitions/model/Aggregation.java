@@ -2,25 +2,17 @@ package eu.europeana.entitymanagement.definitions.model;
 
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import dev.morphia.annotations.Embedded;
 import eu.europeana.entitymanagement.serialization.PositiveNumberFilter;
 import java.util.Date;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-
-import eu.europeana.entitymanagement.definitions.model.Aggregation;
-import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
-import eu.europeana.entitymanagement.vocabulary.XmlFields;
-
 @Embedded
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JacksonXmlRootElement(localName = XmlFields.XML_ORE_AGGREGATION)
 @JsonPropertyOrder({ID, TYPE, CREATED, MODIFIED, PAGE_RANK, RECORD_COUNT, SCORE, AGGREGATES})
 public class Aggregation {
     
@@ -32,7 +24,6 @@ public class Aggregation {
 
     
     @JsonGetter(ID)
-    @JacksonXmlProperty(isAttribute= true, localName = XmlFields.XML_RDF_ABOUT)
     public String getId() {
         return id;
     }
@@ -43,7 +34,6 @@ public class Aggregation {
     }
     
     @JsonGetter(TYPE)
-    @JacksonXmlProperty(localName = XmlFields.XML_RDF_TYPE)
     public String getType() {
         return AGGREGATION;
     }
@@ -51,7 +41,6 @@ public class Aggregation {
 
     
     @JsonGetter(RIGHTS)
-    @JacksonXmlProperty(localName = XmlFields.XML_EDM_RIGHTS)
     public String getRights() {
         return rights;
     }
@@ -62,7 +51,6 @@ public class Aggregation {
     }
     
     @JsonGetter(SOURCE)
-    @JacksonXmlProperty(localName = XmlFields.XML_DC_SOURCE)
     public String getSource() {
         return source;
     }
@@ -73,7 +61,6 @@ public class Aggregation {
     }
     
     @JsonGetter(CREATED)
-    @JacksonXmlProperty(localName = XmlFields.XML_DCTERMS_CREATED)
     public Date getCreated() {
         return created;
     }
@@ -84,7 +71,6 @@ public class Aggregation {
     }
     
     @JsonGetter(MODIFIED)
-    @JacksonXmlProperty(localName = XmlFields.XML_DCTERMS_MODIFIED)
     public Date getModified() {
         return modified;
     }
@@ -95,7 +81,6 @@ public class Aggregation {
     }
     
     @JsonGetter
-    @JacksonXmlProperty
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = PositiveNumberFilter.class)
     public double getPageRank() {
         return pageRank;
@@ -109,7 +94,6 @@ public class Aggregation {
     }
     
     @JsonGetter
-    @JacksonXmlProperty
     public int getRecordCount() {
         return recordCount;
     }
@@ -120,7 +104,6 @@ public class Aggregation {
     }
     
     @JsonGetter
-    @JacksonXmlProperty
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = PositiveNumberFilter.class)
     public int getScore() {
         return score;
@@ -132,7 +115,6 @@ public class Aggregation {
     }
     
     @JsonGetter(AGGREGATES)
-    @JacksonXmlProperty(localName = XmlFields.XML_ORE_AGGREGATES)
     public List<String> getAggregates() {
         return aggregates;
     }

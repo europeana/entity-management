@@ -16,16 +16,17 @@ public final class XmlConstants extends XmlFields{
     public static final String NAMESPACE_WGS84_POS = "http://www.w3.org/2003/01/geo/wgs84_pos#";
     public static final String NAMESPACE_VCARD = "https://www.w3.org/2006/vcard/";
 
-    public static final String RDF = "rdf";
+    public static final String RDF = "RDF";
     public static final String XML = "xml";
     public static final String ABOUT = "about";
+    public static final String TYPE = "type";
     public static final String RESOURCE = "resource";
     public static final String LANG = "lang";
     public static final String XML_EDM_WEB_RESOURCE = "WebResource";
     public static final String IS_SHOWN_BY = "isShownBy";
     public static final String XML_DC_SOURCE = "source";
     
-    public static final String XML_SKOS_CONCEPT = "Concept";
+    public static final String XML_CONCEPT = "Concept";
     public static final String DEPICTION = "depiction";
     public static final String PREF_LABEL = "prefLabel";
     public static final String ALT_LABEL = "altLabel";

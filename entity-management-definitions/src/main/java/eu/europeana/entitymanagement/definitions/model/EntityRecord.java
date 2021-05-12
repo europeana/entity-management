@@ -12,14 +12,11 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
-import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@dev.morphia.annotations.Entity
+@dev.morphia.annotations.Entity("EntityRecord")
 @Indexes(@Index(fields = { @Field("dbId") }, options = @IndexOptions(unique = true)))
 @EntityListeners(EntityRecordWatcher.class)
 public class EntityRecord {
@@ -46,7 +43,6 @@ public class EntityRecord {
 
     
     @JsonGetter
-    @JacksonXmlProperty
     public Entity getEntity() {
         return entity;
     }
@@ -59,7 +55,6 @@ public class EntityRecord {
 
     
     @JsonGetter(WebEntityFields.ID)
-    @JacksonXmlProperty(isAttribute = true, localName = XmlFields.XML_RDF_ABOUT)
     public String getEntityId() {
         return entityId;
     }
@@ -72,7 +67,6 @@ public class EntityRecord {
 
     
     @JsonGetter
-    @JacksonXmlElementWrapper(useWrapping = false)
     public List<EntityProxy> getProxies() {
         return proxies;
     }

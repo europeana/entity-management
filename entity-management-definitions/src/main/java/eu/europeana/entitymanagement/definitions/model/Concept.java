@@ -10,12 +10,8 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JacksonXmlRootElement(localName= XmlFields.XML_SKOS_CONCEPT)
 @JsonPropertyOrder({CONTEXT, ID, TYPE, DEPICTION, IS_SHOWN_BY, PREF_LABEL, ALT_LABEL, HIDDEN_LABEL,NOTE,
 		NOTATION, BROADER, NARROWER, RELATED, BROAD_MATCH, NARROW_MATCH, RELATED_MATCH,CLOSE_MATCH,EXACT_MATCH,IN_SCHEME})
 public class Concept extends Entity {
@@ -24,137 +20,127 @@ public class Concept extends Entity {
 		super();
 	}
 
-	private String[] broader;
-	private String[] narrower;
-	private String[] related;
-	private String[] broadMatch;
-	private String[] narrowMatch;
-	private String[] exactMatch;
-	private String[] coref;
-	private String[] relatedMatch;
-	private String[] closeMatch;
-	private String[] inScheme;
+	private List<String> broader;
+	private List<String> narrower;
+	private List<String> related;
+	private List<String> broadMatch;
+	private List<String> narrowMatch;
+	private List<String> exactMatch;
+	private List<String> coref;
+	private List<String> relatedMatch;
+	private List<String> closeMatch;
+	private List<String> inScheme;
 	private Map<String, List<String>> notation;
 
 	@JsonGetter(BROADER)
-	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_BROADER)
-	public String[] getBroader() {
+	public List<String> getBroader() {
 		return broader;
 	}
 
 	
 	@JsonSetter(BROADER)
-	public void setBroader(String[] broader) {
+	public void setBroader(List<String> broader) {
 		this.broader = broader;
 	}
 
 	@JsonGetter(NARROWER)
-	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_NARROWER)
-	public String[] getNarrower() {
+	public List<String> getNarrower() {
 		return narrower;
 	}
 
 	
 	@JsonSetter(NARROWER)
-	public void setNarrower(String[] narrower) {
+	public void setNarrower(List<String> narrower) {
 		this.narrower = narrower;
 	}
 
 	@JsonGetter(RELATED)
-	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_RELATED)
-	public String[] getRelated() {
+	public List<String> getRelated() {
 		return related;
 	}
 
 	
 	@JsonSetter(RELATED)
-	public void setRelated(String[] related) {
+	public void setRelated(List<String> related) {
 		this.related = related;
 	}
 
 	@JsonGetter(BROAD_MATCH)
-	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_BROAD_MATCH)
-	public String[] getBroadMatch() {
+	public List<String> getBroadMatch() {
 		return broadMatch;
 	}
 
 	
 	@JsonSetter(BROAD_MATCH)
-	public void setBroadMatch(String[] broadMatch) {
+	public void setBroadMatch(List<String> broadMatch) {
 		this.broadMatch = broadMatch;
 	}
 
 	@JsonGetter(NARROW_MATCH)
-	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_NARROW_MATCH)
-	public String[] getNarrowMatch() {
+	public List<String> getNarrowMatch() {
 		return narrowMatch;
 	}
 
 	
 	@JsonSetter(NARROW_MATCH)
-	public void setNarrowMatch(String[] narrowMatch) {
+	public void setNarrowMatch(List<String> narrowMatch) {
 		this.narrowMatch = narrowMatch;
 	}
 
 	@JsonGetter(EXACT_MATCH)
-	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_EXACT_MATCH)
-	public String[] getExactMatch() {
+	public List<String> getExactMatch() {
 		return exactMatch;
 	}
 
 	
 	@JsonSetter(EXACT_MATCH)
-	public void setExactMatch(String[] exactMatch) {
+	public void setExactMatch(List<String> exactMatch) {
 		this.exactMatch = exactMatch;
 	}
 
-	public String[] getCoref() {
+	public List<String> getCoref() {
 		return coref;
 	}
 
 	
-	public void setCoref(String[] coref) {
+	public void setCoref(List<String> coref) {
 		this.coref = coref;
 	}
 
 	@JsonGetter(RELATED_MATCH)
-	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_RELATED_MATCH)
-	public String[] getRelatedMatch() {
+	public List<String> getRelatedMatch() {
 		return relatedMatch;
 	}
 
 	
 	@JsonSetter(RELATED_MATCH)
-	public void setRelatedMatch(String[] relatedMatch) {
+	public void setRelatedMatch(List<String> relatedMatch) {
 		this.relatedMatch = relatedMatch;
 	}
 
 	@JsonGetter(CLOSE_MATCH)
-	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_CLOSE_MATCH)
-	public String[] getCloseMatch() {
+	public List<String> getCloseMatch() {
 		return closeMatch;
 	}
 
 	
 	@JsonSetter(CLOSE_MATCH)
-	public void setCloseMatch(String[] closeMatch) {
+	public void setCloseMatch(List<String> closeMatch) {
 		this.closeMatch = closeMatch;
 	}
 
 	@JsonGetter(IN_SCHEME)
-	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_IN_SCHEMA)
-	public String[] getInScheme() {
+	public List<String> getInScheme() {
 		return inScheme;
 	}
 
 	
 	@JsonSetter(IN_SCHEME)
-	public void setInScheme(String[] inScheme) {
+	public void setInScheme(List<String> inScheme) {
 		this.inScheme = inScheme;
 	}
 
 	@JsonGetter(NOTATION)
-	@JacksonXmlProperty(localName = XmlFields.XML_SKOS_NOTATION)
 	public Map<String, List<String>> getNotation() {
 		return notation;
 	}

@@ -2,10 +2,7 @@ package eu.europeana.entitymanagement.definitions.model;
 
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 
-import eu.europeana.entitymanagement.definitions.model.Entity;
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -13,15 +10,11 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
-import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JacksonXmlRootElement(localName = XmlFields.XML_EDM_AGENT)
 @JsonPropertyOrder({CONTEXT, ID, TYPE, DEPICTION, IS_SHOWN_BY, PREF_LABEL, ALT_LABEL, HIDDEN_LABEL, NAME, BEGIN, DATE_OF_BIRTH, DATE_OF_ESTABLISHMENT,
 		END, DATE_OF_DEATH, DATE_OF_TERMINATION, DATE, PLACE_OF_BIRTH, PLACE_OF_DEATH, GENDER, PROFESSION_OR_OCCUPATION, BIOGRAPHICAL_INFORMATION, NOTE,
 		HAS_PART, IS_PART_OF, HAS_MET, IS_RELATED_TO, WAS_PRESENT_AT, IDENTIFIER, SAME_AS})
@@ -32,16 +25,17 @@ public class Agent extends Entity {
 	}
 
 	// TODO: fix cardinality, change to list
-	private String[] date; // format "YYYY"
-	private String[] begin; // format "YYYY-MM-DD"
-	private String[] end; // format "YYYY-MM-DD"
-	private String[] dateOfBirth; // format "YYYY-MM-DD"
-	private String[] dateOfDeath; // format "YYYY"
-	private String[] wasPresentAt;
-	private String[] hasMet;
+	private List<String> date; // format "YYYY"
+	private List<String> begin; // format "YYYY-MM-DD"
+	private List<String> end; // format "YYYY-MM-DD"
+	private List<String> dateOfBirth; // format "YYYY-MM-DD"
+	private List<String> dateOfDeath; // format "YYYY"
+	private List<String> wasPresentAt;
+	private List<String> hasMet;
 	private Map<String, String> name;
 	private Map<String, List<String>> biographicalInformation;
-	private Map<String, List<String>> professionOrOccupation;
+	// TODO: clarify format. Right now Metis returns a list of Resources
+	private List<String> professionOrOccupation;
 	private Map<String, List<String>> placeOfBirth;
 	private Map<String, List<String>> placeOfDeath;
 
@@ -49,76 +43,61 @@ public class Agent extends Entity {
 	private String dateOfTermination; // format "YYYY"
 	private String gender;
 
-	private String[] exactMatch;
-
-	private Map<String, List<String>> tmpBegin;
-	private Map<String, List<String>> tmpEnd;
-	private Map<String, List<String>> tmpDateOfBirth;
-	private Map<String, List<String>> tmpDateOfDeath;
-	private Map<String, List<String>> tmpGender;
-	private Map<String, List<String>> tmpDateOfEstablishment;
-	private Map<String, List<String>> tmpDateOfTermination;
-	private Map<String, List<String>> tmpName;
-	private Map<String, List<String>> tmpIdentifier;
+	private List<String> exactMatch;
 
 
 	@JsonGetter(WebEntityFields.WAS_PRESENT_AT)
-	@JacksonXmlProperty(localName = XmlFields.XML_WAS_PRESENT_AT)
-	public String[] getWasPresentAt() {
+	public List<String> getWasPresentAt() {
 		return this.wasPresentAt;
 	}
 
+
 	@JsonSetter(WebEntityFields.WAS_PRESENT_AT)
-	public void setWasPresentAt(String[] wasPresentAt) {
+	public void setWasPresentAt(List<String> wasPresentAt) {
 		this.wasPresentAt=wasPresentAt;
 	}
 
 	@JsonGetter(WebEntityFields.DATE)
-	@JacksonXmlProperty(localName = XmlFields.XML_DC_DATE)
-	public String[] getDate() {
+	public List<String> getDate() {
 		return date;
 	}
 
 	@JsonSetter(WebEntityFields.DATE)
-	public void setDate(String[] date) {
+	public void setDate(List<String> date) {
 		this.date = date;
 	}
 
 	@JsonGetter(WebEntityFields.BEGIN)
-	@JacksonXmlProperty(localName = XmlFields.XML_EDM_BEGIN)
-	public String[] getBeginArray() {
+	public List<String> getBeginArray() {
 		return begin;
 	}
 
 	@JsonSetter(BEGIN)
-	public void setBegin(String[] begin) {
+	public void setBegin(List<String> begin) {
 		this.begin = begin;
 	}
 
 	@JsonGetter(END)
-	@JacksonXmlProperty(localName = XmlFields.XML_EDM_END)
-	public String[] getEndArray() {
+	public List<String> getEndArray() {
 		return end;
 	}
 
 	@JsonSetter(END)
-	public void setEnd(String[] end) {
+	public void setEnd(List<String> end) {
 		this.end = end;
 	}
 
 	@JsonGetter(HAS_MET)
-	@JacksonXmlProperty(localName = XmlFields.XML_EDM_HASMET)
-	public String[] getHasMet() {
+	public List<String> getHasMet() {
 		return hasMet;
 	}
 
 	@JsonSetter(HAS_MET)
-	public void setHasMet(String[] hasMet) {
+	public void setHasMet(List<String> hasMet) {
 		this.hasMet = hasMet;
 	}
 
 	@JsonGetter(NAME)
-	@JacksonXmlProperty(localName = XmlFields.XML_FOAF_NAME)
 	public Map<String, String> getName() {
 		return name;
 	}
@@ -129,7 +108,6 @@ public class Agent extends Entity {
 	}
 
 	@JsonGetter(BIOGRAPHICAL_INFORMATION)
-	@JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_BIOGRAPHICAL_INFORMATION)
 	public Map<String, List<String>> getBiographicalInformation() {
 		return biographicalInformation;
 	}
@@ -140,29 +118,26 @@ public class Agent extends Entity {
 	}
 
 	@JsonGetter(DATE_OF_BIRTH)
-	@JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_DATE_OF_BIRTH)
-	public String[] getDateOfBirth() {
+	public List<String> getDateOfBirth() {
 		return dateOfBirth;
 	}
 
 	@JsonSetter(DATE_OF_BIRTH)
-	public void setDateOfBirth(String[] dateOfBirth) {
+	public void setDateOfBirth(List<String> dateOfBirth) {
 		this.dateOfBirth = dateOfBirth;
 	}
 
 	@JsonGetter(DATE_OF_DEATH)
-	@JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_DATE_OF_DEATH)
-	public String[] getDateOfDeath() {
+	public List<String> getDateOfDeath() {
 		return dateOfDeath;
 	}
 
 	@JsonSetter(DATE_OF_DEATH)
-	public void setDateOfDeath(String[] dateOfDeath) {
+	public void setDateOfDeath(List<String> dateOfDeath) {
 		this.dateOfDeath = dateOfDeath;
 	}
 
 	@JsonGetter(PLACE_OF_BIRTH)
-	@JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_PLACE_OF_BIRTH)
 	public Map<String, List<String>> getPlaceOfBirth() {
 		return placeOfBirth;
 	}
@@ -173,7 +148,6 @@ public class Agent extends Entity {
 	}
 
 	@JsonGetter(PLACE_OF_DEATH)
-	@JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_PLACE_OF_DEATH)
 	public Map<String, List<String>> getPlaceOfDeath() {
 		return placeOfDeath;
 	}
@@ -184,7 +158,6 @@ public class Agent extends Entity {
 	}
 
 	@JsonGetter(DATE_OF_ESTABLISHMENT)
-	@JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_DATE_OF_ESTABLISHMENT)
 	public String getDateOfEstablishment() {
 		return dateOfEstablishment;
 	}
@@ -195,7 +168,6 @@ public class Agent extends Entity {
 	}
 
 	@JsonGetter(DATE_OF_TERMINATION)
-	@JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_DATE_OF_TERMINATION)
 	public String getDateOfTermination() {
 		return dateOfTermination;
 	}
@@ -206,7 +178,6 @@ public class Agent extends Entity {
 	}
 
 	@JsonGetter(GENDER)
-	@JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_GENDER)
 	public String getGender() {
 		return gender;
 	}
@@ -217,171 +188,35 @@ public class Agent extends Entity {
 	}
 
 	@JsonGetter(PROFESSION_OR_OCCUPATION)
-	@JacksonXmlProperty(localName = XmlFields.XML_RDAGR2_PROFESSION_OR_OCCUPATION)
-	public Map<String, List<String>> getProfessionOrOccupation() {
+	public List<String> getProfessionOrOccupation() {
 		return professionOrOccupation;
 	}
 
 	@JsonSetter(PROFESSION_OR_OCCUPATION)
-	public void setProfessionOrOccupation(Map<String, List<String>> professionOrOccupation) {
+	public void setProfessionOrOccupation(List<String> professionOrOccupation) {
 		this.professionOrOccupation = professionOrOccupation;
 	}
 
-	public String[] getExactMatch() {
+	public List<String> getExactMatch() {
 		return exactMatch;
 	}
 
-	public void setExactMatch(String[] exactMatch) {
+	public void setExactMatch(List<String> exactMatch) {
 		this.exactMatch = exactMatch;
 	}
 
-	public Map<String, List<String>> getBegin() {
-		// if not available
-		if (getBeginArray() == null)
-			return null;
-		// if not transformed
-		if (tmpBegin == null)
-			tmpBegin = fillTmpMap(Arrays.asList(getBeginArray()));
 
-		return tmpBegin;
-	}
-
-	public Map<String, List<String>> getEnd() {
-		// if not available
-		if (getEndArray() == null)
-			return null;
-		// if not transformed
-		if (tmpEnd == null)
-			tmpEnd = fillTmpMap(Arrays.asList(getEndArray()));
-
-		return tmpEnd;
-	}
-
-
-
-	public Map<String, List<String>> getRdaGr2PlaceOfDeath() {
-		return getPlaceOfDeath();
-	}
-
-	@Deprecated
-	public void setRdaGr2PlaceOfBirth(Map<String, List<String>> rdaGr2PlaceOfBirth) {
-		// TODO Auto-generated method stub
-
-	}
-
-
-	public Map<String, List<String>> getRdaGr2PlaceOfBirth() {
-		return getPlaceOfBirth();
-	}
-
-
-	@Deprecated
-	public void setRdaGr2DateOfDeath(Map<String, List<String>> rdaGr2DateOfDeath) {
-		// TODO Auto-generated method stub
-
-	}
-
-	public Map<String, List<String>> getRdaGr2DateOfDeath() {
-		//if not available
-		if (getDateOfDeath() == null)
-			return null;
-		//if not transformed
-		if (tmpDateOfDeath == null)
-			tmpDateOfDeath = fillTmpMap(Arrays.asList(getDateOfDeath()));
-
-		return tmpDateOfDeath;
-	}
-
-	public void setRdaGr2DateOfEstablishment(Map<String, List<String>> rdaGr2DateOfEstablishment) {
-		// TODO Auto-generated method stub
-
-	}
-
-
-	@Deprecated
-	public Map<String, List<String>> getRdaGr2DateOfEstablishment() {
-		//if not available
-		if (getDateOfEstablishment() == null)
-			return null;
-		//if not transformed
-		if (tmpDateOfEstablishment == null) {
-			tmpDateOfEstablishment = fillTmpMap(Arrays.asList(getDateOfEstablishment()));
-		}
-
-		return tmpDateOfEstablishment;
-	}
-
-
-
-	public void setRdaGr2DateOfTermination(Map<String, List<String>> rdaGr2DateOfTermination) {
-		// TODO Auto-generated method stub
-
-	}
-
-
-	public Map<String, List<String>> getRdaGr2DateOfTermination() {
-		//if not available
-		if (getDateOfTermination() == null)
-			return null;
-		//if not transformed
-		if (tmpDateOfTermination == null) {
-			tmpDateOfTermination = fillTmpMap(Arrays.asList(getDateOfTermination()));
-		}
-
-		return tmpDateOfTermination;
-	}
-
-
-	public void setRdaGr2Gender(Map<String, List<String>> rdaGr2Gender) {
-
-	}
-
-
-	public Map<String, List<String>> getRdaGr2Gender() {
-		//if not available
-		if (getGender() == null)
-			return null;
-		//if not transformed
-		if (tmpGender == null)
-			tmpGender = fillTmpMap(Arrays.asList(getGender()));
-
-		return tmpGender;
-	}
-
-
-	@Deprecated
-	public void setRdaGr2ProfessionOrOccupation(Map<String, List<String>> rdaGr2ProfessionOrOccupation) {
-		// TODO Auto-generated method stub
-
-	}
-
-
-	public Map<String, List<String>> getRdaGr2ProfessionOrOccupation() {
-		return getProfessionOrOccupation();
-	}
-
-
-	public void setRdaGr2BiographicalInformation(Map<String, List<String>> rdaGr2BiographicalInformation) {
-		// TODO Auto-generated method stub
-
-	}
-
-	public Map<String, List<String>> getRdaGr2BiographicalInformation() {
-		return getBiographicalInformation();
-	}
-
-	@Override
 	public String getType() {
 		return EntityTypes.Agent.getEntityType();
 	}
 
-	@Override
+
 	public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
 		//TODO:in case of the performance overhead cause by using the reflecion code, change this method to call the getters for each field individually
 		return field.get(this);
 	}
 
-	@Override
+
 	public void setFieldValue(Field field, Object value) throws IllegalArgumentException, IllegalAccessException {
 		//TODO:in case of the performance overhead cause by using the reflecion code, change this method to call the setter for each field individually
 		field.set(this, value);

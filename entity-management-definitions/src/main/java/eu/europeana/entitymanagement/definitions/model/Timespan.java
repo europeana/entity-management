@@ -2,7 +2,6 @@ package eu.europeana.entitymanagement.definitions.model;
 
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 
-import eu.europeana.entitymanagement.definitions.model.Entity;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
@@ -13,9 +12,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
-import eu.europeana.entitymanagement.definitions.model.Timespan;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
@@ -28,18 +25,18 @@ public class Timespan extends Entity {
         // TODO Auto-generated constructor stub
     }
 
-    private String[] isNextInSequence;
+    private List<String> isNextInSequence;
     private String begin;
     private String end;
 
     @JsonGetter(IS_NEXT_IN_SEQUENCE)
     @JacksonXmlProperty(localName = XmlFields.XML_EDM_IS_NEXT_IN_SEQUENCE)
-    public String[] getIsNextInSequence() {
+    public List<String> getIsNextInSequence() {
         return isNextInSequence;
     }
 
     @JsonSetter(IS_NEXT_IN_SEQUENCE)
-    public void setIsNextInSequence(String[] isNextInSequence) {
+    public void setIsNextInSequence(List<String> isNextInSequence) {
         this.isNextInSequence = isNextInSequence;
     }
 

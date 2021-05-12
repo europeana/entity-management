@@ -41,12 +41,14 @@ public class SerializationUtils {
 
   public static void serializeExternalJson(Writer writer, ObjectMapper mapper, EntityRecord record)
       throws IOException {
-    JsonNode result = getExternalJsonNode(mapper, record);
+    ObjectNode result = getExternalJsonNode(mapper, record);
+    // Entity isAggregatedBy should be included in external profile
+    result.remove(WebEntityFields.IS_AGGREGATED_BY);
     mapper.writeValue(writer, result);
   }
 
 
-  private static JsonNode getExternalJsonNode(ObjectMapper mapper, EntityRecord record)
+  private static ObjectNode getExternalJsonNode(ObjectMapper mapper, EntityRecord record)
       throws EntityManagementRuntimeException {
       return mapper.valueToTree(record.getEntity());
   }

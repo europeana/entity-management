@@ -6,16 +6,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 import dev.morphia.annotations.Embedded;
-import eu.europeana.entitymanagement.definitions.model.Address;
-import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 @Embedded
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JacksonXmlRootElement(localName = XmlFields.XML_VCARD_ADDRESS)
 @JsonPropertyOrder({CONTEXT, ID, TYPE, STREET_ADDRESS, POSTAL_CODE, POST_OFFICE_BOX, LOCALITY, REGION, COUNTRY_NAME, HAS_GEO})
 public class Address {
 
@@ -49,7 +44,6 @@ public class Address {
     }
     
     @JsonGetter(POST_OFFICE_BOX)
-    @JacksonXmlProperty(localName = XmlFields.XML_VCARD_POST_OFFICE_BOX)
     public String getVcardPostOfficeBox() {
         return postBox;
     }
@@ -62,7 +56,6 @@ public class Address {
 
     
     @JsonGetter(COUNTRY_NAME)
-    @JacksonXmlProperty(localName = XmlFields.XML_VCARD_COUNTRY_NAME)
     public String getVcardCountryName() {
         return countryName;
     }
@@ -75,7 +68,6 @@ public class Address {
 
     
     @JsonGetter(POSTAL_CODE)
-    @JacksonXmlProperty(localName = XmlFields.XML_VCARD_POSTAL_CODE)
     public String getVcardPostalCode() {
         return postalCode;
     }
@@ -88,7 +80,6 @@ public class Address {
 
     
     @JsonGetter(LOCALITY)
-    @JacksonXmlProperty(localName = XmlFields.XML_VCARD_LOCALITY)
     public String getVcardLocality() {
         return locality;
     }
@@ -101,7 +92,6 @@ public class Address {
 
     
     @JsonGetter(STREET_ADDRESS)
-    @JacksonXmlProperty(localName = XmlFields.XML_VCARD_STREET_ADDRESS)
     public String getVcardStreetAddress() {
         return streetAddress;
     }
@@ -115,14 +105,12 @@ public class Address {
 
     
     @JsonGetter(ID)
-    @JacksonXmlProperty(isAttribute= true, localName = XmlFields.XML_RDF_ABOUT)
     public String getAbout() {
         return about;
     }
 
     
     @JsonGetter(HAS_GEO)
-    @JacksonXmlProperty(localName = XmlFields.XML_VCARD_HAS_GEO)
     public String getVcardHasGeo() {
         return hasGeo;
     }

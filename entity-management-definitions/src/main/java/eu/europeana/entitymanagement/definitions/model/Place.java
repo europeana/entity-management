@@ -2,23 +2,17 @@ package eu.europeana.entitymanagement.definitions.model;
 
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 
-import eu.europeana.entitymanagement.definitions.model.Entity;
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
-import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
@@ -31,9 +25,9 @@ public class Place extends Entity {
 		// TODO Auto-generated constructor stub
 	}
 
-	private String[] isNextInSequence;
+	private List<String> isNextInSequence;
 	private Float latitude, longitude, altitude;
-	private String[] exactMatch;
+	private List<String> exactMatch;
 
 	private Map<String, List<String>> tmpIsPartOf;
 	private Map<String, List<String>> tmpHasPart;
@@ -41,13 +35,13 @@ public class Place extends Entity {
 	
 	@JsonGetter(IS_NEXT_IN_SEQUENCE)
 	@JacksonXmlProperty(localName = XmlFields.XML_EDM_IS_NEXT_IN_SEQUENCE)
-	public String[] getIsNextInSequence() {
+	public List<String> getIsNextInSequence() {
 		return isNextInSequence;
 	}
 
 	
 	@JsonSetter(IS_NEXT_IN_SEQUENCE)
-	public void setIsNextInSequence(String[] isNextInSequence) {
+	public void setIsNextInSequence(List<String> isNextInSequence) {
 		this.isNextInSequence = isNextInSequence;
 	}
 
@@ -91,12 +85,12 @@ public class Place extends Entity {
 	}
 
 	
-	public String[] getExactMatch() {
+	public List<String> getExactMatch() {
 		return exactMatch;
 	}
 
 	
-	public void setExactMatch(String[] exactMatch) {
+	public void setExactMatch(List<String> exactMatch) {
 		this.exactMatch = exactMatch;
 	}
 

@@ -1,10 +1,17 @@
 package eu.europeana.entitymanagement.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.web.xml.model.RdfBaseWrapper;
+import eu.europeana.entitymanagement.web.xml.model.XmlAgentImpl;
+import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
+import eu.europeana.entitymanagement.web.xml.model.metis.EnrichmentResultList;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -28,6 +35,8 @@ public class SerializationConfig {
         return new Jackson2ObjectMapperBuilder()
                 .defaultUseWrapper(false)
                 .dateFormat(dateFormat)
+                .featuresToEnable(
+                    DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
                 .serializationInclusion(JsonInclude.Include.NON_NULL)
                 .build();
     }
@@ -42,5 +51,11 @@ public class SerializationConfig {
     @Bean
     public com.fasterxml.jackson.databind.Module jaxbAnnotationModule() {
         return new JaxbAnnotationModule();
+    }
+
+    @Bean
+    public JAXBContext jaxbContext() throws JAXBException {
+        // lists all models
+        return JAXBContext.newInstance(EnrichmentResultList.class, RdfBaseWrapper.class);
     }
 }

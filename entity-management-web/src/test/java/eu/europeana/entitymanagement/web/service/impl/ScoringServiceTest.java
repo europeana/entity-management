@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Place;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -42,8 +43,8 @@ public class ScoringServiceTest {
 	Agent agent = new Agent();
 	String entityId = "http://data.europeana.eu/agent/base/146741";
 	agent.setEntityId(entityId);
-	String[] sameAs = new String[] { "http://wikidata.dbpedia.org/resource/Q762",
-		"http://www.wikidata.org/entity/Q762", "http://purl.org/collections/nl/am/p-10456" };
+	List<String> sameAs = List.of("http://wikidata.dbpedia.org/resource/Q762",
+		"http://www.wikidata.org/entity/Q762", "http://purl.org/collections/nl/am/p-10456" );
 	agent.setSameAs(sameAs);
 
 	Map<String, String> prefLabels = new HashMap<String, String>();
@@ -75,7 +76,7 @@ public class ScoringServiceTest {
         Place agent = new Place();
         String entityId = "http://data.europeana.eu/place/base/41488";
         agent.setEntityId(entityId);
-        String[] sameAs = new String[] { "https://sws.geonames.org/2988507/"};
+        List<String> sameAs = List.of("https://sws.geonames.org/2988507/");
         agent.setSameAs(sameAs);
         
         Map<String, String> prefLabels = new HashMap<String, String>();

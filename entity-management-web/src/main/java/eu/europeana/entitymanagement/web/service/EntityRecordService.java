@@ -165,7 +165,7 @@ public class EntityRecordService {
 	 * @param entityCreationRequest entity creation request
 	 */
 	private void copyPreviewMetadata(Entity entity, EntityPreview entityCreationRequest) {
-			entity.setSameAs(new String[]{entityCreationRequest.getId()});
+			entity.setSameAs(List.of(entityCreationRequest.getId()));
 			entity.setPrefLabelStringMap(entityCreationRequest.getPrefLabel());
 			entity.setAltLabel(entityCreationRequest.getAltLabel());
 			entity.setDepiction(entityCreationRequest.getDepiction());
@@ -183,7 +183,7 @@ public class EntityRecordService {
      * @param rdfResources list of SameAs resources
      * @return Optional containing EntityRecord, or empty Optional if none found
      */
-    public Optional<EntityRecord> retrieveMetisCoreferenceSameAs(String[] rdfResources) {
+    public Optional<EntityRecord> retrieveMetisCoreferenceSameAs(List<String> rdfResources) {
 	for (String resource : rdfResources) {
 	    Optional<EntityRecord> entityRecordOptional = retrieveEntityRecordByUri(resource);
 	    if (entityRecordOptional.isPresent()) {
@@ -224,30 +224,30 @@ public class EntityRecordService {
 	 * the common fields for all entity types that are references
 	 */
 	// for the field hasPart
-	String[] hasPartField = entity.getHasPart();
+	List<String> hasPartField = entity.getHasPart();
 	entity.setHasPart(replaceWithInternalReferences(hasPartField));
 
 	// for the field isPartOf
-	String[] isPartOfField = entity.getIsPartOfArray();
+	List<String> isPartOfField = entity.getIsPartOfArray();
 	entity.setIsPartOfArray(replaceWithInternalReferences(isPartOfField));
 
 	// for the field isRelatedTo
-	String[] isRelatedToField = entity.getIsRelatedTo();
+	List<String> isRelatedToField = entity.getIsRelatedTo();
 	entity.setIsRelatedTo(replaceWithInternalReferences(isRelatedToField));
 
     }
 
     private void performReferentialIntegrityConcept(Concept entity) {
 	// for the field broader
-	String[] broaderField = entity.getBroader();
+	List<String> broaderField = entity.getBroader();
 	entity.setBroader(replaceWithInternalReferences(broaderField));
 
 	// for the field narrower
-	String[] narrowerField = entity.getBroader();
+	List<String> narrowerField = entity.getBroader();
 	entity.setNarrower(replaceWithInternalReferences(narrowerField));
 
 	// for the field related
-	String[] relatedField = entity.getRelated();
+	List<String> relatedField = entity.getRelated();
 	entity.setRelated(replaceWithInternalReferences(relatedField));
 
     }
@@ -267,32 +267,32 @@ public class EntityRecordService {
 	    entity.setPlaceOfDeath(updatedField);
 	}
 	// for the field professionOrOccupation
-	Map<String, List<String>> professionOrOccupationField = entity.getProfessionOrOccupation();
+	List<String> professionOrOccupationField = entity.getProfessionOrOccupation();
 	entity.setProfessionOrOccupation(replaceWithInternalReferences(professionOrOccupationField));
 	
 	// for the field hasMet
-	String[] hasMetField = entity.getHasMet();
+	List<String> hasMetField = entity.getHasMet();
 	entity.setHasMet(replaceWithInternalReferences(hasMetField));
 	
 	// for the field hasMet
-	String[] wasPresentField = entity.getWasPresentAt();
+	List<String> wasPresentField = entity.getWasPresentAt();
 	entity.setWasPresentAt(replaceWithInternalReferences(wasPresentField));
 	
 	// for the field date
-	String[] dateField = entity.getDate();
+	List<String> dateField = entity.getDate();
 	entity.setDate(replaceWithInternalReferences(dateField));
 	
     }
 
     private void performReferentialIntegrityPlace(Place entity) {
 	// for the field isNextInSequence
-	String[] isNextInSequenceField = entity.getIsNextInSequence();
+	List<String> isNextInSequenceField = entity.getIsNextInSequence();
 	entity.setIsNextInSequence(replaceWithInternalReferences(isNextInSequenceField));
     }
 
     private void performReferentialIntegrityTimespan(Timespan entity) {
 	// for the field isNextInSequence
-	String[] isNextInSequenceField = entity.getIsNextInSequence();
+	List<String> isNextInSequenceField = entity.getIsNextInSequence();
 	entity.setIsNextInSequence(replaceWithInternalReferences(isNextInSequenceField));
 
     }
@@ -322,7 +322,7 @@ public class EntityRecordService {
 	return updatedReferenceMap;
     }
 
-    private String[] replaceWithInternalReferences(String[] originalReferences) {
+    private List<String> replaceWithInternalReferences(List<String> originalReferences) {
 	if (originalReferences == null) {
 	    return null;
 	}
@@ -334,7 +334,7 @@ public class EntityRecordService {
 	if (updatedReferences.isEmpty()) {
 	    return null;
 	}
-	return updatedReferences.toArray(new String[updatedReferences.size()]);
+	return updatedReferences;
     }
 
     private void addValueOrInternalReference(List<String> updatedReferences, String value) {

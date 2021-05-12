@@ -1,7 +1,6 @@
 package eu.europeana.entitymanagement.definitions.model;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,17 +8,11 @@ import java.util.Map;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
-import eu.europeana.entitymanagement.definitions.model.Address;
-import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 /**
  * This class defines base organization type of an entity.
@@ -46,7 +39,6 @@ public class Organization extends Entity {
 	private Map<String, String> geographicLevel;
 	private String country;
 	private Map<String, String> countryMap;
-	private Map<String, List<String>> tmpIdentifier;
 
 	//address fields
 	private String hasAddress;
@@ -61,7 +53,6 @@ public class Organization extends Entity {
 
 	
 	@JsonGetter(DESCRIPTION)
-	@JacksonXmlProperty(localName = XmlFields.XML_DC_DESCRIPTION)
 	public Map<String, String> getDescription() {
 		return description;
 	}
@@ -74,7 +65,6 @@ public class Organization extends Entity {
 
 	
 	@JsonGetter(ACRONYM)
-	@JacksonXmlProperty(localName = XmlFields.XML_EDM_ACRONYM)
 	public Map<String, List<String>> getAcronym() {
 		return acronym;
 	}
@@ -87,7 +77,6 @@ public class Organization extends Entity {
 
 	
 	@JsonGetter(EUROPEANA_ROLE)
-	@JacksonXmlProperty(localName = XmlFields.XML_EDM_EUROPEANA_ROLE)
 	public Map<String, List<String>> getEuropeanaRole() {
 		return europeanaRole;
 	}
@@ -100,7 +89,6 @@ public class Organization extends Entity {
 
 	
 	@JsonGetter(FOAF_PHONE)
-	@JacksonXmlProperty(localName = XmlFields.XML_FOAF_PHONE)
 	public List<String> getPhone() {
 		return phone;
 	}
@@ -113,7 +101,6 @@ public class Organization extends Entity {
 
 	
 	@JsonGetter(FOAF_MBOX)
-	@JacksonXmlProperty(localName = XmlFields.XML_FOAF_MBOX)
 	public List<String> getMbox() {
 		return mbox;
 	}
@@ -125,8 +112,6 @@ public class Organization extends Entity {
 	}
 
 	
-	@JacksonXmlElementWrapper(localName = XmlFields.XML_VCARD_HAS_ADDRESS)
-	@JacksonXmlProperty(localName = XmlFields.XML_VCARD_ADDRESS)
 	@JsonGetter(ADDRESS_TYPE)
 	public String getHasAddress() {
 		return hasAddress;
@@ -190,7 +175,6 @@ public class Organization extends Entity {
 
 	
 	@JsonGetter(COUNTRY)
-	@JacksonXmlProperty(localName = XmlFields.XML_EDM_COUNTRY)
 	public String getCountry() {
 		return country;
 	}
@@ -213,7 +197,6 @@ public class Organization extends Entity {
 
 	
 	@JsonGetter(GEOGRAPHIC_LEVEL)
-	@JacksonXmlProperty(localName = XmlFields.XML_EDM_GEOGRAPHIC_LEVEL)
 	public Map<String, String> getGeographicLevel() {
 		return geographicLevel;
 	}
@@ -227,7 +210,6 @@ public class Organization extends Entity {
 
 	
 	@JsonGetter(ORGANIZATION_DOMAIN)
-	@JacksonXmlProperty(localName = XmlFields.XML_EDM_ORGANIZATION_DOMAIN)
 	public Map<String, List<String>> getOrganizationDomain() {
 		return organizationDomain;
 	}
@@ -240,7 +222,6 @@ public class Organization extends Entity {
 
 	
 	@JsonGetter(FOAF_HOMEPAGE)
-	@JacksonXmlProperty(localName = XmlFields.XML_FOAF_HOMEPAGE)
 	public String getHomepage() {
 		return homepage;
 	}
@@ -253,7 +234,6 @@ public class Organization extends Entity {
 
 	
 	@JsonGetter(FOAF_LOGO)
-	@JacksonXmlProperty(localName = XmlFields.XML_FOAF_LOGO)
 	public String getLogo() {
 		return logo;
 	}

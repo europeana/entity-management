@@ -4,12 +4,9 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 import dev.morphia.annotations.Embedded;
-import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
-import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 @Embedded
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
@@ -27,26 +24,22 @@ public class WebResource {
     String type;
 
     @JsonGetter(WebEntityFields.ID)
-    @JacksonXmlProperty(isAttribute= true, localName = XmlFields.XML_RDF_ABOUT)
     public String getId() {
         return id;
     }
 
     @JsonGetter(WebEntityFields.SOURCE)
-    @JacksonXmlProperty(localName = XmlFields.XML_DC_SOURCE)
     public String getSource() {
         return source;
     }
 
     @JsonGetter(WebEntityFields.THUMBNAIL)
-    @JacksonXmlProperty(localName = XmlFields.XML_FOAF_THUMBNAIL)
     public String getThumbnail() {
         return thumbnail;
     }
 
     
     @JsonGetter(WebEntityFields.TYPE)
-    @JacksonXmlProperty(localName = XmlFields.XML_RDF_TYPE)
     public String getType() {
         return type;
     }

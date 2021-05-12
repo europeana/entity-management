@@ -45,6 +45,7 @@ import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
 import eu.europeana.entitymanagement.web.xml.model.metis.EnrichmentResultList;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -106,7 +107,7 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
 	     */
 	    Assertions.assertNotNull(entityRecord.getEntity().getNote());
 	    Assertions.assertNotNull(entityRecord.getEntity().getSameAs());
-	    Assertions.assertTrue(((Concept) entityRecord.getEntity()).getBroader().length > 1);
+	    Assertions.assertTrue(((Concept) entityRecord.getEntity()).getBroader().size() > 1);
 	    Assertions.assertNotNull(entityRecord.getEntity().getPrefLabel());
 	}
 
@@ -204,11 +205,11 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
          * Assertions
          */
         //Optional<EntityRecord> agent1_updated = entityRecordService.retrieveEntityRecordByUri(agent1.getEntityId());
-        Assertions.assertTrue(agent1.getPlaceOfBirth().size()==1);
+				assertEquals(1, agent1.getPlaceOfBirth().size());
         Assertions.assertTrue(agent1.getPlaceOfBirth().get("").contains("http://data.europeana.eu/place/base/143914"));
         Assertions.assertNull(agent1.getProfessionOrOccupation());
-        String[] isRelatedTo_agent1 = agent1.getIsRelatedTo();
-        Assertions.assertTrue(isRelatedTo_agent1.length==3);
+        List<String> isRelatedTo_agent1 = agent1.getIsRelatedTo();
+				assertEquals(3, isRelatedTo_agent1.size());
         Assertions.assertTrue(String.join(",", isRelatedTo_agent1).contains("Leonardo_da_Vinci"));
         Assertions.assertTrue(String.join(",", isRelatedTo_agent1).contains("http://data.europeana.eu/Leonardo_da_Vinci"));
 	}

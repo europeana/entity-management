@@ -31,6 +31,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
 
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Concept;
@@ -378,7 +379,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.id", is(concept.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Concept.name())));
 
-        String contentXml = getRetrieveEntityXmlResponse(requestPath, "external");
+        String contentXml = getRetrieveEntityXmlResponse(requestPath);
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, concept);
     }
 
@@ -451,7 +452,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.id", is(agent.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())));
 
-        String contentXml = getRetrieveEntityXmlResponse(requestPath, "external");
+        String contentXml = getRetrieveEntityXmlResponse(requestPath);
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, agent);
     }
 
@@ -473,7 +474,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.id", is(organization.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())));
 
-        String contentXml = getRetrieveEntityXmlResponse(requestPath, "external");
+        String contentXml = getRetrieveEntityXmlResponse(requestPath);
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, organization);
     }
 
@@ -495,7 +496,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.id", is(place.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Place.name())));
 
-        String contentXml = getRetrieveEntityXmlResponse(requestPath, "external");
+        String contentXml = getRetrieveEntityXmlResponse(requestPath);
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, place);
     }
 
@@ -517,7 +518,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.id", is(timespan.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Timespan.name())));
 
-        String contentXml = getRetrieveEntityXmlResponse(requestPath, "external");
+        String contentXml = getRetrieveEntityXmlResponse(requestPath);
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, timespan);
     }
 
@@ -545,8 +546,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        String contentXml = getRetrieveEntityXmlResponse(requestPath, "internal");
-        assertRetrieveAPIResultsInternalProfile(contentXml, resultActions, entityPreview);
+        assertRetrieveAPIResultsInternalProfile(resultActions, entityPreview);
     }
 
     @Test
@@ -622,6 +622,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
 
     private void assertRetrieveAPIResultsExternalProfile(String contentXml, ResultActions resultActions, Entity entity) throws Exception {
+        //TODO: use xpath instead of String.contains() for checking XML response
         Assertions.assertTrue(contentXml.contains(XmlFields.XML_SKOS_PREF_LABEL));
         for (Entry<String, String> prefLabel : entity.getPrefLabelStringMap().entrySet()) {
             resultActions.andExpect(jsonPath("$.prefLabel", Matchers.hasKey(prefLabel.getKey())));
@@ -634,26 +635,25 @@ public class EMControllerIT extends AbstractIntegrationTest {
         }
     }
 
-    private void assertRetrieveAPIResultsInternalProfile(String contentXml, ResultActions resultActions, EntityPreview entity) throws Exception {
+    /**
+     * Checks API responses for the internal profile.
+     * Only JSON-LD is supported for this profile at the moment.
+     */
+    private void assertRetrieveAPIResultsInternalProfile(ResultActions resultActions, EntityPreview entity) throws Exception {
 
     	resultActions.andExpect(jsonPath("$.proxies[0].sameAs", Matchers.hasItem(entity.getId())));
     	resultActions.andExpect(jsonPath("$.proxies[1].id", Matchers.is(entity.getId())));
     	resultActions.andExpect(jsonPath("$.proxies[0].proxyFor", Matchers.containsString(WebEntityFields.BASE_DATA_EUROPEANA_URI)));
     	resultActions.andExpect(jsonPath("$.proxies[1].proxyFor", Matchers.containsString(WebEntityFields.BASE_DATA_EUROPEANA_URI)));
-    	Assertions.assertTrue(contentXml.contains(entity.getId()));
-    	Assertions.assertTrue(contentXml.contains("proxies"));
-    	Assertions.assertTrue(contentXml.contains("proxyFor"));
-    	Assertions.assertTrue(contentXml.contains(WebEntityFields.BASE_DATA_EUROPEANA_URI));
 
         for (Entry<String, String> prefLabel : entity.getPrefLabel().entrySet()) {
             resultActions.andExpect(jsonPath("$.proxies[0].prefLabel", Matchers.hasKey(prefLabel.getKey())));
-            Assertions.assertTrue(contentXml.contains(prefLabel.getKey()));
         }
     }
 
-    private String getRetrieveEntityXmlResponse(String requestPath, String profile) throws Exception {
+    private String getRetrieveEntityXmlResponse(String requestPath) throws Exception {
     	MvcResult resultXml = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".xml")
-        		.param(WebEntityConstants.QUERY_PARAM_PROFILE, profile)
+        		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
                 .accept(MediaType.APPLICATION_XML))
         		.andExpect(status().isOk())
         		.andReturn();
