@@ -7,8 +7,6 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.web.xml.model.RdfBaseWrapper;
-import eu.europeana.entitymanagement.web.xml.model.XmlAgentImpl;
-import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import eu.europeana.entitymanagement.web.xml.model.metis.EnrichmentResultList;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -53,9 +51,16 @@ public class SerializationConfig {
         return new JaxbAnnotationModule();
     }
 
+    /**
+     * Create a {@link JAXBContext} for use across the application.
+     * JAXBContext is thread-safe, however its marshaller and unmarshaller are not, so
+     * they need to be properly set up for multithreaded use.
+     * @return JAXBContext
+     * @throws JAXBException on exception
+     */
     @Bean
     public JAXBContext jaxbContext() throws JAXBException {
-        // lists all models
+        // args are wrapper classes for Deserializing Metis Response and Serializing API output
         return JAXBContext.newInstance(EnrichmentResultList.class, RdfBaseWrapper.class);
     }
 }

@@ -4,8 +4,10 @@ import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,7 +32,10 @@ public class MetisDereferenceService implements InitializingBean {
 	private final WebClient metisWebClient;
 	private final JAXBContext jaxbContext;
 
-	private Unmarshaller unmarshaller;
+	/**
+	 * Create a separate JAXB unmarshaller for each thread
+	 */
+	private ThreadLocal<Unmarshaller> unmarshaller;
 
 	@Autowired
 	public MetisDereferenceService(EntityManagementConfiguration configuration,
@@ -40,8 +45,14 @@ public class MetisDereferenceService implements InitializingBean {
 	}
 
 	@Override
-	public void afterPropertiesSet() throws Exception {
-		unmarshaller = jaxbContext.createUnmarshaller();
+	public void afterPropertiesSet()  {
+		unmarshaller = ThreadLocal.withInitial(() -> {
+			try {
+				return jaxbContext.createUnmarshaller();
+			} catch (JAXBException e) {
+				throw new FunctionalRuntimeException("Error creating JAXB unmarshaller ", e);
+			}
+		});
 	}
 	/**
      * Dereferences the entity with the given id value.
@@ -53,7 +64,7 @@ public class MetisDereferenceService implements InitializingBean {
      */
     public Entity dereferenceEntityById(String id) throws EuropeanaApiException {
 	String metisResponseBody = fetchMetisResponse(id);
-	return parseMetisResponse(unmarshaller, id, metisResponseBody);
+	return parseMetisResponse(unmarshaller.get(), id, metisResponseBody);
     }
 
 
