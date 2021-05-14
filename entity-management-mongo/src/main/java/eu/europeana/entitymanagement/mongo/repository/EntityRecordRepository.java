@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.mongo.repository;
 
+import static dev.morphia.query.Sort.ascending;
 import static dev.morphia.query.Sort.descending;
 import static dev.morphia.query.experimental.filters.Filters.eq;
 import static dev.morphia.query.experimental.filters.Filters.or;
@@ -165,7 +166,7 @@ public class EntityRecordRepository {
     /**
      * Queries the EntityRecord for records that match the given filter(s).
      *
-     * Results are sorted in descending order of modified time.
+     * Results are sorted in ascending order of modified time.
      *
      * @param filters Query filters
      * @return List with results
@@ -175,7 +176,7 @@ public class EntityRecordRepository {
                 .filter(filters)
                 .iterator(new FindOptions()
                         .skip(start)
-                        .sort(descending(ENTITY_MODIFIED))
+                        .sort(ascending(ENTITY_MODIFIED))
                         .limit(count)).toList();
 
     }

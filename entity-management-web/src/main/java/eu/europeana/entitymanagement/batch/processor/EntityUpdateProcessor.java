@@ -52,16 +52,9 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
     @Override
     public EntityRecord process(@NonNull EntityRecord entityRecord) throws Exception {
         //TODO: Validate entity metadata from Proxy Data Source
-        logger.debug("Perform cleaning and normalization of metadata from external proxy for record {}", entityRecord.getEntityId());
         emEntityFieldCleaner.cleanAndNormalize(entityRecord.getExternalProxy().getEntity());
-        
-        logger.debug("Creating consolidated proxy for entityId={} ", entityRecord.getEntityId());
 	      entityRecordService.mergeEntity(entityRecord);
-
-        logger.debug("Validating constraints for entityId={}", entityRecord.getEntityId());
         validateConstraints(entityRecord);
-
-        logger.debug("Checking referential integrity for entityId={}", entityRecord.getEntityId());
         entityRecordService.performReferentialIntegrity(entityRecord.getEntity());
 
       /*

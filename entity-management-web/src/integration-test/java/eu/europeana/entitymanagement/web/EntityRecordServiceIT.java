@@ -31,7 +31,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -72,6 +72,11 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
     @Autowired
     private ObjectMapper objectMapper;
 
+	@BeforeEach
+	void setUp() {
+		entityRecordService.dropRepository();
+	}
+
 	@Test
 	public void mergeEntities() throws JAXBException, JsonMappingException, JsonProcessingException, IOException,
 		EntityCreationException {
@@ -86,7 +91,7 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
 	     * proxy
 	     */
 	    ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_JSON), ConceptImpl.class);
-	    
+
 	    /*
 	     * creating the entity record
 	     */
@@ -100,12 +105,12 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
 	    externalProxy.setProxyId("http://data.external.org/proxy1");
 	    entityRecord.addProxy(internalProxy);
 	    entityRecord.addProxy(externalProxy);
-	    
+
 	    //aggregation is reused from consolidated version
 	    ConceptImpl notConsolidated = (ConceptImpl) EntityObjectFactory.createEntityObject(EntityTypes.Concept);
 	    notConsolidated.setIsAggregatedBy(new AggregationImpl());
 	    entityRecord.setEntity(notConsolidated);
-	    
+
 
 	    entityRecordService.mergeEntity(entityRecord);
 	    /*
@@ -147,12 +152,12 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
 	    externalProxy.setProxyId("http://www.wikidata.org/entity/Q1101933");
 	    entityRecord.addProxy(internalProxy);
 	    entityRecord.addProxy(externalProxy);
-	    
+
 	   //aggregation is reused from consolidated version
             ConceptImpl notConsolidated = (ConceptImpl) EntityObjectFactory.createEntityObject(EntityTypes.Concept);
             notConsolidated.setIsAggregatedBy(new AggregationImpl());
             entityRecord.setEntity(notConsolidated);
-            
+
 
 	    entityRecordService.mergeEntity(entityRecord);
 	    /*

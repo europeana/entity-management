@@ -2,12 +2,15 @@ package eu.europeana.entitymanagement.batch.entity;
 
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
+import eu.europeana.entitymanagement.batch.BatchRepositoryUtils;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import org.bson.types.ObjectId;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
-
-import java.util.Date;
+import org.springframework.batch.core.JobParameters;
 
 @Entity("JobExecution")
 public class JobExecutionEntity {
@@ -34,6 +37,8 @@ public class JobExecutionEntity {
     private Date createTime;
 
     private Date lastUpdated;
+
+    private Map<String, Object> jobParameters = new HashMap<>();
 
     public int getVersion() {
         return version;
@@ -75,8 +80,19 @@ public class JobExecutionEntity {
         return lastUpdated;
     }
 
+    public void setJobParameters(Map<String, Object> jobParameters) {
+        this.jobParameters = jobParameters;
+    }
+
+    public Map<String, Object> getJobParameters() {
+        return jobParameters;
+    }
+
     public static JobExecutionEntity toEntity(JobExecution jobExecution) {
         JobExecutionEntity jobExecutionEntity = new JobExecutionEntity();
+
+        Map<String, Object> paramMap = BatchRepositoryUtils.convertToMap(
+            jobExecution.getJobParameters());
 
         jobExecutionEntity.version = jobExecution.getVersion();
         jobExecutionEntity.jobExecutionId = jobExecution.getId();
@@ -85,6 +101,7 @@ public class JobExecutionEntity {
         jobExecutionEntity.status = jobExecution.getStatus().toString();
         jobExecutionEntity.exitCode = jobExecution.getExitStatus().getExitCode();
         jobExecutionEntity.exitMessage = jobExecution.getExitStatus().getExitDescription();
+        jobExecutionEntity.jobParameters = paramMap;
         jobExecutionEntity.createTime = jobExecution.getCreateTime();
         jobExecutionEntity.lastUpdated = jobExecution.getLastUpdated();
 
@@ -97,7 +114,10 @@ public class JobExecutionEntity {
             return null;
         }
 
-        JobExecution jobExecution = new JobExecution(jobExecutionEntity.getJobExecutionId());
+        JobParameters jobParameters = BatchRepositoryUtils
+            .convertToJobParameters(jobExecutionEntity.getJobParameters());
+
+        JobExecution jobExecution = new JobExecution(jobExecutionEntity.getJobExecutionId(), jobParameters);
         jobExecution.setStartTime(jobExecutionEntity.getStartTime());
         jobExecution.setEndTime(jobExecutionEntity.getEndTime());
         jobExecution.setStatus(BatchStatus.valueOf(jobExecutionEntity.getStatus()));
@@ -109,4 +129,6 @@ public class JobExecutionEntity {
 
         return jobExecution;
     }
+
+
 }

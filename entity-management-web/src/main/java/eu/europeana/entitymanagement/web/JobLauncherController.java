@@ -25,7 +25,6 @@ public class JobLauncherController {
 
     /**
      * Temporary endpoint to test Spring Batch integration
-     * This triggers a simple job that logs to the console
      */
     @PostMapping("/run")
     public ResponseEntity<String> handle(@RequestBody(required = false) String entityId) throws Exception {
@@ -38,7 +37,13 @@ public class JobLauncherController {
         return ResponseEntity.ok("Job successfully triggered");
     }
 
-
-
-
+    /**
+     * Temporary endpoint to test Spring Batch integration
+     * Retries updates for Failed Tasks
+     */
+    @PostMapping("/run/failed")
+    public ResponseEntity<String> retryFailure() throws Exception {
+        batchService.launchEntityFailureRetryJob();
+        return ResponseEntity.ok("Job successfully triggered");
+    }
 }
