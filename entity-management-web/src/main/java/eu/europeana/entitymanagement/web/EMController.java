@@ -4,7 +4,6 @@ import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.web.EntityIdResponse;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -14,7 +13,6 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -163,11 +161,9 @@ public class EMController extends BaseRest {
 		}
 
 		List<String> existingEntityIds = entityRecordService.retrieveMultipleByEntityId(entityIds);
-
 		// get entityIds in request that weren't retrieved from db
 		List<String> failures = entityIds.stream().filter(e -> !existingEntityIds.contains(e))
 				.collect(Collectors.toList());
-
 
 		// runAsynchronously since we're not including updated entities in response
 		launchUpdateTask(existingEntityIds, true);
@@ -175,6 +171,24 @@ public class EMController extends BaseRest {
 		return  ResponseEntity.accepted().body(new EntityIdResponse(entityIds.size(), existingEntityIds, failures));
 	}
 
+	@ApiOperation(value = "Update metrics for given entities", nickname = "updateMultipleEntityFromDatasource", response = java.lang.Void.class)
+	@PostMapping(value = "/management/metrics", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<EntityIdResponse> updateMetricsMultiple(
+			@RequestBody List<String> entityIds,
+			HttpServletRequest request
+	) throws Exception {
+		if (emConfig.isAuthEnabled()) {
+			verifyWriteAccess(Operations.UPDATE, request);
+		}
+
+		List<String> existingEntityIds = entityRecordService.retrieveMultipleByEntityId(entityIds);
+		List<String> failures = entityIds.stream()
+				.filter(e -> !existingEntityIds.contains(e))
+				.collect(Collectors.toList());
+		launchUpdateMetrics(existingEntityIds);
+
+		return  ResponseEntity.accepted().body(new EntityIdResponse(entityIds.size(), existingEntityIds, failures));
+	}
 
 
 
@@ -391,8 +405,14 @@ public class EMController extends BaseRest {
 	private void launchUpdateTask(List<String> entityIds, boolean runAsynchronously)
       throws Exception {
     logger.info("Launching update task for entityIds={}. async={}", entityIds, runAsynchronously);
-    batchService.launchSingleEntityUpdate(entityIds, runAsynchronously);
+    batchService.launchSpecificEntityUpdate(entityIds, runAsynchronously);
   }
+
+	private void launchUpdateMetrics(List<String> entityIds)
+			throws Exception {
+		logger.info("Launching Update Metrics task for entityIds={}", entityIds);
+		batchService.launchEntityMetricsUpdate(entityIds, true);
+	}
 
 	/**
 	 * Gets the database identifier from an EntityId string
