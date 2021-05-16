@@ -3,6 +3,7 @@ package eu.europeana.entitymanagement.mongo.repository;
 import static dev.morphia.query.Sort.ascending;
 import static dev.morphia.query.Sort.descending;
 import static dev.morphia.query.experimental.filters.Filters.eq;
+import static dev.morphia.query.experimental.filters.Filters.in;
 import static dev.morphia.query.experimental.filters.Filters.or;
 import static eu.europeana.entitymanagement.mongo.repository.EntityRecordFields.*;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_DELETE_OPTS;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.validation.ConstraintViolation;
 import javax.validation.ValidatorFactory;
@@ -74,6 +76,26 @@ public class EntityRecordRepository {
         return datastore.find(EntityRecordImpl.class).filter(
                 eq(ENTITY_ID, entityId))
                 .first();
+    }
+
+    /**
+     * Checks if records exist with the given entityIds. Returns a list of found entityIds.
+     * @param entityIds list of entityIds to check
+     * @return list of found entityIds
+     */
+    public List<String> getExistingEntityIds(List<String> entityIds){
+        // Get all EntityRecords that match the given entityIds
+        List<EntityRecordImpl> entityRecords = datastore.find(EntityRecordImpl.class).filter(
+            in(ENTITY_ID, entityIds))
+            .iterator(
+                new FindOptions()
+                    // we only care about the entityId for this query
+                    .projection().include(ENTITY_ID)
+            )
+            .toList();
+
+
+        return entityRecords.stream().map(EntityRecordImpl::getEntityId).collect(Collectors.toList());
     }
 
 

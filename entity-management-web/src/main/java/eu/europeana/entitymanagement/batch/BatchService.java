@@ -9,6 +9,7 @@ import static eu.europeana.entitymanagement.common.config.AppConfigConstants.SYN
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Date;
+import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.BatchStatus;
@@ -52,16 +53,16 @@ public class BatchService {
   /**
    * Launches the update job for a single entity.
    *
-   * @param entityId          entityId to be used in job
+   * @param entityIds          entityId to be used in job
    * @param runAsynchronously indicates whether this job should be run asynchronously or not
    * @throws Exception on error
    */
-  public void launchSingleEntityUpdate(String entityId, boolean runAsynchronously)
+  public void launchSingleEntityUpdate(List<String> entityIds, boolean runAsynchronously)
       throws Exception {
     JobLauncher launcher = runAsynchronously ? defaultJobLauncher : synchronousJobLauncher;
 
     JobParameters jobParameters = BatchUtils
-        .createJobParameters(new String[]{entityId}, new Date(), mapper);
+        .createJobParameters(entityIds.toArray(String[]::new), new Date(), mapper);
     launcher.run(batchUpdateConfig.updateSpecificEntities(), jobParameters);
   }
 
@@ -70,7 +71,7 @@ public class BatchService {
    *
    * @throws Exception on error
    */
-  public void launchMultiEntityUpdate() throws Exception {
+  public void launchAllEntityUpdate() throws Exception {
 
     defaultJobLauncher.run(batchUpdateConfig.updateAllEntities(),
         BatchUtils.createJobParameters(null, new Date(), mapper));

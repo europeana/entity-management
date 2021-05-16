@@ -324,7 +324,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
         //EntityPreview entityPreview = objectMapper.readValue(loadFile(CONCEPT_BATHTUB), EntityPreview.class);
         final ObjectNode nodeReference = new ObjectMapper().readValue(loadFile(CONCEPT_UPDATE_JSON), ObjectNode.class);
-        Optional<EntityRecord> entityRecordUpdated = entityRecordService.retrieveEntityRecordByUri(registeredEntityNode.path("id").asText());
+        Optional<EntityRecord> entityRecordUpdated = entityRecordService.retrieveByEntityId(registeredEntityNode.path("id").asText());
         Assertions.assertTrue(entityRecordUpdated.isPresent());
         Assertions.assertEquals(nodeReference.path("depiction").asText(),
             entityRecordUpdated.get().getEuropeanaProxy().getEntity().getDepiction());
@@ -584,7 +584,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isNoContent());
 
         // check that record was disabled
-        Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveEntityRecordByUri(record.getEntityId());
+        Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveByEntityId(record.getEntityId());
 
         assert dbRecordOptional.isPresent();
         Assertions.assertTrue(dbRecordOptional.get().isDisabled());
@@ -607,7 +607,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isPreconditionFailed());
 
         // check that record was disabled
-        Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveEntityRecordByUri(record.getEntityId());
+        Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveByEntityId(record.getEntityId());
 
         assert dbRecordOptional.isPresent();
         Assertions.assertFalse(dbRecordOptional.get().isDisabled());
@@ -616,7 +616,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
     
     private void assertEntityExists(MvcResult result) throws JsonMappingException, JsonProcessingException, UnsupportedEncodingException {
     	final ObjectNode node = new ObjectMapper().readValue(result.getResponse().getContentAsString(StandardCharsets.UTF_8), ObjectNode.class);
-    	Optional<EntityRecord> dbRecord = entityRecordService.retrieveEntityRecordByUri(node.get("id").asText());
+    	Optional<EntityRecord> dbRecord = entityRecordService.retrieveByEntityId(node.get("id").asText());
         Assertions.assertTrue(dbRecord.isPresent());
     }
 

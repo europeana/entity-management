@@ -3,12 +3,18 @@ package eu.europeana.entitymanagement.web;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
+import eu.europeana.entitymanagement.definitions.web.EntityIdResponse;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -145,6 +151,30 @@ public class EMController extends BaseRest {
 		EntityRecord entityRecord = retrieveEntityRecord(type, identifier);
 		return launchTaskAndRetrieveEntity(type, identifier, entityRecord, profile);
 	}
+
+	@ApiOperation(value = "Update multiple entities from external data source", nickname = "updateMultipleEntityFromDatasource", response = java.lang.Void.class)
+	@PostMapping(value = "/management/update", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<EntityIdResponse> updateMultipleExternalSource(
+			@RequestBody List<String> entityIds,
+			HttpServletRequest request
+	) throws Exception {
+		if (emConfig.isAuthEnabled()) {
+			verifyWriteAccess(Operations.UPDATE, request);
+		}
+
+		List<String> existingEntityIds = entityRecordService.retrieveMultipleByEntityId(entityIds);
+
+		// get entityIds in request that weren't retrieved from db
+		List<String> failures = entityIds.stream().filter(e -> !existingEntityIds.contains(e))
+				.collect(Collectors.toList());
+
+
+		// runAsynchronously since we're not including updated entities in response
+		launchUpdateTask(existingEntityIds, true);
+
+		return  ResponseEntity.accepted().body(new EntityIdResponse(entityIds.size(), existingEntityIds, failures));
+	}
+
 
 
 
@@ -308,11 +338,12 @@ public class EMController extends BaseRest {
 		return ResponseEntity.status(status).headers(headers).eTag(etag).body(body);
 	}
 
+
 	private EntityRecord retrieveEntityRecord(String type, String identifier)
 			throws EuropeanaApiException {
 		String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
 		Optional<EntityRecord> entityRecordOptional = entityRecordService
-				.retrieveEntityRecordByUri(entityUri);
+				.retrieveByEntityId(entityUri);
 		if (entityRecordOptional.isEmpty()) {
 			throw new EntityNotFoundException(entityUri);
 		}
@@ -327,7 +358,7 @@ public class EMController extends BaseRest {
 	private ResponseEntity<String> launchTaskAndRetrieveEntity(String type, String identifier,
 			EntityRecord entityRecord, String profile) throws Exception {
 		// launch synchronous update, then retrieve entity from DB afterwards
-		launchUpdateTask(entityRecord.getEntityId(), false);
+		launchUpdateTask(Collections.singletonList(entityRecord.getEntityId()), false);
 		entityRecord = retrieveEntityRecord(type, identifier);
 
 		return generateResponseEntity(profile, FormatTypes.jsonld, null, entityRecord, HttpStatus.ACCEPTED);
@@ -357,10 +388,10 @@ public class EMController extends BaseRest {
 		return null;
 	}
 
-	private void launchUpdateTask(String entityUri, boolean runAsynchronously)
+	private void launchUpdateTask(List<String> entityIds, boolean runAsynchronously)
       throws Exception {
-    logger.info("Launching update task for entityId={}. async={}", entityUri, runAsynchronously);
-    batchService.launchSingleEntityUpdate(entityUri, runAsynchronously);
+    logger.info("Launching update task for entityIds={}. async={}", entityIds, runAsynchronously);
+    batchService.launchSingleEntityUpdate(entityIds, runAsynchronously);
   }
 
 	/**

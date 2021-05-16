@@ -79,10 +79,14 @@ public class EntityRecordService {
 	this.datasources = datasources;
     }
 
-    public Optional<EntityRecord> retrieveEntityRecordByUri(String entityUri) {
-	return Optional.ofNullable(entityRecordRepository.findByEntityId(entityUri));
+    public Optional<EntityRecord> retrieveByEntityId(String entityId) {
+	return Optional.ofNullable(entityRecordRepository.findByEntityId(entityId));
     }
 
+
+    public List<String> retrieveMultipleByEntityId(List<String> entityIds){
+			return entityRecordRepository.getExistingEntityIds(entityIds);
+		}
     /**
      * Gets coreferenced entity with the given id (sameAs or exactMatch value in the
      * Consolidated version)
@@ -188,7 +192,7 @@ public class EntityRecordService {
      */
     public Optional<EntityRecord> retrieveMetisCoreferenceSameAs(String[] rdfResources) {
 	for (String resource : rdfResources) {
-	    Optional<EntityRecord> entityRecordOptional = retrieveEntityRecordByUri(resource);
+	    Optional<EntityRecord> entityRecordOptional = retrieveByEntityId(resource);
 	    if (entityRecordOptional.isPresent()) {
 		return entityRecordOptional;
 	    }

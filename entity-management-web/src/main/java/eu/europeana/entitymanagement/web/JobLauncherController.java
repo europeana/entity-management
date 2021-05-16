@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.web;
 
 import eu.europeana.entitymanagement.batch.BatchService;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -27,11 +28,11 @@ public class JobLauncherController {
      * Temporary endpoint to test Spring Batch integration
      */
     @PostMapping("/run")
-    public ResponseEntity<String> handle(@RequestBody(required = false) String entityId) throws Exception {
-        if (StringUtils.hasLength(entityId)) {
-            batchService.launchSingleEntityUpdate(entityId, true);
+    public ResponseEntity<String> handle(@RequestBody(required = false) List<String> entityIds) throws Exception {
+        if (entityIds != null && !entityIds.isEmpty()) {
+            batchService.launchSingleEntityUpdate(entityIds, true);
         } else {
-            batchService.launchMultiEntityUpdate();
+            batchService.launchAllEntityUpdate();
         }
 
         return ResponseEntity.ok("Job successfully triggered");
