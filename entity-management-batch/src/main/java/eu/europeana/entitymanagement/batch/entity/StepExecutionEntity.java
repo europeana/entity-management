@@ -1,26 +1,39 @@
 package eu.europeana.entitymanagement.batch.entity;
 
+import static eu.europeana.entitymanagement.batch.BatchConstants.JOB_EXECUTION_ID_KEY;
+import static eu.europeana.entitymanagement.batch.BatchConstants.VERSION_KEY;
+
 import dev.morphia.annotations.Entity;
+import dev.morphia.annotations.Field;
 import dev.morphia.annotations.Id;
+import dev.morphia.annotations.Index;
+import dev.morphia.annotations.Indexed;
+import dev.morphia.annotations.Indexes;
+import java.util.Date;
 import org.bson.types.ObjectId;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 
-import java.util.Date;
-
 @Entity("StepExecution")
+@Indexes({
+    @Index(fields = { @Field(JOB_EXECUTION_ID_KEY), @Field(VERSION_KEY) }),
+})
 public class StepExecutionEntity {
     @Id
     private ObjectId _id;
 
+    @Indexed
     private long stepExecutionId;
 
     private long jobExecutionId;
 
+    @Indexed
     private String stepName;
+
     private Date startTime;
+
     private Date endTime;
     private String status;
     private int commitCount;

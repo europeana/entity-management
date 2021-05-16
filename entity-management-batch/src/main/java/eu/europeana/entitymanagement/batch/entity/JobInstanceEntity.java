@@ -1,28 +1,30 @@
 package eu.europeana.entitymanagement.batch.entity;
 
+import static eu.europeana.entitymanagement.batch.BatchConstants.JOB_KEY_GENERATOR;
+
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
+import dev.morphia.annotations.Indexed;
 import eu.europeana.entitymanagement.batch.BatchRepositoryUtils;
+import java.util.HashMap;
+import java.util.Map;
 import org.bson.types.ObjectId;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static eu.europeana.entitymanagement.batch.BatchConstants.*;
 
 @Entity("JobInstance")
 public class JobInstanceEntity {
     @Id
     private ObjectId _id;
 
+    @Indexed
     private String jobName;
 
     private long jobInstanceId;
 
     private int version;
 
+    @Indexed
     private String jobKey;
 
     private Map<String, Object> jobParameters = new HashMap<>();

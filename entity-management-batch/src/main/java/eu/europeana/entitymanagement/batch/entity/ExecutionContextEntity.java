@@ -1,17 +1,25 @@
 package eu.europeana.entitymanagement.batch.entity;
 
-import dev.morphia.annotations.Entity;
-import dev.morphia.annotations.Id;
-import org.bson.types.ObjectId;
-import org.springframework.batch.core.repository.ExecutionContextSerializer;
-import org.springframework.batch.item.ExecutionContext;
+import static eu.europeana.entitymanagement.batch.BatchConstants.EXECUTION_CTX_ID_KEY;
+import static eu.europeana.entitymanagement.batch.BatchConstants.EXECUTION_CTX_TYPE_KEY;
 
+import dev.morphia.annotations.Entity;
+import dev.morphia.annotations.Field;
+import dev.morphia.annotations.Id;
+import dev.morphia.annotations.Index;
+import dev.morphia.annotations.Indexes;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import org.bson.types.ObjectId;
+import org.springframework.batch.core.repository.ExecutionContextSerializer;
+import org.springframework.batch.item.ExecutionContext;
 
 @Entity("ExecutionContext")
+@Indexes({
+    @Index(fields = {@Field(EXECUTION_CTX_ID_KEY), @Field(EXECUTION_CTX_TYPE_KEY)})
+})
 public class ExecutionContextEntity {
     @Id
     private ObjectId _id;

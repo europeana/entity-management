@@ -4,12 +4,14 @@ import com.mongodb.client.result.UpdateResult;
 import dev.morphia.Datastore;
 import dev.morphia.query.FindOptions;
 import dev.morphia.query.experimental.updates.UpdateOperators;
+import eu.europeana.entitymanagement.batch.entity.ExecutionContextEntity;
 import eu.europeana.entitymanagement.batch.entity.JobExecutionEntity;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.repository.dao.JobExecutionDao;
 import org.springframework.batch.core.repository.dao.NoSuchObjectException;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
@@ -35,8 +37,9 @@ public class JobExecutionRepository extends AbstractRepository implements JobExe
     public void saveJobExecution(JobExecution jobExecution) {
         validateJobExecution(jobExecution);
         jobExecution.incrementVersion();
-        jobExecution.setId(generateSequence(JobExecutionEntity.class.getSimpleName()));
-
+        synchronized (this) {
+            jobExecution.setId(generateSequence(JobExecutionEntity.class.getSimpleName()));
+        }
         JobExecutionEntity jobExecutionEntity = JobExecutionEntity.toEntity(jobExecution);
         getDataStore().save(jobExecutionEntity);
     }

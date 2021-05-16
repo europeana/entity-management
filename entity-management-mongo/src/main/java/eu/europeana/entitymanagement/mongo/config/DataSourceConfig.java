@@ -58,6 +58,10 @@ public class DataSourceConfig {
     @Bean(name = AppConfigConstants.BEAN_BATCH_DATA_STORE)
     public Datastore batchDataStore(MongoClient mongoClient) {
         logger.info("Configuring Batch database: {}", batchDatabase);
-        return Morphia.createDatastore(mongoClient, batchDatabase);
+        Datastore datastore = Morphia.createDatastore(mongoClient, batchDatabase);
+        // Indexes aren't created unless Entity classes are explicitly mapped.
+        datastore.getMapper().mapPackage("eu.europeana.entitymanagement.batch.entity");
+        datastore.ensureIndexes();
+        return datastore;
     }
 }

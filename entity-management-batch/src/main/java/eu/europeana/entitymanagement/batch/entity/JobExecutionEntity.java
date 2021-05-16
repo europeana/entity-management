@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement.batch.entity;
 
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
+import dev.morphia.annotations.Indexed;
 import eu.europeana.entitymanagement.batch.BatchRepositoryUtils;
 import java.util.Date;
 import java.util.HashMap;
@@ -20,8 +21,10 @@ public class JobExecutionEntity {
 
     private int version;
 
+    @Indexed
     private long jobExecutionId;
 
+    @Indexed
     private long jobInstanceId;
 
     private Date startTime;
