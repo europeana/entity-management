@@ -1,7 +1,6 @@
 package eu.europeana.entitymanagement.mongo.repository;
 
 import static dev.morphia.query.Sort.ascending;
-import static dev.morphia.query.Sort.descending;
 import static dev.morphia.query.experimental.filters.Filters.eq;
 import static dev.morphia.query.experimental.filters.Filters.in;
 import static dev.morphia.query.experimental.filters.Filters.or;
@@ -79,14 +78,15 @@ public class EntityRecordRepository {
     }
 
     /**
-     * Checks if records exist with the given entityIds. Returns a list of found entityIds.
+     * Checks if records exist with the given entityIds. Disabled records are excluded from result.
      * @param entityIds list of entityIds to check
      * @return list of found entityIds
      */
     public List<String> getExistingEntityIds(List<String> entityIds){
         // Get all EntityRecords that match the given entityIds
         List<EntityRecordImpl> entityRecords = datastore.find(EntityRecordImpl.class).filter(
-            in(ENTITY_ID, entityIds))
+            in(ENTITY_ID, entityIds),
+            eq(DISABLED, false))
             .iterator(
                 new FindOptions()
                     // we only care about the entityId for this query
