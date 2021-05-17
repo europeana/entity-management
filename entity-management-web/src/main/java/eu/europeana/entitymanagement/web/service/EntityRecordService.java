@@ -109,6 +109,17 @@ public class EntityRecordService {
 	return saveEntityRecord(er);
     }
 
+	/**
+	 * Re-Enable an already existing entity record.
+	 *
+	 * @param entityRecord entity record to update
+	 * @return Re-Enabled entity
+	 */
+	public EntityRecord enableEntityRecord(EntityRecord entityRecord) {
+	entityRecord.setDisabled(false);
+	return saveEntityRecord(entityRecord);
+	}
+
     /**
      * Updates an already existing entity record.
      * 

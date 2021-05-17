@@ -83,7 +83,7 @@ public class EMController extends BaseRest {
 		if (emConfig.isAuthEnabled()) {
 			verifyWriteAccess(Operations.DELETE, request);
 		}
-		EntityRecord entityRecord = retrieveEntityRecord(type, identifier.toLowerCase());
+		EntityRecord entityRecord = retrieveEntityRecord(type, identifier.toLowerCase(), false);
 
 		Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
 		long timestamp = isAggregatedBy != null ?
@@ -95,6 +95,27 @@ public class EMController extends BaseRest {
 	    entityRecordService.disableEntityRecord(entityRecord);
 	    return ResponseEntity.noContent().build();
     }
+
+	@ApiOperation(value = "Re-enable an entity", nickname = "enableEntity", response = java.lang.Void.class)
+	@RequestMapping(value = { "/{type}/base/{identifier}",
+			"/{type}/{identifier}" }, method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<String> enableEntity(
+			@RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
+			@RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
+			@PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
+			@PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
+			HttpServletRequest request) throws HttpException, EuropeanaApiException {
+		if (emConfig.isAuthEnabled()) {
+			verifyWriteAccess(Operations.UPDATE, request);
+		}
+		EntityRecord entityRecord = retrieveEntityRecord(type, identifier.toLowerCase(), true);
+		if (!entityRecord.isDisabled()) {
+			return createResponse(profile, type, identifier, FormatTypes.jsonld, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
+		}
+		logger.debug("Re-enabling entity : {}/{}", type, identifier);
+		entityRecordService.enableEntityRecord(entityRecord);
+		return createResponse(profile, type, identifier, FormatTypes.jsonld, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
+	}
 
     @ApiOperation(value = "Update an entity", nickname = "updateEntity", response = java.lang.Void.class)
     @RequestMapping(value = { "/{type}/base/{identifier}", "/{type}/{identifier}" },method = RequestMethod.PUT, produces = {
@@ -110,7 +131,7 @@ public class EMController extends BaseRest {
 			if (emConfig.isAuthEnabled()) {
 				verifyWriteAccess(Operations.UPDATE, request);
 			}
-		 EntityRecord entityRecord = retrieveEntityRecord(type, identifier);
+		 EntityRecord entityRecord = retrieveEntityRecord(type, identifier, false);
 
 			Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
 			long timestamp = isAggregatedBy != null ?
@@ -142,7 +163,7 @@ public class EMController extends BaseRest {
 		if (emConfig.isAuthEnabled()) {
 			verifyWriteAccess(Operations.UPDATE, request);
 		}
-		EntityRecord entityRecord = retrieveEntityRecord(type, identifier);
+		EntityRecord entityRecord = retrieveEntityRecord(type, identifier, false);
 		return launchTaskAndRetrieveEntity(type, identifier, entityRecord, profile);
 	}
 
@@ -279,7 +300,7 @@ public class EMController extends BaseRest {
 	    throw new HttpBadRequestException("Invalid profile");
 	}
 
-			EntityRecord entityRecord = retrieveEntityRecord(type, identifier);
+			EntityRecord entityRecord = retrieveEntityRecord(type, identifier,false);
 			logger.debug("Entity retrieved entityId={}, using {} format", entityRecord.getEntityId(), outFormat);
 			return generateResponseEntity(profile, outFormat, contentType, entityRecord, HttpStatus.OK);
 		}
@@ -308,7 +329,7 @@ public class EMController extends BaseRest {
 		return ResponseEntity.status(status).headers(headers).eTag(etag).body(body);
 	}
 
-	private EntityRecord retrieveEntityRecord(String type, String identifier)
+	private EntityRecord retrieveEntityRecord(String type, String identifier, boolean enableEntity)
 			throws EuropeanaApiException {
 		String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
 		Optional<EntityRecord> entityRecordOptional = entityRecordService
@@ -318,7 +339,7 @@ public class EMController extends BaseRest {
 		}
 
 		EntityRecord entityRecord = entityRecordOptional.get();
-		if (entityRecord.isDisabled()) {
+		if (entityRecord.isDisabled() && !enableEntity) {
 			throw new EntityRemovedException(String.format(ENTITY_ID_REMOVED_MSG, entityUri));
 		}
 		return entityRecord;
@@ -328,7 +349,7 @@ public class EMController extends BaseRest {
 			EntityRecord entityRecord, String profile) throws Exception {
 		// launch synchronous update, then retrieve entity from DB afterwards
 		launchUpdateTask(entityRecord.getEntityId(), false);
-		entityRecord = retrieveEntityRecord(type, identifier);
+		entityRecord = retrieveEntityRecord(type, identifier, false);
 
 		return generateResponseEntity(profile, FormatTypes.jsonld, null, entityRecord, HttpStatus.ACCEPTED);
 	}
