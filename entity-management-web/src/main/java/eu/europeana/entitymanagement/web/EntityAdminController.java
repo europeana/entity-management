@@ -32,8 +32,6 @@ public class EntityAdminController extends BaseRest {
     @Autowired
     private EntityManagementConfiguration emConfig;
 
-    private EMController emController;
-
     /**
      * Method to publish to Enrichment
      *
@@ -54,7 +52,7 @@ public class EntityAdminController extends BaseRest {
         if (emConfig.isAuthEnabled()) {
             verifyWriteAccess(Operations.DELETE, request);
         }
-        EntityRecord entityRecord = emController.retrieveEntityRecord(type, identifier.toLowerCase());
+        EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier.toLowerCase());
         logger.debug("Deleting permanently entity : {}/{}", type, identifier);
         entityRecordService.delete(entityRecord.getEntityId());
         return ResponseEntity.noContent().build();

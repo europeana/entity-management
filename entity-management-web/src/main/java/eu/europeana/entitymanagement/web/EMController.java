@@ -32,7 +32,6 @@ import eu.europeana.entitymanagement.batch.BatchService;
 import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.exception.EtagMismatchException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
@@ -56,8 +55,7 @@ public class EMController extends BaseRest {
   private final BatchService batchService;
   private final EntityManagementConfiguration emConfig;
 
-	private static final String ENTITY_ID_REMOVED_MSG = "Entity '%s' has been removed";
-	private static final String EXTERNAL_ID_REMOVED_MSG = "Entity id '%s' already exists as '%s', which has been removed";
+  private static final String EXTERNAL_ID_REMOVED_MSG = "Entity id '%s' already exists as '%s', which has been removed";
 
   @Autowired
 	public EMController(EntityRecordService entityRecordService,
@@ -83,7 +81,7 @@ public class EMController extends BaseRest {
 		if (emConfig.isAuthEnabled()) {
 			verifyWriteAccess(Operations.DELETE, request);
 		}
-		EntityRecord entityRecord = retrieveEntityRecord(type, identifier.toLowerCase());
+		EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier.toLowerCase());
 
 		Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
 		long timestamp = isAggregatedBy != null ?
@@ -110,7 +108,7 @@ public class EMController extends BaseRest {
 			if (emConfig.isAuthEnabled()) {
 				verifyWriteAccess(Operations.UPDATE, request);
 			}
-		 EntityRecord entityRecord = retrieveEntityRecord(type, identifier);
+		 EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier);
 
 			Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
 			long timestamp = isAggregatedBy != null ?
@@ -142,7 +140,7 @@ public class EMController extends BaseRest {
 		if (emConfig.isAuthEnabled()) {
 			verifyWriteAccess(Operations.UPDATE, request);
 		}
-		EntityRecord entityRecord = retrieveEntityRecord(type, identifier);
+		EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier);
 		return launchTaskAndRetrieveEntity(type, identifier, entityRecord, profile);
 	}
 
@@ -279,7 +277,7 @@ public class EMController extends BaseRest {
 	    throw new HttpBadRequestException("Invalid profile");
 	}
 
-			EntityRecord entityRecord = retrieveEntityRecord(type, identifier);
+			EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier);
 			logger.debug("Entity retrieved entityId={}, using {} format", entityRecord.getEntityId(), outFormat);
 			return generateResponseEntity(profile, outFormat, contentType, entityRecord, HttpStatus.OK);
 		}
@@ -308,27 +306,11 @@ public class EMController extends BaseRest {
 		return ResponseEntity.status(status).headers(headers).eTag(etag).body(body);
 	}
 
-	protected EntityRecord retrieveEntityRecord(String type, String identifier)
-			throws EuropeanaApiException {
-		String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
-		Optional<EntityRecord> entityRecordOptional = entityRecordService
-				.retrieveEntityRecordByUri(entityUri);
-		if (entityRecordOptional.isEmpty()) {
-			throw new EntityNotFoundException(entityUri);
-		}
-
-		EntityRecord entityRecord = entityRecordOptional.get();
-		if (entityRecord.isDisabled()) {
-			throw new EntityRemovedException(String.format(ENTITY_ID_REMOVED_MSG, entityUri));
-		}
-		return entityRecord;
-	}
-
 	private ResponseEntity<String> launchTaskAndRetrieveEntity(String type, String identifier,
 			EntityRecord entityRecord, String profile) throws Exception {
 		// launch synchronous update, then retrieve entity from DB afterwards
 		launchUpdateTask(entityRecord.getEntityId(), false);
-		entityRecord = retrieveEntityRecord(type, identifier);
+		entityRecord = entityRecordService.retrieveEntityRecord(type, identifier);
 
 		return generateResponseEntity(profile, FormatTypes.jsonld, null, entityRecord, HttpStatus.ACCEPTED);
 	}
