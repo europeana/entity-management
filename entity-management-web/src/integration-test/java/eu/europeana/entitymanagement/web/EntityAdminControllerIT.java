@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.impl.ConceptImpl;
@@ -32,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
-public class EntityAdminControllerIT {
+public class EntityAdminControllerIT extends AbstractIntegrationTest {
 
     @Autowired
     private WebApplicationContext webApplicationContext;
