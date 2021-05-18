@@ -1,41 +1,9 @@
 package eu.europeana.entitymanagement.web;
 
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT1_REFERENTIAL_INTEGRITY_JSON;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT2_REFERENTIAL_INTEGRITY_JSON;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_DA_VINCI_REFERENTIAL_INTEGRITY_JSON;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_DA_VINCI_REFERENTIAL_INTEGRTITY_PERFORMED_JSON;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_FLORENCE_REFERENTIAL_INTEGRTITY;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_SALAI_REFERENTIAL_INTEGRTITY;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_ENGINEERING_REFERENTIAL_INTEGRTITY;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_JSON;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_AMBOISE_REFERENTIAL_INTEGRTITY;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_FLORENCE_REFERENTIAL_INTEGRTITY;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_FRANCE_REFERENTIAL_INTEGRTITY;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_REFERENTIAL_INTEGRITY_JSON;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_SFORZA_CASTLE_REFERENTIAL_INTEGRTITY;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_15_REFERENTIAL_INTEGRTITY;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_16_REFERENTIAL_INTEGRTITY;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
-import static eu.europeana.entitymanagement.web.BaseMvcTestUtils.CONCEPT_BATHTUB;
-import static eu.europeana.entitymanagement.web.BaseMvcTestUtils.CONCEPT_CONSOLIDATED_BATHTUB;
-import static eu.europeana.entitymanagement.web.BaseMvcTestUtils.CONCEPT_DATA_RECONCELIATION_XML;
-import static eu.europeana.entitymanagement.web.BaseMvcTestUtils.CONCEPT_METIS_BATHTUB;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
-import eu.europeana.entitymanagement.definitions.model.Agent;
-import eu.europeana.entitymanagement.definitions.model.Aggregation;
-import eu.europeana.entitymanagement.definitions.model.Concept;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.EntityProxy;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.Place;
-import eu.europeana.entitymanagement.exception.EntityCreationException;
+import eu.europeana.entitymanagement.definitions.model.*;
 import eu.europeana.entitymanagement.utils.EntityComparator;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.service.EntityObjectFactory;
@@ -43,17 +11,24 @@ import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
 import eu.europeana.entitymanagement.web.xml.model.metis.EnrichmentResultList;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import java.io.InputStream;
+import java.util.List;
+
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.*;
+import static eu.europeana.entitymanagement.web.BaseMvcTestUtils.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
 public class EntityRecordServiceIT extends AbstractIntegrationTest{
@@ -65,21 +40,24 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
     @Autowired
     private ObjectMapper objectMapper;
 
+	@BeforeEach
+	void setUp() {
+		entityRecordService.dropRepository();
+	}
+
 	@Test
-	public void mergeEntities() throws JAXBException, JsonMappingException, JsonProcessingException, IOException,
-		EntityCreationException {
+	public void mergeEntities() throws Exception{
 	    /*
 	     * metis deserializer -> get the entity for the external proxy
 	     */
-	    String metisResponse = CONCEPT_DATA_RECONCELIATION_XML;
-	    XmlConceptImpl xmlEntity = (XmlConceptImpl) getMetisResponse(metisResponse);
+		XmlConceptImpl xmlEntity = (XmlConceptImpl) getMetisResponse(CONCEPT_DATA_RECONCELIATION_XML);
 
 	    /*
 	     * read the test data from the json file -> get the entity for the internal
 	     * proxy
 	     */
 	    Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
-	    
+
 	    /*
 	     * creating the entity record
 	     */
@@ -93,12 +71,12 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
 	    externalProxy.setProxyId("http://data.external.org/proxy1");
 	    entityRecord.addProxy(internalProxy);
 	    entityRecord.addProxy(externalProxy);
-	    
+
 	    //aggregation is reused from consolidated version
-	    Concept notConsolidated = (Concept) EntityObjectFactory.createEntityObject(EntityTypes.Concept);
+	    Concept notConsolidated = EntityObjectFactory.createEntityObject(EntityTypes.Concept);
 	    notConsolidated.setIsAggregatedBy(new Aggregation());
 	    entityRecord.setEntity(notConsolidated);
-	    
+
 
 	    entityRecordService.mergeEntity(entityRecord);
 	    /*
@@ -113,13 +91,11 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
 
 	
 	@Test
-	public void mergeEntitiesBathtub() throws JAXBException, JsonMappingException, JsonProcessingException, IOException,
-		EntityCreationException {
+	public void mergeEntitiesBathtub() throws Exception {
 	    /*
 	     * metis deserializer -> get the entity for the external proxy
 	     */
-	    String metisResponse = CONCEPT_METIS_BATHTUB;
-	    XmlConceptImpl xmlEntity = (XmlConceptImpl) getMetisResponse(metisResponse);
+		XmlConceptImpl xmlEntity = (XmlConceptImpl) getMetisResponse(CONCEPT_METIS_BATHTUB);
 
 	    /*
 	     * read the test data from the json file -> get the entity for the internal
@@ -140,12 +116,12 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
 	    externalProxy.setProxyId("http://www.wikidata.org/entity/Q1101933");
 	    entityRecord.addProxy(internalProxy);
 	    entityRecord.addProxy(externalProxy);
-	    
+
 	   //aggregation is reused from consolidated version
-            Concept notConsolidated = (Concept) EntityObjectFactory.createEntityObject(EntityTypes.Concept);
+            Concept notConsolidated = EntityObjectFactory.createEntityObject(EntityTypes.Concept);
             notConsolidated.setIsAggregatedBy(new Aggregation());
             entityRecord.setEntity(notConsolidated);
-            
+
 
 	    entityRecordService.mergeEntity(entityRecord);
 	    /*
@@ -160,11 +136,11 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
 	    
 	    
 	    EntityComparator entityComparator = new EntityComparator();
-	    Assertions.assertTrue(entityComparator.compare(concept_consolidated, entityRecord.getEntity())==0);    
+		assertEquals(0, entityComparator.compare(concept_consolidated, entityRecord.getEntity()));
 	    
 	}
 	
-	private XmlBaseEntityImpl getMetisResponse(String metisResponse) throws JAXBException {
+	private XmlBaseEntityImpl<?> getMetisResponse(String metisResponse) throws JAXBException {
 	    InputStream is = getClass().getResourceAsStream(metisResponse);
 	    JAXBContext jaxbContext = JAXBContext.newInstance(EnrichmentResultList.class);
 	    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
@@ -178,7 +154,7 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
 	}
 	
 	@Test
-	public void performGlobalReferentialIntegrity () throws JsonMappingException, JsonProcessingException, IOException {
+	public void performGlobalReferentialIntegrity () throws Exception{
         entityRecordService.dropRepository();
 		// read the test data from the file
         Agent agent1 = objectMapper.readValue(loadFile(AGENT1_REFERENTIAL_INTEGRITY_JSON), Agent.class);
@@ -215,7 +191,7 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
 	}
 
 	@Test
-	public void performReferentialIntegrity_DaVinci () throws JsonMappingException, JsonProcessingException, IOException, JAXBException, EntityCreationException {
+	public void performReferentialIntegrity_DaVinci () throws Exception{
 	    //TODO: implement the following
 	    //1. create record for agent-davinci-referential-integrity.json
 	    //2. create records for all references entities, xml files available in resources/ref-integrity/references
@@ -300,7 +276,7 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
         //compare (all fields) of the updated da vinci entity against the expected result available in given file
         Agent agentDaVinciForChecking = objectMapper.readValue(loadFile(AGENT_DA_VINCI_REFERENTIAL_INTEGRTITY_PERFORMED_JSON), Agent.class);
 	    EntityComparator entityComparator = new EntityComparator();
-	    Assertions.assertTrue(entityComparator.compare(agentDaVinciForChecking, agentDaVinci)==0);
+		assertEquals(0, entityComparator.compare(agentDaVinciForChecking, agentDaVinci));
 	}
 	       
 }

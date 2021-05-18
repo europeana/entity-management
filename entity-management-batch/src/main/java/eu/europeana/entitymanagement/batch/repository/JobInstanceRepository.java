@@ -36,9 +36,11 @@ public class JobInstanceRepository extends AbstractRepository implements JobInst
         Assert.state(getJobInstance(jobName, jobParameters) == null,
                 "JobInstance must not already exist");
 
-        long jobId = generateSequence(JobInstanceEntity.class.getSimpleName());
-
-        JobInstance jobInstance = new JobInstance(jobId, jobName);
+        JobInstance jobInstance;
+        synchronized (this) {
+            long jobId = generateSequence(JobInstanceEntity.class.getSimpleName());
+            jobInstance= new JobInstance(jobId, jobName);
+        }
         jobInstance.incrementVersion();
 
         JobInstanceEntity jobInstanceEntity = JobInstanceEntity.toEntity(jobInstance, jobParameters);

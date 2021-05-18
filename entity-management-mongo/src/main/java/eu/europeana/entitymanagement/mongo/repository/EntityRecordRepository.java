@@ -1,12 +1,12 @@
 package eu.europeana.entitymanagement.mongo.repository;
 
-import static dev.morphia.query.Sort.descending;
+import static dev.morphia.query.Sort.ascending;
 import static dev.morphia.query.experimental.filters.Filters.eq;
 import static dev.morphia.query.experimental.filters.Filters.or;
-import static eu.europeana.entitymanagement.mongo.repository.EntityRecordFields.ENTITY_EXACT_MATCH;
-import static eu.europeana.entitymanagement.mongo.repository.EntityRecordFields.ENTITY_ID;
-import static eu.europeana.entitymanagement.mongo.repository.EntityRecordFields.ENTITY_MODIFIED;
-import static eu.europeana.entitymanagement.mongo.repository.EntityRecordFields.ENTITY_SAME_AS;
+import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_EXACT_MATCH;
+import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_ID;
+import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_MODIFIED;
+import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_SAME_AS;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_DELETE_OPTS;
 
 import com.mongodb.client.model.ReturnDocument;
@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Optional;
 import javax.annotation.Resource;
 import javax.validation.ValidatorFactory;
+
+import eu.europeana.entitymanagement.definitions.EntityRecordFields;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Repository;
@@ -160,7 +162,7 @@ public class EntityRecordRepository {
     /**
      * Queries the EntityRecord for records that match the given filter(s).
      *
-     * Results are sorted in descending order of modified time.
+     * Results are sorted in ascending order of modified time.
      *
      * @param filters Query filters
      * @return List with results
@@ -170,7 +172,7 @@ public class EntityRecordRepository {
                 .filter(filters)
                 .iterator(new FindOptions()
                         .skip(start)
-                        .sort(descending(ENTITY_MODIFIED))
+                        .sort(ascending(ENTITY_MODIFIED))
                         .limit(count)).toList();
 
     }

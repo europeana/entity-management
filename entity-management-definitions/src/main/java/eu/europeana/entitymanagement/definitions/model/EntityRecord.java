@@ -15,9 +15,14 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 
+import static eu.europeana.entitymanagement.definitions.EntityRecordFields.*;
+
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @dev.morphia.annotations.Entity("EntityRecord")
-@Indexes(@Index(fields = { @Field("dbId") }, options = @IndexOptions(unique = true)))
+@Indexes({
+        @Index(fields = {@Field(ENTITY_EXACT_MATCH)}),
+        @Index(fields = {@Field(ENTITY_SAME_AS)})
+})
 @EntityListeners(EntityRecordWatcher.class)
 public class EntityRecord {
 
@@ -25,6 +30,7 @@ public class EntityRecord {
     @JsonIgnore
     private ObjectId dbId;
 
+    @Indexed
     private String entityId;
 
     private Entity entity;
