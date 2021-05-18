@@ -328,8 +328,10 @@ public class EMControllerIT extends AbstractIntegrationTest {
         Assertions.assertTrue(entityRecordUpdated.isPresent());
         Assertions.assertEquals(nodeReference.path("depiction").asText(),
             entityRecordUpdated.get().getEuropeanaProxy().getEntity().getDepiction());
-        Assertions.assertEquals(nodeReference.path("note").path("en").path(0).asText(),
-            entityRecordUpdated.get().getEuropeanaProxy().getEntity().getNote().get("en").get(0));
+
+        // No "note" field in update request, so it should be removed from Europeana proxy
+        Assertions.assertNull(entityRecordUpdated.get().getEuropeanaProxy().getEntity().getNote());
+
         // acquire the reader for the right type
         ObjectReader reader = objectMapper.readerFor(new TypeReference<Map<String,String>>() {});
         Map<String,String> prefLabelToCheck = reader.readValue(nodeReference.path("prefLabel"));
