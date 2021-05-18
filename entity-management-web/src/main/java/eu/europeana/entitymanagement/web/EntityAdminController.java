@@ -53,7 +53,7 @@ public class EntityAdminController extends BaseRest {
             verifyWriteAccess(Operations.DELETE, request);
         }
         EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier.toLowerCase());
-        logger.debug("Deleting permanently entity : {}/{}", type, identifier);
+        LOG.debug("Deleting permanently entity : {}/{}", type, identifier);
         entityRecordService.delete(entityRecord.getEntityId());
         return ResponseEntity.noContent().build();
     }
