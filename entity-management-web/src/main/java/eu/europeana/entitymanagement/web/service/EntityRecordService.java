@@ -119,6 +119,16 @@ public class EntityRecordService {
 	return this.saveEntityRecord(entityRecord);
     }
 
+	/**
+	 * Delete an already existing entity record permanently.
+	 *
+	 * @param entityId entity record to delete
+	 * @return the number of deleted objects
+	 */
+	public long delete(String entityId) {
+		return entityRecordRepository.deleteForGood(entityId);
+	}
+
     /**
      * Creates an {@link EntityRecord} from an {@link EntityPreview}, which is then
      * persisted.

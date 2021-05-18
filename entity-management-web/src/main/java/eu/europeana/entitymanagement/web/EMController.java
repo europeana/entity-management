@@ -308,7 +308,7 @@ public class EMController extends BaseRest {
 		return ResponseEntity.status(status).headers(headers).eTag(etag).body(body);
 	}
 
-	private EntityRecord retrieveEntityRecord(String type, String identifier)
+	protected EntityRecord retrieveEntityRecord(String type, String identifier)
 			throws EuropeanaApiException {
 		String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
 		Optional<EntityRecord> entityRecordOptional = entityRecordService

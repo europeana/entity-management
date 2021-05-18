@@ -76,7 +76,6 @@ public class EntityRecordRepository {
                 .first();
     }
 
-
     /**
      * Deletes all EntityRecord objects that contain the given entityId
      * @param entityId ID of the dataset to be deleted
@@ -86,7 +85,7 @@ public class EntityRecordRepository {
     public long deleteForGood(String entityId) {
         return datastore.find(EntityRecordImpl.class).filter(
                 eq(ENTITY_ID,entityId))
-                .delete(MULTI_DELETE_OPTS).getDeletedCount();
+                .delete().getDeletedCount();
     }
 
     /**
