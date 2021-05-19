@@ -43,7 +43,7 @@ public class EntityAdminController extends BaseRest {
      * @throws HttpException
      */
     @ApiOperation(value = "Permanent Deletion of Entity", nickname = "deleteEntity", response = java.lang.Void.class)
-    @PostMapping(value = "/{type}/{identifier}/management",produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = "/{type}/{identifier}/management",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> deleteEntity(
             @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
             @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
