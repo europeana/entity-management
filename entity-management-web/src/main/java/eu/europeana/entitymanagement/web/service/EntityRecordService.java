@@ -407,7 +407,7 @@ public class EntityRecordService {
 	public void replaceEuropeanaProxy(final Entity updateRequestEntity, EntityRecord entityRecord) {
 		EntityProxy europeanaProxy = entityRecord.getEuropeanaProxy();
 
-		String[] sameAs = europeanaProxy.getEntity().getSameAs();
+		List<String> sameAs = europeanaProxy.getEntity().getSameAs();
 		String entityId = europeanaProxy.getEntity().getEntityId();
 
 		// copy SameAs and EntityId from existing Europeana proxy metadata
