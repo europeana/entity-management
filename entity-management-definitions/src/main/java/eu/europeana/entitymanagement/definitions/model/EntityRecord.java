@@ -30,7 +30,7 @@ public class EntityRecord {
     @JsonIgnore
     private ObjectId dbId;
 
-    @Indexed
+    @Indexed(options = @IndexOptions(unique = true))
     private String entityId;
 
     private Entity entity;
