@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.mongo.repository;
+package eu.europeana.entitymanagement.definitions;
 
 // Collection field names
 public class EntityRecordFields {

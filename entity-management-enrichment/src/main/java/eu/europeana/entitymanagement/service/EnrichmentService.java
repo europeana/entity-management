@@ -7,7 +7,6 @@ import eu.europeana.enrichment.utils.EntityType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.model.EnrichmentEntity;
 import eu.europeana.entitymanagement.utils.EnrichmentConstants;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
@@ -47,8 +46,8 @@ public class EnrichmentService {
             enrichmentEntity.setAltLabel(entityRecord.getEntity().getAltLabel());
             enrichmentEntity.setHiddenLabel(entityRecord.getEntity().getHiddenLabel());
             enrichmentEntity.setNote(entityRecord.getEntity().getNote());
-            if(entityRecord.getEntity().getSameAs() != null && entityRecord.getEntity().getSameAs().length > 0) {
-                enrichmentEntity.setOwlSameAs(Arrays.asList(entityRecord.getEntity().getSameAs()));
+            if(entityRecord.getEntity().getSameAs() != null && !entityRecord.getEntity().getSameAs().isEmpty()) {
+                enrichmentEntity.setOwlSameAs(entityRecord.getEntity().getSameAs());
             }
             enrichmentEntity.setIsPartOf(String.valueOf(entityRecord.getEntity().getIsPartOfArray()));
             enrichmentEntity.setFoafDepiction(entityRecord.getEntity().getFoafDepiction());

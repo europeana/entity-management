@@ -1,30 +1,69 @@
 package eu.europeana.entitymanagement.definitions.model;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PROXY;
+
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonSetter;
 
 import dev.morphia.annotations.Embedded;
-import eu.europeana.entitymanagement.definitions.model.impl.EntityProxyImpl;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 
 @Embedded
-@JsonDeserialize(as = EntityProxyImpl.class)
-public interface EntityProxy {
+@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
+@JsonPropertyOrder({WebEntityFields.ID, WebEntityFields.TYPE, WebEntityFields.ENTITY, WebEntityFields.PROXY_FOR, WebEntityFields.PROXY_IN})
+public class EntityProxy {
 
-    public String getProxyId();
+    String proxyId;
+    Entity entity;
+    String proxyFor;
+    Aggregation proxyIn;
+    String type;
 
-    public void setProxyId(String proxyId);
+    @JsonGetter(WebEntityFields.TYPE)
+    public String getType() {
+        return PROXY;
+    }
 
-    public Entity getEntity();
 
-    public void setEntity(Entity entity);
+    @JsonGetter(WebEntityFields.ID)
+    public String getProxyId() {
+        return proxyId;
+    }
 
-    public String getProxyFor();
+    @JsonSetter(WebEntityFields.ID)
+    public void setProxyId(String proxyId) {
+        this.proxyId = proxyId;
+    }
 
-    public void setProxyFor(String proxyFor);
+    @JsonIgnore
+    public Entity getEntity() {
+        return entity;
+    }
 
-    public Aggregation getProxyIn();
+    public void setEntity(Entity entity) {
+        this.entity = entity;
+    }
 
-    public void setProxyIn(Aggregation proxyIn);
+    @JsonGetter(WebEntityFields.PROXY_FOR)
+    public String getProxyFor() {
+        return proxyFor;
+    }
 
-    public String getType();
+    @JsonSetter(WebEntityFields.PROXY_FOR)
+    public void setProxyFor(String proxyFor) {
+        this.proxyFor = proxyFor;
+    }
 
+    @JsonGetter(WebEntityFields.PROXY_IN)
+    public Aggregation getProxyIn() {
+        return proxyIn;
+    }
+
+    @JsonSetter(WebEntityFields.PROXY_IN)
+    public void setProxyIn(Aggregation proxyIn) {
+        this.proxyIn = proxyIn;
+    }
 }

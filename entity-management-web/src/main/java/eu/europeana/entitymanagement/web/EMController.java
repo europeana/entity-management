@@ -3,6 +3,7 @@ package eu.europeana.entitymanagement.web;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
+import eu.europeana.entitymanagement.exception.EntityCreationException;
 import java.util.Date;
 import java.util.Optional;
 
@@ -291,7 +292,8 @@ public class EMController extends BaseRest {
 		}
 
 	private ResponseEntity<String> generateResponseEntity(String profile, FormatTypes outFormat,
-			String contentType, EntityRecord entityRecord, HttpStatus status) {
+			String contentType, EntityRecord entityRecord, HttpStatus status)
+			throws EntityCreationException {
 
 		Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
 

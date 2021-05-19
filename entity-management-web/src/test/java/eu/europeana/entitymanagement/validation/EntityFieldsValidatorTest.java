@@ -10,8 +10,8 @@ import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.SerializationConfig;
 import eu.europeana.entitymanagement.config.ValidatorConfig;
+import eu.europeana.entitymanagement.definitions.model.Concept;
 import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.impl.ConceptImpl;
 import java.io.IOException;
 import java.util.Set;
 import javax.annotation.Resource;
@@ -27,22 +27,24 @@ import org.springframework.boot.test.context.SpringBootTest;
     SerializationConfig.class})
 public class EntityFieldsValidatorTest {
 
-    @Qualifier(AppConfigConstants.BEAN_JSON_MAPPER)
-    @Autowired
-    private ObjectMapper objectMapper;
-    
-    @Resource(name = "emValidatorFactory")
-    private ValidatorFactory emValidatorFactory;
+  @Qualifier(AppConfigConstants.BEAN_JSON_MAPPER)
+  @Autowired
+  private ObjectMapper objectMapper;
 
-    @Test
-    public void validateEntityFields() throws JsonMappingException, JsonProcessingException, IOException {
-        // read the test data for the Concept entity from the file
-        ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_VALIDATE_FIELDS_JSON), ConceptImpl.class);
+  @Resource(name = "emValidatorFactory")
+  private ValidatorFactory emValidatorFactory;
 
-        //check the validation of the entity fields
-        Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(concept);
-        Assertions.assertTrue(violations.size()==3);
-        Assertions.assertTrue(!concept.getEntityId().contains(" "));        
-    }
+  @Test
+  public void validateEntityFields()
+      throws JsonMappingException, JsonProcessingException, IOException {
+    // read the test data for the Concept entity from the file
+    Concept concept = objectMapper.readValue(loadFile(CONCEPT_VALIDATE_FIELDS_JSON), Concept.class);
+
+    //check the validation of the entity fields
+    Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator()
+        .validate(concept);
+      Assertions.assertEquals(3, violations.size());
+      Assertions.assertFalse(concept.getEntityId().contains(" "));
+  }
 
 }

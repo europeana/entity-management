@@ -6,7 +6,6 @@
         <module>entity-management-common</module>
         <module>entity-management-web</module>
         <module>entity-management-mongo</module>
-        <module>entity-management-utils</module>
         <module>entity-management-batch</module>
       <module>entity-management-enrichment</module>
     </modules>

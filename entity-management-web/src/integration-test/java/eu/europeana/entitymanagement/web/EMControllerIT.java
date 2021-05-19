@@ -8,9 +8,7 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.impl.*;
+import eu.europeana.entitymanagement.definitions.model.*;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
@@ -382,8 +380,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
     void retrieveConceptExternalShouldBeSuccessful() throws Exception {
         // read the test data for the Concept entity from the file
 	//TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
-	ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_JSON), ConceptImpl.class);
-        EntityRecord entityRecord = new EntityRecordImpl();
+	Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
+        EntityRecord entityRecord = new EntityRecord();
         entityRecord.setEntity(concept);
         entityRecord.setEntityId(concept.getEntityId());
         entityRecordService.saveEntityRecord(entityRecord);
@@ -396,7 +394,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.id", is(concept.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Concept.name())));
 
-        String contentXml = getRetrieveEntityXmlResponse(requestPath, "external");
+        String contentXml = getRetrieveEntityXmlResponse(requestPath);
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, concept);
     }
 
@@ -455,8 +453,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
     public void retrieveAgentExternalShouldBeSuccessful() throws Exception {
         //TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
 	// read the test data for the Agent entity from the file
-        AgentImpl agent = objectMapper.readValue(loadFile(AGENT_JSON), AgentImpl.class);
-        EntityRecord entityRecord = new EntityRecordImpl();
+        Agent agent = objectMapper.readValue(loadFile(AGENT_JSON), Agent.class);
+        EntityRecord entityRecord = new EntityRecord();
         entityRecord.setEntity(agent);
         entityRecord.setEntityId(agent.getEntityId());
         entityRecordService.saveEntityRecord(entityRecord);
@@ -469,7 +467,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.id", is(agent.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())));
 
-        String contentXml = getRetrieveEntityXmlResponse(requestPath, "external");
+        String contentXml = getRetrieveEntityXmlResponse(requestPath);
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, agent);
     }
 
@@ -477,8 +475,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
     public void retrieveOrganizationExternalShouldBeSuccessful() throws Exception {
 	//TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
 	// read the test data for the Organization entity from the file
-        OrganizationImpl organization = objectMapper.readValue(loadFile(ORGANIZATION_JSON), OrganizationImpl.class);
-        EntityRecord entityRecord =  new EntityRecordImpl();
+        Organization organization = objectMapper.readValue(loadFile(ORGANIZATION_JSON), Organization.class);
+        EntityRecord entityRecord =  new EntityRecord();
         entityRecord.setEntity(organization);
         entityRecord.setEntityId(organization.getEntityId());
         entityRecordService.saveEntityRecord(entityRecord);
@@ -491,7 +489,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.id", is(organization.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())));
 
-        String contentXml = getRetrieveEntityXmlResponse(requestPath, "external");
+        String contentXml = getRetrieveEntityXmlResponse(requestPath);
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, organization);
     }
 
@@ -499,8 +497,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
     public void retrievePlaceExternalShouldBeSuccessful() throws Exception {
 	//TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
 	// read the test data for the Place entity from the file
-        PlaceImpl place = objectMapper.readValue(loadFile(PLACE_JSON), PlaceImpl.class);
-        EntityRecord entityRecord =  new EntityRecordImpl();
+        Place place = objectMapper.readValue(loadFile(PLACE_JSON), Place.class);
+        EntityRecord entityRecord =  new EntityRecord();
         entityRecord.setEntity(place);
         entityRecord.setEntityId(place.getEntityId());
         entityRecordService.saveEntityRecord(entityRecord);
@@ -513,7 +511,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.id", is(place.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Place.name())));
 
-        String contentXml = getRetrieveEntityXmlResponse(requestPath, "external");
+        String contentXml = getRetrieveEntityXmlResponse(requestPath);
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, place);
     }
 
@@ -521,8 +519,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
     public void retrieveTimespanExternalShouldBeSuccessful() throws Exception {
 	//TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
 	// read the test data for the Timespan entity from the file
-        TimespanImpl timespan = objectMapper.readValue(loadFile(TIMESPAN_JSON), TimespanImpl.class);
-        EntityRecord entityRecord =  new EntityRecordImpl();
+        Timespan timespan = objectMapper.readValue(loadFile(TIMESPAN_JSON), Timespan.class);
+        EntityRecord entityRecord =  new EntityRecord();
         entityRecord.setEntity(timespan);
         entityRecord.setEntityId(timespan.getEntityId());
         entityRecordService.saveEntityRecord(entityRecord);
@@ -535,7 +533,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.id", is(timespan.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Timespan.name())));
 
-        String contentXml = getRetrieveEntityXmlResponse(requestPath, "external");
+        String contentXml = getRetrieveEntityXmlResponse(requestPath);
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, timespan);
     }
 
@@ -563,15 +561,14 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        String contentXml = getRetrieveEntityXmlResponse(requestPath, "internal");
-        assertRetrieveAPIResultsInternalProfile(contentXml, resultActions, entityPreview);
+        assertRetrieveAPIResultsInternalProfile(resultActions, entityPreview);
     }
 
     @Test
     void updateFromExternalDatasourceShouldRunSuccessfully() throws Exception {
         // create entity in DB
-        ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_JSON), ConceptImpl.class);
-        EntityRecord entityRecord = new EntityRecordImpl();
+        Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
+        EntityRecord entityRecord = new EntityRecord();
         entityRecord.setEntity(concept);
         entityRecord.setEntityId(concept.getEntityId());
         EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
@@ -588,8 +585,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
     @Test
     void deletionShouldBeSuccessful() throws Exception {
         // create entity in DB
-        ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_JSON), ConceptImpl.class);
-        EntityRecord entityRecord = new EntityRecordImpl();
+        Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
+        EntityRecord entityRecord = new EntityRecord();
         entityRecord.setEntity(concept);
         entityRecord.setEntityId(concept.getEntityId());
         EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
@@ -611,8 +608,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
     @Test
     void deletionFailsIfMatch() throws Exception {
         // create entity in DB
-        ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_JSON), ConceptImpl.class);
-        EntityRecord entityRecord = new EntityRecordImpl();
+        Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
+        EntityRecord entityRecord = new EntityRecord();
         entityRecord.setEntity(concept);
         entityRecord.setEntityId(concept.getEntityId());
         EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
@@ -640,6 +637,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
 
     private void assertRetrieveAPIResultsExternalProfile(String contentXml, ResultActions resultActions, Entity entity) throws Exception {
+        //TODO: use xpath instead of String.contains() for checking XML response
         Assertions.assertTrue(contentXml.contains(XmlFields.XML_SKOS_PREF_LABEL));
         for (Entry<String, String> prefLabel : entity.getPrefLabelStringMap().entrySet()) {
             resultActions.andExpect(jsonPath("$.prefLabel", Matchers.hasKey(prefLabel.getKey())));
@@ -652,26 +650,25 @@ public class EMControllerIT extends AbstractIntegrationTest {
         }
     }
 
-    private void assertRetrieveAPIResultsInternalProfile(String contentXml, ResultActions resultActions, EntityPreview entity) throws Exception {
+    /**
+     * Checks API responses for the internal profile.
+     * Only JSON-LD is supported for this profile at the moment.
+     */
+    private void assertRetrieveAPIResultsInternalProfile(ResultActions resultActions, EntityPreview entity) throws Exception {
 
     	resultActions.andExpect(jsonPath("$.proxies[0].sameAs", Matchers.hasItem(entity.getId())));
     	resultActions.andExpect(jsonPath("$.proxies[1].id", Matchers.is(entity.getId())));
     	resultActions.andExpect(jsonPath("$.proxies[0].proxyFor", Matchers.containsString(WebEntityFields.BASE_DATA_EUROPEANA_URI)));
     	resultActions.andExpect(jsonPath("$.proxies[1].proxyFor", Matchers.containsString(WebEntityFields.BASE_DATA_EUROPEANA_URI)));
-    	Assertions.assertTrue(contentXml.contains(entity.getId()));
-    	Assertions.assertTrue(contentXml.contains("proxies"));
-    	Assertions.assertTrue(contentXml.contains("proxyFor"));
-    	Assertions.assertTrue(contentXml.contains(WebEntityFields.BASE_DATA_EUROPEANA_URI));
 
         for (Entry<String, String> prefLabel : entity.getPrefLabel().entrySet()) {
             resultActions.andExpect(jsonPath("$.proxies[0].prefLabel", Matchers.hasKey(prefLabel.getKey())));
-            Assertions.assertTrue(contentXml.contains(prefLabel.getKey()));
         }
     }
 
-    private String getRetrieveEntityXmlResponse(String requestPath, String profile) throws Exception {
+    private String getRetrieveEntityXmlResponse(String requestPath) throws Exception {
     	MvcResult resultXml = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".xml")
-        		.param(WebEntityConstants.QUERY_PARAM_PROFILE, profile)
+        		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
                 .accept(MediaType.APPLICATION_XML))
         		.andExpect(status().isOk())
         		.andReturn();

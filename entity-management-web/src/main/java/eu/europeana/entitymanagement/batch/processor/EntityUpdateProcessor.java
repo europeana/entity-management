@@ -5,7 +5,6 @@ import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTyp
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.impl.AggregationImpl;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityValidationException;
@@ -96,7 +95,7 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
 
         Aggregation aggregation = entity.getIsAggregatedBy();
         if (aggregation == null) {
-            aggregation = new AggregationImpl();
+            aggregation = new Aggregation();
             entity.setIsAggregatedBy(aggregation);
         }
 

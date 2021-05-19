@@ -79,6 +79,13 @@
 			<!-- <version>2.3.0-b170201.1204</version> -->
 		</dependency>
 
+		<dependency>
+			<groupId>com.fasterxml.jackson.module</groupId>
+			<artifactId>jackson-module-jaxb-annotations</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+
+
 		<!-- https://mvnrepository.com/artifact/javax.activation/activation -->
 		<dependency>
 			<groupId>javax.activation</groupId>
@@ -126,12 +133,6 @@
 		<dependency>
 			<groupId>eu.europeana.api</groupId>
 			<artifactId>entity-management-mongo</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
-			<groupId>eu.europeana.api</groupId>
-			<artifactId>entity-management-utils</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 

@@ -22,7 +22,6 @@ import dev.morphia.query.experimental.filters.Filter;
 import dev.morphia.query.experimental.updates.UpdateOperators;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -141,7 +140,7 @@ public class FailedTaskRepository implements InitializingBean {
 
     // then fetch matching EntityRecords
     // TODO: see if this can be done with a single query
-    return datastore.find(EntityRecordImpl.class)
+    return datastore.find(EntityRecord.class)
         .filter(in(ENTITY_ID, matchingIds)).iterator().toList();
   }
 }

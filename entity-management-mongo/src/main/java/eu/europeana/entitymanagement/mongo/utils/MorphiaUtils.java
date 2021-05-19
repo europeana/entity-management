@@ -5,7 +5,7 @@ import dev.morphia.UpdateOptions;
 import dev.morphia.mapping.DiscriminatorFunction;
 import dev.morphia.mapping.MapperOptions;
 import dev.morphia.mapping.NamingStrategy;
-import eu.europeana.entitymanagement.mongo.repository.EntityRecordFields;
+import eu.europeana.entitymanagement.definitions.EntityRecordFields;
 
 public class MorphiaUtils {
 

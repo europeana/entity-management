@@ -1,79 +1,90 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.utils.EntityUtils;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+import org.springframework.util.StringUtils;
 
-@JacksonXmlRootElement(localName = XmlConstants.XML_ADDRESS)
-@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({XmlConstants.XML_STREET_ADDRESS, XmlConstants.XML_POSTAL_CODE, XmlConstants.XML_POST_OFFICE_BOX,
+@XmlRootElement(name = XmlConstants.XML_ADDRESS)
+@XmlType(propOrder={XmlConstants.XML_STREET_ADDRESS, XmlConstants.XML_POSTAL_CODE, XmlConstants.XML_POST_OFFICE_BOX,
     	XmlConstants.XML_LOCALITY, XmlConstants.XML_REGION, XmlConstants.XML_COUNTRY_NAME, XmlConstants.XML_HAS_GEO})
+@XmlAccessorType(XmlAccessType.FIELD)
 public class XmlAddressImpl {
 
-    	@JsonIgnore
-    	Organization organization;
+  @XmlAttribute(name = XmlConstants.ABOUT)
+  private String about;
+
+  @XmlAttribute(name = XmlConstants.XML_STREET_ADDRESS)
+  private String streetAddress;
+
+  @XmlAttribute(name = XmlConstants.XML_POSTAL_CODE)
+  private String postalCode;
+
+  @XmlAttribute(name = XmlConstants.XML_POST_OFFICE_BOX)
+  private String postBox;
+
+  @XmlAttribute(name = XmlConstants.XML_LOCALITY)
+  private String locality;
+
+  @XmlAttribute(name = XmlConstants.XML_REGION)
+  private String region;
+
+  @XmlAttribute(name = XmlConstants.XML_COUNTRY_NAME)
+  private String countryName;
+
+  @XmlAttribute(name = XmlConstants.XML_HAS_GEO)
+  private LabelledResource hasGeo;
+    	
     	
     	public XmlAddressImpl(Organization organization) {
-    	    this.organization = organization;
+        this.about = organization.getHasAddress();
+        this.streetAddress = organization.getStreetAddress();
+        this.locality = organization.getLocality();
+        this.countryName = organization.getCountryName();
+        this.postalCode = organization.getPostalCode();
+        this.postBox = organization.getPostBox();
+        this.locality = organization.getLocality();
+        this.region = organization.getRegion();
+
+        if(StringUtils.hasLength(organization.getHasGeo())){
+          this.hasGeo = new LabelledResource(EntityUtils.toGeoUri(organization.getHasGeo()));
+        }
     	}
     	
-	@JacksonXmlProperty(isAttribute= true, localName = XmlConstants.ABOUT)
+
 	public String getAbout() {
-		return organization.getHasAddress();
+		return about;
 	}
-    	
-	@JacksonXmlProperty(localName = XmlConstants.XML_STREET_ADDRESS)
-	public String getStreetAddress() {
-	    	if(organization.getStreetAddress() == null || organization.getStreetAddress().isEmpty())
-	    	    return null;
-		return organization.getStreetAddress();
-	}
-	
-	@JacksonXmlProperty(localName = XmlConstants.XML_POSTAL_CODE)
-	public String getPostalCode() {
-	    	if(organization.getPostalCode() == null || organization.getPostalCode().isEmpty())
-	    	    return null;
-		return organization.getPostalCode();
-	}
-	
-	@JacksonXmlProperty(localName = XmlConstants.XML_POST_OFFICE_BOX)
-	public String getPostBox() {
-	    	if(organization.getPostBox() == null || organization.getPostBox().isEmpty())
-	    	    return null;
-		return organization.getPostBox();
-	}
-	
-	@JacksonXmlProperty(localName = XmlConstants.XML_LOCALITY)
-	public String getLocality() {
-	    	if(organization.getLocality() == null || organization.getLocality().isEmpty())
-	    	    return null;
-		return organization.getLocality();
-	}
-	
-	@JacksonXmlProperty(localName = XmlConstants.XML_REGION)
-	public String getRegion() {
-	    	if(organization.getRegion() == null || organization.getRegion().isEmpty())
-	    	    return null;
-		return organization.getRegion();
-	}
-	
-	@JacksonXmlProperty(localName = XmlConstants.XML_COUNTRY_NAME)
-	public String getCountryName() {
-	    	if(organization.getCountryName() == null || organization.getCountryName().isEmpty())
-	    	    return null;
-		return organization.getCountryName();
-	}
-	
-	@JacksonXmlProperty(localName = XmlConstants.XML_HAS_GEO)
-	public LabelledResource getHasGeo() {
-	    	if(organization.getHasGeo() == null || organization.getHasGeo().isEmpty())
-	    	    return null;
-		return new LabelledResource(EntityUtils.toGeoUri(organization.getHasGeo()));
-	}
-	
+
+  public String getStreetAddress() {
+    return streetAddress;
+  }
+
+  public String getPostalCode() {
+    return postalCode;
+  }
+
+  public String getPostBox() {
+    return postBox;
+  }
+
+  public String getLocality() {
+    return locality;
+  }
+
+  public String getRegion() {
+    return region;
+  }
+
+  public String getCountryName() {
+    return countryName;
+  }
+
+  public LabelledResource getHasGeo() {
+    return hasGeo;
+  }
 }
