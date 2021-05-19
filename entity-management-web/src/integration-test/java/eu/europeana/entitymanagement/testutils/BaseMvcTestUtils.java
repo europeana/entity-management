@@ -25,7 +25,8 @@ public class BaseMvcTestUtils {
     public static final String TIMESPAN_REGISTER_JSON = "/content/timespan_register.json";  
     
     public static final String CONCEPT_UPDATE_JSON = "/content/concept_update.json";
-    
+    public static final String CONCEPT_EMPTY_UPDATE__JSON = "/content/concept_update_empty.json";
+
     public static final String CONCEPT_VALIDATE_FIELDS_JSON = "/content/concept-validate-fields.json";
     
     public static final String CONCEPT_XML = "/metis-deref/concept.xml";

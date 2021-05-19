@@ -398,6 +398,25 @@ public class EntityRecordService {
 		}
 
 	/**
+	 * Replaces Europeana proxy metadata with the provided entity metadata.
+	 *
+	 * EntityId and SameAs values are not affected
+	 * @param updateRequestEntity entity to replace with
+	 * @param entityRecord entity record
+	 */
+	public void replaceEuropeanaProxy(final Entity updateRequestEntity, EntityRecord entityRecord) {
+		EntityProxy europeanaProxy = entityRecord.getEuropeanaProxy();
+
+		String[] sameAs = europeanaProxy.getEntity().getSameAs();
+		String entityId = europeanaProxy.getEntity().getEntityId();
+
+		// copy SameAs and EntityId from existing Europeana proxy metadata
+		europeanaProxy.setEntity(updateRequestEntity);
+		europeanaProxy.getEntity().setSameAs(sameAs);
+		europeanaProxy.getEntity().setEntityId(entityId);
+	}
+
+	/**
 	 * Updates Europeana proxy metadata with the provided entity metadata.
 	 *
 	 * @param updateEntity entity to copy metadata from
@@ -749,4 +768,6 @@ public class EntityRecordService {
 
 	entityRecord.addProxy(datasourceProxy);
     }
+
+
 }

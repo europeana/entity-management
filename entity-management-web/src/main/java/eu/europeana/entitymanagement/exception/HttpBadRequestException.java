@@ -54,4 +54,9 @@ public class HttpBadRequestException extends EuropeanaApiException {
     public boolean doLogStacktrace() {
         return false;
     }
+
+    @Override
+    public HttpStatus getResponseStatus() {
+        return HttpStatus.BAD_REQUEST;
+    }
 }
