@@ -112,6 +112,12 @@ public class EMController extends BaseRest {
 			}
 		 EntityRecord entityRecord = retrieveEntityRecord(type, identifier);
 
+			// check that  type from update request matches existing entity's
+		if(!entityRecord.getEntity().getType().equals(updateRequestEntity.getType())){
+			throw new HttpBadRequestException(String.format("Request type %s does not match Entity type",
+					updateRequestEntity.getType()));
+		}
+
 			Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
 			long timestamp = isAggregatedBy != null ?
 					isAggregatedBy.getModified().getTime() :
@@ -125,7 +131,7 @@ public class EMController extends BaseRest {
 				throw new EtagMismatchException("If-Match header value does not match generated ETag for entity");
 			}
 
-			entityRecordService.updateEuropeanaProxy(updateRequestEntity, entityRecord);
+			entityRecordService.replaceEuropeanaProxy(updateRequestEntity, entityRecord);
 			entityRecordService.update(entityRecord);
 			return launchTaskAndRetrieveEntity(type, identifier, entityRecord, profile);
     }
