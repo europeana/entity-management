@@ -9,6 +9,9 @@ import static eu.europeana.entitymanagement.web.EntityRecordUtils.getEuropeanaAg
 import static eu.europeana.entitymanagement.web.EntityRecordUtils.getEuropeanaProxyId;
 import static eu.europeana.entitymanagement.web.EntityRecordUtils.getIsAggregatedById;
 
+import eu.europeana.api.commons.error.EuropeanaApiException;
+import eu.europeana.entitymanagement.exception.EntityNotFoundException;
+import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.web.EntityRecordUtils;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -61,6 +64,8 @@ public class EntityRecordService {
 
     private final DataSources datasources;
 
+	private static final String ENTITY_ID_REMOVED_MSG = "Entity '%s' has been removed";
+
 	/**
 	 * Fields to ignore when updating entities from user request
 	 */
@@ -79,6 +84,22 @@ public class EntityRecordService {
     public Optional<EntityRecord> retrieveEntityRecordByUri(String entityUri) {
 	return Optional.ofNullable(entityRecordRepository.findByEntityId(entityUri));
     }
+
+	public EntityRecord retrieveEntityRecord(String type, String identifier)
+			throws EuropeanaApiException {
+		String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
+		Optional<EntityRecord> entityRecordOptional = this.
+				retrieveEntityRecordByUri(entityUri);
+		if (entityRecordOptional.isEmpty()) {
+			throw new EntityNotFoundException(entityUri);
+		}
+
+		EntityRecord entityRecord = entityRecordOptional.get();
+		if (entityRecord.isDisabled()) {
+			throw new EntityRemovedException(String.format(ENTITY_ID_REMOVED_MSG, entityUri));
+		}
+		return entityRecord;
+	}
 
     /**
      * Gets coreferenced entity with the given id (sameAs or exactMatch value in the
@@ -115,6 +136,16 @@ public class EntityRecordService {
     public EntityRecord update(EntityRecord entityRecord) {
 	return this.saveEntityRecord(entityRecord);
     }
+
+	/**
+	 * Delete an already existing entity record permanently.
+	 *
+	 * @param entityId entity record to delete
+	 * @return the number of deleted objects
+	 */
+	public long delete(String entityId) {
+		return entityRecordRepository.deleteForGood(entityId);
+	}
 
     /**
      * Creates an {@link EntityRecord} from an {@link EntityPreview}, which is then

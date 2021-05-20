@@ -8,6 +8,7 @@ import org.apache.commons.io.IOUtils;
 public class BaseMvcTestUtils {
 
     public static final String BASE_SERVICE_URL = "/entity/";
+    public static final String BASE_ADMIN_URL = "/management";
 
     public static final String BATHTUB_DEREF = "/content/deref_bathtub.xml";
     
