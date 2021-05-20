@@ -31,7 +31,7 @@ public class EnrichmentResultBaseWrapper {
             @XmlElement(name = "Place", namespace = "http://www.europeana.eu/schemas/edm/", type = XmlPlaceImpl.class),
             @XmlElement(name = "Organization", namespace = "http://www.europeana.eu/schemas/edm/", type = XmlOrganizationImpl.class),
             @XmlElement(name = "Timespan", namespace = "http://www.europeana.eu/schemas/edm/", type = XmlTimespanImpl.class)})
-    private List<XmlBaseEntityImpl> xmlEntities = new ArrayList<>();
+    private List<XmlBaseEntityImpl<?>> xmlEntities = new ArrayList<>();
 
 
     public EnrichmentResultBaseWrapper() {
@@ -42,11 +42,11 @@ public class EnrichmentResultBaseWrapper {
      *
      * @param enrichmentBase the enrichment information class generated
      */
-    public EnrichmentResultBaseWrapper(List<XmlBaseEntityImpl> enrichmentBase) {
+    public EnrichmentResultBaseWrapper(List<XmlBaseEntityImpl<?>> enrichmentBase) {
         this.xmlEntities = new ArrayList<>(enrichmentBase);
     }
 
-    public List<XmlBaseEntityImpl> getEnrichmentBaseList() {
+    public List<XmlBaseEntityImpl<?>> getEnrichmentBaseList() {
         return new ArrayList<>(xmlEntities);
     }
 
@@ -59,7 +59,7 @@ public class EnrichmentResultBaseWrapper {
      * @return the converted list
      */
     public static List<EnrichmentResultBaseWrapper> createEnrichmentResultBaseWrapperList(
-            Collection<List<XmlBaseEntityImpl>> resultList) {
+            Collection<List<XmlBaseEntityImpl<?>>> resultList) {
         return resultList.stream().map(EnrichmentResultBaseWrapper::new).collect(Collectors.toList());
     }
 }

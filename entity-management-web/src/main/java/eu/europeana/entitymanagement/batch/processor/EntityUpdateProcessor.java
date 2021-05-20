@@ -5,7 +5,6 @@ import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTyp
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.impl.AggregationImpl;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityValidationException;
@@ -52,16 +51,9 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
     @Override
     public EntityRecord process(@NonNull EntityRecord entityRecord) throws Exception {
         //TODO: Validate entity metadata from Proxy Data Source
-        logger.debug("Perform cleaning and normalization of metadata from external proxy for record {}", entityRecord.getEntityId());
         emEntityFieldCleaner.cleanAndNormalize(entityRecord.getExternalProxy().getEntity());
-        
-        logger.debug("Creating consolidated proxy for entityId={} ", entityRecord.getEntityId());
 	      entityRecordService.mergeEntity(entityRecord);
-
-        logger.debug("Validating constraints for entityId={}", entityRecord.getEntityId());
         validateConstraints(entityRecord);
-
-        logger.debug("Checking referential integrity for entityId={}", entityRecord.getEntityId());
         entityRecordService.performReferentialIntegrity(entityRecord.getEntity());
 
       /*
@@ -103,7 +95,7 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
 
         Aggregation aggregation = entity.getIsAggregatedBy();
         if (aggregation == null) {
-            aggregation = new AggregationImpl();
+            aggregation = new Aggregation();
             entity.setIsAggregatedBy(aggregation);
         }
 

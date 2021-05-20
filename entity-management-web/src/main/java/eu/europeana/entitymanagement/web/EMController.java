@@ -1,6 +1,9 @@
 package eu.europeana.entitymanagement.web;
 
+import eu.europeana.api.commons.web.model.vocabulary.Operations;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
+import eu.europeana.entitymanagement.exception.EntityCreationException;
 import java.util.Date;
 import java.util.Optional;
 
@@ -11,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.MultiValueMap;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,7 +33,6 @@ import eu.europeana.entitymanagement.batch.BatchService;
 import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.exception.EtagMismatchException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
@@ -53,18 +54,20 @@ public class EMController extends BaseRest {
   private final MetisDereferenceService dereferenceService;
   private final DataSources datasources;
   private final BatchService batchService;
+  private final EntityManagementConfiguration emConfig;
 
-	private static final String ENTITY_ID_REMOVED_MSG = "Entity '%s' has been removed";
-	private static final String EXTERNAL_ID_REMOVED_MSG = "Entity id '%s' already exists as '%s', which has been removed";
+  private static final String EXTERNAL_ID_REMOVED_MSG = "Entity id '%s' already exists as '%s', which has been removed";
 
   @Autowired
 	public EMController(EntityRecordService entityRecordService,
 			MetisDereferenceService dereferenceService, DataSources datasources,
-			BatchService batchService) {
+			BatchService batchService,
+			EntityManagementConfiguration emConfig) {
 		this.entityRecordService = entityRecordService;
 		this.dereferenceService = dereferenceService;
 		this.datasources = datasources;
 		this.batchService = batchService;
+		this.emConfig = emConfig;
 	}
 
 	@ApiOperation(value = "Disable an entity", nickname = "disableEntity", response = java.lang.Void.class)
@@ -76,8 +79,10 @@ public class EMController extends BaseRest {
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 	    HttpServletRequest request) throws HttpException, EuropeanaApiException {
-
-		EntityRecord entityRecord = retrieveEntityRecord(type, identifier.toLowerCase());
+		if (emConfig.isAuthEnabled()) {
+			verifyWriteAccess(Operations.DELETE, request);
+		}
+		EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier.toLowerCase());
 
 		Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
 		long timestamp = isAggregatedBy != null ?
@@ -101,11 +106,16 @@ public class EMController extends BaseRest {
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 	    @RequestBody Entity updateRequestEntity,
 	    HttpServletRequest request) throws Exception {
+			if (emConfig.isAuthEnabled()) {
+				verifyWriteAccess(Operations.UPDATE, request);
+			}
+		 EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier);
 
-    	// TODO: Re-enable authentication
-    	// verifyReadAccess(request);
-
-		 EntityRecord entityRecord = retrieveEntityRecord(type, identifier);
+			// check that  type from update request matches existing entity's
+		if(!entityRecord.getEntity().getType().equals(updateRequestEntity.getType())){
+			throw new HttpBadRequestException(String.format("Request type %s does not match Entity type",
+					updateRequestEntity.getType()));
+		}
 
 			Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
 			long timestamp = isAggregatedBy != null ?
@@ -120,7 +130,7 @@ public class EMController extends BaseRest {
 				throw new EtagMismatchException("If-Match header value does not match generated ETag for entity");
 			}
 
-			entityRecordService.updateEuropeanaProxy(updateRequestEntity, entityRecord);
+			entityRecordService.replaceEuropeanaProxy(updateRequestEntity, entityRecord);
 			entityRecordService.update(entityRecord);
 			return launchTaskAndRetrieveEntity(type, identifier, entityRecord, profile);
     }
@@ -131,10 +141,13 @@ public class EMController extends BaseRest {
 	public ResponseEntity<String> updateFromExternalSource(
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
-			@RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "internal") String profile
+			@RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "internal") String profile,
+			HttpServletRequest request
 	) throws Exception {
-		EntityRecord entityRecord = retrieveEntityRecord(type, identifier);
-
+		if (emConfig.isAuthEnabled()) {
+			verifyWriteAccess(Operations.UPDATE, request);
+		}
+		EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier);
 		return launchTaskAndRetrieveEntity(type, identifier, entityRecord, profile);
 	}
 
@@ -148,8 +161,12 @@ public class EMController extends BaseRest {
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
 	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
-	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier)
-				throws EuropeanaApiException {
+	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
+			HttpServletRequest request)
+				throws EuropeanaApiException, HttpException {
+		if (emConfig.isAuthEnabled()) {
+			verifyReadAccess(request);
+		}
 	return createResponse(profile, type, identifier, FormatTypes.jsonld, null);
 
     }
@@ -157,14 +174,16 @@ public class EMController extends BaseRest {
     @ApiOperation(value = "Retrieve a known entity", nickname = "getEntity", response = java.lang.Void.class)
     @RequestMapping(value = { "/{type}/base/{identifier}","/{type}/{identifier}" }, 
     method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
-    public ResponseEntity<String> getEntity(
+    public ResponseEntity<String> getXmlEntity(
     	@RequestHeader(value = HttpHeaders.ACCEPT, defaultValue = "application/json") String acceptHeader,
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
 	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
-	    HttpServletRequest request) throws EuropeanaApiException {
-	
+	    HttpServletRequest request) throws EuropeanaApiException, HttpException{
+			if (emConfig.isAuthEnabled()) {
+				verifyReadAccess(request);
+			}
 	logger.debug("Retrieve entity with content negotiation:{}/{}, with accept header {}", type, identifier, acceptHeader);
 	if (acceptHeader.contains(HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML)) {
 	    //if rdf/XML is explicitly requested
@@ -188,16 +207,23 @@ public class EMController extends BaseRest {
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
 	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
-	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier)
-				throws EuropeanaApiException {
+	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
+				HttpServletRequest request)
+				throws EuropeanaApiException, HttpException {
+			if (emConfig.isAuthEnabled()) {
+				verifyReadAccess(request);
+			}
 	return createResponse(profile, type, identifier, FormatTypes.xml, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML);
     }
 
     @ApiOperation(value = "Register a new entity", nickname = "registerEntity", response = java.lang.Void.class)
     @PostMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
 		public ResponseEntity<String> registerEntity(
-				@RequestBody EntityPreview entityCreationRequest)
+				@RequestBody EntityPreview entityCreationRequest, HttpServletRequest request)
 				throws Exception {
+			if (emConfig.isAuthEnabled()) {
+				verifyWriteAccess(Operations.CREATE, request);
+			}
 			logger.debug("Registering new entity: {}", entityCreationRequest.getId());
 	
 			// check if id is already being used, if so return a 301
@@ -244,11 +270,6 @@ public class EMController extends BaseRest {
 
     private ResponseEntity<String> createResponse(String profile, String type, String identifier, FormatTypes outFormat,
 	    String contentType) throws EuropeanaApiException {
-	// TODO: Re-enable authentication
-	// verifyReadAccess(request);
-
-	MultiValueMap<String, String> headers;
-
 			/*
 	 * verify the parameters
 	 */
@@ -263,13 +284,14 @@ public class EMController extends BaseRest {
 	    throw new HttpBadRequestException("Invalid profile");
 	}
 
-			EntityRecord entityRecord = retrieveEntityRecord(type, identifier);
+			EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier);
 			logger.debug("Entity retrieved entityId={}, using {} format", entityRecord.getEntityId(), outFormat);
 			return generateResponseEntity(profile, outFormat, contentType, entityRecord, HttpStatus.OK);
 		}
 
 	private ResponseEntity<String> generateResponseEntity(String profile, FormatTypes outFormat,
-			String contentType, EntityRecord entityRecord, HttpStatus status) {
+			String contentType, EntityRecord entityRecord, HttpStatus status)
+			throws EntityCreationException {
 
 		Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
 
@@ -292,27 +314,11 @@ public class EMController extends BaseRest {
 		return ResponseEntity.status(status).headers(headers).eTag(etag).body(body);
 	}
 
-	private EntityRecord retrieveEntityRecord(String type, String identifier)
-			throws EuropeanaApiException {
-		String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
-		Optional<EntityRecord> entityRecordOptional = entityRecordService
-				.retrieveEntityRecordByUri(entityUri);
-		if (entityRecordOptional.isEmpty()) {
-			throw new EntityNotFoundException(entityUri);
-		}
-
-		EntityRecord entityRecord = entityRecordOptional.get();
-		if (entityRecord.isDisabled()) {
-			throw new EntityRemovedException(String.format(ENTITY_ID_REMOVED_MSG, entityUri));
-		}
-		return entityRecord;
-	}
-
 	private ResponseEntity<String> launchTaskAndRetrieveEntity(String type, String identifier,
 			EntityRecord entityRecord, String profile) throws Exception {
 		// launch synchronous update, then retrieve entity from DB afterwards
 		launchUpdateTask(entityRecord.getEntityId(), false);
-		entityRecord = retrieveEntityRecord(type, identifier);
+		entityRecord = entityRecordService.retrieveEntityRecord(type, identifier);
 
 		return generateResponseEntity(profile, FormatTypes.jsonld, null, entityRecord, HttpStatus.ACCEPTED);
 	}

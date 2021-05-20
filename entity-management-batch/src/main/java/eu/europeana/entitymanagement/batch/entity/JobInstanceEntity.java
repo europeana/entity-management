@@ -1,28 +1,30 @@
 package eu.europeana.entitymanagement.batch.entity;
 
+import static eu.europeana.entitymanagement.batch.BatchConstants.JOB_KEY_GENERATOR;
+
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
-import org.bson.types.ObjectId;
-import org.springframework.batch.core.JobInstance;
-import org.springframework.batch.core.JobParameter;
-import org.springframework.batch.core.JobParameters;
-
+import dev.morphia.annotations.Indexed;
+import eu.europeana.entitymanagement.batch.BatchRepositoryUtils;
 import java.util.HashMap;
 import java.util.Map;
-
-import static eu.europeana.entitymanagement.batch.BatchConstants.*;
+import org.bson.types.ObjectId;
+import org.springframework.batch.core.JobInstance;
+import org.springframework.batch.core.JobParameters;
 
 @Entity("JobInstance")
 public class JobInstanceEntity {
     @Id
     private ObjectId _id;
 
+    @Indexed
     private String jobName;
 
     private long jobInstanceId;
 
     private int version;
 
+    @Indexed
     private String jobKey;
 
     private Map<String, Object> jobParameters = new HashMap<>();
@@ -49,12 +51,7 @@ public class JobInstanceEntity {
 
     public static JobInstanceEntity toEntity(JobInstance jobInstance, final JobParameters jobParameters) {
 
-        // first clean the parameters, as we can't have "." within mongo field names
-        Map<String, JobParameter> jobParams = jobParameters.getParameters();
-        Map<String, Object> paramMap = new HashMap<>(jobParams.size());
-        for (Map.Entry<String, JobParameter> entry : jobParams.entrySet()) {
-            paramMap.put(entry.getKey().replaceAll(DOT_STRING, DOT_ESCAPE_STRING), entry.getValue().getValue());
-        }
+        Map<String, Object> paramMap = BatchRepositoryUtils.convertToMap(jobParameters);
 
         JobInstanceEntity jobInstanceEntity = new JobInstanceEntity();
 

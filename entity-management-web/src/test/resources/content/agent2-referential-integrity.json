@@ -14,9 +14,10 @@
   "dateOfBirth": [
     "1979-03-04"
   ],
-  "professionOrOccupation": {
-    "en": ["Singer-songwriter, Producer"]
-  },
+  "professionOrOccupation": [
+    "https://www.wikidata.org/wiki/Q47541952",
+    "https://www.wikidata.org/wiki/Q488205"
+  ],
   "biographicalInformation":
   {
     "en":["Courtney O. Peebles, a.k.a. \"J.R.\", (born March 4, 1979) is a Christian singer and producer formerly signed to Cross Movement Records. J.R. is also half of the So Hot Productions team along with N.A.B. His debut album was Metamorphosis, released in 2005. He often appears on the hooks of songs by fellow labelmates, such as FLAME and Da' T.R.U.T.H.. He was expected to release his second album, Life By Stereo, in September 2007; however, it was pushed back to December. In 2009, J.R. left Cross Movement Records and went indie to work on a new sound."]

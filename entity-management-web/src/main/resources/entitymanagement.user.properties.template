@@ -13,3 +13,15 @@ batch.chunkSize=10
 # Whether entity metrics should be computed. This requires access to the Pagerank and
 # Search API Solr servers.
 batch.computeMetrics=false
+
+# Whether user requests should be authenticated. Requires Keycloak public key and ApiKey URL if "true"
+auth.enabled=false
+
+# Resource name embedded in JWT token
+authorization.api.name=entities
+
+# API Key URL
+europeana.apikey.serviceurl=
+
+# Keycloak public key used for verifying JWTs
+europeana.apikey.jwttoken.signaturekey=

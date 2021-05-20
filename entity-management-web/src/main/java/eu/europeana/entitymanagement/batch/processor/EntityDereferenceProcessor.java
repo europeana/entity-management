@@ -64,7 +64,7 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
    * Checks if the Europeana proxy has been updated since the last time entity consolidation occurred.
    * This is the case when the update task is triggered after Europeana metadata is updated.
    *
-   * See {@link eu.europeana.entitymanagement.web.service.EntityRecordService#updateEuropeanaProxy(Entity, EntityRecord)}
+   * See {@link eu.europeana.entitymanagement.web.service.EntityRecordService#replaceEuropeanaProxy(Entity, EntityRecord)}
    */
   private boolean isEuropeanaProxyUpdated(EntityRecord entityRecord){
       return

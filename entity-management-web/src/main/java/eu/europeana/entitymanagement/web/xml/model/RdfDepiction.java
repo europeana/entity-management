@@ -1,14 +1,14 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-
 import eu.europeana.entitymanagement.utils.EntityUtils;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 
 public class RdfDepiction {
     
-    @JsonIgnore
+    @XmlTransient
     private String about;
     private String resource;
     
@@ -17,12 +17,12 @@ public class RdfDepiction {
 	resource = EntityUtils.createWikimediaResourceString(about);
     }
     
-    @JacksonXmlProperty(isAttribute=true, localName=XmlConstants.ABOUT)
+    @XmlAttribute(name=XmlConstants.ABOUT)
     public String getAbout() {
 	return about;
     }
     
-    @JacksonXmlProperty(localName=XmlConstants.XML_DC_SOURCE)
+    @XmlElement(name=XmlConstants.XML_DC_SOURCE)
     public LabelledResource getResource() {
 	return new LabelledResource(resource);
     }

@@ -8,5 +8,6 @@ mongo -- "$MONGO_INITDB_DATABASE" <<EOF
 
 db.getSiblingDB('$EM_APP_DB').createCollection('temp');
 db.getSiblingDB('$EM_BATCH_DB').createCollection('temp');
+db.getSiblingDB('$ENRICHMENT_DB').createCollection('temp');
 
 EOF

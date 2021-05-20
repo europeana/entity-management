@@ -132,10 +132,7 @@
             "tr" : ["Leonardo di ser Piero da Vinci (Ses bağlantısına git telaffuz ) (15 Nisan 1452 - 2 Mayıs 1519), Rönesans döneminde yaşamış İtalyan hezârfen. Döneminin önemli bir düşünürü, mimarı, mühendisi, mucidi, matematikçisi, anatomisti, müzisyeni, heykeltıraşı, botanisti, jeoloğu, kartografı, yazarı ve ressamıdır. En tanınmış yapıtları Mona Lisa (1503-1507) ve Son Akşam Yemeği'dir (1495-1497). Rönesans sanatını doruğuna ulaştırmış, yalnız sanat yapısına değil, çeşitli alanlardaki araştırmaları ve buluşlarıyla da tanınan, dünyanın gelmiş geçmiş en büyük sanatçılarından ve dehalarından biri kabul edilir. 2. milenyumun adamı seçilmiştir."],
             "nl" : ["Leonardo da Vinci (Vinci, 15 april 1452 - Amboise, 2 mei 1519) was een architect, uitvinder, ingenieur, filosoof, natuurkundige, scheikundige, anatomist, beeldhouwer, schrijver, schilder en componist uit de Florentijnse Republiek, tijdens de renaissance. Hij wordt gezien als het schoolvoorbeeld van het renaissance-ideaal van de homo universalis en als genie."]
     },
-    "professionOrOccupation": {
-        "en" : ["mathematician", "engineering"],
-        "mt" : ["http://www.wikidata.org/entity/Q11023"]
-    },
+    "professionOrOccupation": ["http://www.wikidata.org/entity/Q11023"],
     "hasMet": [
         "Salai", "http://wikidata.dbpedia.org/resource/Q954126"
     ],

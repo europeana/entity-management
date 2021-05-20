@@ -45,6 +45,7 @@ public class DataSourceConfig {
         Datastore datastore = Morphia.createDatastore(mongoClient, emDatabase, MapperOptions.builder().mapSubPackages(true).build());
         // EA-2520: explicit package mapping required to prevent EntityDecoder error
         datastore.getMapper().mapPackage("eu.europeana.entitymanagement.definitions.model");
+        datastore.ensureIndexes();
         return datastore;
     }
 
@@ -57,6 +58,10 @@ public class DataSourceConfig {
     @Bean(name = AppConfigConstants.BEAN_BATCH_DATA_STORE)
     public Datastore batchDataStore(MongoClient mongoClient) {
         logger.info("Configuring Batch database: {}", batchDatabase);
-        return Morphia.createDatastore(mongoClient, batchDatabase);
+        Datastore datastore = Morphia.createDatastore(mongoClient, batchDatabase);
+        // Indexes aren't created unless Entity classes are explicitly mapped.
+        datastore.getMapper().mapPackage("eu.europeana.entitymanagement.batch.entity");
+        datastore.ensureIndexes();
+        return datastore;
     }
 }

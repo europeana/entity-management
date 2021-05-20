@@ -1,33 +1,29 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
-import java.util.Date;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlText;
-
 import eu.europeana.api.commons.definitions.utils.DateUtils;
+import java.util.Date;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlValue;
 
 public class RdfTypedElement {
 
-    private final String DATA_TYPE_DATETIME = "http://www.w3.org/2001/XMLSchema#dateTime";
-    
-    @JsonIgnore
+  @XmlTransient
     private String value;
-    @JsonIgnore
+    @XmlTransient
     private String type;
     
     public RdfTypedElement(Date date) {
 	this.value = DateUtils.convertDateToStr(date);
-	this.type = DATA_TYPE_DATETIME;
+      this.type = "http://www.w3.org/2001/XMLSchema#dateTime";
     }
     
-    @JacksonXmlProperty(isAttribute= true, localName= XmlConstants.XML_DATATYPE)
+    @XmlAttribute(name= XmlConstants.XML_DATATYPE)
     public String getType() {
 	return type;
     }
     
-    @JacksonXmlText
+    @XmlValue
     public String getValue() {
 	return value;
     }

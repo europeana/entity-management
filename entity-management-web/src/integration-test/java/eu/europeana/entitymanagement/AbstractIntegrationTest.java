@@ -4,7 +4,6 @@ package eu.europeana.entitymanagement;
 import eu.europeana.entitymanagement.testutils.MongoContainer;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockWebServer;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.AfterAll;
@@ -23,11 +22,11 @@ public abstract class AbstractIntegrationTest {
 
     static final MongoContainer MONGO_CONTAINER;
 
-    protected Logger logger = LogManager.getLogger(getClass());
+    protected  static final Logger logger = LogManager.getLogger(AbstractIntegrationTest.class);
 
     static {
-        MONGO_CONTAINER = new MongoContainer("entity-management", "job-repository")
-                .withLogConsumer(new WaitingConsumer().andThen(new ToStringConsumer()));
+        MONGO_CONTAINER = new MongoContainer("entity-management", "job-repository", "enrichment")
+            .withLogConsumer(new WaitingConsumer().andThen(new ToStringConsumer()));
 
         MONGO_CONTAINER.start();
     }
@@ -50,6 +49,7 @@ public abstract class AbstractIntegrationTest {
 
     @AfterAll
     static void teardownAll() throws IOException {
+        logger.info("Shutdown metis server : host = {}; port={}", mockMetis.getHostName(), mockMetis.getPort());
         mockMetis.shutdown();
     }
 
@@ -58,8 +58,14 @@ public abstract class AbstractIntegrationTest {
         registry.add("mongo.connectionUrl", MONGO_CONTAINER::getConnectionUrl);
         registry.add("mongo.em.database", MONGO_CONTAINER::getEntityDb);
         registry.add("mongo.batch.database", MONGO_CONTAINER::getBatchDb);
+        // enrichment database on the same test Mongo instance
+        registry.add("mongo.enrichment.connectionUrl", MONGO_CONTAINER::getConnectionUrl);
+        registry.add("mongo.enrichment.database", MONGO_CONTAINER::getEnrichmentDb);
         registry.add("metis.baseUrl", () -> String.format("http://%s:%s", mockMetis.getHostName(), mockMetis.getPort()));
         registry.add("batch.computeMetrics", () -> "false");
+        registry.add("auth.enabled", () -> "false");
+        logger.info("MONGO_CONTAINER : {}", MONGO_CONTAINER.getConnectionUrl());
+        logger.info("METIS SERVER : host = {}; port={}", mockMetis.getHostName(), mockMetis.getPort());
     }
 
 

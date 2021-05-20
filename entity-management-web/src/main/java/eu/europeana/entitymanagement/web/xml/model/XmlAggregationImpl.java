@@ -6,10 +6,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
-import eu.europeana.entitymanagement.definitions.model.Entity;;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import javax.xml.bind.annotation.XmlRootElement;;
 
-@JacksonXmlRootElement(localName = XmlConstants.XML_ORE_AGGREGATION)
-@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
+@XmlRootElement(name = XmlConstants.XML_ORE_AGGREGATION)
 @JsonPropertyOrder({XmlConstants.XML_CREATED, XmlConstants.XML_MODIFIED, XmlConstants.XML_AGGREGATES})
 public class XmlAggregationImpl {
 

@@ -172,7 +172,9 @@ public class StepExecutionRepository extends AbstractRepository implements StepE
 
         validateStepExecution(stepExecution);
 
-        stepExecution.setId(generateSequence(StepExecutionEntity.class.getSimpleName()));
+        synchronized (this) {
+            stepExecution.setId(generateSequence(StepExecutionEntity.class.getSimpleName()));
+        }
         stepExecution.incrementVersion();
     }
 
