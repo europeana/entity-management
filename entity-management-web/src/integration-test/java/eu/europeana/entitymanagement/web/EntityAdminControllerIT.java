@@ -3,9 +3,8 @@ package eu.europeana.entitymanagement.web;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.definitions.model.Concept;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.impl.ConceptImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -72,8 +71,8 @@ public class EntityAdminControllerIT extends AbstractIntegrationTest {
     @Test
     void permanentDeletionShouldBeSuccessful() throws Exception {
         // create entity in DB
-        ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_JSON), ConceptImpl.class);
-        EntityRecord entityRecord = new EntityRecordImpl();
+        Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
+        EntityRecord entityRecord = new EntityRecord();
         entityRecord.setEntity(concept);
         entityRecord.setEntityId(concept.getEntityId());
         EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
