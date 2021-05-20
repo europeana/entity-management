@@ -12,12 +12,6 @@ import java.util.Optional;
 
 import javax.servlet.ServletContext;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.europeana.entitymanagement.AbstractIntegrationTest;
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
-import eu.europeana.entitymanagement.definitions.model.Concept;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
