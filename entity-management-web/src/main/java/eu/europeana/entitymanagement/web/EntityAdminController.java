@@ -7,10 +7,8 @@ import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
@@ -84,7 +82,7 @@ public class EntityAdminController extends BaseRest {
             @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
             @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
             @RequestBody EntityPreview entityCreationRequest,
-            HttpServletRequest request) throws HttpException, UnsupportedEntityTypeException, EuropeanaApiException {
+            HttpServletRequest request) throws HttpException, EuropeanaApiException {
         if (emConfig.isAuthEnabled()) {
             //TODO later change the verification method once DB migration is done
            // verifyWriteAccess(Operations.CREATE, request);
