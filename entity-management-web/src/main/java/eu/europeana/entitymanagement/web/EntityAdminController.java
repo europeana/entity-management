@@ -14,13 +14,13 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -108,10 +108,13 @@ public class EntityAdminController extends BaseRest {
      * @throws ApplicationAuthenticationException
      */
     private void verifyMigrationAccess(HttpServletRequest request) throws ApplicationAuthenticationException {
-     if (request.getHeader(HttpHeaders.AUTHORIZATION) == null || request.getHeader(HttpHeaders.AUTHORIZATION).isEmpty()) {
+        String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
+     if (!StringUtils.hasLength(authorization) || !authorization.startsWith("Bearer")) {
        throw new ApplicationAuthenticationException("User is not authorised to perform this action", null);
      }
-    if (!request.getHeader(HttpHeaders.AUTHORIZATION).equals(emConfig.getEnrichmentsMigrationPassword())) {
+
+     // Authorization header is "Bearer <token_value>"
+        if (!authorization.substring(7).equals(emConfig.getEnrichmentsMigrationPassword())) {
         throw new ApplicationAuthenticationException("Invalid token for migrating existing entity", null, null, HttpStatus.FORBIDDEN);
     }
     }

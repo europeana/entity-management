@@ -29,7 +29,7 @@ public class EntityCreationException extends EuropeanaApiException {
     }
 
     public boolean logStacktrace() {
-        return true;
+        return false;
     }
 
     @Override
