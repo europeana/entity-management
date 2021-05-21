@@ -19,6 +19,8 @@ public class BaseMvcTestUtils {
     public static final String CONCEPT_DATA_RECONCELIATION_XML = "/metis-deref/concept-data-reconceliation.xml";
     public static final String CONCEPT_METIS_BATHTUB = "/metis-deref/concept-metis-bathtub.xml";
     public static final String CONCEPT_XML = "/metis-deref/concept.xml";
+    public static final String VALID_MIGRATION_ID = "http://www.wikidata.org/entity/testing";
+    public static final String INVALID_MIGRATION_ID = "http://www.testing.org/entity/testing";
 
     public static String getEntityIdentifier(String result) throws JSONException {
         String id = getEntityId(result);

@@ -16,6 +16,7 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,8 +90,8 @@ public class EntityAdminController extends BaseRest {
            // verifyWriteAccess(Operations.CREATE, request);
             verifyMigrationAccess(request);
         }
-        // validate Entity Type
-        EntityTypes.getByEntityType(type);
+        // camel case the type to match enum Constants
+        type = StringUtils.capitalize(type);
         LOG.debug("Migrating existing entity: {}", entityCreationRequest.getId());
 
         EntityRecord savedEntityRecord = entityRecordService
