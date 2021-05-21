@@ -95,6 +95,27 @@ public class EntityAdminControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
+    void permanentDeletionForDeprecatedEntityShouldBeSuccessful() throws Exception {
+        // create disabled entity in DB
+        Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
+        EntityRecord entityRecord = new EntityRecord();
+        entityRecord.setEntity(concept);
+        entityRecord.setEntityId(concept.getEntityId());
+        entityRecord.setDisabled(true);
+        EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
+
+        String requestPath = getEntityRequestPath(record.getEntityId());
+
+        mockMvc.perform(delete(BASE_SERVICE_URL + "/" + requestPath + BASE_ADMIN_URL)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+
+        // check that record is deleted
+        Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveEntityRecordByUri(record.getEntityId());
+        Assertions.assertTrue(dbRecordOptional.isEmpty());
+    }
+
+    @Test
     void migrationExistingEntityShouldBeSuccessful() throws Exception {
         String requestBody = "{\"id\" : \"" + BaseMvcTestUtils.VALID_MIGRATION_ID + "\"}";
         String entityId = EntityRecordUtils.buildEntityIdUri("concept", "1");
