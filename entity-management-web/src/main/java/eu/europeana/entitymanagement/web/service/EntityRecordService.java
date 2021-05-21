@@ -10,19 +10,14 @@ import static eu.europeana.entitymanagement.web.EntityRecordUtils.getEuropeanaPr
 import static eu.europeana.entitymanagement.web.EntityRecordUtils.getIsAggregatedById;
 
 import eu.europeana.api.commons.error.EuropeanaApiException;
+import eu.europeana.enrichment.utils.EntityType;
+import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
+import eu.europeana.entitymanagement.exception.EntityAlreadyExistsException;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.web.EntityRecordUtils;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
@@ -147,7 +142,55 @@ public class EntityRecordService {
 		return entityRecordRepository.deleteForGood(entityId);
 	}
 
-    /**
+	/**
+	 * Creates an {@link EntityRecord} from an {@link EntityPreview}, which is then
+	 * persisted.
+	 * Note : This method is used for creating Entity for Migration requests
+	 *
+	 * @param entityCreationRequest
+	 * @param type type of entity
+	 * @param identifier id of entity
+	 * @return Saved Entity record
+	 * @throws EntityCreationException if an error occurs
+	 */
+	public EntityRecord createEntityFromMigrationRequest(EntityPreview entityCreationRequest, String type, String identifier)
+			throws EntityCreationException, EntityAlreadyExistsException {
+		// Fail quick if no datasource is configured
+		Optional<DataSource> externalDatasourceOptional = datasources.getDatasource(entityCreationRequest.getId());
+		if (externalDatasourceOptional.isEmpty()) {
+			throw new EntityCreationException("No configured datasource for entity " + entityCreationRequest.getId());
+		}
+
+		Date timestamp = new Date();
+		Entity entity = EntityObjectFactory.createEntityObject(type);
+		EntityRecord entityRecord = new EntityRecord();
+		String entityId = generateEntityId(entity.getType(), identifier);
+		// check if entity already exists
+		// this is avoid MongoDb exception for duplicate key
+		checkIfEntityAlreadyExists(entityId);
+
+		entityRecord.setEntityId(entityId);
+		entity.setEntityId(entityId);
+		entityRecord.setEntity(entity);
+
+		Entity europeanaProxyMetadata = EntityObjectFactory.createEntityObject(type);
+		// copy metadata from request into entity
+		europeanaProxyMetadata.setEntityId(entityId);
+		europeanaProxyMetadata.setType(type);
+		copyPreviewMetadata(europeanaProxyMetadata, entityCreationRequest);
+		setEuropeanaMetadata(europeanaProxyMetadata, entityId, entityRecord, timestamp);
+
+		// create metis Entity
+		Entity metisEntity = EntityObjectFactory.createEntityObject(type);
+
+		DataSource externalDatasource = externalDatasourceOptional.get();
+		setExternalProxyMetadata(metisEntity, entityCreationRequest, entityId, externalDatasource, entityRecord, timestamp);
+
+		setEntityAggregation(entityRecord, entityId, timestamp);
+		return entityRecordRepository.save(entityRecord);
+	}
+
+	/**
      * Creates an {@link EntityRecord} from an {@link EntityPreview}, which is then
      * persisted.
      *
@@ -161,14 +204,14 @@ public class EntityRecordService {
 	// Fail quick if no datasource is configured
 	Optional<DataSource> externalDatasourceOptional = datasources.getDatasource(entityCreationRequest.getId());
 	if (externalDatasourceOptional.isEmpty()) {
-	    throw new EntityCreationException("No configured datasource for entity " + entityCreationRequest.getId());
+		throw new EntityCreationException("No configured datasource for entity " + entityCreationRequest.getId());
 	}
 
 	Date timestamp = new Date();
 	Entity entity = EntityObjectFactory.createEntityObject(metisResponse.getType());
 
 	EntityRecord entityRecord = new EntityRecord();
-	String entityId = generateEntityId(entity.getType());
+	String entityId = generateEntityId(entity.getType(), null);
         entityRecord.setEntityId(entityId);
         entity.setEntityId(entityId);
         entityRecord.setEntity(entity);
@@ -191,6 +234,18 @@ public class EntityRecordService {
     }
 
 	/**
+	 * Checks if Entity already exists
+	 * @param entityId
+	 * @throws EntityAlreadyExistsException
+	 */
+	private void checkIfEntityAlreadyExists(String entityId) throws EntityAlreadyExistsException {
+	Optional<EntityRecord> entityRecordOptional = retrieveEntityRecordByUri(entityId);
+	if (!entityRecordOptional.isEmpty()) {
+		throw new EntityAlreadyExistsException(entityId);
+	}
+	}
+
+	/**
 	 * Copies metadata provided during Entity creation, into the created Entity
 	 * @param entity entity
 	 * @param entityCreationRequest entity creation request
@@ -202,9 +257,24 @@ public class EntityRecordService {
 			entity.setDepiction(entityCreationRequest.getDepiction());
 	}
 
-	private String generateEntityId(String entityType) {
-	long dbId = entityRecordRepository.generateAutoIncrement(entityType);
-	return EntityRecordUtils.buildEntityIdUri(entityType, String.valueOf(dbId));
+	/**
+	 * generates the EntityId
+	 * If entityId is present, generate entity id uri with entityId
+	 * else generates a auto increment id
+	 * ex: http://data.europeana.eu/<entitytype>/<entityId>
+	 * OR  http://data.europeana.eu/<entitytype>/<dbId>
+	 *
+	 * @param entityType
+	 * @param entityId
+	 * @return
+	 */
+	private String generateEntityId(String entityType, String entityId) {
+	if (entityId != null || !entityId.isEmpty()) {
+		return EntityRecordUtils.buildEntityIdUri(entityType, entityId);
+	} else {
+		long dbId = entityRecordRepository.generateAutoIncrement(entityType);
+		return EntityRecordUtils.buildEntityIdUri(entityType, String.valueOf(dbId));
+	}
     }
 
     /**

@@ -289,31 +289,6 @@ public class EMController extends BaseRest {
 			return generateResponseEntity(profile, outFormat, contentType, entityRecord, HttpStatus.OK);
 		}
 
-	private ResponseEntity<String> generateResponseEntity(String profile, FormatTypes outFormat,
-			String contentType, EntityRecord entityRecord, HttpStatus status)
-			throws EntityCreationException {
-
-		Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
-
-		long timestamp = isAggregatedBy != null ?
-				isAggregatedBy.getModified().getTime() :
-				0L;
-
-		String etag = computeEtag(timestamp, outFormat.name(), getApiVersion());
-
-		org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
-		headers.add(HttpHeaders.ALLOW, HttpHeaders.ALLOW_GET);
-		if (!outFormat.equals(FormatTypes.schema)) {
-			headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
-			headers.add(HttpHeaders.LINK, HttpHeaders.VALUE_LDP_RESOURCE);
-		}
-		if (contentType != null && !contentType.isEmpty())
-			headers.add(HttpHeaders.CONTENT_TYPE, contentType);
-
-		String body = serialize(entityRecord, outFormat, profile);
-		return ResponseEntity.status(status).headers(headers).eTag(etag).body(body);
-	}
-
 	private ResponseEntity<String> launchTaskAndRetrieveEntity(String type, String identifier,
 			EntityRecord entityRecord, String profile) throws Exception {
 		// launch synchronous update, then retrieve entity from DB afterwards
@@ -359,13 +334,5 @@ public class EMController extends BaseRest {
 	private String getDatabaseIdentifier(String entityId) {
 		//entity id is "http://data.europeana.eu/{type}/{identifier}"
 		return entityId.substring(entityId.lastIndexOf("/") + 1);
-	}
-
-	/**
-	 * Generates a unique hex string based on the input params
-	 * TODO: move logic to {@link eu.europeana.api.commons.web.controller.BaseRestController#generateETag(Date, String, String)}
-	 */
-	private String computeEtag(long timestamp, String format, String version){
-		return DigestUtils.md5Hex(String.format("%s:%s:%s", timestamp, format, version));
 	}
 }
