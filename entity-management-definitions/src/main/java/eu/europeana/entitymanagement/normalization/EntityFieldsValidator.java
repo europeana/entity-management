@@ -2,9 +2,7 @@ package eu.europeana.entitymanagement.normalization;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.time.format.ResolverStyle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -43,8 +41,8 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
     }
 
     @Override
-	public boolean isValid(Entity entity, ConstraintValidatorContext context) {		
-		
+	public boolean isValid(Entity entity, ConstraintValidatorContext context) {	
+    			
 		if (entity==null) {
 			return false;
 		}
@@ -83,6 +81,7 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
 		}
 		return returnValue;
     }
+
 
     boolean validateStringField(ConstraintValidatorContext context, Field field, Object fieldValue, boolean returnValue) throws IllegalAccessException {
 	if (!fieldValue.toString().trim().equals(fieldValue.toString())) {

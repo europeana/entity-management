@@ -82,7 +82,6 @@ public class EntityFieldsValidatorTest {
     Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator()
         .validate(concept);
       Assertions.assertEquals(3, violations.size());
-      Assertions.assertFalse(concept.getEntityId().contains(" "));
   }
 
 }

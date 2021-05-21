@@ -23,12 +23,6 @@ public class EntityUtils {
 	 */
 	public static List<Field> getAllFields(List<Field> fields, Class<?> type) {
 	    fields.addAll(Arrays.asList(type.getDeclaredFields()));
-
-	    for(Field field: fields) {
-	    	if (!field.getType().isAssignableFrom(String.class) && field.getType().getDeclaredFields().length>0) {
-	    		getAllFields(fields, field.getType().getClass());
-	    	}
-	    }
 	    
 	    if (type.getSuperclass() != null) {
 	        getAllFields(fields, type.getSuperclass());
