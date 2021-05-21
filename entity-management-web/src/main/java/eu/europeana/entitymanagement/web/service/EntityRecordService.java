@@ -269,7 +269,7 @@ public class EntityRecordService {
 	 * @return
 	 */
 	private String generateEntityId(String entityType, String entityId) {
-	if (entityId != null || !entityId.isEmpty()) {
+	if (entityId != null) {
 		return EntityRecordUtils.buildEntityIdUri(entityType, entityId);
 	} else {
 		long dbId = entityRecordRepository.generateAutoIncrement(entityType);
