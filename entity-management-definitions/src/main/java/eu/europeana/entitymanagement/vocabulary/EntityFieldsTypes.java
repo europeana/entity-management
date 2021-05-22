@@ -100,6 +100,10 @@ public enum EntityFieldsTypes {
     public String getFieldType() {
         return fieldType;
     }
+    
+    public static String getFieldType(String fieldName) {
+    	return EntityFieldsTypes.valueOf(fieldName).getFieldType();
+    }
 
     public boolean getFieldIsmultilingual() {
         return fieldIsmultilingual;

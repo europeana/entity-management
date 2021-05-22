@@ -406,8 +406,7 @@ public class EntityRecordService {
 	Entity primary = europeanaProxy.getEntity();
 	Entity secondary = externalProxy.getEntity();
 
-			List<Field> fieldsToCombine = new ArrayList<>();
-			EntityUtils.getAllFields(fieldsToCombine, primary.getClass());
+			List<Field> fieldsToCombine = EntityUtils.getAllFields(primary.getClass());
 
 			try {
 
@@ -458,8 +457,7 @@ public class EntityRecordService {
 		throws Exception {
 	EntityProxy europeanaProxy = entityRecord.getEuropeanaProxy();
 
-		List<Field> allFields = new ArrayList<>();
-		EntityUtils.getAllFields(allFields, updateEntity.getClass());
+		List<Field> allFields = EntityUtils.getAllFields(updateEntity.getClass());
 
 		List<Field> filteredList = allFields.stream()
 				.filter(field -> !UPDATE_FIELDS_TO_IGNORE.contains(field.getName()))

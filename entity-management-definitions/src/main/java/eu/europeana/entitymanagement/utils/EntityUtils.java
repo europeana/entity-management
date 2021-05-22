@@ -21,30 +21,18 @@ public class EntityUtils {
 	/*
 	 * getting all fields of the class including the ones from the parent classes using Java reflection
 	 */
-	public static List<Field> getAllFields(List<Field> fields, Class<?> type) {
-	    fields.addAll(Arrays.asList(type.getDeclaredFields()));
-	    
-	    if (type.getSuperclass() != null) {
-	        getAllFields(fields, type.getSuperclass());
-	    }	    
-
-	    return fields;
-	}
-
-	/*
-	 * getting all fields of the class including the ones from the parent classes using Java reflection
-	 */
 	public static List<Field> getAllFields(Class<?> type) {
-	    List<Field> fields = new ArrayList<Field>();
-	    fields.addAll(Arrays.asList(type.getDeclaredFields()));
-
-	    if (type.getSuperclass() != null) {
-	        getAllFields(fields, type.getSuperclass());
-	    }
-
-	    return fields;
-	}
+		List<Field> entityFields = new ArrayList<Field>();
+		getAllFieldsRecursively(entityFields, type);
+	    return entityFields;
+	} 
 	
+	private static void getAllFieldsRecursively (List<Field> fields, Class<?> type) {
+		fields.addAll(Arrays.asList(type.getDeclaredFields()));
+	    if (type.getSuperclass() != null) {
+	    	getAllFieldsRecursively(fields, type.getSuperclass());
+	    }	    
+	}
 	
 	public static boolean isUri (String value) {
 		if(value.startsWith("http://") || value.startsWith("https://")) {

@@ -6,12 +6,12 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -49,8 +49,7 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
 		
 		boolean returnValue=true;
 		
-		List<Field> entityFields = new ArrayList<>();
-		EntityUtils.getAllFields(entityFields, entity.getClass());
+		List<Field> entityFields = EntityUtils.getAllFields(entity.getClass());
 		
 		for (Field field : entityFields) {
 			try {			
@@ -58,21 +57,34 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
 				if (fieldValue==null) continue;
 				Class<?> fieldType = field.getType();
 				String fieldName = field.getName();
+				boolean returnValueLocal = true;
 				/*
 				 * the validation rules are implemented here
 				 */
 				//for the Text field type, check if it is a string and not a reference, and check the language codes
-				if (EntityFieldsTypes.valueOf(fieldName).getFieldType().equals("Text") || EntityFieldsTypes.valueOf(fieldName).getFieldType().equals("Keyword")) {
-					returnValue = validateTextOrKeywordField(context, field, fieldValue, returnValue);
+				if (EntityFieldsTypes.valueOf(fieldName).getFieldType().equals(EntityFieldsTypes.FIELD_TYPE_TEXT) || EntityFieldsTypes.valueOf(fieldName).getFieldType().equals(EntityFieldsTypes.FIELD_TYPE_KEYWORD)) {
+					returnValueLocal = validateTextOrKeywordField(context, field, fieldValue);
 				}
 				//for the URI field type, check if it is a reference
-				else if (EntityFieldsTypes.valueOf(fieldName).getFieldType().equals("URI") || EntityFieldsTypes.valueOf(fieldName).getFieldType().equals("Date") || EntityFieldsTypes.valueOf(fieldName).getFieldType().equals("Email")) {
-					returnValue = validateEmailOrDateOrURIField(context, field, fieldValue, returnValue);
-				}				
+				else if (EntityFieldsTypes.valueOf(fieldName).getFieldType().equals(EntityFieldsTypes.FIELD_TYPE_URI)) {
+					returnValueLocal = validateURIField(context, field, fieldValue);
+				}	
+				//for the URI field type, check if it is a reference
+				else if (EntityFieldsTypes.valueOf(fieldName).getFieldType().equals(EntityFieldsTypes.FIELD_TYPE_DATE)) {
+					returnValueLocal = validateDateField(context, field, fieldValue);
+				}
+				//for the URI field type, check if it is a reference
+				else if (EntityFieldsTypes.valueOf(fieldName).getFieldType().equals(EntityFieldsTypes.FIELD_TYPE_EMAIL)) {
+					returnValueLocal = validateEmailField(context, field, fieldValue);
+				}
 				//check the leading and trailing spaces from the String fields
 				else if (fieldType.isAssignableFrom(String.class)) {					
-					returnValue = validateStringField(context, field, fieldValue, returnValue);
-				}				
+					returnValueLocal = validateStringField(context, field, fieldValue);
+				}	
+				
+				if(returnValueLocal==false && returnValue==true) {
+					returnValue = false;
+				}
 			} catch (IllegalArgumentException e) {
 			    logger.warn("During the validation of the entity fields an illegal or inappropriate argument exception has happened.",e);
 			} catch (IllegalAccessException e) {
@@ -83,9 +95,9 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
     }
 
 
-    boolean validateStringField(ConstraintValidatorContext context, Field field, Object fieldValue, boolean returnValue) throws IllegalAccessException {
+    boolean validateStringField(ConstraintValidatorContext context, Field field, Object fieldValue) throws IllegalAccessException {
 	if (!fieldValue.toString().trim().equals(fieldValue.toString())) {
-		addConstraint(returnValue, context, "The entity field: "+field.getName()+", contains leading and/or trailing spaces: "+fieldValue.toString()+".");
+		addConstraint(context, "The entity field: "+field.getName()+", contains leading and/or trailing spaces: "+fieldValue.toString()+".");
 		return false;
 	}
 	else {
@@ -93,166 +105,199 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
     }
     }
     
-    boolean validateEmailOrDateOrURIField(ConstraintValidatorContext context, Field field, Object fieldValue, boolean returnValue) {
-    	if (field.getType().isArray()) {
-			returnValue = validateEmailOrDateOrURIArrayField(context, field, fieldValue, returnValue);
-		}
-        else if (field.getType().isAssignableFrom(ArrayList.class)) {
-			returnValue = validateEmailOrDateOrURIListField(context, field, fieldValue, returnValue);
+    boolean validateEmailField(ConstraintValidatorContext context, Field field, Object fieldValue) {
+    	boolean returnValue = true;
+    	if (field.getType().isAssignableFrom(ArrayList.class)) {
+			returnValue = validateEmailListField(context, field, fieldValue);
 		}
         else if (field.getType().isAssignableFrom(String.class)){
-			returnValue = validateEmailOrDateOrURIStringField(context, field, fieldValue, returnValue);
+			returnValue = validateEmailStringField(context, field, fieldValue);
         }
         return returnValue;
-    }
+    } 
     
-    boolean validateEmailOrDateOrURIArrayField(ConstraintValidatorContext context, Field field, Object fieldValue, boolean returnValue) {
-		Object[] fieldValueArray = (Object[])fieldValue;    			
-		if (fieldValueArray.length==0) return returnValue;			
-		for (Object fieldValueElem : fieldValueArray) {
-			if (EntityFieldsTypes.valueOf(field.getName()).getFieldType().equals("Email")) {
-				returnValue = checkEmailFormat(context, field, fieldValueElem, returnValue);
-			}
-			else if (EntityFieldsTypes.valueOf(field.getName()).getFieldType().equals("Date")) {
-				returnValue = checkDateFormatISO8601(context, field, fieldValueElem, returnValue);
-			}
-			else if (EntityFieldsTypes.valueOf(field.getName()).getFieldType().equals("URI")) {
-				returnValue = checkURIFormat(context, field, fieldValueElem, returnValue, true);
-			}
+    boolean validateDateField(ConstraintValidatorContext context, Field field, Object fieldValue) {
+    	boolean returnValue = true;
+    	if (field.getType().isAssignableFrom(ArrayList.class)) {
+			returnValue = validateDateListField(context, field, fieldValue);
 		}
+        else if (field.getType().isAssignableFrom(String.class)){
+			returnValue = validateDateStringField(context, field, fieldValue);
+        }
         return returnValue;
-    }  
+    } 
     
-    boolean validateEmailOrDateOrURIListField(ConstraintValidatorContext context, Field field, Object fieldValue, boolean returnValue) {
- 		@SuppressWarnings("unchecked")
+    boolean validateURIField(ConstraintValidatorContext context, Field field, Object fieldValue) {
+    	boolean returnValue = true;
+    	if (field.getType().isAssignableFrom(ArrayList.class)) {
+			returnValue = validateURIListField(context, field, fieldValue);
+		}
+        else if (field.getType().isAssignableFrom(String.class)){
+			returnValue = validateURIStringField(context, field, fieldValue);
+        }
+        return returnValue;
+    } 
+    
+    boolean validateEmailListField(ConstraintValidatorContext context, Field field, Object fieldValue) {
+    	boolean returnValue = true;
+    	@SuppressWarnings("unchecked")
 		List<Object> fieldValueList = (List<Object>)fieldValue;
-		if (fieldValueList.size()==0) return returnValue;
+		if (fieldValueList.size()==0) return true;
 		for (Object fieldValueElem : fieldValueList) {
-			if (EntityFieldsTypes.valueOf(field.getName()).getFieldType().equals("Email")) {
-				returnValue = checkEmailFormat(context, field, fieldValueElem, returnValue);
+			if (checkEmailFormat(context, field, fieldValueElem) == false && returnValue == true) {
+				returnValue = false;
 			}
-			else if (EntityFieldsTypes.valueOf(field.getName()).getFieldType().equals("Date")) {
-				returnValue = checkDateFormatISO8601(context, field, fieldValueElem, returnValue);
-			}
-			else if (EntityFieldsTypes.valueOf(field.getName()).getFieldType().equals("URI")) {
-				returnValue = checkURIFormat(context, field, fieldValueElem, returnValue, true);					
-			}
-			
 		}		
         return returnValue;
     }
-    
-    boolean validateEmailOrDateOrURIStringField(ConstraintValidatorContext context, Field field, Object fieldValue, boolean returnValue) {
-    	if (EntityFieldsTypes.valueOf(field.getName()).getFieldType().equals("Email")) {
-    		returnValue = checkEmailFormat(context, field, fieldValue, returnValue);
-    	}
-    	else if (EntityFieldsTypes.valueOf(field.getName()).getFieldType().equals("Date")) {
-    		returnValue = checkDateFormatISO8601(context, field, fieldValue, returnValue);
-    	}
-    	else if (EntityFieldsTypes.valueOf(field.getName()).getFieldType().equals("URI")) {
-			returnValue = checkURIFormat(context, field, fieldValue, returnValue, true);				
-		}
+
+    boolean validateDateListField(ConstraintValidatorContext context, Field field, Object fieldValue) {
+    	boolean returnValue = true;
+    	@SuppressWarnings("unchecked")
+		List<Object> fieldValueList = (List<Object>)fieldValue;
+		if (fieldValueList.size()==0) return true;
+		for (Object fieldValueElem : fieldValueList) {
+			if (checkDateFormatISO8601(context, field, fieldValueElem) == false && returnValue == true) {
+				returnValue = false;
+			}
+		}		
         return returnValue;
     }
-    
-    boolean checkEmailFormat(ConstraintValidatorContext context, Field field, Object fieldValue, boolean returnValue) {
-        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\."+
-                            "[a-zA-Z0-9_+&*-]+)*@" +
-                            "(?:[a-zA-Z0-9-]+\\.)+[a-z" +
-                            "A-Z]{2,7}$";                              
-        Pattern pat = Pattern.compile(emailRegex);
-        if (fieldValue == null) return false;
-        if (pat.matcher(fieldValue.toString()).matches()) {
-        	return true;
-        }
-        else
-        {
-    		addConstraint(returnValue, context, "The entity field: "+field.getName()+" is of type Email and contains inappropriate characters: "+fieldValue.toString()+".");
-    		return false;
-        }
+
+    boolean validateURIListField(ConstraintValidatorContext context, Field field, Object fieldValue) {
+    	boolean returnValue = true;
+ 		@SuppressWarnings("unchecked")
+		List<Object> fieldValueList = (List<Object>)fieldValue;
+		if (fieldValueList.size()==0) return true;
+		for (Object fieldValueElem : fieldValueList) {
+			if (checkURIFormat(context, field, fieldValueElem, true) == false && returnValue == true) {
+				returnValue = false;
+			}
+		}		
+        return returnValue;
+    }
+
+    boolean validateEmailStringField(ConstraintValidatorContext context, Field field, Object fieldValue) {
+		return checkEmailFormat(context, field, fieldValue);
     }
     
-    boolean checkDateFormatISO8601(ConstraintValidatorContext context, Field field, Object fieldValue, boolean returnValue) {
+    boolean validateDateStringField(ConstraintValidatorContext context, Field field, Object fieldValue) {
+    	return checkDateFormatISO8601(context, field, fieldValue); 
+    }
+    
+    boolean validateURIStringField(ConstraintValidatorContext context, Field field, Object fieldValue) {
+    	return checkURIFormat(context, field, fieldValue, true);				
+    }
+    
+    boolean checkEmailFormat(ConstraintValidatorContext context, Field field, Object fieldValue) {
+    	EmailValidator validator = EmailValidator.getInstance();
+    	if (validator.isValid(fieldValue.toString())) {
+    		return true;
+    	} else {
+    		addConstraint(context, "The entity field: "+field.getName()+" is of type Email and contains inappropriate characters: "+fieldValue.toString()+".");
+    		return false;
+    	}
+    }
+    
+    boolean checkDateFormatISO8601(ConstraintValidatorContext context, Field field, Object fieldValue) {
     	try {
         	//LocalDate.parse(fieldValue.toString(), DateTimeFormatter.ofPattern(java.time.format.DateTimeFormatter.ISO_DATE.toString()).withResolverStyle(ResolverStyle.STRICT));
     		LocalDate.parse(fieldValue.toString(), java.time.format.DateTimeFormatter.ISO_DATE);
+    		return true;
         } catch (DateTimeParseException e) {
-    		addConstraint(returnValue, context, "The entity field: "+field.getName()+" is of type Date and does not comply with the ISO-8601 format: "+fieldValue.toString()+".");
-            returnValue = false;
+    		addConstraint(context, "The entity field: "+field.getName()+" is of type Date and does not comply with the ISO-8601 format: "+fieldValue.toString()+".");
+            return false;
         }
-    	return returnValue;
+    	
     }
     
-    boolean checkURIFormat(ConstraintValidatorContext context, Field field, Object fieldValue, boolean returnValue, boolean shouldBeURI) {
+    boolean checkURIFormat(ConstraintValidatorContext context, Field field, Object fieldValue, boolean shouldBeURI) {
     	if (shouldBeURI && !EntityUtils.isUri(fieldValue.toString())) {
-			addConstraint(returnValue, context, "The entity field: "+field.getName()+" is of type: "+EntityFieldsTypes.valueOf(field.getName()).getFieldType()+" and it's element: "+fieldValue.toString()+" does not have the URI form.");
-			returnValue = false;
+			addConstraint(context, "The entity field: "+field.getName()+" is of type: "+EntityFieldsTypes.getFieldType(field.getName())+" and it's element: "+fieldValue.toString()+" does not have the URI form.");
+			return false;
 		}
     	else if (!shouldBeURI && EntityUtils.isUri(fieldValue.toString())) {
-			addConstraint(returnValue, context, "The entity field: "+field.getName()+" is of type: "+EntityFieldsTypes.valueOf(field.getName()).getFieldType()+" and it's element: "+fieldValue.toString()+" has the URI form.");
-			returnValue = false;
+			addConstraint(context, "The entity field: "+field.getName()+" is of type: "+EntityFieldsTypes.getFieldType(field.getName())+" and it's element: "+fieldValue.toString()+" has the URI form.");
+			return false;
 		}
-    	return returnValue;
+    	return true;
     }
    
-    boolean validateTextOrKeywordField (ConstraintValidatorContext context, Field field, Object fieldValue, boolean returnValue) {
+    boolean validateTextOrKeywordField (ConstraintValidatorContext context, Field field, Object fieldValue) {
+    	boolean returnValue = true;
     	//non-multilingual fields are not of type Map, but they can be of type String[], List<String>, or String
     	if (!EntityFieldsTypes.valueOf(field.getName()).getFieldIsmultilingual()) {
-    		returnValue = validateNonMultilingualTextOrKeywordField(context, field, fieldValue, returnValue);    		
+    		boolean returnValueLocal = validateNonMultilingualTextOrKeywordField(context, field, fieldValue);
+    		if (returnValueLocal == false) {
+    			returnValue = false;
+    		}
     	}
     	else {
-    		returnValue = validateMultilingualTextOrKeywordField(context, field, fieldValue, returnValue); 
-    		returnValue = validateLanguageCodes(context, field, fieldValue, returnValue);    		
+    		boolean returnValueLocal = validateMultilingualTextOrKeywordField(context, field, fieldValue);
+    		if (returnValueLocal == false) {
+    			returnValue = false;
+    		}
+    		returnValueLocal = validateLanguageCodes(context, field, fieldValue);  
+    		if (returnValueLocal == false && returnValue == true) {
+    			returnValue = false;
+    		}
     	}
     	return returnValue;
     }
     
-    boolean validateNonMultilingualTextOrKeywordField(ConstraintValidatorContext context, Field field, Object fieldValue, boolean returnValue) {
-    	//if the field is an array
-		if (field.getType().isArray()) {
-			Object[] fieldValueArray = (Object[])fieldValue;    			
-			if (fieldValueArray.length==0) return returnValue;   			
-			for (Object fieldValueElem : fieldValueArray) {
-				returnValue = checkURIFormat(context, field, fieldValueElem, returnValue, false);
-			}
-		}
-		//if the field is List
-		else if (field.getType().isAssignableFrom(ArrayList.class)) {
+    boolean validateNonMultilingualTextOrKeywordField(ConstraintValidatorContext context, Field field, Object fieldValue) {
+    	boolean returnValue = true;
+    	//if the field is List
+		if (field.getType().isAssignableFrom(ArrayList.class)) {
 			@SuppressWarnings("unchecked")
 			List<Object> fieldValueList = (List<Object>)fieldValue;
-			if (fieldValueList.size()==0) return returnValue;
+			if (fieldValueList.size()==0) return true;
 			for (Object fieldValueElem : fieldValueList) {
-				returnValue = checkURIFormat(context, field, fieldValueElem, returnValue, false);
+				boolean returnValueLocal = checkURIFormat(context, field, fieldValueElem, false);
+				if(returnValueLocal==false && returnValue==true) {
+					returnValue = false;
+				}
 			}
 		}
 		//if the field is String
 		else if (field.getType().isAssignableFrom(String.class)) {
-			returnValue = checkURIFormat(context, field, fieldValue, returnValue, false);
+			boolean returnValueLocal = checkURIFormat(context, field, fieldValue, false);
+			if(returnValueLocal==false) {
+				returnValue = false;
+			}
 		}
 		
 		return returnValue;
     }
     
     @SuppressWarnings("unchecked")
-	boolean validateMultilingualTextOrKeywordField(ConstraintValidatorContext context, Field field, Object fieldValue, boolean returnValue) {
+	boolean validateMultilingualTextOrKeywordField(ConstraintValidatorContext context, Field field, Object fieldValue) {
+    	boolean returnValue = true;
     	//per default the multilingual field must be of type Map
 		Map<Object,Object> fieldValueMap = (Map<Object,Object>)fieldValue;
-		if (fieldValueMap.size()==0) return returnValue;
+		if (fieldValueMap.size()==0) return true;
 		for (Map.Entry<Object, Object> fieldValueMapElem : fieldValueMap.entrySet()) {
 			if (fieldValueMapElem.getValue().getClass().isAssignableFrom(ArrayList.class)) {
 				for (Object fieldValueMapElemValue : (List<Object>)(fieldValueMapElem.getValue())) {
-					returnValue = checkURIFormat(context, field, fieldValueMapElemValue, returnValue, false);
+					boolean returnValueLocal = checkURIFormat(context, field, fieldValueMapElemValue, false);
+					if(returnValueLocal==false && returnValue==true) {
+						returnValue = false;
+					}
 				}
 			}
 			else {
-				returnValue = checkURIFormat(context, field, fieldValueMapElem.getValue(), returnValue, false);				
+				boolean returnValueLocal = checkURIFormat(context, field, fieldValueMapElem.getValue(), false);
+				if(returnValueLocal==false && returnValue==true) {
+					returnValue = false;
+				}
 			}
 		}		
 		return returnValue;
     }
     
     @SuppressWarnings("unchecked")
-	boolean validateLanguageCodes (ConstraintValidatorContext context, Field field, Object fieldValue, boolean returnValue) {
+	boolean validateLanguageCodes (ConstraintValidatorContext context, Field field, Object fieldValue) {
+    	boolean returnValue = true;
     	boolean foundAlternativeCodes = false;
     	//per default the multilingual field must be of type Map
 		Map<Object,Object> fieldValueMap = (Map<Object,Object>)fieldValue;
@@ -276,23 +321,17 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
 				if (foundKnownCode==true) break;
 			}
 			if (foundKnownCode==false) {
-				addConstraint(returnValue, context, "The entity field: "+field.getName()+" contains the language code: "+fieldValueMapElem.getKey().toString()+" that does not belong to the Europena languge codes.");
-				returnValue=false;
+				addConstraint(context, "The entity field: "+field.getName()+" contains the language code: "+fieldValueMapElem.getKey().toString()+" that does not belong to the Europena languge codes.");
+				if (returnValue==true) {
+					returnValue=false;
+				}
 			}			
 		}
 		return returnValue;		
     }
     
-    private void addConstraint(boolean returnValue, ConstraintValidatorContext context, String messageTemplate) {
-	if (returnValue) {
-	    // disable existing violation message
-	    context.disableDefaultConstraintViolation();
-	    // build new violation message and add it
+    private void addConstraint(ConstraintValidatorContext context, String messageTemplate) {
 	    context.buildConstraintViolationWithTemplate(messageTemplate).addConstraintViolation();
-	} else {
-	    // build new violation message and add it
-	    context.buildConstraintViolationWithTemplate(messageTemplate).addConstraintViolation();
-	}
     }
 
 }

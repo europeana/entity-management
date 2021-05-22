@@ -54,7 +54,7 @@ public class EntityFieldsValidatorTest {
         for (ConstraintViolation<Entity> violation : violations) {
             System.out.print(violation.getMessageTemplate());
         }   
-        Assertions.assertTrue(violations.size()==21);
+        Assertions.assertTrue(violations.size()==22);
     }
 
     @Test
@@ -68,7 +68,7 @@ public class EntityFieldsValidatorTest {
         for (ConstraintViolation<Entity> violation : violations) {
             System.out.print(violation.getMessageTemplate());
         }   
-        Assertions.assertTrue(violations.size()==1);
+        Assertions.assertTrue(violations.size()==2);
       
     }  
     
@@ -81,7 +81,7 @@ public class EntityFieldsValidatorTest {
     //check the validation of the entity fields
     Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator()
         .validate(concept);
-      Assertions.assertEquals(3, violations.size());
+      Assertions.assertEquals(4, violations.size());
   }
 
 }
