@@ -16,8 +16,9 @@ public class FailedTask {
   @Indexed
   private String entityId;
 
-  private String errorMessage;
-  private String stackTrace;
+  // default values saved if they're not overwritten
+  private String errorMessage= "No error message";
+  private String stackTrace = "No stacktrace";
 
   /* Created is not explicitly set on instantiation.
    * During upserts, we use the "modified" value if the record doesn't already exist.
