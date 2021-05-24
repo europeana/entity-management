@@ -12,9 +12,7 @@ import static eu.europeana.entitymanagement.web.EntityRecordUtils.getIsAggregate
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.enrichment.utils.EntityType;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
-import eu.europeana.entitymanagement.exception.EntityAlreadyExistsException;
-import eu.europeana.entitymanagement.exception.EntityNotFoundException;
-import eu.europeana.entitymanagement.exception.EntityRemovedException;
+import eu.europeana.entitymanagement.exception.*;
 import eu.europeana.entitymanagement.web.EntityRecordUtils;
 import java.lang.reflect.Field;
 import java.util.*;
@@ -41,7 +39,6 @@ import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.definitions.model.Timespan;
-import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
@@ -460,7 +457,7 @@ public class EntityRecordService {
      * @throws EntityCreationException
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public void mergeEntity(EntityRecord entityRecord) throws EntityCreationException {
+    public void mergeEntity(EntityRecord entityRecord) throws EuropeanaApiException, IllegalAccessException {
 
 	//TODO: consider refactoring of this implemeentation by creating a new class EntityReconciliator
 	/*
@@ -479,7 +476,6 @@ public class EntityRecordService {
 			List<Field> fieldsToCombine = new ArrayList<>();
 			EntityUtils.getAllFields(fieldsToCombine, primary.getClass());
 
-			try {
 
 				Entity consolidatedEntity = combineEntities(primary, secondary, fieldsToCombine, true);
 
@@ -491,11 +487,6 @@ public class EntityRecordService {
 				    aggregation.setModified(new Date());
 				    consolidatedEntity.setIsAggregatedBy(aggregation);
 						entityRecord.setEntity(consolidatedEntity);
-
-			} catch (IllegalArgumentException | IllegalAccessException e) {
-				logger.error(
-						"Error while reconciling entity data", e);
-			}
 		}
 
 	/**

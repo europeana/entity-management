@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement.batch.processor;
 
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.exception.EntityMismatchException;
 import eu.europeana.entitymanagement.utils.EntityComparator;
 import eu.europeana.entitymanagement.web.service.MetisDereferenceService;
 import java.util.Date;
@@ -31,9 +32,18 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
 
     @Override
     public EntityRecord process(@NonNull EntityRecord entityRecord) throws Exception {
-        logger.debug("Calling Metis dereference service for entityId={}", entityRecord.getEntityId());
+        String entityId = entityRecord.getEntityId();
+        logger.debug("Calling Metis dereference service for entityId={}", entityId);
         Entity metisResponse = dereferenceService.dereferenceEntityById(entityRecord.getExternalProxy().getProxyId());
         Entity entity = entityRecord.getEntity();
+
+        String metisType = metisResponse.getType();
+        String entityType = entity.getType();
+        if (!metisType.equals(entityType)) {
+            throw new EntityMismatchException(
+                    String.format("Metis type %s does not match entity type %s for entityId=%s",
+                            metisType, entityType, entityId));
+        }
 
         /*
          * Entity is newly created if its isAggregatedBy creation and last modified time are the same
@@ -43,7 +53,7 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
         boolean isEntityNew = entity.getIsAggregatedBy().getCreated().equals(entity.getIsAggregatedBy().getModified());
 
         if(isEntityNew || !metisResponseMatchesExternalProxy(entityRecord, metisResponse)){
-            logger.debug("Storing de-referenced metadata in external proxy for entityId={}", entityRecord.getEntityId());
+            logger.debug("Storing de-referenced metadata in external proxy for entityId={}", entityId);
             // replace external proxy with MetisResponse
             entityRecord.getExternalProxy().setEntity(metisResponse);
             entityRecord.getExternalProxy().getProxyIn().setModified(new Date());
