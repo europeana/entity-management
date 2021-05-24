@@ -15,6 +15,7 @@ import eu.europeana.entitymanagement.batch.writer.EntityRecordDatabaseWriter;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityMismatchException;
+import eu.europeana.entitymanagement.exception.MetisNotKnownException;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -160,6 +161,7 @@ public class BatchEntityUpdateConfig {
                 .faultTolerant()
                 .skipPolicy(new EntitySkipPolicy())
                 .skip(EntityMismatchException.class)
+                .skip(MetisNotKnownException.class)
             .writer(dbWriter)
             .taskExecutor(singleEntity ? synchronousTaskExecutor : stepThreadPoolExecutor)
             .build();
@@ -176,6 +178,7 @@ public class BatchEntityUpdateConfig {
                 .faultTolerant()
                 .skipPolicy(new EntitySkipPolicy())
                 .skip(EntityMismatchException.class)
+                .skip(MetisNotKnownException.class)
             .taskExecutor(stepThreadPoolExecutor)
             .build();
     }

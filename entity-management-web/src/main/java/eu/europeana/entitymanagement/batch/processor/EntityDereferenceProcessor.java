@@ -3,6 +3,7 @@ package eu.europeana.entitymanagement.batch.processor;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityMismatchException;
+import eu.europeana.entitymanagement.exception.MetisNotKnownException;
 import eu.europeana.entitymanagement.utils.EntityComparator;
 import eu.europeana.entitymanagement.web.service.MetisDereferenceService;
 import java.util.Date;
@@ -34,7 +35,15 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
     public EntityRecord process(@NonNull EntityRecord entityRecord) throws Exception {
         String entityId = entityRecord.getEntityId();
         logger.debug("Calling Metis dereference service for entityId={}", entityId);
-        Entity metisResponse = dereferenceService.dereferenceEntityById(entityRecord.getExternalProxy().getProxyId());
+        String proxyId = entityRecord.getExternalProxy().getProxyId();
+        Entity metisResponse;
+        try {
+            metisResponse = dereferenceService.dereferenceEntityById(proxyId);
+        } catch (MetisNotKnownException e) {
+            // include entityId in exception message, then rethrow it
+            throw new MetisNotKnownException("Unsuccessful Metis dereferenciation for externalId=" +
+                    proxyId + "; entityId=" + entityId);
+        }
         Entity entity = entityRecord.getEntity();
 
         String metisType = metisResponse.getType();
