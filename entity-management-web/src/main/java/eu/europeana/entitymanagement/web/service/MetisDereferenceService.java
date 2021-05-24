@@ -75,7 +75,7 @@ public class MetisDereferenceService implements InitializingBean {
 
 
     String fetchMetisResponse(String entityId) {
-	logger.debug("De-referencing entityId={} from Metis", entityId);
+	logger.info("De-referencing entityId={} from Metis", entityId);
 
 	String metisResponseBody = metisWebClient.get()
 		.uri(uriBuilder -> uriBuilder.path(METIS_DEREF_PATH).queryParam("uri", entityId).build())

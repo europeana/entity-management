@@ -60,7 +60,7 @@ public class EntityUpdateListener extends ItemListenerSupport<EntityRecord, Enti
   @Override
   public void afterWrite(@NonNull  List<? extends EntityRecord> entityRecords) {
     String[] entityIds = getEntityIds(entityRecords);
-    logger.debug("afterWrite: entityIds={}, count={}", Arrays.toString(entityIds), entityIds.length);
+    logger.info("afterWrite: entityIds={}, count={}", Arrays.toString(entityIds), entityIds.length);
 
     // Remove entries from the FailedTask collection if exists
     failedTaskService.removeFailures(Arrays.asList(entityIds));

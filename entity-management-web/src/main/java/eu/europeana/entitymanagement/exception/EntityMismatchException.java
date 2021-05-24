@@ -13,12 +13,12 @@ public class EntityMismatchException extends EuropeanaApiException {
 
     @Override
     public boolean doLog() {
-        return true;
+        return false;
     }
 
     @Override
     public boolean doLogStacktrace() {
-        return true;
+        return false;
     }
 
     @Override

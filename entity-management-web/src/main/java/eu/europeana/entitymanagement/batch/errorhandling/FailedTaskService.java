@@ -36,7 +36,7 @@ public class FailedTaskService {
         createUpdateFailure(entityId, Instant.now(), e.getMessage(),
             ExceptionUtils.getStackTrace(e)));
 
-    logger.debug("Persisted update failure to db. entityId={} matched={}, modified={}", entityId,
+    logger.info("Persisted update failure to db. entityId={} matched={}, modified={}", entityId,
         result.getMatchedCount(), result.getModifiedCount());
   }
 
@@ -58,7 +58,7 @@ public class FailedTaskService {
             Collectors.toList());
 
     BulkWriteResult writeResult = failureRepository.upsertBulk(failures);
-    logger.debug("Persisted update failures to db: matched={}, modified={}, inserted={}",
+    logger.info("Persisted update failures to db: matched={}, modified={}, inserted={}",
         writeResult.getMatchedCount(), writeResult.getModifiedCount(),
         writeResult.getInsertedCount());
   }
@@ -70,7 +70,9 @@ public class FailedTaskService {
    */
   public void removeFailures(List<String> entityIds) {
     long removeCount = failureRepository.removeFailures(entityIds);
-    logger.debug("Removed update failures from db: count={}", removeCount);
+    if(removeCount > 0) {
+      logger.info("Removed update failures from db: count={}", removeCount);
+    }
   }
 
   public List<? extends EntityRecord> getEntityRecordsForFailures(int start, int count, Filter[] queryFilters) {
