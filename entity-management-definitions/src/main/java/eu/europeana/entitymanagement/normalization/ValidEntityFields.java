@@ -8,15 +8,13 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
-import eu.europeana.entitymanagement.normalization.ValidEntityFieldsValidator;
-
 /**
  * Check that the entity fields values are valid.
  * @author StevaneticS
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy=ValidEntityFieldsValidator.class)
+@Constraint(validatedBy=EntityFieldsValidator.class)
 public @interface ValidEntityFields {
 	
 	String message() default "The entity fields values are valid.";
