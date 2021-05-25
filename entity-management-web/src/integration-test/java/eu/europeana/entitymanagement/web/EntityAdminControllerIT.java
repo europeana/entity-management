@@ -118,7 +118,7 @@ public class EntityAdminControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isNoContent());
 
         // check that record is deleted
-        Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveEntityRecordByUri(record.getEntityId());
+        Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveByEntityId(record.getEntityId());
         Assertions.assertTrue(dbRecordOptional.isEmpty());
     }
 

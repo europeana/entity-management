@@ -62,7 +62,7 @@ public class EntityAdminController extends BaseRest {
             verifyWriteAccess(Operations.DELETE, request);
         }
         String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
-        Optional<EntityRecord> entityRecordOptional = entityRecordService.retrieveEntityRecordByUri(entityUri);
+        Optional<EntityRecord> entityRecordOptional = entityRecordService.retrieveByEntityId(entityUri);
         if (entityRecordOptional.isEmpty()) {
             throw new EntityNotFoundException(entityUri);
         }
