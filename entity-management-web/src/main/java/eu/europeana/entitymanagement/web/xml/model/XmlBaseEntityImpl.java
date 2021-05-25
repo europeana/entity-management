@@ -1,35 +1,52 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.ALT_LABEL;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.DEPICTION;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_RDF;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.PREF_LABEL;
 
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.service.EntityObjectFactory;
+import java.util.ArrayList;
+import java.util.List;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
+import org.springframework.util.StringUtils;
 
-public abstract class XmlBaseEntityImpl {
+@XmlAccessorType(XmlAccessType.FIELD)
+public abstract class XmlBaseEntityImpl<T extends Entity> {
 
     @XmlTransient
-    Entity entity;
+    protected T entity;
     @XmlTransient
     String aggregationId;
     /**
-     * relatedElementsToSerialize - this list is maintained by each serialized
+     * relatedentityElementsToSerialize - this list is maintained by each serialized
      * entity and contains the entities that need to be serialized in addition,
      * outside of the given entity
      */
     @XmlTransient
     List<XmlWebResourceImpl> referencedWebResources;
 
+    @XmlAttribute(namespace = NAMESPACE_RDF, name = XmlConstants.ABOUT)
     private String about;
-    private List<LabelledResource> altLabel = new ArrayList<>();
+
+  @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = ALT_LABEL)
+  private List<LabelledResource> altLabel = new ArrayList<>();
+
+    @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = PREF_LABEL)
     private List<LabelledResource> prefLabel = new ArrayList<>();
-    private List<LabelledResource> sameAs = new ArrayList<>();
+
+  @XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.XML_SAME_AS)
+  private List<LabelledResource> sameAs = new ArrayList<>();
+
+  @XmlElement(namespace = XmlConstants.NAMESPACE_FOAF, name = DEPICTION)
+  private LabelledResource depiction;
 
     public XmlBaseEntityImpl() {
 	// default constructor
@@ -39,42 +56,38 @@ public abstract class XmlBaseEntityImpl {
 	return referencedWebResources;
     }
 
-    public XmlBaseEntityImpl(Entity entity) {
+    public XmlBaseEntityImpl(T entity) {
 	this.entity = entity;
 	this.about = entity.getAbout();
 	this.prefLabel = RdfXmlUtils.convertToXmlMultilingualString(entity.getPrefLabel());
 	this.altLabel = RdfXmlUtils.convertToXmlMultilingualString(entity.getAltLabel());
 	this.sameAs = RdfXmlUtils.convertToRdfResource(entity.getSameAs());
+	if(StringUtils.hasLength(entity.getDepiction())){
+    this.depiction = new LabelledResource(entity.getDepiction());
+  }
 	
 	aggregationId = entity.getAbout() + "#aggregation";
-	referencedWebResources = new ArrayList<XmlWebResourceImpl>();
+	referencedWebResources = new ArrayList<>();
     }
 
-    public Entity toEntityModel() throws EntityCreationException {
-	if(getEntity() == null) {
-	    this.entity = EntityObjectFactory.createEntityObject(getTypeEnum());
+    public T toEntityModel() throws EntityCreationException {
+	if(entity == null) {
+	    entity = EntityObjectFactory.createEntityObject(getTypeEnum());
 	}
 	entity.setType(getTypeEnum().getEntityType());
 	
-//	this.about = entity.getAbout();
-	getEntity().setEntityId(getAbout());
-//	this.prefLabel = RdfXmlUtils.convertToXmlMultilingualString(entity.getPrefLabel());
-	getEntity().setPrefLabelStringMap(RdfXmlUtils.toLanguageMap(getPrefLabel()));
-//	this.altLabel = RdfXmlUtils.convertToXmlMultilingualString(entity.getAltLabel());
-	getEntity().setAltLabel(RdfXmlUtils.toLanguageMapList(getAltLabel()));
-	getEntity().setSameAs(RdfXmlUtils.toStringArray(getSameAs()));
-	if(getDepiction() != null) {
-	    getEntity().setDepiction(getDepiction().getResource().getAbout());
+	entity.setEntityId(getAbout());
+	entity.setPrefLabelStringMap(RdfXmlUtils.toLanguageMap(getPrefLabel()));
+	entity.setAltLabel(RdfXmlUtils.toLanguageMapList(getAltLabel()));
+	entity.setSameAs(RdfXmlUtils.toStringList(getSameAs()));
+	if(depiction != null) {
+	    entity.setDepiction(depiction.getResource());
 	}
-	
-	//Metis is not setting the isAggregatedBy, but it might use it in the future
-//	getEntity().setIsAggregatedBy(null);
-	return getEntity();
+	return entity;
     }
 
-    protected abstract EntityTypes getTypeEnum();
+  protected abstract EntityTypes getTypeEnum();
 
-    @XmlAttribute(namespace = XmlConstants.NAMESPACE_RDF, name = XmlConstants.ABOUT)
     public String getAbout() {
 	return this.about;
     }
@@ -83,61 +96,25 @@ public abstract class XmlBaseEntityImpl {
 	this.about = about;
     }
 
-//	@XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.IS_AGGREGATED_BY)
-//	public XmlIsAggregatedByImpl getIsAggregatedBy() {
-//	    	if(entity.getCreated() == null && entity.getModified() == null)
-//	    	    return null;
-//		return new XmlIsAggregatedByImpl(aggregationId);
-//	}
-//	
-    public XmlAggregationImpl createXmlAggregation() {
-//	    	if(entity.getCreated() == null && entity.getModified() == null)
-//	    	    return null;
-	return new XmlAggregationImpl(entity);
-    }
 
-    @XmlElement(namespace = XmlConstants.NAMESPACE_FOAF, name = XmlConstants.DEPICTION)
-    public EdmWebResource getDepiction() {
-	if (entity.getDepiction() == null)
-	    return null;
-	return new EdmWebResource(entity.getDepiction());
-    }
+  public LabelledResource getDepiction() {
+    return depiction;
+  }
 
-    @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.PREF_LABEL)
+
     public List<LabelledResource> getPrefLabel() {
 	return this.prefLabel;
     }
 
-    @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = XmlConstants.ALT_LABEL)
     public List<LabelledResource> getAltLabel() {
 	return this.altLabel;
     }
 
-    @XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.XML_SAME_AS)
     public List<LabelledResource> getSameAs() {
 	return this.sameAs;
     }
 
-    @XmlElement(namespace = XmlConstants.NAMESPACE_EDM, name = XmlConstants.IS_SHOWN_BY)
-    @Deprecated
-    /**
-     * 
-     * @deprecated
-     */
-    public LabelledResource getIsShownBy() {
-
-	if (entity.getReferencedWebResource() != null) {
-//		    referencedWebResources.add(new XmlWebResourceImpl(((BaseEntity)entity).getIsShownById(),((BaseEntity)entity).getIsShownBySource(), ((BaseEntity)entity).getIsShownByThumbnail()));
-//	        return new RdfResource(((BaseEntity)entity).getIsShownById());
-	    referencedWebResources.add(new XmlWebResourceImpl(entity.getReferencedWebResource().getId(),
-		    entity.getReferencedWebResource().getSource(), entity.getReferencedWebResource().getThumbnail()));
-	    return new LabelledResource(entity.getReferencedWebResource().getId());
-	} else {
-	    return null;
-	}
-    }
-
-    public Entity getEntity() {
+    public T getEntity() {
 	return entity;
     }
 

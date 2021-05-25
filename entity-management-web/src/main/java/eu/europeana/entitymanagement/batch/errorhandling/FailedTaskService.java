@@ -11,6 +11,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -70,7 +71,9 @@ public class FailedTaskService {
    */
   public void removeFailures(List<String> entityIds) {
     long removeCount = failureRepository.removeFailures(entityIds);
-    logger.debug("Removed update failures from db: count={}", removeCount);
+    if(removeCount > 0) {
+      logger.debug("Removed update failures from db: count={}", removeCount);
+    }
   }
 
   public List<? extends EntityRecord> getEntityRecordsForFailures(int start, int count, Filter[] queryFilters) {

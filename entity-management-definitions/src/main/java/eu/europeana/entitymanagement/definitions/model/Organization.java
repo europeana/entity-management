@@ -1,123 +1,293 @@
 package eu.europeana.entitymanagement.definitions.model;
 
+import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 
-import eu.europeana.entitymanagement.definitions.model.impl.OrganizationImpl;
-@JsonDeserialize(as = OrganizationImpl.class)
-public interface Organization extends Entity {
-    
-	/**
-	 * Retrieves the acronym for an Organization Class (language,value)
-	 * format
-	 * 
-	 * @return A Map<String,List<List<String>>> for the acronyms of an organization
-	 *         class (one per language)
-	 */
-	Map<String, List<String>> getAcronym();
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonSetter;
 
-	/**
-	 * Set the acronym for an Organization Class
-	 * 
-	 * @param acronym
-	 *            A Map<String,List<List<String>>> for the acronym of an
-	 *            organization class (one per language)
-	 */
-	void setAcronym(Map<String, List<String>> acronym);
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+
+/**
+ * This class defines base organization type of an entity.
+ */
+
+@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
+@JsonPropertyOrder({CONTEXT, ID, TYPE, DEPICTION, PREF_LABEL, ACRONYM, ALT_LABEL, DESCRIPTION, FOAF_LOGO, EUROPEANA_ROLE,
+		ORGANIZATION_DOMAIN, GEOGRAPHIC_LEVEL, COUNTRY, FOAF_HOMEPAGE, FOAF_PHONE, FOAF_MBOX, HAS_ADDRESS, IDENTIFIER, SAME_AS})
+public class Organization extends Entity {
+
+	public Organization() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	private Map<String, String> description;
+	private Map<String, List<String>> acronym;
+	private String logo;
+	private String homepage;
+	private List<String> phone;
+	private List<String> mbox;
+	private Map<String, List<String>> europeanaRole;
+	private Map<String, List<String>> organizationDomain;
+	private Map<String, String> geographicLevel;
+	private String country;
+	private Map<String, String> countryMap;
+
+	//address fields
+	private String hasAddress;
+	private String streetAddress;
+	private String locality;
+	private String region;
+	private String postalCode;
+	private String countryName;
+	private String postBox;
+	private String hasGeo;
+	private Address address;
+
 	
-	/**
-	 * Retrieves the (dc) descriptions of current organization 
-	 * 
-	 * @return A language map containing the dcDescription information 
-	 */
-	Map<String, String> getDescription();
+	@JsonGetter(DESCRIPTION)
+	public Map<String, String> getDescription() {
+		return description;
+	}
+
 	
-	/**
-	 * Sets the (dc) descriptions for current organization
-	 * 
-	 * @param prefLabel
-	 *            A Map<String,String> of dc descriptions (one per language)
-	 */
-	void setDescription(Map<String, String> description);
+	@JsonSetter(DESCRIPTION)
+	public void setDescription(Map<String, String> dcDescription) {
+		this.description = dcDescription;
+	}
+
 	
-	/**
-	 * Retrieves the europeanaRole for an Organization Class (language,value)
-	 * format
-	 * 
-	 * @return A Map<String,List<List<String>>> for the europeanaRoles of an organization
-	 *         class (one per language)
-	 */
-	Map<String, List<String>> getEuropeanaRole();
+	@JsonGetter(ACRONYM)
+	public Map<String, List<String>> getAcronym() {
+		return acronym;
+	}
 
-	/**
-	 * Set the europeanaRole for an Organization Class
-	 * 
-	 * @param acronym
-	 *            A Map<String,List<List<String>>> for the europeanaRole of an
-	 *            organization class (one per language)
-	 */
-	void setEuropeanaRole(Map<String, List<String>> europeanaRole);
 	
-	public String getPostalCode();
+	@JsonSetter(ACRONYM)
+	public void setAcronym(Map<String, List<String>> acronym) {
+		this.acronym = acronym;
+	}
 
-	public void setPostalCode(String postalCode);
+	
+	@JsonGetter(EUROPEANA_ROLE)
+	public Map<String, List<String>> getEuropeanaRole() {
+		return europeanaRole;
+	}
 
-	public String getPostBox();
+	
+	@JsonSetter(EUROPEANA_ROLE)
+	public void setEuropeanaRole(Map<String, List<String>> europeanaRole) {
+		this.europeanaRole = europeanaRole;
+	}
 
-	public void setPostBox(String postBox);
+	
+	@JsonGetter(FOAF_PHONE)
+	public List<String> getPhone() {
+		return phone;
+	}
 
-	public String getCountry();
+	
+	@JsonSetter(FOAF_PHONE)
+	public void setPhone(List<String> phone) {
+		this.phone = phone;
+	}
 
-	public void setCountry(String country);
+	
+	@JsonGetter(FOAF_MBOX)
+	public List<String> getMbox() {
+		return mbox;
+	}
 
-	public String getStreetAddress();
+	
+	@JsonSetter(FOAF_MBOX)
+	public void setMbox(List<String> mbox) {
+		this.mbox = mbox;
+	}
 
-	public void setStreetAddress(String streetAddress);
+	
+	@JsonGetter(ADDRESS_TYPE)
+	public String getHasAddress() {
+		return hasAddress;
+	}
 
-	public Map<String, String> getGeographicLevel();
+	
+	@JsonSetter(ADDRESS_TYPE)
+	public void setHasAddress(String hasAddress) {
+		this.hasAddress = hasAddress;
+	}
 
-	public void setGeographicLevel(Map<String, String> geographicLevel);
+	
+	public String getLocality() {
+		return locality;
+	}
 
-	public Map<String, List<String>> getOrganizationDomain();
+	
+	public void setLocality(String locality) {
+		this.locality = locality;
+	}
 
-	public void setOrganizationDomain(Map<String, List<String>> organizationDomain);
+	
+	public String getRegion() {
+		return region;
+	}
 
-	public String getHomepage();
+	
+	public void setRegion(String region) {
+		this.region = region;
+	}
 
-	public void setHomepage(String homepage);
+	
+	public String getCountryName() {
+		return countryName;
+	}
 
-	public String getLogo();
+	
+	public void setCountryName(String countryName) {
+		this.countryName = countryName;
+	}
 
-	public void setLogo(String logo);
+	
+	public String getPostalCode() {
+		return postalCode;
+	}
 
-	void setCountryName(String countryName);
+	
+	public void setPostalCode(String postalCode) {
+		this.postalCode = postalCode;
+	}
 
-	String getCountryName();
+	
+	public String getPostBox() {
+		return postBox;
+	}
 
-	void setRegion(String region);
+	
+	public void setPostBox(String postBox) {
+		this.postBox = postBox;
+	}
 
-	String getRegion();
+	
+	@JsonGetter(COUNTRY)
+	public String getCountry() {
+		return country;
+	}
 
-	void setLocality(String locality);
+	
+	@JsonSetter(COUNTRY)
+	public void setCountry(String country) {
+		this.country = country;
+	}
 
-	String getLocality();
+	
+	public String getStreetAddress() {
+		return streetAddress;
+	}
 
-	void setHasAddress(String hasAddress);
+	
+	public void setStreetAddress(String streetAddress) {
+		this.streetAddress = streetAddress;
+	}
 
-	String getHasAddress();
+	
+	@JsonGetter(GEOGRAPHIC_LEVEL)
+	public Map<String, String> getGeographicLevel() {
+		return geographicLevel;
+	}
 
-	void setPhone(List<String> phone);
+	
+	@Deprecated
+	@JsonSetter(GEOGRAPHIC_LEVEL)
+	public void setGeographicLevel(Map<String, String> geographicLevel) {
+		this.geographicLevel = geographicLevel;
+	}
 
-	List<String> getPhone();
+	
+	@JsonGetter(ORGANIZATION_DOMAIN)
+	public Map<String, List<String>> getOrganizationDomain() {
+		return organizationDomain;
+	}
 
-	void setMbox(List<String> mbox);
+	
+	@JsonSetter(ORGANIZATION_DOMAIN)
+	public void setOrganizationDomain(Map<String, List<String>> organizationDomain) {
+		this.organizationDomain = organizationDomain;
+	}
 
-	List<String> getMbox();
+	
+	@JsonGetter(FOAF_HOMEPAGE)
+	public String getHomepage() {
+		return homepage;
+	}
 
-	void setHasGeo(String hasGeo);
+	
+	@JsonSetter(FOAF_HOMEPAGE)
+	public void setHomepage(String homepage) {
+		this.homepage = homepage;
+	}
 
-	String getHasGeo();
+	
+	@JsonGetter(FOAF_LOGO)
+	public String getLogo() {
+		return logo;
+	}
 
+	
+	@JsonSetter(FOAF_LOGO)
+	public void setLogo(String logo) {
+		this.logo = logo;
+	}
+
+	
+	public String getHasGeo() {
+		return hasGeo;
+	}
+
+	
+	public void setHasGeo(String hasGeo) {
+		this.hasGeo = hasGeo;
+	}
+
+	public Map<String, String> getGeographicLevelStringMap() {
+		return geographicLevel;
+	}
+
+	public void setGeographicLevelStringMap(Map<String, String> geographicLevel) {
+		this.geographicLevel = geographicLevel;
+	}
+
+
+
+	
+	public Map<String, String> getEdmCountry() {
+		if(countryMap == null) {
+			countryMap = new HashMap<>();
+			countryMap.put(TMP_KEY, country);
+		}
+		return countryMap;
+	}
+
+	
+	public String getType() {
+		return EntityTypes.Organization.getEntityType();
+	}
+
+
+	
+	public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
+		//TODO:in case of the performance overhead cause by using the reflecion code, change this method to call the getters for each field individually
+		return field.get(this);
+	}
+
+	
+	public void setFieldValue(Field field, Object value) throws IllegalArgumentException, IllegalAccessException {
+		//TODO:in case of the performance overhead cause by using the reflecion code, change this method to call the setter for each field individually
+		field.set(this, value);
+	}
 }

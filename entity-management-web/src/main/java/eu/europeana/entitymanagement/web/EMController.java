@@ -1,38 +1,17 @@
 package eu.europeana.entitymanagement.web;
 
-import eu.europeana.api.commons.web.model.vocabulary.Operations;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.definitions.model.Aggregation;
-import java.util.Date;
-import java.util.Optional;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.codec.digest.DigestUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.UriComponentsBuilder;
-
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
+import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.entitymanagement.batch.BatchService;
 import eu.europeana.entitymanagement.common.config.DataSources;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.exception.EntityNotFoundException;
+import eu.europeana.entitymanagement.definitions.web.EntityIdResponse;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.exception.EtagMismatchException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
@@ -43,6 +22,19 @@ import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.web.service.MetisDereferenceService;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -56,8 +48,7 @@ public class EMController extends BaseRest {
   private final BatchService batchService;
   private final EntityManagementConfiguration emConfig;
 
-	private static final String ENTITY_ID_REMOVED_MSG = "Entity '%s' has been removed";
-	private static final String EXTERNAL_ID_REMOVED_MSG = "Entity id '%s' already exists as '%s', which has been removed";
+  private static final String EXTERNAL_ID_REMOVED_MSG = "Entity id '%s' already exists as '%s', which has been removed";
 
   @Autowired
 	public EMController(EntityRecordService entityRecordService,
@@ -83,7 +74,7 @@ public class EMController extends BaseRest {
 		if (emConfig.isAuthEnabled()) {
 			verifyWriteAccess(Operations.DELETE, request);
 		}
-		EntityRecord entityRecord = retrieveEntityRecord(type, identifier.toLowerCase(), false);
+		EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier.toLowerCase(), false);
 
 		Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
 		long timestamp = isAggregatedBy != null ?
@@ -108,11 +99,11 @@ public class EMController extends BaseRest {
 		if (emConfig.isAuthEnabled()) {
 			verifyWriteAccess(Operations.UPDATE, request);
 		}
-		EntityRecord entityRecord = retrieveEntityRecord(type, identifier.toLowerCase(), true);
+		EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier.toLowerCase(), true);
 		if (!entityRecord.isDisabled()) {
 			return createResponse(profile, type, identifier, FormatTypes.jsonld, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
 		}
-		logger.debug("Re-enabling entity : {}/{}", type, identifier);
+		logger.debug("Re-enabling entityId={}", entityRecord.getEntityId());
 		entityRecordService.enableEntityRecord(entityRecord);
 		return createResponse(profile, type, identifier, FormatTypes.jsonld, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
 	}
@@ -131,7 +122,13 @@ public class EMController extends BaseRest {
 			if (emConfig.isAuthEnabled()) {
 				verifyWriteAccess(Operations.UPDATE, request);
 			}
-		 EntityRecord entityRecord = retrieveEntityRecord(type, identifier, false);
+		 EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
+
+			// check that  type from update request matches existing entity's
+		if(!entityRecord.getEntity().getType().equals(updateRequestEntity.getType())){
+			throw new HttpBadRequestException(String.format("Request type %s does not match Entity type",
+					updateRequestEntity.getType()));
+		}
 
 			Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
 			long timestamp = isAggregatedBy != null ?
@@ -146,7 +143,7 @@ public class EMController extends BaseRest {
 				throw new EtagMismatchException("If-Match header value does not match generated ETag for entity");
 			}
 
-			entityRecordService.updateEuropeanaProxy(updateRequestEntity, entityRecord);
+			entityRecordService.replaceEuropeanaProxy(updateRequestEntity, entityRecord);
 			entityRecordService.update(entityRecord);
 			return launchTaskAndRetrieveEntity(type, identifier, entityRecord, profile);
     }
@@ -163,8 +160,48 @@ public class EMController extends BaseRest {
 		if (emConfig.isAuthEnabled()) {
 			verifyWriteAccess(Operations.UPDATE, request);
 		}
-		EntityRecord entityRecord = retrieveEntityRecord(type, identifier, false);
+		EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
 		return launchTaskAndRetrieveEntity(type, identifier, entityRecord, profile);
+	}
+
+	@ApiOperation(value = "Update multiple entities from external data source", nickname = "updateMultipleEntityFromDatasource", response = java.lang.Void.class)
+	@PostMapping(value = "/management/update", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<EntityIdResponse> updateMultipleExternalSource(
+			@RequestBody List<String> entityIds,
+			HttpServletRequest request
+	) throws Exception {
+		if (emConfig.isAuthEnabled()) {
+			verifyWriteAccess(Operations.UPDATE, request);
+		}
+
+		List<String> existingEntityIds = entityRecordService.retrieveMultipleByEntityId(entityIds);
+		// get entityIds in request that weren't retrieved from db
+		List<String> failures = entityIds.stream().filter(e -> !existingEntityIds.contains(e))
+				.collect(Collectors.toList());
+
+		// runAsynchronously since we're not including updated entities in response
+		launchUpdateTask(existingEntityIds, true);
+
+		return  ResponseEntity.accepted().body(new EntityIdResponse(entityIds.size(), existingEntityIds, failures));
+	}
+
+	@ApiOperation(value = "Update metrics for given entities", nickname = "updateMultipleEntityFromDatasource", response = java.lang.Void.class)
+	@PostMapping(value = "/management/metrics", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<EntityIdResponse> updateMetricsMultiple(
+			@RequestBody List<String> entityIds,
+			HttpServletRequest request
+	) throws Exception {
+		if (emConfig.isAuthEnabled()) {
+			verifyWriteAccess(Operations.UPDATE, request);
+		}
+
+		List<String> existingEntityIds = entityRecordService.retrieveMultipleByEntityId(entityIds);
+		List<String> failures = entityIds.stream()
+				.filter(e -> !existingEntityIds.contains(e))
+				.collect(Collectors.toList());
+		launchUpdateMetrics(existingEntityIds);
+
+		return  ResponseEntity.accepted().body(new EntityIdResponse(entityIds.size(), existingEntityIds, failures));
 	}
 
 
@@ -300,56 +337,16 @@ public class EMController extends BaseRest {
 	    throw new HttpBadRequestException("Invalid profile");
 	}
 
-			EntityRecord entityRecord = retrieveEntityRecord(type, identifier,false);
+			EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier,false);
 			logger.debug("Entity retrieved entityId={}, using {} format", entityRecord.getEntityId(), outFormat);
 			return generateResponseEntity(profile, outFormat, contentType, entityRecord, HttpStatus.OK);
 		}
 
-	private ResponseEntity<String> generateResponseEntity(String profile, FormatTypes outFormat,
-			String contentType, EntityRecord entityRecord, HttpStatus status) {
-
-		Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
-
-		long timestamp = isAggregatedBy != null ?
-				isAggregatedBy.getModified().getTime() :
-				0L;
-
-		String etag = computeEtag(timestamp, outFormat.name(), getApiVersion());
-
-		org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
-		headers.add(HttpHeaders.ALLOW, HttpHeaders.ALLOW_GET);
-		if (!outFormat.equals(FormatTypes.schema)) {
-			headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
-			headers.add(HttpHeaders.LINK, HttpHeaders.VALUE_LDP_RESOURCE);
-		}
-		if (contentType != null && !contentType.isEmpty())
-			headers.add(HttpHeaders.CONTENT_TYPE, contentType);
-
-		String body = serialize(entityRecord, outFormat, profile);
-		return ResponseEntity.status(status).headers(headers).eTag(etag).body(body);
-	}
-
-	private EntityRecord retrieveEntityRecord(String type, String identifier, boolean enableEntity)
-			throws EuropeanaApiException {
-		String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
-		Optional<EntityRecord> entityRecordOptional = entityRecordService
-				.retrieveEntityRecordByUri(entityUri);
-		if (entityRecordOptional.isEmpty()) {
-			throw new EntityNotFoundException(entityUri);
-		}
-
-		EntityRecord entityRecord = entityRecordOptional.get();
-		if (entityRecord.isDisabled() && !enableEntity) {
-			throw new EntityRemovedException(String.format(ENTITY_ID_REMOVED_MSG, entityUri));
-		}
-		return entityRecord;
-	}
-
 	private ResponseEntity<String> launchTaskAndRetrieveEntity(String type, String identifier,
 			EntityRecord entityRecord, String profile) throws Exception {
 		// launch synchronous update, then retrieve entity from DB afterwards
-		launchUpdateTask(entityRecord.getEntityId(), false);
-		entityRecord = retrieveEntityRecord(type, identifier, false);
+		launchUpdateTask(Collections.singletonList(entityRecord.getEntityId()), false);
+		entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
 
 		return generateResponseEntity(profile, FormatTypes.jsonld, null, entityRecord, HttpStatus.ACCEPTED);
 	}
@@ -378,11 +375,17 @@ public class EMController extends BaseRest {
 		return null;
 	}
 
-	private void launchUpdateTask(String entityUri, boolean runAsynchronously)
+	private void launchUpdateTask(List<String> entityIds, boolean runAsynchronously)
       throws Exception {
-    logger.info("Launching update task for entityId={}. async={}", entityUri, runAsynchronously);
-    batchService.launchSingleEntityUpdate(entityUri, runAsynchronously);
+    logger.info("Launching update task for entityIds={}. async={}", entityIds, runAsynchronously);
+    batchService.launchSpecificEntityUpdate(entityIds, runAsynchronously);
   }
+
+	private void launchUpdateMetrics(List<String> entityIds)
+			throws Exception {
+		logger.info("Launching Update Metrics task for entityIds={}", entityIds);
+		batchService.launchEntityMetricsUpdate(entityIds, true);
+	}
 
 	/**
 	 * Gets the database identifier from an EntityId string
@@ -390,13 +393,5 @@ public class EMController extends BaseRest {
 	private String getDatabaseIdentifier(String entityId) {
 		//entity id is "http://data.europeana.eu/{type}/{identifier}"
 		return entityId.substring(entityId.lastIndexOf("/") + 1);
-	}
-
-	/**
-	 * Generates a unique hex string based on the input params
-	 * TODO: move logic to {@link eu.europeana.api.commons.web.controller.BaseRestController#generateETag(Date, String, String)}
-	 */
-	private String computeEtag(long timestamp, String format, String version){
-		return DigestUtils.md5Hex(String.format("%s:%s:%s", timestamp, format, version));
 	}
 }

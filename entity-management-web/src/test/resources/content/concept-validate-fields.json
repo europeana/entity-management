@@ -29,7 +29,7 @@
 "broader":["http://www.wikidata.org/entity/Q188451","http://data.europeana.eu/concept/base/1401"],
 "altLabel":
 {
-"aaaaaaaaaaaaaaaaaaaaaaa":["aaaaaaaaaaaaaaaaa"],
+"wrong-for-testing":["Minimal techno"],
 "uk":["Minimal techno"],
 "sv":["Minimal techno"],
 "ro":["Muzică minimal"],
@@ -69,7 +69,7 @@
 "id":"http://archive.org/download/srn2009-07-26/srn2009-07-26.mp3"
 },
 "internal_type":"Concept",
-"id":"http://data.europeana.eu/concept/13 26",
+"id":"http://data.europeana.eu/concept/1326",
 "europeana_term_hits":8917,
 "europeana_doc_count":5,
 "entity_uri":"http://data.europeana.eu/concept/base/1326",

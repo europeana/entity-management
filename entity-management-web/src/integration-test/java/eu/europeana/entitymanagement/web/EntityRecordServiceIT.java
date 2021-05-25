@@ -7,14 +7,14 @@ import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_DA_
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_FLORENCE_REFERENTIAL_INTEGRTITY;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_SALAI_REFERENTIAL_INTEGRTITY;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_ENGINEERING_REFERENTIAL_INTEGRTITY;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_AMBOISE_REFERENTIAL_INTEGRTITY;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_FLORENCE_REFERENTIAL_INTEGRTITY;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_FRANCE_REFERENTIAL_INTEGRTITY;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_REFERENTIAL_INTEGRITY_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_SFORZA_CASTLE_REFERENTIAL_INTEGRTITY;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_15_REFERENTIAL_INTEGRTITY;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_16_REFERENTIAL_INTEGRTITY;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_JSON;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_REFERENTIAL_INTEGRITY_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
 import static eu.europeana.entitymanagement.web.BaseMvcTestUtils.CONCEPT_BATHTUB;
 import static eu.europeana.entitymanagement.web.BaseMvcTestUtils.CONCEPT_CONSOLIDATED_BATHTUB;
@@ -23,8 +23,8 @@ import static eu.europeana.entitymanagement.web.BaseMvcTestUtils.CONCEPT_METIS_B
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -37,28 +37,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.definitions.model.Agent;
+import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Concept;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.impl.AgentImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.AggregationImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.ConceptImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.EntityProxyImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.PlaceImpl;
-import eu.europeana.entitymanagement.exception.EntityCreationException;
+import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.utils.EntityComparator;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import eu.europeana.entitymanagement.web.service.EntityObjectFactory;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
+import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
 import eu.europeana.entitymanagement.web.xml.model.metis.EnrichmentResultList;
 
@@ -78,37 +72,35 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
 	}
 
 	@Test
-	public void mergeEntities() throws JAXBException, JsonMappingException, JsonProcessingException, IOException,
-		EntityCreationException {
+	public void mergeEntities() throws Exception{
 	    /*
 	     * metis deserializer -> get the entity for the external proxy
 	     */
-	    String metisResponse = CONCEPT_DATA_RECONCELIATION_XML;
-	    XmlConceptImpl xmlEntity = (XmlConceptImpl) getMetisResponse(metisResponse);
+		XmlConceptImpl xmlEntity = (XmlConceptImpl) getMetisResponse(CONCEPT_DATA_RECONCELIATION_XML);
 
 	    /*
 	     * read the test data from the json file -> get the entity for the internal
 	     * proxy
 	     */
-	    ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_JSON), ConceptImpl.class);
+	    Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
 
 	    /*
 	     * creating the entity record
 	     */
-	    EntityRecord entityRecord = new EntityRecordImpl();
-	    EntityProxy internalProxy = new EntityProxyImpl();
+	    EntityRecord entityRecord = new EntityRecord();
+	    EntityProxy internalProxy = new EntityProxy();
 	    //TODO: set shell entity on EntityRecord
 	    internalProxy.setEntity(concept);
 	    internalProxy.setProxyId("http://data.europeana.eu/proxy1");
-	    EntityProxy externalProxy = new EntityProxyImpl();
+	    EntityProxy externalProxy = new EntityProxy();
 	    externalProxy.setEntity(xmlEntity.toEntityModel());
 	    externalProxy.setProxyId("http://data.external.org/proxy1");
 	    entityRecord.addProxy(internalProxy);
 	    entityRecord.addProxy(externalProxy);
 
 	    //aggregation is reused from consolidated version
-	    ConceptImpl notConsolidated = (ConceptImpl) EntityObjectFactory.createEntityObject(EntityTypes.Concept);
-	    notConsolidated.setIsAggregatedBy(new AggregationImpl());
+	    Concept notConsolidated = EntityObjectFactory.createEntityObject(EntityTypes.Concept);
+	    notConsolidated.setIsAggregatedBy(new Aggregation());
 	    entityRecord.setEntity(notConsolidated);
 
 
@@ -119,43 +111,41 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
 	     */
 	    Assertions.assertNotNull(entityRecord.getEntity().getNote());
 	    Assertions.assertNotNull(entityRecord.getEntity().getSameAs());
-	    Assertions.assertTrue(((Concept) entityRecord.getEntity()).getBroader().length > 1);
+	    Assertions.assertTrue(((Concept) entityRecord.getEntity()).getBroader().size() > 1);
 	    Assertions.assertNotNull(entityRecord.getEntity().getPrefLabel());
 	}
 
 	
 	@Test
-	public void mergeEntitiesBathtub() throws JAXBException, JsonMappingException, JsonProcessingException, IOException,
-		EntityCreationException {
+	public void mergeEntitiesBathtub() throws Exception {
 	    /*
 	     * metis deserializer -> get the entity for the external proxy
 	     */
-	    String metisResponse = CONCEPT_METIS_BATHTUB;
-	    XmlConceptImpl xmlEntity = (XmlConceptImpl) getMetisResponse(metisResponse);
+		XmlConceptImpl xmlEntity = (XmlConceptImpl) getMetisResponse(CONCEPT_METIS_BATHTUB);
 
 	    /*
 	     * read the test data from the json file -> get the entity for the internal
 	     * proxy
 	     */
-	    ConceptImpl concept = objectMapper.readValue(loadFile(CONCEPT_BATHTUB), ConceptImpl.class);
+	    Concept concept = objectMapper.readValue(loadFile(CONCEPT_BATHTUB), Concept.class);
 
 	    /*
 	     * creating the entity record
 	     */
-	    EntityRecord entityRecord = new EntityRecordImpl();
-	    EntityProxy internalProxy = new EntityProxyImpl();
+	    EntityRecord entityRecord = new EntityRecord();
+	    EntityProxy internalProxy = new EntityProxy();
 		//TODO: set shell entity on EntityRecord
 	    internalProxy.setEntity(concept);
 	    internalProxy.setProxyId("http://data.europeana.eu/concept/1#proxy_europeana");
-	    EntityProxy externalProxy = new EntityProxyImpl();
+	    EntityProxy externalProxy = new EntityProxy();
 	    externalProxy.setEntity(xmlEntity.toEntityModel());
 	    externalProxy.setProxyId("http://www.wikidata.org/entity/Q1101933");
 	    entityRecord.addProxy(internalProxy);
 	    entityRecord.addProxy(externalProxy);
 
 	   //aggregation is reused from consolidated version
-            ConceptImpl notConsolidated = (ConceptImpl) EntityObjectFactory.createEntityObject(EntityTypes.Concept);
-            notConsolidated.setIsAggregatedBy(new AggregationImpl());
+            Concept notConsolidated = EntityObjectFactory.createEntityObject(EntityTypes.Concept);
+            notConsolidated.setIsAggregatedBy(new Aggregation());
             entityRecord.setEntity(notConsolidated);
 
 
@@ -164,7 +154,7 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
 	     * here the assertions are manual and are defined based on what is in put in the
 	     * corresponsing proxy's entity objects
 	     */
-	    ConceptImpl concept_consolidated = objectMapper.readValue(loadFile(CONCEPT_CONSOLIDATED_BATHTUB), ConceptImpl.class);
+	    Concept concept_consolidated = objectMapper.readValue(loadFile(CONCEPT_CONSOLIDATED_BATHTUB), Concept.class);
 	    //TODO: temporary fix untill the merge entities is stable see EntityRecordService.UPDARTE_FIELDS_TO_IGNORE
 	    concept_consolidated.setType(entityRecord.getEntity().getType());
 	    //reuse the isAggregatedBy field 
@@ -172,11 +162,11 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
 	    
 	    
 	    EntityComparator entityComparator = new EntityComparator();
-	    Assertions.assertTrue(entityComparator.compare(concept_consolidated, entityRecord.getEntity())==0);    
+		assertEquals(0, entityComparator.compare(concept_consolidated, entityRecord.getEntity()));
 	    
 	}
 	
-	private XmlBaseEntityImpl getMetisResponse(String metisResponse) throws JAXBException {
+	private XmlBaseEntityImpl<?> getMetisResponse(String metisResponse) throws JAXBException {
 	    InputStream is = getClass().getResourceAsStream(metisResponse);
 	    JAXBContext jaxbContext = JAXBContext.newInstance(EnrichmentResultList.class);
 	    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
@@ -190,23 +180,23 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
 	}
 	
 	@Test
-	public void performGlobalReferentialIntegrity () throws JsonMappingException, JsonProcessingException, IOException {
+	public void performGlobalReferentialIntegrity () throws Exception{
         entityRecordService.dropRepository();
 		// read the test data from the file
-        AgentImpl agent1 = objectMapper.readValue(loadFile(AGENT1_REFERENTIAL_INTEGRITY_JSON), AgentImpl.class);
-        EntityRecord entityRecord1 = new EntityRecordImpl();
+        Agent agent1 = objectMapper.readValue(loadFile(AGENT1_REFERENTIAL_INTEGRITY_JSON), Agent.class);
+        EntityRecord entityRecord1 = new EntityRecord();
         entityRecord1.setEntity(agent1);
         entityRecord1.setEntityId(agent1.getEntityId());
         entityRecordService.saveEntityRecord(entityRecord1);
 
-        AgentImpl agent2 = objectMapper.readValue(loadFile(AGENT2_REFERENTIAL_INTEGRITY_JSON), AgentImpl.class);
-        EntityRecord entityRecord2 = new EntityRecordImpl();
+        Agent agent2 = objectMapper.readValue(loadFile(AGENT2_REFERENTIAL_INTEGRITY_JSON), Agent.class);
+        EntityRecord entityRecord2 = new EntityRecord();
         entityRecord2.setEntity(agent2);
         entityRecord2.setEntityId(agent2.getEntityId());
         entityRecordService.saveEntityRecord(entityRecord2);
 
-        PlaceImpl place = objectMapper.readValue(loadFile(PLACE_REFERENTIAL_INTEGRITY_JSON), PlaceImpl.class);
-        EntityRecord entityRecord3 = new EntityRecordImpl();
+        Place place = objectMapper.readValue(loadFile(PLACE_REFERENTIAL_INTEGRITY_JSON), Place.class);
+        EntityRecord entityRecord3 = new EntityRecord();
         entityRecord3.setEntity(place);
         entityRecord3.setEntityId(place.getEntityId());
         entityRecordService.saveEntityRecord(entityRecord3);
@@ -217,17 +207,17 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
          * Assertions
          */
         //Optional<EntityRecord> agent1_updated = entityRecordService.retrieveEntityRecordByUri(agent1.getEntityId());
-        Assertions.assertTrue(agent1.getPlaceOfBirth().size()==1);
+				assertEquals(1, agent1.getPlaceOfBirth().size());
         Assertions.assertTrue(agent1.getPlaceOfBirth().get("").contains("http://data.europeana.eu/place/base/143914"));
         Assertions.assertNull(agent1.getProfessionOrOccupation());
-        String[] isRelatedTo_agent1 = agent1.getIsRelatedTo();
-        Assertions.assertTrue(isRelatedTo_agent1.length==3);
+        List<String> isRelatedTo_agent1 = agent1.getIsRelatedTo();
+				assertEquals(3, isRelatedTo_agent1.size());
         Assertions.assertTrue(String.join(",", isRelatedTo_agent1).contains("Leonardo_da_Vinci"));
         Assertions.assertTrue(String.join(",", isRelatedTo_agent1).contains("http://data.europeana.eu/Leonardo_da_Vinci"));
 	}
 
 	@Test
-	public void performReferentialIntegrity_DaVinci () throws JsonMappingException, JsonProcessingException, IOException, JAXBException, EntityCreationException {
+	public void performReferentialIntegrity_DaVinci () throws Exception{
 	    //TODO: implement the following
 	    //1. create record for agent-davinci-referential-integrity.json
 	    //2. create records for all references entities, xml files available in resources/ref-integrity/references
@@ -236,8 +226,8 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
         
 		entityRecordService.dropRepository();
 		// create record for agent-davinci-referential-integrity.json
-        AgentImpl agentDaVinci = objectMapper.readValue(loadFile(AGENT_DA_VINCI_REFERENTIAL_INTEGRITY_JSON), AgentImpl.class);
-        EntityRecord entityRecord1 = new EntityRecordImpl();
+        Agent agentDaVinci = objectMapper.readValue(loadFile(AGENT_DA_VINCI_REFERENTIAL_INTEGRITY_JSON), Agent.class);
+        EntityRecord entityRecord1 = new EntityRecord();
         entityRecord1.setEntity(agentDaVinci);
         entityRecord1.setEntityId(agentDaVinci.getEntityId());
         entityRecordService.saveEntityRecord(entityRecord1);
@@ -245,63 +235,63 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
         // create records for all references entities, xml files available in resources/ref-integrity/references
 	    String metisResponse = AGENT_FLORENCE_REFERENTIAL_INTEGRTITY;
 	    Entity entityFromMetisResponse = getMetisResponse(metisResponse).toEntityModel();
-	    EntityRecord entityRecord2 = new EntityRecordImpl();
+	    EntityRecord entityRecord2 = new EntityRecord();
 	    entityRecord2.setEntity(entityFromMetisResponse);
         entityRecord2.setEntityId(entityFromMetisResponse.getEntityId());
         entityRecordService.saveEntityRecord(entityRecord2);
         
 	    metisResponse = AGENT_SALAI_REFERENTIAL_INTEGRTITY;
 	    entityFromMetisResponse = getMetisResponse(metisResponse).toEntityModel();
-	    EntityRecord entityRecord3 = new EntityRecordImpl();
+	    EntityRecord entityRecord3 = new EntityRecord();
         entityRecord3.setEntity(entityFromMetisResponse);
         entityRecord3.setEntityId(entityFromMetisResponse.getEntityId());
         entityRecordService.saveEntityRecord(entityRecord3);
         
 	    metisResponse = CONCEPT_ENGINEERING_REFERENTIAL_INTEGRTITY;
 	    entityFromMetisResponse = getMetisResponse(metisResponse).toEntityModel();
-	    EntityRecord entityRecord4 = new EntityRecordImpl();
+	    EntityRecord entityRecord4 = new EntityRecord();
         entityRecord4.setEntity(entityFromMetisResponse);
         entityRecord4.setEntityId(entityFromMetisResponse.getEntityId());
         entityRecordService.saveEntityRecord(entityRecord4);
 
 	    metisResponse = PLACE_AMBOISE_REFERENTIAL_INTEGRTITY;
 	    entityFromMetisResponse = getMetisResponse(metisResponse).toEntityModel();
-	    EntityRecord entityRecord5 = new EntityRecordImpl();
+	    EntityRecord entityRecord5 = new EntityRecord();
         entityRecord5.setEntity(entityFromMetisResponse);
         entityRecord5.setEntityId(entityFromMetisResponse.getEntityId());
         entityRecordService.saveEntityRecord(entityRecord5);
 
 	    metisResponse = PLACE_FLORENCE_REFERENTIAL_INTEGRTITY;
 	    entityFromMetisResponse = getMetisResponse(metisResponse).toEntityModel();
-	    EntityRecord entityRecord6 = new EntityRecordImpl();
+	    EntityRecord entityRecord6 = new EntityRecord();
         entityRecord6.setEntity(entityFromMetisResponse);
         entityRecord6.setEntityId(entityFromMetisResponse.getEntityId());
         entityRecordService.saveEntityRecord(entityRecord6);
 
 	    metisResponse = PLACE_FRANCE_REFERENTIAL_INTEGRTITY;
 	    entityFromMetisResponse = getMetisResponse(metisResponse).toEntityModel();
-	    EntityRecord entityRecord7 = new EntityRecordImpl();
+	    EntityRecord entityRecord7 = new EntityRecord();
         entityRecord7.setEntity(entityFromMetisResponse);
         entityRecord7.setEntityId(entityFromMetisResponse.getEntityId());
         entityRecordService.saveEntityRecord(entityRecord7);
 
 	    metisResponse = PLACE_SFORZA_CASTLE_REFERENTIAL_INTEGRTITY;
 	    entityFromMetisResponse = getMetisResponse(metisResponse).toEntityModel();
-	    EntityRecord entityRecord8 = new EntityRecordImpl();
+	    EntityRecord entityRecord8 = new EntityRecord();
         entityRecord8.setEntity(entityFromMetisResponse);
         entityRecord8.setEntityId(entityFromMetisResponse.getEntityId());
         entityRecordService.saveEntityRecord(entityRecord8);
 
 	    metisResponse = TIMESPAN_15_REFERENTIAL_INTEGRTITY;
 	    entityFromMetisResponse = getMetisResponse(metisResponse).toEntityModel();
-	    EntityRecord entityRecord9 = new EntityRecordImpl();
+	    EntityRecord entityRecord9 = new EntityRecord();
         entityRecord9.setEntity(entityFromMetisResponse);
         entityRecord9.setEntityId(entityFromMetisResponse.getEntityId());
         entityRecordService.saveEntityRecord(entityRecord9);
         
 	    metisResponse = TIMESPAN_16_REFERENTIAL_INTEGRTITY;
 	    entityFromMetisResponse = getMetisResponse(metisResponse).toEntityModel();
-	    EntityRecord entityRecord10 = new EntityRecordImpl();
+	    EntityRecord entityRecord10 = new EntityRecord();
         entityRecord10.setEntity(entityFromMetisResponse);
         entityRecord10.setEntityId(entityFromMetisResponse.getEntityId());
         entityRecordService.saveEntityRecord(entityRecord10);
@@ -310,9 +300,9 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
         entityRecordService.performReferentialIntegrity(agentDaVinci);
         
         //compare (all fields) of the updated da vinci entity against the expected result available in given file
-        AgentImpl agentDaVinciForChecking = objectMapper.readValue(loadFile(AGENT_DA_VINCI_REFERENTIAL_INTEGRTITY_PERFORMED_JSON), AgentImpl.class);
+        Agent agentDaVinciForChecking = objectMapper.readValue(loadFile(AGENT_DA_VINCI_REFERENTIAL_INTEGRTITY_PERFORMED_JSON), Agent.class);
 	    EntityComparator entityComparator = new EntityComparator();
-	    Assertions.assertTrue(entityComparator.compare(agentDaVinciForChecking, agentDaVinci)==0);
+		assertEquals(0, entityComparator.compare(agentDaVinciForChecking, agentDaVinci));
 	}
 	       
 }

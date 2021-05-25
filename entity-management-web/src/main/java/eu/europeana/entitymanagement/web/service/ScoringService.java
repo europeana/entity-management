@@ -237,7 +237,7 @@ public class ScoringService {
 	if (entity.getSameAs() == null) {
 	    return null;
 	}
-	List<String> values = Arrays.asList(entity.getSameAs());
+	List<String> values = entity.getSameAs();
 
 	String wikidataUri = values.stream().filter(value -> value.startsWith(WIKIDATA_PREFFIX)).findFirst()
 		.orElse(null);

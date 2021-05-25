@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
 
+import java.util.Objects;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlValue;
 
@@ -11,12 +12,8 @@ public class LabelledResource {
 
   public LabelledResource(String lang, String value) {
     this.lang = lang;
-    if(lang != null) {
-        this.lang = lang;
-    } else {
-        //fix for #EA-2325, missing language attributions changed to ""
-	this.lang = "";  
-    }
+    //fix for #EA-2325, missing language attributions changed to ""
+    this.lang = Objects.requireNonNullElse(lang, "");
     this.value = value;
   }
 
