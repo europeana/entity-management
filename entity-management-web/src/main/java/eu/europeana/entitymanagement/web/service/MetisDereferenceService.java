@@ -74,11 +74,11 @@ public class MetisDereferenceService implements InitializingBean {
     }
 
 
-    String fetchMetisResponse(String entityId) {
-	logger.info("De-referencing entityId={} from Metis", entityId);
+    String fetchMetisResponse(String externalId) {
+	logger.debug("De-referencing externalId={} from Metis", externalId);
 
 	String metisResponseBody = metisWebClient.get()
-		.uri(uriBuilder -> uriBuilder.path(METIS_DEREF_PATH).queryParam("uri", entityId).build())
+		.uri(uriBuilder -> uriBuilder.path(METIS_DEREF_PATH).queryParam("uri", externalId).build())
 		.accept(MediaType.APPLICATION_XML).retrieve()
 		// return 400 for 4xx responses from Metis
 		.onStatus(HttpStatus::is4xxClientError,
@@ -88,7 +88,7 @@ public class MetisDereferenceService implements InitializingBean {
 			response -> response.bodyToMono(String.class).map(EuropeanaApiException::new))
 		.bodyToMono(String.class).block();
 
-	logger.debug("Metis dereference response for entityId={} - {} ", entityId, metisResponseBody);
+	logger.debug("Metis dereference response for externalId={} - {} ", externalId, metisResponseBody);
 	return metisResponseBody;
     }
 }

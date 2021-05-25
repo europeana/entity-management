@@ -34,7 +34,6 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
     @Override
     public EntityRecord process(@NonNull EntityRecord entityRecord) throws Exception {
         String entityId = entityRecord.getEntityId();
-        logger.debug("Calling Metis dereference service for entityId={}", entityId);
         String proxyId = entityRecord.getExternalProxy().getProxyId();
         Entity metisResponse;
         try {

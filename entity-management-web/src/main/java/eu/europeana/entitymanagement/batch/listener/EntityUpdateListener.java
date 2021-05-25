@@ -30,30 +30,31 @@ public class EntityUpdateListener extends ItemListenerSupport<EntityRecord, Enti
   }
 
   @Override
-  public void beforeRead() {
-    logger.trace("beforeRead");
-  }
-
-  @Override
   public void afterRead(EntityRecord item) {
-    logger.debug("afterRead: entityId={}", item.getEntityId());
+      if(logger.isDebugEnabled()) {
+          logger.debug("afterRead: entityId={}", item.getEntityId());
+      }
   }
 
 
   @Override
   public void beforeProcess(EntityRecord item) {
-    logger.debug("beforeProcess: entityId={}", item.getEntityId());
+      if(logger.isDebugEnabled()) {
+          logger.debug("beforeProcess: entityId={}", item.getEntityId());
+      }
   }
 
   @Override
   public void afterProcess(EntityRecord item, EntityRecord result) {
-    logger.debug("afterProcess: entityId={}", item.getEntityId());
+      logger.debug("afterProcess: entityId={}", item.getEntityId());
   }
 
   @Override
   public void beforeWrite(@NonNull List<? extends EntityRecord> entityRecords) {
-    String[] entityIds = getEntityIds(entityRecords);
-    logger.debug("beforeWrite: entityIds={}", Arrays.toString(entityIds));
+      if(logger.isDebugEnabled()) {
+          String[] entityIds = getEntityIds(entityRecords);
+          logger.debug("beforeWrite: entityIds={}", Arrays.toString(entityIds));
+      }
   }
 
 
