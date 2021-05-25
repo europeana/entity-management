@@ -1,38 +1,17 @@
 package eu.europeana.entitymanagement.web;
 
-import eu.europeana.api.commons.web.model.vocabulary.Operations;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.definitions.model.Aggregation;
-import eu.europeana.entitymanagement.exception.EntityCreationException;
-import java.util.Date;
-import java.util.Optional;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.codec.digest.DigestUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.UriComponentsBuilder;
-
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
+import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.entitymanagement.batch.BatchService;
 import eu.europeana.entitymanagement.common.config.DataSources;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.web.EntityIdResponse;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.exception.EtagMismatchException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
@@ -43,6 +22,19 @@ import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.web.service.MetisDereferenceService;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -149,6 +141,46 @@ public class EMController extends BaseRest {
 		}
 		EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier);
 		return launchTaskAndRetrieveEntity(type, identifier, entityRecord, profile);
+	}
+
+	@ApiOperation(value = "Update multiple entities from external data source", nickname = "updateMultipleEntityFromDatasource", response = java.lang.Void.class)
+	@PostMapping(value = "/management/update", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<EntityIdResponse> updateMultipleExternalSource(
+			@RequestBody List<String> entityIds,
+			HttpServletRequest request
+	) throws Exception {
+		if (emConfig.isAuthEnabled()) {
+			verifyWriteAccess(Operations.UPDATE, request);
+		}
+
+		List<String> existingEntityIds = entityRecordService.retrieveMultipleByEntityId(entityIds);
+		// get entityIds in request that weren't retrieved from db
+		List<String> failures = entityIds.stream().filter(e -> !existingEntityIds.contains(e))
+				.collect(Collectors.toList());
+
+		// runAsynchronously since we're not including updated entities in response
+		launchUpdateTask(existingEntityIds, true);
+
+		return  ResponseEntity.accepted().body(new EntityIdResponse(entityIds.size(), existingEntityIds, failures));
+	}
+
+	@ApiOperation(value = "Update metrics for given entities", nickname = "updateMultipleEntityFromDatasource", response = java.lang.Void.class)
+	@PostMapping(value = "/management/metrics", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<EntityIdResponse> updateMetricsMultiple(
+			@RequestBody List<String> entityIds,
+			HttpServletRequest request
+	) throws Exception {
+		if (emConfig.isAuthEnabled()) {
+			verifyWriteAccess(Operations.UPDATE, request);
+		}
+
+		List<String> existingEntityIds = entityRecordService.retrieveMultipleByEntityId(entityIds);
+		List<String> failures = entityIds.stream()
+				.filter(e -> !existingEntityIds.contains(e))
+				.collect(Collectors.toList());
+		launchUpdateMetrics(existingEntityIds);
+
+		return  ResponseEntity.accepted().body(new EntityIdResponse(entityIds.size(), existingEntityIds, failures));
 	}
 
 
@@ -292,7 +324,7 @@ public class EMController extends BaseRest {
 	private ResponseEntity<String> launchTaskAndRetrieveEntity(String type, String identifier,
 			EntityRecord entityRecord, String profile) throws Exception {
 		// launch synchronous update, then retrieve entity from DB afterwards
-		launchUpdateTask(entityRecord.getEntityId(), false);
+		launchUpdateTask(Collections.singletonList(entityRecord.getEntityId()), false);
 		entityRecord = entityRecordService.retrieveEntityRecord(type, identifier);
 
 		return generateResponseEntity(profile, FormatTypes.jsonld, null, entityRecord, HttpStatus.ACCEPTED);
@@ -322,11 +354,17 @@ public class EMController extends BaseRest {
 		return null;
 	}
 
-	private void launchUpdateTask(String entityUri, boolean runAsynchronously)
+	private void launchUpdateTask(List<String> entityIds, boolean runAsynchronously)
       throws Exception {
-    logger.info("Launching update task for entityId={}. async={}", entityUri, runAsynchronously);
-    batchService.launchSingleEntityUpdate(entityUri, runAsynchronously);
+    logger.info("Launching update task for entityIds={}. async={}", entityIds, runAsynchronously);
+    batchService.launchSpecificEntityUpdate(entityIds, runAsynchronously);
   }
+
+	private void launchUpdateMetrics(List<String> entityIds)
+			throws Exception {
+		logger.info("Launching Update Metrics task for entityIds={}", entityIds);
+		batchService.launchEntityMetricsUpdate(entityIds, true);
+	}
 
 	/**
 	 * Gets the database identifier from an EntityId string

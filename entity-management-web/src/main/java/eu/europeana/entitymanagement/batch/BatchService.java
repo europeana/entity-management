@@ -9,15 +9,21 @@ import static eu.europeana.entitymanagement.common.config.AppConfigConstants.SYN
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Date;
+import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.BatchStatus;
+import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
+import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -50,19 +56,31 @@ public class BatchService {
   }
 
   /**
-   * Launches the update job for a single entity.
+   * Launches the update job for specific entities.
    *
-   * @param entityId          entityId to be used in job
+   * @param entityIds          entityIds to be used in job
    * @param runAsynchronously indicates whether this job should be run asynchronously or not
    * @throws Exception on error
    */
-  public void launchSingleEntityUpdate(String entityId, boolean runAsynchronously)
+  public void launchSpecificEntityUpdate(List<String> entityIds, boolean runAsynchronously)
+      throws Exception {
+    launchJob(entityIds, runAsynchronously, batchUpdateConfig.updateSpecificEntities());
+  }
+
+
+  public void launchEntityMetricsUpdate(List<String> entityIds, boolean runAsynchronously)
+      throws Exception {
+    launchJob(entityIds, runAsynchronously, batchUpdateConfig.updateMetricsSpecificEntities());
+  }
+
+
+  private void launchJob(List<String> entityIds, boolean runAsynchronously, Job job)
       throws Exception {
     JobLauncher launcher = runAsynchronously ? defaultJobLauncher : synchronousJobLauncher;
 
     JobParameters jobParameters = BatchUtils
-        .createJobParameters(new String[]{entityId}, new Date(), mapper);
-    launcher.run(batchUpdateConfig.updateSpecificEntities(), jobParameters);
+        .createJobParameters(entityIds.toArray(String[]::new), new Date(), mapper);
+    launcher.run(job, jobParameters);
   }
 
   /**
@@ -70,7 +88,7 @@ public class BatchService {
    *
    * @throws Exception on error
    */
-  public void launchMultiEntityUpdate() throws Exception {
+  public void launchAllEntityUpdate() throws Exception {
 
     defaultJobLauncher.run(batchUpdateConfig.updateAllEntities(),
         BatchUtils.createJobParameters(null, new Date(), mapper));

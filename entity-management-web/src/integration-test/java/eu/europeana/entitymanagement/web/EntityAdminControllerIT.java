@@ -97,7 +97,7 @@ public class EntityAdminControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isNoContent());
 
         // check that record is deleted
-        Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveEntityRecordByUri(record.getEntityId());
+        Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveByEntityId(record.getEntityId());
         Assertions.assertTrue(dbRecordOptional.isEmpty());
     }
 
@@ -118,7 +118,7 @@ public class EntityAdminControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
 
         // check that record is present
-        Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveEntityRecordByUri(entityId);
+        Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveByEntityId(entityId);
         Assertions.assertFalse(dbRecordOptional.isEmpty());
 
         entityRecordService.delete(entityId);
@@ -151,11 +151,7 @@ public class EntityAdminControllerIT extends AbstractIntegrationTest {
         entityRecord.setEntity(concept);
         entityRecord.setEntityId(concept.getEntityId());
         EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
-
-        System.out.println(record.getEntityId());
         String requestPath = getEntityRequestPath(record.getEntityId());
-        System.out.println(requestPath);
-
         mockMvc.perform(post(BASE_SERVICE_URL + requestPath + BASE_ADMIN_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))

@@ -1,52 +1,36 @@
 package eu.europeana.entitymanagement.web.service;
 
-import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.EUROPEANA_URL;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.RIGHTS_CREATIVE_COMMONS;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_ID;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_IDENTIFIER;
-import static eu.europeana.entitymanagement.web.EntityRecordUtils.getDatasourceAggregationId;
-import static eu.europeana.entitymanagement.web.EntityRecordUtils.getEuropeanaAggregationId;
-import static eu.europeana.entitymanagement.web.EntityRecordUtils.getEuropeanaProxyId;
-import static eu.europeana.entitymanagement.web.EntityRecordUtils.getIsAggregatedById;
-
+import dev.morphia.query.experimental.filters.Filter;
 import eu.europeana.api.commons.error.EuropeanaApiException;
-import eu.europeana.enrichment.utils.EntityType;
-import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
+import eu.europeana.entitymanagement.common.config.DataSource;
+import eu.europeana.entitymanagement.common.config.DataSources;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.config.AppConfig;
+import eu.europeana.entitymanagement.definitions.model.*;
 import eu.europeana.entitymanagement.exception.EntityAlreadyExistsException;
+import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
+import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
+import eu.europeana.entitymanagement.utils.EntityUtils;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.web.EntityRecordUtils;
-import java.lang.reflect.Field;
-import java.util.*;
-
-import java.util.stream.Collectors;
+import eu.europeana.entitymanagement.web.model.EntityPreview;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import dev.morphia.query.experimental.filters.Filter;
-import eu.europeana.entitymanagement.common.config.DataSource;
-import eu.europeana.entitymanagement.common.config.DataSources;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.config.AppConfig;
-import eu.europeana.entitymanagement.definitions.model.Agent;
-import eu.europeana.entitymanagement.definitions.model.Aggregation;
-import eu.europeana.entitymanagement.definitions.model.Concept;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.EntityProxy;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.Place;
-import eu.europeana.entitymanagement.definitions.model.Timespan;
-import eu.europeana.entitymanagement.exception.EntityCreationException;
-import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
-import eu.europeana.entitymanagement.utils.EntityUtils;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
-import eu.europeana.entitymanagement.web.model.EntityPreview;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.EUROPEANA_URL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.RIGHTS_CREATIVE_COMMONS;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_ID;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_IDENTIFIER;
+import static eu.europeana.entitymanagement.web.EntityRecordUtils.*;
 
 @Service(AppConfig.BEAN_ENTITY_RECORD_SERVICE)
 public class EntityRecordService {
@@ -76,15 +60,15 @@ public class EntityRecordService {
 	this.datasources = datasources;
     }
 
-    public Optional<EntityRecord> retrieveEntityRecordByUri(String entityUri) {
-	return Optional.ofNullable(entityRecordRepository.findByEntityId(entityUri));
+    public Optional<EntityRecord> retrieveByEntityId(String entityId) {
+	return Optional.ofNullable(entityRecordRepository.findByEntityId(entityId));
     }
 
 	public EntityRecord retrieveEntityRecord(String type, String identifier)
 			throws EuropeanaApiException {
 		String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
 		Optional<EntityRecord> entityRecordOptional = this.
-				retrieveEntityRecordByUri(entityUri);
+				retrieveByEntityId(entityUri);
 		if (entityRecordOptional.isEmpty()) {
 			throw new EntityNotFoundException(entityUri);
 		}
@@ -96,6 +80,10 @@ public class EntityRecordService {
 		return entityRecord;
 	}
 
+
+    public List<String> retrieveMultipleByEntityId(List<String> entityIds){
+			return entityRecordRepository.getExistingEntityIds(entityIds);
+		}
     /**
      * Gets coreferenced entity with the given id (sameAs or exactMatch value in the
      * Consolidated version)
@@ -239,8 +227,8 @@ public class EntityRecordService {
 	 * @throws EntityAlreadyExistsException
 	 */
 	private void checkIfEntityAlreadyExists(String entityId) throws EntityAlreadyExistsException {
-	Optional<EntityRecord> entityRecordOptional = retrieveEntityRecordByUri(entityId);
-	if (!entityRecordOptional.isEmpty()) {
+	Optional<EntityRecord> entityRecordOptional = retrieveByEntityId(entityId);
+	if (entityRecordOptional.isPresent()) {
 		throw new EntityAlreadyExistsException(entityId);
 	}
 	}
@@ -286,7 +274,7 @@ public class EntityRecordService {
      */
     public Optional<EntityRecord> retrieveMetisCoreferenceSameAs(List<String> rdfResources) {
 	for (String resource : rdfResources) {
-	    Optional<EntityRecord> entityRecordOptional = retrieveEntityRecordByUri(resource);
+	    Optional<EntityRecord> entityRecordOptional = retrieveByEntityId(resource);
 	    if (entityRecordOptional.isPresent()) {
 		return entityRecordOptional;
 	    }
@@ -295,7 +283,7 @@ public class EntityRecordService {
 	return Optional.empty();
     }
 
-    public void performReferentialIntegrity(Entity entity) throws JsonMappingException, JsonProcessingException {
+    public void performReferentialIntegrity(Entity entity)  {
 
 	//TODO: consider refactoring the implementation of this method by creating a new class (e.g. ReferentialIntegrityProcessor) 
 	performCommonReferentialIntegrity(entity);
@@ -445,9 +433,7 @@ public class EntityRecordService {
 	} else {
 	    //value is external URI, replace it with internal reference if they are accessible
 	    Optional<EntityRecord> record = findMatchingCoreference(value);
-	    if (record.isPresent()) {
-		updatedReferences.add(record.get().getEntityId());
-	    }
+		record.ifPresent(entityRecord -> updatedReferences.add(entityRecord.getEntityId()));
 	}
     }
 
@@ -534,7 +520,7 @@ public class EntityRecordService {
 				.collect(Collectors.toUnmodifiableList());
 
 		Entity europeanaProxyEntity = europeanaProxy.getEntity();
-		/**
+		/*
 		 * updateEntity considered as "primary", since its values take precedence over existing metadata.
 		 * We also overwrite collection fields, instead of concatenating them
  		 */
@@ -571,6 +557,7 @@ public class EntityRecordService {
 	 * @throws EntityCreationException
 	 * @throws IllegalAccessException
 	 */
+	@SuppressWarnings("unchecked")
 	private Entity combineEntities(Entity primary, Entity secondary, List<Field> fieldsToCombine, boolean accumulate)
 			throws EntityCreationException, IllegalAccessException {
 		Entity consolidatedEntity = EntityObjectFactory.createEntityObject(primary.getType());

@@ -1,14 +1,5 @@
 package eu.europeana.entitymanagement.mongo.repository;
 
-import static dev.morphia.query.Sort.ascending;
-import static dev.morphia.query.experimental.filters.Filters.eq;
-import static dev.morphia.query.experimental.filters.Filters.or;
-import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_EXACT_MATCH;
-import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_ID;
-import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_MODIFIED;
-import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_SAME_AS;
-import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_DELETE_OPTS;
-
 import com.mongodb.client.model.ReturnDocument;
 import dev.morphia.Datastore;
 import dev.morphia.ModifyOptions;
@@ -16,24 +7,25 @@ import dev.morphia.query.FindOptions;
 import dev.morphia.query.experimental.filters.Filter;
 import dev.morphia.query.experimental.updates.UpdateOperators;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.definitions.EntityRecordFields;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import java.util.List;
-import java.util.Optional;
+import org.springframework.stereotype.Repository;
+
 import javax.annotation.Resource;
 import javax.validation.ValidatorFactory;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-import eu.europeana.entitymanagement.definitions.EntityRecordFields;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.stereotype.Repository;
+import static dev.morphia.query.Sort.ascending;
+import static dev.morphia.query.experimental.filters.Filters.*;
+import static eu.europeana.entitymanagement.definitions.EntityRecordFields.*;
 
 /**
  * Repository for retrieving the EntityRecord objects.
  */
 @Repository(AppConfigConstants.BEAN_ENTITY_RECORD_REPO)
 public class EntityRecordRepository {
-
-    private static final Logger logger = LogManager.getLogger(EntityRecordRepository.class);
 
     @Resource(name=AppConfigConstants.BEAN_EM_DATA_STORE)
     private Datastore datastore;
@@ -71,6 +63,28 @@ public class EntityRecordRepository {
                 eq(ENTITY_ID, entityId))
                 .first();
     }
+
+    /**
+     * Checks if records exist with the given entityIds. Disabled records are excluded from result.
+     * @param entityIds list of entityIds to check
+     * @return list of found entityIds
+     */
+    public List<String> getExistingEntityIds(List<String> entityIds){
+        // Get all EntityRecords that match the given entityIds
+        List<EntityRecord> entityRecords = datastore.find(EntityRecord.class).filter(
+            in(ENTITY_ID, entityIds),
+            eq(DISABLED, false))
+            .iterator(
+                new FindOptions()
+                    // we only care about the entityId for this query
+                    .projection().include(ENTITY_ID)
+            )
+            .toList();
+
+
+        return entityRecords.stream().map(EntityRecord::getEntityId).collect(Collectors.toList());
+    }
+
 
     /**
      * Deletes all EntityRecord objects that contain the given entityId
