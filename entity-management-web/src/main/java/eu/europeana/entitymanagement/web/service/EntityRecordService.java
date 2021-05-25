@@ -64,7 +64,7 @@ public class EntityRecordService {
 	return Optional.ofNullable(entityRecordRepository.findByEntityId(entityId));
     }
 
-	public EntityRecord retrieveEntityRecord(String type, String identifier)
+	public EntityRecord retrieveEntityRecord(String type, String identifier, boolean retrieveDisabled)
 			throws EuropeanaApiException {
 		String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
 		Optional<EntityRecord> entityRecordOptional = this.
@@ -74,7 +74,7 @@ public class EntityRecordService {
 		}
 
 		EntityRecord entityRecord = entityRecordOptional.get();
-		if (entityRecord.isDisabled()) {
+		if (!retrieveDisabled && entityRecord.isDisabled()) {
 			throw new EntityRemovedException(String.format(ENTITY_ID_REMOVED_MSG, entityUri));
 		}
 		return entityRecord;
@@ -109,6 +109,17 @@ public class EntityRecordService {
 	er.setDisabled(true);
 	return saveEntityRecord(er);
     }
+
+	/**
+	 * Re-Enable an already existing entity record.
+	 *
+	 * @param entityRecord entity record to update
+	 * @return Re-Enabled entity
+	 */
+	public EntityRecord enableEntityRecord(EntityRecord entityRecord) {
+	entityRecord.setDisabled(false);
+	return saveEntityRecord(entityRecord);
+	}
 
     /**
      * Updates an already existing entity record.

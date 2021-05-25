@@ -626,8 +626,55 @@ public class EMControllerIT extends AbstractIntegrationTest {
         assert dbRecordOptional.isPresent();
         Assertions.assertFalse(dbRecordOptional.get().isDisabled());
     }
-    
-    
+
+    @Test
+    void reEnableDisabledEntityShouldBeSuccessful() throws Exception {
+        // create disbaled entity in DB
+        Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
+        EntityRecord entityRecord = new EntityRecord();
+        entityRecord.setEntity(concept);
+        entityRecord.setEntityId(concept.getEntityId());
+        EntityRecord record = entityRecordService.disableEntityRecord(entityRecord);
+       // check if entity is disabled
+        Assertions.assertTrue(record.isDisabled());
+
+        String requestPath = getEntityRequestPath(record.getEntityId());
+
+        mockMvc.perform(post(BASE_SERVICE_URL + "/" + requestPath)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        // check that record was re-enabled
+        Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveByEntityId(record.getEntityId());
+
+        assert dbRecordOptional.isPresent();
+        Assertions.assertFalse(dbRecordOptional.get().isDisabled());
+    }
+
+    @Test
+    void reEnableNonDisabledEntityShouldBeSuccessful() throws Exception {
+        // create entity in DB
+        Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
+        EntityRecord entityRecord = new EntityRecord();
+        entityRecord.setEntity(concept);
+        entityRecord.setEntityId(concept.getEntityId());
+        EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
+        // check if entity is NOT disabled
+        Assertions.assertFalse(entityRecord.isDisabled());
+
+        String requestPath = getEntityRequestPath(record.getEntityId());
+
+        mockMvc.perform(post(BASE_SERVICE_URL + "/" + requestPath)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        // check that record was re-enabled
+        Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveByEntityId(record.getEntityId());
+
+        assert dbRecordOptional.isPresent();
+        Assertions.assertFalse(dbRecordOptional.get().isDisabled());
+    }
+
     private void assertEntityExists(MvcResult result) throws JsonMappingException, JsonProcessingException, UnsupportedEncodingException {
     	final ObjectNode node = new ObjectMapper().readValue(result.getResponse().getContentAsString(StandardCharsets.UTF_8), ObjectNode.class);
     	Optional<EntityRecord> dbRecord = entityRecordService.retrieveByEntityId(node.get("id").asText());
