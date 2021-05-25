@@ -68,7 +68,7 @@ public class EntityAdminController extends BaseRest {
         }
         EntityRecord entityRecord = entityRecordOptional.get();
 
-        LOG.debug("Deleting permanently{}entity : {}/{}", (entityRecord.isDisabled() ? " deprecated " : " "), type, identifier);
+        LOG.info("Permanently deleting entityId={}", entityRecord.getEntityId());
         entityRecordService.delete(entityRecord.getEntityId());
         return ResponseEntity.noContent().build();
     }
