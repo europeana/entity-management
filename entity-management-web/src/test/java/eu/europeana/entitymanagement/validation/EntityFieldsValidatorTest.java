@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_EM_VALIDATOR_FACTORY;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.SerializationConfig;
 import eu.europeana.entitymanagement.config.ValidatorConfig;
@@ -39,7 +40,7 @@ public class EntityFieldsValidatorTest {
   @Qualifier(AppConfigConstants.BEAN_JSON_MAPPER)
   @Autowired
   private ObjectMapper objectMapper;
-  @Resource(name = "emValidatorFactory")
+  @Resource(name = BEAN_EM_VALIDATOR_FACTORY)
   private ValidatorFactory emValidatorFactory;
 
 

@@ -1,5 +1,7 @@
 package eu.europeana.entitymanagement.vocabulary;
 
+import eu.europeana.entitymanagement.definitions.exceptions.EntityValidationException;
+
 public enum EntityFieldsTypes {
 
 	entityId(EntityFieldsTypes.FIELD_TYPE_URI,  false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
@@ -102,10 +104,23 @@ public enum EntityFieldsTypes {
     }
     
     public static String getFieldType(String fieldName) {
-    	return EntityFieldsTypes.valueOf(fieldName).getFieldType();
+        try {
+            return valueOf(fieldName).getFieldType();
+        }catch (IllegalArgumentException e){
+            throw new EntityValidationException("Unknown field: " + fieldName, e);
+        }
     }
 
-    public boolean getFieldIsmultilingual() {
+    public static boolean isMultilingual(String fieldName) {
+        try {
+            return valueOf(fieldName).getFieldIsmultilingual();     
+        }catch (IllegalArgumentException e){
+            throw new EntityValidationException("Unknown field: " + fieldName, e);
+        }
+        
+    }
+    
+    boolean getFieldIsmultilingual() {
         return fieldIsmultilingual;
     }
     
@@ -113,4 +128,5 @@ public enum EntityFieldsTypes {
         return fieldCardinality;
     }
 
+    
 }
