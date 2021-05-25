@@ -9,6 +9,7 @@ import eu.europeana.entitymanagement.config.ValidatorConfig;
 import eu.europeana.entitymanagement.web.MetisDereferenceUtils;
 import java.io.IOException;
 
+import javax.xml.bind.JAXBContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,11 +27,14 @@ public class EntityFieldsCleanerTest {
     @Autowired
     private LanguageCodes emLanguageCodes;
 
+    @Autowired
+    private JAXBContext jaxbContext;
+
     
     @Test
-    public void shouldCleanEntityFields() throws IOException, EuropeanaApiException {
+    public void shouldCleanEntityFields() throws Exception {
 	Agent agent = (Agent) MetisDereferenceUtils
-      .parseMetisResponse("http://www.wikidata.org/entity/Q855", loadFile(BaseMvcTestUtils.AGENT_STALIN_XML));
+      .parseMetisResponse(jaxbContext.createUnmarshaller(), "http://www.wikidata.org/entity/Q855", loadFile(BaseMvcTestUtils.AGENT_STALIN_XML));
 	
         EntityFieldsCleaner fieldCleaner = new EntityFieldsCleaner(emLanguageCodes);
         assert agent != null;

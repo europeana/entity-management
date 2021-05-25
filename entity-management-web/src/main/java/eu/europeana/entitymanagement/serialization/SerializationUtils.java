@@ -1,20 +1,22 @@
 package eu.europeana.entitymanagement.serialization;
 
+import java.io.IOException;
+import java.io.Writer;
+import java.util.List;
+
+import javax.xml.stream.XMLStreamWriter;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+
 import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.util.List;
-import javax.xml.stream.XMLStreamWriter;
 
 public class SerializationUtils {
 
@@ -41,12 +43,14 @@ public class SerializationUtils {
 
   public static void serializeExternalJson(Writer writer, ObjectMapper mapper, EntityRecord record)
       throws IOException {
-    JsonNode result = getExternalJsonNode(mapper, record);
+    ObjectNode result = getExternalJsonNode(mapper, record);
+    // Entity isAggregatedBy should be included in external profile
+    result.remove(WebEntityFields.IS_AGGREGATED_BY);
     mapper.writeValue(writer, result);
   }
 
 
-  private static JsonNode getExternalJsonNode(ObjectMapper mapper, EntityRecord record)
+  private static ObjectNode getExternalJsonNode(ObjectMapper mapper, EntityRecord record)
       throws EntityManagementRuntimeException {
       return mapper.valueToTree(record.getEntity());
   }

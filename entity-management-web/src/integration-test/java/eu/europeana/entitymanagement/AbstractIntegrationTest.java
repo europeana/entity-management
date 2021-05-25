@@ -22,7 +22,7 @@ public abstract class AbstractIntegrationTest {
 
     static final MongoContainer MONGO_CONTAINER;
 
-    protected Logger logger = LogManager.getLogger(getClass());
+    protected  static final Logger logger = LogManager.getLogger(AbstractIntegrationTest.class);
 
     static {
         MONGO_CONTAINER = new MongoContainer("entity-management", "job-repository", "enrichment")
@@ -49,6 +49,7 @@ public abstract class AbstractIntegrationTest {
 
     @AfterAll
     static void teardownAll() throws IOException {
+        logger.info("Shutdown metis server : host = {}; port={}", mockMetis.getHostName(), mockMetis.getPort());
         mockMetis.shutdown();
     }
 
@@ -63,6 +64,8 @@ public abstract class AbstractIntegrationTest {
         registry.add("metis.baseUrl", () -> String.format("http://%s:%s", mockMetis.getHostName(), mockMetis.getPort()));
         registry.add("batch.computeMetrics", () -> "false");
         registry.add("auth.enabled", () -> "false");
+        logger.info("MONGO_CONTAINER : {}", MONGO_CONTAINER.getConnectionUrl());
+        logger.info("METIS SERVER : host = {}; port={}", mockMetis.getHostName(), mockMetis.getPort());
     }
 
 

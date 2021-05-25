@@ -6,7 +6,6 @@
         <module>entity-management-common</module>
         <module>entity-management-web</module>
         <module>entity-management-mongo</module>
-        <module>entity-management-utils</module>
         <module>entity-management-batch</module>
       <module>entity-management-enrichment</module>
     </modules>
@@ -61,6 +60,7 @@
         <version.log4j>2.13.3</version.log4j>
         <metis.version>4-SNAPSHOT</metis.version>
         <version.javax.validation>2.0.1.Final</version.javax.validation>
+        <apache.commons.validator.version>1.7</apache.commons.validator.version>
     </properties>
 
     <dependencyManagement>

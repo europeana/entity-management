@@ -1,20 +1,20 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlTransient;
 
 public class XmlIsAggregatedByImpl {
 
-    	@JsonIgnore
-	String id;
-	
+  @XmlTransient
+  String id;
+
 	public XmlIsAggregatedByImpl(String aggregation_id) {
 	    id = aggregation_id;
 	}
-	
-	@JacksonXmlProperty(isAttribute= true, localName = XmlConstants.RESOURCE)
+
+	@XmlAttribute(name = XmlConstants.RESOURCE)
 	public String getAbout() {
 		return id;
 	}
-    
+
 }

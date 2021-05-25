@@ -4,14 +4,15 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
-import java.util.Set;
-import javax.validation.ConstraintViolation;
-import javax.validation.ValidatorFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.ValidatorFactory;
+import java.util.Set;
 
 /**
  * This {@link ItemProcessor} updates Entity metadata.

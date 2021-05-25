@@ -9,8 +9,8 @@ import static eu.europeana.entitymanagement.batch.BatchUtils.STEP_UPDATE_ENTITY;
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_JSON_MAPPER;
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_STEP_EXECUTOR;
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.SYNC_TASK_EXECUTOR;
-import static eu.europeana.entitymanagement.mongo.repository.EntityRecordFields.ENTITY_ID;
-import static eu.europeana.entitymanagement.mongo.repository.EntityRecordFields.ENTITY_MODIFIED;
+import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_ID;
+import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_MODIFIED;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

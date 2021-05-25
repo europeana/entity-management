@@ -1,82 +1,55 @@
 package eu.europeana.entitymanagement.web.service;
 
+import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
+import eu.europeana.entitymanagement.definitions.model.Agent;
+import eu.europeana.entitymanagement.definitions.model.Concept;
 import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.impl.AgentImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.ConceptImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.OrganizationImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.PlaceImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.TimespanImpl;
+import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.definitions.model.Place;
+import eu.europeana.entitymanagement.definitions.model.Timespan;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.web.xml.model.XmlAgentImpl;
+import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
+import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
+import eu.europeana.entitymanagement.web.xml.model.XmlOrganizationImpl;
+import eu.europeana.entitymanagement.web.xml.model.XmlPlaceImpl;
+import eu.europeana.entitymanagement.web.xml.model.XmlTimespanImpl;
+import java.util.Map;
 
 /**
  * Instantiates a
- * {@link eu.europeana.entitymanagement.definitions.model.impl.Entity} instance,
+ * {@link eu.europeana.entitymanagement.definitions.model.Entity} instance,
  * based on the
  * {@link eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl}
  * instance
  */
 public class EntityObjectFactory {
 
-//    @Deprecated
-//    public static Entity createEntityFromXmlType(Class<? extends Entity> xmlBaseEntityClass)
-//	    throws EntityCreationException {
-//	if (xmlBaseEntityClass.isAssignableFrom(Concept.class)) {
-//	    return new ConceptImpl();
-//	}
-//
-//	if (xmlBaseEntityClass.isAssignableFrom(Timespan.class)) {
-//	    return new TimespanImpl();
-//	}
-//
-//	if (xmlBaseEntityClass.isAssignableFrom(Place.class)) {
-//	    return new PlaceImpl();
-//	}
-//
-//	if (xmlBaseEntityClass.isAssignableFrom(Agent.class)) {
-//	    return new AgentImpl();
-//	}
-//
-//	if (xmlBaseEntityClass.isAssignableFrom(Organization.class)) {
-//	    return new OrganizationImpl();
-//	}
-//
-//	// TODO: add other types
-//	throw new EntityCreationException("No matching BaseEntityImplementation for XML type " + xmlBaseEntityClass);
-//    }
+	private static final Map<EntityTypes, Class<? extends Entity>> entityTypesClassMap = Map.of(
+			EntityTypes.Agent, Agent.class,
+			EntityTypes.Concept, Concept.class,
+			EntityTypes.Organization, Organization.class,
+			EntityTypes.Place, Place.class,
+			EntityTypes.Timespan, Timespan.class
+	);
 
-    public static Class<? extends Entity> getClassForType(EntityTypes modelType) {
+	private static final Map<EntityTypes, Class<? extends XmlBaseEntityImpl<?>>> xmlEntityMap = Map.of(
+			EntityTypes.Agent, XmlAgentImpl.class,
+			EntityTypes.Concept, XmlConceptImpl.class,
+			EntityTypes.Organization, XmlOrganizationImpl.class,
+			EntityTypes.Place, XmlPlaceImpl.class,
+			EntityTypes.Timespan, XmlTimespanImpl.class
+	);
 
-	Class<? extends Entity> ret = null;
-//	EntityTypes entityType = EntityTypes.valueOf(modelType.name());
 
-	switch (modelType) {
-	case Organization:
-	    ret = OrganizationImpl.class;
-	    break;
-	case Concept:
-	    ret = ConceptImpl.class;
-	    break;
-	case Agent:
-	    ret = AgentImpl.class;
-	    break;
-	case Place:
-	    ret = PlaceImpl.class;
-	    break;
-	case Timespan:
-	    ret = TimespanImpl.class;
-	    break;
-	default:
-	    throw new RuntimeException("The given type is not supported by the web model");
-	}
-
-	return ret;
-    }
-
-    public static Entity createEntityObject(EntityTypes entityType) throws EntityCreationException {
+	@SuppressWarnings("unchecked")
+    public static <T extends Entity> T createEntityObject(EntityTypes entityType) throws EntityCreationException {
 
 	try {
-	    return getClassForType(entityType).getDeclaredConstructor().newInstance();
+		Class<T> entityClass = (Class<T>) entityTypesClassMap.get(entityType);
+		// entityClass cannot be null here as map contains all possible types
+		return entityClass.getDeclaredConstructor().newInstance();
 
 	} catch (Exception e) {
 	    throw new EntityCreationException("Error creating instance for " + entityType.toString(), e);
@@ -84,7 +57,31 @@ public class EntityObjectFactory {
     }
     
     public static Entity createEntityObject(String entityType) throws EntityCreationException {
-	
+
 	return createEntityObject(EntityTypes.valueOf(entityType));
 }
+
+	@SuppressWarnings("unchecked")
+	public static <T extends XmlBaseEntityImpl<?>> T createXmlEntity(Entity entity)
+			throws EntityManagementRuntimeException {
+		// we have to explicitly instantiate the Xml instances, as getDeclaredConstructor().newInstance(args)
+		// wouldn't work
+
+		switch (EntityTypes.valueOf(entity.getType())){
+			case Agent:
+				return (T) new XmlAgentImpl((Agent)entity);
+			case Place:
+				return (T) new XmlPlaceImpl((Place) entity);
+			case Concept:
+				return (T) new XmlConceptImpl((Concept) entity);
+			case Timespan:
+				return (T) new XmlTimespanImpl((Timespan) entity);
+			case Organization:
+				return (T) new XmlOrganizationImpl((Organization) entity);
+
+			default:
+				throw new EntityManagementRuntimeException(String.format("Encountered invalid entityType %s in entityId=%s",
+						entity.getType(), entity.getEntityId()));
+		}
+	}
 }

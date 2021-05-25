@@ -5,22 +5,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringEscapeUtils;
-
-//import org.apache.commons.lang3.StringEscapeUtils;
 
 import eu.europeana.corelib.utils.EuropeanaUriUtils;
 
 public class RdfXmlUtils {
 
-    public static List<LabelledResource> convertToRdfResource(String[] elements) {
+    public static List<LabelledResource> convertToRdfResource(List<String> elements) {
 	if (elements == null)
 	    return null;
-	List<LabelledResource> res = new ArrayList<>();
-	for (int index = 0; index < elements.length; index++) {
-	    res.add(new LabelledResource(elements[index]));
-	}
-	return res;
+
+	return elements.stream().map(LabelledResource::new).collect(Collectors.toList());
     }
 
 	public static List<LabelledResource> convertToXmlMultilingualString(Map<String, List<String>> values) {
@@ -30,7 +26,7 @@ public class RdfXmlUtils {
 	for (String language : values.keySet()) {
 	    List<String> entryValues = values.get(language);
 	    for (String entryValue : entryValues) {
-				res.add(new LabelledResource(StringEscapeUtils.escapeXml11(entryValue), language));
+				res.add(new LabelledResource(language, StringEscapeUtils.escapeXml11(entryValue)));
 	    }
 	}
 	return res;
@@ -46,7 +42,7 @@ public class RdfXmlUtils {
 		if (EuropeanaUriUtils.isUri(entryValue))
 		    res.add(new LabelledResource(entryValue));
 		else
-			res.add(new LabelledResource(StringEscapeUtils.escapeXml11(entryValue), language));
+			res.add(new LabelledResource(language, StringEscapeUtils.escapeXml11(entryValue)));
 	    }
 	}
 	return res;
@@ -94,18 +90,18 @@ public class RdfXmlUtils {
 	return res;
     }
 
-    public static String[] toStringArray(List<LabelledResource> resources) {
+    public static List<String> toStringList(List<LabelledResource> resources) {
 	if (resources == null) {
 	    return null;
 	}
 
-	String[] res = new String[resources.size()];
-	int i = 0;
+	List<String> res = new ArrayList<>();
+
 	for (LabelledResource labelledResource : resources) {
 	    if(labelledResource.getResource() != null) {
-	        res[i++] = labelledResource.getResource();
+	        res.add(labelledResource.getResource());
 	    } else {
-	        res[i++] = labelledResource.getValue();
+	        res.add(labelledResource.getValue());
 	    }
 	}
 
