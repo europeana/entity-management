@@ -4,7 +4,7 @@ import eu.europeana.entitymanagement.definitions.exceptions.EntityValidationExce
 
 public enum EntityFieldsTypes {
 
-	entityId(EntityFieldsTypes.FIELD_TYPE_URI,  false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
+    entityId(EntityFieldsTypes.FIELD_TYPE_URI,  false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
     type(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
     depiction(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
     referencedWebResource(EntityFieldsTypes.FIELD_TYPE_WEB_RESOURCE, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
@@ -102,6 +102,16 @@ public enum EntityFieldsTypes {
     public String getFieldType() {
         return fieldType;
     }
+    
+    public static boolean hasTypeDefinition(String fieldName) {
+        try {
+            valueOf(fieldName);
+            return true;
+        }catch (IllegalArgumentException e){
+            return false;
+        }
+    }
+    
     
     public static String getFieldType(String fieldName) {
         try {

@@ -20,6 +20,7 @@ import eu.europeana.entitymanagement.definitions.exceptions.EntityValidationExce
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
+
 import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.*;
 
 @Component
@@ -44,14 +45,20 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
 		
 		for (Field field : entityFields) {
 			try {			
-				Object fieldValue = entity.getFieldValue(field);
+			        String fieldName = field.getName();
+			        if(!EntityFieldsTypes.hasTypeDefinition(fieldName)) {
+			            //there is no type definition to validate against
+			            continue;
+			        }
+			        
+			        Object fieldValue = entity.getFieldValue(field);
 				if (fieldValue==null) { 
 				    //skip validation of empty fields
 				    continue;
 				}
-				Class<?> fieldType = field.getType();
-				String fieldName = field.getName();
 				boolean returnValueLocal = true;
+	                            
+				Class<?> fieldType = field.getType();
 				/*
 				 * the validation rules are implemented here
 				 */
