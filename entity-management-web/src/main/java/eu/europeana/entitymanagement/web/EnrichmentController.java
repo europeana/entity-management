@@ -9,7 +9,7 @@ import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
-import eu.europeana.entitymanagement.model.EnrichmentResponse;
+import eu.europeana.entitymanagement.definitions.web.EntityIdResponse;
 import eu.europeana.entitymanagement.service.EnrichmentService;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import io.swagger.annotations.ApiOperation;
@@ -54,7 +54,7 @@ public class EnrichmentController extends BaseRest{
    */
   @ApiOperation(value = "Publish to enrichment", nickname = "publishEnrichment", response = java.lang.Void.class)
   @PostMapping(value = "/enrichment",produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<EnrichmentResponse> publishEnrichment(
+  public ResponseEntity<EntityIdResponse> publishEnrichment(
       @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
       @RequestBody List<String> entityList,
       HttpServletRequest request) throws ApplicationAuthenticationException {
@@ -72,10 +72,10 @@ public class EnrichmentController extends BaseRest{
    * @param entityList
    * @return
    */
-  private ResponseEntity<EnrichmentResponse> publishToEnrichment(List<String> entityList) {
+  private ResponseEntity<EntityIdResponse> publishToEnrichment(List<String> entityList) {
     List<String> entityPublished = new ArrayList<>();
     for (String entityUri: entityList) {
-      Optional<EntityRecord> entityRecordOptional = entityRecordService.retrieveEntityRecordByUri(entityUri);
+      Optional<EntityRecord> entityRecordOptional = entityRecordService.retrieveByEntityId(entityUri);
       try {
         if (entityRecordOptional.isEmpty()) {
           throw new EntityNotFoundException(entityUri);
@@ -94,7 +94,7 @@ public class EnrichmentController extends BaseRest{
     return new ResponseEntity<>(prepareEnrichmentResponse(entityList, entityPublished), HttpStatus.OK);
   }
 
-    private EnrichmentResponse prepareEnrichmentResponse(List<String> entityList, List<String> entitiesPublished) {
+    private EntityIdResponse prepareEnrichmentResponse(List<String> entityList, List<String> entitiesPublished) {
      List<String> successful = null;
      List<String> failed = null;
      long expected = entityList.size();
@@ -105,6 +105,6 @@ public class EnrichmentController extends BaseRest{
       if (!entityList.isEmpty()) {
           failed = entityList;
       }
-      return  new EnrichmentResponse(expected, successful, failed);
+      return  new EntityIdResponse(expected, successful, failed);
     }
 }

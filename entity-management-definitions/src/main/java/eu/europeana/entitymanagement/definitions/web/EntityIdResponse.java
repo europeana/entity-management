@@ -1,16 +1,16 @@
-package eu.europeana.entitymanagement.model;
+package eu.europeana.entitymanagement.definitions.web;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class EnrichmentResponse {
+public class EntityIdResponse {
 
     private long expected;
     private List<String> successful;
     private List<String> failed;
 
-    public EnrichmentResponse(long expected, List<String> successful, List<String> failed) {
+    public EntityIdResponse(long expected, List<String> successful, List<String> failed) {
         this.expected = expected;
         this.successful = successful;
         this.failed = failed;

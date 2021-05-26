@@ -34,8 +34,7 @@ public class EntityFieldsCleaner {
     @SuppressWarnings("unchecked")
     public void cleanAndNormalize(Entity entity) {
 
-	List<Field> entityFields = new ArrayList<>();
-	EntityUtils.getAllFields(entityFields, entity.getClass());
+	List<Field> entityFields = EntityUtils.getAllFields(entity.getClass());
 
 	try {
 	    for (Field field : entityFields) {
