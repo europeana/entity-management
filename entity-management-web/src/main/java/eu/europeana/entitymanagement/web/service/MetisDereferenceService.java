@@ -79,7 +79,7 @@ public class MetisDereferenceService implements InitializingBean {
 
     String fetchMetisResponse(String externalId) {
     	Instant start= Instant.now();
-		logger.debug("De-referencing externalId={} from Metis", externalId);
+		logger.info("De-referencing externalId={} from Metis", externalId);
 
 	String metisResponseBody = metisWebClient.get()
 		.uri(uriBuilder -> uriBuilder.path(METIS_DEREF_PATH).queryParam("uri", externalId).build())
@@ -93,7 +93,7 @@ public class MetisDereferenceService implements InitializingBean {
 		.bodyToMono(String.class).block();
 
 	long duration = Duration.between(start, Instant.now()).toMillis();
-	logger.debug("Received dereference response for externalId={}. Duration={}ms; response - {} ", externalId, duration, metisResponseBody);
+	logger.info("Received dereference response for externalId={}. Duration={}ms", externalId, duration);
 	return metisResponseBody;
     }
 }

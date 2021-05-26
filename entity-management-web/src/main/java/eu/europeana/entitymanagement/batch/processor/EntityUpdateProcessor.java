@@ -62,7 +62,7 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
        */
         if(entityManagementConfiguration.shouldComputeMetrics()){
             if(logger.isTraceEnabled()) {
-                logger.debug("Computing ranking metrics for entityId={}", entityRecord.getEntityId());
+                logger.trace("Computing ranking metrics for entityId={}", entityRecord.getEntityId());
             }
             computeRankingMetrics(entityRecord);
         }
