@@ -76,9 +76,14 @@ public class EntityUpdateListener extends ItemListenerSupport<EntityRecord, Enti
 
   @Override
   public void afterWrite(@NonNull  List<? extends EntityRecord> entityRecords) {
-        writeDuration = Duration.between(startWrite, Instant.now()).toMillis();
-        String[] entityIds = getEntityIds(entityRecords);
-    logger.info("afterWrite: entityIds={}, count={}; writeDuration={}", Arrays.toString(entityIds), entityIds.length, writeDuration);
+        if(entityRecords.isEmpty()){
+            return;
+        }
+      String[] entityIds = getEntityIds(entityRecords);
+      if(logger.isDebugEnabled()) {
+            writeDuration = Duration.between(startWrite, Instant.now()).toMillis();
+            logger.info("afterWrite: entityIds={}, count={}; writeDuration={}ms", Arrays.toString(entityIds), entityIds.length, writeDuration);
+        }
 
     // Remove entries from the FailedTask collection if exists
     failedTaskService.removeFailures(Arrays.asList(entityIds));
