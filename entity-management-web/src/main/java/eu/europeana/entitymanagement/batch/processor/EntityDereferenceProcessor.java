@@ -61,7 +61,9 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
         boolean isEntityNew = entity.getIsAggregatedBy().getCreated().equals(entity.getIsAggregatedBy().getModified());
 
         if(isEntityNew || !metisResponseMatchesExternalProxy(entityRecord, metisResponse)){
-            logger.debug("Storing de-referenced metadata in external proxy for entityId={}", entityId);
+            if(logger.isTraceEnabled()) {
+                logger.trace("Storing de-referenced metadata in external proxy for entityId={}", entityId);
+            }
             // replace external proxy with MetisResponse
             entityRecord.getExternalProxy().setEntity(metisResponse);
             entityRecord.getExternalProxy().getProxyIn().setModified(new Date());

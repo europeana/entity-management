@@ -21,7 +21,10 @@ import static eu.europeana.entitymanagement.definitions.EntityRecordFields.*;
 @dev.morphia.annotations.Entity("EntityRecord")
 @Indexes({
         @Index(fields = {@Field(ENTITY_EXACT_MATCH)}),
-        @Index(fields = {@Field(ENTITY_SAME_AS)})
+        @Index(fields = {@Field(ENTITY_SAME_AS)}),
+
+        // temporary index for migration
+        @Index(fields = @Field(ENTITY_TYPE))
 })
 @EntityListeners(EntityRecordWatcher.class)
 public class EntityRecord {
@@ -44,6 +47,7 @@ public class EntityRecord {
     private Date created;
 
     @JsonIgnore
+    @Indexed
     private Date modified;
 
 

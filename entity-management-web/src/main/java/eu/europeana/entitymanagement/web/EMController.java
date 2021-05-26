@@ -184,7 +184,6 @@ public class EMController extends BaseRest {
 			if (emConfig.isAuthEnabled()) {
 				verifyReadAccess(request);
 			}
-	logger.debug("Retrieve entity with content negotiation:{}/{}, with accept header {}", type, identifier, acceptHeader);
 	if (acceptHeader.contains(HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML)) {
 	    //if rdf/XML is explicitly requested
 	    return createResponse(profile, type, identifier, FormatTypes.xml, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML);
@@ -224,7 +223,7 @@ public class EMController extends BaseRest {
 			if (emConfig.isAuthEnabled()) {
 				verifyWriteAccess(Operations.CREATE, request);
 			}
-			logger.debug("Registering new entity: {}", entityCreationRequest.getId());
+			logger.info("Registering new entity: externalId={}", entityCreationRequest.getId());
 	
 			// check if id is already being used, if so return a 301
 			Optional<EntityRecord> existingEntity = entityRecordService
@@ -238,8 +237,6 @@ public class EMController extends BaseRest {
 
 			// return 400 error if ID does not match a configured datasource
 			if (!datasources.hasDataSource(entityCreationRequest.getId())) {
-				logger.debug("Entity registration: {} - no matching datasource configured",
-						entityCreationRequest.getId());
 				throw new HttpBadRequestException(String
 						.format("id %s does not match a configured datasource", entityCreationRequest.getId()));
 			}
@@ -255,12 +252,10 @@ public class EMController extends BaseRest {
 				}
 			}
 
-			logger.debug("Saving record for {}", entityCreationRequest.getId());
-
 			EntityRecord savedEntityRecord = entityRecordService
 					.createEntityFromRequest(entityCreationRequest, metisResponse);
 
-			logger.debug("Created Entity record for {}; entityId={}", entityCreationRequest.getId(), savedEntityRecord.getEntityId());
+			logger.info("Created Entity record for externalId={}; entityId={}", entityCreationRequest.getId(), savedEntityRecord.getEntityId());
 
 			return launchTaskAndRetrieveEntity(savedEntityRecord.getEntity().getType(),
 					getDatabaseIdentifier(savedEntityRecord.getEntityId()), savedEntityRecord,
@@ -285,7 +280,6 @@ public class EMController extends BaseRest {
 	}
 
 			EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier);
-			logger.debug("Entity retrieved entityId={}, using {} format", entityRecord.getEntityId(), outFormat);
 			return generateResponseEntity(profile, outFormat, contentType, entityRecord, HttpStatus.OK);
 		}
 
@@ -303,11 +297,7 @@ public class EMController extends BaseRest {
 			throws EntityRemovedException {
 
 		if (existingEntity.isPresent()) {
-			logger.debug("Entity registration id={} - matching coreference found; entityId={}",
-					entityCreationId, existingEntity.get().getEntityId());
 			if (existingEntity.get().isDisabled()) {
-				logger.debug("Entity registration - entityId={} is disabled",
-						existingEntity.get().getEntityId());
 				throw new EntityRemovedException(String
 						.format(EXTERNAL_ID_REMOVED_MSG, entityCreationId, existingEntity.get().getEntityId()));
 			}

@@ -43,8 +43,7 @@ import java.util.Date;
 
 import static eu.europeana.entitymanagement.batch.BatchUtils.*;
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.*;
-import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_ID;
-import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_MODIFIED;
+import static eu.europeana.entitymanagement.definitions.EntityRecordFields.*;
 
 @Component
 public class BatchEntityUpdateConfig {
@@ -78,23 +77,25 @@ public class BatchEntityUpdateConfig {
 
     private final int chunkSize;
 
+    private final int throttleLimit;
+
     //TODO: Too many dependencies. Split up into multiple classes
     @Autowired
     public BatchEntityUpdateConfig(JobBuilderFactory jobBuilderFactory,
-        StepBuilderFactory stepBuilderFactory,
-        @Qualifier(SPECIFIC_ITEM_ENTITYRECORD_READER) ItemReader<EntityRecord> singleEntityRecordReader,
-        @Qualifier(ALL_ITEM_ENTITYRECORD_READER) ItemReader<EntityRecord> multipleEntityRecordReader,
-        @Qualifier(FAILED_TASK_READER) ItemReader<EntityRecord> failedTaskReader,
-        EntityDereferenceProcessor dereferenceProcessor,
-        EntityUpdateProcessor entityUpdateProcessor,
-        EntityRecordDatabaseWriter dbWriter,
-        EntityRecordService entityRecordService,
-        FailedTaskService failedTaskService,
-        EntityUpdateListener entityUpdateListener,
-        @Qualifier(BEAN_STEP_EXECUTOR) TaskExecutor stepThreadPoolExecutor,
-        @Qualifier(SYNC_TASK_EXECUTOR) TaskExecutor synchronousTaskExecutor,
-        @Qualifier(BEAN_JSON_MAPPER) ObjectMapper mapper,
-        EntityManagementConfiguration emConfig) {
+                                   StepBuilderFactory stepBuilderFactory,
+                                   @Qualifier(SPECIFIC_ITEM_ENTITYRECORD_READER) ItemReader<EntityRecord> singleEntityRecordReader,
+                                   @Qualifier(ALL_ITEM_ENTITYRECORD_READER) ItemReader<EntityRecord> multipleEntityRecordReader,
+                                   @Qualifier(FAILED_TASK_READER) ItemReader<EntityRecord> failedTaskReader,
+                                   EntityDereferenceProcessor dereferenceProcessor,
+                                   EntityUpdateProcessor entityUpdateProcessor,
+                                   EntityRecordDatabaseWriter dbWriter,
+                                   EntityRecordService entityRecordService,
+                                   FailedTaskService failedTaskService,
+                                   EntityUpdateListener entityUpdateListener,
+                                   @Qualifier(BEAN_STEP_EXECUTOR) TaskExecutor stepThreadPoolExecutor,
+                                   @Qualifier(SYNC_TASK_EXECUTOR) TaskExecutor synchronousTaskExecutor,
+                                   @Qualifier(BEAN_JSON_MAPPER) ObjectMapper mapper,
+                                   EntityManagementConfiguration emConfig) {
         this.jobBuilderFactory = jobBuilderFactory;
         this.stepBuilderFactory = stepBuilderFactory;
         this.singleItemReader = singleEntityRecordReader;
@@ -110,6 +111,7 @@ public class BatchEntityUpdateConfig {
         this.synchronousTaskExecutor = synchronousTaskExecutor;
         this.mapper = mapper;
         this.chunkSize = emConfig.getBatchChunkSize();
+        this.throttleLimit = emConfig.getBatchStepThrottleLimit();
     }
 
     @Bean(name = SPECIFIC_ITEM_ENTITYRECORD_READER)
@@ -125,7 +127,9 @@ public class BatchEntityUpdateConfig {
     @StepScope
     private SynchronizedItemStreamReader<EntityRecord> allEntityRecordReader(@Value("#{jobParameters[currentStartTime]}") Date currentStartTime) {
         EntityRecordDatabaseReader reader = new EntityRecordDatabaseReader(entityRecordService, chunkSize,
-                Filters.lte(ENTITY_MODIFIED, currentStartTime));
+                Filters.lte(ENTITY_MODIFIED, currentStartTime),
+                // temp filter during migration. Only fetch records without a consolidated entity
+               Filters.exists(ENTITY_TYPE).not());
 
         return threadSafeReader(reader);
     }
@@ -164,6 +168,7 @@ public class BatchEntityUpdateConfig {
                 .skip(MetisNotKnownException.class)
             .writer(dbWriter)
             .taskExecutor(singleEntity ? synchronousTaskExecutor : stepThreadPoolExecutor)
+                .throttleLimit(throttleLimit)
             .build();
     }
 
@@ -180,6 +185,7 @@ public class BatchEntityUpdateConfig {
                 .skip(EntityMismatchException.class)
                 .skip(MetisNotKnownException.class)
             .taskExecutor(stepThreadPoolExecutor)
+                .throttleLimit(throttleLimit)
             .build();
     }
 

@@ -61,7 +61,9 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
        *  Solr servers. To prevent Jobs from failing, we make this conditional.
        */
         if(entityManagementConfiguration.shouldComputeMetrics()){
-            logger.debug("Computing ranking metrics for entityId={}", entityRecord.getEntityId());
+            if(logger.isTraceEnabled()) {
+                logger.debug("Computing ranking metrics for entityId={}", entityRecord.getEntityId());
+            }
             computeRankingMetrics(entityRecord);
         }
 
@@ -70,7 +72,7 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
 
     private void validateConstraints(EntityRecord entityRecord) throws EntityValidationException {
         Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entityRecord.getEntity());
-        if (!violations.isEmpty()) {
+        if (!violations.isEmpty() && logger.isDebugEnabled()) {
             //TODO: throw exception here when the implementation is stable and correct
             logger.debug("The record with the following id has constraint validation errors: " + entityRecord.getEntityId());
         }

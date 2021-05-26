@@ -408,7 +408,6 @@ public class EMControllerIT extends AbstractIntegrationTest {
 	String entityId = registeredEntityNode.get("id").asText();
 	String defaultMozillaAcceptHeader = "ext/html,application/xhtml+xml,application/xml;q=0.9,*/*";
 	String requestPath = getEntityRequestPath(entityId);
-	logger.debug("Retrieving entity record /{} with accept header: ", requestPath, defaultMozillaAcceptHeader);
 	ResultActions resultActions = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath)
         		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
                 .accept(defaultMozillaAcceptHeader));

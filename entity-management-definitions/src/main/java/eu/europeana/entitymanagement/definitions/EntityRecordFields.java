@@ -13,5 +13,6 @@ public class EntityRecordFields {
 
     public static final String ENTITY_SAME_AS = "entity.sameAs";
     public static final String ENTITY_EXACT_MATCH = "entity.exactMatch";
+    public static final String ENTITY_TYPE = "entity.type";
 
 }

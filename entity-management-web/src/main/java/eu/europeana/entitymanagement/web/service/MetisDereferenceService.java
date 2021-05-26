@@ -21,6 +21,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClient.Builder;
 
+import java.time.Duration;
+import java.time.Instant;
+
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.METIS_DEREF_PATH;
 import static eu.europeana.entitymanagement.web.MetisDereferenceUtils.parseMetisResponse;
 
@@ -75,7 +78,8 @@ public class MetisDereferenceService implements InitializingBean {
 
 
     String fetchMetisResponse(String externalId) {
-	logger.debug("De-referencing externalId={} from Metis", externalId);
+    	Instant start= Instant.now();
+		logger.debug("De-referencing externalId={} from Metis", externalId);
 
 	String metisResponseBody = metisWebClient.get()
 		.uri(uriBuilder -> uriBuilder.path(METIS_DEREF_PATH).queryParam("uri", externalId).build())
@@ -88,7 +92,8 @@ public class MetisDereferenceService implements InitializingBean {
 			response -> response.bodyToMono(String.class).map(EuropeanaApiException::new))
 		.bodyToMono(String.class).block();
 
-	logger.debug("Metis dereference response for externalId={} - {} ", externalId, metisResponseBody);
+	long duration = Duration.between(start, Instant.now()).toMillis();
+	logger.debug("Received dereference response for externalId={}. Duration={}ms; response - {} ", externalId, duration, metisResponseBody);
 	return metisResponseBody;
     }
 }
