@@ -1,20 +1,9 @@
 package eu.europeana.entitymanagement.batch;
 
-import static eu.europeana.entitymanagement.batch.BatchUtils.JOB_RETRY_FAILED_ENTITIES;
-import static eu.europeana.entitymanagement.batch.BatchUtils.JOB_UPDATE_ALL_ENTITIES;
-import static eu.europeana.entitymanagement.batch.BatchUtils.JOB_UPDATE_METRICS_SPECIFIC_ENTITIES;
-import static eu.europeana.entitymanagement.batch.BatchUtils.JOB_UPDATE_SPECIFIC_ENTITIES;
-import static eu.europeana.entitymanagement.batch.BatchUtils.STEP_RETRY_FAILED_ENTITIES;
-import static eu.europeana.entitymanagement.batch.BatchUtils.STEP_UPDATE_ENTITY;
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_JSON_MAPPER;
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_STEP_EXECUTOR;
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.SYNC_TASK_EXECUTOR;
-import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_ID;
-import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_MODIFIED;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.morphia.query.experimental.filters.Filters;
+import eu.europeana.entitymanagement.batch.errorhandling.EntitySkipPolicy;
 import eu.europeana.entitymanagement.batch.errorhandling.FailedTaskService;
 import eu.europeana.entitymanagement.batch.errorhandling.FailedTaskUtils;
 import eu.europeana.entitymanagement.batch.listener.EntityUpdateListener;
@@ -26,9 +15,9 @@ import eu.europeana.entitymanagement.batch.reader.FailedTaskDatabaseReader;
 import eu.europeana.entitymanagement.batch.writer.EntityRecordDatabaseWriter;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.exception.EntityMismatchException;
+import eu.europeana.entitymanagement.exception.MetisNotKnownException;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
-import java.util.Arrays;
-import java.util.Date;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.ItemProcessListener;
@@ -49,6 +38,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+import java.util.Date;
+
+import static eu.europeana.entitymanagement.batch.BatchUtils.*;
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.*;
+import static eu.europeana.entitymanagement.definitions.EntityRecordFields.*;
 
 @Component
 public class BatchEntityUpdateConfig {
@@ -83,24 +79,26 @@ public class BatchEntityUpdateConfig {
 
     private final int chunkSize;
 
+    private final int throttleLimit;
+
     //TODO: Too many dependencies. Split up into multiple classes
     @Autowired
     public BatchEntityUpdateConfig(JobBuilderFactory jobBuilderFactory,
-        StepBuilderFactory stepBuilderFactory,
+                                   StepBuilderFactory stepBuilderFactory,
         @Qualifier(SPECIFIC_ITEM_ENTITYRECORD_READER) ItemReader<EntityRecord> specificItemReader,
         @Qualifier(ALL_ITEM_ENTITYRECORD_READER) ItemReader<EntityRecord> allEntityRecordReader,
-        @Qualifier(FAILED_TASK_READER) ItemReader<EntityRecord> failedTaskReader,
-        EntityDereferenceProcessor dereferenceProcessor,
-        EntityUpdateProcessor entityUpdateProcessor,
+                                   @Qualifier(FAILED_TASK_READER) ItemReader<EntityRecord> failedTaskReader,
+                                   EntityDereferenceProcessor dereferenceProcessor,
+                                   EntityUpdateProcessor entityUpdateProcessor,
         EntityMetricsProcessor entityMetricsProcessor,
-        EntityRecordDatabaseWriter dbWriter,
-        EntityRecordService entityRecordService,
-        FailedTaskService failedTaskService,
-        EntityUpdateListener entityUpdateListener,
-        @Qualifier(BEAN_STEP_EXECUTOR) TaskExecutor stepThreadPoolExecutor,
-        @Qualifier(SYNC_TASK_EXECUTOR) TaskExecutor synchronousTaskExecutor,
-        @Qualifier(BEAN_JSON_MAPPER) ObjectMapper mapper,
-        EntityManagementConfiguration emConfig) {
+                                   EntityRecordDatabaseWriter dbWriter,
+                                   EntityRecordService entityRecordService,
+                                   FailedTaskService failedTaskService,
+                                   EntityUpdateListener entityUpdateListener,
+                                   @Qualifier(BEAN_STEP_EXECUTOR) TaskExecutor stepThreadPoolExecutor,
+                                   @Qualifier(SYNC_TASK_EXECUTOR) TaskExecutor synchronousTaskExecutor,
+                                   @Qualifier(BEAN_JSON_MAPPER) ObjectMapper mapper,
+                                   EntityManagementConfiguration emConfig) {
         this.jobBuilderFactory = jobBuilderFactory;
         this.stepBuilderFactory = stepBuilderFactory;
         this.specificItemReader = specificItemReader;
@@ -117,6 +115,7 @@ public class BatchEntityUpdateConfig {
         this.synchronousTaskExecutor = synchronousTaskExecutor;
         this.mapper = mapper;
         this.chunkSize = emConfig.getBatchChunkSize();
+        this.throttleLimit = emConfig.getBatchStepThrottleLimit();
     }
 
     /**
@@ -138,7 +137,9 @@ public class BatchEntityUpdateConfig {
     @StepScope
     private SynchronizedItemStreamReader<EntityRecord> allEntityRecordReader(@Value("#{jobParameters[currentStartTime]}") Date currentStartTime) {
         EntityRecordDatabaseReader reader = new EntityRecordDatabaseReader(entityRecordService, chunkSize,
-                Filters.lte(ENTITY_MODIFIED, currentStartTime));
+                Filters.lte(ENTITY_MODIFIED, currentStartTime),
+                // temp filter during migration. Only fetch records without a consolidated entity
+               Filters.exists(ENTITY_TYPE).not());
 
         return threadSafeReader(reader);
     }
@@ -192,8 +193,13 @@ public class BatchEntityUpdateConfig {
                 (ItemProcessListener<? super EntityRecord, ? super EntityRecord>) entityUpdateListener)
             .reader(singleEntity ? specificItemReader : allEntityRecordReader)
             .processor(compositeUpdateProcessor())
+                .faultTolerant()
+                .skipPolicy(new EntitySkipPolicy())
+                .skip(EntityMismatchException.class)
+                .skip(MetisNotKnownException.class)
             .writer(dbWriter)
             .taskExecutor(singleEntity ? synchronousTaskExecutor : stepThreadPoolExecutor)
+                .throttleLimit(throttleLimit)
             .build();
     }
 
@@ -205,7 +211,12 @@ public class BatchEntityUpdateConfig {
             .writer(dbWriter)
             .listener(
                 (ItemProcessListener<? super EntityRecord, ? super EntityRecord>) entityUpdateListener)
+                .faultTolerant()
+                .skipPolicy(new EntitySkipPolicy())
+                .skip(EntityMismatchException.class)
+                .skip(MetisNotKnownException.class)
             .taskExecutor(stepThreadPoolExecutor)
+                .throttleLimit(throttleLimit)
             .build();
     }
 

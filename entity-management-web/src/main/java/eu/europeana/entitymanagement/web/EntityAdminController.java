@@ -98,11 +98,10 @@ public class EntityAdminController extends BaseRest {
         }
         // camel case the type to match enum Constants
         type = StringUtils.capitalize(type);
-        LOG.debug("Migrating existing entity: {}", entityCreationRequest.getId());
 
         EntityRecord savedEntityRecord = entityRecordService
                 .createEntityFromMigrationRequest(entityCreationRequest, type, identifier);
-        LOG.debug("Created Entity record for {}; entityId={}", entityCreationRequest.getId(), savedEntityRecord.getEntityId());
+        LOG.info("Created Entity record for {}; entityId={}", entityCreationRequest.getId(), savedEntityRecord.getEntityId());
         return generateResponseEntity(EntityProfile.internal.toString(), FormatTypes.jsonld, null, savedEntityRecord, HttpStatus.ACCEPTED);
     }
 

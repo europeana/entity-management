@@ -4,10 +4,15 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import eu.europeana.entitymanagement.batch.processor.EntityUpdateProcessor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest.METHOD;
@@ -31,7 +36,7 @@ import eu.europeana.entitymanagement.web.model.scoring.PageRank;
 
 @Service(AppConfig.BEAN_EM_SCORING_SERVICE)
 public class ScoringService {
-
+	private static final Logger logger = LogManager.getLogger(ScoringService.class);
     SolrClient prSolrClient;
 
     SolrClient searchApiSolrClient;
@@ -201,7 +206,14 @@ public class ScoringService {
 	query.setRows(0);
 
 	try {
+		Instant start = Instant.now();
 	    QueryResponse rsp = getSearchApiSolrClient().query(query, METHOD.POST);
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Retrieved enrichmentCount for entityId={} in {}ms", entityId,
+					Duration.between(start, Instant.now()).toMillis());
+		}
+
 	    return (int) rsp.getResults().getNumFound();
 	} catch (Exception e) {
 	    throw new ScoringComputationException("Unexpected exception occured when retrieving pagerank: " + entityId, e);
@@ -220,8 +232,14 @@ public class ScoringService {
 //	getLogger().trace("query: " + query);
 
 	try {
+		Instant start = Instant.now();
 	    QueryResponse rsp = getPrSolrClient().query(query);
 	    List<PageRank> beans = rsp.getBeans(PageRank.class);
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Retrieved pageRank for entityId={} in {}ms", entity.getEntityId(),
+					Duration.between(start, Instant.now()).toMillis());
+		}
 	    if (beans.isEmpty()) {
 		return null;
 	    } else {

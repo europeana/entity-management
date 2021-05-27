@@ -38,8 +38,10 @@ public class FailedTaskDatabaseReader extends BaseDatabaseReader<EntityRecord> {
     List<? extends EntityRecord> failedRecords = failureService
         .getEntityRecordsForFailures(start, pageSize, failureQueryFilter);
 
-    logger.debug("Retrieved {} failed EntityRecords from database. skip={}, limit={}, entityIds={}", failedRecords.size(), start,
-        pageSize, Arrays.toString(BatchUtils.getEntityIds(failedRecords)));
+    if(logger.isDebugEnabled()) {
+      logger.debug("Retrieved {} failed EntityRecords from database. skip={}, limit={}, entityIds={}", failedRecords.size(), start,
+              pageSize, Arrays.toString(BatchUtils.getEntityIds(failedRecords)));
+    }
     return (Iterator<EntityRecord>) failedRecords.iterator();
   }
 

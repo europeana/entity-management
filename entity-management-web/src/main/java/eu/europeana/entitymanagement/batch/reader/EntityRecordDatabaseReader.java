@@ -40,9 +40,10 @@ public class EntityRecordDatabaseReader extends BaseDatabaseReader<EntityRecord>
     int start = page * pageSize;
     List<? extends EntityRecord> result = entityRecordService
         .findEntitiesWithFilter(start, pageSize, queryFilters);
-
-    logger.debug("Retrieved {} EntityRecords from database. skip={}, limit={}, entityIds={}", result.size(), start,
-        pageSize, Arrays.toString(BatchUtils.getEntityIds(result)));
+    if(logger.isDebugEnabled()) {
+      logger.debug("Retrieved {} EntityRecords from database. skip={}, limit={}, entityIds={}", result.size(), start,
+              pageSize, Arrays.toString(BatchUtils.getEntityIds(result)));
+    }
     return (Iterator<EntityRecord>) result.iterator();
   }
 

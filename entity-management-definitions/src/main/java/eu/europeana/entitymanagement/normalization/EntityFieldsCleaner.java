@@ -78,7 +78,9 @@ public class EntityFieldsCleaner {
 	} else if (isMultipleValueStringMap(field)) {
 	    return normalizeMultipleValueMap((Map<String, List<String>>) fieldValue);
 	} else {
-	    logger.debug("normalization not supported for maps of type: {}", field.getGenericType());
+		if(logger.isTraceEnabled()) {
+			logger.trace("normalization not supported for maps of type: {}", field.getGenericType());
+		}
 	    return fieldValue;
 	}
     }

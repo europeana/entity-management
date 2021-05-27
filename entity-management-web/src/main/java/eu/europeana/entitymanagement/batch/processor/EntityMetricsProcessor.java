@@ -9,12 +9,13 @@ import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.web.model.scoring.EntityMetrics;
 import eu.europeana.entitymanagement.web.service.ScoringService;
-import java.util.Date;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
+
+import java.util.Date;
 
 /**
  * Updates Metrics for EntityRecords
@@ -42,7 +43,10 @@ public class EntityMetricsProcessor implements ItemProcessor<EntityRecord, Entit
      *  Solr servers. To prevent Jobs from failing, we make this conditional.
      */
     if(entityManagementConfiguration.shouldComputeMetrics()){
-      logger.debug("Computing ranking metrics for entityId={}", entityRecord.getEntityId());
+      if(logger.isTraceEnabled()) {
+        logger.trace("Computing ranking metrics for entityId={}", entityRecord.getEntityId());
+      }
+
       computeRankingMetrics(entityRecord);
     }
 

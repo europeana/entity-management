@@ -70,6 +70,9 @@ public class EntityManagementConfiguration  {
   @Value("${batch.step.executor.queueSize: 50}")
   private int batchStepExecutorQueueSize;
 
+  @Value("${batch.step.throttleLimit: 10}")
+  private int batchStepThrottleLimit;
+
   @Value("${batch.computeMetrics: false}")
   private boolean batchComputeMetrics;
 
@@ -173,5 +176,9 @@ public class EntityManagementConfiguration  {
 
   public String getEnrichmentsMigrationPassword() {
     return enrichmentsMigrationPassword;
+  }
+
+  public int getBatchStepThrottleLimit() {
+    return batchStepThrottleLimit;
   }
 }
