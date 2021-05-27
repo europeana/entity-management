@@ -31,5 +31,8 @@ public class AppConfigConstants {
     public static final String METIS_DEREF_PATH = "/dereference";
 
     public static final String ENTITY_RECORD_CTX_KEY = "entityRecordCtx";
+
+    public static final String BEAN_EM_SOLR_SERVICE = "emSolrService";
+    public static final String BEAN_EM_SOLR_CONFIG = "emSolrConfig";
 }
 

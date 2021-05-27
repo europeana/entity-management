@@ -115,6 +115,10 @@
 					<groupId>org.mongodb</groupId>
 					<artifactId>mongo-java-driver</artifactId>
 				</exclusion>
+				<exclusion>
+                    <groupId>xml-apis</groupId>
+                    <artifactId>xml-apis</artifactId>
+                </exclusion>
 			</exclusions>
 		</dependency>
 
@@ -145,6 +149,12 @@
 		<dependency>
 			<groupId>eu.europeana.api</groupId>
 			<artifactId>entity-management-enrichment</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>eu.europeana.api</groupId>
+			<artifactId>entity-management-solr</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 

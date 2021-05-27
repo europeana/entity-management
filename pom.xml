@@ -8,7 +8,8 @@
         <module>entity-management-mongo</module>
         <module>entity-management-batch</module>
       <module>entity-management-enrichment</module>
-    </modules>
+    <module>entity-management-solr</module>
+  </modules>
 
     <parent>
         <groupId>eu.europeana</groupId>
@@ -60,6 +61,7 @@
         <version.log4j>2.13.3</version.log4j>
         <metis.version>4-SNAPSHOT</metis.version>
         <version.javax.validation>2.0.1.Final</version.javax.validation>
+        <version.solrj>7.7.2</version.solrj>
     </properties>
 
     <dependencyManagement>

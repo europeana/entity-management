@@ -68,7 +68,7 @@ public class Agent extends Entity {
 	}
 
 	@JsonGetter(WebEntityFields.BEGIN)
-	public List<String> getBeginArray() {
+	public List<String> getBegin() {
 		return begin;
 	}
 
@@ -78,7 +78,7 @@ public class Agent extends Entity {
 	}
 
 	@JsonGetter(END)
-	public List<String> getEndArray() {
+	public List<String> getEnd() {
 		return end;
 	}
 

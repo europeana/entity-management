@@ -36,6 +36,7 @@ import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.exception.EtagMismatchException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
+import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
@@ -55,6 +56,8 @@ public class EMController extends BaseRest {
   private final DataSources datasources;
   private final BatchService batchService;
   private final EntityManagementConfiguration emConfig;
+  private final SolrService emSolrService;
+
 
   private static final String EXTERNAL_ID_REMOVED_MSG = "Entity id '%s' already exists as '%s', which has been removed";
 
@@ -62,12 +65,14 @@ public class EMController extends BaseRest {
 	public EMController(EntityRecordService entityRecordService,
 			MetisDereferenceService dereferenceService, DataSources datasources,
 			BatchService batchService,
-			EntityManagementConfiguration emConfig) {
+			EntityManagementConfiguration emConfig,
+			SolrService emSolrService) {
 		this.entityRecordService = entityRecordService;
 		this.dereferenceService = dereferenceService;
 		this.datasources = datasources;
 		this.batchService = batchService;
 		this.emConfig = emConfig;
+		this.emSolrService = emSolrService;
 	}
 
 	@ApiOperation(value = "Disable an entity", nickname = "disableEntity", response = java.lang.Void.class)
@@ -262,6 +267,9 @@ public class EMController extends BaseRest {
 
 			logger.debug("Created Entity record for {}; entityId={}", entityCreationRequest.getId(), savedEntityRecord.getEntityId());
 
+			logger.debug("Saving Entity record for: {} to Solr.", entityCreationRequest.getId());
+			emSolrService.storeEntity(savedEntityRecord.getEntity(), true);
+			
 			return launchTaskAndRetrieveEntity(savedEntityRecord.getEntity().getType(),
 					getDatabaseIdentifier(savedEntityRecord.getEntityId()), savedEntityRecord,
 					EntityProfile.internal.toString());
