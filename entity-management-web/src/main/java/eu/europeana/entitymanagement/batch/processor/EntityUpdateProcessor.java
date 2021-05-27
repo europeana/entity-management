@@ -47,9 +47,9 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
 
     private void validateConstraints(EntityRecord entityRecord)  {
         Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entityRecord.getEntity());
-        if (!violations.isEmpty() && logger.isDebugEnabled()) {
+        if (!violations.isEmpty() && logger.isTraceEnabled()) {
             //TODO: throw exception here when the implementation is stable and correct
-            logger.debug("The record with the following id has constraint validation errors: " + entityRecord.getEntityId());
+            logger.trace("The record with the following id has constraint validation errors: " + entityRecord.getEntityId());
         }
     }
 }

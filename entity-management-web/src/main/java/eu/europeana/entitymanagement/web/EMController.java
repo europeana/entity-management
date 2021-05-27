@@ -103,7 +103,7 @@ public class EMController extends BaseRest {
 		if (!entityRecord.isDisabled()) {
 			return createResponse(profile, type, identifier, FormatTypes.jsonld, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
 		}
-		logger.debug("Re-enabling entityId={}", entityRecord.getEntityId());
+		logger.info("Re-enabling entityId={}", entityRecord.getEntityId());
 		entityRecordService.enableEntityRecord(entityRecord);
 		return createResponse(profile, type, identifier, FormatTypes.jsonld, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
 	}
