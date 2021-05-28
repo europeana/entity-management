@@ -1,13 +1,12 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import javax.xml.bind.annotation.XmlRootElement;;
+import eu.europeana.entitymanagement.definitions.model.Entity;;
 
 @XmlRootElement(name = XmlConstants.XML_ORE_AGGREGATION)
 @JsonPropertyOrder({XmlConstants.XML_CREATED, XmlConstants.XML_MODIFIED, XmlConstants.XML_AGGREGATES})

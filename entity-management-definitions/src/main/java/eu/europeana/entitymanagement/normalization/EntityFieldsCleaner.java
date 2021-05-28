@@ -34,8 +34,7 @@ public class EntityFieldsCleaner {
     @SuppressWarnings("unchecked")
     public void cleanAndNormalize(Entity entity) {
 
-	List<Field> entityFields = new ArrayList<>();
-	EntityUtils.getAllFields(entityFields, entity.getClass());
+	List<Field> entityFields = EntityUtils.getAllFields(entity.getClass());
 
 	try {
 	    for (Field field : entityFields) {
@@ -79,7 +78,9 @@ public class EntityFieldsCleaner {
 	} else if (isMultipleValueStringMap(field)) {
 	    return normalizeMultipleValueMap((Map<String, List<String>>) fieldValue);
 	} else {
-	    logger.debug("normalization not supported for maps of type: {}", field.getGenericType());
+		if(logger.isTraceEnabled()) {
+			logger.trace("normalization not supported for maps of type: {}", field.getGenericType());
+		}
 	    return fieldValue;
 	}
     }

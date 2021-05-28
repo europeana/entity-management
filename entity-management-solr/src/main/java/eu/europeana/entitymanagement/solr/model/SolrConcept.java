@@ -7,8 +7,13 @@ import org.apache.solr.client.solrj.beans.Field;
 
 import eu.europeana.entitymanagement.definitions.model.Concept;
 import eu.europeana.entitymanagement.vocabulary.ConceptSolrFields;
+import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 
 public class SolrConcept extends Concept {
+
+	public SolrConcept() {
+		super();
+	}
 
 	public SolrConcept(Concept concept) {
 		super();
@@ -83,14 +88,14 @@ public class SolrConcept extends Concept {
 	@Override
 	@Field(ConceptSolrFields.CLOSE_MATCH)
 	public void setCloseMatch(List<String> closeMatch) {
-		setCloseMatch(closeMatch);
+		super.setCloseMatch(closeMatch);
 	}
 	
 	@Override
 	@Field(ConceptSolrFields.NOTATION_ALL)
 	public void setNotation(Map<String, List<String>> notation) {
-		Map<String, List<String>>  normalizedNotation = SolrUtils.normalizeStringListMap(
-				ConceptSolrFields.NOTATION, notation);
+		Map<String, List<String>>  normalizedNotation = SolrUtils.normalizeStringListMapByAddingPrefix(
+				ConceptSolrFields.NOTATION + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, notation);
 		super.setNotation(normalizedNotation);
 	}
 	
@@ -103,32 +108,32 @@ public class SolrConcept extends Concept {
 	@Override
 	@Field(ConceptSolrFields.PREF_LABEL_ALL)
 	public void setPrefLabelStringMap(Map<String, String> prefLabel) {
-		Map<String, String> normalizedPrefLabel = SolrUtils.normalizeStringMap(
-				ConceptSolrFields.PREF_LABEL, prefLabel);
+		Map<String, String> normalizedPrefLabel = SolrUtils.normalizeStringMapByAddingPrefix(
+				ConceptSolrFields.PREF_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, prefLabel);
 		super.setPrefLabelStringMap(normalizedPrefLabel);
 	}
 	
 	@Override
 	@Field(ConceptSolrFields.ALT_LABEL_ALL)
 	public void setAltLabel(Map<String, List<String>> altLabel) {
-		Map<String, List<String>> normalizedAltLabel = SolrUtils.normalizeStringListMap(
-				ConceptSolrFields.ALT_LABEL, altLabel);
+		Map<String, List<String>> normalizedAltLabel = SolrUtils.normalizeStringListMapByAddingPrefix(
+				ConceptSolrFields.ALT_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, altLabel);
 		super.setAltLabel(normalizedAltLabel);
 	}
 	
 	@Override
 	@Field(ConceptSolrFields.HIDDEN_LABEL)
 	public void setHiddenLabel(Map<String, List<String>> hiddenLabel) {
-		Map<String, List<String>> normalizedHiddenLabel = SolrUtils.normalizeStringListMap(
-				ConceptSolrFields.HIDDEN_LABEL, hiddenLabel);
+		Map<String, List<String>> normalizedHiddenLabel = SolrUtils.normalizeStringListMapByAddingPrefix(
+				ConceptSolrFields.HIDDEN_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, hiddenLabel);
 		super.setHiddenLabel(normalizedHiddenLabel);
 	}
 	
 	@Override
 	@Field(ConceptSolrFields.NOTE_ALL)
 	public void setNote(Map<String, List<String>> note) {
-		Map<String, List<String>>  normalizedNote = SolrUtils.normalizeStringListMap(
-				ConceptSolrFields.NOTE, note);
+		Map<String, List<String>>  normalizedNote = SolrUtils.normalizeStringListMapByAddingPrefix(
+				ConceptSolrFields.NOTE + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, note);
 		super.setNote(normalizedNote);
 	}
 

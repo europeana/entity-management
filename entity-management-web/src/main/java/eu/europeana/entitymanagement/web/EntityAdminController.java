@@ -8,6 +8,7 @@ import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
@@ -25,6 +26,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Optional;
 
 @RestController
 @Validated
@@ -59,8 +61,14 @@ public class EntityAdminController extends BaseRest {
         if (emConfig.isAuthEnabled()) {
             verifyWriteAccess(Operations.DELETE, request);
         }
-        EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier.toLowerCase());
-        LOG.debug("Deleting permanently entity : {}/{}", type, identifier);
+        String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
+        Optional<EntityRecord> entityRecordOptional = entityRecordService.retrieveByEntityId(entityUri);
+        if (entityRecordOptional.isEmpty()) {
+            throw new EntityNotFoundException(entityUri);
+        }
+        EntityRecord entityRecord = entityRecordOptional.get();
+
+        LOG.info("Permanently deleting entityId={}", entityRecord.getEntityId());
         entityRecordService.delete(entityRecord.getEntityId());
         return ResponseEntity.noContent().build();
     }
@@ -90,11 +98,10 @@ public class EntityAdminController extends BaseRest {
         }
         // camel case the type to match enum Constants
         type = StringUtils.capitalize(type);
-        LOG.debug("Migrating existing entity: {}", entityCreationRequest.getId());
 
         EntityRecord savedEntityRecord = entityRecordService
                 .createEntityFromMigrationRequest(entityCreationRequest, type, identifier);
-        LOG.debug("Created Entity record for {}; entityId={}", entityCreationRequest.getId(), savedEntityRecord.getEntityId());
+        LOG.info("Created Entity record for {}; entityId={}", entityCreationRequest.getId(), savedEntityRecord.getEntityId());
         return generateResponseEntity(EntityProfile.internal.toString(), FormatTypes.jsonld, null, savedEntityRecord, HttpStatus.ACCEPTED);
     }
 

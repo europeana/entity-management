@@ -1,16 +1,35 @@
 package eu.europeana.entitymanagement.web;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.europeana.entitymanagement.AbstractIntegrationTest;
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
-import eu.europeana.entitymanagement.definitions.model.*;
-import eu.europeana.entitymanagement.utils.EntityComparator;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.web.service.EntityObjectFactory;
-import eu.europeana.entitymanagement.web.service.EntityRecordService;
-import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
-import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
-import eu.europeana.entitymanagement.web.xml.model.metis.EnrichmentResultList;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT1_REFERENTIAL_INTEGRITY_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT2_REFERENTIAL_INTEGRITY_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_DA_VINCI_REFERENTIAL_INTEGRITY_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_DA_VINCI_REFERENTIAL_INTEGRTITY_PERFORMED_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_FLORENCE_REFERENTIAL_INTEGRTITY;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_SALAI_REFERENTIAL_INTEGRTITY;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_ENGINEERING_REFERENTIAL_INTEGRTITY;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_AMBOISE_REFERENTIAL_INTEGRTITY;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_FLORENCE_REFERENTIAL_INTEGRTITY;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_FRANCE_REFERENTIAL_INTEGRTITY;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_REFERENTIAL_INTEGRITY_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_SFORZA_CASTLE_REFERENTIAL_INTEGRTITY;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_15_REFERENTIAL_INTEGRTITY;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_16_REFERENTIAL_INTEGRTITY;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
+import static eu.europeana.entitymanagement.web.BaseMvcTestUtils.CONCEPT_BATHTUB;
+import static eu.europeana.entitymanagement.web.BaseMvcTestUtils.CONCEPT_CONSOLIDATED_BATHTUB;
+import static eu.europeana.entitymanagement.web.BaseMvcTestUtils.CONCEPT_DATA_RECONCELIATION_XML;
+import static eu.europeana.entitymanagement.web.BaseMvcTestUtils.CONCEPT_METIS_BATHTUB;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import java.io.InputStream;
+import java.util.List;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,17 +37,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import java.io.InputStream;
-import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_JSON;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.*;
-import static eu.europeana.entitymanagement.web.BaseMvcTestUtils.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import eu.europeana.entitymanagement.AbstractIntegrationTest;
+import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.definitions.model.Agent;
+import eu.europeana.entitymanagement.definitions.model.Aggregation;
+import eu.europeana.entitymanagement.definitions.model.Concept;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.EntityProxy;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.model.Place;
+import eu.europeana.entitymanagement.utils.EntityComparator;
+import eu.europeana.entitymanagement.utils.EntityObjectFactory;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.web.service.EntityRecordService;
+import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
+import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
+import eu.europeana.entitymanagement.web.xml.model.metis.EnrichmentResultList;
 
 @SpringBootTest
 public class EntityRecordServiceIT extends AbstractIntegrationTest{

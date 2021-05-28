@@ -1,16 +1,35 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.*;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_DC;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_EDM;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_FOAF;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_RDF;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_VCARD;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ACRONYM;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ADDRESS;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_COUNTRY;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_DESCRIPTION;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_EUROPEANA_ROLE;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_GEOGRAPHIC_LEVEL;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_HOMEPAGE;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IDENTIFIER;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_LOGO;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_MBOX;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ORGANIZATION;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ORGANIZATION_DOMAIN;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PHONE;
 
-import eu.europeana.entitymanagement.definitions.model.Organization;
-import eu.europeana.entitymanagement.exception.EntityCreationException;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
+import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @XmlRootElement(namespace = NAMESPACE_EDM, name = XML_ORGANIZATION)
 @XmlAccessorType(XmlAccessType.FIELD)

@@ -7,12 +7,17 @@ import org.apache.solr.client.solrj.beans.Field;
 
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.vocabulary.AgentSolrFields;
+import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 
 /*
  * TODO:see how to save the referencedWebResource and isAggregatedBy fields for all entities
  */
 public class SolrAgent extends Agent {
 	
+	public SolrAgent() {
+		super();
+	}
+
 	public SolrAgent(Agent agent) {
 		super();
 		this.setType(agent.getType());
@@ -103,32 +108,32 @@ public class SolrAgent extends Agent {
 	@Override
 	@Field(AgentSolrFields.PREF_LABEL_ALL)
 	public void setPrefLabelStringMap(Map<String, String> prefLabel) {
-		Map<String, String> normalizedPrefLabel = SolrUtils.normalizeStringMap(
-				AgentSolrFields.PREF_LABEL, prefLabel);
+		Map<String, String> normalizedPrefLabel = SolrUtils.normalizeStringMapByAddingPrefix(
+				AgentSolrFields.PREF_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, prefLabel);
 		super.setPrefLabelStringMap(normalizedPrefLabel);
 	}
 
 	@Override
 	@Field(AgentSolrFields.ALT_LABEL_ALL)
 	public void setAltLabel(Map<String, List<String>> altLabel) {
-		Map<String, List<String>> normalizedAltLabel = SolrUtils.normalizeStringListMap(
-				AgentSolrFields.ALT_LABEL, altLabel);
+		Map<String, List<String>> normalizedAltLabel = SolrUtils.normalizeStringListMapByAddingPrefix(
+				AgentSolrFields.ALT_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, altLabel);
 		super.setAltLabel(normalizedAltLabel);
 	}
 
 	@Override
 	@Field(AgentSolrFields.HIDDEN_LABEL)
 	public void setHiddenLabel(Map<String, List<String>> hiddenLabel) {
-		Map<String, List<String>> normalizedHiddenLabel = SolrUtils.normalizeStringListMap(
-				AgentSolrFields.HIDDEN_LABEL, hiddenLabel);
+		Map<String, List<String>> normalizedHiddenLabel = SolrUtils.normalizeStringListMapByAddingPrefix(
+				AgentSolrFields.HIDDEN_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, hiddenLabel);
 		super.setHiddenLabel(normalizedHiddenLabel);
 	}
 
 	@Override
 	@Field(AgentSolrFields.NOTE_ALL)
 	public void setNote(Map<String, List<String>> note) {
-		Map<String, List<String>>  normalizedNote = SolrUtils.normalizeStringListMap(
-				AgentSolrFields.NOTE, note);
+		Map<String, List<String>>  normalizedNote = SolrUtils.normalizeStringListMapByAddingPrefix(
+				AgentSolrFields.NOTE + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, note);
 		super.setNote(normalizedNote);
 	}
 	
@@ -167,40 +172,36 @@ public class SolrAgent extends Agent {
 	@Override
 	@Field(AgentSolrFields.BIOGRAPHICAL_INFORMATION_ALL)
 	public void setBiographicalInformation(Map<String, List<String>> biographicalInformation) {
-		Map<String, List<String>> normalizedBiographicalInformation = SolrUtils.normalizeStringListMap(
-				AgentSolrFields.BIOGRAPHICAL_INFORMATION, biographicalInformation);
+		Map<String, List<String>> normalizedBiographicalInformation = SolrUtils.normalizeStringListMapByAddingPrefix(
+				AgentSolrFields.BIOGRAPHICAL_INFORMATION + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, biographicalInformation);
 		super.setBiographicalInformation(normalizedBiographicalInformation);
 	}
 
 	@Override
 	@Field(AgentSolrFields.DATE_OF_BIRTH_ALL)
 	public void setDateOfBirth(List<String> dateOfBirth) {
-		List<String> normalizedDateOfBirth = SolrUtils.normalizeStringList(
-				AgentSolrFields.DATE_OF_BIRTH_ALL, dateOfBirth);
-		super.setDateOfBirth(normalizedDateOfBirth);
+		super.setDateOfBirth(dateOfBirth);
 	}
 
 	@Override
 	@Field(AgentSolrFields.DATE_OF_DEATH_ALL)
 	public void setDateOfDeath(List<String> dateOfDeath) {
-		List<String> normalizedDateOfDeath = SolrUtils.normalizeStringList(
-				AgentSolrFields.DATE_OF_DEATH_ALL, dateOfDeath);
-		super.setDateOfDeath(normalizedDateOfDeath);
+		super.setDateOfDeath(dateOfDeath);
 	}
 
 	@Override
 	@Field(AgentSolrFields.PLACE_OF_BIRTH_ALL)
 	public void setPlaceOfBirth(Map<String, List<String>> placeOfBirth) {
-		Map<String, List<String>> normalizedPlaceOfBirth = SolrUtils.normalizeStringListMap(
-				AgentSolrFields.PLACE_OF_BIRTH, placeOfBirth);
+		Map<String, List<String>> normalizedPlaceOfBirth = SolrUtils.normalizeStringListMapByAddingPrefix(
+				AgentSolrFields.PLACE_OF_BIRTH + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, placeOfBirth);
 		super.setPlaceOfBirth(normalizedPlaceOfBirth);
 	}
 
 	@Override
 	@Field(AgentSolrFields.PLACE_OF_DEATH_ALL)
 	public void setPlaceOfDeath(Map<String, List<String>> placeOfDeath) {
-		Map<String, List<String>> normalizedPlaceOfDeath = SolrUtils.normalizeStringListMap(
-				AgentSolrFields.PLACE_OF_DEATH, placeOfDeath);
+		Map<String, List<String>> normalizedPlaceOfDeath = SolrUtils.normalizeStringListMapByAddingPrefix(
+				AgentSolrFields.PLACE_OF_DEATH + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, placeOfDeath);
 		super.setPlaceOfDeath(normalizedPlaceOfDeath);
 	}
 
@@ -219,9 +220,7 @@ public class SolrAgent extends Agent {
 	@Override
 	@Field(AgentSolrFields.PROFESSION_OR_OCCUPATION_ALL)
 	public void setProfessionOrOccupation(List<String> professionOrOccupation) {
-		List<String> normalizedProfessionOrOccupation = SolrUtils.normalizeStringList(
-				AgentSolrFields.PROFESSION_OR_OCCUPATION, professionOrOccupation);
-		super.setProfessionOrOccupation(normalizedProfessionOrOccupation);
+		super.setProfessionOrOccupation(professionOrOccupation);
 	}
 
 	/**

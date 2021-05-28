@@ -1,20 +1,22 @@
 package eu.europeana.entitymanagement.serialization;
 
+import java.io.IOException;
+import java.io.Writer;
+import java.util.List;
+
+import javax.xml.stream.XMLStreamWriter;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+
 import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.util.List;
-import javax.xml.stream.XMLStreamWriter;
 
 public class SerializationUtils {
 

@@ -7,9 +7,14 @@ import org.apache.solr.client.solrj.beans.Field;
 
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.vocabulary.ConceptSolrFields;
+import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields;
 
 public class SolrOrganization extends Organization {
+
+	public SolrOrganization() {
+		super();
+	}
 
 	public SolrOrganization(Organization organization) {
 		super();
@@ -49,8 +54,8 @@ public class SolrOrganization extends Organization {
 	@Override
 	@Field(OrganizationSolrFields.DC_DESCRIPTION_ALL)
 	public void setDescription(Map<String, String> dcDescription) {
-	    Map<String, String> normalizedDescription = SolrUtils.normalizeStringMap(
-		    OrganizationSolrFields.DC_DESCRIPTION, dcDescription);
+	    Map<String, String> normalizedDescription = SolrUtils.normalizeStringMapByAddingPrefix(
+		    OrganizationSolrFields.DC_DESCRIPTION + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, dcDescription);
 	    super.setDescription(normalizedDescription);
 	}
 	
@@ -58,40 +63,40 @@ public class SolrOrganization extends Organization {
 	@Override
 	@Field(OrganizationSolrFields.EDM_ACRONYM_ALL)
 	public void setAcronym(Map<String, List<String>>  acronym) {
-		Map<String, List<String>> normalizedAcronym = SolrUtils.normalizeStringListMap(
-				OrganizationSolrFields.EDM_ACRONYM, acronym);
+		Map<String, List<String>> normalizedAcronym = SolrUtils.normalizeStringListMapByAddingPrefix(
+				OrganizationSolrFields.EDM_ACRONYM + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, acronym);
 		super.setAcronym(normalizedAcronym);
 	}
 
 	@Override
 	@Field(OrganizationSolrFields.PREF_LABEL_ALL)
 	public void setPrefLabelStringMap(Map<String, String> prefLabel) {
-		Map<String, String> normalizedPrefLabel = SolrUtils.normalizeStringMap(
-				OrganizationSolrFields.PREF_LABEL, prefLabel);
+		Map<String, String> normalizedPrefLabel = SolrUtils.normalizeStringMapByAddingPrefix(
+				OrganizationSolrFields.PREF_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, prefLabel);
 		super.setPrefLabelStringMap(normalizedPrefLabel);
 	}
 
 	@Override
 	@Field(OrganizationSolrFields.ALT_LABEL_ALL)
 	public void setAltLabel(Map<String, List<String>> altLabel) {
-		Map<String, List<String>> normalizedAltLabel = SolrUtils.normalizeStringListMap(
-				OrganizationSolrFields.ALT_LABEL, altLabel);
+		Map<String, List<String>> normalizedAltLabel = SolrUtils.normalizeStringListMapByAddingPrefix(
+				OrganizationSolrFields.ALT_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, altLabel);
 		super.setAltLabel(normalizedAltLabel);
 	}
 
 	@Override
 	@Field(OrganizationSolrFields.HIDDEN_LABEL)
 	public void setHiddenLabel(Map<String, List<String>> hiddenLabel) {
-		Map<String, List<String>> normalizedHiddenLabel = SolrUtils.normalizeStringListMap(
-				ConceptSolrFields.HIDDEN_LABEL, hiddenLabel);
+		Map<String, List<String>> normalizedHiddenLabel = SolrUtils.normalizeStringListMapByAddingPrefix(
+				ConceptSolrFields.HIDDEN_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, hiddenLabel);
 		super.setHiddenLabel(normalizedHiddenLabel);
 	}
 	
 	@Override
 	@Field(OrganizationSolrFields.NOTE_ALL)
 	public void setNote(Map<String, List<String>> note) {
-		Map<String, List<String>>  normalizedNote = SolrUtils.normalizeStringListMap(
-				ConceptSolrFields.NOTE, note);
+		Map<String, List<String>>  normalizedNote = SolrUtils.normalizeStringListMapByAddingPrefix(
+				ConceptSolrFields.NOTE + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, note);
 		super.setNote(normalizedNote);
 	}
 	
@@ -134,24 +139,24 @@ public class SolrOrganization extends Organization {
 	@Override
 	@Field(OrganizationSolrFields.GEOGRAPHIC_LEVEL_ALL)
 	public void setGeographicLevel(Map<String, String> geographicLevel) {
-		Map<String, String> normalizedGeographicLevel = SolrUtils.normalizeStringMap(
-				OrganizationSolrFields.GEOGRAPHIC_LEVEL, geographicLevel);
+		Map<String, String> normalizedGeographicLevel = SolrUtils.normalizeStringMapByAddingPrefix(
+				OrganizationSolrFields.GEOGRAPHIC_LEVEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, geographicLevel);
 		super.setGeographicLevelStringMap(normalizedGeographicLevel);		
 	}
 
 	@Override
 	@Field(OrganizationSolrFields.ORGANIZATION_DOMAIN_ALL)
 	public void setOrganizationDomain(Map<String, List<String>> organizationDomain) {
-		Map<String, List<String>> normalizedOrganizationDomain = SolrUtils.normalizeStringListMap(
-				OrganizationSolrFields.ORGANIZATION_DOMAIN, organizationDomain);
+		Map<String, List<String>> normalizedOrganizationDomain = SolrUtils.normalizeStringListMapByAddingPrefix(
+				OrganizationSolrFields.ORGANIZATION_DOMAIN + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, organizationDomain);
 		super.setOrganizationDomain(normalizedOrganizationDomain);		
 	}
 
 	@Override
 	@Field(OrganizationSolrFields.EUROPEANA_ROLE_ALL)
 	public void setEuropeanaRole(Map<String, List<String>> europeanaRole) {
-		Map<String, List<String>> normalizedEuropeanaRole = SolrUtils.normalizeStringListMap(
-				OrganizationSolrFields.EUROPEANA_ROLE, europeanaRole);
+		Map<String, List<String>> normalizedEuropeanaRole = SolrUtils.normalizeStringListMapByAddingPrefix(
+				OrganizationSolrFields.EUROPEANA_ROLE + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, europeanaRole);
 		super.setEuropeanaRole(normalizedEuropeanaRole);
 	}
 

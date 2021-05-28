@@ -2,8 +2,8 @@ package eu.europeana.entitymanagement.web.xml.model;
 
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.*;
 
+import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
 import eu.europeana.entitymanagement.definitions.model.Place;
-import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.ArrayList;
 import java.util.List;

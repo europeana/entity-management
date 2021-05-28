@@ -7,9 +7,14 @@ import org.apache.solr.client.solrj.beans.Field;
 
 import eu.europeana.entitymanagement.definitions.model.Timespan;
 import eu.europeana.entitymanagement.vocabulary.ConceptSolrFields;
+import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import eu.europeana.entitymanagement.vocabulary.TimespanSolrFields;
 
 public class SolrTimespan extends Timespan {
+
+	public SolrTimespan() {
+		super();
+	}
 
 	public SolrTimespan(Timespan timespan) {
 		super();
@@ -52,14 +57,14 @@ public class SolrTimespan extends Timespan {
     @Override
     @Field(TimespanSolrFields.PREF_LABEL_ALL)
     public void setPrefLabelStringMap(Map<String, String> prefLabel) {
-	Map<String, String> normalizedPrefLabel = SolrUtils.normalizeStringMap(ConceptSolrFields.PREF_LABEL, prefLabel);
+	Map<String, String> normalizedPrefLabel = SolrUtils.normalizeStringMapByAddingPrefix(ConceptSolrFields.PREF_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, prefLabel);
 	super.setPrefLabelStringMap(normalizedPrefLabel);
     }
 
     @Override
     @Field(TimespanSolrFields.ALT_LABEL_ALL)
     public void setAltLabel(Map<String, List<String>> altLabel) {
-	Map<String, List<String>> normalizedAltLabel = SolrUtils.normalizeStringListMap(ConceptSolrFields.ALT_LABEL,
+	Map<String, List<String>> normalizedAltLabel = SolrUtils.normalizeStringListMapByAddingPrefix(ConceptSolrFields.ALT_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
 		altLabel);
 	super.setAltLabel(normalizedAltLabel);
     }
@@ -67,7 +72,7 @@ public class SolrTimespan extends Timespan {
     @Override
     @Field(TimespanSolrFields.HIDDEN_LABEL_ALL)
     public void setHiddenLabel(Map<String, List<String>> hiddenLabel) {
-	Map<String, List<String>> normalizedHiddenLabel = SolrUtils.normalizeStringListMap(ConceptSolrFields.HIDDEN_LABEL,
+	Map<String, List<String>> normalizedHiddenLabel = SolrUtils.normalizeStringListMapByAddingPrefix(ConceptSolrFields.HIDDEN_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
 		hiddenLabel);
 	super.setHiddenLabel(normalizedHiddenLabel);
     }
@@ -75,7 +80,7 @@ public class SolrTimespan extends Timespan {
     @Override
     @Field(TimespanSolrFields.NOTE_ALL)
     public void setNote(Map<String, List<String>> note) {
-	Map<String, List<String>> normalizedNote = SolrUtils.normalizeStringListMap(ConceptSolrFields.NOTE, note);
+	Map<String, List<String>> normalizedNote = SolrUtils.normalizeStringListMapByAddingPrefix(ConceptSolrFields.NOTE + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, note);
 	super.setNote(normalizedNote);
     }
 

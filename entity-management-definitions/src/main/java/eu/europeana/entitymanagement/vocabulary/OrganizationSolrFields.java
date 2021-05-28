@@ -5,7 +5,7 @@ package eu.europeana.entitymanagement.vocabulary;
  */
 public interface OrganizationSolrFields extends EntitySolrFields{
 
-	public static final String EXTENSION_ALL = ".*";
+	public static final String EXTENSION_ALL = DYNAMIC_FIELD_SEPARATOR + "*";
 	public static final String DC_DESCRIPTION = "dc_description";
 	public static final String DC_DESCRIPTION_ALL = "dc_description" + EXTENSION_ALL;
 	public static final String EDM_ACRONYM = "edm_acronym";

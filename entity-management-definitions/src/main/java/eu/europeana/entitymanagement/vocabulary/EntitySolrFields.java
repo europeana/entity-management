@@ -2,17 +2,18 @@ package eu.europeana.entitymanagement.vocabulary;
 
 public interface EntitySolrFields {
 
+	public static final String DYNAMIC_FIELD_SEPARATOR = ".";
     public static final String ID = "id";    
     public static final String TYPE = "type";
     public static final String DEPICTION = "foaf_depiction";
 	public static final String NOTE = "skos_note";
-	public static final String NOTE_ALL = NOTE + ".*";
+	public static final String NOTE_ALL = NOTE + DYNAMIC_FIELD_SEPARATOR + "*";
     public static final String PREF_LABEL = "skos_prefLabel";
-    public static final String PREF_LABEL_ALL = PREF_LABEL + ".*";
+    public static final String PREF_LABEL_ALL = PREF_LABEL + DYNAMIC_FIELD_SEPARATOR + "*";
 	public static final String ALT_LABEL = "skos_altLabel";
-	public static final String ALT_LABEL_ALL = ALT_LABEL + ".*";
+	public static final String ALT_LABEL_ALL = ALT_LABEL + DYNAMIC_FIELD_SEPARATOR + "*";
 	public static final String HIDDEN_LABEL = "skos_hiddenLabel";
-	public static final String HIDDEN_LABEL_ALL = HIDDEN_LABEL + ".*";
+	public static final String HIDDEN_LABEL_ALL = HIDDEN_LABEL + DYNAMIC_FIELD_SEPARATOR + "*";
     public static final String SAME_AS = "owl_sameAs";
 	public static final String IDENTIFIER = "dc_identifier";
 	public static final String IS_RELATED_TO = "edm_isRelatedTo";

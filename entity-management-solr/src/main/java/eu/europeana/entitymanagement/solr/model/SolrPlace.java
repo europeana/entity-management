@@ -6,12 +6,17 @@ import java.util.Map;
 import org.apache.solr.client.solrj.beans.Field;
 
 import eu.europeana.entitymanagement.definitions.model.Place;
+import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import eu.europeana.entitymanagement.vocabulary.PlaceSolrFields;
 
 /*
  * TODO:see how to save the wasPresentAt, referencedWebResource, isAggregatedBy, and entityIdentifier fields
  */
 public class SolrPlace extends Place {
+
+	public SolrPlace() {
+		super();
+	}
 
 	public SolrPlace(Place place) {
 		super();
@@ -89,32 +94,32 @@ public class SolrPlace extends Place {
 	@Override
 	@Field(PlaceSolrFields.NOTE_ALL)
 	public void setNote(Map<String, List<String>> note) {
-		Map<String, List<String>>  normalizedNote = SolrUtils.normalizeStringListMap(
-				PlaceSolrFields.NOTE, note);
+		Map<String, List<String>>  normalizedNote = SolrUtils.normalizeStringListMapByAddingPrefix(
+				PlaceSolrFields.NOTE + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, note);
 		super.setNote(normalizedNote);
 	}
 	
 	@Override
 	@Field(PlaceSolrFields.PREF_LABEL_ALL)
 	public void setPrefLabelStringMap(Map<String, String> prefLabel) {
-		Map<String, String> normalizedPrefLabel = SolrUtils.normalizeStringMap(
-				PlaceSolrFields.PREF_LABEL, prefLabel);
+		Map<String, String> normalizedPrefLabel = SolrUtils.normalizeStringMapByAddingPrefix(
+				PlaceSolrFields.PREF_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, prefLabel);
 		super.setPrefLabelStringMap(normalizedPrefLabel);
 	}
 
 	@Override
 	@Field(PlaceSolrFields.ALT_LABEL_ALL)
 	public void setAltLabel(Map<String, List<String>> altLabel) {
-		Map<String, List<String>> normalizedAltLabel = SolrUtils.normalizeStringListMap(
-				PlaceSolrFields.ALT_LABEL, altLabel);
+		Map<String, List<String>> normalizedAltLabel = SolrUtils.normalizeStringListMapByAddingPrefix(
+				PlaceSolrFields.ALT_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, altLabel);
 		super.setAltLabel(normalizedAltLabel);
 	}
 
 	@Override
 	@Field(PlaceSolrFields.HIDDEN_LABEL)
 	public void setHiddenLabel(Map<String, List<String>> hiddenLabel) {
-		Map<String, List<String>> normalizedHiddenLabel = SolrUtils.normalizeStringListMap(
-				PlaceSolrFields.HIDDEN_LABEL, hiddenLabel);
+		Map<String, List<String>> normalizedHiddenLabel = SolrUtils.normalizeStringListMapByAddingPrefix(
+				PlaceSolrFields.HIDDEN_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, hiddenLabel);
 		super.setHiddenLabel(normalizedHiddenLabel);
 	}
 	

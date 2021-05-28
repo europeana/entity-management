@@ -11,7 +11,7 @@ public class BaseMvcTestUtils {
     public static final String BASE_ADMIN_URL = "/management";
 
     public static final String BATHTUB_DEREF = "/content/deref_bathtub.xml";
-    
+        
     public static final String CONCEPT_JSON = "/content/concept.json";
     public static final String AGENT_JSON = "/content/agent.json";
     public static final String ORGANIZATION_JSON = "/content/organization.json";
@@ -26,8 +26,9 @@ public class BaseMvcTestUtils {
     public static final String TIMESPAN_REGISTER_JSON = "/content/timespan_register.json";  
     
     public static final String CONCEPT_UPDATE_JSON = "/content/concept_update.json";
+    public static final String ORGANIZATION_VALIDATE_FIELDS_JSON = "/content/organization-validation.json";
+    public static final String AGENT_VALIDATE_FIELDS_JSON = "/content/agent-validation.json";
     public static final String CONCEPT_EMPTY_UPDATE__JSON = "/content/concept_update_empty.json";
-
     public static final String CONCEPT_VALIDATE_FIELDS_JSON = "/content/concept-validate-fields.json";
     
     public static final String CONCEPT_XML = "/metis-deref/concept.xml";

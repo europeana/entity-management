@@ -1,12 +1,22 @@
 package eu.europeana.entitymanagement.web;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.europeana.entitymanagement.AbstractIntegrationTest;
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
-import eu.europeana.entitymanagement.definitions.model.Concept;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.web.service.EntityRecordService;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BASE_ADMIN_URL;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BASE_SERVICE_URL;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.getEntityRequestPath;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
+import static org.hamcrest.Matchers.any;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.Optional;
+
+import javax.servlet.ServletContext;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -22,17 +32,14 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import javax.servlet.ServletContext;
-import java.util.Optional;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.*;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BASE_SERVICE_URL;
-import static org.hamcrest.Matchers.*;
-import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import eu.europeana.entitymanagement.AbstractIntegrationTest;
+import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.definitions.model.Concept;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.web.service.EntityRecordService;
 
 /**
  * Integration test for the main Entity Management Admin controller
@@ -90,7 +97,28 @@ public class EntityAdminControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isNoContent());
 
         // check that record is deleted
-        Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveEntityRecordByUri(record.getEntityId());
+        Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveByEntityId(record.getEntityId());
+        Assertions.assertTrue(dbRecordOptional.isEmpty());
+    }
+
+    @Test
+    void permanentDeletionForDeprecatedEntityShouldBeSuccessful() throws Exception {
+        // create disabled entity in DB
+        Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
+        EntityRecord entityRecord = new EntityRecord();
+        entityRecord.setEntity(concept);
+        entityRecord.setEntityId(concept.getEntityId());
+        entityRecord.setDisabled(true);
+        EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
+
+        String requestPath = getEntityRequestPath(record.getEntityId());
+
+        mockMvc.perform(delete(BASE_SERVICE_URL + "/" + requestPath + BASE_ADMIN_URL)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+
+        // check that record is deleted
+        Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveByEntityId(record.getEntityId());
         Assertions.assertTrue(dbRecordOptional.isEmpty());
     }
 
@@ -111,7 +139,7 @@ public class EntityAdminControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
 
         // check that record is present
-        Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveEntityRecordByUri(entityId);
+        Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveByEntityId(entityId);
         Assertions.assertFalse(dbRecordOptional.isEmpty());
 
         entityRecordService.delete(entityId);
@@ -144,11 +172,7 @@ public class EntityAdminControllerIT extends AbstractIntegrationTest {
         entityRecord.setEntity(concept);
         entityRecord.setEntityId(concept.getEntityId());
         EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
-
-        System.out.println(record.getEntityId());
         String requestPath = getEntityRequestPath(record.getEntityId());
-        System.out.println(requestPath);
-
         mockMvc.perform(post(BASE_SERVICE_URL + requestPath + BASE_ADMIN_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))

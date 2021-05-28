@@ -2,8 +2,6 @@ package eu.europeana.entitymanagement.web;
 
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
-import eu.europeana.entitymanagement.exception.EntityCreationException;
-import eu.europeana.entitymanagement.web.service.EntityObjectFactory;
 import eu.europeana.entitymanagement.web.xml.model.RdfBaseWrapper;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import javax.annotation.Resource;
@@ -13,10 +11,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import eu.europeana.entitymanagement.serialization.JsonLdSerializer;
+import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.api.commons.web.controller.BaseRestController;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.BuildInfo;
 import eu.europeana.entitymanagement.config.AppConfig;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.serialization.EntityXmlSerializer;

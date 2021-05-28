@@ -14,6 +14,7 @@ public class BatchUtils {
   // Batch jobs and steps
   public static String JOB_UPDATE_ALL_ENTITIES = "update-all-entities-job";
   public static String JOB_UPDATE_SPECIFIC_ENTITIES = "update-specific-entities-job";
+  public static String JOB_UPDATE_METRICS_SPECIFIC_ENTITIES = "update-metrics-specific-entities-job";
   public static String JOB_RETRY_FAILED_ENTITIES = "retry-failed-entities-job";
   public static String STEP_UPDATE_ENTITY = "update-entity-step";
   public static String STEP_RETRY_FAILED_ENTITIES = "retry-failed-entities-step";

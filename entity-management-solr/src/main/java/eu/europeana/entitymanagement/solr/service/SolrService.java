@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.solr.service;
 
+import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 
@@ -11,6 +12,8 @@ public interface SolrService {
 	 * @param doCommit commit
 	 * @throws SolrServiceException 
 	 */
-	public void storeEntity(Entity solrObject, boolean doCommit) throws SolrServiceException ;	
+	public void storeEntity(Entity solrObject, boolean doCommit) throws SolrServiceException ;
+
+    public Entity searchById(String type, String entityId) throws SolrServiceException, UnsupportedEntityTypeException ;
 
 }

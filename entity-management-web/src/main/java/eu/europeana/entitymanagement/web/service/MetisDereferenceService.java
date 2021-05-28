@@ -9,6 +9,8 @@ import eu.europeana.entitymanagement.exception.HttpBadRequestException;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+
+import eu.europeana.entitymanagement.exception.MetisNotKnownException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
@@ -18,6 +20,9 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClient.Builder;
+
+import java.time.Duration;
+import java.time.Instant;
 
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.METIS_DEREF_PATH;
 import static eu.europeana.entitymanagement.web.MetisDereferenceUtils.parseMetisResponse;
@@ -64,15 +69,20 @@ public class MetisDereferenceService implements InitializingBean {
      */
     public Entity dereferenceEntityById(String id) throws EuropeanaApiException {
 	String metisResponseBody = fetchMetisResponse(id);
-	return parseMetisResponse(unmarshaller.get(), id, metisResponseBody);
+		Entity metisResponse = parseMetisResponse(unmarshaller.get(), id, metisResponseBody);
+		if(metisResponse == null){
+			throw new MetisNotKnownException("Unsuccessful Metis dereferenciation for externalId=" + id);
+		}
+		return metisResponse;
     }
 
 
-    String fetchMetisResponse(String entityId) {
-	logger.debug("De-referencing entityId={} from Metis", entityId);
+    String fetchMetisResponse(String externalId) {
+    	Instant start= Instant.now();
+		logger.info("De-referencing externalId={} from Metis", externalId);
 
 	String metisResponseBody = metisWebClient.get()
-		.uri(uriBuilder -> uriBuilder.path(METIS_DEREF_PATH).queryParam("uri", entityId).build())
+		.uri(uriBuilder -> uriBuilder.path(METIS_DEREF_PATH).queryParam("uri", externalId).build())
 		.accept(MediaType.APPLICATION_XML).retrieve()
 		// return 400 for 4xx responses from Metis
 		.onStatus(HttpStatus::is4xxClientError,
@@ -82,7 +92,8 @@ public class MetisDereferenceService implements InitializingBean {
 			response -> response.bodyToMono(String.class).map(EuropeanaApiException::new))
 		.bodyToMono(String.class).block();
 
-	logger.debug("Metis dereference response for entityId={} - {} ", entityId, metisResponseBody);
+	long duration = Duration.between(start, Instant.now()).toMillis();
+	logger.info("Received dereference response for externalId={}. Duration={}ms", externalId, duration);
 	return metisResponseBody;
     }
 }

@@ -77,6 +77,23 @@
 		<artifactId>entity-management-common</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</dependency> 
+	
+	<dependency>
+    	<groupId>commons-validator</groupId>
+    	<artifactId>commons-validator</artifactId>
+    	<version>${apache.commons.validator.version}</version>
+	</dependency>
+	
+		<dependency>
+			<groupId>eu.europeana.api.commons</groupId>
+			<artifactId>commons-error</artifactId>
+			<version>${api.commons.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>eu.europeana.corelib</groupId>
+			<artifactId>corelib-utils</artifactId>
+			<version>${version.corelib}</version>
+		</dependency>
         
         <!-- https://mvnrepository.com/artifact/org.mongodb/bson -->
 

@@ -85,7 +85,7 @@ public class MongoBatchConfigurer implements BatchConfigurer {
 
 
     public void clearRepository() {
-        logger.debug("Clearing Batch JobRepository...");
+        logger.info("Clearing Batch JobRepository...");
 
         sequenceRepository.drop();
         // casting is safe here, as we know from the constructor what these instances are
@@ -94,6 +94,6 @@ public class MongoBatchConfigurer implements BatchConfigurer {
         ((JobInstanceRepository) mongoJobInstanceDao).drop();
         ((StepExecutionRepository) mongoStepExecutionDao).drop();
 
-        logger.debug("Batch JobRepository cleared");
+        logger.info("Batch JobRepository cleared");
     }
 }

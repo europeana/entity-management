@@ -56,11 +56,8 @@ public class EntityComparator implements Comparator<Entity> {
 
     @SuppressWarnings("unchecked")
     int compareContent(Entity e1, Entity e2) throws IllegalAccessException {
-	List<Field> allObjectFieldsE1 = new ArrayList<>();
-	EntityUtils.getAllFields(allObjectFieldsE1, e1.getClass());
-
-	List<Field> allObjectFieldsE2 = new ArrayList<>();
-	EntityUtils.getAllFields(allObjectFieldsE2, e2.getClass());
+    	
+	List<Field> allObjectFieldsE1 = EntityUtils.getAllFields(e1.getClass());
 
 	for (Field field : allObjectFieldsE1) {
 
