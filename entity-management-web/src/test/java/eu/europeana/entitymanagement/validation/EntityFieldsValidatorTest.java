@@ -1,7 +1,6 @@
 package eu.europeana.entitymanagement.validation;
 
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_VALIDATE_FIELDS_JSON;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_VALIDATE_FIELDS_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_VALIDATE_FIELDS_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
 
@@ -55,7 +54,7 @@ public class EntityFieldsValidatorTest {
         for (ConstraintViolation<Entity> violation : violations) {
             System.out.print(violation.getMessageTemplate());
         }   
-        Assertions.assertTrue(violations.size()==22);
+        Assertions.assertTrue(violations.size()==14);
     }
 
     @Test
@@ -69,20 +68,7 @@ public class EntityFieldsValidatorTest {
         for (ConstraintViolation<Entity> violation : violations) {
             System.out.print(violation.getMessageTemplate());
         }   
-        Assertions.assertTrue(violations.size()==2);
+        Assertions.assertTrue(violations.size()==4);
       
-    }  
-    
-  @Test
-  public void validateEntityFieldsForConcept()
-      throws JsonMappingException, JsonProcessingException, IOException {
-    // read the test data for the Concept entity from the file
-    Concept concept = objectMapper.readValue(loadFile(CONCEPT_VALIDATE_FIELDS_JSON), Concept.class);
-
-    //check the validation of the entity fields
-    Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator()
-        .validate(concept);
-      Assertions.assertEquals(4, violations.size());
-  }
-
+    }
 }

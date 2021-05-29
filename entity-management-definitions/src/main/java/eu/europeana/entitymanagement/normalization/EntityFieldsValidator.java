@@ -62,23 +62,18 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
 				/*
 				 * the validation rules are implemented here
 				 */
-				//for the Text field type, check if it is a string and not a reference, and check the language codes
-				if (FIELD_TYPE_TEXT.equals(EntityFieldsTypes.getFieldType(fieldName)) || FIELD_TYPE_KEYWORD.equals(EntityFieldsTypes.getFieldType(fieldName))) {
-					returnValueLocal = validateTextOrKeywordField(context, field, fieldValue);
+				if (EntityFieldsTypes.isMultilingual(fieldName)) {
+					returnValueLocal = validateMultilingualFieldAndCheckPossibleUri(context, field, fieldValue);
 				}
-				//for the URI field type, check if it is a reference
 				else if (FIELD_TYPE_URI.equals(EntityFieldsTypes.getFieldType(fieldName))) {
 					returnValueLocal = validateURIField(context, field, fieldValue);
-				}	
-				//for the URI field type, check if it is a reference
+				}					
 				else if (FIELD_TYPE_DATE.equals(EntityFieldsTypes.getFieldType(fieldName))) {
 					returnValueLocal = validateDateField(context, field, fieldValue);
 				}
-				//for the URI field type, check if it is a reference
 				else if (FIELD_TYPE_EMAIL.equals(EntityFieldsTypes.getFieldType(fieldName))) {
 					returnValueLocal = validateEmailField(context, field, fieldValue);
 				}
-				//check the leading and trailing spaces from the String fields
 				else if (fieldType.isAssignableFrom(String.class)) {					
 					returnValueLocal = validateStringField(context, field, (String)fieldValue);
 				}	
@@ -171,25 +166,24 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
 
     boolean checkDateFormatISO8601(ConstraintValidatorContext context, Field field, String fieldValue) {
         try {
-                //LocalDate.parse(fieldValue.toString(), DateTimeFormatter.ofPattern(java.time.format.DateTimeFormatter.ISO_DATE.toString()).withResolverStyle(ResolverStyle.STRICT));
-                LocalDate.parse(fieldValue, java.time.format.DateTimeFormatter.ISO_DATE);
-                return true;
+            //LocalDate.parse(fieldValue.toString(), DateTimeFormatter.ofPattern(java.time.format.DateTimeFormatter.ISO_DATE.toString()).withResolverStyle(ResolverStyle.STRICT));
+            LocalDate.parse(fieldValue, java.time.format.DateTimeFormatter.ISO_DATE);
+            return true;
         } catch (DateTimeParseException e) {
-                addConstraint(context, "The entity field: "+field.getName()+" is of type Date and does not comply with the ISO-8601 format: "+fieldValue.toString()+".");
+            addConstraint(context, "The entity field: "+field.getName()+" is of type Date and does not comply with the ISO-8601 format: "+fieldValue.toString()+".");
             return false;
         }
         
-    }
-   
+    }   
     
     @SuppressWarnings("unchecked")
     boolean validateURIField(ConstraintValidatorContext context, Field field, Object fieldValue) {
         boolean returnValue = true;
         if (field.getType().isAssignableFrom(ArrayList.class)) {
-                        returnValue = validateURIListField(context, field, (List<String>)fieldValue);
-                }
+            returnValue = validateURIListField(context, field, (List<String>)fieldValue);
+        }
         else if (field.getType().isAssignableFrom(String.class)){
-                        returnValue = checkURIFormat(context, field, (String)fieldValue, true);
+        	returnValue = checkURIFormat(context, field, (String)fieldValue);
         }
         return returnValue;
     } 
@@ -200,137 +194,88 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
  		    return true;
  		}
 		for (String fieldValueElem : fieldValues) {
-			if (checkURIFormat(context, field, fieldValueElem, true) == false && returnValue == true) {
+			if (checkURIFormat(context, field, fieldValueElem) == false && returnValue == true) {
 				returnValue = false;
 			}
 		}		
         return returnValue;
-    }
-   
+    }    
     
-    
-    boolean checkURIFormat(ConstraintValidatorContext context, Field field, String fieldValue, boolean shouldBeURI) {
-    	if (shouldBeURI && !EntityUtils.isUri(fieldValue)) {
+    boolean checkURIFormat(ConstraintValidatorContext context, Field field, String fieldValue) {
+    	if (EntityUtils.isUri(fieldValue)) {
+    		return true;
+    	}    	
+    	else {
 			addConstraint(context, "The entity field: "+field.getName()+" is of type: "+EntityFieldsTypes.getFieldType(field.getName())+" and it's element: "+fieldValue+" does not have the URI form.");
 			return false;
 		}
-    	else if (!shouldBeURI && EntityUtils.isUri(fieldValue)) {
-			addConstraint(context, "The entity field: "+field.getName()+" is of type: "+EntityFieldsTypes.getFieldType(field.getName())+" and it's element: "+fieldValue+" has the URI form.");
-			return false;
-		}
-    	return true;
-    }
-   
-    boolean validateTextOrKeywordField (ConstraintValidatorContext context, Field field, Object fieldValue) {
-    	boolean returnValue = true;
-    	//non-multilingual fields are not of type Map, but they can be of type String[], List<String>, or String
-    	if (!EntityFieldsTypes.isMultilingual(field.getName())) {
-    		boolean returnValueLocal = validateNonMultilingualTextOrKeywordField(context, field, fieldValue);
-    		if (returnValueLocal == false) {
-    			returnValue = false;
-    		}
-    	}
-    	else {
-    		boolean returnValueLocal = validateMultilingualTextOrKeywordField(context, field, fieldValue);
-    		if (returnValueLocal == false) {
-    			returnValue = false;
-    		}
-    		returnValueLocal = validateLanguageCodes(context, field, fieldValue);  
-    		if (returnValueLocal == false && returnValue == true) {
-    			returnValue = false;
-    		}
-    	}
-    	return returnValue;
-    }
-    
-    boolean validateNonMultilingualTextOrKeywordField(ConstraintValidatorContext context, Field field, Object fieldValue) {
-    	boolean returnValue = true;
-    	//if the field is List
-		if (field.getType().isAssignableFrom(ArrayList.class)) {
-			@SuppressWarnings("unchecked")
-			List<String> fieldValueList = (List<String>)fieldValue;
-			if (fieldValueList.isEmpty()) {
-			    return true;
-			}
-			
-			for (String fieldValueElem : fieldValueList) {
-				boolean returnValueLocal = checkURIFormat(context, field, fieldValueElem, false);
-				if(returnValueLocal==false && returnValue==true) {
-					returnValue = false;
-				}
-			}
-		}
-		//if the field is String
-		else if (field.getType().isAssignableFrom(String.class)) {
-			boolean returnValueLocal = checkURIFormat(context, field, (String)fieldValue, false);
-			if(returnValueLocal==false) {
-				returnValue = false;
-			}
-		}
-		
-		return returnValue;
     }
     
     @SuppressWarnings("unchecked")
-	boolean validateMultilingualTextOrKeywordField(ConstraintValidatorContext context, Field field, Object fieldValue) {
+	boolean validateMultilingualFieldAndCheckPossibleUri(ConstraintValidatorContext context, Field field, Object fieldValue) {
     	boolean returnValue = true;
-    	//per default the multilingual field must be of type Map
+    	//per default the multilingual field must be of type Map and these fields are multilingual
 		Map<Object,Object> fieldValueMap = (Map<Object,Object>)fieldValue;
 		if (fieldValueMap.isEmpty()) { 
 		    return true;
 		}
 		
 		for (Map.Entry<Object, Object> fieldValueMapElem : fieldValueMap.entrySet()) {
-			if (fieldValueMapElem.getValue().getClass().isAssignableFrom(ArrayList.class)) {
-				for (String fieldValueMapElemValue : (List<String>)(fieldValueMapElem.getValue())) {
-					boolean returnValueLocal = checkURIFormat(context, field, fieldValueMapElemValue, false);
+			//only if the key is an empty string, the value is of type URI
+			if(((String)fieldValueMapElem.getKey()).equals("")) {
+				if (fieldValueMapElem.getValue().getClass().isAssignableFrom(ArrayList.class)) {
+					for (String fieldValueMapElemValue : (List<String>)(fieldValueMapElem.getValue())) {
+						boolean returnValueLocal = checkURIFormat(context, field, fieldValueMapElemValue);
+						if(returnValueLocal==false && returnValue==true) {
+							returnValue = false;
+						}
+					}
+				}
+				else if (fieldValueMapElem.getValue().getClass().isAssignableFrom(String.class)){
+					boolean returnValueLocal = checkURIFormat(context, field, (String)fieldValueMapElem.getValue());
 					if(returnValueLocal==false && returnValue==true) {
 						returnValue = false;
 					}
 				}
 			}
-			else if (fieldValueMapElem.getValue().getClass().isAssignableFrom(String.class)){
-				boolean returnValueLocal = checkURIFormat(context, field, (String)fieldValueMapElem.getValue(), false);
-				if(returnValueLocal==false && returnValue==true) {
-					returnValue = false;
-				}
-			}
+			boolean returnValueLocal = validateLanguageCodes(context, field, fieldValueMapElem.getKey().toString());
+			if(returnValueLocal==false && returnValue==true) {
+				returnValue = false;
+			}			
 		}		
 		return returnValue;
     }
     
-    @SuppressWarnings("unchecked")
-	boolean validateLanguageCodes (ConstraintValidatorContext context, Field field, Object fieldValue) {
-    	boolean returnValue = true;
+	boolean validateLanguageCodes (ConstraintValidatorContext context, Field field, String languageCode) {
+    	
+		if (emLanguageCodes==null) return true;
+		if (emLanguageCodes.getLanguages()==null) return true;
+		
+		boolean returnValue = true;
     	boolean foundAlternativeCodes = false;
-    	//per default the multilingual field must be of type Map
-		Map<Object,Object> fieldValueMap = (Map<Object,Object>)fieldValue;
-		for (Map.Entry<Object,Object> fieldValueMapElem : fieldValueMap.entrySet()) {
-			boolean foundKnownCode = false;
-			if (emLanguageCodes==null) break;
-			if (emLanguageCodes.getLanguages()==null) break;
-			for (Language language : emLanguageCodes.getLanguages()) {
-				if (language.getCode().contains(fieldValueMapElem.getKey().toString())) {
-					foundKnownCode = true;
+		boolean foundKnownCode = false;
+
+		for (Language language : emLanguageCodes.getLanguages()) {
+			if (language.getCode().contains(languageCode)) {
+				foundKnownCode = true;
+				break;
+			}
+			if (language.getAlternativeLanguages()==null) continue;
+			for (Language alternativeLanguage : language.getAlternativeLanguages()) {
+				if (alternativeLanguage.getCode().contains(languageCode)) {
+					if (foundAlternativeCodes == false) foundAlternativeCodes = true;
+					foundKnownCode=true;
 					break;
 				}
-				if (language.getAlternativeLanguages()==null) continue;
-				for (Language alternativeLanguage : language.getAlternativeLanguages()) {
-					if (alternativeLanguage.getCode().contains(fieldValueMapElem.getKey().toString())) {
-						if (foundAlternativeCodes == false) foundAlternativeCodes = true;
-						foundKnownCode=true;
-						break;
-					}
-				}
-				if (foundKnownCode==true) break;
 			}
-			if (foundKnownCode==false) {
-				addConstraint(context, "The entity field: "+field.getName()+" contains the language code: "+fieldValueMapElem.getKey().toString()+" that does not belong to the Europena languge codes.");
-				if (returnValue==true) {
-					returnValue=false;
-				}
-			}			
+			if (foundKnownCode==true) break;
 		}
+		if (foundKnownCode==false) {
+			addConstraint(context, "The entity field: "+field.getName()+" contains the language code: "+languageCode+" that does not belong to the Europena languge codes.");
+			if (returnValue==true) {
+				returnValue=false;
+			}
+		}			
 		return returnValue;		
     }
     
