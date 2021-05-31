@@ -4,7 +4,7 @@ import eu.europeana.entitymanagement.definitions.exceptions.EntityValidationExce
 
 public enum EntityFieldsTypes {
 
-	id(EntityFieldsTypes.FIELD_TYPE_URI,  false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
+    id(EntityFieldsTypes.FIELD_TYPE_URI,  false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
     entityId(EntityFieldsTypes.FIELD_TYPE_URI,  false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
     type(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
     depiction(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
@@ -133,6 +133,15 @@ public enum EntityFieldsTypes {
             throw new EntityValidationException("Unknown field: " + fieldName, e);
         }
         
+    }
+    
+    public static boolean isList(String fieldName) {
+        try {
+            String cardinality = valueOf(fieldName).getFieldCardinality();
+            return FIELD_CARDINALITY_0_INFINITE.equals(cardinality) || FIELD_CARDINALITY_1_INFINITE.equals(cardinality);
+        }catch (IllegalArgumentException e){
+            throw new EntityValidationException("Unknown field: " + fieldName, e);
+        }
     }
     
     boolean getFieldIsmultilingual() {
