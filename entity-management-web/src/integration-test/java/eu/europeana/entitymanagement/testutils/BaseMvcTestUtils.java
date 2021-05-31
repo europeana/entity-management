@@ -21,6 +21,7 @@ public class BaseMvcTestUtils {
     public static final String CONCEPT_REGISTER_JSON = "/content/concept_register.json";
     public static final String AGENT_REGISTER_JSON = "/content/agent_register.json";
     public static final String AGENT_REGISTER_STALIN_JSON = "/content/agent_register_stalin.json";
+    public static final String AGENT_REGISTER_JAN_VERMEER = "/content/agent_register_jan_vermeer.json";
     public static final String ORGANIZATION_REGISTER_JSON = "/content/organization_register.json";
     public static final String PLACE_REGISTER_JSON = "/content/place_register.json";
     public static final String TIMESPAN_REGISTER_JSON = "/content/timespan_register.json";  
@@ -34,6 +35,8 @@ public class BaseMvcTestUtils {
     public static final String CONCEPT_XML = "/metis-deref/concept.xml";
     public static final String AGENT_XML = "/metis-deref/agent.xml";
     public static final String AGENT_STALIN_XML = "/metis-deref/agent_stalin.xml";
+    public static final String AGENT_JAN_VERMEER_XML_VIAF = "/metis-deref/agent_jan_vermeer_viaf.xml";
+    public static final String AGENT_JAN_VERMEER_XML_WIKIDATA = "/metis-deref/agent_jan_vermeer_wikidata.xml";
     public static final String ORGANIZATION_XML = "/metis-deref/organization.xml";
     public static final String PLACE_XML = "/metis-deref/place.xml";
     public static final String TIMESPAN_XML = "/metis-deref/timespan.xml";  

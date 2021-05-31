@@ -93,7 +93,10 @@ public class MetisDereferenceService implements InitializingBean {
 		.bodyToMono(String.class).block();
 
 	long duration = Duration.between(start, Instant.now()).toMillis();
-	logger.info("Received dereference response for externalId={}. Duration={}ms", externalId, duration);
+	logger.info("Received Metis response for externalId={}. Duration={}ms", externalId, duration);
+	if(logger.isDebugEnabled()){
+		logger.debug("Metis response for externalId={}: {}", externalId, metisResponseBody);
+	}
 	return metisResponseBody;
     }
 }
