@@ -4,9 +4,10 @@ import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 
+import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 
-public class EntityValidationException extends Exception {
+public class EntityValidationException extends EuropeanaApiException {
 
     /**
      * 
@@ -34,4 +35,11 @@ public class EntityValidationException extends Exception {
 	}
 	return message.toString();
     }
+    
+    @Override
+    public String getMessage() {
+        //ensure that constraint violations are included in the error message 
+        return toString();
+    }
+    
 }

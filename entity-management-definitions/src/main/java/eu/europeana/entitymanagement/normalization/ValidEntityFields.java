@@ -17,7 +17,7 @@ import javax.validation.Payload;
 @Constraint(validatedBy=EntityFieldsValidator.class)
 public @interface ValidEntityFields {
 	
-	String message() default "The entity fields values are valid.";
+	String message() default "The entity medatada is not valid. See constraint validation list.";
 	Class<?>[] groups() default {};
 	Class<? extends Payload>[] payload() default {};
     

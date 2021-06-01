@@ -9,7 +9,7 @@
 "internal_type":"Agent",
 "isShownBy":
 {
-"id":"wrong-for-testing-http://www.collectiedeventermusea.nl/wwwwopacx/wwwopac.ashx?command=getcontent&server=images&value=Historie%5C3589A.jpg",
+"id":"http://www.collectiedeventermusea.nl/wwwwopacx/wwwopac.ashx?command=getcontent&server=images&value=Historie%5C3589A.jpg",
 "source":"http://data.europeana.eu/item/2021659/3589_a",
 "thumbnail":"https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri=http%3A%2F%2Fwww.collectiedeventermusea.nl%2Fwwwwopacx%2Fwwwopac.ashx%3Fcommand%3Dgetcontent%26server%3Dimages%26value%3DHistorie%255C3589A.jpg&type=IMAGE"
 },
@@ -30,7 +30,12 @@
 "en":["Courtney O. Peebles, a.k.a. \"J.R.\", (born March 4, 1979) is a Christian singer and producer formerly signed to Cross Movement Records. J.R. is also half of the So Hot Productions team along with N.A.B. His debut album was Metamorphosis, released in 2005. He often appears on the hooks of songs by fellow labelmates, such as FLAME and Da' T.R.U.T.H.. He was expected to release his second album, Life By Stereo, in September 2007; however, it was pushed back to December. In 2009, J.R. left Cross Movement Records and went indie to work on a new sound."]
 },
 "dateOfBirth":["1979-03-04"],
-"dateOfDeath":["wrong-for-testing"],
+"dateOfDeath":["wrong-for-testing-1"],
+"placeOfBirth":
+{
+"":["wrong-for-testing-2","wrong-for-testing-3"],
+"en":["Place1"]
+},
 "altLabel":
 {
 "en":["J.R.","Peebles, Courtney O."]
