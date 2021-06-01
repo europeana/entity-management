@@ -15,6 +15,7 @@ import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTyp
 import eu.europeana.entitymanagement.exception.EntityAlreadyExistsException;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
+import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.web.EntityRecordUtils;
 import java.lang.reflect.Field;
 import java.util.*;
@@ -489,7 +490,7 @@ public class EntityRecordService {
      * @throws EntityCreationException
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public void mergeEntity(EntityRecord entityRecord) throws EuropeanaApiException, IllegalAccessException {
+    public void mergeEntity(EntityRecord entityRecord) throws EuropeanaApiException {
 
 	//TODO: consider refactoring of this implemeentation by creating a new class EntityReconciliator
 	/*
@@ -592,12 +593,15 @@ public class EntityRecordService {
 	 *               content overwrites the "secondary"
 	 * @return
 	 * @throws EntityCreationException
+	 * @throws EntityUpdateException 
 	 * @throws IllegalAccessException
 	 */
 	@SuppressWarnings("unchecked")
 	private Entity combineEntities(Entity primary, Entity secondary, List<Field> fieldsToCombine, boolean accumulate)
-			throws EntityCreationException, IllegalAccessException {
+			throws EntityCreationException, EntityUpdateException {
 		Entity consolidatedEntity = EntityObjectFactory.createEntityObject(primary.getType());
+		
+		try {
 
 				/*
 				 * store the preferred label in the secondary entity that is different from the
@@ -651,7 +655,10 @@ public class EntityRecordService {
 
 				mergeSkippedPrefLabels(consolidatedEntity, prefLabelsForAltLabels, fieldsToCombine);
 
-
+		} catch (IllegalAccessException e) {
+		    throw new EntityUpdateException("Metadata consolidation failed to access required properties!", e);
+		    
+		}		
 		return consolidatedEntity;
 	}
 

@@ -1,18 +1,20 @@
 package eu.europeana.entitymanagement.batch.processor;
 
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
-import eu.europeana.entitymanagement.web.service.EntityRecordService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import java.util.Set;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.ValidatorFactory;
+
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ValidatorFactory;
-import java.util.Set;
+import eu.europeana.api.commons.error.EuropeanaApiException;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.exception.ingestion.EntityValidationException;
+import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
+import eu.europeana.entitymanagement.web.service.EntityRecordService;
 
 /**
  * This {@link ItemProcessor} updates Entity metadata.
@@ -24,7 +26,7 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
 
     private final EntityFieldsCleaner emEntityFieldCleaner;
 
-    private static final Logger logger = LogManager.getLogger(EntityUpdateProcessor.class);
+//    private static final Logger logger = LogManager.getLogger(EntityUpdateProcessor.class);
 
     public EntityUpdateProcessor(EntityRecordService entityRecordService,
         ValidatorFactory emValidatorFactory, 
@@ -35,21 +37,20 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
     }
 
     @Override
-    public EntityRecord process(@NonNull EntityRecord entityRecord) throws Exception {
+    public EntityRecord process(@NonNull EntityRecord entityRecord) throws EuropeanaApiException {
         //TODO: Validate entity metadata from Proxy Data Source
         emEntityFieldCleaner.cleanAndNormalize(entityRecord.getExternalProxy().getEntity());
-	      entityRecordService.mergeEntity(entityRecord);
-        validateConstraints(entityRecord);
+	entityRecordService.mergeEntity(entityRecord);
         entityRecordService.performReferentialIntegrity(entityRecord.getEntity());
-
+        validateConstraints(entityRecord.getEntity());
+   
         return entityRecord;
     }
 
-    private void validateConstraints(EntityRecord entityRecord)  {
-        Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entityRecord.getEntity());
-        if (!violations.isEmpty() && logger.isTraceEnabled()) {
-            //TODO: throw exception here when the implementation is stable and correct
-            logger.trace("The record with the following id has constraint validation errors: " + entityRecord.getEntityId());
+    private void validateConstraints(Entity entity) throws EntityValidationException  {
+        Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entity);
+        if (!violations.isEmpty()) {
+            throw new EntityValidationException("The consolidated entity contains invalid data!", violations);
         }
     }
 }
