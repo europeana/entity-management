@@ -196,7 +196,13 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
     boolean checkDateFormatISO8601(ConstraintValidatorContext context, Field field, String fieldValue) {
         try {
             //LocalDate.parse(fieldValue.toString(), DateTimeFormatter.ofPattern(java.time.format.DateTimeFormatter.ISO_DATE.toString()).withResolverStyle(ResolverStyle.STRICT));
-            LocalDate.parse(fieldValue, java.time.format.DateTimeFormatter.ISO_DATE);
+            if(fieldValue.contains("T")) {
+                //ISO Date time format
+                LocalDate.parse(fieldValue, java.time.format.DateTimeFormatter.ISO_DATE_TIME);
+            } else {
+                //ISO Date format
+                LocalDate.parse(fieldValue, java.time.format.DateTimeFormatter.ISO_DATE);
+            }
             return true;
         } catch (DateTimeParseException e) {
             addConstraint(context, "The entity field: "+field.getName()+" is of type Date and does not comply with the ISO-8601 format: "+fieldValue.toString()+".");
