@@ -6,6 +6,7 @@ import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_T
 import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_URI;
 
 import java.lang.reflect.Field;
+import java.net.URI;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -79,8 +80,8 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
 					returnValueLocal = validateEmailField(context, field, fieldValue);
 				}
 				else if (fieldType.isAssignableFrom(String.class)) {
-				        //Text or Keyword
-					returnValueLocal = validateStringField(context, field, (String)fieldValue);
+				        //Text or Keyword, not multilingual
+					returnValueLocal = validateStringValue(context, field, (String)fieldValue, null);
 				}	
 				
 				//update global return value
@@ -98,14 +99,37 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
     
 
 
-    boolean validateStringField(ConstraintValidatorContext context, Field field, String fieldValue) {
+    boolean validateStringValue(ConstraintValidatorContext context, Field field, String fieldValue, String key) {
 	if (!fieldValue.equals(fieldValue.trim())) {
-		addConstraint(context, "The entity field: "+field.getName()+", contains leading and/or trailing spaces: "+fieldValue+".");
+		//must not contain trainling spaces
+	        addConstraint(context, "The entity field: "+field.getName()+", contains leading and/or trailing spaces: "+fieldValue+".");
 		return false;
-	}
-	else {
-		return true;
+	}else{
+	    EntityFieldsTypes fieldType = EntityFieldsTypes.valueOf(field.getName());
+            boolean isUri = EntityUtils.isUri(fieldValue);
+            if(!"".equals(key) && isUri) {
+                //do not allow URIs for other key than empty keys
+                addUriNotAllowedConstraint(context, field, fieldValue, key);
+                return false;
+	    }else if ("".equals(key) && isUri){
+	        //key "", allow URIs only for field type TEXT OR URI
+	        if(EntityFieldsTypes.FIELD_TYPE_TEXT_OR_URI.equals(fieldType.getFieldType())){
+	            return validateURIField(context, field, fieldValue);
+	        }else {
+	            addUriNotAllowedConstraint(context, field, fieldValue, key);
+	            return false;
+	        }
+	    }
+	}    
+	return true;
     }
+
+    void addUriNotAllowedConstraint(ConstraintValidatorContext context, Field field, String fieldValue, String key) {
+        String messageTemplate = "The entity field: "+field.getName()+", must not contain URI: "+fieldValue+".";
+        if(key != null) {
+            messageTemplate += " for key: " + key; 
+        }
+        addConstraint(context, messageTemplate);
     }
     
     @SuppressWarnings("unchecked")
@@ -188,7 +212,7 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
             returnValue = validateURIListField(context, field, (List<String>)fieldValue);
         }
         else if (field.getType().isAssignableFrom(String.class)){
-        	returnValue = checkURIFormat(context, field, (String)fieldValue);
+        	returnValue = validateURIField(context, field, (String)fieldValue);
         }
         return returnValue;
     } 
@@ -199,21 +223,35 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
  		    return true;
  		}
 		for (String fieldValueElem : fieldValues) {
-			if (checkURIFormat(context, field, fieldValueElem) == false && returnValue == true) {
+			if (!validateURIField(context, field, fieldValueElem)) {
 				returnValue = false;
 			}
 		}		
         return returnValue;
     }    
     
-    boolean checkURIFormat(ConstraintValidatorContext context, Field field, String fieldValue) {
+    boolean validateURIField(ConstraintValidatorContext context, Field field, String fieldValue) {
     	if (EntityUtils.isUri(fieldValue)) {
-    		return true;
+    		return validateUriFormat(context, field, fieldValue);
     	}    	
     	else {
-			addConstraint(context, "The entity field: "+field.getName()+" is of type: "+EntityFieldsTypes.getFieldType(field.getName())+" and it's element: "+fieldValue+" does not have the URI form.");
-			return false;
-		}
+    	    addConstraint(context, "The entity field: "+field.getName()+" is of type: "+EntityFieldsTypes.getFieldType(field.getName())+" but it's value: "+fieldValue+" does not have the URI form.");
+    	    return false;
+	}
+    }
+
+    boolean validateUriFormat(ConstraintValidatorContext context, Field field, String fieldValue) {
+        //validate URI Format
+        try {
+            new URI(fieldValue);
+            return true;
+        } catch (Exception e) {
+            addConstraint(context,
+                    "The entity field: " + field.getName() + " is of type: "
+                            + EntityFieldsTypes.getFieldType(field.getName()) + " but the value: " + fieldValue
+                            + " does not have a proper URI form.");
+            return false;
+        }
     }
     
     @SuppressWarnings("unchecked")
@@ -271,9 +309,9 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
 	private boolean validateMultilingualValue(ConstraintValidatorContext context, Field field, String key, String multilingualValue,
             String fieldType) {
 	    if("".equals(key) && FIELD_TYPE_TEXT_OR_URI.equals(fieldType)) {
-	        return checkURIFormat(context, field, multilingualValue);
+	        return validateUriFormat(context, field, multilingualValue);
 	    }else {
-	        return validateStringField(context, field, multilingualValue);
+	        return validateStringValue(context, field, multilingualValue, key);
 	    }
     }
 

@@ -54,7 +54,7 @@ public class EntityFieldsValidatorTest {
             System.out.println(violation.getMessageTemplate());
         }   
         //TODO: remove constraine violation: "The entity fields values are valid."
-        Assertions.assertEquals(17, violations.size());
+        Assertions.assertEquals(18, violations.size());
     }
 
     @Test
