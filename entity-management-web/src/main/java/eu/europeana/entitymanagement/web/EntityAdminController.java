@@ -102,7 +102,7 @@ public class EntityAdminController extends BaseRest {
         EntityRecord savedEntityRecord = entityRecordService
                 .createEntityFromMigrationRequest(entityCreationRequest, type, identifier);
         LOG.info("Created Entity record for {}; entityId={}", entityCreationRequest.getId(), savedEntityRecord.getEntityId());
-        return generateResponseEntity(EntityProfile.internal.toString(), FormatTypes.jsonld, null, savedEntityRecord, HttpStatus.ACCEPTED);
+        return generateResponseEntity(EntityProfile.internal.toString(), FormatTypes.jsonld, null, savedEntityRecord, HttpStatus.ACCEPTED, RequestMethod.POST);
     }
 
     /**

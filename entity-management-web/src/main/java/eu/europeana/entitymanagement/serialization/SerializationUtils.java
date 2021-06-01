@@ -45,7 +45,7 @@ public class SerializationUtils {
       throws IOException {
     ObjectNode result = getExternalJsonNode(mapper, record);
     // Entity isAggregatedBy should be included in external profile
-    result.remove(WebEntityFields.IS_AGGREGATED_BY);
+    //result.remove(WebEntityFields.IS_AGGREGATED_BY);
     mapper.writeValue(writer, result);
   }
 

@@ -24,6 +24,7 @@ import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.web.service.AuthorizationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.Date;
 
@@ -103,7 +104,7 @@ public abstract class BaseRest extends BaseRestController {
      * @throws EntityCreationException
      */
     public ResponseEntity<String> generateResponseEntity(String profile, FormatTypes outFormat,
-                                                         String contentType, EntityRecord entityRecord, HttpStatus status)
+                                                         String contentType, EntityRecord entityRecord, HttpStatus status, RequestMethod requestMethod)
             throws EntityCreationException {
 
         Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
@@ -112,10 +113,10 @@ public abstract class BaseRest extends BaseRestController {
                 isAggregatedBy.getModified().getTime() :
                 0L;
 
-        String etag = computeEtag(timestamp, outFormat.name(), getApiVersion());
+        String etag = computeEtag(timestamp, outFormat.name(), getApiVersion(), profile);
 
         org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
-        headers.add(HttpHeaders.ALLOW, HttpHeaders.ALLOW_GET);
+        headers.add(HttpHeaders.ALLOW, requestMethod.toString());
         if (!outFormat.equals(FormatTypes.schema)) {
             headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
             headers.add(HttpHeaders.LINK, HttpHeaders.VALUE_LDP_RESOURCE);
@@ -132,8 +133,8 @@ public abstract class BaseRest extends BaseRestController {
      * Generates a unique hex string based on the input params
      * TODO: move logic to {@link eu.europeana.api.commons.web.controller.BaseRestController#generateETag(Date, String, String)}
      */
-    public String computeEtag(long timestamp, String format, String version){
-        return DigestUtils.md5Hex(String.format("%s:%s:%s", timestamp, format, version));
+    public String computeEtag(long timestamp, String format, String version, String profile){
+        return DigestUtils.md5Hex(String.format("%s:%s:%s:%s", timestamp, format, version, profile));
     }
 
 

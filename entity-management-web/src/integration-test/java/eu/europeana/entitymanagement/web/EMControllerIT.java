@@ -417,7 +417,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
         
         logger.debug("Retrieve entity resonse: {}", resultActions.andReturn().getResponse().getContentAsString());
         resultActions.andExpect(status().isOk())
-        	.andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_XML));
+        	.andExpect(MockMvcResultMatchers.content().contentType(
+        			eu.europeana.api.commons.web.http.HttpHeaders.CONTENT_TYPE_JSONLD_UTF8));
  //TODO: enable when the XML Serialization is fixed
 //                .andExpect(xpath("//Concept/id", namespaces).string(entityId))
 //                .andExpect(xpath("//Concept/type", namespaces).string(EntityTypes.Concept.name()));
@@ -443,7 +444,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
         namespaces.put("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
         
         resultActions.andExpect(status().isOk())
-        	.andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+        	.andExpect(MockMvcResultMatchers.content().contentType(eu.europeana.api.commons.web.http.HttpHeaders.CONTENT_TYPE_JSONLD_UTF8))
         	.andExpect(jsonPath("$.id", is(entityId)))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Concept.name())));
     }
