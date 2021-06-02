@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.exception;
 
 import eu.europeana.api.commons.error.EuropeanaApiException;
+import org.springframework.http.HttpStatus;
 
 /**
  * Exception thrown when trying to combine metadata of different entity types
@@ -13,7 +14,7 @@ public class EntityMismatchException extends EuropeanaApiException {
 
     @Override
     public boolean doLog() {
-        return false;
+        return true;
     }
 
     @Override
@@ -23,6 +24,11 @@ public class EntityMismatchException extends EuropeanaApiException {
 
     @Override
     public boolean doExposeMessage() {
-        return false;
+        return true;
+    }
+
+    @Override
+    public HttpStatus getResponseStatus() {
+        return HttpStatus.BAD_REQUEST;
     }
 }
