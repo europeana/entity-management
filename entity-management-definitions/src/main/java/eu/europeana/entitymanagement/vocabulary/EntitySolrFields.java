@@ -18,14 +18,7 @@ public interface EntitySolrFields {
 	public static final String IDENTIFIER = "dc_identifier";
 	public static final String IS_RELATED_TO = "edm_isRelatedTo";
 	public static final String HAS_PART = "dcterms_hasPart";
-	public static final String IS_PART_OF = "dcterms_isPartOf";
-
-	
-	
-	
-	
-	
-    
+	public static final String IS_PART_OF = "dcterms_isPartOf";    
     
     public static final String WIKIPEDIA_CLICKS = "wikipedia_clicks";
     public static final String EUROPEANA_DOC_COUNT = "europeana_doc_count";
@@ -42,5 +35,5 @@ public interface EntitySolrFields {
     public static final String IS_SHOWN_BY_SOURCE = "isShownBy.source";
     public static final String IS_SHOWN_BY_THUMBNAIL = "isShownBy.thumbnail";
 
-
+    public static final String PAYLOAD = "payload";
 }

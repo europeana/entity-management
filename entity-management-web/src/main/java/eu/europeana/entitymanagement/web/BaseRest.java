@@ -75,7 +75,7 @@ public abstract class BaseRest extends BaseRestController {
      * @return entity in jsonLd format
      * @throws EntityManagementRuntimeException 
      */
-    protected String serialize(EntityRecord entityRecord, FormatTypes format, String profile)
+    public String serialize(EntityRecord entityRecord, FormatTypes format, String profile)
         throws EntityManagementRuntimeException, EntityCreationException {
 
 	String responseBody = null;

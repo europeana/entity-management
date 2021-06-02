@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.definitions.model;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,28 @@ public class Organization extends Entity {
 	public Organization() {
 		super();
 		// TODO Auto-generated constructor stub
+	}
+
+	public Organization(Organization copy) {
+		super(copy);
+		if(copy.getDescription()!=null) this.description = new HashMap<>(copy.getDescription());
+		if(copy.getAcronym()!=null) this.acronym = new HashMap<>(copy.getAcronym());
+	    this.logo = copy.getLogo();
+		this.homepage = copy.getHomepage();
+		if(copy.getPhone()!=null) this.phone = new ArrayList<>(copy.getPhone());
+		if(copy.getMbox()!=null) this.mbox = new ArrayList<>(copy.getMbox());
+		if(copy.getEuropeanaRole()!=null) this.europeanaRole = new HashMap<>(copy.getEuropeanaRole());
+		if(copy.getOrganizationDomain()!=null) this.organizationDomain = new HashMap<>(copy.getOrganizationDomain());
+		if(copy.getGeographicLevel()!=null) this.geographicLevel = new HashMap<>(copy.getGeographicLevel());
+		this.country = copy.getCountry();
+		this.hasAddress = copy.getHasAddress();
+		this.streetAddress = copy.getStreetAddress();
+		this.locality = copy.getLocality();
+		this.region = copy.getRegion();
+		this.postalCode = copy.getPostalCode();
+		this.countryName = copy.getCountryName();
+		this.postBox = copy.getPostBox();
+		this.hasGeo = copy.getHasGeo();
 	}
 
 	private Map<String, String> description;

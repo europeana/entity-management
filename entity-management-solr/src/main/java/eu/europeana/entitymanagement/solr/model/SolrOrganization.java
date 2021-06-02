@@ -6,12 +6,15 @@ import java.util.Map;
 import org.apache.solr.client.solrj.beans.Field;
 
 import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.vocabulary.AgentSolrFields;
 import eu.europeana.entitymanagement.vocabulary.ConceptSolrFields;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields;
 
 public class SolrOrganization extends Organization {
 
+	private String payload;
+	
 	public SolrOrganization() {
 		super();
 	}
@@ -251,4 +254,12 @@ public class SolrOrganization extends Organization {
 		super.setHasGeo(hasGeo);
 	}
 
+	public String getPayload() {
+		return payload;
+	}
+
+	@Field(AgentSolrFields.PAYLOAD)
+	public void setPayload(String payload) {
+		this.payload = payload;
+	}
 }

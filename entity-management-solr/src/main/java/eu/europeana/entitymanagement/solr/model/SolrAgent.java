@@ -231,5 +231,11 @@ public class SolrAgent extends Agent {
 	public void setDate(List<String> date) {
 		super.setDate(date);
 	}
+
+	@Override
+	@Field(AgentSolrFields.PAYLOAD)
+	public void setPayload(String payload) {
+		this.payload = payload;
+	}
 	
 }

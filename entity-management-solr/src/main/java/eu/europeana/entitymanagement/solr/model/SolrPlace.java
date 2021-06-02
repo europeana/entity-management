@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.solr.client.solrj.beans.Field;
 
 import eu.europeana.entitymanagement.definitions.model.Place;
+import eu.europeana.entitymanagement.vocabulary.AgentSolrFields;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import eu.europeana.entitymanagement.vocabulary.PlaceSolrFields;
 
@@ -13,6 +14,8 @@ import eu.europeana.entitymanagement.vocabulary.PlaceSolrFields;
  * TODO:see how to save the wasPresentAt, referencedWebResource, isAggregatedBy, and entityIdentifier fields
  */
 public class SolrPlace extends Place {
+	
+	private String payload;
 
 	public SolrPlace() {
 		super();
@@ -154,4 +157,12 @@ public class SolrPlace extends Place {
 		super.setDepiction(depiction);
 	}
 	
+	public String getPayload() {
+		return payload;
+	}
+
+	@Field(AgentSolrFields.PAYLOAD)
+	public void setPayload(String payload) {
+		this.payload = payload;
+	}
 }

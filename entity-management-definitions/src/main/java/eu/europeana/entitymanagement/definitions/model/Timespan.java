@@ -1,8 +1,22 @@
 package eu.europeana.entitymanagement.definitions.model;
 
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ALT_LABEL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BEGIN;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DEPICTION;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.END;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_PART;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_NEXT_IN_SEQUENCE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_PART_OF;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_SHOWN_BY;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NOTE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +34,14 @@ import eu.europeana.entitymanagement.vocabulary.XmlFields;
     IS_PART_OF, IS_NEXT_IN_SEQUENCE, SAME_AS})
 public class Timespan extends Entity {
 
-    public Timespan() {
+    public Timespan(Timespan copy) {
+		super(copy);
+		if(copy.getIsNextInSequence()!=null) this.isNextInSequence = new ArrayList<>(copy.getIsNextInSequence());
+		this.begin = copy.getBeginString();
+		this.end = copy.getEndString();
+	}
+
+	public Timespan() {
         super();
         // TODO Auto-generated constructor stub
     }

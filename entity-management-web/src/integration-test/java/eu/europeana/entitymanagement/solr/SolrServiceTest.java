@@ -30,7 +30,9 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.definitions.model.Timespan;
+import eu.europeana.entitymanagement.serialization.JsonLdSerializer;
 import eu.europeana.entitymanagement.solr.service.SolrService;
+import eu.europeana.entitymanagement.web.EMController;
 
 /**
  * JUnit test for testing the EMControllerTest class
@@ -45,14 +47,12 @@ public class SolrServiceTest {
     @Qualifier(AppConfigConstants.BEAN_JSON_MAPPER)
     @Autowired
     private ObjectMapper objectMapper;
+    
+    @Autowired
+    JsonLdSerializer emJsonldSerializer;
 
     @Test
     public void storeEntitiesInSolr() throws Exception {
-    	Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
-    	emSolrService.storeEntity(concept, true);
-    	Entity storedConcept = emSolrService.searchById(concept.getType(), concept.getEntityId());
-    	Assertions.assertNotNull(storedConcept);
-    	Assertions.assertEquals(concept.getEntityId(), storedConcept.getEntityId());
     	
     	Agent agent = objectMapper.readValue(loadFile(AGENT_JSON), Agent.class);
     	emSolrService.storeEntity(agent, true);
@@ -65,12 +65,6 @@ public class SolrServiceTest {
     	Entity storedOrganization = emSolrService.searchById(organization.getType(), organization.getEntityId());
     	Assertions.assertNotNull(storedOrganization);
     	Assertions.assertEquals(organization.getEntityId(), storedOrganization.getEntityId());
-
-    	Place place = objectMapper.readValue(loadFile(PLACE_JSON), Place.class);
-    	emSolrService.storeEntity(place, true);
-    	Entity storedPlace = emSolrService.searchById(place.getType(), place.getEntityId());
-    	Assertions.assertNotNull(storedPlace);
-    	Assertions.assertEquals(place.getEntityId(), storedPlace.getEntityId());
 
     	Timespan timespan = objectMapper.readValue(loadFile(TIMESPAN_JSON), Timespan.class);
     	emSolrService.storeEntity(timespan, true);

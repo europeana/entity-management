@@ -6,11 +6,14 @@ import java.util.Map;
 import org.apache.solr.client.solrj.beans.Field;
 
 import eu.europeana.entitymanagement.definitions.model.Concept;
+import eu.europeana.entitymanagement.vocabulary.AgentSolrFields;
 import eu.europeana.entitymanagement.vocabulary.ConceptSolrFields;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 
 public class SolrConcept extends Concept {
 
+	private String payload;
+	
 	public SolrConcept() {
 		super();
 	}
@@ -185,4 +188,12 @@ public class SolrConcept extends Concept {
 		super.setIsPartOfArray(isPartOf);
 	}
 
+	public String getPayload() {
+		return payload;
+	}
+
+	@Field(AgentSolrFields.PAYLOAD)
+	public void setPayload(String payload) {
+		this.payload = payload;
+	}
 }

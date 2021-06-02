@@ -6,11 +6,14 @@ import java.util.Map;
 import org.apache.solr.client.solrj.beans.Field;
 
 import eu.europeana.entitymanagement.definitions.model.Timespan;
+import eu.europeana.entitymanagement.vocabulary.AgentSolrFields;
 import eu.europeana.entitymanagement.vocabulary.ConceptSolrFields;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import eu.europeana.entitymanagement.vocabulary.TimespanSolrFields;
 
 public class SolrTimespan extends Timespan {
+	
+	private String payload;
 
 	public SolrTimespan() {
 		super();
@@ -132,4 +135,12 @@ public class SolrTimespan extends Timespan {
         super.setEndString(end);
     }
 
+	public String getPayload() {
+		return payload;
+	}
+
+	@Field(AgentSolrFields.PAYLOAD)
+	public void setPayload(String payload) {
+		this.payload = payload;
+	}
 }
