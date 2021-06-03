@@ -17,9 +17,6 @@ import org.springframework.context.annotation.PropertySources;
 public class EntityManagementConfiguration  {
 
     private static final Logger LOG = LogManager.getLogger(EntityManagementConfiguration.class);
-
-    @Value("${accept.header.default}")
-    private String acceptHeaderDefault;
     
     @Value("${datasources.config}")
     private String datasourcesXMLConfig;
@@ -185,8 +182,4 @@ public class EntityManagementConfiguration  {
     return batchStepThrottleLimit;
   }
 
-
-public String getAcceptHeaderDefault() {
-	return acceptHeaderDefault;
-}
 }

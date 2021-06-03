@@ -103,8 +103,7 @@ public abstract class BaseRest extends BaseRestController {
      * @return
      * @throws EntityCreationException
      */
-    public ResponseEntity<String> generateResponseEntity(String profile, FormatTypes outFormat,
-                                                         String contentType, EntityRecord entityRecord, HttpStatus status, RequestMethod requestMethod)
+    public ResponseEntity<String> generateResponseEntity(String profile, FormatTypes outFormat, EntityRecord entityRecord, HttpStatus status, RequestMethod requestMethod)
             throws EntityCreationException {
 
         Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
@@ -121,9 +120,10 @@ public abstract class BaseRest extends BaseRestController {
             headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
             headers.add(HttpHeaders.LINK, HttpHeaders.VALUE_LDP_RESOURCE);
         }
-        if (contentType != null && !contentType.isEmpty())
-            headers.add(HttpHeaders.CONTENT_TYPE, contentType);
-
+        
+        if(outFormat.equals(FormatTypes.jsonld)) headers.add(HttpHeaders.CONTENT_TYPE, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
+        else if(outFormat.equals(FormatTypes.xml)) headers.add(HttpHeaders.CONTENT_TYPE, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML);
+        
         String body = serialize(entityRecord, outFormat, profile);
         return ResponseEntity.status(status).headers(headers).eTag(etag).body(body);
     }

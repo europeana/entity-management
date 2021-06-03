@@ -89,7 +89,7 @@ public class EMController extends BaseRest {
 
 	@ApiOperation(value = "Re-enable an entity", nickname = "enableEntity", response = java.lang.Void.class)
 	@RequestMapping(value = { "/{type}/base/{identifier}",
-			"/{type}/{identifier}" }, method = RequestMethod.POST)
+			"/{type}/{identifier}" }, method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String> enableEntity(
 			@RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
 			@RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
@@ -101,15 +101,16 @@ public class EMController extends BaseRest {
 		}
 		EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier.toLowerCase(), true);
 		if (!entityRecord.isDisabled()) {
-			return createResponse(profile, type, identifier, FormatTypes.jsonld, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, RequestMethod.POST);
+			return createResponse(profile, type, identifier, FormatTypes.jsonld, RequestMethod.POST);
 		}
 		logger.info("Re-enabling entityId={}", entityRecord.getEntityId());
 		entityRecordService.enableEntityRecord(entityRecord);
-		return createResponse(profile, type, identifier, FormatTypes.jsonld, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, RequestMethod.POST);
+		return createResponse(profile, type, identifier, FormatTypes.jsonld, RequestMethod.POST);
 	}
 
     @ApiOperation(value = "Update an entity", nickname = "updateEntity", response = java.lang.Void.class)
-    @RequestMapping(value = { "/{type}/base/{identifier}", "/{type}/{identifier}" },method = RequestMethod.PUT)
+    @RequestMapping(value = { "/{type}/base/{identifier}", "/{type}/{identifier}" },method = RequestMethod.PUT,
+    produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> updateEntity(
     	@RequestHeader(value = "If-Match", required = false) String ifMatchHeader,
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
@@ -144,7 +145,7 @@ public class EMController extends BaseRest {
 
 			entityRecordService.replaceEuropeanaProxy(updateRequestEntity, entityRecord);
 			entityRecordService.update(entityRecord);
-			return launchTaskAndRetrieveEntity(type, identifier, entityRecord, profile, RequestMethod.PUT, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML);
+			return launchTaskAndRetrieveEntity(type, identifier, entityRecord, profile, RequestMethod.PUT);
     }
 
 
@@ -160,7 +161,7 @@ public class EMController extends BaseRest {
 			verifyWriteAccess(Operations.UPDATE, request);
 		}
 		EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
-		return launchTaskAndRetrieveEntity(type, identifier, entityRecord, profile, RequestMethod.POST, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML);
+		return launchTaskAndRetrieveEntity(type, identifier, entityRecord, profile, RequestMethod.POST);
 	}
 
 	@ApiOperation(value = "Update multiple entities from external data source", nickname = "updateMultipleEntityFromDatasource", response = java.lang.Void.class)
@@ -203,12 +204,10 @@ public class EMController extends BaseRest {
 		return  ResponseEntity.accepted().body(new EntityIdResponse(entityIds.size(), existingEntityIds, failures));
 	}
 
-
-
-	@CrossOrigin(origins="*", exposedHeaders="{"+HttpHeaders.ALLOW+","+HttpHeaders.VARY+","+HttpHeaders.LINK+","+HttpHeaders.ETAG+"}")
+	@CrossOrigin(exposedHeaders= {HttpHeaders.ALLOW, HttpHeaders.VARY, HttpHeaders.LINK, HttpHeaders.ETAG})
 	@ApiOperation(value = "Retrieve a known entity", nickname = "getEntityJsonLd", response = java.lang.Void.class)
     @RequestMapping(value = { "/{type}/base/{identifier}.jsonld",
-	    "/{type}/{identifier}.jsonld" }, method = RequestMethod.GET)
+	    "/{type}/{identifier}.jsonld" }, method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> getJsonLdEntity(
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
 	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
@@ -219,14 +218,14 @@ public class EMController extends BaseRest {
 		if (emConfig.isAuthEnabled()) {
 			verifyReadAccess(request);
 		}
-	return createResponse(profile, type, identifier, FormatTypes.jsonld, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, RequestMethod.GET);
+	return createResponse(profile, type, identifier, FormatTypes.jsonld, RequestMethod.GET);
 
     }
 
-	@CrossOrigin(origins="*", exposedHeaders="{"+HttpHeaders.ALLOW+","+HttpHeaders.VARY+","+HttpHeaders.LINK+","+HttpHeaders.ETAG+"}")
+	@CrossOrigin(exposedHeaders= {HttpHeaders.ALLOW, HttpHeaders.VARY, HttpHeaders.LINK, HttpHeaders.ETAG})
     @ApiOperation(value = "Retrieve a known entity", nickname = "getEntity", response = java.lang.Void.class)
     @RequestMapping(value = { "/{type}/base/{identifier}","/{type}/{identifier}" }, 
-    method = RequestMethod.GET)
+    method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
     public ResponseEntity<String> getEntity(
     	@RequestHeader(value = HttpHeaders.ACCEPT) String acceptHeader,
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
@@ -239,20 +238,20 @@ public class EMController extends BaseRest {
 			}
 	if (acceptHeader.contains(HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML)) {
 	    //if rdf/XML is explicitly requested
-	    return createResponse(profile, type, identifier, FormatTypes.xml, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML, RequestMethod.GET);
+	    return createResponse(profile, type, identifier, FormatTypes.xml, RequestMethod.GET);
 	}
-	else if (acceptHeader.contains(HttpHeaders.CONTENT_TYPE_JSONLD) || acceptHeader.contains(MediaType.APPLICATION_JSON_VALUE) || acceptHeader.contains(emConfig.getAcceptHeaderDefault())){	
-	    return createResponse(profile, type, identifier, FormatTypes.jsonld, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, RequestMethod.GET);
+	else if (acceptHeader.contains(HttpHeaders.CONTENT_TYPE_JSONLD) || acceptHeader.contains(MediaType.APPLICATION_JSON_VALUE) || acceptHeader.contains(MediaType.ALL_VALUE)){	
+	    return createResponse(profile, type, identifier, FormatTypes.jsonld, RequestMethod.GET);
 	}
 	else {
 		return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Requested formats in the Accept header not supported.");
 	}
     }
 
-	@CrossOrigin(origins="*", exposedHeaders="{"+HttpHeaders.ALLOW+","+HttpHeaders.VARY+","+HttpHeaders.LINK+","+HttpHeaders.ETAG+"}")
+	@CrossOrigin(exposedHeaders= {HttpHeaders.ALLOW, HttpHeaders.VARY, HttpHeaders.LINK, HttpHeaders.ETAG})
     @ApiOperation(value = "Retrieve a known entity", nickname = "getEntityXml", response = java.lang.Void.class)
     @RequestMapping(value = { "/{type}/base/{identifier}.xml",
-	    "/{type}/{identifier}.xml" }, method = RequestMethod.GET)
+	    "/{type}/{identifier}.xml" }, method = RequestMethod.GET, produces = MediaType.APPLICATION_XML_VALUE)
     public ResponseEntity<String> getXmlEntity(
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
 	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
@@ -263,7 +262,7 @@ public class EMController extends BaseRest {
 			if (emConfig.isAuthEnabled()) {
 				verifyReadAccess(request);
 			}
-	return createResponse(profile, type, identifier, FormatTypes.xml, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML, RequestMethod.GET);
+	return createResponse(profile, type, identifier, FormatTypes.xml, RequestMethod.GET);
     }
 
     @ApiOperation(value = "Register a new entity", nickname = "registerEntity", response = java.lang.Void.class)
@@ -310,12 +309,12 @@ public class EMController extends BaseRest {
 
 			return launchTaskAndRetrieveEntity(savedEntityRecord.getEntity().getType(),
 					getDatabaseIdentifier(savedEntityRecord.getEntityId()), savedEntityRecord,
-					EntityProfile.internal.toString(), RequestMethod.POST, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML);
+					EntityProfile.internal.toString(), RequestMethod.POST);
 		}
 
 
     private ResponseEntity<String> createResponse(String profile, String type, String identifier, FormatTypes outFormat,
-	    String contentType, RequestMethod requestMethod) throws EuropeanaApiException {
+	    RequestMethod requestMethod) throws EuropeanaApiException {
 			/*
 	 * verify the parameters
 	 */
@@ -331,16 +330,16 @@ public class EMController extends BaseRest {
 	}
 
 			EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier,false);
-			return generateResponseEntity(profile, outFormat, contentType, entityRecord, HttpStatus.OK, requestMethod);
+			return generateResponseEntity(profile, outFormat, entityRecord, HttpStatus.OK, requestMethod);
 		}
 
 	private ResponseEntity<String> launchTaskAndRetrieveEntity(String type, String identifier,
-			EntityRecord entityRecord, String profile, RequestMethod requestMethod, String contentType) throws Exception {
+			EntityRecord entityRecord, String profile, RequestMethod requestMethod) throws Exception {
 		// launch synchronous update, then retrieve entity from DB afterwards
 		launchUpdateTask(Collections.singletonList(entityRecord.getEntityId()), false);
 		entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
 
-		return generateResponseEntity(profile, FormatTypes.jsonld, contentType, entityRecord, HttpStatus.ACCEPTED, requestMethod);
+		return generateResponseEntity(profile, FormatTypes.jsonld, entityRecord, HttpStatus.ACCEPTED, requestMethod);
 	}
 
 	private ResponseEntity<String> checkExistingEntity(Optional<EntityRecord> existingEntity,
