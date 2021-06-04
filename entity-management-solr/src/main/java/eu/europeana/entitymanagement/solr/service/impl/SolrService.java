@@ -1,7 +1,6 @@
 package eu.europeana.entitymanagement.solr.service.impl;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.List;
 import java.util.Map;
 
@@ -11,6 +10,7 @@ import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.beans.DocumentObjectBinder;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrDocument;
@@ -34,51 +34,53 @@ import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.definitions.model.Timespan;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
-import eu.europeana.entitymanagement.solr.model.SolrAgent;
+import eu.europeana.entitymanagement.solr.model.SolrAgent; 
 import eu.europeana.entitymanagement.solr.model.SolrConcept;
 import eu.europeana.entitymanagement.solr.model.SolrOrganization;
 import eu.europeana.entitymanagement.solr.model.SolrPlace;
 import eu.europeana.entitymanagement.solr.model.SolrTimespan;
-import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @Service(AppConfigConstants.BEAN_EM_SOLR_SERVICE)
-public class SolrServiceImpl implements SolrService {
+public class SolrService {
 
-	@Autowired
-	SolrClient solrServer;
-	
-	@Autowired
-	EntityManagementConfiguration emConfiguration;
-	
 	@Qualifier(AppConfigConstants.BEAN_JSON_MAPPER)
 	@Autowired
 	ObjectMapper emJsonMapper;	
 	
 	private final Logger log = LogManager.getLogger(getClass());
+	
+	EntityManagementConfiguration emConfiguration;
+	
+	SolrClient indexingSolrClient;
+   
+	@Autowired 
+    public SolrService(EntityManagementConfiguration emConfig) {
+		emConfiguration=emConfig;
+    	indexingSolrClient = new HttpSolrClient.Builder(emConfiguration.getIndexingSolrUrl()).build();
+    }
 
-	@Override
-	public void storeEntity(Entity solrObject, boolean doCommit) throws SolrServiceException {
+	public void storeEntity(Entity entity, boolean doCommit) throws SolrServiceException {
 		Entity solrEntity = null;
 		try {
-			if(solrObject.getType().compareToIgnoreCase(EntityTypes.Agent.toString())==0) {
-				solrEntity = new SolrAgent((Agent)solrObject);				
+			if(entity.getType().compareToIgnoreCase(EntityTypes.Agent.toString())==0) {
+				solrEntity = new SolrAgent((Agent)entity);				
 			}
-			else if(solrObject.getType().compareToIgnoreCase(EntityTypes.Concept.toString())==0) {
-				solrEntity = new SolrConcept((Concept)solrObject);				
+			else if(entity.getType().compareToIgnoreCase(EntityTypes.Concept.toString())==0) {
+				solrEntity = new SolrConcept((Concept)entity);				
 			}
-			else if(solrObject.getType().compareToIgnoreCase(EntityTypes.Organization.toString())==0) {
-				solrEntity = new SolrOrganization((Organization)solrObject);
+			else if(entity.getType().compareToIgnoreCase(EntityTypes.Organization.toString())==0) {
+				solrEntity = new SolrOrganization((Organization)entity);
 			}
-			else if(solrObject.getType().compareToIgnoreCase(EntityTypes.Place.toString())==0) {
-				solrEntity = new SolrPlace((Place)solrObject);
+			else if(entity.getType().compareToIgnoreCase(EntityTypes.Place.toString())==0) {
+				solrEntity = new SolrPlace((Place)entity);
 			}
-			else if(solrObject.getType().compareToIgnoreCase(EntityTypes.Timespan.toString())==0) {
-				solrEntity = new SolrTimespan((Timespan)solrObject);
+			else if(entity.getType().compareToIgnoreCase(EntityTypes.Timespan.toString())==0) {
+				solrEntity = new SolrTimespan((Timespan)entity);
 			}
 			
-			solrEntity.setPayload(createSolrSuggesterField(solrObject));
+			solrEntity.setPayload(createSolrSuggesterField(entity));
 			
 		} catch (IOException ex) {
 			throw new SolrServiceException("An unexpected exception occured when creating the Solr objects from the corresponding Entity object.", ex);
@@ -86,10 +88,9 @@ public class SolrServiceImpl implements SolrService {
 				
 		try {			
 			log.debug("Storing to Solr. Object: " + solrEntity.toString());				
-			UpdateResponse rsp = solrServer.addBean(emConfiguration.getSearchApiSolrCollection(), solrEntity);
+			UpdateResponse rsp =indexingSolrClient.addBean(emConfiguration.getIndexingSolrCollection(), solrEntity);
 			log.info("Solr response after storing: " + rsp.toString());
-			if(doCommit)
-				solrServer.commit(emConfiguration.getSearchApiSolrCollection());
+			if(doCommit)				indexingSolrClient.commit(emConfiguration.getIndexingSolrCollection());
 		} catch (SolrServerException | IOException | RuntimeException ex) {
 			throw new SolrServiceException("An unexpected exception occured when storing the Entity: " + solrEntity.toString() + " to Solr.", ex);
 		}
@@ -97,7 +98,6 @@ public class SolrServiceImpl implements SolrService {
 	}
 	
 		@SuppressWarnings("unused")
-		@Override
 	    public Entity searchById(String type, String entityId) throws SolrServiceException, UnsupportedEntityTypeException {
 
 		log.debug("Search entity (type:" + type + " ) by id: " + entityId + " in Solr.");
@@ -106,7 +106,7 @@ public class SolrServiceImpl implements SolrService {
 		SolrQuery query = new SolrQuery();
 		query.set("q", EntitySolrFields.ID+ ":\"" + entityId + "\"");
 		try {
-			rsp = solrServer.query(emConfiguration.getSearchApiSolrCollection(), query);
+			rsp =indexingSolrClient.query(emConfiguration.getIndexingSolrCollection(), query);
 			log.info("query response: " + rsp.toString());
 			if (rsp==null) return null;
 			

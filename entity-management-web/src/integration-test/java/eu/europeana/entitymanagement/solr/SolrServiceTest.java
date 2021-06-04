@@ -22,7 +22,7 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.definitions.model.Timespan;
 import eu.europeana.entitymanagement.serialization.JsonLdSerializer;
-import eu.europeana.entitymanagement.solr.service.SolrService;
+import eu.europeana.entitymanagement.solr.service.impl.SolrService;
 
 /**
  * JUnit test for testing the EMControllerTest class

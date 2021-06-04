@@ -18,10 +18,13 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest.METHOD;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
+import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.common.config.LanguageCodes;
 import eu.europeana.entitymanagement.config.AppConfig;
@@ -37,9 +40,20 @@ import eu.europeana.entitymanagement.web.model.scoring.PageRank;
 @Service(AppConfig.BEAN_EM_SCORING_SERVICE)
 public class ScoringService {
 	private static final Logger logger = LogManager.getLogger(ScoringService.class);
-    SolrClient prSolrClient;
 
+//	@Qualifier(AppConfigConstants.BEAN_SEARCH_API_SOLR_CLIENT)
+//	@Autowired
     SolrClient searchApiSolrClient;
+//
+//	@Qualifier(AppConfigConstants.BEAN_PR_SOLR_CLIENT)
+//	@Autowired
+    SolrClient prSolrClient;
+//	
+//	@Autowired
+//	EntityManagementConfiguration emConfiguration;
+//	
+//	@Autowired
+//	LanguageCodes emLanguageCodes;
 
 //    private static final String[] LANGUAGE_CODES = { "bg", "ca", "cs", "da", "de", "el", "en", "es", "et", "fi", "fr",
 //	    "ga", "gd", "hr", "hu", "ie", "is", "it", "lt", "lv", "mt", "mul", "nl", "no", "pl", "pt", "ro", "ru", "sk",
@@ -67,7 +81,21 @@ public class ScoringService {
         this.emConfiguration = emConfiguration;
         this.emLanguageCodes = emLanguageCodes;
     }
-    
+ 
+    public SolrClient getPrSolrClient() {
+	if (prSolrClient == null) {
+	    prSolrClient = new HttpSolrClient.Builder(emConfiguration.getPrSolrUrl()).build();
+	}
+	return prSolrClient;
+    }
+
+    public SolrClient getSearchApiSolrClient() {
+	if (searchApiSolrClient == null) {
+	    searchApiSolrClient = new HttpSolrClient.Builder(emConfiguration.getSearchApiSolrUrl()).build();
+	}
+	return searchApiSolrClient;
+    }
+
     
     
     public EntityMetrics computeMetrics(Entity entity) throws FunctionalRuntimeException, UnsupportedEntityTypeException{
@@ -262,23 +290,7 @@ public class ScoringService {
 	return wikidataUri;
     }
 
-    public SolrClient getPrSolrClient() {
-	if (prSolrClient == null) {
-	    prSolrClient = new HttpSolrClient.Builder(emConfiguration.getPrSolrUrl()).build();
-	}
-	return prSolrClient;
-    }
-
-    public SolrClient getSearchApiSolrClient() {
-	if (searchApiSolrClient == null) {
-	    searchApiSolrClient = new HttpSolrClient.Builder(emConfiguration.getSearchApiSolrUrl()).build();
-	}
-	return searchApiSolrClient;
-    }
-
-    
-
-    public MaxEntityMetrics getMaxEntityMetrics() throws IOException {
+     public MaxEntityMetrics getMaxEntityMetrics() throws IOException {
 	if (maxEntityMetrics == null) {
 	    XmlMapper xmlMapper = new XmlMapper();
 	    try (InputStream inputStream = getClass().getResourceAsStream("/max-entity-metrics.xml");

@@ -96,6 +96,11 @@
 		</dependency>
         
         <!-- https://mvnrepository.com/artifact/org.mongodb/bson -->
+        
+    <dependency>
+    	<groupId>org.springframework</groupId>
+    	<artifactId>spring-web</artifactId>
+	</dependency>
 
         
 	</dependencies>

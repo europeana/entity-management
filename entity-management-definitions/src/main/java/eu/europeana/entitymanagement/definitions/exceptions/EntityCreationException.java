@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.definitions.exceptions;
 
+import org.springframework.http.HttpStatus;
 import eu.europeana.api.commons.error.EuropeanaApiException;
-//import org.springframework.http.HttpStatus;
 
 /**
  * Exception thrown for all errors that occur while creating or saving an entity to the database
@@ -32,8 +32,8 @@ public class EntityCreationException extends EuropeanaApiException {
         return false;
     }
 
-//    @Override
-//    public HttpStatus getResponseStatus() {
-//        return HttpStatus.BAD_REQUEST;
-//    }
+    @Override
+    public HttpStatus getResponseStatus() {
+        return HttpStatus.BAD_REQUEST;
+    }
 }
