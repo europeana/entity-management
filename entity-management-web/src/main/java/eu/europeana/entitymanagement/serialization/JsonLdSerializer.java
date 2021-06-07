@@ -8,6 +8,7 @@ import java.util.Locale;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
@@ -24,6 +25,10 @@ public class JsonLdSerializer {
 	mapper = new ObjectMapper();
 	SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH);
 	mapper.setDateFormat(df);
+	
+	SimpleFilterProvider dummy = new SimpleFilterProvider();
+    dummy.setFailOnUnknownId(false);
+    mapper.setFilterProvider(dummy);
     }
     
     
