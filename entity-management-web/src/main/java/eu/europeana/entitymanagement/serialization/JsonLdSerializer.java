@@ -26,6 +26,11 @@ public class JsonLdSerializer {
 	SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH);
 	mapper.setDateFormat(df);
 	
+	/*
+	 * necessary because of the @JsonFilter annotations if we want to include all fields,
+	 * otherwise the fields we want to exclude can be specified in the given FilerProvider
+	 */
+	
 	SimpleFilterProvider dummy = new SimpleFilterProvider();
     dummy.setFailOnUnknownId(false);
     mapper.setFilterProvider(dummy);
