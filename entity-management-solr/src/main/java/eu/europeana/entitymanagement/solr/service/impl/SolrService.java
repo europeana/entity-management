@@ -10,7 +10,6 @@ import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.beans.DocumentObjectBinder;
-import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrDocument;
@@ -42,6 +41,8 @@ import eu.europeana.entitymanagement.solr.model.SolrTimespan;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_INDEXING_SOLR_CLIENT;
+
 @Service(AppConfigConstants.BEAN_EM_SOLR_SERVICE)
 public class SolrService {
 
@@ -51,15 +52,16 @@ public class SolrService {
 	
 	private final Logger log = LogManager.getLogger(getClass());
 	
-	EntityManagementConfiguration emConfiguration;
-	
-	SolrClient indexingSolrClient;
+	private EntityManagementConfiguration emConfiguration;
+
+	private final SolrClient indexingSolrClient;
    
 	@Autowired 
-    public SolrService(EntityManagementConfiguration emConfig) {
+    public SolrService(EntityManagementConfiguration emConfig,
+					   @Qualifier(BEAN_INDEXING_SOLR_CLIENT) SolrClient indexingSolrClient) {
 		emConfiguration=emConfig;
-    	indexingSolrClient = new HttpSolrClient.Builder(emConfiguration.getIndexingSolrUrl()).build();
-    }
+		this.indexingSolrClient = indexingSolrClient;
+	}
 
 	public void storeEntity(Entity entity, boolean doCommit) throws SolrServiceException {
 		Entity solrEntity = null;
@@ -90,7 +92,9 @@ public class SolrService {
 			log.debug("Storing to Solr. Object: " + solrEntity.toString());				
 			UpdateResponse rsp =indexingSolrClient.addBean(emConfiguration.getIndexingSolrCollection(), solrEntity);
 			log.info("Solr response after storing: " + rsp.toString());
-			if(doCommit)				indexingSolrClient.commit(emConfiguration.getIndexingSolrCollection());
+			if(doCommit) {
+				indexingSolrClient.commit(emConfiguration.getIndexingSolrCollection());
+			}
 		} catch (SolrServerException | IOException | RuntimeException ex) {
 			throw new SolrServiceException("An unexpected exception occured when storing the Entity: " + solrEntity.toString() + " to Solr.", ex);
 		}
