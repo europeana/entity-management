@@ -1,199 +1,118 @@
 package eu.europeana.entitymanagement.solr.model;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.solr.client.solrj.beans.Field;
 
 import eu.europeana.entitymanagement.definitions.model.Concept;
-import eu.europeana.entitymanagement.vocabulary.AgentSolrFields;
 import eu.europeana.entitymanagement.vocabulary.ConceptSolrFields;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 
-public class SolrConcept extends Concept {
+public class SolrConcept extends SolrEntity<Concept> {
 
-	private String payload;
+	@Field(ConceptSolrFields.BROADER)
+	private List<String> broader;
+	
+	@Field(ConceptSolrFields.NARROWER)
+	private List<String> narrower;
+
+	@Field(ConceptSolrFields.RELATED)
+	private List<String> related;
+
+	@Field(ConceptSolrFields.BROAD_MATCH)
+	private List<String> broadMatch;
+
+	@Field(ConceptSolrFields.NARROW_MATCH)
+	private List<String> narrowMatch;
+
+	@Field(ConceptSolrFields.EXACT_MATCH)
+	private List<String> exactMatch;
+
+	@Field(ConceptSolrFields.COREF)
+	private List<String> coref;
+
+	@Field(ConceptSolrFields.RELATED_MATCH)
+	private List<String> relatedMatch;
+
+	@Field(ConceptSolrFields.CLOSE_MATCH)
+	private List<String> closeMatch;
+
+	@Field(ConceptSolrFields.IN_SCHEME)
+	private List<String> inScheme;
+
+	@Field(ConceptSolrFields.NOTATION_ALL)
+	Map<String, List<String>> notation;
 	
 	public SolrConcept() {
 		super();
 	}
 
 	public SolrConcept(Concept concept) {
-		super();
-		this.setType(concept.getType());
-		this.setEntityId(concept.getEntityId());
-		this.setDepiction(concept.getDepiction());
-		this.setNote(concept.getNote());
-		this.setPrefLabelStringMap(concept.getPrefLabelStringMap());
-		this.setAltLabel(concept.getAltLabel());
-		this.setHiddenLabel(concept.getHiddenLabel());
-		this.setIdentifier(concept.getIdentifier());
-		this.setSameAs(concept.getSameAs());
-		this.setIsRelatedTo(concept.getIsRelatedTo());
-		this.setHasPart(concept.getHasPart());
-		this.setIsPartOfArray(concept.getIsPartOfArray());
+		super(concept);
 		
-		this.setBroader(concept.getBroader());
-		this.setNarrower(concept.getNarrower());
-		this.setRelated(concept.getRelated());
-		this.setBroadMatch(concept.getBroadMatch());
-		this.setNarrowMatch(concept.getNarrowMatch());
-		this.setExactMatch(concept.getExactMatch());
-		this.setCoref(concept.getCoref());
-		this.setRelatedMatch(concept.getRelatedMatch());
-		this.setCloseMatch(concept.getCloseMatch());
-		this.setInScheme(concept.getInScheme());
-		this.setNotation(concept.getNotation());
+		if(concept.getBroader()!=null) this.broader=new ArrayList<>(concept.getBroader());
+		if(concept.getNarrower()!=null) this.narrower= new ArrayList<>(concept.getNarrower());
+		if(concept.getRelated()!=null) this.related= new ArrayList<>(concept.getRelated());
+		if(concept.getBroadMatch()!=null) this.broadMatch=new ArrayList<>(concept.getBroadMatch());
+		if(concept.getNarrowMatch()!=null) this.narrowMatch= new ArrayList<>(concept.getNarrowMatch());
+		if(concept.getExactMatch()!=null) this.exactMatch= new ArrayList<>(concept.getExactMatch());
+		if(concept.getCoref()!=null) this.coref=new ArrayList<>(concept.getCoref());
+		if(concept.getBroader()!=null) this.relatedMatch= new ArrayList<>(concept.getRelatedMatch());
+		if(concept.getRelatedMatch()!=null) this.closeMatch= new ArrayList<>(concept.getCloseMatch());
+		if(concept.getInScheme()!=null) this.inScheme= new ArrayList<>(concept.getInScheme());
+		setNotation(concept.getNotation());
 	}
 
-	@Override
-	@Field(ConceptSolrFields.BROADER)
-	public void setBroader(List<String> broader) {
-		super.setBroader(broader);
-	}
-	
-	@Override
-	@Field(ConceptSolrFields.NARROWER)
-	public void setNarrower(List<String> narrower) {
-		super.setNarrower(narrower);
-	}
-	
-	@Override
-	@Field(ConceptSolrFields.RELATED)
-	public void setRelated(List<String> related) {
-		super.setRelated(related);
-	}
-	
-	@Override
-	@Field(ConceptSolrFields.BROAD_MATCH)
-	public void setBroadMatch(List<String> broadMatch) {
-		super.setBroadMatch(broadMatch);
-	}
-	
-	@Override
-	@Field(ConceptSolrFields.NARROW_MATCH)
-	public void setNarrowMatch(List<String> narrowMatch) {
-		super.setNarrowMatch(narrowMatch);
-	}
-	
-	@Override
-	@Field(ConceptSolrFields.EXACT_MATCH)
-	public void setExactMatch(List<String> exactMatch) {
-		super.setExactMatch(exactMatch);
-	}
-	
-	@Override
-	@Field(ConceptSolrFields.RELATED_MATCH)
-	public void setRelatedMatch(List<String> relatedMatch) {
-		super.setRelatedMatch(relatedMatch);
-	}
-	
-	@Override
-	@Field(ConceptSolrFields.CLOSE_MATCH)
-	public void setCloseMatch(List<String> closeMatch) {
-		super.setCloseMatch(closeMatch);
-	}
-	
-	@Override
-	@Field(ConceptSolrFields.NOTATION_ALL)
-	public void setNotation(Map<String, List<String>> notation) {
-		Map<String, List<String>>  normalizedNotation = SolrUtils.normalizeStringListMapByAddingPrefix(
-				ConceptSolrFields.NOTATION + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, notation);
-		super.setNotation(normalizedNotation);
-	}
-	
-	@Override
-	@Field(ConceptSolrFields.IN_SCHEME)
-	public void setInScheme(List<String> inScheme) {
-		super.setInScheme(inScheme);
-	}
-	
-	@Override
-	@Field(ConceptSolrFields.PREF_LABEL_ALL)
-	public void setPrefLabelStringMap(Map<String, String> prefLabel) {
-		Map<String, String> normalizedPrefLabel = SolrUtils.normalizeStringMapByAddingPrefix(
-				ConceptSolrFields.PREF_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, prefLabel);
-		super.setPrefLabelStringMap(normalizedPrefLabel);
-	}
-	
-	@Override
-	@Field(ConceptSolrFields.ALT_LABEL_ALL)
-	public void setAltLabel(Map<String, List<String>> altLabel) {
-		Map<String, List<String>> normalizedAltLabel = SolrUtils.normalizeStringListMapByAddingPrefix(
-				ConceptSolrFields.ALT_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, altLabel);
-		super.setAltLabel(normalizedAltLabel);
-	}
-	
-	@Override
-	@Field(ConceptSolrFields.HIDDEN_LABEL)
-	public void setHiddenLabel(Map<String, List<String>> hiddenLabel) {
-		Map<String, List<String>> normalizedHiddenLabel = SolrUtils.normalizeStringListMapByAddingPrefix(
-				ConceptSolrFields.HIDDEN_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, hiddenLabel);
-		super.setHiddenLabel(normalizedHiddenLabel);
-	}
-	
-	@Override
-	@Field(ConceptSolrFields.NOTE_ALL)
-	public void setNote(Map<String, List<String>> note) {
-		Map<String, List<String>>  normalizedNote = SolrUtils.normalizeStringListMapByAddingPrefix(
-				ConceptSolrFields.NOTE + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, note);
-		super.setNote(normalizedNote);
+	private void setNotation(Map<String, List<String>> notation) {
+		if (notation!=null) {
+			this.notation = new HashMap<>(SolrUtils.normalizeStringListMapByAddingPrefix(ConceptSolrFields.NOTATION + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, notation));
+		}
 	}
 
-	@Override
-	@Field(ConceptSolrFields.ID)
-	public void setEntityId(String entityId) {
-		super.setEntityId(entityId);
+	public List<String> getBroader() {
+		return broader;
 	}
 
-	@Override
-	@Field(ConceptSolrFields.TYPE)
-	public void setType(String type) {
-		super.setType(type);
-	}
-	
-	@Override
-	@Field(ConceptSolrFields.IS_RELATED_TO)
-	public void setIsRelatedTo(List<String> isRelatedTo) {
-		super.setIsRelatedTo(isRelatedTo);
+	public List<String> getNarrower() {
+		return narrower;
 	}
 
-	@Override
-	@Field(ConceptSolrFields.IDENTIFIER)
-	public void setIdentifier(List<String> identifier) {
-		super.setIdentifier(identifier);
-	}
-	
-	@Override
-	@Field(ConceptSolrFields.DEPICTION)
-	public void setDepiction(String depiction) {
-		super.setDepiction(depiction);
+	public List<String> getRelated() {
+		return related;
 	}
 
-	@Override
-	@Field(ConceptSolrFields.SAME_AS)
-	public void setSameAs(List<String> sameAs) {
-		super.setSameAs(sameAs);
-	}
-	
-	@Override
-	@Field(ConceptSolrFields.HAS_PART)
-	public void setHasPart(List<String> hasPart) {
-		super.setHasPart(hasPart);
+	public List<String> getBroadMatch() {
+		return broadMatch;
 	}
 
-	@Override
-	@Field(ConceptSolrFields.IS_PART_OF)
-	public void setIsPartOfArray(List<String> isPartOf) {
-		super.setIsPartOfArray(isPartOf);
+	public List<String> getNarrowMatch() {
+		return narrowMatch;
 	}
 
-	public String getPayload() {
-		return payload;
+	public List<String> getExactMatch() {
+		return exactMatch;
 	}
 
-	@Field(AgentSolrFields.PAYLOAD)
-	public void setPayload(String payload) {
-		this.payload = payload;
+	public List<String> getCoref() {
+		return coref;
+	}
+
+	public List<String> getRelatedMatch() {
+		return relatedMatch;
+	}
+
+	public List<String> getCloseMatch() {
+		return closeMatch;
+	}
+
+	public List<String> getInScheme() {
+		return inScheme;
+	}
+
+	public Map<String, List<String>> getNotation() {
+		return notation;
 	}
 }

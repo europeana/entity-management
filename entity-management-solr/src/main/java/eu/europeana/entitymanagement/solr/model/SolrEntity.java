@@ -5,10 +5,14 @@ import eu.europeana.entitymanagement.vocabulary.AgentSolrFields;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import org.apache.solr.client.solrj.beans.Field;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public abstract class SolrEntity<T extends Entity> {
+	
+	protected T entity;
 
     @Field(AgentSolrFields.TYPE)
     private String type;
@@ -57,11 +61,16 @@ public abstract class SolrEntity<T extends Entity> {
         setPrefLabelStringMap(entity.getPrefLabelStringMap());
         setAltLabel(entity.getAltLabel());
         setHiddenLabel(entity.getHiddenLabel());
-        this.identifier = entity.getIdentifier();
-        this.sameAs = entity.getSameAs();
-        this.isRelatedTo = entity.getIsRelatedTo();
-        this.hasPart = entity.getHasPart();
-        this.isPartOf = entity.getIsPartOfArray();
+        if(entity.getIdentifier()!=null) this.identifier = new ArrayList<>(entity.getIdentifier());
+        if(entity.getSameAs()!=null) this.sameAs = new ArrayList<>(entity.getSameAs());
+        if(entity.getIsRelatedTo()!=null) this.isRelatedTo = new ArrayList<>(entity.getIsRelatedTo());
+        if(entity.getHasPart()!=null) this.hasPart = new ArrayList<>(entity.getHasPart());
+        if(entity.getIsPartOfArray()!=null) this.isPartOf = new ArrayList<>(entity.getIsPartOfArray());
+        this.entity=entity;
+    }
+    
+    public SolrEntity() {
+    
     }
 
     public void setPayload(String payload) {
@@ -69,23 +78,31 @@ public abstract class SolrEntity<T extends Entity> {
     }
 
     private void setPrefLabelStringMap(Map<String, String> prefLabel) {
-        this.prefLabel = SolrUtils.normalizeStringMapByAddingPrefix(
-                AgentSolrFields.PREF_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, prefLabel);
+    	if (prefLabel!=null) {
+    		this.prefLabel = new HashMap<>(SolrUtils.normalizeStringMapByAddingPrefix(
+                AgentSolrFields.PREF_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, prefLabel));
+    	}
     }
 
     private void setAltLabel(Map<String, List<String>> altLabel) {
-        this.altLabel = SolrUtils.normalizeStringListMapByAddingPrefix(
-                AgentSolrFields.ALT_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, altLabel);
+    	if (altLabel!=null) {
+    		this.altLabel = new HashMap<>(SolrUtils.normalizeStringListMapByAddingPrefix(
+                AgentSolrFields.ALT_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, altLabel));
+    	}
     }
 
     private void setHiddenLabel(Map<String, List<String>> hiddenLabel) {
-        this.hiddenLabel = SolrUtils.normalizeStringListMapByAddingPrefix(
-                AgentSolrFields.HIDDEN_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, hiddenLabel);
+    	if (hiddenLabel!=null) {
+    		this.hiddenLabel = new HashMap<>(SolrUtils.normalizeStringListMapByAddingPrefix(
+                AgentSolrFields.HIDDEN_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, hiddenLabel));
+    	}
     }
 
     private void setNote(Map<String, List<String>> note) {
-        this.note = SolrUtils.normalizeStringListMapByAddingPrefix(
-                AgentSolrFields.NOTE + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, note);
+    	if (note!=null) {
+    		this.note = new HashMap<>(SolrUtils.normalizeStringListMapByAddingPrefix(
+                AgentSolrFields.NOTE + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, note));
+    	}
     }
 
     public String getType() {
@@ -139,4 +156,8 @@ public abstract class SolrEntity<T extends Entity> {
     public String getPayload() {
         return payload;
     }
+
+	public T getEntity() {
+		return entity;
+	}
 }

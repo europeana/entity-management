@@ -1,9 +1,10 @@
 package eu.europeana.entitymanagement.solr.model;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import eu.europeana.entitymanagement.definitions.model.Entity;
 import org.apache.solr.client.solrj.beans.Field;
 
 import eu.europeana.entitymanagement.definitions.model.Agent;
@@ -14,6 +15,10 @@ import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
  * TODO:see how to save the referencedWebResource and isAggregatedBy fields for all entities
  */
 public class SolrAgent extends SolrEntity<Agent> {
+
+	public SolrAgent() {
+		super();
+	}
 
 	@Field(AgentSolrFields.DATE)
 	private List<String> date;
@@ -62,18 +67,17 @@ public class SolrAgent extends SolrEntity<Agent> {
 
 	public SolrAgent(Agent agent) {
 		super(agent);
-
 		
-		this.date = agent.getDate();
-		this.begin = agent.getBegin();
-		this.end = agent.getEnd();
-		this.dateOfBirth = agent.getDateOfBirth();
-		this.dateOfDeath = agent.getDateOfDeath();
-		this.wasPresentAt = agent.getWasPresentAt();
-		this.hasMet = agent.getHasMet();
-		this.name = agent.getName();
+		if(agent.getDate()!=null) this.date = new ArrayList<>(agent.getDate());
+		if(agent.getBegin()!=null) this.begin = new ArrayList<>(agent.getBegin());
+		if(agent.getEnd()!=null) this.end = new ArrayList<>(agent.getEnd());
+		if(agent.getDateOfBirth()!=null) this.dateOfBirth = new ArrayList<>(agent.getDateOfBirth());
+		if(agent.getDateOfDeath()!=null) this.dateOfDeath = new ArrayList<>(agent.getDateOfDeath());
+		if(agent.getWasPresentAt()!=null) this.wasPresentAt = new ArrayList<>(agent.getWasPresentAt());
+		if(agent.getHasMet()!=null) this.hasMet = agent.getHasMet();
+		setName(agent.getName());
 		setBiographicalInformation(agent.getBiographicalInformation());
-		this.professionOrOccupation = agent.getProfessionOrOccupation();
+		if(agent.getProfessionOrOccupation()!=null) this.professionOrOccupation = new ArrayList<>(agent.getProfessionOrOccupation());
 		setPlaceOfBirth(agent.getPlaceOfBirth());
 		setPlaceOfDeath(agent.getPlaceOfDeath());
 		this.dateOfEstablishment = agent.getDateOfEstablishment();
@@ -83,17 +87,102 @@ public class SolrAgent extends SolrEntity<Agent> {
 
 
 	private void setBiographicalInformation(Map<String, List<String>> biographicalInformation) {
-		this.biographicalInformation = SolrUtils.normalizeStringListMapByAddingPrefix(
-				AgentSolrFields.BIOGRAPHICAL_INFORMATION + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, biographicalInformation);
+		if (biographicalInformation!=null)  {
+			this.biographicalInformation = new HashMap<>(SolrUtils.normalizeStringListMapByAddingPrefix(AgentSolrFields.BIOGRAPHICAL_INFORMATION + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, biographicalInformation));
+		}
+		
 	}
 
 	private void setPlaceOfBirth(Map<String, List<String>> placeOfBirth) {
-		this.placeOfBirth = SolrUtils.normalizeStringListMapByAddingPrefix(
-				AgentSolrFields.PLACE_OF_BIRTH + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, placeOfBirth);
+		if (placeOfBirth!=null) {
+			this.placeOfBirth = new HashMap<>(SolrUtils.normalizeStringListMapByAddingPrefix(AgentSolrFields.PLACE_OF_BIRTH + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, placeOfBirth));
+		}
 	}
 
 	private void setPlaceOfDeath(Map<String, List<String>> placeOfDeath) {
-		this.placeOfDeath = SolrUtils.normalizeStringListMapByAddingPrefix(
-				AgentSolrFields.PLACE_OF_DEATH + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, placeOfDeath);
+		if (placeOfDeath!=null) {
+			this.placeOfDeath = new HashMap<>(SolrUtils.normalizeStringListMapByAddingPrefix(AgentSolrFields.PLACE_OF_DEATH + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, placeOfDeath));
+		}
+	}
+	
+	private void setName(Map<String, String> name) {
+		if (name!=null) {
+			this.name = new HashMap<>(SolrUtils.normalizeStringMapByAddingPrefix(AgentSolrFields.NAME + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, name));
+		}
+	}
+
+
+	public List<String> getDate() {
+		return date;
+	}
+
+
+	public List<String> getBegin() {
+		return begin;
+	}
+
+
+	public List<String> getEnd() {
+		return end;
+	}
+
+
+	public List<String> getDateOfBirth() {
+		return dateOfBirth;
+	}
+
+
+	public List<String> getDateOfDeath() {
+		return dateOfDeath;
+	}
+
+
+	public List<String> getWasPresentAt() {
+		return wasPresentAt;
+	}
+
+
+	public List<String> getHasMet() {
+		return hasMet;
+	}
+
+
+	public Map<String, String> getName() {
+		return name;
+	}
+
+
+	public Map<String, List<String>> getBiographicalInformation() {
+		return biographicalInformation;
+	}
+
+
+	public List<String> getProfessionOrOccupation() {
+		return professionOrOccupation;
+	}
+
+
+	public Map<String, List<String>> getPlaceOfBirth() {
+		return placeOfBirth;
+	}
+
+
+	public Map<String, List<String>> getPlaceOfDeath() {
+		return placeOfDeath;
+	}
+
+
+	public String getDateOfEstablishment() {
+		return dateOfEstablishment;
+	}
+
+
+	public String getDateOfTermination() {
+		return dateOfTermination;
+	}
+
+
+	public String getGender() {
+		return gender;
 	}
 }

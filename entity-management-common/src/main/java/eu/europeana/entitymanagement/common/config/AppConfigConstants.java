@@ -36,8 +36,5 @@ public class AppConfigConstants {
     public static final String BEAN_INDEXING_SOLR_CLIENT = "indexingSolrClient";
     public static final String BEAN_PR_SOLR_CLIENT = "prSolrClient";
     public static final String BEAN_SEARCH_API_SOLR_CLIENT = "searchApiSolrClient";
-    public static final String BEAN_INDEXING_SOLR_TEMPLATE = "indexingSolrTemplate";
-    public static final String BEAN_PR_SOLR_TEMPLATE = "prSolrTemplate";
-    public static final String BEAN_SEARCH_API_SOLR_TEMPLATE = "searchApiSolrTemplate";
 }
 

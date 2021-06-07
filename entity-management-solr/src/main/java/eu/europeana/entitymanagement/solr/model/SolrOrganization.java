@@ -1,265 +1,205 @@
 package eu.europeana.entitymanagement.solr.model;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.solr.client.solrj.beans.Field;
 
 import eu.europeana.entitymanagement.definitions.model.Organization;
-import eu.europeana.entitymanagement.vocabulary.AgentSolrFields;
-import eu.europeana.entitymanagement.vocabulary.ConceptSolrFields;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields;
 
-public class SolrOrganization extends Organization {
+public class SolrOrganization extends SolrEntity<Organization> {
 
-	private String payload;
+	@Field(OrganizationSolrFields.DC_DESCRIPTION_ALL)
+	private Map<String, String> description;
+	
+	@Field(OrganizationSolrFields.EDM_ACRONYM_ALL)
+	private Map<String, List<String>> acronym;
+	
+	@Field(OrganizationSolrFields.FOAF_LOGO)
+	private String logo;
+	
+	@Field(OrganizationSolrFields.FOAF_HOMEPAGE)
+	private String homepage;
+	
+	@Field(OrganizationSolrFields.FOAF_PHONE)
+	private List<String> phone;
+	
+	@Field(OrganizationSolrFields.FOAF_MBOX)
+	private List<String> mbox;
+	
+	@Field(OrganizationSolrFields.EUROPEANA_ROLE_ALL)
+	private Map<String, List<String>> europeanaRole;
+	
+	@Field(OrganizationSolrFields.ORGANIZATION_DOMAIN_ALL)
+	private Map<String, List<String>> organizationDomain;
+	
+	@Field(OrganizationSolrFields.GEOGRAPHIC_LEVEL_ALL)
+	private Map<String, String> geographicLevel;
+	
+	@Field(OrganizationSolrFields.COUNTRY)
+	private String country;
+
+	@Field(OrganizationSolrFields.VCARD_HAS_ADDRESS)
+	private String hasAddress;
+	
+	@Field(OrganizationSolrFields.VCARD_STREET_ADDRESS)
+	private String streetAddress;
+	
+	@Field(OrganizationSolrFields.VCARD_LOCALITY)
+	private String locality;
+	
+	@Field(OrganizationSolrFields.VCARD_REGION)
+	private String region;
+	
+	@Field(OrganizationSolrFields.VCARD_POSTAL_CODE)
+	private String postalCode;
+	
+	@Field(OrganizationSolrFields.VCARD_COUNTRYNAME)
+	private String countryName;
+	
+	@Field(OrganizationSolrFields.VCARD_POST_OFFICE_BOX)
+	private String postBox;
+	
+	@Field(OrganizationSolrFields.VCARD_HAS_GEO)
+	private String hasGeo;
 	
 	public SolrOrganization() {
 		super();
 	}
 
 	public SolrOrganization(Organization organization) {
-		super();
-		this.setType(organization.getType());
-		this.setEntityId(organization.getEntityId());
-		this.setDepiction(organization.getDepiction());
-		this.setNote(organization.getNote());
-		this.setPrefLabelStringMap(organization.getPrefLabelStringMap());
-		this.setAltLabel(organization.getAltLabel());
-		this.setHiddenLabel(organization.getHiddenLabel());
-		this.setIdentifier(organization.getIdentifier());
-		this.setSameAs(organization.getSameAs());
-		this.setIsRelatedTo(organization.getIsRelatedTo());
-		this.setHasPart(organization.getHasPart());
-		this.setIsPartOfArray(organization.getIsPartOfArray());
+		super(organization);
 		
-		this.setDescription(organization.getDescription());
-		this.setAcronym(organization.getAcronym());
-		this.setLogo(organization.getLogo());
-		this.setHomepage(organization.getHomepage());
-		this.setPhone(organization.getPhone());
-		this.setMbox(organization.getMbox());
-		this.setEuropeanaRole(organization.getEuropeanaRole());
-		this.setOrganizationDomain(organization.getOrganizationDomain());
-		this.setGeographicLevel(organization.getGeographicLevel());
-		this.setCountry(organization.getCountry());
-		this.setHasAddress(organization.getHasAddress());
-		this.setStreetAddress(organization.getStreetAddress());
-		this.setLocality(organization.getLocality());
-		this.setRegion(organization.getRegion());
-		this.setPostalCode(organization.getPostalCode());
-		this.setCountryName(organization.getCountryName());
-		this.setPostBox(organization.getPostBox());
-		this.setHasGeo(organization.getHasGeo());
+		setDescription(organization.getDescription());
+		setAcronym(organization.getAcronym());
+		this.logo=organization.getLogo();
+		this.homepage= organization.getHomepage();
+		this.phone= organization.getPhone();
+		if(organization.getMbox()!=null) this.mbox=new ArrayList<>(organization.getMbox());
+		setEuropeanaRole(organization.getEuropeanaRole());
+		setOrganizationDomain(organization.getOrganizationDomain());
+		setGeographicLevel(organization.getGeographicLevel());
+		this.country=organization.getCountry();
+		this.hasAddress=organization.getHasAddress();
+		this.streetAddress=organization.getStreetAddress();
+		this.locality=organization.getLocality();
+		this.region=organization.getRegion();
+		this.postalCode=organization.getPostalCode();
+		this.countryName=organization.getCountryName();
+		this.postBox=organization.getPostBox();
+		this.hasGeo=organization.getHasGeo();
 	}
 
-	@Override
-	@Field(OrganizationSolrFields.DC_DESCRIPTION_ALL)
-	public void setDescription(Map<String, String> dcDescription) {
-	    Map<String, String> normalizedDescription = SolrUtils.normalizeStringMapByAddingPrefix(
-		    OrganizationSolrFields.DC_DESCRIPTION + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, dcDescription);
-	    super.setDescription(normalizedDescription);
+	private void setDescription(Map<String, String> dcDescription) {
+	    if(dcDescription!=null) {
+	    	this.description = new HashMap<>(SolrUtils.normalizeStringMapByAddingPrefix(
+		    OrganizationSolrFields.DC_DESCRIPTION + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, dcDescription));
+	    }
+	    
 	}
 	
-	
-	@Override
-	@Field(OrganizationSolrFields.EDM_ACRONYM_ALL)
-	public void setAcronym(Map<String, List<String>>  acronym) {
-		Map<String, List<String>> normalizedAcronym = SolrUtils.normalizeStringListMapByAddingPrefix(
-				OrganizationSolrFields.EDM_ACRONYM + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, acronym);
-		super.setAcronym(normalizedAcronym);
-	}
-
-	@Override
-	@Field(OrganizationSolrFields.PREF_LABEL_ALL)
-	public void setPrefLabelStringMap(Map<String, String> prefLabel) {
-		Map<String, String> normalizedPrefLabel = SolrUtils.normalizeStringMapByAddingPrefix(
-				OrganizationSolrFields.PREF_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, prefLabel);
-		super.setPrefLabelStringMap(normalizedPrefLabel);
-	}
-
-	@Override
-	@Field(OrganizationSolrFields.ALT_LABEL_ALL)
-	public void setAltLabel(Map<String, List<String>> altLabel) {
-		Map<String, List<String>> normalizedAltLabel = SolrUtils.normalizeStringListMapByAddingPrefix(
-				OrganizationSolrFields.ALT_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, altLabel);
-		super.setAltLabel(normalizedAltLabel);
-	}
-
-	@Override
-	@Field(OrganizationSolrFields.HIDDEN_LABEL)
-	public void setHiddenLabel(Map<String, List<String>> hiddenLabel) {
-		Map<String, List<String>> normalizedHiddenLabel = SolrUtils.normalizeStringListMapByAddingPrefix(
-				ConceptSolrFields.HIDDEN_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, hiddenLabel);
-		super.setHiddenLabel(normalizedHiddenLabel);
+	private void setAcronym(Map<String, List<String>>  acronym) {
+		if(acronym!=null) {
+			this.acronym = new HashMap<>(SolrUtils.normalizeStringListMapByAddingPrefix(
+				OrganizationSolrFields.EDM_ACRONYM + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, acronym));
+		}
 	}
 	
-	@Override
-	@Field(OrganizationSolrFields.NOTE_ALL)
-	public void setNote(Map<String, List<String>> note) {
-		Map<String, List<String>>  normalizedNote = SolrUtils.normalizeStringListMapByAddingPrefix(
-				ConceptSolrFields.NOTE + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, note);
-		super.setNote(normalizedNote);
+	private void setGeographicLevel(Map<String, String> geographicLevel) {
+		if(geographicLevel!=null) {
+		this.geographicLevel = new HashMap<>(SolrUtils.normalizeStringMapByAddingPrefix(
+				OrganizationSolrFields.GEOGRAPHIC_LEVEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, geographicLevel));
+		}
 	}
 	
-	@Override
-	@Field(OrganizationSolrFields.IDENTIFIER)
-	public void setIdentifier(List<String> identifier) {
-		super.setIdentifier(identifier);
-	}
-	
-	@Override
-	@Field(OrganizationSolrFields.ID)
-	public void setEntityId(String entityId) {
-		super.setEntityId(entityId);
-	}
-	
-	@Override
-	@Field(OrganizationSolrFields.TYPE)
-	public void setType(String type) {
-		super.setType(type);
-	}	
-	
-	@Override
-	@Field(OrganizationSolrFields.IS_RELATED_TO)
-	public void setIsRelatedTo(List<String> isRelatedTo) {
-		super.setIsRelatedTo(isRelatedTo);
-	}
-	
-	@Override
-	@Field(OrganizationSolrFields.HAS_PART)
-	public void setHasPart(List<String> hasPart) {
-		super.setHasPart(hasPart);
+	private void setOrganizationDomain(Map<String, List<String>> organizationDomain) {
+		if(organizationDomain!=null) {
+		this.organizationDomain=new HashMap<>(SolrUtils.normalizeStringListMapByAddingPrefix(
+				OrganizationSolrFields.ORGANIZATION_DOMAIN + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, organizationDomain));		
+		}
 	}
 
-	@Override
-	@Field(OrganizationSolrFields.IS_PART_OF)
-	public void setIsPartOfArray(List<String> isPartOf) {
-		super.setIsPartOfArray(isPartOf);
-	}
-	
-	@Override
-	@Field(OrganizationSolrFields.GEOGRAPHIC_LEVEL_ALL)
-	public void setGeographicLevel(Map<String, String> geographicLevel) {
-		Map<String, String> normalizedGeographicLevel = SolrUtils.normalizeStringMapByAddingPrefix(
-				OrganizationSolrFields.GEOGRAPHIC_LEVEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, geographicLevel);
-		super.setGeographicLevelStringMap(normalizedGeographicLevel);		
+	private void setEuropeanaRole(Map<String, List<String>> europeanaRole) {
+		if(europeanaRole!=null) {
+		this.europeanaRole=new HashMap<>(SolrUtils.normalizeStringListMapByAddingPrefix(
+				OrganizationSolrFields.EUROPEANA_ROLE + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, europeanaRole));
+		}
 	}
 
-	@Override
-	@Field(OrganizationSolrFields.ORGANIZATION_DOMAIN_ALL)
-	public void setOrganizationDomain(Map<String, List<String>> organizationDomain) {
-		Map<String, List<String>> normalizedOrganizationDomain = SolrUtils.normalizeStringListMapByAddingPrefix(
-				OrganizationSolrFields.ORGANIZATION_DOMAIN + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, organizationDomain);
-		super.setOrganizationDomain(normalizedOrganizationDomain);		
+	public Map<String, String> getDescription() {
+		return description;
 	}
 
-	@Override
-	@Field(OrganizationSolrFields.EUROPEANA_ROLE_ALL)
-	public void setEuropeanaRole(Map<String, List<String>> europeanaRole) {
-		Map<String, List<String>> normalizedEuropeanaRole = SolrUtils.normalizeStringListMapByAddingPrefix(
-				OrganizationSolrFields.EUROPEANA_ROLE + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, europeanaRole);
-		super.setEuropeanaRole(normalizedEuropeanaRole);
+	public Map<String, List<String>> getAcronym() {
+		return acronym;
 	}
 
-	@Override
-	@Field(OrganizationSolrFields.FOAF_HOMEPAGE)
-	public void setHomepage(String homepage) {
-		super.setHomepage(homepage);
+	public String getLogo() {
+		return logo;
 	}
 
-	@Override
-	@Field(OrganizationSolrFields.FOAF_LOGO)
-	public void setLogo(String logo) {
-		super.setLogo(logo);
-	}
-	
-	@Override
-	@Field(OrganizationSolrFields.DEPICTION)
-	public void setDepiction(String depiction) {
-		super.setDepiction(depiction);
-	}
-	
-	@Override
-	@Field(OrganizationSolrFields.SAME_AS)
-	public void setSameAs(List<String> sameAs) {
-		super.setSameAs(sameAs);
-	}
-	
-	@Override
-	@Field(OrganizationSolrFields.VCARD_HAS_ADDRESS)
-	public void setHasAddress(String hasAddress) {
-		super.setHasAddress(hasAddress);
+	public String getHomepage() {
+		return homepage;
 	}
 
-	@Override
-	@Field(OrganizationSolrFields.VCARD_POSTAL_CODE)
-	public void setPostalCode(String postalCode) {
-		super.setPostalCode(postalCode);
+	public List<String> getPhone() {
+		return phone;
 	}
 
-	@Override
-	@Field(OrganizationSolrFields.VCARD_POST_OFFICE_BOX)
-	public void setPostBox(String postBox) {
-		super.setPostBox(postBox);
+	public List<String> getMbox() {
+		return mbox;
 	}
 
-	@Override
-	@Field(OrganizationSolrFields.COUNTRY)
-	public void setCountry(String country) {
-		super.setCountry(country);
+	public Map<String, List<String>> getEuropeanaRole() {
+		return europeanaRole;
 	}
 
-	@Override
-	@Field(OrganizationSolrFields.VCARD_LOCALITY)
-	public void setLocality(String locality) {
-		super.setLocality(locality);
+	public Map<String, List<String>> getOrganizationDomain() {
+		return organizationDomain;
 	}
 
-	@Override
-	@Field(OrganizationSolrFields.VCARD_STREET_ADDRESS)
-	public void setStreetAddress(String streetAddress) {
-		super.setStreetAddress(streetAddress);
+	public Map<String, String> getGeographicLevel() {
+		return geographicLevel;
 	}
 
-
-	@Override
-	@Field(OrganizationSolrFields.VCARD_COUNTRYNAME)
-	public void setCountryName(String countryName) {
-		super.setCountryName(countryName);
+	public String getCountry() {
+		return country;
 	}
 
-	@Override
-	@Field(OrganizationSolrFields.VCARD_REGION)
-	public void setRegion(String region) {
-		super.setRegion(region);
+	public String getHasAddress() {
+		return hasAddress;
 	}
 
-	@Override
-	@Field(OrganizationSolrFields.FOAF_PHONE)
-	public void setPhone(List<String> phone) {
-		super.setPhone(phone);
+	public String getStreetAddress() {
+		return streetAddress;
 	}
 
-	@Override
-	@Field(OrganizationSolrFields.FOAF_MBOX)
-	public void setMbox(List<String> mbox) {
-		super.setMbox(mbox);
+	public String getLocality() {
+		return locality;
 	}
 
-	@Override
-	@Field(OrganizationSolrFields.VCARD_HAS_GEO)
-	public void setHasGeo(String hasGeo) {
-		super.setHasGeo(hasGeo);
+	public String getRegion() {
+		return region;
 	}
 
-	public String getPayload() {
-		return payload;
+	public String getPostalCode() {
+		return postalCode;
 	}
 
-	@Field(AgentSolrFields.PAYLOAD)
-	public void setPayload(String payload) {
-		this.payload = payload;
+	public String getCountryName() {
+		return countryName;
 	}
+
+	public String getPostBox() {
+		return postBox;
+	}
+
+	public String getHasGeo() {
+		return hasGeo;
+	}
+
 }
