@@ -188,10 +188,11 @@ public class SolrUtils {
         else if(entity instanceof Place){
             return new SolrPlace((Place) entity);
         }
-        else if(entity.getType().compareToIgnoreCase(EntityTypes.Timespan.toString())==0){
+        else if(entity instanceof Timespan){
             return new SolrTimespan((Timespan) entity);
         }
 
+        // All possible types have been checked
        throw new IllegalArgumentException(String.format("Unrecognized entity type while creating SolrEntity: %s ",
 			   entity.getClass().getName()));
     }

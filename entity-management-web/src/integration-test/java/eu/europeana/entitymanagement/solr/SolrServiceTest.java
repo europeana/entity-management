@@ -7,10 +7,8 @@ import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZAT
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
 
-import javax.annotation.Resource;
 
 import eu.europeana.entitymanagement.AbstractIntegrationTest;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -37,10 +35,10 @@ import eu.europeana.entitymanagement.solr.model.SolrTimespan;
 import eu.europeana.entitymanagement.solr.model.SolrUtils;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 
-import java.io.IOException;
-
+//TODO: Extend AbstractIntegrationTest, fix and re-enable
+@Disabled("Excluded from automated runs as this introduces a bug with Testcontainers")
 @SpringBootTest
-public class SolrServiceTest extends AbstractIntegrationTest {
+public class SolrServiceTest {
 
 	@Qualifier(AppConfig.BEAN_EM_SOLR_SERVICE)
 	@Autowired
