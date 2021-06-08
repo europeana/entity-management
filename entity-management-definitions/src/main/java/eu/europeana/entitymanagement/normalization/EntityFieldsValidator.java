@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.normalization;
 
 import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_DATE;
+import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_DATETIME;
 import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_EMAIL;
 import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_TEXT_OR_URI;
 import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_URI;
@@ -73,7 +74,8 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
 				else if (FIELD_TYPE_URI.equals(EntityFieldsTypes.getFieldType(fieldName))) {
 					returnValueLocal = validateURIField(context, field, fieldValue);
 				}					
-				else if (FIELD_TYPE_DATE.equals(EntityFieldsTypes.getFieldType(fieldName))) {
+				else if (FIELD_TYPE_DATE.equals(EntityFieldsTypes.getFieldType(fieldName)) || 
+						FIELD_TYPE_DATETIME.equals(EntityFieldsTypes.getFieldType(fieldName))) {
 					returnValueLocal = validateDateField(context, field, fieldValue);
 				}
 				else if (FIELD_TYPE_EMAIL.equals(EntityFieldsTypes.getFieldType(fieldName))) {
@@ -196,7 +198,7 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
     boolean checkDateFormatISO8601(ConstraintValidatorContext context, Field field, String fieldValue) {
         try {
             //LocalDate.parse(fieldValue.toString(), DateTimeFormatter.ofPattern(java.time.format.DateTimeFormatter.ISO_DATE.toString()).withResolverStyle(ResolverStyle.STRICT));
-            if(fieldValue.contains("T")) {
+        	if(FIELD_TYPE_DATETIME.equals(EntityFieldsTypes.getFieldType(field.getName()))) {
                 //ISO Date time format
                 LocalDate.parse(fieldValue, java.time.format.DateTimeFormatter.ISO_DATE_TIME);
             } else {
@@ -205,7 +207,7 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
             }
             return true;
         } catch (DateTimeParseException e) {
-            addConstraint(context, "The entity field: "+field.getName()+" is of type Date and does not comply with the ISO-8601 format: "+fieldValue.toString()+".");
+            addConstraint(context, "The entity field: "+field.getName()+" is of type: "+EntityFieldsTypes.getFieldType(field.getName())+" and does not comply with the ISO-8601 format: "+fieldValue.toString()+".");
             return false;
         }
         

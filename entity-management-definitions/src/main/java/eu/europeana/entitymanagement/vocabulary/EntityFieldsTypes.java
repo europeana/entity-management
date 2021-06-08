@@ -70,8 +70,8 @@ public enum EntityFieldsTypes {
     hasGeo(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
     source(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
     thumbnail(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
-    created(EntityFieldsTypes.FIELD_TYPE_DATE, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
-    modified(EntityFieldsTypes.FIELD_TYPE_DATE, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
+    created(EntityFieldsTypes.FIELD_TYPE_DATETIME, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
+    modified(EntityFieldsTypes.FIELD_TYPE_DATETIME, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
     pageRank(EntityFieldsTypes.FIELD_TYPE_INTEGER, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
     recordCount(EntityFieldsTypes.FIELD_TYPE_INTEGER, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
     score(EntityFieldsTypes.FIELD_TYPE_INTEGER, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
@@ -81,6 +81,7 @@ public enum EntityFieldsTypes {
 	public static final String FIELD_TYPE_URI = "URI";
 	public static final String FIELD_TYPE_INTEGER = "Integer";
 	public static final String FIELD_TYPE_DATE = "Date";
+	public static final String FIELD_TYPE_DATETIME = "Datetime";
 	public static final String FIELD_TYPE_TEXT = "Text";
 	public static final String FIELD_TYPE_KEYWORD = "Keyword";
 	public static final String FIELD_TYPE_EMAIL = "Email";
