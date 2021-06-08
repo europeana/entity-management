@@ -2,14 +2,10 @@ package eu.europeana.entitymanagement.solr.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.solr.client.solrj.beans.Field;
 
-import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.definitions.model.Place;
-import eu.europeana.entitymanagement.vocabulary.AgentSolrFields;
-import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import eu.europeana.entitymanagement.vocabulary.PlaceSolrFields;
 
 /*

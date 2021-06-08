@@ -37,14 +37,8 @@ public class EntityManagementConfiguration  {
     @Value("${entitymanagement.solr.searchapi.url}")
     private String searchApiSolrUrl;
     
-    @Value("${entitymanagement.solr.searchapi.collection}")
-    private String searchApiSolrCollection;
-    
     @Value("${entitymanagement.solr.indexing.url}")
     private String indexingSolrUrl;
-    
-    @Value("${entitymanagement.solr.indexing.collection}")
-    private String indexingSolrCollection;
 
     @Value("${entitymanagement.solr.searchapi.enrichments.query}")
     private String enrichmentsQuery;
@@ -187,10 +181,6 @@ public class EntityManagementConfiguration  {
     return enrichmentsMigrationPassword;
   }
 
-  public String getSearchApiSolrCollection() {
-	return searchApiSolrCollection;
-  }
-
   public int getBatchStepThrottleLimit() {
     return batchStepThrottleLimit;
   }
@@ -200,8 +190,4 @@ public String getIndexingSolrUrl() {
 	return indexingSolrUrl;
 }
 
-
-public String getIndexingSolrCollection() {
-	return indexingSolrCollection;
-}
 }

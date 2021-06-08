@@ -4,6 +4,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import eu.europeana.entitymanagement.definitions.model.Agent;
+import eu.europeana.entitymanagement.definitions.model.Concept;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.definitions.model.Place;
+import eu.europeana.entitymanagement.definitions.model.Timespan;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+
 /**
  * This class implements supporting methods for Solr*Impl classes e.g. normalization of the content
  * to match to the required output format.
@@ -167,5 +175,25 @@ public class SolrUtils {
 		itemArr = itemList.toArray(itemArr);
 		return itemArr;
 	}
+	
+    public static SolrEntity<?> createSolrEntity(Entity entity){
+        if(entity.getType().compareToIgnoreCase(EntityTypes.Agent.toString())==0){
+            return new SolrAgent((Agent) entity);
+        }
+        else if(entity.getType().compareToIgnoreCase(EntityTypes.Concept.toString())==0){
+            return new SolrConcept((Concept) entity);
+        }
+        else if(entity.getType().compareToIgnoreCase(EntityTypes.Organization.toString())==0){
+            return new SolrOrganization((Organization) entity);
+        }
+        else if(entity.getType().compareToIgnoreCase(EntityTypes.Place.toString())==0){
+            return new SolrPlace((Place) entity);
+        }
+        else if(entity.getType().compareToIgnoreCase(EntityTypes.Timespan.toString())==0){
+            return new SolrTimespan((Timespan) entity);
+        }
+        return null;
+    }
+
 	
 }

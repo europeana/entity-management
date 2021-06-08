@@ -60,8 +60,8 @@ public class SolrConcept extends SolrEntity<Concept> {
 		if(concept.getNarrowMatch()!=null) this.narrowMatch= new ArrayList<>(concept.getNarrowMatch());
 		if(concept.getExactMatch()!=null) this.exactMatch= new ArrayList<>(concept.getExactMatch());
 		if(concept.getCoref()!=null) this.coref=new ArrayList<>(concept.getCoref());
-		if(concept.getBroader()!=null) this.relatedMatch= new ArrayList<>(concept.getRelatedMatch());
-		if(concept.getRelatedMatch()!=null) this.closeMatch= new ArrayList<>(concept.getCloseMatch());
+		if(concept.getRelatedMatch()!=null) this.relatedMatch= new ArrayList<>(concept.getRelatedMatch());
+		if(concept.getCloseMatch()!=null) this.closeMatch= new ArrayList<>(concept.getCloseMatch());
 		if(concept.getInScheme()!=null) this.inScheme= new ArrayList<>(concept.getInScheme());
 		setNotation(concept.getNotation());
 	}

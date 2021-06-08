@@ -14,43 +14,43 @@ public abstract class SolrEntity<T extends Entity> {
 	
 	protected T entity;
 
-    @Field(AgentSolrFields.TYPE)
+    @Field(EntitySolrFields.TYPE)
     private String type;
 
-    @Field(AgentSolrFields.ID)
+    @Field(EntitySolrFields.ID)
     private String entityId;
 
-    @Field(AgentSolrFields.DEPICTION)
+    @Field(EntitySolrFields.DEPICTION)
     private String depiction;
 
-    @Field(AgentSolrFields.NOTE_ALL)
+    @Field(EntitySolrFields.NOTE_ALL)
     private Map<String, List<String>> note;
 
-    @Field(AgentSolrFields.PREF_LABEL_ALL)
+    @Field(EntitySolrFields.PREF_LABEL_ALL)
     private Map<String, String> prefLabel;
 
-    @Field(AgentSolrFields.ALT_LABEL_ALL)
+    @Field(EntitySolrFields.ALT_LABEL_ALL)
     private Map<String, List<String>> altLabel;
 
-    @Field(AgentSolrFields.HIDDEN_LABEL)
+    @Field(EntitySolrFields.HIDDEN_LABEL)
     private Map<String, List<String>> hiddenLabel;
 
-    @Field(AgentSolrFields.IDENTIFIER)
+    @Field(EntitySolrFields.IDENTIFIER)
     private List<String> identifier;
 
-    @Field(AgentSolrFields.SAME_AS)
+    @Field(EntitySolrFields.SAME_AS)
     private List<String> sameAs;
 
-    @Field(AgentSolrFields.IS_RELATED_TO)
+    @Field(EntitySolrFields.IS_RELATED_TO)
     private List<String> isRelatedTo;
 
-    @Field(AgentSolrFields.HAS_PART)
+    @Field(EntitySolrFields.HAS_PART)
     private List<String> hasPart;
 
-    @Field(AgentSolrFields.IS_PART_OF)
+    @Field(EntitySolrFields.IS_PART_OF)
     private List<String> isPartOf;
 
-    @Field(AgentSolrFields.PAYLOAD)
+    @Field(EntitySolrFields.PAYLOAD)
     private String payload;
 
     public SolrEntity(T entity) {

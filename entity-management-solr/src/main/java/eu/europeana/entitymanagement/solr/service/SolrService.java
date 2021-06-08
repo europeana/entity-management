@@ -37,9 +37,9 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 @Service(AppConfigConstants.BEAN_EM_SOLR_SERVICE)
 public class SolrService {
 
-	@Qualifier(AppConfigConstants.BEAN_JSON_MAPPER)
 	@Autowired
-	ObjectMapper emJsonMapper;	
+	@Qualifier(AppConfigConstants.BEAN_JSON_MAPPER)
+	ObjectMapper payloadObjectMapper;	
 	
 	private final Logger log = LogManager.getLogger(getClass());
 	
@@ -64,10 +64,10 @@ public class SolrService {
 				
 		try {			
 			log.debug("Storing to Solr. Object: " + solrEntity.toString());				
-			UpdateResponse rsp =indexingSolrClient.addBean(emConfiguration.getIndexingSolrCollection(), solrEntity);
+			UpdateResponse rsp =indexingSolrClient.addBean(solrEntity);
 			log.info("Solr response after storing: " + rsp.toString());
 			if(doCommit)
-				indexingSolrClient.commit(emConfiguration.getIndexingSolrCollection());
+				indexingSolrClient.commit();
 		} catch (SolrServerException | IOException | RuntimeException ex) {
 			throw new SolrServiceException("An unexpected exception occured when storing the Entity: " + solrEntity.toString() + " to Solr.", ex);
 		}
@@ -84,7 +84,7 @@ public class SolrService {
 		SolrQuery query = new SolrQuery();
 		query.set("q", EntitySolrFields.ID+ ":\"" + entityId + "\"");
 		try {
-			rsp =indexingSolrClient.query(emConfiguration.getIndexingSolrCollection(), query);
+			rsp =indexingSolrClient.query(query);
 			log.debug("query response: " + rsp.toString());
 			
 		} catch (IOException | SolrServerException ex) {
@@ -112,8 +112,8 @@ public class SolrService {
 		      
 			if(entity.getEntity().getType().compareToIgnoreCase(EntityTypes.Agent.toString())==0) {
 				filterProvider.addFilter("solrSuggesterFilter", SimpleBeanPropertyFilter.filterOutAllExcept("isShownBy", "prefLabel", "altLabel", "hiddenLabel", "dateOfBirth", "dateOfDeath", "dateOfEstablishment", "dateOfTermination"));
-				emJsonMapper.setFilterProvider(filterProvider);
-				ObjectNode agentJacksonNode = emJsonMapper.valueToTree(entity.getEntity());
+				payloadObjectMapper.setFilterProvider(filterProvider);
+				ObjectNode agentJacksonNode = payloadObjectMapper.valueToTree(entity.getEntity());
 				return agentJacksonNode.toString();
 			}
 			else if(entity.getEntity().getType().compareToIgnoreCase(EntityTypes.Organization.toString())==0) {
@@ -121,8 +121,8 @@ public class SolrService {
 				 * according to the specifications, leaving only the value for the "en" key in the suggester for organizationDomain
 				 */
 				filterProvider.addFilter("solrSuggesterFilter", SimpleBeanPropertyFilter.filterOutAllExcept("isShownBy", "prefLabel", "altLabel", "hiddenLabel", "acronym", "organizationDomain", "country"));			
-				emJsonMapper.setFilterProvider(filterProvider);
-				ObjectNode agentJacksonNode = emJsonMapper.valueToTree(entity.getEntity());
+				payloadObjectMapper.setFilterProvider(filterProvider);
+				ObjectNode agentJacksonNode = payloadObjectMapper.valueToTree(entity.getEntity());
 				JsonNode organizationDomainNode = agentJacksonNode.get("organizationDomain");
 				agentJacksonNode.replace("organizationDomain", organizationDomainNode.get("en"));
 				return agentJacksonNode.toString();
@@ -130,8 +130,8 @@ public class SolrService {
 			}
 			else if(entity.getType().compareToIgnoreCase(EntityTypes.Timespan.toString())==0) {
 				filterProvider.addFilter("solrSuggesterFilter", SimpleBeanPropertyFilter.filterOutAllExcept("isShownBy", "prefLabel", "altLabel", "hiddenLabel", "begin", "end"));
-				emJsonMapper.setFilterProvider(filterProvider);
-				ObjectNode agentJacksonNode = emJsonMapper.valueToTree(entity.getEntity());
+				payloadObjectMapper.setFilterProvider(filterProvider);
+				ObjectNode agentJacksonNode = payloadObjectMapper.valueToTree(entity.getEntity());
 				return agentJacksonNode.toString();
 			}
 			

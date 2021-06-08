@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.apache.solr.client.solrj.beans.Field;
 
-import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.definitions.model.Timespan;
 import eu.europeana.entitymanagement.vocabulary.TimespanSolrFields;
 
