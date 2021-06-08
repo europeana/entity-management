@@ -50,7 +50,7 @@ public class SolrServiceTest {
     @Autowired
     JsonLdSerializer emJsonldSerializer;
 
-    @Test
+    //@Test
     public void storeAgentInSolr() throws Exception {
     	
     	Agent agent = objectMapper.readValue(loadFile(AGENT_JSON), Agent.class);
@@ -61,7 +61,7 @@ public class SolrServiceTest {
 
     }
     
-    @Test
+    //@Test
     public void storeOranizationInSolr() throws Exception {
  
     	Organization organization = objectMapper.readValue(loadFile(ORGANIZATION_JSON), Organization.class);
@@ -71,7 +71,7 @@ public class SolrServiceTest {
     	Assertions.assertEquals(organization.getEntityId(), storedOrganization.getEntityId());
     }
     
-    @Test
+    //@Test
     public void storeTimespanInSolr() throws Exception {
     	
     	Timespan timespan = objectMapper.readValue(loadFile(TIMESPAN_JSON), Timespan.class);
@@ -82,7 +82,7 @@ public class SolrServiceTest {
 
     }
     
-    @Test
+    //@Test
     public void storeConceptInSolr() throws Exception {
     	
     	Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
@@ -93,7 +93,7 @@ public class SolrServiceTest {
 
     }
     
-    @Test
+    //@Test
     public void storePlaceInSolr() throws Exception {
     	
     	Place place = objectMapper.readValue(loadFile(PLACE_JSON), Place.class);
