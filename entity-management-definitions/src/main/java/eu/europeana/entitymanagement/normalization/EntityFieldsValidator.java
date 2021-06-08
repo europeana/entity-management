@@ -281,12 +281,11 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
         boolean valueIsList;
         for (Map.Entry<String, Object> fieldValueMapElem : fieldValueMap.entrySet()) {
             valueIsList = fieldValueMapElem.getValue().getClass().isAssignableFrom(ArrayList.class);
-            // only if the key is an empty string, the value is of type URI
             if(definitionIsList) {
                 //string list
                 if(!valueIsList){
                     //check cardinality for list
-                    addConstraint(context, "The entity field: "+field.getName()+" cardinality: "+EntityFieldsTypes.valueOf(field.getName()).getFieldCardinality()+" and must not be represented as list");
+                    addConstraint(context, "The entity field: "+field.getName()+" cardinality: "+EntityFieldsTypes.valueOf(field.getName()).getFieldCardinality()+" and must be represented as list");
                     localReturnValue = false;
                 }else {
                     List<String> values =  (List<String>) fieldValueMapElem.getValue();
