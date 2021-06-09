@@ -1,18 +1,20 @@
 package eu.europeana.entitymanagement.web;
 
-import eu.europeana.api.commons.error.EuropeanaApiErrorResponse.Builder;
-import javax.servlet.http.HttpServletRequest;
-
+import eu.europeana.api.commons.error.EuropeanaApiErrorResponse;
+import eu.europeana.api.commons.error.EuropeanaGlobalExceptionHandler;
+import eu.europeana.api.commons.web.exception.HttpException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import eu.europeana.api.commons.error.EuropeanaApiErrorResponse;
-import eu.europeana.api.commons.error.EuropeanaGlobalExceptionHandler;
-import eu.europeana.api.commons.web.exception.HttpException;
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @ControllerAdvice
 public class EMExceptionHandler extends EuropeanaGlobalExceptionHandler {
@@ -53,5 +55,27 @@ public class EMExceptionHandler extends EuropeanaGlobalExceptionHandler {
             .status(HttpStatus.BAD_REQUEST.value())
             .contentType(MediaType.APPLICATION_JSON)
             .body(response);
+    }
+
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<EuropeanaApiErrorResponse> handleMethodArgNotValidException(MethodArgumentNotValidException e, HttpServletRequest httpRequest) {
+        BindingResult result = e.getBindingResult();
+        String error ="";
+        List<FieldError> fieldErrors = result.getFieldErrors();
+       if(!fieldErrors.isEmpty()) {
+           // just return the first error
+           error = fieldErrors.get(0).getField() + " " + fieldErrors.get(0).getDefaultMessage();
+       }
+        EuropeanaApiErrorResponse response = new EuropeanaApiErrorResponse.Builder(httpRequest, e, stackTraceEnabled())
+                .setStatus(HttpStatus.BAD_REQUEST.value())
+                .setMessage("Invalid request body")
+                .setError(error)
+                .build();
+
+        return ResponseEntity
+                .status(response.getStatus())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(response);
     }
 }

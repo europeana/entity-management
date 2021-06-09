@@ -4,8 +4,9 @@ import eu.europeana.entitymanagement.definitions.exceptions.EntityValidationExce
 
 public enum EntityFieldsTypes {
 
+    id(EntityFieldsTypes.FIELD_TYPE_URI,  false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
     entityId(EntityFieldsTypes.FIELD_TYPE_URI,  false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
-    type(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
+    type(EntityFieldsTypes.FIELD_TYPE_KEYWORD, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
     depiction(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
     referencedWebResource(EntityFieldsTypes.FIELD_TYPE_WEB_RESOURCE, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
     prefLabel(EntityFieldsTypes.FIELD_TYPE_TEXT, true, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
@@ -22,7 +23,11 @@ public enum EntityFieldsTypes {
     placeOfBirth(EntityFieldsTypes.FIELD_TYPE_TEXT_OR_URI, true, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
     placeOfDeath(EntityFieldsTypes.FIELD_TYPE_TEXT_OR_URI, true, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
     gender(EntityFieldsTypes.FIELD_TYPE_TEXT, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
-    professionOrOccupation(EntityFieldsTypes.FIELD_TYPE_TEXT_OR_URI, true, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
+    /*
+     * TODO: change the professionOrOccupation field to be multilingual if the type of the field in the class changes to Map.
+     * According to the specifications this field is multilingual but for now we keep it not.
+     */    
+    professionOrOccupation(EntityFieldsTypes.FIELD_TYPE_TEXT_OR_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
     biographicalInformation(EntityFieldsTypes.FIELD_TYPE_TEXT, true, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
     note(EntityFieldsTypes.FIELD_TYPE_TEXT, true, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
     hasPart(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
@@ -128,6 +133,15 @@ public enum EntityFieldsTypes {
             throw new EntityValidationException("Unknown field: " + fieldName, e);
         }
         
+    }
+    
+    public static boolean isList(String fieldName) {
+        try {
+            String cardinality = valueOf(fieldName).getFieldCardinality();
+            return FIELD_CARDINALITY_0_INFINITE.equals(cardinality) || FIELD_CARDINALITY_1_INFINITE.equals(cardinality);
+        }catch (IllegalArgumentException e){
+            throw new EntityValidationException("Unknown field: " + fieldName, e);
+        }
     }
     
     boolean getFieldIsmultilingual() {

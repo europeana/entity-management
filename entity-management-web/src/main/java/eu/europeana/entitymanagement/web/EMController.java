@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,6 +39,7 @@ import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.web.EntityIdResponse;
+import eu.europeana.entitymanagement.exception.EntityMismatchException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.exception.EtagMismatchException;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
@@ -49,10 +52,6 @@ import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.web.service.MetisDereferenceService;
 import io.swagger.annotations.ApiOperation;
 
-/*
- * Suggestions:
- * 1. please use @RequestMapping consistently and avoid @PostMapping or @GetMapping (the annotation are used to analyze the methods signatures)
- */
 
 @RestController
 @Validated
@@ -336,10 +335,11 @@ public class EMController extends BaseRest {
     }
 
     @ApiOperation(value = "Register a new entity", nickname = "registerEntity", response = java.lang.Void.class)
-	@RequestMapping(value = "/", method = RequestMethod.POST)
+	@RequestMapping(value = "/", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String> registerEntity(
-				@RequestBody EntityPreview entityCreationRequest, HttpServletRequest request)
+			@Valid @RequestBody EntityPreview entityCreationRequest, HttpServletRequest request)
 				throws Exception {
+
 			if (emConfig.isAuthEnabled()) {
 				verifyWriteAccess(Operations.CREATE, request);
 			}
@@ -363,6 +363,12 @@ public class EMController extends BaseRest {
 
 			Entity metisResponse = dereferenceService
 					.dereferenceEntityById(entityCreationRequest.getId());
+
+			if(!metisResponse.getType().equals(entityCreationRequest.getType())){
+				throw new EntityMismatchException(String.format("Metis type '%s' does not match type '%s' in request",
+						metisResponse.getType(), entityCreationRequest.getType()));
+			}
+
 			if (metisResponse.getSameAs() != null) {
 				existingEntity = entityRecordService
 						.retrieveMetisCoreferenceSameAs(metisResponse.getSameAs());
