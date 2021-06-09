@@ -1,5 +1,30 @@
 package eu.europeana.entitymanagement.web;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
+
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.api.commons.web.exception.HttpException;
@@ -14,6 +39,7 @@ import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.web.EntityIdResponse;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.exception.EtagMismatchException;
+import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
@@ -22,20 +48,11 @@ import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.web.service.MetisDereferenceService;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
+/*
+ * Suggestions:
+ * 1. please use @RequestMapping consistently and avoid @PostMapping or @GetMapping (the annotation are used to analyze the methods signatures)
+ */
 
 @RestController
 @Validated
@@ -47,6 +64,7 @@ public class EMController extends BaseRest {
   private final DataSources datasources;
   private final BatchService batchService;
   private final EntityManagementConfiguration emConfig;
+  static Map<String,Set<String>> methodsRESTTypes = new HashMap<>();
 
   private static final String EXTERNAL_ID_REMOVED_MSG = "Entity id '%s' already exists as '%s', which has been removed";
 
@@ -60,6 +78,7 @@ public class EMController extends BaseRest {
 		this.datasources = datasources;
 		this.batchService = batchService;
 		this.emConfig = emConfig;
+		getMethodRESTTypes(methodsRESTTypes, EMController.class);
 	}
 
 	@ApiOperation(value = "Disable an entity", nickname = "disableEntity", response = java.lang.Void.class)
@@ -100,12 +119,21 @@ public class EMController extends BaseRest {
 			verifyWriteAccess(Operations.UPDATE, request);
 		}
 		EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier.toLowerCase(), true);
+
+		String methodRequestMappingValue=null;
+		try {
+			methodRequestMappingValue = this.getClass().getMethod(new Object() {}.getClass().getEnclosingMethod().getName(), new Object() {}.getClass().getEnclosingMethod().getParameterTypes()).getAnnotation(RequestMapping.class).value()[0].split("\\.", 2)[0];
+		}
+		catch (NoSuchMethodException | SecurityException e) {
+			throw new FunctionalRuntimeException("An exception occured during getting the method @RequestMapping value", e);
+		}
+
 		if (!entityRecord.isDisabled()) {
-			return createResponse(profile, type, identifier, FormatTypes.jsonld, RequestMethod.POST);
+			return createResponse(profile, type, identifier, FormatTypes.jsonld, String.join(",", methodsRESTTypes.get(methodRequestMappingValue)));
 		}
 		logger.info("Re-enabling entityId={}", entityRecord.getEntityId());
 		entityRecordService.enableEntityRecord(entityRecord);
-		return createResponse(profile, type, identifier, FormatTypes.jsonld, RequestMethod.POST);
+		return createResponse(profile, type, identifier, FormatTypes.jsonld, String.join(",", methodsRESTTypes.get(methodRequestMappingValue)));
 	}
 
     @ApiOperation(value = "Update an entity", nickname = "updateEntity", response = java.lang.Void.class)
@@ -145,12 +173,19 @@ public class EMController extends BaseRest {
 
 			entityRecordService.replaceEuropeanaProxy(updateRequestEntity, entityRecord);
 			entityRecordService.update(entityRecord);
-			return launchTaskAndRetrieveEntity(type, identifier, entityRecord, profile, RequestMethod.PUT);
+			
+			String methodRequestMappingValue=null;
+			try {
+				methodRequestMappingValue = this.getClass().getMethod(new Object() {}.getClass().getEnclosingMethod().getName(), new Object() {}.getClass().getEnclosingMethod().getParameterTypes()).getAnnotation(RequestMapping.class).value()[0].split("\\.", 2)[0];
+			}
+			catch (NoSuchMethodException | SecurityException e) {
+				throw new FunctionalRuntimeException("An exception occured during getting the method @RequestMapping value", e);
+			}
+			return launchTaskAndRetrieveEntity(type, identifier, entityRecord, profile, String.join(",", methodsRESTTypes.get(methodRequestMappingValue)));
     }
 
-
 	@ApiOperation(value = "Update an entity from external data source", nickname = "updateEntityFromDatasource", response = java.lang.Void.class)
-	@PostMapping(value = "/{type}/{identifier}/management/update")
+	@RequestMapping(value = "/{type}/{identifier}/management/update", method = RequestMethod.POST)
 	public ResponseEntity<String> updateFromExternalSource(
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
@@ -161,11 +196,18 @@ public class EMController extends BaseRest {
 			verifyWriteAccess(Operations.UPDATE, request);
 		}
 		EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
-		return launchTaskAndRetrieveEntity(type, identifier, entityRecord, profile, RequestMethod.POST);
+		String methodRequestMappingValue=null;
+		try {
+			methodRequestMappingValue = this.getClass().getMethod(new Object() {}.getClass().getEnclosingMethod().getName(), new Object() {}.getClass().getEnclosingMethod().getParameterTypes()).getAnnotation(RequestMapping.class).value()[0].split("\\.", 2)[0];
+		}
+		catch (NoSuchMethodException | SecurityException e) {
+			throw new FunctionalRuntimeException("An exception occured during getting the method @RequestMapping value", e);
+		}
+		return launchTaskAndRetrieveEntity(type, identifier, entityRecord, profile, String.join(",", methodsRESTTypes.get(methodRequestMappingValue)));
 	}
 
 	@ApiOperation(value = "Update multiple entities from external data source", nickname = "updateMultipleEntityFromDatasource", response = java.lang.Void.class)
-	@PostMapping(value = "/management/update")
+	@RequestMapping(value = "/management/update", method = RequestMethod.POST)
 	public ResponseEntity<EntityIdResponse> updateMultipleExternalSource(
 			@RequestBody List<String> entityIds,
 			HttpServletRequest request
@@ -186,7 +228,7 @@ public class EMController extends BaseRest {
 	}
 
 	@ApiOperation(value = "Update metrics for given entities", nickname = "updateMultipleEntityFromDatasource", response = java.lang.Void.class)
-	@PostMapping(value = "/management/metrics")
+	@RequestMapping(value = "/management/metrics", method = RequestMethod.POST)
 	public ResponseEntity<EntityIdResponse> updateMetricsMultiple(
 			@RequestBody List<String> entityIds,
 			HttpServletRequest request
@@ -218,7 +260,17 @@ public class EMController extends BaseRest {
 		if (emConfig.isAuthEnabled()) {
 			verifyReadAccess(request);
 		}
-	return createResponse(profile, type, identifier, FormatTypes.jsonld, RequestMethod.GET);
+
+		String methodRequestMappingValue=null;
+		try {
+			methodRequestMappingValue = this.getClass().getMethod(new Object() {}.getClass().getEnclosingMethod().getName(), new Object() {}.getClass().getEnclosingMethod().getParameterTypes()).getAnnotation(RequestMapping.class).value()[0].split("\\.", 2)[0];
+		}
+		catch (NoSuchMethodException | SecurityException e) {
+			throw new FunctionalRuntimeException("An exception occured during getting the method @RequestMapping value", e);
+		}
+
+		return createResponse(profile, type, identifier, FormatTypes.jsonld, String.join(",", methodsRESTTypes.get(methodRequestMappingValue)));
+		
 
     }
 
@@ -232,20 +284,28 @@ public class EMController extends BaseRest {
 	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
-	    HttpServletRequest request) throws EuropeanaApiException, HttpException{
+	    HttpServletRequest request) throws EuropeanaApiException, HttpException {
 			if (emConfig.isAuthEnabled()) {
 				verifyReadAccess(request);
 			}
-	if (acceptHeader.contains(HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML)) {
-	    //if rdf/XML is explicitly requested
-	    return createResponse(profile, type, identifier, FormatTypes.xml, RequestMethod.GET);
-	}
-	else if (acceptHeader.contains(HttpHeaders.CONTENT_TYPE_JSONLD) || acceptHeader.contains(MediaType.APPLICATION_JSON_VALUE) || acceptHeader.contains(MediaType.ALL_VALUE)){	
-	    return createResponse(profile, type, identifier, FormatTypes.jsonld, RequestMethod.GET);
-	}
-	else {
-		return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Requested formats in the Accept header not supported.");
-	}
+
+			String methodRequestMappingValue=null;
+			try {
+				methodRequestMappingValue = this.getClass().getMethod(new Object() {}.getClass().getEnclosingMethod().getName(), new Object() {}.getClass().getEnclosingMethod().getParameterTypes()).getAnnotation(RequestMapping.class).value()[0].split("\\.", 2)[0];
+			}
+			catch (NoSuchMethodException | SecurityException e) {
+				throw new FunctionalRuntimeException("An exception occured during getting the method @RequestMapping value", e);
+			}
+
+			if (acceptHeader.contains(HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML)) {
+				return createResponse(profile, type, identifier, FormatTypes.xml, String.join(",", methodsRESTTypes.get(methodRequestMappingValue)));
+			}
+			else if (acceptHeader.contains(HttpHeaders.CONTENT_TYPE_JSONLD) || acceptHeader.contains(MediaType.APPLICATION_JSON_VALUE) || acceptHeader.contains(MediaType.ALL_VALUE)){	
+				return createResponse(profile, type, identifier, FormatTypes.jsonld, String.join(",", methodsRESTTypes.get(methodRequestMappingValue)));
+			}
+			else {
+				return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Requested formats in the Accept header not supported.");
+			}
     }
 
 	@CrossOrigin(exposedHeaders= {HttpHeaders.ALLOW, HttpHeaders.VARY, HttpHeaders.LINK, HttpHeaders.ETAG})
@@ -262,12 +322,22 @@ public class EMController extends BaseRest {
 			if (emConfig.isAuthEnabled()) {
 				verifyReadAccess(request);
 			}
-	return createResponse(profile, type, identifier, FormatTypes.xml, RequestMethod.GET);
+			
+			String methodRequestMappingValue=null;
+			try {
+				methodRequestMappingValue = this.getClass().getMethod(new Object() {}.getClass().getEnclosingMethod().getName(), new Object() {}.getClass().getEnclosingMethod().getParameterTypes()).getAnnotation(RequestMapping.class).value()[0].split("\\.", 2)[0];
+			}
+			catch (NoSuchMethodException | SecurityException e) {
+				throw new FunctionalRuntimeException("An exception occured during getting the method @RequestMapping value", e);
+			}
+
+			return createResponse(profile, type, identifier, FormatTypes.xml, String.join(",", methodsRESTTypes.get(methodRequestMappingValue)));
+			
     }
 
     @ApiOperation(value = "Register a new entity", nickname = "registerEntity", response = java.lang.Void.class)
-    @PostMapping(value = "/")
-		public ResponseEntity<String> registerEntity(
+	@RequestMapping(value = "/", method = RequestMethod.POST)
+	public ResponseEntity<String> registerEntity(
 				@RequestBody EntityPreview entityCreationRequest, HttpServletRequest request)
 				throws Exception {
 			if (emConfig.isAuthEnabled()) {
@@ -307,14 +377,22 @@ public class EMController extends BaseRest {
 
 			logger.info("Created Entity record for externalId={}; entityId={}", entityCreationRequest.getId(), savedEntityRecord.getEntityId());
 
+			String methodRequestMappingValue=null;
+			try {
+				methodRequestMappingValue = this.getClass().getMethod(new Object() {}.getClass().getEnclosingMethod().getName(), new Object() {}.getClass().getEnclosingMethod().getParameterTypes()).getAnnotation(RequestMapping.class).value()[0].split("\\.", 2)[0];
+			}
+			catch (NoSuchMethodException | SecurityException e) {
+				throw new FunctionalRuntimeException("An exception occured during getting the method @RequestMapping value", e);
+			}
+
 			return launchTaskAndRetrieveEntity(savedEntityRecord.getEntity().getType(),
 					getDatabaseIdentifier(savedEntityRecord.getEntityId()), savedEntityRecord,
-					EntityProfile.internal.toString(), RequestMethod.POST);
+					EntityProfile.internal.toString(), String.join(",", methodsRESTTypes.get(methodRequestMappingValue)));
 		}
 
 
     private ResponseEntity<String> createResponse(String profile, String type, String identifier, FormatTypes outFormat,
-	    RequestMethod requestMethod) throws EuropeanaApiException {
+	    String allowHeaderParams) throws EuropeanaApiException {
 			/*
 	 * verify the parameters
 	 */
@@ -330,16 +408,16 @@ public class EMController extends BaseRest {
 	}
 
 			EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier,false);
-			return generateResponseEntity(profile, outFormat, entityRecord, HttpStatus.OK, requestMethod);
+			return generateResponseEntity(profile, outFormat, entityRecord, HttpStatus.OK, allowHeaderParams);
 		}
 
 	private ResponseEntity<String> launchTaskAndRetrieveEntity(String type, String identifier,
-			EntityRecord entityRecord, String profile, RequestMethod requestMethod) throws Exception {
+			EntityRecord entityRecord, String profile, String allowHeaderParams) throws Exception {
 		// launch synchronous update, then retrieve entity from DB afterwards
 		launchUpdateTask(Collections.singletonList(entityRecord.getEntityId()), false);
 		entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
 
-		return generateResponseEntity(profile, FormatTypes.jsonld, entityRecord, HttpStatus.ACCEPTED, requestMethod);
+		return generateResponseEntity(profile, FormatTypes.jsonld, entityRecord, HttpStatus.ACCEPTED, allowHeaderParams);
 	}
 
 	private ResponseEntity<String> checkExistingEntity(Optional<EntityRecord> existingEntity,

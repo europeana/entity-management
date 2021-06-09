@@ -9,6 +9,7 @@ import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
+import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
@@ -26,12 +27,27 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+
+/*
+ * Suggestions:
+ * 1. please use @RequestMapping consistently and avoid @PostMapping or @GetMapping (the annotation are used to analyze the methods signatures)
+ */
 
 @RestController
 @Validated
 @RequestMapping("/entity")
 public class EntityAdminController extends BaseRest {
+	
+	public EntityAdminController() {
+		getMethodRESTTypes(methodsRESTTypes, EMController.class);
+	}
+
+	static Map<String,Set<String>> methodsRESTTypes = new HashMap<>();
 
     private static final Logger LOG = LogManager.getLogger(EntityAdminController.class);
 
@@ -52,7 +68,8 @@ public class EntityAdminController extends BaseRest {
      * @throws HttpException
      */
     @ApiOperation(value = "Permanent Deletion of Entity", nickname = "deleteEntity", response = java.lang.Void.class)
-    @DeleteMapping(value = "/{type}/{identifier}/management",produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/{type}/{identifier}/management", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    //@DeleteMapping(value = "/{type}/{identifier}/management",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> deleteEntity(
             @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
             @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
@@ -84,7 +101,8 @@ public class EntityAdminController extends BaseRest {
      * @throws HttpException
      */
     @ApiOperation(value = "Migrate existing Entity", nickname = "migrateExistingEntity", response = java.lang.Void.class)
-    @PostMapping(value = "/{type}/{identifier}/management",produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/{type}/{identifier}/management", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    //@PostMapping(value = "/{type}/{identifier}/management",produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> migrateExistingEntity(
             @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
             @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
@@ -102,7 +120,17 @@ public class EntityAdminController extends BaseRest {
         EntityRecord savedEntityRecord = entityRecordService
                 .createEntityFromMigrationRequest(entityCreationRequest, type, identifier);
         LOG.info("Created Entity record for {}; entityId={}", entityCreationRequest.getId(), savedEntityRecord.getEntityId());
-        return generateResponseEntity(EntityProfile.internal.toString(), FormatTypes.jsonld, savedEntityRecord, HttpStatus.ACCEPTED, RequestMethod.POST);
+        
+		String methodRequestMappingValue=null;
+		try {
+			methodRequestMappingValue = this.getClass().getMethod(new Object() {}.getClass().getEnclosingMethod().getName(), new Object() {}.getClass().getEnclosingMethod().getParameterTypes()).getAnnotation(RequestMapping.class).value()[0].split("\\.", 2)[0];
+		}
+		catch (NoSuchMethodException | SecurityException e) {
+			throw new FunctionalRuntimeException("An exception occured during getting the method @RequestMapping value", e);
+		}
+
+		return generateResponseEntity(EntityProfile.internal.toString(), FormatTypes.jsonld, savedEntityRecord, HttpStatus.ACCEPTED, String.join(",", methodsRESTTypes.get(methodRequestMappingValue)));
+        
     }
 
     /**
