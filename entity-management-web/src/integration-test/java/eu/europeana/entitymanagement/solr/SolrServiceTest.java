@@ -7,9 +7,11 @@ import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZAT
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
 
-import javax.annotation.Resource;
 
+import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -33,24 +35,28 @@ import eu.europeana.entitymanagement.solr.model.SolrTimespan;
 import eu.europeana.entitymanagement.solr.model.SolrUtils;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 
-/**
- * JUnit test for testing the EMControllerTest class
- */
-//@ContextConfiguration(classes = { EntityManagementApp.class})
+//TODO: Extend AbstractIntegrationTest, fix and re-enable
+@Disabled("Excluded from automated runs as this introduces a bug with Testcontainers")
 @SpringBootTest
 public class SolrServiceTest {
 
-    @Resource(name=AppConfig.BEAN_EM_SOLR_SERVICE)
-	SolrService emSolrService;
-    
+	@Qualifier(AppConfig.BEAN_EM_SOLR_SERVICE)
+	@Autowired
+	private SolrService emSolrService;
+
     @Qualifier(AppConfigConstants.BEAN_JSON_MAPPER)
     @Autowired
     private ObjectMapper objectMapper;
     
     @Autowired
-    JsonLdSerializer emJsonldSerializer;
+    private JsonLdSerializer emJsonldSerializer;
 
-    //@Test
+	@BeforeEach
+	void setUp() throws Exception {
+		emSolrService.deleteAllDocuments();
+	}
+
+	@Test
     public void storeAgentInSolr() throws Exception {
     	
     	Agent agent = objectMapper.readValue(loadFile(AGENT_JSON), Agent.class);
@@ -61,7 +67,7 @@ public class SolrServiceTest {
 
     }
     
-    //@Test
+    @Test
     public void storeOranizationInSolr() throws Exception {
  
     	Organization organization = objectMapper.readValue(loadFile(ORGANIZATION_JSON), Organization.class);
@@ -71,7 +77,7 @@ public class SolrServiceTest {
     	Assertions.assertEquals(organization.getEntityId(), storedOrganization.getEntityId());
     }
     
-    //@Test
+    @Test
     public void storeTimespanInSolr() throws Exception {
     	
     	Timespan timespan = objectMapper.readValue(loadFile(TIMESPAN_JSON), Timespan.class);
@@ -82,7 +88,7 @@ public class SolrServiceTest {
 
     }
     
-    //@Test
+    @Test
     public void storeConceptInSolr() throws Exception {
     	
     	Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
@@ -93,16 +99,12 @@ public class SolrServiceTest {
 
     }
     
-    //@Test
+    @Test
     public void storePlaceInSolr() throws Exception {
-    	
     	Place place = objectMapper.readValue(loadFile(PLACE_JSON), Place.class);
     	emSolrService.storeEntity(SolrUtils.createSolrEntity(place), true);
     	SolrPlace storedPlace = emSolrService.searchById(SolrPlace.class, place.getEntityId());
     	Assertions.assertNotNull(storedPlace);
     	Assertions.assertEquals(place.getEntityId(), storedPlace.getEntityId());
-
     }
-  
-  
 }

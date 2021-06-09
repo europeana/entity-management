@@ -15,7 +15,6 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 /**
  * This class implements supporting methods for Solr*Impl classes e.g. normalization of the content
  * to match to the required output format.
- * @author GrafR
  *
  */
 public class SolrUtils {
@@ -176,23 +175,26 @@ public class SolrUtils {
 		return itemArr;
 	}
 	
-    public static SolrEntity<?> createSolrEntity(Entity entity){
-        if(entity.getType().compareToIgnoreCase(EntityTypes.Agent.toString())==0){
+    public static SolrEntity<? extends Entity> createSolrEntity(Entity entity){
+        if(entity instanceof Agent){
             return new SolrAgent((Agent) entity);
         }
-        else if(entity.getType().compareToIgnoreCase(EntityTypes.Concept.toString())==0){
+        else if(entity instanceof Concept){
             return new SolrConcept((Concept) entity);
         }
-        else if(entity.getType().compareToIgnoreCase(EntityTypes.Organization.toString())==0){
+        else if(entity instanceof Organization){
             return new SolrOrganization((Organization) entity);
         }
-        else if(entity.getType().compareToIgnoreCase(EntityTypes.Place.toString())==0){
+        else if(entity instanceof Place){
             return new SolrPlace((Place) entity);
         }
-        else if(entity.getType().compareToIgnoreCase(EntityTypes.Timespan.toString())==0){
+        else if(entity instanceof Timespan){
             return new SolrTimespan((Timespan) entity);
         }
-        return null;
+
+        // All possible types have been checked
+       throw new IllegalArgumentException(String.format("Unrecognized entity type while creating SolrEntity: %s ",
+			   entity.getClass().getName()));
     }
 
 	
