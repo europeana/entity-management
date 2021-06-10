@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.solr;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.model.*;
@@ -16,10 +17,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.*;
 
-//TODO: Extend AbstractIntegrationTest, fix and re-enable
-@Disabled("Excluded from automated runs as this introduces a bug with Testcontainers")
 @SpringBootTest
-public class SolrServiceTest {
+public class SolrServiceIT extends AbstractIntegrationTest {
 
 	@Qualifier(AppConfig.BEAN_EM_SOLR_SERVICE)
 	@Autowired
