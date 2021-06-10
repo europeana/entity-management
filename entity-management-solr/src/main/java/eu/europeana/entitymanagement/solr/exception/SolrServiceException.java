@@ -23,7 +23,7 @@ public class SolrServiceException extends EuropeanaApiException {
 
     @Override
     public boolean doLogStacktrace() {
-        return false;
+        return true;
     }
 
     @Override

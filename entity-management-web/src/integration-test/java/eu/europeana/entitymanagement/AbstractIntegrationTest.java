@@ -74,6 +74,9 @@ public abstract class AbstractIntegrationTest {
         registry.add("batch.computeMetrics", () -> "false");
         registry.add("auth.enabled", () -> "false");
         registry.add("entitymanagement.solr.indexing.url", SOLR_CONTAINER::getConnectionUrl);
+        // enable explicit commits while indexing to Solr in tests
+        registry.add("entitymanagement.solr.indexing.explicitCommits", () -> true);
+
 
         logger.info("MONGO_CONTAINER : {}", MONGO_CONTAINER.getConnectionUrl());
         logger.info("SOLR_CONTAINER : {}", SOLR_CONTAINER.getConnectionUrl());

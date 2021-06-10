@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 import eu.europeana.entitymanagement.solr.SolrUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.solr.client.solrj.beans.Field;
 
 import eu.europeana.entitymanagement.definitions.model.Agent;
@@ -92,26 +93,26 @@ public class SolrAgent extends SolrEntity<Agent> {
 
 
 	private void setBiographicalInformation(Map<String, List<String>> biographicalInformation) {
-		if (biographicalInformation!=null)  {
+		if (MapUtils.isNotEmpty(biographicalInformation))  {
 			this.biographicalInformation = new HashMap<>(SolrUtils.normalizeStringListMapByAddingPrefix(AgentSolrFields.BIOGRAPHICAL_INFORMATION + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, biographicalInformation));
 		}
 		
 	}
 
 	private void setPlaceOfBirth(Map<String, List<String>> placeOfBirth) {
-		if (placeOfBirth!=null) {
+		if (MapUtils.isNotEmpty(placeOfBirth)) {
 			this.placeOfBirth = new HashMap<>(SolrUtils.normalizeStringListMapByAddingPrefix(AgentSolrFields.PLACE_OF_BIRTH + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, placeOfBirth));
 		}
 	}
 
 	private void setPlaceOfDeath(Map<String, List<String>> placeOfDeath) {
-		if (placeOfDeath!=null) {
+		if (MapUtils.isNotEmpty(placeOfDeath)) {
 			this.placeOfDeath = new HashMap<>(SolrUtils.normalizeStringListMapByAddingPrefix(AgentSolrFields.PLACE_OF_DEATH + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, placeOfDeath));
 		}
 	}
 	
 	private void setName(Map<String, String> name) {
-		if (name!=null) {
+		if (MapUtils.isNotEmpty(name)) {
 			this.name = new HashMap<>(SolrUtils.normalizeStringMapByAddingPrefix(AgentSolrFields.NAME + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, name));
 		}
 	}

@@ -1,6 +1,8 @@
 package eu.europeana.entitymanagement.solr.service;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
@@ -66,13 +68,14 @@ public class SolrService implements InitializingBean {
 		objectMapper.setFilterProvider(solrEntityFilter);
 	}
 
+
+	/**
+	 * Indexes a single entity to Solr. Replaces any existing entities with the same entity identifier.
+	 * @param solrEntity entity to be indexed
+	 * @throws SolrServiceException if error occurs while generating payload, or during Solr indexing
+	 */
 	public void storeEntity(final SolrEntity<? extends Entity> solrEntity) throws SolrServiceException {
-		try {
-			solrEntity.setPayload(createSolrSuggesterField(solrEntity));
-		} catch (JsonProcessingException e) {
-			throw new SolrServiceException(String.format("Error generating Solr payload for entityId=%s",
-					solrEntity.getEntityId()), e);
-		}
+		setPayload(solrEntity);
 
 		try {
 			UpdateResponse rsp = solrClient.addBean(solrEntity);
@@ -88,11 +91,44 @@ public class SolrService implements InitializingBean {
 		}
 		
 	}
-	
-		@SuppressWarnings("unused")
+
+
+	/**
+	 * Indexes multiple entities to Solr. Replaces any existing entities with the same entity identifier.
+	 * @param solrEntityList list of entities to be indexed
+	 * @throws SolrServiceException if error occurs while generating payload, or during Solr indexing
+	 */
+	public void storeMultipleEntities(final List<SolrEntity<? extends Entity>> solrEntityList) throws SolrServiceException {
+		// first set payload on SolrEntities
+		for (SolrEntity<? extends Entity> solrEntity : solrEntityList) {
+			setPayload(solrEntity);
+		}
+
+		// EntityIDs for logging
+		String entityIds = Arrays.toString(getEntityIds(solrEntityList));
+		try {
+			UpdateResponse response = solrClient.addBeans(solrEntityList);
+			if(isExplicitCommitsEnabled) {
+				solrClient.commit();
+				log.debug("Performed explicit commit for entityIds={}", entityIds);
+			}
+			log.debug("Indexed {} entities to Solr in {}ms: entityIds={}",
+					solrEntityList.size(), response.getElapsedTime(), entityIds);
+		} catch (SolrServerException | IOException | RuntimeException ex) {
+			throw new SolrServiceException(String.format("Error during Solr indexing for multiple entities, entityIds=%s", entityIds), ex);
+		}
+	}
+
+
+	/**
+	 * Queries Solr for the document matching the provided ID and classType
+ 	 * @param classType {@link SolrEntity} subclass; expected class type for document
+	 * @param entityId entityID
+	 * @return SolrEntity instance
+	 * @throws SolrServiceException if error occurs while executing query
+	 */
 	    public <T extends Entity, U extends SolrEntity<T>> U searchById(Class<U> classType, String entityId)
 				throws SolrServiceException {
-
 
 		QueryResponse rsp;
 		SolrQuery query = new SolrQuery();
@@ -116,7 +152,17 @@ public class SolrService implements InitializingBean {
 
     }
 
-		private String createSolrSuggesterField(SolrEntity<? extends Entity> solrEntity) throws JsonProcessingException {
+	/**
+	 * Deletes all documents.
+	 * Only used during integration tests
+	 */
+	public void deleteAllDocuments() throws Exception {
+		UpdateResponse response = solrClient.deleteByQuery("*");
+		solrClient.commit();
+		log.info("Deleted all documents from Solr in {}ms", response.getElapsedTime());
+	}
+
+    private String createSolrSuggesterField(SolrEntity<? extends Entity> solrEntity) throws JsonProcessingException {
 
 			/*
 			 * specifying fields to be filtered
@@ -133,19 +179,28 @@ public class SolrService implements InitializingBean {
 
 				ObjectNode agentJacksonNode = objectMapper.valueToTree(solrEntity);
 				JsonNode organizationDomainNode = agentJacksonNode.get("organizationDomain");
-				agentJacksonNode.replace("organizationDomain", organizationDomainNode.get("en"));
-				return objectMapper.writeValueAsString(organizationDomainNode);
+				// organizationDomain not always set
+				if(organizationDomainNode != null) {
+					agentJacksonNode.replace("organizationDomain", organizationDomainNode.get("en"));
+					return objectMapper.writeValueAsString(organizationDomainNode);
+				}
 			}
 			return null;
 		}
 
-	/**
-	 * Deletes all documents.
-	 * Only used during integration tests
-	 */
-	public void deleteAllDocuments() throws Exception {
-		UpdateResponse response = solrClient.deleteByQuery("*");
-		solrClient.commit();
-		log.info("Deleted all documents from Solr in {}ms", response.getElapsedTime());
+
+	private void setPayload(SolrEntity<? extends Entity> solrEntity) throws SolrServiceException {
+		try {
+			solrEntity.setPayload(createSolrSuggesterField(solrEntity));
+		} catch (JsonProcessingException e) {
+			throw new SolrServiceException(String.format("Error generating Solr payload for entityId=%s",
+					solrEntity.getEntityId()), e);
+		}
+	}
+
+
+	private  String[] getEntityIds(List<SolrEntity<?>> solrEntityList) {
+		return solrEntityList.stream().map(SolrEntity::getEntityId)
+				.toArray(String[]::new);
 	}
 }

@@ -4,6 +4,7 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.solr.SolrUtils;
 import eu.europeana.entitymanagement.vocabulary.AgentSolrFields;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
+import org.apache.commons.collections.MapUtils;
 import org.apache.solr.client.solrj.beans.Field;
 
 import java.util.ArrayList;
@@ -12,8 +13,6 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class SolrEntity<T extends Entity> {
-	
-	protected T entity;
 
     @Field(EntitySolrFields.TYPE)
     private String type;
@@ -67,7 +66,6 @@ public abstract class SolrEntity<T extends Entity> {
         if(entity.getIsRelatedTo()!=null) this.isRelatedTo = new ArrayList<>(entity.getIsRelatedTo());
         if(entity.getHasPart()!=null) this.hasPart = new ArrayList<>(entity.getHasPart());
         if(entity.getIsPartOfArray()!=null) this.isPartOf = new ArrayList<>(entity.getIsPartOfArray());
-        this.entity=entity;
     }
     
     public SolrEntity() {
@@ -79,28 +77,28 @@ public abstract class SolrEntity<T extends Entity> {
     }
 
     private void setPrefLabelStringMap(Map<String, String> prefLabel) {
-    	if (prefLabel!=null) {
+    	if (MapUtils.isNotEmpty(prefLabel)) {
     		this.prefLabel = new HashMap<>(SolrUtils.normalizeStringMapByAddingPrefix(
                 AgentSolrFields.PREF_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, prefLabel));
     	}
     }
 
     private void setAltLabel(Map<String, List<String>> altLabel) {
-    	if (altLabel!=null) {
+    	if (MapUtils.isNotEmpty(altLabel)) {
     		this.altLabel = new HashMap<>(SolrUtils.normalizeStringListMapByAddingPrefix(
                 AgentSolrFields.ALT_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, altLabel));
     	}
     }
 
     private void setHiddenLabel(Map<String, List<String>> hiddenLabel) {
-    	if (hiddenLabel!=null) {
+    	if (MapUtils.isNotEmpty(hiddenLabel)) {
     		this.hiddenLabel = new HashMap<>(SolrUtils.normalizeStringListMapByAddingPrefix(
                 AgentSolrFields.HIDDEN_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, hiddenLabel));
     	}
     }
 
     private void setNote(Map<String, List<String>> note) {
-    	if (note!=null) {
+    	if (MapUtils.isNotEmpty(note)) {
     		this.note = new HashMap<>(SolrUtils.normalizeStringListMapByAddingPrefix(
                 AgentSolrFields.NOTE + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, note));
     	}

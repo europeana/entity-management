@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import eu.europeana.entitymanagement.solr.SolrUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.solr.client.solrj.beans.Field;
 
 import eu.europeana.entitymanagement.definitions.model.Concept;
@@ -68,7 +69,7 @@ public class SolrConcept extends SolrEntity<Concept> {
 	}
 
 	private void setNotation(Map<String, List<String>> notation) {
-		if (notation!=null) {
+		if (MapUtils.isNotEmpty(notation)) {
 			this.notation = new HashMap<>(SolrUtils.normalizeStringListMapByAddingPrefix(ConceptSolrFields.NOTATION + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, notation));
 		}
 	}

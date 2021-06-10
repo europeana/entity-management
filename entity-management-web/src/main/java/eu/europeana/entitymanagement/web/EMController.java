@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import eu.europeana.entitymanagement.solr.service.SolrService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -47,6 +48,8 @@ import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.web.service.MetisDereferenceService;
 import io.swagger.annotations.ApiOperation;
 
+import static eu.europeana.entitymanagement.solr.SolrUtils.createSolrEntity;
+
 
 @RestController
 @Validated
@@ -54,6 +57,7 @@ import io.swagger.annotations.ApiOperation;
 public class EMController extends BaseRest {
 
   private final EntityRecordService entityRecordService;
+  private final SolrService solrService;
   private final MetisDereferenceService dereferenceService;
   private final DataSources datasources;
   private final BatchService batchService;
@@ -64,11 +68,12 @@ public class EMController extends BaseRest {
 
   @Autowired
 	public EMController(EntityRecordService entityRecordService,
-			MetisDereferenceService dereferenceService, DataSources datasources,
-			BatchService batchService,
-			EntityManagementConfiguration emConfig) {
+						SolrService solrService, MetisDereferenceService dereferenceService, DataSources datasources,
+						BatchService batchService,
+						EntityManagementConfiguration emConfig) {
 		this.entityRecordService = entityRecordService;
-		this.dereferenceService = dereferenceService;
+	  this.solrService = solrService;
+	  this.dereferenceService = dereferenceService;
 		this.datasources = datasources;
 		this.batchService = batchService;
 		this.emConfig = emConfig;
@@ -157,6 +162,11 @@ public class EMController extends BaseRest {
 
 			entityRecordService.replaceEuropeanaProxy(updateRequestEntity, entityRecord);
 			entityRecordService.update(entityRecord);
+
+			// this replaces the existing entity
+			solrService.storeEntity(createSolrEntity(entityRecord.getEntity()));
+			logger.info("Updated Solr document for entityId={}", entityRecord.getEntityId());
+
 			return launchTaskAndRetrieveEntity(type, identifier, entityRecord, profile);
     }
 
@@ -326,10 +336,13 @@ public class EMController extends BaseRest {
 
 			EntityRecord savedEntityRecord = entityRecordService
 					.createEntityFromRequest(entityCreationRequest, metisResponse);
-
 			logger.info("Created Entity record for externalId={}; entityId={}", entityCreationRequest.getId(), savedEntityRecord.getEntityId());
-			
-			return launchTaskAndRetrieveEntity(savedEntityRecord.getEntity().getType(),
+
+			solrService.storeEntity(createSolrEntity(savedEntityRecord.getEntity()));
+			logger.info("Indexed entity to Solr: externalId={}; entityId={}", entityCreationRequest.getId(), savedEntityRecord.getEntityId());
+
+
+		return launchTaskAndRetrieveEntity(savedEntityRecord.getEntity().getType(),
 					getDatabaseIdentifier(savedEntityRecord.getEntityId()), savedEntityRecord,
 					EntityProfile.internal.toString());
 		}

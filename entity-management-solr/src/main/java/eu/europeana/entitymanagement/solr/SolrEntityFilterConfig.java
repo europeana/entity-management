@@ -13,7 +13,7 @@ import static eu.europeana.entitymanagement.solr.SolrUtils.*;
 public class SolrEntityFilterConfig {
 
     @Bean(BEAN_SOLR_ENTITY_FILTER)
-    public static FilterProvider solrEntityFilter() {
+    public FilterProvider solrEntityFilter() {
         SimpleFilterProvider filterProvider = new SimpleFilterProvider();
         filterProvider.addFilter(SOLR_AGENT_FILTER,
                 SimpleBeanPropertyFilter.filterOutAllExcept("isShownBy", "prefLabel", "altLabel", "hiddenLabel", "dateOfBirth", "dateOfDeath", "dateOfEstablishment", "dateOfTermination"));

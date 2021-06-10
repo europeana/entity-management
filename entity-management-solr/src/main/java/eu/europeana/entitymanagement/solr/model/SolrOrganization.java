@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 import eu.europeana.entitymanagement.solr.SolrUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.solr.client.solrj.beans.Field;
 
 import eu.europeana.entitymanagement.definitions.model.Organization;
@@ -100,7 +101,7 @@ public class SolrOrganization extends SolrEntity<Organization> {
 	}
 
 	private void setDescription(Map<String, String> dcDescription) {
-	    if(dcDescription!=null) {
+	    if(MapUtils.isNotEmpty(dcDescription)) {
 	    	this.description = new HashMap<>(SolrUtils.normalizeStringMapByAddingPrefix(
 		    OrganizationSolrFields.DC_DESCRIPTION + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, dcDescription));
 	    }
@@ -108,28 +109,28 @@ public class SolrOrganization extends SolrEntity<Organization> {
 	}
 	
 	private void setAcronym(Map<String, List<String>>  acronym) {
-		if(acronym!=null) {
+		if(MapUtils.isNotEmpty(acronym)) {
 			this.acronym = new HashMap<>(SolrUtils.normalizeStringListMapByAddingPrefix(
 				OrganizationSolrFields.EDM_ACRONYM + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, acronym));
 		}
 	}
 	
 	private void setGeographicLevel(Map<String, String> geographicLevel) {
-		if(geographicLevel!=null) {
+		if(MapUtils.isNotEmpty(geographicLevel)) {
 		this.geographicLevel = new HashMap<>(SolrUtils.normalizeStringMapByAddingPrefix(
 				OrganizationSolrFields.GEOGRAPHIC_LEVEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, geographicLevel));
 		}
 	}
 	
 	private void setOrganizationDomain(Map<String, List<String>> organizationDomain) {
-		if(organizationDomain!=null) {
+		if(MapUtils.isNotEmpty(organizationDomain)) {
 		this.organizationDomain=new HashMap<>(SolrUtils.normalizeStringListMapByAddingPrefix(
 				OrganizationSolrFields.ORGANIZATION_DOMAIN + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, organizationDomain));		
 		}
 	}
 
 	private void setEuropeanaRole(Map<String, List<String>> europeanaRole) {
-		if(europeanaRole!=null) {
+		if(MapUtils.isNotEmpty(europeanaRole)) {
 		this.europeanaRole=new HashMap<>(SolrUtils.normalizeStringListMapByAddingPrefix(
 				OrganizationSolrFields.EUROPEANA_ROLE + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, europeanaRole));
 		}
