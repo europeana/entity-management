@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.solr.model;
 
 import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.solr.SolrUtils;
 import eu.europeana.entitymanagement.vocabulary.AgentSolrFields;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import org.apache.solr.client.solrj.beans.Field;
@@ -156,8 +157,4 @@ public abstract class SolrEntity<T extends Entity> {
     public String getPayload() {
         return payload;
     }
-
-	public T getEntity() {
-		return entity;
-	}
 }

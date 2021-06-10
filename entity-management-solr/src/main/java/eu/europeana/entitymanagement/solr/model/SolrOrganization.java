@@ -5,12 +5,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
+import eu.europeana.entitymanagement.solr.SolrUtils;
 import org.apache.solr.client.solrj.beans.Field;
 
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields;
 
+import static eu.europeana.entitymanagement.solr.SolrUtils.SOLR_ORGANIZATION_FILTER;
+
+@JsonFilter(SOLR_ORGANIZATION_FILTER)
 public class SolrOrganization extends SolrEntity<Organization> {
 
 	@Field(OrganizationSolrFields.DC_DESCRIPTION_ALL)

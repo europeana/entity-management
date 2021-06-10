@@ -40,6 +40,9 @@ public class EntityManagementConfiguration  {
     @Value("${entitymanagement.solr.indexing.url}")
     private String indexingSolrUrl;
 
+    @Value("${entitymanagement.solr.indexing.explicitCommits: false}")
+    private boolean explicitCommitsEnabled;
+
     @Value("${entitymanagement.solr.searchapi.enrichments.query}")
     private String enrichmentsQuery;
 
@@ -190,4 +193,7 @@ public String getIndexingSolrUrl() {
 	return indexingSolrUrl;
 }
 
+    public boolean explicitCommitsEnabled() {
+        return explicitCommitsEnabled;
+    }
 }

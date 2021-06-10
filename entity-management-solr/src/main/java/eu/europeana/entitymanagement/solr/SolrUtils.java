@@ -1,16 +1,11 @@
-package eu.europeana.entitymanagement.solr.model;
+package eu.europeana.entitymanagement.solr;
+
+import eu.europeana.entitymanagement.definitions.model.*;
+import eu.europeana.entitymanagement.solr.model.*;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import eu.europeana.entitymanagement.definitions.model.Agent;
-import eu.europeana.entitymanagement.definitions.model.Concept;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.Organization;
-import eu.europeana.entitymanagement.definitions.model.Place;
-import eu.europeana.entitymanagement.definitions.model.Timespan;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 /**
  * This class implements supporting methods for Solr*Impl classes e.g. normalization of the content
@@ -18,6 +13,10 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
  *
  */
 public class SolrUtils {
+
+	public static final String SOLR_AGENT_FILTER = "solrAgentFilter";
+	public static final String SOLR_ORGANIZATION_FILTER = "solrOrganizationFilter";
+	public static final String SOLR_TIMESPAN_FILTER = "solrTimespanFilter";
 
 	/**
 	 * This method removes unnecessary prefixes from the fields in format Map<String, String> languageMap

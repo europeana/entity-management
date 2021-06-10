@@ -2,11 +2,15 @@ package eu.europeana.entitymanagement.solr.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import org.apache.solr.client.solrj.beans.Field;
 
 import eu.europeana.entitymanagement.definitions.model.Timespan;
 import eu.europeana.entitymanagement.vocabulary.TimespanSolrFields;
 
+import static eu.europeana.entitymanagement.solr.SolrUtils.SOLR_TIMESPAN_FILTER;
+
+@JsonFilter(SOLR_TIMESPAN_FILTER)
 public class SolrTimespan extends SolrEntity<Timespan> {
 	
 	@Field(TimespanSolrFields.IS_NEXT_IN_SEQUENCE)

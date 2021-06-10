@@ -33,7 +33,7 @@ public class SolrServiceException extends EuropeanaApiException {
 
     @Override
     public HttpStatus getResponseStatus() {
-        return HttpStatus.BAD_REQUEST;
+        return HttpStatus.INTERNAL_SERVER_ERROR;
     }
 	
 }
