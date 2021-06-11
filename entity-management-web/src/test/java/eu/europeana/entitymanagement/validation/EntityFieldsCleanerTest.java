@@ -33,7 +33,7 @@ public class EntityFieldsCleanerTest {
     @Test
     public void shouldCleanEntityFields() throws Exception {
 	Agent agent = (Agent) MetisDereferenceUtils
-      .parseMetisResponse(jaxbContext.createUnmarshaller(), "http://www.wikidata.org/entity/Q855", loadFile(BaseMvcTestUtils.AGENT_STALIN_XML));
+      .parseMetisResponse(jaxbContext.createUnmarshaller(), "http://www.wikidata.org/entity/Q855", loadFile(BaseMvcTestUtils.AGENT_STALIN_CLEANING_XML));
 	
         EntityFieldsCleaner fieldCleaner = new EntityFieldsCleaner(emLanguageCodes);
         assert agent != null;
