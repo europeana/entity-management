@@ -41,7 +41,6 @@ import org.bson.types.ObjectId;
 public abstract class Entity {
 
 
-	protected String TMP_KEY = "def";
 	protected String type;
 	protected String entityId;
 	// ID of entityRecord in database
@@ -267,17 +266,7 @@ public abstract class Entity {
 		return tmpPrefLabel;
 	}
 
-	/**
-	 * This method converts List<String> to Map<String, List<String>>
-	 * @param list of strings
-	 */
-	protected Map<String, List<String>> fillTmpMap(List<String> list) {
-
-		Map<String, List<String>> tmpMap = new HashMap<String, List<String>>();
-		tmpMap.put(TMP_KEY, list);
-		return tmpMap;
-	}
-
+	
 	/**
 	 * This method converts  Map<String, String> to Map<String, List<String>>
 	 * @param mapOfStrings map of strings
