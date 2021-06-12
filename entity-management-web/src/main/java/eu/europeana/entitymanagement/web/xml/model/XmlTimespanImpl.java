@@ -34,9 +34,6 @@ public class XmlTimespanImpl extends XmlBaseEntityImpl<Timespan> {
   @XmlElement(namespace = NAMESPACE_DC_TERMS, name = XML_IS_PART_OF)
   private List<LabelledResource> isPartOf = new ArrayList<>();
 
-  @XmlElement(namespace = NAMESPACE_RDF, name = XmlConstants.TYPE)
-  private final EntityTypes type = EntityTypes.Timespan;
-
   @XmlElement(namespace = NAMESPACE_EDM, name =  XML_IS_NEXT_IN_SEQUENCE)
   private List<LabelledResource> isNextInSequence;
         
@@ -99,6 +96,6 @@ public class XmlTimespanImpl extends XmlBaseEntityImpl<Timespan> {
 
   @Override
 	protected EntityTypes getTypeEnum() {
-	    return type;
+	    return EntityTypes.Timespan;
 	}
 }
