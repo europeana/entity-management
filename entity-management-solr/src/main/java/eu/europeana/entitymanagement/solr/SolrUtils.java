@@ -16,9 +16,9 @@ import java.util.stream.Collectors;
  */
 public class SolrUtils {
 
-	public static final String SOLR_AGENT_FILTER = "solrAgentFilter";
-	public static final String SOLR_ORGANIZATION_FILTER = "solrOrganizationFilter";
-	public static final String SOLR_TIMESPAN_FILTER = "solrTimespanFilter";
+	public static final String SOLR_AGENT_SUGGESTER_FILTER = "solrAgentFilter";
+	public static final String SOLR_ORGANIZATION_SUGGESTER_FILTER = "solrOrganizationFilter";
+	public static final String SOLR_TIMESPAN_SUGGESTER_FILTER = "solrTimespanFilter";
 
 	/**
 	 * This method adds prefixes to the fields in format Map<String, List<String>> languageMap

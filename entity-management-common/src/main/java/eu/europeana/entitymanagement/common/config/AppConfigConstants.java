@@ -37,6 +37,6 @@ public class AppConfigConstants {
     public static final String BEAN_PR_SOLR_CLIENT = "prSolrClient";
     public static final String BEAN_SEARCH_API_SOLR_CLIENT = "searchApiSolrClient";
 
-    public static final String BEAN_SOLR_ENTITY_FILTER = "solrEntityFilter";
+    public static final String BEAN_SOLR_ENTITY_SUGGESTER_FILTER = "solrEntityFilter";
 }
 

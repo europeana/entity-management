@@ -14,6 +14,8 @@ import java.util.Map;
 
 public abstract class SolrEntity<T extends Entity> {
 
+    private T entity;
+
     @Field(EntitySolrFields.TYPE)
     private String type;
 
@@ -66,6 +68,8 @@ public abstract class SolrEntity<T extends Entity> {
         if(entity.getIsRelatedTo()!=null) this.isRelatedTo = new ArrayList<>(entity.getIsRelatedTo());
         if(entity.getHasPart()!=null) this.hasPart = new ArrayList<>(entity.getHasPart());
         if(entity.getIsPartOfArray()!=null) this.isPartOf = new ArrayList<>(entity.getIsPartOfArray());
+
+        this.entity = entity;
     }
     
     public SolrEntity() {
@@ -154,5 +158,9 @@ public abstract class SolrEntity<T extends Entity> {
 
     public String getPayload() {
         return payload;
+    }
+
+    public T getEntity() {
+        return entity;
     }
 }

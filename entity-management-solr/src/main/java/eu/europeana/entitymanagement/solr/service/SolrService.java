@@ -6,6 +6,10 @@ import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
+import eu.europeana.entitymanagement.definitions.model.Agent;
+import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.definitions.model.Timespan;
+import eu.europeana.entitymanagement.solr.SolrEntitySuggesterMixins;
 import eu.europeana.entitymanagement.solr.model.SolrAgent;
 import eu.europeana.entitymanagement.solr.model.SolrOrganization;
 import eu.europeana.entitymanagement.solr.model.SolrTimespan;
@@ -40,9 +44,7 @@ import static eu.europeana.entitymanagement.common.config.AppConfigConstants.*;
 @Service(AppConfigConstants.BEAN_EM_SOLR_SERVICE)
 public class SolrService implements InitializingBean {
 
-	@Autowired
-	@Qualifier(BEAN_JSON_MAPPER)
-	private final ObjectMapper objectMapper;
+	private final ObjectMapper payloadMapper;
 
 	private final Logger log = LogManager.getLogger(getClass());
 	private final SolrClient solrClient;
@@ -54,18 +56,21 @@ public class SolrService implements InitializingBean {
     public SolrService(@Qualifier(BEAN_INDEXING_SOLR_CLIENT) SolrClient solrClient,
 					   EntityManagementConfiguration configuration,
 					   @Qualifier(BEAN_JSON_MAPPER) ObjectMapper objectMapper,
-					   @Qualifier(BEAN_SOLR_ENTITY_FILTER) FilterProvider solrEntityFilter) {
+					   @Qualifier(BEAN_SOLR_ENTITY_SUGGESTER_FILTER) FilterProvider solrEntityFilter) {
 		this.solrClient = solrClient;
 		this.isExplicitCommitsEnabled = configuration.explicitCommitsEnabled();
-		this.objectMapper = objectMapper;
+
+		// copy default mapper so Solr payload configurations don't overwrite any global ones
+		this.payloadMapper = objectMapper.copy();
 		this.solrEntityFilter = solrEntityFilter;
 	}
 
 	@Override
 	public void afterPropertiesSet()  {
-		// this means we can't set FilterProviders elsewhere
-		// TODO: confirm if we can create a new ObjectMapper here instead
-		objectMapper.setFilterProvider(solrEntityFilter);
+		payloadMapper.addMixIn(Agent.class, SolrEntitySuggesterMixins.AgentSuggesterMixin.class);
+		payloadMapper.addMixIn(Organization.class, SolrEntitySuggesterMixins.OrganizationSuggesterMixin.class);
+		payloadMapper.addMixIn(Timespan.class, SolrEntitySuggesterMixins.TimespanSuggesterMixin.class);
+		payloadMapper.setFilterProvider(solrEntityFilter);
 	}
 
 
@@ -170,19 +175,19 @@ public class SolrService implements InitializingBean {
 			 */
 		      
 			if(solrEntity instanceof SolrAgent || solrEntity instanceof SolrTimespan) {
-				return objectMapper.writeValueAsString(solrEntity);
+				return payloadMapper.writeValueAsString(solrEntity.getEntity());
 			}
 			else if(solrEntity instanceof SolrOrganization) {
 				/*
 				 * according to the specifications, leaving only the value for the "en" key in the suggester for organizationDomain
 				 */
 
-				ObjectNode agentJacksonNode = objectMapper.valueToTree(solrEntity);
+				ObjectNode agentJacksonNode = payloadMapper.valueToTree(solrEntity.getEntity());
 				JsonNode organizationDomainNode = agentJacksonNode.get("organizationDomain");
 				// organizationDomain not always set
 				if(organizationDomainNode != null) {
 					agentJacksonNode.replace("organizationDomain", organizationDomainNode.get("en"));
-					return objectMapper.writeValueAsString(organizationDomainNode);
+					return payloadMapper.writeValueAsString(organizationDomainNode);
 				}
 			}
 			return null;

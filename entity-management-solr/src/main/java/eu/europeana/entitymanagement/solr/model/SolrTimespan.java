@@ -8,9 +8,9 @@ import org.apache.solr.client.solrj.beans.Field;
 import eu.europeana.entitymanagement.definitions.model.Timespan;
 import eu.europeana.entitymanagement.vocabulary.TimespanSolrFields;
 
-import static eu.europeana.entitymanagement.solr.SolrUtils.SOLR_TIMESPAN_FILTER;
+import static eu.europeana.entitymanagement.solr.SolrUtils.SOLR_TIMESPAN_SUGGESTER_FILTER;
 
-@JsonFilter(SOLR_TIMESPAN_FILTER)
+@JsonFilter(SOLR_TIMESPAN_SUGGESTER_FILTER)
 public class SolrTimespan extends SolrEntity<Timespan> {
 	
 	@Field(TimespanSolrFields.IS_NEXT_IN_SEQUENCE)

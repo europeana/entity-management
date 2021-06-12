@@ -14,9 +14,8 @@ import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields;
 
-import static eu.europeana.entitymanagement.solr.SolrUtils.SOLR_ORGANIZATION_FILTER;
+import static eu.europeana.entitymanagement.solr.SolrUtils.SOLR_ORGANIZATION_SUGGESTER_FILTER;
 
-@JsonFilter(SOLR_ORGANIZATION_FILTER)
 public class SolrOrganization extends SolrEntity<Organization> {
 
 	@Field(OrganizationSolrFields.DC_DESCRIPTION_ALL)

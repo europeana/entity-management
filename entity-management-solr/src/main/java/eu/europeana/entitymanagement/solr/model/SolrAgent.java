@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonFilter;
 import eu.europeana.entitymanagement.solr.SolrUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.solr.client.solrj.beans.Field;
@@ -14,12 +13,9 @@ import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.vocabulary.AgentSolrFields;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 
-import static eu.europeana.entitymanagement.solr.SolrUtils.SOLR_AGENT_FILTER;
-
 /*
  * TODO:see how to save the referencedWebResource and isAggregatedBy fields for all entities
  */
-@JsonFilter(SOLR_AGENT_FILTER)
 public class SolrAgent extends SolrEntity<Agent> {
 
 	public SolrAgent() {
