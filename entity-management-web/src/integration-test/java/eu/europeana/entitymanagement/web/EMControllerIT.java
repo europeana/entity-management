@@ -397,6 +397,29 @@ public class EMControllerIT extends AbstractIntegrationTest {
         String contentXml = getRetrieveEntityXmlResponse(requestPath);
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, concept);
     }
+    
+    @Test
+    void retrieveConceptExternalWithLanguageParameterShouldBeSuccessful() throws Exception {
+	    // read the test data for the Concept entity from the file
+		//TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
+		Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
+        EntityRecord entityRecord = new EntityRecord();
+        entityRecord.setEntity(concept);
+        entityRecord.setEntityId(concept.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord);
+
+        String requestPath = getEntityRequestPath(concept.getEntityId());
+        ResultActions resultActions = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".jsonld")
+        		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+        		.param(WebEntityConstants.QUERY_PARAM_LANGUAGE, "en,de")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(concept.getEntityId())))
+                .andExpect(jsonPath("$.type", is(EntityTypes.Concept.name())));
+
+        resultActions.andExpect(jsonPath("$.prefLabel[*]", hasSize(2)))
+		.andExpect(jsonPath("$.altLabel[*]", hasSize(1)));
+    }
 
     
     @SuppressWarnings("unused")

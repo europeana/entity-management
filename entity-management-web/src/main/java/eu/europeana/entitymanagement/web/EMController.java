@@ -1,5 +1,28 @@
 package eu.europeana.entitymanagement.web;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
+
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.api.commons.web.exception.HttpException;
@@ -23,21 +46,6 @@ import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.web.service.MetisDereferenceService;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.Errors;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.UriComponentsBuilder;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 
 @RestController
@@ -104,11 +112,11 @@ public class EMController extends BaseRest {
 		}
 		EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier.toLowerCase(), true);
 		if (!entityRecord.isDisabled()) {
-			return createResponse(profile, type, identifier, FormatTypes.jsonld, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
+			return createResponse(profile, type, null, identifier, FormatTypes.jsonld, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
 		}
 		logger.info("Re-enabling entityId={}", entityRecord.getEntityId());
 		entityRecordService.enableEntityRecord(entityRecord);
-		return createResponse(profile, type, identifier, FormatTypes.jsonld, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
+		return createResponse(profile, type, null, identifier, FormatTypes.jsonld, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
 	}
 
     @ApiOperation(value = "Update an entity", nickname = "updateEntity", response = java.lang.Void.class)
@@ -216,6 +224,7 @@ public class EMController extends BaseRest {
     public ResponseEntity<String> getJsonLdEntity(
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
 	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
+	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_LANGUAGE, required = false) String languages,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 			HttpServletRequest request)
@@ -223,7 +232,7 @@ public class EMController extends BaseRest {
 		if (emConfig.isAuthEnabled()) {
 			verifyReadAccess(request);
 		}
-	return createResponse(profile, type, identifier, FormatTypes.jsonld, null);
+	return createResponse(profile, type, languages, identifier, FormatTypes.jsonld, null);
 
     }
     
@@ -234,6 +243,7 @@ public class EMController extends BaseRest {
     	@RequestHeader(value = HttpHeaders.ACCEPT, defaultValue = "application/json") String acceptHeader,
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
 	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
+	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_LANGUAGE, required = false) String languages,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 	    HttpServletRequest request) throws EuropeanaApiException, HttpException{
@@ -242,14 +252,14 @@ public class EMController extends BaseRest {
 			}
 	if (acceptHeader.contains(HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML)) {
 	    //if rdf/XML is explicitly requested
-	    return createResponse(profile, type, identifier, FormatTypes.xml, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML);
+	    return createResponse(profile, type, languages, identifier, FormatTypes.xml, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML);
 	}
 	if (acceptHeader.contains(MediaType.APPLICATION_XML_VALUE)) {
 	    //if XML is explicitly requested
-	    return createResponse(profile, type, identifier, FormatTypes.xml, MediaType.APPLICATION_XML_VALUE);
+	    return createResponse(profile, type, languages, identifier, FormatTypes.xml, MediaType.APPLICATION_XML_VALUE);
 	} else {	
 	    //otherwise return default
-	    return createResponse(profile, type, identifier, FormatTypes.jsonld, null);
+	    return createResponse(profile, type, languages, identifier, FormatTypes.jsonld, null);
 	}
     }
 
@@ -261,6 +271,7 @@ public class EMController extends BaseRest {
     public ResponseEntity<String> getXmlEntity(
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
 	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
+	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_LANGUAGE, required = false) String languages,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 				HttpServletRequest request)
@@ -268,7 +279,7 @@ public class EMController extends BaseRest {
 			if (emConfig.isAuthEnabled()) {
 				verifyReadAccess(request);
 			}
-	return createResponse(profile, type, identifier, FormatTypes.xml, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML);
+	return createResponse(profile, type, languages, identifier, FormatTypes.xml, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML);
     }
 
     @ApiOperation(value = "Register a new entity", nickname = "registerEntity", response = java.lang.Void.class)
@@ -326,7 +337,7 @@ public class EMController extends BaseRest {
 		}
 
 
-    private ResponseEntity<String> createResponse(String profile, String type, String identifier, FormatTypes outFormat,
+    private ResponseEntity<String> createResponse(String profile, String type, String languages, String identifier, FormatTypes outFormat,
 	    String contentType) throws EuropeanaApiException {
 			/*
 	 * verify the parameters
@@ -343,7 +354,7 @@ public class EMController extends BaseRest {
 	}
 
 			EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier,false);
-			return generateResponseEntity(profile, outFormat, contentType, entityRecord, HttpStatus.OK);
+			return generateResponseEntity(profile, outFormat, languages, contentType, entityRecord, HttpStatus.OK);
 		}
 
 	private ResponseEntity<String> launchTaskAndRetrieveEntity(String type, String identifier,
@@ -352,7 +363,7 @@ public class EMController extends BaseRest {
 		launchUpdateTask(Collections.singletonList(entityRecord.getEntityId()), false);
 		entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
 
-		return generateResponseEntity(profile, FormatTypes.jsonld, null, entityRecord, HttpStatus.ACCEPTED);
+		return generateResponseEntity(profile, FormatTypes.jsonld, null, null, entityRecord, HttpStatus.ACCEPTED);
 	}
 
 	private ResponseEntity<String> checkExistingEntity(Optional<EntityRecord> existingEntity,

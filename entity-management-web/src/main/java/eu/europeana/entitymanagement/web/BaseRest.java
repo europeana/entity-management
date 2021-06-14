@@ -1,31 +1,39 @@
 package eu.europeana.entitymanagement.web;
 
-import eu.europeana.api.commons.web.http.HttpHeaders;
-import eu.europeana.entitymanagement.definitions.model.Aggregation;
-import eu.europeana.entitymanagement.exception.EntityCreationException;
-import eu.europeana.entitymanagement.web.service.EntityObjectFactory;
-import eu.europeana.entitymanagement.web.xml.model.RdfBaseWrapper;
-import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.annotation.Resource;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
-import eu.europeana.entitymanagement.serialization.JsonLdSerializer;
 import eu.europeana.api.commons.web.controller.BaseRestController;
+import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.BuildInfo;
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
+import eu.europeana.entitymanagement.definitions.model.Aggregation;
+import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.exception.EntityCreationException;
+import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.serialization.EntityXmlSerializer;
+import eu.europeana.entitymanagement.serialization.JsonLdSerializer;
+import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.web.service.AuthorizationService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
-import java.util.Date;
+import eu.europeana.entitymanagement.web.service.EntityObjectFactory;
+import eu.europeana.entitymanagement.web.xml.model.RdfBaseWrapper;
+import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 
 
 public abstract class BaseRest extends BaseRestController {
@@ -101,8 +109,9 @@ public abstract class BaseRest extends BaseRestController {
      * @param status
      * @return
      * @throws EntityCreationException
+     * @throws FunctionalRuntimeException
      */
-    public ResponseEntity<String> generateResponseEntity(String profile, FormatTypes outFormat,
+    public ResponseEntity<String> generateResponseEntity(String profile, FormatTypes outFormat, String languages,
                                                          String contentType, EntityRecord entityRecord, HttpStatus status)
             throws EntityCreationException {
 
@@ -122,7 +131,9 @@ public abstract class BaseRest extends BaseRestController {
         }
         if (contentType != null && !contentType.isEmpty())
             headers.add(HttpHeaders.CONTENT_TYPE, contentType);
-
+        
+        processLanguage(entityRecord.getEntity(),languages);
+        
         String body = serialize(entityRecord, outFormat, profile);
         return ResponseEntity.status(status).headers(headers).eTag(etag).body(body);
     }
@@ -136,5 +147,35 @@ public abstract class BaseRest extends BaseRestController {
         return DigestUtils.md5Hex(String.format("%s:%s:%s", timestamp, format, version));
     }
 
+    @SuppressWarnings("unchecked")
+	private void processLanguage(Entity entity, String languages) {
+		if(languages==null) return;
+		List<String> languagesList = Arrays.asList(languages.split(",", -1));
+    	List<Field> entityFields = EntityUtils.getAllFields(entity.getClass());
+		for(Field field : entityFields) {
+			if(field.getType().isAssignableFrom(Map.class)) {
+				Map<String, Object> currentFieldValue;
+				try {
+					currentFieldValue = (Map<String,Object>) entity.getFieldValue(field);
+				} catch (IllegalArgumentException | IllegalAccessException e) {
+					throw new FunctionalRuntimeException("An exception occured during accessing the entity field: "+field.getName(), e);
+				}
+				if(currentFieldValue==null) continue;
+				Map<String,Object> newFieldValue = new HashMap<>();
+				for(Map.Entry<String,Object> mapEntry : currentFieldValue.entrySet()) {
+					if(languagesList.contains(mapEntry.getKey())) {
+						newFieldValue.put(mapEntry.getKey(), mapEntry.getValue());
+					}
+				}
+				if(currentFieldValue.size()!=newFieldValue.size()) {
+					try {
+						entity.setFieldValue(field, newFieldValue);
+					} catch (IllegalArgumentException | IllegalAccessException e) {
+						throw new FunctionalRuntimeException("An exception occured during setting the entity field: "+field.getName(), e);
+					}
+				}
+			}
+		}
+    }
 
 }
