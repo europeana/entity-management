@@ -53,8 +53,6 @@ public class XmlConceptImpl extends XmlBaseEntityImpl<Concept> {
     @XmlElement(namespace = NAMESPACE_SKOS, name = IN_SCHEMA)
     private List<LabelledResource> inScheme;
 
-    @XmlElement(namespace = NAMESPACE_RDF, name = XmlConstants.TYPE)
-    private final EntityTypes type = EntityTypes.Concept;
 
     public XmlConceptImpl() {
         // default constructor required for deserialization
@@ -153,6 +151,6 @@ public class XmlConceptImpl extends XmlBaseEntityImpl<Concept> {
 
     @Override
     protected EntityTypes getTypeEnum() {
-	return type;
+	return  EntityTypes.Concept;
     }
 }
