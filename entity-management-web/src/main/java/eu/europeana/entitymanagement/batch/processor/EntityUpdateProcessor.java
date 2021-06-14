@@ -40,7 +40,8 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
     public EntityRecord process(@NonNull EntityRecord entityRecord) throws EuropeanaApiException {
         //TODO: Validate entity metadata from Proxy Data Source
         emEntityFieldCleaner.cleanAndNormalize(entityRecord.getExternalProxy().getEntity());
-	entityRecordService.mergeEntity(entityRecord);
+        emEntityFieldCleaner.cleanAndNormalize(entityRecord.getEuropeanaProxy().getEntity());
+        entityRecordService.mergeEntity(entityRecord);
         entityRecordService.performReferentialIntegrity(entityRecord.getEntity());
         validateConstraints(entityRecord.getEntity());
    
