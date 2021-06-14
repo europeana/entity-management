@@ -61,7 +61,7 @@ public class EntityFieldsCleaner {
 		    entity.setFieldValue(field, normalizeValues(field.getName(),(List<String>) fieldValue));
 		} else if (fieldType.isAssignableFrom(Map.class)) {
 		    @SuppressWarnings("rawtypes")
-		    Map normalized = normalizeMapField(field, (Map) fieldValue, entity);
+		    Map normalized = normalizeMapField(field, (Map) fieldValue);
 		    entity.setFieldValue(field, normalized);
 		}
 
