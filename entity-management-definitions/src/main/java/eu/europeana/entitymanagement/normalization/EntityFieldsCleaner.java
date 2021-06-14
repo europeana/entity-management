@@ -35,6 +35,7 @@ public class EntityFieldsCleaner {
     }
 
     public void initialize(ValidEntityFields constraint) {
+    	// empty
     }
 
     @SuppressWarnings("unchecked")
@@ -73,7 +74,7 @@ public class EntityFieldsCleaner {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private Map normalizeMapField(Field field, Map fieldValue, Entity entity)
+    private Map normalizeMapField(Field field, Map fieldValue)
 	    throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 	if (fieldValue == null) {
 	    return null;
@@ -139,7 +140,7 @@ public class EntityFieldsCleaner {
     private List<String> normalizeValues(String fieldName, List<String> values) {
     	List<String> normalized;
     	if(EntityFieldsTypes.getFieldType(fieldName).equals(FIELD_TYPE_DATE)) {
-    		normalized = new ArrayList<String>();
+    		normalized = new ArrayList<>();
 	    	for(String value : values) {
 	    		String normalizedValue = normalizeTextValue(fieldName,value);
 	    		normalized.add(normalizedValue);
