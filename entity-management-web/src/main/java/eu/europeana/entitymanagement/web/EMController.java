@@ -12,6 +12,7 @@ import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.web.EntityIdResponse;
+import eu.europeana.entitymanagement.exception.EntityMismatchException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.exception.EtagMismatchException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
@@ -26,11 +27,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -272,8 +275,9 @@ public class EMController extends BaseRest {
     @ApiOperation(value = "Register a new entity", nickname = "registerEntity", response = java.lang.Void.class)
     @PostMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
 		public ResponseEntity<String> registerEntity(
-				@RequestBody EntityPreview entityCreationRequest, HttpServletRequest request)
+			@Valid @RequestBody EntityPreview entityCreationRequest, HttpServletRequest request)
 				throws Exception {
+
 			if (emConfig.isAuthEnabled()) {
 				verifyWriteAccess(Operations.CREATE, request);
 			}
@@ -297,6 +301,12 @@ public class EMController extends BaseRest {
 
 			Entity metisResponse = dereferenceService
 					.dereferenceEntityById(entityCreationRequest.getId());
+
+			if(!metisResponse.getType().equals(entityCreationRequest.getType())){
+				throw new EntityMismatchException(String.format("Metis type '%s' does not match type '%s' in request",
+						metisResponse.getType(), entityCreationRequest.getType()));
+			}
+
 			if (metisResponse.getSameAs() != null) {
 				existingEntity = entityRecordService
 						.retrieveMetisCoreferenceSameAs(metisResponse.getSameAs());

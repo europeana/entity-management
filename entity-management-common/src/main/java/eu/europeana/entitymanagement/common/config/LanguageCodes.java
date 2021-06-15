@@ -44,6 +44,14 @@ public class LanguageCodes {
 	    return  getSupportedLangCodes().contains(lang);
 	}
 	
+	
+	public boolean isValidAltLanguageCode(String altLangCode) {
+            if(altLangCode == null) {
+                return false;
+            }
+            return  getAltLangMap().containsKey(altLangCode);
+        }
+	
 	public Set<String> getSupportedLangCodes() {
 	        if (supportedLangCodes == null) {
 	            supportedLangCodes = new HashSet<String>(languages.size());

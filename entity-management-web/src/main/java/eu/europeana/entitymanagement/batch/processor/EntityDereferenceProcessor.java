@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, EntityRecord> {
 
+    private static final String MISMATCH_EXCEPTION_STRING = "Metis type %s does not match entity type %s for entityId=%s";
     private static final Logger logger = LogManager.getLogger(EntityDereferenceProcessor.class);
     private final MetisDereferenceService dereferenceService;
     private final EntityComparator entityComparator;
@@ -48,8 +49,9 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
         String metisType = metisResponse.getType();
         String entityType = entity.getType();
         if (!metisType.equals(entityType)) {
+
             throw new EntityMismatchException(
-                    String.format("Metis type %s does not match entity type %s for entityId=%s",
+                    String.format(MISMATCH_EXCEPTION_STRING,
                             metisType, entityType, entityId));
         }
 

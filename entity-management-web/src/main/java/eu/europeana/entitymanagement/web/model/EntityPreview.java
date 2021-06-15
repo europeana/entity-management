@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * Represents the body for Entity creation POST requests.
@@ -14,6 +17,9 @@ public class EntityPreview {
 
     @JsonProperty("@context")
     private String context;
+
+    @NotNull
+    private EntityTypes type;
 
 
     private Map<String, String> prefLabel;
@@ -72,4 +78,7 @@ public class EntityPreview {
         this.depiction = depiction;
     }
 
+    public String getType() {
+        return type.getEntityType();
+    }
 }

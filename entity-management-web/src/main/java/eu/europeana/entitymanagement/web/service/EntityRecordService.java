@@ -1,5 +1,34 @@
 package eu.europeana.entitymanagement.web.service;
 
+import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.EUROPEANA_URL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.RIGHTS_CREATIVE_COMMONS;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_ID;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_IDENTIFIER;
+import static eu.europeana.entitymanagement.web.EntityRecordUtils.getDatasourceAggregationId;
+import static eu.europeana.entitymanagement.web.EntityRecordUtils.getEuropeanaAggregationId;
+import static eu.europeana.entitymanagement.web.EntityRecordUtils.getEuropeanaProxyId;
+import static eu.europeana.entitymanagement.web.EntityRecordUtils.getIsAggregatedById;
+
+import eu.europeana.api.commons.error.EuropeanaApiException;
+import eu.europeana.enrichment.utils.EntityType;
+import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
+import eu.europeana.entitymanagement.exception.EntityAlreadyExistsException;
+import eu.europeana.entitymanagement.exception.EntityNotFoundException;
+import eu.europeana.entitymanagement.exception.EntityRemovedException;
+import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
+import eu.europeana.entitymanagement.web.EntityRecordUtils;
+import java.lang.reflect.Field;
+import java.util.*;
+
+import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+
 import dev.morphia.query.experimental.filters.Filter;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.common.config.DataSource;
@@ -452,7 +481,7 @@ public class EntityRecordService {
      * @throws EntityCreationException
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public void mergeEntity(EntityRecord entityRecord) throws EuropeanaApiException, IllegalAccessException {
+    public void mergeEntity(EntityRecord entityRecord) throws EuropeanaApiException {
 
 	//TODO: consider refactoring of this implemeentation by creating a new class EntityReconciliator
 	/*
@@ -553,14 +582,13 @@ public class EntityRecordService {
 	 * @param accumulate if true, metadata from the secondary entity are added to the matching collection (eg. maps, lists and arrays)
 	 *               within the primary . If accumulate is false, the "primary"
 	 *               content overwrites the "secondary"
-	 * @return
-	 * @throws EntityCreationException
-	 * @throws IllegalAccessException
 	 */
 	@SuppressWarnings("unchecked")
 	private Entity combineEntities(Entity primary, Entity secondary, List<Field> fieldsToCombine, boolean accumulate)
-			throws EntityCreationException, IllegalAccessException {
+			throws EuropeanaApiException {
 		Entity consolidatedEntity = EntityObjectFactory.createEntityObject(primary.getType());
+
+		try {
 
 				/*
 				 * store the preferred label in the secondary entity that is different from the
@@ -614,7 +642,10 @@ public class EntityRecordService {
 
 				mergeSkippedPrefLabels(consolidatedEntity, prefLabelsForAltLabels, fieldsToCombine);
 
+		} catch (IllegalAccessException e) {
+		    throw new EntityUpdateException("Metadata consolidation failed to access required properties!", e);
 
+		}
 		return consolidatedEntity;
 	}
 
