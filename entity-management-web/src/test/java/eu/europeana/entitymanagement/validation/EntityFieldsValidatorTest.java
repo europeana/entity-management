@@ -30,6 +30,8 @@ import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatorGroup;
+import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorGroup;
 
 @SpringBootTest(classes = {ValidatorConfig.class, EntityManagementConfiguration.class,
     SerializationConfig.class})
@@ -43,33 +45,54 @@ public class EntityFieldsValidatorTest {
 
 
     @Test
-    public void validateEntityFieldsForOrganization() throws JsonMappingException, JsonProcessingException, IOException {
+    public void validateEntityFieldsOrganization() throws JsonMappingException, JsonProcessingException, IOException {
 	//TODO: the input file must be updated to comply with the correct jsonld serialization
         Organization organization = objectMapper.readValue(loadFile(ORGANIZATION_VALIDATE_FIELDS_JSON), Organization.class);
-        EntityRecord entityRecord1 = new EntityRecord();
-        entityRecord1.setEntity(organization);
-        entityRecord1.setEntityId(organization.getEntityId());        
-        Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entityRecord1.getEntity());
+        EntityRecord entityRecord = new EntityRecord();
+        entityRecord.setEntity(organization);
+        entityRecord.setEntityId(organization.getEntityId());        
+        Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entityRecord.getEntity(), EntityFieldsCompleteValidatorGroup.class);
         for (ConstraintViolation<Entity> violation : violations) {
             System.out.println(violation.getMessageTemplate());
         }   
         //TODO: remove constraine violation: "The entity fields values are valid."
         Assertions.assertEquals(18, violations.size());
+        /*
+         * checking the minimal level of validation
+         */
+        violations.clear();
+        violations = emValidatorFactory.getValidator().validate(entityRecord.getEntity(), EntityFieldsMinimalValidatorGroup.class);
+        for (ConstraintViolation<Entity> violation : violations) {
+            System.out.println(violation.getMessageTemplate());
+        }   
+        //TODO: remove constraine violation: "The entity fields values are valid."
+        Assertions.assertEquals(22, violations.size());
     }
 
     @Test
-    public void validateEntityFieldsForAgent() throws JsonMappingException, JsonProcessingException, IOException {
+    public void validateEntityFieldsAgent() throws JsonMappingException, JsonProcessingException, IOException {
         
         Agent agent = objectMapper.readValue(loadFile(AGENT_VALIDATE_FIELDS_JSON), Agent.class);
-        EntityRecord entityRecord2 = new EntityRecord();
-        entityRecord2.setEntity(agent);
-        entityRecord2.setEntityId(agent.getEntityId());        
-        Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entityRecord2.getEntity());
+        EntityRecord entityRecord = new EntityRecord();
+        entityRecord.setEntity(agent);
+        entityRecord.setEntityId(agent.getEntityId());        
+        Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entityRecord.getEntity(), EntityFieldsCompleteValidatorGroup.class);
         for (ConstraintViolation<Entity> violation : violations) {
             System.out.println(violation.getMessageTemplate());
         }   
         //TODO: remove constraine violation: "The entity fields values are valid."
         Assertions.assertEquals(4, violations.size());
+        /*
+         * checking the minimal level of validation
+         */
+        violations.clear();
+        violations = emValidatorFactory.getValidator().validate(entityRecord.getEntity(), EntityFieldsMinimalValidatorGroup.class);
+        for (ConstraintViolation<Entity> violation : violations) {
+            System.out.println(violation.getMessageTemplate());
+        }   
+        //TODO: remove constraine violation: "The entity fields values are valid."
+        Assertions.assertEquals(23, violations.size());
+
       
     }
 }

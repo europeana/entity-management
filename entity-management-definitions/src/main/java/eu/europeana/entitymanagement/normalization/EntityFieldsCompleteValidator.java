@@ -28,12 +28,12 @@ import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 
 @Component
-public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFields, Entity> {
+public class EntityFieldsCompleteValidator implements ConstraintValidator<EntityFieldsCompleteValidatorInterface, Entity> {
 
     @Resource(name="emLanguageCodes")
     LanguageCodes emLanguageCodes;
     
-    public void initialize(ValidEntityFields constraint) {
+    public void initialize(EntityFieldsCompleteValidatorInterface constraint) {
 //        System.out.println();
     }
 
@@ -58,8 +58,14 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
 			        
 			        Object fieldValue = entity.getFieldValue(field);
 				if (fieldValue==null) { 
-				    //skip validation of empty fields
-				    continue;
+					/*
+					 * TODO: enable the code below if there is a need to check the mandatory fields in this validator
+					 */
+//					addConstraint(context, "The mandatory field: "+field.getName()+" cannot be NULL.");
+//	                if(returnValue==true) {
+//	                	returnValue=false;
+//	                }
+	                continue;
 				}
 				boolean returnValueLocal = true;
 	                            

@@ -14,6 +14,7 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.ingestion.EntityValidationException;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
+import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatorGroup;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 
 /**
@@ -40,7 +41,7 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
     public EntityRecord process(@NonNull EntityRecord entityRecord) throws EuropeanaApiException {
         //TODO: Validate entity metadata from Proxy Data Source
         emEntityFieldCleaner.cleanAndNormalize(entityRecord.getExternalProxy().getEntity());
-	entityRecordService.mergeEntity(entityRecord);
+        entityRecordService.mergeEntity(entityRecord);
         entityRecordService.performReferentialIntegrity(entityRecord.getEntity());
         validateConstraints(entityRecord.getEntity());
    
@@ -48,7 +49,7 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
     }
 
     private void validateConstraints(Entity entity) throws EntityValidationException  {
-        Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entity);
+        Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entity, EntityFieldsCompleteValidatorGroup.class);
         if (!violations.isEmpty()) {
             throw new EntityValidationException("The consolidated entity contains invalid data!", violations);
         }

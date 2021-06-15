@@ -33,7 +33,7 @@ public class EntityFieldsCleaner {
 	this.emLanguageCodes = emLanguageCodes;
     }
 
-    public void initialize(ValidEntityFields constraint) {
+    public void initialize(EntityFieldsCompleteValidatorInterface constraint) {
     }
 
     @SuppressWarnings("unchecked")
