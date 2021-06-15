@@ -9,6 +9,7 @@ public interface WebEntityConstants extends WebEntityFields{
 	public static final String PATH_PARAM_TYPE = "type";
 	public static final String PATH_PARAM_NAMESPACE = "namespace";
 	public static final String PATH_PARAM_IDENTIFIER = "identifier";
+	public static final String PATH_PARAM_URL = "url";
 	
 	public static final String QUERY_PARAM_TYPE = "type";
 	public static final String QUERY_PARAM_FIELD = "field";
@@ -90,6 +91,6 @@ public interface WebEntityConstants extends WebEntityFields{
 	public static final String CONCEPT_SCHEME_APPLICATION_NAME = "webConceptScheme";
 
 	public static final String RIGHTS_CREATIVE_COMMONS = "https://creativecommons.org/publicdomain/zero/1.0/";
-	public static final String EUROPEANA_URL = "http://www.europeana.eu";
+	public static final String EUROPEANA_URL = "http://www.europeana.eu/";
 
 }
