@@ -29,6 +29,7 @@ import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.serialization.EntityXmlSerializer;
 import eu.europeana.entitymanagement.serialization.JsonLdSerializer;
 import eu.europeana.entitymanagement.utils.EntityUtils;
+import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.web.service.AuthorizationService;
 import eu.europeana.entitymanagement.web.service.EntityObjectFactory;
@@ -153,7 +154,7 @@ public abstract class BaseRest extends BaseRestController {
 		List<String> languagesList = Arrays.asList(languages.split(",", -1));
     	List<Field> entityFields = EntityUtils.getAllFields(entity.getClass());
 		for(Field field : entityFields) {
-			if(field.getType().isAssignableFrom(Map.class)) {
+			if(EntityFieldsTypes.hasTypeDefinition(field.getName()) && EntityFieldsTypes.isMultilingual(field.getName())) {
 				Map<String, Object> currentFieldValue;
 				try {
 					currentFieldValue = (Map<String,Object>) entity.getFieldValue(field);
@@ -163,7 +164,7 @@ public abstract class BaseRest extends BaseRestController {
 				if(currentFieldValue==null) continue;
 				Map<String,Object> newFieldValue = new HashMap<>();
 				for(Map.Entry<String,Object> mapEntry : currentFieldValue.entrySet()) {
-					if(languagesList.contains(mapEntry.getKey())) {
+					if(languagesList.contains(mapEntry.getKey()) || mapEntry.getKey().equals("")) {
 						newFieldValue.put(mapEntry.getKey(), mapEntry.getValue());
 					}
 				}
