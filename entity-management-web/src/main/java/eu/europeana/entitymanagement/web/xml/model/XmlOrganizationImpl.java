@@ -49,9 +49,6 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
 	@XmlElement(namespace = NAMESPACE_VCARD, name =  XML_ADDRESS)
 	private String hasAddress;
 
-	@XmlElement(namespace = NAMESPACE_RDF, name = XmlConstants.TYPE)
-	private final EntityTypes type = EntityTypes.Organization;
-
 	@XmlElement(namespace = NAMESPACE_DC, name =  XML_IDENTIFIER)
 	private List<String> identifier;
         //TODO: implement support for address when available in Metis
@@ -149,6 +146,6 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
 	
 	@Override
 	protected EntityTypes getTypeEnum() {
-	    return type;
+	    return EntityTypes.Organization;
 	}
 }
