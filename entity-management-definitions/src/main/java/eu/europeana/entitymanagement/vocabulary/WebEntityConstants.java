@@ -21,6 +21,7 @@ public interface WebEntityConstants extends WebEntityFields{
 	public static final String QUERY_PARAM_URI = "uri";
 	public static final String QUERY_PARAM_FL = "fl";
 	public static final String QUERY_PARAM_PROFILE = "profile";
+	public static final String QUERY_PARAM_LANGUAGE = "lang";
 	
 	public static final String PARAM_TYPE_ALL = "All";
 	public static final String PARAM_LANGUAGE_ALL = "all";
