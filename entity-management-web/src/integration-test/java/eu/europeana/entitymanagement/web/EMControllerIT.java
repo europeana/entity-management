@@ -398,7 +398,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
     }
     
     @Test
-    void retrieveConceptExternalWithLanguageParameterShouldBeSuccessful() throws Exception {
+    void retrieveConceptWithLanguageFilteringShouldBeSuccessful() throws Exception {
 	    // read the test data for the Concept entity from the file
 		//TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
 		Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
