@@ -77,9 +77,6 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
   @XmlElement(name = XML_PROFESSION_OR_OCCUPATION, namespace = NAMESPACE_RDAGR2)
   private List<LabelledResource> professionOrOccupation = new ArrayList<>();
 
-  @XmlElement(namespace = NAMESPACE_RDF, name = XmlConstants.TYPE)
-  private final EntityTypes type = EntityTypes.Agent;
-
   public XmlAgentImpl(Agent agent) {
     super(agent);
     this.hiddenLabel = RdfXmlUtils.convertToXmlMultilingualString(agent.getHiddenLabel());
@@ -222,7 +219,7 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
 
   @Override
   protected EntityTypes getTypeEnum() {
-    return type;
+    return EntityTypes.Agent;
   }
 
 

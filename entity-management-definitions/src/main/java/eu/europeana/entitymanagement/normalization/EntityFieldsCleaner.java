@@ -3,6 +3,8 @@ package eu.europeana.entitymanagement.normalization;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -17,6 +19,9 @@ import eu.europeana.entitymanagement.common.config.LanguageCodes;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.utils.EntityUtils;
+import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
+
+import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_DATE;
 
 public class EntityFieldsCleaner {
 
@@ -47,12 +52,12 @@ public class EntityFieldsCleaner {
 		    normalizeTextField(field, (String) fieldValue, entity);
 		} else if (fieldType.isAssignableFrom(String[].class)) {
 		    // remove spaces from the String[] fields
-		    List<String> normalizedList = normalizeValues(Arrays.asList((String[]) fieldValue));
+		    List<String> normalizedList = normalizeValues(field.getName(),Arrays.asList((String[]) fieldValue));
 		    String[] normalized = normalizedList.toArray(new String[normalizedList.size()]);
 		    entity.setFieldValue(field, normalized);
 		} else if (fieldType.isAssignableFrom(List.class)) {
 		 // remove spaces from the List<String> fields
-		    entity.setFieldValue(field, normalizeValues((List<String>) fieldValue));
+		    entity.setFieldValue(field, normalizeValues(field.getName(),(List<String>) fieldValue));
 		} else if (fieldType.isAssignableFrom(Map.class)) {
 		    @SuppressWarnings("rawtypes")
 		    Map normalized = normalizeMapField(field, (Map) fieldValue, entity);
@@ -76,7 +81,7 @@ public class EntityFieldsCleaner {
 	if (isSingleValueStringMap(field)) {
 	    return normalizeSingleValueMap((Map<String, String>) fieldValue);
 	} else if (isMultipleValueStringMap(field)) {
-	    return normalizeMultipleValueMap((Map<String, List<String>>) fieldValue);
+	    return normalizeMultipleValueMap(field.getName(), (Map<String, List<String>>) fieldValue);
 	} else {
 		if(logger.isTraceEnabled()) {
 			logger.trace("normalization not supported for maps of type: {}", field.getGenericType());
@@ -106,7 +111,7 @@ public class EntityFieldsCleaner {
     }
 
     @SuppressWarnings({ "unchecked" })
-    private Map<String, List<String>> normalizeMultipleValueMap(Map<String, List<String>> singleValueMap)
+    private Map<String, List<String>> normalizeMultipleValueMap(String fieldName, Map<String, List<String>> singleValueMap)
 	    throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 	// remove spaces from the keys in the Map fields
 //	normalize and remove trailing spaces for the value
@@ -122,7 +127,7 @@ public class EntityFieldsCleaner {
 		continue;
 	    }
 
-	    List<String> normalizedValues = normalizeValues(mapEntry.getValue());
+	    List<String> normalizedValues = normalizeValues(fieldName, mapEntry.getValue());
 	    // remove trailing spaces in the value
 	    normalizedMap.put(normalizedKey, normalizedValues);
 	}
@@ -130,9 +135,19 @@ public class EntityFieldsCleaner {
 
     }
 
-    private List<String> normalizeValues(List<String> values) {
-	List<String> normalized = values.stream().map(String::trim).collect(Collectors.toList());
-	return normalized;
+    private List<String> normalizeValues(String fieldName, List<String> values) {
+    	List<String> normalized;
+    	if(EntityFieldsTypes.getFieldType(fieldName).equals(FIELD_TYPE_DATE)) {
+    		normalized = new ArrayList<String>();
+	    	for(String value : values) {
+	    		String normalizedValue = normalizeTextValue(fieldName,value);
+	    		normalized.add(normalizedValue);
+	    	}
+    	}
+    	else {
+    		normalized = values.stream().map(String::trim).collect(Collectors.toList());
+    	}
+    	return normalized;
     }
 
     String normalizeMapKey(String key) {
@@ -172,25 +187,38 @@ public class EntityFieldsCleaner {
     private void normalizeTextField(Field field, String fieldValue, Entity entity)
 	    throws IllegalArgumentException, IllegalAccessException {
 	if (fieldValue != null) {
-	    String normalizedValue = normalizeTextValue(fieldValue);
+	    String normalizedValue = normalizeTextValue(field.getName(),fieldValue);
 	    if (normalizedValue != fieldValue) {
 		entity.setFieldValue(field, normalizedValue);
 	    }
 	}
     }
 
-    String normalizeTextValue(String fieldValue) throws IllegalAccessException {
+    String normalizeTextValue(String fieldName, String fieldValue) {
 	if (fieldValue != null) {
 	    // remove trailing spaces
 	    String normalizedValue = fieldValue.trim();
+	    if(EntityFieldsTypes.getFieldType(fieldName).equals(FIELD_TYPE_DATE)) {
+	    	normalizedValue=convertDatetimeToDate(normalizedValue);
+	    }
 	    if (fieldValue != normalizedValue) {
 		return normalizedValue;
 	    }
-
 	    // TODO: clean fields that are URI or URLS
-	    // TODO clean fields that contain dates
 	}
 	return fieldValue;
+    }
+    
+    String convertDatetimeToDate(String fieldValue) {
+    	try {
+            if(fieldValue.contains("T")) {
+                //converts from ISO Date time format to ISO Date format
+                return LocalDate.parse(fieldValue, java.time.format.DateTimeFormatter.ISO_DATE_TIME).toString();
+            }
+        } catch (DateTimeParseException e) {
+            return fieldValue;
+        }
+    	return fieldValue;
     }
 
 }

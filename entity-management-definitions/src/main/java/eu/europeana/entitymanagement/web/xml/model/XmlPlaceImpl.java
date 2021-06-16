@@ -40,8 +40,6 @@ public class XmlPlaceImpl extends XmlBaseEntityImpl<Place> {
 	@XmlElement(namespace = NAMESPACE_EDM, name =  XML_IS_NEXT_IN_SEQUENCE)
 	private List<LabelledResource> isNextInSequence;
 
-	@XmlElement(namespace = NAMESPACE_RDF, name = XmlConstants.TYPE)
-	private final EntityTypes type = EntityTypes.Place;
 	
         public XmlPlaceImpl(Place place) {
             super(place);
@@ -108,6 +106,6 @@ public class XmlPlaceImpl extends XmlBaseEntityImpl<Place> {
 
 	@Override
 	protected EntityTypes getTypeEnum() {
-	    return type;
+	    return EntityTypes.Place;
 	}
 }

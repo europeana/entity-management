@@ -76,7 +76,7 @@ public enum EntityFieldsTypes {
     recordCount(EntityFieldsTypes.FIELD_TYPE_INTEGER, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
     score(EntityFieldsTypes.FIELD_TYPE_INTEGER, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
     aggregates(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
-    proxyFor(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1);    
+    proxyFor(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1);
 	
 	public static final String FIELD_TYPE_URI = "URI";
 	public static final String FIELD_TYPE_INTEGER = "Integer";
@@ -127,12 +127,7 @@ public enum EntityFieldsTypes {
     }
 
     public static boolean isMultilingual(String fieldName) {
-        try {
-            return valueOf(fieldName).getFieldIsmultilingual();     
-        }catch (IllegalArgumentException e){
-            throw new EntityValidationException("Unknown field: " + fieldName, e);
-        }
-        
+        return hasTypeDefinition(fieldName) && valueOf(fieldName).getFieldIsmultilingual();         
     }
     
     public static boolean isList(String fieldName) {

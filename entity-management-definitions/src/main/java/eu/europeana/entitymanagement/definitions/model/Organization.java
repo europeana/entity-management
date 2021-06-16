@@ -62,7 +62,7 @@ public class Organization extends Entity {
 	private Map<String, List<String>> organizationDomain;
 	private Map<String, String> geographicLevel;
 	private String country;
-	private Map<String, String> countryMap;
+//	private Map<String, String> countryMap;
 
 	//address fields
 	private String hasAddress;
@@ -286,17 +286,6 @@ public class Organization extends Entity {
 		this.geographicLevel = geographicLevel;
 	}
 
-
-
-	
-	public Map<String, String> getEdmCountry() {
-		if(countryMap == null) {
-			countryMap = new HashMap<>();
-			countryMap.put(TMP_KEY, country);
-		}
-		return countryMap;
-	}
-
 	
 	public String getType() {
 		return EntityTypes.Organization.getEntityType();
@@ -305,13 +294,13 @@ public class Organization extends Entity {
 
 	
 	public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
-		//TODO:in case of the performance overhead cause by using the reflecion code, change this method to call the getters for each field individually
+		//TODO:in case of the performance overhead cause by using the reflection code, change this method to call the getters for each field individually
 		return field.get(this);
 	}
 
 	
 	public void setFieldValue(Field field, Object value) throws IllegalArgumentException, IllegalAccessException {
-		//TODO:in case of the performance overhead cause by using the reflecion code, change this method to call the setter for each field individually
+		//TODO:in case of the performance overhead cause by using the reflection code, change this method to call the setter for each field individually
 		field.set(this, value);
 	}
 }

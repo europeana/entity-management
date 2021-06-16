@@ -171,8 +171,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 // should have Europeana and Datasource proxies
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
         	//
-        	results.andExpect(jsonPath("$.prefLabel[*]", hasSize(24)))
-        		.andExpect(jsonPath("$.altLabel[*]", hasSize(12)));
+        	//results.andExpect(jsonPath("$.prefLabel[*]", hasSize(24))).andExpect(jsonPath("$.altLabel[*]", hasSize(12)));
         	        
         		
         //TODO assert other important properties
@@ -396,6 +395,29 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
         String contentXml = getRetrieveEntityXmlResponse(requestPath);
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, concept);
+    }
+    
+    @Test
+    void retrieveConceptWithLanguageFilteringShouldBeSuccessful() throws Exception {
+	    // read the test data for the Concept entity from the file
+		//TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
+		Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
+        EntityRecord entityRecord = new EntityRecord();
+        entityRecord.setEntity(concept);
+        entityRecord.setEntityId(concept.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord);
+
+        String requestPath = getEntityRequestPath(concept.getEntityId());
+        ResultActions resultActions = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".jsonld")
+        		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+        		.param(WebEntityConstants.QUERY_PARAM_LANGUAGE, "en,de")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(concept.getEntityId())))
+                .andExpect(jsonPath("$.type", is(EntityTypes.Concept.name())));
+
+        resultActions.andExpect(jsonPath("$.prefLabel[*]", hasSize(2)))
+		.andExpect(jsonPath("$.altLabel[*]", hasSize(1)));
     }
 
     
@@ -672,6 +694,47 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
         assert dbRecordOptional.isPresent();
         Assertions.assertFalse(dbRecordOptional.get().isDisabled());
+    }
+
+
+    @Test
+    public void changeProvenanceShouldBeSuccessful() throws Exception {
+        MvcResult resultRegisterEntity = createTestEntityRecord(AGENT_REGISTER_JAN_VERMEER, AGENT_JAN_VERMEER_XML_VIAF, false);
+
+        // matches the id in the JSON file (also used to remove the queued Metis request)
+        String externalUriViaf = "http://viaf.org/viaf/51961439";
+        assertMetisRequest(externalUriViaf);
+        assertMetisRequest(externalUriViaf);
+
+        final ObjectNode registeredEntityNode = new ObjectMapper().readValue(resultRegisterEntity.getResponse().getContentAsString(StandardCharsets.UTF_8), ObjectNode.class);
+
+        // assert content of External proxy
+        Optional<EntityRecord> savedRecord = entityRecordService.retrieveByEntityId(registeredEntityNode.path("id").asText());
+        Assertions.assertTrue(savedRecord.isPresent());
+        EntityProxy externalProxy = savedRecord.get().getExternalProxy();
+
+        Assertions.assertEquals(externalUriViaf, externalProxy.getProxyId());
+
+        String externalUriWikidata = "http://www.wikidata.org/entity/Q41264";
+        // Metis request made with new externalUri
+        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(AGENT_JAN_VERMEER_XML_WIKIDATA)));
+
+        String requestPath = getEntityRequestPath(registeredEntityNode.path("id").asText());
+        mockMvc.perform(MockMvcRequestBuilders.post(BASE_SERVICE_URL + "/" + requestPath + "/management/source")
+                .param(WebEntityConstants.PATH_PARAM_URL, externalUriWikidata)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isAccepted())
+                .andReturn();
+
+
+        assertMetisRequest(externalUriWikidata);
+
+        // check that ExternalProxy ID is updated
+        savedRecord = entityRecordService.retrieveByEntityId(registeredEntityNode.path("id").asText());
+        Assertions.assertTrue(savedRecord.isPresent());
+        externalProxy = savedRecord.get().getExternalProxy();
+
+        Assertions.assertEquals(externalUriWikidata, externalProxy.getProxyId());
     }
 
     private void assertEntityExists(MvcResult result) throws JsonMappingException, JsonProcessingException, UnsupportedEncodingException {
