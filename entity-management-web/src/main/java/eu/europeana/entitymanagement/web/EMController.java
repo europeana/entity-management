@@ -52,6 +52,7 @@ public class EMController extends BaseRest {
   private final EntityManagementConfiguration emConfig;
 
   private static final String EXTERNAL_ID_REMOVED_MSG = "Entity id '%s' already exists as '%s', which has been removed";
+  private static final String SAME_AS_NOT_EXISTS_MSG = "Url '%s' does not exist in entity owl:sameAs";
 
   @Autowired
 	public EMController(EntityRecordService entityRecordService,
@@ -325,6 +326,29 @@ public class EMController extends BaseRest {
 					EntityProfile.internal.toString());
 		}
 
+
+	@ApiOperation(value = "Change provenance for an Entity", nickname = "changeProvenance")
+	@PostMapping(value = "/{type}/{identifier}/management/source", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<String> changeProvenance(
+			@PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
+			@PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
+			@RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "internal") String profile,
+			@RequestParam(value = WebEntityConstants.PATH_PARAM_URL) String url,
+			HttpServletRequest request
+	) throws Exception {
+		if (emConfig.isAuthEnabled()) {
+			verifyWriteAccess(Operations.UPDATE, request);
+		}
+		EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
+
+		if(!entityRecord.getEntity().getSameAs().contains(url)){
+			throw new HttpBadRequestException(String.format(SAME_AS_NOT_EXISTS_MSG, url));
+		}
+
+		entityRecordService.changeExternalProxy(entityRecord, url);
+		entityRecordService.update(entityRecord);
+		return launchTaskAndRetrieveEntity(type, identifier, entityRecord, profile);
+	}
 
     private ResponseEntity<String> createResponse(String profile, String type, String identifier, FormatTypes outFormat,
 	    String contentType) throws EuropeanaApiException {
