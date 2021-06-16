@@ -36,33 +36,32 @@ import eu.europeana.entitymanagement.web.service.EntityObjectFactory;
 import eu.europeana.entitymanagement.web.xml.model.RdfBaseWrapper;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 
-
 public abstract class BaseRest extends BaseRestController {
 
-    @Resource(name=AppConfig.BEAN_AUTHORIZATION_SERVICE)
+    @Resource(name = AppConfig.BEAN_AUTHORIZATION_SERVICE)
     AuthorizationService emAuthorizationService;
 
-    @Resource(name=AppConfig.BEAN_EM_BUILD_INFO)
+    @Resource(name = AppConfig.BEAN_EM_BUILD_INFO)
     BuildInfo emBuildInfo;
-    
-    @Resource(name=AppConfigConstants.BEAN_EM_XML_SERIALIZER)
+
+    @Resource(name = AppConfigConstants.BEAN_EM_XML_SERIALIZER)
     EntityXmlSerializer entityXmlSerializer;
-    
-    @Resource(name=AppConfigConstants.BEAN_EM_JSONLD_SERIALIZER)
+
+    @Resource(name = AppConfigConstants.BEAN_EM_JSONLD_SERIALIZER)
     JsonLdSerializer jsonLdSerializer;
 
     Logger logger = LogManager.getLogger(getClass());
 
     public BaseRest() {
-    	super();
+        super();
     }
 
     public AuthorizationService getAuthorizationService() {
-	return emAuthorizationService;
+        return emAuthorizationService;
     }
 
     public Logger getLogger() {
-	return logger;
+        return logger;
     }
 
     /**
@@ -73,7 +72,7 @@ public abstract class BaseRest extends BaseRestController {
 //    }
 
     public String getApiVersion() {
-	return emBuildInfo.getAppVersion();
+        return emBuildInfo.getAppVersion();
     }
 
     /**
@@ -82,26 +81,26 @@ public abstract class BaseRest extends BaseRestController {
      * @param entity The entity
      * @param format The format extension
      * @return entity in jsonLd format
-     * @throws EntityManagementRuntimeException 
+     * @throws EntityManagementRuntimeException
      */
     protected String serialize(EntityRecord entityRecord, FormatTypes format, String profile)
-        throws EntityManagementRuntimeException, EntityCreationException {
+            throws EntityManagementRuntimeException, EntityCreationException {
 
-	String responseBody = null;
+        String responseBody = null;
 
-	if (FormatTypes.jsonld.equals(format)) {
-	    responseBody = jsonLdSerializer.serialize(entityRecord, profile);
-	} else if (FormatTypes.xml.equals(format)) {
-	  XmlBaseEntityImpl<?> xmlEntity = EntityObjectFactory.createXmlEntity(entityRecord.getEntity());
+        if (FormatTypes.jsonld.equals(format)) {
+            responseBody = jsonLdSerializer.serialize(entityRecord, profile);
+        } else if (FormatTypes.xml.equals(format)) {
+            XmlBaseEntityImpl<?> xmlEntity = EntityObjectFactory.createXmlEntity(entityRecord.getEntity());
 
-	    responseBody = entityXmlSerializer.serializeXmlExternal(new RdfBaseWrapper(xmlEntity));
-	}
-	return responseBody;
+            responseBody = entityXmlSerializer.serializeXmlExternal(new RdfBaseWrapper(xmlEntity));
+        }
+        return responseBody;
     }
 
     /**
-     * Generates serialised EntityRecord Response entity along with
-     * Http status and headers
+     * Generates serialised EntityRecord Response entity along with Http status and
+     * headers
      *
      * @param profile
      * @param outFormat
@@ -113,14 +112,11 @@ public abstract class BaseRest extends BaseRestController {
      * @throws FunctionalRuntimeException
      */
     public ResponseEntity<String> generateResponseEntity(String profile, FormatTypes outFormat, String languages,
-                                                         String contentType, EntityRecord entityRecord, HttpStatus status)
-            throws EntityCreationException {
+            String contentType, EntityRecord entityRecord, HttpStatus status) throws EntityCreationException {
 
         Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
 
-        long timestamp = isAggregatedBy != null ?
-                isAggregatedBy.getModified().getTime() :
-                0L;
+        long timestamp = isAggregatedBy != null ? isAggregatedBy.getModified().getTime() : 0L;
 
         String etag = computeEtag(timestamp, outFormat.name(), getApiVersion());
 
@@ -132,51 +128,61 @@ public abstract class BaseRest extends BaseRestController {
         }
         if (contentType != null && !contentType.isEmpty())
             headers.add(HttpHeaders.CONTENT_TYPE, contentType);
-        
-        processLanguage(entityRecord.getEntity(),languages);
-        
+
+        processLanguage(entityRecord.getEntity(), languages);
+
         String body = serialize(entityRecord, outFormat, profile);
         return ResponseEntity.status(status).headers(headers).eTag(etag).body(body);
     }
 
-
     /**
-     * Generates a unique hex string based on the input params
-     * TODO: move logic to {@link eu.europeana.api.commons.web.controller.BaseRestController#generateETag(Date, String, String)}
+     * Generates a unique hex string based on the input params TODO: move logic to
+     * {@link eu.europeana.api.commons.web.controller.BaseRestController#generateETag(Date, String, String)}
      */
-    public String computeEtag(long timestamp, String format, String version){
+    public String computeEtag(long timestamp, String format, String version) {
         return DigestUtils.md5Hex(String.format("%s:%s:%s", timestamp, format, version));
     }
 
     @SuppressWarnings("unchecked")
-	private void processLanguage(Entity entity, String languages) {
-		if(languages==null) return;
-		List<String> languagesList = Arrays.asList(languages.split(",", -1));
-    	List<Field> entityFields = EntityUtils.getAllFields(entity.getClass());
-		for(Field field : entityFields) {
-			if(EntityFieldsTypes.hasTypeDefinition(field.getName()) && EntityFieldsTypes.isMultilingual(field.getName())) {
-				Map<String, Object> currentFieldValue;
-				try {
-					currentFieldValue = (Map<String,Object>) entity.getFieldValue(field);
-				} catch (IllegalArgumentException | IllegalAccessException e) {
-					throw new FunctionalRuntimeException("An exception occured during accessing the entity field: "+field.getName(), e);
-				}
-				if(currentFieldValue==null) continue;
-				Map<String,Object> newFieldValue = new HashMap<>();
-				for(Map.Entry<String,Object> mapEntry : currentFieldValue.entrySet()) {
-					if(languagesList.contains(mapEntry.getKey()) || mapEntry.getKey().equals("")) {
-						newFieldValue.put(mapEntry.getKey(), mapEntry.getValue());
-					}
-				}
-				if(currentFieldValue.size()!=newFieldValue.size()) {
-					try {
-						entity.setFieldValue(field, newFieldValue);
-					} catch (IllegalArgumentException | IllegalAccessException e) {
-						throw new FunctionalRuntimeException("An exception occured during setting the entity field: "+field.getName(), e);
-					}
-				}
-			}
-		}
+    private void processLanguage(Entity entity, String languages) {
+        if (languages == null || languages.isEmpty())
+            return;
+        
+        List<String> languagesList = Arrays.asList(languages.split(",", -1));
+        List<Field> entityFields = EntityUtils.getAllFields(entity.getClass());
+        Map<String, Object> currentFieldValue;
+        String fieldName = null;
+        try {
+            for (Field field : entityFields) {
+
+                fieldName = field.getName();
+                // filter values only for multilingual fields
+                if (!EntityFieldsTypes.isMultilingual(fieldName)) {
+                    continue;
+                }
+
+                // ignore empty fields
+                currentFieldValue = (Map<String, Object>) entity.getFieldValue(field);
+                if (currentFieldValue == null) {
+                    continue;
+                }
+
+                //filter entries by language
+                Map<String, Object> newFieldValue = new HashMap<>();
+                for (Map.Entry<String, Object> mapEntry : currentFieldValue.entrySet()) {
+                    // allow also the URIs available for empty key
+                    if (languagesList.contains(mapEntry.getKey()) || mapEntry.getKey().equals("")) {
+                        newFieldValue.put(mapEntry.getKey(), mapEntry.getValue());
+                    }
+                }
+                if (currentFieldValue.size() != newFieldValue.size()) {
+                    entity.setFieldValue(field, newFieldValue);
+                }
+            }
+        } catch (IllegalArgumentException | IllegalAccessException e) {
+            throw new FunctionalRuntimeException("An exception occured during setting the entity field: " + fieldName,
+                    e);
+        }
     }
 
 }
