@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.config;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -13,7 +13,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
-    public static final  String MEDIA_TYPE_JSONLD         = "application/ld+json";
     /**
      * Setup CORS for all GET, HEAD and OPTIONS, requests.
      */
@@ -21,9 +20,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
                 .allowedOrigins("*")
-                .allowedMethods(HttpMethod.GET.name(), HttpMethod.HEAD.name(), HttpMethod.POST.name(), HttpMethod.PUT.name(), HttpMethod.DELETE.name(), HttpMethod.OPTIONS.name())
+                .allowedMethods("*")
                 .allowedHeaders("*")
                 .allowCredentials(false)
+                .exposedHeaders(HttpHeaders.ALLOW)
                 .maxAge(1000L); // in seconds
     }
 
@@ -38,7 +38,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
         // releases
         configurer.favorPathExtension(true);
 
-        // application/ld+json should take precedence over application/json
-        configurer.defaultContentType(MediaType.valueOf(MEDIA_TYPE_JSONLD), MediaType.APPLICATION_JSON);
+        // use application/ld+json if no Content-Type is specified
+        configurer.defaultContentType(MediaType.valueOf(eu.europeana.api.commons.web.http.HttpHeaders.CONTENT_TYPE_JSONLD));
     }
 }

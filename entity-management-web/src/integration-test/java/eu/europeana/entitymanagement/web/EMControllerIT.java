@@ -37,7 +37,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import javax.servlet.ServletContext;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -45,11 +44,12 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import static eu.europeana.api.commons.web.http.HttpHeaders.*;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.*;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Integration test for the main Entity Management controller
@@ -58,6 +58,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 public class EMControllerIT extends AbstractIntegrationTest {
+    private static final String HEADER_CONTENT_TYPE = "Content-Type";
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -118,11 +119,15 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 // should have Europeana and Datasource proxies
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
 
-        //TODO assert other important properties
+
+        checkResponseHeaders(results);
+
 
         // matches id in JSON file
         assertMetisRequest("http://www.wikidata.org/entity/Q152095");
     }
+
+
 
     @Test
     void registerAgentShouldBeSuccessful() throws Exception {
@@ -143,7 +148,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 // should have Europeana and Datasource proxies
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
 
-        //TODO assert other important properties
+        checkResponseHeaders(results);
 
         // matches id in JSON file
         assertMetisRequest("http://www.wikidata.org/entity/Q762");
@@ -162,19 +167,16 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isAccepted());
                 
-        
-//        System.out.println(results);
+
                 results.andExpect(jsonPath("$.id", any(String.class)))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())))
                 .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
                 .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
                 // should have Europeana and Datasource proxies
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
-        	//
-        	//results.andExpect(jsonPath("$.prefLabel[*]", hasSize(24))).andExpect(jsonPath("$.altLabel[*]", hasSize(12)));
-        	        
+
         		
-        //TODO assert other important properties
+        checkResponseHeaders(results);
     }
     
     @Test
@@ -190,20 +192,15 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isAccepted());
         
         results.andExpect(jsonPath("$.id", any(String.class)))
-        //TODO Enable when working propertly
-//                .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())))
+                .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())))
                 .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
                 .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
                 // should have Europeana and Datasource proxies
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
 
-        //TODO assert other important properties
+       checkResponseHeaders(results);
 
-        // matches id in JSON file
-//        http://www.wikidata.org/entity/Q193563
         assertMetisRequest("http://www.wikidata.org/entity/Q193563");
-
-//        return results;
     }
 
     @Test
@@ -212,14 +209,12 @@ public class EMControllerIT extends AbstractIntegrationTest {
         mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(PLACE_XML)));
         //second enqueue for the update task
         mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(PLACE_XML)));
-//        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(PLACE_XML)));
-        
+
         ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
                 .content(loadFile(PLACE_REGISTER_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isAccepted());
-        
-        System.out.println(results.andReturn().getResponse().getContentAsString());
+
         results.andExpect(jsonPath("$.id", any(String.class)))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Place.name())))
                 .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
@@ -227,13 +222,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 // should have Europeana and Datasource proxies
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
 
-//        System.out.println(((MockMvc)results).val);
-        //TODO assert other important properties
-        //results.andExpect(jsonPath("$.prefLabel[*]", hasSize(5)))
-//        .andExpect(jsonPath("$.lat", greaterThan(48.0)))
-//        .andExpect(jsonPath("$.long", greaterThan(2.0)));
-//        .andExpect(jsonPath("$.lat", is(48.85341)))
-//        .andExpect(jsonPath("$.long", is(2.3488)));
+       checkResponseHeaders(results);
         
         // matches id in JSON file
         assertMetisRequest("https://sws.geonames.org/2988507/");
@@ -253,16 +242,14 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isAccepted());
         
         results.andExpect(jsonPath("$.id", any(String.class)))
-        //enable when working propertly
+
                 .andExpect(jsonPath("$.type", is(EntityTypes.Timespan.name())))
-//                .andExpect(jsonPath("$.entity").isNotEmpty())
                 .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
                 .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
                 // should have Europeana and Datasource proxies
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
 
-        //TODO assert other important properties
-
+checkResponseHeaders(results);
         // matches id in JSON file
         assertMetisRequest("http://www.wikidata.org/entity/Q8106");
     }
@@ -281,13 +268,14 @@ public class EMControllerIT extends AbstractIntegrationTest {
         final ObjectNode registeredEntityNode = new ObjectMapper().readValue(resultRegisterEntity.getResponse().getContentAsString(StandardCharsets.UTF_8), ObjectNode.class);
 
         String requestPath = getEntityRequestPath(registeredEntityNode.path("id").asText());
-        mockMvc.perform(MockMvcRequestBuilders.put(BASE_SERVICE_URL + "/" + requestPath)
-        		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
-        		.content(loadFile(CONCEPT_UPDATE_JSON))
-        		.contentType(MediaType.APPLICATION_JSON))
+        ResultActions result = mockMvc.perform(put(BASE_SERVICE_URL + "/" + requestPath)
+                .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                .content(loadFile(CONCEPT_UPDATE_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isAccepted())
-                .andExpect(jsonPath("$.id", is(registeredEntityNode.path("id").asText())))
-                .andReturn();
+                .andExpect(jsonPath("$.id", is(registeredEntityNode.path("id").asText())));
+
+        checkResponseHeaders(result);
 
         // Update also triggers a Metis request
         assertMetisRequest(externalUri);
@@ -334,12 +322,13 @@ public class EMControllerIT extends AbstractIntegrationTest {
         Assertions.assertNotNull(europeanaProxyEntity.getDepiction());
 
         String requestPath = getEntityRequestPath(registeredEntityNode.path("id").asText());
-        mockMvc.perform(MockMvcRequestBuilders.put(BASE_SERVICE_URL + "/" + requestPath)
+        ResultActions resultActions = mockMvc.perform(put(BASE_SERVICE_URL + "/" + requestPath)
                 .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
                 .content(loadFile(CONCEPT_EMPTY_UPDATE__JSON))
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isAccepted())
-                .andReturn();
+                .andExpect(status().isAccepted());
+
+        checkResponseHeaders(resultActions);
 
         // update triggers a Metis request
         assertMetisRequest(externalUri);
@@ -356,7 +345,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
     }
 
     MvcResult createTestEntityRecord(String europeanaMetadataFile, String metisResponseFile, boolean forUpdate)
-	    throws IOException, Exception {
+	    throws Exception {
 	// set mock Metis response
         mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(metisResponseFile)));
         //second request for update task during create
@@ -392,6 +381,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(concept.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Concept.name())));
+
+        checkResponseHeaders(resultActions);
 
         String contentXml = getRetrieveEntityXmlResponse(requestPath);
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, concept);
@@ -436,10 +427,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
         
         Map<String, String> namespaces = Maps.newHashMap("skos", "http://www.w3.org/2004/02/skos/core#");
         namespaces.put("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-        
-        logger.debug("Retrieve entity resonse: {}", resultActions.andReturn().getResponse().getContentAsString());
         resultActions.andExpect(status().isOk())
-        	.andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_XML));
+        	.andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE_APPLICATION_RDF_XML));
  //TODO: enable when the XML Serialization is fixed
 //                .andExpect(xpath("//Concept/id", namespaces).string(entityId))
 //                .andExpect(xpath("//Concept/type", namespaces).string(EntityTypes.Concept.name()));
@@ -461,11 +450,9 @@ public class EMControllerIT extends AbstractIntegrationTest {
         		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
                 .accept(anyFormat));
         
-        Map<String, String> namespaces = Maps.newHashMap("skos", "http://www.w3.org/2004/02/skos/core#");
-        namespaces.put("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-        
         resultActions.andExpect(status().isOk())
-        	.andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(header().string(HEADER_CONTENT_TYPE,
+                is(CONTENT_TYPE_JSONLD_UTF8)))
         	.andExpect(jsonPath("$.id", is(entityId)))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Concept.name())));
     }
@@ -722,7 +709,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
         String requestPath = getEntityRequestPath(registeredEntityNode.path("id").asText());
         mockMvc.perform(MockMvcRequestBuilders.post(BASE_SERVICE_URL + "/" + requestPath + "/management/source")
                 .param(WebEntityConstants.PATH_PARAM_URL, externalUriWikidata)
-                .contentType(MediaType.APPLICATION_JSON))
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isAccepted())
                 .andReturn();
 
@@ -735,6 +722,14 @@ public class EMControllerIT extends AbstractIntegrationTest {
         externalProxy = savedRecord.get().getExternalProxy();
 
         Assertions.assertEquals(externalUriWikidata, externalProxy.getProxyId());
+    }
+
+    private void checkResponseHeaders(ResultActions results) throws Exception {
+        results.andExpect(header().string(HEADER_CONTENT_TYPE,
+                is(CONTENT_TYPE_JSONLD_UTF8)))
+                .andExpect(header().exists(HttpHeaders.ETAG))
+                .andExpect(header().string(HttpHeaders.LINK, is(VALUE_LDP_RESOURCE)))
+                .andExpect(header().stringValues(HttpHeaders.VARY, hasItems(containsString(HttpHeaders.ACCEPT))));
     }
 
     private void assertEntityExists(MvcResult result) throws JsonMappingException, JsonProcessingException, UnsupportedEncodingException {
@@ -780,6 +775,9 @@ public class EMControllerIT extends AbstractIntegrationTest {
         		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
                 .accept(MediaType.APPLICATION_XML))
         		.andExpect(status().isOk())
+                // content-type matches Accept header
+                .andExpect(header().string(HEADER_CONTENT_TYPE,
+                        is(MediaType.APPLICATION_XML_VALUE)))
         		.andReturn();
         return resultXml.getResponse().getContentAsString(StandardCharsets.UTF_8);
     }

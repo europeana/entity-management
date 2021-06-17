@@ -6,12 +6,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -121,7 +123,7 @@ public abstract class BaseRest extends BaseRestController {
         String etag = computeEtag(timestamp, outFormat.name(), getApiVersion());
 
         org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
-        headers.add(HttpHeaders.ALLOW, HttpHeaders.ALLOW_GET);
+
         if (!outFormat.equals(FormatTypes.schema)) {
             headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
             headers.add(HttpHeaders.LINK, HttpHeaders.VALUE_LDP_RESOURCE);
