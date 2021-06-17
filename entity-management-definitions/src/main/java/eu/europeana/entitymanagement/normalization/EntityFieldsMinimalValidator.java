@@ -1,7 +1,6 @@
 package eu.europeana.entitymanagement.normalization;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.validation.ConstraintValidator;
@@ -35,7 +34,7 @@ public class EntityFieldsMinimalValidator implements ConstraintValidator<EntityF
 		try {
 			for (Field field : entityFields) {
 				Object fieldValue = entity.getFieldValue(field);
-				if (fieldValue==null) { 
+				if (EntityFieldsTypes.hasTypeDefinition(field.getName()) && EntityFieldsTypes.isMandatory(field.getName()) && fieldValue==null) { 
 					addConstraint(context, "The mandatory field: "+field.getName()+" cannot be NULL.");
 	                if(returnValue==true) {
 	                	returnValue=false;

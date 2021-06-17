@@ -55,11 +55,6 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
                     proxyId + "; entityId=" + entityId);
         }
 
-        /*
-         * TODO: uncomment the line below for the minimal validation
-         */
-        //validateConstraints(metisResponse);
-
         Entity entity = entityRecord.getEntity();
 
         String metisType = metisResponse.getType();
@@ -117,11 +112,4 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
   private boolean metisResponseMatchesExternalProxy(EntityRecord entityRecord, Entity metisResponse){
       return entityComparator.compare(entityRecord.getExternalProxy().getEntity(), metisResponse) == 0;
     }
-  
-  private void validateConstraints(Entity entity) throws EntityValidationException  {
-      Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entity, EntityFieldsMinimalValidatorGroup.class);
-      if (!violations.isEmpty()) {
-          throw new EntityValidationException("The metis dereferenced entity contains invalid data!", violations);
-      }
-  }
 }
