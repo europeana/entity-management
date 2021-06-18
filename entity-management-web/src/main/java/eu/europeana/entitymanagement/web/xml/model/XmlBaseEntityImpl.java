@@ -60,16 +60,14 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
 	this.prefLabel = RdfXmlUtils.convertToXmlMultilingualString(entity.getPrefLabel());
 	this.altLabel = RdfXmlUtils.convertToXmlMultilingualString(entity.getAltLabel());
 	this.sameAs = RdfXmlUtils.convertToRdfResource(entity.getSameAs());
-	if(StringUtils.hasLength(entity.getDepiction())){
-    this.depiction = new LabelledResource(entity.getDepiction());
-
-        // isAggregatedBy not always set in tests
-        // TODO: fix tests, then remove null check here
+	if(StringUtils.hasLength(entity.getDepiction())) {
+        this.depiction = new LabelledResource(entity.getDepiction());
+    }
+	// isAggregatedBy not always set in tests
+    // TODO: fix tests, then remove null check here
     if(entity.getIsAggregatedBy() != null) {
         this.isAggregatedBy = new XmlAggregationImpl(entity.getIsAggregatedBy());
     }
-  }
-	
 	referencedWebResources = new ArrayList<>();
     }
 
@@ -78,7 +76,7 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
 	    entity = EntityObjectFactory.createEntityObject(getTypeEnum());
 	}
 	entity.setType(getTypeEnum().getEntityType());
-	
+
 	entity.setEntityId(getAbout());
 	entity.setPrefLabelStringMap(RdfXmlUtils.toLanguageMap(getPrefLabel()));
 	entity.setAltLabel(RdfXmlUtils.toLanguageMapList(getAltLabel()));
