@@ -43,10 +43,7 @@ public class SerializationUtils {
 
   public static void serializeExternalJson(Writer writer, ObjectMapper mapper, EntityRecord record)
       throws IOException {
-    ObjectNode result = getExternalJsonNode(mapper, record);
-    // Entity isAggregatedBy should be included in external profile
-    result.remove(WebEntityFields.IS_AGGREGATED_BY);
-    mapper.writeValue(writer, result);
+    mapper.writeValue(writer, getExternalJsonNode(mapper, record));
   }
 
 

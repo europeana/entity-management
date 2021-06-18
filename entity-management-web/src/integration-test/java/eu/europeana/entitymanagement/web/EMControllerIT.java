@@ -163,7 +163,6 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isAccepted());
                 
         
-//        System.out.println(results);
                 results.andExpect(jsonPath("$.id", any(String.class)))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())))
                 .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
@@ -190,8 +189,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isAccepted());
         
         results.andExpect(jsonPath("$.id", any(String.class)))
-        //TODO Enable when working propertly
-//                .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())))
+
+                .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())))
                 .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
                 .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
                 // should have Europeana and Datasource proxies
