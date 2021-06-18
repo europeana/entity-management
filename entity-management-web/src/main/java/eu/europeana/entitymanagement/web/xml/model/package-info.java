@@ -17,7 +17,8 @@
     @XmlNs(prefix = "xml", namespaceURI = "http://www.w3.org/XML/1998/namespace"),
     @XmlNs(prefix = "dc", namespaceURI = "http://purl.org/dc/elements/1.1/"),
     @XmlNs(prefix = "vcard", namespaceURI = "https://www.w3.org/2006/vcard/"),
-    @XmlNs(prefix = "rdaGr2", namespaceURI = "http://rdvocab.info/ElementsGr2/")},
+    @XmlNs(prefix = "rdaGr2", namespaceURI = "http://rdvocab.info/ElementsGr2/"),
+    @XmlNs(prefix = "ore", namespaceURI = "http://www.openarchives.org/ore/terms/")},
     namespace = "http://www.europeana.eu/schemas/edm/", elementFormDefault = XmlNsForm.QUALIFIED)
 //@formatter:on
 package eu.europeana.entitymanagement.web.xml.model;

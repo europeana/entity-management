@@ -11,6 +11,7 @@ public final class XmlConstants extends XmlFields{
     public static final String NAMESPACE_RDAGR2 = "http://rdvocab.info/ElementsGr2/";
     public static final String NAMESPACE_OWL = "http://www.w3.org/2002/07/owl#";
     public static final String NAMESPACE_DC = "http://purl.org/dc/elements/1.1/";
+    public static final String NAMESPACE_ORE = "http://www.openarchives.org/ore/terms/";
     public static final String NAMESPACE_DC_TERMS = "http://purl.org/dc/terms/";
     public static final String NAMESPACE_XML = "http://www.w3.org/XML/1998/namespace";
     public static final String NAMESPACE_WGS84_POS = "http://www.w3.org/2003/01/geo/wgs84_pos#";
@@ -97,7 +98,7 @@ public final class XmlConstants extends XmlFields{
     public static final String XML_HAS_GEO = "hasGeo";
     
     public static final String IS_AGGREGATED_BY = "isAggregatedBy";
-    public static final String XML_ORE_AGGREGATION = "Aggregation";
+    public static final String AGGREGATION = "Aggregation";
     public static final String XML_CREATED = "created";
     public static final String XML_MODIFIED = "modified";
     public static final String XML_AGGREGATES = "aggregates";

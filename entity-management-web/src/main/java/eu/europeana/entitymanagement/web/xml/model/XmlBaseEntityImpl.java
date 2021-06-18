@@ -11,11 +11,8 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.service.EntityObjectFactory;
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.*;
+
 import org.springframework.util.StringUtils;
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -23,8 +20,6 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
 
     @XmlTransient
     protected T entity;
-    @XmlTransient
-    String aggregationId;
     /**
      * relatedentityElementsToSerialize - this list is maintained by each serialized
      * entity and contains the entities that need to be serialized in addition,
@@ -48,6 +43,9 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
   @XmlElement(namespace = XmlConstants.NAMESPACE_FOAF, name = DEPICTION)
   private LabelledResource depiction;
 
+    @XmlElement(namespace = XmlConstants.NAMESPACE_ORE, name = XmlConstants.IS_AGGREGATED_BY)
+    private XmlAggregationImpl isAggregatedBy;
+
     public XmlBaseEntityImpl() {
 	// default constructor
     }
@@ -64,9 +62,14 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
 	this.sameAs = RdfXmlUtils.convertToRdfResource(entity.getSameAs());
 	if(StringUtils.hasLength(entity.getDepiction())){
     this.depiction = new LabelledResource(entity.getDepiction());
+
+        // isAggregatedBy not always set in tests
+        // TODO: fix tests, then remove null check here
+    if(entity.getIsAggregatedBy() != null) {
+        this.isAggregatedBy = new XmlAggregationImpl(entity.getIsAggregatedBy());
+    }
   }
 	
-	aggregationId = entity.getAbout() + "#aggregation";
 	referencedWebResources = new ArrayList<>();
     }
 
