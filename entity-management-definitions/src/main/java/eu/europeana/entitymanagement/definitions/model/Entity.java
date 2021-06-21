@@ -2,6 +2,14 @@ package eu.europeana.entitymanagement.definitions.model;
 
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.ENTITY_CONTEXT;
 
+import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.bson.types.ObjectId;
+
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -10,17 +18,13 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+
 import dev.morphia.annotations.Transient;
-import eu.europeana.entitymanagement.normalization.ValidEntityFields;
+import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatorGroup;
+import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatorInterface;
+import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorGroup;
+import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorInterface;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
-import java.lang.reflect.Field;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import javax.validation.groups.Default;
-import org.bson.types.ObjectId;
 
 /*
  * TODO: Define the Jackson annotations, both xml and json, in one place, meaning in this class here and the corresponding extended classes
@@ -37,7 +41,8 @@ import org.bson.types.ObjectId;
 }
 )
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@ValidEntityFields(groups = {Default.class})
+@EntityFieldsCompleteValidatorInterface(groups= {EntityFieldsCompleteValidatorGroup.class})
+@EntityFieldsMinimalValidatorInterface(groups= { EntityFieldsMinimalValidatorGroup.class})
 public abstract class Entity {
 
 

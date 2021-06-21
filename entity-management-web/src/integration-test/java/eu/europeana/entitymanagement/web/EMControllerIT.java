@@ -171,6 +171,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isAccepted());
                 
 
+//        System.out.println(results);
                 results.andExpect(jsonPath("$.id", any(String.class)))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())))
                 .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
@@ -460,7 +461,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
         ResultActions resultActions = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath)
         		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
                 .accept(anyFormat));
-        
+
         resultActions.andExpect(status().isOk())
         .andExpect(header().string(HEADER_CONTENT_TYPE,
                 is(CONTENT_TYPE_JSONLD_UTF8)))

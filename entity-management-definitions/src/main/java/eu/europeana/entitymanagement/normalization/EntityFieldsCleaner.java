@@ -33,9 +33,6 @@ public class EntityFieldsCleaner {
 	this.emLanguageCodes = emLanguageCodes;
     }
 
-    public void initialize(ValidEntityFields constraint) {
-    }
-
     @SuppressWarnings("unchecked")
     public void cleanAndNormalize(Entity entity) {
 
