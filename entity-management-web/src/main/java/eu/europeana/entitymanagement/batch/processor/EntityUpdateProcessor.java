@@ -14,6 +14,8 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.ingestion.EntityValidationException;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
+import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatorGroup;
+import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorGroup;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 
 /**
@@ -38,19 +40,29 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
 
     @Override
     public EntityRecord process(@NonNull EntityRecord entityRecord) throws EuropeanaApiException {
-        //TODO: Validate entity metadata from Proxy Data Source
+        
+    	validateMinimalConstraints(entityRecord.getExternalProxy().getEntity());
         emEntityFieldCleaner.cleanAndNormalize(entityRecord.getExternalProxy().getEntity());
-	entityRecordService.mergeEntity(entityRecord);
+        entityRecordService.mergeEntity(entityRecord);
         entityRecordService.performReferentialIntegrity(entityRecord.getEntity());
-        validateConstraints(entityRecord.getEntity());
+        validateCompleteConstraints(entityRecord.getEntity());
    
         return entityRecord;
     }
 
-    private void validateConstraints(Entity entity) throws EntityValidationException  {
-        Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entity);
+    private void validateCompleteConstraints(Entity entity) throws EntityValidationException  {
+        Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entity, EntityFieldsCompleteValidatorGroup.class);
         if (!violations.isEmpty()) {
             throw new EntityValidationException("The consolidated entity contains invalid data!", violations);
         }
     }
+    
+    private void validateMinimalConstraints(Entity entity) throws EntityValidationException  {
+        Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entity, EntityFieldsMinimalValidatorGroup.class);
+        if (!violations.isEmpty()) {
+            throw new EntityValidationException("The entity from the external source contains invalid data!", violations);
+        }
+    }
+    
+    
 }
