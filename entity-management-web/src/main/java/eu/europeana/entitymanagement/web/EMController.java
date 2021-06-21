@@ -73,7 +73,8 @@ public class EMController extends BaseRest {
 
 	@ApiOperation(value = "Disable an entity", nickname = "disableEntity", response = java.lang.Void.class)
     @RequestMapping(value = { "/{type}/base/{identifier}",
-	    "/{type}/{identifier}" }, method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+	    "/{type}/{identifier}" }, method = RequestMethod.DELETE, produces = {HttpHeaders.CONTENT_TYPE_JSONLD,
+			MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<String> disableEntity(
 	    @RequestHeader(value = "If-Match", required = false) String ifMatchHeader,
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
@@ -99,7 +100,8 @@ public class EMController extends BaseRest {
 
 	@ApiOperation(value = "Re-enable an entity", nickname = "enableEntity", response = java.lang.Void.class)
 	@RequestMapping(value = { "/{type}/base/{identifier}",
-			"/{type}/{identifier}" }, method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+			"/{type}/{identifier}" }, method = RequestMethod.POST, produces = {HttpHeaders.CONTENT_TYPE_JSONLD,
+			MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<String> enableEntity(
 			@RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
 			@RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
@@ -162,7 +164,8 @@ public class EMController extends BaseRest {
 
 
 	@ApiOperation(value = "Update an entity from external data source", nickname = "updateEntityFromDatasource", response = java.lang.Void.class)
-	@PostMapping(value = "/{type}/{identifier}/management/update", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/{type}/{identifier}/management/update", produces = {HttpHeaders.CONTENT_TYPE_JSONLD,
+			MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<String> updateFromExternalSource(
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
@@ -177,7 +180,8 @@ public class EMController extends BaseRest {
 	}
 
 	@ApiOperation(value = "Update multiple entities from external data source", nickname = "updateMultipleEntityFromDatasource", response = java.lang.Void.class)
-	@PostMapping(value = "/management/update", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/management/update", produces = {HttpHeaders.CONTENT_TYPE_JSONLD,
+			MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<EntityIdResponse> updateMultipleExternalSource(
 			@RequestBody List<String> entityIds,
 			HttpServletRequest request
@@ -198,7 +202,8 @@ public class EMController extends BaseRest {
 	}
 
 	@ApiOperation(value = "Update metrics for given entities", nickname = "updateMultipleEntityFromDatasource", response = java.lang.Void.class)
-	@PostMapping(value = "/management/metrics", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/management/metrics", produces = {HttpHeaders.CONTENT_TYPE_JSONLD,
+			MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<EntityIdResponse> updateMetricsMultiple(
 			@RequestBody List<String> entityIds,
 			HttpServletRequest request
@@ -318,7 +323,8 @@ public class EMController extends BaseRest {
 		}
 
 	@ApiOperation(value = "Change provenance for an Entity", nickname = "changeProvenance")
-	@PostMapping(value = "/{type}/{identifier}/management/source", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/{type}/{identifier}/management/source", produces = {HttpHeaders.CONTENT_TYPE_JSONLD,
+			MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<String> changeProvenance(
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
