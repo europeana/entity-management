@@ -70,7 +70,8 @@ public class EntityAdminController extends BaseRest {
 
         LOG.info("Permanently deleting entityId={}", entityRecord.getEntityId());
         entityRecordService.delete(entityRecord.getEntityId());
-        return ResponseEntity.noContent().build();
+
+       return noContentResponse(request);
     }
 
     /**
@@ -102,7 +103,7 @@ public class EntityAdminController extends BaseRest {
         EntityRecord savedEntityRecord = entityRecordService
                 .createEntityFromMigrationRequest(entityCreationRequest, type, identifier);
         LOG.info("Created Entity record for {}; entityId={}", entityCreationRequest.getId(), savedEntityRecord.getEntityId());
-        return generateResponseEntity(EntityProfile.internal.toString(), FormatTypes.jsonld, null, null, savedEntityRecord, HttpStatus.ACCEPTED);
+        return generateResponseEntity(request, EntityProfile.internal.toString(), FormatTypes.jsonld, null, null, savedEntityRecord, HttpStatus.ACCEPTED);
     }
 
     /**

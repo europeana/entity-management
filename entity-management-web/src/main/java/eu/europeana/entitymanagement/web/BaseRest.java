@@ -1,19 +1,17 @@
 package eu.europeana.entitymanagement.web;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
+import eu.europeana.entitymanagement.web.service.RequestPathMethodService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.http.HttpMethod;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -40,19 +38,22 @@ import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 
 public abstract class BaseRest extends BaseRestController {
 
-    @Resource(name = AppConfig.BEAN_AUTHORIZATION_SERVICE)
-    AuthorizationService emAuthorizationService;
+    @Autowired
+    private AuthorizationService emAuthorizationService;
 
-    @Resource(name = AppConfig.BEAN_EM_BUILD_INFO)
-    BuildInfo emBuildInfo;
+    @Autowired
+    private BuildInfo emBuildInfo;
 
-    @Resource(name = AppConfigConstants.BEAN_EM_XML_SERIALIZER)
-    EntityXmlSerializer entityXmlSerializer;
+    @Autowired
+    private EntityXmlSerializer entityXmlSerializer;
 
-    @Resource(name = AppConfigConstants.BEAN_EM_JSONLD_SERIALIZER)
-    JsonLdSerializer jsonLdSerializer;
+    @Autowired
+    private JsonLdSerializer jsonLdSerializer;
 
-    Logger logger = LogManager.getLogger(getClass());
+    @Autowired
+    private RequestPathMethodService requestMethodService;
+
+    protected Logger logger = LogManager.getLogger(getClass());
 
     public BaseRest() {
         super();
@@ -60,10 +61,6 @@ public abstract class BaseRest extends BaseRestController {
 
     public AuthorizationService getAuthorizationService() {
         return emAuthorizationService;
-    }
-
-    public Logger getLogger() {
-        return logger;
     }
 
     /**
@@ -80,13 +77,13 @@ public abstract class BaseRest extends BaseRestController {
     /**
      * This method selects serialization method according to provided format.
      * 
-     * @param entity The entity
+     * @param entityRecord The entity
      * @param format The format extension
      * @return entity in jsonLd format
      * @throws EntityManagementRuntimeException
      */
     protected String serialize(EntityRecord entityRecord, FormatTypes format, String profile)
-            throws EntityManagementRuntimeException, EntityCreationException {
+            throws EntityManagementRuntimeException {
 
         String responseBody = null;
 
@@ -104,6 +101,8 @@ public abstract class BaseRest extends BaseRestController {
      * Generates serialised EntityRecord Response entity along with Http status and
      * headers
      *
+     *
+     * @param request
      * @param profile
      * @param outFormat
      * @param contentType
@@ -113,8 +112,8 @@ public abstract class BaseRest extends BaseRestController {
      * @throws EntityCreationException
      * @throws FunctionalRuntimeException
      */
-    public ResponseEntity<String> generateResponseEntity(String profile, FormatTypes outFormat, String languages,
-            String contentType, EntityRecord entityRecord, HttpStatus status) throws EntityCreationException {
+    public ResponseEntity<String> generateResponseEntity(HttpServletRequest request, String profile, FormatTypes outFormat, String languages,
+                                                         String contentType, EntityRecord entityRecord, HttpStatus status) throws EntityCreationException {
 
         Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
 
@@ -122,8 +121,7 @@ public abstract class BaseRest extends BaseRestController {
 
         String etag = computeEtag(timestamp, outFormat.name(), getApiVersion());
 
-        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
-
+        org.springframework.http.HttpHeaders headers = createAllowHeader(request);
         if (!outFormat.equals(FormatTypes.schema)) {
             headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
             headers.add(HttpHeaders.LINK, HttpHeaders.VALUE_LDP_RESOURCE);
@@ -135,6 +133,27 @@ public abstract class BaseRest extends BaseRestController {
 
         String body = serialize(entityRecord, outFormat, profile);
         return ResponseEntity.status(status).headers(headers).eTag(etag).body(body);
+    }
+
+    protected org.springframework.http.HttpHeaders createAllowHeader(HttpServletRequest request) {
+        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        String allowHeaderValue;
+
+        Optional<String> methodsForRequestPattern = requestMethodService.getMethodsForRequestPattern(request);
+        if (methodsForRequestPattern.isEmpty()) {
+            logger.warn("Could not find other matching methods for {}. Using current request method in Allow header",
+                    request.getRequestURL());
+            allowHeaderValue = request.getMethod();
+        } else {
+            allowHeaderValue = methodsForRequestPattern.get();
+        }
+
+        headers.add(HttpHeaders.ALLOW, allowHeaderValue);
+        return headers;
+    }
+
+    protected ResponseEntity<String> noContentResponse(HttpServletRequest request) {
+        return ResponseEntity.noContent().headers(createAllowHeader(request)).build();
     }
 
     /**

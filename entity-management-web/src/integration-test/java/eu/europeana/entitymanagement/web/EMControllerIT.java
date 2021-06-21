@@ -120,12 +120,14 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
 
 
-        checkResponseHeaders(results);
+        checkAllowHeaderForPOST(results);
+        checkCommonResponseHeaders(results);
 
 
         // matches id in JSON file
         assertMetisRequest("http://www.wikidata.org/entity/Q152095");
     }
+
 
 
 
@@ -148,7 +150,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 // should have Europeana and Datasource proxies
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
 
-        checkResponseHeaders(results);
+        checkAllowHeaderForPOST(results);
+        checkCommonResponseHeaders(results);
 
         // matches id in JSON file
         assertMetisRequest("http://www.wikidata.org/entity/Q762");
@@ -175,8 +178,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 // should have Europeana and Datasource proxies
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
 
-        		
-        checkResponseHeaders(results);
+        checkAllowHeaderForPOST(results);
+        checkCommonResponseHeaders(results);
     }
     
     @Test
@@ -198,7 +201,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 // should have Europeana and Datasource proxies
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
 
-       checkResponseHeaders(results);
+        checkAllowHeaderForPOST(results);
+        checkCommonResponseHeaders(results);
 
         assertMetisRequest("http://www.wikidata.org/entity/Q193563");
     }
@@ -222,7 +226,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 // should have Europeana and Datasource proxies
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
 
-       checkResponseHeaders(results);
+        checkAllowHeaderForPOST(results);
+        checkCommonResponseHeaders(results);
         
         // matches id in JSON file
         assertMetisRequest("https://sws.geonames.org/2988507/");
@@ -249,7 +254,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 // should have Europeana and Datasource proxies
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
 
-checkResponseHeaders(results);
+        checkAllowHeaderForPOST(results);
+        checkCommonResponseHeaders(results);
         // matches id in JSON file
         assertMetisRequest("http://www.wikidata.org/entity/Q8106");
     }
@@ -275,7 +281,8 @@ checkResponseHeaders(results);
                 .andExpect(status().isAccepted())
                 .andExpect(jsonPath("$.id", is(registeredEntityNode.path("id").asText())));
 
-        checkResponseHeaders(result);
+        checkAllowHeaderForDPGP(result);
+        checkCommonResponseHeaders(result);
 
         // Update also triggers a Metis request
         assertMetisRequest(externalUri);
@@ -328,7 +335,8 @@ checkResponseHeaders(results);
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isAccepted());
 
-        checkResponseHeaders(resultActions);
+        checkAllowHeaderForDPGP(resultActions);
+        checkCommonResponseHeaders(resultActions);
 
         // update triggers a Metis request
         assertMetisRequest(externalUri);
@@ -382,7 +390,8 @@ checkResponseHeaders(results);
                 .andExpect(jsonPath("$.id", is(concept.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Concept.name())));
 
-        checkResponseHeaders(resultActions);
+        checkAllowHeaderForGET(resultActions);
+        checkCommonResponseHeaders(resultActions);
 
         String contentXml = getRetrieveEntityXmlResponse(requestPath);
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, concept);
@@ -409,6 +418,8 @@ checkResponseHeaders(results);
 
         resultActions.andExpect(jsonPath("$.prefLabel[*]", hasSize(2)))
 		.andExpect(jsonPath("$.altLabel[*]", hasSize(1)));
+
+        checkAllowHeaderForGET(resultActions);
     }
 
     
@@ -474,6 +485,8 @@ checkResponseHeaders(results);
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(agent.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())));
+
+        checkAllowHeaderForGET(resultActions);
 
         String contentXml = getRetrieveEntityXmlResponse(requestPath);
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, agent);
@@ -601,9 +614,12 @@ checkResponseHeaders(results);
 
         String requestPath = getEntityRequestPath(record.getEntityId());
 
-        mockMvc.perform(delete(BASE_SERVICE_URL + "/" + requestPath)
+        ResultActions resultActions = mockMvc.perform(delete(BASE_SERVICE_URL + "/" + requestPath)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
+
+        // request path matches those for GET, POST and PUT
+        checkAllowHeaderForDPGP(resultActions);
 
         // check that record was disabled
         Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveByEntityId(record.getEntityId());
@@ -724,12 +740,44 @@ checkResponseHeaders(results);
         Assertions.assertEquals(externalUriWikidata, externalProxy.getProxyId());
     }
 
-    private void checkResponseHeaders(ResultActions results) throws Exception {
+    /**
+     * Checks common response headers.
+     * Allow header checked within each test method.
+     */
+    private void checkCommonResponseHeaders(ResultActions results) throws Exception {
         results.andExpect(header().string(HEADER_CONTENT_TYPE,
                 is(CONTENT_TYPE_JSONLD_UTF8)))
                 .andExpect(header().exists(HttpHeaders.ETAG))
                 .andExpect(header().string(HttpHeaders.LINK, is(VALUE_LDP_RESOURCE)))
                 .andExpect(header().stringValues(HttpHeaders.VARY, hasItems(containsString(HttpHeaders.ACCEPT))));
+    }
+
+
+    private void checkAllowHeaderForPOST(ResultActions results) throws Exception {
+        results.andExpect(header().stringValues(
+                HttpHeaders.ALLOW, hasItems(
+                        containsString("POST")
+                )));
+    }
+
+    private void checkAllowHeaderForGET(ResultActions results) throws Exception {
+        results.andExpect(header().stringValues(
+                HttpHeaders.ALLOW, hasItems(
+                        containsString("GET")
+                )));
+    }
+
+    /**
+     * Expects Allow header in response to contain DELETE,POST,GET,PUT
+     */
+    private void checkAllowHeaderForDPGP(ResultActions results) throws Exception {
+        results.andExpect(header().stringValues(
+                HttpHeaders.ALLOW, hasItems(
+                        containsString("GET"),
+                        containsString("DELETE"),
+                        containsString("POST"),
+                        containsString("PUT")
+                )));
     }
 
     private void assertEntityExists(MvcResult result) throws JsonMappingException, JsonProcessingException, UnsupportedEncodingException {

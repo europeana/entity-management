@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import eu.europeana.entitymanagement.web.service.RequestPathMethodService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -60,9 +61,9 @@ public class EMController extends BaseRest {
 
 	@Autowired
 	public EMController(EntityRecordService entityRecordService,
-			MetisDereferenceService dereferenceService, DataSources datasources,
-			BatchService batchService,
-			EntityManagementConfiguration emConfig) {
+						MetisDereferenceService dereferenceService, DataSources datasources,
+						BatchService batchService,
+						EntityManagementConfiguration emConfig) {
 		this.entityRecordService = entityRecordService;
 		this.dereferenceService = dereferenceService;
 		this.datasources = datasources;
@@ -92,8 +93,9 @@ public class EMController extends BaseRest {
 	    String etag = computeEtag(timestamp, FormatTypes.jsonld.name(), getApiVersion());
 	    checkIfMatchHeader(etag, request);
 	    entityRecordService.disableEntityRecord(entityRecord);
-	    return ResponseEntity.noContent().build();
-    }
+
+		return noContentResponse(request);
+	}
 
 	@ApiOperation(value = "Re-enable an entity", nickname = "enableEntity", response = java.lang.Void.class)
 	@RequestMapping(value = { "/{type}/base/{identifier}",
@@ -111,11 +113,11 @@ public class EMController extends BaseRest {
 		EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier.toLowerCase(), true);
 		if (!entityRecord.isDisabled()) {
 
-			return createResponse(profile, type, null, identifier, FormatTypes.jsonld, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
+			return createResponse(request, profile, type, null, identifier, FormatTypes.jsonld, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
 		}
 		logger.info("Re-enabling entityId={}", entityRecord.getEntityId());
 		entityRecordService.enableEntityRecord(entityRecord);
-		return createResponse(profile, type, null, identifier, FormatTypes.jsonld, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
+		return createResponse(request, profile, type, null, identifier, FormatTypes.jsonld, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
 	}
 
     @ApiOperation(value = "Update an entity", nickname = "updateEntity", response = java.lang.Void.class)
@@ -155,7 +157,7 @@ public class EMController extends BaseRest {
 
 			entityRecordService.replaceEuropeanaProxy(updateRequestEntity, entityRecord);
 			entityRecordService.update(entityRecord);
-			return launchTaskAndRetrieveEntity(type, identifier, entityRecord, profile);
+			return launchTaskAndRetrieveEntity(request, type, identifier, entityRecord, profile);
     }
 
 
@@ -171,7 +173,7 @@ public class EMController extends BaseRest {
 			verifyWriteAccess(Operations.UPDATE, request);
 		}
 		EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
-		return launchTaskAndRetrieveEntity(type, identifier, entityRecord, profile);
+		return launchTaskAndRetrieveEntity(request, type, identifier, entityRecord, profile);
 	}
 
 	@ApiOperation(value = "Update multiple entities from external data source", nickname = "updateMultipleEntityFromDatasource", response = java.lang.Void.class)
@@ -231,7 +233,7 @@ public class EMController extends BaseRest {
 		if (emConfig.isAuthEnabled()) {
 			verifyReadAccess(request);
 		}
-	return createResponse(profile, type, languages, identifier, FormatTypes.jsonld,
+	return createResponse(request, profile, type, languages, identifier, FormatTypes.jsonld,
 			HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
 
     }
@@ -251,14 +253,14 @@ public class EMController extends BaseRest {
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 				HttpServletRequest request)
 				throws EuropeanaApiException, HttpException {
-			if (emConfig.isAuthEnabled()) {
+		if (emConfig.isAuthEnabled()) {
 				verifyReadAccess(request);
 			}
 			// if a valid Accept header value is provided, use it; otherwise return application/rdf+xml
 		    // TODO: handle browser requests with multiple Accept header values
 			String responseContentType = GET_XML_ACCEPT_HEADERS.contains(acceptHeader)
 					? acceptHeader : HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML;
-	return createResponse(profile, type, languages, identifier, FormatTypes.xml, responseContentType);
+	return createResponse(request, profile, type, languages, identifier, FormatTypes.xml, responseContentType);
     }
 
     @ApiOperation(value = "Register a new entity", nickname = "registerEntity", response = java.lang.Void.class)
@@ -310,7 +312,7 @@ public class EMController extends BaseRest {
 
 			logger.info("Created Entity record for externalId={}; entityId={}", entityCreationRequest.getId(), savedEntityRecord.getEntityId());
 
-			return launchTaskAndRetrieveEntity(savedEntityRecord.getEntity().getType(),
+			return launchTaskAndRetrieveEntity(request, savedEntityRecord.getEntity().getType(),
 					getDatabaseIdentifier(savedEntityRecord.getEntityId()), savedEntityRecord,
 					EntityProfile.internal.toString());
 		}
@@ -335,11 +337,11 @@ public class EMController extends BaseRest {
 
 		entityRecordService.changeExternalProxy(entityRecord, url);
 		entityRecordService.update(entityRecord);
-		return launchTaskAndRetrieveEntity(type, identifier, entityRecord, profile);
+		return launchTaskAndRetrieveEntity(request, type, identifier, entityRecord, profile);
 	}
 
-    private ResponseEntity<String> createResponse(String profile, String type, String languages, String identifier, FormatTypes outFormat,
-	    String contentType) throws EuropeanaApiException {
+    private ResponseEntity<String> createResponse(HttpServletRequest request, String profile, String type, String languages, String identifier, FormatTypes outFormat,
+												  String contentType) throws EuropeanaApiException {
 			/*
 	 * verify the parameters
 	 */
@@ -355,17 +357,17 @@ public class EMController extends BaseRest {
 	}
 
 			EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier,false);
-			return generateResponseEntity(profile, outFormat, languages, contentType, entityRecord,
+			return generateResponseEntity(request, profile, outFormat, languages, contentType, entityRecord,
 					HttpStatus.OK);
 		}
 
-	private ResponseEntity<String> launchTaskAndRetrieveEntity(String type, String identifier,
-			EntityRecord entityRecord, String profile) throws Exception {
+	private ResponseEntity<String> launchTaskAndRetrieveEntity(HttpServletRequest request, String type, String identifier,
+															   EntityRecord entityRecord, String profile) throws Exception {
 		// launch synchronous update, then retrieve entity from DB afterwards
 		launchUpdateTask(Collections.singletonList(entityRecord.getEntityId()), false);
 		entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
 
-		return generateResponseEntity(profile, FormatTypes.jsonld, null, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8,
+		return generateResponseEntity(request, profile, FormatTypes.jsonld, null, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8,
 				entityRecord, HttpStatus.ACCEPTED);
 	}
 
