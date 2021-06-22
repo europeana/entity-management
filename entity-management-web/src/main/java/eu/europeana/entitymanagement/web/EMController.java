@@ -38,7 +38,6 @@ import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.web.EntityIdResponse;
 import eu.europeana.entitymanagement.exception.EntityMismatchException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
-import eu.europeana.entitymanagement.exception.EtagMismatchException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
@@ -95,7 +94,7 @@ public class EMController extends BaseRest {
 				0L;
 
 	    String etag = computeEtag(timestamp, FormatTypes.jsonld.name(), getApiVersion());
-	    checkIfMatchHeader(etag, request);
+		checkIfMatchHeaderWithQuotes(etag, request);
 	    entityRecordService.disableEntityRecord(entityRecord);
 	    return ResponseEntity.noContent().build();
     }
@@ -158,11 +157,7 @@ public class EMController extends BaseRest {
 
 		 String etag = computeEtag(timestamp, FormatTypes.jsonld.name(), getApiVersion());
 
-			try {
-				checkIfMatchHeader(etag, request);
-			} catch (HttpException e) {
-				throw new EtagMismatchException("If-Match header value does not match generated ETag for entity");
-			}
+		 checkIfMatchHeaderWithQuotes(etag, request);
 
 			entityRecordService.replaceEuropeanaProxy(updateRequestEntity, entityRecord);
 			entityRecordService.update(entityRecord);

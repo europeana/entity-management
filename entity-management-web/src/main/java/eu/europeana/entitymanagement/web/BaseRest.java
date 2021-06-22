@@ -8,7 +8,9 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
+import eu.europeana.entitymanagement.exception.EtagMismatchException;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -182,6 +184,20 @@ public abstract class BaseRest extends BaseRestController {
         } catch (IllegalArgumentException | IllegalAccessException e) {
             throw new FunctionalRuntimeException("An exception occured during setting the entity field: " + fieldName,
                     e);
+        }
+    }
+
+    /**
+     * Reimplementation of {@link BaseRestController#checkIfMatchHeader(String, HttpServletRequest)} that expects
+     * the ETAG value in If-Match headers to be placed between double quotes.
+     *
+     * TODO: move to api-commons
+     */
+    protected void checkIfMatchHeaderWithQuotes(String etag, HttpServletRequest request) throws EtagMismatchException {
+        String ifMatchHeader = request.getHeader("If-Match");
+        // remove double-quotes from header during comparison
+        if (ifMatchHeader != null && !etag.equals(ifMatchHeader.replace("\"", ""))) {
+            throw new EtagMismatchException("If-Match header value does not match generated ETag for entity");
         }
     }
 
