@@ -3,6 +3,7 @@ package eu.europeana.entitymanagement.definitions.model;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +20,16 @@ import eu.europeana.entitymanagement.vocabulary.XmlFields;
 @JsonPropertyOrder({CONTEXT, ID, TYPE, DEPICTION, IS_SHOWN_BY, PREF_LABEL, ALT_LABEL, HIDDEN_LABEL, LATITUDE, LONGITUDE,
 		ALTITUDE, LATITUDE_LONGITUDE, NOTE, HAS_PART, IS_PART_OF, IS_NEXT_IN_SEQUENCE, SAME_AS})
 public class Place extends Entity {
+
+	public Place(Place copy) {
+		super(copy);
+		if(copy.getIsNextInSequence()!=null) this.isNextInSequence = new ArrayList<>(copy.getIsNextInSequence());
+		this.latitude = copy.getLatitude();
+		this.longitude = copy.getLongitude();
+		this.altitude = copy.getAltitude();
+		if(copy.getExactMatch()!=null) this.exactMatch = new ArrayList<>(copy.getExactMatch());
+	}
+
 
 	public Place() {
 		super();

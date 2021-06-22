@@ -3,7 +3,9 @@ package eu.europeana.entitymanagement.definitions.model;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.ENTITY_CONTEXT;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -26,6 +28,7 @@ import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorG
 import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorInterface;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 
+
 /*
  * TODO: Define the Jackson annotations, both xml and json, in one place, meaning in this class here and the corresponding extended classes
  */
@@ -44,6 +47,28 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 @EntityFieldsCompleteValidatorInterface(groups= {EntityFieldsCompleteValidatorGroup.class})
 @EntityFieldsMinimalValidatorInterface(groups= { EntityFieldsMinimalValidatorGroup.class})
 public abstract class Entity {
+
+	public Entity () {
+		
+	}
+	
+	public Entity(Entity copy) {
+		this.type = copy.getType();
+		this.entityId = copy.getEntityId();
+		this.depiction = copy.getDepiction();
+		if(copy.getNote()!=null) this.note = new HashMap<>(copy.getNote());
+		if(copy.getPrefLabel()!=null) this.prefLabel = new HashMap<>(copy.getPrefLabelStringMap());
+		if(copy.getAltLabel()!=null) this.altLabel = new HashMap<>(copy.getAltLabel());
+		if(copy.getHiddenLabel()!=null) this.hiddenLabel = new HashMap<>(copy.getHiddenLabel());
+		if(copy.getIdentifier()!=null) this.identifier = new ArrayList<>(copy.getIdentifier());
+		if(copy.getSameAs()!=null) this.sameAs = new ArrayList<>(copy.getSameAs());
+		if(copy.getIsRelatedTo()!=null) this.isRelatedTo = new ArrayList<>(copy.getIsRelatedTo());
+		if(copy.getHasPart()!=null) this.hasPart = new ArrayList<>(copy.getHasPart());
+		if(copy.getIsPartOfArray()!=null) this.isPartOf = new ArrayList<>(copy.getIsPartOfArray());
+		if(copy.getIsAggregatedBy()!=null) this.isAggregatedBy=new Aggregation(copy.getIsAggregatedBy());
+		if(copy.getReferencedWebResource()!=null) this.referencedWebResource = new WebResource(copy.getReferencedWebResource());
+		this.payload = copy.getPayload();
+	}
 
 
 	protected String type;
@@ -70,6 +95,7 @@ public abstract class Entity {
 
 	protected Aggregation isAggregatedBy;
 	protected WebResource referencedWebResource;
+	protected String payload;
 
 
 	@JsonIgnore
@@ -369,4 +395,15 @@ public abstract class Entity {
 		String[] splitArray = this.getAbout().split("/");
 		this.entityIdentifier =  splitArray[splitArray.length-1];
 	}
+
+	@JsonIgnore
+	public String getPayload() {
+		return payload;
+	}
+
+
+	public void setPayload(String payload) {
+		this.payload = payload;
+	}
+
 }

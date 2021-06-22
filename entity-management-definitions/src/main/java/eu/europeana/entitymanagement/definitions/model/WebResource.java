@@ -13,7 +13,14 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 @JsonPropertyOrder({WebEntityFields.ID, WebEntityFields.SOURCE, WebEntityFields.THUMBNAIL})
 public class WebResource {
 
-    public WebResource() {
+    public WebResource(WebResource copy) {
+		this.source = copy.getSource();
+		this.id = copy.getId();
+		this.thumbnail = copy.getThumbnail();
+		this.type = copy.getType();
+	}
+
+	public WebResource() {
         super();
         // TODO Auto-generated constructor stub
     }

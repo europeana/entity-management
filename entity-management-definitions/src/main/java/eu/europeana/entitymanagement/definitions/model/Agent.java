@@ -3,9 +3,12 @@ package eu.europeana.entitymanagement.definitions.model;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -19,6 +22,26 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 		END, DATE_OF_DEATH, DATE_OF_TERMINATION, DATE, PLACE_OF_BIRTH, PLACE_OF_DEATH, GENDER, PROFESSION_OR_OCCUPATION, BIOGRAPHICAL_INFORMATION, NOTE,
 		HAS_PART, IS_PART_OF, HAS_MET, IS_RELATED_TO, WAS_PRESENT_AT, IDENTIFIER, SAME_AS})
 public class Agent extends Entity {
+
+	public Agent(Agent copy) {
+		super(copy);
+		if(copy.getDate()!=null) this.date = new ArrayList<>(copy.getDate());
+		if(copy.getBegin()!=null) this.begin = new ArrayList<>(copy.getBegin());
+		if(copy.getEnd()!=null) this.end = new ArrayList<>(copy.getEnd());
+		if(copy.getDateOfBirth()!=null) this.dateOfBirth = new ArrayList<>(copy.getDateOfBirth());
+		if(copy.getDateOfDeath()!=null) this.dateOfDeath = new ArrayList<>(copy.dateOfDeath);
+		if(copy.getWasPresentAt()!=null) this.wasPresentAt = new ArrayList<>(copy.getWasPresentAt());
+		if(copy.getHasMet()!=null) this.hasMet = new ArrayList<>(copy.getHasMet());
+		if(copy.getName()!=null) this.name = new HashMap<>(copy.getName());
+		if(copy.getBiographicalInformation()!=null) this.biographicalInformation = new HashMap<>(copy.getBiographicalInformation());
+		if(copy.getProfessionOrOccupation()!=null) this.professionOrOccupation = new ArrayList<>(copy.getProfessionOrOccupation());
+		if(copy.getPlaceOfBirth()!=null) this.placeOfBirth = new HashMap<>(copy.getPlaceOfBirth());
+		if(copy.getPlaceOfDeath()!=null) this.placeOfDeath = new HashMap<>(copy.getPlaceOfDeath());
+		this.dateOfEstablishment = copy.getDateOfEstablishment();
+		this.dateOfTermination = copy.getDateOfTermination();
+		this.gender = copy.getGender();
+		if(copy.getExactMatch()!=null) this.exactMatch = new ArrayList<>(copy.getExactMatch());
+	}
 
 	public Agent() {
 		super();
@@ -68,7 +91,7 @@ public class Agent extends Entity {
 	}
 
 	@JsonGetter(WebEntityFields.BEGIN)
-	public List<String> getBeginArray() {
+	public List<String> getBegin() {
 		return begin;
 	}
 
@@ -78,7 +101,7 @@ public class Agent extends Entity {
 	}
 
 	@JsonGetter(END)
-	public List<String> getEndArray() {
+	public List<String> getEnd() {
 		return end;
 	}
 

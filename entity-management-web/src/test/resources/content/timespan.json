@@ -45,7 +45,6 @@
 "en":["1st-century"],
 "ca":["segle I dC"]
 },
-"payload":"{\"id\": \"http://data.europeana.eu/timespan/1\", \"type\": \"Timespan\", \"prefLabel\": {\"de\": \"1. Jahrhundert\", \"fi\": \"Ensimm\\u00e4inen vuosisata\", \"ru\": \"I \\u0432\\u0435\\u043a\", \"pt\": \"s\\u00e9culo I\", \"bg\": \"1 \\u0432\\u0435\\u043a\", \"lt\": \"I am\\u017eius\", \"lv\": \"1. gadsimts\", \"hr\": \"1. stolje\\u0107e\", \"fr\": \"Ier si\\u00e8cle\", \"hu\": \"1. sz\\u00e1zad\", \"sk\": \"1. storo\\u010die\", \"sl\": \"1. stoletje\", \"ga\": \"1\\u00fa haois\", \"ca\": \"segle I\", \"sv\": \"000-talet\", \"el\": \"1\\u03bf\\u03c2 \\u03b1\\u03b9\\u03ce\\u03bd\\u03b1\\u03c2\", \"en\": \"1st century\", \"it\": \"I secolo\", \"es\": \"siglo I\", \"et\": \"1. sajand\", \"cs\": \"1. stolet\\u00ed\", \"pl\": \"I wiek\", \"da\": \"1. \\u00e5rhundrede\", \"ro\": \"Secolul I\", \"nl\": \"1e eeuw\"}, \"altLabel\": {\"ru\": [\"1 \\u0432\\u0435\\u043a\"], \"sv\": [\"000-tal\", \"1:a seklet\", \"1:a \\u00e5rhundradet\"], \"en\": [\"1st-century\"], \"it\": [\"I Secolo D.C.\", \"Primo secolo\", \"I Secolo\", \"Secolo I\", \"1\\u00b0 secolo\", \"I sec. d.C.\", \"I secolo d.C.\"], \"ca\": [\"segle I dC\"]}, \"isShownBy\": {\"id\": \"https://lh4.ggpht.com/6F6o5WKGTq8XtisUEXLjwnd0kA5cdTuXZ8HC1zScDFMuCt8--djkmPyDsHevbkefcF6FL2ikEZ-pFRHcepouGjmvW54=s0\", \"type\": \"WebResource\", \"source\": \"http://data.europeana.eu/item/90402/RP_P_OB_76_852\", \"thumbnail\": \"https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Flh4.ggpht.com%2F6F6o5WKGTq8XtisUEXLjwnd0kA5cdTuXZ8HC1zScDFMuCt8--djkmPyDsHevbkefcF6FL2ikEZ-pFRHcepouGjmvW54%3Ds0&type=IMAGE\"}, \"begin\": \"0001-01-01\", \"end\": \"0100-12-31\"}",
 "pagerank":368.61893,
 "sameAs":["http://www.wikidata.org/entity/Q8106","http://vocab.getty.edu/aat/300404493","http://babelnet.org/rdf/s02820627n","http://semium.org/time/00xx"],
 "label":
@@ -88,8 +87,8 @@
 "europeana_term_hits":57922,
 "europeana_doc_count":0,
 "entity_uri":"http://data.europeana.eu/timespan/1",
-"edm_end":"0100-12-31",
-"edm_begin":"0001-01-01",
+"end":"0100-12-31",
+"begin":"0001-01-01",
 "derived_score":1.0395991E7,
 "dcterms_isPartOf":["http://semium.org/time/AD1xxx"],
 "coref":["http://www.wikidata.org/entity/Q8106","http://vocab.getty.edu/aat/300404493","http://babelnet.org/rdf/s02820627n","http://semium.org/time/00xx"],

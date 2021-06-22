@@ -9,6 +9,9 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import eu.europeana.api.commons.error.EuropeanaApiException;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
+import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,7 +27,6 @@ import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRunt
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.serialization.EntityXmlSerializer;
 import eu.europeana.entitymanagement.serialization.JsonLdSerializer;
@@ -32,7 +34,6 @@ import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.web.service.AuthorizationService;
-import eu.europeana.entitymanagement.web.service.EntityObjectFactory;
 import eu.europeana.entitymanagement.web.xml.model.RdfBaseWrapper;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 
@@ -111,8 +112,8 @@ public abstract class BaseRest extends BaseRestController {
      * @throws EntityCreationException
      * @throws FunctionalRuntimeException
      */
-    public ResponseEntity<String> generateResponseEntity(String profile, FormatTypes outFormat, String languages,
-            String contentType, EntityRecord entityRecord, HttpStatus status) throws EntityCreationException {
+    protected ResponseEntity<String> generateResponseEntity(String profile, FormatTypes outFormat, String languages,
+            String contentType, EntityRecord entityRecord, HttpStatus status) throws EuropeanaApiException {
 
         Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
 
@@ -144,7 +145,7 @@ public abstract class BaseRest extends BaseRestController {
     }
 
     @SuppressWarnings("unchecked")
-    private void processLanguage(Entity entity, String languages) {
+    private void processLanguage(Entity entity, String languages) throws EuropeanaApiException {
         if (languages == null || languages.isEmpty())
             return;
         
@@ -180,7 +181,7 @@ public abstract class BaseRest extends BaseRestController {
                 }
             }
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new FunctionalRuntimeException("An exception occured during setting the entity field: " + fieldName,
+            throw new EuropeanaApiException("An exception occurred during setting the entity field: " + fieldName,
                     e);
         }
     }
