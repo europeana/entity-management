@@ -28,12 +28,12 @@ import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 
 @Component
-public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFields, Entity> {
+public class EntityFieldsCompleteValidator implements ConstraintValidator<EntityFieldsCompleteValidatorInterface, Entity> {
 
     @Resource(name="emLanguageCodes")
     LanguageCodes emLanguageCodes;
     
-    public void initialize(ValidEntityFields constraint) {
+    public void initialize(EntityFieldsCompleteValidatorInterface constraint) {
 //        System.out.println();
     }
 
@@ -58,8 +58,14 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
 			        
 			        Object fieldValue = entity.getFieldValue(field);
 				if (fieldValue==null) { 
-				    //skip validation of empty fields
-				    continue;
+					/*
+					 * TODO: enable the code below if there is a need to check the mandatory fields in this validator
+					 */
+//					addConstraint(context, "The mandatory field: "+field.getName()+" cannot be NULL.");
+//	                if(returnValue==true) {
+//	                	returnValue=false;
+//	                }
+	                continue;
 				}
 				boolean returnValueLocal = true;
 	                            
@@ -194,17 +200,15 @@ public class EntityFieldsValidator implements ConstraintValidator<ValidEntityFie
     }
 
     boolean checkDateFormatISO8601(ConstraintValidatorContext context, Field field, String fieldValue) {
-        /*
-         * validation that the Date field does not have the Datetime format
-         */
-    	if(fieldValue.contains("T")) {
-        	addConstraint(context, "The entity field: "+field.getName()+" is of type Date and it has the Datetime format: "+fieldValue.toString()+".");
-            return false;
-        }
-
-    	try {
+        try {
             //LocalDate.parse(fieldValue.toString(), DateTimeFormatter.ofPattern(java.time.format.DateTimeFormatter.ISO_DATE.toString()).withResolverStyle(ResolverStyle.STRICT));
-            LocalDate.parse(fieldValue, java.time.format.DateTimeFormatter.ISO_DATE);
+            if(fieldValue.contains("T")) {
+                //ISO Date time format
+                LocalDate.parse(fieldValue, java.time.format.DateTimeFormatter.ISO_DATE_TIME);
+            } else {
+                //ISO Date format
+                LocalDate.parse(fieldValue, java.time.format.DateTimeFormatter.ISO_DATE);
+            }
             return true;
         } catch (DateTimeParseException e) {
             addConstraint(context, "The entity field: "+field.getName()+" is of type Date and does not comply with the ISO-8601 format: "+fieldValue.toString()+".");

@@ -825,11 +825,12 @@ public class EntityRecordService {
 				Entity europeanaProxyMetadata,
 				String entityId, EntityRecord entityRecord, Date timestamp) {
 	Aggregation europeanaAggr = new Aggregation();
+	Optional<DataSource> europeanaDataSource = datasources.getDatasource(EUROPEANA_URL);	
 	europeanaAggr.setId(getEuropeanaAggregationId(entityId));
-	europeanaAggr.setRights(RIGHTS_CREATIVE_COMMONS);
+	europeanaAggr.setRights(europeanaDataSource.isPresent() ? europeanaDataSource.get().getRights() : null);
 	europeanaAggr.setCreated(timestamp);
 	europeanaAggr.setModified(timestamp);
-	europeanaAggr.setSource(EUROPEANA_URL);
+	europeanaAggr.setSource(europeanaDataSource.isPresent() ? europeanaDataSource.get().getUrl() : null);
 
 	EntityProxy europeanaProxy = new EntityProxy();
 	europeanaProxy.setProxyId(getEuropeanaProxyId(entityId));

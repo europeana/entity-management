@@ -92,6 +92,6 @@ public interface WebEntityConstants extends WebEntityFields{
 	public static final String CONCEPT_SCHEME_APPLICATION_NAME = "webConceptScheme";
 
 	public static final String RIGHTS_CREATIVE_COMMONS = "https://creativecommons.org/publicdomain/zero/1.0/";
-	public static final String EUROPEANA_URL = "http://www.europeana.eu/";
+	public static final String EUROPEANA_URL = "https://www.europeana.eu/";
 
 }

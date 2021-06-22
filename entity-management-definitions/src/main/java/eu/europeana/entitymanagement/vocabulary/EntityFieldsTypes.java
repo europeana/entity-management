@@ -139,6 +139,15 @@ public enum EntityFieldsTypes {
         }
     }
     
+    public static boolean isMandatory(String fieldName) {
+        try {
+            String cardinality = valueOf(fieldName).getFieldCardinality();
+            return FIELD_CARDINALITY_1_INFINITE.equals(cardinality) || FIELD_CARDINALITY_1_1.equals(cardinality);
+        }catch (IllegalArgumentException e){
+            throw new EntityValidationException("Unknown field: " + fieldName, e);
+        }
+    }
+    
     boolean getFieldIsmultilingual() {
         return fieldIsmultilingual;
     }
