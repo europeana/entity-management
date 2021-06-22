@@ -20,7 +20,6 @@
 },
 "sameAs":["http://rdf.freebase.com/ns/m.02v_txp","http://www.wikidata.org/entity/Q6104322","http://wikidata.dbpedia.org/resource/Q6104322","http://dbpedia.org/resource/J.R._(musician)"],
 "pagerank":0.53716767,
-"payload":"{\"id\": \"http://data.europeana.eu/agent/base/100013\", \"type\": \"Agent\", \"prefLabel\": {\"en\": \"J.R. (musician)\"}, \"altLabel\": {\"en\": [\"J.R.\", \"Peebles, Courtney O.\"]}, \"isShownBy\": {\"id\": \"http://www.collectiedeventermusea.nl/wwwwopacx/wwwopac.ashx?command=getcontent&server=images&value=Historie%5C3589A.jpg\", \"type\": \"WebResource\", \"source\": \"http://data.europeana.eu/item/2021659/3589_a\", \"thumbnail\": \"https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri=http%3A%2F%2Fwww.collectiedeventermusea.nl%2Fwwwwopacx%2Fwwwopac.ashx%3Fcommand%3Dgetcontent%26server%3Dimages%26value%3DHistorie%255C3589A.jpg&type=IMAGE\"}, \"dateOfBirth\": \"1979-03-04\", \"professionOrOccupation\": [\"https://www.wikidata.org/wiki/Q47541952\",\"https://www.wikidata.org/wiki/Q488205\"]}",
 "professionOrOccupation":[
   "https://www.wikidata.org/wiki/Q47541952",
   "https://www.wikidata.org/wiki/Q488205"

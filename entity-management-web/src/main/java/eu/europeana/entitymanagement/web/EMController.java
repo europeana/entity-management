@@ -1,29 +1,5 @@
 package eu.europeana.entitymanagement.web;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.UriComponentsBuilder;
-
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.api.commons.web.exception.HttpException;
@@ -39,6 +15,7 @@ import eu.europeana.entitymanagement.definitions.web.EntityIdResponse;
 import eu.europeana.entitymanagement.exception.EntityMismatchException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
+import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
@@ -46,6 +23,23 @@ import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.web.service.MetisDereferenceService;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static eu.europeana.entitymanagement.solr.SolrUtils.createSolrEntity;
 
 
 @RestController
@@ -54,21 +48,24 @@ import io.swagger.annotations.ApiOperation;
 public class EMController extends BaseRest {
 
   private final EntityRecordService entityRecordService;
+  private final SolrService solrService;
   private final MetisDereferenceService dereferenceService;
   private final DataSources datasources;
   private final BatchService batchService;
   private final EntityManagementConfiguration emConfig;
+
 
   private static final String EXTERNAL_ID_REMOVED_MSG = "Entity id '%s' already exists as '%s', which has been removed";
   private static final String SAME_AS_NOT_EXISTS_MSG = "Url '%s' does not exist in entity owl:sameAs";
 
   @Autowired
 	public EMController(EntityRecordService entityRecordService,
-			MetisDereferenceService dereferenceService, DataSources datasources,
-			BatchService batchService,
-			EntityManagementConfiguration emConfig) {
+						SolrService solrService, MetisDereferenceService dereferenceService, DataSources datasources,
+						BatchService batchService,
+						EntityManagementConfiguration emConfig) {
 		this.entityRecordService = entityRecordService;
-		this.dereferenceService = dereferenceService;
+	  this.solrService = solrService;
+	  this.dereferenceService = dereferenceService;
 		this.datasources = datasources;
 		this.batchService = batchService;
 		this.emConfig = emConfig;
@@ -161,6 +158,11 @@ public class EMController extends BaseRest {
 
 			entityRecordService.replaceEuropeanaProxy(updateRequestEntity, entityRecord);
 			entityRecordService.update(entityRecord);
+
+			// this replaces the existing entity
+			solrService.storeEntity(createSolrEntity(entityRecord.getEntity()));
+			logger.info("Updated Solr document for entityId={}", entityRecord.getEntityId());
+
 			return launchTaskAndRetrieveEntity(type, identifier, entityRecord, profile);
     }
 
@@ -333,10 +335,13 @@ public class EMController extends BaseRest {
 
 			EntityRecord savedEntityRecord = entityRecordService
 					.createEntityFromRequest(entityCreationRequest, metisResponse);
-
 			logger.info("Created Entity record for externalId={}; entityId={}", entityCreationRequest.getId(), savedEntityRecord.getEntityId());
 
-			return launchTaskAndRetrieveEntity(savedEntityRecord.getEntity().getType(),
+			solrService.storeEntity(createSolrEntity(savedEntityRecord.getEntity()));
+			logger.info("Indexed entity to Solr: externalId={}; entityId={}", entityCreationRequest.getId(), savedEntityRecord.getEntityId());
+
+
+		return launchTaskAndRetrieveEntity(savedEntityRecord.getEntity().getType(),
 					getDatabaseIdentifier(savedEntityRecord.getEntityId()), savedEntityRecord,
 					EntityProfile.internal.toString());
 		}

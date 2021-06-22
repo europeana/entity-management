@@ -2,8 +2,8 @@ package eu.europeana.entitymanagement.web.xml.model;
 
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.*;
 
+import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
 import eu.europeana.entitymanagement.definitions.model.Agent;
-import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.ArrayList;
 import java.util.List;
@@ -84,8 +84,8 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
     this.identifier = agent.getIdentifier();
     this.hasPart = RdfXmlUtils.convertToRdfResource(agent.getHasPart());
     this.isPartOf = RdfXmlUtils.convertToRdfResource(agent.getIsPartOfArray());
-    this.begin = getFirstValue(agent.getBeginArray());
-    this.end = getFirstValue(agent.getEndArray());
+    this.begin = getFirstValue(agent.getBegin());
+    this.end = getFirstValue(agent.getEnd());
     this.hasMet = RdfXmlUtils.convertToRdfResource(agent.getHasMet());
     this.isRelatedTo = RdfXmlUtils.convertToRdfResource(agent.getIsRelatedTo());
     this.name = RdfXmlUtils.convertMapToXmlMultilingualString(agent.getName());

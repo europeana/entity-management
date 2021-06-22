@@ -13,10 +13,12 @@ import eu.europeana.entitymanagement.batch.processor.EntityUpdateProcessor;
 import eu.europeana.entitymanagement.batch.reader.EntityRecordDatabaseReader;
 import eu.europeana.entitymanagement.batch.reader.FailedTaskDatabaseReader;
 import eu.europeana.entitymanagement.batch.writer.EntityRecordDatabaseWriter;
+import eu.europeana.entitymanagement.batch.writer.EntitySolrWriter;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityMismatchException;
 import eu.europeana.entitymanagement.exception.MetisNotKnownException;
+import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,7 +32,9 @@ import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemStreamReader;
+import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.support.CompositeItemProcessor;
+import org.springframework.batch.item.support.CompositeItemWriter;
 import org.springframework.batch.item.support.SynchronizedItemStreamReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -66,6 +70,7 @@ public class BatchEntityUpdateConfig {
     private final EntityUpdateProcessor entityUpdateProcessor;
     private final EntityMetricsProcessor entityMetricsProcessor;
     private final EntityRecordDatabaseWriter dbWriter;
+    private final EntitySolrWriter solrWriter;
     private final EntityRecordService entityRecordService;
 
     private final FailedTaskService failedTaskService;
@@ -85,14 +90,14 @@ public class BatchEntityUpdateConfig {
     @Autowired
     public BatchEntityUpdateConfig(JobBuilderFactory jobBuilderFactory,
                                    StepBuilderFactory stepBuilderFactory,
-        @Qualifier(SPECIFIC_ITEM_ENTITYRECORD_READER) ItemReader<EntityRecord> specificItemReader,
-        @Qualifier(ALL_ITEM_ENTITYRECORD_READER) ItemReader<EntityRecord> allEntityRecordReader,
+                                   @Qualifier(SPECIFIC_ITEM_ENTITYRECORD_READER) ItemReader<EntityRecord> specificItemReader,
+                                   @Qualifier(ALL_ITEM_ENTITYRECORD_READER) ItemReader<EntityRecord> allEntityRecordReader,
                                    @Qualifier(FAILED_TASK_READER) ItemReader<EntityRecord> failedTaskReader,
                                    EntityDereferenceProcessor dereferenceProcessor,
                                    EntityUpdateProcessor entityUpdateProcessor,
-        EntityMetricsProcessor entityMetricsProcessor,
+                                   EntityMetricsProcessor entityMetricsProcessor,
                                    EntityRecordDatabaseWriter dbWriter,
-                                   EntityRecordService entityRecordService,
+                                   EntitySolrWriter solrWriter, EntityRecordService entityRecordService,
                                    FailedTaskService failedTaskService,
                                    EntityUpdateListener entityUpdateListener,
                                    @Qualifier(BEAN_STEP_EXECUTOR) TaskExecutor stepThreadPoolExecutor,
@@ -108,6 +113,7 @@ public class BatchEntityUpdateConfig {
         this.entityUpdateProcessor = entityUpdateProcessor;
         this.entityMetricsProcessor = entityMetricsProcessor;
         this.dbWriter = dbWriter;
+        this.solrWriter = solrWriter;
         this.entityRecordService = entityRecordService;
         this.failedTaskService = failedTaskService;
         this.entityUpdateListener = entityUpdateListener;
@@ -161,10 +167,21 @@ public class BatchEntityUpdateConfig {
      * These are implemented as processors, instead of discrete steps to eliminate the overhead required
      * to pass data between steps (via the Execution context).
      */
+    @Bean
     private ItemProcessor<EntityRecord, EntityRecord> compositeUpdateProcessor() {
         CompositeItemProcessor<EntityRecord, EntityRecord> compositeItemProcessor = new CompositeItemProcessor<>();
         compositeItemProcessor.setDelegates(Arrays.asList(dereferenceProcessor, entityUpdateProcessor, entityMetricsProcessor));
         return compositeItemProcessor;
+    }
+
+    /**
+     * Creates a Composite ItemWriter for persisting Entities to Mongo and Solr
+     */
+    @Bean
+    private ItemWriter<EntityRecord> compositeEntityWriter(){
+        CompositeItemWriter<EntityRecord> compositeWriter = new CompositeItemWriter<>();
+        compositeWriter.setDelegates(Arrays.asList(dbWriter, solrWriter));
+        return compositeWriter;
     }
 
     /**
@@ -180,7 +197,7 @@ public class BatchEntityUpdateConfig {
                 (ItemProcessListener<? super EntityRecord, ? super EntityRecord>) entityUpdateListener)
             .reader(specificItemReader)
             .processor(entityMetricsProcessor)
-            .writer(dbWriter)
+            .writer(compositeEntityWriter())
             .taskExecutor(stepThreadPoolExecutor)
             .build();
     }
@@ -197,7 +214,8 @@ public class BatchEntityUpdateConfig {
                 .skipPolicy(new EntitySkipPolicy())
                 .skip(EntityMismatchException.class)
                 .skip(MetisNotKnownException.class)
-            .writer(dbWriter)
+                .skip(SolrServiceException.class)
+            .writer(compositeEntityWriter())
             .taskExecutor(singleEntity ? synchronousTaskExecutor : stepThreadPoolExecutor)
                 .throttleLimit(throttleLimit)
             .build();
@@ -208,13 +226,14 @@ public class BatchEntityUpdateConfig {
             .<EntityRecord, EntityRecord>chunk(chunkSize)
             .reader(failedTaskReader)
             .processor(compositeUpdateProcessor())
-            .writer(dbWriter)
+            .writer(compositeEntityWriter())
             .listener(
                 (ItemProcessListener<? super EntityRecord, ? super EntityRecord>) entityUpdateListener)
                 .faultTolerant()
                 .skipPolicy(new EntitySkipPolicy())
                 .skip(EntityMismatchException.class)
                 .skip(MetisNotKnownException.class)
+                .skip(SolrServiceException.class)
             .taskExecutor(stepThreadPoolExecutor)
                 .throttleLimit(throttleLimit)
             .build();
