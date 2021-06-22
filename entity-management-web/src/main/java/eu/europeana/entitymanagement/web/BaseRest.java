@@ -1,40 +1,33 @@
 package eu.europeana.entitymanagement.web;
 
-import java.lang.reflect.Field;
-import java.util.*;
-
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-
-import eu.europeana.entitymanagement.web.service.RequestPathMethodService;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
+import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.api.commons.web.controller.BaseRestController;
 import eu.europeana.api.commons.web.http.HttpHeaders;
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.BuildInfo;
-import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.exception.EntityCreationException;
-import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.serialization.EntityXmlSerializer;
 import eu.europeana.entitymanagement.serialization.JsonLdSerializer;
+import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.web.service.AuthorizationService;
-import eu.europeana.entitymanagement.web.service.EntityObjectFactory;
+import eu.europeana.entitymanagement.web.service.RequestPathMethodService;
 import eu.europeana.entitymanagement.web.xml.model.RdfBaseWrapper;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.Field;
+import java.util.*;
 
 public abstract class BaseRest extends BaseRestController {
 
@@ -63,12 +56,6 @@ public abstract class BaseRest extends BaseRestController {
         return emAuthorizationService;
     }
 
-    /**
-     * @return
-     */
-//    protected String getDefaultUserToken() {
-//	return getAuthorizationService().getConfiguration().getUserToken();
-//    }
 
     public String getApiVersion() {
         return emBuildInfo.getAppVersion();
@@ -109,11 +96,10 @@ public abstract class BaseRest extends BaseRestController {
      * @param entityRecord
      * @param status
      * @return
-     * @throws EntityCreationException
-     * @throws FunctionalRuntimeException
+     * @throws EuropeanaApiException
      */
-    public ResponseEntity<String> generateResponseEntity(HttpServletRequest request, String profile, FormatTypes outFormat, String languages,
-                                                         String contentType, EntityRecord entityRecord, HttpStatus status) throws EntityCreationException {
+    protected ResponseEntity<String> generateResponseEntity(HttpServletRequest request, String profile, FormatTypes outFormat, String languages,
+                                                         String contentType, EntityRecord entityRecord, HttpStatus status) throws EuropeanaApiException {
 
         Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
 
@@ -165,7 +151,7 @@ public abstract class BaseRest extends BaseRestController {
     }
 
     @SuppressWarnings("unchecked")
-    private void processLanguage(Entity entity, String languages) {
+    private void processLanguage(Entity entity, String languages) throws EuropeanaApiException {
         if (languages == null || languages.isEmpty())
             return;
         
@@ -201,7 +187,7 @@ public abstract class BaseRest extends BaseRestController {
                 }
             }
         } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new FunctionalRuntimeException("An exception occured during setting the entity field: " + fieldName,
+            throw new EuropeanaApiException("An exception occurred during setting the entity field: " + fieldName,
                     e);
         }
     }

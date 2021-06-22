@@ -1,7 +1,7 @@
-package eu.europeana.entitymanagement.exception;
+package eu.europeana.entitymanagement.definitions.exceptions;
 
-import eu.europeana.api.commons.error.EuropeanaApiException;
 import org.springframework.http.HttpStatus;
+import eu.europeana.api.commons.error.EuropeanaApiException;
 
 /**
  * Exception thrown for all errors that occur while creating or saving an entity to the database

@@ -28,7 +28,7 @@ public class EntityManagementConfiguration  {
     private String apiKeyPublicKey;
 
 
-  @Value("${europeana.apikey.serviceurl}")
+    @Value("${europeana.apikey.serviceurl}")
     private String apiKeyUrl;
 
     @Value("${entitymanagement.solr.pr.url}")
@@ -36,6 +36,12 @@ public class EntityManagementConfiguration  {
 
     @Value("${entitymanagement.solr.searchapi.url}")
     private String searchApiSolrUrl;
+    
+    @Value("${entitymanagement.solr.indexing.url}")
+    private String indexingSolrUrl;
+
+    @Value("${entitymanagement.solr.indexing.explicitCommits: false}")
+    private boolean explicitCommitsEnabled;
 
     @Value("${entitymanagement.solr.searchapi.enrichments.query}")
     private String enrichmentsQuery;
@@ -181,4 +187,13 @@ public class EntityManagementConfiguration  {
   public int getBatchStepThrottleLimit() {
     return batchStepThrottleLimit;
   }
+
+
+public String getIndexingSolrUrl() {
+	return indexingSolrUrl;
+}
+
+    public boolean explicitCommitsEnabled() {
+        return explicitCommitsEnabled;
+    }
 }

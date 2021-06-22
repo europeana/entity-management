@@ -79,7 +79,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
         //clear response queue
         if(mockMetis != null && mockMetis.getRequestCount() > 0) {
             for (int i = 0; i < mockMetis.getRequestCount(); i++) {
-        	mockMetis.takeRequest(1, TimeUnit.MILLISECONDS);   
+        	mockMetis.takeRequest(1, TimeUnit.SECONDS);
 	    }
         }
         

@@ -5,10 +5,11 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.DEPICTION
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_RDF;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.PREF_LABEL;
 
+import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.exception.EntityCreationException;
+import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.web.service.EntityObjectFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.*;

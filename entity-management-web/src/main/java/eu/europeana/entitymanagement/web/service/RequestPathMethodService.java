@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.web.service;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.method.HandlerMethod;
@@ -28,6 +29,7 @@ public class RequestPathMethodService implements InitializingBean {
     private final Map<String, Set<String>> requestPathMethodMap = new HashMap<>();
     private final WebApplicationContext applicationContext;
 
+    @Autowired
     public RequestPathMethodService(WebApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
     }
