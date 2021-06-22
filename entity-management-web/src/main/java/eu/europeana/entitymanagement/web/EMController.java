@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -131,6 +132,14 @@ public class EMController extends BaseRest {
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 	    @RequestBody Entity updateRequestEntity,
 	    HttpServletRequest request) throws Exception {
+		/*
+		 * we don't want to add @NotNull annotation within the entity class, since it has other validators
+		 * so we check for required properties here
+		 */
+		if(CollectionUtils.isEmpty(updateRequestEntity.getSameAs())){
+			throw new HttpBadRequestException("'sameAs' cannot be empty in request body");
+		}
+
 			if (emConfig.isAuthEnabled()) {
 				verifyWriteAccess(Operations.UPDATE, request);
 			}

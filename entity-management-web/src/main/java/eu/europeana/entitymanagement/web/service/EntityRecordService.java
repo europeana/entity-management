@@ -57,6 +57,7 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.RIGHTS
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_ID;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_IDENTIFIER;
 import static eu.europeana.entitymanagement.web.EntityRecordUtils.*;
+import static java.time.Instant.now;
 
 @Service(AppConfig.BEAN_ENTITY_RECORD_SERVICE)
 public class EntityRecordService {
@@ -522,13 +523,13 @@ public class EntityRecordService {
 	public void replaceEuropeanaProxy(final Entity updateRequestEntity, EntityRecord entityRecord) {
 		EntityProxy europeanaProxy = entityRecord.getEuropeanaProxy();
 
-		List<String> sameAs = europeanaProxy.getEntity().getSameAs();
 		String entityId = europeanaProxy.getEntity().getEntityId();
 
-		// copy SameAs and EntityId from existing Europeana proxy metadata
+		// copy EntityId from existing Europeana proxy metadata
 		europeanaProxy.setEntity(updateRequestEntity);
-		europeanaProxy.getEntity().setSameAs(sameAs);
 		europeanaProxy.getEntity().setEntityId(entityId);
+
+		europeanaProxy.getProxyIn().setModified(Date.from(now()));
 	}
 
 	/**
