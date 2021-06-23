@@ -13,7 +13,7 @@ import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doNothing;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Optional;
@@ -24,99 +24,67 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import eu.europeana.entitymanagement.batch.BatchService;
 import eu.europeana.entitymanagement.definitions.model.Concept;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.exception.EntityNotFoundException;
-import eu.europeana.entitymanagement.exception.EntityRemovedException;
 
 /**
  * Integration test for the main Entity Management controller in case of errors occur 
  */
 
-public class EntityDeleteIT extends AbstractIntegrationTest {
+public class EntityReenableIT extends AbstractIntegrationTest {
 
     @Test
-    void deletionShouldBeSuccessful() throws Exception {
-        // create entity in DB
+    void reEnableDisabledEntityShouldBeSuccessful() throws Exception {
+        // create disbaled entity in DB
         Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
         EntityRecord entityRecord = new EntityRecord();
         entityRecord.setEntity(concept);
         entityRecord.setEntityId(concept.getEntityId());
-        EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
+        EntityRecord record = entityRecordService.disableEntityRecord(entityRecord);
+       // check if entity is disabled
+        Assertions.assertTrue(record.isDisabled());
 
         String requestPath = getEntityRequestPath(record.getEntityId());
 
-        mockMvc.perform(delete(BASE_SERVICE_URL + "/" + requestPath)
+        mockMvc.perform(post(BASE_SERVICE_URL + "/" + requestPath)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
 
-        // check that record was disabled
+        // check that record was re-enabled
         Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveByEntityId(record.getEntityId());
 
         assert dbRecordOptional.isPresent();
-        Assertions.assertTrue(dbRecordOptional.get().isDisabled());
+        Assertions.assertFalse(dbRecordOptional.get().isDisabled());
     }
-    
+
     @Test
-    void deletionFailsIfMatch() throws Exception {
+    void reEnableNonDisabledEntityShouldBeSuccessful() throws Exception {
         // create entity in DB
         Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
         EntityRecord entityRecord = new EntityRecord();
         entityRecord.setEntity(concept);
         entityRecord.setEntityId(concept.getEntityId());
         EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
+        // check if entity is NOT disabled
+        Assertions.assertFalse(entityRecord.isDisabled());
 
         String requestPath = getEntityRequestPath(record.getEntityId());
 
-        mockMvc.perform(delete(BASE_SERVICE_URL + "/" + requestPath).header(HttpHeaders.IF_MATCH, "wrong_etag_value")
+        mockMvc.perform(post(BASE_SERVICE_URL + "/" + requestPath)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isPreconditionFailed());
+                .andExpect(status().isOk());
 
-        // check that record was disabled
+        // check that record was re-enabled
         Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveByEntityId(record.getEntityId());
 
         assert dbRecordOptional.isPresent();
         Assertions.assertFalse(dbRecordOptional.get().isDisabled());
     }
     
-    @Test
-    void disableEntityErrorCheck_entityDoesNotExist() throws Exception {
-    	/*
-    	 * check the error if the entity does not exist
-    	 */
-        mockMvc.perform(delete(BASE_SERVICE_URL + "/" + "wrong-type/wrong-identifier")
-                .accept(MediaType.APPLICATION_JSON))
-        		.andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof EntityNotFoundException));
-    }
-
-    @Test
-    void disableEntityErrorCheck_entityDisabled() throws Exception {
-    	/*
-    	 * check the error if the entity is removed/disabled
-    	 */
-        // create entity in the DB
-        Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
-        EntityRecord entityRecord = new EntityRecord();
-        entityRecord.setEntity(concept);
-        entityRecord.setEntityId(concept.getEntityId());
-        EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
-
-        String requestPath = getEntityRequestPath(record.getEntityId());
-
-        mockMvc.perform(delete(BASE_SERVICE_URL + "/" + requestPath)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
-
-        mockMvc.perform(delete(BASE_SERVICE_URL + "/" + requestPath)
-                .accept(MediaType.APPLICATION_JSON))
-        		.andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof EntityRemovedException));
-    }
-
     @TestConfiguration
     public static class TestConfig {
 

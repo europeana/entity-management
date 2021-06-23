@@ -1,6 +1,8 @@
 package eu.europeana.entitymanagement.web;
 
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_REGISTER_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_REGISTER_STALIN_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_STALIN_XML;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_XML;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BASE_SERVICE_URL;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_ERROR_CHECK_1_XML;
@@ -26,6 +28,7 @@ import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.getEntity
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
 import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doNothing;
@@ -35,43 +38,31 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
-import eu.europeana.entitymanagement.AbstractEmControllerTest;
+import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import eu.europeana.entitymanagement.batch.BatchService;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Timespan;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import okhttp3.mockwebserver.MockResponse;
 
 /**
  * Integration test for the main Entity Management controller in case of errors occur 
  */
 
-@SpringBootTest
-public class EntityRegistrationIT extends AbstractEmControllerTest {
-
-    @BeforeEach
-    public void setup() throws Exception {
-    	
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
-
-        //ensure a clean db between test runs
-        this.entityRecordService.dropRepository();
-    }
+public class EntityRegistrationIT extends AbstractIntegrationTest {
 
     /*
      * TODO: uncomment the @Test annotation below when the consolidated entity is populated because when 
@@ -98,9 +89,6 @@ public class EntityRegistrationIT extends AbstractEmControllerTest {
                 .andExpect(jsonPath("$.proxies", hasSize(2)))
                 .andReturn();
 
-        // matches id in JSON file
-        assertMetisRequest("http://www.wikidata.org/entity/Q152095");
-        
         mockMvc.perform(post(BASE_SERVICE_URL)
                 .content(loadFile(CONCEPT_REGISTER_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -125,9 +113,6 @@ public class EntityRegistrationIT extends AbstractEmControllerTest {
                 .andExpect(jsonPath("$.proxies", hasSize(2)))
                 .andReturn();
 
-        // matches id in JSON file
-        assertMetisRequest("http://www.wikidata.org/entity/Q152095");
-        
         // set mock Metis response
         mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(CONCEPT_ERROR_CHECK_1_XML)));
 
@@ -135,9 +120,6 @@ public class EntityRegistrationIT extends AbstractEmControllerTest {
                 .content(loadFile(CONCEPT_REGISTER_ERROR_CHECK_1_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isMovedPermanently());
-        
-        // matches id in JSON file
-        assertMetisRequest("http://www.wikidata.org/entity/Q11019-2");
     }
     
     @Test
@@ -220,14 +202,15 @@ public class EntityRegistrationIT extends AbstractEmControllerTest {
 
 
     @Test
-    public ResultActions registerConceptShouldBeSuccessful() throws Exception {
+    public void registerConceptShouldBeSuccessful() throws Exception {
         // set mock Metis response
         mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(CONCEPT_XML)));
 
         ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
                 .content(loadFile(CONCEPT_REGISTER_JSON))
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isAccepted())
+                .contentType(MediaType.APPLICATION_JSON_VALUE));
+        
+        results.andExpect(status().isAccepted())
                 .andExpect(jsonPath("$.id", any(String.class)))
                 .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
                 .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
@@ -235,108 +218,120 @@ public class EntityRegistrationIT extends AbstractEmControllerTest {
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
 
         //TODO assert other important properties
-
-        // matches id in JSON file
-        assertMetisRequest("http://www.wikidata.org/entity/Q152095");
-
-        return results;
     }
 
     @Test
-    public ResultActions registerAgentShouldBeSuccessful() throws Exception {
+    void registerAgentShouldBeSuccessful() throws Exception {
         // set mock Metis response
         mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(AGENT_XML)));
 
         ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
                 .content(loadFile(AGENT_REGISTER_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isAccepted())
-                .andExpect(jsonPath("$.id", any(String.class)))
-                .andExpect(jsonPath("$.entity").isNotEmpty())
-                .andExpect(jsonPath("$.entity.isAggregatedBy").isNotEmpty())
-                .andExpect(jsonPath("$.entity.isAggregatedBy.aggregates", hasSize(2)))
+                .andExpect(status().isAccepted());
+        
+        results.andExpect(jsonPath("$.id", any(String.class)))
+                .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())))
+        	.andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
+                .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
                 // should have Europeana and Datasource proxies
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
 
         //TODO assert other important properties
-
-        // matches id in JSON file
-        assertMetisRequest("http://www.wikidata.org/entity/Q762");
-
-        return results;
     }
 
+    
     @Test
-    public ResultActions registerOrganizationShouldBeSuccessful() throws Exception {
+    void registerAgentStalinShouldBeSuccessful() throws Exception {
+        // set mock Metis response
+        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(AGENT_STALIN_XML)));
+
+        ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
+                .content(loadFile(AGENT_REGISTER_STALIN_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isAccepted());
+                
+        
+                results.andExpect(jsonPath("$.id", any(String.class)))
+                .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())))
+                .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
+                .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
+                // should have Europeana and Datasource proxies
+                .andExpect(jsonPath("$.proxies", hasSize(2)));
+        	//
+        	//results.andExpect(jsonPath("$.prefLabel[*]", hasSize(24))).andExpect(jsonPath("$.altLabel[*]", hasSize(12)));
+    }
+    
+    @Test
+    public void registerOrganizationShouldBeSuccessful() throws Exception {
         // set mock Metis response
         mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(ORGANIZATION_XML)));
-
+       
         ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
                 .content(loadFile(ORGANIZATION_REGISTER_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isAccepted())
-                .andExpect(jsonPath("$.id", any(String.class)))
-                .andExpect(jsonPath("$.entity").isNotEmpty())
-                .andExpect(jsonPath("$.entity.isAggregatedBy").isNotEmpty())
-                .andExpect(jsonPath("$.entity.isAggregatedBy.aggregates", hasSize(2)))
+                .andExpect(status().isAccepted());
+        
+        results.andExpect(jsonPath("$.id", any(String.class)))
+
+                .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())))
+                .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
+                .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
                 // should have Europeana and Datasource proxies
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
 
         //TODO assert other important properties
 
-        // matches id in JSON file
-        assertMetisRequest("http://www.wikidata.org/entity/Q193563");
-
-        return results;
     }
 
     @Test
-    public ResultActions registerPlaceShouldBeSuccessful() throws Exception {
+    void registerPlaceShouldBeSuccessful() throws Exception {
         // set mock Metis response
         mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(PLACE_XML)));
 
         ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
                 .content(loadFile(PLACE_REGISTER_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isAccepted())
-                .andExpect(jsonPath("$.id", any(String.class)))
-                .andExpect(jsonPath("$.entity").isNotEmpty())
-                .andExpect(jsonPath("$.entity.isAggregatedBy").isNotEmpty())
-                .andExpect(jsonPath("$.entity.isAggregatedBy.aggregates", hasSize(2)))
+                .andExpect(status().isAccepted());
+        
+        System.out.println(results.andReturn().getResponse().getContentAsString());
+        results.andExpect(jsonPath("$.id", any(String.class)))
+                .andExpect(jsonPath("$.type", is(EntityTypes.Place.name())))
+                .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
+                .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
                 // should have Europeana and Datasource proxies
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
 
+//        System.out.println(((MockMvc)results).val);
         //TODO assert other important properties
-
-        // matches id in JSON file
-        assertMetisRequest("https://sws.geonames.org/2988507/");
-
-        return results;
-    }
+        //results.andExpect(jsonPath("$.prefLabel[*]", hasSize(5)))
+//        .andExpect(jsonPath("$.lat", greaterThan(48.0)))
+//        .andExpect(jsonPath("$.long", greaterThan(2.0)));
+//        .andExpect(jsonPath("$.lat", is(48.85341)))
+//        .andExpect(jsonPath("$.long", is(2.3488)));
+}
 
     @Test
-    public ResultActions registerTimespanShouldBeSuccessful() throws Exception {
+    void registerTimespanShouldBeSuccessful() throws Exception {
         // set mock Metis response
         mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(TIMESPAN_XML)));
 
         ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
                 .content(loadFile(TIMESPAN_REGISTER_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isAccepted())
-                .andExpect(jsonPath("$.id", any(String.class)))
-                .andExpect(jsonPath("$.entity").isNotEmpty())
-                .andExpect(jsonPath("$.entity.isAggregatedBy").isNotEmpty())
-                .andExpect(jsonPath("$.entity.isAggregatedBy.aggregates", hasSize(2)))
+                .andExpect(status().isAccepted());
+        
+        results.andExpect(jsonPath("$.id", any(String.class)))
+        //enable when working propertly
+                .andExpect(jsonPath("$.type", is(EntityTypes.Timespan.name())))
+//                .andExpect(jsonPath("$.entity").isNotEmpty())
+                .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
+                .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
                 // should have Europeana and Datasource proxies
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
 
         //TODO assert other important properties
-
-        // matches id in JSON file
-        assertMetisRequest("http://www.wikidata.org/entity/Q8106");
-
-        return results;
-    }
+}
     
     @TestConfiguration
     public static class TestConfig {

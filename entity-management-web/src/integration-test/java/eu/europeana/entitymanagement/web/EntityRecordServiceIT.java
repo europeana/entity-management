@@ -31,16 +31,9 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.context.SpringBootTest;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.europeana.entitymanagement.AbstractIntegrationTest;
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Concept;
@@ -51,26 +44,12 @@ import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.utils.EntityComparator;
 import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
 import eu.europeana.entitymanagement.web.xml.model.metis.EnrichmentResultList;
 
-@SpringBootTest
 public class EntityRecordServiceIT extends AbstractIntegrationTest{
-
-    @Autowired
-    private EntityRecordService entityRecordService;
-    
-    @Qualifier(AppConfigConstants.BEAN_JSON_MAPPER)
-    @Autowired
-    private ObjectMapper objectMapper;
-
-	@BeforeEach
-	void setUp() {
-		entityRecordService.dropRepository();
-	}
-
+	
 	@Test
 	public void mergeEntities() throws Exception{
 	    /*

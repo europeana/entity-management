@@ -1,4 +1,5 @@
 {
+  "type": "Concept",
   "id": "http://not.in.the.datasources",
   "prefLabel": {
     "en": "bathtub"

@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.web;
 
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BASE_SERVICE_URL;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_EMPTY_UPDATE__JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_REGISTER_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_UPDATE_JSON;
@@ -28,10 +29,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
@@ -39,16 +38,16 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import eu.europeana.entitymanagement.AbstractEmControllerTest;
+import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import eu.europeana.entitymanagement.batch.BatchService;
 import eu.europeana.entitymanagement.definitions.model.Concept;
+import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Timespan;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
@@ -60,18 +59,8 @@ import okhttp3.mockwebserver.MockResponse;
  * Integration test for the main Entity Management controller in case of errors occur 
  */
 
-@SpringBootTest
-public class EntityUpdateIT extends AbstractEmControllerTest {
-
-    @BeforeEach
-    public void setup() throws Exception {
-    	
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
-
-        //ensure a clean db between test runs
-        this.entityRecordService.dropRepository();
-    }
-    
+public class EntityUpdateIT extends AbstractIntegrationTest {
+	
     @Test
     public void updateEntityErrorCheck_wrongIfMatchHeader() throws Exception {
     	/*
@@ -85,9 +74,6 @@ public class EntityUpdateIT extends AbstractEmControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isAccepted())
                 .andReturn();
-
-        // matches the id in the JSON file (also used to remove the queued Metis request)
-        assertMetisRequest("http://www.wikidata.org/entity/Q152095");
 
         final ObjectNode registeredEntityNode = new ObjectMapper().readValue(resultRegisterEntity.getResponse().getContentAsString(StandardCharsets.UTF_8), ObjectNode.class);
 
@@ -171,6 +157,24 @@ public class EntityUpdateIT extends AbstractEmControllerTest {
     }
 
     @Test
+    void updateFromExternalDatasourceShouldRunSuccessfully() throws Exception {
+        // create entity in DB
+        Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
+        EntityRecord entityRecord = new EntityRecord();
+        entityRecord.setEntity(concept);
+        entityRecord.setEntityId(concept.getEntityId());
+        EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
+
+        String requestPath = getEntityRequestPath(record.getEntityId());
+
+        mockMvc.perform(post(BASE_SERVICE_URL + "/" + requestPath + "/management/update")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isAccepted());
+
+        //TODO: test error flows
+    }
+
+    @Test
     public void updateConceptShouldBeSuccessful() throws Exception {
     	
         mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(CONCEPT_XML)));
@@ -181,9 +185,6 @@ public class EntityUpdateIT extends AbstractEmControllerTest {
                 .andExpect(status().isAccepted())
                 .andReturn();
     	
-        // matches the id in the JSON file (also used to remove the queued Metis request)
-        assertMetisRequest("http://www.wikidata.org/entity/Q152095");
-
         final ObjectNode registeredEntityNode = new ObjectMapper().readValue(resultRegisterEntity.getResponse().getContentAsString(StandardCharsets.UTF_8), ObjectNode.class);
 
         String requestPath = getEntityRequestPath(registeredEntityNode.path("id").asText());
@@ -213,7 +214,42 @@ public class EntityUpdateIT extends AbstractEmControllerTest {
         }
 
     }
+        
+    @Test
+    void updatePUTShouldReplaceEuropeanaProxy() throws Exception{
+        MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML, true);
 
+        final ObjectNode registeredEntityNode = new ObjectMapper().readValue(resultRegisterEntity.getResponse().getContentAsString(StandardCharsets.UTF_8), ObjectNode.class);
+
+        // assert content of Europeana proxy
+        Optional<EntityRecord> savedRecord = entityRecordService.retrieveByEntityId(registeredEntityNode.path("id").asText());
+        Assertions.assertTrue(savedRecord.isPresent());
+        Entity europeanaProxyEntity = savedRecord.get().getEuropeanaProxy().getEntity();
+
+        // values match labels in json file
+        Assertions.assertEquals("bathtub", europeanaProxyEntity.getPrefLabelStringMap().get("en"));
+        Assertions.assertEquals("bath", europeanaProxyEntity.getAltLabel().get("en").get(0));
+        Assertions.assertEquals("tub", europeanaProxyEntity.getAltLabel().get("en").get(1));
+        Assertions.assertNotNull(europeanaProxyEntity.getDepiction());
+
+        String requestPath = getEntityRequestPath(registeredEntityNode.path("id").asText());
+        mockMvc.perform(MockMvcRequestBuilders.put(BASE_SERVICE_URL + "/" + requestPath)
+                .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                .content(loadFile(CONCEPT_EMPTY_UPDATE__JSON))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isAccepted())
+                .andReturn();
+
+        // check that update removed fields from Europeana proxy in original request
+        savedRecord = entityRecordService.retrieveByEntityId(registeredEntityNode.path("id").asText());
+        Assertions.assertTrue(savedRecord.isPresent());
+        europeanaProxyEntity = savedRecord.get().getEuropeanaProxy().getEntity();
+
+        Assertions.assertNull(europeanaProxyEntity.getPrefLabel());
+        Assertions.assertNull(europeanaProxyEntity.getAltLabel());
+        Assertions.assertNull(europeanaProxyEntity.getNote());
+        Assertions.assertNull(europeanaProxyEntity.getDepiction());
+    }
     
     @TestConfiguration
     public static class TestConfig {
