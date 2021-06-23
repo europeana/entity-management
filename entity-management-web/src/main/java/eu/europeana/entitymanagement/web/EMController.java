@@ -6,6 +6,7 @@ import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.entitymanagement.batch.BatchService;
+import eu.europeana.entitymanagement.batch.model.BatchUpdateType;
 import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
@@ -193,9 +194,7 @@ public class EMController extends BaseRest {
 		List<String> failures = entityIds.stream().filter(e -> !existingEntityIds.contains(e))
 				.collect(Collectors.toList());
 
-		// runAsynchronously since we're not including updated entities in response
-		launchUpdateTask(existingEntityIds, true);
-
+		batchService.scheduleUpdates(existingEntityIds, BatchUpdateType.FULL);
 		return  ResponseEntity.accepted().body(new EntityIdResponse(entityIds.size(), existingEntityIds, failures));
 	}
 
@@ -213,8 +212,8 @@ public class EMController extends BaseRest {
 		List<String> failures = entityIds.stream()
 				.filter(e -> !existingEntityIds.contains(e))
 				.collect(Collectors.toList());
-		launchUpdateMetrics(existingEntityIds);
 
+		batchService.scheduleUpdates(existingEntityIds, BatchUpdateType.METRICS);
 		return  ResponseEntity.accepted().body(new EntityIdResponse(entityIds.size(), existingEntityIds, failures));
 	}
 
@@ -388,7 +387,7 @@ public class EMController extends BaseRest {
 	private ResponseEntity<String> launchTaskAndRetrieveEntity(String type, String identifier,
 			EntityRecord entityRecord, String profile) throws Exception {
 		// launch synchronous update, then retrieve entity from DB afterwards
-		launchUpdateTask(Collections.singletonList(entityRecord.getEntityId()), false);
+		launchUpdateTask(entityRecord.getEntityId());
 		entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
 
 		return generateResponseEntity(profile, FormatTypes.jsonld, null, null, entityRecord, HttpStatus.ACCEPTED);
@@ -414,17 +413,17 @@ public class EMController extends BaseRest {
 		return null;
 	}
 
-	private void launchUpdateTask(List<String> entityIds, boolean runAsynchronously)
+	private void launchUpdateTask(String entityId)
       throws Exception {
-    logger.info("Launching update task for entityIds={}. async={}", entityIds, runAsynchronously);
-    batchService.launchSpecificEntityUpdate(entityIds, runAsynchronously);
+    logger.info("Launching synchronous update for entityId={}", entityId);
+    batchService.runSynchronousUpdate(entityId);
   }
 
-	private void launchUpdateMetrics(List<String> entityIds)
-			throws Exception {
-		logger.info("Launching Update Metrics task for entityIds={}", entityIds);
-		batchService.launchEntityMetricsUpdate(entityIds, true);
-	}
+//	private void launchUpdateMetrics(List<String> entityIds)
+//			throws Exception {
+//		logger.info("Launching Update Metrics task for entityIds={}", entityIds);
+//		batchService.launchEntityMetricsUpdate(entityIds, true);
+//	}
 
 	/**
 	 * Gets the database identifier from an EntityId string

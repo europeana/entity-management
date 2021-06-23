@@ -2,14 +2,13 @@ package eu.europeana.entitymanagement.batch.listener;
 
 import static eu.europeana.entitymanagement.batch.BatchUtils.getEntityIds;
 
-import eu.europeana.entitymanagement.batch.errorhandling.FailedTaskService;
+import eu.europeana.entitymanagement.batch.service.FailedTaskService;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Timer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

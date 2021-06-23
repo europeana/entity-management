@@ -1,105 +1,51 @@
 package eu.europeana.entitymanagement.batch;
 
-import static eu.europeana.entitymanagement.batch.BatchUtils.JOB_UPDATE_ALL_ENTITIES;
-import static eu.europeana.entitymanagement.batch.BatchUtils.JOB_UPDATE_SPECIFIC_ENTITIES;
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_JSON_MAPPER;
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.DEFAULT_JOB_LAUNCHER;
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.SYNC_JOB_LAUNCHER;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Date;
-import java.util.List;
+import eu.europeana.entitymanagement.batch.model.BatchUpdateType;
+import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.batch.core.BatchStatus;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobInstance;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersInvalidException;
-import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
-import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
-import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
-import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import java.time.Instant;
+import java.util.Date;
+import java.util.List;
+
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.SYNC_JOB_LAUNCHER;
 
 @Service
 public class BatchService {
+    private static final Logger logger = LogManager.getLogger(BatchService.class);
 
-  private static final Logger logger = LogManager.getLogger(BatchService.class);
+    private final BatchEntityUpdateConfig batchUpdateConfig;
+    private final JobLauncher synchronousJobLauncher;
+    private final ScheduledTaskService scheduledTaskService;
 
-  private final BatchEntityUpdateConfig batchUpdateConfig;
-  private final ObjectMapper mapper;
+    @Autowired
+    public BatchService(BatchEntityUpdateConfig batchUpdateConfig,
+                        @Qualifier(SYNC_JOB_LAUNCHER) JobLauncher synchronousJobLauncher,
+                        ScheduledTaskService scheduledTaskService) {
+        this.batchUpdateConfig = batchUpdateConfig;
+        this.scheduledTaskService = scheduledTaskService;
+        this.synchronousJobLauncher = synchronousJobLauncher;
+    }
 
-  private final JobLauncher defaultJobLauncher;
-  private final JobLauncher synchronousJobLauncher;
-
-  private final JobExplorer jobExplorer;
-
-
-  @Autowired
-  public BatchService(BatchEntityUpdateConfig batchUpdateConfig,
-      @Qualifier(BEAN_JSON_MAPPER) ObjectMapper mapper,
-      @Qualifier(DEFAULT_JOB_LAUNCHER) JobLauncher defaultJobLauncher,
-      @Qualifier(SYNC_JOB_LAUNCHER) JobLauncher synchronousJobLauncher,
-      JobExplorer jobExplorer) {
-    this.batchUpdateConfig = batchUpdateConfig;
-    this.mapper = mapper;
-    this.defaultJobLauncher = defaultJobLauncher;
-    this.synchronousJobLauncher = synchronousJobLauncher;
-    this.jobExplorer = jobExplorer;
-  }
-
-  /**
-   * Launches the update job for specific entities.
-   *
-   * @param entityIds          entityIds to be used in job
-   * @param runAsynchronously indicates whether this job should be run asynchronously or not
-   * @throws Exception on error
-   */
-  public void launchSpecificEntityUpdate(List<String> entityIds, boolean runAsynchronously)
-      throws Exception {
-    launchJob(entityIds, runAsynchronously, batchUpdateConfig.updateSpecificEntities());
-  }
+    public void runSynchronousUpdate(String entityId) throws Exception {
+        logger.info("Triggering synchronous update for entityId={}", entityId);
+        synchronousJobLauncher.run(batchUpdateConfig.updateSingleEntityJob(),
+                        BatchUtils.createJobParameters(entityId, Date.from(Instant.now())));
+    }
 
 
-  public void launchEntityMetricsUpdate(List<String> entityIds, boolean runAsynchronously)
-      throws Exception {
-    launchJob(entityIds, runAsynchronously, batchUpdateConfig.updateMetricsSpecificEntities());
-  }
-
-
-  private void launchJob(List<String> entityIds, boolean runAsynchronously, Job job)
-      throws Exception {
-    JobLauncher launcher = runAsynchronously ? defaultJobLauncher : synchronousJobLauncher;
-
-    JobParameters jobParameters = BatchUtils
-        .createJobParameters(entityIds.toArray(String[]::new), new Date(), mapper);
-    launcher.run(job, jobParameters);
-  }
-
-  /**
-   * Launches the update job for multiple entities. Runs asynchronously.
-   *
-   * @throws Exception on error
-   */
-  public void launchAllEntityUpdate() throws Exception {
-
-    defaultJobLauncher.run(batchUpdateConfig.updateAllEntities(),
-        BatchUtils.createJobParameters(null, new Date(), mapper));
-  }
-
-  /**
-   * Launches the update job for retrying failed tasks
-   * @throws Exception on error
-   */
-  public void launchEntityFailureRetryJob() throws Exception {
-    defaultJobLauncher.run(batchUpdateConfig.retryFailedTasks(),
-        BatchUtils.createJobParameters(null, new Date(), mapper));
-  }
+    public void scheduleUpdates(List<String> entityIds, BatchUpdateType updateType) {
+        if(CollectionUtils.isEmpty(entityIds)){
+            return;
+        }
+        logger.info("Scheduling async updates for entityIds={}", entityIds.toArray());
+            scheduledTaskService.scheduleUpdateBulk(entityIds, updateType);
+    }
 }

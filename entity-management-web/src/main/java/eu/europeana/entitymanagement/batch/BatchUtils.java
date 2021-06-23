@@ -23,23 +23,14 @@ public class BatchUtils {
   /**
    * Creates JobParameters for triggering the Spring Batch update job for specific entities
    *
-   * @param entityIds string array containing entity ids
+   * @param entityId string array containing entity ids
    * @param runTime   trigger time for job
-   * @param mapper    JSON object mapper
-   * @return JobParameters with trigger time and entityIds
-   * @throws JsonProcessingException
+   * @return JobParameters with trigger time and entityId
    */
-  public static JobParameters createJobParameters(@Nullable String[] entityIds, Date runTime,
-      ObjectMapper mapper) throws JsonProcessingException {
-    JobParametersBuilder paramBuilder = new JobParametersBuilder()
-        .addDate(JobParameter.CURRENT_START_TIME.key(), runTime);
-
-    if (entityIds != null) {
-
-      paramBuilder.addString(JobParameter.ENTITY_ID.key(),
-          mapper.writeValueAsString(entityIds));
-    }
-    return paramBuilder.toJobParameters();
+  public static JobParameters createJobParameters(String entityId, Date runTime) {
+    return new JobParametersBuilder()
+        .addDate(JobParameter.CURRENT_START_TIME.key(), runTime).addString(JobParameter.ENTITY_ID.key(),
+          entityId).toJobParameters();
   }
 
 
