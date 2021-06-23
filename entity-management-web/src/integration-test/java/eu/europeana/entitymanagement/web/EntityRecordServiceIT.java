@@ -104,7 +104,7 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
 	    entityRecord.setEntity(notConsolidated);
 
 
-	    entityRecordService.mergeEntity(entityRecord);
+	    entityRecordService.mergeEntities(internalProxy.getEntity(), externalProxy.getEntity());
 	    /*
 	     * here the assertions are manual and are defined based on what is in put in the
 	     * corresponsing proxy's entity objects
@@ -149,7 +149,7 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
             entityRecord.setEntity(notConsolidated);
 
 
-	    entityRecordService.mergeEntity(entityRecord);
+	    entityRecordService.mergeEntities(internalProxy.getEntity(), externalProxy.getEntity());
 	    /*
 	     * here the assertions are manual and are defined based on what is in put in the
 	     * corresponsing proxy's entity objects
