@@ -49,7 +49,7 @@ public class MetisDereferenceServiceTest {
 	assertEquals(8, entity.getAltLabel().size());
 	assertEquals("Wannenbad", entity.getAltLabel().get("de").get(0));
 
-	String broader = entity.getBroader()[0];
+	String broader = entity.getBroader().get(0);
 	assertEquals("http://www.wikidata.org/entity/Q987767", broader);
 		
 	assertEquals(7, entity.getNote().size());

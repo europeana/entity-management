@@ -8,9 +8,10 @@ import org.apache.commons.io.IOUtils;
 public class BaseMvcTestUtils {
 
     public static final String BASE_SERVICE_URL = "/entity/";
+    public static final String BASE_ADMIN_URL = "/management";
 
     public static final String BATHTUB_DEREF = "/content/deref_bathtub.xml";
-    
+        
     public static final String CONCEPT_JSON = "/content/concept.json";
     public static final String AGENT_JSON = "/content/agent.json";
     public static final String ORGANIZATION_JSON = "/content/organization.json";
@@ -23,6 +24,7 @@ public class BaseMvcTestUtils {
     public static final String CONCEPT_REGISTER_ERROR_CHECK_2_JSON = "/content/concept_register_error_check_2.json";
     public static final String AGENT_REGISTER_JSON = "/content/agent_register.json";
     public static final String AGENT_REGISTER_STALIN_JSON = "/content/agent_register_stalin.json";
+    public static final String AGENT_REGISTER_JAN_VERMEER = "/content/agent_register_jan_vermeer.json";
     public static final String ORGANIZATION_REGISTER_JSON = "/content/organization_register.json";
     public static final String PLACE_REGISTER_JSON = "/content/place_register.json";
     public static final String TIMESPAN_REGISTER_JSON = "/content/timespan_register.json";  
@@ -31,12 +33,19 @@ public class BaseMvcTestUtils {
     public static final String TIMESPAN_UPDATE_JSON = "/content/timespan_update.json";
     
     public static final String CONCEPT_VALIDATE_FIELDS_JSON = "/content/concept-validate-fields.json";
+    public static final String ORGANIZATION_VALIDATE_FIELDS_JSON = "/content/organization-validation.json";
+    public static final String AGENT_VALIDATE_FIELDS_JSON = "/content/agent-validation.json";
+    public static final String CONCEPT_EMPTY_UPDATE__JSON = "/content/concept_update_empty.json";
+
     
     public static final String CONCEPT_XML = "/metis-deref/concept.xml";
     public static final String CONCEPT_ERROR_CHECK_1_XML = "/metis-deref/concept-error-check-1.xml";
     
     public static final String AGENT_XML = "/metis-deref/agent.xml";
     public static final String AGENT_STALIN_XML = "/metis-deref/agent_stalin.xml";
+    public static final String AGENT_STALIN_CLEANING_XML = "/metis-deref/agent_stalin_cleaning.xml";
+    public static final String AGENT_JAN_VERMEER_XML_VIAF = "/metis-deref/agent_jan_vermeer_viaf.xml";
+    public static final String AGENT_JAN_VERMEER_XML_WIKIDATA = "/metis-deref/agent_jan_vermeer_wikidata.xml";
     public static final String ORGANIZATION_XML = "/metis-deref/organization.xml";
     public static final String PLACE_XML = "/metis-deref/place.xml";
     public static final String TIMESPAN_XML = "/metis-deref/timespan.xml";  

@@ -6,17 +6,24 @@ import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEA
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.DEFAULT_JOB_LAUNCHER;
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.SYNC_JOB_LAUNCHER;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Date;
+import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.BatchStatus;
+import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
+import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -48,21 +55,32 @@ public class BatchService {
     this.jobExplorer = jobExplorer;
   }
 
-
   /**
-   * Launches the update job for a single entity.
+   * Launches the update job for specific entities.
    *
-   * @param entityId          entityId to be used in job
+   * @param entityIds          entityIds to be used in job
    * @param runAsynchronously indicates whether this job should be run asynchronously or not
    * @throws Exception on error
    */
-  public void launchSingleEntityUpdate(String entityId, boolean runAsynchronously)
+  public void launchSpecificEntityUpdate(List<String> entityIds, boolean runAsynchronously)
+      throws Exception {
+    launchJob(entityIds, runAsynchronously, batchUpdateConfig.updateSpecificEntities());
+  }
+
+
+  public void launchEntityMetricsUpdate(List<String> entityIds, boolean runAsynchronously)
+      throws Exception {
+    launchJob(entityIds, runAsynchronously, batchUpdateConfig.updateMetricsSpecificEntities());
+  }
+
+
+  private void launchJob(List<String> entityIds, boolean runAsynchronously, Job job)
       throws Exception {
     JobLauncher launcher = runAsynchronously ? defaultJobLauncher : synchronousJobLauncher;
 
     JobParameters jobParameters = BatchUtils
-        .createJobParameters(new String[]{entityId}, new Date(), mapper);
-    launcher.run(batchUpdateConfig.updateSpecificEntities(), jobParameters);
+        .createJobParameters(entityIds.toArray(String[]::new), new Date(), mapper);
+    launcher.run(job, jobParameters);
   }
 
   /**
@@ -70,44 +88,18 @@ public class BatchService {
    *
    * @throws Exception on error
    */
-  public void launchMultiEntityUpdate() throws Exception {
-    // first check if any failed or stopped executions exist for job
-
-    JobParameters jobParameters;
-    JobExecution jobExecution = getLastExecution(JOB_UPDATE_ALL_ENTITIES);
-    if (jobExecution != null) {
-      logger
-          .debug("Found {} execution for jobId={}; jobExecutionId={}", jobExecution.getStatus(),
-              JOB_UPDATE_ALL_ENTITIES, jobExecution.getId());
-
-      if (jobExecution.getStatus().isGreaterThan(BatchStatus.STOPPING)) {
-        jobParameters = jobExecution.getJobParameters();
-        logger
-            .info("Restarting {} job instance for jobName={}", jobExecution.getStatus(),
-                JOB_UPDATE_ALL_ENTITIES);
-
-        defaultJobLauncher.run(batchUpdateConfig.updateAllEntities(), jobParameters);
-        return;
-      }
-    }
-
-    logger.info("No failed or stopped execution found for jobName={}. Creating a new instance",
-        JOB_UPDATE_SPECIFIC_ENTITIES);
+  public void launchAllEntityUpdate() throws Exception {
 
     defaultJobLauncher.run(batchUpdateConfig.updateAllEntities(),
         BatchUtils.createJobParameters(null, new Date(), mapper));
   }
 
-
-  private JobExecution getLastExecution(String jobIdentifier) {
-    JobInstance lastJobInstance = jobExplorer.getLastJobInstance(jobIdentifier);
-
-    if (lastJobInstance == null) {
-      logger.debug("No jobInstance found for jobId={}", jobIdentifier);
-      return null;
-    }
-
-    // get the last execution of the latest instance (results already sorted by most-recent-first)
-    return jobExplorer.getLastJobExecution(lastJobInstance);
+  /**
+   * Launches the update job for retrying failed tasks
+   * @throws Exception on error
+   */
+  public void launchEntityFailureRetryJob() throws Exception {
+    defaultJobLauncher.run(batchUpdateConfig.retryFailedTasks(),
+        BatchUtils.createJobParameters(null, new Date(), mapper));
   }
 }

@@ -1,9 +1,9 @@
 package eu.europeana.entitymanagement.web;
 
 import eu.europeana.entitymanagement.batch.BatchService;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,20 +25,25 @@ public class JobLauncherController {
 
     /**
      * Temporary endpoint to test Spring Batch integration
-     * This triggers a simple job that logs to the console
      */
     @PostMapping("/run")
-    public ResponseEntity<String> handle(@RequestBody(required = false) String entityId) throws Exception {
-        if (StringUtils.hasLength(entityId)) {
-            batchService.launchSingleEntityUpdate(entityId, true);
+    public ResponseEntity<String> handle(@RequestBody(required = false) List<String> entityIds) throws Exception {
+        if (entityIds != null && !entityIds.isEmpty()) {
+            batchService.launchSpecificEntityUpdate(entityIds, true);
         } else {
-            batchService.launchMultiEntityUpdate();
+            batchService.launchAllEntityUpdate();
         }
 
         return ResponseEntity.ok("Job successfully triggered");
     }
 
-
-
-
+    /**
+     * Temporary endpoint to test Spring Batch integration
+     * Retries updates for Failed Tasks
+     */
+    @PostMapping("/run/failed")
+    public ResponseEntity<String> retryFailure() throws Exception {
+        batchService.launchEntityFailureRetryJob();
+        return ResponseEntity.ok("Job successfully triggered");
+    }
 }

@@ -24,14 +24,24 @@ public class EntityManagementConfiguration  {
     @Value("${languagecodes.config}")
     private String languagecodesXMLConfig;
 
-    @Value("${europeana.apikey.jwttoken.siganturekey}")
-    private String europeanaApikeyJwttokenSiganturekey;
+    @Value("${europeana.apikey.jwttoken.signaturekey}")
+    private String apiKeyPublicKey;
+
+
+    @Value("${europeana.apikey.serviceurl}")
+    private String apiKeyUrl;
 
     @Value("${entitymanagement.solr.pr.url}")
     private String prSolrUrl;
 
     @Value("${entitymanagement.solr.searchapi.url}")
     private String searchApiSolrUrl;
+    
+    @Value("${entitymanagement.solr.indexing.url}")
+    private String indexingSolrUrl;
+
+    @Value("${entitymanagement.solr.indexing.explicitCommits: false}")
+    private boolean explicitCommitsEnabled;
 
     @Value("${entitymanagement.solr.searchapi.enrichments.query}")
     private String enrichmentsQuery;
@@ -66,9 +76,17 @@ public class EntityManagementConfiguration  {
   @Value("${batch.step.executor.queueSize: 50}")
   private int batchStepExecutorQueueSize;
 
+  @Value("${batch.step.throttleLimit: 10}")
+  private int batchStepThrottleLimit;
+
   @Value("${batch.computeMetrics: false}")
   private boolean batchComputeMetrics;
 
+  @Value("${auth.enabled: true}")
+  private boolean authEnabled;
+
+  @Value("${enrichmentMigrationPassword}")
+  private String enrichmentsMigrationPassword;
 
 
   public EntityManagementConfiguration() {
@@ -95,10 +113,15 @@ public class EntityManagementConfiguration  {
 	return hitsQuery;
     }
 
-    
-    public String getJwtTokenSignatureKey() {
-	return europeanaApikeyJwttokenSiganturekey;
-    }
+
+  public String getApiKeyPublicKey() {
+    return apiKeyPublicKey;
+  }
+
+
+  public String getApiKeyUrl() {
+    return apiKeyUrl;
+  }
 
     
     public String getAuthorizationApiName() {
@@ -152,4 +175,25 @@ public class EntityManagementConfiguration  {
   public boolean shouldComputeMetrics() {
     return batchComputeMetrics;
   }
+
+  public boolean isAuthEnabled() {
+    return authEnabled;
+  }
+
+  public String getEnrichmentsMigrationPassword() {
+    return enrichmentsMigrationPassword;
+  }
+
+  public int getBatchStepThrottleLimit() {
+    return batchStepThrottleLimit;
+  }
+
+
+public String getIndexingSolrUrl() {
+	return indexingSolrUrl;
+}
+
+    public boolean explicitCommitsEnabled() {
+        return explicitCommitsEnabled;
+    }
 }

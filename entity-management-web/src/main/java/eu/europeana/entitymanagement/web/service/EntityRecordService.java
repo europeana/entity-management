@@ -1,68 +1,48 @@
 package eu.europeana.entitymanagement.web.service;
 
-import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.EUROPEANA_URL;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.RIGHTS_CREATIVE_COMMONS;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_ID;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_IDENTIFIER;
-import static eu.europeana.entitymanagement.web.EntityRecordUtils.getDatasourceAggregationId;
-import static eu.europeana.entitymanagement.web.EntityRecordUtils.getEuropeanaAggregationId;
-import static eu.europeana.entitymanagement.web.EntityRecordUtils.getEuropeanaProxyId;
-import static eu.europeana.entitymanagement.web.EntityRecordUtils.getIsAggregatedById;
-
-import eu.europeana.entitymanagement.web.EntityRecordUtils;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
-
-import java.util.stream.Collectors;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-
 import dev.morphia.query.experimental.filters.Filter;
+import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.AppConfig;
-import eu.europeana.entitymanagement.definitions.model.Agent;
-import eu.europeana.entitymanagement.definitions.model.Aggregation;
-import eu.europeana.entitymanagement.definitions.model.Concept;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.EntityProxy;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.Place;
-import eu.europeana.entitymanagement.definitions.model.Timespan;
-import eu.europeana.entitymanagement.definitions.model.impl.AggregationImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.EntityProxyImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
-import eu.europeana.entitymanagement.exception.EntityCreationException;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
+import eu.europeana.entitymanagement.definitions.model.*;
+import eu.europeana.entitymanagement.exception.EntityAlreadyExistsException;
+import eu.europeana.entitymanagement.exception.EntityNotFoundException;
+import eu.europeana.entitymanagement.exception.EntityRemovedException;
+import eu.europeana.entitymanagement.exception.HttpBadRequestException;
+import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
+import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
+import eu.europeana.entitymanagement.web.EntityRecordUtils;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.EUROPEANA_URL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.RIGHTS_CREATIVE_COMMONS;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_ID;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_IDENTIFIER;
+import static eu.europeana.entitymanagement.web.EntityRecordUtils.*;
 
 @Service(AppConfig.BEAN_ENTITY_RECORD_SERVICE)
 public class EntityRecordService {
-
-    Logger logger = LogManager.getLogger(getClass());
 
     private final EntityRecordRepository entityRecordRepository;
 
     final EntityManagementConfiguration emConfiguration;
 
     private final DataSources datasources;
+
+	private static final String ENTITY_ID_REMOVED_MSG = "Entity '%s' has been removed";
 
 	/**
 	 * Fields to ignore when updating entities from user request
@@ -79,10 +59,30 @@ public class EntityRecordService {
 	this.datasources = datasources;
     }
 
-    public Optional<EntityRecord> retrieveEntityRecordByUri(String entityUri) {
-	return Optional.ofNullable(entityRecordRepository.findByEntityId(entityUri));
+    public Optional<EntityRecord> retrieveByEntityId(String entityId) {
+	return Optional.ofNullable(entityRecordRepository.findByEntityId(entityId));
     }
 
+	public EntityRecord retrieveEntityRecord(String type, String identifier, boolean retrieveDisabled)
+			throws EuropeanaApiException {
+		String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
+		Optional<EntityRecord> entityRecordOptional = this.
+				retrieveByEntityId(entityUri);
+		if (entityRecordOptional.isEmpty()) {
+			throw new EntityNotFoundException(entityUri);
+		}
+
+		EntityRecord entityRecord = entityRecordOptional.get();
+		if (!retrieveDisabled && entityRecord.isDisabled()) {
+			throw new EntityRemovedException(String.format(ENTITY_ID_REMOVED_MSG, entityUri));
+		}
+		return entityRecord;
+	}
+
+
+    public List<String> retrieveMultipleByEntityId(List<String> entityIds){
+			return entityRecordRepository.getExistingEntityIds(entityIds);
+		}
     /**
      * Gets coreferenced entity with the given id (sameAs or exactMatch value in the
      * Consolidated version)
@@ -109,6 +109,17 @@ public class EntityRecordService {
 	return saveEntityRecord(er);
     }
 
+	/**
+	 * Re-Enable an already existing entity record.
+	 *
+	 * @param entityRecord entity record to update
+	 * @return Re-Enabled entity
+	 */
+	public EntityRecord enableEntityRecord(EntityRecord entityRecord) {
+	entityRecord.setDisabled(false);
+	return saveEntityRecord(entityRecord);
+	}
+
     /**
      * Updates an already existing entity record.
      * 
@@ -119,7 +130,65 @@ public class EntityRecordService {
 	return this.saveEntityRecord(entityRecord);
     }
 
-    /**
+	/**
+	 * Delete an already existing entity record permanently.
+	 *
+	 * @param entityId entity record to delete
+	 * @return the number of deleted objects
+	 */
+	public long delete(String entityId) {
+		return entityRecordRepository.deleteForGood(entityId);
+	}
+
+	/**
+	 * Creates an {@link EntityRecord} from an {@link EntityPreview}, which is then
+	 * persisted.
+	 * Note : This method is used for creating Entity for Migration requests
+	 *
+	 * @param entityCreationRequest
+	 * @param type type of entity
+	 * @param identifier id of entity
+	 * @return Saved Entity record
+	 * @throws EntityCreationException if an error occurs
+	 */
+	public EntityRecord createEntityFromMigrationRequest(EntityPreview entityCreationRequest, String type, String identifier)
+			throws EntityCreationException, EntityAlreadyExistsException {
+		// Fail quick if no datasource is configured
+		Optional<DataSource> externalDatasourceOptional = datasources.getDatasource(entityCreationRequest.getId());
+		if (externalDatasourceOptional.isEmpty()) {
+			throw new EntityCreationException("No configured datasource for entity " + entityCreationRequest.getId());
+		}
+
+		Date timestamp = new Date();
+		Entity entity = EntityObjectFactory.createEntityObject(type);
+		EntityRecord entityRecord = new EntityRecord();
+		String entityId = generateEntityId(entity.getType(), identifier);
+		// check if entity already exists
+		// this is avoid MongoDb exception for duplicate key
+		checkIfEntityAlreadyExists(entityId);
+
+		entityRecord.setEntityId(entityId);
+		entity.setEntityId(entityId);
+		entityRecord.setEntity(entity);
+
+		Entity europeanaProxyMetadata = EntityObjectFactory.createEntityObject(type);
+		// copy metadata from request into entity
+		europeanaProxyMetadata.setEntityId(entityId);
+		europeanaProxyMetadata.setType(type);
+		copyPreviewMetadata(europeanaProxyMetadata, entityCreationRequest);
+		setEuropeanaMetadata(europeanaProxyMetadata, entityId, entityRecord, timestamp);
+
+		// create metis Entity
+		Entity metisEntity = EntityObjectFactory.createEntityObject(type);
+
+		DataSource externalDatasource = externalDatasourceOptional.get();
+		setExternalProxyMetadata(metisEntity, entityCreationRequest.getId(), entityId, externalDatasource, entityRecord, timestamp);
+
+		setEntityAggregation(entityRecord, entityId, timestamp);
+		return entityRecordRepository.save(entityRecord);
+	}
+
+	/**
      * Creates an {@link EntityRecord} from an {@link EntityPreview}, which is then
      * persisted.
      *
@@ -133,14 +202,14 @@ public class EntityRecordService {
 	// Fail quick if no datasource is configured
 	Optional<DataSource> externalDatasourceOptional = datasources.getDatasource(entityCreationRequest.getId());
 	if (externalDatasourceOptional.isEmpty()) {
-	    throw new EntityCreationException("No configured datasource for entity " + entityCreationRequest.getId());
+		throw new EntityCreationException("No configured datasource for entity " + entityCreationRequest.getId());
 	}
 
 	Date timestamp = new Date();
 	Entity entity = EntityObjectFactory.createEntityObject(metisResponse.getType());
 
-	EntityRecord entityRecord = new EntityRecordImpl();
-	String entityId = generateEntityId(entity.getType());
+	EntityRecord entityRecord = new EntityRecord();
+	String entityId = generateEntityId(entity.getType(), null);
         entityRecord.setEntityId(entityId);
         entity.setEntityId(entityId);
         entityRecord.setEntity(entity);
@@ -155,7 +224,7 @@ public class EntityRecordService {
 
        
 	DataSource externalDatasource = externalDatasourceOptional.get();
-	setExternalProxyMetadata(metisResponse, entityCreationRequest, entityId, externalDatasource, entityRecord, timestamp);
+	setExternalProxyMetadata(metisResponse, entityCreationRequest.getId(), entityId, externalDatasource, entityRecord, timestamp);
 
 	setEntityAggregation(entityRecord, entityId, timestamp);
 	return entityRecordRepository.save(entityRecord);
@@ -163,20 +232,47 @@ public class EntityRecordService {
     }
 
 	/**
+	 * Checks if Entity already exists
+	 * @param entityId
+	 * @throws EntityAlreadyExistsException
+	 */
+	private void checkIfEntityAlreadyExists(String entityId) throws EntityAlreadyExistsException {
+	Optional<EntityRecord> entityRecordOptional = retrieveByEntityId(entityId);
+	if (entityRecordOptional.isPresent()) {
+		throw new EntityAlreadyExistsException(entityId);
+	}
+	}
+
+	/**
 	 * Copies metadata provided during Entity creation, into the created Entity
 	 * @param entity entity
 	 * @param entityCreationRequest entity creation request
 	 */
 	private void copyPreviewMetadata(Entity entity, EntityPreview entityCreationRequest) {
-			entity.setSameAs(new String[]{entityCreationRequest.getId()});
+			entity.setSameAs(List.of(entityCreationRequest.getId()));
 			entity.setPrefLabelStringMap(entityCreationRequest.getPrefLabel());
 			entity.setAltLabel(entityCreationRequest.getAltLabel());
 			entity.setDepiction(entityCreationRequest.getDepiction());
 	}
 
-	private String generateEntityId(String entityType) {
-	long dbId = entityRecordRepository.generateAutoIncrement(entityType);
-	return EntityRecordUtils.buildEntityIdUri(entityType, String.valueOf(dbId));
+	/**
+	 * generates the EntityId
+	 * If entityId is present, generate entity id uri with entityId
+	 * else generates a auto increment id
+	 * ex: http://data.europeana.eu/<entitytype>/<entityId>
+	 * OR  http://data.europeana.eu/<entitytype>/<dbId>
+	 *
+	 * @param entityType
+	 * @param entityId
+	 * @return
+	 */
+	private String generateEntityId(String entityType, String entityId) {
+	if (entityId != null) {
+		return EntityRecordUtils.buildEntityIdUri(entityType, entityId);
+	} else {
+		long dbId = entityRecordRepository.generateAutoIncrement(entityType);
+		return EntityRecordUtils.buildEntityIdUri(entityType, String.valueOf(dbId));
+	}
     }
 
     /**
@@ -186,9 +282,9 @@ public class EntityRecordService {
      * @param rdfResources list of SameAs resources
      * @return Optional containing EntityRecord, or empty Optional if none found
      */
-    public Optional<EntityRecord> retrieveMetisCoreferenceSameAs(String[] rdfResources) {
+    public Optional<EntityRecord> retrieveMetisCoreferenceSameAs(List<String> rdfResources) {
 	for (String resource : rdfResources) {
-	    Optional<EntityRecord> entityRecordOptional = retrieveEntityRecordByUri(resource);
+	    Optional<EntityRecord> entityRecordOptional = retrieveByEntityId(resource);
 	    if (entityRecordOptional.isPresent()) {
 		return entityRecordOptional;
 	    }
@@ -197,7 +293,7 @@ public class EntityRecordService {
 	return Optional.empty();
     }
 
-    public void performReferentialIntegrity(Entity entity) throws JsonMappingException, JsonProcessingException {
+    public void performReferentialIntegrity(Entity entity)  {
 
 	//TODO: consider refactoring the implementation of this method by creating a new class (e.g. ReferentialIntegrityProcessor) 
 	performCommonReferentialIntegrity(entity);
@@ -227,30 +323,30 @@ public class EntityRecordService {
 	 * the common fields for all entity types that are references
 	 */
 	// for the field hasPart
-	String[] hasPartField = entity.getHasPart();
+	List<String> hasPartField = entity.getHasPart();
 	entity.setHasPart(replaceWithInternalReferences(hasPartField));
 
 	// for the field isPartOf
-	String[] isPartOfField = entity.getIsPartOfArray();
+	List<String> isPartOfField = entity.getIsPartOfArray();
 	entity.setIsPartOfArray(replaceWithInternalReferences(isPartOfField));
 
 	// for the field isRelatedTo
-	String[] isRelatedToField = entity.getIsRelatedTo();
+	List<String> isRelatedToField = entity.getIsRelatedTo();
 	entity.setIsRelatedTo(replaceWithInternalReferences(isRelatedToField));
 
     }
 
     private void performReferentialIntegrityConcept(Concept entity) {
 	// for the field broader
-	String[] broaderField = entity.getBroader();
+	List<String> broaderField = entity.getBroader();
 	entity.setBroader(replaceWithInternalReferences(broaderField));
 
 	// for the field narrower
-	String[] narrowerField = entity.getBroader();
+	List<String> narrowerField = entity.getBroader();
 	entity.setNarrower(replaceWithInternalReferences(narrowerField));
 
 	// for the field related
-	String[] relatedField = entity.getRelated();
+	List<String> relatedField = entity.getRelated();
 	entity.setRelated(replaceWithInternalReferences(relatedField));
 
     }
@@ -270,32 +366,32 @@ public class EntityRecordService {
 	    entity.setPlaceOfDeath(updatedField);
 	}
 	// for the field professionOrOccupation
-	Map<String, List<String>> professionOrOccupationField = entity.getProfessionOrOccupation();
+	List<String> professionOrOccupationField = entity.getProfessionOrOccupation();
 	entity.setProfessionOrOccupation(replaceWithInternalReferences(professionOrOccupationField));
 	
 	// for the field hasMet
-	String[] hasMetField = entity.getHasMet();
+	List<String> hasMetField = entity.getHasMet();
 	entity.setHasMet(replaceWithInternalReferences(hasMetField));
 	
 	// for the field hasMet
-	String[] wasPresentField = entity.getWasPresentAt();
+	List<String> wasPresentField = entity.getWasPresentAt();
 	entity.setWasPresentAt(replaceWithInternalReferences(wasPresentField));
 	
 	// for the field date
-	String[] dateField = entity.getDate();
+	List<String> dateField = entity.getDate();
 	entity.setDate(replaceWithInternalReferences(dateField));
 	
     }
 
     private void performReferentialIntegrityPlace(Place entity) {
 	// for the field isNextInSequence
-	String[] isNextInSequenceField = entity.getIsNextInSequence();
+	List<String> isNextInSequenceField = entity.getIsNextInSequence();
 	entity.setIsNextInSequence(replaceWithInternalReferences(isNextInSequenceField));
     }
 
     private void performReferentialIntegrityTimespan(Timespan entity) {
 	// for the field isNextInSequence
-	String[] isNextInSequenceField = entity.getIsNextInSequence();
+	List<String> isNextInSequenceField = entity.getIsNextInSequence();
 	entity.setIsNextInSequence(replaceWithInternalReferences(isNextInSequenceField));
 
     }
@@ -325,7 +421,7 @@ public class EntityRecordService {
 	return updatedReferenceMap;
     }
 
-    private String[] replaceWithInternalReferences(String[] originalReferences) {
+    private List<String> replaceWithInternalReferences(List<String> originalReferences) {
 	if (originalReferences == null) {
 	    return null;
 	}
@@ -337,7 +433,7 @@ public class EntityRecordService {
 	if (updatedReferences.isEmpty()) {
 	    return null;
 	}
-	return updatedReferences.toArray(new String[updatedReferences.size()]);
+	return updatedReferences;
     }
 
     private void addValueOrInternalReference(List<String> updatedReferences, String value) {
@@ -347,9 +443,7 @@ public class EntityRecordService {
 	} else {
 	    //value is external URI, replace it with internal reference if they are accessible
 	    Optional<EntityRecord> record = findMatchingCoreference(value);
-	    if (record.isPresent()) {
-		updatedReferences.add(record.get().getEntityId());
-	    }
+		record.ifPresent(entityRecord -> updatedReferences.add(entityRecord.getEntityId()));
 	}
     }
 
@@ -362,7 +456,7 @@ public class EntityRecordService {
      * @throws EntityCreationException
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public void mergeEntity(EntityRecord entityRecord) throws EntityCreationException {
+    public void mergeEntity(EntityRecord entityRecord) throws EuropeanaApiException {
 
 	//TODO: consider refactoring of this implemeentation by creating a new class EntityReconciliator
 	/*
@@ -378,10 +472,8 @@ public class EntityRecordService {
 	Entity primary = europeanaProxy.getEntity();
 	Entity secondary = externalProxy.getEntity();
 
-			List<Field> fieldsToCombine = new ArrayList<>();
-			EntityUtils.getAllFields(fieldsToCombine, primary.getClass());
+			List<Field> fieldsToCombine = EntityUtils.getAllFields(primary.getClass());
 
-			try {
 
 				Entity consolidatedEntity = combineEntities(primary, secondary, fieldsToCombine, true);
 
@@ -393,12 +485,26 @@ public class EntityRecordService {
 				    aggregation.setModified(new Date());
 				    consolidatedEntity.setIsAggregatedBy(aggregation);
 						entityRecord.setEntity(consolidatedEntity);
-
-			} catch (IllegalArgumentException | IllegalAccessException e) {
-				logger.error(
-						"Error while reconciling entity data", e);
-			}
 		}
+
+	/**
+	 * Replaces Europeana proxy metadata with the provided entity metadata.
+	 *
+	 * EntityId and SameAs values are not affected
+	 * @param updateRequestEntity entity to replace with
+	 * @param entityRecord entity record
+	 */
+	public void replaceEuropeanaProxy(final Entity updateRequestEntity, EntityRecord entityRecord) {
+		EntityProxy europeanaProxy = entityRecord.getEuropeanaProxy();
+
+		List<String> sameAs = europeanaProxy.getEntity().getSameAs();
+		String entityId = europeanaProxy.getEntity().getEntityId();
+
+		// copy SameAs and EntityId from existing Europeana proxy metadata
+		europeanaProxy.setEntity(updateRequestEntity);
+		europeanaProxy.getEntity().setSameAs(sameAs);
+		europeanaProxy.getEntity().setEntityId(entityId);
+	}
 
 	/**
 	 * Updates Europeana proxy metadata with the provided entity metadata.
@@ -411,15 +517,14 @@ public class EntityRecordService {
 		throws Exception {
 	EntityProxy europeanaProxy = entityRecord.getEuropeanaProxy();
 
-		List<Field> allFields = new ArrayList<>();
-		EntityUtils.getAllFields(allFields, updateEntity.getClass());
+		List<Field> allFields = EntityUtils.getAllFields(updateEntity.getClass());
 
 		List<Field> filteredList = allFields.stream()
 				.filter(field -> !UPDATE_FIELDS_TO_IGNORE.contains(field.getName()))
 				.collect(Collectors.toUnmodifiableList());
 
 		Entity europeanaProxyEntity = europeanaProxy.getEntity();
-		/**
+		/*
 		 * updateEntity considered as "primary", since its values take precedence over existing metadata.
 		 * We also overwrite collection fields, instead of concatenating them
  		 */
@@ -452,13 +557,13 @@ public class EntityRecordService {
 	 * @param accumulate if true, metadata from the secondary entity are added to the matching collection (eg. maps, lists and arrays)
 	 *               within the primary . If accumulate is false, the "primary"
 	 *               content overwrites the "secondary"
-	 * @return
-	 * @throws EntityCreationException
-	 * @throws IllegalAccessException
 	 */
+	@SuppressWarnings("unchecked")
 	private Entity combineEntities(Entity primary, Entity secondary, List<Field> fieldsToCombine, boolean accumulate)
-			throws EntityCreationException, IllegalAccessException {
+			throws EuropeanaApiException {
 		Entity consolidatedEntity = EntityObjectFactory.createEntityObject(primary.getType());
+
+		try {
 
 				/*
 				 * store the preferred label in the secondary entity that is different from the
@@ -512,7 +617,10 @@ public class EntityRecordService {
 
 				mergeSkippedPrefLabels(consolidatedEntity, prefLabelsForAltLabels, fieldsToCombine);
 
+		} catch (IllegalAccessException e) {
+		    throw new EntityUpdateException("Metadata consolidation failed to access required properties!", e);
 
+		}
 		return consolidatedEntity;
 	}
 
@@ -702,7 +810,7 @@ public class EntityRecordService {
     }
 
     private void setEntityAggregation(EntityRecord entityRecord, String entityId, Date timestamp) {
-        Aggregation isAggregatedBy = new AggregationImpl();
+        Aggregation isAggregatedBy = new Aggregation();
         isAggregatedBy.setId(getIsAggregatedById(entityId));
 	isAggregatedBy.setCreated(timestamp);
 	isAggregatedBy.setModified(timestamp);
@@ -716,14 +824,15 @@ public class EntityRecordService {
     private void setEuropeanaMetadata(
 				Entity europeanaProxyMetadata,
 				String entityId, EntityRecord entityRecord, Date timestamp) {
-	Aggregation europeanaAggr = new AggregationImpl();
+	Aggregation europeanaAggr = new Aggregation();
+	Optional<DataSource> europeanaDataSource = datasources.getDatasource(EUROPEANA_URL);	
 	europeanaAggr.setId(getEuropeanaAggregationId(entityId));
-	europeanaAggr.setRights(RIGHTS_CREATIVE_COMMONS);
+	europeanaAggr.setRights(europeanaDataSource.isPresent() ? europeanaDataSource.get().getRights() : null);
 	europeanaAggr.setCreated(timestamp);
 	europeanaAggr.setModified(timestamp);
-	europeanaAggr.setSource(EUROPEANA_URL);
+	europeanaAggr.setSource(europeanaDataSource.isPresent() ? europeanaDataSource.get().getUrl() : null);
 
-	EntityProxy europeanaProxy = new EntityProxyImpl();
+	EntityProxy europeanaProxy = new EntityProxy();
 	europeanaProxy.setProxyId(getEuropeanaProxyId(entityId));
 	europeanaProxy.setProxyFor(entityId);
 	europeanaProxy.setProxyIn(europeanaAggr);
@@ -735,21 +844,45 @@ public class EntityRecordService {
 
     private void setExternalProxyMetadata(
 				Entity metisResponse,
-				EntityPreview entityCreationRequest, String entityId,
+				String proxyId, String entityId,
 				DataSource externalDatasource, EntityRecord entityRecord, Date timestamp) {
-	Aggregation datasourceAggr = new AggregationImpl();
+	Aggregation datasourceAggr = new Aggregation();
 	datasourceAggr.setId(getDatasourceAggregationId(entityId));
 	datasourceAggr.setCreated(timestamp);
 	datasourceAggr.setModified(timestamp);
 	datasourceAggr.setRights(externalDatasource.getRights());
 	datasourceAggr.setSource(externalDatasource.getUrl());
 
-	EntityProxy datasourceProxy = new EntityProxyImpl();
-	datasourceProxy.setProxyId(entityCreationRequest.getId());
+	EntityProxy datasourceProxy = new EntityProxy();
+	datasourceProxy.setProxyId(proxyId);
 	datasourceProxy.setProxyFor(entityId);
 	datasourceProxy.setProxyIn(datasourceAggr);
 	datasourceProxy.setEntity(metisResponse);
 
 	entityRecord.addProxy(datasourceProxy);
     }
+
+
+	/**
+	 * Recreates the external proxy on an Entity, using the newProxyId value as its proxyId
+	 * @param entityRecord entity record
+	 * @param newProxyId new proxyId value
+	 * @throws EuropeanaApiException on exception
+	 */
+	public void changeExternalProxy(EntityRecord entityRecord, String newProxyId) throws EuropeanaApiException {
+		Optional<DataSource> externalDatasourceOptional = datasources.getDatasource(newProxyId);
+		if (externalDatasourceOptional.isEmpty()) {
+			throw new HttpBadRequestException("No configured datasource for url " + newProxyId);
+		}
+
+		// remove the external proxy as we're recreating it from scratch
+		EntityProxy externalProxy = entityRecord.getExternalProxy();
+		String entityType = externalProxy.getEntity().getType();
+
+		entityRecord.getProxies().remove(externalProxy);
+
+		setExternalProxyMetadata(EntityObjectFactory.createEntityObject(entityType),
+				newProxyId, entityRecord.getEntityId(), externalDatasourceOptional.get(),
+				entityRecord, new Date());
+	}
 }

@@ -4,14 +4,10 @@ import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_REG
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_XML;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BASE_SERVICE_URL;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_ERROR_CHECK_1_XML;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_JSON;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_REGISTER_METIS_ERROR_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_REGISTER_ERROR_CHECK_1_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_REGISTER_ERROR_CHECK_2_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_REGISTER_JSON;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_UPDATE_JSON;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_UPDATE_JSON;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_XML;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_REGISTER_METIS_ERROR_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_XML;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_REGISTER_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_XML;
@@ -19,6 +15,7 @@ import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_REG
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_XML;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_REGISTER_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_XML;
 //import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BASE_SERVICE_URL;
 //import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BATHTUB_DEREF;
 //import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_JSON;
@@ -30,55 +27,34 @@ import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
 import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.nio.charset.StandardCharsets;
-
-import javax.annotation.Resource;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.annotation.PropertySources;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.entitymanagement.AbstractEmControllerTest;
 import eu.europeana.entitymanagement.batch.BatchService;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.impl.ConceptImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.EntityRecordImpl;
-import eu.europeana.entitymanagement.definitions.model.impl.TimespanImpl;
-import eu.europeana.entitymanagement.exception.EntityNotFoundException;
+import eu.europeana.entitymanagement.definitions.model.Timespan;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
-import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import okhttp3.mockwebserver.MockResponse;
 
 /**
@@ -208,8 +184,8 @@ public class EntityRegistrationIT extends AbstractEmControllerTest {
     	/*
     	 * check the error if the entity is removed/disabled
     	 */
-        TimespanImpl timespan = objectMapper.readValue(loadFile(TIMESPAN_JSON), TimespanImpl.class);
-        EntityRecord entityRecord =  new EntityRecordImpl();
+        Timespan timespan = objectMapper.readValue(loadFile(TIMESPAN_JSON), Timespan.class);
+        EntityRecord entityRecord =  new EntityRecord();
         entityRecord.setEntity(timespan);
         entityRecord.setEntityId(timespan.getEntityId());
         entityRecordService.saveEntityRecord(entityRecord);
@@ -372,7 +348,7 @@ public class EntityRegistrationIT extends AbstractEmControllerTest {
         @Primary
         public BatchService batchServiceBean() throws Exception {
             BatchService batchService = Mockito.mock(BatchService.class);
-            doNothing().when(batchService).launchSingleEntityUpdate(anyString(), anyBoolean());
+            doNothing().when(batchService).launchSpecificEntityUpdate(anyList(), anyBoolean());
             return batchService;
         }
     }

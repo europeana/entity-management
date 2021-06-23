@@ -36,7 +36,7 @@ public abstract class XmlFields {
     public static final String XML_DC_IDENTIFIER = "dc:identifier";
     public static final String XML_DCTERMS_HAS_PART = "dcterms:hasPart";
     public static final String XML_DCTERMS_IS_PART_OF = "dcterms:isPartOf";
-    public static final String XML_WAS_PRESENT_AT = "edm:wasPresentAt";
+    public static final String XML_WAS_PRESENT_AT = "wasPresentAt";
     public static final String XML_EDM_BEGIN = "edm:begin";
     public static final String XML_EDM_END = "edm:end";
     public static final String XML_EDM_HASMET = "edm:hasMet";

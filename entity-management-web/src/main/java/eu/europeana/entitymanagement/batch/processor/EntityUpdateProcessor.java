@@ -1,28 +1,22 @@
 package eu.europeana.entitymanagement.batch.processor;
 
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
-import eu.europeana.entitymanagement.definitions.model.Aggregation;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.impl.AggregationImpl;
-import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
-import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
-import eu.europeana.entitymanagement.exception.ingestion.EntityValidationException;
-import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
-import eu.europeana.entitymanagement.web.model.scoring.EntityMetrics;
-import eu.europeana.entitymanagement.web.service.ScoringService;
-import eu.europeana.entitymanagement.web.service.EntityRecordService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import java.util.Set;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.ValidatorFactory;
+
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ValidatorFactory;
-import java.util.Date;
-import java.util.Set;
+import eu.europeana.api.commons.error.EuropeanaApiException;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.exception.ingestion.EntityValidationException;
+import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
+import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatorGroup;
+import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorGroup;
+import eu.europeana.entitymanagement.web.service.EntityRecordService;
 
 /**
  * This {@link ItemProcessor} updates Entity metadata.
@@ -31,85 +25,44 @@ import java.util.Set;
 public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, EntityRecord> {
     private final EntityRecordService entityRecordService;
     private final ValidatorFactory emValidatorFactory;
-    private final ScoringService scoringService;
-    private final EntityManagementConfiguration entityManagementConfiguration;
+
     private final EntityFieldsCleaner emEntityFieldCleaner;
 
-    private static final Logger logger = LogManager.getLogger(EntityUpdateProcessor.class);
+//    private static final Logger logger = LogManager.getLogger(EntityUpdateProcessor.class);
 
     public EntityUpdateProcessor(EntityRecordService entityRecordService,
         ValidatorFactory emValidatorFactory, 
-        EntityFieldsCleaner emEntityFieldCleaner,
-        ScoringService scoringService,
-        EntityManagementConfiguration entityManagementConfiguration) {
+        EntityFieldsCleaner emEntityFieldCleaner) {
         this.entityRecordService = entityRecordService;
         this.emValidatorFactory = emValidatorFactory;
         this.emEntityFieldCleaner = emEntityFieldCleaner;
-        this.scoringService = scoringService;
-        this.entityManagementConfiguration = entityManagementConfiguration;
     }
 
     @Override
-    public EntityRecord process(@NonNull EntityRecord entityRecord) throws Exception {
-        //TODO: Validate entity metadata from Proxy Data Source
-        logger.debug("Perform cleaning and normalization of metadata from external proxy for record {}", entityRecord.getEntityId());
-        emEntityFieldCleaner.cleanAndNormalize(entityRecord.getExternalProxy().getEntity());
+    public EntityRecord process(@NonNull EntityRecord entityRecord) throws EuropeanaApiException {
         
-        logger.debug("Creating consolidated proxy for entityId={} ", entityRecord.getEntityId());
-	      entityRecordService.mergeEntity(entityRecord);
-
-        logger.debug("Validating constraints for entityId={}", entityRecord.getEntityId());
-        validateConstraints(entityRecord);
-
-        logger.debug("Checking referential integrity for entityId={}", entityRecord.getEntityId());
+    	validateMinimalConstraints(entityRecord.getExternalProxy().getEntity());
+        emEntityFieldCleaner.cleanAndNormalize(entityRecord.getExternalProxy().getEntity());
+        entityRecordService.mergeEntity(entityRecord);
         entityRecordService.performReferentialIntegrity(entityRecord.getEntity());
-
-      /*
-       *  Metrics not computed by default, as it requires access to the PageRank and Search API
-       *  Solr servers. To prevent Jobs from failing, we make this conditional.
-       */
-        if(entityManagementConfiguration.shouldComputeMetrics()){
-            logger.debug("Computing ranking metrics for entityId={}", entityRecord.getEntityId());
-            computeRankingMetrics(entityRecord);
-        }
-
+        validateCompleteConstraints(entityRecord.getEntity());
+   
         return entityRecord;
     }
 
-    private void validateConstraints(EntityRecord entityRecord) throws EntityValidationException {
-        Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entityRecord.getEntity());
+    private void validateCompleteConstraints(Entity entity) throws EntityValidationException  {
+        Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entity, EntityFieldsCompleteValidatorGroup.class);
         if (!violations.isEmpty()) {
-            //TODO: throw exception here when the implementation is stable and correct
-            logger.debug("The record with the following id has constraint validation errors: " + entityRecord.getEntityId());
+            throw new EntityValidationException("The consolidated entity contains invalid data!", violations);
         }
     }
-
-
-    private void computeRankingMetrics(EntityRecord entityRecord) throws EntityUpdateException {
-        Entity entity = entityRecord.getEntity();
-        if (entity == null) {
-            throw new EntityUpdateException(
-                    "An entity object needs to be available in EntityRecord in order to compute the scoring metrics!");
+    
+    private void validateMinimalConstraints(Entity entity) throws EntityValidationException  {
+        Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entity, EntityFieldsMinimalValidatorGroup.class);
+        if (!violations.isEmpty()) {
+            throw new EntityValidationException("The entity from the external source contains invalid data!", violations);
         }
-
-
-        EntityMetrics metrics;
-        try {
-            metrics = scoringService.computeMetrics(entity);
-        } catch (FunctionalRuntimeException | UnsupportedEntityTypeException e) {
-            throw new EntityUpdateException(
-                    "Cannot compute ranking metrics for entityId=" + entity.getEntityId(), e);
-        }
-
-        Aggregation aggregation = entity.getIsAggregatedBy();
-        if (aggregation == null) {
-            aggregation = new AggregationImpl();
-            entity.setIsAggregatedBy(aggregation);
-        }
-
-        aggregation.setPageRank(metrics.getPageRank());
-        aggregation.setRecordCount(metrics.getEnrichmentCount());
-        aggregation.setScore(metrics.getScore());
-        aggregation.setModified(new Date());
     }
+    
+    
 }

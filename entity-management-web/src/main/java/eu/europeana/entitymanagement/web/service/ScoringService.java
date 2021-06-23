@@ -4,19 +4,27 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import eu.europeana.entitymanagement.batch.processor.EntityUpdateProcessor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest.METHOD;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
+import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.common.config.LanguageCodes;
 import eu.europeana.entitymanagement.config.AppConfig;
@@ -31,26 +39,21 @@ import eu.europeana.entitymanagement.web.model.scoring.PageRank;
 
 @Service(AppConfig.BEAN_EM_SCORING_SERVICE)
 public class ScoringService {
+	private static final Logger logger = LogManager.getLogger(ScoringService.class);
 
-    SolrClient prSolrClient;
+	private final SolrClient searchApiSolrClient;
+	private final SolrClient prSolrClient;
 
-    SolrClient searchApiSolrClient;
-
-//    private static final String[] LANGUAGE_CODES = { "bg", "ca", "cs", "da", "de", "el", "en", "es", "et", "fi", "fr",
-//	    "ga", "gd", "hr", "hu", "ie", "is", "it", "lt", "lv", "mt", "mul", "nl", "no", "pl", "pt", "ro", "ru", "sk",
-//	    "sl", "sr", "sv", "tr", "yi", "cy" };
-
-//    private Set<String> supportedLangCodes;
 
     private static MaxEntityMetrics maxEntityMetrics;
     private static EntityMetrics maxOverallMetrics;
-    //
+
     private static final int RANGE_EXTENSION_FACTOR = 100;
 
-//    @Resource
+
     private EntityManagementConfiguration emConfiguration; 
     
-//    @Resource(name = AppConfig.BEAN_EM_LANGUAGE_CODES)
+
     private LanguageCodes emLanguageCodes; 
     
     
@@ -58,12 +61,14 @@ public class ScoringService {
     public static final String WIKIDATA_DBPEDIA_PREFIX = "http://wikidata.dbpedia.org/resource/";
 
 
-    public ScoringService(EntityManagementConfiguration emConfiguration, LanguageCodes emLanguageCodes){
+    public ScoringService(EntityManagementConfiguration emConfiguration, LanguageCodes emLanguageCodes,
+						  @Qualifier(AppConfigConstants.BEAN_SEARCH_API_SOLR_CLIENT) SolrClient searchApiSolrClient, @Qualifier(AppConfigConstants.BEAN_PR_SOLR_CLIENT) SolrClient prSolrClient){
         this.emConfiguration = emConfiguration;
         this.emLanguageCodes = emLanguageCodes;
-    }
-    
-    
+		this.searchApiSolrClient = searchApiSolrClient;
+		this.prSolrClient = prSolrClient;
+	}
+
     
     public EntityMetrics computeMetrics(Entity entity) throws FunctionalRuntimeException, UnsupportedEntityTypeException{
 	EntityMetrics metrics = new EntityMetrics(entity.getEntityId());
@@ -201,7 +206,14 @@ public class ScoringService {
 	query.setRows(0);
 
 	try {
-	    QueryResponse rsp = getSearchApiSolrClient().query(query, METHOD.POST);
+		Instant start = Instant.now();
+	    QueryResponse rsp = searchApiSolrClient.query(query, METHOD.POST);
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Retrieved enrichmentCount for entityId={} in {}ms", entityId,
+					Duration.between(start, Instant.now()).toMillis());
+		}
+
 	    return (int) rsp.getResults().getNumFound();
 	} catch (Exception e) {
 	    throw new ScoringComputationException("Unexpected exception occured when retrieving pagerank: " + entityId, e);
@@ -220,8 +232,14 @@ public class ScoringService {
 //	getLogger().trace("query: " + query);
 
 	try {
-	    QueryResponse rsp = getPrSolrClient().query(query);
+		Instant start = Instant.now();
+	    QueryResponse rsp = prSolrClient.query(query);
 	    List<PageRank> beans = rsp.getBeans(PageRank.class);
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Retrieved pageRank for entityId={} in {}ms", entity.getEntityId(),
+					Duration.between(start, Instant.now()).toMillis());
+		}
 	    if (beans.isEmpty()) {
 		return null;
 	    } else {
@@ -237,30 +255,14 @@ public class ScoringService {
 	if (entity.getSameAs() == null) {
 	    return null;
 	}
-	List<String> values = Arrays.asList(entity.getSameAs());
+	List<String> values = entity.getSameAs();
 
 	String wikidataUri = values.stream().filter(value -> value.startsWith(WIKIDATA_PREFFIX)).findFirst()
 		.orElse(null);
 	return wikidataUri;
     }
 
-    public SolrClient getPrSolrClient() {
-	if (prSolrClient == null) {
-	    prSolrClient = new HttpSolrClient.Builder(emConfiguration.getPrSolrUrl()).build();
-	}
-	return prSolrClient;
-    }
-
-    public SolrClient getSearchApiSolrClient() {
-	if (searchApiSolrClient == null) {
-	    searchApiSolrClient = new HttpSolrClient.Builder(emConfiguration.getSearchApiSolrUrl()).build();
-	}
-	return searchApiSolrClient;
-    }
-
-    
-
-    public MaxEntityMetrics getMaxEntityMetrics() throws IOException {
+     public MaxEntityMetrics getMaxEntityMetrics() throws IOException {
 	if (maxEntityMetrics == null) {
 	    XmlMapper xmlMapper = new XmlMapper();
 	    try (InputStream inputStream = getClass().getResourceAsStream("/max-entity-metrics.xml");

@@ -7,11 +7,15 @@ version: "3.9"
 #  mongo.connectionUrl = mongodb://admin-user:admin-password@localhost:27017
 #  mongo.em.database = entity-management
 #  mongo.batch.database = job-repository
+#
+#  mongo.enrichment.connectionUrl = mongodb://admin-user:admin-password@localhost:27017
+#  mongo.enrichment.database = enrichment
+#
+#  entitymanagement.solr.indexing.url=http://localhost:8983/entity-management
+#
 #  ###############
 
 #  To stop it afterwards, run docker-compose down
-
-
 
 services:
   db:
@@ -25,9 +29,20 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=admin-user
       - MONGO_INITDB_ROOT_PASSWORD=admin-password
       - MONGO_INITDB_DATABASE=admin
-      # Databases for EM and Spring Batch
+      # Databases for EM, Spring Batch and Enrichment
       - EM_APP_DB=entity-management
       - EM_BATCH_DB=job-repository
+      - ENRICHMENT_DB=enrichment
+
+  solr:
+    build:
+      context: ./entity-management-web/src/integration-test/resources/solr-docker
+      dockerfile: Dockerfile
+    container_name: solr
+    ports:
+    - 8983:8983
+    environment:
+    - EM_INDEXING_CORE=entity-management
 
   app:
     image: library/tomcat:9.0-jdk11
@@ -57,3 +72,4 @@ services:
       - "1099:1099"
     depends_on:
       - db
+      - solr

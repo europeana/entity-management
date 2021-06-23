@@ -1,6 +1,8 @@
 package eu.europeana.entitymanagement.exception.ingestion;
 
-public class EntityUpdateException extends Exception {
+import eu.europeana.api.commons.error.EuropeanaApiException;
+
+public class EntityUpdateException extends EuropeanaApiException {
 
     /**
      * 

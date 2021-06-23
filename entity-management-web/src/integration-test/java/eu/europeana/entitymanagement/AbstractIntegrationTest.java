@@ -2,9 +2,9 @@ package eu.europeana.entitymanagement;
 
 
 import eu.europeana.entitymanagement.testutils.MongoContainer;
+import eu.europeana.entitymanagement.testutils.SolrContainer;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockWebServer;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.AfterAll;
@@ -20,16 +20,24 @@ import java.io.IOException;
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.METIS_DEREF_PATH;
 
 public abstract class AbstractIntegrationTest {
+    protected static final Logger logger = LogManager.getLogger(AbstractIntegrationTest.class);
 
     static final MongoContainer MONGO_CONTAINER;
+    static final SolrContainer SOLR_CONTAINER;
 
-    protected Logger logger = LogManager.getLogger(getClass());
 
     static {
-        MONGO_CONTAINER = new MongoContainer("entity-management", "job-repository")
-                .withLogConsumer(new WaitingConsumer().andThen(new ToStringConsumer()));
+        MONGO_CONTAINER = new MongoContainer("entity-management", "job-repository", "enrichment")
+                .withLogConsumer(new WaitingConsumer()
+                        .andThen(new ToStringConsumer()));
 
         MONGO_CONTAINER.start();
+
+        SOLR_CONTAINER = new SolrContainer("entity-management")
+                .withLogConsumer(new WaitingConsumer()
+                        .andThen(new ToStringConsumer()));
+
+        SOLR_CONTAINER.start();
     }
 
 
@@ -50,6 +58,7 @@ public abstract class AbstractIntegrationTest {
 
     @AfterAll
     static void teardownAll() throws IOException {
+        logger.info("Shutdown metis server : host = {}; port={}", mockMetis.getHostName(), mockMetis.getPort());
         mockMetis.shutdown();
     }
 
@@ -58,8 +67,20 @@ public abstract class AbstractIntegrationTest {
         registry.add("mongo.connectionUrl", MONGO_CONTAINER::getConnectionUrl);
         registry.add("mongo.em.database", MONGO_CONTAINER::getEntityDb);
         registry.add("mongo.batch.database", MONGO_CONTAINER::getBatchDb);
+        // enrichment database on the same test Mongo instance
+        registry.add("mongo.enrichment.connectionUrl", MONGO_CONTAINER::getConnectionUrl);
+        registry.add("mongo.enrichment.database", MONGO_CONTAINER::getEnrichmentDb);
         registry.add("metis.baseUrl", () -> String.format("http://%s:%s", mockMetis.getHostName(), mockMetis.getPort()));
         registry.add("batch.computeMetrics", () -> "false");
+        registry.add("auth.enabled", () -> "false");
+        registry.add("entitymanagement.solr.indexing.url", SOLR_CONTAINER::getConnectionUrl);
+        // enable explicit commits while indexing to Solr in tests
+        registry.add("entitymanagement.solr.indexing.explicitCommits", () -> true);
+
+
+        logger.info("MONGO_CONTAINER : {}", MONGO_CONTAINER.getConnectionUrl());
+        logger.info("SOLR_CONTAINER : {}", SOLR_CONTAINER.getConnectionUrl());
+        logger.info("METIS SERVER : host = {}; port={}", mockMetis.getHostName(), mockMetis.getPort());
     }
 
 
