@@ -268,11 +268,10 @@ public class EMController extends BaseRest {
 		if (emConfig.isAuthEnabled()) {
 				verifyReadAccess(request);
 			}
-			// if a valid Accept header value is provided, use it; otherwise return application/rdf+xml
-		    // TODO: handle browser requests with multiple Accept header values
-			String responseContentType = GET_XML_ACCEPT_HEADERS.contains(acceptHeader)
-					? acceptHeader : HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML;
-	return createResponse(request, profile, type, languages, identifier, FormatTypes.xml, responseContentType);
+
+		// always return application/rdf+xml Content-Type
+	return createResponse(request, profile, type, languages, identifier, FormatTypes.xml,
+			HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML);
     }
 
     @ApiOperation(value = "Register a new entity", nickname = "registerEntity", response = java.lang.Void.class)

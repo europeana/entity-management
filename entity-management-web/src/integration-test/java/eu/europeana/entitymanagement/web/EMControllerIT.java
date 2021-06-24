@@ -615,12 +615,9 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
         String requestPath = getEntityRequestPath(record.getEntityId());
 
-        ResultActions resultActions = mockMvc.perform(delete(BASE_SERVICE_URL + "/" + requestPath)
-                .accept(MediaType.APPLICATION_JSON))
+        ResultActions resultActions = mockMvc.perform(delete(BASE_SERVICE_URL + "/" + requestPath))
                 .andExpect(status().isNoContent());
 
-        // request path matches those for GET, POST and PUT
-        checkAllowHeaderForDPGP(resultActions);
 
         // check that record was disabled
         Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveByEntityId(record.getEntityId());
@@ -641,8 +638,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
         String requestPath = getEntityRequestPath(record.getEntityId());
 
-        mockMvc.perform(delete(BASE_SERVICE_URL + "/" + requestPath).header(HttpHeaders.IF_MATCH, "wrong_etag_value")
-                .accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(delete(BASE_SERVICE_URL + "/" + requestPath)
+            .header(HttpHeaders.IF_MATCH, "wrong_etag_value"))
                 .andExpect(status().isPreconditionFailed());
 
         // check that record was disabled
@@ -824,9 +821,9 @@ public class EMControllerIT extends AbstractIntegrationTest {
         		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
                 .accept(MediaType.APPLICATION_XML))
         		.andExpect(status().isOk())
-                // content-type matches Accept header
+                // content-type matches is always application/rdf+xml
                 .andExpect(header().string(HEADER_CONTENT_TYPE,
-                        is(MediaType.APPLICATION_XML_VALUE)))
+                        is(eu.europeana.api.commons.web.http.HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML)))
         		.andReturn();
         return resultXml.getResponse().getContentAsString(StandardCharsets.UTF_8);
     }
