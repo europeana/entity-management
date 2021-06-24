@@ -17,10 +17,10 @@ public class AppConfigConstants {
     public static final String BEAN_METIS_DEREF_SERVICE = "metisDerefService";
     public static final String BEAN_EM_BUILD_INFO = "emBuildInfo";
     public static final String BEAN_AUTHORIZATION_SERVICE = "authorizationService";
-    public static final String BEAN_JOB_EXECUTOR = "jobTaskExecutor";
-    public static final String BEAN_STEP_EXECUTOR = "stepTaskExecutor";
-    public static final String SYNC_TASK_EXECUTOR = "syncTaskExecutor";
-    public static final String DEFAULT_JOB_LAUNCHER = "defaultJobLauncher";
+    public static final String SCHEDULED_JOB_EXECUTOR = "jobTaskExecutor";
+    public static final String STEP_EXECUTOR = "stepTaskExecutor";
+    public static final String SYNC_JOB_EXECUTOR = "syncTaskExecutor";
+    public static final String SCHEDULED_JOB_LAUNCHER = "scheduledJobLauncher";
     public static final String SYNC_JOB_LAUNCHER = "syncJobLauncher";
 
 

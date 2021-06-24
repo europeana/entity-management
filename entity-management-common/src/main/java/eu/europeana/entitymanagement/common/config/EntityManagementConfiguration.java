@@ -58,15 +58,6 @@ public class EntityManagementConfiguration  {
     @Value("${batch.chunkSize: 10}")
     private int batchChunkSize;
 
-    @Value("${batch.job.executor.corePool: 10}")
-    private int batchJobExecutorCorePool;
-
-    @Value("${batch.job.executor.maxPool: 100}")
-    private int batchJobExecutorMaxPool;
-
-    @Value("${batch.job.executor.queueSize: 50}")
-    private int batchJobExecutorQueueSize;
-
   @Value("${batch.step.executor.corePool: 10}")
   private int batchStepExecutorCorePool;
 
@@ -146,18 +137,6 @@ public class EntityManagementConfiguration  {
 
   public int getBatchChunkSize() {
     return batchChunkSize;
-  }
-
-  public int getBatchJobExecutorCorePool() {
-    return batchJobExecutorCorePool;
-  }
-
-  public int getBatchJobExecutorMaxPool() {
-    return batchJobExecutorMaxPool;
-  }
-
-  public int getBatchJobExecutorQueueSize() {
-    return batchJobExecutorQueueSize;
   }
 
   public int getBatchStepExecutorCorePool() {

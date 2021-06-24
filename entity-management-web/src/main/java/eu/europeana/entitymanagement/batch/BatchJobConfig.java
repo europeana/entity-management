@@ -1,13 +1,13 @@
 package eu.europeana.entitymanagement.batch;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.morphia.query.experimental.filters.Filters;
 import eu.europeana.entitymanagement.batch.listener.EntityUpdateListener;
 import eu.europeana.entitymanagement.batch.processor.EntityDereferenceProcessor;
 import eu.europeana.entitymanagement.batch.processor.EntityMetricsProcessor;
 import eu.europeana.entitymanagement.batch.processor.EntityUpdateProcessor;
 import eu.europeana.entitymanagement.batch.reader.EntityRecordDatabaseReader;
-import eu.europeana.entitymanagement.batch.service.FailedTaskService;
+import eu.europeana.entitymanagement.batch.reader.ScheduledTaskDatabaseReader;
+import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.batch.writer.EntityRecordDatabaseWriter;
 import eu.europeana.entitymanagement.batch.writer.EntitySolrWriter;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
@@ -39,25 +39,25 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.Date;
 
-import static eu.europeana.entitymanagement.batch.BatchUtils.JOB_UPDATE_SPECIFIC_ENTITIES;
-import static eu.europeana.entitymanagement.batch.BatchUtils.STEP_UPDATE_ENTITY;
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.*;
+import static eu.europeana.entitymanagement.batch.BatchUtils.*;
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.STEP_EXECUTOR;
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.SYNC_JOB_EXECUTOR;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_ID;
 
 @Component
-public class BatchEntityUpdateConfig {
+public class BatchJobConfig {
 
-    private static final String SINGLE_ENTITYRECORD_READER = "specificItemEntityRecordReader";
-    private static final String ALL_ITEM_ENTITYRECORD_READER = "allItemEntityRecordReader";
-    private static final String FAILED_TASK_READER = "allItemEntityFailureReader";
-
+    private static final String SINGLE_ENTITYRECORD_READER = "singleEntityRecordReader";
+    private static final String SCHEDULED_TASK_READER = "scheduledTaskReader";
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
 
     private final ItemReader<EntityRecord> singleEntityRecordReader;
 
+    private ItemReader<EntityRecord> scheduledTaskReader;
     private final EntityDereferenceProcessor dereferenceProcessor;
     private final EntityUpdateProcessor entityUpdateProcessor;
     private final EntityMetricsProcessor entityMetricsProcessor;
@@ -65,14 +65,12 @@ public class BatchEntityUpdateConfig {
     private final EntitySolrWriter solrWriter;
     private final EntityRecordService entityRecordService;
 
-    private final FailedTaskService failedTaskService;
+    private final ScheduledTaskService scheduledTaskService;
 
     private final EntityUpdateListener entityUpdateListener;
 
     private final TaskExecutor stepThreadPoolExecutor;
     private final TaskExecutor synchronousTaskExecutor;
-
-    private final ObjectMapper mapper;
 
     private final int chunkSize;
 
@@ -85,34 +83,34 @@ public class BatchEntityUpdateConfig {
 
     //TODO: Too many dependencies. Split up into multiple classes
     @Autowired
-    public BatchEntityUpdateConfig(JobBuilderFactory jobBuilderFactory,
-                                   StepBuilderFactory stepBuilderFactory,
-                                   @Qualifier(SINGLE_ENTITYRECORD_READER) ItemReader<EntityRecord> singleEntityRecordReader,
-                                   EntityDereferenceProcessor dereferenceProcessor,
-                                   EntityUpdateProcessor entityUpdateProcessor,
-                                   EntityMetricsProcessor entityMetricsProcessor,
-                                   EntityRecordDatabaseWriter dbWriter,
-                                   EntitySolrWriter solrWriter, EntityRecordService entityRecordService,
-                                   FailedTaskService failedTaskService,
-                                   EntityUpdateListener entityUpdateListener,
-                                   @Qualifier(BEAN_STEP_EXECUTOR) TaskExecutor stepThreadPoolExecutor,
-                                   @Qualifier(SYNC_TASK_EXECUTOR) TaskExecutor synchronousTaskExecutor,
-                                   @Qualifier(BEAN_JSON_MAPPER) ObjectMapper mapper,
-                                   EntityManagementConfiguration emConfig) {
+    public BatchJobConfig(JobBuilderFactory jobBuilderFactory,
+                          StepBuilderFactory stepBuilderFactory,
+                          @Qualifier(SINGLE_ENTITYRECORD_READER) ItemReader<EntityRecord> singleEntityRecordReader,
+                          @Qualifier(SCHEDULED_TASK_READER) ItemReader<EntityRecord> scheduledTaskReader,
+                          EntityDereferenceProcessor dereferenceProcessor,
+                          EntityUpdateProcessor entityUpdateProcessor,
+                          EntityMetricsProcessor entityMetricsProcessor,
+                          EntityRecordDatabaseWriter dbWriter,
+                          EntitySolrWriter solrWriter, EntityRecordService entityRecordService,
+                          ScheduledTaskService scheduledTaskService,
+                          EntityUpdateListener entityUpdateListener,
+                          @Qualifier(STEP_EXECUTOR) TaskExecutor stepThreadPoolExecutor,
+                          @Qualifier(SYNC_JOB_EXECUTOR) TaskExecutor synchronousTaskExecutor,
+                          EntityManagementConfiguration emConfig) {
         this.jobBuilderFactory = jobBuilderFactory;
         this.stepBuilderFactory = stepBuilderFactory;
         this.singleEntityRecordReader = singleEntityRecordReader;
+        this.scheduledTaskReader = scheduledTaskReader;
         this.dereferenceProcessor = dereferenceProcessor;
         this.entityUpdateProcessor = entityUpdateProcessor;
         this.entityMetricsProcessor = entityMetricsProcessor;
         this.dbWriter = dbWriter;
         this.solrWriter = solrWriter;
         this.entityRecordService = entityRecordService;
-        this.failedTaskService = failedTaskService;
+        this.scheduledTaskService = scheduledTaskService;
         this.entityUpdateListener = entityUpdateListener;
         this.stepThreadPoolExecutor = stepThreadPoolExecutor;
         this.synchronousTaskExecutor = synchronousTaskExecutor;
-        this.mapper = mapper;
         this.chunkSize = emConfig.getBatchChunkSize();
         this.throttleLimit = emConfig.getBatchStepThrottleLimit();
     }
@@ -128,6 +126,18 @@ public class BatchEntityUpdateConfig {
         );
     }
 
+    @Bean(name = SCHEDULED_TASK_READER)
+    @StepScope
+    private SynchronizedItemStreamReader<EntityRecord> allEntityFailureReader(
+            @Value("#{jobParameters[currentStartTime]}") Date currentStartTime,
+            @Value("#{jobParameters[updateType]}") String updateType
+    ) {
+        ScheduledTaskDatabaseReader reader = new ScheduledTaskDatabaseReader(scheduledTaskService, chunkSize,
+                Filters.lte(EMBatchConstants.CREATED, currentStartTime),
+                Filters.eq(EMBatchConstants.UPDATE_TYPE, updateType));
+
+        return threadSafeReader(reader);
+    }
 
 
     /**
@@ -155,6 +165,9 @@ public class BatchEntityUpdateConfig {
     }
 
 
+    /**
+     * Step for updating a single entity
+     */
     private Step updateSingleEntityStep(){
         return this.stepBuilderFactory.get(STEP_UPDATE_ENTITY)
             .<EntityRecord, EntityRecord>chunk(1)
@@ -173,10 +186,43 @@ public class BatchEntityUpdateConfig {
             .build();
     }
 
-    Job updateSingleEntityJob() {
-        return this.jobBuilderFactory.get(JOB_UPDATE_SPECIFIC_ENTITIES)
+
+    private Step updateScheduledEntitiesStep() {
+        return this.stepBuilderFactory.get(STEP_UPDATE_SCHEDULED_ENTITIES)
+                .<EntityRecord, EntityRecord>chunk(chunkSize)
+                .reader(scheduledTaskReader)
+                .processor(compositeUpdateProcessor())
+                .writer(compositeEntityWriter())
+                .listener(
+                        (ItemProcessListener<? super EntityRecord, ? super EntityRecord>) entityUpdateListener)
+                .faultTolerant()
+                .skipPolicy(noopSkipPolicy)
+                .skip(EntityMismatchException.class)
+                .skip(MetisNotKnownException.class)
+                .skip(SolrServiceException.class)
+                .taskExecutor(stepThreadPoolExecutor)
+                .throttleLimit(throttleLimit)
+                .build();
+    }
+
+    /**
+     * Job for updating a single entity.
+     * Expects `entityId` string in JobParameters. This would typically be run synchronously
+     */
+    Job updateSingleEntity() {
+        return this.jobBuilderFactory.get(JOB_UPDATE_SINGLE_ENTITY)
                 .incrementer(new RunIdIncrementer())
                 .start(updateSingleEntityStep())
+                .build();
+    }
+
+    /**
+     * Job for updating entities scheduled via the ScheduledTasks collection
+     * Expects `currentStartTime` date and `updateType` string in JobParameters.
+     */
+    Job updateScheduledEntities(){
+        return this.jobBuilderFactory.get(JOB_UPDATE_SCHEDULED_ENTITIES)
+                .start(updateScheduledEntitiesStep())
                 .build();
     }
 

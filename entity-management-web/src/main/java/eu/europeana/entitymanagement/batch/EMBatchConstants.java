@@ -15,4 +15,8 @@ public class EMBatchConstants {
   // Error handling field-specific fields
   public final static String ERROR_MSG = "errorMessage";
   public final static String STACKTRACE = "stackTrace";
+
+  // ScheduledTask
+  public final static String UPDATE_TYPE = "updateType";
+
 }

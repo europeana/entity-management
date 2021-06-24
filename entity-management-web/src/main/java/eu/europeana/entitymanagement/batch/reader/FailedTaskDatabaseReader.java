@@ -12,7 +12,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.lang.NonNull;
 
 /**
- * Reads Failures from the FailedTasks collections, then retrieves the matching EntityRecords
+ * Reads Failures from the FailedTasks collection, then retrieves the matching EntityRecords
  */
 public class FailedTaskDatabaseReader extends BaseDatabaseReader<EntityRecord> {
 

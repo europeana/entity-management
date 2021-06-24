@@ -5,8 +5,8 @@ package eu.europeana.entitymanagement.batch;
  */
 public enum JobParameter {
     CURRENT_START_TIME("currentStartTime"),
-    PREVIOUS_START_TIME("previousStartTime"),
-    ENTITY_ID("entityId");
+    ENTITY_ID("entityId"),
+    UPDATE_TYPE("updateType");
 
     private final String key;
 

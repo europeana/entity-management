@@ -1,9 +1,5 @@
 package eu.europeana.entitymanagement.config;
 
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.DEFAULT_JOB_LAUNCHER;
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.SYNC_JOB_LAUNCHER;
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.SYNC_TASK_EXECUTOR;
-
 import eu.europeana.entitymanagement.batch.config.MongoBatchConfigurer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
@@ -13,6 +9,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.task.TaskExecutor;
 
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.*;
+
 @Configuration
 public class JobLauncherConfig {
 
@@ -21,12 +19,12 @@ public class JobLauncherConfig {
 
   public JobLauncherConfig(
       MongoBatchConfigurer mongoBatchConfigurer,
-      @Qualifier(SYNC_TASK_EXECUTOR) TaskExecutor synchronousTaskExecutor) {
+      @Qualifier(SYNC_JOB_EXECUTOR) TaskExecutor synchronousTaskExecutor) {
     this.mongoBatchConfigurer = mongoBatchConfigurer;
     this.synchronousTaskExecutor = synchronousTaskExecutor;
   }
 
-  @Bean(name = DEFAULT_JOB_LAUNCHER)
+  @Bean(name = SCHEDULED_JOB_LAUNCHER)
   @Primary
   public JobLauncher defaultJobLauncher() throws Exception {
     return mongoBatchConfigurer.getJobLauncher();

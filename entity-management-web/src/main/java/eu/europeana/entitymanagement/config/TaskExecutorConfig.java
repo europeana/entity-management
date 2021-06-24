@@ -1,17 +1,17 @@
 package eu.europeana.entitymanagement.config;
 
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_JOB_EXECUTOR;
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_STEP_EXECUTOR;
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.SYNC_TASK_EXECUTOR;
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.SCHEDULED_JOB_EXECUTOR;
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.STEP_EXECUTOR;
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.SYNC_JOB_EXECUTOR;
 
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
+import java.util.concurrent.Executors;
 
 @Configuration
 public class TaskExecutorConfig {
@@ -23,17 +23,15 @@ public class TaskExecutorConfig {
     this.emConfig = emConfig;
   }
 
-  @Bean(BEAN_JOB_EXECUTOR)
+  @Bean(SCHEDULED_JOB_EXECUTOR)
   public TaskExecutor jobLauncherExecutor() {
-    ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-    taskExecutor.setCorePoolSize(emConfig.getBatchJobExecutorCorePool());
-    taskExecutor.setMaxPoolSize(emConfig.getBatchJobExecutorMaxPool());
-    taskExecutor.setQueueCapacity(emConfig.getBatchJobExecutorQueueSize());
-    return taskExecutor;
+    // This is roughly equivalent to Executors.newSingleThreadExecutor(),
+    // sharing a single thread for all tasks
+    return new ThreadPoolTaskExecutor();
   }
 
 
-  @Bean(BEAN_STEP_EXECUTOR)
+  @Bean(STEP_EXECUTOR)
   public TaskExecutor stepExecutor() {
     ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
     taskExecutor.setCorePoolSize(emConfig.getBatchStepExecutorCorePool());
@@ -43,7 +41,7 @@ public class TaskExecutorConfig {
     return taskExecutor;
   }
 
-  @Bean(SYNC_TASK_EXECUTOR)
+  @Bean(SYNC_JOB_EXECUTOR)
   public TaskExecutor synchronousExecutor(){
     return new SyncTaskExecutor();
   }

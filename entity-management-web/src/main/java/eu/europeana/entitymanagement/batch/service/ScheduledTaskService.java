@@ -29,22 +29,6 @@ public class ScheduledTaskService {
     }
 
     /**
-     * Creates a {@link eu.europeana.entitymanagement.batch.model.ScheduledTask} instance for this entity, and then persists it
-     *
-     * @param entityId entityId
-     */
-    public void scheduleUpdate(String entityId, BatchUpdateType updateType) {
-        UpdateResult result = repository.upsert(
-                new ScheduledTask.Builder(entityId, updateType)
-                        .modified(Instant.now())
-                        .build()
-        );
-
-        logger.info("Persisted scheduledTask to db; entityId={} matched={}, modified={}", entityId,
-                result.getMatchedCount(), result.getModifiedCount());
-    }
-
-    /**
      * Creates {@link ScheduledTask} instances for entityIds, and then saves them to the
      * database
      *

@@ -9,6 +9,7 @@ import dev.morphia.Datastore;
 import dev.morphia.query.FindOptions;
 import dev.morphia.query.experimental.filters.Filter;
 import dev.morphia.query.experimental.updates.UpdateOperators;
+import eu.europeana.entitymanagement.batch.model.BatchUpdateType;
 import eu.europeana.entitymanagement.batch.model.ScheduledTask;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -47,24 +48,6 @@ public class ScheduledTaskRepository implements InitializingBean {
         datastore.ensureIndexes(ScheduledTask.class);
     }
 
-    /**
-     * Upserts the provided {@link ScheduledTask} into the database
-     *
-     * @param task scheduled task
-     * @return updateResult
-     */
-    public UpdateResult upsert(ScheduledTask task) {
-        return datastore.find(ScheduledTask.class)
-                .filter(
-                        eq(ENTITY_ID, task.getEntityId())
-                )
-                .update(
-                        UpdateOperators.set(ENTITY_ID, task.getEntityId()),
-                        UpdateOperators.set(MODIFIED, task.getLastModified()),
-                        // set "created" value if this a new doc
-                        UpdateOperators.setOnInsert(Map.of(CREATED, task.getLastModified()))
-                ).execute(UPSERT_OPTS);
-    }
 
     /**
      * Upserts the {@link ScheduledTask} list to the database
@@ -79,14 +62,33 @@ public class ScheduledTaskRepository implements InitializingBean {
         List<WriteModel<ScheduledTask>> updates = new ArrayList<>();
 
         for (ScheduledTask task : tasks) {
+            Document updateDoc = new Document(
+                    ENTITY_ID, task.getEntityId())
+                    .append(MODIFIED, task.getLastModified());
+            Document setOnInsertDoc = new Document(CREATED, task.getLastModified())
+                    // manually set Morphia discriminator as we're bypassing its API for this query
+                    .append("_t", ScheduledTask.class.getSimpleName());
+
+            boolean shouldChangeUpdateType = task.getUpdateType() == BatchUpdateType.FULL;
+            /*
+             * If entity is now scheduled for a full update, this:
+             *  - changes the current updateType from METRICS to FULL;
+             *  - leaves current updateType as FULL (no change)
+             */
+            if(shouldChangeUpdateType){
+                updateDoc.append(UPDATE_TYPE, task.getUpdateType().name());
+            } else {
+                // if updateType already included in $set, don't include it again in $setOnInsert
+                setOnInsertDoc.append(UPDATE_TYPE, task.getUpdateType().name());
+            }
+
             updates.add(new UpdateOneModel<>(
                     new Document(ENTITY_ID, task.getEntityId()),
-                    new Document(DOC_SET,
-                            new Document(ENTITY_ID, task.getEntityId())
-                                    .append(MODIFIED, task.getLastModified())
-                    )
-                            // set "created" if this is a new document
-                            .append(DOC_SET_ON_INSERT, new Document(CREATED, task.getLastModified())),
+                    new Document(DOC_SET, updateDoc)
+                            // set "created" and updateType if this is a new document
+                            .append(DOC_SET_ON_INSERT,
+                                    setOnInsertDoc
+                            ),
                     UPSERT_OPTS
             ));
         }
