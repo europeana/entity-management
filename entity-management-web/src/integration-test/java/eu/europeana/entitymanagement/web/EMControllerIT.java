@@ -724,7 +724,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
         mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(AGENT_JAN_VERMEER_XML_WIKIDATA)));
 
         String requestPath = getEntityRequestPath(registeredEntityNode.path("id").asText());
-        mockMvc.perform(MockMvcRequestBuilders.post(BASE_SERVICE_URL + "/" + requestPath + "/management/source")
+        mockMvc.perform(MockMvcRequestBuilders.put(BASE_SERVICE_URL + "/" + requestPath + "/management/source")
                 .param(WebEntityConstants.PATH_PARAM_URL, externalUriWikidata)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isAccepted())
