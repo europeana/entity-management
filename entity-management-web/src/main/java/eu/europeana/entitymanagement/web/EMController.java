@@ -343,7 +343,7 @@ public class EMController extends BaseRest {
 		}
 
 	@ApiOperation(value = "Change provenance for an Entity", nickname = "changeProvenance")
-	@PostMapping(value = "/{type}/{identifier}/management/source", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PutMapping(value = "/{type}/{identifier}/management/source", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String> changeProvenance(
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
