@@ -1,9 +1,5 @@
 package eu.europeana.entitymanagement.config;
 
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.SCHEDULED_JOB_EXECUTOR;
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.STEP_EXECUTOR;
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.SYNC_JOB_EXECUTOR;
-
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,7 +7,7 @@ import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import java.util.concurrent.Executors;
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.*;
 
 @Configuration
 public class TaskExecutorConfig {
@@ -23,10 +19,15 @@ public class TaskExecutorConfig {
     this.emConfig = emConfig;
   }
 
+  /**
+   * Creates a JobLauncher to be used for scheduled entity updates.
+   * This is a singleThreadExecutor, so updates cannot run simultaneously.
+   */
   @Bean(SCHEDULED_JOB_EXECUTOR)
   public TaskExecutor jobLauncherExecutor() {
-    // This is roughly equivalent to Executors.newSingleThreadExecutor(),
-    // sharing a single thread for all tasks
+    /* Roughly equivalent to Executors.newSingleThreadExecutor(),
+     * sharing a single thread for all tasks
+     */
     return new ThreadPoolTaskExecutor();
   }
 

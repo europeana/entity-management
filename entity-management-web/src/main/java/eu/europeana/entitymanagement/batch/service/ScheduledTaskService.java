@@ -1,7 +1,6 @@
 package eu.europeana.entitymanagement.batch.service;
 
 import com.mongodb.bulk.BulkWriteResult;
-import com.mongodb.client.result.UpdateResult;
 import dev.morphia.query.experimental.filters.Filter;
 import eu.europeana.entitymanagement.batch.model.BatchUpdateType;
 import eu.europeana.entitymanagement.batch.model.ScheduledTask;
@@ -56,7 +55,7 @@ public class ScheduledTaskService {
      *
      * @param entityIds list of entityIds
      */
-    public void removedTasks(List<String> entityIds) {
+    public void removeTasks(List<String> entityIds) {
         long removeCount = repository.removeTasks(entityIds);
         if (removeCount > 0) {
             logger.info("Removed scheduled tasks from db: count={}", removeCount);
@@ -66,20 +65,5 @@ public class ScheduledTaskService {
     public List<? extends EntityRecord> getEntityRecordsForTasks(int start, int count, Filter[] queryFilters) {
         return repository.getEntityRecordsForTasks(start, count, queryFilters);
     }
-
-
-    /**
-     * Removes entities from the ScheduledTasks collection if their entityId is contained within
-     * the provided entityIds
-     *
-     * @param entityIds list of entityIds
-     */
-    public void removeTasks(List<String> entityIds) {
-        long removeCount = repository.removeTasks(entityIds);
-        if (removeCount > 0) {
-            logger.info("Removed tasks from db: count={}", removeCount);
-        }
-    }
-
 
 }

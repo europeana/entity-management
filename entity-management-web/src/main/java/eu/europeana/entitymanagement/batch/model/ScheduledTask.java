@@ -1,13 +1,18 @@
 package eu.europeana.entitymanagement.batch.model;
 
-import dev.morphia.annotations.Entity;
-import dev.morphia.annotations.Id;
-import dev.morphia.annotations.Indexed;
+import dev.morphia.annotations.*;
 import org.bson.types.ObjectId;
 
 import java.time.Instant;
 
+import static eu.europeana.entitymanagement.batch.EMBatchConstants.CREATED;
+import static eu.europeana.entitymanagement.batch.EMBatchConstants.UPDATE_TYPE;
+
+
 @Entity("ScheduledTasks")
+@Indexes({
+        @Index(fields = {@Field(CREATED), @Field(UPDATE_TYPE)})
+})
 public class ScheduledTask {
 
     @Id
@@ -21,10 +26,10 @@ public class ScheduledTask {
      * During upserts, we use the value for modified if record doesn't already exist
      */
     private Instant created;
-        private Instant lastModified;
+    private Instant lastModified;
     private BatchUpdateType updateType;
 
-    private ScheduledTask(){
+    private ScheduledTask() {
         // private constructor
     }
 

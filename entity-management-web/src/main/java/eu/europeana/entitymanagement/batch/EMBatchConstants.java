@@ -1,5 +1,8 @@
 package eu.europeana.entitymanagement.batch;
 
+import eu.europeana.entitymanagement.batch.model.FailedTask;
+import eu.europeana.entitymanagement.batch.model.ScheduledTask;
+
 public class EMBatchConstants {
 
   // Document ops
@@ -18,5 +21,10 @@ public class EMBatchConstants {
 
   // ScheduledTask
   public final static String UPDATE_TYPE = "updateType";
+
+    public final static String SCHEDULED_TASK_CLASSNAME = ScheduledTask.class.getSimpleName();
+    public final static String FAILED_TASK_CLASSNAME = FailedTask.class.getSimpleName();
+
+    public final static String MORPHIA_DISCRIMINATOR = "_t";
 
 }

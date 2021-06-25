@@ -90,7 +90,9 @@ public class FailedTaskRepository implements InitializingBean {
                       .append(STACKTRACE, failure.getStackTrace()
                       ))
               // set "created" if this is a new document
-              .append(DOC_SET_ON_INSERT, new Document(CREATED, failure.getModified())),
+              .append(DOC_SET_ON_INSERT, new Document(CREATED, failure.getModified()))
+                      // add discriminator manually as we're bypassing Morphia for this db query
+              .append(MORPHIA_DISCRIMINATOR, FAILED_TASK_CLASSNAME),
               UPSERT_OPTS
       ));
     }

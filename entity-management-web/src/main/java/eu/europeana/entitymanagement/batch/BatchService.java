@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.List;
 
 import static eu.europeana.entitymanagement.batch.model.BatchUpdateType.FULL;
+import static eu.europeana.entitymanagement.batch.model.BatchUpdateType.METRICS;
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.SCHEDULED_JOB_LAUNCHER;
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.SYNC_JOB_LAUNCHER;
 
@@ -27,8 +28,8 @@ import static eu.europeana.entitymanagement.common.config.AppConfigConstants.SYN
  * Config loaded here so scheduling properties can be loaded
  */
 @Configuration
-@PropertySources({ @PropertySource("classpath:entitymanagement.properties"),
-        @PropertySource(value = "classpath:entitymanagement.user.properties", ignoreResourceNotFound = true) })
+@PropertySources({@PropertySource("classpath:entitymanagement.properties"),
+        @PropertySource(value = "classpath:entitymanagement.user.properties", ignoreResourceNotFound = true)})
 @Service
 public class BatchService {
     private static final Logger logger = LogManager.getLogger(BatchService.class);
@@ -52,36 +53,36 @@ public class BatchService {
     public void runSynchronousUpdate(String entityId) throws Exception {
         logger.info("Triggering synchronous update for entityId={}", entityId);
         synchronousJobLauncher.run(batchUpdateConfig.updateSingleEntity(),
-                        BatchUtils.createJobParameters(entityId, Date.from(Instant.now())));
+                BatchUtils.createJobParameters(entityId, Date.from(Instant.now())));
     }
 
     public void scheduleUpdates(List<String> entityIds, BatchUpdateType updateType) {
-        if(CollectionUtils.isEmpty(entityIds)){
+        if (CollectionUtils.isEmpty(entityIds)) {
             return;
         }
         logger.info("Scheduling async updates for entityIds={}", entityIds.toArray());
-            scheduledTaskService.scheduleUpdateBulk(entityIds, updateType);
+        scheduledTaskService.scheduleUpdateBulk(entityIds, updateType);
     }
 
     /**
      * Periodically run full entity updates.
      */
-    @Scheduled(initialDelayString = "${batch.schedule.initialDelayMillis:300000}",
-            fixedDelayString= "${batch.schedule.fixedDelayMillis: 1800000}")
+    @Scheduled(initialDelayString = "${batch.schedule.full.initialDelayMillis}",
+            fixedDelayString = "${batch.schedule.fixedDelayMillis}")
     private void runScheduledFullUpdate() throws Exception {
         logger.info("Triggering scheduled full update for entities");
-        scheduledJobLauncher.run(batchUpdateConfig.updateScheduledEntities(),
+        scheduledJobLauncher.run(batchUpdateConfig.updateScheduledEntities(FULL),
                 BatchUtils.createJobParameters(FULL, Date.from(Instant.now())));
     }
 
     /**
      * Periodically run metrics updates.
      */
-//    @Scheduled(initialDelayString = "${batch.schedule.initialDelayMillis}",
-//            fixedDelayString= "${batch.schedule.fixedDelayMillis}")
-//    private void runScheduledMetricsUpdate() throws Exception {
-//        logger.info("Triggering scheduled metrics update for entities");
-//        scheduledJobLauncher.run(batchUpdateConfig.updateScheduledEntities(),
-//                BatchUtils.createJobParameters(METRICS, Date.from(Instant.now())));
-//    }
+    @Scheduled(initialDelayString = "${batch.schedule.metrics.initialDelayMillis}",
+            fixedDelayString = "${batch.schedule.fixedDelayMillis}")
+    private void runScheduledMetricsUpdate() throws Exception {
+        logger.info("Triggering scheduled metrics update for entities");
+        scheduledJobLauncher.run(batchUpdateConfig.updateScheduledEntities(METRICS),
+                BatchUtils.createJobParameters(METRICS, Date.from(Instant.now())));
+    }
 }

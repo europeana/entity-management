@@ -4,11 +4,9 @@ import com.mongodb.bulk.BulkWriteResult;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.UpdateOneModel;
 import com.mongodb.client.model.WriteModel;
-import com.mongodb.client.result.UpdateResult;
 import dev.morphia.Datastore;
 import dev.morphia.query.FindOptions;
 import dev.morphia.query.experimental.filters.Filter;
-import dev.morphia.query.experimental.updates.UpdateOperators;
 import eu.europeana.entitymanagement.batch.model.BatchUpdateType;
 import eu.europeana.entitymanagement.batch.model.ScheduledTask;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
@@ -21,11 +19,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static dev.morphia.query.Sort.ascending;
-import static dev.morphia.query.experimental.filters.Filters.eq;
 import static dev.morphia.query.experimental.filters.Filters.in;
 import static eu.europeana.entitymanagement.batch.EMBatchConstants.*;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_DELETE_OPTS;
@@ -65,20 +61,21 @@ public class ScheduledTaskRepository implements InitializingBean {
             Document updateDoc = new Document(
                     ENTITY_ID, task.getEntityId())
                     .append(MODIFIED, task.getLastModified());
+
             Document setOnInsertDoc = new Document(CREATED, task.getLastModified())
                     // manually set Morphia discriminator as we're bypassing its API for this query
-                    .append("_t", ScheduledTask.class.getSimpleName());
+                    .append(MORPHIA_DISCRIMINATOR, SCHEDULED_TASK_CLASSNAME);
 
             boolean shouldChangeUpdateType = task.getUpdateType() == BatchUpdateType.FULL;
             /*
-             * If entity is now scheduled for a full update, this:
-             *  - changes the current updateType from METRICS to FULL;
-             *  - leaves current updateType as FULL (no change)
+             * If entity is being scheduled for a full update, this:
+             *  - changes the current updateType from METRICS to FULL; or
+             *  - leaves current updateType as FULL (no change) otherwise
              */
             if(shouldChangeUpdateType){
                 updateDoc.append(UPDATE_TYPE, task.getUpdateType().name());
             } else {
-                // if updateType already included in $set, don't include it again in $setOnInsert
+                // only include updateType in $setOnInsert if it isn't added in $set
                 setOnInsertDoc.append(UPDATE_TYPE, task.getUpdateType().name());
             }
 
@@ -124,6 +121,7 @@ public class ScheduledTaskRepository implements InitializingBean {
                         // we only care about the EntityID
                         .projection().include(ENTITY_ID)
                         .skip(start)
+                        // matches the index sort order defined in ScheduledTask
                         .sort(ascending(CREATED))
                         .limit(count)).toList();
 
