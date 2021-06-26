@@ -55,7 +55,7 @@ public class EntityManagementConfiguration  {
     @Value("${metis.baseUrl}")
     private String metisBaseUrl;
 
-    @Value("${batch.chunkSize: 10}")
+    @Value("${batch.step.chunkSize: 10}")
     private int batchChunkSize;
 
   @Value("${batch.step.executor.corePool: 10}")

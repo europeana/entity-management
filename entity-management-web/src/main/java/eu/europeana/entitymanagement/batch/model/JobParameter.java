@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.batch;
+package eu.europeana.entitymanagement.batch.model;
 
 /**
  * Parameters for triggering jobs

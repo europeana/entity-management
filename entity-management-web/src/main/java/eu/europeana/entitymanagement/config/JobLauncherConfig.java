@@ -19,7 +19,7 @@ public class JobLauncherConfig {
 
   public JobLauncherConfig(
       MongoBatchConfigurer mongoBatchConfigurer,
-      @Qualifier(SYNC_JOB_EXECUTOR) TaskExecutor synchronousTaskExecutor) {
+      @Qualifier(WEB_REQUEST_JOB_EXECUTOR) TaskExecutor synchronousTaskExecutor) {
     this.mongoBatchConfigurer = mongoBatchConfigurer;
     this.synchronousTaskExecutor = synchronousTaskExecutor;
   }

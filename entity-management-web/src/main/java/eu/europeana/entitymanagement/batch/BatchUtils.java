@@ -1,16 +1,13 @@
 package eu.europeana.entitymanagement.batch;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europeana.entitymanagement.batch.model.BatchUpdateType;
+import eu.europeana.entitymanagement.batch.model.JobParameter;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 
-import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
-import org.springframework.lang.Nullable;
 
 public class BatchUtils {
 
@@ -24,7 +21,7 @@ public class BatchUtils {
   /**
    * Creates JobParameters for triggering the Spring Batch update job for specific entities
    *
-   * @param entityId string array containing entity ids
+   * @param entityId entity id
    * @param runTime   trigger time for job
    * @return JobParameters with trigger time and entityId
    */

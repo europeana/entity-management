@@ -1,6 +1,7 @@
-package eu.europeana.entitymanagement.batch;
+package eu.europeana.entitymanagement.batch.config;
 
 import dev.morphia.query.experimental.filters.Filters;
+import eu.europeana.entitymanagement.batch.EMBatchConstants;
 import eu.europeana.entitymanagement.batch.listener.EntityUpdateListener;
 import eu.europeana.entitymanagement.batch.model.BatchUpdateType;
 import eu.europeana.entitymanagement.batch.processor.EntityDereferenceProcessor;
@@ -24,6 +25,7 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.step.builder.SimpleStepBuilder;
 import org.springframework.batch.core.step.skip.SkipPolicy;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
@@ -45,11 +47,11 @@ import java.util.Date;
 import static eu.europeana.entitymanagement.batch.BatchUtils.*;
 import static eu.europeana.entitymanagement.batch.model.BatchUpdateType.FULL;
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.STEP_EXECUTOR;
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.SYNC_JOB_EXECUTOR;
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.WEB_REQUEST_JOB_EXECUTOR;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_ID;
 
 @Component
-public class BatchJobConfig {
+public class EntityUpdateJobConfig {
 
     private static final String SINGLE_ENTITY_RECORD_READER = "singleEntityRecordReader";
     private static final String SCHEDULED_TASK_READER = "scheduledTaskReader";
@@ -85,20 +87,20 @@ public class BatchJobConfig {
 
     //TODO: Too many dependencies. Split up into multiple classes
     @Autowired
-    public BatchJobConfig(JobBuilderFactory jobBuilderFactory,
-                          StepBuilderFactory stepBuilderFactory,
-                          @Qualifier(SINGLE_ENTITY_RECORD_READER) ItemReader<EntityRecord> singleEntityRecordReader,
-                          @Qualifier(SCHEDULED_TASK_READER) ItemReader<EntityRecord> scheduledTaskReader,
-                          EntityDereferenceProcessor dereferenceProcessor,
-                          EntityUpdateProcessor entityUpdateProcessor,
-                          EntityMetricsProcessor entityMetricsProcessor,
-                          EntityRecordDatabaseWriter dbWriter,
-                          EntitySolrWriter solrWriter, EntityRecordService entityRecordService,
-                          ScheduledTaskService scheduledTaskService,
-                          EntityUpdateListener entityUpdateListener,
-                          @Qualifier(STEP_EXECUTOR) TaskExecutor stepThreadPoolExecutor,
-                          @Qualifier(SYNC_JOB_EXECUTOR) TaskExecutor synchronousTaskExecutor,
-                          EntityManagementConfiguration emConfig) {
+    public EntityUpdateJobConfig(JobBuilderFactory jobBuilderFactory,
+                                 StepBuilderFactory stepBuilderFactory,
+                                 @Qualifier(SINGLE_ENTITY_RECORD_READER) ItemReader<EntityRecord> singleEntityRecordReader,
+                                 @Qualifier(SCHEDULED_TASK_READER) ItemReader<EntityRecord> scheduledTaskReader,
+                                 EntityDereferenceProcessor dereferenceProcessor,
+                                 EntityUpdateProcessor entityUpdateProcessor,
+                                 EntityMetricsProcessor entityMetricsProcessor,
+                                 EntityRecordDatabaseWriter dbWriter,
+                                 EntitySolrWriter solrWriter, EntityRecordService entityRecordService,
+                                 ScheduledTaskService scheduledTaskService,
+                                 EntityUpdateListener entityUpdateListener,
+                                 @Qualifier(STEP_EXECUTOR) TaskExecutor stepThreadPoolExecutor,
+                                 @Qualifier(WEB_REQUEST_JOB_EXECUTOR) TaskExecutor synchronousTaskExecutor,
+                                 EntityManagementConfiguration emConfig) {
         this.jobBuilderFactory = jobBuilderFactory;
         this.stepBuilderFactory = stepBuilderFactory;
         this.singleEntityRecordReader = singleEntityRecordReader;
@@ -115,6 +117,16 @@ public class BatchJobConfig {
         this.synchronousTaskExecutor = synchronousTaskExecutor;
         this.chunkSize = emConfig.getBatchChunkSize();
         this.throttleLimit = emConfig.getBatchStepThrottleLimit();
+    }
+
+    /**
+     * Makes ItemReader thread-safe
+     */
+    private <T> SynchronizedItemStreamReader<T> threadSafeReader(
+            ItemStreamReader<T> reader) {
+        final SynchronizedItemStreamReader<T> synchronizedItemStreamReader = new SynchronizedItemStreamReader<>();
+        synchronizedItemStreamReader.setDelegate(reader);
+        return synchronizedItemStreamReader;
     }
 
     /**
@@ -147,7 +159,7 @@ public class BatchJobConfig {
      * metrics update.
      *
      * These are implemented as processors, instead of discrete steps to eliminate the overhead required
-     * to pass data between steps (via the Execution context).
+     * to pass data between steps via the Execution context.
      */
     @Bean
     private ItemProcessor<EntityRecord, EntityRecord> compositeUpdateProcessor() {
@@ -166,77 +178,48 @@ public class BatchJobConfig {
         return compositeWriter;
     }
 
-
     /**
-     * Step for updating a single entity
-     */
-    private Step updateSingleEntityStep(){
-        return this.stepBuilderFactory.get(STEP_UPDATE_ENTITY)
-            .<EntityRecord, EntityRecord>chunk(1)
-            // setting up listener for Read/Process/Write
-            .listener(
-                (ItemProcessListener<? super EntityRecord, ? super EntityRecord>) entityUpdateListener)
-            .reader(singleEntityRecordReader)
-            .processor(compositeUpdateProcessor())
-                .faultTolerant()
-                .skipPolicy(noopSkipPolicy)
-                .skip(EntityMismatchException.class)
-                .skip(MetisNotKnownException.class)
-                .skip(SolrServiceException.class)
-            .writer(compositeEntityWriter())
-            .taskExecutor(synchronousTaskExecutor)
-            .build();
-    }
-
-
-    /**
-     * Step for updating scheduled entities. Gets entityIds from the ScheduledTasks collection
-     */
-    private Step updateFullScheduledStep() {
-        return this.stepBuilderFactory.get(STEP_UPDATE_SCHEDULED_ENTITIES)
-                .<EntityRecord, EntityRecord>chunk(chunkSize)
-                .reader(scheduledTaskReader)
-                .processor(compositeUpdateProcessor())
-                .writer(compositeEntityWriter())
-                .listener(
-                        (ItemProcessListener<? super EntityRecord, ? super EntityRecord>) entityUpdateListener)
-                .faultTolerant()
-                .skipPolicy(noopSkipPolicy)
-                .skip(EntityMismatchException.class)
-                .skip(MetisNotKnownException.class)
-                .skip(SolrServiceException.class)
-                .taskExecutor(stepThreadPoolExecutor)
-                .throttleLimit(throttleLimit)
-                .build();
-    }
-
-    /**
-     * Updates only metrics for scheduled Entities.
+     * Step for updating entities.
+     * Uses a different reader and processor, based on the value of updateType.
+     * @param updateType type of update – either METRICS or FULL
+     * @param chunkSize chunk size for step
+     * @param executor task executor to use. If chunkSize is 1, this should typically be a synchronous executor.
+     * @param reader ItemReader to use in step.
      *
-     * This is deliberately a standalone step, instead of a Flow.
-     * See comment on {@link BatchJobConfig#compositeUpdateProcessor()}
+     * @return step
      */
-    private Step updateMetricsScheduledStep(){
-        return this.stepBuilderFactory.get(STEP_UPDATE_ENTITY)
+    private Step updateEntity(BatchUpdateType updateType, int chunkSize, TaskExecutor executor,
+                              ItemReader<EntityRecord> reader){
+        SimpleStepBuilder<EntityRecord, EntityRecord> step = this.stepBuilderFactory.get(STEP_UPDATE_ENTITY)
                 .<EntityRecord, EntityRecord>chunk(chunkSize)
+                .reader(reader);
+        // set processor based on the update type
+        step.processor(updateType == FULL ? compositeUpdateProcessor() : entityMetricsProcessor);
+
+        return step.writer(compositeEntityWriter())
                 .listener(
                         (ItemProcessListener<? super EntityRecord, ? super EntityRecord>) entityUpdateListener)
-                .reader(scheduledTaskReader)
-                .processor(entityMetricsProcessor)
-                .writer(compositeEntityWriter())
-                .taskExecutor(stepThreadPoolExecutor)
+                .faultTolerant()
+                .skipPolicy(noopSkipPolicy)
+                .skip(EntityMismatchException.class)
+                .skip(MetisNotKnownException.class)
+                .skip(SolrServiceException.class)
+                .taskExecutor(executor)
                 .throttleLimit(throttleLimit)
                 .build();
     }
+
 
     /**
      * Job for updating a single entity.
      * Expects `entityId` string in JobParameters. This would typically be run synchronously
      */
-    Job updateSingleEntity() {
+    public Job updateSingleEntity() {
         return this.jobBuilderFactory.get(JOB_UPDATE_SINGLE_ENTITY)
                 .incrementer(new RunIdIncrementer())
-                .start(updateSingleEntityStep())
+                // this job is always launched from web requests, so synchronousTaskExecutor is used. It
+                // also directly retrieves entities from the EntityRecord database.
+                .start(updateEntity(FULL, 1, synchronousTaskExecutor, singleEntityRecordReader))
                 .build();
     }
 
@@ -244,20 +227,10 @@ public class BatchJobConfig {
      * Job for updating entities scheduled via the ScheduledTasks collection
      * Expects `currentStartTime` date and `updateType` string in JobParameters.
      */
-    Job updateScheduledEntities(BatchUpdateType updateType){
+    public Job updateScheduledEntities(BatchUpdateType updateType){
         return this.jobBuilderFactory.get(JOB_UPDATE_SCHEDULED_ENTITIES)
-                .start( updateType == FULL ? updateFullScheduledStep() : updateMetricsScheduledStep())
+                // This job is always launched via a @Scheduled method.
+                .start(updateEntity(updateType, chunkSize, stepThreadPoolExecutor, scheduledTaskReader))
                 .build();
-    }
-
-
-    /**
-     * Makes ItemReader thread-safe
-     */
-    private <T> SynchronizedItemStreamReader<T> threadSafeReader(
-        ItemStreamReader<T> reader) {
-        final SynchronizedItemStreamReader<T> synchronizedItemStreamReader = new SynchronizedItemStreamReader<>();
-        synchronizedItemStreamReader.setDelegate(reader);
-        return synchronizedItemStreamReader;
     }
 }

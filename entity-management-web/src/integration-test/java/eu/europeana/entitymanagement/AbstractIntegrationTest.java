@@ -72,6 +72,8 @@ public abstract class AbstractIntegrationTest {
         registry.add("mongo.enrichment.database", MONGO_CONTAINER::getEnrichmentDb);
         registry.add("metis.baseUrl", () -> String.format("http://%s:%s", mockMetis.getHostName(), mockMetis.getPort()));
         registry.add("batch.computeMetrics", () -> "false");
+        // Do not run scheduled entity updates in tests
+        registry.add("batch.scheduling.enabled", () -> "false");
         registry.add("auth.enabled", () -> "false");
         registry.add("entitymanagement.solr.indexing.url", SOLR_CONTAINER::getConnectionUrl);
         // enable explicit commits while indexing to Solr in tests

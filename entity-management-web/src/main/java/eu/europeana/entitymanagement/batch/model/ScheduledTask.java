@@ -26,17 +26,17 @@ public class ScheduledTask {
      * During upserts, we use the value for modified if record doesn't already exist
      */
     private Instant created;
-    private Instant lastModified;
+    private Instant modified;
     private BatchUpdateType updateType;
 
     private ScheduledTask() {
         // private constructor
     }
 
-    public ScheduledTask(String entityId, BatchUpdateType updateType, Instant lastModified) {
+    public ScheduledTask(String entityId, BatchUpdateType updateType, Instant modified) {
         this.entityId = entityId;
         this.updateType = updateType;
-        this.lastModified = lastModified;
+        this.modified = modified;
     }
 
 
@@ -48,8 +48,8 @@ public class ScheduledTask {
         return created;
     }
 
-    public Instant getLastModified() {
-        return lastModified;
+    public Instant getModified() {
+        return modified;
     }
 
     public BatchUpdateType getUpdateType() {

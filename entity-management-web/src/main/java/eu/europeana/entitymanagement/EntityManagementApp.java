@@ -11,7 +11,6 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * Main application. Allows deploying as a war and logs instance data when deployed in Cloud Foundry
@@ -27,7 +26,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
         }
 )
 @EnableBatchProcessing
-@EnableScheduling
 public class EntityManagementApp extends SpringBootServletInitializer {
 
     /**

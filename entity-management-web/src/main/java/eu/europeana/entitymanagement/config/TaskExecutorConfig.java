@@ -25,10 +25,10 @@ public class TaskExecutorConfig {
    */
   @Bean(SCHEDULED_JOB_EXECUTOR)
   public TaskExecutor jobLauncherExecutor() {
-    /* Roughly equivalent to Executors.newSingleThreadExecutor(),
-     * sharing a single thread for all tasks
+    /*
+     * launch all scheduled jobs within the Spring scheduling thread
      */
-    return new ThreadPoolTaskExecutor();
+    return new SyncTaskExecutor();
   }
 
 
@@ -42,7 +42,10 @@ public class TaskExecutorConfig {
     return taskExecutor;
   }
 
-  @Bean(SYNC_JOB_EXECUTOR)
+  /**
+   * Creates a TaskExecutor to be used for entity updates directly triggered from web requests.
+   */
+  @Bean(WEB_REQUEST_JOB_EXECUTOR)
   public TaskExecutor synchronousExecutor(){
     return new SyncTaskExecutor();
   }

@@ -5,7 +5,7 @@ import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
-import eu.europeana.entitymanagement.batch.BatchService;
+import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.batch.model.BatchUpdateType;
 import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
@@ -35,7 +35,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -52,7 +51,7 @@ public class EMController extends BaseRest {
   private final SolrService solrService;
   private final MetisDereferenceService dereferenceService;
   private final DataSources datasources;
-  private final BatchService batchService;
+  private final EntityUpdateService entityUpdateService;
   private final EntityManagementConfiguration emConfig;
 
 
@@ -62,13 +61,13 @@ public class EMController extends BaseRest {
   @Autowired
 	public EMController(EntityRecordService entityRecordService,
 						SolrService solrService, MetisDereferenceService dereferenceService, DataSources datasources,
-						BatchService batchService,
+						EntityUpdateService entityUpdateService,
 						EntityManagementConfiguration emConfig) {
 		this.entityRecordService = entityRecordService;
 	  this.solrService = solrService;
 	  this.dereferenceService = dereferenceService;
 		this.datasources = datasources;
-		this.batchService = batchService;
+		this.entityUpdateService = entityUpdateService;
 		this.emConfig = emConfig;
 	}
 
@@ -194,7 +193,7 @@ public class EMController extends BaseRest {
 		List<String> failures = entityIds.stream().filter(e -> !existingEntityIds.contains(e))
 				.collect(Collectors.toList());
 
-		batchService.scheduleUpdates(existingEntityIds, BatchUpdateType.FULL);
+		entityUpdateService.scheduleUpdates(existingEntityIds, BatchUpdateType.FULL);
 		return  ResponseEntity.accepted().body(new EntityIdResponse(entityIds.size(), existingEntityIds, failures));
 	}
 
@@ -213,7 +212,7 @@ public class EMController extends BaseRest {
 				.filter(e -> !existingEntityIds.contains(e))
 				.collect(Collectors.toList());
 
-		batchService.scheduleUpdates(existingEntityIds, BatchUpdateType.METRICS);
+		entityUpdateService.scheduleUpdates(existingEntityIds, BatchUpdateType.METRICS);
 		return  ResponseEntity.accepted().body(new EntityIdResponse(entityIds.size(), existingEntityIds, failures));
 	}
 
@@ -416,14 +415,8 @@ public class EMController extends BaseRest {
 	private void launchUpdateTask(String entityId)
       throws Exception {
     logger.info("Launching synchronous update for entityId={}", entityId);
-    batchService.runSynchronousUpdate(entityId);
+    entityUpdateService.runSynchronousUpdate(entityId);
   }
-
-//	private void launchUpdateMetrics(List<String> entityIds)
-//			throws Exception {
-//		logger.info("Launching Update Metrics task for entityIds={}", entityIds);
-//		batchService.launchEntityMetricsUpdate(entityIds, true);
-//	}
 
 	/**
 	 * Gets the database identifier from an EntityId string

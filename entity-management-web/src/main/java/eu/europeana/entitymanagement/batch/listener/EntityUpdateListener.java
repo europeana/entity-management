@@ -42,7 +42,7 @@ public class EntityUpdateListener extends ItemListenerSupport<EntityRecord, Enti
         }
       String[] entityIds = getEntityIds(entityRecords);
       if(logger.isDebugEnabled()) {
-            logger.info("afterWrite: entityIds={}, count={};", Arrays.toString(entityIds), entityIds.length);
+            logger.debug("afterWrite: entityIds={}, count={};", Arrays.toString(entityIds), entityIds.length);
         }
 
     // Remove entries from the FailedTask collection if exists

@@ -60,9 +60,9 @@ public class ScheduledTaskRepository implements InitializingBean {
         for (ScheduledTask task : tasks) {
             Document updateDoc = new Document(
                     ENTITY_ID, task.getEntityId())
-                    .append(MODIFIED, task.getLastModified());
+                    .append(MODIFIED, task.getModified());
 
-            Document setOnInsertDoc = new Document(CREATED, task.getLastModified())
+            Document setOnInsertDoc = new Document(CREATED, task.getModified())
                     // manually set Morphia discriminator as we're bypassing its API for this query
                     .append(MORPHIA_DISCRIMINATOR, SCHEDULED_TASK_CLASSNAME);
 
