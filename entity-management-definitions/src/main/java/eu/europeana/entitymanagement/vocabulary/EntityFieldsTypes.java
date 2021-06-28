@@ -127,18 +127,22 @@ public enum EntityFieldsTypes {
     }
 
     public static boolean isMultilingual(String fieldName) {
-        try {
-            return valueOf(fieldName).getFieldIsmultilingual();     
-        }catch (IllegalArgumentException e){
-            throw new EntityValidationException("Unknown field: " + fieldName, e);
-        }
-        
+        return hasTypeDefinition(fieldName) && valueOf(fieldName).getFieldIsmultilingual();         
     }
     
     public static boolean isList(String fieldName) {
         try {
             String cardinality = valueOf(fieldName).getFieldCardinality();
             return FIELD_CARDINALITY_0_INFINITE.equals(cardinality) || FIELD_CARDINALITY_1_INFINITE.equals(cardinality);
+        }catch (IllegalArgumentException e){
+            throw new EntityValidationException("Unknown field: " + fieldName, e);
+        }
+    }
+    
+    public static boolean isMandatory(String fieldName) {
+        try {
+            String cardinality = valueOf(fieldName).getFieldCardinality();
+            return FIELD_CARDINALITY_1_INFINITE.equals(cardinality) || FIELD_CARDINALITY_1_1.equals(cardinality);
         }catch (IllegalArgumentException e){
             throw new EntityValidationException("Unknown field: " + fieldName, e);
         }

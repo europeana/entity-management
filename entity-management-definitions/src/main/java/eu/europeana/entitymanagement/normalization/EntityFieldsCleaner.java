@@ -34,10 +34,6 @@ public class EntityFieldsCleaner {
 	this.emLanguageCodes = emLanguageCodes;
     }
 
-    public void initialize(ValidEntityFields constraint) {
-    	// empty
-    }
-
     @SuppressWarnings("unchecked")
     public void cleanAndNormalize(Entity entity) {
 	List<Field> entityFields = EntityUtils.getAllFields(entity.getClass());

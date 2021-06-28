@@ -1,57 +1,25 @@
 package eu.europeana.entitymanagement.web.service;
 
-import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.EUROPEANA_URL;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.RIGHTS_CREATIVE_COMMONS;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_ID;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_IDENTIFIER;
-import static eu.europeana.entitymanagement.web.EntityRecordUtils.getDatasourceAggregationId;
-import static eu.europeana.entitymanagement.web.EntityRecordUtils.getEuropeanaAggregationId;
-import static eu.europeana.entitymanagement.web.EntityRecordUtils.getEuropeanaProxyId;
-import static eu.europeana.entitymanagement.web.EntityRecordUtils.getIsAggregatedById;
-
-import eu.europeana.api.commons.error.EuropeanaApiException;
-import eu.europeana.enrichment.utils.EntityType;
-import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
-import eu.europeana.entitymanagement.exception.EntityAlreadyExistsException;
-import eu.europeana.entitymanagement.exception.EntityNotFoundException;
-import eu.europeana.entitymanagement.exception.EntityRemovedException;
-import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
-import eu.europeana.entitymanagement.web.EntityRecordUtils;
-import java.lang.reflect.Field;
-import java.util.*;
-
-import java.util.stream.Collectors;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-
 import dev.morphia.query.experimental.filters.Filter;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.AppConfig;
-import eu.europeana.entitymanagement.definitions.model.Agent;
-import eu.europeana.entitymanagement.definitions.model.Aggregation;
-import eu.europeana.entitymanagement.definitions.model.Concept;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.EntityProxy;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.Place;
-import eu.europeana.entitymanagement.definitions.model.Timespan;
-import eu.europeana.entitymanagement.exception.EntityCreationException;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
+import eu.europeana.entitymanagement.definitions.model.*;
+import eu.europeana.entitymanagement.exception.EntityAlreadyExistsException;
+import eu.europeana.entitymanagement.exception.EntityNotFoundException;
+import eu.europeana.entitymanagement.exception.EntityRemovedException;
+import eu.europeana.entitymanagement.exception.HttpBadRequestException;
+import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
+import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.web.EntityRecordUtils;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -67,8 +35,6 @@ import static eu.europeana.entitymanagement.web.EntityRecordUtils.*;
 
 @Service(AppConfig.BEAN_ENTITY_RECORD_SERVICE)
 public class EntityRecordService {
-
-    Logger logger = LogManager.getLogger(getClass());
 
     private final EntityRecordRepository entityRecordRepository;
 
@@ -216,7 +182,7 @@ public class EntityRecordService {
 		Entity metisEntity = EntityObjectFactory.createEntityObject(type);
 
 		DataSource externalDatasource = externalDatasourceOptional.get();
-		setExternalProxyMetadata(metisEntity, entityCreationRequest, entityId, externalDatasource, entityRecord, timestamp);
+		setExternalProxyMetadata(metisEntity, entityCreationRequest.getId(), entityId, externalDatasource, entityRecord, timestamp);
 
 		setEntityAggregation(entityRecord, entityId, timestamp);
 		return entityRecordRepository.save(entityRecord);
@@ -258,7 +224,7 @@ public class EntityRecordService {
 
        
 	DataSource externalDatasource = externalDatasourceOptional.get();
-	setExternalProxyMetadata(metisResponse, entityCreationRequest, entityId, externalDatasource, entityRecord, timestamp);
+	setExternalProxyMetadata(metisResponse, entityCreationRequest.getId(), entityId, externalDatasource, entityRecord, timestamp);
 
 	setEntityAggregation(entityRecord, entityId, timestamp);
 	return entityRecordRepository.save(entityRecord);
@@ -591,16 +557,12 @@ public class EntityRecordService {
 	 * @param accumulate if true, metadata from the secondary entity are added to the matching collection (eg. maps, lists and arrays)
 	 *               within the primary . If accumulate is false, the "primary"
 	 *               content overwrites the "secondary"
-	 * @return
-	 * @throws EntityCreationException
-	 * @throws EntityUpdateException 
-	 * @throws IllegalAccessException
 	 */
 	@SuppressWarnings("unchecked")
 	private Entity combineEntities(Entity primary, Entity secondary, List<Field> fieldsToCombine, boolean accumulate)
-			throws EntityCreationException, EntityUpdateException {
+			throws EuropeanaApiException {
 		Entity consolidatedEntity = EntityObjectFactory.createEntityObject(primary.getType());
-		
+
 		try {
 
 				/*
@@ -657,8 +619,8 @@ public class EntityRecordService {
 
 		} catch (IllegalAccessException e) {
 		    throw new EntityUpdateException("Metadata consolidation failed to access required properties!", e);
-		    
-		}		
+
+		}
 		return consolidatedEntity;
 	}
 
@@ -863,11 +825,12 @@ public class EntityRecordService {
 				Entity europeanaProxyMetadata,
 				String entityId, EntityRecord entityRecord, Date timestamp) {
 	Aggregation europeanaAggr = new Aggregation();
+	Optional<DataSource> europeanaDataSource = datasources.getDatasource(EUROPEANA_URL);	
 	europeanaAggr.setId(getEuropeanaAggregationId(entityId));
-	europeanaAggr.setRights(RIGHTS_CREATIVE_COMMONS);
+	europeanaAggr.setRights(europeanaDataSource.isPresent() ? europeanaDataSource.get().getRights() : null);
 	europeanaAggr.setCreated(timestamp);
 	europeanaAggr.setModified(timestamp);
-	europeanaAggr.setSource(EUROPEANA_URL);
+	europeanaAggr.setSource(europeanaDataSource.isPresent() ? europeanaDataSource.get().getUrl() : null);
 
 	EntityProxy europeanaProxy = new EntityProxy();
 	europeanaProxy.setProxyId(getEuropeanaProxyId(entityId));
@@ -881,7 +844,7 @@ public class EntityRecordService {
 
     private void setExternalProxyMetadata(
 				Entity metisResponse,
-				EntityPreview entityCreationRequest, String entityId,
+				String proxyId, String entityId,
 				DataSource externalDatasource, EntityRecord entityRecord, Date timestamp) {
 	Aggregation datasourceAggr = new Aggregation();
 	datasourceAggr.setId(getDatasourceAggregationId(entityId));
@@ -891,7 +854,7 @@ public class EntityRecordService {
 	datasourceAggr.setSource(externalDatasource.getUrl());
 
 	EntityProxy datasourceProxy = new EntityProxy();
-	datasourceProxy.setProxyId(entityCreationRequest.getId());
+	datasourceProxy.setProxyId(proxyId);
 	datasourceProxy.setProxyFor(entityId);
 	datasourceProxy.setProxyIn(datasourceAggr);
 	datasourceProxy.setEntity(metisResponse);
@@ -900,4 +863,26 @@ public class EntityRecordService {
     }
 
 
+	/**
+	 * Recreates the external proxy on an Entity, using the newProxyId value as its proxyId
+	 * @param entityRecord entity record
+	 * @param newProxyId new proxyId value
+	 * @throws EuropeanaApiException on exception
+	 */
+	public void changeExternalProxy(EntityRecord entityRecord, String newProxyId) throws EuropeanaApiException {
+		Optional<DataSource> externalDatasourceOptional = datasources.getDatasource(newProxyId);
+		if (externalDatasourceOptional.isEmpty()) {
+			throw new HttpBadRequestException("No configured datasource for url " + newProxyId);
+		}
+
+		// remove the external proxy as we're recreating it from scratch
+		EntityProxy externalProxy = entityRecord.getExternalProxy();
+		String entityType = externalProxy.getEntity().getType();
+
+		entityRecord.getProxies().remove(externalProxy);
+
+		setExternalProxyMetadata(EntityObjectFactory.createEntityObject(entityType),
+				newProxyId, entityRecord.getEntityId(), externalDatasourceOptional.get(),
+				entityRecord, new Date());
+	}
 }

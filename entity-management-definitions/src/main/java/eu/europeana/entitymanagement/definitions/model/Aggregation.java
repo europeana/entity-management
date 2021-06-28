@@ -8,6 +8,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import dev.morphia.annotations.Embedded;
 import eu.europeana.entitymanagement.serialization.PositiveNumberFilter;
+
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -15,8 +17,25 @@ import java.util.List;
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({ID, TYPE, CREATED, MODIFIED, PAGE_RANK, RECORD_COUNT, SCORE, AGGREGATES})
 public class Aggregation {
+	
+	public Aggregation() {
+		
+	}
     
-    String id, type, rights, source;
+    public Aggregation(Aggregation copy) {
+		this.id = copy.getId();
+		this.type = copy.getType();
+		this.rights = copy.getRights();
+		this.source = copy.getSource();
+		this.created = copy.getCreated();
+		this.modified = copy.getModified();
+		this.score = copy.getScore();
+		this.recordCount = copy.getRecordCount();
+		this.pageRank = copy.getPageRank();
+		if(copy.getAggregates()!=null) this.aggregates = new ArrayList<>(copy.getAggregates());
+	}
+
+	String id, type, rights, source;
     Date created, modified;
     int score, recordCount;
     double pageRank;

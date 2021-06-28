@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import eu.europeana.entitymanagement.config.SolrConfig;
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Place;
 import java.util.HashMap;
@@ -30,7 +31,7 @@ import eu.europeana.entitymanagement.web.service.ScoringService;
  */
 //TODO: create a "proper" integration test with this
 @SpringBootTest(classes = {ValidatorConfig.class,
-        SerializationConfig.class, EntityManagementConfiguration.class, ScoringService.class})
+        SerializationConfig.class, EntityManagementConfiguration.class, ScoringService.class, SolrConfig.class})
 public class ScoringServiceTest {
 
     @Resource(name=AppConfig.BEAN_EM_SCORING_SERVICE)
