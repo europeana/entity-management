@@ -43,6 +43,7 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
         
     	validateMinimalConstraints(entityRecord.getExternalProxy().getEntity());
         emEntityFieldCleaner.cleanAndNormalize(entityRecord.getExternalProxy().getEntity());
+        emEntityFieldCleaner.cleanAndNormalize(entityRecord.getEuropeanaProxy().getEntity());
         entityRecordService.mergeEntity(entityRecord);
         entityRecordService.performReferentialIntegrity(entityRecord.getEntity());
         validateCompleteConstraints(entityRecord.getEntity());
