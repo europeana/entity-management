@@ -1,41 +1,37 @@
 package eu.europeana.entitymanagement.web;
 
-import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Resource;
-
 import eu.europeana.api.commons.error.EuropeanaApiException;
-import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
-import eu.europeana.entitymanagement.utils.EntityObjectFactory;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
 import eu.europeana.api.commons.web.controller.BaseRestController;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.BuildInfo;
 import eu.europeana.entitymanagement.config.AppConfig;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.exception.EtagMismatchException;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.serialization.EntityXmlSerializer;
 import eu.europeana.entitymanagement.serialization.JsonLdSerializer;
+import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.web.service.AuthorizationService;
 import eu.europeana.entitymanagement.web.xml.model.RdfBaseWrapper;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.Field;
+import java.util.*;
 
 public abstract class BaseRest extends BaseRestController {
 
@@ -183,6 +179,20 @@ public abstract class BaseRest extends BaseRestController {
         } catch (IllegalArgumentException | IllegalAccessException e) {
             throw new EuropeanaApiException("An exception occurred during setting the entity field: " + fieldName,
                     e);
+        }
+    }
+
+    /**
+     * Reimplementation of {@link BaseRestController#checkIfMatchHeader(String, HttpServletRequest)} that expects
+     * the ETAG value in If-Match headers to be placed between double quotes.
+     *
+     * TODO: move to api-commons
+     */
+    protected void checkIfMatchHeaderWithQuotes(String etag, HttpServletRequest request) throws EtagMismatchException {
+        String ifMatchHeader = request.getHeader("If-Match");
+        // remove double-quotes from header during comparison
+        if (ifMatchHeader != null && !etag.equals(ifMatchHeader.replace("\"", ""))) {
+            throw new EtagMismatchException("If-Match header value does not match generated ETag for entity");
         }
     }
 
