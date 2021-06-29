@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement.solr.service;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -10,6 +11,7 @@ import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.definitions.model.Timespan;
 import eu.europeana.entitymanagement.solr.SolrEntitySuggesterMixins;
+import eu.europeana.entitymanagement.solr.SolrSearchPaginatingIterator;
 import eu.europeana.entitymanagement.solr.model.SolrAgent;
 import eu.europeana.entitymanagement.solr.model.SolrOrganization;
 import eu.europeana.entitymanagement.solr.model.SolrTimespan;
@@ -51,14 +53,16 @@ public class SolrService implements InitializingBean {
 	private final FilterProvider solrEntityFilter;
 
 	private final boolean isExplicitCommitsEnabled;
-   
-	@Autowired 
+	private final int solrQueryMaxRows;
+
+	@Autowired
     public SolrService(@Qualifier(BEAN_INDEXING_SOLR_CLIENT) SolrClient solrClient,
 					   EntityManagementConfiguration configuration,
 					   @Qualifier(BEAN_JSON_MAPPER) ObjectMapper objectMapper,
 					   @Qualifier(BEAN_SOLR_ENTITY_SUGGESTER_FILTER) FilterProvider solrEntityFilter) {
 		this.solrClient = solrClient;
 		this.isExplicitCommitsEnabled = configuration.explicitCommitsEnabled();
+		this.solrQueryMaxRows = configuration.getSolrQueryMaxRows();
 
 		// copy default mapper so Solr payload configurations don't overwrite any global ones
 		this.payloadMapper = objectMapper.copy();
@@ -94,7 +98,7 @@ public class SolrService implements InitializingBean {
 		} catch (SolrServerException | IOException | RuntimeException ex) {
 			throw new SolrServiceException(String.format("Error during Solr indexing for entityId=%s", solrEntity.getEntityId()), ex);
 		}
-		
+
 	}
 
 
@@ -140,9 +144,11 @@ public class SolrService implements InitializingBean {
 		query.set("q", EntitySolrFields.ID+ ":\"" + entityId + "\"");
 		try {
 			rsp = solrClient.query(query);
-			log.debug("Performed Solr search query in {}ms:  type={}, entityId={}",
-					rsp.getElapsedTime(), classType.getSimpleName(), entityId);
-			
+			if(log.isDebugEnabled()) {
+				log.debug("Performed Solr search query in {}ms:  type={}, entityId={}",
+						rsp.getElapsedTime(), classType.getSimpleName(), entityId);
+			}
+
 		} catch (IOException | SolrServerException ex) {
 		    throw new SolrServiceException(String.format("Error while searching Solr for entityId=%s", entityId), ex);
 		}		
@@ -154,8 +160,41 @@ public class SolrService implements InitializingBean {
 		
 		SolrDocument doc = docList.get(0);
 		return binder.getBean(classType, doc);
-
     }
+
+
+	/**
+	 * Fetches all documents matching the query string using a cursor.
+	 *
+	 * This method returns an iterator yielding a list of {@link SolrEntity} instances.
+	 * @param searchQueryString query string
+	 * @param fields if not empty, specifies fields to be included in the query response
+	 * @return iterator
+	 */
+	public  SolrSearchPaginatingIterator getSearchIterator(String searchQueryString, List<String> fields)  {
+
+		SolrQuery q = (new SolrQuery(searchQueryString))
+				.setRows(solrQueryMaxRows)
+				.setFields(fields.toArray(String[]::new))
+				.setSort(SolrQuery.SortClause.asc(EntitySolrFields.ID));
+
+		return new SolrSearchPaginatingIterator(solrClient, q);
+	}
+
+
+	/**
+	 * Fetches all documents matching the query string using a cursor.
+	 *
+	 * This method returns an iterator yielding a list of {@link SolrEntity} instances.
+	 * @param searchQueryString query string
+	 * @return iterator
+	 */
+	public  SolrSearchPaginatingIterator getSearchIterator(String searchQueryString) {
+		return getSearchIterator(searchQueryString, Collections.emptyList());
+	}
+
+
+
 
 	/**
 	 * Deletes all documents.
@@ -173,7 +212,7 @@ public class SolrService implements InitializingBean {
 			 * specifying fields to be filtered
 			 * TODO: add the isShownBy.source and isShownBy.thumbnail fields
 			 */
-		      
+
 			if(solrEntity instanceof SolrAgent || solrEntity instanceof SolrTimespan) {
 				return payloadMapper.writeValueAsString(solrEntity.getEntity());
 			}

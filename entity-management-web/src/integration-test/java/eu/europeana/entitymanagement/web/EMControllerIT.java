@@ -7,8 +7,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.europeana.entitymanagement.AbstractIntegrationTest;
+import eu.europeana.entitymanagement.batch.model.BatchUpdateType;
+import eu.europeana.entitymanagement.batch.model.ScheduledTask;
+import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.*;
+import eu.europeana.entitymanagement.solr.SolrUtils;
+import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
@@ -19,6 +24,7 @@ import okhttp3.mockwebserver.MockResponse;
 import org.apache.commons.lang.StringUtils;
 import org.assertj.core.util.Maps;
 import org.hamcrest.Matchers;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -65,6 +71,12 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
     @Autowired
     private EntityRecordService entityRecordService;
+
+    @Autowired
+    private SolrService solrService;
+
+    @Autowired
+    private ScheduledTaskService taskService;
 
     @Qualifier(AppConfigConstants.BEAN_JSON_MAPPER)
     @Autowired
@@ -498,11 +510,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
     public void retrieveOrganizationExternalShouldBeSuccessful() throws Exception {
 	//TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
 	// read the test data for the Organization entity from the file
-        Organization organization = objectMapper.readValue(loadFile(ORGANIZATION_JSON), Organization.class);
-        EntityRecord entityRecord =  new EntityRecord();
-        entityRecord.setEntity(organization);
-        entityRecord.setEntityId(organization.getEntityId());
-        entityRecordService.saveEntityRecord(entityRecord);
+        Organization organization = createOrganization();
 
         String requestPath = getEntityRequestPath(organization.getEntityId());
         ResultActions resultActions = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".jsonld")
@@ -516,15 +524,12 @@ public class EMControllerIT extends AbstractIntegrationTest {
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, organization);
     }
 
+
     @Test
     public void retrievePlaceExternalShouldBeSuccessful() throws Exception {
 	//TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
 	// read the test data for the Place entity from the file
-        Place place = objectMapper.readValue(loadFile(PLACE_JSON), Place.class);
-        EntityRecord entityRecord =  new EntityRecord();
-        entityRecord.setEntity(place);
-        entityRecord.setEntityId(place.getEntityId());
-        entityRecordService.saveEntityRecord(entityRecord);
+        Place place = createPlace();
 
         String requestPath = getEntityRequestPath(place.getEntityId());
         ResultActions resultActions = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".jsonld")
@@ -538,15 +543,13 @@ public class EMControllerIT extends AbstractIntegrationTest {
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, place);
     }
 
+
+
     @Test
     public void retrieveTimespanExternalShouldBeSuccessful() throws Exception {
 	//TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
 	// read the test data for the Timespan entity from the file
-        Timespan timespan = objectMapper.readValue(loadFile(TIMESPAN_JSON), Timespan.class);
-        EntityRecord entityRecord =  new EntityRecord();
-        entityRecord.setEntity(timespan);
-        entityRecord.setEntityId(timespan.getEntityId());
-        entityRecordService.saveEntityRecord(entityRecord);
+        Timespan timespan = createTimespan();
 
         String requestPath = getEntityRequestPath(timespan.getEntityId());
         ResultActions resultActions = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".jsonld")
@@ -560,10 +563,9 @@ public class EMControllerIT extends AbstractIntegrationTest {
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, timespan);
     }
 
+
     @Test
     public void retrieveEntityInternalShouldBeSuccessful() throws Exception {
-
-//    	ResultActions registeredEntityResults = registerConceptShouldBeSuccessful();
         mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(CONCEPT_XML)));
         //second enqueue for the update task
         mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(CONCEPT_XML)));
@@ -590,12 +592,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
     @Test
     void updateFromExternalDatasourceShouldRunSuccessfully() throws Exception {
         // create entity in DB
-        Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
-        EntityRecord entityRecord = new EntityRecord();
-        entityRecord.setEntity(concept);
-        entityRecord.setEntityId(concept.getEntityId());
-        EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
-
+        EntityRecord record = createConcept();
         String requestPath = getEntityRequestPath(record.getEntityId());
 
         mockMvc.perform(post(BASE_SERVICE_URL + "/" + requestPath + "/management/update")
@@ -608,11 +605,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
     @Test
     void deletionShouldBeSuccessful() throws Exception {
         // create entity in DB
-        Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
-        EntityRecord entityRecord = new EntityRecord();
-        entityRecord.setEntity(concept);
-        entityRecord.setEntityId(concept.getEntityId());
-        EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
+        EntityRecord record = createConcept();
 
         String requestPath = getEntityRequestPath(record.getEntityId());
 
@@ -628,14 +621,11 @@ public class EMControllerIT extends AbstractIntegrationTest {
     }
 
 
+
     @Test
     void deletionFailsIfMatch() throws Exception {
         // create entity in DB
-        Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
-        EntityRecord entityRecord = new EntityRecord();
-        entityRecord.setEntity(concept);
-        entityRecord.setEntityId(concept.getEntityId());
-        EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
+        EntityRecord record = createConcept();
 
         String requestPath = getEntityRequestPath(record.getEntityId());
 
@@ -739,6 +729,40 @@ public class EMControllerIT extends AbstractIntegrationTest {
         Assertions.assertEquals(externalUriWikidata, externalProxy.getProxyId());
     }
 
+    @Test
+    void triggeringMetricsUpdateViaSearchShouldBeSuccessful() throws Exception {
+        Place place = createPlace();
+        solrService.storeEntity(SolrUtils.createSolrEntity(place));
+
+        mockMvc.perform(MockMvcRequestBuilders.post(BASE_SERVICE_URL + "/management/search/metrics")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"query\": \"*:*\"}"))
+                .andExpect(status().isAccepted())
+                .andReturn();
+
+        Optional<ScheduledTask> task = taskService.getTask(place.getEntityId());
+
+        Assertions.assertTrue(task.isPresent());
+        Assertions.assertEquals(BatchUpdateType.METRICS, task.get().getUpdateType());
+    }
+
+    @Test
+    void triggeringFullUpdateViaSearchShouldBeSuccessful() throws Exception {
+        EntityRecord concept = createConcept();
+        solrService.storeEntity(SolrUtils.createSolrEntity(concept.getEntity()));
+
+        mockMvc.perform(MockMvcRequestBuilders.post(BASE_SERVICE_URL + "/management/search/update")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"query\": \"*:*\"}"))
+                .andExpect(status().isAccepted())
+                .andReturn();
+
+        Optional<ScheduledTask> task = taskService.getTask(concept.getEntityId());
+
+        Assertions.assertTrue(task.isPresent());
+        Assertions.assertEquals(BatchUpdateType.FULL, task.get().getUpdateType());
+    }
+
     private void assertEntityExists(MvcResult result) throws JsonMappingException, JsonProcessingException, UnsupportedEncodingException {
     	final ObjectNode node = new ObjectMapper().readValue(result.getResponse().getContentAsString(StandardCharsets.UTF_8), ObjectNode.class);
     	Optional<EntityRecord> dbRecord = entityRecordService.retrieveByEntityId(node.get("id").asText());
@@ -785,5 +809,45 @@ public class EMControllerIT extends AbstractIntegrationTest {
         		.andReturn();
         return resultXml.getResponse().getContentAsString(StandardCharsets.UTF_8);
     }
-   
+
+
+    private EntityRecord createConcept() throws Exception {
+        Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
+        EntityRecord entityRecord = new EntityRecord();
+        entityRecord.setEntity(concept);
+        entityRecord.setEntityId(concept.getEntityId());
+        return entityRecordService.saveEntityRecord(entityRecord);
+    }
+
+    @NotNull
+    private Place createPlace() throws Exception {
+        Place place = objectMapper.readValue(loadFile(PLACE_JSON), Place.class);
+        EntityRecord entityRecord =  new EntityRecord();
+        entityRecord.setEntity(place);
+        entityRecord.setEntityId(place.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord);
+        return place;
+    }
+
+    @NotNull
+    private Timespan createTimespan() throws Exception {
+        Timespan timespan = objectMapper.readValue(loadFile(TIMESPAN_JSON), Timespan.class);
+        EntityRecord entityRecord =  new EntityRecord();
+        entityRecord.setEntity(timespan);
+        entityRecord.setEntityId(timespan.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord);
+        return timespan;
+    }
+
+
+    @NotNull
+    private Organization createOrganization() throws Exception {
+        Organization organization = objectMapper.readValue(loadFile(ORGANIZATION_JSON), Organization.class);
+        EntityRecord entityRecord =  new EntityRecord();
+        entityRecord.setEntity(organization);
+        entityRecord.setEntityId(organization.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord);
+        return organization;
+    }
+
 }

@@ -19,9 +19,11 @@ import eu.europeana.entitymanagement.exception.EtagMismatchException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
+import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
+import eu.europeana.entitymanagement.web.model.SearchRequest;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.web.service.MetisDereferenceService;
 import io.swagger.annotations.ApiOperation;
@@ -165,7 +167,7 @@ public class EMController extends BaseRest {
 
 	@ApiOperation(value = "Update an entity from external data source", nickname = "updateEntityFromDatasource", response = java.lang.Void.class)
 	@PostMapping(value = "/{type}/{identifier}/management/update", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<String> updateFromExternalSource(
+	public ResponseEntity<String> triggerSingleEntityFullUpdate(
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 			@RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "internal") String profile,
@@ -180,7 +182,7 @@ public class EMController extends BaseRest {
 
 	@ApiOperation(value = "Update multiple entities from external data source", nickname = "updateMultipleEntityFromDatasource", response = java.lang.Void.class)
 	@PostMapping(value = "/management/update", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<EntityIdResponse> updateMultipleExternalSource(
+	public ResponseEntity<EntityIdResponse> triggerFullUpdateMultipleEntitiesWithEntityIds(
 			@RequestBody List<String> entityIds,
 			HttpServletRequest request
 	) throws Exception {
@@ -197,9 +199,23 @@ public class EMController extends BaseRest {
 		return  ResponseEntity.accepted().body(new EntityIdResponse(entityIds.size(), existingEntityIds, failures));
 	}
 
+	@ApiOperation(value = "Update multiple entities from external data source using a search query", nickname = "updateMultipleEntityFromDatasource", response = java.lang.Void.class)
+	@PostMapping(value = "/management/search/update", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<String> triggerFullUpdateMultipleEntitiesWithSearchQuery(
+			@RequestBody SearchRequest searchRequest,
+			HttpServletRequest request
+	) throws Exception {
+		if (emConfig.isAuthEnabled()) {
+			verifyWriteAccess(Operations.UPDATE, request);
+		}
+
+		entityUpdateService.scheduleUpdatesWithSearch(searchRequest, BatchUpdateType.FULL);
+		return ResponseEntity.accepted().build();
+	}
+
 	@ApiOperation(value = "Update metrics for given entities", nickname = "updateMultipleEntityFromDatasource", response = java.lang.Void.class)
 	@PostMapping(value = "/management/metrics", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<EntityIdResponse> updateMetricsMultiple(
+	public ResponseEntity<EntityIdResponse> triggerMetricsUpdateMultipleEntitiesWithEntityIds(
 			@RequestBody List<String> entityIds,
 			HttpServletRequest request
 	) throws Exception {
@@ -216,7 +232,20 @@ public class EMController extends BaseRest {
 		return  ResponseEntity.accepted().body(new EntityIdResponse(entityIds.size(), existingEntityIds, failures));
 	}
 
+	@ApiOperation(value = "Update metrics for entities matching a search query", nickname = "updateMultipleEntityFromDatasource", response = java.lang.Void.class)
+	@PostMapping(value = "/management/search/metrics", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<String> triggerMetricsUpdateMultipleEntitiesWithSearchQuery(
+			@RequestBody SearchRequest searchRequest,
+			HttpServletRequest request
+	) throws Exception {
+		if (emConfig.isAuthEnabled()) {
+			verifyWriteAccess(Operations.UPDATE, request);
+		}
 
+		entityUpdateService.scheduleUpdatesWithSearch(searchRequest, BatchUpdateType.METRICS);
+		return ResponseEntity.accepted().build();
+	}
+	
 
 	@ApiOperation(value = "Retrieve a known entity", nickname = "getEntityJsonLd", response = java.lang.Void.class)
     @RequestMapping(value = { "/{type}/base/{identifier}.jsonld",
