@@ -5,12 +5,11 @@ import eu.europeana.entitymanagement.batch.config.EntityUpdateJobConfig;
 import eu.europeana.entitymanagement.batch.BatchUtils;
 import eu.europeana.entitymanagement.batch.model.BatchUpdateType;
 import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.solr.SolrSearchPaginatingIterator;
+import eu.europeana.entitymanagement.solr.SolrSearchCursorIterator;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.solr.model.SolrEntity;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
-import eu.europeana.entitymanagement.web.model.SearchRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.launch.JobLauncher;
@@ -78,12 +77,12 @@ public class EntityUpdateService {
     /**
      * Schedules entity updates using a search query
      *
-     * @param searchRequest contains search query
+     * @param query search query
      * @param updateType    update type to schedule
      * @throws SolrServiceException if error occurs during search
      */
-    public void scheduleUpdatesWithSearch(SearchRequest searchRequest, BatchUpdateType updateType) throws SolrServiceException {
-        SolrSearchPaginatingIterator iterator = solrService.getSearchIterator(searchRequest.getQuery(),
+    public void scheduleUpdatesWithSearch(String query, BatchUpdateType updateType) throws SolrServiceException {
+        SolrSearchCursorIterator iterator = solrService.getSearchIterator(query,
                 List.of(EntitySolrFields.TYPE, EntitySolrFields.ID));
 
         while (iterator.hasNext()) {

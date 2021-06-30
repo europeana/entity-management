@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
  * Fetches documents from Solr using a cursor.
  * See https://solr.apache.org/guide/7_6/pagination-of-results.html#fetching-a-large-number-of-sorted-results-cursors
  */
-public class SolrSearchPaginatingIterator {
+public class SolrSearchCursorIterator {
     private final SolrClient client;
     private final SolrQuery solrQuery;
     private String cursorMark;
@@ -35,7 +35,7 @@ public class SolrSearchPaginatingIterator {
 
     private String previousCursorMark;
 
-    public SolrSearchPaginatingIterator(SolrClient client, SolrQuery solrQuery) {
+    public SolrSearchCursorIterator(SolrClient client, SolrQuery solrQuery) {
         validateQueryFields(solrQuery);
 
         this.solrQuery = solrQuery;
@@ -43,10 +43,17 @@ public class SolrSearchPaginatingIterator {
         this.cursorMark = CursorMarkParams.CURSOR_MARK_START;
     }
 
+    /**
+     * Checks if additional documents can be retrieved for the Solr query
+     * @return true if documents can be retrieved, false otherwise
+     */
     public boolean hasNext() {
         return !cursorMark.equals(previousCursorMark);
     }
 
+    /**
+     * Retrieves the next chunk of documents that match the search query.
+     */
     public <T extends Entity> List<SolrEntity<T>> next() throws SolrServiceException {
         solrQuery.set(CursorMarkParams.CURSOR_MARK_PARAM, cursorMark);
         QueryResponse response;
@@ -82,7 +89,7 @@ public class SolrSearchPaginatingIterator {
      * 'id' and 'type' fields are required.
      * If query specifies fields, both must be included
      *
-     * @param solrQuery
+     * @param solrQuery query object
      */
     private void validateQueryFields(SolrQuery solrQuery) {
         String fieldString = solrQuery.getFields();
@@ -95,7 +102,5 @@ public class SolrSearchPaginatingIterator {
         if (!Set.of(EntitySolrFields.TYPE, EntitySolrFields.ID).containsAll(fields)) {
             throw new IllegalArgumentException("SolrQuery fields must either be empty or contain id and type");
         }
-
-
     }
 }

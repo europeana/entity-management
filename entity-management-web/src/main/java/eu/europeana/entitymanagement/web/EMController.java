@@ -19,11 +19,9 @@ import eu.europeana.entitymanagement.exception.EtagMismatchException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
-import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
-import eu.europeana.entitymanagement.web.model.SearchRequest;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.web.service.MetisDereferenceService;
 import io.swagger.annotations.ApiOperation;
@@ -31,6 +29,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -42,6 +42,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static eu.europeana.entitymanagement.solr.SolrUtils.createSolrEntity;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.QUERY_PARAM_QUERY;
 
 
 @RestController
@@ -49,16 +50,17 @@ import static eu.europeana.entitymanagement.solr.SolrUtils.createSolrEntity;
 @RequestMapping("/entity")
 public class EMController extends BaseRest {
 
-  private final EntityRecordService entityRecordService;
-  private final SolrService solrService;
-  private final MetisDereferenceService dereferenceService;
-  private final DataSources datasources;
-  private final EntityUpdateService entityUpdateService;
-  private final EntityManagementConfiguration emConfig;
+	private final EntityRecordService entityRecordService;
+	private final SolrService solrService;
+	private final MetisDereferenceService dereferenceService;
+	private final DataSources datasources;
+	private final EntityUpdateService entityUpdateService;
+	private final EntityManagementConfiguration emConfig;
 
 
-  private static final String EXTERNAL_ID_REMOVED_MSG = "Entity id '%s' already exists as '%s', which has been removed";
-  private static final String SAME_AS_NOT_EXISTS_MSG = "Url '%s' does not exist in entity owl:sameAs";
+	private static final String EXTERNAL_ID_REMOVED_MSG = "Entity id '%s' already exists as '%s', which has been removed";
+	private static final String SAME_AS_NOT_EXISTS_MSG = "Url '%s' does not exist in entity owl:sameAs";
+	public static final String INVALID_UPDATE_REQUEST_MSG = "Request must either specify a 'query' param or contain entity identifiers in body";
 
   @Autowired
 	public EMController(EntityRecordService entityRecordService,
@@ -182,12 +184,23 @@ public class EMController extends BaseRest {
 
 	@ApiOperation(value = "Update multiple entities from external data source", nickname = "updateMultipleEntityFromDatasource", response = java.lang.Void.class)
 	@PostMapping(value = "/management/update", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<EntityIdResponse> triggerFullUpdateMultipleEntitiesWithEntityIds(
-			@RequestBody List<String> entityIds,
+	public ResponseEntity<EntityIdResponse> triggerFullUpdateMultipleEntities(
+			@RequestBody (required = false) List<String> entityIds,
+			@RequestParam(value = QUERY_PARAM_QUERY, required = false) String query,
 			HttpServletRequest request
 	) throws Exception {
 		if (emConfig.isAuthEnabled()) {
 			verifyWriteAccess(Operations.UPDATE, request);
+		}
+
+		// query param takes precedence over request body
+		if(StringUtils.hasLength(query)){
+			entityUpdateService.scheduleUpdatesWithSearch(query, BatchUpdateType.FULL);
+			return ResponseEntity.accepted().build();
+		}
+
+		if(CollectionUtils.isEmpty(entityIds)){
+			throw new HttpBadRequestException(INVALID_UPDATE_REQUEST_MSG);
 		}
 
 		List<String> existingEntityIds = entityRecordService.retrieveMultipleByEntityId(entityIds);
@@ -199,28 +212,26 @@ public class EMController extends BaseRest {
 		return  ResponseEntity.accepted().body(new EntityIdResponse(entityIds.size(), existingEntityIds, failures));
 	}
 
-	@ApiOperation(value = "Update multiple entities from external data source using a search query", nickname = "updateMultipleEntityFromDatasource", response = java.lang.Void.class)
-	@PostMapping(value = "/management/search/update", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<String> triggerFullUpdateMultipleEntitiesWithSearchQuery(
-			@RequestBody SearchRequest searchRequest,
+
+	@ApiOperation(value = "Update metrics for given entities", nickname = "updateMultipleEntityFromDatasource", response = java.lang.Void.class)
+	@PostMapping(value = "/management/metrics", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<EntityIdResponse> triggerMetricsUpdateMultipleEntities(
+			@RequestBody (required = false) List<String> entityIds,
+			@RequestParam(value = QUERY_PARAM_QUERY, required = false) String query,
 			HttpServletRequest request
 	) throws Exception {
 		if (emConfig.isAuthEnabled()) {
 			verifyWriteAccess(Operations.UPDATE, request);
 		}
 
-		entityUpdateService.scheduleUpdatesWithSearch(searchRequest, BatchUpdateType.FULL);
-		return ResponseEntity.accepted().build();
-	}
+		// query param takes precedence over request body
+		if(StringUtils.hasLength(query)){
+			entityUpdateService.scheduleUpdatesWithSearch(query, BatchUpdateType.METRICS);
+			return ResponseEntity.accepted().build();
+		}
 
-	@ApiOperation(value = "Update metrics for given entities", nickname = "updateMultipleEntityFromDatasource", response = java.lang.Void.class)
-	@PostMapping(value = "/management/metrics", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<EntityIdResponse> triggerMetricsUpdateMultipleEntitiesWithEntityIds(
-			@RequestBody List<String> entityIds,
-			HttpServletRequest request
-	) throws Exception {
-		if (emConfig.isAuthEnabled()) {
-			verifyWriteAccess(Operations.UPDATE, request);
+		if(CollectionUtils.isEmpty(entityIds)){
+			throw new HttpBadRequestException(INVALID_UPDATE_REQUEST_MSG);
 		}
 
 		List<String> existingEntityIds = entityRecordService.retrieveMultipleByEntityId(entityIds);
@@ -231,21 +242,6 @@ public class EMController extends BaseRest {
 		entityUpdateService.scheduleUpdates(existingEntityIds, BatchUpdateType.METRICS);
 		return  ResponseEntity.accepted().body(new EntityIdResponse(entityIds.size(), existingEntityIds, failures));
 	}
-
-	@ApiOperation(value = "Update metrics for entities matching a search query", nickname = "updateMultipleEntityFromDatasource", response = java.lang.Void.class)
-	@PostMapping(value = "/management/search/metrics", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<String> triggerMetricsUpdateMultipleEntitiesWithSearchQuery(
-			@RequestBody SearchRequest searchRequest,
-			HttpServletRequest request
-	) throws Exception {
-		if (emConfig.isAuthEnabled()) {
-			verifyWriteAccess(Operations.UPDATE, request);
-		}
-
-		entityUpdateService.scheduleUpdatesWithSearch(searchRequest, BatchUpdateType.METRICS);
-		return ResponseEntity.accepted().build();
-	}
-	
 
 	@ApiOperation(value = "Retrieve a known entity", nickname = "getEntityJsonLd", response = java.lang.Void.class)
     @RequestMapping(value = { "/{type}/base/{identifier}.jsonld",

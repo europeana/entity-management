@@ -11,7 +11,7 @@ import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.definitions.model.Timespan;
 import eu.europeana.entitymanagement.solr.SolrEntitySuggesterMixins;
-import eu.europeana.entitymanagement.solr.SolrSearchPaginatingIterator;
+import eu.europeana.entitymanagement.solr.SolrSearchCursorIterator;
 import eu.europeana.entitymanagement.solr.model.SolrAgent;
 import eu.europeana.entitymanagement.solr.model.SolrOrganization;
 import eu.europeana.entitymanagement.solr.model.SolrTimespan;
@@ -171,14 +171,14 @@ public class SolrService implements InitializingBean {
 	 * @param fields if not empty, specifies fields to be included in the query response
 	 * @return iterator
 	 */
-	public  SolrSearchPaginatingIterator getSearchIterator(String searchQueryString, List<String> fields)  {
+	public SolrSearchCursorIterator getSearchIterator(String searchQueryString, List<String> fields)  {
 
 		SolrQuery q = (new SolrQuery(searchQueryString))
 				.setRows(solrQueryMaxRows)
 				.setFields(fields.toArray(String[]::new))
 				.setSort(SolrQuery.SortClause.asc(EntitySolrFields.ID));
 
-		return new SolrSearchPaginatingIterator(solrClient, q);
+		return new SolrSearchCursorIterator(solrClient, q);
 	}
 
 
@@ -189,7 +189,7 @@ public class SolrService implements InitializingBean {
 	 * @param searchQueryString query string
 	 * @return iterator
 	 */
-	public  SolrSearchPaginatingIterator getSearchIterator(String searchQueryString) {
+	public SolrSearchCursorIterator getSearchIterator(String searchQueryString) {
 		return getSearchIterator(searchQueryString, Collections.emptyList());
 	}
 

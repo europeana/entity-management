@@ -118,7 +118,7 @@ public class SolrServiceIT extends AbstractIntegrationTest {
 	 */
 	private List<SolrEntity<?>> getSolrEntities(String searchQuery) throws Exception {
 		List<SolrEntity<?>> solrEntities = new ArrayList<>();
-		SolrSearchPaginatingIterator iterator = emSolrService.getSearchIterator(searchQuery);
+		SolrSearchCursorIterator iterator = emSolrService.getSearchIterator(searchQuery);
 
 		while(iterator.hasNext()){
 			solrEntities.addAll(iterator.next());

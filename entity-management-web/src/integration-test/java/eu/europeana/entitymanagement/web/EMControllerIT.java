@@ -53,6 +53,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.*;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.QUERY_PARAM_QUERY;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -734,9 +735,9 @@ public class EMControllerIT extends AbstractIntegrationTest {
         Place place = createPlace();
         solrService.storeEntity(SolrUtils.createSolrEntity(place));
 
-        mockMvc.perform(MockMvcRequestBuilders.post(BASE_SERVICE_URL + "/management/search/metrics")
+        mockMvc.perform(MockMvcRequestBuilders.post(BASE_SERVICE_URL + "/management/metrics")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{ \"query\": \"*:*\"}"))
+                .param(QUERY_PARAM_QUERY, "*:*"))
                 .andExpect(status().isAccepted())
                 .andReturn();
 
@@ -751,9 +752,9 @@ public class EMControllerIT extends AbstractIntegrationTest {
         EntityRecord concept = createConcept();
         solrService.storeEntity(SolrUtils.createSolrEntity(concept.getEntity()));
 
-        mockMvc.perform(MockMvcRequestBuilders.post(BASE_SERVICE_URL + "/management/search/update")
+        mockMvc.perform(MockMvcRequestBuilders.post(BASE_SERVICE_URL + "/management/update")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{ \"query\": \"*:*\"}"))
+                .param(QUERY_PARAM_QUERY, "*:*"))
                 .andExpect(status().isAccepted())
                 .andReturn();
 
