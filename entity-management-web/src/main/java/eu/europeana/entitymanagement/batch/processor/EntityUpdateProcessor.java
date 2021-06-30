@@ -61,7 +61,10 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
         emEntityFieldCleaner.cleanAndNormalize(normalizedEntity);
         Entity consolidatedEntity = entityRecordService.mergeEntities(europeanaEntity, normalizedEntity);
         entityRecordService.performReferentialIntegrity(consolidatedEntity);
-        validateCompleteConstraints(entityRecord.getEntity());
+        validateCompleteConstraints(consolidatedEntity);
+        
+        entityRecordService.updateConsolidatedVersion(entityRecord, consolidatedEntity);
+        
    
         return entityRecord;
     }
