@@ -303,11 +303,14 @@ public class EMControllerIT extends AbstractIntegrationTest {
         // acquire the reader for the right type
         ObjectReader reader = objectMapper.readerFor(new TypeReference<Map<String,String>>() {});
         Map<String,String> prefLabelToCheck = reader.readValue(nodeReference.path("prefLabel"));
-        Map<String,String> prefLabelUpdated = entityRecordUpdated.get().getEuropeanaProxy().getEntity().getPrefLabelStringMap();
+        Map<String,String> prefLabelUpdated = entityRecordUpdated.get().getEntity().getPrefLabelStringMap();
         for (Map.Entry<String,String> prefLabelEntry : prefLabelToCheck.entrySet()) {
         	Assertions.assertTrue(prefLabelUpdated.containsKey(prefLabelEntry.getKey()));
         	// Text fields will be capitalised
-        	Assertions.assertTrue(prefLabelUpdated.containsValue(StringUtils.capitalize(prefLabelEntry.getValue())));
+        	Assertions.assertTrue(prefLabelUpdated.containsValue(prefLabelEntry.getValue()));
+        	//TODO: consider capitalization of Europeana Metadata as well 
+//        	Assertions.assertTrue(prefLabelUpdated.containsValue(StringUtils.capitalize(prefLabelEntry.getValue())));
+        	
         }
 
     }
@@ -329,10 +332,9 @@ public class EMControllerIT extends AbstractIntegrationTest {
         Entity europeanaProxyEntity = savedRecord.get().getEuropeanaProxy().getEntity();
 
         // values match labels in json file
-        // NOTE : Text fileds are captilaised
-        Assertions.assertEquals("Bathtub", europeanaProxyEntity.getPrefLabelStringMap().get("en"));
-        Assertions.assertEquals("Bath", europeanaProxyEntity.getAltLabel().get("en").get(0));
-        Assertions.assertEquals("Tub", europeanaProxyEntity.getAltLabel().get("en").get(1));
+        Assertions.assertEquals("bathtub", europeanaProxyEntity.getPrefLabelStringMap().get("en"));
+        Assertions.assertEquals("bath", europeanaProxyEntity.getAltLabel().get("en").get(0));
+        Assertions.assertEquals("tub", europeanaProxyEntity.getAltLabel().get("en").get(1));
         Assertions.assertNotNull(europeanaProxyEntity.getDepiction());
 
         String requestPath = getEntityRequestPath(registeredEntityNode.path("id").asText());
@@ -396,7 +398,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.id", is(concept.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Concept.name())));
 
-        String contentXml = getRetrieveEntityResponse(requestPath, ".xml");
+        String contentXml = getRetrieveEntityXmlResponse(requestPath);
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, concept);
     }
     
@@ -491,7 +493,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.id", is(agent.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())));
 
-        String contentXml = getRetrieveEntityResponse(requestPath, ".xml");
+        String contentXml = getRetrieveEntityXmlResponse(requestPath);
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, agent);
     }
 
@@ -513,7 +515,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.id", is(organization.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())));
 
-        String contentXml = getRetrieveEntityResponse(requestPath, ".xml");
+        String contentXml = getRetrieveEntityXmlResponse(requestPath);
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, organization);
     }
 
@@ -535,7 +537,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.id", is(place.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Place.name())));
 
-        String contentXml = getRetrieveEntityResponse(requestPath, ".xml");
+        String contentXml = getRetrieveEntityXmlResponse(requestPath);
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, place);
     }
 
@@ -563,9 +565,6 @@ public class EMControllerIT extends AbstractIntegrationTest {
 //                .andExpect(jsonPath("$.proxies[0].ProxyIn.recordCount").doesNotExist())
 //                .andExpect(jsonPath("$.proxies[0].ProxyIn.score").doesNotExist())
                 ;
-
-        String contentXml = getRetrieveEntityResponse(requestPath, ".jsonld");
-        assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, place);
     }
     
     
@@ -623,7 +622,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.id", is(timespan.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Timespan.name())));
 
-        String contentXml = getRetrieveEntityResponse(requestPath, ".xml");
+        String contentXml = getRetrieveEntityXmlResponse(requestPath);
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, timespan);
     }
 
@@ -844,12 +843,13 @@ public class EMControllerIT extends AbstractIntegrationTest {
         }
     }
 
-    private String getRetrieveEntityResponse(String requestPath, String extension) throws Exception {
-    	MvcResult result = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + extension)
-        		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external"))
+    private String getRetrieveEntityXmlResponse(String requestPath) throws Exception {
+    	MvcResult resultXml = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".xml")
+        		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                .accept(MediaType.APPLICATION_XML))
         		.andExpect(status().isOk())
         		.andReturn();
-        return result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        return resultXml.getResponse().getContentAsString(StandardCharsets.UTF_8);
     }
    
 }
