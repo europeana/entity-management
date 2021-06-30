@@ -11,9 +11,7 @@ public class PositiveNumberFilter {
 
     if (other instanceof Integer) {
       return (Integer) other < 0;
-    }
-
-    if (other instanceof Double) {
+    }else if (other instanceof Double) {
       return (Double) other < 0;
     }
 

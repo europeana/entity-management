@@ -390,9 +390,10 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(concept.getEntityId())))
+                .andExpect(jsonPath("$.id", is(concept.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Concept.name())));
 
-        String contentXml = getRetrieveEntityXmlResponse(requestPath);
+        String contentXml = getRetrieveEntityResponse(requestPath, ".xml");
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, concept);
     }
     
@@ -487,7 +488,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.id", is(agent.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())));
 
-        String contentXml = getRetrieveEntityXmlResponse(requestPath);
+        String contentXml = getRetrieveEntityResponse(requestPath, ".xml");
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, agent);
     }
 
@@ -509,7 +510,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.id", is(organization.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())));
 
-        String contentXml = getRetrieveEntityXmlResponse(requestPath);
+        String contentXml = getRetrieveEntityResponse(requestPath, ".xml");
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, organization);
     }
 
@@ -531,10 +532,76 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.id", is(place.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Place.name())));
 
-        String contentXml = getRetrieveEntityXmlResponse(requestPath);
+        String contentXml = getRetrieveEntityResponse(requestPath, ".xml");
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, place);
     }
 
+    @Test
+    public void retrievePlaceInternalShouldBeSuccessful() throws Exception {
+        //TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
+        // read the test data for the Place entity from the file
+        Place place = objectMapper.readValue(loadFile(PLACE_JSON), Place.class);
+        EntityRecord entityRecord =  new EntityRecord();
+        entityRecord.setEntity(place);
+        entityRecord.setEntityId(place.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord);
+
+        String requestPath = getEntityRequestPath(place.getEntityId());
+        ResultActions resultActions = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".jsonld")
+                        .param(WebEntityConstants.QUERY_PARAM_PROFILE, "internal")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(place.getEntityId())))
+//                .andExpect(jsonPath("$.isAggregatedBy.pageRank", is(place.getEntityId())))
+                .andExpect(jsonPath("$.type", is(EntityTypes.Place.name())))
+                
+//                There are no proxies in the response if the registration is not called through the mock service 
+//                .andExpect(jsonPath("$.proxies[0].ProxyIn.pageRank").doesNotExist())
+//                .andExpect(jsonPath("$.proxies[0].ProxyIn.recordCount").doesNotExist())
+//                .andExpect(jsonPath("$.proxies[0].ProxyIn.score").doesNotExist())
+                ;
+
+        String contentXml = getRetrieveEntityResponse(requestPath, ".jsonld");
+        assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, place);
+    }
+    
+    
+    @Test
+    public void proxiesShouldNotHaveMetrics() throws Exception {
+        // set mock Metis response
+        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(AGENT_XML)));
+        //second enqueue for the update task
+        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(AGENT_XML)));
+
+        ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
+                .content(loadFile(AGENT_REGISTER_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .param(WebEntityConstants.QUERY_PARAM_PROFILE, "internal"))
+                .andExpect(status().isAccepted());
+        
+        results.andExpect(jsonPath("$.id", any(String.class)))
+                .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())))
+                .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
+                .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
+                // should have Europeana and Datasource proxies
+                .andExpect(jsonPath("$.proxies", hasSize(2)));
+
+        //TODO assert other important properties
+        results
+        .andExpect(jsonPath("$.proxies[0].proxyIn").exists())
+        .andExpect(jsonPath("$.proxies[0].proxyIn.pageRank").doesNotExist())
+        .andExpect(jsonPath("$.proxies[0].proxyIn.recordCount").doesNotExist())
+        .andExpect(jsonPath("$.proxies[0].proxyIn.score").doesNotExist());
+        
+        results.andExpect(jsonPath("$.proxies[1].proxyIn").exists())
+        .andExpect(jsonPath("$.proxies[1].proxyIn.pageRank").doesNotExist())
+        .andExpect(jsonPath("$.proxies[1].proxyIn.recordCount").doesNotExist())
+        .andExpect(jsonPath("$.proxies[1].proxyIn.score").doesNotExist());
+        
+
+    }
+
+    
     @Test
     public void retrieveTimespanExternalShouldBeSuccessful() throws Exception {
 	//TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
@@ -553,7 +620,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.id", is(timespan.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Timespan.name())));
 
-        String contentXml = getRetrieveEntityXmlResponse(requestPath);
+        String contentXml = getRetrieveEntityResponse(requestPath, ".xml");
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, timespan);
     }
 
@@ -774,13 +841,12 @@ public class EMControllerIT extends AbstractIntegrationTest {
         }
     }
 
-    private String getRetrieveEntityXmlResponse(String requestPath) throws Exception {
-    	MvcResult resultXml = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".xml")
-        		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
-                .accept(MediaType.APPLICATION_XML))
+    private String getRetrieveEntityResponse(String requestPath, String extension) throws Exception {
+    	MvcResult result = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + extension)
+        		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external"))
         		.andExpect(status().isOk())
         		.andReturn();
-        return resultXml.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        return result.getResponse().getContentAsString(StandardCharsets.UTF_8);
     }
    
 }

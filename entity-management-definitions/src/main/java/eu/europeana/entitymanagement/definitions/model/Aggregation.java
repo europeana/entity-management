@@ -37,8 +37,8 @@ public class Aggregation {
 
     String id, type, rights, source;
     Date created, modified;
-    int score, recordCount;
-    double pageRank;
+    int score=-1, recordCount=-1;
+    double pageRank=-1d;
     List<String> aggregates;
 
     
@@ -112,6 +112,7 @@ public class Aggregation {
     }
     
     @JsonGetter(RECORD_COUNT)
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = PositiveNumberFilter.class)
     public int getRecordCount() {
         return recordCount;
     }
