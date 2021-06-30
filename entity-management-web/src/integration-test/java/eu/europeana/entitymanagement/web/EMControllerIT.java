@@ -303,11 +303,14 @@ public class EMControllerIT extends AbstractIntegrationTest {
         // acquire the reader for the right type
         ObjectReader reader = objectMapper.readerFor(new TypeReference<Map<String,String>>() {});
         Map<String,String> prefLabelToCheck = reader.readValue(nodeReference.path("prefLabel"));
-        Map<String,String> prefLabelUpdated = entityRecordUpdated.get().getEuropeanaProxy().getEntity().getPrefLabelStringMap();
+        Map<String,String> prefLabelUpdated = entityRecordUpdated.get().getEntity().getPrefLabelStringMap();
         for (Map.Entry<String,String> prefLabelEntry : prefLabelToCheck.entrySet()) {
         	Assertions.assertTrue(prefLabelUpdated.containsKey(prefLabelEntry.getKey()));
         	// Text fields will be capitalised
-        	Assertions.assertTrue(prefLabelUpdated.containsValue(StringUtils.capitalize(prefLabelEntry.getValue())));
+        	Assertions.assertTrue(prefLabelUpdated.containsValue(prefLabelEntry.getValue()));
+        	//TODO: consider capitalization of Europeana Metadata as well 
+//        	Assertions.assertTrue(prefLabelUpdated.containsValue(StringUtils.capitalize(prefLabelEntry.getValue())));
+        	
         }
 
     }
@@ -329,10 +332,9 @@ public class EMControllerIT extends AbstractIntegrationTest {
         Entity europeanaProxyEntity = savedRecord.get().getEuropeanaProxy().getEntity();
 
         // values match labels in json file
-        // NOTE : Text fileds are captilaised
-        Assertions.assertEquals("Bathtub", europeanaProxyEntity.getPrefLabelStringMap().get("en"));
-        Assertions.assertEquals("Bath", europeanaProxyEntity.getAltLabel().get("en").get(0));
-        Assertions.assertEquals("Tub", europeanaProxyEntity.getAltLabel().get("en").get(1));
+        Assertions.assertEquals("bathtub", europeanaProxyEntity.getPrefLabelStringMap().get("en"));
+        Assertions.assertEquals("bath", europeanaProxyEntity.getAltLabel().get("en").get(0));
+        Assertions.assertEquals("tub", europeanaProxyEntity.getAltLabel().get("en").get(1));
         Assertions.assertNotNull(europeanaProxyEntity.getDepiction());
 
         String requestPath = getEntityRequestPath(registeredEntityNode.path("id").asText());
@@ -392,6 +394,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
         		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(concept.getEntityId())))
                 .andExpect(jsonPath("$.id", is(concept.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Concept.name())));
 
@@ -538,6 +541,69 @@ public class EMControllerIT extends AbstractIntegrationTest {
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, place);
     }
 
+    @Test
+    public void retrievePlaceInternalShouldBeSuccessful() throws Exception {
+        //TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
+        // read the test data for the Place entity from the file
+        Place place = objectMapper.readValue(loadFile(PLACE_JSON), Place.class);
+        EntityRecord entityRecord =  new EntityRecord();
+        entityRecord.setEntity(place);
+        entityRecord.setEntityId(place.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord);
+
+        String requestPath = getEntityRequestPath(place.getEntityId());
+        ResultActions resultActions = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".jsonld")
+                        .param(WebEntityConstants.QUERY_PARAM_PROFILE, "internal")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(place.getEntityId())))
+//                .andExpect(jsonPath("$.isAggregatedBy.pageRank", is(place.getEntityId())))
+                .andExpect(jsonPath("$.type", is(EntityTypes.Place.name())))
+                
+//                There are no proxies in the response if the registration is not called through the mock service 
+//                .andExpect(jsonPath("$.proxies[0].ProxyIn.pageRank").doesNotExist())
+//                .andExpect(jsonPath("$.proxies[0].ProxyIn.recordCount").doesNotExist())
+//                .andExpect(jsonPath("$.proxies[0].ProxyIn.score").doesNotExist())
+                ;
+    }
+    
+    
+    @Test
+    public void proxiesShouldNotHaveMetrics() throws Exception {
+        // set mock Metis response
+        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(AGENT_XML)));
+        //second enqueue for the update task
+        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(AGENT_XML)));
+
+        ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
+                .content(loadFile(AGENT_REGISTER_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .param(WebEntityConstants.QUERY_PARAM_PROFILE, "internal"))
+                .andExpect(status().isAccepted());
+        
+        results.andExpect(jsonPath("$.id", any(String.class)))
+                .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())))
+                .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
+                .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
+                // should have Europeana and Datasource proxies
+                .andExpect(jsonPath("$.proxies", hasSize(2)));
+
+        //TODO assert other important properties
+        results
+        .andExpect(jsonPath("$.proxies[0].proxyIn").exists())
+        .andExpect(jsonPath("$.proxies[0].proxyIn.pageRank").doesNotExist())
+        .andExpect(jsonPath("$.proxies[0].proxyIn.recordCount").doesNotExist())
+        .andExpect(jsonPath("$.proxies[0].proxyIn.score").doesNotExist());
+        
+        results.andExpect(jsonPath("$.proxies[1].proxyIn").exists())
+        .andExpect(jsonPath("$.proxies[1].proxyIn.pageRank").doesNotExist())
+        .andExpect(jsonPath("$.proxies[1].proxyIn.recordCount").doesNotExist())
+        .andExpect(jsonPath("$.proxies[1].proxyIn.score").doesNotExist());
+        
+
+    }
+
+    
     @Test
     public void retrieveTimespanExternalShouldBeSuccessful() throws Exception {
 	//TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);

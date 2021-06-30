@@ -22,8 +22,12 @@ public class EntityValidationException extends EuropeanaApiException {
 
     @Override
     public String toString() {
-	StringBuilder message = new StringBuilder(super.toString());
-	return getConstrainsValidationMessage(message);
+	return buildErrorMessage(super.getMessage());
+    }
+
+    String buildErrorMessage(String errorMessage) {
+        StringBuilder message = new StringBuilder(errorMessage);
+        return getConstrainsValidationMessage(message);
     }
 
     public String getConstrainsValidationMessage(StringBuilder message) {
@@ -39,7 +43,7 @@ public class EntityValidationException extends EuropeanaApiException {
     @Override
     public String getMessage() {
         //ensure that constraint violations are included in the error message 
-        return toString();
+        return buildErrorMessage(super.getMessage());
     }
     
 }
