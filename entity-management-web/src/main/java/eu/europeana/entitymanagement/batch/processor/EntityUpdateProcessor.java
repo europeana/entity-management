@@ -11,13 +11,11 @@ import org.springframework.stereotype.Component;
 
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.ingestion.EntityValidationException;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatorGroup;
 import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorGroup;
-import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 
 /**
@@ -42,28 +40,16 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
 
     @Override
     public EntityRecord process(@NonNull EntityRecord entityRecord) throws EuropeanaApiException {
-
-        EntityProxy europeanaProxy = entityRecord.getEuropeanaProxy();
-        EntityProxy externalProxy = entityRecord.getExternalProxy();
-        if (europeanaProxy == null || externalProxy == null) {
-            throw new EuropeanaApiException(String.format(
-                    "Unable to process entity record with id: %s. Europeana proxy or external proxy is not available in the record!",
-                    entityRecord.getEntityId()));
-        }
-
-        Entity europeanaEntity = europeanaProxy.getEntity();
-        Entity externalEntity = externalProxy.getEntity();
-
-        validateMinimalConstraints(externalEntity);
-        //data processing must be performed on a deep clone
-        Entity normalizedEntity = EntityObjectFactory.createNewEntity(externalEntity);
-        emEntityFieldCleaner.cleanAndNormalize(normalizedEntity);
-        Entity consolidatedEntity = entityRecordService.mergeEntities(europeanaEntity, externalEntity);
-        entityRecordService.performReferentialIntegrity(consolidatedEntity);
-        validateCompleteConstraints(consolidatedEntity);
         
         entityRecordService.updateConsolidatedVersion(entityRecord, consolidatedEntity);
 
+    	validateMinimalConstraints(entityRecord.getExternalProxy().getEntity());
+        emEntityFieldCleaner.cleanAndNormalize(entityRecord.getExternalProxy().getEntity());
+        emEntityFieldCleaner.cleanAndNormalize(entityRecord.getEuropeanaProxy().getEntity());
+        entityRecordService.mergeEntity(entityRecord);
+        entityRecordService.performReferentialIntegrity(entityRecord.getEntity());
+        validateCompleteConstraints(entityRecord.getEntity());
+   
         return entityRecord;
     }
 

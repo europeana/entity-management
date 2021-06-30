@@ -16,6 +16,7 @@ import eu.europeana.entitymanagement.vocabulary.XmlFields;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import okhttp3.mockwebserver.MockResponse;
+import org.apache.commons.lang.StringUtils;
 import org.assertj.core.util.Maps;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
@@ -305,7 +306,8 @@ public class EMControllerIT extends AbstractIntegrationTest {
         Map<String,String> prefLabelUpdated = entityRecordUpdated.get().getEuropeanaProxy().getEntity().getPrefLabelStringMap();
         for (Map.Entry<String,String> prefLabelEntry : prefLabelToCheck.entrySet()) {
         	Assertions.assertTrue(prefLabelUpdated.containsKey(prefLabelEntry.getKey()));
-        	Assertions.assertTrue(prefLabelUpdated.containsValue(prefLabelEntry.getValue()));
+        	// Text fields will be capitalised
+        	Assertions.assertTrue(prefLabelUpdated.containsValue(StringUtils.capitalize(prefLabelEntry.getValue())));
         }
 
     }
@@ -327,9 +329,10 @@ public class EMControllerIT extends AbstractIntegrationTest {
         Entity europeanaProxyEntity = savedRecord.get().getEuropeanaProxy().getEntity();
 
         // values match labels in json file
-        Assertions.assertEquals("bathtub", europeanaProxyEntity.getPrefLabelStringMap().get("en"));
-        Assertions.assertEquals("bath", europeanaProxyEntity.getAltLabel().get("en").get(0));
-        Assertions.assertEquals("tub", europeanaProxyEntity.getAltLabel().get("en").get(1));
+        // NOTE : Text fileds are captilaised
+        Assertions.assertEquals("Bathtub", europeanaProxyEntity.getPrefLabelStringMap().get("en"));
+        Assertions.assertEquals("Bath", europeanaProxyEntity.getAltLabel().get("en").get(0));
+        Assertions.assertEquals("Tub", europeanaProxyEntity.getAltLabel().get("en").get(1));
         Assertions.assertNotNull(europeanaProxyEntity.getDepiction());
 
         String requestPath = getEntityRequestPath(registeredEntityNode.path("id").asText());
@@ -786,7 +789,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
         mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(AGENT_JAN_VERMEER_XML_WIKIDATA)));
 
         String requestPath = getEntityRequestPath(registeredEntityNode.path("id").asText());
-        mockMvc.perform(MockMvcRequestBuilders.post(BASE_SERVICE_URL + "/" + requestPath + "/management/source")
+        mockMvc.perform(MockMvcRequestBuilders.put(BASE_SERVICE_URL + "/" + requestPath + "/management/source")
                 .param(WebEntityConstants.PATH_PARAM_URL, externalUriWikidata)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isAccepted())

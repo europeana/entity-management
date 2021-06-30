@@ -9,5 +9,8 @@
   "note": {
     "en": ["large container for holding water in which a person may bathe"]
   },
+  "sameAs": [
+    "http://www.wikidata.org/entity/Q152095"
+  ],
   "depiction": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/1rm60rt0t_rtbcwh.jpg/330px-1rm60rt0t_rtbcwh_updated.jpg"
 }
