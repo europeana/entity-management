@@ -58,7 +58,7 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
         //data processing must be performed on a deep clone
         Entity normalizedEntity = EntityObjectFactory.createNewEntity(externalEntity);
         emEntityFieldCleaner.cleanAndNormalize(normalizedEntity);
-        Entity consolidatedEntity = entityRecordService.mergeEntities(europeanaEntity, externalEntity);
+        Entity consolidatedEntity = entityRecordService.mergeEntities(europeanaEntity, normalizedEntity);
         entityRecordService.performReferentialIntegrity(consolidatedEntity);
         validateCompleteConstraints(consolidatedEntity);
         
