@@ -84,4 +84,25 @@ public class EntityObjectFactory {
 						entity.getType(), entity.getEntityId()));
 		}
 	}
+	
+	public static Entity createNewEntity(Entity entity)
+                        throws EntityManagementRuntimeException {
+	    
+	        switch (EntityTypes.valueOf(entity.getType())){
+                        case Agent:
+                                return new Agent((Agent)entity);
+                        case Place:
+                                return new Place((Place) entity);
+                        case Concept:
+                                return new Concept((Concept) entity);
+                        case Timespan:
+                                return new Timespan((Timespan) entity);
+                        case Organization:
+                                return new Organization((Organization) entity);
+
+                        default:
+                                throw new EntityManagementRuntimeException(String.format("Encountered invalid entityType %s in entityId=%s",
+                                                entity.getType(), entity.getEntityId()));
+                }
+        }
 }

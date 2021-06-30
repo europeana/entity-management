@@ -44,12 +44,14 @@
         <java.version>11</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <api.commons.version>0.3.5-SNAPSHOT</api.commons.version>
+        <api.commons.version>0.3.7-SNAPSHOT</api.commons.version>
         <corelib.version>2.11.0</corelib.version>
         <junit.version>5.7.0</junit.version>
         <jackson.version>2.11.4</jackson.version>
         <version.commonsLang3>3.0</version.commonsLang3>
+        <!-- 
         <version.annotationLd>1.1.6</version.annotationLd>
+         -->
         <spring-boot.version>2.4.0</spring-boot.version>
         <swagger.version>3.0.0</swagger.version>
         <morphia.version>2.1.4</morphia.version>

@@ -14,7 +14,6 @@ import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.web.EntityIdResponse;
 import eu.europeana.entitymanagement.exception.EntityMismatchException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
-import eu.europeana.entitymanagement.exception.EtagMismatchException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
@@ -28,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -94,7 +94,7 @@ public class EMController extends BaseRest {
 				0L;
 
 	    String etag = computeEtag(timestamp, FormatTypes.jsonld.name(), getApiVersion());
-	    checkIfMatchHeader(etag, request);
+		checkIfMatchHeaderWithQuotes(etag, request);
 	    entityRecordService.disableEntityRecord(entityRecord);
 
 		return noContentResponse(request);
@@ -135,6 +135,14 @@ public class EMController extends BaseRest {
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 	    @RequestBody Entity updateRequestEntity,
 	    HttpServletRequest request) throws Exception {
+		/*
+		 * we don't want to add @NotNull annotation within the entity class, since it has other validators
+		 * so we check for required properties here
+		 */
+		if(CollectionUtils.isEmpty(updateRequestEntity.getSameAs())){
+			throw new HttpBadRequestException("'sameAs' cannot be empty in request body");
+		}
+
 			if (emConfig.isAuthEnabled()) {
 				verifyWriteAccess(Operations.UPDATE, request);
 			}
@@ -153,11 +161,7 @@ public class EMController extends BaseRest {
 
 		 String etag = computeEtag(timestamp, FormatTypes.jsonld.name(), getApiVersion());
 
-			try {
-				checkIfMatchHeader(etag, request);
-			} catch (HttpException e) {
-				throw new EtagMismatchException("If-Match header value does not match generated ETag for entity");
-			}
+		 checkIfMatchHeaderWithQuotes(etag, request);
 
 			entityRecordService.replaceEuropeanaProxy(updateRequestEntity, entityRecord);
 			entityRecordService.update(entityRecord);
