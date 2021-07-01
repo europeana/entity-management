@@ -68,7 +68,7 @@ public class EntityUpdateSchedulingConfig implements InitializingBean {
     private void runScheduledFullUpdate() throws Exception {
         logger.info("Triggering scheduled full update for entities");
         scheduledJobLauncher.run(updateJobConfig.updateScheduledEntities(FULL),
-                BatchUtils.createJobParameters(FULL, Date.from(Instant.now())));
+                BatchUtils.createJobParameters(null, Date.from(Instant.now()), FULL));
     }
 
     /**
@@ -79,7 +79,7 @@ public class EntityUpdateSchedulingConfig implements InitializingBean {
     private void runScheduledMetricsUpdate() throws Exception {
         logger.info("Triggering scheduled metrics update for entities");
         scheduledJobLauncher.run(updateJobConfig.updateScheduledEntities(METRICS),
-                BatchUtils.createJobParameters(METRICS, Date.from(Instant.now())));
+                BatchUtils.createJobParameters(null, Date.from(Instant.now()), METRICS));
     }
 
 
