@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement.solr;
 
 import eu.europeana.entitymanagement.definitions.model.*;
 import eu.europeana.entitymanagement.solr.model.*;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import org.apache.commons.collections.MapUtils;
 
 import java.util.HashMap;
@@ -64,6 +65,29 @@ public class SolrUtils {
 			res = languageMap;
 		}
 		return res;
+	}
+
+	/**
+	 * Gets the {@link SolrEntity} class for an entity type.
+	 * @param solrType entity type in Solr
+	 * @return SolrEntity class type
+	 */
+	@SuppressWarnings("unchecked")
+	public static  <T extends Entity, U extends SolrEntity<T>>  Class<U> getSolrEntityClass(String solrType){
+		if(solrType.equals(EntityTypes.Agent.getEntityType())){
+			return (Class<U>) SolrAgent.class;
+		} else if(solrType.equals(EntityTypes.Concept.getEntityType())){
+			return (Class<U>) SolrConcept.class;
+		} else if(solrType.equals(EntityTypes.Organization.getEntityType())){
+			return (Class<U>) SolrOrganization.class;
+		} else if(solrType.equals(EntityTypes.Place.getEntityType())){
+			return (Class<U>) SolrPlace.class;
+		} else if(solrType.equals(EntityTypes.Timespan.getEntityType())){
+			return (Class<U>) SolrTimespan.class;
+		}
+
+		throw new IllegalArgumentException(String.format("Unrecognized entity type while determining Solr entity class: %s ",
+				solrType));
 	}
 
 

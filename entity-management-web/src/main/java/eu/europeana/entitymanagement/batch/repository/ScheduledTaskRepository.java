@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static dev.morphia.query.Sort.ascending;
+import static dev.morphia.query.experimental.filters.Filters.eq;
 import static dev.morphia.query.experimental.filters.Filters.in;
 import static eu.europeana.entitymanagement.batch.EMBatchConstants.*;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_DELETE_OPTS;
@@ -130,5 +131,11 @@ public class ScheduledTaskRepository implements InitializingBean {
 
         return datastore.find(EntityRecord.class)
                 .filter(in(ENTITY_ID, matchingIds)).iterator().toList();
+    }
+
+    public ScheduledTask getTask(String entityId) {
+        return datastore.find(ScheduledTask.class)
+                .filter(eq(ENTITY_ID, entityId))
+                .first();
     }
 }
