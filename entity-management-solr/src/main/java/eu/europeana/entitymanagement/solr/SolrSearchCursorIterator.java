@@ -4,6 +4,8 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.solr.model.SolrEntity;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -28,20 +30,25 @@ import java.util.stream.Collectors;
  * See https://solr.apache.org/guide/7_6/pagination-of-results.html#fetching-a-large-number-of-sorted-results-cursors
  */
 public class SolrSearchCursorIterator {
+    private final DocumentObjectBinder objectBinder = new DocumentObjectBinder();
+    private final Logger log = LogManager.getLogger(SolrSearchCursorIterator.class);
+
     private final SolrClient client;
     private final SolrQuery solrQuery;
-    private String cursorMark;
-    private final DocumentObjectBinder objectBinder = new DocumentObjectBinder();
 
+    private String cursorMark;
     private String previousCursorMark;
 
     public SolrSearchCursorIterator(SolrClient client, SolrQuery solrQuery) {
         validateQueryFields(solrQuery);
+        ensureSortClause(solrQuery);
 
         this.solrQuery = solrQuery;
         this.client = client;
         this.cursorMark = CursorMarkParams.CURSOR_MARK_START;
     }
+
+
 
     /**
      * Checks if additional documents can be retrieved for the Solr query
@@ -57,13 +64,23 @@ public class SolrSearchCursorIterator {
     public <T extends Entity> List<SolrEntity<T>> next() throws SolrServiceException {
         solrQuery.set(CursorMarkParams.CURSOR_MARK_PARAM, cursorMark);
         QueryResponse response;
+
         try {
             response = client.query(solrQuery);
         } catch (SolrServerException | IOException ex) {
             throw new SolrServiceException(String.format("Error while searching Solr q=%s", solrQuery.getQuery()), ex);
         }
+
         previousCursorMark = cursorMark;
         cursorMark = response.getNextCursorMark();
+
+        if(log.isDebugEnabled()) {
+            log.debug("Performed Solr search query in {}ms: numFound={}, cursorMark={}, q={}",
+                    response.getElapsedTime(), response.getResults().getNumFound(),
+                    cursorMark, solrQuery.getQuery());
+        }
+
+
         SolrDocumentList documents = response.getResults();
         if (CollectionUtils.isEmpty(documents)) {
             return Collections.emptyList();
@@ -101,6 +118,16 @@ public class SolrSearchCursorIterator {
         List<String> fields = Arrays.asList(fieldString.split(","));
         if (!Set.of(EntitySolrFields.TYPE, EntitySolrFields.ID).containsAll(fields)) {
             throw new IllegalArgumentException("SolrQuery fields must either be empty or contain id and type");
+        }
+    }
+
+    /**
+     * Cursor functionality requires a sort clause in the query
+     * @param solrQuery query object
+     */
+    private void ensureSortClause(SolrQuery solrQuery) {
+        if(CollectionUtils.isEmpty(solrQuery.getSorts())){
+            throw new IllegalArgumentException("SolrQuery must specify a sort with a unique field");
         }
     }
 }

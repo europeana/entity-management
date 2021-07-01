@@ -43,8 +43,8 @@ public class EntityManagementConfiguration  {
     @Value("${entitymanagement.solr.indexing.explicitCommits: false}")
     private boolean explicitCommitsEnabled;
 
-    @Value("${entitymanagement.solr.indexing.query.maxRows: 100}")
-    private int solrQueryMaxRows;
+    @Value("${entitymanagement.solr.indexing.query.maxPageSize: 100}")
+    private int solrQueryMaxPageSize;
 
     @Value("${entitymanagement.solr.searchapi.enrichments.query}")
     private String enrichmentsQuery;
@@ -179,7 +179,7 @@ public String getIndexingSolrUrl() {
         return explicitCommitsEnabled;
     }
 
-    public int getSolrQueryMaxRows() {
-      return solrQueryMaxRows;
+    public int getSolrQueryMaxPageSize() {
+      return solrQueryMaxPageSize;
     }
 }

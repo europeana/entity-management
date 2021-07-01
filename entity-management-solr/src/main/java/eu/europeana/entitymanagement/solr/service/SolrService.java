@@ -62,7 +62,7 @@ public class SolrService implements InitializingBean {
 					   @Qualifier(BEAN_SOLR_ENTITY_SUGGESTER_FILTER) FilterProvider solrEntityFilter) {
 		this.solrClient = solrClient;
 		this.isExplicitCommitsEnabled = configuration.explicitCommitsEnabled();
-		this.solrQueryMaxRows = configuration.getSolrQueryMaxRows();
+		this.solrQueryMaxRows = configuration.getSolrQueryMaxPageSize();
 
 		// copy default mapper so Solr payload configurations don't overwrite any global ones
 		this.payloadMapper = objectMapper.copy();
@@ -172,8 +172,7 @@ public class SolrService implements InitializingBean {
 	 * @return iterator
 	 */
 	public SolrSearchCursorIterator getSearchIterator(String searchQueryString, List<String> fields)  {
-
-		SolrQuery q = (new SolrQuery(searchQueryString))
+		SolrQuery q = new SolrQuery(searchQueryString)
 				.setRows(solrQueryMaxRows)
 				.setFields(fields.toArray(String[]::new))
 				.setSort(SolrQuery.SortClause.asc(EntitySolrFields.ID));
