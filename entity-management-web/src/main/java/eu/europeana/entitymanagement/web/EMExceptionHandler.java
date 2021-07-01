@@ -88,28 +88,28 @@ public class EMExceptionHandler extends EuropeanaGlobalExceptionHandler {
 
     /**
      * Customise the response for {@link org.springframework.web.HttpRequestMethodNotSupportedException}
-     * TODO: move to api-commons
+     * 
      */
-    //TODO: check alignment with api-commons method
-//    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-//    public ResponseEntity<EuropeanaApiErrorResponse> handleHttpRequestMethodNotSupported(
-//            HttpRequestMethodNotSupportedException e, HttpServletRequest httpRequest) {
-//
-//        EuropeanaApiErrorResponse response = new EuropeanaApiErrorResponse.Builder(httpRequest, e, stackTraceEnabled())
-//                .setStatus(HttpStatus.METHOD_NOT_ALLOWED.value())
-//                .setMessage(e.getMessage())
-//                .setError("Invalid method for request path")
-//                .build();
-//
-//        Set<HttpMethod> supportedMethods = e.getSupportedHttpMethods();
-//
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setContentType(MediaType.APPLICATION_JSON);
-//
-//        if (supportedMethods != null) {
-//            headers.setAllow(supportedMethods);
-//        }
-//        return new ResponseEntity<>(response, headers, HttpStatus.METHOD_NOT_ALLOWED);
-//    }
+    //TODO: remove method when updating API Commons version
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<EuropeanaApiErrorResponse> handleHttpRequestMethodNotSupported(
+            HttpRequestMethodNotSupportedException e, HttpServletRequest httpRequest) {
+
+        EuropeanaApiErrorResponse response = new EuropeanaApiErrorResponse.Builder(httpRequest, e, stackTraceEnabled())
+                .setStatus(HttpStatus.METHOD_NOT_ALLOWED.value())
+                .setMessage(e.getMessage())
+                .setError("Invalid method for request path")
+                .build();
+
+        Set<HttpMethod> supportedMethods = e.getSupportedHttpMethods();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        if (supportedMethods != null) {
+            headers.setAllow(supportedMethods);
+        }
+        return new ResponseEntity<>(response, headers, HttpStatus.METHOD_NOT_ALLOWED);
+    }
    
 }
