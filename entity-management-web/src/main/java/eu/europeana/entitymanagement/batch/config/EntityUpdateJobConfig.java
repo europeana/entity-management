@@ -9,6 +9,7 @@ import eu.europeana.entitymanagement.batch.processor.EntityMetricsProcessor;
 import eu.europeana.entitymanagement.batch.processor.EntityUpdateProcessor;
 import eu.europeana.entitymanagement.batch.reader.EntityRecordDatabaseReader;
 import eu.europeana.entitymanagement.batch.reader.ScheduledTaskDatabaseReader;
+import eu.europeana.entitymanagement.batch.service.FailedTaskService;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.batch.writer.EntityRecordDatabaseWriter;
 import eu.europeana.entitymanagement.batch.writer.EntitySolrWriter;
@@ -71,7 +72,9 @@ public class EntityUpdateJobConfig {
 
     private final ScheduledTaskService scheduledTaskService;
 
+    private final FailedTaskService failedTaskService;
     private final EntityUpdateListener entityUpdateListener;
+
 
     private final TaskExecutor stepThreadPoolExecutor;
     private final TaskExecutor synchronousTaskExecutor;
@@ -97,7 +100,7 @@ public class EntityUpdateJobConfig {
                                  EntityRecordDatabaseWriter dbWriter,
                                  EntitySolrWriter solrWriter, EntityRecordService entityRecordService,
                                  ScheduledTaskService scheduledTaskService,
-                                 EntityUpdateListener entityUpdateListener,
+                                 FailedTaskService failedTaskService, EntityUpdateListener entityUpdateListener,
                                  @Qualifier(STEP_EXECUTOR) TaskExecutor stepThreadPoolExecutor,
                                  @Qualifier(WEB_REQUEST_JOB_EXECUTOR) TaskExecutor synchronousTaskExecutor,
                                  EntityManagementConfiguration emConfig) {
@@ -112,6 +115,7 @@ public class EntityUpdateJobConfig {
         this.solrWriter = solrWriter;
         this.entityRecordService = entityRecordService;
         this.scheduledTaskService = scheduledTaskService;
+        this.failedTaskService = failedTaskService;
         this.entityUpdateListener = entityUpdateListener;
         this.stepThreadPoolExecutor = stepThreadPoolExecutor;
         this.synchronousTaskExecutor = synchronousTaskExecutor;
@@ -153,6 +157,11 @@ public class EntityUpdateJobConfig {
         return threadSafeReader(reader);
     }
 
+    @Bean
+    @StepScope
+    private EntityUpdateListener entityUpdateListener(@Value("#{jobParameters[updateType]}") String updateType){
+        return new EntityUpdateListener(failedTaskService, scheduledTaskService, BatchUpdateType.valueOf(updateType));
+    }
 
     /**
      * Creates a Composite ItemProcessor to perform Metis de-referencing, metadata update, and

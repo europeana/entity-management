@@ -53,12 +53,13 @@ public class ScheduledTaskService {
      * Removes entities from the ScheduledTasks collection if their entityId is contained within
      * the provided entityIds
      *
+     * @param updateType updateType to filter on
      * @param entityIds list of entityIds
      */
-    public void removeTasks(List<String> entityIds) {
-        long removeCount = repository.removeTasks(entityIds);
-        if (removeCount > 0) {
-            logger.info("Removed scheduled tasks from db: count={}", removeCount);
+    public void removeTasks(BatchUpdateType updateType, List<String> entityIds) {
+        long removeCount = repository.removeTasks(updateType, entityIds);
+        if (removeCount > 0 && logger.isDebugEnabled()) {
+            logger.debug("Removed scheduled tasks from db: count={}", removeCount);
         }
     }
 

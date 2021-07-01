@@ -8,6 +8,8 @@ import java.util.Date;
 import java.util.List;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 
 public class BatchUtils {
 
@@ -23,18 +25,19 @@ public class BatchUtils {
    *
    * @param entityId entity id
    * @param runTime   trigger time for job
+   * @param updateType update tpe for job
    * @return JobParameters with trigger time and entityId
    */
-  public static JobParameters createJobParameters(String entityId, Date runTime) {
-    return new JobParametersBuilder()
-        .addDate(JobParameter.CURRENT_START_TIME.key(), runTime).addString(JobParameter.ENTITY_ID.key(),
-          entityId).toJobParameters();
-  }
-
-  public static JobParameters createJobParameters(BatchUpdateType updateType, Date runTime) {
-    return new JobParametersBuilder()
+  public static JobParameters createJobParameters(@Nullable String entityId, Date runTime, BatchUpdateType updateType) {
+    JobParametersBuilder jobParametersBuilder = new JobParametersBuilder()
             .addDate(JobParameter.CURRENT_START_TIME.key(), runTime)
-            .addString(JobParameter.UPDATE_TYPE.key(), updateType.name())
+            .addString(JobParameter.UPDATE_TYPE.key(), updateType.name());
+
+    if (StringUtils.hasLength(entityId)) {
+      jobParametersBuilder.addString(JobParameter.ENTITY_ID.key(), entityId);
+    }
+
+    return jobParametersBuilder
             .toJobParameters();
   }
 
