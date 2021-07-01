@@ -737,7 +737,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
         mockMvc.perform(MockMvcRequestBuilders.post(BASE_SERVICE_URL + "/management/metrics")
                 .contentType(MediaType.APPLICATION_JSON)
-                .param(QUERY_PARAM_QUERY, "*:*"))
+                .param(QUERY_PARAM_QUERY, "id:\"" + place.getEntityId()+ "\""))
                 .andExpect(status().isAccepted())
                 .andReturn();
 
@@ -754,7 +754,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
         mockMvc.perform(MockMvcRequestBuilders.post(BASE_SERVICE_URL + "/management/update")
                 .contentType(MediaType.APPLICATION_JSON)
-                .param(QUERY_PARAM_QUERY, "*:*"))
+                .param(QUERY_PARAM_QUERY, "id:\"" + concept.getEntityId()+ "\""))
                 .andExpect(status().isAccepted())
                 .andReturn();
 
