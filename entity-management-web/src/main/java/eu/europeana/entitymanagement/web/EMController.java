@@ -5,7 +5,8 @@ import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
-import eu.europeana.entitymanagement.batch.BatchService;
+import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
+import eu.europeana.entitymanagement.batch.model.BatchUpdateType;
 import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
@@ -34,7 +35,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -51,7 +51,7 @@ public class EMController extends BaseRest {
   private final SolrService solrService;
   private final MetisDereferenceService dereferenceService;
   private final DataSources datasources;
-  private final BatchService batchService;
+  private final EntityUpdateService entityUpdateService;
   private final EntityManagementConfiguration emConfig;
 
   private static final String EXTERNAL_ID_REMOVED_MSG = "Entity id '%s' already exists as '%s', which has been removed";
@@ -63,13 +63,13 @@ public class EMController extends BaseRest {
   @Autowired
 	public EMController(EntityRecordService entityRecordService,
 						SolrService solrService, MetisDereferenceService dereferenceService, DataSources datasources,
-						BatchService batchService,
+						EntityUpdateService entityUpdateService,
 						EntityManagementConfiguration emConfig) {
 		this.entityRecordService = entityRecordService;
 	  this.solrService = solrService;
 	  this.dereferenceService = dereferenceService;
 		this.datasources = datasources;
-		this.batchService = batchService;
+		this.entityUpdateService = entityUpdateService;
 		this.emConfig = emConfig;
 	}
 
@@ -206,9 +206,7 @@ public class EMController extends BaseRest {
 		List<String> failures = entityIds.stream().filter(e -> !existingEntityIds.contains(e))
 				.collect(Collectors.toList());
 
-		// runAsynchronously since we're not including updated entities in response
-		launchUpdateTask(existingEntityIds, true);
-
+		entityUpdateService.scheduleUpdates(existingEntityIds, BatchUpdateType.FULL);
 		return  ResponseEntity.accepted().body(new EntityIdResponse(entityIds.size(), existingEntityIds, failures));
 	}
 
@@ -227,8 +225,8 @@ public class EMController extends BaseRest {
 		List<String> failures = entityIds.stream()
 				.filter(e -> !existingEntityIds.contains(e))
 				.collect(Collectors.toList());
-		launchUpdateMetrics(existingEntityIds);
 
+		entityUpdateService.scheduleUpdates(existingEntityIds, BatchUpdateType.METRICS);
 		return  ResponseEntity.accepted().body(new EntityIdResponse(entityIds.size(), existingEntityIds, failures));
 	}
 
@@ -383,7 +381,7 @@ public class EMController extends BaseRest {
 	private ResponseEntity<String> launchTaskAndRetrieveEntity(HttpServletRequest request, String type, String identifier,
 															   EntityRecord entityRecord, String profile) throws Exception {
 		// launch synchronous update, then retrieve entity from DB afterwards
-		launchUpdateTask(Collections.singletonList(entityRecord.getEntityId()), false);
+		launchUpdateTask(entityRecord.getEntityId());
 		entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
 
 		return generateResponseEntity(request, profile, FormatTypes.jsonld, null, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8,
@@ -410,17 +408,11 @@ public class EMController extends BaseRest {
 		return null;
 	}
 
-	private void launchUpdateTask(List<String> entityIds, boolean runAsynchronously)
+	private void launchUpdateTask(String entityId)
       throws Exception {
-    logger.info("Launching update task for entityIds={}. async={}", entityIds, runAsynchronously);
-    batchService.launchSpecificEntityUpdate(entityIds, runAsynchronously);
+    logger.info("Launching synchronous update for entityId={}", entityId);
+    entityUpdateService.runSynchronousUpdate(entityId);
   }
-
-	private void launchUpdateMetrics(List<String> entityIds)
-			throws Exception {
-		logger.info("Launching Update Metrics task for entityIds={}", entityIds);
-		batchService.launchEntityMetricsUpdate(entityIds, true);
-	}
 
 	/**
 	 * Gets the database identifier from an EntityId string

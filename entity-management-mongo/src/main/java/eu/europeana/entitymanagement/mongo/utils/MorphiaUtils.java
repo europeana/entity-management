@@ -11,7 +11,7 @@ public class MorphiaUtils {
 
     // Indicates that an update query should be executed as an "upsert",
     // ie. creates new records if they do not already exist, or updates them if they do.
-    public static final UpdateOptions UPSET_OPTS = new UpdateOptions().upsert(true);
+    public static final UpdateOptions UPSERT_OPTS = new UpdateOptions().upsert(true);
 
     private MorphiaUtils() {
 	// private constructor to prevent instantiation

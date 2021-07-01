@@ -41,7 +41,7 @@ public class AppConfig extends AppConfigConstants{
     @Resource(name = BEAN_XML_MAPPER)
     private XmlMapper xmlMapper;
 
-    @Resource(name= BEAN_JOB_EXECUTOR)
+    @Resource(name= SCHEDULED_JOB_EXECUTOR)
     private TaskExecutor jobLauncherExecutor;
 
     
