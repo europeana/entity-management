@@ -2,16 +2,16 @@ package eu.europeana.entitymanagement.web;
 
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.exception.MetisDereferenceError;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import eu.europeana.entitymanagement.web.xml.model.metis.EnrichmentResultList;
-import java.io.StringReader;
-import javax.xml.bind.JAXBContext;
+
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import java.io.StringReader;
+import java.util.Optional;
 
 public class MetisDereferenceUtils {
-
-  private static Unmarshaller jaxbDeserializer;
 
   /**
    * Unmarshalls Metis dereference response into an Entity
@@ -27,8 +27,8 @@ public class MetisDereferenceUtils {
       try {
         derefResult = (EnrichmentResultList) unmarshaller.unmarshal(new StringReader(metisResponseBody));
       } catch (JAXBException | RuntimeException e) {
-        throw new EuropeanaApiException(
-            "Unexpected exception occurred when parsing metis dereference response for entity:  " + id, e);
+        throw new MetisDereferenceError(
+            String.format("Error while deserializing metis dereference response for uri '%s'", id), e);
       }
 
 
@@ -39,9 +39,17 @@ public class MetisDereferenceUtils {
       return null;
     }
 
-    XmlBaseEntityImpl<?> xmlBaseEntity = derefResult.getEnrichmentBaseResultWrapperList().get(0)
-        .getEnrichmentBaseList().get(0);
+    Optional<XmlBaseEntityImpl<?>> entityOptional = derefResult
+            .getEnrichmentBaseResultWrapperList()
+            .get(0)
+            .getEnrichmentBaseList().stream()
+            // Metis sometimes returns multiple entities in result. Make sure the correct one is picked.
+            .filter(e -> id.equals(e.getAbout())).findFirst();
 
-    return xmlBaseEntity.toEntityModel();
+    if(entityOptional.isEmpty()){
+      throw new MetisDereferenceError(String.format("No match in Metis dereference response for uri '%s'", id));
+    }
+
+    return entityOptional.get().toEntityModel();
   }
 }
