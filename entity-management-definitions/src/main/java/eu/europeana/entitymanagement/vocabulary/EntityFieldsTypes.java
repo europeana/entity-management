@@ -1,6 +1,6 @@
 package eu.europeana.entitymanagement.vocabulary;
 
-import eu.europeana.entitymanagement.definitions.exceptions.EntityValidationException;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityFieldAccessException;
 
 public enum EntityFieldsTypes {
 
@@ -122,7 +122,7 @@ public enum EntityFieldsTypes {
         try {
             return valueOf(fieldName).getFieldType();
         }catch (IllegalArgumentException e){
-            throw new EntityValidationException("Unknown field: " + fieldName, e);
+            throw new EntityFieldAccessException("Unknown field: " + fieldName, e);
         }
     }
 
@@ -135,7 +135,7 @@ public enum EntityFieldsTypes {
             String cardinality = valueOf(fieldName).getFieldCardinality();
             return FIELD_CARDINALITY_0_INFINITE.equals(cardinality) || FIELD_CARDINALITY_1_INFINITE.equals(cardinality);
         }catch (IllegalArgumentException e){
-            throw new EntityValidationException("Unknown field: " + fieldName, e);
+            throw new EntityFieldAccessException("Unknown field: " + fieldName, e);
         }
     }
     
@@ -144,7 +144,7 @@ public enum EntityFieldsTypes {
             String cardinality = valueOf(fieldName).getFieldCardinality();
             return FIELD_CARDINALITY_1_INFINITE.equals(cardinality) || FIELD_CARDINALITY_1_1.equals(cardinality);
         }catch (IllegalArgumentException e){
-            throw new EntityValidationException("Unknown field: " + fieldName, e);
+            throw new EntityFieldAccessException("Unknown field: " + fieldName, e);
         }
     }
     

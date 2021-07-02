@@ -5,8 +5,7 @@ import org.bson.types.ObjectId;
 
 import java.time.Instant;
 
-import static eu.europeana.entitymanagement.batch.EMBatchConstants.CREATED;
-import static eu.europeana.entitymanagement.batch.EMBatchConstants.UPDATE_TYPE;
+import static eu.europeana.entitymanagement.batch.EMBatchConstants.*;
 
 
 @Entity("ScheduledTasks")

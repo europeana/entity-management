@@ -77,6 +77,8 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
 	     * metis deserializer -> get the entity for the external proxy
 	     */
 		XmlConceptImpl xmlEntity = (XmlConceptImpl) getMetisResponse(CONCEPT_DATA_RECONCELIATION_XML);
+		    Concept externalEntity = xmlEntity.toEntityModel();
+		        
 
 	    /*
 	     * read the test data from the json file -> get the entity for the internal
@@ -84,35 +86,21 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
 	     */
 	    Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
 
-	    /*
-	     * creating the entity record
-	     */
-	    EntityRecord entityRecord = new EntityRecord();
-	    EntityProxy internalProxy = new EntityProxy();
-	    //TODO: set shell entity on EntityRecord
-	    internalProxy.setEntity(concept);
-	    internalProxy.setProxyId("http://data.europeana.eu/proxy1");
-	    EntityProxy externalProxy = new EntityProxy();
-	    externalProxy.setEntity(xmlEntity.toEntityModel());
-	    externalProxy.setProxyId("http://data.external.org/proxy1");
-	    entityRecord.addProxy(internalProxy);
-	    entityRecord.addProxy(externalProxy);
-
+	    
 	    //aggregation is reused from consolidated version
 	    Concept notConsolidated = EntityObjectFactory.createEntityObject(EntityTypes.Concept);
-	    notConsolidated.setIsAggregatedBy(new Aggregation());
-	    entityRecord.setEntity(notConsolidated);
+//	    notConsolidated.setIsAggregatedBy(new Aggregation());
+//	    entityRecord.setEntity(notConsolidated);
 
-
-	    entityRecordService.mergeEntity(entityRecord);
+	    Concept mergedEntity = (Concept) entityRecordService.mergeEntities(concept, externalEntity);
 	    /*
 	     * here the assertions are manual and are defined based on what is in put in the
 	     * corresponsing proxy's entity objects
 	     */
-	    Assertions.assertNotNull(entityRecord.getEntity().getNote());
-	    Assertions.assertNotNull(entityRecord.getEntity().getSameAs());
-	    Assertions.assertTrue(((Concept) entityRecord.getEntity()).getBroader().size() > 1);
-	    Assertions.assertNotNull(entityRecord.getEntity().getPrefLabel());
+	    Assertions.assertNotNull(mergedEntity.getNote());
+	    Assertions.assertNotNull(mergedEntity.getSameAs());
+	    Assertions.assertTrue(mergedEntity.getBroader().size() > 1);
+	    Assertions.assertNotNull(mergedEntity.getPrefLabel());
 	}
 
 	
@@ -128,41 +116,22 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
 	     * proxy
 	     */
 	    Concept concept = objectMapper.readValue(loadFile(CONCEPT_BATHTUB), Concept.class);
+	    Concept externalEntity = xmlEntity.toEntityModel();
 
-	    /*
-	     * creating the entity record
-	     */
-	    EntityRecord entityRecord = new EntityRecord();
-	    EntityProxy internalProxy = new EntityProxy();
-		//TODO: set shell entity on EntityRecord
-	    internalProxy.setEntity(concept);
-	    internalProxy.setProxyId("http://data.europeana.eu/concept/1#proxy_europeana");
-	    EntityProxy externalProxy = new EntityProxy();
-	    externalProxy.setEntity(xmlEntity.toEntityModel());
-	    externalProxy.setProxyId("http://www.wikidata.org/entity/Q1101933");
-	    entityRecord.addProxy(internalProxy);
-	    entityRecord.addProxy(externalProxy);
-
-	   //aggregation is reused from consolidated version
-            Concept notConsolidated = EntityObjectFactory.createEntityObject(EntityTypes.Concept);
-            notConsolidated.setIsAggregatedBy(new Aggregation());
-            entityRecord.setEntity(notConsolidated);
-
-
-	    entityRecordService.mergeEntity(entityRecord);
+            Concept mergedEntity = (Concept) entityRecordService.mergeEntities(concept, externalEntity);
 	    /*
 	     * here the assertions are manual and are defined based on what is in put in the
 	     * corresponsing proxy's entity objects
 	     */
 	    Concept concept_consolidated = objectMapper.readValue(loadFile(CONCEPT_CONSOLIDATED_BATHTUB), Concept.class);
 	    //TODO: temporary fix untill the merge entities is stable see EntityRecordService.UPDARTE_FIELDS_TO_IGNORE
-	    concept_consolidated.setType(entityRecord.getEntity().getType());
+	    concept_consolidated.setType(concept.getType());
 	    //reuse the isAggregatedBy field 
-	    concept_consolidated.setIsAggregatedBy(entityRecord.getEntity().getIsAggregatedBy());
+//	    concept_consolidated.setIsAggregatedBy(entityRecord.getEntity().getIsAggregatedBy());
 	    
 	    
 	    EntityComparator entityComparator = new EntityComparator();
-		assertEquals(0, entityComparator.compare(concept_consolidated, entityRecord.getEntity()));
+		assertEquals(0, entityComparator.compare(concept_consolidated, mergedEntity));
 	    
 	}
 	

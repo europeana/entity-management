@@ -40,6 +40,7 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.solr.model.SolrEntity;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
+import org.springframework.util.CollectionUtils;
 
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.*;
 
@@ -108,6 +109,11 @@ public class SolrService implements InitializingBean {
 	 * @throws SolrServiceException if error occurs while generating payload, or during Solr indexing
 	 */
 	public void storeMultipleEntities(final List<SolrEntity<? extends Entity>> solrEntityList) throws SolrServiceException {
+		if(CollectionUtils.isEmpty(solrEntityList)){
+			// prevents Solr error if empty list is passed to this method
+			return;
+		}
+
 		// first set payload on SolrEntities
 		for (SolrEntity<? extends Entity> solrEntity : solrEntityList) {
 			setPayload(solrEntity);

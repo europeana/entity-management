@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.batch.listener;
 
+import eu.europeana.entitymanagement.batch.model.BatchUpdateType;
 import eu.europeana.entitymanagement.batch.service.FailedTaskService;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -18,19 +19,20 @@ import static eu.europeana.entitymanagement.batch.BatchUtils.getEntityIds;
 /**
  * Listens for Read, Processing and Write operations during Entity Update steps.
  */
-@Component
 public class EntityUpdateListener extends ItemListenerSupport<EntityRecord, EntityRecord> {
 
     private static final Logger logger = LogManager.getLogger(EntityUpdateListener.class);
 
     private final FailedTaskService failedTaskService;
     private final ScheduledTaskService scheduledTaskService;
+    private final BatchUpdateType updateType;
 
     @Autowired
   public EntityUpdateListener(
-            FailedTaskService failedTaskService, ScheduledTaskService scheduledTaskService) {
+            FailedTaskService failedTaskService, ScheduledTaskService scheduledTaskService, BatchUpdateType updateType) {
     this.failedTaskService = failedTaskService;
         this.scheduledTaskService = scheduledTaskService;
+        this.updateType = updateType;
     }
 
 
@@ -48,8 +50,8 @@ public class EntityUpdateListener extends ItemListenerSupport<EntityRecord, Enti
     // Remove entries from the FailedTask collection if exists
     failedTaskService.removeFailures(Arrays.asList(entityIds));
 
-      // Also remove from ScheduledTasks
-    scheduledTaskService.removeTasks(Arrays.asList(entityIds));
+      // Also remove from ScheduledTasks (only deleted if updateType matches that of current run)
+    scheduledTaskService.removeTasks(updateType, Arrays.asList(entityIds));
   }
 
   @Override

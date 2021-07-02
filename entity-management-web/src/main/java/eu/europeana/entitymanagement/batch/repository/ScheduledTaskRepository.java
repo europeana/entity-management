@@ -96,14 +96,16 @@ public class ScheduledTaskRepository implements InitializingBean {
 
     /**
      * Deletes {@link ScheduledTask} entries in the db whose entityId is contained within
-     * the provided list.
+     * the provided list, also matching the updateType.
      *
+     *
+     * @param updateType updateType to filter on
      * @param entityIds entityId list
      * @return number of deleted entries
      */
-    public long removeTasks(List<String> entityIds) {
+    public long removeTasks(BatchUpdateType updateType, List<String> entityIds) {
         return datastore.find(ScheduledTask.class).filter(
-                in(ENTITY_ID, entityIds))
+                in(ENTITY_ID, entityIds), eq(UPDATE_TYPE, updateType))
                 .delete(MULTI_DELETE_OPTS).getDeletedCount();
     }
 

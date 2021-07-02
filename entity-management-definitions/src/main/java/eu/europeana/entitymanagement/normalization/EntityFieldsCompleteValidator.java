@@ -22,7 +22,7 @@ import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.stereotype.Component;
 
 import eu.europeana.entitymanagement.common.config.LanguageCodes;
-import eu.europeana.entitymanagement.definitions.exceptions.EntityValidationException;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityFieldAccessException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
@@ -94,9 +94,9 @@ public class EntityFieldsCompleteValidator implements ConstraintValidator<Entity
 				returnValue = returnValue && returnValueLocal;
 				
 			} catch (IllegalArgumentException e) {
-			    throw new EntityValidationException("During the validation of the entity fields an illegal or inappropriate argument exception has happened.", e);	    
+			    throw new EntityFieldAccessException("During the validation of the entity fields an illegal or inappropriate argument exception has happened.", e);	    
 			} catch (IllegalAccessException e) {
-			    throw new EntityValidationException("During the validation of the entity fields an illegal access to some method or field has happened.", e);
+			    throw new EntityFieldAccessException("During the validation of the entity fields an illegal access to some method or field has happened.", e);
 			} 
 		}
 		return returnValue;
