@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -67,4 +68,13 @@ public class ScheduledTaskService {
         return repository.getEntityRecordsForTasks(start, count, queryFilters);
     }
 
+
+    /**
+     * Gets the ScheduledTask with the given entityId from the database
+     * @param entityId entityId
+     * @return true if exists, false otherwise
+     */
+    public Optional<ScheduledTask> getTask(String entityId){
+        return Optional.ofNullable(repository.getTask(entityId));
+    }
 }

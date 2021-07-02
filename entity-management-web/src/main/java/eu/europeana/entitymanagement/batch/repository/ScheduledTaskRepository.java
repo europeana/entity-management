@@ -134,4 +134,10 @@ public class ScheduledTaskRepository implements InitializingBean {
         return datastore.find(EntityRecord.class)
                 .filter(in(ENTITY_ID, matchingIds)).iterator().toList();
     }
+
+    public ScheduledTask getTask(String entityId) {
+        return datastore.find(ScheduledTask.class)
+                .filter(eq(ENTITY_ID, entityId))
+                .first();
+    }
 }

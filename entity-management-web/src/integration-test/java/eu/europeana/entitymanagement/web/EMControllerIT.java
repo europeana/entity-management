@@ -7,8 +7,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.europeana.entitymanagement.AbstractIntegrationTest;
+import eu.europeana.entitymanagement.batch.model.BatchUpdateType;
+import eu.europeana.entitymanagement.batch.model.ScheduledTask;
+import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.*;
+import eu.europeana.entitymanagement.solr.SolrUtils;
+import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
@@ -16,9 +21,11 @@ import eu.europeana.entitymanagement.vocabulary.XmlFields;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import okhttp3.mockwebserver.MockResponse;
+import org.apache.commons.lang.StringUtils;
 import org.assertj.core.util.Maps;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,6 +55,7 @@ import java.util.concurrent.TimeUnit;
 import static eu.europeana.api.commons.web.http.HttpHeaders.*;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.*;
 import static org.hamcrest.CoreMatchers.containsString;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.QUERY_PARAM_QUERY;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -67,6 +75,12 @@ public class EMControllerIT extends AbstractIntegrationTest {
     @Autowired
     private EntityRecordService entityRecordService;
 
+    @Autowired
+    private SolrService solrService;
+
+    @Autowired
+    private ScheduledTaskService taskService;
+
     @Qualifier(AppConfigConstants.BEAN_JSON_MAPPER)
     @Autowired
     private ObjectMapper objectMapper;
@@ -76,7 +90,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
     @BeforeEach
     public void setup() {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
-
+        
         //ensure a clean db between test runs
         this.entityRecordService.dropRepository();
     }
@@ -308,9 +322,9 @@ public class EMControllerIT extends AbstractIntegrationTest {
         	Assertions.assertTrue(prefLabelUpdated.containsKey(prefLabelEntry.getKey()));
         	// Text fields will be capitalised
         	Assertions.assertTrue(prefLabelUpdated.containsValue(prefLabelEntry.getValue()));
-        	//TODO: consider capitalization of Europeana Metadata as well 
+        	//TODO: consider capitalization of Europeana Metadata as well
 //        	Assertions.assertTrue(prefLabelUpdated.containsValue(StringUtils.capitalize(prefLabelEntry.getValue())));
-        	
+
         }
 
     }
@@ -506,11 +520,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
     public void retrieveOrganizationExternalShouldBeSuccessful() throws Exception {
 	//TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
 	// read the test data for the Organization entity from the file
-        Organization organization = objectMapper.readValue(loadFile(ORGANIZATION_JSON), Organization.class);
-        EntityRecord entityRecord =  new EntityRecord();
-        entityRecord.setEntity(organization);
-        entityRecord.setEntityId(organization.getEntityId());
-        entityRecordService.saveEntityRecord(entityRecord);
+        Organization organization = createOrganization();
 
         String requestPath = getEntityRequestPath(organization.getEntityId());
         ResultActions resultActions = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".jsonld")
@@ -524,15 +534,12 @@ public class EMControllerIT extends AbstractIntegrationTest {
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, organization);
     }
 
+
     @Test
     public void retrievePlaceExternalShouldBeSuccessful() throws Exception {
 	//TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
 	// read the test data for the Place entity from the file
-        Place place = objectMapper.readValue(loadFile(PLACE_JSON), Place.class);
-        EntityRecord entityRecord =  new EntityRecord();
-        entityRecord.setEntity(place);
-        entityRecord.setEntityId(place.getEntityId());
-        entityRecordService.saveEntityRecord(entityRecord);
+        Place place = createPlace();
 
         String requestPath = getEntityRequestPath(place.getEntityId());
         ResultActions resultActions = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".jsonld")
@@ -564,15 +571,15 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.id", is(place.getEntityId())))
 //                .andExpect(jsonPath("$.isAggregatedBy.pageRank", is(place.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Place.name())))
-                
-//                There are no proxies in the response if the registration is not called through the mock service 
+
+//                There are no proxies in the response if the registration is not called through the mock service
 //                .andExpect(jsonPath("$.proxies[0].ProxyIn.pageRank").doesNotExist())
 //                .andExpect(jsonPath("$.proxies[0].ProxyIn.recordCount").doesNotExist())
 //                .andExpect(jsonPath("$.proxies[0].ProxyIn.score").doesNotExist())
                 ;
     }
-    
-    
+
+
     @Test
     public void proxiesShouldNotHaveMetrics() throws Exception {
         // set mock Metis response
@@ -585,7 +592,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .param(WebEntityConstants.QUERY_PARAM_PROFILE, "internal"))
                 .andExpect(status().isAccepted());
-        
+
         results.andExpect(jsonPath("$.id", any(String.class)))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())))
                 .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
@@ -599,12 +606,12 @@ public class EMControllerIT extends AbstractIntegrationTest {
         .andExpect(jsonPath("$.proxies[0].proxyIn.pageRank").doesNotExist())
         .andExpect(jsonPath("$.proxies[0].proxyIn.recordCount").doesNotExist())
         .andExpect(jsonPath("$.proxies[0].proxyIn.score").doesNotExist());
-        
+
         results.andExpect(jsonPath("$.proxies[1].proxyIn").exists())
         .andExpect(jsonPath("$.proxies[1].proxyIn.pageRank").doesNotExist())
         .andExpect(jsonPath("$.proxies[1].proxyIn.recordCount").doesNotExist())
         .andExpect(jsonPath("$.proxies[1].proxyIn.score").doesNotExist());
-        
+
 
     }
 
@@ -613,11 +620,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
     public void retrieveTimespanExternalShouldBeSuccessful() throws Exception {
 	//TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
 	// read the test data for the Timespan entity from the file
-        Timespan timespan = objectMapper.readValue(loadFile(TIMESPAN_JSON), Timespan.class);
-        EntityRecord entityRecord =  new EntityRecord();
-        entityRecord.setEntity(timespan);
-        entityRecord.setEntityId(timespan.getEntityId());
-        entityRecordService.saveEntityRecord(entityRecord);
+        Timespan timespan = createTimespan();
 
         String requestPath = getEntityRequestPath(timespan.getEntityId());
         ResultActions resultActions = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".jsonld")
@@ -630,6 +633,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
         String contentXml = getRetrieveEntityXmlResponse(requestPath);
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, timespan);
     }
+
 
     @Test
     public void retrieveEntityInternalShouldBeSuccessful() throws Exception {
@@ -659,12 +663,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
     @Test
     void updateFromExternalDatasourceShouldRunSuccessfully() throws Exception {
         // create entity in DB
-        Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
-        EntityRecord entityRecord = new EntityRecord();
-        entityRecord.setEntity(concept);
-        entityRecord.setEntityId(concept.getEntityId());
-        EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
-
+        EntityRecord record = createConcept();
         String requestPath = getEntityRequestPath(record.getEntityId());
 
         mockMvc.perform(post(BASE_SERVICE_URL + "/" + requestPath + "/management/update")
@@ -677,11 +676,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
     @Test
     void deletionShouldBeSuccessful() throws Exception {
         // create entity in DB
-        Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
-        EntityRecord entityRecord = new EntityRecord();
-        entityRecord.setEntity(concept);
-        entityRecord.setEntityId(concept.getEntityId());
-        EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
+        EntityRecord record = createConcept();
 
         String requestPath = getEntityRequestPath(record.getEntityId());
 
@@ -697,14 +692,11 @@ public class EMControllerIT extends AbstractIntegrationTest {
     }
 
 
+
     @Test
     void deletionFailsIfMatch() throws Exception {
         // create entity in DB
-        Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
-        EntityRecord entityRecord = new EntityRecord();
-        entityRecord.setEntity(concept);
-        entityRecord.setEntityId(concept.getEntityId());
-        EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
+        EntityRecord record = createConcept();
 
         String requestPath = getEntityRequestPath(record.getEntityId());
 
@@ -808,6 +800,40 @@ public class EMControllerIT extends AbstractIntegrationTest {
         Assertions.assertEquals(externalUriWikidata, externalProxy.getProxyId());
     }
 
+    @Test
+    void triggeringMetricsUpdateViaSearchShouldBeSuccessful() throws Exception {
+        Place place = createPlace();
+        solrService.storeEntity(SolrUtils.createSolrEntity(place));
+
+        mockMvc.perform(MockMvcRequestBuilders.post(BASE_SERVICE_URL + "/management/metrics")
+                .contentType(MediaType.APPLICATION_JSON)
+                .param(QUERY_PARAM_QUERY, "id:\"" + place.getEntityId()+ "\""))
+                .andExpect(status().isAccepted())
+                .andReturn();
+
+        Optional<ScheduledTask> task = taskService.getTask(place.getEntityId());
+
+        Assertions.assertTrue(task.isPresent());
+        Assertions.assertEquals(BatchUpdateType.METRICS, task.get().getUpdateType());
+    }
+
+    @Test
+    void triggeringFullUpdateViaSearchShouldBeSuccessful() throws Exception {
+        EntityRecord concept = createConcept();
+        solrService.storeEntity(SolrUtils.createSolrEntity(concept.getEntity()));
+
+        mockMvc.perform(MockMvcRequestBuilders.post(BASE_SERVICE_URL + "/management/update")
+                .contentType(MediaType.APPLICATION_JSON)
+                .param(QUERY_PARAM_QUERY, "id:\"" + concept.getEntityId()+ "\""))
+                .andExpect(status().isAccepted())
+                .andReturn();
+
+        Optional<ScheduledTask> task = taskService.getTask(concept.getEntityId());
+
+        Assertions.assertTrue(task.isPresent());
+        Assertions.assertEquals(BatchUpdateType.FULL, task.get().getUpdateType());
+    }
+
     /**
      * Checks common response headers.
      * Allow header checked within each test method.
@@ -897,5 +923,45 @@ public class EMControllerIT extends AbstractIntegrationTest {
         		.andReturn();
         return resultXml.getResponse().getContentAsString(StandardCharsets.UTF_8);
     }
-   
+
+
+    private EntityRecord createConcept() throws Exception {
+        Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
+        EntityRecord entityRecord = new EntityRecord();
+        entityRecord.setEntity(concept);
+        entityRecord.setEntityId(concept.getEntityId());
+        return entityRecordService.saveEntityRecord(entityRecord);
+    }
+
+    @NotNull
+    private Place createPlace() throws Exception {
+        Place place = objectMapper.readValue(loadFile(PLACE_JSON), Place.class);
+        EntityRecord entityRecord =  new EntityRecord();
+        entityRecord.setEntity(place);
+        entityRecord.setEntityId(place.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord);
+        return place;
+    }
+
+    @NotNull
+    private Timespan createTimespan() throws Exception {
+        Timespan timespan = objectMapper.readValue(loadFile(TIMESPAN_JSON), Timespan.class);
+        EntityRecord entityRecord =  new EntityRecord();
+        entityRecord.setEntity(timespan);
+        entityRecord.setEntityId(timespan.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord);
+        return timespan;
+    }
+
+
+    @NotNull
+    private Organization createOrganization() throws Exception {
+        Organization organization = objectMapper.readValue(loadFile(ORGANIZATION_JSON), Organization.class);
+        EntityRecord entityRecord =  new EntityRecord();
+        entityRecord.setEntity(organization);
+        entityRecord.setEntityId(organization.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord);
+        return organization;
+    }
+
 }
