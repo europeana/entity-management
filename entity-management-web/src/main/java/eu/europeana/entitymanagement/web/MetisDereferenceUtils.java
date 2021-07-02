@@ -1,7 +1,6 @@
 package eu.europeana.entitymanagement.web;
 
 import eu.europeana.api.commons.error.EuropeanaApiException;
-import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.exception.MetisDereferenceError;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import eu.europeana.entitymanagement.web.xml.model.metis.EnrichmentResultList;
@@ -20,7 +19,7 @@ public class MetisDereferenceUtils {
    * @return Entity implementation
    * @throws EuropeanaApiException on error
    */
-  public static Entity parseMetisResponse(Unmarshaller unmarshaller, String id, String metisResponseBody)
+  public static XmlBaseEntityImpl<?> parseMetisResponse(Unmarshaller unmarshaller, String id, String metisResponseBody)
       throws EuropeanaApiException {
     EnrichmentResultList derefResult;
 
@@ -50,6 +49,6 @@ public class MetisDereferenceUtils {
       throw new MetisDereferenceError(String.format("No match in Metis dereference response for uri '%s'", id));
     }
 
-    return entityOptional.get().toEntityModel();
+    return entityOptional.get();
   }
 }

@@ -18,8 +18,8 @@ public class BaseMvcTestUtils {
     public static final String PLACE_JSON = "/content/place.json";
     public static final String TIMESPAN_JSON = "/content/timespan.json"; 
     
-    public static final String CONCEPT_REGISTER_JSON = "/content/concept_register.json";
-    public static final String AGENT_REGISTER_JSON = "/content/agent_register.json";
+    public static final String CONCEPT_REGISTER_BATHTUB_JSON = "/content/concept_register.json";
+    public static final String AGENT_REGISTER_DAVINCI_JSON = "/content/agent_register_davinci.json";
     public static final String AGENT_REGISTER_STALIN_JSON = "/content/agent_register_stalin.json";
     public static final String AGENT_REGISTER_JAN_VERMEER = "/content/agent_register_jan_vermeer.json";
     public static final String ORGANIZATION_REGISTER_JSON = "/content/organization_register.json";
@@ -31,8 +31,9 @@ public class BaseMvcTestUtils {
     public static final String AGENT_VALIDATE_FIELDS_JSON = "/content/agent-validation.json";
     public static final String CONCEPT_EMPTY_UPDATE__JSON = "/content/concept_update_empty.json";
     
-    public static final String CONCEPT_XML = "/metis-deref/concept.xml";
-    public static final String AGENT_XML = "/metis-deref/agent.xml";
+    public static final String CONCEPT_MACHINE_XML = "/metis-deref/concept_machine.xml";
+    public static final String CONCEPT_BATHTUB_XML = "/metis-deref/concept-metis-bathtub.xml";
+    public static final String AGENT_DA_VINCI_XML = "/metis-deref/agent_da_vinci.xml";
     public static final String AGENT_STALIN_XML = "/metis-deref/agent_stalin.xml";
     public static final String AGENT_STALIN_CLEANING_XML = "/metis-deref/agent_stalin_cleaning.xml";
     public static final String AGENT_JAN_VERMEER_XML_VIAF = "/metis-deref/agent_jan_vermeer_viaf.xml";

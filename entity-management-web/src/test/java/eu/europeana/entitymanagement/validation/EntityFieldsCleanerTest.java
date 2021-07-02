@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import javax.xml.bind.JAXBContext;
 
+import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,11 +33,12 @@ public class EntityFieldsCleanerTest {
     
     @Test
     public void shouldCleanEntityFields() throws Exception {
-	Agent agent = (Agent) MetisDereferenceUtils
-      .parseMetisResponse(jaxbContext.createUnmarshaller(), "http://www.wikidata.org/entity/Q855", loadFile(BaseMvcTestUtils.AGENT_STALIN_CLEANING_XML));
-	
+        XmlBaseEntityImpl<?> xmlAgent = MetisDereferenceUtils
+                .parseMetisResponse(jaxbContext.createUnmarshaller(), "http://www.wikidata.org/entity/Q855", loadFile(BaseMvcTestUtils.AGENT_STALIN_CLEANING_XML));
+        assert xmlAgent != null;
+
+        Agent agent = (Agent) xmlAgent.toEntityModel();
         EntityFieldsCleaner fieldCleaner = new EntityFieldsCleaner(emLanguageCodes);
-        assert agent != null;
         fieldCleaner.cleanAndNormalize(agent);
         assertEquals(24, agent.getPrefLabel().size());
         assertEquals(12, agent.getAltLabel().size());
