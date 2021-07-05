@@ -28,8 +28,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.EUROPEANA_URL;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_ID;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_IDENTIFIER;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 import static eu.europeana.entitymanagement.web.EntityRecordUtils.*;
 import static java.time.Instant.now;
 
@@ -48,8 +47,8 @@ public class EntityRecordService {
 	 * Fields to ignore when updating entities from user request
 	 */
 	private final List<String> UPDATE_FIELDS_TO_IGNORE = List
-			.of(WebEntityFields.ID, WebEntityFields.IDENTIFIER, WebEntityFields.TYPE, ENTITY_ID, ENTITY_IDENTIFIER,
-					WebEntityFields.IS_AGGREGATED_BY);
+			.of(ID, TYPE, ENTITY_ID, ENTITY_IDENTIFIER,
+					IS_AGGREGATED_BY);
 
 	@Autowired
     public EntityRecordService(EntityRecordRepository entityRecordRepository,
