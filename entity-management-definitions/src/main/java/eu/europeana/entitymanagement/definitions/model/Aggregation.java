@@ -19,8 +19,20 @@ import java.util.List;
 public class Aggregation {
 	
 	public Aggregation() {
-		
 	}
+
+    /**
+     * Creates a new Aggregation instance
+     * @param initializeNumericFields if true, pageRank, recordCount and score are initialized to zero, meaning
+     *                                 they are included during serialization.
+     */
+	public Aggregation(boolean initializeNumericFields){
+        if(initializeNumericFields){
+            this.pageRank = 0;
+            this.recordCount = 0;
+            this.score = 0;
+        }
+    }
     
     public Aggregation(Aggregation copy) {
 		this.id = copy.getId();
@@ -35,11 +47,22 @@ public class Aggregation {
 		if(copy.getAggregates()!=null) this.aggregates = new ArrayList<>(copy.getAggregates());
 	}
 
-    String id, type, rights, source;
-    Date created, modified;
-    int score=-1, recordCount=-1;
-    double pageRank=-1d;
-    List<String> aggregates;
+    private String id;
+	private String type;
+	private String rights;
+	private String source;
+    private Date created;
+    private Date modified;
+
+    /**
+     * Initialize numeric fields with negative values, so they are not serialized unless a value is
+     * explicitly set
+     */
+    private int score= -1;
+    private int recordCount= -1;
+    private double pageRank= -1d;
+
+    private List<String> aggregates;
 
     
     @JsonGetter(ID)
