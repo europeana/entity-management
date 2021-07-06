@@ -36,6 +36,7 @@ import eu.europeana.entitymanagement.web.service.AuthorizationService;
 import eu.europeana.entitymanagement.web.service.RequestPathMethodService;
 import eu.europeana.entitymanagement.web.xml.model.RdfBaseWrapper;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
+import org.springframework.util.StringUtils;
 
 public abstract class BaseRest extends BaseRestController {
 
@@ -119,6 +120,11 @@ public abstract class BaseRest extends BaseRestController {
         if (!outFormat.equals(FormatTypes.schema)) {
             headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
             headers.add(HttpHeaders.LINK, HttpHeaders.VALUE_LDP_RESOURCE);
+
+            // Access-Control-Expose-Headers only set for CORS requests
+            if(StringUtils.hasLength(request.getHeader(org.springframework.http.HttpHeaders.ORIGIN))) {
+                headers.setAccessControlExposeHeaders(List.of(HttpHeaders.ETAG, HttpHeaders.LINK, HttpHeaders.VARY));
+            }
         }
         if (contentType != null && !contentType.isEmpty())
             headers.add(HttpHeaders.CONTENT_TYPE, contentType);

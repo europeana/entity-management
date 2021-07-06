@@ -5,15 +5,14 @@ import eu.europeana.api.commons.error.EuropeanaGlobalExceptionHandler;
 import eu.europeana.api.commons.web.exception.HttpException;
 import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpMediaTypeException;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.context.request.WebRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -97,8 +96,8 @@ public class EMExceptionHandler extends EuropeanaGlobalExceptionHandler {
 
         EuropeanaApiErrorResponse response = new EuropeanaApiErrorResponse.Builder(httpRequest, e, stackTraceEnabled())
                 .setStatus(HttpStatus.METHOD_NOT_ALLOWED.value())
-                .setMessage(e.getMessage())
-                .setError("Invalid method for request path")
+                .setError(e.getMessage())
+                .setMessage("Invalid method for request path")
                 .build();
 
         Set<HttpMethod> supportedMethods = e.getSupportedHttpMethods();
@@ -111,5 +110,20 @@ public class EMExceptionHandler extends EuropeanaGlobalExceptionHandler {
         }
         return new ResponseEntity<>(response, headers, HttpStatus.METHOD_NOT_ALLOWED);
     }
-   
+
+
+    @ExceptionHandler(HttpMediaTypeException.class)
+    public ResponseEntity<EuropeanaApiErrorResponse> handleInvalidMediaType(HttpMediaTypeException e, HttpServletRequest httpRequest){
+
+        EuropeanaApiErrorResponse response = new EuropeanaApiErrorResponse.Builder(httpRequest, e, stackTraceEnabled())
+                .setStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE.value())
+                .setError(e.getMessage())
+                .setMessage("Unsupported media type. Supported types are: " + MediaType.toString(e.getSupportedMediaTypes()))
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.UNSUPPORTED_MEDIA_TYPE.value())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(response);
+    }
 }
