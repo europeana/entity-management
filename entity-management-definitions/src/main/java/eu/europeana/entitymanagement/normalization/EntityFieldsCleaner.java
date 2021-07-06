@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,7 +22,7 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 
-import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_DATE;
+import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.*;
 
 public class EntityFieldsCleaner {
 
@@ -33,12 +34,8 @@ public class EntityFieldsCleaner {
 	this.emLanguageCodes = emLanguageCodes;
     }
 
-    public void initialize(ValidEntityFields constraint) {
-    }
-
     @SuppressWarnings("unchecked")
     public void cleanAndNormalize(Entity entity) {
-
 	List<Field> entityFields = EntityUtils.getAllFields(entity.getClass());
 
 	try {
@@ -60,7 +57,7 @@ public class EntityFieldsCleaner {
 		    entity.setFieldValue(field, normalizeValues(field.getName(),(List<String>) fieldValue));
 		} else if (fieldType.isAssignableFrom(Map.class)) {
 		    @SuppressWarnings("rawtypes")
-		    Map normalized = normalizeMapField(field, (Map) fieldValue, entity);
+		    Map normalized = normalizeMapField(field, (Map) fieldValue);
 		    entity.setFieldValue(field, normalized);
 		}
 
@@ -73,13 +70,13 @@ public class EntityFieldsCleaner {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private Map normalizeMapField(Field field, Map fieldValue, Entity entity)
+    private Map normalizeMapField(Field field, Map fieldValue)
 	    throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 	if (fieldValue == null) {
 	    return null;
 	}
 	if (isSingleValueStringMap(field)) {
-	    return normalizeSingleValueMap((Map<String, String>) fieldValue);
+	    return normalizeSingleValueMap(field, (Map<String, String>) fieldValue);
 	} else if (isMultipleValueStringMap(field)) {
 	    return normalizeMultipleValueMap(field.getName(), (Map<String, List<String>>) fieldValue);
 	} else {
@@ -91,11 +88,12 @@ public class EntityFieldsCleaner {
     }
 
     @SuppressWarnings({ "unchecked" })
-    Map<String, String> normalizeSingleValueMap(Map<String, String> singleValueMap)
+    Map<String, String> normalizeSingleValueMap(Field field, Map<String, String> singleValueMap)
 	    throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 	// remove spaces from the keys in the Map fields, normalize and remove trailing
 	// spaces for the value, apply language normalization and filtering
 	// value must be restricted to the 24 language codes that Europeana supports
+	// Text Fields values must be capitalised
 	Map<String, String> normalizedMap = ConstructorUtils.invokeConstructor(singleValueMap.getClass(),
 		singleValueMap.size());
 	for (Map.Entry<String, String> mapEntry : singleValueMap.entrySet()) {
@@ -104,8 +102,8 @@ public class EntityFieldsCleaner {
 		// skip invalid language codes
 		continue;
 	    }
-	    // remove trailing spaces in the value
-	    normalizedMap.put(normalizedKey, mapEntry.getValue().trim());
+	    // remove trailing spaces in the value and capitalise text Fields
+		normalizedMap.put(normalizedKey, capitaliseTextFields(field.getName(),mapEntry.getValue()));
 	}
 	return normalizedMap;
     }
@@ -114,7 +112,7 @@ public class EntityFieldsCleaner {
     private Map<String, List<String>> normalizeMultipleValueMap(String fieldName, Map<String, List<String>> singleValueMap)
 	    throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 	// remove spaces from the keys in the Map fields
-//	normalize and remove trailing spaces for the value
+//	normalize and remove trailing spaces for the value and capitalise Text Fields
 //	 apply language normalization and filtering
 //	 value must be restricted to the 24 language codes that Europeana supports
 	Map<String, List<String>> normalizedMap = ConstructorUtils.invokeConstructor(singleValueMap.getClass(),
@@ -138,14 +136,14 @@ public class EntityFieldsCleaner {
     private List<String> normalizeValues(String fieldName, List<String> values) {
     	List<String> normalized;
     	if(EntityFieldsTypes.getFieldType(fieldName).equals(FIELD_TYPE_DATE)) {
-    		normalized = new ArrayList<String>();
+    		normalized = new ArrayList<>();
 	    	for(String value : values) {
 	    		String normalizedValue = normalizeTextValue(fieldName,value);
 	    		normalized.add(normalizedValue);
 	    	}
     	}
     	else {
-    		normalized = values.stream().map(String::trim).collect(Collectors.toList());
+    		normalized = values.stream().map(x -> normalizeTextValue(fieldName, x)).collect(Collectors.toList());
     	}
     	return normalized;
     }
@@ -196,8 +194,9 @@ public class EntityFieldsCleaner {
 
     String normalizeTextValue(String fieldName, String fieldValue) {
 	if (fieldValue != null) {
-	    // remove trailing spaces
-	    String normalizedValue = fieldValue.trim();
+	    // remove trailing spaces and capitalise Text fields
+	    String normalizedValue = capitaliseTextFields(fieldName, fieldValue);
+
 	    if(EntityFieldsTypes.getFieldType(fieldName).equals(FIELD_TYPE_DATE)) {
 	    	normalizedValue=convertDatetimeToDate(normalizedValue);
 	    }
@@ -220,5 +219,24 @@ public class EntityFieldsCleaner {
         }
     	return fieldValue;
     }
+
+	/**
+	 * Will trim the white spaces for the field value.
+	 * Also will capitalise the Text Fields
+	 *
+	 * @param fieldName
+	 * @param fieldValue
+	 * @return
+	 */
+	private String capitaliseTextFields(String fieldName, String fieldValue) {
+    if (EntityFieldsTypes.getFieldType(fieldName).equals(FIELD_TYPE_TEXT)) {
+    	return StringUtils.capitalize(fieldValue.trim());
+	}
+    if (EntityFieldsTypes.getFieldType(fieldName).equals(FIELD_TYPE_TEXT_OR_URI)
+			&& !(StringUtils.startsWithAny(fieldValue, "https://", "http://"))) {
+		return StringUtils.capitalize(fieldValue.trim());
+	}
+    return fieldValue.trim();
+	}
 
 }

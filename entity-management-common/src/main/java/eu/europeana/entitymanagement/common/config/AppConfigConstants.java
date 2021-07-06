@@ -17,10 +17,10 @@ public class AppConfigConstants {
     public static final String BEAN_METIS_DEREF_SERVICE = "metisDerefService";
     public static final String BEAN_EM_BUILD_INFO = "emBuildInfo";
     public static final String BEAN_AUTHORIZATION_SERVICE = "authorizationService";
-    public static final String BEAN_JOB_EXECUTOR = "jobTaskExecutor";
-    public static final String BEAN_STEP_EXECUTOR = "stepTaskExecutor";
-    public static final String SYNC_TASK_EXECUTOR = "syncTaskExecutor";
-    public static final String DEFAULT_JOB_LAUNCHER = "defaultJobLauncher";
+    public static final String SCHEDULED_JOB_EXECUTOR = "scheduledUpdateTaskExecutor";
+    public static final String STEP_EXECUTOR = "stepTaskExecutor";
+    public static final String WEB_REQUEST_JOB_EXECUTOR = "webRequestTaskExecutor";
+    public static final String SCHEDULED_JOB_LAUNCHER = "scheduledJobLauncher";
     public static final String SYNC_JOB_LAUNCHER = "syncJobLauncher";
 
 
@@ -31,5 +31,12 @@ public class AppConfigConstants {
     public static final String METIS_DEREF_PATH = "/dereference";
 
     public static final String ENTITY_RECORD_CTX_KEY = "entityRecordCtx";
+
+    public static final String BEAN_EM_SOLR_SERVICE = "emSolrService";
+    public static final String BEAN_INDEXING_SOLR_CLIENT = "indexingSolrClient";
+    public static final String BEAN_PR_SOLR_CLIENT = "prSolrClient";
+    public static final String BEAN_SEARCH_API_SOLR_CLIENT = "searchApiSolrClient";
+
+    public static final String BEAN_SOLR_ENTITY_SUGGESTER_FILTER = "solrEntityFilter";
 }
 

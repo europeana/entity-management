@@ -1,18 +1,26 @@
 package eu.europeana.entitymanagement.batch.processor;
 
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.exception.EntityMismatchException;
-import eu.europeana.entitymanagement.exception.MetisNotKnownException;
-import eu.europeana.entitymanagement.utils.EntityComparator;
-import eu.europeana.entitymanagement.web.service.MetisDereferenceService;
 import java.util.Date;
+import java.util.Set;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.ValidatorFactory;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
+
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.exception.EntityMismatchException;
+import eu.europeana.entitymanagement.exception.MetisNotKnownException;
+import eu.europeana.entitymanagement.exception.ingestion.EntityValidationException;
+import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorGroup;
+import eu.europeana.entitymanagement.utils.EntityComparator;
+import eu.europeana.entitymanagement.web.service.MetisDereferenceService;
 
 /**
  * This {@link ItemProcessor} retrieves Entity metadata from Metis, and then overwrites the local
@@ -25,11 +33,13 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
     private static final Logger logger = LogManager.getLogger(EntityDereferenceProcessor.class);
     private final MetisDereferenceService dereferenceService;
     private final EntityComparator entityComparator;
+    private final ValidatorFactory emValidatorFactory;
 
     @Autowired
-    public EntityDereferenceProcessor(MetisDereferenceService dereferenceService) {
+    public EntityDereferenceProcessor(MetisDereferenceService dereferenceService, ValidatorFactory emValidatorFactory) {
         this.dereferenceService = dereferenceService;
         this.entityComparator = new EntityComparator();
+        this.emValidatorFactory = emValidatorFactory;
     }
 
     @Override
@@ -44,6 +54,7 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
             throw new MetisNotKnownException("Unsuccessful Metis dereferenciation for externalId=" +
                     proxyId + "; entityId=" + entityId);
         }
+
         Entity entity = entityRecord.getEntity();
 
         String metisType = metisResponse.getType();
@@ -69,16 +80,9 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
             // replace external proxy with MetisResponse
             entityRecord.getExternalProxy().setEntity(metisResponse);
             entityRecord.getExternalProxy().getProxyIn().setModified(new Date());
-            return entityRecord;
         }
 
-        // Update could also be triggered after changes to Europeana proxy.
-        if(isEuropeanaProxyUpdated(entityRecord)){
-          return entityRecord;
-        }
-
-        // Otherwise stop processing
-        return null;
+        return entityRecord;
     }
 
 

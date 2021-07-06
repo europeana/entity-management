@@ -28,7 +28,7 @@ public class EntityManagementConfiguration  {
     private String apiKeyPublicKey;
 
 
-  @Value("${europeana.apikey.serviceurl}")
+    @Value("${europeana.apikey.serviceurl}")
     private String apiKeyUrl;
 
     @Value("${entitymanagement.solr.pr.url}")
@@ -36,6 +36,15 @@ public class EntityManagementConfiguration  {
 
     @Value("${entitymanagement.solr.searchapi.url}")
     private String searchApiSolrUrl;
+    
+    @Value("${entitymanagement.solr.indexing.url}")
+    private String indexingSolrUrl;
+
+    @Value("${entitymanagement.solr.indexing.explicitCommits: false}")
+    private boolean explicitCommitsEnabled;
+
+    @Value("${entitymanagement.solr.indexing.query.maxPageSize: 100}")
+    private int solrQueryMaxPageSize;
 
     @Value("${entitymanagement.solr.searchapi.enrichments.query}")
     private String enrichmentsQuery;
@@ -49,17 +58,8 @@ public class EntityManagementConfiguration  {
     @Value("${metis.baseUrl}")
     private String metisBaseUrl;
 
-    @Value("${batch.chunkSize: 10}")
+    @Value("${batch.step.chunkSize: 10}")
     private int batchChunkSize;
-
-    @Value("${batch.job.executor.corePool: 10}")
-    private int batchJobExecutorCorePool;
-
-    @Value("${batch.job.executor.maxPool: 100}")
-    private int batchJobExecutorMaxPool;
-
-    @Value("${batch.job.executor.queueSize: 50}")
-    private int batchJobExecutorQueueSize;
 
   @Value("${batch.step.executor.corePool: 10}")
   private int batchStepExecutorCorePool;
@@ -142,18 +142,6 @@ public class EntityManagementConfiguration  {
     return batchChunkSize;
   }
 
-  public int getBatchJobExecutorCorePool() {
-    return batchJobExecutorCorePool;
-  }
-
-  public int getBatchJobExecutorMaxPool() {
-    return batchJobExecutorMaxPool;
-  }
-
-  public int getBatchJobExecutorQueueSize() {
-    return batchJobExecutorQueueSize;
-  }
-
   public int getBatchStepExecutorCorePool() {
     return batchStepExecutorCorePool;
   }
@@ -181,4 +169,17 @@ public class EntityManagementConfiguration  {
   public int getBatchStepThrottleLimit() {
     return batchStepThrottleLimit;
   }
+
+
+public String getIndexingSolrUrl() {
+	return indexingSolrUrl;
+}
+
+    public boolean explicitCommitsEnabled() {
+        return explicitCommitsEnabled;
+    }
+
+    public int getSolrQueryMaxPageSize() {
+      return solrQueryMaxPageSize;
+    }
 }

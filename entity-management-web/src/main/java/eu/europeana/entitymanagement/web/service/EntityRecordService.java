@@ -1,50 +1,25 @@
 package eu.europeana.entitymanagement.web.service;
 
-import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.EUROPEANA_URL;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.RIGHTS_CREATIVE_COMMONS;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_ID;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_IDENTIFIER;
-import static eu.europeana.entitymanagement.web.EntityRecordUtils.getDatasourceAggregationId;
-import static eu.europeana.entitymanagement.web.EntityRecordUtils.getEuropeanaAggregationId;
-import static eu.europeana.entitymanagement.web.EntityRecordUtils.getEuropeanaProxyId;
-import static eu.europeana.entitymanagement.web.EntityRecordUtils.getIsAggregatedById;
-
-import eu.europeana.api.commons.error.EuropeanaApiException;
-import eu.europeana.enrichment.utils.EntityType;
-import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
-import eu.europeana.entitymanagement.exception.EntityAlreadyExistsException;
-import eu.europeana.entitymanagement.exception.EntityNotFoundException;
-import eu.europeana.entitymanagement.exception.EntityRemovedException;
-import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
-import eu.europeana.entitymanagement.web.EntityRecordUtils;
-import java.lang.reflect.Field;
-import java.util.*;
-
-import java.util.stream.Collectors;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-
 import dev.morphia.query.experimental.filters.Filter;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.AppConfig;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
 import eu.europeana.entitymanagement.definitions.model.*;
-import eu.europeana.entitymanagement.exception.*;
+import eu.europeana.entitymanagement.exception.EntityAlreadyExistsException;
+import eu.europeana.entitymanagement.exception.EntityNotFoundException;
+import eu.europeana.entitymanagement.exception.EntityRemovedException;
+import eu.europeana.entitymanagement.exception.HttpBadRequestException;
+import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
+import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.web.EntityRecordUtils;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -53,10 +28,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.EUROPEANA_URL;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.RIGHTS_CREATIVE_COMMONS;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_ID;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_IDENTIFIER;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 import static eu.europeana.entitymanagement.web.EntityRecordUtils.*;
+import static java.time.Instant.now;
 
 @Service(AppConfig.BEAN_ENTITY_RECORD_SERVICE)
 public class EntityRecordService {
@@ -73,8 +47,8 @@ public class EntityRecordService {
 	 * Fields to ignore when updating entities from user request
 	 */
 	private final List<String> UPDATE_FIELDS_TO_IGNORE = List
-			.of(WebEntityFields.ID, WebEntityFields.IDENTIFIER, WebEntityFields.TYPE, ENTITY_ID, ENTITY_IDENTIFIER,
-					WebEntityFields.IS_AGGREGATED_BY);
+			.of(ID, TYPE, ENTITY_ID, ENTITY_IDENTIFIER,
+					IS_AGGREGATED_BY);
 
 	@Autowired
     public EntityRecordService(EntityRecordRepository entityRecordRepository,
@@ -471,47 +445,41 @@ public class EntityRecordService {
 		record.ifPresent(entityRecord -> updatedReferences.add(entityRecord.getEntityId()));
 	}
     }
+   
 
     /**
-     * This function merges the data from the entities of the entity record proxies
-     * to the consilidated entity. TODO: see how to merge the Aggregation and
-     * WebResource objects (currently only the fields that are not of the Class type
-     * are merged)
+     * This function merges the metadata data from the provided entities and returns the consolidated version
      * 
      * @throws EntityCreationException
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public void mergeEntity(EntityRecord entityRecord) throws EuropeanaApiException {
+    
+        public Entity mergeEntities(Entity primary, Entity secondary) throws EuropeanaApiException {
 
-	//TODO: consider refactoring of this implemeentation by creating a new class EntityReconciliator
-	/*
-	 * The primary entity corresponds to the entity in the Europeana proxy. The
-	 * secondary entity corresponds to the entity in the external proxy.
-	 */
-	EntityProxy europeanaProxy = entityRecord.getEuropeanaProxy();
-	EntityProxy externalProxy = entityRecord.getExternalProxy();
-	if (europeanaProxy == null || externalProxy == null) {
-	    return;
-	}
+            // TODO: consider refactoring of this implemeentation by creating a new class
+            // EntityReconciliator
+            /*
+             * The primary entity corresponds to the entity in the Europeana proxy. The
+             * secondary entity corresponds to the entity in the external proxy.
+             */
+            List<Field> fieldsToCombine = EntityUtils.getAllFields(primary.getClass());
+            return combineEntities(primary, secondary, fieldsToCombine, true);
+        }
 
-	Entity primary = europeanaProxy.getEntity();
-	Entity secondary = externalProxy.getEntity();
-
-			List<Field> fieldsToCombine = EntityUtils.getAllFields(primary.getClass());
-
-
-				Entity consolidatedEntity = combineEntities(primary, secondary, fieldsToCombine, true);
-
-				/*
-				 * isAggregatedBy isn't set on Europeana Proxy, so it won't be copied to the consolidatedEntity
-				 * We add it separately here
- 				 */
-				    Aggregation aggregation = entityRecord.getEntity().getIsAggregatedBy();
-				    aggregation.setModified(new Date());
-				    consolidatedEntity.setIsAggregatedBy(aggregation);
-						entityRecord.setEntity(consolidatedEntity);
-		}
-
+        public void updateConsolidatedVersion(EntityRecord entityRecord, Entity consolidatedEntity) {
+             
+            /*
+             * isAggregatedBy isn't set on Europeana Proxy, so it won't be copied to the
+             * consolidatedEntity We add it separately here
+             * 
+             * TODO: WebResource objects (currently only the fields that are not of the Class type are merged)
+             */
+            Aggregation aggregation = entityRecord.getEntity().getIsAggregatedBy();
+            aggregation.setModified(new Date());
+            consolidatedEntity.setIsAggregatedBy(aggregation);
+            entityRecord.setEntity(consolidatedEntity);
+        }
+    
+    
 	/**
 	 * Replaces Europeana proxy metadata with the provided entity metadata.
 	 *
@@ -522,13 +490,13 @@ public class EntityRecordService {
 	public void replaceEuropeanaProxy(final Entity updateRequestEntity, EntityRecord entityRecord) {
 		EntityProxy europeanaProxy = entityRecord.getEuropeanaProxy();
 
-		List<String> sameAs = europeanaProxy.getEntity().getSameAs();
 		String entityId = europeanaProxy.getEntity().getEntityId();
 
-		// copy SameAs and EntityId from existing Europeana proxy metadata
+		// copy EntityId from existing Europeana proxy metadata
 		europeanaProxy.setEntity(updateRequestEntity);
-		europeanaProxy.getEntity().setSameAs(sameAs);
 		europeanaProxy.getEntity().setEntityId(entityId);
+
+		europeanaProxy.getProxyIn().setModified(Date.from(now()));
 	}
 
 	/**

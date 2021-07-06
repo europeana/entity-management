@@ -52,7 +52,8 @@ public class EntityAdminController extends BaseRest {
      * @throws HttpException
      */
     @ApiOperation(value = "Permanent Deletion of Entity", nickname = "deleteEntity", response = java.lang.Void.class)
-    @DeleteMapping(value = "/{type}/{identifier}/management",produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = "/{type}/{identifier}/management",produces = {HttpHeaders.CONTENT_TYPE_JSONLD,
+            MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<String> deleteEntity(
             @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
             @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
@@ -70,7 +71,8 @@ public class EntityAdminController extends BaseRest {
 
         LOG.info("Permanently deleting entityId={}", entityRecord.getEntityId());
         entityRecordService.delete(entityRecord.getEntityId());
-        return ResponseEntity.noContent().build();
+
+       return noContentResponse(request);
     }
 
     /**
@@ -102,7 +104,7 @@ public class EntityAdminController extends BaseRest {
         EntityRecord savedEntityRecord = entityRecordService
                 .createEntityFromMigrationRequest(entityCreationRequest, type, identifier);
         LOG.info("Created Entity record for {}; entityId={}", entityCreationRequest.getId(), savedEntityRecord.getEntityId());
-        return generateResponseEntity(EntityProfile.internal.toString(), FormatTypes.jsonld, null, null, savedEntityRecord, HttpStatus.ACCEPTED);
+        return generateResponseEntity(request, EntityProfile.internal.toString(), FormatTypes.jsonld, null, null, savedEntityRecord, HttpStatus.ACCEPTED);
     }
 
     /**

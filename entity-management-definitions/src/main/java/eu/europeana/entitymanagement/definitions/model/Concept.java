@@ -3,6 +3,8 @@ package eu.europeana.entitymanagement.definitions.model;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({CONTEXT, ID, TYPE, DEPICTION, IS_SHOWN_BY, PREF_LABEL, ALT_LABEL, HIDDEN_LABEL,NOTE,
@@ -18,6 +21,21 @@ public class Concept extends Entity {
 
 	public Concept() {
 		super();
+	}
+
+	public Concept(Concept copy) {
+		super(copy);
+		if(copy.getBroader()!=null) this.broader = new ArrayList<>(copy.getBroader());
+		if(copy.getNarrower()!=null) this.narrower = new ArrayList<>(copy.getNarrower());
+		if(copy.getRelated()!=null) this.related = new ArrayList<>(copy.getRelated());
+		if(copy.getBroadMatch()!=null) this.broadMatch = new ArrayList<>(copy.getBroadMatch());
+		if(copy.getNarrowMatch()!=null) this.narrowMatch = new ArrayList<>(copy.getNarrowMatch());
+		if(copy.getExactMatch()!=null) this.exactMatch = new ArrayList<>(copy.getExactMatch());
+		if(copy.getCoref()!=null) this.coref = new ArrayList<>(copy.getCoref());
+		if(copy.getRelatedMatch()!=null) this.relatedMatch = new ArrayList<>(copy.getRelatedMatch());
+		if(copy.getCloseMatch()!=null) this.closeMatch = new ArrayList<>(copy.getCloseMatch());
+		if(copy.getInScheme()!=null) this.inScheme = new ArrayList<>(copy.getInScheme());
+		if(copy.getNotation()!=null) this.notation = new HashMap<>(copy.getNotation());
 	}
 
 	private List<String> broader;
@@ -153,7 +171,7 @@ public class Concept extends Entity {
 
 	
 	public String getType() {
-		return "Concept";
+		return EntityTypes.Concept.getEntityType();
 	}
 
 	

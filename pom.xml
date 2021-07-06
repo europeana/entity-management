@@ -8,7 +8,8 @@
         <module>entity-management-mongo</module>
         <module>entity-management-batch</module>
       <module>entity-management-enrichment</module>
-    </modules>
+    <module>entity-management-solr</module>
+  </modules>
 
     <parent>
         <groupId>eu.europeana</groupId>
@@ -43,12 +44,14 @@
         <java.version>11</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <api.commons.version>0.3.5-SNAPSHOT</api.commons.version>
+        <api.commons.version>0.3.5</api.commons.version>
         <corelib.version>2.11.0</corelib.version>
         <junit.version>5.7.0</junit.version>
         <jackson.version>2.11.4</jackson.version>
         <version.commonsLang3>3.0</version.commonsLang3>
+        <!-- 
         <version.annotationLd>1.1.6</version.annotationLd>
+         -->
         <spring-boot.version>2.4.0</spring-boot.version>
         <swagger.version>3.0.0</swagger.version>
         <morphia.version>2.1.4</morphia.version>
@@ -60,7 +63,9 @@
         <version.log4j>2.13.3</version.log4j>
         <metis.version>4-SNAPSHOT</metis.version>
         <version.javax.validation>2.0.1.Final</version.javax.validation>
+        <version.solrj>7.7.2</version.solrj>
         <apache.commons.validator.version>1.7</apache.commons.validator.version>
+
     </properties>
 
     <dependencyManagement>
@@ -133,7 +138,10 @@
         </plugin>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.8.0</version>
+          <configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+			</configuration>
         </plugin>
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
