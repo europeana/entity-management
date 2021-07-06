@@ -28,6 +28,7 @@ public class DataSourcesTest {
     String WIKIDATA = "http://www.wikidata.org/";
     String GEONAMES = "https://sws.geonames.org/";
     String EUROPEANA_FASHION = "http://thesaurus.europeanafashion.eu/thesaurus/";
+    String EUROPEANA = "https://www.europeana.eu/";
 
 
     @Test
@@ -41,7 +42,7 @@ public class DataSourcesTest {
         assertTrue(dataSources.hasDataSource(WIKIDATA));
         assertTrue(dataSources.hasDataSource(GEONAMES));
         assertTrue(dataSources.hasDataSource(EUROPEANA_FASHION));
-
+        assertTrue(dataSources.hasDataSource(EUROPEANA));
     }
 
 }

@@ -1,10 +1,11 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <config>
-    <source url="http://www.wikidata.org/"                         rights="https://creativecommons.org/publicdomain/zero/1.0/"/>
-    <source url="http://vocab.getty.edu/aat/"                      rights="http://opendatacommons.org/licenses/by/1-0/"/>
-    <source url="http://vocab.getty.edu/ulan/"                     rights="http://opendatacommons.org/licenses/by/1-0/"/>
-    <source url="http://viaf.org/viaf/"                            rights="http://opendatacommons.org/licenses/by/1.0/"/>
-    <source url="https://sws.geonames.org/"                        rights="https://creativecommons.org/licenses/by/4.0/"/>
-    <source url="http://www.mimo-db.eu/"                           rights=""/>
-    <source url="http://thesaurus.europeanafashion.eu/thesaurus/"  rights=""/>
+    <source url="http://www.wikidata.org/"                         rights="https://creativecommons.org/publicdomain/zero/1.0/"    id="europeana"/>
+    <source url="http://vocab.getty.edu/aat/"                      rights="http://opendatacommons.org/licenses/by/1-0/"	          id="getty-aat"/>
+    <source url="http://vocab.getty.edu/ulan/"                     rights="http://opendatacommons.org/licenses/by/1-0/"           id="getty-ulan"/>
+    <source url="http://viaf.org/viaf/"                            rights="http://opendatacommons.org/licenses/by/1.0/"           id="viaf"/>
+    <source url="https://sws.geonames.org/"                        rights="https://creativecommons.org/licenses/by/4.0/"          id="geonames"/>
+    <source url="http://www.mimo-db.eu/"                           rights=""                                                      id="mimo-db"/>
+    <source url="http://thesaurus.europeanafashion.eu/thesaurus/"  rights=""                                                      id="thesaurus"/>
+    <source url="https://www.europeana.eu/"  					   rights="https://creativecommons.org/publicdomain/zero/1.0/"    id="europeana"/>
 </config>
