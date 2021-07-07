@@ -24,6 +24,7 @@ import okhttp3.mockwebserver.MockResponse;
 import org.apache.commons.lang.StringUtils;
 import org.assertj.core.util.Maps;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.AfterEach;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -87,18 +88,21 @@ public class EMControllerIT extends AbstractIntegrationTest {
     private MockMvc mockMvc;
 
     @BeforeEach
-    public void setup() throws Exception {
+    public void setup() {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
-        
-        //clear response queue
-        if(mockMetis != null && mockMetis.getRequestCount() > 0) {
-            for (int i = 0; i < mockMetis.getRequestCount(); i++) {
-        	mockMetis.takeRequest(1, TimeUnit.SECONDS);
-	    }
-        }
         
         //ensure a clean db between test runs
         this.entityRecordService.dropRepository();
+    }
+
+    @AfterEach
+    void tearDown() throws InterruptedException {
+        //clear response queue
+        if (mockMetis != null && mockMetis.getRequestCount() > 0) {
+            for (int i = 0; i < mockMetis.getRequestCount(); i++) {
+                mockMetis.takeRequest(1, TimeUnit.SECONDS);
+            }
+        }
     }
 
     /**
@@ -117,13 +121,13 @@ public class EMControllerIT extends AbstractIntegrationTest {
     @Test
     public void registerConceptShouldBeSuccessful() throws Exception {
         // set mock Metis response
-        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(CONCEPT_XML)));
+        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(CONCEPT_BATHTUB_XML)));
         //second enqueue for the update task
-        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(CONCEPT_XML)));
+        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(CONCEPT_BATHTUB_XML)));
         
 
         ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
-                .content(loadFile(CONCEPT_REGISTER_JSON))
+                .content(loadFile(CONCEPT_REGISTER_BATHTUB_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
         
         results.andExpect(status().isAccepted())
@@ -148,12 +152,12 @@ public class EMControllerIT extends AbstractIntegrationTest {
     @Test
     void registerAgentShouldBeSuccessful() throws Exception {
         // set mock Metis response
-        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(AGENT_XML)));
+        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(AGENT_DA_VINCI_XML)));
         //second enqueue for the update task
-        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(AGENT_XML)));
+        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(AGENT_DA_VINCI_XML)));
 
         ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
-                .content(loadFile(AGENT_REGISTER_JSON))
+                .content(loadFile(AGENT_REGISTER_DAVINCI_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isAccepted());
         
@@ -277,7 +281,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
     @Test
     public void updateConceptShouldBeSuccessful() throws Exception {
-        MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML, true);
+        MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_BATHTUB_JSON, CONCEPT_BATHTUB_XML, true);
 
         // matches the id in the JSON file (also used to remove the queued Metis request)
         String externalUri = "http://www.wikidata.org/entity/Q152095";
@@ -327,7 +331,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
     @Test
     void updatePUTShouldReplaceEuropeanaProxy() throws Exception{
-        MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML, true);
+        MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_BATHTUB_JSON, CONCEPT_BATHTUB_XML, true);
 
         // matches the id in the JSON file (also used to remove the queued Metis request)
         String externalUri = "http://www.wikidata.org/entity/Q152095";
@@ -447,7 +451,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
     @Test
     public void retrieveWithContentNegotiationInMozillaShouldBeSuccessful() throws Exception {
         // read the test data for the Concept entity from the file
-	MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML, false);
+	MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_BATHTUB_JSON, CONCEPT_BATHTUB_XML, false);
 	final ObjectNode registeredEntityNode = new ObjectMapper().readValue(resultRegisterEntity.getResponse().getContentAsString(StandardCharsets.UTF_8), ObjectNode.class);
 	String entityId = registeredEntityNode.get("id").asText();
 	String defaultMozillaAcceptHeader = "ext/html,application/xhtml+xml,application/xml;q=0.9,*/*";
@@ -470,7 +474,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
     @Test
     public void retrieveWithContentNegotiationShouldBeSuccessful() throws Exception {
         // read the test data for the Concept entity from the file
-	MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML, false);
+	MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_BATHTUB_JSON, CONCEPT_BATHTUB_XML, false);
 	String response = resultRegisterEntity.getResponse().getContentAsString();
 	//TODO read the id from response, for the time being we can assume the id is 1
 	final ObjectNode registeredEntityNode = new ObjectMapper().readValue(resultRegisterEntity.getResponse().getContentAsString(StandardCharsets.UTF_8), ObjectNode.class);
@@ -579,12 +583,12 @@ public class EMControllerIT extends AbstractIntegrationTest {
     @Test
     public void proxiesShouldNotHaveMetrics() throws Exception {
         // set mock Metis response
-        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(AGENT_XML)));
+        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(AGENT_DA_VINCI_XML)));
         //second enqueue for the update task
-        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(AGENT_XML)));
+        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(AGENT_DA_VINCI_XML)));
 
         ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
-                .content(loadFile(AGENT_REGISTER_JSON))
+                .content(loadFile(AGENT_REGISTER_DAVINCI_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .param(WebEntityConstants.QUERY_PARAM_PROFILE, "internal"))
                 .andExpect(status().isAccepted());
@@ -611,7 +615,7 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
     }
 
-
+    
     @Test
     public void retrieveTimespanExternalShouldBeSuccessful() throws Exception {
 	//TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
@@ -633,16 +637,16 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
     @Test
     public void retrieveEntityInternalShouldBeSuccessful() throws Exception {
-        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(CONCEPT_XML)));
+        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(CONCEPT_BATHTUB_XML)));
         //second enqueue for the update task
-        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(CONCEPT_XML)));
+        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(CONCEPT_BATHTUB_XML)));
 
 	//TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
 	// read the test data for the entity from the file
-        EntityPreview entityPreview = objectMapper.readValue(loadFile(CONCEPT_REGISTER_JSON), EntityPreview.class);
+        EntityPreview entityPreview = objectMapper.readValue(loadFile(CONCEPT_REGISTER_BATHTUB_JSON), EntityPreview.class);
 
         ResultActions registeredEntityResults = mockMvc.perform(post(BASE_SERVICE_URL)
-                .content(loadFile(CONCEPT_REGISTER_JSON))
+                .content(loadFile(CONCEPT_REGISTER_BATHTUB_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
 
         final ObjectNode registeredEntityNode = new ObjectMapper().readValue(registeredEntityResults.andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8), ObjectNode.class);
