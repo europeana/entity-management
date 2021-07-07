@@ -3,127 +3,103 @@
 <language code="en">
 	<altLang code="eng"/>
 	<altLang code="en-gb"/>
-	<altLang code="en-GB"/>
 </language>
 <language code="nl">
 	<altLang code="dut"/>
     <altLang code="nld"/>
     <altLang code="nl-nl"/>
-    <altLang code="nl-NL"/>
 </language>
 <language code="fr">
     <altLang code="fre"/>
     <altLang code="fra"/>
     <altLang code="fr-fr"/>
-    <altLang code="fr-FR"/>
 </language>
 <language code="de">
     <altLang code="ger"/>
     <altLang code="deu"/>
     <altLang code="de-de"/>
-    <altLang code="de-DE"/>
 </language>
 <language code="es">
     <altLang code="spa"/>
     <altLang code="es-es"/>
-    <altLang code="es-ES"/>
 </language>
 <language code="sv">
     <altLang code="swe"/>
     <altLang code="sv-se"/>
-    <altLang code="sv-SE"/>
 </language>
 <language code="it">
     <altLang code="ita"/>
     <altLang code="it-it"/>
-    <altLang code="it-IT"/>
 </language>
 <language code="fi">
     <altLang code="fin"/>
     <altLang code="fi-fi"/>
-    <altLang code="fi-FI"/>
 </language>
 <language code="da">
     <altLang code="dan"/>
     <altLang code="da-dk"/>
-    <altLang code="da-DK"/>
 </language>
 <language code="el">
     <altLang code="ell"/>
     <altLang code="gre"/>
     <altLang code="el-gr"/>
-    <altLang code="el-GR"/>
 </language>
 <language code="cs">
     <altLang code="ces"/>
     <altLang code="cze"/>
     <altLang code="cs-cz"/>
-    <altLang code="cs-CZ"/>
 </language>
 <language code="sk">
     <altLang code="slo"/>
     <altLang code="sk-sk"/>
-    <altLang code="sk-SK"/>
 </language>
 <language code="sl">
     <altLang code="slv"/>
     <altLang code="sl-si"/>
-    <altLang code="sl-SI"/>
 </language>
 <language code="pt">
     <altLang code="por"/>
     <altLang code="pt-pt"/>
-    <altLang code="pt-PT"/>
 </language>
 <language code="hu">
     <altLang code="hun"/>
     <altLang code="hu-hu"/>
-    <altLang code="hu-HU"/>
 </language>
 <language code="lt">
     <altLang code="lit"/>
     <altLang code="lt-lt"/>
-    <altLang code="lt-LT"/>
 </language>
 <language code="pl">
     <altLang code="pol"/>
     <altLang code="pl-pl"/>
-    <altLang code="pl-PL"/>
 </language>
 <language code="ro">
     <altLang code="rum"/>
     <altLang code="ron"/>
     <altLang code="ro-ro"/>
-    <altLang code="ro-RO"/>
 </language>
 <language code="bg">
     <altLang code="bul"/>
     <altLang code="bg-bg"/>
-    <altLang code="bg-BG"/>
 </language>
 <language code="hr">
     <altLang code="hrv"/>
     <altLang code="hr-hr"/>
-    <altLang code="hr-HR"/>
 </language>
 <language code="lv">
     <altLang code="lav"/>
     <altLang code="lv-lv"/>
-    <altLang code="lv-LV"/>
 </language>
 <language code="ga">
     <altLang code="gle"/>
     <altLang code="ga-ie"/>
-    <altLang code="ga-IE"/>
 </language>
 <language code="mt">
     <altLang code="mlt"/>
     <altLang code="mt-mt"/>
-    <altLang code="mt-MT"/>
 </language>
 <language code="et">
     <altLang code="est"/>
     <altLang code="et-ee"/>
-    <altLang code="et-EE"/>
 </language>
 </languages>
