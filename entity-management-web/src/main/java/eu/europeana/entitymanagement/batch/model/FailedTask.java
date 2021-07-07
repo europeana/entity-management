@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.batch.errorhandling;
+package eu.europeana.entitymanagement.batch.model;
 
 
 import dev.morphia.annotations.Entity;

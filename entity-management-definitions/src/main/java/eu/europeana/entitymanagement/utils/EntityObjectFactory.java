@@ -87,10 +87,8 @@ public class EntityObjectFactory {
 	
 	public static Entity createNewEntity(Entity entity)
                         throws EntityManagementRuntimeException {
-                // we have to explicitly instantiate the Xml instances, as getDeclaredConstructor().newInstance(args)
-                // wouldn't work
-
-                switch (EntityTypes.valueOf(entity.getType())){
+	    
+	        switch (EntityTypes.valueOf(entity.getType())){
                         case Agent:
                                 return new Agent((Agent)entity);
                         case Place:

@@ -42,6 +42,7 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
 
     @Override
     public EntityRecord process(@NonNull EntityRecord entityRecord) throws EuropeanaApiException {
+        
 
         EntityProxy europeanaProxy = entityRecord.getEuropeanaProxy();
         EntityProxy externalProxy = entityRecord.getExternalProxy();
@@ -63,7 +64,8 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
         validateCompleteConstraints(consolidatedEntity);
         
         entityRecordService.updateConsolidatedVersion(entityRecord, consolidatedEntity);
-
+        
+   
         return entityRecord;
     }
 

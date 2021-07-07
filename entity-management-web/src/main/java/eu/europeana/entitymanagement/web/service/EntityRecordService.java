@@ -28,9 +28,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.EUROPEANA_URL;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_ID;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_IDENTIFIER;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 import static eu.europeana.entitymanagement.web.EntityRecordUtils.*;
+import static java.time.Instant.now;
 
 @Service(AppConfig.BEAN_ENTITY_RECORD_SERVICE)
 public class EntityRecordService {
@@ -47,8 +47,8 @@ public class EntityRecordService {
 	 * Fields to ignore when updating entities from user request
 	 */
 	private final List<String> UPDATE_FIELDS_TO_IGNORE = List
-			.of(WebEntityFields.ID, WebEntityFields.IDENTIFIER, WebEntityFields.TYPE, ENTITY_ID, ENTITY_IDENTIFIER,
-					WebEntityFields.IS_AGGREGATED_BY);
+			.of(ID, TYPE, ENTITY_ID, ENTITY_IDENTIFIER,
+					IS_AGGREGATED_BY);
 
 	@Autowired
     public EntityRecordService(EntityRecordRepository entityRecordRepository,
@@ -490,13 +490,13 @@ public class EntityRecordService {
 	public void replaceEuropeanaProxy(final Entity updateRequestEntity, EntityRecord entityRecord) {
 		EntityProxy europeanaProxy = entityRecord.getEuropeanaProxy();
 
-		List<String> sameAs = europeanaProxy.getEntity().getSameAs();
 		String entityId = europeanaProxy.getEntity().getEntityId();
 
-		// copy SameAs and EntityId from existing Europeana proxy metadata
+		// copy EntityId from existing Europeana proxy metadata
 		europeanaProxy.setEntity(updateRequestEntity);
-		europeanaProxy.getEntity().setSameAs(sameAs);
 		europeanaProxy.getEntity().setEntityId(entityId);
+
+		europeanaProxy.getProxyIn().setModified(Date.from(now()));
 	}
 
 	/**
@@ -803,7 +803,7 @@ public class EntityRecordService {
     }
 
     private void setEntityAggregation(EntityRecord entityRecord, String entityId, Date timestamp) {
-        Aggregation isAggregatedBy = new Aggregation();
+        Aggregation isAggregatedBy = new Aggregation(true);
         isAggregatedBy.setId(getIsAggregatedById(entityId));
 	isAggregatedBy.setCreated(timestamp);
 	isAggregatedBy.setModified(timestamp);

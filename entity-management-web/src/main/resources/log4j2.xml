@@ -16,6 +16,10 @@
         <Logger name="org.apache.http" level="INFO"/>
         <Logger name="eu.europeana.entitymanagement" level="DEBUG"/>
         <Logger name="eu.europeana.entitymanagement.utils" level="TRACE"/>
+
+        <!--Suppress unhelpful Spring Batch warnings.
+        See https://stackoverflow.com/questions/23780587/spring-batch-reader-in-multi-threader-job -->
+        <Logger name="org.springframework.batch.core.step" level="ERROR"/>
         
     </Loggers>
 </Configuration>
