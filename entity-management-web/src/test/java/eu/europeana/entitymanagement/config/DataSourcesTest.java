@@ -42,7 +42,7 @@ public class DataSourcesTest {
         assertTrue(dataSources.hasDataSource(WIKIDATA));
         assertTrue(dataSources.hasDataSource(GEONAMES));
         assertTrue(dataSources.hasDataSource(EUROPEANA_FASHION));
-        assertTrue(dataSources.hasDataSource(EUROPEANA));
+        assertTrue(dataSources.getEuropeanaDatasource().isPresent());
     }
 
 }
