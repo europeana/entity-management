@@ -11,6 +11,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import eu.europeana.entitymanagement.exception.MetisNotKnownException;
+import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
@@ -69,11 +70,11 @@ public class MetisDereferenceService implements InitializingBean {
      */
     public Entity dereferenceEntityById(String id) throws EuropeanaApiException {
 	String metisResponseBody = fetchMetisResponse(id);
-		Entity metisResponse = parseMetisResponse(unmarshaller.get(), id, metisResponseBody);
+		XmlBaseEntityImpl<?> metisResponse = parseMetisResponse(unmarshaller.get(), id, metisResponseBody);
 		if(metisResponse == null){
 			throw new MetisNotKnownException("Unsuccessful Metis dereferenciation for externalId=" + id);
 		}
-		return metisResponse;
+		return metisResponse.toEntityModel();
     }
 
 

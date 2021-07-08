@@ -1,14 +1,11 @@
 package eu.europeana.entitymanagement.web.model.metis;
 
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import eu.europeana.entitymanagement.web.xml.model.LabelledResource;
-import eu.europeana.entitymanagement.web.xml.model.XmlAgentImpl;
-import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
-import eu.europeana.entitymanagement.web.xml.model.XmlOrganizationImpl;
-import eu.europeana.entitymanagement.web.xml.model.XmlPlaceImpl;
-import eu.europeana.entitymanagement.web.xml.model.XmlTimespanImpl;
+import eu.europeana.entitymanagement.web.MetisDereferenceUtils;
+import eu.europeana.entitymanagement.web.xml.model.*;
 import eu.europeana.entitymanagement.web.xml.model.metis.EnrichmentResultList;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -22,21 +19,21 @@ import org.junit.jupiter.api.Test;
 
 class MetisResponseDeserializerTest {
 
-	private static JAXBContext jaxbContext;
+	private static Unmarshaller unmarshaller;
 
 	@BeforeAll
 	static void beforeAll() throws JAXBException {
-		jaxbContext = JAXBContext.newInstance(EnrichmentResultList.class);
+		 unmarshaller = JAXBContext.newInstance(EnrichmentResultList.class).createUnmarshaller();
 	}
 
 	@Test
     void shouldDeserializeConcept() throws Exception {
-			EnrichmentResultList resultList = getEnrichmentResultList("/metis-deref/concept-response.xml");
-
-			// get unmarshalled object
-	XmlConceptImpl xmlEntity = (XmlConceptImpl) resultList.getEnrichmentBaseResultWrapperList().get(0)
-		.getEnrichmentBaseList().get(0);
-	assertEquals("http://www.wikidata.org/entity/Q152095", xmlEntity.getAbout());
+		String uri = "http://www.wikidata.org/entity/Q152095";
+		// get unmarshalled object
+		XmlConceptImpl xmlEntity = (XmlConceptImpl)MetisDereferenceUtils.parseMetisResponse(unmarshaller, uri,
+				loadFile("/metis-deref/concept-response.xml"));
+		assert xmlEntity != null;
+		assertEquals(uri, xmlEntity.getAbout());
 
 	//check prefLabels
 	assertNotNull(xmlEntity.getPrefLabel());
@@ -64,11 +61,12 @@ class MetisResponseDeserializerTest {
 
 	@Test
 	void shouldDeserializeAgent() throws Exception {
-		EnrichmentResultList resultList = getEnrichmentResultList("/metis-deref/agent.xml");
-		XmlAgentImpl xmlEntity = (XmlAgentImpl) resultList.getEnrichmentBaseResultWrapperList().get(0)
-				.getEnrichmentBaseList().get(0);
+		String uri = "http://www.wikidata.org/entity/Q762";
+		XmlAgentImpl xmlEntity = (XmlAgentImpl)MetisDereferenceUtils.parseMetisResponse(unmarshaller, uri,
+				loadFile("/metis-deref/agent_da_vinci.xml"));
+		assert xmlEntity != null;
 
-		assertEquals("http://www.wikidata.org/entity/Q762", xmlEntity.getAbout());
+		assertEquals(uri, xmlEntity.getAbout());
 
 		//check prefLabels
 		assertNotNull(xmlEntity.getPrefLabel());
@@ -87,9 +85,10 @@ class MetisResponseDeserializerTest {
 
 	@Test
 	void shouldDeserializeTimespan() throws Exception {
-		EnrichmentResultList resultList = getEnrichmentResultList("/metis-deref/timespan.xml");
-		XmlTimespanImpl timespan = (XmlTimespanImpl) resultList.getEnrichmentBaseResultWrapperList().get(0)
-				.getEnrichmentBaseList().get(0);
+		String uri = "http://www.wikidata.org/entity/Q8106";
+		XmlTimespanImpl timespan = (XmlTimespanImpl)MetisDereferenceUtils.parseMetisResponse(unmarshaller, uri,
+				loadFile("/metis-deref/timespan.xml"));
+		assert timespan != null;
 
 		assertEquals("http://www.wikidata.org/entity/Q8106", timespan.getAbout());
 
@@ -103,9 +102,10 @@ class MetisResponseDeserializerTest {
 
 	@Test
 	void shouldDeserializePlace() throws Exception {
-		EnrichmentResultList resultList = getEnrichmentResultList("/metis-deref/place.xml");
-		XmlPlaceImpl place = (XmlPlaceImpl) resultList.getEnrichmentBaseResultWrapperList().get(0)
-				.getEnrichmentBaseList().get(0);
+		String uri = "https://sws.geonames.org/2988507/";
+		XmlPlaceImpl place = (XmlPlaceImpl)MetisDereferenceUtils.parseMetisResponse(unmarshaller, uri,
+				loadFile("/metis-deref/place.xml"));
+		assert place != null;
 
 		assertEquals("https://sws.geonames.org/2988507/", place.getAbout());
 
@@ -119,26 +119,14 @@ class MetisResponseDeserializerTest {
 
 	@Test
 	void shouldDeserializeOrganizations() throws Exception {
-		EnrichmentResultList resultList = getEnrichmentResultList("/metis-deref/organization.xml");
-		XmlOrganizationImpl organization = (XmlOrganizationImpl) resultList.getEnrichmentBaseResultWrapperList().get(0)
-				.getEnrichmentBaseList().get(0);
-
+		String uri = "http://www.wikidata.org/entity/Q193563";
+		XmlOrganizationImpl organization = (XmlOrganizationImpl)MetisDereferenceUtils.parseMetisResponse(unmarshaller, uri,
+				loadFile("/metis-deref/organization.xml"));
+		assert organization != null;
 		assertEquals("http://www.wikidata.org/entity/Q193563", organization.getAbout());
 		assertEquals(72, organization.getAltLabel().size());
 		assertEquals(23, organization.getPrefLabel().size());
 
 		//TODO: complete assertions
 	}
-
-	@NotNull
-	private EnrichmentResultList getEnrichmentResultList(String xmlFile) throws Exception {
-		InputStream is = getClass().getResourceAsStream(xmlFile);
-		Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-		EnrichmentResultList resultList = (EnrichmentResultList) unmarshaller.unmarshal(is);
-
-		assertNotNull(resultList);
-		assertEquals(1, resultList.getEnrichmentBaseResultWrapperList().size());
-		return resultList;
-	}
-
 }
