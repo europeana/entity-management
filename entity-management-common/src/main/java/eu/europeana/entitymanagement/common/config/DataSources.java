@@ -9,7 +9,9 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 @JacksonXmlRootElement(localName = "config")
 public class DataSources {
-	
+
+	public final static String EUROPEANA_ID = "europeana";
+
 	@JacksonXmlElementWrapper(useWrapping = false)
 	@JacksonXmlProperty(localName = "source")
 	private List<DataSource> datasources;
@@ -36,6 +38,10 @@ public class DataSources {
 	 */
 	public Optional<DataSource> getDatasource(String url) {
 		return datasources.stream().filter(s -> url.contains(s.getUrl())).findFirst();
+	}
+
+	public Optional<DataSource> getEuropeanaDatasource(){
+		return datasources.stream().filter(s -> EUROPEANA_ID.equals(s.getId())).findFirst();
 	}
 
 }

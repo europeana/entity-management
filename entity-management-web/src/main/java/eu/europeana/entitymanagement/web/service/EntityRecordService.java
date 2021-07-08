@@ -27,7 +27,6 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.EUROPEANA_URL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 import static eu.europeana.entitymanagement.web.EntityRecordUtils.*;
 import static java.time.Instant.now;
@@ -818,12 +817,13 @@ public class EntityRecordService {
 				Entity europeanaProxyMetadata,
 				String entityId, EntityRecord entityRecord, Date timestamp) {
 	Aggregation europeanaAggr = new Aggregation();
-	Optional<DataSource> europeanaDataSource = datasources.getDatasource(EUROPEANA_URL);	
+	Optional<DataSource> europeanaDataSource = datasources.getEuropeanaDatasource();
 	europeanaAggr.setId(getEuropeanaAggregationId(entityId));
-	europeanaAggr.setRights(europeanaDataSource.isPresent() ? europeanaDataSource.get().getRights() : null);
+	// europeana datasource is checked on startup, so it cannot be empty here
+	europeanaAggr.setRights(europeanaDataSource.get().getRights());
+	europeanaAggr.setSource(europeanaDataSource.get().getUrl());
 	europeanaAggr.setCreated(timestamp);
 	europeanaAggr.setModified(timestamp);
-	europeanaAggr.setSource(europeanaDataSource.isPresent() ? europeanaDataSource.get().getUrl() : null);
 
 	EntityProxy europeanaProxy = new EntityProxy();
 	europeanaProxy.setProxyId(getEuropeanaProxyId(entityId));
