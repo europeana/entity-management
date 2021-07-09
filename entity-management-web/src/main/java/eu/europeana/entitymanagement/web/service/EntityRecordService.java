@@ -340,7 +340,7 @@ public class EntityRecordService {
 	entity.setBroader(replaceWithInternalReferences(broaderField));
 
 	// for the field narrower
-	List<String> narrowerField = entity.getBroader();
+	List<String> narrowerField = entity.getNarrower();
 	entity.setNarrower(replaceWithInternalReferences(narrowerField));
 
 	// for the field related
@@ -371,7 +371,7 @@ public class EntityRecordService {
 	List<String> hasMetField = entity.getHasMet();
 	entity.setHasMet(replaceWithInternalReferences(hasMetField));
 	
-	// for the field hasMet
+	// for the field wasPresentAt
 	List<String> wasPresentField = entity.getWasPresentAt();
 	entity.setWasPresentAt(replaceWithInternalReferences(wasPresentField));
 	
