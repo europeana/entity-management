@@ -21,6 +21,7 @@ public class EMBatchConstants {
 
     // ScheduledTask
     public final static String UPDATE_TYPE = "updateType";
+    public final static String HAS_BEEN_PROCESSED = "hasBeenProcessed";
 
     public final static String SCHEDULED_TASK_CLASSNAME = ScheduledTask.class.getSimpleName();
     public final static String FAILED_TASK_CLASSNAME = FailedTask.class.getSimpleName();

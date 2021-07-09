@@ -35,14 +35,8 @@ public class ScheduledTaskService {
      * @param entityIds list of entityIds
      */
     public void scheduleUpdateBulk(List<String> entityIds, BatchUpdateType updateType) {
-        Instant now = Instant.now();
-
-        List<ScheduledTask> tasks = entityIds.stream()
-                .map(entityId ->
-                        new ScheduledTask.Builder(entityId, updateType)
-                                .modified(now)
-                                .build()
-                ).collect(Collectors.toList());
+        List<ScheduledTask> tasks = createScheduledTasks(
+            entityIds, updateType, false);
 
         BulkWriteResult writeResult = repository.upsertBulk(tasks);
         logger.info("Persisted scheduled tasks to db: matched={}, modified={}, inserted={}",
@@ -51,14 +45,28 @@ public class ScheduledTaskService {
     }
 
     /**
-     * Removes entities from the ScheduledTasks collection if their entityId is contained within
-     * the provided entityIds
-     *
-     * @param updateType updateType to filter on
+     * Marks entities as processed
+     * @param updateType update type
      * @param entityIds list of entityIds
      */
-    public void removeTasks(BatchUpdateType updateType, List<String> entityIds) {
-        long removeCount = repository.removeTasks(updateType, entityIds);
+    public void markAsProcessed(BatchUpdateType updateType, List<String> entityIds){
+        List<ScheduledTask> tasks = createScheduledTasks(
+            entityIds, updateType, true);
+
+        BulkWriteResult writeResult = repository.markAsProcessed(updateType, tasks);
+        logger.info("Marked scheduled tasks as processed: matched={}, modified={}, inserted={}",
+            writeResult.getMatchedCount(), writeResult.getModifiedCount(),
+            writeResult.getInsertedCount());
+    }
+
+
+    /**
+     * Removes entities from the ScheduledTasks collection that have been processed
+     *
+     * @param updateType updateType to filter on
+     */
+    public void removeProcessedTasks(BatchUpdateType updateType) {
+        long removeCount = repository.removeProcessedTasks(updateType);
         if (removeCount > 0 && logger.isDebugEnabled()) {
             logger.debug("Removed scheduled tasks from db: count={}", removeCount);
         }
@@ -76,5 +84,21 @@ public class ScheduledTaskService {
      */
     public Optional<ScheduledTask> getTask(String entityId){
         return Optional.ofNullable(repository.getTask(entityId));
+    }
+
+    /**
+     * Helper method to instantiate ScheduledTasks from list of entityIds
+     */
+    private List<ScheduledTask> createScheduledTasks(List<String> entityIds,
+        BatchUpdateType updateType, boolean hasBeenProcessed) {
+        Instant now = Instant.now();
+
+        return entityIds.stream()
+            .map(entityId ->
+                new ScheduledTask.Builder(entityId, updateType)
+                    .setProcessed(hasBeenProcessed)
+                    .modified(now)
+                    .build()
+            ).collect(Collectors.toList());
     }
 }
