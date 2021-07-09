@@ -1,20 +1,18 @@
 package eu.europeana.entitymanagement.batch.listener;
 
+import static eu.europeana.entitymanagement.batch.BatchUtils.getEntityIds;
+
 import eu.europeana.entitymanagement.batch.model.BatchUpdateType;
 import eu.europeana.entitymanagement.batch.service.FailedTaskService;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.listener.ItemListenerSupport;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Component;
-
-import java.util.Arrays;
-import java.util.List;
-
-import static eu.europeana.entitymanagement.batch.BatchUtils.getEntityIds;
 
 /**
  * Listens for Read, Processing and Write operations during Entity Update steps.
@@ -27,7 +25,6 @@ public class EntityUpdateListener extends ItemListenerSupport<EntityRecord, Enti
     private final ScheduledTaskService scheduledTaskService;
     private final BatchUpdateType updateType;
 
-    @Autowired
   public EntityUpdateListener(
             FailedTaskService failedTaskService, ScheduledTaskService scheduledTaskService, BatchUpdateType updateType) {
     this.failedTaskService = failedTaskService;
@@ -62,8 +59,12 @@ public class EntityUpdateListener extends ItemListenerSupport<EntityRecord, Enti
 
   @Override
   public void onProcessError(@NonNull EntityRecord entityRecord, @NonNull Exception e) {
-    logger.warn("onProcessError: entityId={}", entityRecord.getEntityId(), e);
-    failedTaskService.persistFailure(entityRecord.getEntityId(), e);
+    String entityId = entityRecord.getEntityId();
+    logger.warn("onProcessError: entityId={}", entityId, e);
+    failedTaskService.persistFailure(entityId, e);
+
+    // Remove entityId from ScheduledTasks to prevent continuous update loop
+    scheduledTaskService.removeTasks(updateType, Collections.singletonList(entityId));
   }
 
 
@@ -73,5 +74,7 @@ public class EntityUpdateListener extends ItemListenerSupport<EntityRecord, Enti
 
     logger.warn("onWriteError: entityIds={}", entityIds, e);
     failedTaskService.persistFailureBulk(entityRecords, e);
+
+    scheduledTaskService.removeTasks(updateType, Arrays.asList(entityIds));
   }
 }
