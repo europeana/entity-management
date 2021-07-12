@@ -15,10 +15,8 @@ public class BatchUtils {
 
   // Batch jobs and steps
   public static String JOB_UPDATE_SINGLE_ENTITY = "update-single-entity-job";
-  public static String STEP_UPDATE_ENTITY = "update-single-entity-step";
+  public static String STEP_UPDATE_ENTITY = "update-entity-step";
   public static String JOB_UPDATE_SCHEDULED_ENTITIES = "update-scheduled-entities-job";
-  public static String STEP_UPDATE_SCHEDULED_ENTITIES = "update-scheduled-entities-step";
-
 
   /**
    * Creates JobParameters for triggering the Spring Batch update job for specific entities

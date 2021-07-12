@@ -2,7 +2,8 @@ package eu.europeana.entitymanagement.batch.config;
 
 import dev.morphia.query.experimental.filters.Filters;
 import eu.europeana.entitymanagement.batch.EMBatchConstants;
-import eu.europeana.entitymanagement.batch.listener.EntityUpdateListener;
+import eu.europeana.entitymanagement.batch.listener.EntityUpdateItemListener;
+import eu.europeana.entitymanagement.batch.listener.EntityUpdateStepListener;
 import eu.europeana.entitymanagement.batch.model.BatchUpdateType;
 import eu.europeana.entitymanagement.batch.processor.EntityDereferenceProcessor;
 import eu.europeana.entitymanagement.batch.processor.EntityMetricsProcessor;
@@ -22,6 +23,7 @@ import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import org.springframework.batch.core.ItemProcessListener;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -73,7 +75,7 @@ public class EntityUpdateJobConfig {
     private final ScheduledTaskService scheduledTaskService;
 
     private final FailedTaskService failedTaskService;
-    private final EntityUpdateListener entityUpdateListener;
+    private final EntityUpdateItemListener itemListener;
 
 
     private final TaskExecutor stepThreadPoolExecutor;
@@ -100,7 +102,7 @@ public class EntityUpdateJobConfig {
                                  EntityRecordDatabaseWriter dbWriter,
                                  EntitySolrWriter solrWriter, EntityRecordService entityRecordService,
                                  ScheduledTaskService scheduledTaskService,
-                                 FailedTaskService failedTaskService, EntityUpdateListener entityUpdateListener,
+                                 FailedTaskService failedTaskService, EntityUpdateItemListener itemListener,
                                  @Qualifier(STEP_EXECUTOR) TaskExecutor stepThreadPoolExecutor,
                                  @Qualifier(WEB_REQUEST_JOB_EXECUTOR) TaskExecutor synchronousTaskExecutor,
                                  EntityManagementConfiguration emConfig) {
@@ -116,7 +118,7 @@ public class EntityUpdateJobConfig {
         this.entityRecordService = entityRecordService;
         this.scheduledTaskService = scheduledTaskService;
         this.failedTaskService = failedTaskService;
-        this.entityUpdateListener = entityUpdateListener;
+        this.itemListener = itemListener;
         this.stepThreadPoolExecutor = stepThreadPoolExecutor;
         this.synchronousTaskExecutor = synchronousTaskExecutor;
         this.chunkSize = emConfig.getBatchChunkSize();
@@ -159,8 +161,12 @@ public class EntityUpdateJobConfig {
 
     @Bean
     @StepScope
-    private EntityUpdateListener entityUpdateListener(@Value("#{jobParameters[updateType]}") String updateType){
-        return new EntityUpdateListener(failedTaskService, scheduledTaskService, BatchUpdateType.valueOf(updateType));
+    private EntityUpdateItemListener entityUpdateListener(@Value("#{jobParameters[updateType]}") String updateType){
+        return new EntityUpdateItemListener(failedTaskService, scheduledTaskService, BatchUpdateType.valueOf(updateType));
+    }
+
+    private StepExecutionListener updateEntityStepListener(BatchUpdateType updateType){
+        return new EntityUpdateStepListener(scheduledTaskService, updateType);
     }
 
     /**
@@ -207,7 +213,7 @@ public class EntityUpdateJobConfig {
 
         return step.writer(compositeEntityWriter())
                 .listener(
-                        (ItemProcessListener<? super EntityRecord, ? super EntityRecord>) entityUpdateListener)
+                        (ItemProcessListener<? super EntityRecord, ? super EntityRecord>) itemListener)
                 .faultTolerant()
                 .skipPolicy(noopSkipPolicy)
                 .skip(EntityMismatchException.class)
@@ -215,6 +221,7 @@ public class EntityUpdateJobConfig {
                 .skip(SolrServiceException.class)
                 .taskExecutor(executor)
                 .throttleLimit(throttleLimit)
+                .listener(updateEntityStepListener(updateType))
                 .build();
     }
 
