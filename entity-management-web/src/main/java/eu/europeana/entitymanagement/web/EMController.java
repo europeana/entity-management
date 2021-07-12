@@ -9,7 +9,9 @@ import eu.europeana.entitymanagement.batch.model.BatchUpdateType;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
+import eu.europeana.entitymanagement.definitions.model.Concept;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.web.EntityIdResponse;
@@ -18,6 +20,7 @@ import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
@@ -136,13 +139,7 @@ public class EMController extends BaseRest {
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 	    @RequestBody Entity updateRequestEntity,
 	    HttpServletRequest request) throws Exception {
-		/*
-		 * we don't want to add @NotNull annotation within the entity class, since it has other validators
-		 * so we check for required properties here
-		 */
-		if(CollectionUtils.isEmpty(updateRequestEntity.getSameAs())){
-			throw new HttpBadRequestException("'sameAs' cannot be empty in request body");
-		}
+			checkExternalCoreferenceExists(updateRequestEntity);
 
 			if (emConfig.isAuthEnabled()) {
 				verifyWriteAccess(Operations.UPDATE, request);
@@ -444,5 +441,33 @@ public class EMController extends BaseRest {
 	private String getDatabaseIdentifier(String entityId) {
 		//entity id is "http://data.europeana.eu/{type}/{identifier}"
 		return entityId.substring(entityId.lastIndexOf("/") + 1);
+	}
+
+
+	/*
+	 * we don't want to add @NotNull annotation within the entity class, since it has other validators
+	 * so we check for required properties here
+	 */
+	private void checkExternalCoreferenceExists(
+			@RequestBody Entity updateRequest)
+			throws HttpBadRequestException {
+
+		// valid updates must include sameAs (for all entity types) OR exactMatch (for Agent, Concept
+		// and Place)
+
+		boolean isValidConceptUpdate = updateRequest instanceof Concept
+				&& CollectionUtils.isEmpty(((Concept)updateRequest).getExactMatch());
+
+		boolean isValidAgentUpdate = updateRequest instanceof Agent
+				&& CollectionUtils.isEmpty(((Agent)updateRequest).getExactMatch());
+
+		boolean isValidPlaceUpdate = updateRequest instanceof Concept
+				&& CollectionUtils.isEmpty(((Concept)updateRequest).getExactMatch());
+
+
+		if(!isValidConceptUpdate && !isValidAgentUpdate && !isValidPlaceUpdate &&
+				CollectionUtils.isEmpty(updateRequest.getSameAs())){
+			throw new HttpBadRequestException("'sameAs' cannot be empty in request body");
+		}
 	}
 }
