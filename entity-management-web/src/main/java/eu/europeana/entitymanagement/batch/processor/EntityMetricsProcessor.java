@@ -74,11 +74,13 @@ public class EntityMetricsProcessor implements ItemProcessor<EntityRecord, Entit
     if (aggregation == null) {
       aggregation = new Aggregation();
       entity.setIsAggregatedBy(aggregation);
+      Date now = new Date();
+      aggregation.setCreated(now);
+      aggregation.setModified(now);
     }
 
     aggregation.setPageRank(metrics.getPageRank());
     aggregation.setRecordCount(metrics.getEnrichmentCount());
     aggregation.setScore(metrics.getScore());
-    aggregation.setModified(new Date());
   }
 }

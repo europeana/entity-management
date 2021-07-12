@@ -38,7 +38,7 @@ public class MongoContainer extends GenericContainer<MongoContainer> {
         super(dockerImageName);
 
         if(useFixedPorts){
-            this.addFixedExposedPort(27017,27017);     
+            this.addFixedExposedPort(27018,27017);
         }else{
             this.withExposedPorts(27017);    
         }

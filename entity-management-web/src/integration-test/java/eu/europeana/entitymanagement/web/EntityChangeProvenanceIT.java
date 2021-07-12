@@ -1,97 +1,46 @@
 package eu.europeana.entitymanagement.web;
 
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_JAN_VERMEER_XML_VIAF;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_REGISTER_JAN_VERMEER;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BASE_SERVICE_URL;
-//import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BASE_SERVICE_URL;
-//import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BATHTUB_DEREF;
-//import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_JSON;
-//import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_JSON;
-//import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_JSON;
-//import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_JSON;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.getEntityRequestPath;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.doNothing;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Optional;
-
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import eu.europeana.entitymanagement.AbstractIntegrationTest;
-import eu.europeana.entitymanagement.batch.BatchService;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-/**
- * Integration test for the main Entity Management controller in case of errors occur 
- */
+import java.util.Optional;
 
-public class EntityChangeProvenanceIT extends AbstractIntegrationTest {
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+public class EntityChangeProvenanceIT extends BaseWebControllerTest {
 
     @Test
     public void changeProvenanceShouldBeSuccessful() throws Exception {
-        MvcResult resultRegisterEntity = createTestEntityRecord(AGENT_REGISTER_JAN_VERMEER, AGENT_JAN_VERMEER_XML_VIAF, false);
+        String europeanaMetadata = loadFile(AGENT_REGISTER_JAN_VERMEER);
+        String metisResponse = loadFile(AGENT_JAN_VERMEER_XML_VIAF);
 
-        // matches the id in the JSON file (also used to remove the queued Metis request)
-        String externalUriViaf = "http://viaf.org/viaf/51961439";
- 
-        final ObjectNode registeredEntityNode = new ObjectMapper().readValue(resultRegisterEntity.getResponse().getContentAsString(StandardCharsets.UTF_8), ObjectNode.class);
+        EntityRecord savedRecord = createEntity(europeanaMetadata, metisResponse, AGENT_JAN_VERMEER_VIAF_URI);
 
         // assert content of External proxy
-        Optional<EntityRecord> savedRecord = entityRecordService.retrieveByEntityId(registeredEntityNode.path("id").asText());
-        Assertions.assertTrue(savedRecord.isPresent());
-        EntityProxy externalProxy = savedRecord.get().getExternalProxy();
+        EntityProxy externalProxy = savedRecord.getExternalProxy();
 
-        Assertions.assertEquals(externalUriViaf, externalProxy.getProxyId());
+        Assertions.assertEquals(AGENT_JAN_VERMEER_VIAF_URI, externalProxy.getProxyId());
+        String requestPath = getEntityRequestPath(savedRecord.getEntityId());
 
-        entityRecordService.mergeEntity(savedRecord.get());
-        entityRecordService.saveEntityRecord(savedRecord.get());
-        
-        String externalUriWikidata = "http://www.wikidata.org/entity/Q41264";
-
-        String requestPath = getEntityRequestPath(registeredEntityNode.path("id").asText());
-        mockMvc.perform(MockMvcRequestBuilders.post(BASE_SERVICE_URL + "/" + requestPath + "/management/source")
-                .param(WebEntityConstants.PATH_PARAM_URL, externalUriWikidata)
-                .contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(MockMvcRequestBuilders.put(BASE_SERVICE_URL + "/" + requestPath + "/management/source")
+                // change url to wikidata
+                .param(WebEntityConstants.PATH_PARAM_URL, AGENT_JAN_VERMEER_WIKIDATA_URI)
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isAccepted())
-                .andReturn();
-
-        // check that ExternalProxy ID is updated
-        savedRecord = entityRecordService.retrieveByEntityId(registeredEntityNode.path("id").asText());
-        Assertions.assertTrue(savedRecord.isPresent());
-        externalProxy = savedRecord.get().getExternalProxy();
-
-        Assertions.assertEquals(externalUriWikidata, externalProxy.getProxyId());
+                // external proxyId should have changed to wikidata. expects external proxy to come second!
+                .andExpect(jsonPath("$.proxies[1].id", containsString(AGENT_JAN_VERMEER_WIKIDATA_URI)));
     }
-
-    @TestConfiguration
-    public static class TestConfig {
-
-        /**
-         * Do not trigger batch jobs in this test.
-         */
-        @Bean
-        @Primary
-        public BatchService batchServiceBean() throws Exception {
-            BatchService batchService = Mockito.mock(BatchService.class);
-            doNothing().when(batchService).launchSpecificEntityUpdate(anyList(), anyBoolean());
-            return batchService;
-        }
-    }
-
 }

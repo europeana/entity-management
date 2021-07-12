@@ -1,6 +1,6 @@
 version: "3.9"
 
-# To only start mongo, run: docker-compose up -d db
+# To start mongo and solr, run: docker-compose up -d
 # Then use the following settings in entitymanagement.user.properties
 #
 #  ###############
@@ -43,33 +43,3 @@ services:
     - 8983:8983
     environment:
     - EM_INDEXING_CORE=entity-management
-
-  app:
-    image: library/tomcat:9.0-jdk11
-    environment:
-      mongo.connectionUrl: mongodb://api_user:password@db:27017
-      mongo.em.database: entity-management
-      mongo.batch.database: job-repository
-      #Memory monitoring (JConsole connection possible via localhost:1099)
-      CATALINA_OPTS: '
-                        -Djava.rmi.server.hostname=0.0.0.0
-                        -Dcom.sun.management.jmxremote
-                        -Dcom.sun.management.jmxremote.port=1099
-                        -Dcom.sun.management.jmxremote.rmi.port=1099
-                        -Dcom.sun.management.jmxremote.local.only=false
-                        -Dcom.sun.management.jmxremote.authenticate=false
-                        -Dcom.sun.management.jmxremote.ssl=false
-                        '
-      JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8000
-    volumes:
-      - ./entity-management-web/target/entity-management-web.war:/usr/local/tomcat/webapps/ROOT.war
-    ports:
-      #Tomcat http port
-      - "8080:8080"
-      #Debug port
-      - "8000:8000"
-      #JMX Port
-      - "1099:1099"
-    depends_on:
-      - db
-      - solr

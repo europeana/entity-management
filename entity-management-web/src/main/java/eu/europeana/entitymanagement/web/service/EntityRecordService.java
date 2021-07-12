@@ -27,11 +27,9 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.EUROPEANA_URL;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.RIGHTS_CREATIVE_COMMONS;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_ID;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_IDENTIFIER;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 import static eu.europeana.entitymanagement.web.EntityRecordUtils.*;
+import static java.time.Instant.now;
 
 @Service(AppConfig.BEAN_ENTITY_RECORD_SERVICE)
 public class EntityRecordService {
@@ -48,8 +46,8 @@ public class EntityRecordService {
 	 * Fields to ignore when updating entities from user request
 	 */
 	private final List<String> UPDATE_FIELDS_TO_IGNORE = List
-			.of(WebEntityFields.ID, WebEntityFields.IDENTIFIER, WebEntityFields.TYPE, ENTITY_ID, ENTITY_IDENTIFIER,
-					WebEntityFields.IS_AGGREGATED_BY);
+			.of(ID, TYPE, ENTITY_ID, ENTITY_IDENTIFIER,
+					IS_AGGREGATED_BY);
 
 	@Autowired
     public EntityRecordService(EntityRecordRepository entityRecordRepository,
@@ -446,47 +444,41 @@ public class EntityRecordService {
 		record.ifPresent(entityRecord -> updatedReferences.add(entityRecord.getEntityId()));
 	}
     }
+   
 
     /**
-     * This function merges the data from the entities of the entity record proxies
-     * to the consilidated entity. TODO: see how to merge the Aggregation and
-     * WebResource objects (currently only the fields that are not of the Class type
-     * are merged)
+     * This function merges the metadata data from the provided entities and returns the consolidated version
      * 
      * @throws EntityCreationException
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public void mergeEntity(EntityRecord entityRecord) throws EuropeanaApiException {
+    
+        public Entity mergeEntities(Entity primary, Entity secondary) throws EuropeanaApiException {
 
-	//TODO: consider refactoring of this implemeentation by creating a new class EntityReconciliator
-	/*
-	 * The primary entity corresponds to the entity in the Europeana proxy. The
-	 * secondary entity corresponds to the entity in the external proxy.
-	 */
-	EntityProxy europeanaProxy = entityRecord.getEuropeanaProxy();
-	EntityProxy externalProxy = entityRecord.getExternalProxy();
-	if (europeanaProxy == null || externalProxy == null) {
-	    return;
-	}
+            // TODO: consider refactoring of this implemeentation by creating a new class
+            // EntityReconciliator
+            /*
+             * The primary entity corresponds to the entity in the Europeana proxy. The
+             * secondary entity corresponds to the entity in the external proxy.
+             */
+            List<Field> fieldsToCombine = EntityUtils.getAllFields(primary.getClass());
+            return combineEntities(primary, secondary, fieldsToCombine, true);
+        }
 
-	Entity primary = europeanaProxy.getEntity();
-	Entity secondary = externalProxy.getEntity();
-
-			List<Field> fieldsToCombine = EntityUtils.getAllFields(primary.getClass());
-
-
-				Entity consolidatedEntity = combineEntities(primary, secondary, fieldsToCombine, true);
-
-				/*
-				 * isAggregatedBy isn't set on Europeana Proxy, so it won't be copied to the consolidatedEntity
-				 * We add it separately here
- 				 */
-				    Aggregation aggregation = entityRecord.getEntity().getIsAggregatedBy();
-				    aggregation.setModified(new Date());
-				    consolidatedEntity.setIsAggregatedBy(aggregation);
-						entityRecord.setEntity(consolidatedEntity);
-		}
-
+        public void updateConsolidatedVersion(EntityRecord entityRecord, Entity consolidatedEntity) {
+             
+            /*
+             * isAggregatedBy isn't set on Europeana Proxy, so it won't be copied to the
+             * consolidatedEntity We add it separately here
+             * 
+             * TODO: WebResource objects (currently only the fields that are not of the Class type are merged)
+             */
+            Aggregation aggregation = entityRecord.getEntity().getIsAggregatedBy();
+            aggregation.setModified(new Date());
+            consolidatedEntity.setIsAggregatedBy(aggregation);
+            entityRecord.setEntity(consolidatedEntity);
+        }
+    
+    
 	/**
 	 * Replaces Europeana proxy metadata with the provided entity metadata.
 	 *
@@ -497,13 +489,13 @@ public class EntityRecordService {
 	public void replaceEuropeanaProxy(final Entity updateRequestEntity, EntityRecord entityRecord) {
 		EntityProxy europeanaProxy = entityRecord.getEuropeanaProxy();
 
-		List<String> sameAs = europeanaProxy.getEntity().getSameAs();
 		String entityId = europeanaProxy.getEntity().getEntityId();
 
-		// copy SameAs and EntityId from existing Europeana proxy metadata
+		// copy EntityId from existing Europeana proxy metadata
 		europeanaProxy.setEntity(updateRequestEntity);
-		europeanaProxy.getEntity().setSameAs(sameAs);
 		europeanaProxy.getEntity().setEntityId(entityId);
+
+		europeanaProxy.getProxyIn().setModified(Date.from(now()));
 	}
 
 	/**
@@ -810,7 +802,7 @@ public class EntityRecordService {
     }
 
     private void setEntityAggregation(EntityRecord entityRecord, String entityId, Date timestamp) {
-        Aggregation isAggregatedBy = new Aggregation();
+        Aggregation isAggregatedBy = new Aggregation(true);
         isAggregatedBy.setId(getIsAggregatedById(entityId));
 	isAggregatedBy.setCreated(timestamp);
 	isAggregatedBy.setModified(timestamp);
@@ -825,12 +817,13 @@ public class EntityRecordService {
 				Entity europeanaProxyMetadata,
 				String entityId, EntityRecord entityRecord, Date timestamp) {
 	Aggregation europeanaAggr = new Aggregation();
-	Optional<DataSource> europeanaDataSource = datasources.getDatasource(EUROPEANA_URL);	
+	Optional<DataSource> europeanaDataSource = datasources.getEuropeanaDatasource();
 	europeanaAggr.setId(getEuropeanaAggregationId(entityId));
-	europeanaAggr.setRights(europeanaDataSource.isPresent() ? europeanaDataSource.get().getRights() : null);
+	// europeana datasource is checked on startup, so it cannot be empty here
+	europeanaAggr.setRights(europeanaDataSource.get().getRights());
+	europeanaAggr.setSource(europeanaDataSource.get().getUrl());
 	europeanaAggr.setCreated(timestamp);
 	europeanaAggr.setModified(timestamp);
-	europeanaAggr.setSource(europeanaDataSource.isPresent() ? europeanaDataSource.get().getUrl() : null);
 
 	EntityProxy europeanaProxy = new EntityProxy();
 	europeanaProxy.setProxyId(getEuropeanaProxyId(entityId));

@@ -80,16 +80,9 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
             // replace external proxy with MetisResponse
             entityRecord.getExternalProxy().setEntity(metisResponse);
             entityRecord.getExternalProxy().getProxyIn().setModified(new Date());
-            return entityRecord;
         }
 
-        // Update could also be triggered after changes to Europeana proxy.
-        if(isEuropeanaProxyUpdated(entityRecord)){
-          return entityRecord;
-        }
-
-        // Otherwise stop processing
-        return null;
+        return entityRecord;
     }
 
 

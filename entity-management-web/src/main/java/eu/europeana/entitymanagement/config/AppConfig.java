@@ -23,6 +23,7 @@ import eu.europeana.api.commons.oauth2.service.impl.EuropeanaClientDetailsServic
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import org.springframework.util.Assert;
 import org.springframework.web.filter.ShallowEtagHeaderFilter;
 
 /**
@@ -41,7 +42,7 @@ public class AppConfig extends AppConfigConstants{
     @Resource(name = BEAN_XML_MAPPER)
     private XmlMapper xmlMapper;
 
-    @Resource(name= BEAN_JOB_EXECUTOR)
+    @Resource(name= SCHEDULED_JOB_EXECUTOR)
     private TaskExecutor jobLauncherExecutor;
 
     
@@ -52,12 +53,22 @@ public class AppConfig extends AppConfigConstants{
     @Bean(name=BEAN_EM_DATA_SOURCES)
     public DataSources getDataSources() throws IOException {
 	String datasourcesXMLConfigFile = emConfiguration.getDatasourcesXMLConfig();
-		
-	try (InputStream inputStream = getClass().getResourceAsStream(datasourcesXMLConfigFile);
-		BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-	    String contents = reader.lines().collect(Collectors.joining(System.lineSeparator()));
-	    return xmlMapper.readValue(contents, DataSources.class);
-	}
+
+	DataSources dataSources;
+	try (InputStream inputStream = getClass().getResourceAsStream(datasourcesXMLConfigFile)) {
+        assert inputStream != null;
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            String contents = reader.lines().collect(Collectors.joining(System.lineSeparator()));
+            dataSources =  xmlMapper.readValue(contents, DataSources.class);
+        }
+    }
+
+	if(dataSources.getEuropeanaDatasource().isEmpty()){
+	    throw new IllegalStateException(String.format("Datasource must be configured with id='%s' in %s",
+                DataSources.EUROPEANA_ID, datasourcesXMLConfigFile));
+    }
+
+	return dataSources;
     }
 
 

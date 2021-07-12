@@ -1,12 +1,12 @@
-package eu.europeana.entitymanagement.batch;
+package eu.europeana.entitymanagement.batch.model;
 
 /**
  * Parameters for triggering jobs
  */
 public enum JobParameter {
     CURRENT_START_TIME("currentStartTime"),
-    PREVIOUS_START_TIME("previousStartTime"),
-    ENTITY_ID("entityIds");
+    ENTITY_ID("entityId"),
+    UPDATE_TYPE("updateType");
 
     private final String key;
 

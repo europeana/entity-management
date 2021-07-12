@@ -1,103 +1,44 @@
 package eu.europeana.entitymanagement.web;
 
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BASE_SERVICE_URL;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_JSON;
-//import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BASE_SERVICE_URL;
-//import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BATHTUB_DEREF;
-//import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_JSON;
-//import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_JSON;
-//import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_JSON;
-//import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_JSON;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.getEntityRequestPath;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.doNothing;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.Optional;
-
-import org.junit.jupiter.api.Assertions;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 
-import eu.europeana.entitymanagement.AbstractIntegrationTest;
-import eu.europeana.entitymanagement.batch.BatchService;
-import eu.europeana.entitymanagement.definitions.model.Concept;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.*;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/**
- * Integration test for the main Entity Management controller in case of errors occur 
- */
 
-public class EntityReenableIT extends AbstractIntegrationTest {
+@SpringBootTest
+@AutoConfigureMockMvc
+public class EntityReenableIT extends BaseWebControllerTest {
 
     @Test
     void reEnableDisabledEntityShouldBeSuccessful() throws Exception {
-        // create disbaled entity in DB
-        Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
-        EntityRecord entityRecord = new EntityRecord();
-        entityRecord.setEntity(concept);
-        entityRecord.setEntityId(concept.getEntityId());
-        EntityRecord record = entityRecordService.disableEntityRecord(entityRecord);
-       // check if entity is disabled
-        Assertions.assertTrue(record.isDisabled());
+        String europeanaMetadata = loadFile(CONCEPT_REGISTER_BATHTUB_JSON);
+        String metisResponse = loadFile(CONCEPT_BATHTUB_XML);
 
-        String requestPath = getEntityRequestPath(record.getEntityId());
+        EntityRecord entityRecord = createEntity(europeanaMetadata, metisResponse, CONCEPT_BATHTUB_URI);
+        deprecateEntity(entityRecord);
 
+        String requestPath = getEntityRequestPath(entityRecord.getEntityId());
         mockMvc.perform(post(BASE_SERVICE_URL + "/" + requestPath)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
         // check that record was re-enabled
-        Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveByEntityId(record.getEntityId());
-
-        assert dbRecordOptional.isPresent();
-        Assertions.assertFalse(dbRecordOptional.get().isDisabled());
-    }
-
-    @Test
-    void reEnableNonDisabledEntityShouldBeSuccessful() throws Exception {
-        // create entity in DB
-        Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
-        EntityRecord entityRecord = new EntityRecord();
-        entityRecord.setEntity(concept);
-        entityRecord.setEntityId(concept.getEntityId());
-        EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
-        // check if entity is NOT disabled
-        Assertions.assertFalse(entityRecord.isDisabled());
-
-        String requestPath = getEntityRequestPath(record.getEntityId());
-
-        mockMvc.perform(post(BASE_SERVICE_URL + "/" + requestPath)
+        mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".jsonld")
+                .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-
-        // check that record was re-enabled
-        Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveByEntityId(record.getEntityId());
-
-        assert dbRecordOptional.isPresent();
-        Assertions.assertFalse(dbRecordOptional.get().isDisabled());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(entityRecord.getEntityId())))
+                .andExpect(jsonPath("$.type", is(EntityTypes.Concept.name())));
     }
-    
-    @TestConfiguration
-    public static class TestConfig {
-
-        /**
-         * Do not trigger batch jobs in this test.
-         */
-        @Bean
-        @Primary
-        public BatchService batchServiceBean() throws Exception {
-            BatchService batchService = Mockito.mock(BatchService.class);
-            doNothing().when(batchService).launchSpecificEntityUpdate(anyList(), anyBoolean());
-            return batchService;
-        }
-    }
-
 }

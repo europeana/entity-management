@@ -1,135 +1,52 @@
 package eu.europeana.entitymanagement.web;
 
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BASE_SERVICE_URL;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_JSON;
-//import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BASE_SERVICE_URL;
-//import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BATHTUB_DEREF;
-//import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_JSON;
-//import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_JSON;
-//import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_JSON;
-//import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_JSON;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.getEntityRequestPath;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.doNothing;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Optional;
-
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-
-import eu.europeana.entitymanagement.AbstractIntegrationTest;
-import eu.europeana.entitymanagement.batch.BatchService;
-import eu.europeana.entitymanagement.definitions.model.Concept;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.exception.EntityNotFoundException;
-import eu.europeana.entitymanagement.exception.EntityRemovedException;
-
-/**
- * Integration test for the main Entity Management controller in case of errors occur 
- */
-
-public class EntityDeleteIT extends AbstractIntegrationTest {
+@SpringBootTest
+@AutoConfigureMockMvc
+public class EntityDeleteIT extends BaseWebControllerTest {
 
     @Test
     void deletionShouldBeSuccessful() throws Exception {
-        // create entity in DB
-        Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
-        EntityRecord entityRecord = new EntityRecord();
-        entityRecord.setEntity(concept);
-        entityRecord.setEntityId(concept.getEntityId());
-        EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
+        String europeanaMetadata = loadFile(CONCEPT_REGISTER_BATHTUB_JSON);
+        String metisResponse = loadFile(CONCEPT_BATHTUB_XML);
 
-        String requestPath = getEntityRequestPath(record.getEntityId());
+        EntityRecord entityRecord = createEntity(europeanaMetadata, metisResponse, CONCEPT_BATHTUB_URI);
+        String requestPath = getEntityRequestPath(entityRecord.getEntityId());
 
         mockMvc.perform(delete(BASE_SERVICE_URL + "/" + requestPath)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
-
-        // check that record was disabled
-        Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveByEntityId(record.getEntityId());
-
-        assert dbRecordOptional.isPresent();
-        Assertions.assertTrue(dbRecordOptional.get().isDisabled());
     }
-    
+
+
     @Test
-    void deletionFailsIfMatch() throws Exception {
-        // create entity in DB
-        Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
-        EntityRecord entityRecord = new EntityRecord();
-        entityRecord.setEntity(concept);
-        entityRecord.setEntityId(concept.getEntityId());
-        EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
-
-        String requestPath = getEntityRequestPath(record.getEntityId());
-
-        mockMvc.perform(delete(BASE_SERVICE_URL + "/" + requestPath).header(HttpHeaders.IF_MATCH, "wrong_etag_value")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isPreconditionFailed());
-
-        // check that record was disabled
-        Optional<EntityRecord> dbRecordOptional = entityRecordService.retrieveByEntityId(record.getEntityId());
-
-        assert dbRecordOptional.isPresent();
-        Assertions.assertFalse(dbRecordOptional.get().isDisabled());
-    }
-    
-    @Test
-    void disableEntityErrorCheck_entityDoesNotExist() throws Exception {
-    	/*
-    	 * check the error if the entity does not exist
-    	 */
+    void deletingNonExistingEntityShouldReturn404() throws Exception {
         mockMvc.perform(delete(BASE_SERVICE_URL + "/" + "wrong-type/wrong-identifier")
                 .accept(MediaType.APPLICATION_JSON))
-        		.andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof EntityNotFoundException));
+                .andExpect(status().isNotFound());
     }
 
     @Test
-    void disableEntityErrorCheck_entityDisabled() throws Exception {
-    	/*
-    	 * check the error if the entity is removed/disabled
-    	 */
-        // create entity in the DB
-        Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
-        EntityRecord entityRecord = new EntityRecord();
-        entityRecord.setEntity(concept);
-        entityRecord.setEntityId(concept.getEntityId());
-        EntityRecord record = entityRecordService.saveEntityRecord(entityRecord);
+    void deletingDeprecatedEntityShouldReturn410() throws Exception {
+        String europeanaMetadata = loadFile(CONCEPT_REGISTER_BATHTUB_JSON);
+        String metisResponse = loadFile(CONCEPT_BATHTUB_XML);
 
-        String requestPath = getEntityRequestPath(record.getEntityId());
+        EntityRecord entityRecord = createEntity(europeanaMetadata, metisResponse, CONCEPT_BATHTUB_URI);
+        deprecateEntity(entityRecord);
+
+        String requestPath = getEntityRequestPath(entityRecord.getEntityId());
 
         mockMvc.perform(delete(BASE_SERVICE_URL + "/" + requestPath)
                 .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
-
-        mockMvc.perform(delete(BASE_SERVICE_URL + "/" + requestPath)
-                .accept(MediaType.APPLICATION_JSON))
-        		.andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof EntityRemovedException));
+                .andExpect(status().isGone());
     }
-
-    @TestConfiguration
-    public static class TestConfig {
-
-        /**
-         * Do not trigger batch jobs in this test.
-         */
-        @Bean
-        @Primary
-        public BatchService batchServiceBean() throws Exception {
-            BatchService batchService = Mockito.mock(BatchService.class);
-            doNothing().when(batchService).launchSpecificEntityUpdate(anyList(), anyBoolean());
-            return batchService;
-        }
-    }
-
 }

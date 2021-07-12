@@ -20,4 +20,10 @@ public class DataSource {
 		return rights;
 	}
 
+	@JacksonXmlProperty(isAttribute = true)
+	private String id;
+
+	public String getId() {
+		return id;
+	}
 }

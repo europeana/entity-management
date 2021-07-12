@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({CONTEXT, ID, TYPE, DEPICTION, IS_SHOWN_BY, PREF_LABEL, ALT_LABEL, HIDDEN_LABEL,NOTE,
@@ -170,7 +171,7 @@ public class Concept extends Entity {
 
 	
 	public String getType() {
-		return "Concept";
+		return EntityTypes.Concept.getEntityType();
 	}
 
 	

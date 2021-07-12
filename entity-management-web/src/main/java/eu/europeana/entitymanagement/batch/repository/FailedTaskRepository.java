@@ -1,15 +1,11 @@
-package eu.europeana.entitymanagement.batch.errorhandling;
+package eu.europeana.entitymanagement.batch.repository;
 
 import static dev.morphia.query.Sort.ascending;
 import static dev.morphia.query.experimental.filters.Filters.eq;
 import static dev.morphia.query.experimental.filters.Filters.in;
-import static eu.europeana.entitymanagement.batch.errorhandling.FailedTaskUtils.CREATED;
-import static eu.europeana.entitymanagement.batch.errorhandling.FailedTaskUtils.ENTITY_ID;
-import static eu.europeana.entitymanagement.batch.errorhandling.FailedTaskUtils.ERROR_MSG;
-import static eu.europeana.entitymanagement.batch.errorhandling.FailedTaskUtils.MODIFIED;
-import static eu.europeana.entitymanagement.batch.errorhandling.FailedTaskUtils.STACKTRACE;
+import static eu.europeana.entitymanagement.batch.EMBatchConstants.*;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_DELETE_OPTS;
-import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.UPSET_OPTS;
+import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.UPSERT_OPTS;
 
 import com.mongodb.bulk.BulkWriteResult;
 import com.mongodb.client.MongoCollection;
@@ -20,6 +16,7 @@ import dev.morphia.Datastore;
 import dev.morphia.query.FindOptions;
 import dev.morphia.query.experimental.filters.Filter;
 import dev.morphia.query.experimental.updates.UpdateOperators;
+import eu.europeana.entitymanagement.batch.model.FailedTask;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import java.util.ArrayList;
@@ -70,7 +67,7 @@ public class FailedTaskRepository implements InitializingBean {
             UpdateOperators.set(MODIFIED, failure.getModified()),
             // set "created" value if this a new doc
             UpdateOperators.setOnInsert(Map.of(CREATED, failure.getModified()))
-        ).execute(UPSET_OPTS);
+        ).execute(UPSERT_OPTS);
   }
 
   /**
@@ -86,19 +83,17 @@ public class FailedTaskRepository implements InitializingBean {
 
     for (FailedTask failure : failures) {
       updates.add(new UpdateOneModel<>(
-          // filter
           new Document(ENTITY_ID, failure.getEntityId()),
-          // update
-          new Document(Map.of(
-              ENTITY_ID, failure.getEntityId(),
-              MODIFIED, failure.getModified(),
-              ERROR_MSG, failure.getErrorMessage(),
-              STACKTRACE, failure.getStackTrace()
-          ))
+              new Document(DOC_SET, new Document(ENTITY_ID, failure.getEntityId())
+                      .append(MODIFIED, failure.getModified())
+                      .append(ERROR_MSG, failure.getErrorMessage())
+                      .append(STACKTRACE, failure.getStackTrace()
+                      ))
               // set "created" if this is a new document
-              .append("$setOnInsert", new Document(CREATED, failure.getModified())),
-          // update options
-          UPSET_OPTS
+              .append(DOC_SET_ON_INSERT, new Document(CREATED, failure.getModified()))
+                      // add discriminator manually as we're bypassing Morphia for this db query
+              .append(MORPHIA_DISCRIMINATOR, FAILED_TASK_CLASSNAME),
+              UPSERT_OPTS
       ));
     }
 

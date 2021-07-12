@@ -1,52 +1,52 @@
 package eu.europeana.entitymanagement;
 
 
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.testutils.MongoContainer;
 import eu.europeana.entitymanagement.testutils.SolrContainer;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import okhttp3.HttpUrl;
+import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.junit.AfterClass;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.containers.output.ToStringConsumer;
 import org.testcontainers.containers.output.WaitingConsumer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
+import java.util.Objects;
 
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.METIS_DEREF_PATH;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BASE_SERVICE_URL;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.*;
 
 @SpringBootTest
-@AutoConfigureMockMvc
 public abstract class AbstractIntegrationTest {
-    protected static final Logger logger = LogManager.getLogger(AbstractIntegrationTest.class);
+    private static final Logger logger = LogManager.getLogger(AbstractIntegrationTest.class);
+    private static final MongoContainer MONGO_CONTAINER;
+    private static final SolrContainer SOLR_CONTAINER;
 
-    static final MongoContainer MONGO_CONTAINER;
-    static final SolrContainer SOLR_CONTAINER;
+    protected MockMvc mockMvc;
 
+    @Autowired
+    protected EntityRecordService entityRecordService;
+
+
+    @Autowired
+    private WebApplicationContext webApplicationContext;
 
     static {
         MONGO_CONTAINER = new MongoContainer("entity-management", "job-repository", "enrichment")
@@ -63,6 +63,7 @@ public abstract class AbstractIntegrationTest {
     }
 
 
+
     /**
      * MockWebServer needs to be static, so we can inject its port into the Spring context.
      * <p>
@@ -72,28 +73,47 @@ public abstract class AbstractIntegrationTest {
      * See: https://github.com/spring-projects/spring-framework/issues/24825
      */
     protected static MockWebServer mockMetis;
-    
-    @Autowired
-    protected WebApplicationContext webApplicationContext;
-
-    @Autowired
-    protected EntityRecordService entityRecordService;
-
-    @Qualifier(AppConfigConstants.BEAN_JSON_MAPPER)
-    @Autowired
-    protected ObjectMapper objectMapper;
-
-    protected MockMvc mockMvc;
 
     @BeforeAll
-    static void setupAll() {
+    public static void setupAll() throws IOException {
         mockMetis = new MockWebServer();
+
+        final Dispatcher dispatcher = new Dispatcher() {
+            @NotNull
+            @Override
+            public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
+                String externalId = Objects.requireNonNull(request.getRequestUrl()).queryParameter("uri");
+                try {
+                    String responseBody = loadFile(METIS_RESPONSE_MAP.getOrDefault(externalId, EMPTY_METIS_RESPONSE));
+                    return new MockResponse()
+                            .setResponseCode(200)
+                            .setBody(responseBody);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
+
+        mockMetis.setDispatcher(dispatcher);
+        mockMetis.start();
     }
 
     @AfterAll
-    static void teardownAll() throws IOException {
+    public static void teardownAll() throws IOException {
         logger.info("Shutdown metis server : host = {}; port={}", mockMetis.getHostName(), mockMetis.getPort());
         mockMetis.shutdown();
+    }
+
+
+
+
+
+    @BeforeEach
+    protected void setup() throws Exception {
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
+
+        //ensure a clean db between test runs
+        this.entityRecordService.dropRepository();
     }
 
     @DynamicPropertySource
@@ -106,6 +126,8 @@ public abstract class AbstractIntegrationTest {
         registry.add("mongo.enrichment.database", MONGO_CONTAINER::getEnrichmentDb);
         registry.add("metis.baseUrl", () -> String.format("http://%s:%s", mockMetis.getHostName(), mockMetis.getPort()));
         registry.add("batch.computeMetrics", () -> "false");
+        // Do not run scheduled entity updates in tests
+        registry.add("batch.scheduling.enabled", () -> "false");
         registry.add("auth.enabled", () -> "false");
         registry.add("entitymanagement.solr.indexing.url", SOLR_CONTAINER::getConnectionUrl);
         // enable explicit commits while indexing to Solr in tests
@@ -116,31 +138,19 @@ public abstract class AbstractIntegrationTest {
         logger.info("SOLR_CONTAINER : {}", SOLR_CONTAINER.getConnectionUrl());
         logger.info("METIS SERVER : host = {}; port={}", mockMetis.getHostName(), mockMetis.getPort());
     }
-    
-    @BeforeEach
-    public void setup() throws Exception {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
-       
-        //ensure a clean db between test runs
-        this.entityRecordService.dropRepository();
-    }
-    
-    protected MvcResult createTestEntityRecord(String europeanaMetadataFile, String metisResponseFile, boolean forUpdate)
-    	    throws IOException, Exception {
-    	// set mock Metis response
-            mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(metisResponseFile)));
-            //second request for update task during create
-            mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(metisResponseFile)));
-            //third request of update when update method is called
-            if(forUpdate) {
-                mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(metisResponseFile)));  
-            }
 
-        	MvcResult resultRegisterEntity = mockMvc.perform(post(BASE_SERVICE_URL)
-                    .content(loadFile(europeanaMetadataFile))
-                    .contentType(MediaType.APPLICATION_JSON_VALUE))
-                    .andExpect(status().isAccepted())
-                    .andReturn();
-    	return resultRegisterEntity;
-        }
+
+    /**
+     * Asserts that a de-reference request was actually made to the mock Metis server
+     *
+     * @param uri uri param in request
+     * @throws InterruptedException
+     */
+    protected void assertMetisRequest(String uri) throws InterruptedException {
+        // check that app actually sent request
+        HttpUrl requestedUrl = mockMetis.takeRequest().getRequestUrl();
+        assert requestedUrl != null;
+        Assertions.assertEquals(METIS_DEREF_PATH, requestedUrl.encodedPath());
+        Assertions.assertEquals(uri, requestedUrl.queryParameter("uri"));
+    }
 }

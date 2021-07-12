@@ -22,7 +22,8 @@ public interface WebEntityConstants extends WebEntityFields{
 	public static final String QUERY_PARAM_FL = "fl";
 	public static final String QUERY_PARAM_PROFILE = "profile";
 	public static final String QUERY_PARAM_LANGUAGE = "lang";
-	
+	public static final String QUERY_PARAM_QUERY = "query";
+
 	public static final String PARAM_TYPE_ALL = "All";
 	public static final String PARAM_LANGUAGE_ALL = "all";
 	public static final String PARAM_LANGUAGE_EN = "en";
@@ -90,8 +91,5 @@ public interface WebEntityConstants extends WebEntityFields{
 	// Web application
 	public static final String CONCEPT_SCHEME = "conceptScheme";	
 	public static final String CONCEPT_SCHEME_APPLICATION_NAME = "webConceptScheme";
-
-	public static final String RIGHTS_CREATIVE_COMMONS = "https://creativecommons.org/publicdomain/zero/1.0/";
-	public static final String EUROPEANA_URL = "https://www.europeana.eu/";
 
 }

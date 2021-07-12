@@ -19,8 +19,20 @@ import java.util.List;
 public class Aggregation {
 	
 	public Aggregation() {
-		
 	}
+
+    /**
+     * Creates a new Aggregation instance
+     * @param initializeNumericFields if true, pageRank, recordCount and score are initialized to zero, meaning
+     *                                 they are included during serialization.
+     */
+	public Aggregation(boolean initializeNumericFields){
+        if(initializeNumericFields){
+            this.pageRank = 0;
+            this.recordCount = 0;
+            this.score = 0;
+        }
+    }
     
     public Aggregation(Aggregation copy) {
 		this.id = copy.getId();
@@ -35,11 +47,22 @@ public class Aggregation {
 		if(copy.getAggregates()!=null) this.aggregates = new ArrayList<>(copy.getAggregates());
 	}
 
-	String id, type, rights, source;
-    Date created, modified;
-    int score, recordCount;
-    double pageRank;
-    List<String> aggregates;
+    private String id;
+	private String type;
+	private String rights;
+	private String source;
+    private Date created;
+    private Date modified;
+
+    /**
+     * Initialize numeric fields with negative values, so they are not serialized unless a value is
+     * explicitly set
+     */
+    private int score= -1;
+    private int recordCount= -1;
+    private double pageRank= -1d;
+
+    private List<String> aggregates;
 
     
     @JsonGetter(ID)
@@ -99,36 +122,36 @@ public class Aggregation {
         this.modified = modified;
     }
     
-    @JsonGetter
+    @JsonGetter(PAGE_RANK)
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = PositiveNumberFilter.class)
     public double getPageRank() {
         return pageRank;
     }
 
     
-    @JsonSetter
-
+    @JsonSetter(PAGE_RANK)
     public void setPageRank(double pageRank) {
         this.pageRank = pageRank;
     }
     
-    @JsonGetter
+    @JsonGetter(RECORD_COUNT)
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = PositiveNumberFilter.class)
     public int getRecordCount() {
         return recordCount;
     }
     
-    @JsonSetter
+    @JsonSetter(RECORD_COUNT)
     public void setRecordCount(int recordCount) {
         this.recordCount = recordCount;
     }
     
-    @JsonGetter
+    @JsonGetter(SCORE)
     @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = PositiveNumberFilter.class)
     public int getScore() {
         return score;
     }
     
-    @JsonSetter
+    @JsonSetter(SCORE)
     public void setScore(int score) {
         this.score = score;
     }
