@@ -7,11 +7,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
+
+import eu.europeana.corelib.edm.model.schemaorg.MultilingualString;
+import eu.europeana.corelib.edm.model.schemaorg.Person;
+import eu.europeana.corelib.edm.model.schemaorg.Text;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
@@ -50,11 +56,15 @@ public class Concept extends Entity {
 	private List<String> inScheme;
 	private Map<String, List<String>> notation;
 
+	public void toSchemaOrgEntity () {
+		schemaOrgEntity = new eu.europeana.corelib.edm.model.schemaorg.Concept();
+		super.toSchemaOrgEntity();
+	}
+	
 	@JsonGetter(BROADER)
 	public List<String> getBroader() {
 		return broader;
 	}
-
 	
 	@JsonSetter(BROADER)
 	public void setBroader(List<String> broader) {

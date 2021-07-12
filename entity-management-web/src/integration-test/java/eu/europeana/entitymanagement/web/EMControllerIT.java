@@ -21,7 +21,6 @@ import eu.europeana.entitymanagement.vocabulary.XmlFields;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import okhttp3.mockwebserver.MockResponse;
-import org.apache.commons.lang.StringUtils;
 import org.assertj.core.util.Maps;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
@@ -54,7 +53,6 @@ import java.util.concurrent.TimeUnit;
 
 import static eu.europeana.api.commons.web.http.HttpHeaders.*;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.*;
-import static org.hamcrest.CoreMatchers.containsString;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.QUERY_PARAM_QUERY;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -514,6 +512,52 @@ public class EMControllerIT extends AbstractIntegrationTest {
 
         String contentXml = getRetrieveEntityXmlResponse(requestPath);
         assertRetrieveAPIResultsExternalProfile(contentXml, resultActions, agent);
+    }
+    
+    @Test
+    public void retrieveAgentExternalSchemaOrgShouldBeSuccessful() throws Exception {
+        //TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
+        Agent agent = objectMapper.readValue(loadFile(AGENT_JSON), Agent.class);
+        EntityRecord entityRecord = new EntityRecord();
+        entityRecord.setEntity(agent);
+        entityRecord.setEntityId(agent.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord);
+
+        String requestPath = getEntityRequestPath(agent.getEntityId());
+        ResultActions resultActions = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".schema.jsonld")
+        		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.@id", is(agent.getEntityId())));
+
+        checkAllowHeaderForGET(resultActions);
+
+        for (String sameAsElem : agent.getSameAs()) {
+        	resultActions.andExpect(jsonPath("$.sameAs", Matchers.hasItem(sameAsElem)));
+        }
+    }
+
+    @Test
+    public void retrieveAgentInternalSchemaOrgShouldBeSuccessful() throws Exception {
+        //TODO: switch to the use of MvcResult resultRegisterEntity = createTestEntityRecord(CONCEPT_REGISTER_JSON, CONCEPT_XML);
+        Agent agent = objectMapper.readValue(loadFile(AGENT_JSON), Agent.class);
+        EntityRecord entityRecord = new EntityRecord();
+        entityRecord.setEntity(agent);
+        entityRecord.setEntityId(agent.getEntityId());
+        entityRecordService.saveEntityRecord(entityRecord);
+
+        String requestPath = getEntityRequestPath(agent.getEntityId());
+        ResultActions resultActions = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".schema.jsonld")
+        		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "internal")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.@id", is(agent.getEntityId())));
+
+        checkAllowHeaderForGET(resultActions);
+
+        for (String sameAsElem : agent.getSameAs()) {
+        	resultActions.andExpect(jsonPath("$.sameAs", Matchers.hasItem(sameAsElem)));
+        }
     }
 
     @Test

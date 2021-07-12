@@ -7,13 +7,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
+import eu.europeana.corelib.edm.model.schemaorg.MultilingualString;
+import eu.europeana.corelib.edm.model.schemaorg.Person;
+import eu.europeana.corelib.edm.model.schemaorg.Text;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 
@@ -67,7 +72,62 @@ public class Agent extends Entity {
 	private String gender;
 
 	private List<String> exactMatch;
-
+	
+	public void toSchemaOrgEntity () {
+		
+		schemaOrgEntity = new eu.europeana.corelib.edm.model.schemaorg.Person();
+		super.toSchemaOrgEntity();
+		Person schemaOrgAgent = (Person) schemaOrgEntity;
+		
+		/*
+		 * TODO: create the MultilingualString constructor in the corelib with 
+		 * the language and value parameters and call it in all places where the MultilingualString
+		 * object is instantiated
+		 */
+		if(name!=null) {
+			for (Entry<String, String> nameEntry : name.entrySet()) {
+				MultilingualString nameEntrySchemaOrg = new MultilingualString();
+				nameEntrySchemaOrg.setLanguage(nameEntry.getKey());
+				nameEntrySchemaOrg.setValue(nameEntry.getValue());
+				schemaOrgAgent.addName(nameEntrySchemaOrg);
+			}
+		}
+		
+		if(dateOfBirth!=null) {
+			for (String dateOfBirthEach : dateOfBirth) {
+				schemaOrgAgent.addBirthDate(new Text(dateOfBirthEach));
+			}
+		}
+		
+		if(dateOfDeath!=null) {
+			for (String dateOfDeathEach : dateOfDeath) {
+				schemaOrgAgent.addDeathDate(new Text(dateOfDeathEach));
+			}
+		}
+		
+		if(gender!=null && !gender.isBlank()) 
+		{
+			schemaOrgAgent.addGender(new Text(gender));
+		}
+		
+		if(placeOfBirth!=null) {
+			for (Entry<String, List<String>> placeOfBirthEntry : placeOfBirth.entrySet()) {
+				MultilingualString placeOfBirthEntrySchemaOrg = new MultilingualString();
+				placeOfBirthEntrySchemaOrg.setLanguage(placeOfBirthEntry.getKey());
+				placeOfBirthEntrySchemaOrg.setValue(placeOfBirthEntry.getValue().get(0));
+				schemaOrgAgent.addBirthPlace(placeOfBirthEntrySchemaOrg);
+			}
+		}
+		
+		if(placeOfDeath!=null) {
+			for (Entry<String, List<String>> placeOfDeathEntry : placeOfDeath.entrySet()) {
+				MultilingualString placeOfDeathEntrySchemaOrg = new MultilingualString();
+				placeOfDeathEntrySchemaOrg.setLanguage(placeOfDeathEntry.getKey());
+				placeOfDeathEntrySchemaOrg.setValue(placeOfDeathEntry.getValue().get(0));
+				schemaOrgAgent.addDeathPlace(placeOfDeathEntrySchemaOrg);
+			}	
+		}
+	}
 
 	@JsonGetter(WebEntityFields.WAS_PRESENT_AT)
 	public List<String> getWasPresentAt() {

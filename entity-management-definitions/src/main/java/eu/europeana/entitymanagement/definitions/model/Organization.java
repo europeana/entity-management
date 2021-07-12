@@ -5,15 +5,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
+import eu.europeana.corelib.edm.model.schemaorg.MultilingualString;
+import eu.europeana.corelib.edm.model.schemaorg.Person;
+import eu.europeana.corelib.edm.model.schemaorg.Text;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 /**
@@ -74,6 +79,22 @@ public class Organization extends Entity {
 	private String postBox;
 	private String hasGeo;
 	private Address address;
+
+	public void toSchemaOrgEntity () {
+		
+		schemaOrgEntity = new eu.europeana.corelib.edm.model.schemaorg.Organization();
+		super.toSchemaOrgEntity();
+		eu.europeana.corelib.edm.model.schemaorg.Organization schemaOrgOrganization = (eu.europeana.corelib.edm.model.schemaorg.Organization) schemaOrgEntity;
+		
+		if(description!=null) {
+			for (Entry<String, String> descriptionEntry : description.entrySet()) {
+				MultilingualString descriptionEntrySchemaOrg = new MultilingualString();
+				descriptionEntrySchemaOrg.setLanguage(descriptionEntry.getKey());
+				descriptionEntrySchemaOrg.setValue(descriptionEntry.getValue());
+				schemaOrgOrganization.addDescription(descriptionEntrySchemaOrg);
+			}
+		}		
+	}
 
 	
 	@JsonGetter(DESCRIPTION)

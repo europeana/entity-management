@@ -22,6 +22,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
@@ -50,6 +51,11 @@ public class Timespan extends Entity {
     private List<String> isNextInSequence;
     private String begin;
     private String end;
+    
+    public void toSchemaOrgEntity () {
+		schemaOrgEntity = new eu.europeana.corelib.edm.model.schemaorg.Timespan();
+		super.toSchemaOrgEntity();
+	}
 
     @JsonGetter(IS_NEXT_IN_SEQUENCE)
     @JacksonXmlProperty(localName = XmlFields.XML_EDM_IS_NEXT_IN_SEQUENCE)

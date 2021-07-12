@@ -6,13 +6,19 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
+import eu.europeana.corelib.edm.model.schemaorg.GeoCoordinates;
+import eu.europeana.corelib.edm.model.schemaorg.MultilingualString;
+import eu.europeana.corelib.edm.model.schemaorg.Person;
+import eu.europeana.corelib.edm.model.schemaorg.Text;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
@@ -43,6 +49,20 @@ public class Place extends Entity {
 	private Map<String, List<String>> tmpIsPartOf;
 	private Map<String, List<String>> tmpHasPart;
 
+	public void toSchemaOrgEntity () {
+		
+		schemaOrgEntity = new eu.europeana.corelib.edm.model.schemaorg.Place();
+		eu.europeana.corelib.edm.model.schemaorg.Place schemaOrgPlace = (eu.europeana.corelib.edm.model.schemaorg.Place) schemaOrgEntity;
+		super.toSchemaOrgEntity();
+
+		if(latitude!=null && longitude!=null && altitude!=null) {
+			GeoCoordinates geo = new GeoCoordinates();
+			geo.addLatitude(new Text(String.valueOf(latitude)));
+			geo.addLongitude(new Text(String.valueOf(longitude)));
+			geo.addElevation(new Text(String.valueOf(altitude)));
+			schemaOrgPlace.addGeo(geo);
+		}		
+	}
 	
 	@JsonGetter(IS_NEXT_IN_SEQUENCE)
 	@JacksonXmlProperty(localName = XmlFields.XML_EDM_IS_NEXT_IN_SEQUENCE)

@@ -83,8 +83,8 @@ public abstract class BaseRest extends BaseRestController {
 
         String responseBody = null;
 
-        if (FormatTypes.jsonld.equals(format)) {
-            responseBody = jsonLdSerializer.serialize(entityRecord, profile);
+        if (FormatTypes.jsonld.equals(format) || FormatTypes.schema.equals(format)) {
+            responseBody = jsonLdSerializer.serialize(entityRecord, format, profile);
         } else if (FormatTypes.xml.equals(format)) {
             XmlBaseEntityImpl<?> xmlEntity = EntityObjectFactory.createXmlEntity(entityRecord.getEntity());
 
