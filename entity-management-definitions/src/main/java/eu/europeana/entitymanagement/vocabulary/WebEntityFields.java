@@ -11,6 +11,7 @@ public interface WebEntityFields {
 	
 	// common fields
 	public static final String ID = "id";
+	public static final String ID_SCHEMA = "@id";
 	public static final String TYPE = "type";
 	public static final String SAME_AS = "sameAs";
 	public static final String IDENTIFIER = "identifier";

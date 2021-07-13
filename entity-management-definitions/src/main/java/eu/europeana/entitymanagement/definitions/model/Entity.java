@@ -22,6 +22,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 
 import dev.morphia.annotations.Transient;
+import eu.europeana.corelib.edm.model.schemaorg.Text;
+import eu.europeana.corelib.edm.model.schemaorg.Thing;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatorGroup;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatorInterface;
 import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorGroup;
@@ -97,6 +99,21 @@ public abstract class Entity {
 	protected WebResource referencedWebResource;
 	protected String payload;
 
+	@Transient
+	protected Thing schemaOrgEntity;
+	
+	public void toSchemaOrgEntity () {
+		if(schemaOrgEntity==null) return;
+		
+		schemaOrgEntity.setId(entityId);
+		
+		if(sameAs!=null)
+		{
+			for(String sameAsEach : sameAs) {
+				schemaOrgEntity.addSameAs(new Text(sameAsEach));
+			}
+		}
+	}
 
 	@JsonIgnore
 	public WebResource getReferencedWebResource() {
@@ -406,4 +423,8 @@ public abstract class Entity {
 		this.payload = payload;
 	}
 
+	@JsonIgnore
+	public Thing getSchemaOrgEntity() {
+		return schemaOrgEntity;
+	}
 }

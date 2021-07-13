@@ -7,12 +7,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
+import eu.europeana.corelib.edm.model.schemaorg.MultilingualString;
+import eu.europeana.corelib.edm.model.schemaorg.Person;
+import eu.europeana.corelib.edm.model.schemaorg.Text;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 
@@ -66,7 +71,69 @@ public class Agent extends Entity {
 	private String gender;
 
 	private List<String> exactMatch;
-
+	
+	public void toSchemaOrgEntity () {
+		
+		schemaOrgEntity = new eu.europeana.corelib.edm.model.schemaorg.Person();
+		super.toSchemaOrgEntity();
+		Person schemaOrgAgent = (Person) schemaOrgEntity;
+		
+		/*
+		 * TODO: create the MultilingualString constructor in the corelib with 
+		 * the language and value parameters and call it in all places where the MultilingualString
+		 * object is instantiated
+		 */
+		if(name!=null) {
+			for (Entry<String, String> nameEntry : name.entrySet()) {
+				MultilingualString nameEntrySchemaOrg = new MultilingualString();
+				nameEntrySchemaOrg.setLanguage(nameEntry.getKey());
+				nameEntrySchemaOrg.setValue(nameEntry.getValue());
+				schemaOrgAgent.addName(nameEntrySchemaOrg);
+			}
+		}
+		
+		if(dateOfBirth!=null) {
+			for (String dateOfBirthEach : dateOfBirth) {
+				schemaOrgAgent.addBirthDate(new Text(dateOfBirthEach));
+			}
+		}
+		
+		if(dateOfDeath!=null) {
+			for (String dateOfDeathEach : dateOfDeath) {
+				schemaOrgAgent.addDeathDate(new Text(dateOfDeathEach));
+			}
+		}
+		
+		if(gender!=null && !gender.isBlank()) 
+		{
+			schemaOrgAgent.addGender(new Text(gender));
+		}
+		
+		if(placeOfBirth!=null) {
+			for (String placeOfBirthEach : placeOfBirth) {
+				MultilingualString placeOfBirthEntrySchemaOrg = new MultilingualString();
+				/*
+				 * TODO: change the place of birth field in the corelib schemaorg model to be compatible with 
+				 * the given entity management field (without the language parameter)
+				 */
+				placeOfBirthEntrySchemaOrg.setLanguage("");
+				placeOfBirthEntrySchemaOrg.setValue(placeOfBirthEach);
+				schemaOrgAgent.addBirthPlace(placeOfBirthEntrySchemaOrg);
+			}
+		}
+		
+		if(placeOfDeath!=null) {
+			for (String placeOfDeathEach : placeOfDeath) {
+				MultilingualString placeOfDeathEntrySchemaOrg = new MultilingualString();
+				/*
+				 * TODO: the same as the comment for the place of birth field
+				 */
+				placeOfDeathEntrySchemaOrg.setLanguage("");
+				placeOfDeathEntrySchemaOrg.setValue(placeOfDeathEach);
+				schemaOrgAgent.addDeathPlace(placeOfDeathEntrySchemaOrg);
+			}	
+		}
+	}
 
 	@JsonGetter(WebEntityFields.WAS_PRESENT_AT)
 	public List<String> getWasPresentAt() {

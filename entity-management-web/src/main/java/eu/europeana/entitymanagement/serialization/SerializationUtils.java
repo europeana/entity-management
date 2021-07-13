@@ -4,74 +4,77 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
 
-import javax.xml.stream.XMLStreamWriter;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
-import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 
 public class SerializationUtils {
 
-
-
-
-  public static void serializeInternalXml(XMLStreamWriter xmlWriter, XmlMapper xmlMapper, EntityRecord record)
+  public static void serializeInternalJson(Writer writer, ObjectMapper mapper, EntityRecord record, FormatTypes format)
       throws IOException {
-	  JsonNode result = getInternalJsonNode(xmlMapper, record);
-	  xmlMapper.writeValue(xmlWriter, result);
-  }
-
-  public static void serializeInternalJson(Writer writer, ObjectMapper mapper, EntityRecord record)
-      throws IOException {
-    JsonNode result = getInternalJsonNode(mapper, record);
+    JsonNode result = getInternalJsonNode(mapper, record, format);
     mapper.writeValue(writer, result);
   }
 
-  public static void serializeExternalXml(XMLStreamWriter xmlWriter, XmlMapper xmlMapper, EntityRecord record)
+  public static void serializeExternalJson(Writer writer, ObjectMapper mapper, EntityRecord record, FormatTypes format)
       throws IOException {
-    JsonNode result = getExternalJsonNode(xmlMapper, record);
-    xmlMapper.writeValue(xmlWriter, result);
+	  mapper.writeValue(writer, getExternalJsonNode(mapper, record, format));
   }
 
-  public static void serializeExternalJson(Writer writer, ObjectMapper mapper, EntityRecord record)
-      throws IOException {
-    mapper.writeValue(writer, getExternalJsonNode(mapper, record));
-  }
-
-
-  private static ObjectNode getExternalJsonNode(ObjectMapper mapper, EntityRecord record)
+  private static ObjectNode getExternalJsonNode(ObjectMapper mapper, EntityRecord record, FormatTypes format)
       throws EntityManagementRuntimeException {
-      return mapper.valueToTree(record.getEntity());
+	  if (format.equals(FormatTypes.schema)) {
+		  record.getEntity().toSchemaOrgEntity();
+		  return mapper.valueToTree(record.getEntity().getSchemaOrgEntity());
+	  }
+	  else {
+		  return mapper.valueToTree(record.getEntity());
+	  }
   }
 
-  private static JsonNode getInternalJsonNode(ObjectMapper mapper, EntityRecord record){
-    Entity recordEntity = record.getEntity();
+  private static JsonNode getInternalJsonNode(ObjectMapper mapper, EntityRecord record, FormatTypes format){
+	ObjectNode entityNode = null;
+	if(!format.equals(FormatTypes.schema)) {
+		entityNode = mapper.valueToTree(record.getEntity());
+	}
+	else {
+		record.getEntity().toSchemaOrgEntity();
+		entityNode = mapper.valueToTree(record.getEntity().getSchemaOrgEntity());
+	}
+	    
     List<EntityProxy> recordProxies = record.getProxies();
-    ObjectNode entityNode = mapper.valueToTree(recordEntity);
 
     ArrayNode proxyNode = mapper.createArrayNode();
 
     for(EntityProxy proxy: recordProxies){
-      Entity proxyEntity = proxy.getEntity();
-      ObjectNode proxyEntityNode = mapper.valueToTree(proxyEntity);
+    	ObjectNode proxyEntityNode=null;
+    	if(!format.equals(FormatTypes.schema)) {
+    		proxyEntityNode = mapper.valueToTree(proxy.getEntity());	
+	        // Entity @context shouldn't appear in proxy metadata
+	        proxyEntityNode.remove(WebEntityFields.CONTEXT);
+	        // Entity ID shouldn't overwrite proxyId
+	        proxyEntityNode.remove(WebEntityFields.ID);
+    	}
+    	else {
+    		proxy.getEntity().toSchemaOrgEntity();
+    		proxyEntityNode = mapper.valueToTree(proxy.getEntity().getSchemaOrgEntity());	
+	        // Entity @context shouldn't appear in proxy metadata
+	        proxyEntityNode.remove(WebEntityFields.CONTEXT);
+	        // Entity ID shouldn't overwrite proxyId
+	        proxyEntityNode.remove(WebEntityFields.ID_SCHEMA);
 
-      // Entity @context shouldn't appear in proxy metadata
-      proxyEntityNode.remove(WebEntityFields.CONTEXT);
-      // Entity ID shouldn't overwrite proxyId
-      proxyEntityNode.remove(WebEntityFields.ID);
+    	}
 
-      ObjectNode embeddedProxyNode = mapper.valueToTree(proxy);
-      JsonNode mergedNode = SerializationUtils
-          .mergeProxyAndEntity(mapper, embeddedProxyNode, proxyEntityNode);
-      proxyNode.add(mergedNode.deepCopy());
+        ObjectNode embeddedProxyNode = mapper.valueToTree(proxy);
+        JsonNode mergedNode = SerializationUtils.mergeProxyAndEntity(mapper, embeddedProxyNode, proxyEntityNode);
+        proxyNode.add(mergedNode.deepCopy());
     }
 
     return SerializationUtils
