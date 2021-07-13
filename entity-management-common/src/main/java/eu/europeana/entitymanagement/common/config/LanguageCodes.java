@@ -41,7 +41,7 @@ public class LanguageCodes {
 	    if(lang == null) {
 		return false;
 	    }
-	    return  getSupportedLangCodes().contains(lang);
+	    return  getSupportedLangCodes().contains(lang.toLowerCase());
 	}
 	
 	
@@ -49,7 +49,7 @@ public class LanguageCodes {
             if(altLangCode == null) {
                 return false;
             }
-            return  getAltLangMap().containsKey(altLangCode);
+            return  getAltLangMap().containsKey(altLangCode.toLowerCase());
         }
 	
 	public Set<String> getSupportedLangCodes() {
@@ -63,11 +63,11 @@ public class LanguageCodes {
 	}
 	
 	public String getByAlternativeCode(String altLang) {
-	    if(altLang == null || !getAltLangMap().containsKey(altLang)) {
+	    if(altLang == null || !getAltLangMap().containsKey(altLang.toLowerCase())) {
 		return null;
 	    }
 	    
-	    return getAltLangMap().get(altLang);
+	    return getAltLangMap().get(altLang.toLowerCase());
 	}
 
 //	@JacksonXmlRootElement(localName = "language")

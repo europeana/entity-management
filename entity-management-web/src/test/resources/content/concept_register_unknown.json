@@ -1,0 +1,5 @@
+{
+  "@context": "http://www.europeana.eu/schemas/context/entity.jsonld",
+  "id": "http://www.wikidata.org/entity/Q0000",
+  "type": "Concept"
+}

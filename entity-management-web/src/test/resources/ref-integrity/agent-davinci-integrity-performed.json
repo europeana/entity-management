@@ -76,13 +76,8 @@
     "dateOfDeath": [
         "1519-05-02", "http://semium.org/time/15xx"
     ],
-    "placeOfBirth": {
-        "en" : ["Vinci, Republic of Florence"],
-        "mt" : ["http://data.europeana.eu/place/base/143905"]
-    },
-    "placeOfDeath": {
-        "mt": ["http://data.europeana.eu/place/base/42996"]
-    },
+    "placeOfBirth": ["http://data.europeana.eu/place/base/143905"],
+    "placeOfDeath": ["http://data.europeana.eu/place/base/42996"],
     "biographicalInformation": {
             "de" : ["Leonardo da Vinci [ˌleoˈnardo da ˈvintʃi] (* 15. April 1452 in Anchiano bei Vinci; † 2. Mai 1519 auf Schloss Clos Lucé, Amboise; eigentlich Leonardo di ser Piero, toskanisch auch Lionardo) war ein italienischer Maler, Bildhauer, Architekt, Anatom, Mechaniker, Ingenieur und Naturphilosoph. Er gilt als einer der berühmtesten Universalgelehrten aller Zeiten.Sein Namenszusatz da Vinci ist kein Familien-, sondern ein Herkunftsname und bedeutet „aus Vinci“. Der Geburtsort Vinci ist ein Kastell bzw. befestigtes Hügeldorf und liegt in der Nähe der Stadt Empoli (ca. 30 km westlich von Florenz) in der heutigen Provinz Florenz, Region Toskana."],
             "no" : ["Leonardo di ser Piero da Vinci (født 15. april 1452 i fjellandsbyen Vinci i nærheten av Firenze, død 2. mai 1519 i Amboise i Indre-et-Loire i Frankrike) var en av de største og mest mangesidige begavelser europeisk kultur har fostret. Han var blant annet maler, billedhogger, arkitekt, ingeniør, oppfinner og vitenskapsmann. Han anses som universalgeniet framfor noen, arketypen på «renessansemennesket».Det er først og fremst som maler Leonardo er kjent. To av arbeidene hans, «Mona Lisa» og «Nattverden», er de mest kjente og de som oftest reproduseres og parodieres. Også Leonardos tegning «Den vitruviske mann» er blitt et ikon, og viser hans interesse for menneskelig anatomi.Leonardo var også en fremragende ingeniør og oppfinner, med ideer som lå langt forut for hans tid. På tegnebordet oppfant han blant annet helikopteret, stridsvognen, bruken av konsentrert solenergi, kalkulatoren, dobbeltskroget og en grunnleggende teori for platetektonikk. Få av tegningene hans ble konstruert og realisert i løpet av hans levetid. Som vitenskapsmann gjorde han oppdagelser i anatomi, astronomi, byggeteknikk, optikk og hydrodynamikk."],

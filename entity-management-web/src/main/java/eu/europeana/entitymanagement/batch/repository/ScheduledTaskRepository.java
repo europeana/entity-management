@@ -8,6 +8,7 @@ import dev.morphia.Datastore;
 import dev.morphia.query.FindOptions;
 import dev.morphia.query.experimental.filters.Filter;
 import eu.europeana.entitymanagement.batch.model.BatchUpdateType;
+import eu.europeana.entitymanagement.batch.model.FailedTask;
 import eu.europeana.entitymanagement.batch.model.ScheduledTask;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -45,6 +46,26 @@ public class ScheduledTaskRepository implements InitializingBean {
         datastore.ensureIndexes(ScheduledTask.class);
     }
 
+    /**
+     * Marks the given tasks as "processed". Update only occurs if current updateType for a task
+     * matches the specified updateType.
+     * @param updateType batch update type
+     * @param tasks list of scheduled tasks
+     * @return BulkWriteResult of db query
+     */
+    public BulkWriteResult markAsProcessed(BatchUpdateType updateType, List<ScheduledTask> tasks) {
+        List<WriteModel<ScheduledTask>> updates = new ArrayList<>();
+        for (ScheduledTask task : tasks) {
+            updates.add(new UpdateOneModel<>(
+                // query filters on updateType
+                new Document(ENTITY_ID, task.getEntityId()).append(UPDATE_TYPE, updateType),
+                new Document(DOC_SET, new Document(HAS_BEEN_PROCESSED, task.hasBeenProcessed())
+                    .append(MODIFIED, task.getModified()))
+            ));
+        }
+        return datastore.getMapper()
+            .getCollection(ScheduledTask.class).bulkWrite(updates);
+    }
 
     /**
      * Upserts the {@link ScheduledTask} list to the database
@@ -61,6 +82,7 @@ public class ScheduledTaskRepository implements InitializingBean {
         for (ScheduledTask task : tasks) {
             Document updateDoc = new Document(
                     ENTITY_ID, task.getEntityId())
+                    .append(HAS_BEEN_PROCESSED, task.hasBeenProcessed())
                     .append(MODIFIED, task.getModified());
 
             Document setOnInsertDoc = new Document(CREATED, task.getModified())
@@ -95,17 +117,13 @@ public class ScheduledTaskRepository implements InitializingBean {
     }
 
     /**
-     * Deletes {@link ScheduledTask} entries in the db whose entityId is contained within
-     * the provided list, also matching the updateType.
-     *
-     *
+     * Deletes {@link ScheduledTask} entries in the db that have been processed
      * @param updateType updateType to filter on
-     * @param entityIds entityId list
      * @return number of deleted entries
      */
-    public long removeTasks(BatchUpdateType updateType, List<String> entityIds) {
+    public long removeProcessedTasks(BatchUpdateType updateType) {
         return datastore.find(ScheduledTask.class).filter(
-                in(ENTITY_ID, entityIds), eq(UPDATE_TYPE, updateType))
+                eq(HAS_BEEN_PROCESSED, true), eq(UPDATE_TYPE, updateType))
                 .delete(MULTI_DELETE_OPTS).getDeletedCount();
     }
 

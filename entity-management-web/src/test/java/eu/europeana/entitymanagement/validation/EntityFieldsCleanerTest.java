@@ -23,7 +23,9 @@ import eu.europeana.entitymanagement.web.MetisDereferenceUtils;
 @SpringBootTest(classes = {ValidatorConfig.class,
     SerializationConfig.class, EntityManagementConfiguration.class})
 public class EntityFieldsCleanerTest {
-    
+
+    private static final String AGENT_STALIN_CLEANING_XML = "/metis-deref/agent_stalin_cleaning.xml";
+
     @Autowired
     private LanguageCodes emLanguageCodes;
 
@@ -34,7 +36,7 @@ public class EntityFieldsCleanerTest {
     @Test
     public void shouldCleanEntityFields() throws Exception {
         XmlBaseEntityImpl<?> xmlAgent = MetisDereferenceUtils
-                .parseMetisResponse(jaxbContext.createUnmarshaller(), "http://www.wikidata.org/entity/Q855", loadFile(BaseMvcTestUtils.AGENT_STALIN_CLEANING_XML));
+                .parseMetisResponse(jaxbContext.createUnmarshaller(), "http://www.wikidata.org/entity/Q855", loadFile(AGENT_STALIN_CLEANING_XML));
         assert xmlAgent != null;
 
         Agent agent = (Agent) xmlAgent.toEntityModel();

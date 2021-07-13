@@ -53,10 +53,10 @@ public class SolrAgent extends SolrEntity<Agent> {
 	private List<String> professionOrOccupation;
 
 	@Field(AgentSolrFields.PLACE_OF_BIRTH_ALL)
-	private Map<String, List<String>> placeOfBirth;
+	private List<String> placeOfBirth;
 
 	@Field(AgentSolrFields.PLACE_OF_DEATH_ALL)
-	private Map<String, List<String>> placeOfDeath;
+	private List<String> placeOfDeath;
 
 	@Field(AgentSolrFields.DATE_OF_ESTABLISHMENT)
 	private String dateOfEstablishment;
@@ -79,9 +79,15 @@ public class SolrAgent extends SolrEntity<Agent> {
 		if(agent.getHasMet()!=null) this.hasMet = agent.getHasMet();
 		setName(agent.getName());
 		setBiographicalInformation(agent.getBiographicalInformation());
-		if(agent.getProfessionOrOccupation()!=null) this.professionOrOccupation = new ArrayList<>(agent.getProfessionOrOccupation());
-		setPlaceOfBirth(agent.getPlaceOfBirth());
-		setPlaceOfDeath(agent.getPlaceOfDeath());
+		if(agent.getProfessionOrOccupation()!=null) {
+			this.professionOrOccupation = new ArrayList<>(agent.getProfessionOrOccupation());
+		}
+		if(agent.getPlaceOfBirth() != null) {
+			this.placeOfBirth = new ArrayList<>(agent.getPlaceOfBirth());
+		}
+		if(agent.getPlaceOfDeath() != null) {
+			this.placeOfDeath = new ArrayList<>(agent.getPlaceOfDeath());
+		}
 		this.dateOfEstablishment = agent.getDateOfEstablishment();
 		this.dateOfTermination = agent.getDateOfTermination();
 		this.gender = agent.getGender();
@@ -92,20 +98,8 @@ public class SolrAgent extends SolrEntity<Agent> {
 		if (MapUtils.isNotEmpty(biographicalInformation))  {
 			this.biographicalInformation = new HashMap<>(SolrUtils.normalizeStringListMapByAddingPrefix(AgentSolrFields.BIOGRAPHICAL_INFORMATION + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, biographicalInformation));
 		}
-		
 	}
 
-	private void setPlaceOfBirth(Map<String, List<String>> placeOfBirth) {
-		if (MapUtils.isNotEmpty(placeOfBirth)) {
-			this.placeOfBirth = new HashMap<>(SolrUtils.normalizeStringListMapByAddingPrefix(AgentSolrFields.PLACE_OF_BIRTH + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, placeOfBirth));
-		}
-	}
-
-	private void setPlaceOfDeath(Map<String, List<String>> placeOfDeath) {
-		if (MapUtils.isNotEmpty(placeOfDeath)) {
-			this.placeOfDeath = new HashMap<>(SolrUtils.normalizeStringListMapByAddingPrefix(AgentSolrFields.PLACE_OF_DEATH + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, placeOfDeath));
-		}
-	}
 	
 	private void setName(Map<String, String> name) {
 		if (MapUtils.isNotEmpty(name)) {
@@ -164,12 +158,12 @@ public class SolrAgent extends SolrEntity<Agent> {
 	}
 
 
-	public Map<String, List<String>> getPlaceOfBirth() {
+	public List<String> getPlaceOfBirth() {
 		return placeOfBirth;
 	}
 
 
-	public Map<String, List<String>> getPlaceOfDeath() {
+	public List<String> getPlaceOfDeath() {
 		return placeOfDeath;
 	}
 

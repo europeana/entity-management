@@ -202,12 +202,12 @@ public class EMControllerIT extends AbstractIntegrationTest {
     @Test
     public void registerOrganizationShouldBeSuccessful() throws Exception {
         // set mock Metis response
-        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(ORGANIZATION_XML)));
+        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(ORGANIZATION_BNF_XML)));
         //second enqueue for the update task
-        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(ORGANIZATION_XML)));
+        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(loadFile(ORGANIZATION_BNF_XML)));
         
         ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
-                .content(loadFile(ORGANIZATION_REGISTER_JSON))
+                .content(loadFile(ORGANIZATION_REGISTER_BNF_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isAccepted());
         

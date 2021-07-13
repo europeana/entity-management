@@ -149,6 +149,9 @@ public class EMController extends BaseRest {
 			}
 		 EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
 
+    	// TODO: Re-enable authentication
+    	//verifyReadAccess(request);
+
 			// check that  type from update request matches existing entity's
 		if(!entityRecord.getEntity().getType().equals(updateRequestEntity.getType())){
 			throw new HttpBadRequestException(String.format("Request type %s does not match Entity type",

@@ -31,11 +31,7 @@
 },
 "dateOfBirth":["1979-03-04"],
 "dateOfDeath":["wrong-for-testing-1"],
-"placeOfBirth":
-{
-"":["wrong-for-testing-2","wrong-for-testing-3"],
-"en":["Place1"]
-},
+"placeOfBirth": ["http://valid-uri-for-testing-1","http://valid-uri-for-testing-2"],
 "altLabel":
 {
 "en":["J.R.","Peebles, Courtney O."]
