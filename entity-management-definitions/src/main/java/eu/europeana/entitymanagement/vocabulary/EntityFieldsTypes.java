@@ -20,13 +20,14 @@ public enum EntityFieldsTypes {
     dateOfDeath(EntityFieldsTypes.FIELD_TYPE_DATE, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
     dateOfTermination(EntityFieldsTypes.FIELD_TYPE_DATE, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
     date(EntityFieldsTypes.FIELD_TYPE_DATE_OR_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
-    placeOfBirth(EntityFieldsTypes.FIELD_TYPE_TEXT_OR_URI, true, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
-    placeOfDeath(EntityFieldsTypes.FIELD_TYPE_TEXT_OR_URI, true, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
+    // Metis currently returns multiple URI values for placeOfBirth and placeOfDeath
+    placeOfBirth(EntityFieldsTypes.FIELD_TYPE_TEXT_OR_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
+    placeOfDeath(EntityFieldsTypes.FIELD_TYPE_TEXT_OR_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
     gender(EntityFieldsTypes.FIELD_TYPE_TEXT, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
     /*
      * TODO: change the professionOrOccupation field to be multilingual if the type of the field in the class changes to Map.
      * According to the specifications this field is multilingual but for now we keep it not.
-     */    
+     */
     professionOrOccupation(EntityFieldsTypes.FIELD_TYPE_TEXT_OR_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
     biographicalInformation(EntityFieldsTypes.FIELD_TYPE_TEXT, true, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
     note(EntityFieldsTypes.FIELD_TYPE_TEXT, true, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),

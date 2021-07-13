@@ -98,9 +98,9 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
     this.dcDate = agent.getDate();
     this.gender = agent.getGender();
     this.placeOfBirth = RdfXmlUtils
-        .convertToXmlMultilingualStringOrRdfResource(agent.getPlaceOfBirth());
+        .convertToRdfResource(agent.getPlaceOfBirth());
     this.placeOfDeath = RdfXmlUtils
-        .convertToXmlMultilingualStringOrRdfResource(agent.getPlaceOfDeath());
+        .convertToRdfResource(agent.getPlaceOfDeath());
     this.professionOrOccupation = RdfXmlUtils
         .convertToRdfResource(agent.getProfessionOrOccupation());
   }
@@ -129,8 +129,8 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
     entity.setDateOfTermination(dateOfTermination);
     entity.setDate(dcDate);
     entity.setGender(gender);
-    entity.setPlaceOfBirth(RdfXmlUtils.toLanguageMapList(placeOfBirth));
-    entity.setPlaceOfDeath(RdfXmlUtils.toLanguageMapList(placeOfDeath));
+    entity.setPlaceOfBirth(RdfXmlUtils.toStringList(placeOfBirth));
+    entity.setPlaceOfDeath(RdfXmlUtils.toStringList(placeOfDeath));
     entity.setProfessionOrOccupation(RdfXmlUtils.toStringList(professionOrOccupation));
 
     return entity;

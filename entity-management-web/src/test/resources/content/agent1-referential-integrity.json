@@ -52,10 +52,7 @@
   "dateOfBirth": [
     "1981-02-17"
   ],
-  "placeOfBirth": 
-    {
-      "": ["http://dbpedia.org/resource/Ferrara","http://dbpedia.org/resource/Provincia_di_Ferrara"]
-    },
+  "placeOfBirth": ["http://dbpedia.org/resource/Ferrara","http://dbpedia.org/resource/Provincia_di_Ferrara"],
   "professionOrOccupation": ["http://dbpedia.org/resource/Paris_Hilton__1"],
   "biographicalInformation":
     {

@@ -350,19 +350,13 @@ public class EntityRecordService {
     }
 
     private void performReferentialIntegrityAgent(Agent entity) {
-	Map<String, List<String>> updatedField = null;
-	// for the field placeOfBirth
-	Map<String, List<String>> placeOfBirthField = entity.getPlaceOfBirth();
-	if (placeOfBirthField != null) {
-	    updatedField = replaceWithInternalReferences(placeOfBirthField);
-	    entity.setPlaceOfBirth(updatedField);
-	}
-	// for the field placeOfDeath
-	Map<String, List<String>> placeOfDeathField = entity.getPlaceOfDeath();
-	if (placeOfDeathField != null) {
-	    updatedField = replaceWithInternalReferences(placeOfDeathField);
-	    entity.setPlaceOfDeath(updatedField);
-	}
+		// for the field placeOfBirth
+		List<String> placeOfBirthField = entity.getPlaceOfBirth();
+		entity.setPlaceOfBirth(replaceWithInternalReferences(placeOfBirthField));
+
+		// for the field placeOfDeath
+		List<String> placeOfDeathField = entity.getPlaceOfDeath();
+		entity.setPlaceOfDeath(replaceWithInternalReferences(placeOfDeathField));
 	// for the field professionOrOccupation
 	List<String> professionOrOccupationField = entity.getProfessionOrOccupation();
 	entity.setProfessionOrOccupation(replaceWithInternalReferences(professionOrOccupationField));
