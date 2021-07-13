@@ -110,19 +110,26 @@ public class Agent extends Entity {
 		}
 		
 		if(placeOfBirth!=null) {
-			for (Entry<String, List<String>> placeOfBirthEntry : placeOfBirth.entrySet()) {
+			for (String placeOfBirthEach : placeOfBirth) {
 				MultilingualString placeOfBirthEntrySchemaOrg = new MultilingualString();
-				placeOfBirthEntrySchemaOrg.setLanguage(placeOfBirthEntry.getKey());
-				placeOfBirthEntrySchemaOrg.setValue(placeOfBirthEntry.getValue().get(0));
+				/*
+				 * TODO: change the place of birth field in the corelib schemaorg model to be compatible with 
+				 * the given entity management field (without the language parameter)
+				 */
+				placeOfBirthEntrySchemaOrg.setLanguage("");
+				placeOfBirthEntrySchemaOrg.setValue(placeOfBirthEach);
 				schemaOrgAgent.addBirthPlace(placeOfBirthEntrySchemaOrg);
 			}
 		}
 		
 		if(placeOfDeath!=null) {
-			for (Entry<String, List<String>> placeOfDeathEntry : placeOfDeath.entrySet()) {
+			for (String placeOfDeathEach : placeOfDeath) {
 				MultilingualString placeOfDeathEntrySchemaOrg = new MultilingualString();
-				placeOfDeathEntrySchemaOrg.setLanguage(placeOfDeathEntry.getKey());
-				placeOfDeathEntrySchemaOrg.setValue(placeOfDeathEntry.getValue().get(0));
+				/*
+				 * TODO: the same as the comment for the place of birth field
+				 */
+				placeOfDeathEntrySchemaOrg.setLanguage("");
+				placeOfDeathEntrySchemaOrg.setValue(placeOfDeathEach);
 				schemaOrgAgent.addDeathPlace(placeOfDeathEntrySchemaOrg);
 			}	
 		}
