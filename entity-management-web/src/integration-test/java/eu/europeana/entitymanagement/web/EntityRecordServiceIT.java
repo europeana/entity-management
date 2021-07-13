@@ -149,7 +149,7 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
          */
         //Optional<EntityRecord> agent1_updated = entityRecordService.retrieveEntityRecordByUri(agent1.getEntityId());
         assertEquals(1, agent1.getPlaceOfBirth().size());
-        Assertions.assertTrue(agent1.getPlaceOfBirth().get("").contains("http://data.europeana.eu/place/base/143914"));
+        Assertions.assertTrue(agent1.getPlaceOfBirth().contains("http://data.europeana.eu/place/base/143914"));
         Assertions.assertNull(agent1.getProfessionOrOccupation());
         List<String> isRelatedTo_agent1 = agent1.getIsRelatedTo();
         assertEquals(3, isRelatedTo_agent1.size());

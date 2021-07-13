@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -35,8 +34,8 @@ public class Agent extends Entity {
 		if(copy.getName()!=null) this.name = new HashMap<>(copy.getName());
 		if(copy.getBiographicalInformation()!=null) this.biographicalInformation = new HashMap<>(copy.getBiographicalInformation());
 		if(copy.getProfessionOrOccupation()!=null) this.professionOrOccupation = new ArrayList<>(copy.getProfessionOrOccupation());
-		if(copy.getPlaceOfBirth()!=null) this.placeOfBirth = new HashMap<>(copy.getPlaceOfBirth());
-		if(copy.getPlaceOfDeath()!=null) this.placeOfDeath = new HashMap<>(copy.getPlaceOfDeath());
+		if(copy.getPlaceOfBirth()!=null) this.placeOfBirth = new ArrayList<>(copy.getPlaceOfBirth());
+		if(copy.getPlaceOfDeath()!=null) this.placeOfDeath = new ArrayList<>(copy.getPlaceOfDeath());
 		this.dateOfEstablishment = copy.getDateOfEstablishment();
 		this.dateOfTermination = copy.getDateOfTermination();
 		this.gender = copy.getGender();
@@ -59,8 +58,8 @@ public class Agent extends Entity {
 	private Map<String, List<String>> biographicalInformation;
 	// TODO: clarify format. Right now Metis returns a list of Resources
 	private List<String> professionOrOccupation;
-	private Map<String, List<String>> placeOfBirth;
-	private Map<String, List<String>> placeOfDeath;
+	private List<String> placeOfBirth;
+	private List<String> placeOfDeath;
 
 	private String dateOfEstablishment; // format "YYYY"
 	private String dateOfTermination; // format "YYYY"
@@ -161,22 +160,22 @@ public class Agent extends Entity {
 	}
 
 	@JsonGetter(PLACE_OF_BIRTH)
-	public Map<String, List<String>> getPlaceOfBirth() {
+	public List<String> getPlaceOfBirth() {
 		return placeOfBirth;
 	}
 
 	@JsonSetter(PLACE_OF_BIRTH)
-	public void setPlaceOfBirth(Map<String, List<String>> placeOfBirth) {
+	public void setPlaceOfBirth(List<String> placeOfBirth) {
 		this.placeOfBirth = placeOfBirth;
 	}
 
 	@JsonGetter(PLACE_OF_DEATH)
-	public Map<String, List<String>> getPlaceOfDeath() {
+	public List<String> getPlaceOfDeath() {
 		return placeOfDeath;
 	}
 
 	@JsonSetter(PLACE_OF_DEATH)
-	public void setPlaceOfDeath(Map<String, List<String>> placeOfDeath) {
+	public void setPlaceOfDeath(List<String> placeOfDeath) {
 		this.placeOfDeath = placeOfDeath;
 	}
 
