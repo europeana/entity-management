@@ -3,28 +3,47 @@ package eu.europeana.entitymanagement;
 
 import eu.europeana.entitymanagement.testutils.MongoContainer;
 import eu.europeana.entitymanagement.testutils.SolrContainer;
+import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import okhttp3.HttpUrl;
+import okhttp3.mockwebserver.Dispatcher;
+import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.junit.AfterClass;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.containers.output.ToStringConsumer;
 import org.testcontainers.containers.output.WaitingConsumer;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.METIS_DEREF_PATH;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.*;
 
+@SpringBootTest
+@AutoConfigureMockMvc
+@DirtiesContext
 public abstract class AbstractIntegrationTest {
-    protected static final Logger logger = LogManager.getLogger(AbstractIntegrationTest.class);
+    private static final Logger logger = LogManager.getLogger(AbstractIntegrationTest.class);
+    private static final MongoContainer MONGO_CONTAINER;
+    private static final SolrContainer SOLR_CONTAINER;
 
-    static final MongoContainer MONGO_CONTAINER;
-    static final SolrContainer SOLR_CONTAINER;
-
+    protected MockMvc mockMvc;
 
     static {
         MONGO_CONTAINER = new MongoContainer("entity-management", "job-repository", "enrichment")
@@ -40,7 +59,6 @@ public abstract class AbstractIntegrationTest {
         SOLR_CONTAINER.start();
     }
 
-
     /**
      * MockWebServer needs to be static, so we can inject its port into the Spring context.
      * <p>
@@ -51,16 +69,56 @@ public abstract class AbstractIntegrationTest {
      */
     protected static MockWebServer mockMetis;
 
+    @Autowired
+    protected EntityRecordService entityRecordService;
+
+
+    @Autowired
+    private WebApplicationContext webApplicationContext;
+
+    @BeforeEach
+    protected void setup() throws Exception {
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
+
+        //ensure a clean db between test runs
+        this.entityRecordService.dropRepository();
+    }
+
     @BeforeAll
-    static void setupAll() {
+    public static void setupAll() throws IOException {
         mockMetis = new MockWebServer();
+
+        final Dispatcher dispatcher = new Dispatcher() {
+            @NotNull
+            @Override
+            public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
+                String externalId = Objects.requireNonNull(request.getRequestUrl()).queryParameter("uri");
+                try {
+                    String responseBody = loadFile(METIS_RESPONSE_MAP.getOrDefault(externalId, EMPTY_METIS_RESPONSE));
+                    return new MockResponse()
+                            .setResponseCode(200)
+                            .setBody(responseBody);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
+
+        mockMetis.setDispatcher(dispatcher);
+        mockMetis.start();
     }
 
     @AfterAll
-    static void teardownAll() throws IOException {
+    public static void teardownAll() throws IOException {
         logger.info("Shutdown metis server : host = {}; port={}", mockMetis.getHostName(), mockMetis.getPort());
         mockMetis.shutdown();
     }
+
+
+
+
+
+
 
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {

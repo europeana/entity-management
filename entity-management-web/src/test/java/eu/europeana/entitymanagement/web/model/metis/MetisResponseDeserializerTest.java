@@ -87,7 +87,7 @@ class MetisResponseDeserializerTest {
 	void shouldDeserializeTimespan() throws Exception {
 		String uri = "http://www.wikidata.org/entity/Q8106";
 		XmlTimespanImpl timespan = (XmlTimespanImpl)MetisDereferenceUtils.parseMetisResponse(unmarshaller, uri,
-				loadFile("/metis-deref/timespan.xml"));
+				loadFile("/metis-deref/timespan_1st_century.xml"));
 		assert timespan != null;
 
 		assertEquals("http://www.wikidata.org/entity/Q8106", timespan.getAbout());
@@ -104,7 +104,7 @@ class MetisResponseDeserializerTest {
 	void shouldDeserializePlace() throws Exception {
 		String uri = "https://sws.geonames.org/2988507/";
 		XmlPlaceImpl place = (XmlPlaceImpl)MetisDereferenceUtils.parseMetisResponse(unmarshaller, uri,
-				loadFile("/metis-deref/place.xml"));
+				loadFile("/metis-deref/place_paris.xml"));
 		assert place != null;
 
 		assertEquals("https://sws.geonames.org/2988507/", place.getAbout());
@@ -121,7 +121,7 @@ class MetisResponseDeserializerTest {
 	void shouldDeserializeOrganizations() throws Exception {
 		String uri = "http://www.wikidata.org/entity/Q193563";
 		XmlOrganizationImpl organization = (XmlOrganizationImpl)MetisDereferenceUtils.parseMetisResponse(unmarshaller, uri,
-				loadFile("/metis-deref/organization.xml"));
+				loadFile("/metis-deref/organization_bnf.xml"));
 		assert organization != null;
 		assertEquals("http://www.wikidata.org/entity/Q193563", organization.getAbout());
 		assertEquals(72, organization.getAltLabel().size());

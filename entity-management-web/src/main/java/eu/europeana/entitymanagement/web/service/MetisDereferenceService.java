@@ -91,6 +91,8 @@ public class MetisDereferenceService implements InitializingBean {
 		// return 500 for everything else
 		.onStatus(HttpStatus::isError,
 			response -> response.bodyToMono(String.class).map(EuropeanaApiException::new))
+		.onStatus(HttpStatus::is5xxServerError,
+				response -> response.bodyToMono(String.class).map(EuropeanaApiException::new))
 		.bodyToMono(String.class).block();
 
 	long duration = Duration.between(start, Instant.now()).toMillis();
