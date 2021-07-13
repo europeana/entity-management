@@ -18,7 +18,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -34,19 +36,14 @@ import static eu.europeana.entitymanagement.common.config.AppConfigConstants.MET
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.*;
 
 @SpringBootTest
+@AutoConfigureMockMvc
+@DirtiesContext
 public abstract class AbstractIntegrationTest {
     private static final Logger logger = LogManager.getLogger(AbstractIntegrationTest.class);
     private static final MongoContainer MONGO_CONTAINER;
     private static final SolrContainer SOLR_CONTAINER;
 
     protected MockMvc mockMvc;
-
-    @Autowired
-    protected EntityRecordService entityRecordService;
-
-
-    @Autowired
-    private WebApplicationContext webApplicationContext;
 
     static {
         MONGO_CONTAINER = new MongoContainer("entity-management", "job-repository", "enrichment")
@@ -62,8 +59,6 @@ public abstract class AbstractIntegrationTest {
         SOLR_CONTAINER.start();
     }
 
-
-
     /**
      * MockWebServer needs to be static, so we can inject its port into the Spring context.
      * <p>
@@ -73,6 +68,21 @@ public abstract class AbstractIntegrationTest {
      * See: https://github.com/spring-projects/spring-framework/issues/24825
      */
     protected static MockWebServer mockMetis;
+
+    @Autowired
+    protected EntityRecordService entityRecordService;
+
+
+    @Autowired
+    private WebApplicationContext webApplicationContext;
+
+    @BeforeEach
+    protected void setup() throws Exception {
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
+
+        //ensure a clean db between test runs
+        this.entityRecordService.dropRepository();
+    }
 
     @BeforeAll
     public static void setupAll() throws IOException {
@@ -108,13 +118,7 @@ public abstract class AbstractIntegrationTest {
 
 
 
-    @BeforeEach
-    protected void setup() throws Exception {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
 
-        //ensure a clean db between test runs
-        this.entityRecordService.dropRepository();
-    }
 
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {

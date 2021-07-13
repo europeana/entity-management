@@ -39,7 +39,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 abstract class BaseWebControllerTest extends AbstractIntegrationTest {
 
-
     @Autowired
     private JAXBContext jaxbContext;
 
@@ -49,6 +48,7 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
     @Qualifier(AppConfigConstants.BEAN_JSON_MAPPER)
     @Autowired
     private ObjectMapper objectMapper;
+
 
     protected static String loadFile(String resourcePath) throws IOException {
         InputStream is = BaseWebControllerTest.class.getResourceAsStream(resourcePath);
