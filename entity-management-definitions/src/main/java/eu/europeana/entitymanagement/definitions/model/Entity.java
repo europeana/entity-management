@@ -22,8 +22,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 
 import dev.morphia.annotations.Transient;
-import eu.europeana.corelib.edm.model.schemaorg.Text;
-import eu.europeana.corelib.edm.model.schemaorg.Thing;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatorGroup;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatorInterface;
 import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorGroup;
@@ -69,7 +67,6 @@ public abstract class Entity {
 		if(copy.getIsPartOfArray()!=null) this.isPartOf = new ArrayList<>(copy.getIsPartOfArray());
 		if(copy.getIsAggregatedBy()!=null) this.isAggregatedBy=new Aggregation(copy.getIsAggregatedBy());
 		if(copy.getReferencedWebResource()!=null) this.referencedWebResource = new WebResource(copy.getReferencedWebResource());
-		this.payload = copy.getPayload();
 	}
 
 
@@ -98,22 +95,6 @@ public abstract class Entity {
 	protected Aggregation isAggregatedBy;
 	protected WebResource referencedWebResource;
 	protected String payload;
-
-	@Transient
-	protected Thing schemaOrgEntity;
-	
-	public void toSchemaOrgEntity () {
-		if(schemaOrgEntity==null) return;
-		
-		schemaOrgEntity.setId(entityId);
-		
-		if(sameAs!=null)
-		{
-			for(String sameAsEach : sameAs) {
-				schemaOrgEntity.addSameAs(new Text(sameAsEach));
-			}
-		}
-	}
 
 	@JsonIgnore
 	public WebResource getReferencedWebResource() {
@@ -411,20 +392,5 @@ public abstract class Entity {
 	private void setEntityIdentifier(){
 		String[] splitArray = this.getAbout().split("/");
 		this.entityIdentifier =  splitArray[splitArray.length-1];
-	}
-
-	@JsonIgnore
-	public String getPayload() {
-		return payload;
-	}
-
-
-	public void setPayload(String payload) {
-		this.payload = payload;
-	}
-
-	@JsonIgnore
-	public Thing getSchemaOrgEntity() {
-		return schemaOrgEntity;
 	}
 }

@@ -12,6 +12,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.schemaorg.model.SchemaOrgEntity;
+import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 
@@ -41,15 +43,14 @@ public class SerializationUtils {
 
   private static JsonNode getInternalJsonNode(ObjectMapper mapper, EntityRecord record, FormatTypes format){
 	ObjectNode entityNode = null;
-	if(!format.equals(FormatTypes.schema)) {
-		entityNode = mapper.valueToTree(record.getEntity());
-	}
-	else {
-		record.getEntity().toSchemaOrgEntity();
-		entityNode = mapper.valueToTree(record.getEntity().getSchemaOrgEntity());
-	}
-	    
-    List<EntityProxy> recordProxies = record.getProxies();
+      if (format.equals(FormatTypes.schema)) {
+          SchemaOrgEntity<?> schemaOrgEntity = EntityObjectFactory.createSchemaOrgEntity(record.getEntity());
+          entityNode = mapper.valueToTree(schemaOrgEntity.get());
+      } else {
+          entityNode = mapper.valueToTree(record.getEntity());
+      }
+
+      List<EntityProxy> recordProxies = record.getProxies();
 
     ArrayNode proxyNode = mapper.createArrayNode();
 

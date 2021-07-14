@@ -8,6 +8,8 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.definitions.model.Timespan;
+import eu.europeana.entitymanagement.schemaorg.model.SchemaOrgEntity;
+import eu.europeana.entitymanagement.schemaorg.model.SchemaOrgPlace;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.xml.model.XmlAgentImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
@@ -60,6 +62,19 @@ public class EntityObjectFactory {
 
 	return createEntityObject(EntityTypes.valueOf(entityType));
 }
+
+	@SuppressWarnings("unchecked")
+	public static <T extends Entity> SchemaOrgEntity<T> createSchemaOrgEntity(Entity entity) {
+		switch (EntityTypes.valueOf(entity.getType())) {
+			case Place:
+				return (SchemaOrgEntity<T>) new SchemaOrgPlace((Place) entity);
+
+			//TODO: convert other types
+			default:
+				throw new EntityManagementRuntimeException(String.format("Encountered invalid entityType %s in entityId=%s",
+						entity.getType(), entity.getEntityId()));
+		}
+	}
 
 	@SuppressWarnings("unchecked")
 	public static <T extends XmlBaseEntityImpl<?>> T createXmlEntity(Entity entity)
