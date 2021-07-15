@@ -1,24 +1,37 @@
 package eu.europeana.entitymanagement.definitions.model;
 
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ACRONYM;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ADDRESS_TYPE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ALT_LABEL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.COUNTRY;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DEPICTION;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DESCRIPTION;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.EUROPEANA_ROLE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_HOMEPAGE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_LOGO;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_MBOX;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_PHONE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.GEOGRAPHIC_LEVEL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_ADDRESS;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IDENTIFIER;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ORGANIZATION_DOMAIN;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
-
-import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
-import eu.europeana.corelib.edm.model.schemaorg.MultilingualString;
-import eu.europeana.corelib.edm.model.schemaorg.Person;
-import eu.europeana.corelib.edm.model.schemaorg.Text;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 /**
@@ -79,65 +92,41 @@ public class Organization extends Entity {
 	private String postBox;
 	private String hasGeo;
 	private Address address;
-
-	public void toSchemaOrgEntity () {
-		
-		schemaOrgEntity = new eu.europeana.corelib.edm.model.schemaorg.Organization();
-		super.toSchemaOrgEntity();
-		eu.europeana.corelib.edm.model.schemaorg.Organization schemaOrgOrganization = (eu.europeana.corelib.edm.model.schemaorg.Organization) schemaOrgEntity;
-		
-		if(description!=null) {
-			for (Entry<String, String> descriptionEntry : description.entrySet()) {
-				MultilingualString descriptionEntrySchemaOrg = new MultilingualString();
-				descriptionEntrySchemaOrg.setLanguage(descriptionEntry.getKey());
-				descriptionEntrySchemaOrg.setValue(descriptionEntry.getValue());
-				schemaOrgOrganization.addDescription(descriptionEntrySchemaOrg);
-			}
-		}		
-	}
-
 	
 	@JsonGetter(DESCRIPTION)
 	public Map<String, String> getDescription() {
 		return description;
 	}
 
-	
 	@JsonSetter(DESCRIPTION)
 	public void setDescription(Map<String, String> dcDescription) {
 		this.description = dcDescription;
 	}
-
 	
 	@JsonGetter(ACRONYM)
 	public Map<String, List<String>> getAcronym() {
 		return acronym;
 	}
-
 	
 	@JsonSetter(ACRONYM)
 	public void setAcronym(Map<String, List<String>> acronym) {
 		this.acronym = acronym;
 	}
-
 	
 	@JsonGetter(EUROPEANA_ROLE)
 	public Map<String, List<String>> getEuropeanaRole() {
 		return europeanaRole;
 	}
-
 	
 	@JsonSetter(EUROPEANA_ROLE)
 	public void setEuropeanaRole(Map<String, List<String>> europeanaRole) {
 		this.europeanaRole = europeanaRole;
 	}
-
 	
 	@JsonGetter(FOAF_PHONE)
 	public List<String> getPhone() {
 		return phone;
 	}
-
 	
 	@JsonSetter(FOAF_PHONE)
 	public void setPhone(List<String> phone) {

@@ -12,6 +12,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.schemaorg.model.SchemaOrgEntity;
+import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 
@@ -31,8 +33,8 @@ public class SerializationUtils {
   private static ObjectNode getExternalJsonNode(ObjectMapper mapper, EntityRecord record, FormatTypes format)
       throws EntityManagementRuntimeException {
 	  if (format.equals(FormatTypes.schema)) {
-		  record.getEntity().toSchemaOrgEntity();
-		  return mapper.valueToTree(record.getEntity().getSchemaOrgEntity());
+          SchemaOrgEntity<?> schemaOrgEntity = EntityObjectFactory.createSchemaOrgEntity(record.getEntity());
+          return mapper.valueToTree(schemaOrgEntity.get());
 	  }
 	  else {
 		  return mapper.valueToTree(record.getEntity());
@@ -41,35 +43,34 @@ public class SerializationUtils {
 
   private static JsonNode getInternalJsonNode(ObjectMapper mapper, EntityRecord record, FormatTypes format){
 	ObjectNode entityNode = null;
-	if(!format.equals(FormatTypes.schema)) {
-		entityNode = mapper.valueToTree(record.getEntity());
-	}
-	else {
-		record.getEntity().toSchemaOrgEntity();
-		entityNode = mapper.valueToTree(record.getEntity().getSchemaOrgEntity());
-	}
-	    
-    List<EntityProxy> recordProxies = record.getProxies();
+      if (format.equals(FormatTypes.schema)) {
+          SchemaOrgEntity<?> schemaOrgEntity = EntityObjectFactory.createSchemaOrgEntity(record.getEntity());
+          entityNode = mapper.valueToTree(schemaOrgEntity.get());
+      } else {
+          entityNode = mapper.valueToTree(record.getEntity());
+      }
+
+      List<EntityProxy> recordProxies = record.getProxies();
 
     ArrayNode proxyNode = mapper.createArrayNode();
 
     for(EntityProxy proxy: recordProxies){
-    	ObjectNode proxyEntityNode=null;
-    	if(!format.equals(FormatTypes.schema)) {
-    		proxyEntityNode = mapper.valueToTree(proxy.getEntity());	
-	        // Entity @context shouldn't appear in proxy metadata
-	        proxyEntityNode.remove(WebEntityFields.CONTEXT);
-	        // Entity ID shouldn't overwrite proxyId
-	        proxyEntityNode.remove(WebEntityFields.ID);
-    	}
-    	else {
-    		proxy.getEntity().toSchemaOrgEntity();
-    		proxyEntityNode = mapper.valueToTree(proxy.getEntity().getSchemaOrgEntity());	
+    	ObjectNode proxyEntityNode=null;    	
+    	if(format.equals(FormatTypes.schema)) {  		
+            SchemaOrgEntity<?> schemaOrgProxyEntity = EntityObjectFactory.createSchemaOrgEntity(proxy.getEntity());
+            proxyEntityNode = mapper.valueToTree(schemaOrgProxyEntity.get());
 	        // Entity @context shouldn't appear in proxy metadata
 	        proxyEntityNode.remove(WebEntityFields.CONTEXT);
 	        // Entity ID shouldn't overwrite proxyId
 	        proxyEntityNode.remove(WebEntityFields.ID_SCHEMA);
 
+    	}
+    	else {
+    		proxyEntityNode = mapper.valueToTree(proxy.getEntity());	
+	        // Entity @context shouldn't appear in proxy metadata
+	        proxyEntityNode.remove(WebEntityFields.CONTEXT);
+	        // Entity ID shouldn't overwrite proxyId
+	        proxyEntityNode.remove(WebEntityFields.ID);
     	}
 
         ObjectNode embeddedProxyNode = mapper.valueToTree(proxy);

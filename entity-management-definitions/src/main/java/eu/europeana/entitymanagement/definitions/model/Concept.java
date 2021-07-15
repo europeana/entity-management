@@ -1,23 +1,36 @@
 package eu.europeana.entitymanagement.definitions.model;
 
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ALT_LABEL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BROADER;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BROAD_MATCH;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CLOSE_MATCH;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DEPICTION;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.EXACT_MATCH;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HIDDEN_LABEL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IN_SCHEME;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_SHOWN_BY;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NARROWER;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NARROW_MATCH;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NOTATION;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NOTE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.RELATED;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.RELATED_MATCH;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
-import eu.europeana.corelib.edm.model.schemaorg.MultilingualString;
-import eu.europeana.corelib.edm.model.schemaorg.Person;
-import eu.europeana.corelib.edm.model.schemaorg.Text;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
@@ -55,11 +68,6 @@ public class Concept extends Entity {
 	private List<String> closeMatch;
 	private List<String> inScheme;
 	private Map<String, List<String>> notation;
-
-	public void toSchemaOrgEntity () {
-		schemaOrgEntity = new eu.europeana.corelib.edm.model.schemaorg.Concept();
-		super.toSchemaOrgEntity();
-	}
 	
 	@JsonGetter(BROADER)
 	public List<String> getBroader() {
