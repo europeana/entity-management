@@ -302,7 +302,7 @@ public class EMController extends BaseRest {
     }
     
 	@ApiOperation(value = "Retrieve a known entity", nickname = "getEntitySchemaJsonLd", response = java.lang.Void.class)
-    @GetMapping(value = { "/{type}/base/{identifier}.schema.jsonld", "/{type}/{identifier}.schema.jsonld" }, 
+    @GetMapping(value = { "/{type}/base/{identifier}.schema.json", "/{type}/{identifier}.schema.json" },
     			produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<String> getEntitySchemaJsonLd(
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
