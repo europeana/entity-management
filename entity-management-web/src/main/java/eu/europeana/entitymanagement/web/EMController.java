@@ -213,7 +213,7 @@ public class EMController extends BaseRest {
 		// query param takes precedence over request body
 		if(StringUtils.hasLength(query)){
 			entityUpdateService.scheduleUpdatesWithSearch(query, BatchUpdateType.FULL);
-			return ResponseEntity.accepted().build();
+			return returnEmptyAcceptedResponse(request);
 		}
 
 		if(CollectionUtils.isEmpty(entityIds)){
@@ -239,7 +239,7 @@ public class EMController extends BaseRest {
 		// query param takes precedence over request body
 		if(StringUtils.hasLength(query)){
 			entityUpdateService.scheduleUpdatesWithSearch(query, BatchUpdateType.METRICS);
-			return ResponseEntity.accepted().build();
+			return returnEmptyAcceptedResponse(request);
 		}
 
 		if(CollectionUtils.isEmpty(entityIds)){
@@ -248,6 +248,7 @@ public class EMController extends BaseRest {
 
 		return scheduleBatchUpdates(request, entityIds, BatchUpdateType.METRICS);
 	}
+
 
 	@ApiOperation(value = "Retrieve a known entity", nickname = "getEntityJsonLd", response = java.lang.Void.class)
     @GetMapping(value = { "/{type}/base/{identifier}.jsonld",
@@ -446,26 +447,16 @@ public class EMController extends BaseRest {
 				.collect(groupingBy(EntityIdDisabledStatus::isDisabled));
 
 		// get entityIds that can be scheduled (disabled = false)
-		List<EntityIdDisabledStatus> nonDisabledEntitites = entityIdsByDisabled.get(false);
-		List<String> toBeScheduled;
-
-		if (CollectionUtils.isEmpty(nonDisabledEntitites)) {
-			toBeScheduled = Collections.emptyList();
-		} else {
-			toBeScheduled = nonDisabledEntitites.stream()
-					.map(EntityIdDisabledStatus::getEntityId).collect(Collectors.toList());
-		}
-
+		List<EntityIdDisabledStatus> nonDisabledEntities = entityIdsByDisabled.get(false);
+		List<String> toBeScheduled = CollectionUtils.isEmpty(nonDisabledEntities) ? Collections.emptyList() :
+				nonDisabledEntities.stream()
+						.map(EntityIdDisabledStatus::getEntityId).collect(Collectors.toList());
 
 		// updates skipped if disabled=true
 		List<EntityIdDisabledStatus> disabledEntities = entityIdsByDisabled.get(true);
-		List<String> skippedEntities;
-		if(CollectionUtils.isEmpty(disabledEntities)){
-			skippedEntities = Collections.emptyList();
-		} else {
-			skippedEntities = disabledEntities.stream()
-				.map(EntityIdDisabledStatus::getEntityId).collect(Collectors.toList());
-		}
+		List<String> skipped = CollectionUtils.isEmpty(disabledEntities) ? Collections.emptyList() :
+				disabledEntities.stream()
+						.map(EntityIdDisabledStatus::getEntityId).collect(Collectors.toList());
 
 		entityUpdateService.scheduleUpdates(toBeScheduled, updateType);
 
@@ -473,8 +464,15 @@ public class EMController extends BaseRest {
 		org.springframework.http.HttpHeaders httpHeaders = createAllowHeader(request);
 		httpHeaders.add(HttpHeaders.CONTENT_TYPE, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
 		return ResponseEntity.accepted().headers(httpHeaders).body(
-				new EntityIdResponse(entityIds.size(), toBeScheduled, failures, skippedEntities)
+				new EntityIdResponse(entityIds.size(), toBeScheduled, failures, skipped)
 		);
+	}
+
+	private ResponseEntity<EntityIdResponse> returnEmptyAcceptedResponse(HttpServletRequest request) {
+		// set required headers
+		org.springframework.http.HttpHeaders httpHeaders = createAllowHeader(request);
+		httpHeaders.add(HttpHeaders.CONTENT_TYPE, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
+		return ResponseEntity.accepted().headers(httpHeaders).build();
 	}
 
 	private void launchUpdateTask(String entityId)
