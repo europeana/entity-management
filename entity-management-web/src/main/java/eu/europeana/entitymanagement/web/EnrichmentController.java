@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -105,6 +106,6 @@ public class EnrichmentController extends BaseRest{
       if (!entityList.isEmpty()) {
           failed = entityList;
       }
-      return  new EntityIdResponse(expected, successful, failed);
+      return  new EntityIdResponse(expected, successful, failed, Collections.emptyList());
     }
 }
