@@ -14,10 +14,10 @@ version: "3.9"
 #  entitymanagement.solr.indexing.url=http://localhost:8983/entity-management
 #  ###############
 #
-# Additionally the application can be configured to use the nginx proxy to cache Metis dereference responses:
+# Configure the following to cache Metis responses
 #
 # ##############
-# metis.proxy.enabled = false
+# metis.proxy.enabled = true
 # metis.proxy.url = http://localhost:8081
 # ##############
 #
@@ -58,8 +58,6 @@ services:
     container_name: nginx-proxy
     ports:
       - 8081:80
-    environment:
-      - EM_INDEXING_CORE=entity-management
     volumes:
       # see proxy_cache_path in nginx.conf
       - $HOME/.nginx/entity-management-proxy/cache:/var/cache/nginx
