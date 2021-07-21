@@ -136,6 +136,8 @@ public abstract class AbstractIntegrationTest {
         registry.add("entitymanagement.solr.indexing.url", SOLR_CONTAINER::getConnectionUrl);
         // enable explicit commits while indexing to Solr in tests
         registry.add("entitymanagement.solr.indexing.explicitCommits", () -> true);
+        // override setting in .properties file in case this is enabled
+        registry.add("metis.proxy.enabled", () -> false);
 
 
         logger.info("MONGO_CONTAINER : {}", MONGO_CONTAINER.getConnectionUrl());
