@@ -1,6 +1,6 @@
 version: "3.9"
 
-# To start mongo and solr, run: docker-compose up -d
+# To start mongo, solr and nginx-proxy, run: docker-compose up -d
 # Then use the following settings in entitymanagement.user.properties
 #
 #  ###############
@@ -12,10 +12,17 @@ version: "3.9"
 #  mongo.enrichment.database = enrichment
 #
 #  entitymanagement.solr.indexing.url=http://localhost:8983/entity-management
-#
 #  ###############
-
-#  To stop it afterwards, run docker-compose down
+#
+# Additionally the application can be configured to use the nginx proxy to cache Metis dereference responses:
+#
+# ##############
+# metis.proxy.enabled = false
+# metis.proxy.url = http://localhost:8081
+# ##############
+#
+#
+#  To stop afterwards, run: docker-compose down
 
 services:
   db:
@@ -43,3 +50,16 @@ services:
     - 8983:8983
     environment:
     - EM_INDEXING_CORE=entity-management
+
+  proxy:
+    build:
+      context: ./misc/nginx-proxy
+      dockerfile: Dockerfile
+    container_name: nginx-proxy
+    ports:
+      - 8081:80
+    environment:
+      - EM_INDEXING_CORE=entity-management
+    volumes:
+      # see proxy_cache_path in nginx.conf
+      - $HOME/.nginx/entity-management-proxy/cache:/var/cache/nginx

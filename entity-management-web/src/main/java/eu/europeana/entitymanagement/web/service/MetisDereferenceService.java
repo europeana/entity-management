@@ -16,12 +16,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClient.Builder;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.time.Duration;
 import java.time.Instant;
 
@@ -35,8 +37,10 @@ import static eu.europeana.entitymanagement.web.MetisDereferenceUtils.parseMetis
 public class MetisDereferenceService implements InitializingBean {
     private static final Logger logger = LogManager.getLogger(MetisDereferenceService.class);
 
-	private final WebClient metisWebClient;
+	private WebClient metisWebClient;
 	private final JAXBContext jaxbContext;
+
+	private final EntityManagementConfiguration config;
 
 	/**
 	 * Create a separate JAXB unmarshaller for each thread
@@ -45,21 +49,21 @@ public class MetisDereferenceService implements InitializingBean {
 
 	@Autowired
 	public MetisDereferenceService(EntityManagementConfiguration configuration,
-			Builder webClientBuilder, JAXBContext jaxbContext) {
+			JAXBContext jaxbContext) {
 		this.jaxbContext = jaxbContext;
-		this.metisWebClient = webClientBuilder.baseUrl(configuration.getMetisBaseUrl()).build();
+		this.config = configuration;
 	}
 
+
+
 	@Override
-	public void afterPropertiesSet()  {
-		unmarshaller = ThreadLocal.withInitial(() -> {
-			try {
-				return jaxbContext.createUnmarshaller();
-			} catch (JAXBException e) {
-				throw new FunctionalRuntimeException("Error creating JAXB unmarshaller ", e);
-			}
-		});
+	public void afterPropertiesSet() throws MalformedURLException {
+		configureMetisWebClient();
+		configureJaxb();
 	}
+
+
+
 	/**
      * Dereferences the entity with the given id value.
      *
@@ -102,4 +106,41 @@ public class MetisDereferenceService implements InitializingBean {
 	}
 	return metisResponseBody;
     }
+
+
+	private void configureJaxb() {
+		unmarshaller = ThreadLocal.withInitial(() -> {
+			try {
+				return jaxbContext.createUnmarshaller();
+			} catch (JAXBException e) {
+				throw new FunctionalRuntimeException("Error creating JAXB unmarshaller ", e);
+			}
+		});
+	}
+
+	private void configureMetisWebClient() throws MalformedURLException {
+		WebClient.Builder webClientBuilder = WebClient.builder();
+		if(config.useMetisProxy()){
+			String defaultHostHeader = new URL(config.getMetisBaseUrl()).getHost();
+			String proxyUrl = ensureTrailingSlash(config.getMetisProxyUrl());
+
+			webClientBuilder.defaultHeader(HttpHeaders.HOST,
+					defaultHostHeader)
+					// ensure that baseUrl has a trailing slash
+					.baseUrl(proxyUrl);
+			logger.info("Using proxy for Metis dereferencing. defaultHostHeader={}; proxy={}",
+					defaultHostHeader, proxyUrl);
+		} else {
+			webClientBuilder.baseUrl(ensureTrailingSlash(config.getMetisBaseUrl()));
+		}
+
+		logger.info("Metis baseUrl={}", config.getMetisBaseUrl());
+		this.metisWebClient = webClientBuilder.build();
+	}
+
+
+	private String ensureTrailingSlash(String url) {
+		return url.endsWith("/") ? url : url + "/";
+	}
+
 }
