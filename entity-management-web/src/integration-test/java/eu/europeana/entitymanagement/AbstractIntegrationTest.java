@@ -139,7 +139,6 @@ public abstract class AbstractIntegrationTest {
         // override setting in .properties file in case this is enabled
         registry.add("metis.proxy.enabled", () -> false);
 
-
         logger.info("MONGO_CONTAINER : {}", MONGO_CONTAINER.getConnectionUrl());
         logger.info("SOLR_CONTAINER : {}", SOLR_CONTAINER.getConnectionUrl());
         logger.info("METIS SERVER : host = {}; port={}", mockMetis.getHostName(), mockMetis.getPort());
