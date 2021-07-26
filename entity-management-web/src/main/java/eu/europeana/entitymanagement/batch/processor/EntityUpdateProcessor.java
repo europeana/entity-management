@@ -1,14 +1,5 @@
 package eu.europeana.entitymanagement.batch.processor;
 
-import java.util.Set;
-
-import javax.validation.ConstraintViolation;
-import javax.validation.ValidatorFactory;
-
-import org.springframework.batch.item.ItemProcessor;
-import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Component;
-
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
@@ -17,8 +8,14 @@ import eu.europeana.entitymanagement.exception.ingestion.EntityValidationExcepti
 import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatorGroup;
 import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorGroup;
-import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
+import org.springframework.batch.item.ItemProcessor;
+import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Component;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.ValidatorFactory;
+import java.util.Set;
 
 /**
  * This {@link ItemProcessor} updates Entity metadata.
@@ -30,7 +27,6 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
 
     private final EntityFieldsCleaner emEntityFieldCleaner;
 
-//    private static final Logger logger = LogManager.getLogger(EntityUpdateProcessor.class);
 
     public EntityUpdateProcessor(EntityRecordService entityRecordService,
         ValidatorFactory emValidatorFactory, 
@@ -56,13 +52,10 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
         Entity externalEntity = externalProxy.getEntity();
 
         validateMinimalConstraints(externalEntity);
-        //data processing must be performed on a deep clone
-        Entity normalizedEntity = EntityObjectFactory.createNewEntity(externalEntity);
-        emEntityFieldCleaner.cleanAndNormalize(normalizedEntity);
-        Entity consolidatedEntity = entityRecordService.mergeEntities(europeanaEntity, normalizedEntity);
+        Entity consolidatedEntity = entityRecordService.mergeEntities(europeanaEntity, externalEntity);
+        emEntityFieldCleaner.cleanAndNormalize(consolidatedEntity);
         entityRecordService.performReferentialIntegrity(consolidatedEntity);
         validateCompleteConstraints(consolidatedEntity);
-        
         entityRecordService.updateConsolidatedVersion(entityRecord, consolidatedEntity);
         
    

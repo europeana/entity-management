@@ -1,36 +1,31 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.ALT_LABEL;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.DEPICTION;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_RDF;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.PREF_LABEL;
-
 import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
+import javax.xml.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.annotation.*;
 
-import org.springframework.util.StringUtils;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.*;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public abstract class XmlBaseEntityImpl<T extends Entity> {
 
     @XmlTransient
     protected T entity;
-    /**
-     * relatedentityElementsToSerialize - this list is maintained by each serialized
-     * entity and contains the entities that need to be serialized in addition,
-     * outside of the given entity
-     */
-    @XmlTransient
-    List<XmlWebResourceImpl> referencedWebResources;
 
     @XmlAttribute(namespace = NAMESPACE_RDF, name = XmlConstants.ABOUT)
     private String about;
+
+    @XmlElement(namespace = XmlConstants.NAMESPACE_EDM, name = IS_SHOWN_BY)
+    private XmlWebResourceImpl isShownBy;
+
+    @XmlElement(namespace = NAMESPACE_FOAF, name = DEPICTION)
+    private XmlWebResourceImpl depiction;
+
 
   @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = ALT_LABEL)
   private List<LabelledResource> altLabel = new ArrayList<>();
@@ -41,8 +36,6 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
   @XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.XML_SAME_AS)
   private List<LabelledResource> sameAs = new ArrayList<>();
 
-  @XmlElement(namespace = XmlConstants.NAMESPACE_FOAF, name = DEPICTION)
-  private LabelledResource depiction;
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_ORE, name = XmlConstants.IS_AGGREGATED_BY)
     private XmlAggregationImpl isAggregatedBy;
@@ -51,25 +44,30 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
 	// default constructor
     }
 
-    public List<XmlWebResourceImpl> getReferencedWebResources() {
-	return referencedWebResources;
+    public XmlWebResourceImpl getIsShownBy() {
+	return isShownBy;
     }
 
     public XmlBaseEntityImpl(T entity) {
 	this.entity = entity;
 	this.about = entity.getAbout();
-	this.prefLabel = RdfXmlUtils.convertToXmlMultilingualString(entity.getPrefLabel());
+	this.prefLabel = RdfXmlUtils.convertMapToXmlMultilingualString(entity.getPrefLabel());
 	this.altLabel = RdfXmlUtils.convertToXmlMultilingualString(entity.getAltLabel());
 	this.sameAs = RdfXmlUtils.convertToRdfResource(entity.getSameAs());
-	if(StringUtils.hasLength(entity.getDepiction())) {
-        this.depiction = new LabelledResource(entity.getDepiction());
-    }
 	// isAggregatedBy not always set in tests
     // TODO: fix tests, then remove null check here
     if(entity.getIsAggregatedBy() != null) {
         this.isAggregatedBy = new XmlAggregationImpl(entity.getIsAggregatedBy());
     }
-	referencedWebResources = new ArrayList<>();
+
+    if(entity.getIsShownBy() != null){
+        isShownBy = XmlWebResourceImpl.fromWebResource(entity.getIsShownBy());
+    }
+
+    if(entity.getDepiction() != null){
+        depiction = XmlWebResourceImpl.fromWebResource(entity.getDepiction());
+    }
+
     }
 
     public T toEntityModel() throws EntityCreationException {
@@ -79,11 +77,11 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
 	entity.setType(getTypeEnum().getEntityType());
 
 	entity.setEntityId(getAbout());
-	entity.setPrefLabelStringMap(RdfXmlUtils.toLanguageMap(getPrefLabel()));
+	entity.setPrefLabel(RdfXmlUtils.toLanguageMap(getPrefLabel()));
 	entity.setAltLabel(RdfXmlUtils.toLanguageMapList(getAltLabel()));
 	entity.setSameAs(RdfXmlUtils.toStringList(getSameAs()));
 	if(depiction != null) {
-	    entity.setDepiction(depiction.getResource());
+	    entity.setDepiction(XmlWebResourceImpl.toWebResource(depiction));
 	}
 	return entity;
     }
@@ -99,7 +97,7 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
     }
 
 
-  public LabelledResource getDepiction() {
+  public XmlWebResourceImpl getDepiction() {
     return depiction;
   }
 

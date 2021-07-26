@@ -3,6 +3,8 @@ package eu.europeana.entitymanagement.normalization;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -11,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import eu.europeana.entitymanagement.definitions.model.WebResource;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.apache.logging.log4j.LogManager;
@@ -28,11 +31,14 @@ public class EntityFieldsCleaner {
 
     private static final Logger logger = LogManager.getLogger(EntityFieldsCleaner.class);
 
-    LanguageCodes emLanguageCodes;
+    private final LanguageCodes emLanguageCodes;
 
-    public EntityFieldsCleaner(LanguageCodes emLanguageCodes) {
+    private final String thumbnailBaseUrl;
+
+    public EntityFieldsCleaner(LanguageCodes emLanguageCodes, String thumbnailBaseUrl) {
 	this.emLanguageCodes = emLanguageCodes;
-    }
+		this.thumbnailBaseUrl = thumbnailBaseUrl;
+	}
 
     @SuppressWarnings("unchecked")
     public void cleanAndNormalize(Entity entity) {
@@ -50,7 +56,7 @@ public class EntityFieldsCleaner {
 		} else if (fieldType.isAssignableFrom(String[].class)) {
 		    // remove spaces from the String[] fields
 		    List<String> normalizedList = normalizeValues(field.getName(),Arrays.asList((String[]) fieldValue));
-		    String[] normalized = normalizedList.toArray(new String[normalizedList.size()]);
+		    String[] normalized = normalizedList.toArray(new String[0]);
 		    entity.setFieldValue(field, normalized);
 		} else if (fieldType.isAssignableFrom(List.class)) {
 		 // remove spaces from the List<String> fields
@@ -59,6 +65,8 @@ public class EntityFieldsCleaner {
 		    @SuppressWarnings("rawtypes")
 		    Map normalized = normalizeMapField(field, (Map) fieldValue);
 		    entity.setFieldValue(field, normalized);
+		} else if(WebResource.class.isAssignableFrom(fieldType)){
+			entity.setFieldValue(field, normalizeWebResource((WebResource)fieldValue));
 		}
 
 	    }
@@ -69,7 +77,18 @@ public class EntityFieldsCleaner {
 	}
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+	private WebResource normalizeWebResource(WebResource existingFieldValue) {
+		WebResource webResource = new WebResource(existingFieldValue);
+		// generate thumbnail if missing
+		if(StringUtils.isEmpty(webResource.getThumbnail())){
+			webResource.setThumbnail(thumbnailBaseUrl + URLEncoder.encode(existingFieldValue.getId(),
+					StandardCharsets.UTF_8));
+		}
+
+		return webResource;
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
     private Map normalizeMapField(Field field, Map fieldValue)
 	    throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 	if (fieldValue == null) {
@@ -186,7 +205,7 @@ public class EntityFieldsCleaner {
 	    throws IllegalArgumentException, IllegalAccessException {
 	if (fieldValue != null) {
 	    String normalizedValue = normalizeTextValue(field.getName(),fieldValue);
-	    if (normalizedValue != fieldValue) {
+	    if (!normalizedValue.equals(fieldValue)) {
 		entity.setFieldValue(field, normalizedValue);
 	    }
 	}

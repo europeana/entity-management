@@ -120,15 +120,15 @@ public class EntityUpdateIT extends BaseWebControllerTest {
         final ObjectNode nodeReference = mapper.readValue(loadFile(CONCEPT_UPDATE_BATHTUB_JSON), ObjectNode.class);
         Optional<EntityRecord> entityRecordUpdated = retrieveEntity(entityRecord.getEntityId());
         Assertions.assertTrue(entityRecordUpdated.isPresent());
-        Assertions.assertEquals(nodeReference.path("depiction").asText(),
-                entityRecordUpdated.get().getEuropeanaProxy().getEntity().getDepiction());
+        Assertions.assertEquals(nodeReference.path("depiction").path("id").asText(),
+                entityRecordUpdated.get().getEuropeanaProxy().getEntity().getDepiction().getId());
         Assertions.assertEquals(nodeReference.path("note").path("en").path(0).asText(),
                 entityRecordUpdated.get().getEuropeanaProxy().getEntity().getNote().get("en").get(0));
         // acquire the reader for the right type
         ObjectReader reader = mapper.readerFor(new TypeReference<Map<String, String>>() {
         });
         Map<String, String> prefLabelToCheck = reader.readValue(nodeReference.path("prefLabel"));
-        Map<String, String> prefLabelUpdated = entityRecordUpdated.get().getEuropeanaProxy().getEntity().getPrefLabelStringMap();
+        Map<String, String> prefLabelUpdated = entityRecordUpdated.get().getEuropeanaProxy().getEntity().getPrefLabel();
         for (Map.Entry<String, String> prefLabelEntry : prefLabelToCheck.entrySet()) {
             Assertions.assertTrue(prefLabelUpdated.containsKey(prefLabelEntry.getKey()));
             Assertions.assertTrue(prefLabelUpdated.containsValue(prefLabelEntry.getValue()));
@@ -147,7 +147,7 @@ public class EntityUpdateIT extends BaseWebControllerTest {
         Entity europeanaProxyEntity = savedRecord.getEuropeanaProxy().getEntity();
 
         // values match labels in json file
-        Assertions.assertNotNull(europeanaProxyEntity.getPrefLabelStringMap().get("en"));
+        Assertions.assertNotNull(europeanaProxyEntity.getPrefLabel().get("en"));
         Assertions.assertNotNull(europeanaProxyEntity.getAltLabel().get("en").get(0));
         Assertions.assertNotNull(europeanaProxyEntity.getAltLabel().get("en").get(1));
         Assertions.assertNotNull(europeanaProxyEntity.getDepiction());

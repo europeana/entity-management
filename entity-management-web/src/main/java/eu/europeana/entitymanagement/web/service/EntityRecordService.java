@@ -248,7 +248,7 @@ public class EntityRecordService {
 	 */
 	private void copyPreviewMetadata(Entity entity, EntityPreview entityCreationRequest) {
 			entity.setSameAs(List.of(entityCreationRequest.getId()));
-			entity.setPrefLabelStringMap(entityCreationRequest.getPrefLabel());
+			entity.setPrefLabel(entityCreationRequest.getPrefLabel());
 			entity.setAltLabel(entityCreationRequest.getAltLabel());
 			entity.setDepiction(entityCreationRequest.getDepiction());
 	}
@@ -597,7 +597,16 @@ public class EntityRecordService {
 			} else if (Map.class.isAssignableFrom(fieldType)) {
 					combineEntities(consolidatedEntity, primary, secondary, prefLabelsForAltLabels, field, fieldName, accumulate);
 
+			} else if(WebResource.class.isAssignableFrom(fieldType)) {
+				WebResource primaryWebResource = (WebResource) primary.getFieldValue(field);
+				WebResource secondaryWebResource = (WebResource) secondary.getFieldValue(field);
+				if (primaryWebResource == null && secondaryWebResource != null) {
+					consolidatedEntity.setFieldValue(field, new WebResource(secondaryWebResource));
+				} else if (primaryWebResource != null) {
+					consolidatedEntity.setFieldValue(field, new WebResource(primaryWebResource));
+				}
 			}
+
 
 				}
 

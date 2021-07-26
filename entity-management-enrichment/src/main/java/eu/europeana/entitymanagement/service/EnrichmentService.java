@@ -4,6 +4,7 @@ import com.mongodb.MongoException;
 import eu.europeana.enrichment.internal.model.EnrichmentTerm;
 import eu.europeana.enrichment.service.dao.EnrichmentDao;
 import eu.europeana.enrichment.utils.EntityType;
+import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.model.EnrichmentEntity;
 import eu.europeana.entitymanagement.utils.EnrichmentConstants;
@@ -42,7 +43,7 @@ public class EnrichmentService {
 
             // set entity
             enrichmentEntity.setAbout(entityRecord.getEntityId());
-            enrichmentEntity.setPrefLabel(entityRecord.getEntity().getPrefLabel());
+            enrichmentEntity.setPrefLabel(Entity.toStringListMap(entityRecord.getEntity().getPrefLabel()));
             enrichmentEntity.setAltLabel(entityRecord.getEntity().getAltLabel());
             enrichmentEntity.setHiddenLabel(entityRecord.getEntity().getHiddenLabel());
             enrichmentEntity.setNote(entityRecord.getEntity().getNote());
@@ -50,7 +51,8 @@ public class EnrichmentService {
                 enrichmentEntity.setOwlSameAs(entityRecord.getEntity().getSameAs());
             }
             enrichmentEntity.setIsPartOf(String.valueOf(entityRecord.getEntity().getIsPartOfArray()));
-            enrichmentEntity.setFoafDepiction(entityRecord.getEntity().getFoafDepiction());
+            enrichmentEntity.setFoafDepiction(entityRecord.getEntity().getDepiction() != null ?
+                    entityRecord.getEntity().getDepiction().getId(): null);
 
             enrichmentTerm.setEntityType(EntityType.valueOf(entityRecord.getEntity().getType().toUpperCase()));
             enrichmentTerm.setEnrichmentEntity(enrichmentEntity);
