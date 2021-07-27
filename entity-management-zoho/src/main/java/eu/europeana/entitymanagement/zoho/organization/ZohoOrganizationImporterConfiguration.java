@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.PropertySources;
 
 import com.zoho.api.authenticator.store.FileStore;
 import com.zoho.api.authenticator.store.TokenStore;
@@ -17,7 +18,8 @@ import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.zoho.ZohoAccessClient;
 
 @Configuration(AppConfigConstants.BEAN_ZOHO_ORGANIZATION_IMPORTER_CONFIGURATION)
-@PropertySource(value = "classpath:zoho_import.user.properties", ignoreResourceNotFound = true)
+@PropertySources({ @PropertySource(value="classpath:zoho_import.properties", ignoreResourceNotFound = true),
+@PropertySource(value = "classpath:zoho_import.user.properties", ignoreResourceNotFound = true)})
 public class ZohoOrganizationImporterConfiguration {
 
     private static final Logger LOGGER = LogManager.getLogger(ZohoOrganizationImporterConfiguration.class);
