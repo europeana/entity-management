@@ -17,7 +17,7 @@ import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.zoho.ZohoAccessClient;
 
 @Configuration
-@PropertySource(value = "classpath:zoho_import.properties", ignoreResourceNotFound = true)
+@PropertySource(value = "classpath:zoho_import.user.properties", ignoreResourceNotFound = true)
 public class ZohoOrganizationImporterConfiguration {
 
     private static final Logger LOGGER = LogManager.getLogger(ZohoOrganizationImporterConfiguration.class);
@@ -45,7 +45,7 @@ public class ZohoOrganizationImporterConfiguration {
     private String tokenFile;
 
     public FileStore getFileTokenStore() throws Exception {
-    	String filename=Thread.currentThread().getContextClassLoader().getResource("token_store.txt").getPath();
+    	String filename=Thread.currentThread().getContextClassLoader().getResource(tokenFile).getPath();
     	return new FileStore(filename);
     }
 

@@ -28,5 +28,6 @@ build/
 .vscode/
 
 **/*.user.properties
+**/*.user.txt
 
 .DS_Store

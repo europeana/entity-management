@@ -1,2 +1,0 @@
-"user_mail","client_id","refresh_token","access_token","grant_token","expiry_time"
-"api@europeana.eu","1000.A2Y8RFNF1F60WZAD28P0WC02AA0P7Y","1000.177227e214295a09e861a65199d739b3.dd1f4794db084a4a6dda5b2584949793","1000.606db2566aa7685657eb94613960a0d9.f52a43edc280c348bc351844abc4f071","1000.ed8c1b252594f1ebba899b6114418a95.297b7bcaa00ea2f86c08f1b51ea68879","1627364926413"
