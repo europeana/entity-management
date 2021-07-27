@@ -16,7 +16,7 @@ import com.zoho.api.authenticator.store.TokenStore;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.zoho.ZohoAccessClient;
 
-@Configuration
+@Configuration(AppConfigConstants.BEAN_ZOHO_ORGANIZATION_IMPORTER_CONFIGURATION)
 @PropertySource(value = "classpath:zoho_import.user.properties", ignoreResourceNotFound = true)
 public class ZohoOrganizationImporterConfiguration {
 
@@ -49,7 +49,6 @@ public class ZohoOrganizationImporterConfiguration {
     	return new FileStore(filename);
     }
 
-    @Bean(AppConfigConstants.BEAN_ZOHO_ACCESS_CLIENT)
     public ZohoAccessClient getZohoAccessClient() throws Exception {
         if (zohoGrantToken == null || zohoGrantToken.length() < 6) {
             throw new IllegalArgumentException("zoho.authentication.token is invalid: " + zohoGrantToken);

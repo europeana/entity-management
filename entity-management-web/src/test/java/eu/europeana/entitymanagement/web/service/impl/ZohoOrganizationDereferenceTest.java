@@ -13,7 +13,6 @@ import com.zoho.crm.api.record.Record;
 
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.Organization;
-import eu.europeana.entitymanagement.zoho.ZohoAccessClient;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationImporterConfiguration;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
@@ -26,14 +25,14 @@ public class ZohoOrganizationDereferenceTest {
 	  @Autowired
 	  private ZohoOrganizationConverter zohoOrganizationConverter;
 	  
-	  @Qualifier(AppConfigConstants.BEAN_ZOHO_ACCESS_CLIENT)
+	  @Qualifier(AppConfigConstants.BEAN_ZOHO_ORGANIZATION_IMPORTER_CONFIGURATION)
 	  @Autowired
-	  private ZohoAccessClient zohoAccessClient;
+	  private ZohoOrganizationImporterConfiguration zohoOrganizationImporterConfiguration;
 	  
 	  @Test
 	  public void organizationDereferenceTest() throws ZohoException, Exception {
 		  String organizationId = "1482250000004513401";
-		  Optional<Record> zohoOrganization = zohoAccessClient.getZohoRecordOrganizationById(organizationId);
+		  Optional<Record> zohoOrganization = zohoOrganizationImporterConfiguration.getZohoAccessClient().getZohoRecordOrganizationById(organizationId);
 		  Organization org = null;
 		  if (zohoOrganization.isPresent()) {
 			  org = zohoOrganizationConverter.convertToOrganizationEntity(zohoOrganization.get());
