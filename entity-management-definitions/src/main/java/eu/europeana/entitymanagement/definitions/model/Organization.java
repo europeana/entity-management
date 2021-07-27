@@ -1,14 +1,32 @@
 package eu.europeana.entitymanagement.definitions.model;
 
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ACRONYM;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ADDRESS_TYPE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ALT_LABEL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.COUNTRY;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DEPICTION;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DESCRIPTION;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.EUROPEANA_ROLE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_HOMEPAGE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_LOGO;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_MBOX;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_PHONE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.GEOGRAPHIC_LEVEL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_ADDRESS;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IDENTIFIER;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ORGANIZATION_DOMAIN;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
-
-import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -302,5 +320,13 @@ public class Organization extends Entity {
 	public void setFieldValue(Field field, Object value) throws IllegalArgumentException, IllegalAccessException {
 		//TODO:in case of the performance overhead cause by using the reflection code, change this method to call the setter for each field individually
 		field.set(this, value);
+	}
+
+	public Address getAddress() {
+		return address;
+	}
+
+	public void setAddress(Address address) {
+		this.address = address;
 	}
 }

@@ -157,6 +157,12 @@
 			<artifactId>entity-management-solr</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>eu.europeana.api</groupId>
+			<artifactId>entity-management-zoho</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 
 		<dependency>
 			<groupId>eu.europeana.corelib</groupId>
@@ -235,8 +241,7 @@
 			<artifactId>mockwebserver</artifactId>
 			<scope>test</scope>
 		</dependency>
-
-
+		
 	</dependencies>
 	<build>
 		<!-- set fixed name for easy deployment -->
@@ -261,6 +266,10 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<!-- <version>2.22.0</version> -->
+				<configuration>
+        			<reuseForks>false</reuseForks>
+        			<forkCount>1</forkCount>
+    			</configuration>
 			</plugin>
 
 		</plugins>
