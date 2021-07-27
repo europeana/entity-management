@@ -18,8 +18,7 @@ import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.zoho.ZohoAccessClient;
 
 @Configuration(AppConfigConstants.BEAN_ZOHO_ORGANIZATION_IMPORTER_CONFIGURATION)
-@PropertySources({ @PropertySource(value="classpath:zoho_import.properties", ignoreResourceNotFound = true),
-@PropertySource(value = "classpath:zoho_import.user.properties", ignoreResourceNotFound = true)})
+@PropertySource(value="classpath:zoho_import.properties", ignoreResourceNotFound = true)
 public class ZohoOrganizationImporterConfiguration {
 
     private static final Logger LOGGER = LogManager.getLogger(ZohoOrganizationImporterConfiguration.class);

@@ -27,7 +27,7 @@ build/
 ### VS Code ###
 .vscode/
 
-**/*.user.properties
-**/*.user.txt
+**/*.properties
+**/*.txt
 
 .DS_Store
