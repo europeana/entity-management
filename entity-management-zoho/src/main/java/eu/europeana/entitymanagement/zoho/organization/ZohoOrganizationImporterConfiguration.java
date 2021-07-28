@@ -46,8 +46,8 @@ public class ZohoOrganizationImporterConfiguration {
     private String tokenFile;
 
     public FileStore getFileTokenStore() throws Exception {
-    	String filename=Thread.currentThread().getContextClassLoader().getResource(tokenFile).getPath();
-    	return new FileStore(filename);
+    	String filepath=Thread.currentThread().getContextClassLoader().getResource(tokenFile).getPath();
+    	return new FileStore(filepath);
     }
 
     public ZohoAccessClient getZohoAccessClient() throws Exception {
