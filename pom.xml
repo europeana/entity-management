@@ -9,7 +9,9 @@
         <module>entity-management-batch</module>
       <module>entity-management-enrichment</module>
     <module>entity-management-solr</module>
-  </modules>
+    <module>entity-management-usage-stats</module>
+
+    </modules>
 
     <parent>
         <groupId>eu.europeana</groupId>

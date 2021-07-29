@@ -8,8 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import eu.europeana.entitymanagement.service.UsageStatsService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -55,6 +57,8 @@ public abstract class BaseRest extends BaseRestController {
     @Autowired
     private RequestPathMethodService requestMethodService;
 
+    private UsageStatsService usageStatsService = new UsageStatsService();
+
     protected Logger logger = LogManager.getLogger(getClass());
 
     public BaseRest() {
@@ -65,6 +69,9 @@ public abstract class BaseRest extends BaseRestController {
         return emAuthorizationService;
     }
 
+    public UsageStatsService getUsageStatsService() {
+        return usageStatsService;
+    }
 
     public String getApiVersion() {
         return emBuildInfo.getAppVersion();

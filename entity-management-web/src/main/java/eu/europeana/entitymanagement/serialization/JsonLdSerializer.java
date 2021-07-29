@@ -5,6 +5,8 @@ import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import eu.europeana.entitymanagement.model.Metric;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -78,4 +80,11 @@ public class JsonLdSerializer {
 			return buffer.toString();
     }
 
+    public String serializeMetric(Metric metric) {
+		try {
+			return mapper.writer().writeValueAsString(metric);
+		} catch (JsonProcessingException e) {
+			throw new EntityManagementRuntimeException("Unexpected exception occurred when serializing metric!",e);
+		}
+	}
 }
