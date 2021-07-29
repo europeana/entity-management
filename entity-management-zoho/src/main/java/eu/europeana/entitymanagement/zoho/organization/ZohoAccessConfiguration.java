@@ -22,22 +22,22 @@ public class ZohoAccessConfiguration {
     	LOGGER.info("Initializing ZohoOrganizationImporterConfiguration bean as: configuration.");
     }
     
-    @Value("${zoho.email}")
+    @Value("${zoho.email: #{null}}")
     private String zohoEmail;
     
-    @Value("${zoho.client.id}")
+    @Value("${zoho.client.id: #{null}}")
     private String zohoClientId;
     
-    @Value("${zoho.client.secret}")
+    @Value("${zoho.client.secret: #{null}}")
     private String zohoClientSecret;
     
-    @Value("${zoho.grant.token}")
+    @Value("${zoho.grant.token: #{null}}")
     private String zohoGrantToken;
     
-    @Value("${zoho.redirect.url}")
+    @Value("${zoho.redirect.url: #{null}}")
     private String zohoRedirectUrl;
     
-    @Value("${token.store.file.path}")
+    @Value("${token.store.file.path: #{null}}")
     private String tokenFile;
 
     public FileStore getFileTokenStore() throws Exception {
