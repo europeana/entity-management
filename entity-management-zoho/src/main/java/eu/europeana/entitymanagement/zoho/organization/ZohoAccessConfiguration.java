@@ -1,15 +1,10 @@
 package eu.europeana.entitymanagement.zoho.organization;
 
-import java.io.File;
-import java.nio.file.Paths;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.annotation.PropertySources;
 
 import com.zoho.api.authenticator.store.FileStore;
 import com.zoho.api.authenticator.store.TokenStore;
@@ -17,13 +12,13 @@ import com.zoho.api.authenticator.store.TokenStore;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.zoho.ZohoAccessClient;
 
-@Configuration(AppConfigConstants.BEAN_ZOHO_ORGANIZATION_IMPORTER_CONFIGURATION)
+@Configuration(AppConfigConstants.BEAN_ZOHO_ACCESS_CONFIGURATION)
 @PropertySource(value="classpath:zoho_import.properties", ignoreResourceNotFound = true)
-public class ZohoOrganizationImporterConfiguration {
+public class ZohoAccessConfiguration {
 
-    private static final Logger LOGGER = LogManager.getLogger(ZohoOrganizationImporterConfiguration.class);
+    private static final Logger LOGGER = LogManager.getLogger(ZohoAccessConfiguration.class);
 
-    public ZohoOrganizationImporterConfiguration() {
+    public ZohoAccessConfiguration() {
     	LOGGER.info("Initializing ZohoOrganizationImporterConfiguration bean as: configuration.");
     }
     

@@ -7,17 +7,14 @@ import java.util.List;
 import java.util.Locale;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
 
 import com.zoho.crm.api.record.Record;
 
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.Address;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 
-@Component(AppConfigConstants.BEAN_ZOHO_ORGANIZATION_CONVERTER)
 public class ZohoOrganizationConverter {
 
     public Organization convertToOrganizationEntity(Record record) {

@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.web.service.impl;
+package eu.europeana.entitymanagement.zoho.organization;
 
 import java.util.Optional;
 
@@ -13,26 +13,21 @@ import com.zoho.crm.api.record.Record;
 
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.Organization;
-import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
-import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationImporterConfiguration;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 
-@SpringBootTest(classes = {ZohoOrganizationConverter.class, ZohoOrganizationImporterConfiguration.class})
+@SpringBootTest(classes = {ZohoOrganizationConverter.class, ZohoAccessConfiguration.class})
 @Disabled("Excluded from automated runs as this depends on Zoho.")
 public class ZohoOrganizationDereferenceTest {
 
-	  @Qualifier(AppConfigConstants.BEAN_ZOHO_ORGANIZATION_CONVERTER)
+	  @Qualifier(AppConfigConstants.BEAN_ZOHO_ACCESS_CONFIGURATION)
 	  @Autowired
-	  private ZohoOrganizationConverter zohoOrganizationConverter;
-	  
-	  @Qualifier(AppConfigConstants.BEAN_ZOHO_ORGANIZATION_IMPORTER_CONFIGURATION)
-	  @Autowired
-	  private ZohoOrganizationImporterConfiguration zohoOrganizationImporterConfiguration;
+	  private ZohoAccessConfiguration zohoAccessConfiguration;
 	  
 	  @Test
 	  public void organizationDereferenceTest() throws ZohoException, Exception {
+		  ZohoOrganizationConverter zohoOrganizationConverter = new ZohoOrganizationConverter();
 		  String organizationId = "1482250000004513401";
-		  Optional<Record> zohoOrganization = zohoOrganizationImporterConfiguration.getZohoAccessClient().getZohoRecordOrganizationById(organizationId);
+		  Optional<Record> zohoOrganization = zohoAccessConfiguration.getZohoAccessClient().getZohoRecordOrganizationById(organizationId);
 		  Organization org = null;
 		  if (zohoOrganization.isPresent()) {
 			  org = zohoOrganizationConverter.convertToOrganizationEntity(zohoOrganization.get());
