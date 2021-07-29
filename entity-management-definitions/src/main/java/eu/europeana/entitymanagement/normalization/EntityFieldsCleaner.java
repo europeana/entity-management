@@ -26,6 +26,7 @@ import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 
 import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.*;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BASE_DATA_EUROPEANA_URI;
 
 public class EntityFieldsCleaner {
 
@@ -79,9 +80,11 @@ public class EntityFieldsCleaner {
 
 	private WebResource normalizeWebResource(WebResource existingFieldValue) {
 		WebResource webResource = new WebResource(existingFieldValue);
-		// generate thumbnail if missing
-		if(StringUtils.isEmpty(webResource.getThumbnail())){
-			webResource.setThumbnail(thumbnailBaseUrl + URLEncoder.encode(existingFieldValue.getId(),
+
+		// generate missing thumbnail for Europeana resources
+		if(StringUtils.isEmpty(webResource.getThumbnail()) &&
+				webResource.getSource().startsWith(BASE_DATA_EUROPEANA_URI)){
+			webResource.setThumbnail(thumbnailBaseUrl + URLEncoder.encode(webResource.getId(),
 					StandardCharsets.UTF_8));
 		}
 
