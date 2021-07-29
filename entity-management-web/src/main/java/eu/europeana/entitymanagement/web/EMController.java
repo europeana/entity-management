@@ -417,11 +417,9 @@ public class EMController extends BaseRest {
 
 			// return 301 redirect
 			return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
-					.location(UriComponentsBuilder.newInstance().path("/entity/{id}.{format}")
-							.queryParam("profile", "internal")
+					.location(UriComponentsBuilder.newInstance().path("/entity/{id}")
 							.buildAndExpand(
-							EntityRecordUtils.extractIdentifierFromEntityId(existingEntity.get().getEntityId()),
-							FormatTypes.jsonld).toUri())
+							EntityRecordUtils.extractIdentifierFromEntityId(existingEntity.get().getEntityId())).toUri())
 					.build();
 		}
 		return null;
