@@ -82,6 +82,12 @@ public class EntityManagementConfiguration  {
   @Value("${enrichmentMigrationPassword}")
   private String enrichmentsMigrationPassword;
 
+  @Value("${metis.proxy.enabled: false}")
+  private boolean useMetisProxy;
+
+  @Value("${metis.proxy.url:}")
+  private String metisProxyUrl;
+
 
   public EntityManagementConfiguration() {
 	LOG.info("Initializing EntityManagementConfiguration bean as: configuration");
@@ -181,5 +187,13 @@ public String getIndexingSolrUrl() {
 
     public int getSolrQueryMaxPageSize() {
       return solrQueryMaxPageSize;
+    }
+
+    public boolean useMetisProxy() {
+        return useMetisProxy;
+    }
+
+    public String getMetisProxyUrl() {
+        return metisProxyUrl;
     }
 }

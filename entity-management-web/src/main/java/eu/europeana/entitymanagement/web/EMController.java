@@ -136,14 +136,6 @@ public class EMController extends BaseRest {
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 	    @RequestBody Entity updateRequestEntity,
 	    HttpServletRequest request) throws Exception {
-		/*
-		 * we don't want to add @NotNull annotation within the entity class, since it has other validators
-		 * so we check for required properties here
-		 */
-		if(CollectionUtils.isEmpty(updateRequestEntity.getSameAs())){
-			throw new HttpBadRequestException("'sameAs' cannot be empty in request body");
-		}
-
 			if (emConfig.isAuthEnabled()) {
 				verifyWriteAccess(Operations.UPDATE, request);
 			}
