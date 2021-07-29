@@ -1,12 +1,12 @@
 package eu.europeana.entitymanagement.web.model;
 
-import java.util.List;
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
+import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Represents the body for Entity creation POST requests.
@@ -24,13 +24,13 @@ public class EntityPreview {
 
     private Map<String, String> prefLabel;
     private Map<String, List<String>> altLabel;
-    private String depiction;
+    private WebResource depiction;
 
     public EntityPreview() {
         // create explicit empty constructor
     }
 
-    public EntityPreview(String id, String context, Map<String, String> prefLabel, Map<String, List<String>> altLabel, String depiction) {
+    public EntityPreview(String id, String context, Map<String, String> prefLabel, Map<String, List<String>> altLabel, WebResource depiction) {
         this.id = id;
         this.context = context;
         this.prefLabel = prefLabel;
@@ -70,11 +70,11 @@ public class EntityPreview {
         this.altLabel = altLabel;
     }
 
-    public String getDepiction() {
+    public WebResource getDepiction() {
         return depiction;
     }
 
-    public void setDepiction(String depiction) {
+    public void setDepiction(WebResource depiction) {
         this.depiction = depiction;
     }
 

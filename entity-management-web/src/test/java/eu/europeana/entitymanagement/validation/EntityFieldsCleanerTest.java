@@ -17,7 +17,6 @@ import eu.europeana.entitymanagement.config.SerializationConfig;
 import eu.europeana.entitymanagement.config.ValidatorConfig;
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
-import eu.europeana.entitymanagement.testutils.BaseMvcTestUtils;
 import eu.europeana.entitymanagement.web.MetisDereferenceUtils;
 
 @SpringBootTest(classes = {ValidatorConfig.class,
@@ -40,7 +39,7 @@ public class EntityFieldsCleanerTest {
         assert xmlAgent != null;
 
         Agent agent = (Agent) xmlAgent.toEntityModel();
-        EntityFieldsCleaner fieldCleaner = new EntityFieldsCleaner(emLanguageCodes);
+        EntityFieldsCleaner fieldCleaner = new EntityFieldsCleaner(emLanguageCodes, "http://thumbnail.url");
         fieldCleaner.cleanAndNormalize(agent);
         assertEquals(24, agent.getPrefLabel().size());
         assertEquals(12, agent.getAltLabel().size());
