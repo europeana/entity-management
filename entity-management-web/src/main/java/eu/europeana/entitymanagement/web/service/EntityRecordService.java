@@ -247,7 +247,6 @@ public class EntityRecordService {
 	 * @param entityCreationRequest entity creation request
 	 */
 	private void copyPreviewMetadata(Entity entity, EntityPreview entityCreationRequest) {
-			entity.setSameAs(List.of(entityCreationRequest.getId()));
 			entity.setPrefLabel(entityCreationRequest.getPrefLabel());
 			entity.setAltLabel(entityCreationRequest.getAltLabel());
 			entity.setDepiction(entityCreationRequest.getDepiction());
@@ -616,6 +615,18 @@ public class EntityRecordService {
 		    throw new EntityUpdateException("Metadata consolidation failed to access required properties!", e);
 
 		}
+
+		// Add external proxy id to consolidated entity sameAs
+		String externalProxyId = secondary.getEntityId();
+		List<String> consolidatedEntitySameAs = consolidatedEntity.getSameAs();
+
+		if (consolidatedEntitySameAs == null) {
+			consolidatedEntity.setSameAs(Collections.singletonList(externalProxyId));
+		}
+		else if (!consolidatedEntitySameAs.contains(externalProxyId)) {
+			consolidatedEntitySameAs.add(externalProxyId);
+		}
+
 		return consolidatedEntity;
 	}
 
