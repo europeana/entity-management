@@ -1,7 +1,21 @@
 package eu.europeana.entitymanagement.definitions.model;
 
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.ENTITY_CONTEXT;
-
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ALT_LABEL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HIDDEN_LABEL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NOTE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IDENTIFIER;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_RELATED_TO;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_PART;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_PART_OF;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DEPICTION;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_SHOWN_BY;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_AGGREGATED_BY;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,8 +40,6 @@ import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidator
 import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatorInterface;
 import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorGroup;
 import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorInterface;
-import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
-
 
 /*
  * TODO: Define the Jackson annotations, both xml and json, in one place, meaning in this class here and the corresponding extended classes
@@ -107,58 +119,58 @@ public abstract class Entity {
 		this.referencedWebResource = resource;
 	}
 
-	@JsonGetter(WebEntityFields.PREF_LABEL)
+	@JsonGetter(PREF_LABEL)
 	public Map<String, String> getPrefLabelStringMap() {
 		return prefLabel;
 	}
 
 
-	@JsonSetter(WebEntityFields.PREF_LABEL)
+	@JsonSetter(PREF_LABEL)
 	public void setPrefLabelStringMap(Map<String, String> prefLabel) {
 		this.prefLabel = prefLabel;
 	}
 
-	@JsonGetter(WebEntityFields.ALT_LABEL)
+	@JsonGetter(ALT_LABEL)
 	public Map<String, List<String>> getAltLabel() {
 		return altLabel;
 	}
 
 
-	@JsonSetter(WebEntityFields.ALT_LABEL)
+	@JsonSetter(ALT_LABEL)
 	public void setAltLabel(Map<String, List<String>> altLabel) {
 		this.altLabel = altLabel;
 	}
 
-	@JsonGetter(WebEntityFields.HIDDEN_LABEL)
+	@JsonGetter(HIDDEN_LABEL)
 	public Map<String, List<String>> getHiddenLabel() {
 		return hiddenLabel;
 	}
 
 
-	@JsonSetter(WebEntityFields.HIDDEN_LABEL)
+	@JsonSetter(HIDDEN_LABEL)
 	public void setHiddenLabel(Map<String, List<String>> hiddenLabel) {
 		this.hiddenLabel = hiddenLabel;
 	}
 
-	@JsonGetter(WebEntityFields.NOTE)
+	@JsonGetter(NOTE)
 	public Map<String, List<String>> getNote() {
 		return note;
 	}
 
 
-	@JsonSetter(WebEntityFields.NOTE)
+	@JsonSetter(NOTE)
 	public void setNote(Map<String, List<String>> note) {
 		this.note = note;
 	}
 
 
-	@JsonGetter(WebEntityFields.TYPE)
+	@JsonGetter(TYPE)
 	public String getType() {
 		return type;
 	}
 
 
-	@JsonSetter(WebEntityFields.TYPE)
+	@JsonSetter(TYPE)
 	public void setType(String type) {
 		this.type=type;
 	}
@@ -166,24 +178,24 @@ public abstract class Entity {
 
 
 
-	@JsonGetter(WebEntityFields.ID)
+	@JsonGetter(ID)
 	public String getEntityId() {
 		return entityId;
 	}
 
 
-	@JsonSetter(WebEntityFields.ID)
+	@JsonSetter(ID)
 	public void setEntityId(String entityId) {
 		this.entityId = entityId;
 	}
 
-	@JsonGetter(WebEntityFields.IDENTIFIER)
+	@JsonGetter(IDENTIFIER)
 	public List<String> getIdentifier() {
 		return identifier;
 	}
 
 
-	@JsonSetter(WebEntityFields.IDENTIFIER)
+	@JsonSetter(IDENTIFIER)
 	public void setIdentifier(List<String> identifier) {
 		this.identifier = identifier;
 	}
@@ -198,61 +210,61 @@ public abstract class Entity {
 		setEntityIdentifier();
 	}
 
-	@JsonGetter(WebEntityFields.IS_RELATED_TO)
+	@JsonGetter(IS_RELATED_TO)
 	public List<String> getIsRelatedTo() {
 		return isRelatedTo;
 	}
 
 
-	@JsonSetter(WebEntityFields.IS_RELATED_TO)
+	@JsonSetter(IS_RELATED_TO)
 	public void setIsRelatedTo(List<String> isRelatedTo) {
 		this.isRelatedTo = isRelatedTo;
 	}
 
 
 
-	@JsonGetter(WebEntityFields.HAS_PART)
+	@JsonGetter(HAS_PART)
 	public List<String> getHasPart() {
 		return hasPart;
 	}
 
 
-	@JsonSetter(WebEntityFields.HAS_PART)
+	@JsonSetter(HAS_PART)
 	public void setHasPart(List<String> hasPart) {
 		this.hasPart = hasPart;
 	}
 
 
-	@JsonGetter(WebEntityFields.IS_PART_OF)
+	@JsonGetter(IS_PART_OF)
 	public List<String> getIsPartOfArray() {
 		return isPartOf;
 	}
 
 
-	@JsonSetter(WebEntityFields.IS_PART_OF)
+	@JsonSetter(IS_PART_OF)
 	public void setIsPartOfArray(List<String> isPartOf) {
 		this.isPartOf = isPartOf;
 	}
 
-	@JsonGetter(WebEntityFields.DEPICTION)
+	@JsonGetter(DEPICTION)
 	public String getDepiction() {
 		return depiction;
 	}
 
 
-	@JsonSetter(WebEntityFields.DEPICTION)
+	@JsonSetter(DEPICTION)
 	public void setDepiction(String depiction) {
 		this.depiction = depiction;
 	}
 
 
-	@JsonGetter(WebEntityFields.SAME_AS)
+	@JsonGetter(SAME_AS)
 	public List<String> getSameAs() {
 		return sameAs;
 	}
 
 
-	@JsonSetter(WebEntityFields.SAME_AS)
+	@JsonSetter(SAME_AS)
 	public void setSameAs(List<String> sameAs) {
 		this.sameAs = sameAs;
 	}
@@ -340,7 +352,7 @@ public abstract class Entity {
 	 * is used and it needs the whole object, not just the id
 	 */
 
-	@JsonGetter(WebEntityFields.IS_SHOWN_BY)
+	@JsonGetter(IS_SHOWN_BY)
 	public String getIsShownBy() {
 		if (referencedWebResource!=null)
 		{
@@ -350,7 +362,7 @@ public abstract class Entity {
 	}
 
 
-	@JsonSetter(WebEntityFields.IS_SHOWN_BY)
+	@JsonSetter(IS_SHOWN_BY)
 	public void setIsShownBy(WebResource resource) {
 		referencedWebResource=resource;
 	}
@@ -370,7 +382,7 @@ public abstract class Entity {
 
 
 
-	@JsonGetter(WebEntityFields.IS_AGGREGATED_BY)
+	@JsonGetter(IS_AGGREGATED_BY)
 	public Aggregation getIsAggregatedBy() {
 		return isAggregatedBy;
 	}
@@ -378,13 +390,13 @@ public abstract class Entity {
 	/**
 	 * Not included in XML responses
 	 */
-	@JsonGetter(WebEntityFields.CONTEXT)
+	@JsonGetter(CONTEXT)
 	public String getContext() {
 		return ENTITY_CONTEXT;
 	}
 
 
-	@JsonSetter(WebEntityFields.IS_AGGREGATED_BY)
+	@JsonSetter(IS_AGGREGATED_BY)
 	public void setIsAggregatedBy(Aggregation isAggregatedBy) {
 		this.isAggregatedBy = isAggregatedBy;
 	}

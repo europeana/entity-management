@@ -122,7 +122,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
         EntityRecord entityRecord = createEntity(europeanaMetadata, metisResponse, AGENT_DA_VINCI_URI);
 
         String requestPath = getEntityRequestPath(entityRecord.getEntityId());
-        ResultActions resultActions = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".schema.json")
+        ResultActions resultActions = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".schema.jsonld")
         		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -142,7 +142,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
         EntityRecord entityRecord = createEntity(europeanaMetadata, metisResponse, AGENT_DA_VINCI_URI);
 
         String requestPath = getEntityRequestPath(entityRecord.getEntityId());
-        ResultActions resultActions = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".schema.json")
+        ResultActions resultActions = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".schema.jsonld")
         		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "internal")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())

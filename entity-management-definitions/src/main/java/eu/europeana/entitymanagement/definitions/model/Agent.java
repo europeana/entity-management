@@ -95,27 +95,27 @@ public class Agent extends Entity {
 
 	private List<String> exactMatch;
 
-	@JsonGetter(WebEntityFields.WAS_PRESENT_AT)
+	@JsonGetter(WAS_PRESENT_AT)
 	public List<String> getWasPresentAt() {
 		return this.wasPresentAt;
 	}
 
-	@JsonSetter(WebEntityFields.WAS_PRESENT_AT)
+	@JsonSetter(WAS_PRESENT_AT)
 	public void setWasPresentAt(List<String> wasPresentAt) {
 		this.wasPresentAt=wasPresentAt;
 	}
 
-	@JsonGetter(WebEntityFields.DATE)
+	@JsonGetter(DATE)
 	public List<String> getDate() {
 		return date;
 	}
 
-	@JsonSetter(WebEntityFields.DATE)
+	@JsonSetter(DATE)
 	public void setDate(List<String> date) {
 		this.date = date;
 	}
 
-	@JsonGetter(WebEntityFields.BEGIN)
+	@JsonGetter(BEGIN)
 	public List<String> getBegin() {
 		return begin;
 	}
