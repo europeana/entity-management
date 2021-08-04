@@ -32,7 +32,7 @@ public class MetisDereferenceServiceTest {
 
 	//bathtube
 	String entityId = "http://www.wikidata.org/entity/Q152095";
-	Concept entity = (Concept) metisDerefService.dereferenceEntityById(entityId);
+	Concept entity = (Concept) metisDerefService.dereferenceEntityById(entityId, "Concept");
 	assertNotNull(entity);
 	assertEquals(entityId, entity.getEntityId());
 	

@@ -1,9 +1,16 @@
 package eu.europeana.entitymanagement.web.service;
 
 import eu.europeana.api.commons.error.EuropeanaApiException;
+import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.AppConfig;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
+import eu.europeana.entitymanagement.definitions.model.Agent;
+import eu.europeana.entitymanagement.definitions.model.Concept;
 import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.definitions.model.Place;
+import eu.europeana.entitymanagement.definitions.model.Timespan;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
 import javax.xml.bind.JAXBContext;
@@ -11,21 +18,36 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import eu.europeana.entitymanagement.exception.MetisNotKnownException;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.web.xml.model.XmlAgentImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
+import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
+import eu.europeana.entitymanagement.web.xml.model.XmlOrganizationImpl;
+import eu.europeana.entitymanagement.web.xml.model.XmlPlaceImpl;
+import eu.europeana.entitymanagement.web.xml.model.XmlTimespanImpl;
+import eu.europeana.entitymanagement.wikidata.WikidataAccessService;
+import eu.europeana.entitymanagement.zoho.organization.ZohoAccessConfiguration;
+import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
+import eu.europeana.entitymanagement.zoho.utils.ZohoException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.zoho.crm.api.record.Record;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Optional;
 
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.METIS_DEREF_PATH;
 import static eu.europeana.entitymanagement.web.MetisDereferenceUtils.parseMetisResponse;
@@ -41,6 +63,8 @@ public class MetisDereferenceService implements InitializingBean {
 	private final JAXBContext jaxbContext;
 
 	private final EntityManagementConfiguration config;
+	
+	private final ZohoAccessConfiguration zohoAccessConfiguration;
 
 	/**
 	 * Create a separate JAXB unmarshaller for each thread
@@ -48,13 +72,12 @@ public class MetisDereferenceService implements InitializingBean {
 	private ThreadLocal<Unmarshaller> unmarshaller;
 
 	@Autowired
-	public MetisDereferenceService(EntityManagementConfiguration configuration,
-			JAXBContext jaxbContext) {
+	public MetisDereferenceService(EntityManagementConfiguration configuration, JAXBContext jaxbContext, 
+			ZohoAccessConfiguration zohoAccessConfiguration) {
 		this.jaxbContext = jaxbContext;
 		this.config = configuration;
+		this.zohoAccessConfiguration = zohoAccessConfiguration;
 	}
-
-
 
 	@Override
 	public void afterPropertiesSet() throws MalformedURLException {
@@ -62,23 +85,38 @@ public class MetisDereferenceService implements InitializingBean {
 		configureJaxb();
 	}
 
-
-
 	/**
      * Dereferences the entity with the given id value.
      *
      * @param id external ID for entity
      * @return An optional containing the de-referenced entity, or an empty optional
      *         if no match found.
-     * @throws EuropeanaApiException on error
+	 * @throws Exception 
+	 * @throws ZohoException 
      */
-    public Entity dereferenceEntityById(String id) throws EuropeanaApiException {
-	String metisResponseBody = fetchMetisResponse(id);
-		XmlBaseEntityImpl<?> metisResponse = parseMetisResponse(unmarshaller.get(), id, metisResponseBody);
-		if(metisResponse == null){
-			throw new MetisNotKnownException("Unsuccessful Metis dereferenciation for externalId=" + id);
+    public Entity dereferenceEntityById(String id, String entityType) throws ZohoException, Exception {
+		if (entityType!=null && EntityTypes.valueOf(entityType).equals(EntityTypes.Organization)){
+		    ZohoOrganizationConverter zohoOrganizationConverter = new ZohoOrganizationConverter();
+			Optional<Record> zohoOrganization = zohoAccessConfiguration.getZohoAccessClient().getZohoRecordOrganizationById(id);
+			Organization org = null;
+			if (zohoOrganization.isPresent()) {
+				org = zohoOrganizationConverter.convertToOrganizationEntity(zohoOrganization.get());
+			}
+			return org;
+			/*
+			 * TODO: add the call to the WikidataAccessService service and merge the entities as required
+			 */
+			
 		}
-		return metisResponse.toEntityModel();
+		else
+		{
+	    	String metisResponseBody = fetchMetisResponse(id);
+			XmlBaseEntityImpl<?> metisResponse = parseMetisResponse(unmarshaller.get(), id, metisResponseBody);
+			if(metisResponse == null){
+				throw new MetisNotKnownException("Unsuccessful Metis dereferenciation for externalId=" + id);
+			}
+			return metisResponse.toEntityModel();
+		}
     }
 
 

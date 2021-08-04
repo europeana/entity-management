@@ -41,5 +41,6 @@ public class AppConfigConstants {
     
     public static final String BEAN_ZOHO_ORGANIZATION_CONVERTER = "zohoOrganizationConverter";
     public static final String BEAN_ZOHO_ACCESS_CONFIGURATION = "zohoAccessConfiguration";
+    public static final String BEAN_WIKIDATA_ACCESS_SERVICE = "wikidataAccessService";
 }
 

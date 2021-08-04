@@ -329,7 +329,7 @@ public class EMController extends BaseRest {
 			}
 
 			Entity metisResponse = dereferenceService
-					.dereferenceEntityById(entityCreationRequest.getId());
+					.dereferenceEntityById(entityCreationRequest.getId(), null);
 
 			if(!metisResponse.getType().equals(entityCreationRequest.getType())){
 				throw new EntityMismatchException(String.format("Metis type '%s' does not match type '%s' in request",

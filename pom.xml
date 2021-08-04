@@ -67,6 +67,8 @@
         <version.solrj>7.7.2</version.solrj>
         <apache.commons.validator.version>1.7</apache.commons.validator.version>
 		<version.com.zoho.crm.java-sdk>3.0.1</version.com.zoho.crm.java-sdk>
+		<version.jakarta>2.3.3</version.jakarta>
+		<version.jaxb>2.3.3</version.jaxb>
     </properties>
 
     <dependencyManagement>

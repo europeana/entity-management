@@ -23,9 +23,6 @@ import org.json.JSONObject;
 
 public final class ZohoUtils {
 
-  private ZohoUtils() {
-  }
-
   /**
    * Method that would check if the object provided is of type {@link JSONObject.Null} and will
    * return a correct representation of {@link String} or null.
