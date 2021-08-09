@@ -48,7 +48,6 @@ public class UsageStatsController extends BaseRest {
     private ResponseEntity<String> getEntitiesStats(String apikey) throws EntityApiAccessException, UsageStatsException {
     Metric metric = new Metric();
     metric.setType(UsageStatsFields.OVERALL_TOTAL_TYPE);
-    metric.setDescription(UsageStatsFields.DESCRIPTION_VALUE);
     getUsageStatsService().getStatsForLang(metric, apikey);
     metric.setTimestamp(new Date());
     return new ResponseEntity<>(serializeMetricView(metric), HttpStatus.OK);

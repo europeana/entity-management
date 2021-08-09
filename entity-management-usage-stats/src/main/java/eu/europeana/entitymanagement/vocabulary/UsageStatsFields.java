@@ -10,8 +10,6 @@ public class UsageStatsFields {
 
     // Metric Constants
     public static final String OVERALL_TOTAL_TYPE = "OverallTotal";
-    public static final String DESCRIPTION = "description";
-    public static final String DESCRIPTION_VALUE = "All values are in percent(%)";
     public static final String TYPE               = "type";
     public static final String CREATED            = "created";
     public static final String ENTITIES_PER_LANG_TYPE  = "entities";

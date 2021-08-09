@@ -15,9 +15,6 @@ public class Metric {
     @JsonProperty(UsageStatsFields.TYPE)
     private String type;
 
-    @JsonProperty(UsageStatsFields.DESCRIPTION)
-    private String description;
-
     @JsonProperty(UsageStatsFields.CREATED)
     private Date timestamp;
 
@@ -46,9 +43,5 @@ public class Metric {
 
     public void setEntities(List<EntitiesPerLanguage> entities) {
         this.entities = entities;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 }
