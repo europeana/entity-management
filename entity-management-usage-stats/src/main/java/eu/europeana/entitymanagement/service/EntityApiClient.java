@@ -2,8 +2,9 @@ package eu.europeana.entitymanagement.service;
 
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.entitymanagement.exception.EntityApiAccessException;
-import eu.europeana.entitymanagement.model.EntityApiResponse;
-import eu.europeana.entitymanagement.model.EntityCountType;
+import eu.europeana.entitymanagement.exception.UsageStatsException;
+import eu.europeana.entitymanagement.model.EntitiesPerLanguage;
+import eu.europeana.entitymanagement.model.Entity;
 import eu.europeana.entitymanagement.vocabulary.UsageStatsFields;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -16,7 +17,6 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import java.io.IOException;
-import java.util.*;
 
 /**
  * Entity Api Client Service
@@ -27,6 +27,16 @@ import java.util.*;
 public class EntityApiClient {
 
     /**
+     * Return the entity with total values per type
+     * @param apikey
+     * @return
+     * @throws EntityApiAccessException
+     */
+    public Entity getEntity(String apikey) throws EntityApiAccessException {
+    JSONObject jsonObject = getEntityFromURL(buildEntityApiUrl(null, apikey));
+    return exrtractFacetValues(jsonObject);
+    }
+    /**
      * returns the Entity Api response
      *
      * @param lang
@@ -34,13 +44,12 @@ public class EntityApiClient {
      * @return
      * @throws EntityApiAccessException
      */
-    public EntityApiResponse getEntityApiResponse(String lang, String apikey) throws EntityApiAccessException {
-    JSONObject jsonObject = getEntityFromURL(buildEntityUrl(lang, apikey));
+    public EntitiesPerLanguage getEntitiesForLanguage(String lang, String apikey, Entity entityTotal) throws EntityApiAccessException, UsageStatsException {
+    JSONObject jsonObject = getEntityFromURL(buildEntityApiUrl(lang, apikey));
     if (jsonObject != null) {
-        List<EntityCountType> countPerType = extractValues(jsonObject);
-        if (!countPerType.isEmpty()) {
-            return new EntityApiResponse(lang, countPerType);
-        }
+        EntitiesPerLanguage entities = getEntityPerLangValues(jsonObject, entityTotal);
+        entities.setLang(lang);
+        return entities;
     }
     return null;
     }
@@ -52,19 +61,70 @@ public class EntityApiClient {
      * @return
      * @throws EntityApiAccessException
      */
-    private List<EntityCountType> extractValues(JSONObject jsonObject) throws EntityApiAccessException {
-    List<EntityCountType> countPerLabel = new ArrayList<>();
+    private EntitiesPerLanguage getEntityPerLangValues(JSONObject jsonObject, Entity entityTotal) throws EntityApiAccessException, UsageStatsException {
+    EntitiesPerLanguage entityPerLanguage = new EntitiesPerLanguage();
+    Entity entity = exrtractFacetValues(jsonObject);
+    calculatePercentageValues(entity, entityTotal, entityPerLanguage);
+    return entityPerLanguage;
+    }
+
+    private void calculatePercentageValues(Entity entityPerLanguage, Entity entityTotal, EntitiesPerLanguage entities) throws UsageStatsException {
+    try {
+        entities.setTimespans(getPercentage(entityPerLanguage.getTimespans(), entityTotal.getTimespans()));
+        entities.setPlaces(getPercentage(entityPerLanguage.getPlaces(), entityTotal.getPlaces()));
+        entities.setConcepts(getPercentage(entityPerLanguage.getConcepts(), entityTotal.getConcepts()));
+        entities.setAgents(getPercentage(entityPerLanguage.getAgents(), entityTotal.getAgents()));
+        entities.setOrganisations(getPercentage(entityPerLanguage.getOrganisations(), entityTotal.getOrganisations()));
+        entities.setTotal(getPercentage(entityPerLanguage.getTotal(), entityTotal.getTotal()));
+
+    } catch (Exception e) {
+        throw new UsageStatsException("Error calculating the percentage values." +e.getMessage());
+    }
+    }
+
+    private int getPercentage(int value, int total) {
+    return Math.round(((float) value / (float) total) * 100);
+    }
+
+    /**
+     * Extracts facet values from Entity api response
+     *
+     * @param jsonObject
+     * @return
+     * @throws EntityApiAccessException
+     */
+    private Entity exrtractFacetValues(JSONObject jsonObject) throws EntityApiAccessException {
+    Entity entity = new Entity();
     try {
         JSONObject facets = (JSONObject) jsonObject.get("facets");
         JSONArray valuesArray = facets.getJSONArray("values");
         for(int i =0; i<valuesArray.length(); i++) {
             JSONObject jo = (JSONObject) valuesArray.get(i);
-            countPerLabel.add(new EntityCountType(jo.getString("count"), jo.getString("label")));
+            String label = jo.getString("label");
+            int count = Integer.parseInt(jo.getString("count"));
+            switch(label) {
+                case "Agent" :
+                    entity.setAgents(count);
+                    break;
+                case "Concept" :
+                    entity.setConcepts(count);
+                    break;
+                case "Timespan" :
+                    entity.setTimespans(count);
+                    break;
+                case "Place" :
+                    entity.setPlaces(count);
+                    break;
+                case "Organization" :
+                    entity.setOrganisations(count);
+                    break;
+            }
         }
+        entity.setTotal(getTotal(entity));
+        return entity;
     } catch (JSONException e) {
         throw new EntityApiAccessException("Cannot parse entity API response." + e.getMessage());
     }
-    return countPerLabel;
     }
 
     /**
@@ -98,18 +158,31 @@ public class EntityApiClient {
     }
 
     /**
-     * Returns the entity api search url for the provided language
-     * example : https://api.europeana.eu/entity/search.json?query=skos_prefLabel.fr:*&profile=facets&facet=type&pageSize=0&wskey=
+     * Returns the entity api search urls :
+     * 1) lang parameter is present : queries on lang and facets on type
+     *     https://api.europeana.eu/entity/search.json?query=skos_prefLabel.fr:*&profile=facets&facet=type&pageSize=0&wskey=
+     * 2) if lang parameter is not present : queries all and facets on type
+     *     https://api.europeana.eu/entity/search.json?query=*&profile=facets&facet=type&pageSize=0&wskey=api2demo
      *
      * @param lang
      * @param apiKey
      * @return
      */
-    private String buildEntityUrl(String lang, String apiKey) {
+    private static String buildEntityApiUrl(String lang, String apiKey) {
     StringBuilder url = new StringBuilder(UsageStatsFields.ENTITY_API_BASE_URL);
-    url.append("?").append(UsageStatsFields.ENTITY_API_SEARCH_QUERY).append(lang);
+    // adds : query=skos_prefLabel.<lang>:*
+    if (lang != null && !lang.isBlank()) {
+        url.append("?").append(UsageStatsFields.ENTITY_API_PREFLABEL_SEARCH_QUERY).append(lang);
+        url.append(UsageStatsFields.ENTITY_API_PREFLABEL_QUERY_SEPERATOR);
+    } else { // adds : query=*
+        url.append("?").append(UsageStatsFields.ENTITY_API_SEARCH_ALL_QUERY);
+    }
     url.append(UsageStatsFields.ENTITY_API_SEARCH_PFPS);
     url.append('&').append(CommonApiConstants.PARAM_WSKEY).append('=').append(apiKey);
     return url.toString();
+    }
+
+    private int getTotal(Entity entity) {
+        return (entity.getAgents() + entity.getConcepts() + entity.getOrganisations() + entity.getPlaces() +entity.getTimespans());
     }
 }

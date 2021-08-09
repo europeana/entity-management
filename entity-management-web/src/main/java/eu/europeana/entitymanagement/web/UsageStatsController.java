@@ -4,6 +4,7 @@ import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.entitymanagement.exception.EntityApiAccessException;
+import eu.europeana.entitymanagement.exception.UsageStatsException;
 import eu.europeana.entitymanagement.model.Metric;
 import eu.europeana.entitymanagement.serialization.JsonLdSerializer;
 import eu.europeana.entitymanagement.vocabulary.UsageStatsFields;
@@ -44,9 +45,10 @@ public class UsageStatsController extends BaseRest {
      *
      * @return
      */
-    private ResponseEntity<String> getEntitiesStats(String apikey) throws EntityApiAccessException {
+    private ResponseEntity<String> getEntitiesStats(String apikey) throws EntityApiAccessException, UsageStatsException {
     Metric metric = new Metric();
     metric.setType(UsageStatsFields.OVERALL_TOTAL_TYPE);
+    metric.setDescription(UsageStatsFields.DESCRIPTION_VALUE);
     getUsageStatsService().getStatsForLang(metric, apikey);
     metric.setTimestamp(new Date());
     return new ResponseEntity<>(serializeMetricView(metric), HttpStatus.OK);

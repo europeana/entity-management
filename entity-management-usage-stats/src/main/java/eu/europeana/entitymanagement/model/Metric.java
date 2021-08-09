@@ -15,11 +15,14 @@ public class Metric {
     @JsonProperty(UsageStatsFields.TYPE)
     private String type;
 
+    @JsonProperty(UsageStatsFields.DESCRIPTION)
+    private String description;
+
     @JsonProperty(UsageStatsFields.CREATED)
     private Date timestamp;
 
-    @JsonProperty(UsageStatsFields.ENTITY_PER_TYPE_PER_LANG)
-    private List<EntityApiResponse> countTypePerLang;
+    @JsonProperty(UsageStatsFields.ENTITIES_PER_LANG_TYPE)
+    private List<EntitiesPerLanguage> entities;
 
     public String getType() {
         return type;
@@ -37,11 +40,15 @@ public class Metric {
         this.timestamp = timestamp;
     }
 
-    public List<EntityApiResponse> getCountTypePerLang() {
-        return countTypePerLang;
+    public List<EntitiesPerLanguage> getEntities() {
+        return entities;
     }
 
-    public void setCountTypePerLang(List<EntityApiResponse> countTypePerLang) {
-        this.countTypePerLang = countTypePerLang;
+    public void setEntities(List<EntitiesPerLanguage> entities) {
+        this.entities = entities;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

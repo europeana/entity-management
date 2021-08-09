@@ -1,7 +1,9 @@
 package eu.europeana.entitymanagement.service;
 
 import eu.europeana.entitymanagement.exception.EntityApiAccessException;
-import eu.europeana.entitymanagement.model.EntityApiResponse;
+import eu.europeana.entitymanagement.exception.UsageStatsException;
+import eu.europeana.entitymanagement.model.EntitiesPerLanguage;
+import eu.europeana.entitymanagement.model.Entity;
 import eu.europeana.entitymanagement.model.Metric;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,21 +31,23 @@ public class UsageStatsService {
     }
 
     /**
-     *  Retrieves the entity api response and sets it in metric
+     *  Retrieves the entity api response per language per type in percentages.
+     *
      * @param metric
      * @param apikey
      * @throws EntityApiAccessException
      */
-    public void getStatsForLang(Metric metric, String apikey) throws EntityApiAccessException {
-        List<EntityApiResponse> countTypePerLang = new ArrayList<>();
+    public void getStatsForLang(Metric metric, String apikey) throws EntityApiAccessException, UsageStatsException {
+        Entity entityTotal = getEntityApiClient().getEntity(apikey);
+        List<EntitiesPerLanguage> entitiesPerLanguageList = new ArrayList<>();
         for(String lang : languages) {
-            EntityApiResponse entityApiResponse = getEntityApiClient().getEntityApiResponse(lang, apikey);
-            if(entityApiResponse != null) {
-                countTypePerLang.add(entityApiResponse);
+            EntitiesPerLanguage entitiesPerLanguage = getEntityApiClient().getEntitiesForLanguage(lang, apikey, entityTotal);
+            if(entitiesPerLanguage != null) {
+                entitiesPerLanguageList.add(entitiesPerLanguage);
             } else {
                 LOG.error("No stats found for lang {} in entity api", lang);
             }
         }
-        metric.setCountTypePerLang(countTypePerLang);
+        metric.setEntities(entitiesPerLanguageList);
     }
 }
