@@ -167,6 +167,11 @@ public class EntityRecordService {
 
 		entityRecord.setEntityId(entityId);
 		entity.setEntityId(entityId);
+		/*
+		 * sameAs will be replaced during consolidation; however we set this here to prevent duplicate
+		 * registrations if consolidation fails
+		 */
+		entity.setSameAs(Collections.singletonList(entityCreationRequest.getId()));
 		entityRecord.setEntity(entity);
 
 		Entity europeanaProxyMetadata = EntityObjectFactory.createEntityObject(type);
@@ -210,7 +215,12 @@ public class EntityRecordService {
 	String entityId = generateEntityId(entity.getType(), null);
         entityRecord.setEntityId(entityId);
         entity.setEntityId(entityId);
-        entityRecord.setEntity(entity);
+		/*
+		 * sameAs will be replaced during consolidation; however we set this here to prevent duplicate
+		 * registrations if consolidation fails
+		 */
+		entity.setSameAs(Collections.singletonList(entityCreationRequest.getId()));
+		entityRecord.setEntity(entity);
 
 
         Entity europeanaProxyMetadata = EntityObjectFactory.createEntityObject(metisResponse.getType());
