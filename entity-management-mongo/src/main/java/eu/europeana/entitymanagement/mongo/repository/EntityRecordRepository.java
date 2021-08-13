@@ -9,10 +9,12 @@ import dev.morphia.query.experimental.updates.UpdateOperators;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.EntityRecordFields;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.Resource;
 import javax.validation.ValidatorFactory;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -64,27 +66,29 @@ public class EntityRecordRepository {
                 .first();
     }
 
-    /**
-     * Checks if records exist with the given entityIds. Disabled records are excluded from result.
-     * @param entityIds list of entityIds to check
-     * @return list of found entityIds
-     */
-    public List<String> getExistingEntityIds(List<String> entityIds){
+    public List<EntityIdDisabledStatus> getEntityIds(List<String> entityIds, boolean excludeDisabled){
         // Get all EntityRecords that match the given entityIds
+        List<Filter> filters = new ArrayList<>();
+        filters.add(in(ENTITY_ID, entityIds));
+
+        // only fetch records where disabled flag isn't set
+        if(excludeDisabled){
+            filters.add(eq(DISABLED, false));
+        }
+
         List<EntityRecord> entityRecords = datastore.find(EntityRecord.class).filter(
-            in(ENTITY_ID, entityIds),
-            eq(DISABLED, false))
-            .iterator(
-                new FindOptions()
-                    // we only care about the entityId for this query
-                    .projection().include(ENTITY_ID)
-            )
-            .toList();
-
-
-        return entityRecords.stream().map(EntityRecord::getEntityId).collect(Collectors.toList());
+                filters.toArray(Filter[]::new))
+                .iterator(
+                        new FindOptions()
+                                // we only care about the entityId and disabled flag for this query
+                                .projection().include(ENTITY_ID)
+                                .projection().include(DISABLED)
+                )
+                .toList();
+        return entityRecords.stream().map(entityRecord ->
+                new EntityIdDisabledStatus(entityRecord.getEntityId(), entityRecord.isDisabled())
+        ).collect(Collectors.toList());
     }
-
 
     /**
      * Deletes all EntityRecord objects that contain the given entityId

@@ -8,6 +8,7 @@ import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
 import eu.europeana.entitymanagement.definitions.model.*;
+import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
 import eu.europeana.entitymanagement.exception.EntityAlreadyExistsException;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
@@ -78,8 +79,8 @@ public class EntityRecordService {
 	}
 
 
-    public List<String> retrieveMultipleByEntityId(List<String> entityIds){
-			return entityRecordRepository.getExistingEntityIds(entityIds);
+    public List<EntityIdDisabledStatus> retrieveMultipleByEntityId(List<String> entityIds, boolean excludeDisabled){
+			return entityRecordRepository.getEntityIds(entityIds, excludeDisabled);
 		}
     /**
      * Gets coreferenced entity with the given id (sameAs or exactMatch value in the

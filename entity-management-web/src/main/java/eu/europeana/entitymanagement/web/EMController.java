@@ -12,6 +12,7 @@ import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
 import eu.europeana.entitymanagement.definitions.web.EntityIdResponse;
 import eu.europeana.entitymanagement.exception.EntityMismatchException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
@@ -36,12 +37,15 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static eu.europeana.entitymanagement.solr.SolrUtils.createSolrEntity;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.QUERY_PARAM_QUERY;
+import static java.util.stream.Collectors.groupingBy;
 
 
 @RestController
@@ -201,20 +205,14 @@ public class EMController extends BaseRest {
 		// query param takes precedence over request body
 		if(StringUtils.hasLength(query)){
 			entityUpdateService.scheduleUpdatesWithSearch(query, BatchUpdateType.FULL);
-			return ResponseEntity.accepted().build();
+			return returnEmptyAcceptedResponse(request);
 		}
 
 		if(CollectionUtils.isEmpty(entityIds)){
 			throw new HttpBadRequestException(INVALID_UPDATE_REQUEST_MSG);
 		}
 
-		List<String> existingEntityIds = entityRecordService.retrieveMultipleByEntityId(entityIds);
-		// get entityIds in request that weren't retrieved from db
-		List<String> failures = entityIds.stream().filter(e -> !existingEntityIds.contains(e))
-				.collect(Collectors.toList());
-
-		entityUpdateService.scheduleUpdates(existingEntityIds, BatchUpdateType.FULL);
-		return  ResponseEntity.accepted().body(new EntityIdResponse(entityIds.size(), existingEntityIds, failures));
+		return scheduleBatchUpdates(request, entityIds, BatchUpdateType.FULL);
 	}
 
 
@@ -233,21 +231,16 @@ public class EMController extends BaseRest {
 		// query param takes precedence over request body
 		if(StringUtils.hasLength(query)){
 			entityUpdateService.scheduleUpdatesWithSearch(query, BatchUpdateType.METRICS);
-			return ResponseEntity.accepted().build();
+			return returnEmptyAcceptedResponse(request);
 		}
 
 		if(CollectionUtils.isEmpty(entityIds)){
 			throw new HttpBadRequestException(INVALID_UPDATE_REQUEST_MSG);
 		}
 
-		List<String> existingEntityIds = entityRecordService.retrieveMultipleByEntityId(entityIds);
-		List<String> failures = entityIds.stream()
-				.filter(e -> !existingEntityIds.contains(e))
-				.collect(Collectors.toList());
-
-		entityUpdateService.scheduleUpdates(existingEntityIds, BatchUpdateType.METRICS);
-		return  ResponseEntity.accepted().body(new EntityIdResponse(entityIds.size(), existingEntityIds, failures));
+		return scheduleBatchUpdates(request, entityIds, BatchUpdateType.METRICS);
 	}
+
 
 	@ApiOperation(value = "Retrieve a known entity", nickname = "getEntityJsonLd", response = java.lang.Void.class)
     @GetMapping(value = { "/{type}/base/{identifier}.jsonld",
@@ -423,6 +416,53 @@ public class EMController extends BaseRest {
 					.build();
 		}
 		return null;
+	}
+
+	private ResponseEntity<EntityIdResponse> scheduleBatchUpdates(HttpServletRequest request, List<String> entityIds, BatchUpdateType updateType) {
+		// Get all existing EntityIds and their disabled status
+		List<EntityIdDisabledStatus> statusList = entityRecordService
+				.retrieveMultipleByEntityId(entityIds, false);
+
+		// extract only the entityIds for easy comparison
+		List<String> existingEntityIds = statusList.stream()
+				.map(EntityIdDisabledStatus::getEntityId)
+				.collect(Collectors.toList());
+
+		// failures are entityIds that weren't retrieved
+		List<String> failures = entityIds.stream()
+				.filter(e -> !existingEntityIds.contains(e))
+				.collect(Collectors.toList());
+
+		Map<Boolean, List<EntityIdDisabledStatus>> entityIdsByDisabled = statusList.stream()
+				.collect(groupingBy(EntityIdDisabledStatus::isDisabled));
+
+		// get entityIds that can be scheduled (disabled = false)
+		List<EntityIdDisabledStatus> nonDisabledEntities = entityIdsByDisabled.get(false);
+		List<String> toBeScheduled = CollectionUtils.isEmpty(nonDisabledEntities) ? Collections.emptyList() :
+				nonDisabledEntities.stream()
+						.map(EntityIdDisabledStatus::getEntityId).collect(Collectors.toList());
+
+		// updates skipped if disabled=true
+		List<EntityIdDisabledStatus> disabledEntities = entityIdsByDisabled.get(true);
+		List<String> skipped = CollectionUtils.isEmpty(disabledEntities) ? Collections.emptyList() :
+				disabledEntities.stream()
+						.map(EntityIdDisabledStatus::getEntityId).collect(Collectors.toList());
+
+		entityUpdateService.scheduleUpdates(toBeScheduled, updateType);
+
+		// set required headers for this endpoint
+		org.springframework.http.HttpHeaders httpHeaders = createAllowHeader(request);
+		httpHeaders.add(HttpHeaders.CONTENT_TYPE, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
+		return ResponseEntity.accepted().headers(httpHeaders).body(
+				new EntityIdResponse(entityIds.size(), toBeScheduled, failures, skipped)
+		);
+	}
+
+	private ResponseEntity<EntityIdResponse> returnEmptyAcceptedResponse(HttpServletRequest request) {
+		// set required headers
+		org.springframework.http.HttpHeaders httpHeaders = createAllowHeader(request);
+		httpHeaders.add(HttpHeaders.CONTENT_TYPE, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
+		return ResponseEntity.accepted().headers(httpHeaders).build();
 	}
 
 	private void launchUpdateTask(String entityId)

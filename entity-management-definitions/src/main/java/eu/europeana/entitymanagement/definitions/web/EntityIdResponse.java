@@ -8,11 +8,13 @@ public class EntityIdResponse {
 
     private long expected;
     private List<String> successful;
+    private List<String> skipped;
     private List<String> failed;
 
-    public EntityIdResponse(long expected, List<String> successful, List<String> failed) {
+    public EntityIdResponse(long expected, List<String> successful, List<String> failed, List<String> skipped) {
         this.expected = expected;
         this.successful = successful;
+        this.skipped = skipped;
         this.failed = failed;
     }
 
@@ -20,23 +22,15 @@ public class EntityIdResponse {
         return expected;
     }
 
-    public void setExpected(long expected) {
-        this.expected = expected;
-    }
-
     public List<String> getSuccessful() {
         return successful;
-    }
-
-    public void setSuccessful(List<String> successful) {
-        this.successful = successful;
     }
 
     public List<String> getFailed() {
         return failed;
     }
 
-    public void setFailed(List<String> failed) {
-        this.failed = failed;
+    public List<String> getSkipped() {
+        return skipped;
     }
 }
