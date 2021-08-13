@@ -9,28 +9,38 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SOURCE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.THUMBNAIL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
+
+import java.util.Objects;
 
 @Embedded
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({ID, SOURCE, THUMBNAIL})
+@JsonPropertyOrder({ID, TYPE, SOURCE, THUMBNAIL})
+
 public class WebResource {
 
-    public WebResource(WebResource copy) {
-		this.source = copy.getSource();
-		this.id = copy.getId();
-		this.thumbnail = copy.getThumbnail();
-		this.type = copy.getType();
-	}
+    public static final String type = "WebResource";
+    private String source;
+    private String id;
+    private String thumbnail;
 
 	public WebResource() {
         super();
         // TODO Auto-generated constructor stub
     }
 
-    String source;
-    String id;
-    String thumbnail;
-    String type;
+    public WebResource(WebResource copy) {
+        this.source = copy.getSource();
+        this.id = copy.getId();
+        this.thumbnail = copy.getThumbnail();
+    }
+
+    public WebResource(String id, String source, String thumbnail){
+	    this.id = id;
+	    this.source = source;
+	    this.thumbnail = thumbnail;
+    }
 
     @JsonGetter(ID)
     public String getId() {
@@ -46,8 +56,8 @@ public class WebResource {
     public String getThumbnail() {
         return thumbnail;
     }
-    
-    @JsonGetter(TYPE)
+
+    @JsonGetter(WebEntityFields.TYPE)
     public String getType() {
         return type;
     }
@@ -64,34 +74,24 @@ public class WebResource {
     }
 
     
-    @JsonSetter(TYPE)
-    public void setType(String typeParam) {
-        type=typeParam;
-    }
-
-    
     @JsonSetter(ID)
     public void setId(String idParam) {
         id=idParam;
     }
 
-    
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (obj == null || obj.getClass() != this.getClass()) {
-            return false;
-        }
 
-        WebResource guest = (WebResource) obj;
-        return (id == guest.getId() || (id!=null && id.equals(guest.getId()))) &&
-            (thumbnail == guest.getThumbnail() || (thumbnail!=null && thumbnail.equals(guest.getThumbnail()))) &&
-            (source == guest.getSource() || (source!=null && source.equals(guest.getSource())));
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
+        WebResource that = (WebResource) o;
+
+        if (!Objects.equals(source, that.source)) return false;
+        if (!id.equals(that.id)) return false;
+        return Objects.equals(thumbnail, that.thumbnail);
     }
 
-    
     public int hashCode() {
         final int prime = 31;
         int result = 1;

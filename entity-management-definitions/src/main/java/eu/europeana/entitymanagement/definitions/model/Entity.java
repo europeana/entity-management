@@ -40,10 +40,8 @@ import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidator
 import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatorInterface;
 import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorGroup;
 import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorInterface;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 
-/*
- * TODO: Define the Jackson annotations, both xml and json, in one place, meaning in this class here and the corresponding extended classes
- */
 @dev.morphia.annotations.Embedded
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = As.EXISTING_PROPERTY, property = "type")
@@ -69,7 +67,7 @@ public abstract class Entity {
 		this.entityId = copy.getEntityId();
 		this.depiction = copy.getDepiction();
 		if(copy.getNote()!=null) this.note = new HashMap<>(copy.getNote());
-		if(copy.getPrefLabel()!=null) this.prefLabel = new HashMap<>(copy.getPrefLabelStringMap());
+		if(copy.getPrefLabel()!=null) this.prefLabel = new HashMap<>(copy.getPrefLabel());
 		if(copy.getAltLabel()!=null) this.altLabel = new HashMap<>(copy.getAltLabel());
 		if(copy.getHiddenLabel()!=null) this.hiddenLabel = new HashMap<>(copy.getHiddenLabel());
 		if(copy.getIdentifier()!=null) this.identifier = new ArrayList<>(copy.getIdentifier());
@@ -78,7 +76,8 @@ public abstract class Entity {
 		if(copy.getHasPart()!=null) this.hasPart = new ArrayList<>(copy.getHasPart());
 		if(copy.getIsPartOfArray()!=null) this.isPartOf = new ArrayList<>(copy.getIsPartOfArray());
 		if(copy.getIsAggregatedBy()!=null) this.isAggregatedBy=new Aggregation(copy.getIsAggregatedBy());
-		if(copy.getReferencedWebResource()!=null) this.referencedWebResource = new WebResource(copy.getReferencedWebResource());
+		if(copy.getIsShownBy()!=null) this.isShownBy = new WebResource(copy.getIsShownBy());
+		this.payload = copy.getPayload();
 	}
 
 
@@ -87,13 +86,11 @@ public abstract class Entity {
 	// ID of entityRecord in database
 	@Transient
 	protected String entityIdentifier;
-	// depiction
-	protected String depiction;
+
 	protected Map<String, List<String>> note;
 	protected Map<String, String> prefLabel;
 	protected Map<String, List<String>> altLabel;
 	protected Map<String, List<String>> hiddenLabel;
-	protected Map<String, List<String>> tmpPrefLabel;
 
 	protected List<String> identifier;
 	protected List<String> sameAs;
@@ -105,28 +102,19 @@ public abstract class Entity {
 	protected List<String> isPartOf;
 
 	protected Aggregation isAggregatedBy;
-	protected WebResource referencedWebResource;
+	protected WebResource isShownBy;
+	protected WebResource depiction;
 	protected String payload;
 
-	@JsonIgnore
-	public WebResource getReferencedWebResource() {
-		return referencedWebResource;
-	}
 
-
-	@JsonSetter
-	public void setReferencedWebResource(WebResource resource) {
-		this.referencedWebResource = resource;
-	}
-
-	@JsonGetter(PREF_LABEL)
-	public Map<String, String> getPrefLabelStringMap() {
+	@JsonGetter(WebEntityFields.PREF_LABEL)
+	public Map<String, String> getPrefLabel() {
 		return prefLabel;
 	}
 
 
-	@JsonSetter(PREF_LABEL)
-	public void setPrefLabelStringMap(Map<String, String> prefLabel) {
+	@JsonSetter(WebEntityFields.PREF_LABEL)
+	public void setPrefLabel(Map<String, String> prefLabel) {
 		this.prefLabel = prefLabel;
 	}
 
@@ -246,14 +234,14 @@ public abstract class Entity {
 		this.isPartOf = isPartOf;
 	}
 
-	@JsonGetter(DEPICTION)
-	public String getDepiction() {
+	@JsonGetter(WebEntityFields.DEPICTION)
+	public WebResource getDepiction() {
 		return depiction;
 	}
 
 
-	@JsonSetter(DEPICTION)
-	public void setDepiction(String depiction) {
+	@JsonSetter(WebEntityFields.DEPICTION)
+	public void setDepiction(WebResource depiction) {
 		this.depiction = depiction;
 	}
 
@@ -269,19 +257,6 @@ public abstract class Entity {
 		this.sameAs = sameAs;
 	}
 
-
-	@Deprecated
-	@JsonIgnore
-	public void setFoafDepiction(String foafDepiction) {
-		setDepiction(foafDepiction);
-	}
-
-
-	public String getFoafDepiction() {
-		return getDepiction();
-	}
-
-
 	@Deprecated
 	public ObjectId getId() {
 		// TODO Auto-generated method stub
@@ -292,41 +267,6 @@ public abstract class Entity {
 	@Deprecated
 	@JsonIgnore
 	public void setId(ObjectId id) {
-		// TODO Auto-generated method stub
-	}
-
-
-	public Map<String, List<String>> getPrefLabel() {
-		//if not available
-		if (getPrefLabelStringMap() == null)
-			return null;
-		//if not transformed
-		if (tmpPrefLabel == null)
-			tmpPrefLabel = fillTmpMapToMap(getPrefLabelStringMap());
-
-		return tmpPrefLabel;
-	}
-
-	
-	/**
-	 * This method converts  Map<String, String> to Map<String, List<String>>
-	 * @param mapOfStrings map of strings
-	 */
-	protected Map<String, List<String>> fillTmpMapToMap(Map<String, String> mapOfStrings) {
-
-		Map<String, List<String>> tmpMap = null;
-		tmpMap = mapOfStrings.entrySet().stream().collect(Collectors.toMap(
-				entry -> entry.getKey(),
-				entry -> Collections.singletonList(entry.getValue()))
-		);
-
-		return tmpMap;
-	}
-
-
-	@Deprecated
-	@JsonIgnore
-	public void setPrefLabel(Map<String, List<String>> prefLabel) {
 		// TODO Auto-generated method stub
 	}
 
@@ -346,25 +286,16 @@ public abstract class Entity {
 		return this.entityIdentifier;
 	}
 
-	/*
-	 * Warning: Please note that for the serialization of this field where the given getter is used, only the id is serialized
-	 * which makes it impossible to deserialize the object from its serialization, since for the deserialization the given setter
-	 * is used and it needs the whole object, not just the id
-	 */
 
-	@JsonGetter(IS_SHOWN_BY)
-	public String getIsShownBy() {
-		if (referencedWebResource!=null)
-		{
-			return referencedWebResource.getId();
-		}
-		return null;
+	@JsonGetter(WebEntityFields.IS_SHOWN_BY)
+	public WebResource getIsShownBy() {
+		return isShownBy;
 	}
 
 
 	@JsonSetter(IS_SHOWN_BY)
 	public void setIsShownBy(WebResource resource) {
-		referencedWebResource=resource;
+		isShownBy =resource;
 	}
 
 
@@ -404,5 +335,23 @@ public abstract class Entity {
 	private void setEntityIdentifier(){
 		String[] splitArray = this.getAbout().split("/");
 		this.entityIdentifier =  splitArray[splitArray.length-1];
+	}
+
+	@JsonIgnore
+	public String getPayload() {
+		return payload;
+	}
+
+
+	public void setPayload(String payload) {
+		this.payload = payload;
+	}
+
+
+	public static Map<String, List<String>> toStringListMap(Map<String, String> stringMap){
+		return  stringMap.entrySet().stream().collect(Collectors.toMap(
+				Map.Entry::getKey,
+				entry -> Collections.singletonList(entry.getValue()))
+		);
 	}
 }

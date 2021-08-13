@@ -7,5 +7,5 @@
   "altLabel": {
     "en": [ "bath", "tub" ]
   },
-  "depiction": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/1rm60rt0t_rtbcwh.jpg/330px-1rm60rt0t_rtbcwh.jpg"
+  "depiction": {"id":"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/1rm60rt0t_rtbcwh.jpg/330px-1rm60rt0t_rtbcwh.jpg"}
 }

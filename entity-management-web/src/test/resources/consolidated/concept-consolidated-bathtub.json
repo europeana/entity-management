@@ -64,7 +64,10 @@
 					"större behållare avsedd för vatten där person kan bada"
 				]
 	},
-  "depiction": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/1rm60rt0t_rtbcwh.jpg/330px-1rm60rt0t_rtbcwh.jpg",
+  "depiction": {
+	  "id":"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/1rm60rt0t_rtbcwh.jpg/330px-1rm60rt0t_rtbcwh.jpg",
+	  "source": "http://valid-uri-for-testing"
+  },
   "sameAs": [ "http://www.wikidata.org/entity/Q152095"],
   "broader":["http://www.wikidata.org/entity/Q987767"]
 }

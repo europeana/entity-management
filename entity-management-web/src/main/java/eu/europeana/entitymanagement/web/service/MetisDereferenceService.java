@@ -12,6 +12,7 @@ import javax.xml.bind.Unmarshaller;
 
 import eu.europeana.entitymanagement.exception.MetisNotKnownException;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
@@ -122,7 +123,7 @@ public class MetisDereferenceService implements InitializingBean {
 		WebClient.Builder webClientBuilder = WebClient.builder();
 		if(config.useMetisProxy()){
 			String defaultHostHeader = new URL(config.getMetisBaseUrl()).getHost();
-			String proxyUrl = ensureTrailingSlash(config.getMetisProxyUrl());
+			String proxyUrl = ensureNoTrailingSlash(config.getMetisProxyUrl());
 
 			webClientBuilder.defaultHeader(HttpHeaders.HOST,
 					defaultHostHeader)
@@ -131,7 +132,7 @@ public class MetisDereferenceService implements InitializingBean {
 			logger.info("Using proxy for Metis dereferencing. defaultHostHeader={}; proxy={}",
 					defaultHostHeader, proxyUrl);
 		} else {
-			webClientBuilder.baseUrl(ensureTrailingSlash(config.getMetisBaseUrl()));
+			webClientBuilder.baseUrl(ensureNoTrailingSlash(config.getMetisBaseUrl()));
 		}
 
 		logger.info("Metis baseUrl={}", config.getMetisBaseUrl());
@@ -139,8 +140,7 @@ public class MetisDereferenceService implements InitializingBean {
 	}
 
 
-	private String ensureTrailingSlash(String url) {
-		return url.endsWith("/") ? url : url + "/";
+	private String ensureNoTrailingSlash(String url){
+    	return url.endsWith("/") ? StringUtils.substring(url, 0, url.length() - 1) : url;
 	}
-
 }
