@@ -1,6 +1,34 @@
 package eu.europeana.entitymanagement.definitions.model;
 
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ALT_LABEL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BEGIN;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BIOGRAPHICAL_INFORMATION;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DATE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DATE_OF_BIRTH;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DATE_OF_DEATH;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DATE_OF_ESTABLISHMENT;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DATE_OF_TERMINATION;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DEPICTION;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.END;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.GENDER;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_MET;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_PART;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HIDDEN_LABEL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IDENTIFIER;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_PART_OF;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_RELATED_TO;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_SHOWN_BY;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NAME;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NOTE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PLACE_OF_BIRTH;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PLACE_OF_DEATH;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PROFESSION_OR_OCCUPATION;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.WAS_PRESENT_AT;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -67,29 +95,27 @@ public class Agent extends Entity {
 
 	private List<String> exactMatch;
 
-
-	@JsonGetter(WebEntityFields.WAS_PRESENT_AT)
+	@JsonGetter(WAS_PRESENT_AT)
 	public List<String> getWasPresentAt() {
 		return this.wasPresentAt;
 	}
 
-
-	@JsonSetter(WebEntityFields.WAS_PRESENT_AT)
+	@JsonSetter(WAS_PRESENT_AT)
 	public void setWasPresentAt(List<String> wasPresentAt) {
 		this.wasPresentAt=wasPresentAt;
 	}
 
-	@JsonGetter(WebEntityFields.DATE)
+	@JsonGetter(DATE)
 	public List<String> getDate() {
 		return date;
 	}
 
-	@JsonSetter(WebEntityFields.DATE)
+	@JsonSetter(DATE)
 	public void setDate(List<String> date) {
 		this.date = date;
 	}
 
-	@JsonGetter(WebEntityFields.BEGIN)
+	@JsonGetter(BEGIN)
 	public List<String> getBegin() {
 		return begin;
 	}

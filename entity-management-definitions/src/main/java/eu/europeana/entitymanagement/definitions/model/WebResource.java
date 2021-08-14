@@ -4,8 +4,11 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
-
 import dev.morphia.annotations.Embedded;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SOURCE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.THUMBNAIL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 
@@ -13,7 +16,8 @@ import java.util.Objects;
 
 @Embedded
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({WebEntityFields.ID, WebEntityFields.TYPE, WebEntityFields.SOURCE, WebEntityFields.THUMBNAIL})
+@JsonPropertyOrder({ID, TYPE, SOURCE, THUMBNAIL})
+
 public class WebResource {
 
     public static final String type = "WebResource";
@@ -38,17 +42,17 @@ public class WebResource {
 	    this.thumbnail = thumbnail;
     }
 
-    @JsonGetter(WebEntityFields.ID)
+    @JsonGetter(ID)
     public String getId() {
         return id;
     }
 
-    @JsonGetter(WebEntityFields.SOURCE)
+    @JsonGetter(SOURCE)
     public String getSource() {
         return source;
     }
 
-    @JsonGetter(WebEntityFields.THUMBNAIL)
+    @JsonGetter(THUMBNAIL)
     public String getThumbnail() {
         return thumbnail;
     }
@@ -57,21 +61,20 @@ public class WebResource {
     public String getType() {
         return type;
     }
-
     
-    @JsonSetter(WebEntityFields.THUMBNAIL)
+    @JsonSetter(THUMBNAIL)
     public void setThumbnail(String thumbnailParam) {
         thumbnail=thumbnailParam;
     }
 
     
-    @JsonSetter(WebEntityFields.SOURCE)
+    @JsonSetter(SOURCE)
     public void setSource(String sourceParam) {
         source=sourceParam;
     }
 
     
-    @JsonSetter(WebEntityFields.ID)
+    @JsonSetter(ID)
     public void setId(String idParam) {
         id=idParam;
     }

@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.web;
 
+import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
@@ -13,6 +14,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import org.hamcrest.Matchers;
 
 
 public class EntityRetrievalIT extends BaseWebControllerTest {
@@ -109,7 +112,48 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
                 .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())));
     }
 
+    @Test
+    public void retrieveAgentExternalSchemaOrgShouldBeSuccessful() throws Exception {
 
+    	String europeanaMetadata = loadFile(AGENT_REGISTER_DAVINCI_JSON);
+        String metisResponse = loadFile(AGENT_DA_VINCI_XML);
+        EntityRecord entityRecord = createEntity(europeanaMetadata, metisResponse, AGENT_DA_VINCI_URI);
+
+        String requestPath = getEntityRequestPath(entityRecord.getEntityId());
+        ResultActions resultActions = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".schema.jsonld")
+        		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.@id", is(entityRecord.getEntityId())));
+
+        checkAllowHeaderForGET(resultActions);
+
+        for (String sameAsElem : entityRecord.getEntity().getSameAs()) {
+        	resultActions.andExpect(jsonPath("$.sameAs", Matchers.hasItem(sameAsElem)));
+        }
+    }
+
+    @Test
+    public void retrieveAgentInternalSchemaOrgShouldBeSuccessful() throws Exception {
+    	String europeanaMetadata = loadFile(AGENT_REGISTER_DAVINCI_JSON);
+        String metisResponse = loadFile(AGENT_DA_VINCI_XML);
+        EntityRecord entityRecord = createEntity(europeanaMetadata, metisResponse, AGENT_DA_VINCI_URI);
+
+        String requestPath = getEntityRequestPath(entityRecord.getEntityId());
+        ResultActions resultActions = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".schema.jsonld")
+        		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "internal")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.@id", is(entityRecord.getEntityId())));
+
+        checkAllowHeaderForGET(resultActions);
+
+        for (String sameAsElem : entityRecord.getEntity().getSameAs()) {
+        	resultActions.andExpect(jsonPath("$.sameAs", Matchers.hasItem(sameAsElem)));
+        }
+    }
+
+    //
     @Test
     public void retrieveOrganizationJsonExternalShouldBeSuccessful() throws Exception {
         String europeanaMetadata = loadFile(ORGANIZATION_REGISTER_BNF_JSON);

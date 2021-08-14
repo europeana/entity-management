@@ -285,6 +285,25 @@ public class EMController extends BaseRest {
 	return createResponse(request, profile, type, languages, identifier, FormatTypes.xml,
 			HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML);
     }
+    
+	@ApiOperation(value = "Retrieve a known entity", nickname = "getEntitySchemaJsonLd", response = java.lang.Void.class)
+    @GetMapping(value = { "/{type}/base/{identifier}.schema.jsonld", "/{type}/{identifier}.schema.jsonld" },
+    			produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<String> getEntitySchemaJsonLd(
+	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
+	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
+	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_LANGUAGE, required = false) String languages,
+	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
+	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
+			HttpServletRequest request)
+				throws EuropeanaApiException, HttpException {
+		if (emConfig.isAuthEnabled()) {
+			verifyReadAccess(request);
+		}
+	return createResponse(request, profile, type, languages, identifier, FormatTypes.schema,
+			HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
+
+    }
 
     @ApiOperation(value = "Register a new entity", nickname = "registerEntity", response = java.lang.Void.class)
     @PostMapping(value = "/", produces = {MediaType.APPLICATION_JSON_VALUE, HttpHeaders.CONTENT_TYPE_JSONLD})
