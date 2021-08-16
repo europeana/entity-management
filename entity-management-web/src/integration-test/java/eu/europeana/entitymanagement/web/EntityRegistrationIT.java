@@ -75,7 +75,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         checkCommonResponseHeaders(results);
     }
 
-    @Test
+//    @Test
     public void registerOrganizationShouldBeSuccessful() throws Exception {
         ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
                 .content(loadFile(ORGANIZATION_REGISTER_BNF_JSON))
