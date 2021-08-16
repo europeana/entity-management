@@ -21,9 +21,7 @@ import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 
 public class ZohoOrganizationConverter {
 
-    private static final int LANGUAGE_CODE_LENGTH = 5;
-    private static final int SAME_AS_CODE_LENGTH = 2;
-
+   
     public Organization convertToOrganizationEntity(Record record) {
         Organization org = new Organization();
         org.setAbout(ZohoConstants.URL_ORGANIZATION_PREFFIX + Long.toString(record.getId()));
@@ -72,7 +70,7 @@ public class ZohoOrganizationConverter {
     
     private Map<String, List<String>> getAllAltLabel(Record record) {
         Map<String, List<String>> altLabelMap = new HashMap<>();
-        for(int i = 0; i < LANGUAGE_CODE_LENGTH; i++) {
+        for(int i = 0; i < ZohoConstants.LANGUAGE_CODE_LENGTH; i++) {
             String label = ZohoUtils.stringFieldSupplier(record.getKeyValue(ZohoConstants.ALTERNATIVE_FIELD+ "_" + i));
             if (label != null) {
                 String lang = ZohoConstants.LANG_ALTERNATIVE_FIELD + "_" + i;
@@ -85,7 +83,7 @@ public class ZohoOrganizationConverter {
     
     private List<String> getAllSameAs(Record record) {
         List<String> sameAsList = new ArrayList<>();
-        for(int i = 0; i < SAME_AS_CODE_LENGTH; i++) {
+        for(int i = 0; i < ZohoConstants.SAME_AS_CODE_LENGTH; i++) {
             String sameAs = ZohoUtils.stringFieldSupplier(record.getKeyValue(ZohoConstants.SAME_AS_FIELD + "_" + i));
             if (sameAs != null) {
                 sameAsList.add(sameAs);

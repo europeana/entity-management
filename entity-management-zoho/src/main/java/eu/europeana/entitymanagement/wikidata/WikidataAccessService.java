@@ -13,16 +13,13 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
 import eu.europeana.entitymanagement.definitions.model.Address;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.web.xml.model.WikidataOrganization;
 import eu.europeana.entitymanagement.web.xml.model.XmlOrganizationImpl;
-import eu.europeana.entitymanagement.zoho.utils.Constants;
 import eu.europeana.entitymanagement.zoho.utils.WikidataAccessException;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 
@@ -35,6 +32,8 @@ import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 public class WikidataAccessService {
     private static final Logger LOGGER = LoggerFactory.getLogger(WikidataAccessService.class);
     private final WikidataAccessDao wikidataAccessDao;
+    public static final String WIKIDATA_BASE_URL = "http://www.wikidata.org/entity/Q";
+    
 
     public WikidataAccessService(WikidataAccessDao wikidataAccessDao) {
         this.wikidataAccessDao = wikidataAccessDao;
@@ -45,7 +44,7 @@ public class WikidataAccessService {
     }
 
     public URI buildOrganizationUri(String organizationId) {
-        String contactsSearchUrl = String.format("%s%s", Constants.WIKIDATA_BASE_URL, organizationId);
+        String contactsSearchUrl = String.format("%s%s", WIKIDATA_BASE_URL, organizationId);
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(contactsSearchUrl);
         return builder.build().encode().toUri();
     }
