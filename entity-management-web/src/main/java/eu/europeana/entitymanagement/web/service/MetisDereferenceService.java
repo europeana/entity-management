@@ -79,30 +79,42 @@ public class MetisDereferenceService implements InitializingBean {
      * Dereferences the entity with the given id value.
      *
      * @param id external ID for entity
+     * @param entityType the type of the entity
      * @return An optional containing the de-referenced entity, or an empty optional
      *         if no match found.
 	 * @throws Exception 
 	 * @throws ZohoException 
      */
-    public Entity dereferenceEntityById(String id, String entityType) throws ZohoException, Exception {
-		if (EntityTypes.Organization.getEntityType().equals(entityType)){
-			Optional<Record> zohoOrganization = zohoAccessConfiguration.getZohoAccessClient().getZohoRecordOrganizationById(id);
-			Organization org = null;
-			if (zohoOrganization.isPresent()) {
-			        org = zohoOrganizationConverter.convertToOrganizationEntity(zohoOrganization.get());
-			}
-			return org;
-		}
-		else
-		{
-	    	String metisResponseBody = fetchMetisResponse(id);
-			XmlBaseEntityImpl<?> metisResponse = parseMetisResponse(unmarshaller.get(), id, metisResponseBody);
-			if(metisResponse == null){
-				throw new MetisNotKnownException("Unsuccessful Metis dereferenciation for externalId=" + id);
-			}
-			return metisResponse.toEntityModel();
-		}
-    }
+        public Entity dereferenceEntityById(String id, String entityType) throws ZohoException, Exception {
+            if(id == null) {
+                return null;
+            }
+            
+            if (EntityTypes.Organization.getEntityType().equals(entityType)) {
+                String zohoId;
+                if(!id.contains("/")) {
+                    zohoId = id;
+                }else {
+                    String[] uriParts = id.split("/");
+                    zohoId = uriParts[uriParts.length -1];     
+                }
+                 
+                Optional<Record> zohoOrganization = zohoAccessConfiguration.getZohoAccessClient()
+                        .getZohoRecordOrganizationById(zohoId);
+                Organization org = null;
+                if (zohoOrganization.isPresent()) {
+                    org = zohoOrganizationConverter.convertToOrganizationEntity(zohoOrganization.get());
+                }
+                return org;
+            } else {
+                String metisResponseBody = fetchMetisResponse(id);
+                XmlBaseEntityImpl<?> metisResponse = parseMetisResponse(unmarshaller.get(), id, metisResponseBody);
+                if (metisResponse == null) {
+                    throw new MetisNotKnownException("Unsuccessful Metis dereferenciation for externalId=" + id);
+                }
+                return metisResponse.toEntityModel();
+            }
+        }
 
 
     String fetchMetisResponse(String externalId) {
