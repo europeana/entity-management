@@ -99,7 +99,7 @@ public class WikidataAccessService {
 	    if (StringUtils.isEmpty(organization.getLogo())) {
 	    	organization.setLogo(wikidataOrganizationEntity.getLogo());
 	    }
-	    if (StringUtils.isEmpty(organization.getDepiction())) {
+	    if (organization.getDepiction() == null) {
 	    	organization.setDepiction(wikidataOrganizationEntity.getDepiction());
 	    }
 	    if (StringUtils.isEmpty(organization.getHomepage())) {

@@ -28,7 +28,9 @@
   <dependency>
       <groupId>jakarta.xml.bind</groupId>
       <artifactId>jakarta.xml.bind-api</artifactId>
+      <!-- 
       <version>${version.jakarta}</version>
+       -->
   </dependency>
   <dependency>
       <groupId>com.sun.xml.bind</groupId>
@@ -40,12 +42,12 @@
 	<dependency>
 		<groupId>eu.europeana.api</groupId>
 		<artifactId>entity-management-definitions</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>${project.version}</version>
 	</dependency>
 	<dependency>
 		<groupId>eu.europeana.api</groupId>
 		<artifactId>entity-management-common</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>${project.version}</version>
 	</dependency>
 	<dependency>
 		<groupId>org.junit.jupiter</groupId>
@@ -71,7 +73,7 @@
 	<dependency>
     	<groupId>net.sf.saxon</groupId>
    		<artifactId>Saxon-HE</artifactId>
-    	<version>10.5</version>
+    	<version>${version.saxon-he}</version>
 	</dependency>
     
 	</dependencies>

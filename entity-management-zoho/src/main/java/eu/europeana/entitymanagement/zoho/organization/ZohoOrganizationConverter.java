@@ -22,7 +22,7 @@ public class ZohoOrganizationConverter {
         org.setAbout(ZohoConstants.URL_ORGANIZATION_PREFFIX + Long.toString(record.getId()));
         org.setIdentifier(ZohoUtils.stringListSupplier(Arrays.asList(new String[]{Long.toString(record.getId())})));
         String isoLanguage = toIsoLanguage(ZohoUtils.stringFieldSupplier(record.getKeyValue(ZohoConstants.LANG_ORGANIZATION_NAME_FIELD)));
-        org.setPrefLabelStringMap(ZohoUtils.createMap(isoLanguage, ZohoUtils.stringFieldSupplier(record.getKeyValue(ZohoConstants.ACCOUNT_NAME_FIELD))));
+        org.setPrefLabel(ZohoUtils.createMap(isoLanguage, ZohoUtils.stringFieldSupplier(record.getKeyValue(ZohoConstants.ACCOUNT_NAME_FIELD))));
         String isoLanguage1 = toIsoLanguage(ZohoUtils.stringFieldSupplier(record.getKeyValue(ZohoConstants.LANG_ALTERNATIVE_FIELD)));
         org.setAltLabel(ZohoUtils.createMapWithLists(isoLanguage1, ZohoUtils.stringFieldSupplier(record.getKeyValue(ZohoConstants.ALTERNATIVE_FIELD))));
 
