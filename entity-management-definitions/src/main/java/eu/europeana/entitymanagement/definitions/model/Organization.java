@@ -236,7 +236,6 @@ public class Organization extends Entity {
 	}
 
 	
-	@Deprecated
 	@JsonSetter(GEOGRAPHIC_LEVEL)
 	public void setGeographicLevel(Map<String, String> geographicLevel) {
 		this.geographicLevel = geographicLevel;
@@ -288,13 +287,13 @@ public class Organization extends Entity {
 		this.hasGeo = hasGeo;
 	}
 
-	public Map<String, String> getGeographicLevelStringMap() {
-		return geographicLevel;
-	}
-
-	public void setGeographicLevelStringMap(Map<String, String> geographicLevel) {
-		this.geographicLevel = geographicLevel;
-	}
+//	public Map<String, String> getGeographicLevelStringMap() {
+//		return geographicLevel;
+//	}
+//
+//	public void setGeographicLevelStringMap(Map<String, String> geographicLevel) {
+//		this.geographicLevel = geographicLevel;
+//	}
 
 	
 	public String getType() {
