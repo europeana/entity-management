@@ -53,6 +53,8 @@ public class MetisDereferenceService implements InitializingBean {
 	private final EntityManagementConfiguration config;
 	
 	private final ZohoAccessConfiguration zohoAccessConfiguration;
+	ZohoOrganizationConverter zohoOrganizationConverter = new ZohoOrganizationConverter();
+        
 
 	/**
 	 * Create a separate JAXB unmarshaller for each thread
@@ -83,18 +85,13 @@ public class MetisDereferenceService implements InitializingBean {
 	 * @throws ZohoException 
      */
     public Entity dereferenceEntityById(String id, String entityType) throws ZohoException, Exception {
-		if (entityType!=null && EntityTypes.valueOf(entityType).equals(EntityTypes.Organization)){
-		    ZohoOrganizationConverter zohoOrganizationConverter = new ZohoOrganizationConverter();
+		if (EntityTypes.Organization.getEntityType().equals(entityType)){
 			Optional<Record> zohoOrganization = zohoAccessConfiguration.getZohoAccessClient().getZohoRecordOrganizationById(id);
 			Organization org = null;
 			if (zohoOrganization.isPresent()) {
-				org = zohoOrganizationConverter.convertToOrganizationEntity(zohoOrganization.get());
+			        org = zohoOrganizationConverter.convertToOrganizationEntity(zohoOrganization.get());
 			}
 			return org;
-			/*
-			 * TODO: add the call to the WikidataAccessService service and merge the entities as required
-			 */
-			
 		}
 		else
 		{
