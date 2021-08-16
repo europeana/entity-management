@@ -1,40 +1,23 @@
 package eu.europeana.entitymanagement.web.service;
 
-import eu.europeana.api.commons.error.EuropeanaApiException;
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.config.AppConfig;
-import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
-import eu.europeana.entitymanagement.definitions.model.Agent;
-import eu.europeana.entitymanagement.definitions.model.Concept;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.Organization;
-import eu.europeana.entitymanagement.definitions.model.Place;
-import eu.europeana.entitymanagement.definitions.model.Timespan;
-import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
-import eu.europeana.entitymanagement.exception.HttpBadRequestException;
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.METIS_DEREF_PATH;
+import static eu.europeana.entitymanagement.web.MetisDereferenceUtils.parseMetisResponse;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Optional;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import eu.europeana.entitymanagement.exception.MetisNotKnownException;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.web.xml.model.XmlAgentImpl;
-import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
-import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
-import eu.europeana.entitymanagement.web.xml.model.XmlOrganizationImpl;
-import eu.europeana.entitymanagement.web.xml.model.XmlPlaceImpl;
-import eu.europeana.entitymanagement.web.xml.model.XmlTimespanImpl;
-import eu.europeana.entitymanagement.wikidata.WikidataAccessService;
-import eu.europeana.entitymanagement.zoho.organization.ZohoAccessConfiguration;
-import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
-import eu.europeana.entitymanagement.zoho.utils.ZohoException;
-
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -43,14 +26,19 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.zoho.crm.api.record.Record;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Optional;
-
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.METIS_DEREF_PATH;
-import static eu.europeana.entitymanagement.web.MetisDereferenceUtils.parseMetisResponse;
+import eu.europeana.api.commons.error.EuropeanaApiException;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.config.AppConfig;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
+import eu.europeana.entitymanagement.exception.HttpBadRequestException;
+import eu.europeana.entitymanagement.exception.MetisNotKnownException;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
+import eu.europeana.entitymanagement.zoho.organization.ZohoAccessConfiguration;
+import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
+import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 
 /**
  * Handles de-referencing entities from Metis.
@@ -160,7 +148,7 @@ public class MetisDereferenceService implements InitializingBean {
 		WebClient.Builder webClientBuilder = WebClient.builder();
 		if(config.useMetisProxy()){
 			String defaultHostHeader = new URL(config.getMetisBaseUrl()).getHost();
-			String proxyUrl = ensureTrailingSlash(config.getMetisProxyUrl());
+			String proxyUrl = ensureNoTrailingSlash(config.getMetisProxyUrl());
 
 			webClientBuilder.defaultHeader(HttpHeaders.HOST,
 					defaultHostHeader)
@@ -169,7 +157,7 @@ public class MetisDereferenceService implements InitializingBean {
 			logger.info("Using proxy for Metis dereferencing. defaultHostHeader={}; proxy={}",
 					defaultHostHeader, proxyUrl);
 		} else {
-			webClientBuilder.baseUrl(ensureTrailingSlash(config.getMetisBaseUrl()));
+			webClientBuilder.baseUrl(ensureNoTrailingSlash(config.getMetisBaseUrl()));
 		}
 
 		logger.info("Metis baseUrl={}", config.getMetisBaseUrl());
@@ -177,8 +165,7 @@ public class MetisDereferenceService implements InitializingBean {
 	}
 
 
-	private String ensureTrailingSlash(String url) {
-		return url.endsWith("/") ? url : url + "/";
+	private String ensureNoTrailingSlash(String url){
+    	return url.endsWith("/") ? StringUtils.substring(url, 0, url.length() - 1) : url;
 	}
-
 }

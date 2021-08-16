@@ -4,94 +4,94 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
-
 import dev.morphia.annotations.Embedded;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SOURCE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.THUMBNAIL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
+
+import java.util.Objects;
 
 @Embedded
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({WebEntityFields.ID, WebEntityFields.SOURCE, WebEntityFields.THUMBNAIL})
+@JsonPropertyOrder({ID, TYPE, SOURCE, THUMBNAIL})
+
 public class WebResource {
 
-    public WebResource(WebResource copy) {
-		this.source = copy.getSource();
-		this.id = copy.getId();
-		this.thumbnail = copy.getThumbnail();
-		this.type = copy.getType();
-	}
+    public static final String type = "WebResource";
+    private String source;
+    private String id;
+    private String thumbnail;
 
 	public WebResource() {
         super();
         // TODO Auto-generated constructor stub
     }
 
-    String source;
-    String id;
-    String thumbnail;
-    String type;
+    public WebResource(WebResource copy) {
+        this.source = copy.getSource();
+        this.id = copy.getId();
+        this.thumbnail = copy.getThumbnail();
+    }
 
-    @JsonGetter(WebEntityFields.ID)
+    public WebResource(String id, String source, String thumbnail){
+	    this.id = id;
+	    this.source = source;
+	    this.thumbnail = thumbnail;
+    }
+
+    @JsonGetter(ID)
     public String getId() {
         return id;
     }
 
-    @JsonGetter(WebEntityFields.SOURCE)
+    @JsonGetter(SOURCE)
     public String getSource() {
         return source;
     }
 
-    @JsonGetter(WebEntityFields.THUMBNAIL)
+    @JsonGetter(THUMBNAIL)
     public String getThumbnail() {
         return thumbnail;
     }
 
-    
     @JsonGetter(WebEntityFields.TYPE)
     public String getType() {
         return type;
     }
-
     
-    @JsonSetter(WebEntityFields.THUMBNAIL)
+    @JsonSetter(THUMBNAIL)
     public void setThumbnail(String thumbnailParam) {
         thumbnail=thumbnailParam;
     }
 
     
-    @JsonSetter(WebEntityFields.SOURCE)
+    @JsonSetter(SOURCE)
     public void setSource(String sourceParam) {
         source=sourceParam;
     }
 
     
-    @JsonSetter(WebEntityFields.TYPE)
-    public void setType(String typeParam) {
-        type=typeParam;
-    }
-
-    
-    @JsonSetter(WebEntityFields.ID)
+    @JsonSetter(ID)
     public void setId(String idParam) {
         id=idParam;
     }
 
-    
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (obj == null || obj.getClass() != this.getClass()) {
-            return false;
-        }
 
-        WebResource guest = (WebResource) obj;
-        return (id == guest.getId() || (id!=null && id.equals(guest.getId()))) &&
-            (thumbnail == guest.getThumbnail() || (thumbnail!=null && thumbnail.equals(guest.getThumbnail()))) &&
-            (source == guest.getSource() || (source!=null && source.equals(guest.getSource())));
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
+        WebResource that = (WebResource) o;
+
+        if (!Objects.equals(source, that.source)) return false;
+        if (!id.equals(that.id)) return false;
+        return Objects.equals(thumbnail, that.thumbnail);
     }
 
-    
     public int hashCode() {
         final int prime = 31;
         int result = 1;

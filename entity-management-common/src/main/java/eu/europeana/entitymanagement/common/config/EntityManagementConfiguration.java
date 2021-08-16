@@ -27,6 +27,8 @@ public class EntityManagementConfiguration  {
     @Value("${europeana.apikey.jwttoken.signaturekey}")
     private String apiKeyPublicKey;
 
+    @Value("${europeana.thumbnail.urlPrefix}")
+    private String thumbnailBaseUrl;
 
     @Value("${europeana.apikey.serviceurl}")
     private String apiKeyUrl;
@@ -195,5 +197,9 @@ public String getIndexingSolrUrl() {
 
     public String getMetisProxyUrl() {
         return metisProxyUrl;
+    }
+
+    public String getThumbnailBaseUrl() {
+        return thumbnailBaseUrl;
     }
 }

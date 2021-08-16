@@ -42,7 +42,7 @@ public class MetisDereferenceServiceTest {
 	//check prefLabels
 	assertNotNull(entity.getPrefLabel());
 	assertEquals(23, entity.getPrefLabel().size());
-	assertEquals("bathtub", entity.getPrefLabelStringMap().get("en"));
+	assertEquals("bathtub", entity.getPrefLabel().get("en"));
 
 	//check altLabels
 	assertNotNull(entity.getAltLabel());

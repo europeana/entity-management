@@ -92,49 +92,41 @@ public class Organization extends Entity {
 	private String postBox;
 	private String hasGeo;
 	private Address address;
-
 	
 	@JsonGetter(DESCRIPTION)
 	public Map<String, String> getDescription() {
 		return description;
 	}
 
-	
 	@JsonSetter(DESCRIPTION)
 	public void setDescription(Map<String, String> dcDescription) {
 		this.description = dcDescription;
 	}
-
 	
 	@JsonGetter(ACRONYM)
 	public Map<String, List<String>> getAcronym() {
 		return acronym;
 	}
-
 	
 	@JsonSetter(ACRONYM)
 	public void setAcronym(Map<String, List<String>> acronym) {
 		this.acronym = acronym;
 	}
-
 	
 	@JsonGetter(EUROPEANA_ROLE)
 	public Map<String, List<String>> getEuropeanaRole() {
 		return europeanaRole;
 	}
-
 	
 	@JsonSetter(EUROPEANA_ROLE)
 	public void setEuropeanaRole(Map<String, List<String>> europeanaRole) {
 		this.europeanaRole = europeanaRole;
 	}
-
 	
 	@JsonGetter(FOAF_PHONE)
 	public List<String> getPhone() {
 		return phone;
 	}
-
 	
 	@JsonSetter(FOAF_PHONE)
 	public void setPhone(List<String> phone) {

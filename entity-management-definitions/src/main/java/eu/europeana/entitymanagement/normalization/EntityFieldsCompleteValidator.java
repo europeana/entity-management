@@ -18,6 +18,7 @@ import javax.annotation.Resource;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import eu.europeana.entitymanagement.definitions.model.WebResource;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +27,7 @@ import eu.europeana.entitymanagement.definitions.exceptions.EntityFieldAccessExc
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
+import org.springframework.util.StringUtils;
 
 @Component
 public class EntityFieldsCompleteValidator implements ConstraintValidator<EntityFieldsCompleteValidatorInterface, Entity> {
@@ -88,7 +90,9 @@ public class EntityFieldsCompleteValidator implements ConstraintValidator<Entity
 				else if (fieldType.isAssignableFrom(String.class)) {
 				        //Text or Keyword, not multilingual
 					returnValueLocal = validateStringValue(context, field, (String)fieldValue, null);
-				}	
+				} else if(WebResource.class.isAssignableFrom(fieldType)){
+				    returnValueLocal = validateWebResourceField(context, field, (WebResource)fieldValue);
+                }
 				
 				//update global return value
 				returnValue = returnValue && returnValueLocal;
@@ -338,6 +342,27 @@ public class EntityFieldsCompleteValidator implements ConstraintValidator<Entity
                     }
                 }
 		return isValid;		
+    }
+
+    private boolean validateWebResourceField(ConstraintValidatorContext context, Field field, WebResource webResource){
+        boolean isValid = true;
+
+        if(webResource.getId() == null || !validateURIField(context, field, webResource.getId())){
+            addConstraint(context, "Field " + field.getName() + " has an invalid id value");
+            isValid = false;
+        }
+        if(webResource.getSource() == null || !validateURIField(context, field, webResource.getSource())){
+            addConstraint(context, "Field " + field.getName() + " has an invalid source value");
+            isValid = false;
+        }
+
+        // thumbnail can be empty
+        if(StringUtils.hasLength(webResource.getThumbnail())
+                && !validateURIField(context, field, webResource.getThumbnail())){
+            addConstraint(context, "Field " + field.getName() + " has an invalid thumbnail value");
+            isValid = false;
+        }
+        return isValid;
     }
     
     private void addConstraint(ConstraintValidatorContext context, String messageTemplate) {

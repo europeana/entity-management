@@ -8,6 +8,7 @@ import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
 import eu.europeana.entitymanagement.definitions.model.*;
+import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
 import eu.europeana.entitymanagement.exception.EntityAlreadyExistsException;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
@@ -78,8 +79,8 @@ public class EntityRecordService {
 	}
 
 
-    public List<String> retrieveMultipleByEntityId(List<String> entityIds){
-			return entityRecordRepository.getExistingEntityIds(entityIds);
+    public List<EntityIdDisabledStatus> retrieveMultipleByEntityId(List<String> entityIds, boolean excludeDisabled){
+			return entityRecordRepository.getEntityIds(entityIds, excludeDisabled);
 		}
     /**
      * Gets coreferenced entity with the given id (sameAs or exactMatch value in the
@@ -167,6 +168,11 @@ public class EntityRecordService {
 
 		entityRecord.setEntityId(entityId);
 		entity.setEntityId(entityId);
+		/*
+		 * sameAs will be replaced during consolidation; however we set this here to prevent duplicate
+		 * registrations if consolidation fails
+		 */
+		entity.setSameAs(Collections.singletonList(entityCreationRequest.getId()));
 		entityRecord.setEntity(entity);
 
 		Entity europeanaProxyMetadata = EntityObjectFactory.createEntityObject(type);
@@ -210,7 +216,12 @@ public class EntityRecordService {
 	String entityId = generateEntityId(entity.getType(), null);
         entityRecord.setEntityId(entityId);
         entity.setEntityId(entityId);
-        entityRecord.setEntity(entity);
+		/*
+		 * sameAs will be replaced during consolidation; however we set this here to prevent duplicate
+		 * registrations if consolidation fails
+		 */
+		entity.setSameAs(Collections.singletonList(entityCreationRequest.getId()));
+		entityRecord.setEntity(entity);
 
 
         Entity europeanaProxyMetadata = EntityObjectFactory.createEntityObject(metisResponse.getType());
@@ -247,8 +258,7 @@ public class EntityRecordService {
 	 * @param entityCreationRequest entity creation request
 	 */
 	private void copyPreviewMetadata(Entity entity, EntityPreview entityCreationRequest) {
-			entity.setSameAs(List.of(entityCreationRequest.getId()));
-			entity.setPrefLabelStringMap(entityCreationRequest.getPrefLabel());
+			entity.setPrefLabel(entityCreationRequest.getPrefLabel());
 			entity.setAltLabel(entityCreationRequest.getAltLabel());
 			entity.setDepiction(entityCreationRequest.getDepiction());
 	}
@@ -597,7 +607,16 @@ public class EntityRecordService {
 			} else if (Map.class.isAssignableFrom(fieldType)) {
 					combineEntities(consolidatedEntity, primary, secondary, prefLabelsForAltLabels, field, fieldName, accumulate);
 
+			} else if(WebResource.class.isAssignableFrom(fieldType)) {
+				WebResource primaryWebResource = (WebResource) primary.getFieldValue(field);
+				WebResource secondaryWebResource = (WebResource) secondary.getFieldValue(field);
+				if (primaryWebResource == null && secondaryWebResource != null) {
+					consolidatedEntity.setFieldValue(field, new WebResource(secondaryWebResource));
+				} else if (primaryWebResource != null) {
+					consolidatedEntity.setFieldValue(field, new WebResource(primaryWebResource));
+				}
 			}
+
 
 				}
 
@@ -607,6 +626,18 @@ public class EntityRecordService {
 		    throw new EntityUpdateException("Metadata consolidation failed to access required properties!", e);
 
 		}
+
+		// Add external proxy id to consolidated entity sameAs
+		String externalProxyId = secondary.getEntityId();
+		List<String> consolidatedEntitySameAs = consolidatedEntity.getSameAs();
+
+		if (consolidatedEntitySameAs == null) {
+			consolidatedEntity.setSameAs(Collections.singletonList(externalProxyId));
+		}
+		else if (!consolidatedEntitySameAs.contains(externalProxyId)) {
+			consolidatedEntitySameAs.add(externalProxyId);
+		}
+
 		return consolidatedEntity;
 	}
 
