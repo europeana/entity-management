@@ -90,7 +90,7 @@ public class MetisDereferenceService implements InitializingBean {
                 return null;
             }
             
-            if (EntityTypes.Organization.getEntityType().equals(entityType)) {
+            if (isZohoOrganization(id, entityType)) {
                 String zohoId;
                 if(!id.contains("/")) {
                     zohoId = id;
@@ -115,6 +115,10 @@ public class MetisDereferenceService implements InitializingBean {
                 return metisResponse.toEntityModel();
             }
         }
+
+    boolean isZohoOrganization(String id, String entityType) {
+        return EntityTypes.Organization.getEntityType().equals(entityType) && id.contains("crm.zoho.com");
+    }
 
 
     String fetchMetisResponse(String externalId) {
