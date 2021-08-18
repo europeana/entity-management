@@ -166,7 +166,7 @@
 
 		<dependency>
 			<groupId>eu.europeana.corelib</groupId>
-			<artifactId>corelib-utils</artifactId>
+			<artifactId>corelib-schemaorg</artifactId>
 			<version>${version.corelib}</version>
 		</dependency>
 
