@@ -34,6 +34,7 @@ public class BaseMvcTestUtils {
     public static final String AGENT_REGISTER_STALIN_JSON = "/content/agent_register_stalin.json";
     public static final String AGENT_REGISTER_JAN_VERMEER = "/content/agent_register_jan_vermeer.json";
     public static final String ORGANIZATION_REGISTER_BNF_JSON = "/content/organization_register_bnf.json";
+    public static final String ORGANIZATION_REGISTER_BNF_ZOHO_JSON = "/content/organization_register_zoho_bnf.json";
     public static final String PLACE_REGISTER_PARIS_JSON = "/content/place_register_paris.json";
     public static final String TIMESPAN_REGISTER_1ST_CENTURY_JSON = "/content/timespan_register_1st_century.json";
     
