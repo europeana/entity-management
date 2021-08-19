@@ -16,7 +16,7 @@ import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 
 @SpringBootTest(classes = {ZohoOrganizationConverter.class, ZohoAccessConfiguration.class})
-//@Disabled("Excluded from automated runs as this depends on Zoho.")
+@Disabled("Excluded from automated runs as this depends on Zoho.")
 public class ZohoAccessTest {
 
 	  @Qualifier(AppConfigConstants.BEAN_ZOHO_ACCESS_CONFIGURATION)
