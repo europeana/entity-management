@@ -9,6 +9,7 @@
         <module>entity-management-batch</module>
       <module>entity-management-enrichment</module>
     <module>entity-management-solr</module>
+     <module>entity-management-zoho</module>
   </modules>
 
     <parent>
@@ -65,7 +66,10 @@
         <version.javax.validation>2.0.1.Final</version.javax.validation>
         <version.solrj>7.7.2</version.solrj>
         <apache.commons.validator.version>1.7</apache.commons.validator.version>
-
+		<version.com.zoho.crm.java-sdk>3.0.1</version.com.zoho.crm.java-sdk>
+		<version.jakarta>2.3.3</version.jakarta>
+		<version.jaxb>2.3.3</version.jaxb>
+		<version.saxon-he>10.5</version.saxon-he>
     </properties>
 
     <dependencyManagement>

@@ -3,26 +3,28 @@ package eu.europeana.entitymanagement.web.service.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import eu.europeana.entitymanagement.web.service.MetisDereferenceService;
 import javax.annotation.Resource;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import eu.europeana.entitymanagement.EntityManagementApp;
+import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.model.Concept;
+import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.web.service.MetisDereferenceService;
+import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 
 /**
  * JUnit test for testing the EMControllerTest class
  */
-@ContextConfiguration(classes = { EntityManagementApp.class})
-@ExtendWith(SpringExtension.class)
+//EntityManagementApp.class
+//@ContextConfiguration(classes = { JobLauncherConfig.class, EntityManagementConfiguration.class, AppConfig.class, EnrichmentConfig.class, ValidatorConfig.class,
+//        SerializationConfig.class, MetisDereferenceService.class, })
+//@ExtendWith(SpringExtension.class)
 @Disabled("Excluded from automated runs as this depends on Metis")
-public class MetisDereferenceServiceTest {
+public class MetisDereferenceServiceTest extends AbstractIntegrationTest {
 
     @Resource(name=AppConfig.BEAN_METIS_DEREF_SERVICE)
     MetisDereferenceService metisDerefService;
@@ -32,7 +34,7 @@ public class MetisDereferenceServiceTest {
 
 	//bathtube
 	String entityId = "http://www.wikidata.org/entity/Q152095";
-	Concept entity = (Concept) metisDerefService.dereferenceEntityById(entityId);
+	Concept entity = (Concept) metisDerefService.dereferenceEntityById(entityId, "Concept");
 	assertNotNull(entity);
 	assertEquals(entityId, entity.getEntityId());
 	
@@ -52,10 +54,29 @@ public class MetisDereferenceServiceTest {
 	String broader = entity.getBroader().get(0);
 	assertEquals("http://www.wikidata.org/entity/Q987767", broader);
 		
-	assertEquals(7, entity.getNote().size());
+	assertEquals(8, entity.getNote().size());
 
 	
     }
   
   
+    @Test
+    public void organizationDereferenceTest() throws ZohoException, Exception {
+            String organizationId = "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000002112001";
+            Organization org = (Organization) metisDerefService.dereferenceEntityById(organizationId, "Organization");
+            
+            Assertions.assertNotNull(org);
+            assertEquals(1, org.getPrefLabel().size());
+            assertEquals(1, org.getAltLabel().size());
+            assertEquals(1, org.getAcronym().size());
+            assertEquals(1, org.getEuropeanaRole().size());
+            assertEquals(1, org.getGeographicLevel().size());
+            assertEquals(1, org.getAcronym().size());
+            assertEquals("FR", org.getCountry());
+            Assertions.assertNotNull(org.getHomepage());
+            Assertions.assertNotNull(org.getLogo());
+            Assertions.assertNotNull(org.getAddress().getVcardStreetAddress());
+            Assertions.assertNotNull(org.getAddress().getVcardCountryName());
+            
+    }
 }

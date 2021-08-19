@@ -1,0 +1,69 @@
+package eu.europeana.entitymanagement.zoho.organization;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+
+import com.zoho.api.authenticator.store.FileStore;
+import com.zoho.api.authenticator.store.TokenStore;
+
+import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.zoho.ZohoAccessClient;
+
+@Configuration(AppConfigConstants.BEAN_ZOHO_ACCESS_CONFIGURATION)
+@PropertySource(value="classpath:zoho_import.properties", ignoreResourceNotFound = true)
+public class ZohoAccessConfiguration {
+
+    private static final Logger LOGGER = LogManager.getLogger(ZohoAccessConfiguration.class);
+
+    public ZohoAccessConfiguration() {
+    	LOGGER.info("Initializing ZohoOrganizationImporterConfiguration bean as: configuration.");
+    }
+    
+    @Value("${zoho.email:#{null}}")
+    private String zohoEmail;
+    
+    @Value("${zoho.client.id:#{null}}")
+    private String zohoClientId;
+    
+    @Value("${zoho.client.secret:#{null}}")
+    private String zohoClientSecret;
+    
+    @Value("${zoho.grant.token:#{null}}")
+    private String zohoGrantToken;
+    
+    @Value("${zoho.redirect.url:#{null}}")
+    private String zohoRedirectUrl;
+    
+    @Value("${token.store.file.path:#{null}}")
+    private String tokenFile;
+
+    public FileStore getFileTokenStore() throws Exception {
+    	return new FileStore(tokenFile);
+    }
+
+    public ZohoAccessClient getZohoAccessClient() throws Exception {
+        if (zohoGrantToken == null || zohoGrantToken.length() < 6) {
+            throw new IllegalArgumentException("zoho.authentication.token is invalid: " + zohoGrantToken);
+        }
+        LOGGER.info("Using zoho authentication token: {} ..." , zohoGrantToken.substring(0, 3));
+        return new ZohoAccessClient(
+                getTokenStore(),
+                zohoEmail,
+                zohoClientId,
+                zohoClientSecret,
+                zohoGrantToken,
+                zohoRedirectUrl);
+    }
+
+    private TokenStore getTokenStore() throws Exception {
+        TokenStore tokenStore = getFileTokenStore();
+        if(tokenStore==null || tokenStore.getTokens().isEmpty()) {
+            throw new IllegalArgumentException("Something went wrong with token store. Please verify the properties for the file token store.");
+        }
+        return tokenStore;
+    }
+
+}

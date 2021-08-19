@@ -15,7 +15,6 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 /**
  * Main application. Allows deploying as a war and logs instance data when deployed in Cloud Foundry
  */
-//@SpringBootApplication(scanBasePackages = {"eu.europeana.entitymanagement", "eu.europeana.api.commons"},
 @SpringBootApplication(scanBasePackages = {"eu.europeana.entitymanagement"},
         exclude = {
                 // Remove these exclusions to re-enable security

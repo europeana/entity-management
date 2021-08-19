@@ -1,17 +1,18 @@
 package eu.europeana.entitymanagement.web.service;
 
-import eu.europeana.api.commons.error.EuropeanaApiException;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.config.AppConfig;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
-import eu.europeana.entitymanagement.exception.HttpBadRequestException;
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.METIS_DEREF_PATH;
+import static eu.europeana.entitymanagement.web.MetisDereferenceUtils.parseMetisResponse;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Optional;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import eu.europeana.entitymanagement.exception.MetisNotKnownException;
-import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,13 +24,21 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.time.Duration;
-import java.time.Instant;
+import com.zoho.crm.api.record.Record;
 
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.METIS_DEREF_PATH;
-import static eu.europeana.entitymanagement.web.MetisDereferenceUtils.parseMetisResponse;
+import eu.europeana.api.commons.error.EuropeanaApiException;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.config.AppConfig;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
+import eu.europeana.entitymanagement.exception.HttpBadRequestException;
+import eu.europeana.entitymanagement.exception.MetisNotKnownException;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
+import eu.europeana.entitymanagement.zoho.organization.ZohoAccessConfiguration;
+import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
+import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 
 /**
  * Handles de-referencing entities from Metis.
@@ -42,6 +51,10 @@ public class MetisDereferenceService implements InitializingBean {
 	private final JAXBContext jaxbContext;
 
 	private final EntityManagementConfiguration config;
+	
+	private final ZohoAccessConfiguration zohoAccessConfiguration;
+	ZohoOrganizationConverter zohoOrganizationConverter = new ZohoOrganizationConverter();
+        
 
 	/**
 	 * Create a separate JAXB unmarshaller for each thread
@@ -49,13 +62,12 @@ public class MetisDereferenceService implements InitializingBean {
 	private ThreadLocal<Unmarshaller> unmarshaller;
 
 	@Autowired
-	public MetisDereferenceService(EntityManagementConfiguration configuration,
-			JAXBContext jaxbContext) {
+	public MetisDereferenceService(EntityManagementConfiguration configuration, JAXBContext jaxbContext, 
+			ZohoAccessConfiguration zohoAccessConfiguration) {
 		this.jaxbContext = jaxbContext;
 		this.config = configuration;
+		this.zohoAccessConfiguration = zohoAccessConfiguration;
 	}
-
-
 
 	@Override
 	public void afterPropertiesSet() throws MalformedURLException {
@@ -63,23 +75,49 @@ public class MetisDereferenceService implements InitializingBean {
 		configureJaxb();
 	}
 
-
-
 	/**
      * Dereferences the entity with the given id value.
      *
      * @param id external ID for entity
+     * @param entityType the type of the entity
      * @return An optional containing the de-referenced entity, or an empty optional
      *         if no match found.
-     * @throws EuropeanaApiException on error
+	 * @throws Exception 
+	 * @throws ZohoException 
      */
-    public Entity dereferenceEntityById(String id) throws EuropeanaApiException {
-	String metisResponseBody = fetchMetisResponse(id);
-		XmlBaseEntityImpl<?> metisResponse = parseMetisResponse(unmarshaller.get(), id, metisResponseBody);
-		if(metisResponse == null){
-			throw new MetisNotKnownException("Unsuccessful Metis dereferenciation for externalId=" + id);
-		}
-		return metisResponse.toEntityModel();
+        public Entity dereferenceEntityById(String id, String entityType) throws ZohoException, Exception {
+            if(id == null) {
+                return null;
+            }
+            
+            if (isZohoOrganization(id, entityType)) {
+                String zohoId;
+                if(!id.contains("/")) {
+                    zohoId = id;
+                }else {
+                    String[] uriParts = id.split("/");
+                    zohoId = uriParts[uriParts.length -1];     
+                }
+                 
+                Optional<Record> zohoOrganization = zohoAccessConfiguration.getZohoAccessClient()
+                        .getZohoRecordOrganizationById(zohoId);
+                Organization org = null;
+                if (zohoOrganization.isPresent()) {
+                    org = zohoOrganizationConverter.convertToOrganizationEntity(zohoOrganization.get());
+                }
+                return org;
+            } else {
+                String metisResponseBody = fetchMetisResponse(id);
+                XmlBaseEntityImpl<?> metisResponse = parseMetisResponse(unmarshaller.get(), id, metisResponseBody);
+                if (metisResponse == null) {
+                    throw new MetisNotKnownException("Unsuccessful Metis dereferenciation for externalId=" + id);
+                }
+                return metisResponse.toEntityModel();
+            }
+        }
+
+    boolean isZohoOrganization(String id, String entityType) {
+        return EntityTypes.Organization.getEntityType().equals(entityType) && id.contains("crm.zoho.com");
     }
 
 

@@ -3,7 +3,6 @@ package eu.europeana.entitymanagement.web.xml.model;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_DC;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_EDM;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_FOAF;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_RDF;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_VCARD;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ACRONYM;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ADDRESS;
