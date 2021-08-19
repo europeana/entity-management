@@ -1,0 +1,13 @@
+{
+  "type": "Organization",
+  "id": "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000002112001",
+  "prefLabel": {
+    "fr": "Bibliothèque nationale de France"
+  },
+  "altLabel": {
+    "fr": [ "bibliothèque nationale FR"]
+  },
+  "depiction": {
+  	"id":"https://upload.wikimedia.org/wikipedia/commons/3/3f/Biblioth%C3%A8que_nationale_de_France_%28site_Richelieu%29%2C_Paris_-_Salle_Ovale.jpg"
+  }
+}
