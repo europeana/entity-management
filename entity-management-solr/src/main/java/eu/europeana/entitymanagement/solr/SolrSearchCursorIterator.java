@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.solr;
 
 import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.solr.exception.InvalidSearchQueryException;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.solr.model.SolrEntity;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
@@ -10,6 +11,7 @@ import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.beans.DocumentObjectBinder;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
@@ -30,6 +32,10 @@ import java.util.stream.Collectors;
  * See https://solr.apache.org/guide/7_6/pagination-of-results.html#fetching-a-large-number-of-sorted-results-cursors
  */
 public class SolrSearchCursorIterator {
+    private static final String UNDEFINED_FIELD = "undefined field";
+    private static final String CANNOT_PARSE_TEXT_FRAGMENT = "org.apache.solr.search.SyntaxError: Cannot parse ";
+
+
     private final DocumentObjectBinder objectBinder = new DocumentObjectBinder();
     private final Logger log = LogManager.getLogger(SolrSearchCursorIterator.class);
 
@@ -67,6 +73,8 @@ public class SolrSearchCursorIterator {
 
         try {
             response = client.query(solrQuery);
+        } catch (HttpSolrClient.RemoteSolrException e) {
+            throw handleRemoteSolrException(solrQuery, e);
         } catch (SolrServerException | IOException ex) {
             throw new SolrServiceException(String.format("Error while searching Solr q=%s", solrQuery.getQuery()), ex);
         }
@@ -129,5 +137,27 @@ public class SolrSearchCursorIterator {
         if(CollectionUtils.isEmpty(solrQuery.getSorts())){
             throw new IllegalArgumentException("SolrQuery must specify a sort with a unique field");
         }
+    }
+
+
+    private SolrServiceException handleRemoteSolrException(SolrQuery searchQuery, HttpSolrClient.RemoteSolrException e) {
+        String remoteMessage = e.getMessage();
+
+        if (remoteMessage.contains(UNDEFINED_FIELD)) {
+            // invalid search field
+            int startPos = remoteMessage.indexOf(UNDEFINED_FIELD) + UNDEFINED_FIELD.length();
+            String fieldName = remoteMessage.substring(startPos);
+            return new InvalidSearchQueryException("Unknown field '" + fieldName + "' in search query");
+        } else if (remoteMessage.contains(CANNOT_PARSE_TEXT_FRAGMENT)) {
+            return new InvalidSearchQueryException("Invalid syntax in search query");
+        }
+
+        int separatorPos = remoteMessage.lastIndexOf(':');
+        if (separatorPos > 0) {
+            // remove server url from remote message
+            remoteMessage = remoteMessage.substring(separatorPos + 1);
+        }
+        return new SolrServiceException("An error occurred when searching entities: " + searchQuery.toString()
+                + ", remote message: " + remoteMessage, e);
     }
 }
