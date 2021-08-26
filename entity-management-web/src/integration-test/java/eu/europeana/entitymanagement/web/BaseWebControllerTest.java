@@ -9,9 +9,11 @@ import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import okhttp3.mockwebserver.MockResponse;
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import javax.xml.bind.JAXBContext;
@@ -19,15 +21,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import static eu.europeana.api.commons.web.http.HttpHeaders.CONTENT_TYPE_JSONLD_UTF8;
 import static eu.europeana.api.commons.web.http.HttpHeaders.VALUE_LDP_RESOURCE;
+import static javax.ws.rs.core.HttpHeaders.ALLOW;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 
 abstract class BaseWebControllerTest extends AbstractIntegrationTest {
+
+    protected MockMvc mockMvc;
 
     @Autowired
     private JAXBContext jaxbContext;
@@ -39,6 +46,16 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private WebApplicationContext webApplicationContext;
+
+    @BeforeEach
+    protected void setup() throws Exception {
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
+
+        //ensure a clean db between test runs
+        this.entityRecordService.dropRepository();
+    }
 
     protected static String loadFile(String resourcePath) throws IOException {
         InputStream is = BaseWebControllerTest.class.getResourceAsStream(resourcePath);
@@ -69,6 +86,15 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
                 .andExpect(header().exists(HttpHeaders.ETAG))
                 .andExpect(header().string(HttpHeaders.LINK, is(VALUE_LDP_RESOURCE)))
                 .andExpect(header().stringValues(HttpHeaders.VARY, hasItems(containsString(HttpHeaders.ACCEPT))));
+    }
+
+    protected void checkCorsHeaders(ResultActions results) throws Exception {
+        results.andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN,
+                is("*")))
+            .andExpect(header().stringValues(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,
+                hasItems(containsString(HttpHeaders.ALLOW),
+                    containsString(HttpHeaders.ETAG), containsString(HttpHeaders.LINK),
+                    containsString(HttpHeaders.VARY))));
     }
 
 

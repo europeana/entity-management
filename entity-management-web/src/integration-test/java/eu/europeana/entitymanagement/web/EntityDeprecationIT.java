@@ -12,10 +12,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class EntityDeleteIT extends BaseWebControllerTest {
+public class EntityDeprecationIT extends BaseWebControllerTest {
 
     @Test
-    void deletionShouldBeSuccessful() throws Exception {
+    void deprecationShouldBeSuccessful() throws Exception {
         String europeanaMetadata = loadFile(CONCEPT_REGISTER_BATHTUB_JSON);
         String metisResponse = loadFile(CONCEPT_BATHTUB_XML);
 
@@ -29,14 +29,14 @@ public class EntityDeleteIT extends BaseWebControllerTest {
 
 
     @Test
-    void deletingNonExistingEntityShouldReturn404() throws Exception {
+    void deprecatingNonExistingEntityShouldReturn404() throws Exception {
         mockMvc.perform(delete(BASE_SERVICE_URL + "/" + "wrong-type/wrong-identifier")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    void deletingDeprecatedEntityShouldReturn410() throws Exception {
+    void deprecatingAlreadyDeprecatedEntityShouldReturn410() throws Exception {
         String europeanaMetadata = loadFile(CONCEPT_REGISTER_BATHTUB_JSON);
         String metisResponse = loadFile(CONCEPT_BATHTUB_XML);
 

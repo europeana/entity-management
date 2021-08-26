@@ -1,9 +1,16 @@
 package eu.europeana.entitymanagement;
 
 
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.METIS_DEREF_PATH;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.EMPTY_METIS_RESPONSE;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.METIS_RESPONSE_MAP;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
+
 import eu.europeana.entitymanagement.testutils.MongoContainer;
 import eu.europeana.entitymanagement.testutils.SolrContainer;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
+import java.io.IOException;
+import java.util.Objects;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
@@ -12,28 +19,17 @@ import okhttp3.mockwebserver.RecordedRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.junit.AfterClass;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.containers.output.ToStringConsumer;
 import org.testcontainers.containers.output.WaitingConsumer;
-
-import java.io.IOException;
-import java.util.Objects;
-
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.METIS_DEREF_PATH;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -43,7 +39,6 @@ public abstract class AbstractIntegrationTest {
     private static final MongoContainer MONGO_CONTAINER;
     private static final SolrContainer SOLR_CONTAINER;
 
-    protected MockMvc mockMvc;
 
     static {
         MONGO_CONTAINER = new MongoContainer("entity-management", "job-repository", "enrichment")
@@ -71,18 +66,6 @@ public abstract class AbstractIntegrationTest {
 
     @Autowired
     protected EntityRecordService entityRecordService;
-
-
-    @Autowired
-    private WebApplicationContext webApplicationContext;
-
-    @BeforeEach
-    protected void setup() throws Exception {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
-
-        //ensure a clean db between test runs
-        this.entityRecordService.dropRepository();
-    }
 
     @BeforeAll
     public static void setupAll() throws IOException {
