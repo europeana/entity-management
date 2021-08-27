@@ -41,7 +41,7 @@ public class ValidatorConfig {
 
   @Bean(name=BEAN_EM_ENTITY_FIELD_CLEANER)
   public EntityFieldsCleaner getEntityFieldsCleanerBean() throws IOException {
-    return new EntityFieldsCleaner(getLanguageCodes());
+    return new EntityFieldsCleaner(getLanguageCodes(), emConfiguration.getThumbnailBaseUrl());
   }
 
   @Bean(name=BEAN_EM_LANGUAGE_CODES)

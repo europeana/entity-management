@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.solr.model;
 
 import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.solr.SolrUtils;
 import eu.europeana.entitymanagement.vocabulary.AgentSolrFields;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
@@ -55,14 +56,20 @@ public abstract class SolrEntity<T extends Entity> {
     @Field(EntitySolrFields.PAYLOAD)
     private String payload;
 
+    @Field(EntitySolrFields.IS_SHOWN_BY_ALL)
+    private Map<String, String> isShownBy;
+
     public SolrEntity(T entity) {
         this.type = entity.getType();
         this.entityId = entity.getEntityId();
-        this.depiction = entity.getDepiction();
+        if(entity.getDepiction() != null){
+            this.depiction = entity.getDepiction().getId();
+        }
         setNote(entity.getNote());
-        setPrefLabelStringMap(entity.getPrefLabelStringMap());
+        setPrefLabelStringMap(entity.getPrefLabel());
         setAltLabel(entity.getAltLabel());
         setHiddenLabel(entity.getHiddenLabel());
+        setIsShownBy(entity.getIsShownBy());
         if(entity.getIdentifier()!=null) this.identifier = new ArrayList<>(entity.getIdentifier());
         if(entity.getSameAs()!=null) this.sameAs = new ArrayList<>(entity.getSameAs());
         if(entity.getIsRelatedTo()!=null) this.isRelatedTo = new ArrayList<>(entity.getIsRelatedTo());
@@ -71,9 +78,10 @@ public abstract class SolrEntity<T extends Entity> {
 
         this.entity = entity;
     }
-    
+
+
     public SolrEntity() {
-    
+    // no-arg constructor
     }
 
     public void setPayload(String payload) {
@@ -106,6 +114,17 @@ public abstract class SolrEntity<T extends Entity> {
     		this.note = new HashMap<>(SolrUtils.normalizeStringListMapByAddingPrefix(
                 AgentSolrFields.NOTE + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, note));
     	}
+    }
+
+    private void setIsShownBy(WebResource webResource) {
+        if (webResource == null) {
+            return;
+        }
+
+        this.isShownBy = new HashMap<>();
+        this.isShownBy.put(EntitySolrFields.IS_SHOWN_BY, webResource.getId());
+        this.isShownBy.put(EntitySolrFields.IS_SHOWN_BY_SOURCE, webResource.getSource());
+        this.isShownBy.put(EntitySolrFields.IS_SHOWN_BY_THUMBNAIL, webResource.getThumbnail());
     }
 
     public String getType() {

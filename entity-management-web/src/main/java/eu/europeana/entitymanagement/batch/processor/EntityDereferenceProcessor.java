@@ -48,7 +48,7 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
         String proxyId = entityRecord.getExternalProxy().getProxyId();
         Entity metisResponse;
         try {
-            metisResponse = dereferenceService.dereferenceEntityById(proxyId);
+            metisResponse = dereferenceService.dereferenceEntityById(proxyId, entityRecord.getEntity().getType());
         } catch (MetisNotKnownException e) {
             // include entityId in exception message, then rethrow it
             throw new MetisNotKnownException("Unsuccessful Metis dereferenciation for externalId=" +

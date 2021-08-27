@@ -76,6 +76,11 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
     }
 
     @Test
+    @Deprecated
+    /**
+     * @deprecated zoho is the primary source for organizations see registerZohoOrganizationShouldBeSuccessful
+     * @throws Exception
+     */
     public void registerOrganizationShouldBeSuccessful() throws Exception {
         ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
                 .content(loadFile(ORGANIZATION_REGISTER_BNF_JSON))
@@ -93,6 +98,27 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         checkCommonResponseHeaders(results);
     }
 
+//    @Test
+    /* Doesn't work without correct zoho import configuration
+     * TODO: mock zoho response */
+    public void registerZohoOrganizationShouldBeSuccessful() throws Exception {
+        ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
+                .content(loadFile(ORGANIZATION_REGISTER_BNF_ZOHO_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isAccepted());
+
+        results.andExpect(jsonPath("$.id", any(String.class)))
+                .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())))
+                .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
+                .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
+                // should have Europeana and Datasource proxies
+                .andExpect(jsonPath("$.proxies", hasSize(2)));
+
+        checkAllowHeaderForPOST(results);
+        checkCommonResponseHeaders(results);
+    }
+    
+    
     @Test
     void registerPlaceShouldBeSuccessful() throws Exception {
         ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
@@ -138,7 +164,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         String metisResponse = loadFile(CONCEPT_BATHTUB_XML);
 
         String entityId = createEntity(europeanaMetadata, metisResponse, CONCEPT_BATHTUB_URI).getEntityId();
-        String redirectUrl = String.format("/entity/%s.jsonld?profile=internal",EntityRecordUtils.extractIdentifierFromEntityId(entityId));
+        String redirectUrl = String.format("/entity/%s",EntityRecordUtils.extractIdentifierFromEntityId(entityId));
 
         mockMvc.perform(post(BASE_SERVICE_URL)
                 .content(europeanaMetadata)

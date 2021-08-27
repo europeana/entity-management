@@ -33,8 +33,8 @@ public class SerializationUtils {
   private static ObjectNode getExternalJsonNode(ObjectMapper mapper, EntityRecord record, FormatTypes format)
       throws EntityManagementRuntimeException {
 	  if (format.equals(FormatTypes.schema)) {
-		  record.getEntity().toSchemaOrgEntity();
-		  return mapper.valueToTree(record.getEntity().getSchemaOrgEntity());
+          SchemaOrgEntity<?> schemaOrgEntity = EntityObjectFactory.createSchemaOrgEntity(record.getEntity());
+          return mapper.valueToTree(schemaOrgEntity.get());
 	  }
 	  else {
 		  return mapper.valueToTree(record.getEntity());
@@ -55,22 +55,22 @@ public class SerializationUtils {
     ArrayNode proxyNode = mapper.createArrayNode();
 
     for(EntityProxy proxy: recordProxies){
-    	ObjectNode proxyEntityNode=null;
-    	if(!format.equals(FormatTypes.schema)) {
-    		proxyEntityNode = mapper.valueToTree(proxy.getEntity());	
-	        // Entity @context shouldn't appear in proxy metadata
-	        proxyEntityNode.remove(WebEntityFields.CONTEXT);
-	        // Entity ID shouldn't overwrite proxyId
-	        proxyEntityNode.remove(WebEntityFields.ID);
-    	}
-    	else {
-    		proxy.getEntity().toSchemaOrgEntity();
-    		proxyEntityNode = mapper.valueToTree(proxy.getEntity().getSchemaOrgEntity());	
+    	ObjectNode proxyEntityNode=null;    	
+    	if(format.equals(FormatTypes.schema)) {  		
+            SchemaOrgEntity<?> schemaOrgProxyEntity = EntityObjectFactory.createSchemaOrgEntity(proxy.getEntity());
+            proxyEntityNode = mapper.valueToTree(schemaOrgProxyEntity.get());
 	        // Entity @context shouldn't appear in proxy metadata
 	        proxyEntityNode.remove(WebEntityFields.CONTEXT);
 	        // Entity ID shouldn't overwrite proxyId
 	        proxyEntityNode.remove(WebEntityFields.ID_SCHEMA);
 
+    	}
+    	else {
+    		proxyEntityNode = mapper.valueToTree(proxy.getEntity());	
+	        // Entity @context shouldn't appear in proxy metadata
+	        proxyEntityNode.remove(WebEntityFields.CONTEXT);
+	        // Entity ID shouldn't overwrite proxyId
+	        proxyEntityNode.remove(WebEntityFields.ID);
     	}
 
         ObjectNode embeddedProxyNode = mapper.valueToTree(proxy);

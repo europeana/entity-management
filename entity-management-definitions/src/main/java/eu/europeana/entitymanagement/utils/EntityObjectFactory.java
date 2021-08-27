@@ -1,5 +1,7 @@
 package eu.europeana.entitymanagement.utils;
 
+import java.util.Map;
+
 import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
 import eu.europeana.entitymanagement.definitions.model.Agent;
@@ -8,8 +10,12 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.definitions.model.Timespan;
+import eu.europeana.entitymanagement.schemaorg.model.SchemaOrgAgent;
+import eu.europeana.entitymanagement.schemaorg.model.SchemaOrgConcept;
 import eu.europeana.entitymanagement.schemaorg.model.SchemaOrgEntity;
+import eu.europeana.entitymanagement.schemaorg.model.SchemaOrgOrganization;
 import eu.europeana.entitymanagement.schemaorg.model.SchemaOrgPlace;
+import eu.europeana.entitymanagement.schemaorg.model.SchemaOrgTimespan;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.xml.model.XmlAgentImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
@@ -17,7 +23,6 @@ import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlOrganizationImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlPlaceImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlTimespanImpl;
-import java.util.Map;
 
 /**
  * Instantiates a
@@ -68,8 +73,14 @@ public class EntityObjectFactory {
 		switch (EntityTypes.valueOf(entity.getType())) {
 			case Place:
 				return (SchemaOrgEntity<T>) new SchemaOrgPlace((Place) entity);
-
-			//TODO: convert other types
+			case Agent:
+				return (SchemaOrgEntity<T>) new SchemaOrgAgent((Agent) entity);
+			case Concept:
+				return (SchemaOrgEntity<T>) new SchemaOrgConcept((Concept) entity);
+			case Organization:
+				return (SchemaOrgEntity<T>) new SchemaOrgOrganization((Organization) entity);
+			case Timespan:
+				return (SchemaOrgEntity<T>) new SchemaOrgTimespan((Timespan) entity);
 			default:
 				throw new EntityManagementRuntimeException(String.format("Encountered invalid entityType %s in entityId=%s",
 						entity.getType(), entity.getEntityId()));

@@ -53,7 +53,7 @@ public class ScoringServiceTest {
 	prefLabels.put("fr", "Léonard de Vinci");
 	// not supported language to be filtered out
 	prefLabels.put("zh", "cannot read it");
-	agent.setPrefLabelStringMap(prefLabels);
+	agent.setPrefLabel(prefLabels);
 
 	EntityMetrics metrics = scoringService.computeMetrics(agent);
 
@@ -85,7 +85,7 @@ public class ScoringServiceTest {
         prefLabels.put("it", "Parigi");
         // not supported language to be filtered out
         prefLabels.put("ru", "Паріж");
-        agent.setPrefLabelStringMap(prefLabels);
+        agent.setPrefLabel(prefLabels);
 
         EntityMetrics metrics = scoringService.computeMetrics(agent);
 

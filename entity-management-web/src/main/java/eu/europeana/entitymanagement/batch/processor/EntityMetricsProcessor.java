@@ -15,6 +15,7 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.util.Date;
 
 /**
@@ -38,6 +39,13 @@ public class EntityMetricsProcessor implements ItemProcessor<EntityRecord, Entit
 
   @Override
   public EntityRecord process(@NonNull EntityRecord entityRecord) throws Exception {
+    Date now = new Date();
+    if (entityRecord.getEntity().getIsAggregatedBy() == null) {
+      Aggregation aggregation = new Aggregation();
+      aggregation.setCreated(now);
+      entityRecord.getEntity().setIsAggregatedBy(aggregation);
+    }
+
     /*
      *  Metrics not computed by default, as it requires access to the PageRank and Search API
      *  Solr servers. To prevent Jobs from failing, we make this conditional.
@@ -50,6 +58,8 @@ public class EntityMetricsProcessor implements ItemProcessor<EntityRecord, Entit
       computeRankingMetrics(entityRecord);
     }
 
+    // Always set modified time (even if metrics weren't updated) as this is used for ETag generation
+    entityRecord.getEntity().getIsAggregatedBy().setModified(now);
     return entityRecord;
   }
 

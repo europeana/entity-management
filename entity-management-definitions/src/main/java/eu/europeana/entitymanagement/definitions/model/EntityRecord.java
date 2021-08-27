@@ -7,14 +7,12 @@ import java.util.List;
 import dev.morphia.annotations.*;
 import eu.europeana.entitymanagement.utils.EntityRecordWatcher;
 import org.bson.types.ObjectId;
-
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSetter;
-
-import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
-
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BASE_DATA_EUROPEANA_URI;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.*;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
@@ -64,13 +62,13 @@ public class EntityRecord {
     }
 
     
-    @JsonGetter(WebEntityFields.ID)
+    @JsonGetter(ID)
     public String getEntityId() {
         return entityId;
     }
 
     
-    @JsonSetter(WebEntityFields.ID)
+    @JsonSetter(ID)
     public void setEntityId(String entityId) {
         this.entityId = entityId;
     }
@@ -129,13 +127,13 @@ public class EntityRecord {
     
     public EntityProxy getEuropeanaProxy() {
         return proxies.stream()
-            .filter(s -> s.getProxyId().startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI)).findFirst().orElse(null);
+            .filter(s -> s.getProxyId().startsWith(BASE_DATA_EUROPEANA_URI)).findFirst().orElse(null);
     }
 
     
     @JsonIgnore
     public EntityProxy getExternalProxy() {
         return proxies.stream()
-            .filter(s -> !s.getProxyId().startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI)).findFirst().orElse(null);
+            .filter(s -> !s.getProxyId().startsWith(BASE_DATA_EUROPEANA_URI)).findFirst().orElse(null);
     }
 }

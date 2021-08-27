@@ -27,6 +27,8 @@ public class EntityManagementConfiguration  {
     @Value("${europeana.apikey.jwttoken.signaturekey}")
     private String apiKeyPublicKey;
 
+    @Value("${europeana.thumbnail.urlPrefix}")
+    private String thumbnailBaseUrl;
 
     @Value("${europeana.apikey.serviceurl}")
     private String apiKeyUrl;
@@ -81,6 +83,12 @@ public class EntityManagementConfiguration  {
 
   @Value("${enrichmentMigrationPassword}")
   private String enrichmentsMigrationPassword;
+
+  @Value("${metis.proxy.enabled: false}")
+  private boolean useMetisProxy;
+
+  @Value("${metis.proxy.url:}")
+  private String metisProxyUrl;
 
 
   public EntityManagementConfiguration() {
@@ -181,5 +189,17 @@ public String getIndexingSolrUrl() {
 
     public int getSolrQueryMaxPageSize() {
       return solrQueryMaxPageSize;
+    }
+
+    public boolean useMetisProxy() {
+        return useMetisProxy;
+    }
+
+    public String getMetisProxyUrl() {
+        return metisProxyUrl;
+    }
+
+    public String getThumbnailBaseUrl() {
+        return thumbnailBaseUrl;
     }
 }

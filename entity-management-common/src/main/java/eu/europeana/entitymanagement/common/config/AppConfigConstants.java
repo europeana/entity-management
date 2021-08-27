@@ -38,5 +38,8 @@ public class AppConfigConstants {
     public static final String BEAN_SEARCH_API_SOLR_CLIENT = "searchApiSolrClient";
 
     public static final String BEAN_SOLR_ENTITY_SUGGESTER_FILTER = "solrEntityFilter";
+    
+    public static final String BEAN_ZOHO_ACCESS_CONFIGURATION = "zohoAccessConfiguration";
+    public static final String BEAN_WIKIDATA_ACCESS_SERVICE = "wikidataAccessService";
 }
 

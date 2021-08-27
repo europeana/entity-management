@@ -46,7 +46,7 @@ class EntityRecordRepositoryIT extends AbstractIntegrationTest {
          */
         prefLabelTest.put("perfLabel_pl", "I wiek");
         prefLabelTest.put("perfLabel_da", "1. århundrede");
-        entity.setPrefLabelStringMap(prefLabelTest);
+        entity.setPrefLabel(prefLabelTest);
         WebResource webResource = new WebResource();
         webResource.setId("http://www.sbc.org.pl/Timespan/16573/doc.pdf");
         webResource.setSource("http://data.europeana.eu/item/7284673/_nnd7fT5");
