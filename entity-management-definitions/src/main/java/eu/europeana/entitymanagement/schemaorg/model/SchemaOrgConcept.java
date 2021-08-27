@@ -11,8 +11,6 @@ public class SchemaOrgConcept extends SchemaOrgEntity<Concept> {
     public SchemaOrgConcept(Concept concept) {
     	schemaOrgConcept = new eu.europeana.corelib.edm.model.schemaorg.Concept();
     	SchemaOrgUtils.processEntity(concept, schemaOrgConcept);
-    	
-//        setCommonProperties(schemaOrgConcept, concept);
     }
 
     @Override

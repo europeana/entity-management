@@ -11,8 +11,6 @@ public class SchemaOrgTimespan extends SchemaOrgEntity<Timespan> {
     public SchemaOrgTimespan(Timespan timespan) {
     	schemaOrgTimespan = new eu.europeana.corelib.edm.model.schemaorg.Timespan();
         SchemaOrgUtils.processEntity(timespan, schemaOrgTimespan);
-
-//        setCommonProperties(schemaOrgTimespan, timespan);
     }
 
     @Override

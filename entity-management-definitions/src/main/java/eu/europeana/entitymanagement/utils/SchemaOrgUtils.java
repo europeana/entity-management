@@ -50,7 +50,7 @@ public final class SchemaOrgUtils {
      * Update properties of the given Schema.Org Thing using data from the given EDM Entity
      *
      * @param entity	EDM Entity
-     * @param thing	Schema.Org Entity to update
+     * @param contextualEntity	Schema.Org Entity to update
      */
     public static void  processEntity(Entity entity, ContextualEntity contextualEntity) {
 
