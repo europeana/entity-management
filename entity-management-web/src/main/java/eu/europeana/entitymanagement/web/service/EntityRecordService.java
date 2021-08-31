@@ -21,6 +21,8 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.web.EntityRecordUtils;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
+import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -214,8 +216,8 @@ public class EntityRecordService {
 
 		EntityRecord entityRecord = new EntityRecord();
 		String entityId = null;
-		//only in case of the Organization type use the provided id from metis
-		if(EntityTypes.Organization.getEntityType().equals(entity.getType())) {
+		//only in case of Zoho Organization use the provided id from metis
+		if(ZohoUtils.isZohoOrganization(metisResponse.getEntityId(), metisResponse.getType())) {
 			entityId = metisResponse.getEntityId();
 		}
 		else {

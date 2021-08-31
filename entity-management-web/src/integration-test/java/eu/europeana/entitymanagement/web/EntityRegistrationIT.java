@@ -75,7 +75,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         checkCommonResponseHeaders(results);
     }
 
-    @Test
+    //@Test
     @Deprecated
     /**
      * @deprecated zoho is the primary source for organizations see registerZohoOrganizationShouldBeSuccessful
