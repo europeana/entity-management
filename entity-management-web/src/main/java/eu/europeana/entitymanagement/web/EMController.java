@@ -19,6 +19,7 @@ import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
@@ -330,6 +331,11 @@ public class EMController extends BaseRest {
 			if (!datasources.hasDataSource(entityCreationRequest.getId())) {
 				throw new HttpBadRequestException(String
 						.format("id %s does not match a configured datasource", entityCreationRequest.getId()));
+			}
+			//in case of Organization it must be the zoho Organization
+			if (EntityTypes.Organization.getEntityType().equals(entityCreationRequest.getType()) && !entityCreationRequest.getId().contains(DataSources.ZOHO_ID)) {
+				throw new HttpBadRequestException(String
+						.format("The Organization entity should come from Zoho and have the correponding id format containing: %s", DataSources.ZOHO_ID));
 			}
 
 			Entity metisResponse = dereferenceService

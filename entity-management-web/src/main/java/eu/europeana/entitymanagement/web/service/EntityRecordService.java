@@ -203,17 +203,24 @@ public class EntityRecordService {
      */
     public EntityRecord createEntityFromRequest(EntityPreview entityCreationRequest, Entity metisResponse)
 	    throws EntityCreationException {
-	// Fail quick if no datasource is configured
-	Optional<DataSource> externalDatasourceOptional = datasources.getDatasource(entityCreationRequest.getId());
-	if (externalDatasourceOptional.isEmpty()) {
-		throw new EntityCreationException("No configured datasource for entity " + entityCreationRequest.getId());
-	}
+		// Fail quick if no datasource is configured
+		Optional<DataSource> externalDatasourceOptional = datasources.getDatasource(entityCreationRequest.getId());
+		if (externalDatasourceOptional.isEmpty()) {
+			throw new EntityCreationException("No configured datasource for entity " + entityCreationRequest.getId());
+		}
 
-	Date timestamp = new Date();
-	Entity entity = EntityObjectFactory.createEntityObject(metisResponse.getType());
+		Date timestamp = new Date();
+		Entity entity = EntityObjectFactory.createEntityObject(metisResponse.getType());
 
-	EntityRecord entityRecord = new EntityRecord();
-	String entityId = generateEntityId(entity.getType(), null);
+		EntityRecord entityRecord = new EntityRecord();
+		String entityId = null;
+		//only in case of the Organization type use the provided id from metis
+		if(EntityTypes.Organization.getEntityType().equals(entity.getType())) {
+			entityId = metisResponse.getEntityId();
+		}
+		else {
+			entityId = generateEntityId(entity.getType(), null);
+		}
         entityRecord.setEntityId(entityId);
         entity.setEntityId(entityId);
 		/*

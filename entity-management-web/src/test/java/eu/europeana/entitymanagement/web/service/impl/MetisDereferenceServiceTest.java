@@ -23,7 +23,7 @@ import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 //@ContextConfiguration(classes = { JobLauncherConfig.class, EntityManagementConfiguration.class, AppConfig.class, EnrichmentConfig.class, ValidatorConfig.class,
 //        SerializationConfig.class, MetisDereferenceService.class, })
 //@ExtendWith(SpringExtension.class)
-@Disabled("Excluded from automated runs as this depends on Metis")
+//@Disabled("Excluded from automated runs as this depends on Metis")
 public class MetisDereferenceServiceTest extends AbstractIntegrationTest {
 
     @Resource(name=AppConfig.BEAN_METIS_DEREF_SERVICE)
