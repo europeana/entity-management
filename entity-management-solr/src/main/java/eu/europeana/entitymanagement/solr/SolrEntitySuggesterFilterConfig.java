@@ -19,12 +19,12 @@ public class SolrEntitySuggesterFilterConfig {
     public FilterProvider solrEntitySuggesterFilter() {
         SimpleFilterProvider filterProvider = new SimpleFilterProvider();
         filterProvider.addFilter(SOLR_AGENT_SUGGESTER_FILTER,
-                SimpleBeanPropertyFilter.filterOutAllExcept("isShownBy", "prefLabel", "altLabel", "hiddenLabel", "dateOfBirth", "dateOfDeath", "dateOfEstablishment", "dateOfTermination"));
+                SimpleBeanPropertyFilter.filterOutAllExcept("type", "isShownBy", "prefLabel", "altLabel", "hiddenLabel", "dateOfBirth", "dateOfDeath", "dateOfEstablishment", "dateOfTermination"));
 
         filterProvider.addFilter(SOLR_ORGANIZATION_SUGGESTER_FILTER,
-                SimpleBeanPropertyFilter.filterOutAllExcept("isShownBy", "prefLabel", "altLabel", "hiddenLabel", "acronym", "organizationDomain", "country"));
+                SimpleBeanPropertyFilter.filterOutAllExcept("type", "isShownBy", "prefLabel", "altLabel", "hiddenLabel", "acronym", "organizationDomain", "country"));
         filterProvider.addFilter(SOLR_TIMESPAN_SUGGESTER_FILTER,
-                SimpleBeanPropertyFilter.filterOutAllExcept("isShownBy", "prefLabel", "altLabel", "hiddenLabel", "begin", "end"));
+                SimpleBeanPropertyFilter.filterOutAllExcept("type", "isShownBy", "prefLabel", "altLabel", "hiddenLabel", "begin", "end"));
 
         return filterProvider;
     }
