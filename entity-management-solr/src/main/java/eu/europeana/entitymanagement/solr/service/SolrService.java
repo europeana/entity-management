@@ -228,10 +228,9 @@ public class SolrService implements InitializingBean {
 
 				ObjectNode agentJacksonNode = payloadMapper.valueToTree(solrEntity.getEntity());
 				JsonNode organizationDomainNode = agentJacksonNode.get("organizationDomain");
-				// organizationDomain not always set
-				if(organizationDomainNode != null) {
-					agentJacksonNode.replace("organizationDomain", organizationDomainNode.get("en"));
-					return payloadMapper.writeValueAsString(organizationDomainNode);
+				if(organizationDomainNode != null && organizationDomainNode.toString().contains("\"en\"")) {
+					agentJacksonNode.replace("organizationDomain", organizationDomainNode.get("\"en\""));
+					return payloadMapper.writeValueAsString(agentJacksonNode);
 				}
 			}
 			return null;
