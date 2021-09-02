@@ -8,12 +8,16 @@ import javax.annotation.Resource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import eu.europeana.entitymanagement.AbstractIntegrationTest;
+import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.model.Concept;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.web.service.MetisDereferenceService;
+import eu.europeana.entitymanagement.wikidata.WikidataAccessService;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 
 /**
@@ -29,6 +33,10 @@ public class MetisDereferenceServiceTest extends AbstractIntegrationTest {
     @Resource(name=AppConfig.BEAN_METIS_DEREF_SERVICE)
     MetisDereferenceService metisDerefService;
 
+	@Qualifier(AppConfigConstants.BEAN_WIKIDATA_ACCESS_SERVICE)
+	@Autowired
+	private WikidataAccessService wikidataService;
+	  
     @Test
     public void dereferenceConceptById() throws Exception {
 
@@ -61,7 +69,7 @@ public class MetisDereferenceServiceTest extends AbstractIntegrationTest {
   
   
     @Test
-    public void organizationDereferenceTest() throws ZohoException, Exception {
+    public void zohoOrganizationDereferenceTest() throws ZohoException, Exception {
             String organizationId = "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000002112001";
             Organization org = (Organization) metisDerefService.dereferenceEntityById(organizationId, "Organization");
             
@@ -79,4 +87,11 @@ public class MetisDereferenceServiceTest extends AbstractIntegrationTest {
             Assertions.assertNotNull(org.getAddress().getVcardCountryName());
             
     }
+ 
+	@Test
+	public void wikidataOrganizationDereferenceTest() throws ZohoException, Exception {
+		String organizationId = "http://www.wikidata.org/entity/Q1781094";
+        Organization org = (Organization) metisDerefService.dereferenceEntityById(organizationId, "Organization");
+		Assertions.assertNotNull(org);
+	}
 }

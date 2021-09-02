@@ -11,6 +11,8 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 public class DataSources {
 
 	public final static String EUROPEANA_ID = "europeana";
+	public final static String ZOHO_ID = "crm.zoho.com";
+	public final static String WIKIDATA_ID = "www.wikidata.org";
 
 	@JacksonXmlElementWrapper(useWrapping = false)
 	@JacksonXmlProperty(localName = "source")
