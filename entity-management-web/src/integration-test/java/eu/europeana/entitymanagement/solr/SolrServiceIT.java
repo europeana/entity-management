@@ -40,19 +40,16 @@ public class SolrServiceIT extends AbstractIntegrationTest {
 	}
 
 	@Test
-    public void storeAgentInSolr() throws Exception {
-    	
+    public void storeAgentInSolr() throws Exception {    	
     	Agent agent = objectMapper.readValue(loadFile(AGENT_JSON), Agent.class);
     	emSolrService.storeEntity(SolrUtils.createSolrEntity(agent));
 		SolrAgent storedAgent = emSolrService.searchById(SolrAgent.class, agent.getEntityId());
 		Assertions.assertNotNull(storedAgent);
     	Assertions.assertEquals(agent.getEntityId(), storedAgent.getEntityId());
-
     }
     
     @Test
-    public void storeOrganizationInSolr() throws Exception {
- 
+    public void storeOrganizationInSolr() throws Exception { 
     	Organization organization = objectMapper.readValue(loadFile(ORGANIZATION_JSON), Organization.class);
     	emSolrService.storeEntity(SolrUtils.createSolrEntity(organization));
      	SolrOrganization storedOrganization = emSolrService.searchById(SolrOrganization.class, organization.getEntityId());
