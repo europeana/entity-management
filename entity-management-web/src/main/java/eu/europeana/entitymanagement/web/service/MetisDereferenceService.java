@@ -27,8 +27,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import com.zoho.crm.api.record.Record;
 
 import eu.europeana.api.commons.error.EuropeanaApiException;
-import eu.europeana.entitymanagement.common.config.DataSource;
-import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.AppConfig;
@@ -124,9 +122,6 @@ public class MetisDereferenceService implements InitializingBean {
             }
         }
 
-    boolean isZohoOrganization(String id, String entityType) {
-        return EntityTypes.Organization.getEntityType().equals(entityType) && id.contains(DataSources.ZOHO_ID);
-    }
 
     boolean isWikidataOrganization(String id, String entityType) {
         return EntityTypes.Organization.getEntityType().equals(entityType) && id.contains(DataSources.WIKIDATA_ID);

@@ -32,3 +32,6 @@ build/
 *.properties
 
 .DS_Store
+
+# Zoho sdk log files
+SDKLogs.log*

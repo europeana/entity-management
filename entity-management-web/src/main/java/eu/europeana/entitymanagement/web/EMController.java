@@ -335,20 +335,20 @@ public class EMController extends BaseRest {
 			//in case of Organization it must be the zoho Organization
 			if (EntityTypes.Organization.getEntityType().equals(entityCreationRequest.getType()) && !entityCreationRequest.getId().contains(DataSources.ZOHO_ID)) {
 				throw new HttpBadRequestException(String
-						.format("The Organization entity should come from Zoho and have the correponding id format containing: %s", DataSources.ZOHO_ID));
+						.format("The Organization entity should come from Zoho and have the corresponding id format containing: %s", DataSources.ZOHO_ID));
 			}
 
-			Entity metisResponse = dereferenceService
+			Entity datasourceResponse = dereferenceService
 					.dereferenceEntityById(entityCreationRequest.getId(), entityCreationRequest.getType());
 
-			if(!metisResponse.getType().equals(entityCreationRequest.getType())){
-				throw new EntityMismatchException(String.format("Metis type '%s' does not match type '%s' in request",
-						metisResponse.getType(), entityCreationRequest.getType()));
+			if(!datasourceResponse.getType().equals(entityCreationRequest.getType())){
+				throw new EntityMismatchException(String.format("Datasource type '%s' does not match type '%s' in request",
+						datasourceResponse.getType(), entityCreationRequest.getType()));
 			}
 
-			if (metisResponse.getSameAs() != null) {
+			if (datasourceResponse.getSameAs() != null) {
 				existingEntity = entityRecordService
-						.retrieveMetisCoreferenceSameAs(metisResponse.getSameAs());
+						.retrieveCoreferenceSameAs(datasourceResponse.getSameAs());
 				response = checkExistingEntity(existingEntity, entityCreationRequest.getId());
 				if (response != null) {
 					return response;
@@ -356,7 +356,7 @@ public class EMController extends BaseRest {
 			}
 
 			EntityRecord savedEntityRecord = entityRecordService
-					.createEntityFromRequest(entityCreationRequest, metisResponse);
+					.createEntityFromRequest(entityCreationRequest, datasourceResponse);
 			logger.info("Created Entity record for externalId={}; entityId={}", entityCreationRequest.getId(), savedEntityRecord.getEntityId());
 
 			solrService.storeEntity(createSolrEntity(savedEntityRecord.getEntity()));
