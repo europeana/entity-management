@@ -42,13 +42,33 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
+import org.springframework.util.CollectionUtils;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({CONTEXT, ID, TYPE, DEPICTION, IS_SHOWN_BY, PREF_LABEL, ALT_LABEL, HIDDEN_LABEL, NAME, BEGIN, DATE_OF_BIRTH, DATE_OF_ESTABLISHMENT,
 		END, DATE_OF_DEATH, DATE_OF_TERMINATION, DATE, PLACE_OF_BIRTH, PLACE_OF_DEATH, GENDER, PROFESSION_OR_OCCUPATION, BIOGRAPHICAL_INFORMATION, NOTE,
 		HAS_PART, IS_PART_OF, HAS_MET, IS_RELATED_TO, WAS_PRESENT_AT, IDENTIFIER, SAME_AS})
 public class Agent extends Entity {
+
+	private List<String> date;
+	private List<String> begin;
+	private List<String> end;
+	private List<String> dateOfBirth;
+	private List<String> dateOfDeath;
+	private List<String> wasPresentAt;
+	private List<String> hasMet;
+	private Map<String, String> name;
+	private Map<String, List<String>> biographicalInformation;
+	// TODO: clarify format. Right now Metis returns a list of Resources
+	private List<String> professionOrOccupation;
+	private List<String> placeOfBirth;
+	private List<String> placeOfDeath;
+
+	private List<String> dateOfEstablishment;
+	private List<String> dateOfTermination;
+	private List<String> gender;
+
+	private List<String> exactMatch;
 
 	public Agent(Agent copy) {
 		super(copy);
@@ -74,26 +94,6 @@ public class Agent extends Entity {
 		super();
 	}
 
-	// TODO: fix cardinality, change to list
-	private List<String> date; // format "YYYY"
-	private List<String> begin; // format "YYYY-MM-DD"
-	private List<String> end; // format "YYYY-MM-DD"
-	private List<String> dateOfBirth; // format "YYYY-MM-DD"
-	private List<String> dateOfDeath; // format "YYYY"
-	private List<String> wasPresentAt;
-	private List<String> hasMet;
-	private Map<String, String> name;
-	private Map<String, List<String>> biographicalInformation;
-	// TODO: clarify format. Right now Metis returns a list of Resources
-	private List<String> professionOrOccupation;
-	private List<String> placeOfBirth;
-	private List<String> placeOfDeath;
-
-	private String dateOfEstablishment; // format "YYYY"
-	private String dateOfTermination; // format "YYYY"
-	private String gender;
-
-	private List<String> exactMatch;
 
 	@JsonGetter(WAS_PRESENT_AT)
 	public List<String> getWasPresentAt() {
@@ -109,30 +109,47 @@ public class Agent extends Entity {
 	public List<String> getDate() {
 		return date;
 	}
-
 	@JsonSetter(DATE)
 	public void setDate(List<String> date) {
 		this.date = date;
 	}
 
-	@JsonGetter(BEGIN)
+
 	public List<String> getBegin() {
 		return begin;
 	}
 
-	@JsonSetter(BEGIN)
+	@JsonGetter(BEGIN)
+	private String getSerializedBegin(){
+		return CollectionUtils.lastElement(begin);
+	}
+
 	public void setBegin(List<String> begin) {
 		this.begin = begin;
 	}
 
-	@JsonGetter(END)
+	@JsonSetter(BEGIN)
+	private void setSerializedBegin(String beginString){
+		addToList(begin, beginString);
+	}
+
+
 	public List<String> getEnd() {
 		return end;
 	}
 
-	@JsonSetter(END)
+	@JsonGetter(END)
+	private String getSerializedEnd(){
+		return CollectionUtils.lastElement(end);
+	}
+
 	public void setEnd(List<String> end) {
 		this.end = end;
+	}
+
+	@JsonSetter(END)
+	private void setSerializedEnd(String endString) {
+		addToList(end, endString);
 	}
 
 	@JsonGetter(HAS_MET)
@@ -165,74 +182,131 @@ public class Agent extends Entity {
 		this.biographicalInformation = biographicalInformation;
 	}
 
-	@JsonGetter(DATE_OF_BIRTH)
 	public List<String> getDateOfBirth() {
 		return dateOfBirth;
 	}
 
-	@JsonSetter(DATE_OF_BIRTH)
+	@JsonGetter(DATE_OF_BIRTH)
+	private String getSerializedDateOfBirth(){
+		return CollectionUtils.lastElement(dateOfBirth);
+	}
+
 	public void setDateOfBirth(List<String> dateOfBirth) {
 		this.dateOfBirth = dateOfBirth;
 	}
 
-	@JsonGetter(DATE_OF_DEATH)
+	@JsonSetter(DATE_OF_BIRTH)
+	private void setSerializedDateOfBirth(String dateOfBirthString){
+		addToList(dateOfBirth, dateOfBirthString);
+	}
+
 	public List<String> getDateOfDeath() {
 		return dateOfDeath;
 	}
 
-	@JsonSetter(DATE_OF_DEATH)
+	@JsonGetter(DATE_OF_DEATH)
+	private String getSerializedDateOfDeath(){
+		return CollectionUtils.lastElement(dateOfDeath);
+	}
+
 	public void setDateOfDeath(List<String> dateOfDeath) {
 		this.dateOfDeath = dateOfDeath;
 	}
 
-	@JsonGetter(PLACE_OF_BIRTH)
+	@JsonSetter(DATE_OF_DEATH)
+	private void setSerializedDateOfDeath(String dateOfDeathString){
+		addToList(dateOfDeath, dateOfDeathString);
+	}
+
 	public List<String> getPlaceOfBirth() {
 		return placeOfBirth;
 	}
 
-	@JsonSetter(PLACE_OF_BIRTH)
+	@JsonGetter(PLACE_OF_BIRTH)
+	private String getSerializedPlaceOfBirth(){
+		return CollectionUtils.lastElement(placeOfBirth);
+	}
+
 	public void setPlaceOfBirth(List<String> placeOfBirth) {
 		this.placeOfBirth = placeOfBirth;
 	}
 
-	@JsonGetter(PLACE_OF_DEATH)
+	@JsonSetter(PLACE_OF_BIRTH)
+	private void setSerializedPlaceOfBirth(String placeOfBirthString){
+		addToList(placeOfBirth, placeOfBirthString);
+	}
+
 	public List<String> getPlaceOfDeath() {
 		return placeOfDeath;
 	}
 
-	@JsonSetter(PLACE_OF_DEATH)
+	@JsonGetter(PLACE_OF_DEATH)
+	private String getSerializedPlaceOfDeath(){
+		return CollectionUtils.lastElement(placeOfDeath);
+	}
+
 	public void setPlaceOfDeath(List<String> placeOfDeath) {
 		this.placeOfDeath = placeOfDeath;
 	}
 
-	@JsonGetter(DATE_OF_ESTABLISHMENT)
-	public String getDateOfEstablishment() {
+	@JsonSetter(PLACE_OF_DEATH)
+	private void setSerializedPlaceOfDeath(String placeOfDeathString){
+		addToList(placeOfDeath, placeOfDeathString);
+	}
+
+	public List<String> getDateOfEstablishment() {
 		return dateOfEstablishment;
 	}
 
-	@JsonSetter(DATE_OF_ESTABLISHMENT)
-	public void setDateOfEstablishment(String dateOfEstablishment) {
+	@JsonGetter(DATE_OF_ESTABLISHMENT)
+	private String getSerializedDateOfEstablishment(){
+		return CollectionUtils.lastElement(dateOfEstablishment);
+	}
+
+	public void setDateOfEstablishment(List<String> dateOfEstablishment) {
 		this.dateOfEstablishment = dateOfEstablishment;
 	}
 
-	@JsonGetter(DATE_OF_TERMINATION)
-	public String getDateOfTermination() {
+	@JsonSetter(DATE_OF_ESTABLISHMENT)
+	private void setSerializedDateOfEstablishment(String dateOfEstablishmentString){
+		addToList(dateOfEstablishment, dateOfEstablishmentString);
+	}
+
+	public List<String> getDateOfTermination() {
 		return dateOfTermination;
 	}
 
-	@JsonSetter(DATE_OF_TERMINATION)
-	public void setDateOfTermination(String dateOfTermination) {
+	@JsonGetter(DATE_OF_TERMINATION)
+	private String getSerializedDateOfTermination(){
+		return CollectionUtils.lastElement(dateOfTermination);
+	}
+
+	public void setDateOfTermination(List<String> dateOfTermination) {
 		this.dateOfTermination = dateOfTermination;
 	}
 
-	@JsonGetter(GENDER)
-	public String getGender() {
+	@JsonSetter(DATE_OF_TERMINATION)
+	private void setSerializedDateOfTermination(String dateOfTerminationString){
+		addToList(dateOfTermination, dateOfTerminationString);
+	}
+
+
+	public List<String> getGender() {
 		return gender;
 	}
 
-	@JsonSetter(GENDER)
-	public void setGender(String gender) {
+	@JsonGetter(GENDER)
+	private String getSerializedGender(){
+		return CollectionUtils.lastElement(gender);
+	}
+
+	public void setGender(List<String> gender) {
 		this.gender = gender;
+	}
+
+	@JsonSetter(GENDER)
+	private void setSerializedGender(String genderString){
+		addToList(gender, genderString);
 	}
 
 	@JsonGetter(PROFESSION_OR_OCCUPATION)
@@ -270,4 +344,11 @@ public class Agent extends Entity {
 		field.set(this, value);
 	}
 
+	private <T> void addToList(List<T> itemList, T item) {
+		if (itemList == null) {
+			itemList = new ArrayList<>();
+		}
+
+		itemList.add(item);
+	}
 }

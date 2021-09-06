@@ -6,6 +6,7 @@ import eu.europeana.corelib.edm.model.schemaorg.MultilingualString;
 import eu.europeana.corelib.edm.model.schemaorg.Text;
 import eu.europeana.corelib.edm.model.schemaorg.Thing;
 import eu.europeana.entitymanagement.definitions.model.Agent;
+import org.springframework.util.CollectionUtils;
 
 public class SchemaOrgAgent extends SchemaOrgEntity<Agent> {
 
@@ -39,9 +40,9 @@ public class SchemaOrgAgent extends SchemaOrgEntity<Agent> {
 			}
 		}
 		
-		if(agent.getGender()!=null) 
+		if(!CollectionUtils.isEmpty(agent.getGender()))
 		{
-			schemaOrgAgent.addGender(new Text(agent.getGender()));
+			schemaOrgAgent.addGender(new Text(CollectionUtils.lastElement(agent.getGender())));
 		}
 		
 		if(agent.getPlaceOfBirth()!=null) {
