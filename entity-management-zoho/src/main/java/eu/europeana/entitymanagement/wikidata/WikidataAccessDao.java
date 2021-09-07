@@ -26,7 +26,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.springframework.stereotype.Component;
 
+import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.web.xml.model.WikidataOrganization;
 import eu.europeana.entitymanagement.zoho.utils.WikidataAccessException;
 
@@ -36,6 +38,7 @@ import eu.europeana.entitymanagement.zoho.utils.WikidataAccessException;
  * @author Srishti Singh (srishti.singh@europeana.eu)
  * @since 2021-07-06
  */
+@Component(AppConfigConstants.BEAN_WIKIDATA_ACCESS_DAO)
 public class WikidataAccessDao {
 
     private Transformer transformer;

@@ -13,8 +13,11 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
 import eu.europeana.entitymanagement.definitions.model.Address;
 import eu.europeana.entitymanagement.definitions.model.Organization;
@@ -29,12 +32,13 @@ import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
  * @author Srishti Singh (srishti.singh@europeana.eu)
  * @since 2021-07-06
  */
+@Service(AppConfigConstants.BEAN_WIKIDATA_ACCESS_SERVICE)
 public class WikidataAccessService {
     private static final Logger LOGGER = LoggerFactory.getLogger(WikidataAccessService.class);
     private final WikidataAccessDao wikidataAccessDao;
     public static final String WIKIDATA_BASE_URL = "http://www.wikidata.org/entity/Q";
     
-
+    @Autowired
     public WikidataAccessService(WikidataAccessDao wikidataAccessDao) {
         this.wikidataAccessDao = wikidataAccessDao;
     }

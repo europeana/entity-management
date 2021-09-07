@@ -113,6 +113,25 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
     }
 
     @Test
+    void retrieveConceptJsonExternalSchemaOrgShouldBeSuccessful() throws Exception {
+
+        String europeanaMetadata = loadFile(CONCEPT_REGISTER_BATHTUB_JSON);
+        String metisResponse = loadFile(CONCEPT_BATHTUB_XML);
+
+        String entityId = createEntity(europeanaMetadata, metisResponse, CONCEPT_BATHTUB_URI).getEntityId();
+
+        String requestPath = getEntityRequestPath(entityId);
+        mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".schema.jsonld")
+                .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.@id", is(entityId)))
+        		.andExpect(jsonPath("$.name").isNotEmpty())
+        		.andExpect(jsonPath("$.description").isNotEmpty())
+        		.andExpect(jsonPath("$.alternateName").isNotEmpty());
+    }
+    
+    @Test
     public void retrieveAgentExternalSchemaOrgShouldBeSuccessful() throws Exception {
 
     	String europeanaMetadata = loadFile(AGENT_REGISTER_DAVINCI_JSON);
@@ -130,30 +149,49 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
 
         for (String sameAsElem : entityRecord.getEntity().getSameAs()) {
         	resultActions.andExpect(jsonPath("$.sameAs", Matchers.hasItem(sameAsElem)));
-        }
+        }        
+        resultActions.andExpect(jsonPath("$.gender").isNotEmpty());
+        resultActions.andExpect(jsonPath("$.deathDate").isNotEmpty());
+        resultActions.andExpect(jsonPath("$.birthDate").isNotEmpty());
+        resultActions.andExpect(jsonPath("$.name").isNotEmpty());
+        resultActions.andExpect(jsonPath("$.alternateName").isNotEmpty());
     }
 
     @Test
-    public void retrieveAgentInternalSchemaOrgShouldBeSuccessful() throws Exception {
-    	String europeanaMetadata = loadFile(AGENT_REGISTER_DAVINCI_JSON);
-        String metisResponse = loadFile(AGENT_DA_VINCI_XML);
-        EntityRecord entityRecord = createEntity(europeanaMetadata, metisResponse, AGENT_DA_VINCI_URI);
+    public void retrieveOrganizationExternalSchemaOrgShouldBeSuccessful() throws Exception {
+        String europeanaMetadata = loadFile(ORGANIZATION_REGISTER_BNF_JSON);
+        String metisResponse = loadFile(ORGANIZATION_BNF_XML);
 
-        String requestPath = getEntityRequestPath(entityRecord.getEntityId());
-        ResultActions resultActions = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".schema.jsonld")
-        		.param(WebEntityConstants.QUERY_PARAM_PROFILE, "internal")
+        String entityId = createEntity(europeanaMetadata, metisResponse, ORGANIZATION_BNF_URI).getEntityId();
+
+        String requestPath = getEntityRequestPath(entityId);
+        mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".schema.jsonld")
+                .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.@id", is(entityRecord.getEntityId())));
-
-        checkAllowHeaderForGET(resultActions);
-
-        for (String sameAsElem : entityRecord.getEntity().getSameAs()) {
-        	resultActions.andExpect(jsonPath("$.sameAs", Matchers.hasItem(sameAsElem)));
-        }
+                .andExpect(jsonPath("$.@id", is(entityId)))
+                .andExpect(jsonPath("$.sameAs").isNotEmpty());
     }
 
-    //
+    @Test
+    public void retrievePlaceExternalSchemaOrgShouldBeSuccessful() throws Exception {
+        String europeanaMetadata = loadFile(PLACE_REGISTER_PARIS_JSON);
+        String metisResponse = loadFile(PLACE_PARIS_XML);
+
+        String entityId = createEntity(europeanaMetadata, metisResponse, PLACE_PARIS_URI).getEntityId();
+
+        String requestPath = getEntityRequestPath(entityId);
+        mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".schema.jsonld")
+                .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.@id", is(entityId)))
+                .andExpect(jsonPath("$.geo").isNotEmpty())
+                .andExpect(jsonPath("$.name").isNotEmpty())
+                .andExpect(jsonPath("$.alternateName").isNotEmpty())
+                .andExpect(jsonPath("$.sameAs").isNotEmpty());
+    }
+
     @Test
     public void retrieveOrganizationJsonExternalShouldBeSuccessful() throws Exception {
         String europeanaMetadata = loadFile(ORGANIZATION_REGISTER_BNF_JSON);
