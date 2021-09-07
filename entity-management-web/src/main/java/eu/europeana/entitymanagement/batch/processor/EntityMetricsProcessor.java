@@ -80,14 +80,8 @@ public class EntityMetricsProcessor implements ItemProcessor<EntityRecord, Entit
           "Cannot compute ranking metrics for entityId=" + entity.getEntityId(), e);
     }
 
+    // cannot be null here as it's set in process()
     Aggregation aggregation = entity.getIsAggregatedBy();
-    if (aggregation == null) {
-      aggregation = new Aggregation();
-      entity.setIsAggregatedBy(aggregation);
-      Date now = new Date();
-      aggregation.setCreated(now);
-      aggregation.setModified(now);
-    }
 
     aggregation.setPageRank(metrics.getPageRank());
     aggregation.setRecordCount(metrics.getEnrichmentCount());

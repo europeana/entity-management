@@ -19,6 +19,7 @@ import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
@@ -331,18 +332,23 @@ public class EMController extends BaseRest {
 				throw new HttpBadRequestException(String
 						.format("id %s does not match a configured datasource", entityCreationRequest.getId()));
 			}
-
-			Entity metisResponse = dereferenceService
-					.dereferenceEntityById(entityCreationRequest.getId(), entityCreationRequest.getType());
-
-			if(!metisResponse.getType().equals(entityCreationRequest.getType())){
-				throw new EntityMismatchException(String.format("Metis type '%s' does not match type '%s' in request",
-						metisResponse.getType(), entityCreationRequest.getType()));
+			//in case of Organization it must be the zoho Organization
+			if (EntityTypes.Organization.getEntityType().equals(entityCreationRequest.getType()) && !entityCreationRequest.getId().contains(DataSources.ZOHO_ID)) {
+				throw new HttpBadRequestException(String
+						.format("The Organization entity should come from Zoho and have the corresponding id format containing: %s", DataSources.ZOHO_ID));
 			}
 
-			if (metisResponse.getSameAs() != null) {
+			Entity datasourceResponse = dereferenceService
+					.dereferenceEntityById(entityCreationRequest.getId(), entityCreationRequest.getType());
+
+			if(!datasourceResponse.getType().equals(entityCreationRequest.getType())){
+				throw new EntityMismatchException(String.format("Datasource type '%s' does not match type '%s' in request",
+						datasourceResponse.getType(), entityCreationRequest.getType()));
+			}
+
+			if (datasourceResponse.getSameAs() != null) {
 				existingEntity = entityRecordService
-						.retrieveMetisCoreferenceSameAs(metisResponse.getSameAs());
+						.retrieveCoreferenceSameAs(datasourceResponse.getSameAs());
 				response = checkExistingEntity(existingEntity, entityCreationRequest.getId());
 				if (response != null) {
 					return response;
@@ -350,7 +356,7 @@ public class EMController extends BaseRest {
 			}
 
 			EntityRecord savedEntityRecord = entityRecordService
-					.createEntityFromRequest(entityCreationRequest, metisResponse);
+					.createEntityFromRequest(entityCreationRequest, datasourceResponse);
 			logger.info("Created Entity record for externalId={}; entityId={}", entityCreationRequest.getId(), savedEntityRecord.getEntityId());
 
 			solrService.storeEntity(createSolrEntity(savedEntityRecord.getEntity()));

@@ -75,7 +75,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         checkCommonResponseHeaders(results);
     }
 
-    @Test
+    //@Test
     @Deprecated
     /**
      * @deprecated zoho is the primary source for organizations see registerZohoOrganizationShouldBeSuccessful
@@ -98,7 +98,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         checkCommonResponseHeaders(results);
     }
 
-//    @Test
+    //@Test
     /* Doesn't work without correct zoho import configuration
      * TODO: mock zoho response */
     public void registerZohoOrganizationShouldBeSuccessful() throws Exception {
