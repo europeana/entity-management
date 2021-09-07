@@ -42,7 +42,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import org.springframework.util.CollectionUtils;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({CONTEXT, ID, TYPE, DEPICTION, IS_SHOWN_BY, PREF_LABEL, ALT_LABEL, HIDDEN_LABEL, NAME, BEGIN, DATE_OF_BIRTH, DATE_OF_ESTABLISHMENT,
@@ -115,41 +114,24 @@ public class Agent extends Entity {
 	}
 
 
+	@JsonGetter(BEGIN)
 	public List<String> getBegin() {
 		return begin;
 	}
 
-	@JsonGetter(BEGIN)
-	private String getSerializedBegin(){
-		return CollectionUtils.lastElement(begin);
-	}
-
+	@JsonSetter(BEGIN)
 	public void setBegin(List<String> begin) {
 		this.begin = begin;
 	}
 
-	@JsonSetter(BEGIN)
-	private void setSerializedBegin(String beginString){
-		addToList(begin, beginString);
-	}
-
-
+	@JsonGetter(END)
 	public List<String> getEnd() {
 		return end;
 	}
 
-	@JsonGetter(END)
-	private String getSerializedEnd(){
-		return CollectionUtils.lastElement(end);
-	}
-
+	@JsonSetter(END)
 	public void setEnd(List<String> end) {
 		this.end = end;
-	}
-
-	@JsonSetter(END)
-	private void setSerializedEnd(String endString) {
-		addToList(end, endString);
 	}
 
 	@JsonGetter(HAS_MET)
@@ -182,131 +164,76 @@ public class Agent extends Entity {
 		this.biographicalInformation = biographicalInformation;
 	}
 
+	@JsonGetter(DATE_OF_BIRTH)
 	public List<String> getDateOfBirth() {
 		return dateOfBirth;
 	}
 
-	@JsonGetter(DATE_OF_BIRTH)
-	private String getSerializedDateOfBirth(){
-		return CollectionUtils.lastElement(dateOfBirth);
-	}
-
+	@JsonSetter(DATE_OF_BIRTH)
 	public void setDateOfBirth(List<String> dateOfBirth) {
 		this.dateOfBirth = dateOfBirth;
 	}
 
-	@JsonSetter(DATE_OF_BIRTH)
-	private void setSerializedDateOfBirth(String dateOfBirthString){
-		addToList(dateOfBirth, dateOfBirthString);
-	}
-
+	@JsonGetter(DATE_OF_DEATH)
 	public List<String> getDateOfDeath() {
 		return dateOfDeath;
 	}
 
-	@JsonGetter(DATE_OF_DEATH)
-	private String getSerializedDateOfDeath(){
-		return CollectionUtils.lastElement(dateOfDeath);
-	}
-
+	@JsonSetter(DATE_OF_DEATH)
 	public void setDateOfDeath(List<String> dateOfDeath) {
 		this.dateOfDeath = dateOfDeath;
 	}
 
-	@JsonSetter(DATE_OF_DEATH)
-	private void setSerializedDateOfDeath(String dateOfDeathString){
-		addToList(dateOfDeath, dateOfDeathString);
-	}
-
+	@JsonGetter(PLACE_OF_BIRTH)
 	public List<String> getPlaceOfBirth() {
 		return placeOfBirth;
 	}
 
-	@JsonGetter(PLACE_OF_BIRTH)
-	private String getSerializedPlaceOfBirth(){
-		return CollectionUtils.lastElement(placeOfBirth);
-	}
-
+	@JsonSetter(PLACE_OF_BIRTH)
 	public void setPlaceOfBirth(List<String> placeOfBirth) {
 		this.placeOfBirth = placeOfBirth;
 	}
 
-	@JsonSetter(PLACE_OF_BIRTH)
-	private void setSerializedPlaceOfBirth(String placeOfBirthString){
-		addToList(placeOfBirth, placeOfBirthString);
-	}
 
+	@JsonGetter(PLACE_OF_DEATH)
 	public List<String> getPlaceOfDeath() {
 		return placeOfDeath;
 	}
 
-	@JsonGetter(PLACE_OF_DEATH)
-	private String getSerializedPlaceOfDeath(){
-		return CollectionUtils.lastElement(placeOfDeath);
-	}
-
+	@JsonSetter(PLACE_OF_DEATH)
 	public void setPlaceOfDeath(List<String> placeOfDeath) {
 		this.placeOfDeath = placeOfDeath;
 	}
 
-	@JsonSetter(PLACE_OF_DEATH)
-	private void setSerializedPlaceOfDeath(String placeOfDeathString){
-		addToList(placeOfDeath, placeOfDeathString);
-	}
-
+	@JsonGetter(DATE_OF_ESTABLISHMENT)
 	public List<String> getDateOfEstablishment() {
 		return dateOfEstablishment;
 	}
 
-	@JsonGetter(DATE_OF_ESTABLISHMENT)
-	private String getSerializedDateOfEstablishment(){
-		return CollectionUtils.lastElement(dateOfEstablishment);
-	}
-
+	@JsonSetter(DATE_OF_ESTABLISHMENT)
 	public void setDateOfEstablishment(List<String> dateOfEstablishment) {
 		this.dateOfEstablishment = dateOfEstablishment;
 	}
 
-	@JsonSetter(DATE_OF_ESTABLISHMENT)
-	private void setSerializedDateOfEstablishment(String dateOfEstablishmentString){
-		addToList(dateOfEstablishment, dateOfEstablishmentString);
-	}
-
+	@JsonGetter(DATE_OF_TERMINATION)
 	public List<String> getDateOfTermination() {
 		return dateOfTermination;
 	}
 
-	@JsonGetter(DATE_OF_TERMINATION)
-	private String getSerializedDateOfTermination(){
-		return CollectionUtils.lastElement(dateOfTermination);
-	}
-
+	@JsonSetter(DATE_OF_TERMINATION)
 	public void setDateOfTermination(List<String> dateOfTermination) {
 		this.dateOfTermination = dateOfTermination;
 	}
 
-	@JsonSetter(DATE_OF_TERMINATION)
-	private void setSerializedDateOfTermination(String dateOfTerminationString){
-		addToList(dateOfTermination, dateOfTerminationString);
-	}
-
-
+	@JsonGetter(GENDER)
 	public List<String> getGender() {
 		return gender;
 	}
 
-	@JsonGetter(GENDER)
-	private String getSerializedGender(){
-		return CollectionUtils.lastElement(gender);
-	}
-
-	public void setGender(List<String> gender) {
-		this.gender = gender;
-	}
 
 	@JsonSetter(GENDER)
-	private void setSerializedGender(String genderString){
-		addToList(gender, genderString);
+	public void setGender(List<String> gender) {
+		this.gender = gender;
 	}
 
 	@JsonGetter(PROFESSION_OR_OCCUPATION)
@@ -342,13 +269,5 @@ public class Agent extends Entity {
 	public void setFieldValue(Field field, Object value) throws IllegalArgumentException, IllegalAccessException {
 		//TODO:in case of the performance overhead cause by using the reflecion code, change this method to call the setter for each field individually
 		field.set(this, value);
-	}
-
-	private <T> void addToList(List<T> itemList, T item) {
-		if (itemList == null) {
-			itemList = new ArrayList<>();
-		}
-
-		itemList.add(item);
 	}
 }

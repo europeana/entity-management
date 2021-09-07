@@ -159,7 +159,7 @@ public class EntityRecordService {
 		}
 
 		Date timestamp = new Date();
-		Entity entity = EntityObjectFactory.createEntityObject(type);
+		Entity entity = EntityObjectFactory.createProxyEntityObject(type);
 		EntityRecord entityRecord = new EntityRecord();
 		String entityId = generateEntityId(entity.getType(), identifier);
 		// check if entity already exists
@@ -175,7 +175,7 @@ public class EntityRecordService {
 		entity.setSameAs(Collections.singletonList(entityCreationRequest.getId()));
 		entityRecord.setEntity(entity);
 
-		Entity europeanaProxyMetadata = EntityObjectFactory.createEntityObject(type);
+		Entity europeanaProxyMetadata = EntityObjectFactory.createProxyEntityObject(type);
 		// copy metadata from request into entity
 		europeanaProxyMetadata.setEntityId(entityId);
 		europeanaProxyMetadata.setType(type);
@@ -183,7 +183,7 @@ public class EntityRecordService {
 		setEuropeanaMetadata(europeanaProxyMetadata, entityId, entityRecord, timestamp);
 
 		// create metis Entity
-		Entity metisEntity = EntityObjectFactory.createEntityObject(type);
+		Entity metisEntity = EntityObjectFactory.createProxyEntityObject(type);
 
 		DataSource externalDatasource = externalDatasourceOptional.get();
 		setExternalProxyMetadata(metisEntity, entityCreationRequest.getId(), entityId, externalDatasource, entityRecord, timestamp);
@@ -210,7 +210,7 @@ public class EntityRecordService {
 	}
 
 	Date timestamp = new Date();
-	Entity entity = EntityObjectFactory.createEntityObject(metisResponse.getType());
+	Entity entity = EntityObjectFactory.createConsolidatedEntityObject(metisResponse.getType());
 
 	EntityRecord entityRecord = new EntityRecord();
 	String entityId = generateEntityId(entity.getType(), null);
@@ -224,7 +224,7 @@ public class EntityRecordService {
 		entityRecord.setEntity(entity);
 
 
-        Entity europeanaProxyMetadata = EntityObjectFactory.createEntityObject(metisResponse.getType());
+        Entity europeanaProxyMetadata = EntityObjectFactory.createProxyEntityObject(metisResponse.getType());
 				// copy metadata from request into entity
 				europeanaProxyMetadata.setEntityId(entityId);
 				europeanaProxyMetadata.setType(metisResponse.getType());
@@ -557,7 +557,7 @@ public class EntityRecordService {
 	@SuppressWarnings("unchecked")
 	private Entity combineEntities(Entity primary, Entity secondary, List<Field> fieldsToCombine, boolean accumulate)
 			throws EuropeanaApiException {
-		Entity consolidatedEntity = EntityObjectFactory.createEntityObject(primary.getType());
+		Entity consolidatedEntity = EntityObjectFactory.createConsolidatedEntityObject(primary.getType());
 
 		try {
 
@@ -899,7 +899,7 @@ public class EntityRecordService {
 
 		entityRecord.getProxies().remove(externalProxy);
 
-		setExternalProxyMetadata(EntityObjectFactory.createEntityObject(entityType),
+		setExternalProxyMetadata(EntityObjectFactory.createProxyEntityObject(entityType),
 				newProxyId, entityRecord.getEntityId(), externalDatasourceOptional.get(),
 				entityRecord, new Date());
 	}
