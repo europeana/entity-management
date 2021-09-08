@@ -19,7 +19,7 @@ import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
-import eu.europeana.entitymanagement.web.EntityRecordUtils;
+import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 
@@ -31,7 +31,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
-import static eu.europeana.entitymanagement.web.EntityRecordUtils.*;
+import static eu.europeana.entitymanagement.utils.EntityRecordUtils.*;
 import static java.time.Instant.now;
 
 @Service(AppConfig.BEAN_ENTITY_RECORD_SERVICE)
@@ -215,9 +215,9 @@ public class EntityRecordService {
 		Entity entity = EntityObjectFactory.createEntityObject(datasourceResponse.getType());
 
 		EntityRecord entityRecord = new EntityRecord();
-		String entityId = null;
+		String entityId;
 		//only in case of Zoho Organization use the provided id from de-referencing
-		if(ZohoUtils.isZohoOrganization(datasourceResponse.getEntityId(), datasourceResponse.getType())) {
+		if(ZohoUtils.isZohoOrganization(entityCreationRequest.getId(), datasourceResponse.getType())) {
 			entityId = datasourceResponse.getEntityId();
 		}
 		else {

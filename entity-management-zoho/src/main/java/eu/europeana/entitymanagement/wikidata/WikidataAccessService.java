@@ -1,4 +1,6 @@
 package eu.europeana.entitymanagement.wikidata;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.dereference.Dereferencer;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -7,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import java.util.Optional;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.io.FileUtils;
@@ -33,7 +36,7 @@ import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
  * @since 2021-07-06
  */
 @Service(AppConfigConstants.BEAN_WIKIDATA_ACCESS_SERVICE)
-public class WikidataAccessService {
+public class WikidataAccessService implements Dereferencer {
     private static final Logger LOGGER = LoggerFactory.getLogger(WikidataAccessService.class);
     private final WikidataAccessDao wikidataAccessDao;
     public static final String WIKIDATA_BASE_URL = "http://www.wikidata.org/entity/Q";
@@ -53,7 +56,8 @@ public class WikidataAccessService {
         return builder.build().encode().toUri();
     }
 
-    public XmlOrganizationImpl dereference(String wikidataUri) throws WikidataAccessException, EntityCreationException {
+    @Override
+		public Optional<Entity> dereferenceEntityById(String wikidataUri) throws WikidataAccessException, EntityCreationException {
         StringBuilder wikidataXml = null;
         WikidataOrganization wikidataOrganization = null;
         try {
@@ -64,7 +68,10 @@ public class WikidataAccessService {
             throw new WikidataAccessException("Cannot parse wikidata xml response for uri: " + wikidataUri, var5);
         }
 
-        return wikidataOrganization == null ? null : wikidataOrganization.getOrganization();
+        if(wikidataOrganization == null){
+        	return Optional.empty();
+				}
+        return Optional.of(wikidataOrganization.getOrganization().toEntityModel());
     }
 
     public WikidataOrganization parseWikidataOrganization(File inputFile) throws JAXBException {

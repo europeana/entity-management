@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.web;
 
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -164,7 +165,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         String metisResponse = loadFile(CONCEPT_BATHTUB_XML);
 
         String entityId = createEntity(europeanaMetadata, metisResponse, CONCEPT_BATHTUB_URI).getEntityId();
-        String redirectUrl = String.format("/entity/%s",EntityRecordUtils.extractIdentifierFromEntityId(entityId));
+        String redirectUrl = String.format("/entity/%s", EntityRecordUtils.extractIdentifierFromEntityId(entityId));
 
         mockMvc.perform(post(BASE_SERVICE_URL)
                 .content(europeanaMetadata)
