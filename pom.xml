@@ -229,23 +229,4 @@
               </plugin>
           </plugins>
   </build>
-
-    <!-- release profile set by default so users have to explicitly trigger dev behaviour-->
-    <profiles>
-        <profile>
-            <id>dev</id>
-            <properties>
-                <activeProfile>dev</activeProfile>
-            </properties>
-        </profile>
-        <profile>
-            <id>release</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <properties>
-                <activeProfile>release</activeProfile>
-            </properties>
-        </profile>
-    </profiles>
 </project>

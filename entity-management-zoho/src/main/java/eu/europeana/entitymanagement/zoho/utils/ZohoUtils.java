@@ -2,7 +2,9 @@ package eu.europeana.entitymanagement.zoho.utils;
 
 import com.zoho.crm.api.util.Choice;
 
+import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -232,4 +234,28 @@ public final class ZohoUtils {
       List<String> mergedList = mergeStringLists(baseList, addList);
       return mergedList == null ? null : mergedList.toArray(new String[0]);
   }
+  
+  /**
+   * get the zohoId as the last part of the id (the part after the last /)
+   * @param id
+   */
+  public static String getZohoId (String id) {
+      if(!id.contains("/")) {
+          return id;
+      }else {
+          String[] uriParts = id.split("/");
+          return uriParts[uriParts.length -1];     
+      }
+  }
+  
+  /**
+   * check if the entity is the Zoho organization
+   * @param id
+   * @param entityType
+   * @return
+   */
+  public static boolean isZohoOrganization(String id, String entityType) {
+      return EntityTypes.Organization.getEntityType().equals(entityType) && id.contains(DataSources.ZOHO_ID);
+  }
+  
 }

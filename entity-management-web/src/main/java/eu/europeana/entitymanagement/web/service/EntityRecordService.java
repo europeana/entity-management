@@ -21,6 +21,8 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.web.EntityRecordUtils;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
+import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -197,23 +199,30 @@ public class EntityRecordService {
      * persisted.
      *
      * @param entityCreationRequest de-referenced XML response instance from Metis
-     * @param metisResponse    Metis de-referencing response
+     * @param datasourceResponse    Entity obtained from de-referencing
      * @return Saved Entity record
      * @throws EntityCreationException if an error occurs
      */
-    public EntityRecord createEntityFromRequest(EntityPreview entityCreationRequest, Entity metisResponse)
+    public EntityRecord createEntityFromRequest(EntityPreview entityCreationRequest, Entity datasourceResponse)
 	    throws EntityCreationException {
-	// Fail quick if no datasource is configured
-	Optional<DataSource> externalDatasourceOptional = datasources.getDatasource(entityCreationRequest.getId());
-	if (externalDatasourceOptional.isEmpty()) {
-		throw new EntityCreationException("No configured datasource for entity " + entityCreationRequest.getId());
-	}
+		// Fail quick if no datasource is configured
+		Optional<DataSource> externalDatasourceOptional = datasources.getDatasource(entityCreationRequest.getId());
+		if (externalDatasourceOptional.isEmpty()) {
+			throw new EntityCreationException("No configured datasource for entity " + entityCreationRequest.getId());
+		}
 
-	Date timestamp = new Date();
-	Entity entity = EntityObjectFactory.createEntityObject(metisResponse.getType());
+		Date timestamp = new Date();
+		Entity entity = EntityObjectFactory.createEntityObject(datasourceResponse.getType());
 
-	EntityRecord entityRecord = new EntityRecord();
-	String entityId = generateEntityId(entity.getType(), null);
+		EntityRecord entityRecord = new EntityRecord();
+		String entityId = null;
+		//only in case of Zoho Organization use the provided id from de-referencing
+		if(ZohoUtils.isZohoOrganization(datasourceResponse.getEntityId(), datasourceResponse.getType())) {
+			entityId = datasourceResponse.getEntityId();
+		}
+		else {
+			entityId = generateEntityId(entity.getType(), null);
+		}
         entityRecord.setEntityId(entityId);
         entity.setEntityId(entityId);
 		/*
@@ -224,16 +233,16 @@ public class EntityRecordService {
 		entityRecord.setEntity(entity);
 
 
-        Entity europeanaProxyMetadata = EntityObjectFactory.createEntityObject(metisResponse.getType());
+        Entity europeanaProxyMetadata = EntityObjectFactory.createEntityObject(datasourceResponse.getType());
 				// copy metadata from request into entity
 				europeanaProxyMetadata.setEntityId(entityId);
-				europeanaProxyMetadata.setType(metisResponse.getType());
+				europeanaProxyMetadata.setType(datasourceResponse.getType());
 				copyPreviewMetadata(europeanaProxyMetadata, entityCreationRequest);
         setEuropeanaMetadata(europeanaProxyMetadata, entityId, entityRecord, timestamp);
 
        
 	DataSource externalDatasource = externalDatasourceOptional.get();
-	setExternalProxyMetadata(metisResponse, entityCreationRequest.getId(), entityId, externalDatasource, entityRecord, timestamp);
+	setExternalProxyMetadata(datasourceResponse, entityCreationRequest.getId(), entityId, externalDatasource, entityRecord, timestamp);
 
 	setEntityAggregation(entityRecord, entityId, timestamp);
 	return entityRecordRepository.save(entityRecord);
@@ -284,13 +293,13 @@ public class EntityRecordService {
     }
 
     /**
-     * Checks if any of the resources in the SameAs field from Metis is alredy
+     * Checks if any of the resources in the SameAs field from the Datasource is already
      * known.
      * 
      * @param rdfResources list of SameAs resources
      * @return Optional containing EntityRecord, or empty Optional if none found
      */
-    public Optional<EntityRecord> retrieveMetisCoreferenceSameAs(List<String> rdfResources) {
+    public Optional<EntityRecord> retrieveCoreferenceSameAs(List<String> rdfResources) {
 	for (String resource : rdfResources) {
 	    Optional<EntityRecord> entityRecordOptional = retrieveByEntityId(resource);
 	    if (entityRecordOptional.isPresent()) {

@@ -1,31 +1,20 @@
 package eu.europeana.entitymanagement.schemaorg.model;
 
-import java.util.Map.Entry;
-
-import eu.europeana.corelib.edm.model.schemaorg.MultilingualString;
-import eu.europeana.corelib.edm.model.schemaorg.Thing;
+import eu.europeana.corelib.edm.model.schemaorg.ContextualEntity;
 import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.utils.SchemaOrgUtils;
 
 public class SchemaOrgOrganization extends SchemaOrgEntity<Organization> {
 
-    private final eu.europeana.corelib.edm.model.schemaorg.Organization schemaOrgOrganization;
+    private final eu.europeana.corelib.edm.model.schemaorg.EdmOrganization schemaOrgOrganization;
 
     public SchemaOrgOrganization(Organization ogranization) {
-        schemaOrgOrganization = new eu.europeana.corelib.edm.model.schemaorg.Organization();
-		if(ogranization.getDescription()!=null) {
-			for (Entry<String, String> descriptionEntry : ogranization.getDescription().entrySet()) {
-				MultilingualString descriptionEntrySchemaOrg = new MultilingualString();
-				descriptionEntrySchemaOrg.setLanguage(descriptionEntry.getKey());
-				descriptionEntrySchemaOrg.setValue(descriptionEntry.getValue());
-				schemaOrgOrganization.addDescription(descriptionEntrySchemaOrg);
-			}
-		}	
-
-        setCommonProperties(schemaOrgOrganization, ogranization);
+        schemaOrgOrganization = new eu.europeana.corelib.edm.model.schemaorg.EdmOrganization();
+        SchemaOrgUtils.processEntity(ogranization, schemaOrgOrganization);        
     }
 
     @Override
-    public Thing get() {
+    public ContextualEntity get() {
         return schemaOrgOrganization;
     }
 }

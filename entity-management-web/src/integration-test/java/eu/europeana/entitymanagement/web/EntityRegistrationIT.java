@@ -62,7 +62,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
     }
 
     @Test
-    @Deprecated
+    @Disabled("Doesn't work without correct zoho import configuration")
     /**
      * @deprecated zoho is the primary source for organizations see registerZohoOrganizationShouldBeSuccessful
      * @throws Exception

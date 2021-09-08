@@ -79,8 +79,7 @@ public class ZohoAccessConfiguration {
             // create fresh token store
             tokenStoreFile.delete();
         } else {
-            tokenStoreFile.getParentFile().mkdirs();
-
+        	if(tokenStoreFile.getParentFile()!=null) tokenStoreFile.getParentFile().mkdirs();
         }
         // create empty token store
         boolean created = tokenStoreFile.createNewFile();

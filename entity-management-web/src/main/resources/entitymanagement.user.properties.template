@@ -3,10 +3,6 @@ mongo.connectionUrl = mongodb://<host>:<port>
 mongo.em.database = <entity-management-db>
 mongo.batch.database = <spring-batch-db>
 
-# when the "dev" profile is active, these set whether the database should be cleared on startup
-mongo.batch.database.reset=false
-mongo.em.database.reset=false
-
 # number of EntityRecords to process in one commit-interval (before writing to the database)
 batch.chunkSize=10
 
