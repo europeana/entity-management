@@ -142,8 +142,12 @@ Secretari General del Partit Comunista de la Unió Soviètica
 <skos:note xml:lang="lt">buvęs TSRS vadovas</skos:note>
 <rdaGr2:placeOfBirth rdf:resource="http://www.wikidata.org/entity/Q19583"/>
 <rdaGr2:placeOfBirth rdf:resource="http://www.wikidata.org/entity/Q4088132"/>
+<!-- multiple dateOfBirth values added to test cleaning-->
 <rdaGr2:dateOfBirth>1878-12-18T00:00:00Z</rdaGr2:dateOfBirth>
+<rdaGr2:dateOfBirth>1878-12-19T00:00:00Z</rdaGr2:dateOfBirth>
+<!-- multiple dateOfDeath values added to test cleaning-->
 <rdaGr2:dateOfDeath>1953-03-05T00:00:00Z</rdaGr2:dateOfDeath>
+<rdaGr2:dateOfDeath>1953-03-06T00:00:00Z</rdaGr2:dateOfDeath>
 <rdaGr2:dateOfEstablishment>1923-02-12T00:00:00Z</rdaGr2:dateOfEstablishment>
 <rdaGr2:gender>Male</rdaGr2:gender>
 <rdaGr2:professionOrOccupation rdf:resource="http://www.wikidata.org/entity/Q462189"/>

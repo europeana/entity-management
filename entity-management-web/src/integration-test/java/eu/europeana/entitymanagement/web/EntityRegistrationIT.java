@@ -67,6 +67,11 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         results.andExpect(jsonPath("$.id", any(String.class)))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())))
                 .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
+                // fields to be serialized as string
+                .andExpect(jsonPath("$.dateOfBirth", any(String.class)))
+                .andExpect(jsonPath("$.dateOfDeath", any(String.class)))
+                .andExpect(jsonPath("$.dateOfEstablishment", any(String.class)))
+
                 .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
                 // should have Europeana and Datasource proxies
                 .andExpect(jsonPath("$.proxies", hasSize(2)));

@@ -14,52 +14,62 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.util.CollectionUtils;
 
 /**
- * This class is used when serializing agent instances contained within the consolidated entity.
+ * Necessary for serializing agent instances contained within the consolidated entity.
+ *
+ * Also see {@link eu.europeana.entitymanagement.definitions.mixins.ConsolidatedAgentMixin}
  */
 public class ConsolidatedAgent extends Agent {
 
+  public ConsolidatedAgent() {
+    // default constructor
+  }
+
+  public ConsolidatedAgent(Agent copy) {
+    super(copy);
+  }
+
   @JsonProperty(BEGIN)
   private String beginString() {
-    return CollectionUtils.lastElement(getBegin());
+    return CollectionUtils.firstElement(getBegin());
   }
 
   @JsonProperty(END)
   private String endString() {
-    return CollectionUtils.lastElement(getEnd());
+    return CollectionUtils.firstElement(getEnd());
   }
 
   @JsonProperty(DATE_OF_BIRTH)
   private String dateOfBirthString() {
-    return CollectionUtils.lastElement(getDateOfBirth());
+    return CollectionUtils.firstElement(getDateOfBirth());
   }
 
   @JsonProperty(DATE_OF_ESTABLISHMENT)
   private String dateOfEstablishmentString() {
-    return CollectionUtils.lastElement(getDateOfEstablishment());
+    return CollectionUtils.firstElement(getDateOfEstablishment());
   }
 
   @JsonProperty(PLACE_OF_DEATH)
   private String placeOfDeathString() {
-    return CollectionUtils.lastElement(getPlaceOfDeath());
+    return CollectionUtils.firstElement(getPlaceOfDeath());
   }
 
   @JsonProperty(DATE_OF_DEATH)
   private String dateOfDeathString() {
-    return CollectionUtils.lastElement(getDateOfDeath());
+    return CollectionUtils.firstElement(getDateOfDeath());
   }
 
   @JsonProperty(PLACE_OF_BIRTH)
   private String placeOfBirthString() {
-    return CollectionUtils.lastElement(getPlaceOfBirth());
+    return CollectionUtils.firstElement(getPlaceOfBirth());
   }
 
   @JsonProperty(GENDER)
   private String genderString() {
-    return CollectionUtils.lastElement(getGender());
+    return CollectionUtils.firstElement(getGender());
   }
 
   @JsonProperty(DATE_OF_TERMINATION)
   private String dateOfTerminationString() {
-    return CollectionUtils.lastElement(getDateOfTermination());
+    return CollectionUtils.firstElement(getDateOfTermination());
   }
 }

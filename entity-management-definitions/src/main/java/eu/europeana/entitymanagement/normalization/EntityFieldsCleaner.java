@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.normalization;
 
+import eu.europeana.entitymanagement.definitions.model.ConsolidatedAgent;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
@@ -27,6 +28,13 @@ import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 
 import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.*;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BASE_DATA_EUROPEANA_URI;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BEGIN;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DATE_OF_BIRTH;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DATE_OF_DEATH;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DATE_OF_ESTABLISHMENT;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DATE_OF_TERMINATION;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.END;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.GENDER;
 
 public class EntityFieldsCleaner {
 
@@ -35,6 +43,19 @@ public class EntityFieldsCleaner {
     private final LanguageCodes emLanguageCodes;
 
     private final String thumbnailBaseUrl;
+
+	/**
+	 * Mapping between Entity classes and List<String> fields that should contain a single entity.
+	 * This is only applicable for the consolidated entity, where we want to serialize certain fields
+	 * as String but save them to the database as List<String>
+	 *
+	 * List values must match field names in the Entity class.
+	 */
+	private final Map<Class<? extends Entity>, List<String>> SINGLE_ELEMENT_LIST_FIELDS = Map.of(
+			ConsolidatedAgent.class, List.of(BEGIN, END, DATE_OF_BIRTH, DATE_OF_DEATH,
+					DATE_OF_ESTABLISHMENT, DATE_OF_TERMINATION, GENDER)
+	);
+
 
     public EntityFieldsCleaner(LanguageCodes emLanguageCodes, String thumbnailBaseUrl) {
 	this.emLanguageCodes = emLanguageCodes;
@@ -60,8 +81,23 @@ public class EntityFieldsCleaner {
 		    String[] normalized = normalizedList.toArray(new String[0]);
 		    entity.setFieldValue(field, normalized);
 		} else if (fieldType.isAssignableFrom(List.class)) {
-		 // remove spaces from the List<String> fields
-		    entity.setFieldValue(field, normalizeValues(field.getName(),(List<String>) fieldValue));
+			List<String> fieldValueList = (List<String>) fieldValue;
+			if (fieldValueList.isEmpty()) {
+				continue;
+			}
+
+			// remove spaces from the List<String> fields
+			List<String> normalizedList = normalizeValues(field.getName(), fieldValueList);
+
+			// if Entity field is supposed to contain a single element, remove all elements except the first
+			if (SINGLE_ELEMENT_LIST_FIELDS.containsKey(entity.getClass()) &&
+					SINGLE_ELEMENT_LIST_FIELDS.get(entity.getClass()).contains(field.getName()) &&
+					normalizedList.size() > 1
+			) {
+				normalizedList.subList(1, normalizedList.size()).clear();
+			}
+			entity.setFieldValue(field, normalizedList);
+
 		} else if (fieldType.isAssignableFrom(Map.class)) {
 		    @SuppressWarnings("rawtypes")
 		    Map normalized = normalizeMapField(field, (Map) fieldValue);
