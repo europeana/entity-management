@@ -1,7 +1,8 @@
 package eu.europeana.entitymanagement.schemaorg.model;
 
-import eu.europeana.corelib.edm.model.schemaorg.Thing;
+import eu.europeana.corelib.edm.model.schemaorg.ContextualEntity;
 import eu.europeana.entitymanagement.definitions.model.Concept;
+import eu.europeana.entitymanagement.utils.SchemaOrgUtils;
 
 public class SchemaOrgConcept extends SchemaOrgEntity<Concept> {
 
@@ -9,11 +10,11 @@ public class SchemaOrgConcept extends SchemaOrgEntity<Concept> {
 
     public SchemaOrgConcept(Concept concept) {
     	schemaOrgConcept = new eu.europeana.corelib.edm.model.schemaorg.Concept();
-        setCommonProperties(schemaOrgConcept, concept);
+    	SchemaOrgUtils.processEntity(concept, schemaOrgConcept);
     }
 
     @Override
-    public Thing get() {
+    public ContextualEntity get() {
         return schemaOrgConcept;
     }
 }

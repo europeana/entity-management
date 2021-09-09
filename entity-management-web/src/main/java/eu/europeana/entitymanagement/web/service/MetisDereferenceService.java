@@ -27,6 +27,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import com.zoho.crm.api.record.Record;
 
 import eu.europeana.api.commons.error.EuropeanaApiException;
+import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.model.Entity;
@@ -35,10 +36,15 @@ import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
 import eu.europeana.entitymanagement.exception.MetisNotKnownException;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.web.EntityRecordUtils;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
+import eu.europeana.entitymanagement.web.xml.model.XmlOrganizationImpl;
+import eu.europeana.entitymanagement.wikidata.WikidataAccessDao;
+import eu.europeana.entitymanagement.wikidata.WikidataAccessService;
 import eu.europeana.entitymanagement.zoho.organization.ZohoAccessConfiguration;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
+import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 
 /**
  * Handles de-referencing entities from Metis.
@@ -54,7 +60,6 @@ public class MetisDereferenceService implements InitializingBean {
 	
 	private final ZohoAccessConfiguration zohoAccessConfiguration;
 	ZohoOrganizationConverter zohoOrganizationConverter = new ZohoOrganizationConverter();
-        
 
 	/**
 	 * Create a separate JAXB unmarshaller for each thread
@@ -90,14 +95,9 @@ public class MetisDereferenceService implements InitializingBean {
                 return null;
             }
             
-            if (isZohoOrganization(id, entityType)) {
-                String zohoId;
-                if(!id.contains("/")) {
-                    zohoId = id;
-                }else {
-                    String[] uriParts = id.split("/");
-                    zohoId = uriParts[uriParts.length -1];     
-                }
+            if (ZohoUtils.isZohoOrganization(id, entityType)) {
+
+                String zohoId = EntityRecordUtils.getIdFromUrl(id);
                  
                 Optional<Record> zohoOrganization = zohoAccessConfiguration.getZohoAccessClient()
                         .getZohoRecordOrganizationById(zohoId);
@@ -106,7 +106,13 @@ public class MetisDereferenceService implements InitializingBean {
                     org = zohoOrganizationConverter.convertToOrganizationEntity(zohoOrganization.get());
                 }
                 return org;
-            } else {
+            }
+            else if (isWikidataOrganization(id, entityType)) {
+                WikidataAccessService wikidataService = new WikidataAccessService(new WikidataAccessDao());
+                XmlOrganizationImpl org = wikidataService.dereference(id);
+                return org.toEntityModel();
+            }
+            else {
                 String metisResponseBody = fetchMetisResponse(id);
                 XmlBaseEntityImpl<?> metisResponse = parseMetisResponse(unmarshaller.get(), id, metisResponseBody);
                 if (metisResponse == null) {
@@ -116,10 +122,10 @@ public class MetisDereferenceService implements InitializingBean {
             }
         }
 
-    boolean isZohoOrganization(String id, String entityType) {
-        return EntityTypes.Organization.getEntityType().equals(entityType) && id.contains("crm.zoho.com");
-    }
 
+    boolean isWikidataOrganization(String id, String entityType) {
+        return EntityTypes.Organization.getEntityType().equals(entityType) && id.contains(DataSources.WIKIDATA_ID);
+    }
 
     String fetchMetisResponse(String externalId) {
     	Instant start= Instant.now();

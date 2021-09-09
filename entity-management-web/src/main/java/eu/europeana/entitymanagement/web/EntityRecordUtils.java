@@ -37,4 +37,13 @@ public abstract class EntityRecordUtils {
 	public static String getEuropeanaProxyId(String entityId) {
 		return entityId + "#proxy_europeana";
 	}
+	
+	public static String getIdFromUrl (String url) {
+	    if(!url.contains("/")) {
+	        return url;
+	    }else {
+	        String[] uriParts = url.split("/");
+	        return uriParts[uriParts.length -1];     
+	    }
+	}
 }

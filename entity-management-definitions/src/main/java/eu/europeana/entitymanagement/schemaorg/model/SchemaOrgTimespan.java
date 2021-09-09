@@ -1,7 +1,8 @@
 package eu.europeana.entitymanagement.schemaorg.model;
 
-import eu.europeana.corelib.edm.model.schemaorg.Thing;
+import eu.europeana.corelib.edm.model.schemaorg.ContextualEntity;
 import eu.europeana.entitymanagement.definitions.model.Timespan;
+import eu.europeana.entitymanagement.utils.SchemaOrgUtils;
 
 public class SchemaOrgTimespan extends SchemaOrgEntity<Timespan> {
 
@@ -9,11 +10,11 @@ public class SchemaOrgTimespan extends SchemaOrgEntity<Timespan> {
 
     public SchemaOrgTimespan(Timespan timespan) {
     	schemaOrgTimespan = new eu.europeana.corelib.edm.model.schemaorg.Timespan();
-        setCommonProperties(schemaOrgTimespan, timespan);
+        SchemaOrgUtils.processEntity(timespan, schemaOrgTimespan);
     }
 
     @Override
-    public Thing get() {
+    public ContextualEntity get() {
         return schemaOrgTimespan;
     }
 }
