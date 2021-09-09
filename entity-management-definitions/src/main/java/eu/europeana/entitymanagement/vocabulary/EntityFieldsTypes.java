@@ -148,6 +148,18 @@ public enum EntityFieldsTypes {
             throw new EntityFieldAccessException("Unknown field: " + fieldName, e);
         }
     }
+
+    /**
+     * Returns true if the field cannot contain more than 1 element
+     */
+    public static boolean isScalar(String fieldName){
+        try {
+            String cardinality = valueOf(fieldName).getFieldCardinality();
+            return FIELD_CARDINALITY_0_1.equals(cardinality) || FIELD_CARDINALITY_1_1.equals(cardinality);
+        }catch (IllegalArgumentException e){
+            throw new EntityFieldAccessException("Unknown field: " + fieldName, e);
+        }
+    }
     
     boolean getFieldIsmultilingual() {
         return fieldIsmultilingual;

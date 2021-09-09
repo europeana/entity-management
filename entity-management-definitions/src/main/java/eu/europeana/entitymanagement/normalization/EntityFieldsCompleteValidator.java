@@ -159,6 +159,12 @@ public class EntityFieldsCompleteValidator implements ConstraintValidator<Entity
     		if (fieldValues.isEmpty()) { 
 		    return true;
 		}
+
+      if (EntityFieldsTypes.isScalar(field.getName()) && fieldValues.size() > 1) {
+        addConstraint(context,
+            "The entity field: " + field.getName() + " cannot have more than one value");
+        return false;
+      }
 		for (String fieldValueElem : fieldValues) {
 		    boolean returnValueLocal = checkEmailFormat(context, field, fieldValueElem);
 		    //update global return value
@@ -195,6 +201,11 @@ public class EntityFieldsCompleteValidator implements ConstraintValidator<Entity
     		if (fieldValues.isEmpty()) {
 		    return true;
 		}
+      if (EntityFieldsTypes.isScalar(field.getName()) && fieldValues.size() > 1) {
+        addConstraint(context,
+            "The entity field: " + field.getName() + " cannot have more than one value");
+        return false;
+      }
 		for (String fieldValueElem : fieldValues) {
 			if (checkDateFormatISO8601(context, field, fieldValueElem) == false && returnValue == true) {
 				returnValue = false;
@@ -238,6 +249,12 @@ public class EntityFieldsCompleteValidator implements ConstraintValidator<Entity
  		if (fieldValues.isEmpty()) {
  		    return true;
  		}
+
+      if (EntityFieldsTypes.isScalar(field.getName()) && fieldValues.size() > 1) {
+        addConstraint(context,
+            "The entity field: " + field.getName() + " cannot have more than one value");
+        return false;
+      }
 		for (String fieldValueElem : fieldValues) {
 			if (!validateURIField(context, field, fieldValueElem)) {
 				returnValue = false;
