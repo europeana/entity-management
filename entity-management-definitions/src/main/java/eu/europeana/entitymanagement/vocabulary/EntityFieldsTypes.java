@@ -150,9 +150,9 @@ public enum EntityFieldsTypes {
     }
 
     /**
-     * Returns true if the field cannot contain more than 1 element
+     * Checks if the field cannot contain more than 1 element
      */
-    public static boolean isScalar(String fieldName){
+    public static boolean isSingleValueField(String fieldName){
         try {
             String cardinality = valueOf(fieldName).getFieldCardinality();
             return FIELD_CARDINALITY_0_1.equals(cardinality) || FIELD_CARDINALITY_1_1.equals(cardinality);

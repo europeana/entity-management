@@ -160,7 +160,7 @@ public class EntityFieldsCompleteValidator implements ConstraintValidator<Entity
 		    return true;
 		}
 
-      if (EntityFieldsTypes.isScalar(field.getName()) && fieldValues.size() > 1) {
+      if (EntityFieldsTypes.isSingleValueField(field.getName()) && fieldValues.size() > 1) {
         addConstraint(context,
             "The entity field: " + field.getName() + " cannot have more than one value");
         return false;
@@ -201,7 +201,7 @@ public class EntityFieldsCompleteValidator implements ConstraintValidator<Entity
     		if (fieldValues.isEmpty()) {
 		    return true;
 		}
-      if (EntityFieldsTypes.isScalar(field.getName()) && fieldValues.size() > 1) {
+      if (EntityFieldsTypes.isSingleValueField(field.getName()) && fieldValues.size() > 1) {
         addConstraint(context,
             "The entity field: " + field.getName() + " cannot have more than one value");
         return false;
@@ -250,7 +250,7 @@ public class EntityFieldsCompleteValidator implements ConstraintValidator<Entity
  		    return true;
  		}
 
-      if (EntityFieldsTypes.isScalar(field.getName()) && fieldValues.size() > 1) {
+      if (EntityFieldsTypes.isSingleValueField(field.getName()) && fieldValues.size() > 1) {
         addConstraint(context,
             "The entity field: " + field.getName() + " cannot have more than one value");
         return false;
