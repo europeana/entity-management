@@ -4,14 +4,13 @@ import static eu.europeana.entitymanagement.common.config.AppConfigConstants.MET
 import static eu.europeana.entitymanagement.web.MetisDereferenceUtils.parseMetisResponse;
 
 import eu.europeana.api.commons.error.EuropeanaApiException;
-import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.dereference.Dereferencer;
+import eu.europeana.entitymanagement.exception.DatasourceNotReachableException;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 import java.net.MalformedURLException;
@@ -32,6 +31,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import reactor.core.Exceptions;
 
 /**
  * Handles de-referencing entities from Metis.
@@ -68,8 +69,8 @@ public class MetisDereferenceService implements InitializingBean, Dereferencer {
      * @param id external ID for entity
      * @return An optional containing the de-referenced entity, or an empty optional
      *         if no match found.
-	 * @throws Exception 
-	 * @throws ZohoException 
+	 * @throws Exception
+	 * @throws ZohoException
      */
 	@Override
 	public Optional<Entity> dereferenceEntityById(String id)
@@ -85,22 +86,58 @@ public class MetisDereferenceService implements InitializingBean, Dereferencer {
 
 
 
-    String fetchMetisResponse(String externalId) {
+    String fetchMetisResponse(String externalId) throws Exception {
     	Instant start= Instant.now();
 		logger.info("De-referencing externalId={} from Metis", externalId);
 
-	String metisResponseBody = metisWebClient.get()
-		.uri(uriBuilder -> uriBuilder.path(METIS_DEREF_PATH).queryParam("uri", externalId).build())
-		.accept(MediaType.APPLICATION_XML).retrieve()
-		// return 400 for 4xx responses from Metis
-		.onStatus(HttpStatus::is4xxClientError,
-			response -> response.bodyToMono(String.class).map(HttpBadRequestException::new))
-		// return 500 for everything else
-		.onStatus(HttpStatus::isError,
-			response -> response.bodyToMono(String.class).map(EuropeanaApiException::new))
-		.onStatus(HttpStatus::is5xxServerError,
-				response -> response.bodyToMono(String.class).map(EuropeanaApiException::new))
-		.bodyToMono(String.class).block();
+			String metisResponseBody;
+			try {
+				metisResponseBody = metisWebClient.get()
+						.uri(
+								uriBuilder -> uriBuilder.path(METIS_DEREF_PATH).queryParam("uri", externalId)
+										.build())
+						.accept(MediaType.APPLICATION_XML).retrieve()
+						// 404 response received if Metis dereference service is down
+						.onStatus(HttpStatus.NOT_FOUND::equals,
+								response -> response.bodyToMono(String.class).map(DatasourceNotReachableException::new))
+						// return 400 for other 4xx responses from Metis
+						.onStatus(HttpStatus::is4xxClientError,
+								response -> response.bodyToMono(String.class).map(HttpBadRequestException::new))
+						// return 500 for everything else
+						.onStatus(HttpStatus::isError,
+								response -> response.bodyToMono(String.class).map(EuropeanaApiException::new))
+						.bodyToMono(String.class)
+						.block();
+			}
+			// thrown if DNS lookup for Metis dereference url fails
+			catch (WebClientRequestException we) {
+				throw new DatasourceNotReachableException("Metis Dereference Service");
+			}
+			catch (Exception e){
+				/*
+				 * Spring WebFlux wraps exceptions in ReactiveError (see Exceptions.propagate())
+				 * We cannot handle that exception in @ControllerAdvice classes, so we unwrap the underlying
+				 * exception and rethrow it here.
+				 *
+				 * We check for all exceptions (instead of just EuropeanaApiException) because all its subclasses
+				 * return a different value for getResponseStatus()
+ 				 */
+
+				Throwable t = Exceptions.unwrap(e);
+
+				if (t instanceof DatasourceNotReachableException) {
+					throw new DatasourceNotReachableException(t.getMessage());
+				}
+				if (t instanceof HttpBadRequestException) {
+					throw new HttpBadRequestException(t.getMessage());
+				}
+
+				if (t instanceof EuropeanaApiException) {
+					throw new EuropeanaApiException(t.getMessage());
+				}
+
+				throw new Exception(t);
+			}
 
 	long duration = Duration.between(start, Instant.now()).toMillis();
 	logger.info("Received Metis response for externalId={}. Duration={}ms", externalId, duration);

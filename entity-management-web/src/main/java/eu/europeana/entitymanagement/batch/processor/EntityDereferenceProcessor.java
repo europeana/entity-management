@@ -17,7 +17,6 @@ import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityMismatchException;
 import eu.europeana.entitymanagement.exception.DatasourceNotKnownException;
 import eu.europeana.entitymanagement.utils.EntityComparator;
-import eu.europeana.entitymanagement.web.service.MetisDereferenceService;
 
 /**
  * This {@link ItemProcessor} retrieves Entity metadata from Metis, and then overwrites the local
