@@ -1,12 +1,16 @@
-package eu.europeana.entitymanagement.web;
+package eu.europeana.entitymanagement.utils;
 
 import org.apache.commons.lang3.StringUtils;
 
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 
-public abstract class EntityRecordUtils {
+public class EntityRecordUtils {
 
-    public static String buildEntityIdUri(String type, String identifier) {
+	private EntityRecordUtils() {
+		// private constructor to prevent instantiation
+	}
+
+	public static String buildEntityIdUri(String type, String identifier) {
 	StringBuilder stringBuilder = new StringBuilder();
 
 	stringBuilder.append(WebEntityFields.BASE_DATA_EUROPEANA_URI);

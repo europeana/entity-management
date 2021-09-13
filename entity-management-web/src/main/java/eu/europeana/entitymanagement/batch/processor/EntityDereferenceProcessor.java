@@ -1,10 +1,9 @@
 package eu.europeana.entitymanagement.batch.processor;
 
+import eu.europeana.entitymanagement.dereference.Dereferencer;
+import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
 import java.util.Date;
-import java.util.Set;
-
-import javax.validation.ConstraintViolation;
-import javax.validation.ValidatorFactory;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,9 +15,7 @@ import org.springframework.stereotype.Component;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityMismatchException;
-import eu.europeana.entitymanagement.exception.MetisNotKnownException;
-import eu.europeana.entitymanagement.exception.ingestion.EntityValidationException;
-import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorGroup;
+import eu.europeana.entitymanagement.exception.DatasourceNotKnownException;
 import eu.europeana.entitymanagement.utils.EntityComparator;
 import eu.europeana.entitymanagement.web.service.MetisDereferenceService;
 
@@ -31,29 +28,29 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
 
     private static final String MISMATCH_EXCEPTION_STRING = "Metis type %s does not match entity type %s for entityId=%s";
     private static final Logger logger = LogManager.getLogger(EntityDereferenceProcessor.class);
-    private final MetisDereferenceService dereferenceService;
+    private final DereferenceServiceLocator dereferenceServiceLocator;
     private final EntityComparator entityComparator;
-    private final ValidatorFactory emValidatorFactory;
 
     @Autowired
-    public EntityDereferenceProcessor(MetisDereferenceService dereferenceService, ValidatorFactory emValidatorFactory) {
-        this.dereferenceService = dereferenceService;
+    public EntityDereferenceProcessor(DereferenceServiceLocator dereferenceServiceLocator) {
+        this.dereferenceServiceLocator = dereferenceServiceLocator;
         this.entityComparator = new EntityComparator();
-        this.emValidatorFactory = emValidatorFactory;
     }
 
     @Override
     public EntityRecord process(@NonNull EntityRecord entityRecord) throws Exception {
         String entityId = entityRecord.getEntityId();
         String proxyId = entityRecord.getExternalProxy().getProxyId();
-        Entity metisResponse;
-        try {
-            metisResponse = dereferenceService.dereferenceEntityById(proxyId, entityRecord.getEntity().getType());
-        } catch (MetisNotKnownException e) {
-            // include entityId in exception message, then rethrow it
-            throw new MetisNotKnownException("Unsuccessful Metis dereferenciation for externalId=" +
+
+      Dereferencer dereferencer = dereferenceServiceLocator.getDereferencer(proxyId,
+          entityRecord.getEntity().getType());
+      Optional<Entity> metisResponseOptional = dereferencer.dereferenceEntityById(proxyId);
+         if (metisResponseOptional.isEmpty()) {
+            throw new DatasourceNotKnownException("Unsuccessful dereferenciation for externalId=" +
                     proxyId + "; entityId=" + entityId);
         }
+
+        Entity metisResponse = metisResponseOptional.get();
 
         Entity entity = entityRecord.getEntity();
 

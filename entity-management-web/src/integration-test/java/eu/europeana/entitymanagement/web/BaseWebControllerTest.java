@@ -141,18 +141,6 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
         return entityRecordService.retrieveByEntityId(savedRecord.getEntityId()).orElseThrow();
     }
 
-    protected void queueMetisResponseForRequest(String metisResponseBody, boolean forUpdate)
-            throws Exception {
-        // set mock Metis response
-        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(metisResponseBody));
-        //second request for update task during create
-        mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(metisResponseBody));
-        //third request of update when update method is called
-        if (forUpdate) {
-            mockMetis.enqueue(new MockResponse().setResponseCode(200).setBody(metisResponseBody));
-        }
-    }
-
     protected void deprecateEntity(EntityRecord entityRecord){
         entityRecordService.disableEntityRecord(entityRecord);
     }

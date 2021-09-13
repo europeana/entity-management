@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement.web;
 
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.testutils.BaseMvcTestUtils;
+import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
