@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class EnrichmentService {
@@ -47,8 +48,8 @@ public class EnrichmentService {
             enrichmentEntity.setAltLabel(entityRecord.getEntity().getAltLabel());
             enrichmentEntity.setHiddenLabel(entityRecord.getEntity().getHiddenLabel());
             enrichmentEntity.setNote(entityRecord.getEntity().getNote());
-            if(entityRecord.getEntity().getSameAs() != null && !entityRecord.getEntity().getSameAs().isEmpty()) {
-                enrichmentEntity.setOwlSameAs(entityRecord.getEntity().getSameAs());
+            if(!CollectionUtils.isEmpty(entityRecord.getEntity().getSameReferenceLinks())) {
+                enrichmentEntity.setOwlSameAs(entityRecord.getEntity().getSameReferenceLinks());
             }
             enrichmentEntity.setIsPartOf(String.valueOf(entityRecord.getEntity().getIsPartOfArray()));
             enrichmentEntity.setFoafDepiction(entityRecord.getEntity().getDepiction() != null ?

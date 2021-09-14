@@ -1,37 +1,17 @@
 package eu.europeana.entitymanagement.definitions.model;
 
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ALT_LABEL;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BROADER;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BROAD_MATCH;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CLOSE_MATCH;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DEPICTION;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.EXACT_MATCH;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HIDDEN_LABEL;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IN_SCHEME;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_SHOWN_BY;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NARROWER;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NARROW_MATCH;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NOTATION;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NOTE;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.RELATED;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.RELATED_MATCH;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
-
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
-
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({CONTEXT, ID, TYPE, DEPICTION, IS_SHOWN_BY, PREF_LABEL, ALT_LABEL, HIDDEN_LABEL,NOTE,
@@ -49,7 +29,6 @@ public class Concept extends Entity {
 		if(copy.getRelated()!=null) this.related = new ArrayList<>(copy.getRelated());
 		if(copy.getBroadMatch()!=null) this.broadMatch = new ArrayList<>(copy.getBroadMatch());
 		if(copy.getNarrowMatch()!=null) this.narrowMatch = new ArrayList<>(copy.getNarrowMatch());
-		if(copy.getExactMatch()!=null) this.exactMatch = new ArrayList<>(copy.getExactMatch());
 		if(copy.getCoref()!=null) this.coref = new ArrayList<>(copy.getCoref());
 		if(copy.getRelatedMatch()!=null) this.relatedMatch = new ArrayList<>(copy.getRelatedMatch());
 		if(copy.getCloseMatch()!=null) this.closeMatch = new ArrayList<>(copy.getCloseMatch());
@@ -123,17 +102,6 @@ public class Concept extends Entity {
 		this.narrowMatch = narrowMatch;
 	}
 
-	@JsonGetter(EXACT_MATCH)
-	public List<String> getExactMatch() {
-		return exactMatch;
-	}
-
-	
-	@JsonSetter(EXACT_MATCH)
-	public void setExactMatch(List<String> exactMatch) {
-		this.exactMatch = exactMatch;
-	}
-
 	public List<String> getCoref() {
 		return coref;
 	}
@@ -204,4 +172,15 @@ public class Concept extends Entity {
 		field.set(this, value);
 	}
 
+	@Override
+	@JsonSetter(EXACT_MATCH)
+	public void setSameReferenceLinks(List<String> uris) {
+		this.exactMatch = uris;
+	}
+
+	@Override
+	@JsonGetter(EXACT_MATCH)
+	public List<String> getSameReferenceLinks() {
+		return this.exactMatch;
+	}
 }

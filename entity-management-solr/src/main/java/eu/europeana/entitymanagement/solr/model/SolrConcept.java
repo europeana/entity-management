@@ -60,7 +60,6 @@ public class SolrConcept extends SolrEntity<Concept> {
 		if(concept.getRelated()!=null) this.related= new ArrayList<>(concept.getRelated());
 		if(concept.getBroadMatch()!=null) this.broadMatch=new ArrayList<>(concept.getBroadMatch());
 		if(concept.getNarrowMatch()!=null) this.narrowMatch= new ArrayList<>(concept.getNarrowMatch());
-		if(concept.getExactMatch()!=null) this.exactMatch= new ArrayList<>(concept.getExactMatch());
 		if(concept.getCoref()!=null) this.coref=new ArrayList<>(concept.getCoref());
 		if(concept.getRelatedMatch()!=null) this.relatedMatch= new ArrayList<>(concept.getRelatedMatch());
 		if(concept.getCloseMatch()!=null) this.closeMatch= new ArrayList<>(concept.getCloseMatch());
@@ -116,5 +115,10 @@ public class SolrConcept extends SolrEntity<Concept> {
 
 	public Map<String, List<String>> getNotation() {
 		return notation;
+	}
+
+	@Override
+	protected void setSameReferenceLinks(ArrayList<String> uris) {
+		this.exactMatch = exactMatch;
 	}
 }

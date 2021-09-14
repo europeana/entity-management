@@ -174,7 +174,7 @@ public class EntityRecordService {
 		 * sameAs will be replaced during consolidation; however we set this here to prevent duplicate
 		 * registrations if consolidation fails
 		 */
-		entity.setSameAs(Collections.singletonList(entityCreationRequest.getId()));
+		entity.setSameReferenceLinks(Collections.singletonList(entityCreationRequest.getId()));
 		entityRecord.setEntity(entity);
 
 		Entity europeanaProxyMetadata = EntityObjectFactory.createEntityObject(type);
@@ -229,7 +229,7 @@ public class EntityRecordService {
 		 * sameAs will be replaced during consolidation; however we set this here to prevent duplicate
 		 * registrations if consolidation fails
 		 */
-		entity.setSameAs(Collections.singletonList(entityCreationRequest.getId()));
+		entity.setSameReferenceLinks(Collections.singletonList(entityCreationRequest.getId()));
 		entityRecord.setEntity(entity);
 
 
@@ -293,22 +293,22 @@ public class EntityRecordService {
     }
 
     /**
-     * Checks if any of the resources in the SameAs field from the Datasource is already
+     * Checks if any of the resources in the SameAs / ExactMatch field from the Datasource is already
      * known.
      * 
-     * @param rdfResources list of SameAs resources
+     * @param rdfResources list of SameAs/ExactMatch resources
      * @return Optional containing EntityRecord, or empty Optional if none found
      */
-    public Optional<EntityRecord> retrieveCoreferenceSameAs(List<String> rdfResources) {
-	for (String resource : rdfResources) {
-	    Optional<EntityRecord> entityRecordOptional = retrieveByEntityId(resource);
-	    if (entityRecordOptional.isPresent()) {
-		return entityRecordOptional;
-	    }
-	}
+		public Optional<EntityRecord> retrieveCoreferencedEntity(List<String> rdfResources) {
+			for (String resource : rdfResources) {
+				Optional<EntityRecord> entityRecordOptional = retrieveByEntityId(resource);
+				if (entityRecordOptional.isPresent()) {
+					return entityRecordOptional;
+				}
+			}
 
-	return Optional.empty();
-    }
+			return Optional.empty();
+		}
 
     public void performReferentialIntegrity(Entity entity)  {
 
@@ -636,15 +636,15 @@ public class EntityRecordService {
 
 		}
 
-		// Add external proxy id to consolidated entity sameAs
+		// Add external proxy id to consolidated entity sameAs / exactMatch
 		String externalProxyId = secondary.getEntityId();
-		List<String> consolidatedEntitySameAs = consolidatedEntity.getSameAs();
+		List<String> consolidatedEntitySameRefs = consolidatedEntity.getSameReferenceLinks();
 
-		if (consolidatedEntitySameAs == null) {
-			consolidatedEntity.setSameAs(Collections.singletonList(externalProxyId));
+		if (consolidatedEntitySameRefs == null) {
+			consolidatedEntity.setSameReferenceLinks(Collections.singletonList(externalProxyId));
 		}
-		else if (!consolidatedEntitySameAs.contains(externalProxyId)) {
-			consolidatedEntitySameAs.add(externalProxyId);
+		else if (!consolidatedEntitySameRefs.contains(externalProxyId)) {
+			consolidatedEntitySameRefs.add(externalProxyId);
 		}
 
 		return consolidatedEntity;

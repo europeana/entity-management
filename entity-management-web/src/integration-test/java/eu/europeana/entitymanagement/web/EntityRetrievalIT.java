@@ -148,7 +148,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.@id", is(entityRecord.getEntityId())));
 
-        for (String sameAsElem : entityRecord.getEntity().getSameAs()) {
+        for (String sameAsElem : entityRecord.getEntity().getSameReferenceLinks()) {
         	resultActions.andExpect(jsonPath("$.sameAs", Matchers.hasItem(sameAsElem)));
         }
         resultActions.andExpect(jsonPath("$.gender").isNotEmpty());

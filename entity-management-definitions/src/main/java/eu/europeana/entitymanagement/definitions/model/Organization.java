@@ -92,6 +92,8 @@ public class Organization extends Entity {
 	private String postBox;
 	private String hasGeo;
 	private Address address;
+
+	private List<String> sameAs;
 	
 	@JsonGetter(DESCRIPTION)
 	public Map<String, String> getDescription() {
@@ -319,5 +321,17 @@ public class Organization extends Entity {
 
 	public void setAddress(Address address) {
 		this.address = address;
+	}
+
+	@Override
+	@JsonSetter(SAME_AS)
+	public void setSameReferenceLinks(List<String> uris) {
+		this.sameAs = uris;
+	}
+
+	@Override
+	@JsonGetter(SAME_AS)
+	public List<String> getSameReferenceLinks() {
+		return this.sameAs;
 	}
 }

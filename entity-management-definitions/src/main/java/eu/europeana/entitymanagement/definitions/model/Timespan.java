@@ -49,6 +49,7 @@ public class Timespan extends Entity {
     private List<String> isNextInSequence;
     private String begin;
     private String end;
+    private List<String> sameAs;
 
     @JsonGetter(IS_NEXT_IN_SEQUENCE)
     @JacksonXmlProperty(localName = XmlFields.XML_EDM_IS_NEXT_IN_SEQUENCE)
@@ -158,4 +159,15 @@ public class Timespan extends Entity {
         field.set(this, value);
     }
 
+    @Override
+    @JsonSetter(SAME_AS)
+    public void setSameReferenceLinks(List<String> uris) {
+        this.sameAs = uris;
+    }
+
+    @Override
+    @JsonGetter(SAME_AS)
+    public List<String> getSameReferenceLinks() {
+        return this.sameAs;
+    }
 }

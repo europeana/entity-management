@@ -120,16 +120,14 @@ public class WikidataAccessService implements Dereferencer {
 	    List<String> mbox = ZohoUtils.mergeStringLists(organization.getMbox(), wikidataOrganizationEntity.getMbox());
 	    organization.setMbox(mbox);
 	    List<String> sameAs = this.buildSameAs(organization, wikidataOrganizationEntity);
-	    organization.setSameAs(sameAs);
+	    organization.setSameReferenceLinks(sameAs);
 	    organization.setDescription(wikidataOrganizationEntity.getDescription());
 	    mergeAddress(organization, wikidataOrganizationEntity);
     }
 
 	private List<String> buildSameAs(Organization organization, Organization wikidataOrganization) {
-	    List<String> mergedSameAs = organization.getOwlSameAs();
-	    for (int i = 0; i < wikidataOrganization.getOwlSameAs().size(); i++) {
-	      mergedSameAs.add(wikidataOrganization.getOwlSameAs().get(i));
-	    }
+	    List<String> mergedSameAs = organization.getSameReferenceLinks();
+			mergedSameAs.addAll(wikidataOrganization.getSameReferenceLinks());
 	    String wikidataResourceUri = wikidataOrganization.getAbout();
 	    if (!mergedSameAs.contains(wikidataResourceUri)) {
 	        mergedSameAs.add(wikidataResourceUri);

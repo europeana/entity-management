@@ -41,9 +41,6 @@ public abstract class SolrEntity<T extends Entity> {
     @Field(EntitySolrFields.IDENTIFIER)
     private List<String> identifier;
 
-    @Field(EntitySolrFields.SAME_AS)
-    private List<String> sameAs;
-
     @Field(EntitySolrFields.IS_RELATED_TO)
     private List<String> isRelatedTo;
 
@@ -71,14 +68,13 @@ public abstract class SolrEntity<T extends Entity> {
         setHiddenLabel(entity.getHiddenLabel());
         setIsShownBy(entity.getIsShownBy());
         if(entity.getIdentifier()!=null) this.identifier = new ArrayList<>(entity.getIdentifier());
-        if(entity.getSameAs()!=null) this.sameAs = new ArrayList<>(entity.getSameAs());
+        if(entity.getSameReferenceLinks() != null) this.setSameReferenceLinks(new ArrayList<>(entity.getSameReferenceLinks()));
         if(entity.getIsRelatedTo()!=null) this.isRelatedTo = new ArrayList<>(entity.getIsRelatedTo());
         if(entity.getHasPart()!=null) this.hasPart = new ArrayList<>(entity.getHasPart());
         if(entity.getIsPartOfArray()!=null) this.isPartOf = new ArrayList<>(entity.getIsPartOfArray());
 
         this.entity = entity;
     }
-
 
     public SolrEntity() {
     // no-arg constructor
@@ -159,10 +155,6 @@ public abstract class SolrEntity<T extends Entity> {
         return identifier;
     }
 
-    public List<String> getSameAs() {
-        return sameAs;
-    }
-
     public List<String> getIsRelatedTo() {
         return isRelatedTo;
     }
@@ -182,4 +174,6 @@ public abstract class SolrEntity<T extends Entity> {
     public T getEntity() {
         return entity;
     }
+
+    protected abstract void setSameReferenceLinks(ArrayList<String> uris);
 }

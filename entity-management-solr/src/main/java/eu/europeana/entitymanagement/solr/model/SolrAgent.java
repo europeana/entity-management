@@ -22,6 +22,9 @@ public class SolrAgent extends SolrEntity<Agent> {
 		super();
 	}
 
+	@Field(EntitySolrFields.SAME_AS)
+	private List<String> sameAs;
+
 	@Field(AgentSolrFields.DATE)
 	private List<String> date;
 
@@ -180,5 +183,10 @@ public class SolrAgent extends SolrEntity<Agent> {
 
 	public String getGender() {
 		return gender;
+	}
+
+	@Override
+	protected void setSameReferenceLinks(ArrayList<String> uris) {
+		this.sameAs = uris;
 	}
 }

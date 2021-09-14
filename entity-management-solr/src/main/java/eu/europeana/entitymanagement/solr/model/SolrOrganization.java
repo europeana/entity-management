@@ -18,6 +18,9 @@ import static eu.europeana.entitymanagement.solr.SolrUtils.SOLR_ORGANIZATION_SUG
 
 public class SolrOrganization extends SolrEntity<Organization> {
 
+	@Field(EntitySolrFields.SAME_AS)
+	private List<String> sameAs;
+
 	@Field(OrganizationSolrFields.DC_DESCRIPTION_ALL)
 	private Map<String, String> description;
 	
@@ -207,4 +210,8 @@ public class SolrOrganization extends SolrEntity<Organization> {
 		return hasGeo;
 	}
 
+	@Override
+	protected void setSameReferenceLinks(ArrayList<String> uris) {
+		this.sameAs = uris;
+	}
 }

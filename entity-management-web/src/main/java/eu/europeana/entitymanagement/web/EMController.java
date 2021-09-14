@@ -28,7 +28,6 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
-import eu.europeana.entitymanagement.web.service.MetisDereferenceService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -66,7 +65,7 @@ public class EMController extends BaseRest {
 	private final EntityManagementConfiguration emConfig;
 
 	private static final String EXTERNAL_ID_REMOVED_MSG = "Entity id '%s' already exists as '%s', which has been removed";
-	private static final String SAME_AS_NOT_EXISTS_MSG = "Url '%s' does not exist in entity owl:sameAs";
+	private static final String SAME_AS_NOT_EXISTS_MSG = "Url '%s' does not exist in entity owl:sameAs or skos:exactMatch";
 	public static final String INVALID_UPDATE_REQUEST_MSG = "Request must either specify a 'query' param or contain entity identifiers in body";
 
 
@@ -362,9 +361,9 @@ public class EMController extends BaseRest {
 						datasourceResponse.getType(), creationRequestType));
 			}
 
-			if (datasourceResponse.getSameAs() != null) {
+			if (datasourceResponse.getSameReferenceLinks() != null) {
 				existingEntity = entityRecordService
-						.retrieveCoreferenceSameAs(datasourceResponse.getSameAs());
+						.retrieveCoreferencedEntity(datasourceResponse.getSameReferenceLinks());
 				response = checkExistingEntity(existingEntity, creationRequestId);
 				if (response != null) {
 					return response;
@@ -399,7 +398,7 @@ public class EMController extends BaseRest {
 		}
 		EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
 
-		if(!entityRecord.getEntity().getSameAs().contains(url)){
+		if(!entityRecord.getEntity().getSameReferenceLinks().contains(url)){
 			throw new HttpBadRequestException(String.format(SAME_AS_NOT_EXISTS_MSG, url));
 		}
 
