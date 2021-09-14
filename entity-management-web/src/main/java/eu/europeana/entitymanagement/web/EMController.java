@@ -37,10 +37,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static eu.europeana.entitymanagement.solr.SolrUtils.createSolrEntity;
@@ -386,26 +383,50 @@ public class EMController extends BaseRest {
 		return launchTaskAndRetrieveEntity(request, type, identifier, entityRecord, profile);
 	}
 
-    private ResponseEntity<String> createResponse(HttpServletRequest request, String profile, String type, String languages, String identifier, FormatTypes outFormat,
+    private ResponseEntity<String> createResponse(HttpServletRequest request, String profileParam, String type, String languages, String identifier, FormatTypes outFormat,
 												  String contentType) throws EuropeanaApiException {
-			/*
-	 * verify the parameters
-	 */
-	boolean valid_profile = false;
-	for (EntityProfile ep : EntityProfile.values()) {
-	    if (ep.name().equals(profile)) {
-		valid_profile = true;
-		break;
-	    }
-	}
-	if (!valid_profile) {
-	    throw new HttpBadRequestException("Invalid profile");
+	// validate profile
+	String profile = getProfile(profileParam);
+	EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier,false);
+	return generateResponseEntity(request, profile, outFormat, languages, contentType, entityRecord,
+				HttpStatus.OK);
 	}
 
-			EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier,false);
-			return generateResponseEntity(request, profile, outFormat, languages, contentType, entityRecord,
-					HttpStatus.OK);
+	/**
+	 * gets the first valid profile from profile param
+	 * @param profileParam
+	 * @return
+	 * @throws HttpBadRequestException
+	 */
+	private String getProfile(String profileParam) throws HttpBadRequestException {
+	List<String> profiles = new ArrayList<>();
+	for(String profile : Arrays.asList(org.apache.commons.lang3.StringUtils.split(profileParam, ","))) {
+		profiles.add(getByName(profile));
+	}
+	// get the first valid profile -internal or external
+	for(String profile : profiles) {
+		if (!profile.equals(EntityProfile.debug.name())) {
+			return profile;
 		}
+	}
+	return profileParam;
+	}
+
+	/**
+	 * gets the valid EntityProfile names
+	 *
+	 * @param name
+	 * @return
+	 * @throws HttpBadRequestException
+	 */
+	public static String getByName(String name) throws HttpBadRequestException {
+	for (EntityProfile ep : EntityProfile.values()) {
+		if (ep.name().equals(name)) {
+			return ep.name();
+		}
+	}
+	throw new HttpBadRequestException("Invalid profile "+ name);
+	}
 
 	private ResponseEntity<String> launchTaskAndRetrieveEntity(HttpServletRequest request, String type, String identifier,
 															   EntityRecord entityRecord, String profile) throws Exception {
