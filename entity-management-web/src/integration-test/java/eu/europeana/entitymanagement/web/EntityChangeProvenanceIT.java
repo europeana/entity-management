@@ -26,8 +26,8 @@ public class EntityChangeProvenanceIT extends BaseWebControllerTest {
 
         EntityRecord savedRecord = createEntity(europeanaMetadata, metisResponse, AGENT_JAN_VERMEER_VIAF_URI);
 
-        // assert content of External proxy
-        EntityProxy externalProxy = savedRecord.getExternalProxy();
+        // assert content of default External proxy
+        EntityProxy externalProxy = savedRecord.getExternalProxies().get(0);
 
         Assertions.assertEquals(AGENT_JAN_VERMEER_VIAF_URI, externalProxy.getProxyId());
         String requestPath = getEntityRequestPath(savedRecord.getEntityId());

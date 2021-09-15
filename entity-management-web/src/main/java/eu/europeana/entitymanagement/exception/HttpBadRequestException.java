@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 
 /**
- * Exception thrown when a web request cannot be properly handled.
+ * Exception thrown when an error occurs due to bad user input.
  */
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class HttpBadRequestException extends EuropeanaApiException {
