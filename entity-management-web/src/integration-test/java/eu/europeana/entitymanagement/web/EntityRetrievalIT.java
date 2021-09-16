@@ -46,6 +46,14 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
     }
 
     @Test
+    void retrievalErrorWithDebugProfileShouldIncludeStacktrace() throws Exception{
+        mockMvc.perform(get(BASE_SERVICE_URL + "/" + "wrong-type/wrong-identifier.jsonld?profile=debug")
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.trace").exists());
+    }
+
+    @Test
     void retrieveDeprecatedEntityShouldReturn410() throws Exception {
         String europeanaMetadata = loadFile(CONCEPT_REGISTER_BATHTUB_JSON);
         String metisResponse = loadFile(CONCEPT_BATHTUB_XML);
