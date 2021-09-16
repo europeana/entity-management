@@ -40,6 +40,8 @@ import javax.validation.Valid;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants.PROFILE_DEBUG;
+import static eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants.QUERY_PARAM_PROFILE_SEPARATOR;
 import static eu.europeana.entitymanagement.solr.SolrUtils.createSolrEntity;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.QUERY_PARAM_QUERY;
 import static java.util.stream.Collectors.groupingBy;
@@ -61,6 +63,8 @@ public class EMController extends BaseRest {
 	private static final String SAME_AS_NOT_EXISTS_MSG = "Url '%s' does not exist in entity owl:sameAs";
 	public static final String INVALID_UPDATE_REQUEST_MSG = "Request must either specify a 'query' param or contain entity identifiers in body";
 
+	// profile used if none included in request
+	public static final String DEFAULT_REQUEST_PROFILE = EntityProfile.external.name();
 
   @Autowired
 	public EMController(EntityRecordService entityRecordService,
@@ -108,7 +112,7 @@ public class EMController extends BaseRest {
 			MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<String> enableEntity(
 			@RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
-			@RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
+			@RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = false) String profile,
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 			HttpServletRequest request) throws HttpException, EuropeanaApiException {
@@ -132,7 +136,7 @@ public class EMController extends BaseRest {
     public ResponseEntity<String> updateEntity(
     	@RequestHeader(value = "If-Match", required = false) String ifMatchHeader,
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
-	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "internal") String profile,
+	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = false) String profile,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 	    @RequestBody Entity updateRequestEntity,
@@ -177,7 +181,7 @@ public class EMController extends BaseRest {
 	public ResponseEntity<String> triggerSingleEntityFullUpdate(
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
-			@RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "internal") String profile,
+			@RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = false) String profile,
 			HttpServletRequest request
 	) throws Exception {
 		if (emConfig.isAuthEnabled()) {
@@ -245,7 +249,7 @@ public class EMController extends BaseRest {
 			MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<String> getJsonLdEntity(
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
-	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
+	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = false) String profile,
 	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_LANGUAGE, required = false) String languages,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
@@ -268,7 +272,7 @@ public class EMController extends BaseRest {
     public ResponseEntity<String> getXmlEntity(
 			@RequestHeader(value = HttpHeaders.ACCEPT) String acceptHeader,
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
-	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
+	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = false) String profile,
 	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_LANGUAGE, required = false) String languages,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
@@ -288,7 +292,7 @@ public class EMController extends BaseRest {
     			produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<String> getEntitySchemaJsonLd(
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
-	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
+	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = false) String profile,
 	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_LANGUAGE, required = false) String languages,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
@@ -365,7 +369,7 @@ public class EMController extends BaseRest {
 	public ResponseEntity<String> changeProvenance(
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
-			@RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "internal") String profile,
+			@RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = false) String profile,
 			@RequestParam(value = WebEntityConstants.PATH_PARAM_URL) String url,
 			HttpServletRequest request
 	) throws Exception {
@@ -386,46 +390,40 @@ public class EMController extends BaseRest {
     private ResponseEntity<String> createResponse(HttpServletRequest request, String profileParam, String type, String languages, String identifier, FormatTypes outFormat,
 												  String contentType) throws EuropeanaApiException {
 	// validate profile
-	String profile = getProfile(profileParam);
+	String entityProfile = getEntityProfile(profileParam);
+
 	EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier,false);
-	return generateResponseEntity(request, profile, outFormat, languages, contentType, entityRecord,
-				HttpStatus.OK);
+  // if request doesn't specify a valid EntityProfile, use external by default
+	return generateResponseEntity(request, entityProfile,
+			outFormat, languages, contentType, entityRecord, HttpStatus.OK);
 	}
 
 	/**
 	 * gets the first valid profile from profile param
-	 * @param profileParam
-	 * @return
-	 * @throws HttpBadRequestException
+	 * @param profileParamString profile request query param
+	 * @return valid EntityProfile in request
 	 */
-	private String getProfile(String profileParam) throws HttpBadRequestException {
-	List<String> profiles = new ArrayList<>();
-	for(String profile : Arrays.asList(org.apache.commons.lang3.StringUtils.split(profileParam, ","))) {
-		profiles.add(getByName(profile));
-	}
-	// get the first valid profile -internal or external
-	for(String profile : profiles) {
-		if (!profile.equals(EntityProfile.debug.name())) {
-			return profile;
-		}
-	}
-	return profileParam;
-	}
+	private String getEntityProfile(String profileParamString)
+			throws HttpBadRequestException {
+		if (StringUtils.hasLength(profileParamString)) {
+			List<String> profiles = List.of(profileParamString.split(QUERY_PARAM_PROFILE_SEPARATOR));
+			List<String> entityProfiles = Arrays.stream(EntityProfile.values()).map(Enum::name)
+					.collect(Collectors.toList());
 
-	/**
-	 * gets the valid EntityProfile names
-	 *
-	 * @param name
-	 * @return
-	 * @throws HttpBadRequestException
-	 */
-	public static String getByName(String name) throws HttpBadRequestException {
-	for (EntityProfile ep : EntityProfile.values()) {
-		if (ep.name().equals(name)) {
-			return ep.name();
+			for (String profileValue : profiles) {
+				if (entityProfiles.contains(profileValue)) {
+					return profileValue;
+				}
+			}
+
+			// no valid EntityProfile found. If profile param contains anything other than debug, throw an error
+			if(profiles.size() > 1 || !profiles.contains(PROFILE_DEBUG)){
+				throw new HttpBadRequestException("No valid EntityProfile in request");
+			}
 		}
-	}
-	throw new HttpBadRequestException("Invalid profile "+ name);
+
+		// use default profile if none specified
+		return DEFAULT_REQUEST_PROFILE;
 	}
 
 	private ResponseEntity<String> launchTaskAndRetrieveEntity(HttpServletRequest request, String type, String identifier,
@@ -434,7 +432,9 @@ public class EMController extends BaseRest {
 		launchUpdateTask(entityRecord.getEntityId());
 		entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
 
-		return generateResponseEntity(request, profile, FormatTypes.jsonld, null, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8,
+		String profileValue = getEntityProfile(profile);
+
+		return generateResponseEntity(request, profileValue, FormatTypes.jsonld, null, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8,
 				entityRecord, HttpStatus.ACCEPTED);
 	}
 
