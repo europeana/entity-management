@@ -8,16 +8,12 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeException;
-import org.springframework.web.HttpMediaTypeNotAcceptableException;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class EMExceptionHandler extends EuropeanaGlobalExceptionHandler {
@@ -84,33 +80,6 @@ public class EMExceptionHandler extends EuropeanaGlobalExceptionHandler {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(response);
     }
-
-    /**
-     * Customise the response for {@link org.springframework.web.HttpRequestMethodNotSupportedException}
-     * 
-     */
-    //TODO: remove method when updating API Commons version
-    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<EuropeanaApiErrorResponse> handleHttpRequestMethodNotSupported(
-            HttpRequestMethodNotSupportedException e, HttpServletRequest httpRequest) {
-
-        EuropeanaApiErrorResponse response = new EuropeanaApiErrorResponse.Builder(httpRequest, e, stackTraceEnabled())
-                .setStatus(HttpStatus.METHOD_NOT_ALLOWED.value())
-                .setError(e.getMessage())
-                .setMessage("Invalid method for request path")
-                .build();
-
-        Set<HttpMethod> supportedMethods = e.getSupportedHttpMethods();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        if (supportedMethods != null) {
-            headers.setAllow(supportedMethods);
-        }
-        return new ResponseEntity<>(response, headers, HttpStatus.METHOD_NOT_ALLOWED);
-    }
-
 
     @ExceptionHandler(HttpMediaTypeException.class)
     public ResponseEntity<EuropeanaApiErrorResponse> handleInvalidMediaType(HttpMediaTypeException e, HttpServletRequest httpRequest){
