@@ -80,7 +80,7 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
 	entity.setPrefLabel(RdfXmlUtils.toLanguageMap(getPrefLabel()));
 	entity.setAltLabel(RdfXmlUtils.toLanguageMapList(getAltLabel()));
 	entity.setSameAs(RdfXmlUtils.toStringList(getSameAs()));
-	if(depiction != null) {
+	if(depiction != null && !depiction.isEmpty()) {
 	    entity.setDepiction(XmlWebResourceImpl.toWebResource(depiction));
 	}
 	return entity;

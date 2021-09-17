@@ -2,7 +2,6 @@ package eu.europeana.entitymanagement.definitions.model;
 
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.ENTITY_CONTEXT;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ALT_LABEL;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HIDDEN_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NOTE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
@@ -12,7 +11,6 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_RELATE
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_PART;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_PART_OF;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DEPICTION;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_SHOWN_BY;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_AGGREGATED_BY;
@@ -84,8 +82,6 @@ public abstract class Entity {
 	protected String type;
 	protected String entityId;
 	// ID of entityRecord in database
-	@Transient
-	protected String entityIdentifier;
 
 	protected Map<String, List<String>> note;
 	protected Map<String, String> prefLabel;
@@ -195,7 +191,6 @@ public abstract class Entity {
 
 	public void setAbout(String about) {
 		setEntityId(about);
-		setEntityIdentifier();
 	}
 
 	@JsonGetter(IS_RELATED_TO)
@@ -281,12 +276,6 @@ public abstract class Entity {
 		return getSameAs();
 	}
 
-
-	public String getEntityIdentifier() {
-		return this.entityIdentifier;
-	}
-
-
 	@JsonGetter(WebEntityFields.IS_SHOWN_BY)
 	public WebResource getIsShownBy() {
 		return isShownBy;
@@ -330,11 +319,6 @@ public abstract class Entity {
 	@JsonSetter(IS_AGGREGATED_BY)
 	public void setIsAggregatedBy(Aggregation isAggregatedBy) {
 		this.isAggregatedBy = isAggregatedBy;
-	}
-	
-	private void setEntityIdentifier(){
-		String[] splitArray = this.getAbout().split("/");
-		this.entityIdentifier =  splitArray[splitArray.length-1];
 	}
 
 	@JsonIgnore

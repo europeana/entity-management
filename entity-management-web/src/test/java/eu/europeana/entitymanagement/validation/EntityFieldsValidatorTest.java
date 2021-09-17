@@ -56,7 +56,7 @@ public class EntityFieldsValidatorTest {
             System.out.println(violation.getMessageTemplate());
         }   
         //TODO: remove constraine violation: "The entity fields values are valid."
-        Assertions.assertEquals(18, violations.size());
+        Assertions.assertEquals(17, violations.size());
     }
 
     @Test
@@ -69,9 +69,9 @@ public class EntityFieldsValidatorTest {
         Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entityRecord.getEntity(), EntityFieldsMinimalValidatorGroup.class);
         for (ConstraintViolation<Entity> violation : violations) {
             System.out.println(violation.getMessageTemplate());
-        }   
-        //TODO: remove constraine violation: "The entity fields values are valid."
-        Assertions.assertEquals(4, violations.size());
+        }
+        // validation errors on geographicLevel and type
+      Assertions.assertEquals(3, violations.size());
     }
     
     @Test

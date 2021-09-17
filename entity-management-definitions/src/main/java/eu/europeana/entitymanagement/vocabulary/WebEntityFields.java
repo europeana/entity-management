@@ -27,8 +27,6 @@ public interface WebEntityFields {
 	public static final String IS_SHOWN_BY = "isShownBy";
 	public static final String ENTITY = "entity";
 	public static final String ENTITY_ID = "entityId";
-	public static final String ENTITY_IDENTIFIER = "entityIdentifier";
-
 
 	//common administrative information
 	public static final String CREATED = "created";

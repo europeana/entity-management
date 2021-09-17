@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.solr.model;
 
+import eu.europeana.entitymanagement.definitions.model.Address;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -89,14 +90,18 @@ public class SolrOrganization extends SolrEntity<Organization> {
 		setOrganizationDomain(organization.getOrganizationDomain());
 		setGeographicLevel(organization.getGeographicLevel());
 		this.country=organization.getCountry();
-		this.hasAddress=organization.getHasAddress();
-		this.streetAddress=organization.getStreetAddress();
-		this.locality=organization.getLocality();
-		this.region=organization.getRegion();
-		this.postalCode=organization.getPostalCode();
-		this.countryName=organization.getCountryName();
-		this.postBox=organization.getPostBox();
-		this.hasGeo=organization.getHasGeo();
+
+		Address organizationAddress = organization.getAddress();
+		if(organizationAddress != null){
+
+			this.hasAddress= organizationAddress.getAbout();
+			this.streetAddress=organizationAddress.getVcardStreetAddress();
+			this.locality=organizationAddress.getVcardLocality();
+			this.postalCode=organizationAddress.getVcardPostalCode();
+			this.countryName=organizationAddress.getVcardCountryName();
+			this.postBox=organizationAddress.getVcardPostOfficeBox();
+			this.hasGeo=organizationAddress.getVcardHasGeo();
+		}
 	}
 
 	private void setDescription(Map<String, String> dcDescription) {
