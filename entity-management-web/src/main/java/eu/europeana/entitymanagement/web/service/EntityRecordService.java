@@ -173,7 +173,7 @@ public class EntityRecordService {
 		 * sameAs will be replaced during consolidation; however we set this here to prevent duplicate
 		 * registrations if consolidation fails
 		 */
-		entity.setSameAs(Collections.singletonList(entityCreationRequest.getId()));
+		entity.setSameAs(new ArrayList<>(List.of(entityCreationRequest.getId())));
 		entityRecord.setEntity(entity);
 
 		Entity europeanaProxyMetadata = EntityObjectFactory.createEntityObject(type);
@@ -224,7 +224,8 @@ public class EntityRecordService {
 		 * sameAs will be replaced during consolidation; however we set this here to prevent duplicate
 		 * registrations if consolidation fails
 		 */
-		entity.setSameAs(Collections.singletonList(externalProxyId));
+
+		entity.setSameAs(new ArrayList<>(List.of(externalProxyId)));
 		entityRecord.setEntity(entity);
 
 
@@ -664,7 +665,8 @@ public class EntityRecordService {
 		List<String> consolidatedEntitySameAs = consolidatedEntity.getSameAs();
 
 		if (consolidatedEntitySameAs == null) {
-			consolidatedEntity.setSameAs(Collections.singletonList(externalProxyId));
+			// sameAs is mutable here as we might need to add more values to it later
+			consolidatedEntity.setSameAs(new ArrayList<>(List.of(externalProxyId)));
 		}
 		else if (!consolidatedEntitySameAs.contains(externalProxyId)) {
 			consolidatedEntitySameAs.add(externalProxyId);
