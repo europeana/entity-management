@@ -9,6 +9,7 @@ import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatorGroup;
 import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorGroup;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
+import java.util.List;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
@@ -38,22 +39,27 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
 
     @Override
     public EntityRecord process(@NonNull EntityRecord entityRecord) throws EuropeanaApiException {
-        
 
-        EntityProxy europeanaProxy = entityRecord.getEuropeanaProxy();
-        // TODO: Support multiple external proxies (EA:2706)
-        EntityProxy externalProxy = entityRecord.getExternalProxies().get(0);
-        if (europeanaProxy == null || externalProxy == null) {
-            throw new EuropeanaApiException(String.format(
-                    "Unable to process entity record with id: %s. Europeana proxy or external proxy is not available in the record!",
-                    entityRecord.getEntityId()));
+        List<EntityProxy> externalProxies = entityRecord.getExternalProxies();
+
+        Entity externalProxyEntity = externalProxies.get(0).getEntity();
+        validateMinimalConstraints(externalProxyEntity);
+
+        if (externalProxies.size() > 1) {
+            // cumulatively merge all external proxies
+            for (int i = 1; i < externalProxies.size(); i++) {
+                Entity secondaryProxyEntity = externalProxies.get(i).getEntity();
+                // validate each proxy's metadata before merging
+                validateMinimalConstraints(secondaryProxyEntity);
+                externalProxyEntity = entityRecordService.mergeEntities(externalProxyEntity,
+                    secondaryProxyEntity);
+            }
         }
 
-        Entity europeanaEntity = europeanaProxy.getEntity();
-        Entity externalEntity = externalProxy.getEntity();
+        Entity europeanaProxyEntity = entityRecord.getEuropeanaProxy().getEntity();
 
-        validateMinimalConstraints(externalEntity);
-        Entity consolidatedEntity = entityRecordService.mergeEntities(europeanaEntity, externalEntity);
+        Entity consolidatedEntity = entityRecordService.mergeEntities(europeanaProxyEntity,
+            externalProxyEntity);
         emEntityFieldCleaner.cleanAndNormalize(consolidatedEntity);
         entityRecordService.performReferentialIntegrity(consolidatedEntity);
         validateCompleteConstraints(consolidatedEntity);
