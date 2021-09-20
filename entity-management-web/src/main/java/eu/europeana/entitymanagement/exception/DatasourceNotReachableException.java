@@ -13,6 +13,12 @@ public class DatasourceNotReachableException extends EuropeanaApiException {
   }
 
   @Override
+  public boolean doExposeMessage() {
+    // suppress message for this exception, as it typically contains response from upstream server
+    return false;
+  }
+
+  @Override
   public boolean doLog() {
     return true;
   }
