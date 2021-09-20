@@ -111,7 +111,7 @@ public class MetisDereferenceService implements InitializingBean, Dereferencer {
 			}
 			// thrown if DNS lookup for Metis dereference url fails
 			catch (WebClientRequestException we) {
-				throw new DatasourceNotReachableException("Metis Dereference Service");
+				throw new DatasourceNotReachableException("Metis Dereference Service is not reachable");
 			}
 			catch (Exception e){
 				/*
