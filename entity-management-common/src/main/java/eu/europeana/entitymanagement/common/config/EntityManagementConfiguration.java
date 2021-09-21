@@ -36,9 +36,15 @@ public class EntityManagementConfiguration  {
     @Value("${entitymanagement.solr.pr.url}")
     private String prSolrUrl;
 
-    @Value("${entitymanagement.solr.searchapi.url}")
-    private String searchApiSolrUrl;
-    
+    @Value("${europeana.searchapi.urlPrefix}")
+    private String searchApiUrlPrefix;
+
+    @Value("${europeana.searchapi.enrichments.query}")
+    private String enrichmentsQuery;
+
+  @Value("${europeana.searchapi.enrichments.query.organizations}")
+  private String enrichmentsQueryOrgs;
+
     @Value("${entitymanagement.solr.indexing.url}")
     private String indexingSolrUrl;
 
@@ -48,8 +54,6 @@ public class EntityManagementConfiguration  {
     @Value("${entitymanagement.solr.indexing.query.maxPageSize: 100}")
     private int solrQueryMaxPageSize;
 
-    @Value("${entitymanagement.solr.searchapi.enrichments.query}")
-    private String enrichmentsQuery;
 
     @Value("${entitymanagement.solr.searchapi.hits.query}")
     private String hitsQuery;
@@ -101,8 +105,8 @@ public class EntityManagementConfiguration  {
     }
 
     
-    public String getSearchApiSolrUrl() {
-	return searchApiSolrUrl;
+    public String getSearchApiUrlPrefix() {
+	return searchApiUrlPrefix;
     }
 
     
@@ -202,4 +206,8 @@ public String getIndexingSolrUrl() {
     public String getThumbnailBaseUrl() {
         return thumbnailBaseUrl;
     }
+
+  public String getEnrichmentsQueryOrgs() {
+    return enrichmentsQueryOrgs;
+  }
 }
