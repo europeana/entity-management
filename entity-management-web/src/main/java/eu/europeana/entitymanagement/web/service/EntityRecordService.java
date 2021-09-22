@@ -88,11 +88,11 @@ public class EntityRecordService {
      * Gets coreferenced entity with the given id (sameAs or exactMatch value in the
      * Consolidated version)
      * 
-     * @param id co-reference id
+     * @param uris co-reference uris
      * @return Optional containing matching record, or empty optional if none found.
      */
-    public Optional<EntityRecord> findMatchingCoreference(String id) {
-	return entityRecordRepository.findMatchingEntitiesByCoreference(id);
+    public Optional<EntityRecord> findMatchingCoreference(List<String> uris) {
+	return entityRecordRepository.findMatchingEntitiesByCoreference(uris);
     }
 
     public EntityRecord saveEntityRecord(EntityRecord er) {
@@ -292,24 +292,6 @@ public class EntityRecordService {
 	}
     }
 
-    /**
-     * Checks if any of the resources in the SameAs / ExactMatch field from the Datasource is already
-     * known.
-     * 
-     * @param rdfResources list of SameAs/ExactMatch resources
-     * @return Optional containing EntityRecord, or empty Optional if none found
-     */
-		public Optional<EntityRecord> retrieveCoreferencedEntity(List<String> rdfResources) {
-			for (String resource : rdfResources) {
-				Optional<EntityRecord> entityRecordOptional = retrieveByEntityId(resource);
-				if (entityRecordOptional.isPresent()) {
-					return entityRecordOptional;
-				}
-			}
-
-			return Optional.empty();
-		}
-
     public void performReferentialIntegrity(Entity entity)  {
 
 	//TODO: consider refactoring the implementation of this method by creating a new class (e.g. ReferentialIntegrityProcessor) 
@@ -453,7 +435,7 @@ public class EntityRecordService {
 	    updatedReferences.add(value);
 	} else {
 	    //value is external URI, replace it with internal reference if they are accessible
-	    Optional<EntityRecord> record = findMatchingCoreference(value);
+	    Optional<EntityRecord> record = findMatchingCoreference(Collections.singletonList(value));
 		record.ifPresent(entityRecord -> updatedReferences.add(entityRecord.getEntityId()));
 	}
     }

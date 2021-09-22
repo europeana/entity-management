@@ -323,7 +323,7 @@ public class EMController extends BaseRest {
 	
 			// check if id is already being used, if so return a 301
 			Optional<EntityRecord> existingEntity = entityRecordService
-					.findMatchingCoreference(creationRequestId);
+					.findMatchingCoreference(Collections.singletonList(creationRequestId));
 			ResponseEntity<String> response = checkExistingEntity(existingEntity,
 					creationRequestId);
 
@@ -363,7 +363,7 @@ public class EMController extends BaseRest {
 
 			if (datasourceResponse.getSameReferenceLinks() != null) {
 				existingEntity = entityRecordService
-						.retrieveCoreferencedEntity(datasourceResponse.getSameReferenceLinks());
+						.findMatchingCoreference(datasourceResponse.getSameReferenceLinks());
 				response = checkExistingEntity(existingEntity, creationRequestId);
 				if (response != null) {
 					return response;
