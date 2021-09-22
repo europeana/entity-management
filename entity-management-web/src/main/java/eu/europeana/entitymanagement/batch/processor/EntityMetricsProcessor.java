@@ -15,7 +15,6 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
 import java.util.Date;
 
 /**
@@ -83,7 +82,7 @@ public class EntityMetricsProcessor implements ItemProcessor<EntityRecord, Entit
     // cannot be null here as it's set in process()
     Aggregation aggregation = entity.getIsAggregatedBy();
 
-    aggregation.setPageRank(metrics.getPageRank());
+    aggregation.setPageRank((double) metrics.getPageRank());
     aggregation.setRecordCount(metrics.getEnrichmentCount());
     aggregation.setScore(metrics.getScore());
   }
