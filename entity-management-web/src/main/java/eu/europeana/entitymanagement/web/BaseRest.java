@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.web;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Date;
@@ -27,6 +28,7 @@ import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EtagMismatchException;
+import eu.europeana.entitymanagement.schemaorg.model.SchemaOrgEntity;
 import eu.europeana.entitymanagement.serialization.EntityXmlSerializer;
 import eu.europeana.entitymanagement.serialization.JsonLdSerializer;
 import eu.europeana.entitymanagement.utils.EntityObjectFactory;
@@ -51,6 +53,9 @@ public abstract class BaseRest extends BaseRestController {
 
     @Autowired
     private JsonLdSerializer jsonLdSerializer;
+    
+    @Autowired
+    private eu.europeana.corelib.edm.utils.JsonLdSerializer corelibJsonLdSerializer;
 
     @Autowired
     private RequestPathMethodService requestMethodService;
@@ -83,13 +88,20 @@ public abstract class BaseRest extends BaseRestController {
 
         String responseBody = null;
 
-        if (FormatTypes.jsonld.equals(format) || FormatTypes.schema.equals(format)) {
+        if (FormatTypes.jsonld.equals(format)) {
             responseBody = jsonLdSerializer.serialize(entityRecord, format, profile);
         } else if (FormatTypes.xml.equals(format)) {
             XmlBaseEntityImpl<?> xmlEntity = EntityObjectFactory.createXmlEntity(entityRecord.getEntity());
-            
             responseBody = entityXmlSerializer.serializeXmlExternal(new RdfBaseWrapper(xmlEntity));
+        } else if (FormatTypes.schema.equals(format)) {
+        	SchemaOrgEntity<?> schemaOrgEntity = EntityObjectFactory.createSchemaOrgEntity(entityRecord.getEntity());
+        	try {
+				responseBody = corelibJsonLdSerializer.serialize(schemaOrgEntity.get());
+			} catch (IOException e) {
+				throw new EntityManagementRuntimeException("Unexpected exception occurred when serializing the schemaorg entity.",e);
+			}
         }
+        
         return responseBody;
     }
 
