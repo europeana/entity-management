@@ -39,11 +39,9 @@ public class EntityManagementConfiguration  {
     @Value("${europeana.searchapi.urlPrefix}")
     private String searchApiUrlPrefix;
 
-    @Value("${europeana.searchapi.enrichments.query}")
-    private String enrichmentsQuery;
 
-  @Value("${europeana.searchapi.enrichments.query.organizations}")
-  private String enrichmentsQueryOrgs;
+  @Value("${europeana.searchapi.enrichments.contentTier}")
+  private String enrichmentsQueryContentTier;
 
     @Value("${entitymanagement.solr.indexing.url}")
     private String indexingSolrUrl;
@@ -107,11 +105,6 @@ public class EntityManagementConfiguration  {
     
     public String getSearchApiUrlPrefix() {
 	return searchApiUrlPrefix;
-    }
-
-    
-    public String getEnrichmentsQuery() {
-	return enrichmentsQuery;
     }
 
     
@@ -207,7 +200,7 @@ public String getIndexingSolrUrl() {
         return thumbnailBaseUrl;
     }
 
-  public String getEnrichmentsQueryOrgs() {
-    return enrichmentsQueryOrgs;
+  public String getEnrichmentsQueryContentTier() {
+    return enrichmentsQueryContentTier;
   }
 }

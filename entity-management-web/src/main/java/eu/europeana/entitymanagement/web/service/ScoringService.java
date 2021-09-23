@@ -161,9 +161,8 @@ public class ScoringService {
     }
 
 	private Integer getEnrichmentCount(Entity entity) {
-    	boolean isOrg = entity.getType().equals(EntityTypes.Organization.getEntityType());
-
-		return enrichmentCountQueryService.getEnrichmentCount(entity.getEntityId(), isOrg);
+		return enrichmentCountQueryService.getEnrichmentCount(entity.getEntityId(),
+				entity.getType());
 	}
 
 

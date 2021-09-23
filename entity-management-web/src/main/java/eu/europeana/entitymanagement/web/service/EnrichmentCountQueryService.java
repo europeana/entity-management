@@ -3,9 +3,11 @@ package eu.europeana.entitymanagement.web.service;
 
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.exception.ScoringComputationException;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.model.EnrichmentCountResponse;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.MediaType;
@@ -15,19 +17,27 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Service
 public class EnrichmentCountQueryService {
 
-  private final WebClient webClient;
-  private final String searchApiUriPrefix;
-  private final String enrichmentQuery;
-  private final String enrichmentQueryOrgs;
-
+  /**
+   * Query fields for entity types
+   */
+  private static final Map<String, String> ENRICHMENT_QUERY_FIELD_MAP = Map.of(
+      EntityTypes.Agent.getEntityType(), "edm_agent",
+      EntityTypes.Concept.getEntityType(), "skos_concept",
+      EntityTypes.Place.getEntityType(), "edm_place",
+      EntityTypes.Timespan.getEntityType(), "edm_timespan",
+      EntityTypes.Organization.getEntityType(), "foaf_organization"
+  );
   private static final Logger logger = LogManager.getLogger(EnrichmentCountQueryService.class);
   private static final String ERROR_MSG = "Error retrieving enrichmentCount for entityId=";
+  private static final String contentTierPrefix = "AND contentTier:";
 
+  private final WebClient webClient;
+  private final String searchApiUriPrefix;
+  private final String contentTier;
 
   public EnrichmentCountQueryService(EntityManagementConfiguration configuration) {
     searchApiUriPrefix = configuration.getSearchApiUrlPrefix();
-    enrichmentQuery = configuration.getEnrichmentsQuery();
-    enrichmentQueryOrgs = configuration.getEnrichmentsQueryOrgs();
+    contentTier = contentTierPrefix + configuration.getEnrichmentsQueryContentTier();
 
     webClient = WebClient.builder().build();
   }
@@ -37,12 +47,16 @@ public class EnrichmentCountQueryService {
    * Queries the Search API to retrieve enrichment counts for the given entityId. Organizations have
    * a different query string.
    *
-   * @param entityId       entityID string
-   * @param isOrganization indicates whether this is an organization.
+   * @param entityId entityID string
+   * @param type     entity type
    */
-  public int getEnrichmentCount(String entityId, boolean isOrganization) {
-    String searchQuery = isOrganization ? String.format(enrichmentQueryOrgs, entityId)
-        : String.format(enrichmentQuery, entityId);
+  public int getEnrichmentCount(String entityId, String type) {
+    String searchQuery = String.format("%s:\"%s\" ", ENRICHMENT_QUERY_FIELD_MAP.get(type),
+        entityId);
+
+    if (!EntityTypes.Organization.getEntityType().equals(type)) {
+      searchQuery = searchQuery + contentTier;
+    }
 
     String uri = searchApiUriPrefix + searchQuery;
 
@@ -72,7 +86,6 @@ public class EnrichmentCountQueryService {
     }
 
     if (response == null) {
-      // unlikely as exception should be thrown earlier if response cannot be deserialized.
       throw new ScoringComputationException(
           ERROR_MSG + entityId);
     }
