@@ -5,6 +5,7 @@ import eu.europeana.entitymanagement.dereference.Dereferencer;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.wikidata.WikidataAccessService;
 import eu.europeana.entitymanagement.zoho.organization.ZohoDereferenceService;
+import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,7 @@ public class DereferenceServiceLocator {
    */
   public Dereferencer getDereferencer(String id, String entityType) {
 
-    if (isWikidataOrganization(id, entityType)) {
+    if (WikidataUtils.isWikidataOrganization(id, entityType)) {
       return wikidataAccessService;
     }
 
@@ -40,11 +41,5 @@ public class DereferenceServiceLocator {
     }
 
     return metisDereferenceService;
-  }
-
-
-  private boolean isWikidataOrganization(String id, String entityType) {
-    return EntityTypes.Organization.getEntityType().equals(entityType) && id.contains(
-        DataSources.WIKIDATA_ID);
   }
 }

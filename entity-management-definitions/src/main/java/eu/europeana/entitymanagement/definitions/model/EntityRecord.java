@@ -6,6 +6,7 @@ import java.util.List;
 
 import dev.morphia.annotations.*;
 import eu.europeana.entitymanagement.utils.EntityRecordWatcher;
+import java.util.stream.Collectors;
 import org.bson.types.ObjectId;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -122,18 +123,15 @@ public class EntityRecord {
     public Date getModified() {
         return this.modified;
     }
-
-    @JsonIgnore
     
     public EntityProxy getEuropeanaProxy() {
         return proxies.stream()
             .filter(s -> s.getProxyId().startsWith(BASE_DATA_EUROPEANA_URI)).findFirst().orElse(null);
     }
 
-    
-    @JsonIgnore
-    public EntityProxy getExternalProxy() {
+
+    public List<EntityProxy> getExternalProxies(){
         return proxies.stream()
-            .filter(s -> !s.getProxyId().startsWith(BASE_DATA_EUROPEANA_URI)).findFirst().orElse(null);
+            .filter(s -> !s.getProxyId().startsWith(BASE_DATA_EUROPEANA_URI)).collect(Collectors.toList());
     }
 }
