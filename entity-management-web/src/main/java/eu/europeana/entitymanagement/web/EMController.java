@@ -106,6 +106,7 @@ public class EMController extends BaseRest {
 	    String etag = computeEtag(timestamp, FormatTypes.jsonld.name(), getApiVersion());
 		checkIfMatchHeaderWithQuotes(etag, request);
 	    entityRecordService.disableEntityRecord(entityRecord);
+			solrService.deleteById(entityRecord.getEntityId());
 
 		return noContentResponse(request);
 	}
@@ -131,6 +132,8 @@ public class EMController extends BaseRest {
 		}
 		logger.info("Re-enabling entityId={}", entityRecord.getEntityId());
 		entityRecordService.enableEntityRecord(entityRecord);
+		solrService.storeEntity(createSolrEntity(entityRecord.getEntity()));
+
 		return createResponse(request, profile, type, null, identifier, FormatTypes.jsonld, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
 	}
 
