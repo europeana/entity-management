@@ -160,7 +160,7 @@ public class EntityRecordService {
 		Optional<DataSource> externalDatasourceOptional = getDataSource(entityCreationRequest.getId());
 
 		Date timestamp = new Date();
-		Entity entity = EntityObjectFactory.createEntityObject(type);
+		Entity entity = EntityObjectFactory.createProxyEntityObject(type);
 		EntityRecord entityRecord = new EntityRecord();
 		String entityId = generateEntityId(entity.getType(), identifier);
 		// check if entity already exists
@@ -176,7 +176,7 @@ public class EntityRecordService {
 		entity.setSameAs(new ArrayList<>(List.of(entityCreationRequest.getId())));
 		entityRecord.setEntity(entity);
 
-		Entity europeanaProxyMetadata = EntityObjectFactory.createEntityObject(type);
+		Entity europeanaProxyMetadata = EntityObjectFactory.createProxyEntityObject(type);
 		// copy metadata from request into entity
 		europeanaProxyMetadata.setEntityId(entityId);
 		europeanaProxyMetadata.setType(type);
@@ -184,10 +184,11 @@ public class EntityRecordService {
 		setEuropeanaMetadata(europeanaProxyMetadata, entityId, entityRecord, timestamp);
 
 		// create metis Entity
-		Entity metisEntity = EntityObjectFactory.createEntityObject(type);
+		Entity metisEntity = EntityObjectFactory.createProxyEntityObject(type);
 
 		DataSource externalDatasource = externalDatasourceOptional.get();
-		createExternalProxy(metisEntity, entityCreationRequest.getId(), entityId, externalDatasource, entityRecord, timestamp);
+		setExternalProxyMetadata(metisEntity, entityCreationRequest.getId(), entityId, externalDatasource, entityRecord, timestamp);
+//		createExternalProxy(metisEntity, entityCreationRequest.getId(), entityId, externalDatasource, entityRecord, timestamp);
 
 		setEntityAggregation(entityRecord, entityId, timestamp);
 		return entityRecordRepository.save(entityRecord);
@@ -208,8 +209,9 @@ public class EntityRecordService {
 			String externalProxyId = entityCreationRequest.getId();
 			Optional<DataSource> externalDatasourceOptional = getDataSource(externalProxyId);
 
-			Date timestamp = new Date();
-		Entity entity = EntityObjectFactory.createEntityObject(datasourceResponse.getType());
+		Date timestamp = new Date();
+		Entity entity = EntityObjectFactory.createConsolidatedEntityObject(datasourceResponse.getType());
+
 		boolean isZohoOrg = ZohoUtils.isZohoOrganization(externalProxyId,
 				datasourceResponse.getType());
 
@@ -229,7 +231,7 @@ public class EntityRecordService {
 		entityRecord.setEntity(entity);
 
 
-        Entity europeanaProxyMetadata = EntityObjectFactory.createEntityObject(datasourceResponse.getType());
+        Entity europeanaProxyMetadata = EntityObjectFactory.createProxyEntityObject(datasourceResponse.getType());
 				// copy metadata from request into entity
 				europeanaProxyMetadata.setEntityId(entityId);
 				europeanaProxyMetadata.setType(datasourceResponse.getType());
@@ -239,7 +241,8 @@ public class EntityRecordService {
        
 	DataSource externalDatasource = externalDatasourceOptional.get();
 	// create default external proxy
-	createExternalProxy(datasourceResponse, externalProxyId, entityId, externalDatasource, entityRecord, timestamp);
+	setExternalProxyMetadata(datasourceResponse, entityCreationRequest.getId(), entityId, externalDatasource, entityRecord, timestamp);
+//	createExternalProxy(datasourceResponse, externalProxyId, entityId, externalDatasource, entityRecord, timestamp);
 
 	// for Zoho organizations, create second proxy for Wikidata metadata
 		Optional<String> wikidataId;
@@ -247,12 +250,12 @@ public class EntityRecordService {
 				(wikidataId = WikidataUtils.getWikidataId(datasourceResponse.getSameAs())).isPresent()) {
 
 			// entity metadata will be populated during update task
-			Entity wikidataProxyEntity = EntityObjectFactory.createEntityObject(
+			Entity wikidataProxyEntity = EntityObjectFactory.createProxyEntityObject(
 					datasourceResponse.getType());
 
 			Optional<DataSource> wikidataDatasource = getDataSource(wikidataId.get());
 			// exception is thrown in factory method if wikidataDatasource is empty
-			createExternalProxy(wikidataProxyEntity,
+			setExternalProxyMetadata(wikidataProxyEntity,
 					wikidataId.get(), entityId, wikidataDatasource.get(), entityRecord, timestamp);
 
 			// add wikidata uri to entity sameAs
@@ -590,7 +593,7 @@ public class EntityRecordService {
 	@SuppressWarnings("unchecked")
 	private Entity combineEntities(Entity primary, Entity secondary, List<Field> fieldsToCombine, boolean accumulate)
 			throws EuropeanaApiException {
-		Entity consolidatedEntity = EntityObjectFactory.createEntityObject(primary.getType());
+		Entity consolidatedEntity = EntityObjectFactory.createConsolidatedEntityObject(primary.getType());
 
 		try {
 
@@ -894,26 +897,23 @@ public class EntityRecordService {
 	entityRecord.addProxy(europeanaProxy);
     }
 
-    private void createExternalProxy(
-				Entity proxyEntity,
-				String proxyId, String entityId,
-				DataSource externalDatasource, EntityRecord entityRecord, Date timestamp) {
-	Aggregation datasourceAggr = new Aggregation();
-	datasourceAggr.setId(getDatasourceAggregationId(entityId));
-	datasourceAggr.setCreated(timestamp);
-	datasourceAggr.setModified(timestamp);
-	datasourceAggr.setRights(externalDatasource.getRights());
-	datasourceAggr.setSource(externalDatasource.getUrl());
+    private void setExternalProxyMetadata(Entity metisResponse, String proxyId, String entityId,
+            DataSource externalDatasource, EntityRecord entityRecord, Date timestamp) {
+        Aggregation datasourceAggr = new Aggregation();
+        datasourceAggr.setId(getDatasourceAggregationId(entityId));
+        datasourceAggr.setCreated(timestamp);
+        datasourceAggr.setModified(timestamp);
+        datasourceAggr.setRights(externalDatasource.getRights());
+        datasourceAggr.setSource(externalDatasource.getUrl());
 
-	EntityProxy datasourceProxy = new EntityProxy();
-	datasourceProxy.setProxyId(proxyId);
-	datasourceProxy.setProxyFor(entityId);
-	datasourceProxy.setProxyIn(datasourceAggr);
-	datasourceProxy.setEntity(proxyEntity);
+        EntityProxy datasourceProxy = new EntityProxy();
+        datasourceProxy.setProxyId(proxyId);
+        datasourceProxy.setProxyFor(entityId);
+        datasourceProxy.setProxyIn(datasourceAggr);
+        datasourceProxy.setEntity(metisResponse);
 
-	entityRecord.addProxy(datasourceProxy);
+        entityRecord.addProxy(datasourceProxy);
     }
-
 
 	/**
 	 * Recreates the external proxy on an Entity, using the newProxyId value as its proxyId
@@ -939,7 +939,7 @@ public class EntityRecordService {
 
 		entityRecord.getProxies().remove(externalProxy);
 
-		createExternalProxy(EntityObjectFactory.createEntityObject(entityType),
+		setExternalProxyMetadata(EntityObjectFactory.createProxyEntityObject(entityType),
 				newProxyId, entityRecord.getEntityId(), externalDatasourceOptional.get(),
 				entityRecord, new Date());
 	}

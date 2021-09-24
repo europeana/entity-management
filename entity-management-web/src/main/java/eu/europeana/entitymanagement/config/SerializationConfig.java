@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.definitions.mixins.ConsolidatedAgentMixin;
+import eu.europeana.entitymanagement.definitions.model.ConsolidatedAgent;
 import eu.europeana.entitymanagement.web.xml.model.RdfBaseWrapper;
 import eu.europeana.entitymanagement.web.xml.model.WikidataOrganization;
 import eu.europeana.entitymanagement.web.xml.model.metis.EnrichmentResultList;
@@ -37,6 +39,7 @@ public class SerializationConfig {
                 .featuresToEnable(
                     DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
                 .serializationInclusion(JsonInclude.Include.NON_NULL)
+                .mixIn(ConsolidatedAgent.class, ConsolidatedAgentMixin.class)
                 .build();
     }
 

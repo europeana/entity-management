@@ -3,6 +3,7 @@ package eu.europeana.entitymanagement.validation;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import eu.europeana.entitymanagement.definitions.model.ConsolidatedAgent;
 import javax.xml.bind.JAXBContext;
 
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
@@ -38,11 +39,15 @@ public class EntityFieldsCleanerTest {
                 .parseMetisResponse(jaxbContext.createUnmarshaller(), "http://www.wikidata.org/entity/Q855", loadFile(AGENT_STALIN_CLEANING_XML));
         assert xmlAgent != null;
 
-        Agent agent = (Agent) xmlAgent.toEntityModel();
+        ConsolidatedAgent agent = new ConsolidatedAgent((Agent) xmlAgent.toEntityModel());
         EntityFieldsCleaner fieldCleaner = new EntityFieldsCleaner(emLanguageCodes, "http://thumbnail.url");
         fieldCleaner.cleanAndNormalize(agent);
         assertEquals(24, agent.getPrefLabel().size());
         assertEquals(12, agent.getAltLabel().size());
+
+        assertEquals(1, agent.getDateOfBirth().size());
+        assertEquals(1, agent.getDateOfDeath().size());
+
         //TODO: perform more robust testing
         //TODO: create json file with expected output and use entity comparator
         for(String dateOfBirth : agent.getDateOfBirth()) {

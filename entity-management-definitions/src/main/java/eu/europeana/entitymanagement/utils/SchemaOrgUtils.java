@@ -28,6 +28,7 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.definitions.model.Timespan;
+import org.springframework.util.CollectionUtils;
 
 public final class SchemaOrgUtils {
 
@@ -225,7 +226,7 @@ public final class SchemaOrgUtils {
             }
 
             // gender
-            addStringProperty(agentObject, agent.getGender(), SchemaOrgConstants.PROPERTY_GENDER);
+            addStringProperty(agentObject, CollectionUtils.firstElement(agent.getGender()), SchemaOrgConstants.PROPERTY_GENDER);
 
             // jobTitle
             addStringProperties(agentObject, agent.getProfessionOrOccupation(),
@@ -243,13 +244,13 @@ public final class SchemaOrgUtils {
         if (agentObject instanceof eu.europeana.corelib.edm.model.schemaorg.Organization) {
             // foundingDate
             if (agent.getDateOfEstablishment() != null) {
-                addStringProperty(agentObject, agent.getDateOfEstablishment(),
+                addStringProperty(agentObject, CollectionUtils.firstElement(agent.getDateOfEstablishment()),
                         SchemaOrgConstants.PROPERTY_FOUNDING_DATE);
             }
 
             // dissolutionDate
             if (agent.getDateOfTermination()!= null) {
-                addStringProperty(agentObject, agent.getDateOfTermination(),
+                addStringProperty(agentObject, CollectionUtils.firstElement(agent.getDateOfTermination()),
                         SchemaOrgConstants.PROPERTY_DISSOLUTION_DATE);
             }
         }
