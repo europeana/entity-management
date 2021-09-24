@@ -14,17 +14,20 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
 import eu.europeana.entitymanagement.definitions.web.EntityIdResponse;
+import eu.europeana.entitymanagement.dereference.Dereferencer;
 import eu.europeana.entitymanagement.exception.EntityMismatchException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
+import eu.europeana.entitymanagement.exception.DatasourceNotKnownException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
+import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
+import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
-import eu.europeana.entitymanagement.web.service.MetisDereferenceService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -38,12 +41,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import static eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants.PROFILE_DEBUG;
+import static eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants.QUERY_PARAM_PROFILE_SEPARATOR;
 import static eu.europeana.entitymanagement.solr.SolrUtils.createSolrEntity;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.QUERY_PARAM_QUERY;
 import static java.util.stream.Collectors.groupingBy;
@@ -56,7 +58,7 @@ public class EMController extends BaseRest {
 
 	private final EntityRecordService entityRecordService;
 	private final SolrService solrService;
-	private final MetisDereferenceService dereferenceService;
+	private final DereferenceServiceLocator dereferenceServiceLocator;
 	private final DataSources datasources;
 	private final EntityUpdateService entityUpdateService;
 	private final EntityManagementConfiguration emConfig;
@@ -65,15 +67,17 @@ public class EMController extends BaseRest {
 	private static final String SAME_AS_NOT_EXISTS_MSG = "Url '%s' does not exist in entity owl:sameAs";
 	public static final String INVALID_UPDATE_REQUEST_MSG = "Request must either specify a 'query' param or contain entity identifiers in body";
 
+	// profile used if none included in request
+	public static final String DEFAULT_REQUEST_PROFILE = EntityProfile.external.name();
 
   @Autowired
 	public EMController(EntityRecordService entityRecordService,
-						SolrService solrService, MetisDereferenceService dereferenceService, DataSources datasources,
+						SolrService solrService, DereferenceServiceLocator dereferenceServiceLocator, DataSources datasources,
 						EntityUpdateService entityUpdateService,
 						EntityManagementConfiguration emConfig) {
 		this.entityRecordService = entityRecordService;
 	  this.solrService = solrService;
-	  this.dereferenceService = dereferenceService;
+	  this.dereferenceServiceLocator = dereferenceServiceLocator;
 		this.datasources = datasources;
 		this.entityUpdateService = entityUpdateService;
 		this.emConfig = emConfig;
@@ -112,7 +116,7 @@ public class EMController extends BaseRest {
 			MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<String> enableEntity(
 			@RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
-			@RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
+			@RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = false) String profile,
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 			HttpServletRequest request) throws HttpException, EuropeanaApiException {
@@ -136,7 +140,7 @@ public class EMController extends BaseRest {
     public ResponseEntity<String> updateEntity(
     	@RequestHeader(value = "If-Match", required = false) String ifMatchHeader,
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
-	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "internal") String profile,
+	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = false) String profile,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
 	    @RequestBody Entity updateRequestEntity,
@@ -181,7 +185,7 @@ public class EMController extends BaseRest {
 	public ResponseEntity<String> triggerSingleEntityFullUpdate(
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
-			@RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "internal") String profile,
+			@RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = false) String profile,
 			HttpServletRequest request
 	) throws Exception {
 		if (emConfig.isAuthEnabled()) {
@@ -249,7 +253,7 @@ public class EMController extends BaseRest {
 			MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<String> getJsonLdEntity(
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
-	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
+	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = false) String profile,
 	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_LANGUAGE, required = false) String languages,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
@@ -272,7 +276,7 @@ public class EMController extends BaseRest {
     public ResponseEntity<String> getXmlEntity(
 			@RequestHeader(value = HttpHeaders.ACCEPT) String acceptHeader,
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
-	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
+	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = false) String profile,
 	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_LANGUAGE, required = false) String languages,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
@@ -292,7 +296,7 @@ public class EMController extends BaseRest {
     			produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<String> getEntitySchemaJsonLd(
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
-	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "external") String profile,
+	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = false) String profile,
 	    @RequestParam(value = WebEntityConstants.QUERY_PARAM_LANGUAGE, required = false) String languages,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 	    @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
@@ -315,41 +319,53 @@ public class EMController extends BaseRest {
 			if (emConfig.isAuthEnabled()) {
 				verifyWriteAccess(Operations.CREATE, request);
 			}
-			logger.info("Registering new entity: externalId={}", entityCreationRequest.getId());
+			String creationRequestId = entityCreationRequest.getId();
+			logger.info("Registering new entity: externalId={}", creationRequestId);
 	
 			// check if id is already being used, if so return a 301
 			Optional<EntityRecord> existingEntity = entityRecordService
-					.findMatchingCoreference(entityCreationRequest.getId());
+					.findMatchingCoreference(creationRequestId);
 			ResponseEntity<String> response = checkExistingEntity(existingEntity,
-					entityCreationRequest.getId());
+					creationRequestId);
 
 			if (response != null) {
 				return response;
 			}
 
 			// return 400 error if ID does not match a configured datasource
-			if (!datasources.hasDataSource(entityCreationRequest.getId())) {
+			if (!datasources.hasDataSource(creationRequestId)) {
 				throw new HttpBadRequestException(String
-						.format("id %s does not match a configured datasource", entityCreationRequest.getId()));
+						.format("id %s does not match a configured datasource", creationRequestId));
 			}
 			//in case of Organization it must be the zoho Organization
-			if (EntityTypes.Organization.getEntityType().equals(entityCreationRequest.getType()) && !entityCreationRequest.getId().contains(DataSources.ZOHO_ID)) {
+			String creationRequestType = entityCreationRequest.getType();
+			if (EntityTypes.Organization.getEntityType().equals(creationRequestType) && !creationRequestId.contains(DataSources.ZOHO_ID)) {
 				throw new HttpBadRequestException(String
 						.format("The Organization entity should come from Zoho and have the corresponding id format containing: %s", DataSources.ZOHO_ID));
 			}
 
-			Entity datasourceResponse = dereferenceService
-					.dereferenceEntityById(entityCreationRequest.getId(), entityCreationRequest.getType());
+			Dereferencer dereferenceService = dereferenceServiceLocator.getDereferencer(creationRequestId,
+					creationRequestType);
 
-			if(!datasourceResponse.getType().equals(entityCreationRequest.getType())){
+			Optional<Entity> datasourceResponseOptional = dereferenceService
+					.dereferenceEntityById(creationRequestId);
+
+			if (datasourceResponseOptional.isEmpty()) {
+				throw new DatasourceNotKnownException("Unsuccessful dereferenciation for externalId=" +
+						creationRequestId);
+			}
+
+			Entity datasourceResponse = datasourceResponseOptional.get();
+
+			if(!datasourceResponse.getType().equals(creationRequestType)){
 				throw new EntityMismatchException(String.format("Datasource type '%s' does not match type '%s' in request",
-						datasourceResponse.getType(), entityCreationRequest.getType()));
+						datasourceResponse.getType(), creationRequestType));
 			}
 
 			if (datasourceResponse.getSameAs() != null) {
 				existingEntity = entityRecordService
 						.retrieveCoreferenceSameAs(datasourceResponse.getSameAs());
-				response = checkExistingEntity(existingEntity, entityCreationRequest.getId());
+				response = checkExistingEntity(existingEntity, creationRequestId);
 				if (response != null) {
 					return response;
 				}
@@ -357,10 +373,10 @@ public class EMController extends BaseRest {
 
 			EntityRecord savedEntityRecord = entityRecordService
 					.createEntityFromRequest(entityCreationRequest, datasourceResponse);
-			logger.info("Created Entity record for externalId={}; entityId={}", entityCreationRequest.getId(), savedEntityRecord.getEntityId());
+			logger.info("Created Entity record for externalId={}; entityId={}", creationRequestId, savedEntityRecord.getEntityId());
 
 			solrService.storeEntity(createSolrEntity(savedEntityRecord.getEntity()));
-			logger.info("Indexed entity to Solr: externalId={}; entityId={}", entityCreationRequest.getId(), savedEntityRecord.getEntityId());
+			logger.info("Indexed entity to Solr: externalId={}; entityId={}", creationRequestId, savedEntityRecord.getEntityId());
 
 
 		return launchTaskAndRetrieveEntity(request, savedEntityRecord.getEntity().getType(),
@@ -374,7 +390,7 @@ public class EMController extends BaseRest {
 	public ResponseEntity<String> changeProvenance(
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
 			@PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
-			@RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, defaultValue = "internal") String profile,
+			@RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = false) String profile,
 			@RequestParam(value = WebEntityConstants.PATH_PARAM_URL) String url,
 			HttpServletRequest request
 	) throws Exception {
@@ -392,26 +408,44 @@ public class EMController extends BaseRest {
 		return launchTaskAndRetrieveEntity(request, type, identifier, entityRecord, profile);
 	}
 
-    private ResponseEntity<String> createResponse(HttpServletRequest request, String profile, String type, String languages, String identifier, FormatTypes outFormat,
+    private ResponseEntity<String> createResponse(HttpServletRequest request, String profileParam, String type, String languages, String identifier, FormatTypes outFormat,
 												  String contentType) throws EuropeanaApiException {
-			/*
-	 * verify the parameters
-	 */
-	boolean valid_profile = false;
-	for (EntityProfile ep : EntityProfile.values()) {
-	    if (ep.name().equals(profile)) {
-		valid_profile = true;
-		break;
-	    }
-	}
-	if (!valid_profile) {
-	    throw new HttpBadRequestException("Invalid profile");
+	// validate profile
+	String entityProfile = getEntityProfile(profileParam);
+
+	EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier,false);
+  // if request doesn't specify a valid EntityProfile, use external by default
+	return generateResponseEntity(request, entityProfile,
+			outFormat, languages, contentType, entityRecord, HttpStatus.OK);
 	}
 
-			EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier,false);
-			return generateResponseEntity(request, profile, outFormat, languages, contentType, entityRecord,
-					HttpStatus.OK);
+	/**
+	 * gets the first valid profile from profile param
+	 * @param profileParamString profile request query param
+	 * @return valid EntityProfile in request
+	 */
+	private String getEntityProfile(String profileParamString)
+			throws HttpBadRequestException {
+		if (StringUtils.hasLength(profileParamString)) {
+			List<String> profiles = List.of(profileParamString.split(QUERY_PARAM_PROFILE_SEPARATOR));
+			List<String> entityProfiles = Arrays.stream(EntityProfile.values()).map(Enum::name)
+					.collect(Collectors.toList());
+
+			for (String profileValue : profiles) {
+				if (entityProfiles.contains(profileValue)) {
+					return profileValue;
+				}
+			}
+
+			// no valid EntityProfile found. If profile param contains anything other than debug, throw an error
+			if(profiles.size() > 1 || !profiles.contains(PROFILE_DEBUG)){
+				throw new HttpBadRequestException("No valid EntityProfile in request");
+			}
 		}
+
+		// use default profile if none specified
+		return DEFAULT_REQUEST_PROFILE;
+	}
 
 	private ResponseEntity<String> launchTaskAndRetrieveEntity(HttpServletRequest request, String type, String identifier,
 															   EntityRecord entityRecord, String profile) throws Exception {
@@ -419,7 +453,9 @@ public class EMController extends BaseRest {
 		launchUpdateTask(entityRecord.getEntityId());
 		entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
 
-		return generateResponseEntity(request, profile, FormatTypes.jsonld, null, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8,
+		String profileValue = getEntityProfile(profile);
+
+		return generateResponseEntity(request, profileValue, FormatTypes.jsonld, null, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8,
 				entityRecord, HttpStatus.ACCEPTED);
 	}
 

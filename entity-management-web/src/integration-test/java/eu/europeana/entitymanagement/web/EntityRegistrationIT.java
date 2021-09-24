@@ -1,7 +1,9 @@
 package eu.europeana.entitymanagement.web;
 
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,50 +23,38 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
 
     @Test
     public void registerConceptShouldBeSuccessful() throws Exception {
-        ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
-                .content(loadFile(CONCEPT_REGISTER_BATHTUB_JSON))
-                .contentType(MediaType.APPLICATION_JSON_VALUE));
 
-        results.andExpect(status().isAccepted())
+        mockMvc.perform(post(BASE_SERVICE_URL)
+                .content(loadFile(CONCEPT_REGISTER_BATHTUB_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE)).andExpect(status().isAccepted())
                 .andExpect(jsonPath("$.id", any(String.class)))
                 .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
                 .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
                 // should have Europeana and Datasource proxies
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
-
-
-        checkAllowHeaderForPOST(results);
-        checkCommonResponseHeaders(results);
     }
 
     @Test
     void registerAgentShouldBeSuccessful() throws Exception {
-        ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
+
+        mockMvc.perform(post(BASE_SERVICE_URL)
                 .content(loadFile(AGENT_REGISTER_DAVINCI_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isAccepted());
-
-        results.andExpect(jsonPath("$.id", any(String.class)))
+                .andExpect(status().isAccepted()).andExpect(jsonPath("$.id", any(String.class)))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())))
                 .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
                 .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
                 // should have Europeana and Datasource proxies
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
-
-        checkAllowHeaderForPOST(results);
-        checkCommonResponseHeaders(results);
     }
 
 
     @Test
     void registerAgentStalinShouldBeSuccessful() throws Exception {
-        ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
+        mockMvc.perform(post(BASE_SERVICE_URL)
                 .content(loadFile(AGENT_REGISTER_STALIN_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isAccepted());
-
-
-        results.andExpect(jsonPath("$.id", any(String.class)))
+                .andExpect(status().isAccepted()).andExpect(jsonPath("$.id", any(String.class)))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())))
                 .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
                 // fields to be serialized as string
@@ -75,90 +65,71 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                 .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
                 // should have Europeana and Datasource proxies
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
-
-        checkAllowHeaderForPOST(results);
-        checkCommonResponseHeaders(results);
     }
 
-    //@Test
-    @Deprecated
+    @Test
+    @Disabled("Doesn't work without correct zoho import configuration")
     /**
      * @deprecated zoho is the primary source for organizations see registerZohoOrganizationShouldBeSuccessful
      * @throws Exception
      */
     public void registerOrganizationShouldBeSuccessful() throws Exception {
-        ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
+
+        mockMvc.perform(post(BASE_SERVICE_URL)
                 .content(loadFile(ORGANIZATION_REGISTER_BNF_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isAccepted());
-
-        results.andExpect(jsonPath("$.id", any(String.class)))
+                .andExpect(status().isAccepted()).andExpect(jsonPath("$.id", any(String.class)))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())))
                 .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
                 .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
                 // should have Europeana and Datasource proxies
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
-
-        checkAllowHeaderForPOST(results);
-        checkCommonResponseHeaders(results);
     }
 
-    //@Test
-    /* Doesn't work without correct zoho import configuration
-     * TODO: mock zoho response */
+    /**
+     * TODO: mock zoho response
+     */
+    @Test
+    @Disabled("Doesn't work without correct zoho import configuration")
     public void registerZohoOrganizationShouldBeSuccessful() throws Exception {
-        ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
+
+        mockMvc.perform(post(BASE_SERVICE_URL)
                 .content(loadFile(ORGANIZATION_REGISTER_BNF_ZOHO_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isAccepted());
-
-        results.andExpect(jsonPath("$.id", any(String.class)))
+                .andExpect(status().isAccepted()).andExpect(jsonPath("$.id", any(String.class)))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())))
                 .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
                 .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
                 // should have Europeana and Datasource proxies
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
-
-        checkAllowHeaderForPOST(results);
-        checkCommonResponseHeaders(results);
     }
     
     
     @Test
     void registerPlaceShouldBeSuccessful() throws Exception {
-        ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
+        mockMvc.perform(post(BASE_SERVICE_URL)
                 .content(loadFile(PLACE_REGISTER_PARIS_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isAccepted());
-
-        results.andExpect(jsonPath("$.id", any(String.class)))
+                .andExpect(status().isAccepted()).andExpect(jsonPath("$.id", any(String.class)))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Place.name())))
                 .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
                 .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
                 // should have Europeana and Datasource proxies
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
-
-        checkAllowHeaderForPOST(results);
-        checkCommonResponseHeaders(results);
     }
 
     @Test
     void registerTimespanShouldBeSuccessful() throws Exception {
-        ResultActions results = mockMvc.perform(post(BASE_SERVICE_URL)
+        mockMvc.perform(post(BASE_SERVICE_URL)
                 .content(loadFile(TIMESPAN_REGISTER_1ST_CENTURY_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isAccepted());
-
-        results.andExpect(jsonPath("$.id", any(String.class)))
+                .andExpect(status().isAccepted()).andExpect(jsonPath("$.id", any(String.class)))
 
                 .andExpect(jsonPath("$.type", is(EntityTypes.Timespan.name())))
                 .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
                 .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
                 // should have Europeana and Datasource proxies
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
-
-        checkAllowHeaderForPOST(results);
-        checkCommonResponseHeaders(results);
     }
 
 
@@ -169,7 +140,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         String metisResponse = loadFile(CONCEPT_BATHTUB_XML);
 
         String entityId = createEntity(europeanaMetadata, metisResponse, CONCEPT_BATHTUB_URI).getEntityId();
-        String redirectUrl = String.format("/entity/%s",EntityRecordUtils.extractIdentifierFromEntityId(entityId));
+        String redirectUrl = String.format("/entity/%s", EntityRecordUtils.extractIdentifierFromEntityId(entityId));
 
         mockMvc.perform(post(BASE_SERVICE_URL)
                 .content(europeanaMetadata)
@@ -203,12 +174,12 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
     }
 
     @Test
-    public void registrationWithEmptyMetisResponseShouldReturn500() throws Exception {
+    public void registrationWithEmptyMetisResponseShouldReturn400() throws Exception {
         // mockMetis returns an empty response body for this entity
         String europeanaMetadata = loadFile(CONCEPT_REGISTER_UNKNOWN_ENTITY);
         mockMvc.perform(post(BASE_SERVICE_URL)
                 .content(europeanaMetadata)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().is5xxServerError());
+                .andExpect(status().isBadRequest());
     }
 }

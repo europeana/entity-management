@@ -9,6 +9,7 @@ import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
 import eu.europeana.entitymanagement.definitions.model.*;
 import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
+import eu.europeana.entitymanagement.exception.DatasourceNotKnownException;
 import eu.europeana.entitymanagement.exception.EntityAlreadyExistsException;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
@@ -19,8 +20,9 @@ import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
-import eu.europeana.entitymanagement.web.EntityRecordUtils;
+import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
+import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +33,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
-import static eu.europeana.entitymanagement.web.EntityRecordUtils.*;
+import static eu.europeana.entitymanagement.utils.EntityRecordUtils.*;
 import static java.time.Instant.now;
 
 @Service(AppConfig.BEAN_ENTITY_RECORD_SERVICE)
@@ -155,10 +157,7 @@ public class EntityRecordService {
 	public EntityRecord createEntityFromMigrationRequest(EntityPreview entityCreationRequest, String type, String identifier)
 			throws EntityCreationException, EntityAlreadyExistsException {
 		// Fail quick if no datasource is configured
-		Optional<DataSource> externalDatasourceOptional = datasources.getDatasource(entityCreationRequest.getId());
-		if (externalDatasourceOptional.isEmpty()) {
-			throw new EntityCreationException("No configured datasource for entity " + entityCreationRequest.getId());
-		}
+		Optional<DataSource> externalDatasourceOptional = getDataSource(entityCreationRequest.getId());
 
 		Date timestamp = new Date();
 		Entity entity = EntityObjectFactory.createProxyEntityObject(type);
@@ -174,7 +173,7 @@ public class EntityRecordService {
 		 * sameAs will be replaced during consolidation; however we set this here to prevent duplicate
 		 * registrations if consolidation fails
 		 */
-		entity.setSameAs(Collections.singletonList(entityCreationRequest.getId()));
+		entity.setSameAs(new ArrayList<>(List.of(entityCreationRequest.getId())));
 		entityRecord.setEntity(entity);
 
 		Entity europeanaProxyMetadata = EntityObjectFactory.createProxyEntityObject(type);
@@ -189,6 +188,7 @@ public class EntityRecordService {
 
 		DataSource externalDatasource = externalDatasourceOptional.get();
 		setExternalProxyMetadata(metisEntity, entityCreationRequest.getId(), entityId, externalDatasource, entityRecord, timestamp);
+//		createExternalProxy(metisEntity, entityCreationRequest.getId(), entityId, externalDatasource, entityRecord, timestamp);
 
 		setEntityAggregation(entityRecord, entityId, timestamp);
 		return entityRecordRepository.save(entityRecord);
@@ -206,30 +206,28 @@ public class EntityRecordService {
     public EntityRecord createEntityFromRequest(EntityPreview entityCreationRequest, Entity datasourceResponse)
 	    throws EntityCreationException {
 		// Fail quick if no datasource is configured
-		Optional<DataSource> externalDatasourceOptional = datasources.getDatasource(entityCreationRequest.getId());
-		if (externalDatasourceOptional.isEmpty()) {
-			throw new EntityCreationException("No configured datasource for entity " + entityCreationRequest.getId());
-		}
+			String externalProxyId = entityCreationRequest.getId();
+			Optional<DataSource> externalDatasourceOptional = getDataSource(externalProxyId);
 
 		Date timestamp = new Date();
 		Entity entity = EntityObjectFactory.createConsolidatedEntityObject(datasourceResponse.getType());
 
+		boolean isZohoOrg = ZohoUtils.isZohoOrganization(externalProxyId,
+				datasourceResponse.getType());
+
 		EntityRecord entityRecord = new EntityRecord();
-		String entityId = null;
 		//only in case of Zoho Organization use the provided id from de-referencing
-		if(ZohoUtils.isZohoOrganization(datasourceResponse.getEntityId(), datasourceResponse.getType())) {
-			entityId = datasourceResponse.getEntityId();
-		}
-		else {
-			entityId = generateEntityId(entity.getType(), null);
-		}
-        entityRecord.setEntityId(entityId);
-        entity.setEntityId(entityId);
+		String entityId = isZohoOrg ? datasourceResponse.getEntityId() :
+				generateEntityId(entity.getType(), null) ;
+
+		entityRecord.setEntityId(entityId);
+		entity.setEntityId(entityId);
 		/*
 		 * sameAs will be replaced during consolidation; however we set this here to prevent duplicate
 		 * registrations if consolidation fails
 		 */
-		entity.setSameAs(Collections.singletonList(entityCreationRequest.getId()));
+
+		entity.setSameAs(new ArrayList<>(List.of(externalProxyId)));
 		entityRecord.setEntity(entity);
 
 
@@ -242,12 +240,41 @@ public class EntityRecordService {
 
        
 	DataSource externalDatasource = externalDatasourceOptional.get();
+	// create default external proxy
 	setExternalProxyMetadata(datasourceResponse, entityCreationRequest.getId(), entityId, externalDatasource, entityRecord, timestamp);
+//	createExternalProxy(datasourceResponse, externalProxyId, entityId, externalDatasource, entityRecord, timestamp);
+
+	// for Zoho organizations, create second proxy for Wikidata metadata
+		Optional<String> wikidataId;
+		if (isZohoOrg &&
+				(wikidataId = WikidataUtils.getWikidataId(datasourceResponse.getSameAs())).isPresent()) {
+
+			// entity metadata will be populated during update task
+			Entity wikidataProxyEntity = EntityObjectFactory.createProxyEntityObject(
+					datasourceResponse.getType());
+
+			Optional<DataSource> wikidataDatasource = getDataSource(wikidataId.get());
+			// exception is thrown in factory method if wikidataDatasource is empty
+			setExternalProxyMetadata(wikidataProxyEntity,
+					wikidataId.get(), entityId, wikidataDatasource.get(), entityRecord, timestamp);
+
+			// add wikidata uri to entity sameAs
+			entity.getSameAs().add(wikidataId.get());
+		}
 
 	setEntityAggregation(entityRecord, entityId, timestamp);
 	return entityRecordRepository.save(entityRecord);
 
     }
+
+	private Optional<DataSource> getDataSource(String externalProxyId)
+			throws EntityCreationException {
+		Optional<DataSource> externalDatasourceOptional = datasources.getDatasource(externalProxyId);
+		if (externalDatasourceOptional.isEmpty()) {
+			throw new EntityCreationException("No configured datasource for id " + externalProxyId);
+		}
+		return externalDatasourceOptional;
+	}
 
 	/**
 	 * Checks if Entity already exists
@@ -641,7 +668,8 @@ public class EntityRecordService {
 		List<String> consolidatedEntitySameAs = consolidatedEntity.getSameAs();
 
 		if (consolidatedEntitySameAs == null) {
-			consolidatedEntity.setSameAs(Collections.singletonList(externalProxyId));
+			// sameAs is mutable here as we might need to add more values to it later
+			consolidatedEntity.setSameAs(new ArrayList<>(List.of(externalProxyId)));
 		}
 		else if (!consolidatedEntitySameAs.contains(externalProxyId)) {
 			consolidatedEntitySameAs.add(externalProxyId);
@@ -869,26 +897,23 @@ public class EntityRecordService {
 	entityRecord.addProxy(europeanaProxy);
     }
 
-    private void setExternalProxyMetadata(
-				Entity metisResponse,
-				String proxyId, String entityId,
-				DataSource externalDatasource, EntityRecord entityRecord, Date timestamp) {
-	Aggregation datasourceAggr = new Aggregation();
-	datasourceAggr.setId(getDatasourceAggregationId(entityId));
-	datasourceAggr.setCreated(timestamp);
-	datasourceAggr.setModified(timestamp);
-	datasourceAggr.setRights(externalDatasource.getRights());
-	datasourceAggr.setSource(externalDatasource.getUrl());
+    private void setExternalProxyMetadata(Entity metisResponse, String proxyId, String entityId,
+            DataSource externalDatasource, EntityRecord entityRecord, Date timestamp) {
+        Aggregation datasourceAggr = new Aggregation();
+        datasourceAggr.setId(getDatasourceAggregationId(entityId));
+        datasourceAggr.setCreated(timestamp);
+        datasourceAggr.setModified(timestamp);
+        datasourceAggr.setRights(externalDatasource.getRights());
+        datasourceAggr.setSource(externalDatasource.getUrl());
 
-	EntityProxy datasourceProxy = new EntityProxy();
-	datasourceProxy.setProxyId(proxyId);
-	datasourceProxy.setProxyFor(entityId);
-	datasourceProxy.setProxyIn(datasourceAggr);
-	datasourceProxy.setEntity(metisResponse);
+        EntityProxy datasourceProxy = new EntityProxy();
+        datasourceProxy.setProxyId(proxyId);
+        datasourceProxy.setProxyFor(entityId);
+        datasourceProxy.setProxyIn(datasourceAggr);
+        datasourceProxy.setEntity(metisResponse);
 
-	entityRecord.addProxy(datasourceProxy);
+        entityRecord.addProxy(datasourceProxy);
     }
-
 
 	/**
 	 * Recreates the external proxy on an Entity, using the newProxyId value as its proxyId
@@ -899,11 +924,17 @@ public class EntityRecordService {
 	public void changeExternalProxy(EntityRecord entityRecord, String newProxyId) throws EuropeanaApiException {
 		Optional<DataSource> externalDatasourceOptional = datasources.getDatasource(newProxyId);
 		if (externalDatasourceOptional.isEmpty()) {
-			throw new HttpBadRequestException("No configured datasource for url " + newProxyId);
+			throw new DatasourceNotKnownException("No configured datasource for url " + newProxyId);
 		}
 
-		// remove the external proxy as we're recreating it from scratch
-		EntityProxy externalProxy = entityRecord.getExternalProxy();
+		List<EntityProxy> externalProxies = entityRecord.getExternalProxies();
+
+		if(externalProxies.size() > 1){
+			//Changing provenance isn't supported if entity has multiple external proxies (eg. for Zoho orgs)
+			throw new HttpBadRequestException("Changing provenance not supported for entity");
+		}
+
+		EntityProxy externalProxy = externalProxies.get(0);
 		String entityType = externalProxy.getEntity().getType();
 
 		entityRecord.getProxies().remove(externalProxy);

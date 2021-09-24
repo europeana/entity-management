@@ -5,6 +5,8 @@ import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -13,6 +15,8 @@ import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@SpringBootTest
+@AutoConfigureMockMvc
 public class EntityChangeProvenanceIT extends BaseWebControllerTest {
 
     @Test
@@ -22,13 +26,14 @@ public class EntityChangeProvenanceIT extends BaseWebControllerTest {
 
         EntityRecord savedRecord = createEntity(europeanaMetadata, metisResponse, AGENT_JAN_VERMEER_VIAF_URI);
 
-        // assert content of External proxy
-        EntityProxy externalProxy = savedRecord.getExternalProxy();
+        // assert content of default External proxy
+        EntityProxy externalProxy = savedRecord.getExternalProxies().get(0);
 
         Assertions.assertEquals(AGENT_JAN_VERMEER_VIAF_URI, externalProxy.getProxyId());
         String requestPath = getEntityRequestPath(savedRecord.getEntityId());
 
-        mockMvc.perform(MockMvcRequestBuilders.put(BASE_SERVICE_URL + "/" + requestPath + "/management/source")
+        // request internal profile so proxies are included in response
+        mockMvc.perform(MockMvcRequestBuilders.put(BASE_SERVICE_URL + "/" + requestPath + "/management/source?profile=internal")
                 // change url to wikidata
                 .param(WebEntityConstants.PATH_PARAM_URL, AGENT_JAN_VERMEER_WIKIDATA_URI)
                 .accept(MediaType.APPLICATION_JSON))

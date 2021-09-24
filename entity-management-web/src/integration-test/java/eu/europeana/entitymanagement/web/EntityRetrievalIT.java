@@ -1,23 +1,26 @@
 package eu.europeana.entitymanagement.web;
 
-import eu.europeana.entitymanagement.definitions.model.Agent;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
-import org.junit.jupiter.api.Test;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.ResultActions;
-
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.*;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.any;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.ResultActions;
 
-
+@SpringBootTest
+@AutoConfigureMockMvc
 public class EntityRetrievalIT extends BaseWebControllerTest {
 
     @Test
@@ -43,6 +46,14 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
         mockMvc.perform(get(BASE_SERVICE_URL + "/" + "wrong-type/wrong-identifier.jsonld")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void retrievalErrorWithDebugProfileShouldIncludeStacktrace() throws Exception{
+        mockMvc.perform(get(BASE_SERVICE_URL + "/" + "wrong-type/wrong-identifier.jsonld?profile=debug")
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.trace").exists());
     }
 
     @Test
@@ -130,7 +141,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
         		.andExpect(jsonPath("$.description").isNotEmpty())
         		.andExpect(jsonPath("$.alternateName").isNotEmpty());
     }
-    
+
     @Test
     public void retrieveAgentExternalSchemaOrgShouldBeSuccessful() throws Exception {
 
@@ -145,11 +156,9 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.@id", is(entityRecord.getEntityId())));
 
-        checkAllowHeaderForGET(resultActions);
-
         for (String sameAsElem : entityRecord.getEntity().getSameAs()) {
         	resultActions.andExpect(jsonPath("$.sameAs", Matchers.hasItem(sameAsElem)));
-        }        
+        }
         resultActions.andExpect(jsonPath("$.gender").isNotEmpty());
         resultActions.andExpect(jsonPath("$.deathDate").isNotEmpty());
         resultActions.andExpect(jsonPath("$.birthDate").isNotEmpty());

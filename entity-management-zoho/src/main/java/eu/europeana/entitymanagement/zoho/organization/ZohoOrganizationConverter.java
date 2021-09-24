@@ -20,8 +20,11 @@ import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 
 public class ZohoOrganizationConverter {
 
-   
-    public Organization convertToOrganizationEntity(Record record) {
+    private ZohoOrganizationConverter() {
+        // private constructor to prevent instantiation
+    }
+
+    public static Organization convertToOrganizationEntity(Record record) {
         Organization org = new Organization();
         org.setAbout(ZohoConstants.URL_ORGANIZATION_PREFFIX + record.getId());
         org.setIdentifier(ZohoUtils.stringListSupplier(List.of(Long.toString(record.getId()))));
@@ -45,7 +48,7 @@ public class ZohoOrganizationConverter {
                 org.setGeographicLevel(ZohoUtils.createMap(Locale.ENGLISH.getLanguage(), geographicLevel.get(0)));
         }
         
-        String organizationCountry = this.toEdmCountry(ZohoUtils.stringFieldSupplier(record.getKeyValue(ZohoConstants.ORGANIZATION_COUNTRY_FIELD)));
+        String organizationCountry = toEdmCountry(ZohoUtils.stringFieldSupplier(record.getKeyValue(ZohoConstants.ORGANIZATION_COUNTRY_FIELD)));
         org.setCountry(organizationCountry);
         List<String> sameAs = getAllSameAs(record);
         if (!sameAs.isEmpty()) {
@@ -65,7 +68,7 @@ public class ZohoOrganizationConverter {
         return org;
     }
     
-    private Map<String, List<String>> getAllAltLabel(Record record) {
+    private static Map<String, List<String>> getAllAltLabel(Record record) {
         Map<String, List<String>> altLabelMap = new HashMap<>();
         for(int i = 0; i < ZohoConstants.LANGUAGE_CODE_LENGTH; i++) {
             String label = ZohoUtils.stringFieldSupplier(record.getKeyValue(ZohoConstants.ALTERNATIVE_FIELD+ "_" + i));
@@ -78,7 +81,7 @@ public class ZohoOrganizationConverter {
         return altLabelMap;
     }
     
-    private List<String> getAllSameAs(Record record) {
+    private static List<String> getAllSameAs(Record record) {
         List<String> sameAsList = new ArrayList<>();
         for(int i = 0; i < ZohoConstants.SAME_AS_CODE_LENGTH; i++) {
             String sameAs = ZohoUtils.stringFieldSupplier(record.getKeyValue(ZohoConstants.SAME_AS_FIELD + "_" + i));
@@ -89,7 +92,7 @@ public class ZohoOrganizationConverter {
         return sameAsList;
     }
 
-    String toEdmCountry(String organizationCountry) {
+    private static String toEdmCountry(String organizationCountry) {
         if (StringUtils.isBlank(organizationCountry)) {
             return null;
         } else {

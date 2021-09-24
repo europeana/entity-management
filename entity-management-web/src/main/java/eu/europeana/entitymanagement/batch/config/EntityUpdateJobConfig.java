@@ -17,7 +17,7 @@ import eu.europeana.entitymanagement.batch.writer.EntitySolrWriter;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityMismatchException;
-import eu.europeana.entitymanagement.exception.MetisNotKnownException;
+import eu.europeana.entitymanagement.exception.DatasourceNotKnownException;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import org.springframework.batch.core.ItemProcessListener;
@@ -217,7 +217,7 @@ public class EntityUpdateJobConfig {
                 .faultTolerant()
                 .skipPolicy(noopSkipPolicy)
                 .skip(EntityMismatchException.class)
-                .skip(MetisNotKnownException.class)
+                .skip(DatasourceNotKnownException.class)
                 .skip(SolrServiceException.class)
                 .taskExecutor(executor)
                 .throttleLimit(throttleLimit)

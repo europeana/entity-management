@@ -2,7 +2,12 @@ package eu.europeana.entitymanagement.web.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.dereference.Dereferencer;
+import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
+import java.util.Optional;
 import javax.annotation.Resource;
 
 import org.junit.jupiter.api.Assertions;
@@ -30,20 +35,19 @@ import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 @Disabled("Excluded from automated runs as this depends on Metis")
 public class MetisDereferenceServiceTest extends AbstractIntegrationTest {
 
-    @Resource(name=AppConfig.BEAN_METIS_DEREF_SERVICE)
-    MetisDereferenceService metisDerefService;
-
-	@Qualifier(AppConfigConstants.BEAN_WIKIDATA_ACCESS_SERVICE)
-	@Autowired
-	private WikidataAccessService wikidataService;
+    @Autowired
+    private DereferenceServiceLocator dereferenceServiceLocator;
 	  
     @Test
     public void dereferenceConceptById() throws Exception {
 
 	//bathtube
 	String entityId = "http://www.wikidata.org/entity/Q152095";
-	Concept entity = (Concept) metisDerefService.dereferenceEntityById(entityId, "Concept");
-	assertNotNull(entity);
+      Dereferencer dereferencer = dereferenceServiceLocator.getDereferencer(entityId, "Concept");
+      Optional<Entity> entityOptional = dereferencer.dereferenceEntityById(entityId);
+	assertTrue(entityOptional.isPresent());
+
+	Concept entity = (Concept) entityOptional.get();
 	assertEquals(entityId, entity.getEntityId());
 	
 	// get unmarshalled object
@@ -69,11 +73,14 @@ public class MetisDereferenceServiceTest extends AbstractIntegrationTest {
   
   
     @Test
-    public void zohoOrganizationDereferenceTest() throws ZohoException, Exception {
+    public void zohoOrganizationDereferenceTest() throws Exception {
             String organizationId = "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000002112001";
-            Organization org = (Organization) metisDerefService.dereferenceEntityById(organizationId, "Organization");
+      Dereferencer dereferencer = dereferenceServiceLocator.getDereferencer(organizationId, "Organization");
+            Optional<Entity> orgOptional =  dereferencer.dereferenceEntityById(organizationId);
             
-            Assertions.assertNotNull(org);
+            Assertions.assertTrue(orgOptional.isPresent());
+
+            Organization org = (Organization) orgOptional.get();
             assertEquals(1, org.getPrefLabel().size());
             assertEquals(1, org.getAltLabel().size());
             assertEquals(1, org.getAcronym().size());
@@ -89,9 +96,11 @@ public class MetisDereferenceServiceTest extends AbstractIntegrationTest {
     }
  
 	@Test
-	public void wikidataOrganizationDereferenceTest() throws ZohoException, Exception {
-		String organizationId = "http://www.wikidata.org/entity/Q1781094";
-        Organization org = (Organization) metisDerefService.dereferenceEntityById(organizationId, "Organization");
-		Assertions.assertNotNull(org);
-	}
+  public void wikidataOrganizationDereferenceTest() throws ZohoException, Exception {
+    String organizationId = "http://www.wikidata.org/entity/Q1781094";
+    Dereferencer dereferencer = dereferenceServiceLocator.getDereferencer(organizationId,
+        "Organization");
+    Optional<Entity> orgOptional = dereferencer.dereferenceEntityById(organizationId);
+    Assertions.assertTrue(orgOptional.isPresent());
+  }
 }

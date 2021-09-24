@@ -1,10 +1,10 @@
 package eu.europeana.entitymanagement.batch.processor;
 
+import eu.europeana.entitymanagement.definitions.model.EntityProxy;
+import eu.europeana.entitymanagement.dereference.Dereferencer;
+import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
 import java.util.Date;
-import java.util.Set;
-
-import javax.validation.ConstraintViolation;
-import javax.validation.ValidatorFactory;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,54 +16,51 @@ import org.springframework.stereotype.Component;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityMismatchException;
-import eu.europeana.entitymanagement.exception.MetisNotKnownException;
-import eu.europeana.entitymanagement.exception.ingestion.EntityValidationException;
-import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorGroup;
+import eu.europeana.entitymanagement.exception.DatasourceNotKnownException;
 import eu.europeana.entitymanagement.utils.EntityComparator;
-import eu.europeana.entitymanagement.web.service.MetisDereferenceService;
 
 /**
- * This {@link ItemProcessor} retrieves Entity metadata from Metis, and then overwrites the local
- * metadata with Metis' if different.
+ * This {@link ItemProcessor} retrieves Entity metadata from all proxy datasources, and then overwrites the local
+ * metadata if datasource response is different.
  */
 @Component
 public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, EntityRecord> {
 
-    private static final String MISMATCH_EXCEPTION_STRING = "Metis type %s does not match entity type %s for entityId=%s";
+    private static final String MISMATCH_EXCEPTION_STRING = "DataSource type %s does not match entity type %s for entityId=%s, proxyId=%s";
     private static final Logger logger = LogManager.getLogger(EntityDereferenceProcessor.class);
-    private final MetisDereferenceService dereferenceService;
+    private final DereferenceServiceLocator dereferenceServiceLocator;
     private final EntityComparator entityComparator;
-    private final ValidatorFactory emValidatorFactory;
 
     @Autowired
-    public EntityDereferenceProcessor(MetisDereferenceService dereferenceService, ValidatorFactory emValidatorFactory) {
-        this.dereferenceService = dereferenceService;
+    public EntityDereferenceProcessor(DereferenceServiceLocator dereferenceServiceLocator) {
+        this.dereferenceServiceLocator = dereferenceServiceLocator;
         this.entityComparator = new EntityComparator();
-        this.emValidatorFactory = emValidatorFactory;
     }
 
     @Override
     public EntityRecord process(@NonNull EntityRecord entityRecord) throws Exception {
         String entityId = entityRecord.getEntityId();
-        String proxyId = entityRecord.getExternalProxy().getProxyId();
-        Entity metisResponse;
-        try {
-            metisResponse = dereferenceService.dereferenceEntityById(proxyId, entityRecord.getEntity().getType());
-        } catch (MetisNotKnownException e) {
-            // include entityId in exception message, then rethrow it
-            throw new MetisNotKnownException("Unsuccessful Metis dereferenciation for externalId=" +
-                    proxyId + "; entityId=" + entityId);
+      for (EntityProxy externalProxy : entityRecord.getExternalProxies()) {
+        String proxyId = externalProxy.getProxyId();
+
+        Dereferencer dereferencer = dereferenceServiceLocator.getDereferencer(proxyId,
+            entityRecord.getEntity().getType());
+        Optional<Entity> proxyResponseOptional = dereferencer.dereferenceEntityById(proxyId);
+        if (proxyResponseOptional.isEmpty()) {
+          throw new DatasourceNotKnownException("Unsuccessful dereferenciation for externalId=" +
+              proxyId + "; entityId=" + entityId);
         }
+
+        Entity proxyResponse = proxyResponseOptional.get();
 
         Entity entity = entityRecord.getEntity();
 
-        String metisType = metisResponse.getType();
+        String proxyResponseType = proxyResponse.getType();
         String entityType = entity.getType();
-        if (!metisType.equals(entityType)) {
-
-            throw new EntityMismatchException(
-                    String.format(MISMATCH_EXCEPTION_STRING,
-                            metisType, entityType, entityId));
+        if (!proxyResponseType.equals(entityType)) {
+          throw new EntityMismatchException(
+              String.format(MISMATCH_EXCEPTION_STRING,
+                  proxyResponseType, entityType, entityId, proxyId));
         }
 
         /*
@@ -71,38 +68,31 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
          * It needs to be processed at least once, which would update the last modified time.
          * See EntityRecordService.mergeEntities()
          */
-        boolean isEntityNew = entity.getIsAggregatedBy().getCreated().equals(entity.getIsAggregatedBy().getModified());
+        boolean isEntityNew = entity.getIsAggregatedBy().getCreated()
+            .equals(entity.getIsAggregatedBy().getModified());
 
-        if(isEntityNew || !metisResponseMatchesExternalProxy(entityRecord, metisResponse)){
-            if(logger.isTraceEnabled()) {
-                logger.trace("Storing de-referenced metadata in external proxy for entityId={}", entityId);
-            }
-            // replace external proxy with MetisResponse
-            entityRecord.getExternalProxy().setEntity(metisResponse);
-            entityRecord.getExternalProxy().getProxyIn().setModified(new Date());
+        if (isEntityNew || !datasourceResponseMatchesExternalProxy(externalProxy, proxyResponse)) {
+          if (logger.isTraceEnabled()) {
+            logger.trace("Storing de-referenced metadata in external proxy for entityId={}",
+                entityId);
+          }
+          // replace external proxy with proxy response
+          externalProxy.setEntity(proxyResponse);
+          externalProxy.getProxyIn().setModified(new Date());
         }
+      }
 
         return entityRecord;
     }
 
 
-  /**
-   * Checks if the Europeana proxy has been updated since the last time entity consolidation occurred.
-   * This is the case when the update task is triggered after Europeana metadata is updated.
-   *
-   * See {@link eu.europeana.entitymanagement.web.service.EntityRecordService#replaceEuropeanaProxy(Entity, EntityRecord)}
-   */
-  private boolean isEuropeanaProxyUpdated(EntityRecord entityRecord){
-      return
-          entityRecord.getEuropeanaProxy().getProxyIn().getModified()
-              .after(entityRecord.getEntity().getIsAggregatedBy().getModified());
-    }
+
 
 
   /**
-   * Checks if Metis response matches metadata in external proxy
+   * Checks if Datasource response matches metadata in external proxy
    */
-  private boolean metisResponseMatchesExternalProxy(EntityRecord entityRecord, Entity metisResponse){
-      return entityComparator.compare(entityRecord.getExternalProxy().getEntity(), metisResponse) == 0;
+  private boolean datasourceResponseMatchesExternalProxy(EntityProxy entityProxy, Entity metisResponse){
+      return entityComparator.compare(entityProxy.getEntity(), metisResponse) == 0;
     }
 }

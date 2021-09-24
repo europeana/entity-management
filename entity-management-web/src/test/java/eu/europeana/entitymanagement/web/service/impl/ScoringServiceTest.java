@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import eu.europeana.entitymanagement.config.SolrConfig;
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Place;
+import eu.europeana.entitymanagement.web.service.EnrichmentCountQueryService;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,14 +32,15 @@ import eu.europeana.entitymanagement.web.service.ScoringService;
  */
 //TODO: create a "proper" integration test with this
 @SpringBootTest(classes = {ValidatorConfig.class,
-        SerializationConfig.class, EntityManagementConfiguration.class, ScoringService.class, SolrConfig.class})
+        SerializationConfig.class, EntityManagementConfiguration.class, ScoringService.class, SolrConfig.class,
+    EnrichmentCountQueryService.class})
 public class ScoringServiceTest {
 
     @Resource(name=AppConfig.BEAN_EM_SCORING_SERVICE)
     ScoringService scoringService;
 
     @Test
-    @Disabled("Excluded from automated runs as this requires Solr")
+    @Disabled("Excluded from automated runs as this requires Search API")
     public void testComputeMetrics() throws Exception {
 
 	Agent agent = new Agent();
@@ -71,7 +73,7 @@ public class ScoringServiceTest {
     }
     
     @Test
-    @Disabled("Excluded from automated runs as this requires Solr")
+    @Disabled("Excluded from automated runs as this requires Search API")
     public void testComputeMetricsForPlaces() throws Exception {
 
         Place agent = new Place();
