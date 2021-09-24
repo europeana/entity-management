@@ -155,22 +155,29 @@ public class EntityFieldsCompleteValidator implements ConstraintValidator<Entity
     } 
     
     boolean validateEmailListField(ConstraintValidatorContext context, Field field, List<String> fieldValues) {
-    	boolean returnValue = true;
-    		if (fieldValues.isEmpty()) { 
-		    return true;
-		}
+        boolean returnValue = true;
+        if (fieldValues.isEmpty()) {
+            return true;
+        }
 
-      if (EntityFieldsTypes.isSingleValueField(field.getName()) && fieldValues.size() > 1) {
-        addConstraint(context,
-            "The entity field: " + field.getName() + " cannot have more than one value");
-        return false;
-      }
-		for (String fieldValueElem : fieldValues) {
-		    boolean returnValueLocal = checkEmailFormat(context, field, fieldValueElem);
-		    //update global return value
-                    returnValue = returnValue && returnValueLocal;
-		}		
+        if (hasFieldCardinalityViolation(context, field, fieldValues)) {
+            return false;
+        }
+        for (String fieldValueElem : fieldValues) {
+            boolean returnValueLocal = checkEmailFormat(context, field, fieldValueElem);
+            // update global return value
+            returnValue = returnValue && returnValueLocal;
+        }
         return returnValue;
+    }
+
+    boolean hasFieldCardinalityViolation(ConstraintValidatorContext context, Field field, List<String> fieldValues) {
+        if (EntityFieldsTypes.isSingleValueField(field.getName()) && fieldValues.size() > 1) {
+            addConstraint(context,
+                "The entity field: " + field.getName() + " cannot have more than one value");
+            return true;
+        }
+        return false;  
     }
 
     boolean checkEmailFormat(ConstraintValidatorContext context, Field field, String fieldValue) {
@@ -198,19 +205,17 @@ public class EntityFieldsCompleteValidator implements ConstraintValidator<Entity
     
     boolean validateDateListField(ConstraintValidatorContext context, Field field, List<String> fieldValues) {
     	boolean returnValue = true;
-    		if (fieldValues.isEmpty()) {
-		    return true;
-		}
-      if (EntityFieldsTypes.isSingleValueField(field.getName()) && fieldValues.size() > 1) {
-        addConstraint(context,
-            "The entity field: " + field.getName() + " cannot have more than one value");
-        return false;
-      }
-		for (String fieldValueElem : fieldValues) {
-			if (checkDateFormatISO8601(context, field, fieldValueElem) == false && returnValue == true) {
-				returnValue = false;
-			}
-		}		
+        if (fieldValues.isEmpty()) {
+            return true;
+        }
+        if (hasFieldCardinalityViolation(context, field, fieldValues)) {
+            return false;
+        }
+        for (String fieldValueElem : fieldValues) {
+            if (checkDateFormatISO8601(context, field, fieldValueElem) == false && returnValue == true) {
+                returnValue = false;
+            }
+        }	
         return returnValue;
     }
 
@@ -245,21 +250,19 @@ public class EntityFieldsCompleteValidator implements ConstraintValidator<Entity
     } 
     
     boolean validateURIListField(ConstraintValidatorContext context, Field field, List<String> fieldValues) {
-    	boolean returnValue = true;
- 		if (fieldValues.isEmpty()) {
- 		    return true;
- 		}
+        boolean returnValue = true;
+        if (fieldValues.isEmpty()) {
+            return true;
+        }
 
-      if (EntityFieldsTypes.isSingleValueField(field.getName()) && fieldValues.size() > 1) {
-        addConstraint(context,
-            "The entity field: " + field.getName() + " cannot have more than one value");
-        return false;
-      }
-		for (String fieldValueElem : fieldValues) {
-			if (!validateURIField(context, field, fieldValueElem)) {
-				returnValue = false;
-			}
-		}		
+        if (hasFieldCardinalityViolation(context, field, fieldValues)) {
+            return false;
+        }
+        for (String fieldValueElem : fieldValues) {
+            if (!validateURIField(context, field, fieldValueElem)) {
+                returnValue = false;
+            }
+        }
         return returnValue;
     }    
     
