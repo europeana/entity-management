@@ -6,6 +6,7 @@ import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationExcept
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -42,10 +43,10 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
   private List<LabelledResource> biographicalInformation = new ArrayList<>();
 
   @XmlElement(name = XML_BEGIN, namespace = NAMESPACE_EDM)
-  private String begin;
+  private List<String> begin;
 
   @XmlElement(name = XML_END, namespace = NAMESPACE_EDM)
-  private String end;
+  private List<String> end;
 
   @XmlElement(name = XML_IS_RELATED_TO, namespace = NAMESPACE_EDM)
   private List<LabelledResource> isRelatedTo = new ArrayList<>();
@@ -54,22 +55,22 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
   private List<LabelledResource> name = new ArrayList<>();
 
   @XmlElement(name = XML_DATE_OF_BIRTH, namespace = NAMESPACE_RDAGR2)
-  private String dateOfBirth;
+  private List<String> dateOfBirth;
 
   @XmlElement(name = XML_DATE_OF_DEATH, namespace = NAMESPACE_RDAGR2)
-  private String dateOfDeath;
+  private List<String> dateOfDeath;
 
   @XmlElement(name = XML_DATE_OF_ESTABLISHMENT, namespace = NAMESPACE_RDAGR2)
-  private String dateOfEstablishment;
+  private List<String> dateOfEstablishment;
 
   @XmlElement(name = XML_DATE_OF_TERMINATION, namespace = NAMESPACE_RDAGR2)
-  private String dateOfTermination;
+  private List<String> dateOfTermination;
 
   @XmlElement(name = XML_DATE, namespace = NAMESPACE_DC)
   private List<String> dcDate;
 
   @XmlElement(name = XML_GENDER, namespace = NAMESPACE_RDAGR2)
-  private String gender;
+  private List<String> gender;
 
   @XmlElement(name = XML_PLACE_OF_BIRTH, namespace = NAMESPACE_RDAGR2)
   private List<LabelledResource> placeOfBirth = new ArrayList<>();
@@ -87,15 +88,15 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
     this.identifier = agent.getIdentifier();
     this.hasPart = RdfXmlUtils.convertToRdfResource(agent.getHasPart());
     this.isPartOf = RdfXmlUtils.convertToRdfResource(agent.getIsPartOfArray());
-    this.begin = getFirstValue(agent.getBegin());
-    this.end = getFirstValue(agent.getEnd());
+    this.begin = agent.getBegin();
+    this.end = agent.getEnd();
     this.hasMet = RdfXmlUtils.convertToRdfResource(agent.getHasMet());
     this.isRelatedTo = RdfXmlUtils.convertToRdfResource(agent.getIsRelatedTo());
     this.name = RdfXmlUtils.convertMapToXmlMultilingualString(agent.getName());
     this.biographicalInformation = RdfXmlUtils
         .convertToXmlMultilingualString(agent.getBiographicalInformation());
-    this.dateOfBirth = getFirstValue(agent.getDateOfBirth());
-    this.dateOfDeath = getFirstValue(agent.getDateOfDeath());
+    this.dateOfBirth = agent.getDateOfBirth();
+    this.dateOfDeath = agent.getDateOfDeath();
     this.dateOfEstablishment = agent.getDateOfEstablishment();
     this.dateOfTermination = agent.getDateOfTermination();
     this.dcDate = agent.getDate();
@@ -120,14 +121,14 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
     entity.setIdentifier(identifier);
     entity.setHasPart(RdfXmlUtils.toStringList(hasPart));
     entity.setIsPartOfArray(RdfXmlUtils.toStringList(isPartOf));
-    entity.setBegin(toList(begin));
-    entity.setEnd(toList(end));
+    entity.setBegin(begin);
+    entity.setEnd(end);
     entity.setHasMet(RdfXmlUtils.toStringList(hasMet));
     entity.setIsRelatedTo(RdfXmlUtils.toStringList(isRelatedTo));
     entity.setName(RdfXmlUtils.toLanguageMap(name));
     entity.setBiographicalInformation(RdfXmlUtils.toLanguageMapList(biographicalInformation));
-    entity.setDateOfBirth(toList(dateOfBirth));
-    entity.setDateOfDeath(toList(dateOfDeath));
+    entity.setDateOfBirth(dateOfBirth);
+    entity.setDateOfDeath(dateOfDeath);
     entity.setDateOfEstablishment(dateOfEstablishment);
     entity.setDateOfTermination(dateOfTermination);
     entity.setDate(dcDate);
@@ -163,11 +164,11 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
     return isPartOf;
   }
 
-  public String getBegin() {
+  public List<String> getBegin() {
     return begin;
   }
 
-  public String getEnd() {
+  public List<String> getEnd() {
     return end;
   }
 
@@ -188,23 +189,23 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
   }
 
 
-  public String getDateOfBirth() {
+  public List<String> getDateOfBirth() {
     return dateOfBirth;
   }
 
-  public String getDateOfDeath() {
+  public List<String> getDateOfDeath() {
     return dateOfDeath;
   }
 
-  public String getDateOfEstablishment() {
+  public List<String> getDateOfEstablishment() {
     return dateOfEstablishment;
   }
 
-  public String getDateOfTermination() {
+  public List<String> getDateOfTermination() {
     return dateOfTermination;
   }
 
-  public String getGender() {
+  public List<String> getGender() {
     return gender;
   }
 

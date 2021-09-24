@@ -6,7 +6,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.definitions.mixins.ConsolidatedAgentMixin;
+import eu.europeana.entitymanagement.definitions.model.ConsolidatedAgent;
 import eu.europeana.entitymanagement.web.xml.model.RdfBaseWrapper;
+import eu.europeana.entitymanagement.web.xml.model.WikidataOrganization;
 import eu.europeana.entitymanagement.web.xml.model.metis.EnrichmentResultList;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -36,6 +39,7 @@ public class SerializationConfig {
                 .featuresToEnable(
                     DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
                 .serializationInclusion(JsonInclude.Include.NON_NULL)
+                .mixIn(ConsolidatedAgent.class, ConsolidatedAgentMixin.class)
                 .build();
     }
 
@@ -60,7 +64,7 @@ public class SerializationConfig {
      */
     @Bean
     public JAXBContext jaxbContext() throws JAXBException {
-        // args are wrapper classes for Deserializing Metis Response and Serializing API output
-        return JAXBContext.newInstance(EnrichmentResultList.class, RdfBaseWrapper.class);
+        // args are wrapper classes for Deserializing Metis Response, Wikidata response, and Serializing XML output
+        return JAXBContext.newInstance(EnrichmentResultList.class, RdfBaseWrapper.class, WikidataOrganization.class);
     }
 }

@@ -36,6 +36,7 @@ public class Agent extends Entity {
 		this.dateOfEstablishment = copy.getDateOfEstablishment();
 		this.dateOfTermination = copy.getDateOfTermination();
 		this.gender = copy.getGender();
+		this.sameAs = copy.sameAs;
 	}
 
 	public Agent() {
@@ -57,9 +58,9 @@ public class Agent extends Entity {
 	private List<String> placeOfBirth;
 	private List<String> placeOfDeath;
 
-	private String dateOfEstablishment; // format "YYYY"
-	private String dateOfTermination; // format "YYYY"
-	private String gender;
+	private List<String> dateOfEstablishment;
+	private List<String> dateOfTermination;
+	private List<String> gender;
 
 	private List<String> sameAs;
 
@@ -77,11 +78,11 @@ public class Agent extends Entity {
 	public List<String> getDate() {
 		return date;
 	}
-
 	@JsonSetter(DATE)
 	public void setDate(List<String> date) {
 		this.date = date;
 	}
+
 
 	@JsonGetter(BEGIN)
 	public List<String> getBegin() {
@@ -163,6 +164,7 @@ public class Agent extends Entity {
 		this.placeOfBirth = placeOfBirth;
 	}
 
+
 	@JsonGetter(PLACE_OF_DEATH)
 	public List<String> getPlaceOfDeath() {
 		return placeOfDeath;
@@ -174,32 +176,33 @@ public class Agent extends Entity {
 	}
 
 	@JsonGetter(DATE_OF_ESTABLISHMENT)
-	public String getDateOfEstablishment() {
+	public List<String> getDateOfEstablishment() {
 		return dateOfEstablishment;
 	}
 
 	@JsonSetter(DATE_OF_ESTABLISHMENT)
-	public void setDateOfEstablishment(String dateOfEstablishment) {
+	public void setDateOfEstablishment(List<String> dateOfEstablishment) {
 		this.dateOfEstablishment = dateOfEstablishment;
 	}
 
 	@JsonGetter(DATE_OF_TERMINATION)
-	public String getDateOfTermination() {
+	public List<String> getDateOfTermination() {
 		return dateOfTermination;
 	}
 
 	@JsonSetter(DATE_OF_TERMINATION)
-	public void setDateOfTermination(String dateOfTermination) {
+	public void setDateOfTermination(List<String> dateOfTermination) {
 		this.dateOfTermination = dateOfTermination;
 	}
 
 	@JsonGetter(GENDER)
-	public String getGender() {
+	public List<String> getGender() {
 		return gender;
 	}
 
+
 	@JsonSetter(GENDER)
-	public void setGender(String gender) {
+	public void setGender(List<String> gender) {
 		this.gender = gender;
 	}
 

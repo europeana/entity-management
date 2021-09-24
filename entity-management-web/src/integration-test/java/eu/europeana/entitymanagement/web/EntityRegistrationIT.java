@@ -57,6 +57,11 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                 .andExpect(status().isAccepted()).andExpect(jsonPath("$.id", any(String.class)))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())))
                 .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
+                // fields to be serialized as string
+                .andExpect(jsonPath("$.dateOfBirth", any(String.class)))
+                .andExpect(jsonPath("$.dateOfDeath", any(String.class)))
+                .andExpect(jsonPath("$.dateOfEstablishment", any(String.class)))
+
                 .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
                 // should have Europeana and Datasource proxies
                 .andExpect(jsonPath("$.proxies", hasSize(2)));
@@ -169,12 +174,12 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
     }
 
     @Test
-    public void registrationWithEmptyMetisResponseShouldReturn500() throws Exception {
+    public void registrationWithEmptyMetisResponseShouldReturn400() throws Exception {
         // mockMetis returns an empty response body for this entity
         String europeanaMetadata = loadFile(CONCEPT_REGISTER_UNKNOWN_ENTITY);
         mockMvc.perform(post(BASE_SERVICE_URL)
                 .content(europeanaMetadata)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().is5xxServerError());
+                .andExpect(status().isBadRequest());
     }
 }

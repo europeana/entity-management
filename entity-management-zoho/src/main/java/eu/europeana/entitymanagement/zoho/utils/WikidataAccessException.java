@@ -1,10 +1,18 @@
 package eu.europeana.entitymanagement.zoho.utils;
 
-public class WikidataAccessException extends Exception {
+import eu.europeana.api.commons.error.EuropeanaApiException;
+import org.springframework.http.HttpStatus;
+
+public class WikidataAccessException extends EuropeanaApiException {
 
     private static final long serialVersionUID = 7724261367420984595L;
 
-    public WikidataAccessException(String message, Throwable th) {
-        super(message, th);
+
+    public WikidataAccessException(String msg, Throwable t) {
+        super(msg,  t);
+    }
+
+    public WikidataAccessException(String msg) {
+        super(msg);
     }
 }

@@ -69,7 +69,7 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
 
     public T toEntityModel() throws EntityCreationException {
 	if(entity == null) {
-	    entity = EntityObjectFactory.createEntityObject(getTypeEnum());
+	    entity = EntityObjectFactory.createProxyEntityObject(getTypeEnum().getEntityType());
 	}
 	entity.setType(getTypeEnum().getEntityType());
 

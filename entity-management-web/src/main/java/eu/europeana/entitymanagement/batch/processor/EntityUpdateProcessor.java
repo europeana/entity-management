@@ -41,7 +41,8 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
         
 
         EntityProxy europeanaProxy = entityRecord.getEuropeanaProxy();
-        EntityProxy externalProxy = entityRecord.getExternalProxy();
+        // TODO: Support multiple external proxies (EA:2706)
+        EntityProxy externalProxy = entityRecord.getExternalProxies().get(0);
         if (europeanaProxy == null || externalProxy == null) {
             throw new EuropeanaApiException(String.format(
                     "Unable to process entity record with id: %s. Europeana proxy or external proxy is not available in the record!",

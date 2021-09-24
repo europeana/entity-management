@@ -26,13 +26,14 @@ public class EntityChangeProvenanceIT extends BaseWebControllerTest {
 
         EntityRecord savedRecord = createEntity(europeanaMetadata, metisResponse, AGENT_JAN_VERMEER_VIAF_URI);
 
-        // assert content of External proxy
-        EntityProxy externalProxy = savedRecord.getExternalProxy();
+        // assert content of default External proxy
+        EntityProxy externalProxy = savedRecord.getExternalProxies().get(0);
 
         Assertions.assertEquals(AGENT_JAN_VERMEER_VIAF_URI, externalProxy.getProxyId());
         String requestPath = getEntityRequestPath(savedRecord.getEntityId());
 
-        mockMvc.perform(MockMvcRequestBuilders.put(BASE_SERVICE_URL + "/" + requestPath + "/management/source")
+        // request internal profile so proxies are included in response
+        mockMvc.perform(MockMvcRequestBuilders.put(BASE_SERVICE_URL + "/" + requestPath + "/management/source?profile=internal")
                 // change url to wikidata
                 .param(WebEntityConstants.PATH_PARAM_URL, AGENT_JAN_VERMEER_WIKIDATA_URI)
                 .accept(MediaType.APPLICATION_JSON))

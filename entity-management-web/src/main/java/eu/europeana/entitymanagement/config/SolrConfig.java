@@ -28,12 +28,6 @@ public class SolrConfig {
         return new HttpSolrClient.Builder(emConfiguration.getPrSolrUrl()).build();
     }
 
-    @Bean(AppConfigConstants.BEAN_SEARCH_API_SOLR_CLIENT)
-    public SolrClient searchApiSolrClient() {
-        logger.info("Configuring search API solr client at the url: {}", emConfiguration.getSearchApiSolrUrl());
-        return new HttpSolrClient.Builder(emConfiguration.getSearchApiSolrUrl()).build();
-    }
-
     @Bean(AppConfigConstants.BEAN_INDEXING_SOLR_CLIENT)
     public SolrClient indexingSolrClient() {
         logger.info("Configuring indexing solr client at the url: {}", emConfiguration.getIndexingSolrUrl());
