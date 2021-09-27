@@ -12,8 +12,8 @@ import java.io.InputStream;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import org.assertj.core.api.Assertions;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -76,8 +76,10 @@ class MetisResponseDeserializerTest {
 		assertEquals("Leonardo da Vinci", enLabel.getValue());
 
 		// check dates
-		assertEquals("1452-04-24T00:00:00Z", xmlEntity.getDateOfBirth());
-		assertEquals("1519-05-12T00:00:00Z", xmlEntity.getDateOfDeath());
+		assertEquals("1452-04-24T00:00:00Z", xmlEntity.getDateOfBirth().get(0));
+		assertEquals("1519-05-12T00:00:00Z", xmlEntity.getDateOfDeath().get(0));
+
+
 
 		assertEquals(27, xmlEntity.getProfessionOrOccupation().size());
 		//TODO: assert other fields

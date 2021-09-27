@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.utils;
 
+import eu.europeana.entitymanagement.definitions.model.ConsolidatedAgent;
 import java.util.Map;
 
 import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
@@ -33,7 +34,16 @@ import eu.europeana.entitymanagement.web.xml.model.XmlTimespanImpl;
  */
 public class EntityObjectFactory {
 
-	private static final Map<EntityTypes, Class<? extends Entity>> entityTypesClassMap = Map.of(
+	private static final Map<EntityTypes, Class<? extends Entity>> consolidatedEntityTypesClassMap = Map.of(
+			// ConsolidatedAgent used to serialize fields with correct cardinalities
+			EntityTypes.Agent, ConsolidatedAgent.class,
+			EntityTypes.Concept, Concept.class,
+			EntityTypes.Organization, Organization.class,
+			EntityTypes.Place, Place.class,
+			EntityTypes.Timespan, Timespan.class
+	);
+
+	private static final Map<EntityTypes, Class<? extends Entity>> proxyEntityTypesClassMap = Map.of(
 			EntityTypes.Agent, Agent.class,
 			EntityTypes.Concept, Concept.class,
 			EntityTypes.Organization, Organization.class,
@@ -51,10 +61,11 @@ public class EntityObjectFactory {
 
 
 	@SuppressWarnings("unchecked")
-    public static <T extends Entity> T createEntityObject(EntityTypes entityType) throws EntityCreationException {
+    private static <T extends Entity> T instantiateEntityObject(Map<EntityTypes, Class<? extends Entity>> entityMap,
+			EntityTypes entityType) throws EntityCreationException {
 
 	try {
-		Class<T> entityClass = (Class<T>) entityTypesClassMap.get(entityType);
+		Class<T> entityClass = (Class<T>) entityMap.get(entityType);
 		// entityClass cannot be null here as map contains all possible types
 		return entityClass.getDeclaredConstructor().newInstance();
 
@@ -62,11 +73,18 @@ public class EntityObjectFactory {
 	    throw new EntityCreationException("Error creating instance for " + entityType.toString(), e);
 	}
     }
-    
-    public static Entity createEntityObject(String entityType) throws EntityCreationException {
 
-	return createEntityObject(EntityTypes.valueOf(entityType));
-}
+	public static <T extends Entity> T createProxyEntityObject(String entityType)
+			throws EntityCreationException {
+
+		return instantiateEntityObject(proxyEntityTypesClassMap, EntityTypes.valueOf(entityType));
+	}
+
+	public static <T extends Entity> T createConsolidatedEntityObject(String entityType)
+			throws EntityCreationException {
+
+		return instantiateEntityObject(consolidatedEntityTypesClassMap, EntityTypes.valueOf(entityType));
+	}
 
 	@SuppressWarnings("unchecked")
 	public static <T extends Entity> SchemaOrgEntity<T> createSchemaOrgEntity(Entity entity) {

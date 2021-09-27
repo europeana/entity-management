@@ -16,6 +16,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class XmlTimespanImpl extends XmlBaseEntityImpl<Timespan> {
 
+  @XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.XML_SAME_AS)
+  private List<LabelledResource> sameAs = new ArrayList<>();
+
   @XmlElement(namespace = NAMESPACE_SKOS, name =  HIDDEN_LABEL)
   private List<LabelledResource> hiddenLabel = new ArrayList<>();
 
@@ -98,4 +101,14 @@ public class XmlTimespanImpl extends XmlBaseEntityImpl<Timespan> {
 	protected EntityTypes getTypeEnum() {
 	    return EntityTypes.Timespan;
 	}
+
+  @Override
+  public List<LabelledResource> getSameReferenceLinks() {
+    return this.sameAs;
+  }
+
+  @Override
+  public void setSameReferenceLinks(List<LabelledResource> uris) {
+    this.sameAs = uris;
+  }
 }

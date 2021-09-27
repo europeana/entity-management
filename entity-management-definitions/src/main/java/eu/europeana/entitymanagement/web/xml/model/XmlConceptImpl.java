@@ -66,7 +66,6 @@ public class XmlConceptImpl extends XmlBaseEntityImpl<Concept> {
         this.broader = RdfXmlUtils.convertToRdfResource(concept.getBroader());
         this.broadMatch = RdfXmlUtils.convertToRdfResource(concept.getBroadMatch());
         this.narrowMatch = RdfXmlUtils.convertToRdfResource(concept.getNarrowMatch());
-        this.exactMatch = RdfXmlUtils.convertToRdfResource(concept.getExactMatch());
         this.relatedMatch = RdfXmlUtils.convertToRdfResource(concept.getRelatedMatch());
         this.closeMatch = RdfXmlUtils.convertToRdfResource(concept.getCloseMatch());
         this.note = RdfXmlUtils.convertToXmlMultilingualString(concept.getNote());
@@ -83,7 +82,6 @@ public class XmlConceptImpl extends XmlBaseEntityImpl<Concept> {
         entity.setBroader(RdfXmlUtils.toStringList(getBroader()));
         entity.setBroadMatch(RdfXmlUtils.toStringList(getBroadMatch()));
         entity.setNarrowMatch(RdfXmlUtils.toStringList(getNarrowMatch()));
-        entity.setExactMatch(RdfXmlUtils.toStringList(getExactMatch()));
         entity.setRelatedMatch(RdfXmlUtils.toStringList(getRelatedMatch()));
         entity.setCloseMatch(RdfXmlUtils.toStringList(getCloseMatch()));
         entity.setInScheme(RdfXmlUtils.toStringList(getInScheme()));
@@ -152,5 +150,15 @@ public class XmlConceptImpl extends XmlBaseEntityImpl<Concept> {
     @Override
     protected EntityTypes getTypeEnum() {
 	return  EntityTypes.Concept;
+    }
+
+    @Override
+    public List<LabelledResource> getSameReferenceLinks() {
+        return this.exactMatch;
+    }
+
+    @Override
+    public void setSameReferenceLinks(List<LabelledResource> uris) {
+        this.exactMatch = uris;
     }
 }

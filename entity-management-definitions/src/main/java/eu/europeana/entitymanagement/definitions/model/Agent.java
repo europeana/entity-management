@@ -1,48 +1,17 @@
 package eu.europeana.entitymanagement.definitions.model;
 
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ALT_LABEL;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BEGIN;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BIOGRAPHICAL_INFORMATION;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DATE;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DATE_OF_BIRTH;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DATE_OF_DEATH;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DATE_OF_ESTABLISHMENT;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DATE_OF_TERMINATION;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DEPICTION;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.END;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.GENDER;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_MET;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_PART;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HIDDEN_LABEL;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IDENTIFIER;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_PART_OF;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_RELATED_TO;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_SHOWN_BY;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NAME;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NOTE;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PLACE_OF_BIRTH;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PLACE_OF_DEATH;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PROFESSION_OR_OCCUPATION;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.WAS_PRESENT_AT;
-
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
-
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({CONTEXT, ID, TYPE, DEPICTION, IS_SHOWN_BY, PREF_LABEL, ALT_LABEL, HIDDEN_LABEL, NAME, BEGIN, DATE_OF_BIRTH, DATE_OF_ESTABLISHMENT,
@@ -67,7 +36,7 @@ public class Agent extends Entity {
 		this.dateOfEstablishment = copy.getDateOfEstablishment();
 		this.dateOfTermination = copy.getDateOfTermination();
 		this.gender = copy.getGender();
-		if(copy.getExactMatch()!=null) this.exactMatch = new ArrayList<>(copy.getExactMatch());
+		this.sameAs = copy.sameAs;
 	}
 
 	public Agent() {
@@ -89,11 +58,11 @@ public class Agent extends Entity {
 	private List<String> placeOfBirth;
 	private List<String> placeOfDeath;
 
-	private String dateOfEstablishment; // format "YYYY"
-	private String dateOfTermination; // format "YYYY"
-	private String gender;
+	private List<String> dateOfEstablishment;
+	private List<String> dateOfTermination;
+	private List<String> gender;
 
-	private List<String> exactMatch;
+	private List<String> sameAs;
 
 	@JsonGetter(WAS_PRESENT_AT)
 	public List<String> getWasPresentAt() {
@@ -109,11 +78,11 @@ public class Agent extends Entity {
 	public List<String> getDate() {
 		return date;
 	}
-
 	@JsonSetter(DATE)
 	public void setDate(List<String> date) {
 		this.date = date;
 	}
+
 
 	@JsonGetter(BEGIN)
 	public List<String> getBegin() {
@@ -195,6 +164,7 @@ public class Agent extends Entity {
 		this.placeOfBirth = placeOfBirth;
 	}
 
+
 	@JsonGetter(PLACE_OF_DEATH)
 	public List<String> getPlaceOfDeath() {
 		return placeOfDeath;
@@ -206,32 +176,33 @@ public class Agent extends Entity {
 	}
 
 	@JsonGetter(DATE_OF_ESTABLISHMENT)
-	public String getDateOfEstablishment() {
+	public List<String> getDateOfEstablishment() {
 		return dateOfEstablishment;
 	}
 
 	@JsonSetter(DATE_OF_ESTABLISHMENT)
-	public void setDateOfEstablishment(String dateOfEstablishment) {
+	public void setDateOfEstablishment(List<String> dateOfEstablishment) {
 		this.dateOfEstablishment = dateOfEstablishment;
 	}
 
 	@JsonGetter(DATE_OF_TERMINATION)
-	public String getDateOfTermination() {
+	public List<String> getDateOfTermination() {
 		return dateOfTermination;
 	}
 
 	@JsonSetter(DATE_OF_TERMINATION)
-	public void setDateOfTermination(String dateOfTermination) {
+	public void setDateOfTermination(List<String> dateOfTermination) {
 		this.dateOfTermination = dateOfTermination;
 	}
 
 	@JsonGetter(GENDER)
-	public String getGender() {
+	public List<String> getGender() {
 		return gender;
 	}
 
+
 	@JsonSetter(GENDER)
-	public void setGender(String gender) {
+	public void setGender(List<String> gender) {
 		this.gender = gender;
 	}
 
@@ -243,14 +214,6 @@ public class Agent extends Entity {
 	@JsonSetter(PROFESSION_OR_OCCUPATION)
 	public void setProfessionOrOccupation(List<String> professionOrOccupation) {
 		this.professionOrOccupation = professionOrOccupation;
-	}
-
-	public List<String> getExactMatch() {
-		return exactMatch;
-	}
-
-	public void setExactMatch(List<String> exactMatch) {
-		this.exactMatch = exactMatch;
 	}
 
 
@@ -270,4 +233,15 @@ public class Agent extends Entity {
 		field.set(this, value);
 	}
 
+	@Override
+	@JsonSetter(SAME_AS)
+	public void setSameReferenceLinks(List<String> uris) {
+		this.sameAs = uris;
+	}
+
+	@Override
+	@JsonGetter(SAME_AS)
+	public List<String> getSameReferenceLinks() {
+		return this.sameAs;
+	}
 }

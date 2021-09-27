@@ -12,6 +12,7 @@ import org.apache.solr.client.solrj.beans.Field;
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.vocabulary.AgentSolrFields;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
+import org.springframework.util.CollectionUtils;
 
 /*
  * TODO:see how to save the referencedWebResource and isAggregatedBy fields for all entities
@@ -21,6 +22,9 @@ public class SolrAgent extends SolrEntity<Agent> {
 	public SolrAgent() {
 		super();
 	}
+
+	@Field(EntitySolrFields.SAME_AS)
+	private List<String> sameAs;
 
 	@Field(AgentSolrFields.DATE)
 	private List<String> date;
@@ -88,9 +92,9 @@ public class SolrAgent extends SolrEntity<Agent> {
 		if(agent.getPlaceOfDeath() != null) {
 			this.placeOfDeath = new ArrayList<>(agent.getPlaceOfDeath());
 		}
-		this.dateOfEstablishment = agent.getDateOfEstablishment();
-		this.dateOfTermination = agent.getDateOfTermination();
-		this.gender = agent.getGender();
+		this.dateOfEstablishment = CollectionUtils.lastElement(agent.getDateOfEstablishment());
+		this.dateOfTermination = CollectionUtils.lastElement(agent.getDateOfTermination());
+		this.gender = CollectionUtils.lastElement(agent.getGender());
 	}
 
 
@@ -180,5 +184,10 @@ public class SolrAgent extends SolrEntity<Agent> {
 
 	public String getGender() {
 		return gender;
+	}
+
+	@Override
+	protected void setSameReferenceLinks(ArrayList<String> uris) {
+		this.sameAs = uris;
 	}
 }

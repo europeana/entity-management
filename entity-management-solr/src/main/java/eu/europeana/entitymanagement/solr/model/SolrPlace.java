@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.solr.model;
 
+import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +14,9 @@ import eu.europeana.entitymanagement.vocabulary.PlaceSolrFields;
  */
 public class SolrPlace extends SolrEntity<Place> {
 
+	@Field(EntitySolrFields.SAME_AS)
+	private List<String> sameAs;
+
 	@Field(PlaceSolrFields.IS_NEXT_IN_SEQUENCE)
 	private List<String> isNextInSequence;
 	
@@ -24,9 +28,6 @@ public class SolrPlace extends SolrEntity<Place> {
 	
 	@Field(PlaceSolrFields.ALTITUDE)
 	private Float altitude;
-	
-	@Field(PlaceSolrFields.EXACT_MATCH)
-	private List<String> exactMatch;
 
 	public SolrPlace() {
 		super();
@@ -39,7 +40,6 @@ public class SolrPlace extends SolrEntity<Place> {
 		this.latitude=place.getLatitude();
 		this.longitude=place.getLongitude();
 		this.altitude=place.getAltitude();
-		this.exactMatch=place.getExactMatch();
 	}
 
 	public List<String> getIsNextInSequence() {
@@ -58,9 +58,9 @@ public class SolrPlace extends SolrEntity<Place> {
 		return altitude;
 	}
 
-	public List<String> getExactMatch() {
-		return exactMatch;
+	@Override
+	protected void setSameReferenceLinks(ArrayList<String> uris) {
+		this.sameAs = uris;
 	}
-	
 
 }
