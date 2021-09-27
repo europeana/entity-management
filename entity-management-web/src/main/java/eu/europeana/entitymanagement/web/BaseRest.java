@@ -84,7 +84,7 @@ public abstract class BaseRest extends BaseRestController {
      * @throws EntityManagementRuntimeException
      */
     protected String serialize(EntityRecord entityRecord, FormatTypes format, String profile)
-            throws EntityManagementRuntimeException {
+            throws EuropeanaApiException {
 
         String responseBody = null;
 
@@ -98,7 +98,7 @@ public abstract class BaseRest extends BaseRestController {
         	try {
 				responseBody = corelibJsonLdSerializer.serialize(schemaOrgEntity.get());
 			} catch (IOException e) {
-				throw new EntityManagementRuntimeException("Unexpected exception occurred when serializing the schemaorg entity.",e);
+				throw new EuropeanaApiException("Unexpected exception occurred when serializing the schemaorg entity.",e);
 			}
         }
         
