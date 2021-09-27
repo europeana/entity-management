@@ -90,11 +90,11 @@ public class EntityRecordService {
      * Gets coreferenced entity with the given id (sameAs or exactMatch value in the
      * Consolidated version)
      * 
-     * @param id co-reference id
+     * @param uris co-reference uris
      * @return Optional containing matching record, or empty optional if none found.
      */
-    public Optional<EntityRecord> findMatchingCoreference(String id) {
-	return entityRecordRepository.findMatchingEntitiesByCoreference(id);
+    public Optional<EntityRecord> findMatchingCoreference(List<String> uris) {
+	return entityRecordRepository.findMatchingEntitiesByCoreference(uris);
     }
 
     public EntityRecord saveEntityRecord(EntityRecord er) {
@@ -173,7 +173,7 @@ public class EntityRecordService {
 		 * sameAs will be replaced during consolidation; however we set this here to prevent duplicate
 		 * registrations if consolidation fails
 		 */
-		entity.setSameAs(new ArrayList<>(List.of(entityCreationRequest.getId())));
+		entity.setSameReferenceLinks(new ArrayList<>(List.of(entityCreationRequest.getId())));
 		entityRecord.setEntity(entity);
 
 		Entity europeanaProxyMetadata = EntityObjectFactory.createProxyEntityObject(type);
@@ -227,7 +227,7 @@ public class EntityRecordService {
 		 * registrations if consolidation fails
 		 */
 
-		entity.setSameAs(new ArrayList<>(List.of(externalProxyId)));
+		entity.setSameReferenceLinks(new ArrayList<>(List.of(externalProxyId)));
 		entityRecord.setEntity(entity);
 
 
@@ -247,7 +247,7 @@ public class EntityRecordService {
 	// for Zoho organizations, create second proxy for Wikidata metadata
 		Optional<String> wikidataId;
 		if (isZohoOrg &&
-				(wikidataId = WikidataUtils.getWikidataId(datasourceResponse.getSameAs())).isPresent()) {
+				(wikidataId = WikidataUtils.getWikidataId(datasourceResponse.getSameReferenceLinks())).isPresent()) {
 
 			// entity metadata will be populated during update task
 			Entity wikidataProxyEntity = EntityObjectFactory.createProxyEntityObject(
@@ -259,7 +259,7 @@ public class EntityRecordService {
 					wikidataId.get(), entityId, wikidataDatasource.get(), entityRecord, timestamp);
 
 			// add wikidata uri to entity sameAs
-			entity.getSameAs().add(wikidataId.get());
+			entity.getSameReferenceLinks().add(wikidataId.get());
 		}
 
 	setEntityAggregation(entityRecord, entityId, timestamp);
@@ -317,24 +317,6 @@ public class EntityRecordService {
 		long dbId = entityRecordRepository.generateAutoIncrement(entityType);
 		return EntityRecordUtils.buildEntityIdUri(entityType, String.valueOf(dbId));
 	}
-    }
-
-    /**
-     * Checks if any of the resources in the SameAs field from the Datasource is already
-     * known.
-     * 
-     * @param rdfResources list of SameAs resources
-     * @return Optional containing EntityRecord, or empty Optional if none found
-     */
-    public Optional<EntityRecord> retrieveCoreferenceSameAs(List<String> rdfResources) {
-	for (String resource : rdfResources) {
-	    Optional<EntityRecord> entityRecordOptional = retrieveByEntityId(resource);
-	    if (entityRecordOptional.isPresent()) {
-		return entityRecordOptional;
-	    }
-	}
-
-	return Optional.empty();
     }
 
     public void performReferentialIntegrity(Entity entity)  {
@@ -480,7 +462,7 @@ public class EntityRecordService {
 	    updatedReferences.add(value);
 	} else {
 	    //value is external URI, replace it with internal reference if they are accessible
-	    Optional<EntityRecord> record = findMatchingCoreference(value);
+	    Optional<EntityRecord> record = findMatchingCoreference(Collections.singletonList(value));
 		record.ifPresent(entityRecord -> updatedReferences.add(entityRecord.getEntityId()));
 	}
     }
@@ -663,16 +645,16 @@ public class EntityRecordService {
 
 		}
 
-		// Add external proxy id to consolidated entity sameAs
+		// Add external proxy id to consolidated entity sameAs / exactMatch
 		String externalProxyId = secondary.getEntityId();
-		List<String> consolidatedEntitySameAs = consolidatedEntity.getSameAs();
+		List<String> consolidatedEntitySameRefs = consolidatedEntity.getSameReferenceLinks();
 
-		if (consolidatedEntitySameAs == null) {
+		if (consolidatedEntitySameRefs == null) {
 			// sameAs is mutable here as we might need to add more values to it later
-			consolidatedEntity.setSameAs(new ArrayList<>(List.of(externalProxyId)));
+			consolidatedEntity.setSameReferenceLinks(new ArrayList<>(List.of(externalProxyId)));
 		}
-		else if (!consolidatedEntitySameAs.contains(externalProxyId)) {
-			consolidatedEntitySameAs.add(externalProxyId);
+		else if (!consolidatedEntitySameRefs.contains(externalProxyId)) {
+			consolidatedEntitySameRefs.add(externalProxyId);
 		}
 
 		return consolidatedEntity;

@@ -52,7 +52,7 @@ public class ZohoOrganizationConverter {
         org.setCountry(organizationCountry);
         List<String> sameAs = getAllSameAs(record);
         if (!sameAs.isEmpty()) {
-            org.setSameAs(sameAs);
+            org.setSameReferenceLinks(sameAs);
 
         }
         

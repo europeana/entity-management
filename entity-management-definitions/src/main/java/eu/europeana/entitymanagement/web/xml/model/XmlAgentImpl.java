@@ -18,6 +18,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
 
+  @XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.XML_SAME_AS)
+  private List<LabelledResource> sameAs = new ArrayList<>();
+
   @XmlElement(name = XML_IS_PART_OF, namespace = NAMESPACE_DC_TERMS)
   private List<LabelledResource> isPartOf = new ArrayList<>();
 
@@ -221,6 +224,30 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
   @Override
   protected EntityTypes getTypeEnum() {
     return EntityTypes.Agent;
+  }
+
+  @Override
+  public List<LabelledResource> getSameReferenceLinks() {
+    return this.sameAs;
+  }
+
+  @Override
+  public void setSameReferenceLinks(List<LabelledResource> uris) {
+    this.sameAs = uris;
+  }
+
+  private<T> T getFirstValue(List<T> list){
+     if(list == null) {
+       return null;
+     }
+     return list.get(0);
+  }
+
+  private <T> List<T> toList(T field) {
+    if (field == null){
+      return null;
+    }
+    return List.of(field);
   }
 
 }

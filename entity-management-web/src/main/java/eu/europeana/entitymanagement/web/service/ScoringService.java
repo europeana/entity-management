@@ -198,10 +198,10 @@ public class ScoringService {
     }
 
     private String getWikidataUrl(Entity entity) {
-	if (entity.getSameAs() == null) {
+	if (entity.getSameReferenceLinks() == null) {
 	    return null;
 	}
-	List<String> values = entity.getSameAs();
+	List<String> values = entity.getSameReferenceLinks();
 
 	String wikidataUri = values.stream().filter(value -> value.startsWith(WIKIDATA_PREFFIX)).findFirst()
 		.orElse(null);

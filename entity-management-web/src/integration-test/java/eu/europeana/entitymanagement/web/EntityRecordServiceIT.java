@@ -72,7 +72,7 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
          * corresponsing proxy's entity objects
          */
         Assertions.assertNotNull(mergedEntity.getNote());
-        Assertions.assertNotNull(mergedEntity.getSameAs());
+        Assertions.assertNotNull(mergedEntity.getSameReferenceLinks());
         Assertions.assertTrue(mergedEntity.getBroader().size() > 1);
         Assertions.assertNotNull(mergedEntity.getPrefLabel());
     }

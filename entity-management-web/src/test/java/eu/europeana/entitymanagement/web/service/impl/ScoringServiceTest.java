@@ -48,7 +48,7 @@ public class ScoringServiceTest {
 	agent.setEntityId(entityId);
 	List<String> sameAs = List.of("http://wikidata.dbpedia.org/resource/Q762",
 		"http://www.wikidata.org/entity/Q762", "http://purl.org/collections/nl/am/p-10456" );
-	agent.setSameAs(sameAs);
+	agent.setSameReferenceLinks(sameAs);
 
 	Map<String, String> prefLabels = new HashMap<String, String>();
 	prefLabels.put("en", "Leonardo da Vinci");
@@ -80,7 +80,7 @@ public class ScoringServiceTest {
         String entityId = "http://data.europeana.eu/place/base/41488";
         agent.setEntityId(entityId);
         List<String> sameAs = List.of("https://sws.geonames.org/2988507/");
-        agent.setSameAs(sameAs);
+        agent.setSameReferenceLinks(sameAs);
         
         Map<String, String> prefLabels = new HashMap<String, String>();
         prefLabels.put("en", "Paris");

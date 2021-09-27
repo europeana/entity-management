@@ -1,5 +1,7 @@
 package eu.europeana.entitymanagement.solr.model;
 
+import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
@@ -12,7 +14,10 @@ import static eu.europeana.entitymanagement.solr.SolrUtils.SOLR_TIMESPAN_SUGGEST
 
 @JsonFilter(SOLR_TIMESPAN_SUGGESTER_FILTER)
 public class SolrTimespan extends SolrEntity<Timespan> {
-	
+
+	@Field(EntitySolrFields.SAME_AS)
+	private List<String> sameAs;
+
 	@Field(TimespanSolrFields.IS_NEXT_IN_SEQUENCE)
     private List<String> isNextInSequence;
 	
@@ -44,5 +49,10 @@ public class SolrTimespan extends SolrEntity<Timespan> {
 
 	public String getEnd() {
 		return end;
+	}
+
+	@Override
+	protected void setSameReferenceLinks(ArrayList<String> uris) {
+		this.sameAs = uris;
 	}
 }
