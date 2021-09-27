@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
+
+import eu.europeana.corelib.edm.utils.JsonLdSerializer;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.mixins.ConsolidatedAgentMixin;
 import eu.europeana.entitymanagement.definitions.model.ConsolidatedAgent;
@@ -66,5 +68,10 @@ public class SerializationConfig {
     public JAXBContext jaxbContext() throws JAXBException {
         // args are wrapper classes for Deserializing Metis Response, Wikidata response, and Serializing XML output
         return JAXBContext.newInstance(EnrichmentResultList.class, RdfBaseWrapper.class, WikidataOrganization.class);
+    }
+    
+    @Bean
+    public JsonLdSerializer corelibJsonLdSerializer() {
+    	return new JsonLdSerializer();
     }
 }

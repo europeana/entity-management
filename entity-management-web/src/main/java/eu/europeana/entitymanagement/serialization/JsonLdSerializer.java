@@ -11,10 +11,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 
-import eu.europeana.corelib.edm.model.schemaorg.Text;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -30,24 +27,8 @@ public class JsonLdSerializer {
     
     public JsonLdSerializer(@Qualifier(BEAN_JSON_MAPPER) ObjectMapper objectMapper) {
 		mapper = objectMapper.copy();
-		SimpleModule module = new SimpleModule();
-		/*
-		 * TODO: change the TextSerializer constructor in the corelib module to be public
-		 * and use it here instead of the EMTextSerializer which is a workaround
-		 */
-		module.addSerializer(Text.class, new EMTextSerializer(Text.class));
-		mapper.registerModule(module);
 		SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH);
 		mapper.setDateFormat(df);
-		
-		/*
-		 * necessary because of the @JsonFilter annotations if we want to include all fields,
-		 * otherwise the fields we want to exclude can be specified in the given FilerProvider
-		 */
-		
-		SimpleFilterProvider dummy = new SimpleFilterProvider();
-	    dummy.setFailOnUnknownId(false);
-	    mapper.setFilterProvider(dummy);
     }
     
     
