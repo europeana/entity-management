@@ -106,6 +106,7 @@ public class EMController extends BaseRest {
 	    String etag = computeEtag(timestamp, FormatTypes.jsonld.name(), getApiVersion());
 		checkIfMatchHeaderWithQuotes(etag, request);
 	    entityRecordService.disableEntityRecord(entityRecord);
+			solrService.deleteById(entityRecord.getEntityId());
 
 		return noContentResponse(request);
 	}
@@ -131,6 +132,8 @@ public class EMController extends BaseRest {
 		}
 		logger.info("Re-enabling entityId={}", entityRecord.getEntityId());
 		entityRecordService.enableEntityRecord(entityRecord);
+		solrService.storeEntity(createSolrEntity(entityRecord.getEntity()));
+
 		return createResponse(request, profile, type, null, identifier, FormatTypes.jsonld, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
 	}
 
@@ -374,10 +377,6 @@ public class EMController extends BaseRest {
 			EntityRecord savedEntityRecord = entityRecordService
 					.createEntityFromRequest(entityCreationRequest, datasourceResponse);
 			logger.info("Created Entity record for externalId={}; entityId={}", creationRequestId, savedEntityRecord.getEntityId());
-
-			solrService.storeEntity(createSolrEntity(savedEntityRecord.getEntity()));
-			logger.info("Indexed entity to Solr: externalId={}; entityId={}", creationRequestId, savedEntityRecord.getEntityId());
-
 
 		return launchTaskAndRetrieveEntity(request, savedEntityRecord.getEntity().getType(),
 					getDatabaseIdentifier(savedEntityRecord.getEntityId()), savedEntityRecord,

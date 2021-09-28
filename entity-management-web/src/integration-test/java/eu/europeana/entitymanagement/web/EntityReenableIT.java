@@ -1,8 +1,10 @@
 package eu.europeana.entitymanagement.web;
 
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.solr.model.SolrConcept;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,6 +29,7 @@ public class EntityReenableIT extends BaseWebControllerTest {
 
         EntityRecord entityRecord = createEntity(europeanaMetadata, metisResponse, CONCEPT_BATHTUB_URI);
         deprecateEntity(entityRecord);
+        assertDisabled(entityRecord.getEntityId());
 
         String requestPath = getEntityRequestPath(entityRecord.getEntityId());
         mockMvc.perform(post(BASE_SERVICE_URL + "/" + requestPath)
@@ -40,5 +43,9 @@ public class EntityReenableIT extends BaseWebControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(entityRecord.getEntityId())))
                 .andExpect(jsonPath("$.type", is(EntityTypes.Concept.name())));
+
+        // confirm that Solr document now exists
+        SolrConcept solrConcept = solrService.searchById(SolrConcept.class, entityRecord.getEntityId());
+        Assertions.assertNotNull(solrConcept);
     }
 }

@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.web;
 
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.solr.model.SolrConcept;
 import eu.europeana.entitymanagement.testutils.BaseMvcTestUtils;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
@@ -31,6 +32,10 @@ public class EntityAdminControllerIT extends BaseWebControllerTest {
         String metisResponse = loadFile(CONCEPT_BATHTUB_XML);
 
         EntityRecord entityRecord = createEntity(europeanaMetadata, metisResponse, CONCEPT_BATHTUB_URI);
+
+        // confirm that Solr document is saved
+        SolrConcept solrConcept = solrService.searchById(SolrConcept.class, entityRecord.getEntityId());
+        Assertions.assertNotNull(solrConcept);
 
         String requestPath = getEntityRequestPath(entityRecord.getEntityId());
 
@@ -118,9 +123,13 @@ public class EntityAdminControllerIT extends BaseWebControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-    private void assertDeletion(String entityId) {
+    private void assertDeletion(String entityId) throws Exception {
         // check that record is deleted
         Optional<EntityRecord> dbRecordOptional = retrieveEntity(entityId);
         Assertions.assertTrue(dbRecordOptional.isEmpty());
+
+        // check that Solr document is also deleted
+        SolrConcept solrConcept = solrService.searchById(SolrConcept.class, entityId);
+        Assertions.assertNull(solrConcept);
     }
 }

@@ -5,10 +5,13 @@ import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
+import eu.europeana.entitymanagement.solr.model.SolrConcept;
+import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
-import okhttp3.mockwebserver.MockResponse;
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -26,7 +29,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static eu.europeana.api.commons.web.http.HttpHeaders.CONTENT_TYPE_JSONLD_UTF8;
 import static eu.europeana.api.commons.web.http.HttpHeaders.VALUE_LDP_RESOURCE;
-import static javax.ws.rs.core.HttpHeaders.ALLOW;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
@@ -38,6 +40,9 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
 
     @Autowired
     private JAXBContext jaxbContext;
+
+    @Autowired
+    protected SolrService solrService;
 
     @Autowired
     private EntityUpdateService entityUpdateService;
@@ -141,11 +146,27 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
         return entityRecordService.retrieveByEntityId(savedRecord.getEntityId()).orElseThrow();
     }
 
-    protected void deprecateEntity(EntityRecord entityRecord){
+    protected void deprecateEntity(EntityRecord entityRecord) throws SolrServiceException {
         entityRecordService.disableEntityRecord(entityRecord);
+        solrService.deleteById(entityRecord.getEntityId());
     }
 
     protected Optional<EntityRecord> retrieveEntity(String entityId){
         return entityRecordService.retrieveByEntityId(entityId);
+    }
+
+    protected void assertDisabled(String entityId) throws Exception {
+        // check that record is disabled
+        Optional<EntityRecord> dbRecordOptional = retrieveEntity(entityId);
+
+        Assertions.assertTrue(dbRecordOptional.isPresent());
+
+        EntityRecord entityRecord = dbRecordOptional.get();
+
+        Assertions.assertTrue(entityRecord.isDisabled());
+
+        // check that Solr document is also deleted
+        SolrConcept solrConcept = solrService.searchById(SolrConcept.class, entityId);
+        Assertions.assertNull(solrConcept);
     }
 }
