@@ -378,10 +378,6 @@ public class EMController extends BaseRest {
 					.createEntityFromRequest(entityCreationRequest, datasourceResponse);
 			logger.info("Created Entity record for externalId={}; entityId={}", creationRequestId, savedEntityRecord.getEntityId());
 
-			solrService.storeEntity(createSolrEntity(savedEntityRecord.getEntity()));
-			logger.info("Indexed entity to Solr: externalId={}; entityId={}", creationRequestId, savedEntityRecord.getEntityId());
-
-
 		return launchTaskAndRetrieveEntity(request, savedEntityRecord.getEntity().getType(),
 					getDatabaseIdentifier(savedEntityRecord.getEntityId()), savedEntityRecord,
 					EntityProfile.internal.toString());
