@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.validation;
 
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_EM_VALIDATOR_FACTORY;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_VALIDATE_FIELDS_EMPTY_PREFLABEL_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_VALIDATE_FIELDS_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_VALIDATE_FIELDS_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
@@ -71,7 +72,7 @@ public class EntityFieldsValidatorTest {
             System.out.println(violation.getMessageTemplate());
         }   
         //TODO: remove constraine violation: "The entity fields values are valid."
-        Assertions.assertEquals(4, violations.size());
+        Assertions.assertEquals(3, violations.size());
     }
     
     @Test
@@ -103,4 +104,20 @@ public class EntityFieldsValidatorTest {
         //TODO: remove constraine violation: "The entity fields values are valid."
         Assertions.assertEquals(2, violations.size());      
     }
+
+  @Test
+  void validationShouldFailIfPrefLabelIsEmpty() throws IOException {
+      // file contains same content as AGENT_VALIDATE_FIELDS_JSON, except empty prefLabel
+    Agent agent = objectMapper.readValue(loadFile(AGENT_VALIDATE_FIELDS_EMPTY_PREFLABEL_JSON), Agent.class);
+    EntityRecord entityRecord = new EntityRecord();
+    entityRecord.setEntity(agent);
+    entityRecord.setEntityId(agent.getEntityId());
+    Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entityRecord.getEntity(), EntityFieldsMinimalValidatorGroup.class);
+    for (ConstraintViolation<Entity> violation : violations) {
+      System.out.println(violation.getMessageTemplate());
+    }
+
+    // file contains same content as AGENT_VALIDATE_FIELDS_JSON, except empty prefLabel
+    Assertions.assertEquals(3, violations.size());
+  }
 }

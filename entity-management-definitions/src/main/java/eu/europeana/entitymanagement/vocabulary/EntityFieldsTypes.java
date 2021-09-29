@@ -4,14 +4,19 @@ import eu.europeana.entitymanagement.definitions.exceptions.EntityFieldAccessExc
 
 public enum EntityFieldsTypes {
 
+    // General fields
     id(EntityFieldsTypes.FIELD_TYPE_URI,  false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
     entityId(EntityFieldsTypes.FIELD_TYPE_URI,  false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
     type(EntityFieldsTypes.FIELD_TYPE_KEYWORD, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
     depiction(EntityFieldsTypes.FIELD_TYPE_WEB_RESOURCE, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
     isShownBy(EntityFieldsTypes.FIELD_TYPE_WEB_RESOURCE, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
-    prefLabel(EntityFieldsTypes.FIELD_TYPE_TEXT, true, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
+    // there must be at least 1 prefLabel
+    prefLabel(EntityFieldsTypes.FIELD_TYPE_TEXT, true, EntityFieldsTypes.FIELD_CARDINALITY_0_1, 1),
     altLabel(EntityFieldsTypes.FIELD_TYPE_TEXT, true, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
     hiddenLabel(EntityFieldsTypes.FIELD_TYPE_TEXT, true, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
+    sameAs(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
+
+    // Agent-specific fields
     name(EntityFieldsTypes.FIELD_TYPE_TEXT, true, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
     begin(EntityFieldsTypes.FIELD_TYPE_DATE, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
     end(EntityFieldsTypes.FIELD_TYPE_DATE, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
@@ -37,7 +42,7 @@ public enum EntityFieldsTypes {
     isRelatedTo(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
     wasPresentAt(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
     identifier(EntityFieldsTypes.FIELD_TYPE_KEYWORD, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
-    sameAs(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
+
     latitude(EntityFieldsTypes.FIELD_TYPE_FLOAT, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
     longitude(EntityFieldsTypes.FIELD_TYPE_FLOAT, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
     altitude(EntityFieldsTypes.FIELD_TYPE_FLOAT, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
@@ -54,21 +59,27 @@ public enum EntityFieldsTypes {
     inScheme(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
     acronym(EntityFieldsTypes.FIELD_TYPE_TEXT, true, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
     description(EntityFieldsTypes.FIELD_TYPE_TEXT, true, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
+
+    // Organization-specific fields
     logo(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
     europeanaRole(EntityFieldsTypes.FIELD_TYPE_KEYWORD, true, EntityFieldsTypes.FIELD_CARDINALITY_1_INFINITE),
-    organizationDomain(EntityFieldsTypes.FIELD_TYPE_KEYWORD, true, EntityFieldsTypes.FIELD_CARDINALITY_1_INFINITE),
-    geographicLevel(EntityFieldsTypes.FIELD_TYPE_KEYWORD, true, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
-    country(EntityFieldsTypes.FIELD_TYPE_TEXT, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
+    organizationDomain(EntityFieldsTypes.FIELD_TYPE_KEYWORD, true, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
+    geographicLevel(EntityFieldsTypes.FIELD_TYPE_KEYWORD, true, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
+    country(EntityFieldsTypes.FIELD_TYPE_TEXT, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
     homepage(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
     phone(EntityFieldsTypes.FIELD_TYPE_KEYWORD, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
     mbox(EntityFieldsTypes.FIELD_TYPE_EMAIL, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
-    hasAddress(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
+    hasAddress(EntityFieldsTypes.FIELD_TYPE_ADDRESS, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
+
+    // Address-specific fields
     streetAddress(EntityFieldsTypes.FIELD_TYPE_TEXT, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
     postalCode(EntityFieldsTypes.FIELD_TYPE_KEYWORD, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
     postBox(EntityFieldsTypes.FIELD_TYPE_KEYWORD, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
     locality(EntityFieldsTypes.FIELD_TYPE_TEXT, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
     countryName(EntityFieldsTypes.FIELD_TYPE_TEXT, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
     hasGeo(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
+
+
     source(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
     thumbnail(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
     created(EntityFieldsTypes.FIELD_TYPE_DATE, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
@@ -89,20 +100,31 @@ public enum EntityFieldsTypes {
 	public static final String FIELD_TYPE_TEXT_OR_URI = "Text or URI";
 	public static final String FIELD_TYPE_DATE_OR_URI = "Date or URI";
 	public static final String FIELD_TYPE_WEB_RESOURCE = "WebResource";
-	
+	public static final String FIELD_TYPE_ADDRESS = "Address";
+
 	public static final String FIELD_CARDINALITY_1_1 = "1..1";
 	public static final String FIELD_CARDINALITY_0_1 = "0..1";
 	public static final String FIELD_CARDINALITY_0_INFINITE = "0..*";
 	public static final String FIELD_CARDINALITY_1_INFINITE = "1..*";
+
 	
     private final String fieldType;
     private final boolean fieldIsmultilingual;
     private final String fieldCardinality;
 
+    private final int minContentCount;
+
     private EntityFieldsTypes (String fieldType, boolean fieldIsmultilingual, String fieldCardinality) {
+        this(fieldType, fieldIsmultilingual, fieldCardinality, 0);
+    }
+
+    private EntityFieldsTypes(String fieldType, boolean fieldIsmultilingual,
+        String fieldCardinality, int minContentCount) {
+
         this.fieldType = fieldType;
         this.fieldIsmultilingual = fieldIsmultilingual;
         this.fieldCardinality = fieldCardinality;
+        this.minContentCount = minContentCount;
     }
 
     public String getFieldType() {
@@ -159,6 +181,10 @@ public enum EntityFieldsTypes {
         }catch (IllegalArgumentException e){
             throw new EntityFieldAccessException("Unknown field: " + fieldName, e);
         }
+    }
+
+    public static int getMinContentCount(String fieldName) {
+        return valueOf(fieldName).minContentCount;
     }
     
     boolean getFieldIsmultilingual() {
