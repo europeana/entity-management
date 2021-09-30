@@ -3,6 +3,7 @@ package eu.europeana.entitymanagement.normalization;
 import java.lang.reflect.Field;
 import java.util.List;
 
+import java.util.Map;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
@@ -34,11 +35,32 @@ public class EntityFieldsMinimalValidator implements ConstraintValidator<EntityF
 		try {
 			for (Field field : entityFields) {
 				Object fieldValue = entity.getFieldValue(field);
-				if (EntityFieldsTypes.hasTypeDefinition(field.getName()) && EntityFieldsTypes.isMandatory(field.getName()) && fieldValue==null) { 
-					addConstraint(context, "The mandatory field: "+field.getName()+" cannot be NULL.");
-	                if(returnValue==true) {
-	                	returnValue=false;
-	                }
+				String fieldName = field.getName();
+
+				if (!EntityFieldsTypes.hasTypeDefinition(fieldName)) {
+					continue;
+				}
+
+				if (fieldValue == null) {
+					if (EntityFieldsTypes.isMandatory(fieldName)) {
+						addConstraint(context, "The mandatory field: " + fieldName + " cannot be NULL.");
+						if (returnValue) {
+							returnValue = false;
+						}
+					}
+
+					continue;
+				}
+
+				int minContentCount = EntityFieldsTypes.getMinContentCount(fieldName);
+				if (minContentCount > 0) {
+					if ((List.class.isAssignableFrom(fieldValue.getClass())
+							&& ((List<?>) fieldValue).size() < minContentCount) ||
+							(Map.class.isAssignableFrom(fieldValue.getClass())
+									&& ((Map<?, ?>) fieldValue).size() < minContentCount)) {
+						addConstraint(context,
+								fieldName + " must have at least " + minContentCount + " values");
+					}
 				}
 			}
 		}
