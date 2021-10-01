@@ -79,11 +79,24 @@
 			<!-- <version>2.3.0-b170201.1204</version> -->
 		</dependency>
 
+		<dependency>
+			<groupId>com.fasterxml.jackson.module</groupId>
+			<artifactId>jackson-module-jaxb-annotations</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+
+
 		<!-- https://mvnrepository.com/artifact/javax.activation/activation -->
 		<dependency>
 			<groupId>javax.activation</groupId>
 			<artifactId>activation</artifactId>
 			<version>1.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.15</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.glassfish.jaxb/jaxb-runtime -->
@@ -102,6 +115,10 @@
 					<groupId>org.mongodb</groupId>
 					<artifactId>mongo-java-driver</artifactId>
 				</exclusion>
+				<exclusion>
+                    <groupId>xml-apis</groupId>
+                    <artifactId>xml-apis</artifactId>
+                </exclusion>
 			</exclusions>
 		</dependency>
 
@@ -125,19 +142,31 @@
 
 		<dependency>
 			<groupId>eu.europeana.api</groupId>
-			<artifactId>entity-management-utils</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
-			<groupId>eu.europeana.api</groupId>
 			<artifactId>entity-management-batch</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
+			<groupId>eu.europeana.api</groupId>
+			<artifactId>entity-management-enrichment</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>eu.europeana.api</groupId>
+			<artifactId>entity-management-solr</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>eu.europeana.api</groupId>
+			<artifactId>entity-management-zoho</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
 			<groupId>eu.europeana.corelib</groupId>
-			<artifactId>corelib-utils</artifactId>
+			<artifactId>corelib-schemaorg</artifactId>
 			<version>${version.corelib}</version>
 		</dependency>
 
@@ -178,6 +207,10 @@
 					<groupId>org.junit.vintage</groupId>
 					<artifactId>junit-vintage-engine</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>com.vaadin.external.google</groupId>
+					<artifactId>android-json</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 
@@ -212,8 +245,7 @@
 			<artifactId>mockwebserver</artifactId>
 			<scope>test</scope>
 		</dependency>
-
-
+		
 	</dependencies>
 	<build>
 		<!-- set fixed name for easy deployment -->
@@ -232,14 +264,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
-			<!-- JUnit 5 requires Surefire version 2.22.0 or higher -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<!-- <version>2.22.0</version> -->
-			</plugin>
-
 		</plugins>
 	</build>
 

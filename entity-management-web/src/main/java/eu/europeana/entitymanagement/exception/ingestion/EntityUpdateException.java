@@ -1,17 +1,17 @@
 package eu.europeana.entitymanagement.exception.ingestion;
 
-public class EntityUpdateException extends Exception {
+import eu.europeana.api.commons.error.EuropeanaApiException;
 
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 6189347322304269972L;
+public class EntityUpdateException extends EuropeanaApiException {
 
-    public EntityUpdateException(String message, Throwable th) {
-	super(message, th);
-    }
+  /** */
+  private static final long serialVersionUID = 6189347322304269972L;
 
-    public EntityUpdateException(String message) {
-	super(message);
-    }
+  public EntityUpdateException(String message, Throwable th) {
+    super(message, th);
+  }
+
+  public EntityUpdateException(String message) {
+    super(message);
+  }
 }

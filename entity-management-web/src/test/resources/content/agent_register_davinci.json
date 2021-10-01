@@ -1,0 +1,14 @@
+{
+  "type": "Agent",
+  "id": "http://www.wikidata.org/entity/Q762",
+  "prefLabel": {
+    "en": "Leonardo da Vinci"
+  },
+  "altLabel": {
+    "en": [ "L da Vinci", "Leonardo" ]
+  },
+  "depiction": {
+    "id":"https://commons.wikimedia.org/wiki/Leonardo_da_Vinci#/media/File:Francesco_Melzi_-_Portrait_of_Leonardo.png",
+    "source": "http://valid-uri-for-testing"
+  }
+}

@@ -28,5 +28,10 @@ build/
 .vscode/
 
 **/*.user.properties
+*.txt
+*.properties
 
 .DS_Store
+
+# Zoho sdk log files
+SDKLogs.log*

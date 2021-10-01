@@ -52,14 +52,8 @@
   "dateOfBirth": [
     "1981-02-17"
   ],
-  "placeOfBirth": 
-    {
-      "": ["http://dbpedia.org/resource/Ferrara","http://dbpedia.org/resource/Provincia_di_Ferrara"]
-    },
-  "professionOrOccupation":
-    {
-      "": ["http://dbpedia.org/resource/Paris_Hilton__1"]
-    },
+  "placeOfBirth": ["http://dbpedia.org/resource/Ferrara","http://dbpedia.org/resource/Provincia_di_Ferrara"],
+  "professionOrOccupation": ["http://dbpedia.org/resource/Paris_Hilton__1"],
   "biographicalInformation":
     {
       "hi": ["पेरिस व्हिटनी हिल्टन (जन्म:17 फ़रवरी 1981) एक अमेरिकी टेलीविजन कलाकार , व्यवसायी, फैशन डिजाइनर, मॉडल, अभिनेत्री, निर्माता, डीजे, लेखक और गायिका हैं। वह हिल्टन होटल के संस्थापक कोनराड हिल्टन के पोते की बेटी हैं।"],

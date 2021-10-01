@@ -1,0 +1,73 @@
+{
+  "@context": "http://www.europeana.eu/schemas/context/entity.jsonld",
+  "id": "http://www.wikidata.org/entity/Q152095",
+  "type": "Concept",
+  "prefLabel": {
+    "en": "bathtub - europeana",
+    "de": "Badewanne - europeana",
+    "ro": "Cada de baie - europeana",
+	"sv": "badkar",
+	"ru": "Ванна",
+	"fi": "kylpyamme",
+	"pt": "banheira",
+	"bg": "Вана",
+	"el": "μπανιέρα",
+	"lt": "Vonia",
+	"it": "vasca da bagno",
+	"fr": "baignoire",
+	"hu": "fürdőkád",
+	"es": "bañera",
+	"et": "Vann",
+	"cs": "vana",
+	"sk": "Vaňa",
+	"sl": "Kopalna kad",
+	"ga": "Folcadán",
+	"pl": "Wanna kąpielowa",
+	"da": "badekar",
+	"nl": "badkuip",
+	"ca": "banyera"
+},
+  "altLabel": {
+    "en": [ "alternative bathtub - europeana", "tub-update", "bathtub", "bath", "tub" ],
+    "de": [ "badefass-europeana", "Oder Badewanne - europeana", "Nocheine Badewanne - europeana", "Badewanne", "Wannenbad"],
+	"ro": [ "Cada de facut baie - europeana", "Inca o cada de baie", "Cadă" ],
+    "sv": [ "karbad" ],
+	"fi": [ "amme" ],
+	"fr": [ "ofuro", "furo", "o-furo", "baignoire en bois"],
+    "hu": ["kád"],
+	"es": ["Banadera","Bañadera","Banera"],
+	"nl": ["Ligbad"]
+	},
+	"note": {
+				"de": [
+					"Behältnis, das zur Körperhygiene genutzt wird"
+				],
+				"fi": [
+					"kylpemiseen tarkoitettu kaluste"
+				],
+				"en": [
+					"large container for holding water in which a person may bathe"
+				],
+				"it": [
+					"recipiente destinato ad essere riempito di acqua per fare un bagno"
+				],
+				"fr": [
+					"récipient destiné à être rempli de liquide pour prendre un bain, ou une douche"
+				],
+				"hu": [
+					"fürdésre alkalmas, többnyire hosszúkás fürdőszobai medence"
+				],
+				"es": [
+					"recipiente"
+				],
+				"sv": [
+					"större behållare avsedd för vatten där person kan bada"
+				]
+	},
+  "depiction": {
+	  "id":"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/1rm60rt0t_rtbcwh.jpg/330px-1rm60rt0t_rtbcwh.jpg",
+	  "source": "http://valid-uri-for-testing"
+  },
+  "exactMatch": [ "http://www.wikidata.org/entity/Q152095"],
+  "broader":["http://www.wikidata.org/entity/Q987767"]
+}

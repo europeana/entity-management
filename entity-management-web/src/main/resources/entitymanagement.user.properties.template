@@ -3,9 +3,21 @@ mongo.connectionUrl = mongodb://<host>:<port>
 mongo.em.database = <entity-management-db>
 mongo.batch.database = <spring-batch-db>
 
-# when the "dev" profile is active, these set whether the database should be cleared on startup
-mongo.batch.database.reset=false
-mongo.em.database.reset=false
-
 # number of EntityRecords to process in one commit-interval (before writing to the database)
 batch.chunkSize=10
+
+# Whether entity metrics should be computed. This requires access to the Pagerank and
+# Search API Solr servers.
+batch.computeMetrics=false
+
+# Whether user requests should be authenticated. Requires Keycloak public key and ApiKey URL if "true"
+auth.enabled=false
+
+# Resource name embedded in JWT token
+authorization.api.name=entities
+
+# API Key URL
+europeana.apikey.serviceurl=
+
+# Keycloak public key used for verifying JWTs
+europeana.apikey.jwttoken.signaturekey=

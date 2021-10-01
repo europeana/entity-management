@@ -1,0 +1,11 @@
+{
+  "type": "Concept",
+  "id": "http://not.in.the.datasources",
+  "prefLabel": {
+    "en": "bathtub"
+  },
+  "altLabel": {
+    "en": [ "bath", "tub" ]
+  },
+  "depiction": {"id":"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/1rm60rt0t_rtbcwh.jpg/330px-1rm60rt0t_rtbcwh.jpg"}
+}

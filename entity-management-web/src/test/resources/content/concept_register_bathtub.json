@@ -1,0 +1,20 @@
+{
+  "@context": "http://www.europeana.eu/schemas/context/entity.jsonld",
+  "id": "http://www.wikidata.org/entity/Q152095",
+  "type": "Concept",
+  "prefLabel": {
+    "en": "bathtub - europeana",
+    "de": "Badewanne - europeana",
+    "ro": "Cada de baie - europeana"
+  },
+  "altLabel": {
+    "en": [ "alternative bathtub - europeana", "tub-update" ],
+    "de": [ "badefass-europeana", "Oder Badewanne - europeana", "Nocheine Badewanne - europeana"],
+    "ro": [ "Cada de facut baie - europeana", "Inca o cada de baie" ]
+  },
+  "exactMatch": [ "http://www.wikidata.org/entity/Q152095"],
+  "depiction": {
+    "id": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/1rm60rt0t_rtbcwh.jpg/330px-1rm60rt0t_rtbcwh.jpg",
+    "source": "http://valid-uri-for-testing"
+  }
+}

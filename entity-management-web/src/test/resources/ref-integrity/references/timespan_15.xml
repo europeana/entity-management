@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metis:results xmlns:dcterms="http://purl.org/dc/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:edm="http://www.europeana.eu/schemas/edm/" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema" xmlns:cc="http://creativecommons.org/ns" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdaGr2="http://rdvocab.info/ElementsGr2/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:wgs84_pos="http://www.w3.org/2003/01/geo/wgs84_pos#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:metis="http://www.europeana.eu/schemas/metis">
+<metis:result>
+<edm:Timespan rdf:about="http://data.europeana.eu/timespan/15">
+  <edm:isShownBy rdf:resource="http://tools.yoolib.net/i/s4/inha/files/7001-8000/7885/media/7891/1041_bensba_est007497_4/WID800/HEI900.jpg"/>
+  <skos:prefLabel xml:lang="de">15. Jahrhundert</skos:prefLabel>
+  <skos:prefLabel xml:lang="ru">XV век</skos:prefLabel>
+  <skos:prefLabel xml:lang="fi">1400-luku</skos:prefLabel>
+  <skos:prefLabel xml:lang="pt">século XV</skos:prefLabel>
+  <skos:prefLabel xml:lang="bg">15 век</skos:prefLabel>
+  <skos:prefLabel xml:lang="lt">XV amžius</skos:prefLabel>
+  <skos:prefLabel xml:lang="hr">15. stoljeće</skos:prefLabel>
+  <skos:prefLabel xml:lang="lv">15. gadsimts</skos:prefLabel>
+  <skos:prefLabel xml:lang="fr">XVe siècle</skos:prefLabel>
+  <skos:prefLabel xml:lang="hu">15. század</skos:prefLabel>
+  <skos:prefLabel xml:lang="sk">15. storočie</skos:prefLabel>
+  <skos:prefLabel xml:lang="sl">15. stoletje</skos:prefLabel>
+  <skos:prefLabel xml:lang="ga">15ú haois</skos:prefLabel>
+  <skos:prefLabel xml:lang="ca">Segle XV</skos:prefLabel>
+  <skos:prefLabel xml:lang="sv">1400-talet</skos:prefLabel>
+  <skos:prefLabel xml:lang="el">15ος αιώνας</skos:prefLabel>
+  <skos:prefLabel xml:lang="en">15th century</skos:prefLabel>
+  <skos:prefLabel xml:lang="it">XV secolo</skos:prefLabel>
+  <skos:prefLabel xml:lang="es">siglo XV</skos:prefLabel>
+  <skos:prefLabel xml:lang="et">15. sajand</skos:prefLabel>
+  <skos:prefLabel xml:lang="cs">15. století</skos:prefLabel>
+  <skos:prefLabel xml:lang="pl">XV wiek</skos:prefLabel>
+  <skos:prefLabel xml:lang="ro">Secolul al XV-lea</skos:prefLabel>
+  <skos:prefLabel xml:lang="da">15. århundrede</skos:prefLabel>
+  <skos:prefLabel xml:lang="nl">15e eeuw</skos:prefLabel>
+  <skos:altLabel xml:lang="sv">1400-tal</skos:altLabel>
+  <skos:altLabel xml:lang="sv">15:e århundradet</skos:altLabel>
+  <skos:altLabel xml:lang="sv">15:e seklet</skos:altLabel>
+  <skos:altLabel xml:lang="sv">1400-talet (sekel)</skos:altLabel>
+  <skos:altLabel xml:lang="sv">1400-talet (århundrade)</skos:altLabel>
+  <skos:altLabel xml:lang="ru">15 век</skos:altLabel>
+  <skos:altLabel xml:lang="en">15th-century</skos:altLabel>
+  <skos:altLabel xml:lang="it">Quindicesimo secolo</skos:altLabel>
+  <skos:altLabel xml:lang="it">Secolo XV</skos:altLabel>
+  <skos:altLabel xml:lang="it">XV secolo d.C</skos:altLabel>
+  <skos:altLabel xml:lang="it">15° secolo</skos:altLabel>
+  <skos:altLabel xml:lang="it">Quattrocento</skos:altLabel>
+  <skos:altLabel xml:lang="it">XV Secolo</skos:altLabel>
+  <skos:altLabel xml:lang="fr">15e siècle</skos:altLabel>
+  <skos:hiddenLabel>15??</skos:hiddenLabel>
+  <skos:hiddenLabel>15e</skos:hiddenLabel>
+  <skos:hiddenLabel>15..</skos:hiddenLabel>
+  <edm:begin>1401-01-01</edm:begin>
+  <edm:end>1500-12-31</edm:end>
+  <dcterms:isPartOf rdf:resource="http://semium.org/time/AD2xxx"/>
+  <edm:isNextInSequence rdf:resource="http://data.europeana.eu/timespan/14"/>
+  <owl:sameAs rdf:resource="http://id.nlm.nih.gov/mesh/D049668"/>
+  <owl:sameAs rdf:resource="http://babelnet.org/rdf/s02814426n"/>
+  <owl:sameAs rdf:resource="http://id.loc.gov/authorities/names/sh85048142"/>
+  <owl:sameAs rdf:resource="http://www.wikidata.org/entity/Q7018"/>
+  <owl:sameAs rdf:resource="http://semium.org/time/14xx"/>
+  <owl:sameAs rdf:resource="http://vocab.getty.edu/aat/300404465"/>
+</edm:Timespan>
+<edm:WebResource rdf:about="http://tools.yoolib.net/i/s4/inha/files/7001-8000/7885/media/7891/1041_bensba_est007497_4/WID800/HEI900.jpg">
+  <dc:source rdf:resource="http://data.europeana.eu/item/9200495/yoolib_inha_7885"/>
+  <foaf:thumbnail rdf:resource="https://api.europeana.eu/thumbnail/v2/url.json?uri=http%3A%2F%2Ftools.yoolib.net%2Fi%2Fs4%2Finha%2Ffiles%2F7001-8000%2F7885%2Fmedia%2F7891%2F1041_bensba_est007497_4%2FWID800%2FHEI900.jpg&amp;type=IMAGE"/>
+</edm:WebResource>
+</metis:result>
+</metis:results>

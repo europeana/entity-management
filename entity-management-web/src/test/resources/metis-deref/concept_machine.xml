@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<metis:results xmlns:dcterms="http://purl.org/dc/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:edm="http://www.europeana.eu/schemas/edm/" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema" xmlns:cc="http://creativecommons.org/ns" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdaGr2="http://rdvocab.info/ElementsGr2/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:wgs84_pos="http://www.w3.org/2003/01/geo/wgs84_pos#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:metis="http://www.europeana.eu/schemas/metis">
+    <metis:result>
+        <skos:Concept rdf:about="http://www.wikidata.org/entity/Q11019">
+            <skos:altLabel xml:lang="de">Gerät</skos:altLabel>
+            <skos:altLabel xml:lang="el">μηχάνημα</skos:altLabel>
+            <skos:altLabel xml:lang="ru">механизм</skos:altLabel>
+            <skos:altLabel xml:lang="pl">Maszyna</skos:altLabel>
+            <skos:altLabel xml:lang="es">maquina</skos:altLabel>
+            <skos:altLabel xml:lang="fi">laite</skos:altLabel>
+            <skos:altLabel xml:lang="fi">härveli</skos:altLabel>
+            <skos:altLabel xml:lang="fi">vekotin</skos:altLabel>
+            <skos:altLabel xml:lang="da">Mekanisk apparat</skos:altLabel>
+            <skos:prefLabel xml:lang="en">machine</skos:prefLabel>
+            <skos:prefLabel xml:lang="it">macchina</skos:prefLabel>
+            <skos:prefLabel xml:lang="bg">Машина</skos:prefLabel>
+            <skos:prefLabel xml:lang="ca">màquina</skos:prefLabel>
+            <skos:prefLabel xml:lang="cs">stroj</skos:prefLabel>
+            <skos:prefLabel xml:lang="da">maskine</skos:prefLabel>
+            <skos:prefLabel xml:lang="de">Maschine</skos:prefLabel>
+            <skos:prefLabel xml:lang="el">Μηχανή</skos:prefLabel>
+            <skos:prefLabel xml:lang="es">máquina</skos:prefLabel>
+            <skos:prefLabel xml:lang="et">masin</skos:prefLabel>
+            <skos:prefLabel xml:lang="fi">kone</skos:prefLabel>
+            <skos:prefLabel xml:lang="fr">machine</skos:prefLabel>
+            <skos:prefLabel xml:lang="ga">meaisín</skos:prefLabel>
+            <skos:prefLabel xml:lang="hr">stroj</skos:prefLabel>
+            <skos:prefLabel xml:lang="hu">gép</skos:prefLabel>
+            <skos:prefLabel xml:lang="lt">Mechaninė sistema</skos:prefLabel>
+            <skos:prefLabel xml:lang="lv">mašīna</skos:prefLabel>
+            <skos:prefLabel xml:lang="nl">machine</skos:prefLabel>
+            <skos:prefLabel xml:lang="pl">maszyna</skos:prefLabel>
+            <skos:prefLabel xml:lang="pt">máquina</skos:prefLabel>
+            <skos:prefLabel xml:lang="ro">mașină</skos:prefLabel>
+            <skos:prefLabel xml:lang="ru">машина</skos:prefLabel>
+            <skos:prefLabel xml:lang="sk">Stroj</skos:prefLabel>
+            <skos:prefLabel xml:lang="sl">Stroj</skos:prefLabel>
+            <skos:prefLabel xml:lang="sv">maskin</skos:prefLabel>
+            <skos:note xml:lang="en">tool containing one or more parts that uses energy to perform an intended action</skos:note>
+            <skos:note xml:lang="it">insieme di componenti, di cui almeno uno mobile, collegati tra loro, dotati di azionatori, circuiti di comando</skos:note>
+            <skos:note xml:lang="es">conjunto de elementos móviles y fijos orientados para realizar un trabajo determinado</skos:note>
+            <skos:note xml:lang="cs">mechanické nebo elektromechanické zařízení</skos:note>
+            <skos:note xml:lang="de">mechanisches Gerät mit Antriebssystem</skos:note>
+            <skos:note xml:lang="fr">outil capable d'effectuer des tâches en consommant de l'énergie</skos:note>
+            <skos:note xml:lang="ru">преобразователь энергии, помогающий выполнять определённые действия</skos:note>
+            <skos:note xml:lang="ro">dispozitiv tehnic care dispune de un sistem de acționare/antrenare propriu</skos:note>
+            <skos:note xml:lang="pt">ferramenta que contém uma ou mais partes que usam energia para realizar uma ação pretendida</skos:note>
+            <skos:note xml:lang="sk">zariadenie premieňajúce jeden druh energie na iný druh</skos:note>
+            <skos:note xml:lang="nl">werktuig met bepaalde functie</skos:note>
+            <skos:note xml:lang="fi">laite, jonka avulla voidaan aikaansaada energian muodon, vaikutustavan, -suunnan tai -kohdan säännöllisiä muutoksia</skos:note>
+            <skos:note xml:lang="da">værktøj der indeholder en eller flere dele, som anvender energi til at udføre en bestemt handling</skos:note>
+            <skos:note xml:lang="ca">conjunt independent de mecanismes dissenyat amb l'objectiu de realitzar una o més tasques determinades</skos:note>
+            <skos:broader rdf:resource="http://www.wikidata.org/entity/Q39546"/>
+            <skos:broader rdf:resource="http://www.wikidata.org/entity/Q1183543"/>
+        </skos:Concept>
+    </metis:result>
+</metis:results>

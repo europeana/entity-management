@@ -1,75 +1,84 @@
 package eu.europeana.entitymanagement.web.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import eu.europeana.entitymanagement.definitions.model.WebResource;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.List;
 import java.util.Map;
+import javax.validation.constraints.NotNull;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-/**
- * Represents the body for Entity creation POST requests.
- */
+/** Represents the body for Entity creation POST requests. */
 public class EntityPreview {
-	
-    private String id;
 
-    @JsonProperty("@context")
-    private String context;
+  private String id;
 
+  @JsonProperty("@context")
+  private String context;
 
-    private Map<String, String> prefLabel;
-    private Map<String, List<String>> altLabel;
-    private String depiction;
+  @NotNull private EntityTypes type;
 
-    public EntityPreview() {
-        // create explicit empty constructor
-    }
+  private Map<String, String> prefLabel;
+  private Map<String, List<String>> altLabel;
+  private WebResource depiction;
 
-    public EntityPreview(String id, String context, Map<String, String> prefLabel, Map<String, List<String>> altLabel, String depiction) {
-        this.id = id;
-        this.context = context;
-        this.prefLabel = prefLabel;
-        this.altLabel = altLabel;
-        this.depiction = depiction;
-    }
+  public EntityPreview() {
+    // create explicit empty constructor
+  }
 
-    public void setId(String id) {
-        this.id = id;
-    }
+  public EntityPreview(
+      String id,
+      String context,
+      Map<String, String> prefLabel,
+      Map<String, List<String>> altLabel,
+      WebResource depiction) {
+    this.id = id;
+    this.context = context;
+    this.prefLabel = prefLabel;
+    this.altLabel = altLabel;
+    this.depiction = depiction;
+  }
 
-    public String getId() {
-        return id;
-    }
+  public void setId(String id) {
+    this.id = id;
+  }
 
-    public String getContext() {
-        return context;
-    }
+  public String getId() {
+    return id;
+  }
 
-    public void setContext(String context) {
-        this.context = context;
-    }
+  public String getContext() {
+    return context;
+  }
 
-    public Map<String, String> getPrefLabel() {
-        return prefLabel;
-    }
+  public void setContext(String context) {
+    this.context = context;
+  }
 
-    public void setPrefLabel(Map<String, String> prefLabel) {
-        this.prefLabel = prefLabel;
-    }
+  public Map<String, String> getPrefLabel() {
+    return prefLabel;
+  }
 
-    public Map<String, List<String>> getAltLabel() {
-        return altLabel;
-    }
+  public void setPrefLabel(Map<String, String> prefLabel) {
+    this.prefLabel = prefLabel;
+  }
 
-    public void setAltLabel(Map<String, List<String>> altLabel) {
-        this.altLabel = altLabel;
-    }
+  public Map<String, List<String>> getAltLabel() {
+    return altLabel;
+  }
 
-    public String getDepiction() {
-        return depiction;
-    }
+  public void setAltLabel(Map<String, List<String>> altLabel) {
+    this.altLabel = altLabel;
+  }
 
-    public void setDepiction(String depiction) {
-        this.depiction = depiction;
-    }
+  public WebResource getDepiction() {
+    return depiction;
+  }
 
+  public void setDepiction(WebResource depiction) {
+    this.depiction = depiction;
+  }
+
+  public String getType() {
+    return type.getEntityType();
+  }
 }

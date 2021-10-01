@@ -8,63 +8,60 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 @JacksonXmlRootElement(localName = "metrics")
 public class EntityMetrics {
 
-    Integer enrichmentCount, hitCount, score, pageRank;
-    String entityId, entityType;
+  int enrichmentCount, hitCount, score, pageRank;
+  String entityId, entityType;
 
-    public EntityMetrics() {
+  public EntityMetrics() {}
 
-    }
+  public EntityMetrics(String entityId) {
+    this.entityId = entityId;
+  }
 
-    public EntityMetrics(String entityId) {
-	this.entityId = entityId;
-    }
+  public int getEnrichmentCount() {
+    return enrichmentCount;
+  }
 
-    public Integer getEnrichmentCount() {
-	return enrichmentCount;
-    }
+  public void setEnrichmentCount(Integer enrichmentCount) {
+    this.enrichmentCount = enrichmentCount;
+  }
 
-    public void setEnrichmentCount(Integer enrichmentCount) {
-	this.enrichmentCount = enrichmentCount;
-    }
+  public int getHitCount() {
+    return hitCount;
+  }
 
-    public Integer getHitCount() {
-	return hitCount;
-    }
+  public void setHitCount(Integer hitCount) {
+    this.hitCount = hitCount;
+  }
 
-    public void setHitCount(Integer hitCount) {
-	this.hitCount = hitCount;
-    }
+  public int getScore() {
+    return score;
+  }
 
-    public Integer getScore() {
-	return score;
-    }
+  public void setScore(Integer score) {
+    this.score = score;
+  }
 
-    public void setScore(Integer score) {
-	this.score = score;
-    }
+  public int getPageRank() {
+    return pageRank;
+  }
 
-    public Integer getPageRank() {
-	return pageRank;
-    }
+  public void setPageRank(Integer pageRank) {
+    this.pageRank = pageRank;
+  }
 
-    public void setPageRank(Integer pageRank) {
-	this.pageRank = pageRank;
-    }
+  public String getEntityId() {
+    return entityId;
+  }
 
-    public String getEntityId() {
-	return entityId;
-    }
+  public void setEntityId(String entityId) {
+    this.entityId = entityId;
+  }
 
-    public void setEntityId(String entityId) {
-	this.entityId = entityId;
-    }
+  public String getEntityType() {
+    return entityType;
+  }
 
-    public String getEntityType() {
-        return entityType;
-    }
-
-    public void setEntityType(String entityType) {
-        this.entityType = entityType;
-    }
-
+  public void setEntityType(String entityType) {
+    this.entityType = entityType;
+  }
 }

@@ -1,83 +1,314 @@
 package eu.europeana.entitymanagement.definitions.model;
 
+import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.ENTITY_CONTEXT;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ALT_LABEL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_PART;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HIDDEN_LABEL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IDENTIFIER;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_AGGREGATED_BY;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_PART_OF;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_RELATED_TO;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_SHOWN_BY;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NOTE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
+
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import dev.morphia.annotations.Transient;
+import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatorGroup;
+import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatorInterface;
+import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorGroup;
+import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorInterface;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import org.bson.types.ObjectId;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+@dev.morphia.annotations.Embedded
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = As.EXISTING_PROPERTY, property = "type")
+@JsonSubTypes({
+  @JsonSubTypes.Type(value = Agent.class, name = "Agent"),
+  @JsonSubTypes.Type(value = Concept.class, name = "Concept"),
+  @JsonSubTypes.Type(value = Organization.class, name = "Organization"),
+  @JsonSubTypes.Type(value = Place.class, name = "Place"),
+  @JsonSubTypes.Type(value = Timespan.class, name = "Timespan")
+})
+@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
+@EntityFieldsCompleteValidatorInterface(groups = {EntityFieldsCompleteValidatorGroup.class})
+@EntityFieldsMinimalValidatorInterface(groups = {EntityFieldsMinimalValidatorGroup.class})
+public abstract class Entity {
 
-import dev.morphia.annotations.Embedded;
-import eu.europeana.corelib.definitions.edm.entity.ContextualClass;
-import eu.europeana.entitymanagement.definitions.model.impl.BaseEntity;
+  public Entity() {}
 
-@Embedded
-@JsonDeserialize(as = BaseEntity.class)
-public interface Entity extends ContextualClass {
+  public Entity(Entity copy) {
 
-	public String[] getIdentifier();
+    if (!copy.getType().equals(getType())) {
+      throw new IllegalArgumentException("Cannot copy " + copy.getType() + " into " + getType());
+    }
 
-	public void setIdentifier(String[] identifier);
+    this.type = copy.getType();
+    this.entityId = copy.getEntityId();
+    this.depiction = copy.getDepiction();
+    if (copy.getNote() != null) this.note = new HashMap<>(copy.getNote());
+    if (copy.getPrefLabel() != null) this.prefLabel = new HashMap<>(copy.getPrefLabel());
+    if (copy.getAltLabel() != null) this.altLabel = new HashMap<>(copy.getAltLabel());
+    if (copy.getHiddenLabel() != null) this.hiddenLabel = new HashMap<>(copy.getHiddenLabel());
+    if (copy.getIdentifier() != null) this.identifier = new ArrayList<>(copy.getIdentifier());
+    if (copy.getSameReferenceLinks() != null)
+      this.setSameReferenceLinks(new ArrayList<>(copy.getSameReferenceLinks()));
+    if (copy.getIsRelatedTo() != null) this.isRelatedTo = new ArrayList<>(copy.getIsRelatedTo());
+    if (copy.getHasPart() != null) this.hasPart = new ArrayList<>(copy.getHasPart());
+    if (copy.getIsPartOfArray() != null) this.isPartOf = new ArrayList<>(copy.getIsPartOfArray());
+    if (copy.getIsAggregatedBy() != null)
+      this.isAggregatedBy = new Aggregation(copy.getIsAggregatedBy());
+    if (copy.getIsShownBy() != null) this.isShownBy = new WebResource(copy.getIsShownBy());
+    this.payload = copy.getPayload();
+  }
 
-	public String[] getIsRelatedTo();
+  protected String type;
+  protected String entityId;
+  // ID of entityRecord in database
+  @Transient protected String entityIdentifier;
 
-	public void setIsRelatedTo(String[] isRelatedTo);
+  protected Map<String, List<String>> note;
+  protected Map<String, String> prefLabel;
+  protected Map<String, List<String>> altLabel;
+  protected Map<String, List<String>> hiddenLabel;
 
-	public String getEntityId();
+  protected List<String> identifier;
+  protected List<String> isRelatedTo;
 
-	public void setEntityId(String enitityId);
+  // hierarchical structure available only for a part of entities. Add set/get
+  // methods to the appropriate interfaces
+  protected List<String> hasPart;
+  protected List<String> isPartOf;
 
-	public String getType();
-	
-	public void setType(String type);
+  protected Aggregation isAggregatedBy;
+  protected WebResource isShownBy;
+  protected WebResource depiction;
+  protected String payload;
 
-	public String[] getSameAs();
+  @JsonGetter(WebEntityFields.PREF_LABEL)
+  public Map<String, String> getPrefLabel() {
+    return prefLabel;
+  }
 
-	public String getDepiction();
-	
-	public void setDepiction(String depiction);
+  @JsonSetter(WebEntityFields.PREF_LABEL)
+  public void setPrefLabel(Map<String, String> prefLabel) {
+    this.prefLabel = prefLabel;
+  }
 
+  @JsonGetter(ALT_LABEL)
+  public Map<String, List<String>> getAltLabel() {
+    return altLabel;
+  }
 
-	/**
-	 * Retrieves the preferable label for a contextual class (language,value)
-	 * 
-	 * @return A Map<String, String> for the preferable labels of a contextual class 
-	 *         (one per language)
-	 */
-	public Map<String, String> getPrefLabelStringMap();
-	
-	WebResource getReferencedWebResource();
-	
-	String getIsShownBy();
-	
-	void setIsShownBy (WebResource webResource);
-	
-	Object getFieldValue (Field field) throws IllegalArgumentException, IllegalAccessException;
-	
-	void setFieldValue (Field field, Object value) throws IllegalArgumentException, IllegalAccessException;
+  @JsonSetter(ALT_LABEL)
+  public void setAltLabel(Map<String, List<String>> altLabel) {
+    this.altLabel = altLabel;
+  }
 
-	void setIsAggregatedBy(Aggregation isAggregatedBy);
+  @JsonGetter(HIDDEN_LABEL)
+  public Map<String, List<String>> getHiddenLabel() {
+    return hiddenLabel;
+  }
 
-	Aggregation getIsAggregatedBy();
+  @JsonSetter(HIDDEN_LABEL)
+  public void setHiddenLabel(Map<String, List<String>> hiddenLabel) {
+    this.hiddenLabel = hiddenLabel;
+  }
 
-	void setFoafDepiction(String foafDepiction);
+  @JsonGetter(NOTE)
+  public Map<String, List<String>> getNote() {
+    return note;
+  }
 
-	void setSameAs(String[] sameAs);
-	
-	public String[] getIsPartOfArray();
+  @JsonSetter(NOTE)
+  public void setNote(Map<String, List<String>> note) {
+    this.note = note;
+  }
 
-	void setIsPartOfArray(String[] isPartOf);
-	
-	public String[] getHasPart();
+  @JsonGetter(TYPE)
+  public String getType() {
+    return type;
+  }
 
-	void setHasPart(String[] hasPart);
+  @JsonSetter(TYPE)
+  public void setType(String type) {
+    this.type = type;
+  }
 
-	void setNote(Map<String, List<String>> note);
+  @JsonGetter(ID)
+  public String getEntityId() {
+    return entityId;
+  }
 
-	void setHiddenLabel(Map<String, List<String>> hiddenLabel);
+  @JsonSetter(ID)
+  public void setEntityId(String entityId) {
+    this.entityId = entityId;
+  }
 
-	void setAltLabel(Map<String, List<String>> altLabel);
+  @JsonGetter(IDENTIFIER)
+  public List<String> getIdentifier() {
+    return identifier;
+  }
 
-	void setPrefLabelStringMap(Map<String, String> prefLabel);
+  @JsonSetter(IDENTIFIER)
+  public void setIdentifier(List<String> identifier) {
+    this.identifier = identifier;
+  }
 
-	void copyShellFrom(Entity entity);
+  @JsonIgnore
+  public String getAbout() {
+    return getEntityId();
+  }
+
+  public void setAbout(String about) {
+    setEntityId(about);
+    setEntityIdentifier();
+  }
+
+  @JsonGetter(IS_RELATED_TO)
+  public List<String> getIsRelatedTo() {
+    return isRelatedTo;
+  }
+
+  @JsonSetter(IS_RELATED_TO)
+  public void setIsRelatedTo(List<String> isRelatedTo) {
+    this.isRelatedTo = isRelatedTo;
+  }
+
+  @JsonGetter(HAS_PART)
+  public List<String> getHasPart() {
+    return hasPart;
+  }
+
+  @JsonSetter(HAS_PART)
+  public void setHasPart(List<String> hasPart) {
+    this.hasPart = hasPart;
+  }
+
+  @JsonGetter(IS_PART_OF)
+  public List<String> getIsPartOfArray() {
+    return isPartOf;
+  }
+
+  @JsonSetter(IS_PART_OF)
+  public void setIsPartOfArray(List<String> isPartOf) {
+    this.isPartOf = isPartOf;
+  }
+
+  @JsonGetter(WebEntityFields.DEPICTION)
+  public WebResource getDepiction() {
+    return depiction;
+  }
+
+  @JsonSetter(WebEntityFields.DEPICTION)
+  public void setDepiction(WebResource depiction) {
+    this.depiction = depiction;
+  }
+
+  @Deprecated
+  public ObjectId getId() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Deprecated
+  @JsonIgnore
+  public void setId(ObjectId id) {
+    // TODO Auto-generated method stub
+  }
+
+  public String getEntityIdentifier() {
+    return this.entityIdentifier;
+  }
+
+  @JsonGetter(WebEntityFields.IS_SHOWN_BY)
+  public WebResource getIsShownBy() {
+    return isShownBy;
+  }
+
+  @JsonSetter(IS_SHOWN_BY)
+  public void setIsShownBy(WebResource resource) {
+    isShownBy = resource;
+  }
+
+  public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
+    // TODO:in case of the performance overhead cause by using the reflecion code, change this
+    // method to call the getters for each field individually
+    return field.get(this);
+  }
+
+  public void setFieldValue(Field field, Object value)
+      throws IllegalArgumentException, IllegalAccessException {
+    // TODO:in case of the performance overhead cause by using the reflecion code, change this
+    // method to call the setter for each field individually
+    field.set(this, value);
+  }
+
+  @JsonGetter(IS_AGGREGATED_BY)
+  public Aggregation getIsAggregatedBy() {
+    return isAggregatedBy;
+  }
+
+  /** Not included in XML responses */
+  @JsonGetter(CONTEXT)
+  public String getContext() {
+    return ENTITY_CONTEXT;
+  }
+
+  @JsonSetter(IS_AGGREGATED_BY)
+  public void setIsAggregatedBy(Aggregation isAggregatedBy) {
+    this.isAggregatedBy = isAggregatedBy;
+  }
+
+  private void setEntityIdentifier() {
+    String[] splitArray = this.getAbout().split("/");
+    this.entityIdentifier = splitArray[splitArray.length - 1];
+  }
+
+  @JsonIgnore
+  public String getPayload() {
+    return payload;
+  }
+
+  public void setPayload(String payload) {
+    this.payload = payload;
+  }
+
+  public static Map<String, List<String>> toStringListMap(Map<String, String> stringMap) {
+    return stringMap.entrySet().stream()
+        .collect(
+            Collectors.toMap(
+                Map.Entry::getKey, entry -> Collections.singletonList(entry.getValue())));
+  }
+
+  /**
+   * Gets list of URIs that refer to the same entity. For {@link Concept}, this is the
+   * skos:ExactMatch. For all other entity types, this is owl:sameAs.
+   */
+  public abstract List<String> getSameReferenceLinks();
+
+  /**
+   * Sets list of URIs that refer to the same entity. For {@link Concept}, this is the
+   * skos:ExactMatch. For all other entity types, this is owl:sameAs.
+   *
+   * @param uris List of entity uris
+   */
+  public abstract void setSameReferenceLinks(List<String> uris);
 }

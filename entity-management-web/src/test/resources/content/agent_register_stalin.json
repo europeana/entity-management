@@ -1,0 +1,14 @@
+{
+  "type": "Agent",
+  "id": "http://www.wikidata.org/entity/Q855",
+  "prefLabel": {
+    "ro": "Iosif Visarionovici Stalin"
+  },
+  "altLabel": {
+    "ro": [ "Stalin"]
+  },
+  "depiction": {
+    "id":"https://ro.wikipedia.org/wiki/Iosif_Vissarionovici_Stalin#/media/File:Stalin_Museum_Batumi.jpg",
+    "source": "http://valid-uri-for-testing"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "type": "Place",
+  "id": "https://sws.geonames.org/2988507/",
+  "prefLabel": {
+    "en": "Paris"
+  },
+  "altLabel": {
+    "rue": [ "Паріж" ]
+  },
+  "depiction": {
+    "id":"https://commons.wikimedia.org/wiki/Paris#/media/File:Paris_-_Eiffelturm_und_Marsfeld2.jpg",
+    "source": "http://valid-uri-for-testing"
+  }
+}
