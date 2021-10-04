@@ -1,21 +1,6 @@
 package eu.europeana.entitymanagement.web;
 
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_DA_VINCI_URI;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_DA_VINCI_XML;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_REGISTER_DAVINCI_JSON;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BASE_SERVICE_URL;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_BATHTUB_URI;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_BATHTUB_XML;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_REGISTER_BATHTUB_JSON;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_BNF_URI;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_BNF_XML;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_REGISTER_BNF_JSON;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_PARIS_URI;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_PARIS_XML;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_REGISTER_PARIS_JSON;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_1ST_CENTURY_URI;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_1ST_CENTURY_XML;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_REGISTER_1ST_CENTURY_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.*;
 import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -24,6 +9,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.zoho.crm.api.record.Record;
+import java.util.Optional;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -184,11 +171,13 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
 
     @Test
     public void retrieveOrganizationExternalSchemaOrgShouldBeSuccessful() throws Exception {
-        String europeanaMetadata = loadFile(ORGANIZATION_REGISTER_BNF_JSON);
-        String metisResponse = loadFile(ORGANIZATION_BNF_XML);
+        // id in JSON matches ORGANIZATION_BNF_URI_ZOHO value
+        String europeanaMetadata = loadFile(ORGANIZATION_REGISTER_BNF_ZOHO_JSON);
+        Optional<Record> zohoRecord = getZohoOrganizationRecord(ORGANIZATION_BNF_URI_ZOHO);
 
-        String entityId = createEntity(europeanaMetadata, metisResponse, ORGANIZATION_BNF_URI).getEntityId();
+        assert zohoRecord.isPresent() : "Mocked Zoho response not loaded";
 
+        String entityId = createOrganization(europeanaMetadata, zohoRecord.get()).getEntityId();
         String requestPath = getEntityRequestPath(entityId);
         mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".schema.jsonld")
                 .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
@@ -219,10 +208,12 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
 
     @Test
     public void retrieveOrganizationJsonExternalShouldBeSuccessful() throws Exception {
-        String europeanaMetadata = loadFile(ORGANIZATION_REGISTER_BNF_JSON);
-        String metisResponse = loadFile(ORGANIZATION_BNF_XML);
+        // id in JSON matches ORGANIZATION_BNF_URI_ZOHO value
+        String europeanaMetadata = loadFile(ORGANIZATION_REGISTER_BNF_ZOHO_JSON);
+        Optional<Record> zohoRecord = getZohoOrganizationRecord(ORGANIZATION_BNF_URI_ZOHO);
 
-        String entityId = createEntity(europeanaMetadata, metisResponse, ORGANIZATION_BNF_URI).getEntityId();
+        assert zohoRecord.isPresent() : "Mocked Zoho response not loaded";
+        String entityId = createOrganization(europeanaMetadata, zohoRecord.get()).getEntityId();
 
         String requestPath = getEntityRequestPath(entityId);
         mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".jsonld")
@@ -230,7 +221,8 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(entityId)))
-                .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())));
+                .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())))
+                .andExpect(jsonPath("$.sameAs").isNotEmpty());
     }
 
     @Test

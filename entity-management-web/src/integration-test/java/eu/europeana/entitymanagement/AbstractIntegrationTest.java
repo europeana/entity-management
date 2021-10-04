@@ -1,9 +1,10 @@
 package eu.europeana.entitymanagement;
 
 
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.METIS_DEREF_PATH;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.EMPTY_METIS_RESPONSE;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.METIS_RESPONSE_MAP;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_BNF_URI_WIKIDATA_PATH_SUFFIX;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_BNF_WIKIDATA_RESPONSE_XML;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
 
 import eu.europeana.entitymanagement.testutils.MongoContainer;
@@ -11,7 +12,6 @@ import eu.europeana.entitymanagement.testutils.SolrContainer;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import java.io.IOException;
 import java.util.Objects;
-import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -20,7 +20,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -56,13 +55,9 @@ public abstract class AbstractIntegrationTest {
 
     /**
      * MockWebServer needs to be static, so we can inject its port into the Spring context.
-     * <p>
-     * Since the WebServer is reused across tests, every test interacting with Metis NEEDS to call assertMetisRequest()
-     * to clear its queue!
-     * <p>
-     * See: https://github.com/spring-projects/spring-framework/issues/24825
      */
-    protected static MockWebServer mockMetis;
+    private static MockWebServer mockMetis;
+    private static MockWebServer mockWikidata;
 
     @Autowired
     protected EntityRecordService entityRecordService;
@@ -70,37 +65,20 @@ public abstract class AbstractIntegrationTest {
     @BeforeAll
     public static void setupAll() throws IOException {
         mockMetis = new MockWebServer();
-
-        final Dispatcher dispatcher = new Dispatcher() {
-            @NotNull
-            @Override
-            public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
-                String externalId = Objects.requireNonNull(request.getRequestUrl()).queryParameter("uri");
-                try {
-                    String responseBody = loadFile(METIS_RESPONSE_MAP.getOrDefault(externalId, EMPTY_METIS_RESPONSE));
-                    return new MockResponse()
-                            .setResponseCode(200)
-                            .setBody(responseBody);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        };
-
-        mockMetis.setDispatcher(dispatcher);
+        mockMetis.setDispatcher(setupMetisDispatcher());
         mockMetis.start();
+
+        mockWikidata = new MockWebServer();
+        mockWikidata.setDispatcher(setupWikidataDispatcher());
+        mockWikidata.start();
     }
+
 
     @AfterAll
     public static void teardownAll() throws IOException {
         logger.info("Shutdown metis server : host = {}; port={}", mockMetis.getHostName(), mockMetis.getPort());
         mockMetis.shutdown();
     }
-
-
-
-
-
 
 
     @DynamicPropertySource
@@ -112,6 +90,7 @@ public abstract class AbstractIntegrationTest {
         registry.add("mongo.enrichment.connectionUrl", MONGO_CONTAINER::getConnectionUrl);
         registry.add("mongo.enrichment.database", MONGO_CONTAINER::getEnrichmentDb);
         registry.add("metis.baseUrl", () -> String.format("http://%s:%s", mockMetis.getHostName(), mockMetis.getPort()));
+        registry.add("wikidata.baseUrl", () -> String.format("http://%s:%s", mockWikidata.getHostName(), mockWikidata.getPort()));
         registry.add("batch.computeMetrics", () -> "false");
         // Do not run scheduled entity updates in tests
         registry.add("batch.scheduling.enabled", () -> "false");
@@ -128,17 +107,45 @@ public abstract class AbstractIntegrationTest {
     }
 
 
-    /**
-     * Asserts that a de-reference request was actually made to the mock Metis server
-     *
-     * @param uri uri param in request
-     * @throws InterruptedException
-     */
-    protected void assertMetisRequest(String uri) throws InterruptedException {
-        // check that app actually sent request
-        HttpUrl requestedUrl = mockMetis.takeRequest().getRequestUrl();
-        assert requestedUrl != null;
-        Assertions.assertEquals(METIS_DEREF_PATH, requestedUrl.encodedPath());
-        Assertions.assertEquals(uri, requestedUrl.queryParameter("uri"));
+    private static Dispatcher setupMetisDispatcher() {
+        return new Dispatcher() {
+            @NotNull
+            @Override
+            public MockResponse dispatch(@NotNull RecordedRequest request) throws InterruptedException {
+                String externalId = Objects.requireNonNull(request.getRequestUrl())
+                    .queryParameter("uri");
+                try {
+                    String responseBody = loadFile(
+                        METIS_RESPONSE_MAP.getOrDefault(externalId, EMPTY_METIS_RESPONSE));
+                    return new MockResponse()
+                        .setResponseCode(200)
+                        .setBody(responseBody);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
     }
+
+
+    private static Dispatcher setupWikidataDispatcher() {
+        return new Dispatcher() {
+
+            @NotNull
+            @Override
+            public MockResponse dispatch(@NotNull RecordedRequest request) {
+                try {
+                    if (ORGANIZATION_BNF_URI_WIKIDATA_PATH_SUFFIX.equals(request.getPath())) {
+                        String responseBody = loadFile(ORGANIZATION_BNF_WIKIDATA_RESPONSE_XML);
+                        return new MockResponse().setResponseCode(200).setBody(responseBody);
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                // for now, only one request is mocked in tests
+                return new MockResponse().setResponseCode(404);
+            }
+        };
+    }
+
 }

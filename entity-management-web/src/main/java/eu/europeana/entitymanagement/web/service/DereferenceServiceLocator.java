@@ -1,9 +1,7 @@
 package eu.europeana.entitymanagement.web.service;
 
-import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.dereference.Dereferencer;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.wikidata.WikidataAccessService;
+import eu.europeana.entitymanagement.wikidata.WikidataDereferenceService;
 import eu.europeana.entitymanagement.zoho.organization.ZohoDereferenceService;
 import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
@@ -15,16 +13,16 @@ public class DereferenceServiceLocator {
 
   private final MetisDereferenceService metisDereferenceService;
   private final ZohoDereferenceService zohoDereferenceService;
-  private final WikidataAccessService wikidataAccessService;
+  private final WikidataDereferenceService wikidataDereferenceService;
 
   @Autowired
   public DereferenceServiceLocator(
       MetisDereferenceService metisDereferenceService,
       ZohoDereferenceService zohoDereferenceService,
-      WikidataAccessService wikidataAccessService) {
+      WikidataDereferenceService wikidataDereferenceService) {
     this.metisDereferenceService = metisDereferenceService;
     this.zohoDereferenceService = zohoDereferenceService;
-    this.wikidataAccessService = wikidataAccessService;
+    this.wikidataDereferenceService = wikidataDereferenceService;
   }
 
   /**
@@ -33,7 +31,7 @@ public class DereferenceServiceLocator {
   public Dereferencer getDereferencer(String id, String entityType) {
 
     if (WikidataUtils.isWikidataOrganization(id, entityType)) {
-      return wikidataAccessService;
+      return wikidataDereferenceService;
     }
 
     if (ZohoUtils.isZohoOrganization(id, entityType)) {

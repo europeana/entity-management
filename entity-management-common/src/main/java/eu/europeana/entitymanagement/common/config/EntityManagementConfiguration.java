@@ -62,6 +62,10 @@ public class EntityManagementConfiguration  {
     @Value("${metis.baseUrl}")
     private String metisBaseUrl;
 
+    @Value("${wikidata.baseUrl:}")
+    private String wikidataBaseUrl;
+
+
     @Value("${batch.step.chunkSize: 10}")
     private int batchChunkSize;
 
@@ -202,5 +206,13 @@ public String getIndexingSolrUrl() {
 
   public String getEnrichmentsQueryContentTier() {
     return enrichmentsQueryContentTier;
+  }
+
+  /**
+   * Gets a custom base url to use for Wikidata dereference requests.
+   * Mainly used for mocking wikidata responses in integration tests
+   */
+  public String getWikidataBaseUrl() {
+    return wikidataBaseUrl;
   }
 }

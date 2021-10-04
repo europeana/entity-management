@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.zoho;
 
+import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collections;
@@ -146,14 +147,16 @@ public class ZohoAccessClient {
     return Collections.emptyList();
   }
 
-  public Optional<Record> getZohoRecordOrganizationById(String organizationId)
+  public Optional<Record> getZohoRecordOrganizationById(String zohoUrl)
       throws ZohoException {
+
+    String zohoId = EntityRecordUtils.getIdFromUrl(zohoUrl);
     try {
       RecordOperations recordOperations = new RecordOperations();
       ParameterMap paramInstance = new ParameterMap();
       paramInstance.add(SearchRecordsParam.CRITERIA, String
           .format(ZohoConstants.ZOHO_OPERATION_FORMAT_STRING, ZohoConstants.ID_FIELD,
-              ZohoConstants.EQUALS_OPERATION, organizationId));
+              ZohoConstants.EQUALS_OPERATION, zohoId));
 
       APIResponse<ResponseHandler> response = recordOperations
           .searchRecords(ZohoConstants.ACCOUNTS_MODULE_NAME, paramInstance);
