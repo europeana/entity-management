@@ -179,7 +179,6 @@ public class EntityRecordService {
 		Entity europeanaProxyMetadata = EntityObjectFactory.createProxyEntityObject(type);
 		// copy metadata from request into entity
 		europeanaProxyMetadata.setEntityId(entityId);
-		europeanaProxyMetadata.setType(type);
 		copyPreviewMetadata(europeanaProxyMetadata, entityCreationRequest);
 		setEuropeanaMetadata(europeanaProxyMetadata, entityId, entityRecord, timestamp);
 
@@ -234,7 +233,6 @@ public class EntityRecordService {
         Entity europeanaProxyMetadata = EntityObjectFactory.createProxyEntityObject(datasourceResponse.getType());
 				// copy metadata from request into entity
 				europeanaProxyMetadata.setEntityId(entityId);
-				europeanaProxyMetadata.setType(datasourceResponse.getType());
 				copyPreviewMetadata(europeanaProxyMetadata, entityCreationRequest);
         setEuropeanaMetadata(europeanaProxyMetadata, entityId, entityRecord, timestamp);
 

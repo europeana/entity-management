@@ -79,8 +79,7 @@ public abstract class Entity {
 		this.payload = copy.getPayload();
 	}
 
-
-	protected String type;
+	protected String type = getType();
 	protected String entityId;
 	// ID of entityRecord in database
 
@@ -147,20 +146,8 @@ public abstract class Entity {
 		this.note = note;
 	}
 
-
 	@JsonGetter(TYPE)
-	public String getType() {
-		return type;
-	}
-
-
-	@JsonSetter(TYPE)
-	public void setType(String type) {
-		this.type=type;
-	}
-
-
-
+	public abstract String getType();
 
 	@JsonGetter(ID)
 	public String getEntityId() {

@@ -67,8 +67,7 @@ public class EntityFieldsValidatorTest {
         for (ConstraintViolation<Entity> violation : violations) {
             System.out.println(violation.getMessageTemplate());
         }   
-        // validation errors on geographicLevel and type
-      Assertions.assertEquals(2, violations.size());
+      Assertions.assertEquals(0, violations.size());
     }
     
     @Test
@@ -97,8 +96,7 @@ public class EntityFieldsValidatorTest {
         for (ConstraintViolation<Entity> violation : violations) {
             System.out.println(violation.getMessageTemplate());
         }   
-        //TODO: remove constraine violation: "The entity fields values are valid."
-        Assertions.assertEquals(2, violations.size());      
+        Assertions.assertEquals(0, violations.size());
     }
 
   @Test
@@ -114,6 +112,6 @@ public class EntityFieldsValidatorTest {
     }
 
     // file contains same content as AGENT_VALIDATE_FIELDS_JSON, except empty prefLabel
-    Assertions.assertEquals(3, violations.size());
+    Assertions.assertEquals(2, violations.size());
   }
 }
