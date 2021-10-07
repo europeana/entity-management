@@ -155,16 +155,16 @@ public class EntityRecordRepository {
 
 
     /**
-     * Gets EntityRecord containing the given id in its sameAs or exactMatch fields.
-     * @param id id to query
+     * Gets EntityRecord containing the given uris in its sameAs or exactMatch fields.
+     * @param uris uris to query
      * @return Optional containing result, or empty Optional if no match
      */
-    public Optional<EntityRecord> findMatchingEntitiesByCoreference(String id) {
+    public Optional<EntityRecord> findMatchingEntitiesByCoreference(List<String> uris) {
 
         EntityRecord value = datastore.find(EntityRecord.class).disableValidation()
                 .filter(or(
-                        eq(ENTITY_SAME_AS, id),
-                        eq(ENTITY_EXACT_MATCH, id)
+                        in(ENTITY_SAME_AS, uris),
+                        in(ENTITY_EXACT_MATCH, uris)
                         )
                 ).first();
 

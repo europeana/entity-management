@@ -9,6 +9,7 @@ import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
+import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
@@ -36,11 +37,20 @@ public class EntityAdminController extends BaseRest {
 
     private static final Logger LOG = LogManager.getLogger(EntityAdminController.class);
 
-    @Autowired
-    private EntityRecordService entityRecordService;
+    private final EntityRecordService entityRecordService;
+
+    private final SolrService solrService;
+
+    private final EntityManagementConfiguration emConfig;
 
     @Autowired
-    private EntityManagementConfiguration emConfig;
+    public EntityAdminController(
+        EntityRecordService entityRecordService, SolrService solrService,
+        EntityManagementConfiguration emConfig) {
+        this.entityRecordService = entityRecordService;
+        this.solrService = solrService;
+        this.emConfig = emConfig;
+    }
 
     /**
      * Method to publish to Enrichment
@@ -72,6 +82,7 @@ public class EntityAdminController extends BaseRest {
 
         LOG.info("Permanently deleting entityId={}", entityRecord.getEntityId());
         entityRecordService.delete(entityRecord.getEntityId());
+        solrService.deleteById(entityRecord.getEntityId());
 
        return noContentResponse(request);
     }

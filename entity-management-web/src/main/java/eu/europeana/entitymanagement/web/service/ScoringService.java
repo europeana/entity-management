@@ -13,7 +13,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrRequest.METHOD;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -37,7 +36,7 @@ import eu.europeana.entitymanagement.web.model.scoring.PageRank;
 public class ScoringService {
 	private static final Logger logger = LogManager.getLogger(ScoringService.class);
 
-	private final SolrClient searchApiSolrClient;
+	private final EnrichmentCountQueryService enrichmentCountQueryService;
 	private final SolrClient prSolrClient;
 
 
@@ -58,10 +57,10 @@ public class ScoringService {
 
 
     public ScoringService(EntityManagementConfiguration emConfiguration, LanguageCodes emLanguageCodes,
-						  @Qualifier(AppConfigConstants.BEAN_SEARCH_API_SOLR_CLIENT) SolrClient searchApiSolrClient, @Qualifier(AppConfigConstants.BEAN_PR_SOLR_CLIENT) SolrClient prSolrClient){
+						  EnrichmentCountQueryService enrichmentCountQueryService, @Qualifier(AppConfigConstants.BEAN_PR_SOLR_CLIENT) SolrClient prSolrClient){
         this.emConfiguration = emConfiguration;
         this.emLanguageCodes = emLanguageCodes;
-		this.searchApiSolrClient = searchApiSolrClient;
+		this.enrichmentCountQueryService = enrichmentCountQueryService;
 		this.prSolrClient = prSolrClient;
 	}
 
@@ -86,46 +85,23 @@ public class ScoringService {
 	return metrics;
     }
 
-//    Integer getHitCount(Entity entity) {
-//	if (entity.getPrefLabelStringMap() == null || entity.getPrefLabelStringMap().isEmpty()) {
-//	    return 0;
-//	}
-//
-//	// filter pref labels for supported values only
-//	List<String> labels = entity.getPrefLabelStringMap().entrySet().stream()
-//		.filter(entry -> emLanguageCodes.isValidLanguageCode(entry.getKey())).map(map -> map.getValue())
-//		.collect(Collectors.toList());
-//
-//	if (labels == null || labels.isEmpty()) {
-//	    return 0;// could be -1 if needed
-//	}
-//
-//	// use exact phrase search for all labels
-//	String solrQuery = String.format("\"%s\"", String.join("\" OR \"", labels));
-//	SolrQuery query = new SolrQuery(solrQuery);
-//	return getCountBySolrQuery(query, entity.getEntityId());
-//    }
 
     private void computeScore(EntityMetrics metrics) throws FunctionalRuntimeException{
 	int normalizedPR= 0, normalizedEC= 0; 
-//	int normalizedHC= 0;
+
 	try {
 	    normalizedPR = computeNormalizedMetricValue(metrics, "pageRank");
 	    normalizedEC = computeNormalizedMetricValue(metrics, "enrichmentCount");
-//	    normalizedHC = computeNormalizedMetricValue(metrics, "hitCount");
-
 	} catch (IOException e) {
 	    throw new FunctionalRuntimeException("Cannot compute entity score. There is probably a sistem configuration issue", e);
 	}
 	
-//	int score = normalizedPR * Math.max(normalizedEC, normalizedHC);
 	int score = normalizedPR * normalizedEC;
         metrics.setScore(score);
     }
 
     private int computeNormalizedMetricValue(EntityMetrics metrics, String metric) throws IOException {
-//	getMaxOverallMetrics()
-	
+
 	int metricValue;
 	int maxValueForType;
 	int maxValueOverall;
@@ -146,17 +122,8 @@ public class ScoringService {
 		return 1;
 	    maxValueForType = getMaxEntityMetrics().maxValues(metrics.getEntityType()).getEnrichmentCount();
 	    maxValueOverall = getMaxOverallMetrics().getEnrichmentCount();
-	    //trust = 1;
 	    break;
-//	case "hitCount":
-//	    metricValue = metrics.getHitCount(); 
-//	    if(metricValue <= 1)
-//		return 1;
-//	    maxValueForType = getMaxEntityMetrics().maxValues(metrics.getEntityType()).getHitCount();
-//	    maxValueOverall = getMaxOverallMetrics().getHitCount();
-//	    //reduces trust due to ambiguitiy of label search
-//	    trust = 0.5f;
-//	    break;
+
 	default:
 	    throw new FunctionalRuntimeException("Unknown/unsuported metric: " + metric)
 	    ;
@@ -193,30 +160,11 @@ public class ScoringService {
 	return maxOverallMetrics;	
     }
 
-    private Integer getEnrichmentCount(Entity entity) {
-	String queryStr = emConfiguration.getEnrichmentsQuery();
-	queryStr = String.format(queryStr, entity.getEntityId());
-	SolrQuery query = new SolrQuery(queryStr);
-	return getCountBySolrQuery(query, entity.getEntityId());
-    }
-
-    private Integer getCountBySolrQuery(SolrQuery query, String entityId) {
-	query.setRows(0);
-
-	try {
-		Instant start = Instant.now();
-	    QueryResponse rsp = searchApiSolrClient.query(query, METHOD.POST);
-
-		if (logger.isDebugEnabled()) {
-			logger.debug("Retrieved enrichmentCount for entityId={} in {}ms", entityId,
-					Duration.between(start, Instant.now()).toMillis());
-		}
-
-	    return (int) rsp.getResults().getNumFound();
-	} catch (Exception e) {
-	    throw new ScoringComputationException("Unexpected exception occured when retrieving pagerank: " + entityId, e);
+	private Integer getEnrichmentCount(Entity entity) {
+		return enrichmentCountQueryService.getEnrichmentCount(entity.getEntityId(),
+				entity.getType());
 	}
-    }
+
 
     private PageRank getPageRank(Entity entity) {
 	SolrQuery query = new SolrQuery();
@@ -250,10 +198,10 @@ public class ScoringService {
     }
 
     private String getWikidataUrl(Entity entity) {
-	if (entity.getSameAs() == null) {
+	if (entity.getSameReferenceLinks() == null) {
 	    return null;
 	}
-	List<String> values = entity.getSameAs();
+	List<String> values = entity.getSameReferenceLinks();
 
 	String wikidataUri = values.stream().filter(value -> value.startsWith(WIKIDATA_PREFFIX)).findFirst()
 		.orElse(null);

@@ -43,7 +43,6 @@ public class Place extends Entity {
 		this.latitude = copy.getLatitude();
 		this.longitude = copy.getLongitude();
 		this.altitude = copy.getAltitude();
-		if(copy.getExactMatch()!=null) this.exactMatch = new ArrayList<>(copy.getExactMatch());
 	}
 
 
@@ -54,7 +53,7 @@ public class Place extends Entity {
 
 	private List<String> isNextInSequence;
 	private Float latitude, longitude, altitude;
-	private List<String> exactMatch;
+	private List<String> sameAs;
 
 	private Map<String, List<String>> tmpIsPartOf;
 	private Map<String, List<String>> tmpHasPart;
@@ -110,14 +109,16 @@ public class Place extends Entity {
 		this.altitude = altitude;
 	}
 
-	
-	public List<String> getExactMatch() {
-		return exactMatch;
+	@Override
+	@JsonSetter(SAME_AS)
+	public void setSameReferenceLinks(List<String> uris) {
+		this.sameAs = uris;
 	}
 
-	
-	public void setExactMatch(List<String> exactMatch) {
-		this.exactMatch = exactMatch;
+	@Override
+	@JsonGetter(SAME_AS)
+	public List<String> getSameReferenceLinks() {
+		return this.sameAs;
 	}
 
 

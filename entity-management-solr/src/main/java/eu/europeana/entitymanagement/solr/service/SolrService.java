@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.solr.service;
 
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -199,7 +200,24 @@ public class SolrService implements InitializingBean {
 	}
 
 
-
+	/**
+	 * Deletes the document whose id matches the specified entityId value
+	 *
+	 * @param entityId entity id
+	 * @throws SolrServiceException on error
+	 */
+	public void deleteById(String entityId) throws SolrServiceException {
+		try {
+			solrClient.deleteById(entityId);
+			if (isExplicitCommitsEnabled) {
+				solrClient.commit();
+			}
+			log.info("Deleted document from Solr; entityId={}", entityId);
+		} catch (SolrServerException | IOException e) {
+			throw new SolrServiceException(String.format("Error deleting entityId=%s",
+					entityId), e);
+		}
+	}
 
 	/**
 	 * Deletes all documents.

@@ -4,16 +4,16 @@ import eu.europeana.api.commons.error.EuropeanaApiException;
 import org.springframework.http.HttpStatus;
 
 /**
- * Exception thrown when an invalid response is received from Metis.
+ * Exception thrown when an invalid response is received from external datasource.
  *
  * {@link DatasourceNotKnownException} should be used if the response is valid but empty (equivalent to HTTP 404 status code)
  */
-public class MetisDereferenceError extends EuropeanaApiException {
-    public MetisDereferenceError(String msg) {
+public class DatasourceDereferenceException extends EuropeanaApiException {
+    public DatasourceDereferenceException(String msg) {
         super(msg);
     }
 
-    public MetisDereferenceError(String msg, Throwable t) {
+    public DatasourceDereferenceException(String msg, Throwable t) {
         super(msg, t);
     }
 

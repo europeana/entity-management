@@ -16,6 +16,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class XmlPlaceImpl extends XmlBaseEntityImpl<Place> {
 
+	@XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.XML_SAME_AS)
+	private List<LabelledResource> sameAs = new ArrayList<>();
+
 		@XmlElement(namespace = NAMESPACE_WGS84_POS, name = XML_WGS84_POS_LAT)
 		private Float latitude;
 
@@ -107,5 +110,15 @@ public class XmlPlaceImpl extends XmlBaseEntityImpl<Place> {
 	@Override
 	protected EntityTypes getTypeEnum() {
 	    return EntityTypes.Place;
+	}
+
+	@Override
+	public List<LabelledResource> getSameReferenceLinks() {
+		return this.sameAs;
+	}
+
+	@Override
+	public void setSameReferenceLinks(List<LabelledResource> uris) {
+		this.sameAs = uris;
 	}
 }

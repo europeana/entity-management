@@ -1,6 +1,8 @@
 package eu.europeana.entitymanagement.web;
 
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.solr.model.SolrConcept;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,11 +22,17 @@ public class EntityDeprecationIT extends BaseWebControllerTest {
         String metisResponse = loadFile(CONCEPT_BATHTUB_XML);
 
         EntityRecord entityRecord = createEntity(europeanaMetadata, metisResponse, CONCEPT_BATHTUB_URI);
+        // confirm that Solr document is saved
+        SolrConcept solrConcept = solrService.searchById(SolrConcept.class, entityRecord.getEntityId());
+        Assertions.assertNotNull(solrConcept);
+
         String requestPath = getEntityRequestPath(entityRecord.getEntityId());
 
         mockMvc.perform(delete(BASE_SERVICE_URL + "/" + requestPath)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
+
+        assertDisabled(entityRecord.getEntityId());
     }
 
 

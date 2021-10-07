@@ -2,27 +2,17 @@ package eu.europeana.entitymanagement.definitions.model;
 
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.ENTITY_CONTEXT;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ALT_LABEL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_PART;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HIDDEN_LABEL;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NOTE;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IDENTIFIER;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_RELATED_TO;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_PART;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_PART_OF;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_SHOWN_BY;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_AGGREGATED_BY;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.bson.types.ObjectId;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_PART_OF;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_RELATED_TO;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_SHOWN_BY;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NOTE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -32,13 +22,19 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
-
-import dev.morphia.annotations.Transient;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatorGroup;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatorInterface;
 import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorGroup;
 import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorInterface;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import org.bson.types.ObjectId;
 
 @dev.morphia.annotations.Embedded
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -61,6 +57,11 @@ public abstract class Entity {
 	}
 	
 	public Entity(Entity copy) {
+
+		if (!copy.getType().equals(getType())) {
+			throw new IllegalArgumentException("Cannot copy " + copy.getType() + " into " + getType());
+		}
+
 		this.type = copy.getType();
 		this.entityId = copy.getEntityId();
 		this.depiction = copy.getDepiction();
@@ -69,7 +70,7 @@ public abstract class Entity {
 		if(copy.getAltLabel()!=null) this.altLabel = new HashMap<>(copy.getAltLabel());
 		if(copy.getHiddenLabel()!=null) this.hiddenLabel = new HashMap<>(copy.getHiddenLabel());
 		if(copy.getIdentifier()!=null) this.identifier = new ArrayList<>(copy.getIdentifier());
-		if(copy.getSameAs()!=null) this.sameAs = new ArrayList<>(copy.getSameAs());
+		if(copy.getSameReferenceLinks()!=null) this.setSameReferenceLinks(new ArrayList<>(copy.getSameReferenceLinks()));
 		if(copy.getIsRelatedTo()!=null) this.isRelatedTo = new ArrayList<>(copy.getIsRelatedTo());
 		if(copy.getHasPart()!=null) this.hasPart = new ArrayList<>(copy.getHasPart());
 		if(copy.getIsPartOfArray()!=null) this.isPartOf = new ArrayList<>(copy.getIsPartOfArray());
@@ -89,7 +90,6 @@ public abstract class Entity {
 	protected Map<String, List<String>> hiddenLabel;
 
 	protected List<String> identifier;
-	protected List<String> sameAs;
 	protected List<String> isRelatedTo;
 
 	// hierarchical structure available only for a part of entities. Add set/get
@@ -240,18 +240,6 @@ public abstract class Entity {
 		this.depiction = depiction;
 	}
 
-
-	@JsonGetter(SAME_AS)
-	public List<String> getSameAs() {
-		return sameAs;
-	}
-
-
-	@JsonSetter(SAME_AS)
-	public void setSameAs(List<String> sameAs) {
-		this.sameAs = sameAs;
-	}
-
 	@Deprecated
 	public ObjectId getId() {
 		// TODO Auto-generated method stub
@@ -265,16 +253,6 @@ public abstract class Entity {
 		// TODO Auto-generated method stub
 	}
 
-	@Deprecated
-	@JsonIgnore
-	public void setOwlSameAs(List<String> owlSameAs) {
-		setSameAs(sameAs);
-
-	}
-
-	public List<String> getOwlSameAs() {
-		return getSameAs();
-	}
 
 	@JsonGetter(WebEntityFields.IS_SHOWN_BY)
 	public WebResource getIsShownBy() {
@@ -338,4 +316,18 @@ public abstract class Entity {
 				entry -> Collections.singletonList(entry.getValue()))
 		);
 	}
+
+	/**
+	 * Gets list of URIs that refer to the same entity. For {@link Concept}, this is the
+	 * skos:ExactMatch. For all other entity types, this is owl:sameAs.
+	 */
+	public abstract List<String> getSameReferenceLinks();
+
+	/**
+	 * Sets list of URIs that refer to the same entity. For {@link Concept}, this is the
+	 * skos:ExactMatch. For all other entity types, this is owl:sameAs.
+	 *
+	 * @param uris List of entity uris
+	 */
+	public abstract void setSameReferenceLinks(List<String> uris);
 }

@@ -1,27 +1,14 @@
 package eu.europeana.entitymanagement.validation;
 
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_EM_VALIDATOR_FACTORY;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_VALIDATE_FIELDS_EMPTY_PREFLABEL_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_VALIDATE_FIELDS_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_VALIDATE_FIELDS_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
 
-import java.io.IOException;
-import java.util.Set;
-
-import javax.annotation.Resource;
-import javax.validation.ConstraintViolation;
-import javax.validation.ValidatorFactory;
-
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.context.SpringBootTest;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.SerializationConfig;
@@ -32,6 +19,16 @@ import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatorGroup;
 import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorGroup;
+import java.io.IOException;
+import java.util.Set;
+import javax.annotation.Resource;
+import javax.validation.ConstraintViolation;
+import javax.validation.ValidatorFactory;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest(classes = {ValidatorConfig.class, EntityManagementConfiguration.class,
     SerializationConfig.class})
@@ -69,9 +66,9 @@ public class EntityFieldsValidatorTest {
         Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entityRecord.getEntity(), EntityFieldsMinimalValidatorGroup.class);
         for (ConstraintViolation<Entity> violation : violations) {
             System.out.println(violation.getMessageTemplate());
-        }
+        }   
         // validation errors on geographicLevel and type
-      Assertions.assertEquals(3, violations.size());
+      Assertions.assertEquals(2, violations.size());
     }
     
     @Test
@@ -103,4 +100,20 @@ public class EntityFieldsValidatorTest {
         //TODO: remove constraine violation: "The entity fields values are valid."
         Assertions.assertEquals(2, violations.size());      
     }
+
+  @Test
+  void validationShouldFailIfPrefLabelIsEmpty() throws IOException {
+      // file contains same content as AGENT_VALIDATE_FIELDS_JSON, except empty prefLabel
+    Agent agent = objectMapper.readValue(loadFile(AGENT_VALIDATE_FIELDS_EMPTY_PREFLABEL_JSON), Agent.class);
+    EntityRecord entityRecord = new EntityRecord();
+    entityRecord.setEntity(agent);
+    entityRecord.setEntityId(agent.getEntityId());
+    Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entityRecord.getEntity(), EntityFieldsMinimalValidatorGroup.class);
+    for (ConstraintViolation<Entity> violation : violations) {
+      System.out.println(violation.getMessageTemplate());
+    }
+
+    // file contains same content as AGENT_VALIDATE_FIELDS_JSON, except empty prefLabel
+    Assertions.assertEquals(3, violations.size());
+  }
 }

@@ -20,18 +20,16 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABE
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonSetter;
-
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 /**
  * This class defines base organization type of an entity.
@@ -74,7 +72,9 @@ public class Organization extends Entity {
 	private String country;
 
 	private Address hasAddress;
-	
+
+	private List<String> sameAs;
+
 	@JsonGetter(DESCRIPTION)
 	public Map<String, String> getDescription() {
 		return description;
@@ -126,7 +126,7 @@ public class Organization extends Entity {
 	public void setMbox(List<String> mbox) {
 		this.mbox = mbox;
 	}
-	
+
 	@JsonGetter(COUNTRY)
 	public String getCountry() {
 		return country;
@@ -147,7 +147,7 @@ public class Organization extends Entity {
 	public void setAddress(Address hasAddress) {
 		this.hasAddress = hasAddress;
 	}
-
+	
 	@JsonGetter(GEOGRAPHIC_LEVEL)
 	public Map<String, String> getGeographicLevel() {
 		return geographicLevel;
@@ -206,7 +206,18 @@ public class Organization extends Entity {
 		return field.get(this);
 	}
 
-	
+	@Override
+	@JsonSetter(SAME_AS)
+	public void setSameReferenceLinks(List<String> uris) {
+		this.sameAs = uris;
+	}
+
+	@Override
+	@JsonGetter(SAME_AS)
+	public List<String> getSameReferenceLinks() {
+		return this.sameAs;
+	}
+
 	public void setFieldValue(Field field, Object value) throws IllegalArgumentException, IllegalAccessException {
 		//TODO:in case of the performance overhead cause by using the reflection code, change this method to call the setter for each field individually
 		field.set(this, value);

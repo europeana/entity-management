@@ -1,6 +1,21 @@
 package eu.europeana.entitymanagement.web;
 
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.*;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_DA_VINCI_URI;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_DA_VINCI_XML;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_REGISTER_DAVINCI_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BASE_SERVICE_URL;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_BATHTUB_URI;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_BATHTUB_XML;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_REGISTER_BATHTUB_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_BNF_URI;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_BNF_XML;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_REGISTER_BNF_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_PARIS_URI;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_PARIS_XML;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_REGISTER_PARIS_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_1ST_CENTURY_URI;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_1ST_CENTURY_XML;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_REGISTER_1ST_CENTURY_JSON;
 import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -9,15 +24,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
+
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -141,7 +157,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
         		.andExpect(jsonPath("$.description").isNotEmpty())
         		.andExpect(jsonPath("$.alternateName").isNotEmpty());
     }
-
+  
     @Test
     public void retrieveAgentExternalSchemaOrgShouldBeSuccessful() throws Exception {
 
@@ -156,7 +172,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.@id", is(entityRecord.getEntityId())));
 
-        for (String sameAsElem : entityRecord.getEntity().getSameAs()) {
+        for (String sameAsElem : entityRecord.getEntity().getSameReferenceLinks()) {
         	resultActions.andExpect(jsonPath("$.sameAs", Matchers.hasItem(sameAsElem)));
         }
         resultActions.andExpect(jsonPath("$.gender").isNotEmpty());

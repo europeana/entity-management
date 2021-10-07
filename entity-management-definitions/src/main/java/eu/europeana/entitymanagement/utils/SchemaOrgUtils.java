@@ -28,6 +28,7 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.definitions.model.Timespan;
+import org.springframework.util.CollectionUtils;
 
 public final class SchemaOrgUtils {
 
@@ -88,7 +89,7 @@ public final class SchemaOrgUtils {
         addMultilingualProperties(conceptObject, concept.getNote(), SchemaOrgConstants.PROPERTY_DESCRIPTION);
 
         // sameAs
-        addTextProperties(conceptObject, concept.getExactMatch(), SchemaOrgConstants.PROPERTY_SAME_AS);
+        addTextProperties(conceptObject, concept.getSameReferenceLinks(), SchemaOrgConstants.PROPERTY_SAME_AS);
 
         // url
         addEntityPageUrl(concept, conceptObject, SchemaOrgConstants.ENTITY_PAGE_URL_CONCEPT_TYPE);
@@ -141,7 +142,7 @@ public final class SchemaOrgUtils {
         addReferences(placeObject, edmPlace.getIsPartOfArray(), SchemaOrgConstants.PROPERTY_CONTAINED_IN_PLACE, eu.europeana.corelib.edm.model.schemaorg.Place.class, null);
 
         // sameAs
-        addTextProperties(placeObject, edmPlace.getOwlSameAs(), SchemaOrgConstants.PROPERTY_SAME_AS);
+        addTextProperties(placeObject, edmPlace.getSameReferenceLinks(), SchemaOrgConstants.PROPERTY_SAME_AS);
 
         // url
         //not available yet
@@ -225,7 +226,7 @@ public final class SchemaOrgUtils {
             }
 
             // gender
-            addStringProperty(agentObject, agent.getGender(), SchemaOrgConstants.PROPERTY_GENDER);
+            addStringProperty(agentObject, CollectionUtils.firstElement(agent.getGender()), SchemaOrgConstants.PROPERTY_GENDER);
 
             // jobTitle
             addStringProperties(agentObject, agent.getProfessionOrOccupation(),
@@ -243,19 +244,19 @@ public final class SchemaOrgUtils {
         if (agentObject instanceof eu.europeana.corelib.edm.model.schemaorg.Organization) {
             // foundingDate
             if (agent.getDateOfEstablishment() != null) {
-                addStringProperty(agentObject, agent.getDateOfEstablishment(),
+                addStringProperty(agentObject, CollectionUtils.firstElement(agent.getDateOfEstablishment()),
                         SchemaOrgConstants.PROPERTY_FOUNDING_DATE);
             }
 
             // dissolutionDate
             if (agent.getDateOfTermination()!= null) {
-                addStringProperty(agentObject, agent.getDateOfTermination(),
+                addStringProperty(agentObject, CollectionUtils.firstElement(agent.getDateOfTermination()),
                         SchemaOrgConstants.PROPERTY_DISSOLUTION_DATE);
             }
         }
 
         // sameAs
-        addTextProperties(agentObject, agent.getOwlSameAs(), SchemaOrgConstants.PROPERTY_SAME_AS);
+        addTextProperties(agentObject, agent.getSameReferenceLinks(), SchemaOrgConstants.PROPERTY_SAME_AS);
 
         // url
         addEntityPageUrl(agent, agentObject, SchemaOrgConstants.ENTITY_PAGE_URL_AGENT_TYPE);
@@ -302,7 +303,7 @@ public final class SchemaOrgUtils {
         addTextProperties(entityObject, organization.getIdentifier(), SchemaOrgConstants.PROPERTY_IDENTIFIER);
 
         // sameAs
-        addTextProperties(entityObject, organization.getOwlSameAs(), SchemaOrgConstants.PROPERTY_SAME_AS);
+        addTextProperties(entityObject, organization.getSameReferenceLinks(), SchemaOrgConstants.PROPERTY_SAME_AS);
 
         // url
         addEntityPageUrl(organization, entityObject, SchemaOrgConstants.ENTITY_PAGE_URL_ORGANIZATION_TYPE);
@@ -336,7 +337,7 @@ public final class SchemaOrgUtils {
         addEntityPageUrl(time, timespanObject, SchemaOrgConstants.ENTITY_PAGE_URL_TIMESPAN_TYPE);
 
         // sameAs
-        addTextProperties(timespanObject, time.getOwlSameAs(), SchemaOrgConstants.PROPERTY_SAME_AS);
+        addTextProperties(timespanObject, time.getSameReferenceLinks(), SchemaOrgConstants.PROPERTY_SAME_AS);
 
     }
 

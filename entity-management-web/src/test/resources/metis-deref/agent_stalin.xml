@@ -143,6 +143,7 @@ Secretari General del Partit Comunista de la Unió Soviètica
 <rdaGr2:placeOfBirth rdf:resource="http://www.wikidata.org/entity/Q19583"/>
 <rdaGr2:placeOfBirth rdf:resource="http://www.wikidata.org/entity/Q4088132"/>
 <rdaGr2:dateOfBirth>1878-12-18</rdaGr2:dateOfBirth>
+<rdaGr2:dateOfBirth>1878-12-19</rdaGr2:dateOfBirth>
 <rdaGr2:dateOfDeath>1953-03-05</rdaGr2:dateOfDeath>
 <rdaGr2:dateOfEstablishment>1923-02-12</rdaGr2:dateOfEstablishment>
 <rdaGr2:gender>Male</rdaGr2:gender>

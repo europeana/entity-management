@@ -33,9 +33,6 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
     @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = PREF_LABEL)
     private List<LabelledResource> prefLabel = new ArrayList<>();
 
-  @XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.XML_SAME_AS)
-  private List<LabelledResource> sameAs = new ArrayList<>();
-
 
     @XmlElement(namespace = XmlConstants.NAMESPACE_ORE, name = XmlConstants.IS_AGGREGATED_BY)
     private XmlAggregationImpl isAggregatedBy;
@@ -53,7 +50,7 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
 	this.about = entity.getAbout();
 	this.prefLabel = RdfXmlUtils.convertMapToXmlMultilingualString(entity.getPrefLabel());
 	this.altLabel = RdfXmlUtils.convertToXmlMultilingualString(entity.getAltLabel());
-	this.sameAs = RdfXmlUtils.convertToRdfResource(entity.getSameAs());
+	setSameReferenceLinks(RdfXmlUtils.convertToRdfResource(entity.getSameReferenceLinks()));
 	// isAggregatedBy not always set in tests
     // TODO: fix tests, then remove null check here
     if(entity.getIsAggregatedBy() != null) {
@@ -72,14 +69,15 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
 
     public T toEntityModel() throws EntityCreationException {
 	if(entity == null) {
-	    entity = EntityObjectFactory.createEntityObject(getTypeEnum());
+	    entity = EntityObjectFactory.createProxyEntityObject(getTypeEnum().getEntityType());
 	}
 	entity.setType(getTypeEnum().getEntityType());
 
 	entity.setEntityId(getAbout());
 	entity.setPrefLabel(RdfXmlUtils.toLanguageMap(getPrefLabel()));
 	entity.setAltLabel(RdfXmlUtils.toLanguageMapList(getAltLabel()));
-	entity.setSameAs(RdfXmlUtils.toStringList(getSameAs()));
+	// sets sameAs or exactMatch values (for concepts)
+	entity.setSameReferenceLinks(RdfXmlUtils.toStringList(getSameReferenceLinks()));
 	if(depiction != null && !depiction.isEmpty()) {
 	    entity.setDepiction(XmlWebResourceImpl.toWebResource(depiction));
 	}
@@ -110,12 +108,10 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
 	return this.altLabel;
     }
 
-    public List<LabelledResource> getSameAs() {
-	return this.sameAs;
-    }
-
     public T getEntity() {
 	return entity;
     }
 
+    public abstract List<LabelledResource> getSameReferenceLinks();
+    public abstract void setSameReferenceLinks(List<LabelledResource> uris);
 }

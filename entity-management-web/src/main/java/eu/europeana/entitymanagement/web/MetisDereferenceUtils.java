@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.web;
 
 import eu.europeana.api.commons.error.EuropeanaApiException;
-import eu.europeana.entitymanagement.exception.MetisDereferenceError;
+import eu.europeana.entitymanagement.exception.DatasourceDereferenceException;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import eu.europeana.entitymanagement.web.xml.model.metis.EnrichmentResultList;
 
@@ -26,7 +26,7 @@ public class MetisDereferenceUtils {
       try {
         derefResult = (EnrichmentResultList) unmarshaller.unmarshal(new StringReader(metisResponseBody));
       } catch (JAXBException | RuntimeException e) {
-        throw new MetisDereferenceError(
+        throw new DatasourceDereferenceException(
             String.format("Error while deserializing metis dereference response for uri '%s'", id), e);
       }
 
@@ -46,7 +46,7 @@ public class MetisDereferenceUtils {
             .filter(e -> id.equals(e.getAbout())).findFirst();
 
     if(entityOptional.isEmpty()){
-      throw new MetisDereferenceError(String.format("No match in Metis dereference response for uri '%s'", id));
+      throw new DatasourceDereferenceException(String.format("No match in Metis dereference response for uri '%s'", id));
     }
 
     return entityOptional.get();

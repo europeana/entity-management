@@ -1,16 +1,38 @@
 package eu.europeana.entitymanagement.web;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.europeana.entitymanagement.AbstractIntegrationTest;
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
-import eu.europeana.entitymanagement.definitions.model.*;
-import eu.europeana.entitymanagement.utils.EntityComparator;
-import eu.europeana.entitymanagement.utils.EntityObjectFactory;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.web.service.EntityRecordService;
-import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
-import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
-import eu.europeana.entitymanagement.web.xml.model.metis.EnrichmentResultList;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT1_REFERENTIAL_INTEGRITY_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT2_REFERENTIAL_INTEGRITY_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_DA_VINCI_REFERENTIAL_INTEGRITY_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_DA_VINCI_REFERENTIAL_INTEGRTITY_PERFORMED_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_DA_VINCI_XML;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_FLORENCE_REFERENTIAL_INTEGRTITY;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_REGISTER_DAVINCI_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_SALAI_REFERENTIAL_INTEGRTITY;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_BATHTUB_XML;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_CONSOLIDATED_BATHTUB;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_DATA_RECONCELIATION_XML;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_ENGINEERING_REFERENTIAL_INTEGRTITY;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_REGISTER_BATHTUB_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_AMBOISE_REFERENTIAL_INTEGRTITY;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_FLORENCE_REFERENTIAL_INTEGRTITY;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_FRANCE_REFERENTIAL_INTEGRTITY;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_REFERENTIAL_INTEGRITY_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_SFORZA_CASTLE_REFERENTIAL_INTEGRTITY;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_15_REFERENTIAL_INTEGRTITY;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_16_REFERENTIAL_INTEGRTITY;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import java.io.InputStream;
+import java.util.List;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,15 +41,29 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import java.io.InputStream;
-import java.util.List;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import eu.europeana.corelib.edm.model.schemaorg.SchemaOrgConstants;
+import eu.europeana.corelib.edm.model.schemaorg.Text;
+import eu.europeana.entitymanagement.AbstractIntegrationTest;
+import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.definitions.model.Agent;
+import eu.europeana.entitymanagement.definitions.model.Concept;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.model.Place;
+import eu.europeana.entitymanagement.schemaorg.model.SchemaOrgEntity;
+import eu.europeana.entitymanagement.serialization.EMTextSerializer;
+import eu.europeana.entitymanagement.utils.EntityComparator;
+import eu.europeana.entitymanagement.utils.EntityObjectFactory;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.web.service.EntityRecordService;
+import eu.europeana.entitymanagement.web.xml.model.XmlAgentImpl;
+import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
+import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
+import eu.europeana.entitymanagement.web.xml.model.metis.EnrichmentResultList;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -62,7 +98,7 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
 
 
         //aggregation is reused from consolidated version
-        Concept notConsolidated = EntityObjectFactory.createEntityObject(EntityTypes.Concept);
+        Concept notConsolidated = EntityObjectFactory.createProxyEntityObject(EntityTypes.Concept.getEntityType());
 //	    notConsolidated.setIsAggregatedBy(new Aggregation());
 //	    entityRecord.setEntity(notConsolidated);
 
@@ -72,7 +108,7 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
          * corresponsing proxy's entity objects
          */
         Assertions.assertNotNull(mergedEntity.getNote());
-        Assertions.assertNotNull(mergedEntity.getSameAs());
+        Assertions.assertNotNull(mergedEntity.getSameReferenceLinks());
         Assertions.assertTrue(mergedEntity.getBroader().size() > 1);
         Assertions.assertNotNull(mergedEntity.getPrefLabel());
     }
@@ -107,6 +143,35 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
         EntityComparator entityComparator = new EntityComparator();
         assertEquals(0, entityComparator.compare(concept_consolidated, mergedEntity));
 
+    }
+    
+    /*
+     * testing some properties of the schemaorg entity (e.g. the jobTitle of the Agent entity)
+     */
+    //@Test
+    public void schemaorgTestProperties() throws Exception {
+    	XmlAgentImpl xmlEntity = (XmlAgentImpl) getMetisResponse(AGENT_DA_VINCI_XML);
+        Agent agentExternalEntity = xmlEntity.toEntityModel();
+        Agent agentInternalEntity = objectMapper.readValue(loadFile(AGENT_REGISTER_DAVINCI_JSON), Agent.class);
+        Agent mergedAgentEntity = (Agent) entityRecordService.mergeEntities(agentInternalEntity, agentExternalEntity);
+    
+        SchemaOrgEntity<?> schemaOrgAgent = EntityObjectFactory.createSchemaOrgEntity(mergedAgentEntity);
+        
+        ObjectMapper mapperSchemaorg = objectMapper.copy();
+		SimpleModule module = new SimpleModule();
+		module.addSerializer(Text.class, new EMTextSerializer(Text.class));
+		mapperSchemaorg.registerModule(module);
+
+        JsonNode schemaOrgAgentJson = mapperSchemaorg.valueToTree(schemaOrgAgent.get());
+        
+        /*
+         * testing the jobTitle field of the schemaorg entity
+         */
+        if(agentExternalEntity.getProfessionOrOccupation()!=null && agentExternalEntity.getProfessionOrOccupation().size()>0) {
+	        JsonNode jobTitleNode = schemaOrgAgentJson.findValue(SchemaOrgConstants.PROPERTY_JOB_TITLE);
+	        assertTrue(jobTitleNode.isArray());
+	        assertTrue(agentExternalEntity.getProfessionOrOccupation().contains(jobTitleNode.get(0).asText()));
+        }
     }
 
     private XmlBaseEntityImpl<?> getMetisResponse(String metisResponse) throws JAXBException {

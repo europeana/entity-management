@@ -1,0 +1,44 @@
+{
+"_version_":1685721580748931072,
+"coref":["http://rdf.freebase.com/ns/m.02v_txp","http://www.wikidata.org/entity/Q6104322","http://wikidata.dbpedia.org/resource/Q6104322","http://dbpedia.org/resource/J.R._(musician)"],
+"derived_score":115273.0,
+"entity_uri":"http://data.europeana.eu/agent/base/100013",
+"europeana_doc_count":2,
+"europeana_term_hits":8,
+"id":"http://data.europeana.eu/agent/100013",
+"internal_type":"Agent",
+"isShownBy":
+{
+"id":"http://www.collectiedeventermusea.nl/wwwwopacx/wwwopac.ashx?command=getcontent&server=images&value=Historie%5C3589A.jpg",
+"source":"http://data.europeana.eu/item/2021659/3589_a",
+"thumbnail":"https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri=http%3A%2F%2Fwww.collectiedeventermusea.nl%2Fwwwwopacx%2Fwwwopac.ashx%3Fcommand%3Dgetcontent%26server%3Dimages%26value%3DHistorie%255C3589A.jpg&type=IMAGE"
+},
+"label":["J.R. (musician)","J.R.","Peebles, Courtney O."],
+"label":
+{
+"en":["J.R. (musician)","J.R.","Peebles, Courtney O."]
+},
+"sameAs":["http://rdf.freebase.com/ns/m.02v_txp","http://www.wikidata.org/entity/Q6104322","http://wikidata.dbpedia.org/resource/Q6104322","http://dbpedia.org/resource/J.R._(musician)"],
+"pagerank":0.53716767,
+"payload":"{\"id\": \"http://data.europeana.eu/agent/base/100013\", \"type\": \"Agent\", \"prefLabel\": {\"en\": \"J.R. (musician)\"}, \"altLabel\": {\"en\": [\"J.R.\", \"Peebles, Courtney O.\"]}, \"isShownBy\": {\"id\": \"http://www.collectiedeventermusea.nl/wwwwopacx/wwwopac.ashx?command=getcontent&server=images&value=Historie%5C3589A.jpg\", \"type\": \"WebResource\", \"source\": \"http://data.europeana.eu/item/2021659/3589_a\", \"thumbnail\": \"https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri=http%3A%2F%2Fwww.collectiedeventermusea.nl%2Fwwwwopacx%2Fwwwopac.ashx%3Fcommand%3Dgetcontent%26server%3Dimages%26value%3DHistorie%255C3589A.jpg&type=IMAGE\"}, \"dateOfBirth\": \"1979-03-04\", \"professionOrOccupation\": {\"en\": [\"Singer-songwriter, Producer\"]}}",
+"professionOrOccupation": [
+ "Singer-songwriter", 
+ "Producer"
+],
+"biographicalInformation":
+{
+"en":["Courtney O. Peebles, a.k.a. \"J.R.\", (born March 4, 1979) is a Christian singer and producer formerly signed to Cross Movement Records. J.R. is also half of the So Hot Productions team along with N.A.B. His debut album was Metamorphosis, released in 2005. He often appears on the hooks of songs by fellow labelmates, such as FLAME and Da' T.R.U.T.H.. He was expected to release his second album, Life By Stereo, in September 2007; however, it was pushed back to December. In 2009, J.R. left Cross Movement Records and went indie to work on a new sound."]
+},
+"dateOfBirth":["1979-03-04"],
+"dateOfDeath":["wrong-for-testing-1"],
+"placeOfBirth": ["http://valid-uri-for-testing-1","http://valid-uri-for-testing-2"],
+"altLabel":
+{
+"en":["J.R.","Peebles, Courtney O."]
+},
+"prefLabel": {},
+"suggest_filters":["Agent","in_europeana"],
+"text":["J.R. (musician)","Courtney O. Peebles, a.k.a. \"J.R.\", (born March 4, 1979) is a Christian singer and producer formerly signed to Cross Movement Records. J.R. is also half of the So Hot Productions team along with N.A.B. His debut album was Metamorphosis, released in 2005. He often appears on the hooks of songs by fellow labelmates, such as FLAME and Da' T.R.U.T.H.. He was expected to release his second album, Life By Stereo, in September 2007; however, it was pushed back to December. In 2009, J.R. left Cross Movement Records and went indie to work on a new sound.","J.R.","Peebles, Courtney O.","Singer-songwriter, Producer"],
+"timestamp":"2020-12-10T19:42:56.172Z",
+"type":"Agent"
+}

@@ -28,7 +28,6 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
-import eu.europeana.entitymanagement.web.service.MetisDereferenceService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -65,7 +64,7 @@ public class EMController extends BaseRest {
 	private final EntityManagementConfiguration emConfig;
 
 	private static final String EXTERNAL_ID_REMOVED_MSG = "Entity id '%s' already exists as '%s', which has been removed";
-	private static final String SAME_AS_NOT_EXISTS_MSG = "Url '%s' does not exist in entity owl:sameAs";
+	private static final String SAME_AS_NOT_EXISTS_MSG = "Url '%s' does not exist in entity owl:sameAs or skos:exactMatch";
 	public static final String INVALID_UPDATE_REQUEST_MSG = "Request must either specify a 'query' param or contain entity identifiers in body";
 
 	// profile used if none included in request
@@ -107,6 +106,7 @@ public class EMController extends BaseRest {
 	    String etag = computeEtag(timestamp, FormatTypes.jsonld.name(), getApiVersion());
 		checkIfMatchHeaderWithQuotes(etag, request);
 	    entityRecordService.disableEntityRecord(entityRecord);
+			solrService.deleteById(entityRecord.getEntityId());
 
 		return noContentResponse(request);
 	}
@@ -132,6 +132,8 @@ public class EMController extends BaseRest {
 		}
 		logger.info("Re-enabling entityId={}", entityRecord.getEntityId());
 		entityRecordService.enableEntityRecord(entityRecord);
+		solrService.storeEntity(createSolrEntity(entityRecord.getEntity()));
+
 		return createResponse(request, profile, type, null, identifier, FormatTypes.jsonld, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
 	}
 
@@ -325,7 +327,7 @@ public class EMController extends BaseRest {
 	
 			// check if id is already being used, if so return a 301
 			Optional<EntityRecord> existingEntity = entityRecordService
-					.findMatchingCoreference(creationRequestId);
+					.findMatchingCoreference(Collections.singletonList(creationRequestId));
 			ResponseEntity<String> response = checkExistingEntity(existingEntity,
 					creationRequestId);
 
@@ -363,9 +365,9 @@ public class EMController extends BaseRest {
 						datasourceResponse.getType(), creationRequestType));
 			}
 
-			if (datasourceResponse.getSameAs() != null) {
+			if (datasourceResponse.getSameReferenceLinks() != null) {
 				existingEntity = entityRecordService
-						.retrieveCoreferenceSameAs(datasourceResponse.getSameAs());
+						.findMatchingCoreference(datasourceResponse.getSameReferenceLinks());
 				response = checkExistingEntity(existingEntity, creationRequestId);
 				if (response != null) {
 					return response;
@@ -375,10 +377,6 @@ public class EMController extends BaseRest {
 			EntityRecord savedEntityRecord = entityRecordService
 					.createEntityFromRequest(entityCreationRequest, datasourceResponse);
 			logger.info("Created Entity record for externalId={}; entityId={}", creationRequestId, savedEntityRecord.getEntityId());
-
-			solrService.storeEntity(createSolrEntity(savedEntityRecord.getEntity()));
-			logger.info("Indexed entity to Solr: externalId={}; entityId={}", creationRequestId, savedEntityRecord.getEntityId());
-
 
 		return launchTaskAndRetrieveEntity(request, savedEntityRecord.getEntity().getType(),
 					getDatabaseIdentifier(savedEntityRecord.getEntityId()), savedEntityRecord,
@@ -400,7 +398,7 @@ public class EMController extends BaseRest {
 		}
 		EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
 
-		if(!entityRecord.getEntity().getSameAs().contains(url)){
+		if(!entityRecord.getEntity().getSameReferenceLinks().contains(url)){
 			throw new HttpBadRequestException(String.format(SAME_AS_NOT_EXISTS_MSG, url));
 		}
 

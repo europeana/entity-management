@@ -19,6 +19,9 @@ import org.springframework.util.CollectionUtils;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
 
+	@XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.XML_SAME_AS)
+	private List<LabelledResource> sameAs = new ArrayList<>();
+
 	@XmlElement(namespace = NAMESPACE_EDM, name = XML_ACRONYM)
 	private List<LabelledResource> acronym = new ArrayList<>();
 
@@ -152,5 +155,15 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
 	@Override
 	protected EntityTypes getTypeEnum() {
 	    return EntityTypes.Organization;
+	}
+
+	@Override
+	public List<LabelledResource> getSameReferenceLinks() {
+		return this.sameAs;
+	}
+
+	@Override
+	public void setSameReferenceLinks(List<LabelledResource> uris) {
+		this.sameAs = uris;
 	}
 }
