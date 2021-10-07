@@ -41,35 +41,24 @@
     <description>Parent module for the Entity Management API</description>
 
     <properties>
-    	<version.entitymanagementApi>0.0.1-SNAPSHOT</version.entitymanagementApi>
+    	  <version.entitymanagementApi>0.0.1-SNAPSHOT</version.entitymanagementApi>
         <java.version>11</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <api.commons.version>0.3.8</api.commons.version>
-        <corelib.version>2.11.0</corelib.version>
-        <junit.version>5.7.0</junit.version>
+        <corelib.version>2.14.1-SNAPSHOT</corelib.version>
         <jackson.version>2.11.4</jackson.version>
-        <version.commonsLang3>3.0</version.commonsLang3>
-        <!-- 
-        <version.annotationLd>1.1.6</version.annotationLd>
-         -->
-        <spring-boot.version>2.4.0</spring-boot.version>
+        <spring-boot.version>2.5.5</spring-boot.version>
         <swagger.version>3.0.0</swagger.version>
         <morphia.version>2.1.4</morphia.version>
-        <jna.version>5.7.0</jna.version>
         <mock-webserver.version>4.9.0</mock-webserver.version>
-        <testcontainers.version>1.15.2</testcontainers.version>
-        <version.corelib>2.14.1-SNAPSHOT</version.corelib>
-        <version.javax.annotation>1.3.2</version.javax.annotation>
-        <version.log4j>2.13.3</version.log4j>
-        <metis.version>4-SNAPSHOT</metis.version>
-        <version.javax.validation>2.0.1.Final</version.javax.validation>
-        <version.solrj>7.7.2</version.solrj>
+        <testcontainers.version>1.16.0</testcontainers.version>
+        <metis.version>4.1</metis.version>
+        <solrj.version>7.7.2</solrj.version>
         <apache.commons.validator.version>1.7</apache.commons.validator.version>
-		<version.com.zoho.crm.java-sdk>3.0.1</version.com.zoho.crm.java-sdk>
-		<version.jakarta>2.3.3</version.jakarta>
-		<version.jaxb>2.3.3</version.jaxb>
-		<version.saxon-he>10.5</version.saxon-he>
+		    <zoho-sdk.version>3.0.1</zoho-sdk.version>
+		    <jaxb.version>2.3.3</jaxb.version>
+		    <saxon-he.version>10.5</saxon-he.version>
     </properties>
 
     <dependencyManagement>
@@ -94,15 +83,6 @@
                 <version>${testcontainers.version}</version>
                 <scope>test</scope>
             </dependency>
-            <!-- Required to use Testcontainers on Apple Silicon
-             see: https://github.com/testcontainers/testcontainers-java/issues/3834
-             -->
-            <dependency>
-                <groupId>net.java.dev.jna</groupId>
-                <artifactId>jna</artifactId>
-                <version>${jna.version}</version>
-                <scope>test</scope>
-            </dependency>
 
             <dependency>
                 <groupId>com.squareup.okhttp3</groupId>
@@ -121,54 +101,6 @@
     </dependencyManagement>
     
       <build>
-    <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
-      <plugins>
-        <plugin>
-          <artifactId>maven-clean-plugin</artifactId>
-          <version>3.1.0</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-site-plugin</artifactId>
-          <version>3.7.1</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-project-info-reports-plugin</artifactId>
-          <version>3.0.0</version>
-        </plugin>
-        <!-- see http://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging -->
-        <plugin>
-          <artifactId>maven-resources-plugin</artifactId>
-          <version>3.0.2</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <configuration>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
-			</configuration>
-        </plugin>
-        <plugin>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.22.1</version>
-        </plugin>
-          <plugin>
-              <artifactId>maven-failsafe-plugin</artifactId>
-              <version>3.0.0-M5</version>
-          </plugin>
-        <plugin>
-          <artifactId>maven-jar-plugin</artifactId>
-          <version>3.0.2</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-install-plugin</artifactId>
-          <version>2.5.2</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-deploy-plugin</artifactId>
-          <version>2.8.2</version>
-        </plugin>
-      </plugins>
-    </pluginManagement>
           <!--  allow Maven to manipulate resource files as a part of the build process.
                  build.properties by default is expanded by spring-boot-maven-plugin
           -->
@@ -182,6 +114,7 @@
               <plugin>
                   <groupId>org.apache.maven.plugins</groupId>
                   <artifactId>maven-failsafe-plugin</artifactId>
+                  <version>3.0.0-M5</version>
                   <executions>
                       <execution>
                           <goals>

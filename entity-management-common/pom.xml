@@ -15,9 +15,6 @@
    <dependency>
 		<groupId>org.springframework</groupId>
 		<artifactId>spring-context</artifactId>
-		<!--  
-		<version>${version.spring}</version>
-		-->
 	</dependency>
 	<dependency>
 	    <groupId>com.fasterxml.jackson.dataformat</groupId>
@@ -26,17 +23,7 @@
 	<dependency>
     	<groupId>org.apache.logging.log4j</groupId>
     	<artifactId>log4j-api</artifactId>
-    	<!-- 
-    	<version>${version.log4j}</version>
-    	 -->
-    </dependency> 
-	<!-- 	 
-	
-	<dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-webflux</artifactId>
     </dependency>
-     -->
     <dependency>
 		<groupId>eu.europeana.api.commons</groupId>
 		<artifactId>commons-definitions</artifactId>
@@ -51,9 +38,6 @@
 	<dependency>
     	<groupId>javax.validation</groupId>
     	<artifactId>validation-api</artifactId>
-    	<!-- 
-    	<version>${version.javax.validation}</version>
-    	 -->
 	</dependency>
     
   </dependencies>

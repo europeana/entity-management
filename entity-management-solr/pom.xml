@@ -7,7 +7,6 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
 
-  <groupId>eu.europeana.api</groupId>
   <artifactId>entity-management-solr</artifactId>
   <version>0.0.1-SNAPSHOT</version>
 
@@ -25,7 +24,7 @@
 	 <dependency>
 	  	<groupId>org.apache.solr</groupId>
 	  	<artifactId>solr-solrj</artifactId>	  
-	  	<version>${version.solrj}</version>	
+	  	<version>${solrj.version}</version>
 	</dependency>
 	
 		<dependency>
@@ -33,13 +32,5 @@
 			<artifactId>commons-error</artifactId>
 			<version>${api.commons.version}</version>
 		</dependency>
-	
-	<!-- https://mvnrepository.com/artifact/org.json/json -->
-	
   </dependencies>
-
-  <build>
-   
-  </build>
-
 </project>
