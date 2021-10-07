@@ -71,14 +71,12 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
 	if(entity == null) {
 	    entity = EntityObjectFactory.createProxyEntityObject(getTypeEnum().getEntityType());
 	}
-	entity.setType(getTypeEnum().getEntityType());
-
 	entity.setEntityId(getAbout());
 	entity.setPrefLabel(RdfXmlUtils.toLanguageMap(getPrefLabel()));
 	entity.setAltLabel(RdfXmlUtils.toLanguageMapList(getAltLabel()));
 	// sets sameAs or exactMatch values (for concepts)
 	entity.setSameReferenceLinks(RdfXmlUtils.toStringList(getSameReferenceLinks()));
-	if(depiction != null) {
+	if(depiction != null && !depiction.isEmpty()) {
 	    entity.setDepiction(XmlWebResourceImpl.toWebResource(depiction));
 	}
 	return entity;

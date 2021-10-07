@@ -1,22 +1,6 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_DC;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_EDM;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_FOAF;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_VCARD;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ACRONYM;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ADDRESS;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_COUNTRY;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_DESCRIPTION;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_EUROPEANA_ROLE;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_GEOGRAPHIC_LEVEL;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_HOMEPAGE;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IDENTIFIER;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_LOGO;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_MBOX;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ORGANIZATION;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ORGANIZATION_DOMAIN;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PHONE;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +13,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import org.springframework.util.CollectionUtils;
 
 @XmlRootElement(namespace = NAMESPACE_EDM, name = XML_ORGANIZATION)
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -67,8 +52,8 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
 	@XmlElement(namespace = NAMESPACE_FOAF, name =  XML_MBOX)
 	private List<String> mbox;
 
-	@XmlElement(namespace = NAMESPACE_VCARD, name =  XML_ADDRESS)
-	private String hasAddress;
+	@XmlElement(namespace = NAMESPACE_VCARD, name =  XML_HAS_ADDRESS)
+	private XmlAddresses hasAddress;
 
 	@XmlElement(namespace = NAMESPACE_DC, name =  XML_IDENTIFIER)
 	private List<String> identifier;
@@ -88,7 +73,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
 	    	}
                 this.phone = organization.getPhone();
 	    	this.mbox = organization.getMbox();
-	    	this.hasAddress = organization.getHasAddress();
+	    	this.hasAddress = new XmlAddresses(List.of(new XmlAddressImpl(organization.getAddress())));
 	    	this.identifier = organization.getIdentifier();
 	}
 	
@@ -106,7 +91,9 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
             }
             entity.setPhone(getPhone());
             entity.setMbox(getMbox());
-            entity.setHasAddress(getHasAddress());
+            if(hasAddress != null && !CollectionUtils.isEmpty(hasAddress.getVcardAddressesList())){
+							entity.setAddress(hasAddress.getVcardAddressesList().get(0).toAddress());
+						}
             entity.setIdentifier(getIdentifier());
             return entity;
         }
@@ -161,7 +148,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
 	    	return identifier;
 	}
 
-	public String getHasAddress() {
+	public XmlAddresses getHasAddress() {
           return hasAddress;
 	}
 	

@@ -6,23 +6,9 @@ import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_VAL
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_VALIDATE_FIELDS_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
 
-import java.io.IOException;
-import java.util.Set;
-
-import javax.annotation.Resource;
-import javax.validation.ConstraintViolation;
-import javax.validation.ValidatorFactory;
-
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.context.SpringBootTest;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.SerializationConfig;
@@ -33,6 +19,16 @@ import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatorGroup;
 import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorGroup;
+import java.io.IOException;
+import java.util.Set;
+import javax.annotation.Resource;
+import javax.validation.ConstraintViolation;
+import javax.validation.ValidatorFactory;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest(classes = {ValidatorConfig.class, EntityManagementConfiguration.class,
     SerializationConfig.class})
@@ -57,7 +53,7 @@ public class EntityFieldsValidatorTest {
             System.out.println(violation.getMessageTemplate());
         }   
         //TODO: remove constraine violation: "The entity fields values are valid."
-        Assertions.assertEquals(18, violations.size());
+        Assertions.assertEquals(17, violations.size());
     }
 
     @Test
@@ -71,8 +67,7 @@ public class EntityFieldsValidatorTest {
         for (ConstraintViolation<Entity> violation : violations) {
             System.out.println(violation.getMessageTemplate());
         }   
-        //TODO: remove constraine violation: "The entity fields values are valid."
-        Assertions.assertEquals(3, violations.size());
+      Assertions.assertEquals(0, violations.size());
     }
     
     @Test
@@ -101,8 +96,7 @@ public class EntityFieldsValidatorTest {
         for (ConstraintViolation<Entity> violation : violations) {
             System.out.println(violation.getMessageTemplate());
         }   
-        //TODO: remove constraine violation: "The entity fields values are valid."
-        Assertions.assertEquals(2, violations.size());      
+        Assertions.assertEquals(0, violations.size());
     }
 
   @Test
@@ -118,6 +112,6 @@ public class EntityFieldsValidatorTest {
     }
 
     // file contains same content as AGENT_VALIDATE_FIELDS_JSON, except empty prefLabel
-    Assertions.assertEquals(3, violations.size());
+    Assertions.assertEquals(2, violations.size());
   }
 }

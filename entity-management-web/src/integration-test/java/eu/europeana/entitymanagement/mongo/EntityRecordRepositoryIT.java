@@ -39,7 +39,6 @@ class EntityRecordRepositoryIT extends AbstractIntegrationTest {
 
         Timespan entity = new Timespan();
         entity.setEntityId(entityId);
-        entity.setType("Timespan");
         entity.setBeginString("0001-01-01");
         entity.setEndString("0100-12-31");
         Map<String, String> prefLabelTest = new HashMap<String, String>();

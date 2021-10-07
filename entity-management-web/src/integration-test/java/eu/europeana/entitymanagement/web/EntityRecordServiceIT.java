@@ -135,7 +135,6 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
          */
         Concept concept_consolidated = objectMapper.readValue(loadFile(CONCEPT_CONSOLIDATED_BATHTUB), Concept.class);
         //TODO: temporary fix untill the merge entities is stable see EntityRecordService.UPDARTE_FIELDS_TO_IGNORE
-        concept_consolidated.setType(concept.getType());
         //reuse the isAggregatedBy field
 //	    concept_consolidated.setIsAggregatedBy(entityRecord.getEntity().getIsAggregatedBy());
 
