@@ -4,10 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.Timespan;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import org.junit.jupiter.api.Assertions;
@@ -102,35 +100,6 @@ public class EntityUpdateIT extends BaseWebControllerTest {
                 .content(loadFile(CONCEPT_UPDATE_BATHTUB_JSON))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isAccepted());
-    }
-    
-    @Test
-    void updateTimespanShouldBeSuccessful() throws Exception {
-        String europeanaMetadata = loadFile(TIMESPAN_REGISTER_1ST_CENTURY_JSON);
-        String metisResponse = loadFile(TIMESPAN_1ST_CENTURY_XML);
-
-        EntityRecord entityRecord = createEntity(europeanaMetadata, metisResponse, TIMESPAN_1ST_CENTURY_URI);
-
-        String requestPath = getEntityRequestPath(entityRecord.getEntityId());
-
-        mockMvc.perform(MockMvcRequestBuilders.put(BASE_SERVICE_URL + "/" + requestPath)
-                .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
-                .content(europeanaMetadata)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isAccepted());
-        
-        Optional<EntityRecord> entityRecordUpdated = retrieveEntity(entityRecord.getEntityId());
-        Assertions.assertTrue(entityRecordUpdated.isPresent());
-        Timespan timespan = (Timespan)(entityRecordUpdated.get().getEntity());
-        Assertions.assertNotNull(timespan.getPrefLabel());
-        Assertions.assertFalse(timespan.getPrefLabel().isEmpty());
-        Assertions.assertNotNull(timespan.getAltLabel());
-        Assertions.assertNotNull(timespan.getBeginString());
-        Assertions.assertNotNull(timespan.getEndString());
-        Assertions.assertFalse(timespan.getAltLabel().isEmpty());
-
-//        Assertions.assertNotNull(timespan.getIsPartOfArray());
-//        Assertions.assertNotNull(timespan.getIsNextInSequence());
     }
 
     @Test

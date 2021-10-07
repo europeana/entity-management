@@ -30,6 +30,7 @@ public class MetisDereferenceUtils {
             String.format("Error while deserializing metis dereference response for uri '%s'", id), e);
       }
 
+
     if (derefResult == null || derefResult.getEnrichmentBaseResultWrapperList().isEmpty()
         || derefResult.getEnrichmentBaseResultWrapperList().get(0).getEnrichmentBaseList().isEmpty()) {
       // Metis returns an empty XML response if de-referencing is unsuccessful,

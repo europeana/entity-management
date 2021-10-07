@@ -18,12 +18,7 @@ public class BaseMvcTestUtils {
     public static final String AGENT_JSON = "/content/agent.json";
     public static final String ORGANIZATION_JSON = "/content/organization.json";
     public static final String PLACE_JSON = "/content/place.json";
-    @Deprecated
-    /**
-     * @deprecated incorrect data representation use TIMESPAN_REGISTER_1ST_CENTURY_JSON
-     */
     public static final String TIMESPAN_JSON = "/content/timespan.json"; 
-    public static final String TIMESPAN_REGISTER_1ST_CENTURY_JSON = "/content/timespan_register_1st_century.json";
     
     public static final String CONCEPT_REGISTER_METIS_ERROR_JSON = "/content/concept_register_metis_error.json";
     public static final String CONCEPT_REGISTER_ERROR_CHECK_1_JSON = "/content/concept_register_error_check_1.json";
@@ -41,6 +36,7 @@ public class BaseMvcTestUtils {
     public static final String ORGANIZATION_REGISTER_BNF_JSON = "/content/organization_register_bnf.json";
     public static final String ORGANIZATION_REGISTER_BNF_ZOHO_JSON = "/content/organization_register_zoho_bnf.json";
     public static final String PLACE_REGISTER_PARIS_JSON = "/content/place_register_paris.json";
+    public static final String TIMESPAN_REGISTER_1ST_CENTURY_JSON = "/content/timespan_register_1st_century.json";
     
     public static final String CONCEPT_UPDATE_BATHTUB_JSON = "/content/concept_update_bathtub.json";
     public static final String TIMESPAN_UPDATE_JSON = "/content/timespan_update.json";
