@@ -95,10 +95,8 @@ class MetisResponseDeserializerTest {
 		assertEquals("http://www.wikidata.org/entity/Q8106", timespan.getAbout());
 
 		assertEquals(1, timespan.getIsPartOf().size());
-		assertEquals("0001-01-01T00:00:00Z", timespan.getBegin());
-		//assertEquals("0100-12-31T00:00:00Z", timespan.getEnd());
-		//TODO: fix by replacing with the line above when the Metis issue is fixed
-		assertEquals("0100-12-30T00:00:00Z", timespan.getEnd());
+		assertEquals("0001-01-01", timespan.getBegin());
+		assertEquals("0100-12-31", timespan.getEnd());
 
 		//TODO: assert other properties
 	}
