@@ -30,7 +30,7 @@ public class EnrichmentResultBaseWrapper {
             @XmlElement(name = "Agent", namespace = "http://www.europeana.eu/schemas/edm/", type = XmlAgentImpl.class),
             @XmlElement(name = "Place", namespace = "http://www.europeana.eu/schemas/edm/", type = XmlPlaceImpl.class),
             @XmlElement(name = "Organization", namespace = "http://www.europeana.eu/schemas/edm/", type = XmlOrganizationImpl.class),
-            @XmlElement(name = "Timespan", namespace = "http://www.europeana.eu/schemas/edm/", type = XmlTimespanImpl.class)})
+            @XmlElement(name = "TimeSpan", namespace = "http://www.europeana.eu/schemas/edm/", type = XmlTimespanImpl.class)})
     private List<XmlBaseEntityImpl<?>> xmlEntities = new ArrayList<>();
 
 
