@@ -4,17 +4,15 @@ import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 
 public interface UpdateTask {
 
-    String[] getDataSources();
+  String[] getDataSources();
 
-    String getEntityId();
+  String getEntityId();
 
-    void setRecord(EntityRecord record);
+  void setRecord(EntityRecord record);
 
-    EntityRecord getRecord();
+  EntityRecord getRecord();
 
-    void setStatus(String status);
+  void setStatus(String status);
 
-    String getStatus();
-
-    
+  String getStatus();
 }

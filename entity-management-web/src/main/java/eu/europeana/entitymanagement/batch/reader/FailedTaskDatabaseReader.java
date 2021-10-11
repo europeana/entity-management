@@ -11,20 +11,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.lang.NonNull;
 
-/**
- * Reads Failures from the FailedTasks collection, then retrieves the matching EntityRecords
- */
+/** Reads Failures from the FailedTasks collection, then retrieves the matching EntityRecords */
 public class FailedTaskDatabaseReader extends BaseDatabaseReader<EntityRecord> {
 
-  private static final Logger logger = LogManager
-      .getLogger(FailedTaskDatabaseReader.class);
+  private static final Logger logger = LogManager.getLogger(FailedTaskDatabaseReader.class);
   private final FailedTaskService failureService;
 
   private final Filter[] failureQueryFilter;
 
   public FailedTaskDatabaseReader(
-      FailedTaskService failureService, int pageSize,
-      Filter... failureQueryFilter) {
+      FailedTaskService failureService, int pageSize, Filter... failureQueryFilter) {
     super(pageSize);
     this.failureService = failureService;
     this.failureQueryFilter = failureQueryFilter;
@@ -35,12 +31,16 @@ public class FailedTaskDatabaseReader extends BaseDatabaseReader<EntityRecord> {
   @SuppressWarnings("unchecked")
   protected Iterator<EntityRecord> doPageRead() {
     int start = page * pageSize;
-    List<? extends EntityRecord> failedRecords = failureService
-        .getEntityRecordsForFailures(start, pageSize, failureQueryFilter);
+    List<? extends EntityRecord> failedRecords =
+        failureService.getEntityRecordsForFailures(start, pageSize, failureQueryFilter);
 
-    if(logger.isDebugEnabled()) {
-      logger.debug("Retrieved {} failed EntityRecords from database. skip={}, limit={}, entityIds={}", failedRecords.size(), start,
-              pageSize, Arrays.toString(BatchUtils.getEntityIds(failedRecords)));
+    if (logger.isDebugEnabled()) {
+      logger.debug(
+          "Retrieved {} failed EntityRecords from database. skip={}, limit={}, entityIds={}",
+          failedRecords.size(),
+          start,
+          pageSize,
+          Arrays.toString(BatchUtils.getEntityIds(failedRecords)));
     }
     return (Iterator<EntityRecord>) failedRecords.iterator();
   }

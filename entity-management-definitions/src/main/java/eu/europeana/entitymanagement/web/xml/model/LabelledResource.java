@@ -1,6 +1,5 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
-
 import java.util.Objects;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlValue;
@@ -12,7 +11,7 @@ public class LabelledResource {
 
   public LabelledResource(String lang, String value) {
     this.lang = lang;
-    //fix for #EA-2325, missing language attributions changed to ""
+    // fix for #EA-2325, missing language attributions changed to ""
     this.lang = Objects.requireNonNullElse(lang, "");
     this.value = value;
   }
@@ -21,8 +20,7 @@ public class LabelledResource {
     this.resource = resource;
   }
 
-  public LabelledResource() {
-  }
+  public LabelledResource() {}
 
   @XmlAttribute(name = XmlConstants.RESOURCE, namespace = XmlConstants.NAMESPACE_RDF)
   public String getResource() {
@@ -42,13 +40,13 @@ public class LabelledResource {
     this.value = value;
   }
 
-  @XmlAttribute(name= XmlConstants.LANG, namespace=javax.xml.XMLConstants.XML_NS_URI)
+  @XmlAttribute(name = XmlConstants.LANG, namespace = javax.xml.XMLConstants.XML_NS_URI)
   public String getLang() {
-      if (lang == null && getValue() != null) {
-	  // fix for #EA-2325, missing language attributions changed to ""
-	  return "";
-      }
-      return lang;
+    if (lang == null && getValue() != null) {
+      // fix for #EA-2325, missing language attributions changed to ""
+      return "";
+    }
+    return lang;
   }
 
   public void setLang(String lang) {

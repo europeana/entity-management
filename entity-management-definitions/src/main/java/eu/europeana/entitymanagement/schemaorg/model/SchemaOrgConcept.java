@@ -6,15 +6,15 @@ import eu.europeana.entitymanagement.utils.SchemaOrgUtils;
 
 public class SchemaOrgConcept extends SchemaOrgEntity<Concept> {
 
-    private final eu.europeana.corelib.edm.model.schemaorg.Concept schemaOrgConcept;
+  private final eu.europeana.corelib.edm.model.schemaorg.Concept schemaOrgConcept;
 
-    public SchemaOrgConcept(Concept concept) {
-    	schemaOrgConcept = new eu.europeana.corelib.edm.model.schemaorg.Concept();
-    	SchemaOrgUtils.processEntity(concept, schemaOrgConcept);
-    }
+  public SchemaOrgConcept(Concept concept) {
+    schemaOrgConcept = new eu.europeana.corelib.edm.model.schemaorg.Concept();
+    SchemaOrgUtils.processEntity(concept, schemaOrgConcept);
+  }
 
-    @Override
-    public ContextualEntity get() {
-        return schemaOrgConcept;
-    }
+  @Override
+  public ContextualEntity get() {
+    return schemaOrgConcept;
+  }
 }

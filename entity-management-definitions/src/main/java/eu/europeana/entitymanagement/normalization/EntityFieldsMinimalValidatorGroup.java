@@ -1,5 +1,3 @@
 package eu.europeana.entitymanagement.normalization;
 
-public interface EntityFieldsMinimalValidatorGroup {
-   
-}
+public interface EntityFieldsMinimalValidatorGroup {}

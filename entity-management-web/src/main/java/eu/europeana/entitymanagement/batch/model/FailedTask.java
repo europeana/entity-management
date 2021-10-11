@@ -1,6 +1,5 @@
 package eu.europeana.entitymanagement.batch.model;
 
-
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
 import dev.morphia.annotations.Indexed;
@@ -10,14 +9,12 @@ import org.bson.types.ObjectId;
 @Entity("FailedTasks")
 public class FailedTask {
 
-  @Id
-  private ObjectId dbId;
+  @Id private ObjectId dbId;
 
-  @Indexed
-  private String entityId;
+  @Indexed private String entityId;
 
   // default values saved if they're not overwritten
-  private String errorMessage= "No error message";
+  private String errorMessage = "No error message";
   private String stackTrace = "No stacktrace";
 
   /* Created is not explicitly set on instantiation.
@@ -30,29 +27,24 @@ public class FailedTask {
     // default constructor
   }
 
-  public FailedTask(String entityId, Instant modified, String errorMessage,
-      String stackTrace) {
+  public FailedTask(String entityId, Instant modified, String errorMessage, String stackTrace) {
     this.entityId = entityId;
     this.modified = modified;
     this.errorMessage = errorMessage;
     this.stackTrace = stackTrace;
   }
 
-
   public String getEntityId() {
     return entityId;
   }
-
 
   public Instant getCreated() {
     return created;
   }
 
-
   public String getErrorMessage() {
     return errorMessage;
   }
-
 
   public String getStackTrace() {
     return stackTrace;
@@ -62,7 +54,6 @@ public class FailedTask {
     return modified;
   }
 
-
   public static class Builder {
 
     private final String entityId;
@@ -71,10 +62,9 @@ public class FailedTask {
     private String errorMessage;
     private String stackTrace;
 
-    public Builder(String entityId){
+    public Builder(String entityId) {
       this.entityId = entityId;
     }
-
 
     public Builder modified(Instant modified) {
       this.modified = modified;
@@ -98,13 +88,22 @@ public class FailedTask {
 
   @Override
   public String toString() {
-    return "FailedTask{" +
-        "dbId=" + dbId +
-        ", entityId='" + entityId + '\'' +
-        ", created=" + created +
-        ", modified=" + modified +
-        ", errorMessage='" + errorMessage + '\'' +
-        ", stackTrace='" + stackTrace + '\'' +
-        '}';
+    return "FailedTask{"
+        + "dbId="
+        + dbId
+        + ", entityId='"
+        + entityId
+        + '\''
+        + ", created="
+        + created
+        + ", modified="
+        + modified
+        + ", errorMessage='"
+        + errorMessage
+        + '\''
+        + ", stackTrace='"
+        + stackTrace
+        + '\''
+        + '}';
   }
 }
