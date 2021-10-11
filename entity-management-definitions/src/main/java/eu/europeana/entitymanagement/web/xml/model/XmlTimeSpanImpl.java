@@ -3,7 +3,7 @@ package eu.europeana.entitymanagement.web.xml.model;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.*;
 
 import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
-import eu.europeana.entitymanagement.definitions.model.Timespan;
+import eu.europeana.entitymanagement.definitions.model.TimeSpan;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(namespace = NAMESPACE_EDM, name = XML_TIMESPAN)
 @XmlAccessorType(XmlAccessType.FIELD)
-public class XmlTimespanImpl extends XmlBaseEntityImpl<Timespan> {
+public class XmlTimeSpanImpl extends XmlBaseEntityImpl<TimeSpan> {
 
   @XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.XML_SAME_AS)
   private List<LabelledResource> sameAs = new ArrayList<>();
@@ -40,7 +40,7 @@ public class XmlTimespanImpl extends XmlBaseEntityImpl<Timespan> {
   @XmlElement(namespace = NAMESPACE_EDM, name = XML_IS_NEXT_IN_SEQUENCE)
   private List<LabelledResource> isNextInSequence;
 
-  public XmlTimespanImpl(Timespan timespan) {
+  public XmlTimeSpanImpl(TimeSpan timespan) {
     super(timespan);
     this.hiddenLabel = RdfXmlUtils.convertToXmlMultilingualString(timespan.getHiddenLabel());
     this.begin = timespan.getBeginString();
@@ -51,11 +51,11 @@ public class XmlTimespanImpl extends XmlBaseEntityImpl<Timespan> {
     this.isNextInSequence = RdfXmlUtils.convertToRdfResource(timespan.getIsNextInSequence());
   }
 
-  public XmlTimespanImpl() {
+  public XmlTimeSpanImpl() {
     // default constructor
   }
 
-  public Timespan toEntityModel() throws EntityCreationException {
+  public TimeSpan toEntityModel() throws EntityCreationException {
     super.toEntityModel();
     entity.setHiddenLabel(RdfXmlUtils.toLanguageMapList(hiddenLabel));
     entity.setBeginString(begin);
@@ -97,7 +97,7 @@ public class XmlTimespanImpl extends XmlBaseEntityImpl<Timespan> {
 
   @Override
   protected EntityTypes getTypeEnum() {
-    return EntityTypes.Timespan;
+    return EntityTypes.TimeSpan;
   }
 
   @Override

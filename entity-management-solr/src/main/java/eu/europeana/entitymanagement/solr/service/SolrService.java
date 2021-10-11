@@ -12,14 +12,14 @@ import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.Organization;
-import eu.europeana.entitymanagement.definitions.model.Timespan;
+import eu.europeana.entitymanagement.definitions.model.TimeSpan;
 import eu.europeana.entitymanagement.solr.SolrEntitySuggesterMixins;
 import eu.europeana.entitymanagement.solr.SolrSearchCursorIterator;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.solr.model.SolrAgent;
 import eu.europeana.entitymanagement.solr.model.SolrEntity;
 import eu.europeana.entitymanagement.solr.model.SolrOrganization;
-import eu.europeana.entitymanagement.solr.model.SolrTimespan;
+import eu.europeana.entitymanagement.solr.model.SolrTimeSpan;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import java.io.IOException;
 import java.util.Arrays;
@@ -73,7 +73,7 @@ public class SolrService implements InitializingBean {
     payloadMapper.addMixIn(Agent.class, SolrEntitySuggesterMixins.AgentSuggesterMixin.class);
     payloadMapper.addMixIn(
         Organization.class, SolrEntitySuggesterMixins.OrganizationSuggesterMixin.class);
-    payloadMapper.addMixIn(Timespan.class, SolrEntitySuggesterMixins.TimespanSuggesterMixin.class);
+    payloadMapper.addMixIn(TimeSpan.class, SolrEntitySuggesterMixins.TimespanSuggesterMixin.class);
     payloadMapper.setFilterProvider(solrEntityFilter);
   }
 
@@ -248,7 +248,7 @@ public class SolrService implements InitializingBean {
      * TODO: add the isShownBy.source and isShownBy.thumbnail fields
      */
 
-    if (solrEntity instanceof SolrAgent || solrEntity instanceof SolrTimespan) {
+    if (solrEntity instanceof SolrAgent || solrEntity instanceof SolrTimeSpan) {
       return payloadMapper.writeValueAsString(solrEntity.getEntity());
     } else if (solrEntity instanceof SolrOrganization) {
       /*

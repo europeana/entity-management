@@ -7,7 +7,7 @@ public enum EntityTypes implements EntityKeyword {
   Concept("Concept", "https://www.w3.org/2009/08/skos-reference/skos.html#Concept"),
   Agent("Agent", "http://www.europeana.eu/schemas/edm/Agent"),
   Place("Place", "http://www.europeana.eu/schemas/edm/Place"),
-  Timespan("Timespan", "http://www.europeana.eu/schemas/edm/Timespan");
+  TimeSpan("TimeSpan", "http://www.europeana.eu/schemas/edm/TimeSpan");
 
   private String entityType;
   private String httpUri;

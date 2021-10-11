@@ -22,7 +22,7 @@ public class EnrichmentCountQueryService {
           EntityTypes.Agent.getEntityType(), "edm_agent",
           EntityTypes.Concept.getEntityType(), "skos_concept",
           EntityTypes.Place.getEntityType(), "edm_place",
-          EntityTypes.Timespan.getEntityType(), "edm_timespan",
+          EntityTypes.TimeSpan.getEntityType(), "edm_timespan",
           EntityTypes.Organization.getEntityType(), "foaf_organization");
 
   private static final Logger logger = LogManager.getLogger(EnrichmentCountQueryService.class);

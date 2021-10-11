@@ -3,33 +3,33 @@ package eu.europeana.entitymanagement.solr.model;
 import static eu.europeana.entitymanagement.solr.SolrUtils.SOLR_TIMESPAN_SUGGESTER_FILTER;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
-import eu.europeana.entitymanagement.definitions.model.Timespan;
+import eu.europeana.entitymanagement.definitions.model.TimeSpan;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
-import eu.europeana.entitymanagement.vocabulary.TimespanSolrFields;
+import eu.europeana.entitymanagement.vocabulary.TimeSpanSolrFields;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.solr.client.solrj.beans.Field;
 
 @JsonFilter(SOLR_TIMESPAN_SUGGESTER_FILTER)
-public class SolrTimespan extends SolrEntity<Timespan> {
+public class SolrTimeSpan extends SolrEntity<TimeSpan> {
 
   @Field(EntitySolrFields.SAME_AS)
   private List<String> sameAs;
 
-  @Field(TimespanSolrFields.IS_NEXT_IN_SEQUENCE)
+  @Field(TimeSpanSolrFields.IS_NEXT_IN_SEQUENCE)
   private List<String> isNextInSequence;
 
-  @Field(TimespanSolrFields.BEGIN)
+  @Field(TimeSpanSolrFields.BEGIN)
   private String begin;
 
-  @Field(TimespanSolrFields.END)
+  @Field(TimeSpanSolrFields.END)
   private String end;
 
-  public SolrTimespan() {
+  public SolrTimeSpan() {
     super();
   }
 
-  public SolrTimespan(Timespan timespan) {
+  public SolrTimeSpan(TimeSpan timespan) {
     super(timespan);
 
     this.isNextInSequence = timespan.getIsNextInSequence();

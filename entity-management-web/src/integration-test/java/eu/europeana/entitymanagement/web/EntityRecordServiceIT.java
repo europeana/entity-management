@@ -55,6 +55,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -226,7 +227,8 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest {
             .contains("http://data.europeana.eu/Leonardo_da_Vinci"));
   }
 
-  //    @Test
+  @Disabled("Disabled as this test is brittle")
+  @Test
   public void performReferentialIntegrity_DaVinci() throws Exception {
     // TODO: implement the following
     // 1. create record for agent-davinci-referential-integrity.json

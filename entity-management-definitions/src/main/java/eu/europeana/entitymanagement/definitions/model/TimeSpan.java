@@ -44,9 +44,9 @@ import java.util.Map;
   IS_NEXT_IN_SEQUENCE,
   SAME_AS
 })
-public class Timespan extends Entity {
+public class TimeSpan extends Entity {
 
-  public Timespan(Timespan copy) {
+  public TimeSpan(TimeSpan copy) {
     super(copy);
     if (copy.getIsNextInSequence() != null)
       this.isNextInSequence = new ArrayList<>(copy.getIsNextInSequence());
@@ -54,7 +54,7 @@ public class Timespan extends Entity {
     this.end = copy.getEndString();
   }
 
-  public Timespan() {
+  public TimeSpan() {
     super();
     // TODO Auto-generated constructor stub
   }
@@ -145,7 +145,7 @@ public class Timespan extends Entity {
   }
 
   public String getType() {
-    return EntityTypes.Timespan.getEntityType();
+    return EntityTypes.TimeSpan.getEntityType();
   }
 
   public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {

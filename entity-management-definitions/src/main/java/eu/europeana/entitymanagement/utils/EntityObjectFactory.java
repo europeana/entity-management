@@ -8,7 +8,7 @@ import eu.europeana.entitymanagement.definitions.model.ConsolidatedAgent;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.definitions.model.Place;
-import eu.europeana.entitymanagement.definitions.model.Timespan;
+import eu.europeana.entitymanagement.definitions.model.TimeSpan;
 import eu.europeana.entitymanagement.schemaorg.model.SchemaOrgAgent;
 import eu.europeana.entitymanagement.schemaorg.model.SchemaOrgConcept;
 import eu.europeana.entitymanagement.schemaorg.model.SchemaOrgEntity;
@@ -21,7 +21,7 @@ import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlOrganizationImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlPlaceImpl;
-import eu.europeana.entitymanagement.web.xml.model.XmlTimespanImpl;
+import eu.europeana.entitymanagement.web.xml.model.XmlTimeSpanImpl;
 import java.util.Map;
 
 /**
@@ -37,7 +37,7 @@ public class EntityObjectFactory {
           EntityTypes.Concept, Concept.class,
           EntityTypes.Organization, Organization.class,
           EntityTypes.Place, Place.class,
-          EntityTypes.Timespan, Timespan.class);
+          EntityTypes.TimeSpan, TimeSpan.class);
 
   private static final Map<EntityTypes, Class<? extends Entity>> proxyEntityTypesClassMap =
       Map.of(
@@ -45,7 +45,7 @@ public class EntityObjectFactory {
           EntityTypes.Concept, Concept.class,
           EntityTypes.Organization, Organization.class,
           EntityTypes.Place, Place.class,
-          EntityTypes.Timespan, Timespan.class);
+          EntityTypes.TimeSpan, TimeSpan.class);
 
   private static final Map<EntityTypes, Class<? extends XmlBaseEntityImpl<?>>> xmlEntityMap =
       Map.of(
@@ -53,7 +53,7 @@ public class EntityObjectFactory {
           EntityTypes.Concept, XmlConceptImpl.class,
           EntityTypes.Organization, XmlOrganizationImpl.class,
           EntityTypes.Place, XmlPlaceImpl.class,
-          EntityTypes.Timespan, XmlTimespanImpl.class);
+          EntityTypes.TimeSpan, XmlTimeSpanImpl.class);
 
   @SuppressWarnings("unchecked")
   private static <T extends Entity> T instantiateEntityObject(
@@ -94,8 +94,8 @@ public class EntityObjectFactory {
         return (SchemaOrgEntity<T>) new SchemaOrgConcept((Concept) entity);
       case Organization:
         return (SchemaOrgEntity<T>) new SchemaOrgOrganization((Organization) entity);
-      case Timespan:
-        return (SchemaOrgEntity<T>) new SchemaOrgTimespan((Timespan) entity);
+      case TimeSpan:
+        return (SchemaOrgEntity<T>) new SchemaOrgTimespan((TimeSpan) entity);
       default:
         throw new EntityManagementRuntimeException(
             String.format(
@@ -118,8 +118,8 @@ public class EntityObjectFactory {
         return (T) new XmlPlaceImpl((Place) entity);
       case Concept:
         return (T) new XmlConceptImpl((Concept) entity);
-      case Timespan:
-        return (T) new XmlTimespanImpl((Timespan) entity);
+      case TimeSpan:
+        return (T) new XmlTimeSpanImpl((TimeSpan) entity);
       case Organization:
         return (T) new XmlOrganizationImpl((Organization) entity);
 
@@ -140,8 +140,8 @@ public class EntityObjectFactory {
         return new Place((Place) entity);
       case Concept:
         return new Concept((Concept) entity);
-      case Timespan:
-        return new Timespan((Timespan) entity);
+      case TimeSpan:
+        return new TimeSpan((TimeSpan) entity);
       case Organization:
         return new Organization((Organization) entity);
 

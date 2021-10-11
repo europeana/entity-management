@@ -44,7 +44,7 @@ import org.bson.types.ObjectId;
   @JsonSubTypes.Type(value = Concept.class, name = "Concept"),
   @JsonSubTypes.Type(value = Organization.class, name = "Organization"),
   @JsonSubTypes.Type(value = Place.class, name = "Place"),
-  @JsonSubTypes.Type(value = Timespan.class, name = "Timespan")
+  @JsonSubTypes.Type(value = TimeSpan.class, name = "TimeSpan")
 })
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @EntityFieldsCompleteValidatorInterface(groups = {EntityFieldsCompleteValidatorGroup.class})

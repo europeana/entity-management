@@ -346,8 +346,8 @@ public class EntityRecordService {
       case Place:
         performReferentialIntegrityPlace((Place) entity);
         break;
-      case Timespan:
-        performReferentialIntegrityTimespan((Timespan) entity);
+      case TimeSpan:
+        performReferentialIntegrityTimespan((TimeSpan) entity);
         break;
       case Organization:
         break;
@@ -418,7 +418,7 @@ public class EntityRecordService {
     entity.setIsNextInSequence(replaceWithInternalReferences(isNextInSequenceField));
   }
 
-  private void performReferentialIntegrityTimespan(Timespan entity) {
+  private void performReferentialIntegrityTimespan(TimeSpan entity) {
     // for the field isNextInSequence
     List<String> isNextInSequenceField = entity.getIsNextInSequence();
     entity.setIsNextInSequence(replaceWithInternalReferences(isNextInSequenceField));
