@@ -16,7 +16,7 @@ import org.springframework.util.CollectionUtils;
 /**
  * Necessary for serializing agent instances contained within the consolidated entity.
  *
- * Also see {@link eu.europeana.entitymanagement.definitions.mixins.ConsolidatedAgentMixin}
+ * <p>Also see {@link eu.europeana.entitymanagement.definitions.mixins.ConsolidatedAgentMixin}
  */
 public class ConsolidatedAgent extends Agent {
 

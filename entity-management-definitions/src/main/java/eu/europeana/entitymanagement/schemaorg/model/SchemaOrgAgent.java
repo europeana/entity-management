@@ -6,15 +6,15 @@ import eu.europeana.entitymanagement.utils.SchemaOrgUtils;
 
 public class SchemaOrgAgent extends SchemaOrgEntity<Agent> {
 
-    private final eu.europeana.corelib.edm.model.schemaorg.Person schemaOrgAgent;
+  private final eu.europeana.corelib.edm.model.schemaorg.Person schemaOrgAgent;
 
-    public SchemaOrgAgent(Agent agent) {
-    	schemaOrgAgent = new eu.europeana.corelib.edm.model.schemaorg.Person();
-    	SchemaOrgUtils.processEntity(agent, schemaOrgAgent);
-    }
+  public SchemaOrgAgent(Agent agent) {
+    schemaOrgAgent = new eu.europeana.corelib.edm.model.schemaorg.Person();
+    SchemaOrgUtils.processEntity(agent, schemaOrgAgent);
+  }
 
-    @Override
-    public ContextualEntity get() {
-        return schemaOrgAgent;
-    }
+  @Override
+  public ContextualEntity get() {
+    return schemaOrgAgent;
+  }
 }

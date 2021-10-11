@@ -2,123 +2,119 @@ package eu.europeana.entitymanagement.definitions.model;
 
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.JsonGetter;
-
 import dev.morphia.annotations.Embedded;
 
 @Embedded
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({CONTEXT, ID, TYPE, STREET_ADDRESS, POSTAL_CODE, POST_OFFICE_BOX, LOCALITY, REGION, COUNTRY_NAME, HAS_GEO})
+@JsonPropertyOrder({
+  CONTEXT,
+  ID,
+  TYPE,
+  STREET_ADDRESS,
+  POSTAL_CODE,
+  POST_OFFICE_BOX,
+  LOCALITY,
+  REGION,
+  COUNTRY_NAME,
+  HAS_GEO
+})
 public class Address {
 
-    public Address() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+  public Address() {
+    super();
+    // TODO Auto-generated constructor stub
+  }
 
-    public Address(Address copy) {
-        super();
-        this.about = copy.getAbout();
-        this.streetAddress = copy.getVcardStreetAddress();
-        this.postalCode = copy.getVcardPostalCode();
-        this.postBox = copy.getVcardPostOfficeBox();
-        this.locality = copy.getVcardLocality();
-        this.countryName = copy.getVcardCountryName();
-        this.hasGeo = copy.getVcardHasGeo();
-    }
+  public Address(Address copy) {
+    super();
+    this.about = copy.getAbout();
+    this.streetAddress = copy.getVcardStreetAddress();
+    this.postalCode = copy.getVcardPostalCode();
+    this.postBox = copy.getVcardPostOfficeBox();
+    this.locality = copy.getVcardLocality();
+    this.countryName = copy.getVcardCountryName();
+    this.hasGeo = copy.getVcardHasGeo();
+  }
 
-    private String about;
-    private String streetAddress;
-    private String postalCode;
-    private String postBox;
-    private String locality;
-    private String countryName;
-    private String hasGeo;
-    
-    @JsonSetter(POST_OFFICE_BOX)
-    public void setVcardPostOfficeBox(String vcardPostOfficeBox) {
-        this.postBox = vcardPostOfficeBox;
-    }
-    
-    @JsonGetter(POST_OFFICE_BOX)
-    public String getVcardPostOfficeBox() {
-        return postBox;
-    }
+  private String about;
+  private String streetAddress;
+  private String postalCode;
+  private String postBox;
+  private String locality;
+  private String countryName;
+  private String hasGeo;
 
-    
-    @JsonSetter(COUNTRY_NAME)
-    public void setVcardCountryName(String vcardCountryName) {
-        this.countryName = vcardCountryName;
-    }
+  @JsonSetter(POST_OFFICE_BOX)
+  public void setVcardPostOfficeBox(String vcardPostOfficeBox) {
+    this.postBox = vcardPostOfficeBox;
+  }
 
-    
-    @JsonGetter(COUNTRY_NAME)
-    public String getVcardCountryName() {
-        return countryName;
-    }
+  @JsonGetter(POST_OFFICE_BOX)
+  public String getVcardPostOfficeBox() {
+    return postBox;
+  }
 
-    
-    @JsonSetter(POSTAL_CODE)
-    public void setVcardPostalCode(String vcardPostalCode) {
-        this.postalCode = vcardPostalCode;
-    }
+  @JsonSetter(COUNTRY_NAME)
+  public void setVcardCountryName(String vcardCountryName) {
+    this.countryName = vcardCountryName;
+  }
 
-    
-    @JsonGetter(POSTAL_CODE)
-    public String getVcardPostalCode() {
-        return postalCode;
-    }
+  @JsonGetter(COUNTRY_NAME)
+  public String getVcardCountryName() {
+    return countryName;
+  }
 
-    
-    @JsonSetter(LOCALITY)
-    public void setVcardLocality(String vcardLocality) {
-        this.locality = vcardLocality;
-    }
+  @JsonSetter(POSTAL_CODE)
+  public void setVcardPostalCode(String vcardPostalCode) {
+    this.postalCode = vcardPostalCode;
+  }
 
-    
-    @JsonGetter(LOCALITY)
-    public String getVcardLocality() {
-        return locality;
-    }
+  @JsonGetter(POSTAL_CODE)
+  public String getVcardPostalCode() {
+    return postalCode;
+  }
 
-    
-    @JsonSetter(STREET_ADDRESS)
-    public void setVcardStreetAddress(String vcardStreetAddress) {
-        this.streetAddress = vcardStreetAddress;
-    }
+  @JsonSetter(LOCALITY)
+  public void setVcardLocality(String vcardLocality) {
+    this.locality = vcardLocality;
+  }
 
-    
-    @JsonGetter(STREET_ADDRESS)
-    public String getVcardStreetAddress() {
-        return streetAddress;
-    }
+  @JsonGetter(LOCALITY)
+  public String getVcardLocality() {
+    return locality;
+  }
 
+  @JsonSetter(STREET_ADDRESS)
+  public void setVcardStreetAddress(String vcardStreetAddress) {
+    this.streetAddress = vcardStreetAddress;
+  }
 
-    
-    @JsonSetter(ID)
-    public void setAbout(String about) {
-        this.about = about;
-    }
+  @JsonGetter(STREET_ADDRESS)
+  public String getVcardStreetAddress() {
+    return streetAddress;
+  }
 
-    
-    @JsonGetter(ID)
-    public String getAbout() {
-        return about;
-    }
+  @JsonSetter(ID)
+  public void setAbout(String about) {
+    this.about = about;
+  }
 
-    
-    @JsonGetter(HAS_GEO)
-    public String getVcardHasGeo() {
-        return hasGeo;
-    }
+  @JsonGetter(ID)
+  public String getAbout() {
+    return about;
+  }
 
-    
-    @JsonSetter(HAS_GEO)
-    public void setVcardHasGeo(String hasGeo) {
-        this.hasGeo = hasGeo;
-    }
+  @JsonGetter(HAS_GEO)
+  public String getVcardHasGeo() {
+    return hasGeo;
+  }
 
+  @JsonSetter(HAS_GEO)
+  public void setVcardHasGeo(String hasGeo) {
+    this.hasGeo = hasGeo;
+  }
 }

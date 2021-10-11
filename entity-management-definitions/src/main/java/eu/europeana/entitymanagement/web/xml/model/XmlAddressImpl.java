@@ -9,14 +9,15 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 import org.springframework.util.StringUtils;
 
 @XmlRootElement(namespace = NAMESPACE_VCARD, name = XmlConstants.XML_ADDRESS)
 // This throws an error because of fieldname - xml property mismatch.
 // TODO: Fix and uncomment
-//@XmlType(propOrder={XmlConstants.XML_STREET_ADDRESS, XmlConstants.XML_POSTAL_CODE, XmlConstants.XML_POST_OFFICE_BOX,
-//    	XmlConstants.XML_LOCALITY, XmlConstants.XML_REGION, XmlConstants.XML_COUNTRY_NAME, XmlConstants.XML_HAS_GEO})
+// @XmlType(propOrder={XmlConstants.XML_STREET_ADDRESS, XmlConstants.XML_POSTAL_CODE,
+// XmlConstants.XML_POST_OFFICE_BOX,
+//    	XmlConstants.XML_LOCALITY, XmlConstants.XML_REGION, XmlConstants.XML_COUNTRY_NAME,
+// XmlConstants.XML_HAS_GEO})
 @XmlAccessorType(XmlAccessType.FIELD)
 public class XmlAddressImpl {
 
@@ -49,22 +50,21 @@ public class XmlAddressImpl {
     if (StringUtils.hasLength(address.getAbout())) {
       this.about = new LabelledResource(address.getAbout());
     }
-        this.streetAddress = address.getVcardStreetAddress();
-        this.locality = address.getVcardLocality();
-        this.countryName = address.getVcardCountryName();
-        this.postalCode = address.getVcardPostalCode();
-        this.postBox = address.getVcardPostOfficeBox();
-        this.locality = address.getVcardLocality();
+    this.streetAddress = address.getVcardStreetAddress();
+    this.locality = address.getVcardLocality();
+    this.countryName = address.getVcardCountryName();
+    this.postalCode = address.getVcardPostalCode();
+    this.postBox = address.getVcardPostOfficeBox();
+    this.locality = address.getVcardLocality();
 
-        if(StringUtils.hasLength(address.getVcardHasGeo())){
-          this.hasGeo = new LabelledResource(EntityUtils.toGeoUri(address.getVcardHasGeo()));
-        }
-    	}
-    	
+    if (StringUtils.hasLength(address.getVcardHasGeo())) {
+      this.hasGeo = new LabelledResource(EntityUtils.toGeoUri(address.getVcardHasGeo()));
+    }
+  }
 
-	public LabelledResource getAbout() {
-		return about;
-	}
+  public LabelledResource getAbout() {
+    return about;
+  }
 
   public String getStreetAddress() {
     return streetAddress;
@@ -90,20 +90,20 @@ public class XmlAddressImpl {
     return hasGeo;
   }
 
-  public Address toAddress(){
-    	  Address address = new Address();
-    	  if(about != null){
-          address.setAbout(about.getResource());
-        }
-    	  address.setVcardStreetAddress(streetAddress);
-    	  address.setVcardPostalCode(postalCode);
-    	  address.setVcardPostOfficeBox(postBox);
-    	  address.setVcardLocality(locality);
-    	  address.setVcardCountryName(countryName);
-    	  if(hasGeo != null) {
-          address.setVcardHasGeo(hasGeo.getResource());
-        }
+  public Address toAddress() {
+    Address address = new Address();
+    if (about != null) {
+      address.setAbout(about.getResource());
+    }
+    address.setVcardStreetAddress(streetAddress);
+    address.setVcardPostalCode(postalCode);
+    address.setVcardPostOfficeBox(postBox);
+    address.setVcardLocality(locality);
+    address.setVcardCountryName(countryName);
+    if (hasGeo != null) {
+      address.setVcardHasGeo(hasGeo.getResource());
+    }
 
-    	  return address;
+    return address;
   }
 }

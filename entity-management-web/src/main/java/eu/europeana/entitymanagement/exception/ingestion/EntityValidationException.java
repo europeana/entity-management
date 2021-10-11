@@ -1,49 +1,46 @@
 package eu.europeana.entitymanagement.exception.ingestion;
 
-import java.util.Set;
-
-import javax.validation.ConstraintViolation;
-
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
+import java.util.Set;
+import javax.validation.ConstraintViolation;
 
 public class EntityValidationException extends EuropeanaApiException {
 
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 4490232069167863982L;
-    Set<ConstraintViolation<Entity>> validationErrors;
+  /** */
+  private static final long serialVersionUID = 4490232069167863982L;
 
-    public EntityValidationException(String message, Set<ConstraintViolation<Entity>> validationErrors) {
-	super(message);
-	this.validationErrors = validationErrors;
-    }
+  Set<ConstraintViolation<Entity>> validationErrors;
 
-    @Override
-    public String toString() {
-	return buildErrorMessage(super.getMessage());
-    }
+  public EntityValidationException(
+      String message, Set<ConstraintViolation<Entity>> validationErrors) {
+    super(message);
+    this.validationErrors = validationErrors;
+  }
 
-    String buildErrorMessage(String errorMessage) {
-        StringBuilder message = new StringBuilder(errorMessage);
-        return getConstrainsValidationMessage(message);
-    }
+  @Override
+  public String toString() {
+    return buildErrorMessage(super.getMessage());
+  }
 
-    public String getConstrainsValidationMessage(StringBuilder message) {
-	if (validationErrors != null) {
-	    message.append("Constraint violations: ");
-	    for (ConstraintViolation<Entity> violation : validationErrors) {
-		message.append("\n").append(violation.getMessage());
-	    }
-	}
-	return message.toString();
+  String buildErrorMessage(String errorMessage) {
+    StringBuilder message = new StringBuilder(errorMessage);
+    return getConstrainsValidationMessage(message);
+  }
+
+  public String getConstrainsValidationMessage(StringBuilder message) {
+    if (validationErrors != null) {
+      message.append("Constraint violations: ");
+      for (ConstraintViolation<Entity> violation : validationErrors) {
+        message.append("\n").append(violation.getMessage());
+      }
     }
-    
-    @Override
-    public String getMessage() {
-        //ensure that constraint violations are included in the error message 
-        return buildErrorMessage(super.getMessage());
-    }
-    
+    return message.toString();
+  }
+
+  @Override
+  public String getMessage() {
+    // ensure that constraint violations are included in the error message
+    return buildErrorMessage(super.getMessage());
+  }
 }

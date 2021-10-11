@@ -18,8 +18,7 @@ public class XmlAddresses {
     // default no-arg constructor
   }
 
-  public XmlAddresses(
-      List<XmlAddressImpl> vcardAddressesList) {
+  public XmlAddresses(List<XmlAddressImpl> vcardAddressesList) {
     this.vcardAddressesList = vcardAddressesList;
   }
 
@@ -29,5 +28,4 @@ public class XmlAddresses {
   public List<XmlAddressImpl> getVcardAddressesList() {
     return vcardAddressesList == null ? null : new ArrayList<>(vcardAddressesList);
   }
-
 }
