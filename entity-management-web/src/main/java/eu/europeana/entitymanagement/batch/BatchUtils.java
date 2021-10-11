@@ -3,6 +3,7 @@ package eu.europeana.entitymanagement.batch;
 import eu.europeana.entitymanagement.batch.model.BatchUpdateType;
 import eu.europeana.entitymanagement.batch.model.JobParameter;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+
 import java.util.Date;
 import java.util.List;
 import org.springframework.batch.core.JobParameters;
@@ -21,14 +22,12 @@ public class BatchUtils {
    * Creates JobParameters for triggering the Spring Batch update job for specific entities
    *
    * @param entityId entity id
-   * @param runTime trigger time for job
+   * @param runTime   trigger time for job
    * @param updateType update tpe for job
    * @return JobParameters with trigger time and entityId
    */
-  public static JobParameters createJobParameters(
-      @Nullable String entityId, Date runTime, BatchUpdateType updateType) {
-    JobParametersBuilder jobParametersBuilder =
-        new JobParametersBuilder()
+  public static JobParameters createJobParameters(@Nullable String entityId, Date runTime, BatchUpdateType updateType) {
+    JobParametersBuilder jobParametersBuilder = new JobParametersBuilder()
             .addDate(JobParameter.CURRENT_START_TIME.key(), runTime)
             .addString(JobParameter.UPDATE_TYPE.key(), updateType.name());
 
@@ -36,10 +35,13 @@ public class BatchUtils {
       jobParametersBuilder.addString(JobParameter.ENTITY_ID.key(), entityId);
     }
 
-    return jobParametersBuilder.toJobParameters();
+    return jobParametersBuilder
+            .toJobParameters();
   }
 
+
   public static String[] getEntityIds(List<? extends EntityRecord> entityRecords) {
-    return entityRecords.stream().map(EntityRecord::getEntityId).toArray(String[]::new);
+    return entityRecords.stream().map(EntityRecord::getEntityId)
+        .toArray(String[]::new);
   }
 }

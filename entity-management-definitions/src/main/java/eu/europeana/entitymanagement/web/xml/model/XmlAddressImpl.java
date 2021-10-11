@@ -10,16 +10,8 @@ import javax.xml.bind.annotation.XmlType;
 import org.springframework.util.StringUtils;
 
 @XmlRootElement(name = XmlConstants.XML_ADDRESS)
-@XmlType(
-    propOrder = {
-      XmlConstants.XML_STREET_ADDRESS,
-      XmlConstants.XML_POSTAL_CODE,
-      XmlConstants.XML_POST_OFFICE_BOX,
-      XmlConstants.XML_LOCALITY,
-      XmlConstants.XML_REGION,
-      XmlConstants.XML_COUNTRY_NAME,
-      XmlConstants.XML_HAS_GEO
-    })
+@XmlType(propOrder={XmlConstants.XML_STREET_ADDRESS, XmlConstants.XML_POSTAL_CODE, XmlConstants.XML_POST_OFFICE_BOX,
+    	XmlConstants.XML_LOCALITY, XmlConstants.XML_REGION, XmlConstants.XML_COUNTRY_NAME, XmlConstants.XML_HAS_GEO})
 @XmlAccessorType(XmlAccessType.FIELD)
 public class XmlAddressImpl {
 
@@ -46,25 +38,27 @@ public class XmlAddressImpl {
 
   @XmlAttribute(name = XmlConstants.XML_HAS_GEO)
   private LabelledResource hasGeo;
+    	
+    	
+    	public XmlAddressImpl(Organization organization) {
+        this.about = organization.getHasAddress();
+        this.streetAddress = organization.getStreetAddress();
+        this.locality = organization.getLocality();
+        this.countryName = organization.getCountryName();
+        this.postalCode = organization.getPostalCode();
+        this.postBox = organization.getPostBox();
+        this.locality = organization.getLocality();
+        this.region = organization.getRegion();
 
-  public XmlAddressImpl(Organization organization) {
-    this.about = organization.getHasAddress();
-    this.streetAddress = organization.getStreetAddress();
-    this.locality = organization.getLocality();
-    this.countryName = organization.getCountryName();
-    this.postalCode = organization.getPostalCode();
-    this.postBox = organization.getPostBox();
-    this.locality = organization.getLocality();
-    this.region = organization.getRegion();
+        if(StringUtils.hasLength(organization.getHasGeo())){
+          this.hasGeo = new LabelledResource(EntityUtils.toGeoUri(organization.getHasGeo()));
+        }
+    	}
+    	
 
-    if (StringUtils.hasLength(organization.getHasGeo())) {
-      this.hasGeo = new LabelledResource(EntityUtils.toGeoUri(organization.getHasGeo()));
-    }
-  }
-
-  public String getAbout() {
-    return about;
-  }
+	public String getAbout() {
+		return about;
+	}
 
   public String getStreetAddress() {
     return streetAddress;

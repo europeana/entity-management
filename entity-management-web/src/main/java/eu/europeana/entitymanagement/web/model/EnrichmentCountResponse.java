@@ -1,6 +1,8 @@
 package eu.europeana.entitymanagement.web.model;
 
-/** Response from Search API enrichment count query */
+/**
+ * Response from Search API enrichment count query
+ */
 public class EnrichmentCountResponse {
 
   private int totalResults;
@@ -15,6 +17,8 @@ public class EnrichmentCountResponse {
 
   @Override
   public String toString() {
-    return "{" + "totalResults=" + totalResults + '}';
+    return "{" +
+        "totalResults=" + totalResults +
+        '}';
   }
 }

@@ -1,6 +1,8 @@
 package eu.europeana.entitymanagement.web.service;
 
+import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.dereference.Dereferencer;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.wikidata.WikidataAccessService;
 import eu.europeana.entitymanagement.zoho.organization.ZohoDereferenceService;
 import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
@@ -25,7 +27,9 @@ public class DereferenceServiceLocator {
     this.wikidataAccessService = wikidataAccessService;
   }
 
-  /** Gets the {@link Dereferencer} implementation that is applicable for the given id and type */
+  /**
+   * Gets the {@link Dereferencer} implementation that is applicable for the given id and type
+   */
   public Dereferencer getDereferencer(String id, String entityType) {
 
     if (WikidataUtils.isWikidataOrganization(id, entityType)) {

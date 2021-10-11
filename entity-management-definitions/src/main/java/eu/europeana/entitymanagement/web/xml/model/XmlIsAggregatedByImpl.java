@@ -5,14 +5,16 @@ import javax.xml.bind.annotation.XmlTransient;
 
 public class XmlIsAggregatedByImpl {
 
-  @XmlTransient String id;
+  @XmlTransient
+  String id;
 
-  public XmlIsAggregatedByImpl(String aggregation_id) {
-    id = aggregation_id;
-  }
+	public XmlIsAggregatedByImpl(String aggregation_id) {
+	    id = aggregation_id;
+	}
 
-  @XmlAttribute(name = XmlConstants.RESOURCE)
-  public String getAbout() {
-    return id;
-  }
+	@XmlAttribute(name = XmlConstants.RESOURCE)
+	public String getAbout() {
+		return id;
+	}
+
 }

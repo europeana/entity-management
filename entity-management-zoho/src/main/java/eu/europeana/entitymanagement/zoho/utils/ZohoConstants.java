@@ -2,25 +2,22 @@ package eu.europeana.entitymanagement.zoho.utils;
 
 public final class ZohoConstants {
 
-  // Modules
+  //Modules
   public static final String CONTACTS_MODULE_NAME = "Contacts";
   public static final String ACCOUNTS_MODULE_NAME = "Accounts";
 
-  // Fields
-  // Accounts is the equivalent to Organizations
+  //Fields
+  //Accounts is the equivalent to Organizations
   public static final String ID_FIELD = "id";
-  public static final String ACCOUNT_NAME_FIELD =
-      "Account_Name"; // This is the organization field name in Zoho
-  public static final String NAME_FIELD =
-      "name"; // This is the name of the organization under the Account_Name
+  public static final String ACCOUNT_NAME_FIELD = "Account_Name"; //This is the organization field name in Zoho
+  public static final String NAME_FIELD = "name"; // This is the name of the organization under the Account_Name
   public static final String FIRST_NAME_FIELD = "First_Name";
   public static final String LAST_NAME_FIELD = "Last_Name";
   public static final String EMAIL_FIELD = "Email";
   public static final String USER_COUNTRY_FIELD = "Country";
   public static final String PARTICIPATION_LEVEL_FIELD = "Participation_level";
   public static final String METIS_USER_FIELD = "Metis_user";
-  public static final String ACCOUNT_ROLE_FIELD =
-      "Pick_List_3"; // This is the Account/Organization Role field
+  public static final String ACCOUNT_ROLE_FIELD = "Pick_List_3"; // This is the Account/Organization Role field
   public static final String ORGANIZATION_ROLE_FIELD = "Organisation_Role2";
   public static final String LANG_ORGANIZATION_NAME_FIELD = "Lang_Organisation_Name";
   public static final String LANG_ALTERNATIVE_FIELD = "Lang_Alternative";
@@ -44,18 +41,20 @@ public final class ZohoConstants {
   public static final String URL_ORGANIZATION_PREFFIX = "http://data.europeana.eu/organization/";
   public static final String ADDRESS_ABOUT = "#address";
 
-  // Operations
+  //Operations
   public static final String EQUALS_OPERATION = "equals";
   public static final String STARTS_WITH_OPERATION = "starts_with";
 
-  // General constants
+  //General constants
   public static final String ZOHO_OPERATION_FORMAT_STRING = "(%s:%s:%s)";
   public static final String DELIMITER_COMMA = ",";
   public static final String OR = "OR";
   public static final String UNDEFINED_LANGUAGE_KEY = "def";
-
+  
   public static final int LANGUAGE_CODE_LENGTH = 5;
   public static final int SAME_AS_CODE_LENGTH = 2;
 
-  private ZohoConstants() {}
+
+  private ZohoConstants() {
+  }
 }

@@ -22,7 +22,8 @@ public class FailedTaskService {
   private static final Logger logger = LogManager.getLogger(FailedTaskService.class);
 
   @Autowired
-  public FailedTaskService(FailedTaskRepository failureRepository) {
+  public FailedTaskService(
+      FailedTaskRepository failureRepository) {
     this.failureRepository = failureRepository;
   }
 
@@ -30,23 +31,20 @@ public class FailedTaskService {
    * Creates a {@link FailedTask} instance for this entity, and then persists it
    *
    * @param entityId entityId
-   * @param e exception
+   * @param e        exception
    */
   public void persistFailure(String entityId, Exception e) {
-    UpdateResult result =
-        failureRepository.upsert(
-            createUpdateFailure(
-                entityId, Instant.now(), e.getMessage(), ExceptionUtils.getStackTrace(e)));
+    UpdateResult result = failureRepository.upsert(
+        createUpdateFailure(entityId, Instant.now(), e.getMessage(),
+            ExceptionUtils.getStackTrace(e)));
 
-    logger.info(
-        "Persisted update failure to db. entityId={} matched={}, modified={}",
-        entityId,
-        result.getMatchedCount(),
-        result.getModifiedCount());
+    logger.info("Persisted update failure to db. entityId={} matched={}, modified={}", entityId,
+        result.getMatchedCount(), result.getModifiedCount());
   }
 
   /**
-   * Creates {@link FailedTask} instances for all entities, and then saves them to the database
+   * Creates {@link FailedTask} instances for all entities, and then saves them to the
+   * database
    *
    * @param entityRecords list of entity records to be saved
    * @param e exception
@@ -57,44 +55,44 @@ public class FailedTaskService {
     Instant now = Instant.now();
 
     // create FailedTask instance for each entityRecord
-    List<FailedTask> failures =
-        entityRecords.stream()
-            .map(r -> createUpdateFailure(r.getEntityId(), now, message, stackTrace))
-            .collect(Collectors.toList());
+    List<FailedTask> failures = entityRecords.stream()
+        .map(r -> createUpdateFailure(r.getEntityId(), now, message, stackTrace)).collect(
+            Collectors.toList());
 
     BulkWriteResult writeResult = failureRepository.upsertBulk(failures);
-    logger.info(
-        "Persisted update failures to db: matched={}, modified={}, inserted={}",
-        writeResult.getMatchedCount(),
-        writeResult.getModifiedCount(),
+    logger.info("Persisted update failures to db: matched={}, modified={}, inserted={}",
+        writeResult.getMatchedCount(), writeResult.getModifiedCount(),
         writeResult.getInsertedCount());
   }
 
   /**
-   * Removes entities from the FailedTasks collection if their entityId is contained within the
-   * provided entityIds
-   *
+   * Removes entities from the FailedTasks collection if their entityId is contained within
+   * the provided entityIds
    * @param entityIds list of entityIds
    */
   public void removeFailures(List<String> entityIds) {
     long removeCount = failureRepository.removeFailures(entityIds);
-    if (removeCount > 0) {
+    if(removeCount > 0) {
       logger.info("Removed update failures from db: count={}", removeCount);
     }
   }
 
-  public List<? extends EntityRecord> getEntityRecordsForFailures(
-      int start, int count, Filter[] queryFilters) {
+  public List<? extends EntityRecord> getEntityRecordsForFailures(int start, int count, Filter[] queryFilters) {
     return failureRepository.getEntityRecordsForFailures(start, count, queryFilters);
   }
 
-  /** Helper method to instantiate {@link FailedTask} instances */
-  private FailedTask createUpdateFailure(
-      String entityId, Instant modified, String message, String stacktrace) {
+
+  /**
+   * Helper method to instantiate {@link FailedTask} instances
+   */
+  private FailedTask createUpdateFailure(String entityId, Instant modified, String message,
+      String stacktrace) {
     return new FailedTask.Builder(entityId)
         .modified(modified)
         .message(message)
         .stackTrace(stacktrace)
         .build();
   }
+
+
 }

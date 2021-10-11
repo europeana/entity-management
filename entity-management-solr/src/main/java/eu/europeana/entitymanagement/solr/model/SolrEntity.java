@@ -5,187 +5,175 @@ import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.solr.SolrUtils;
 import eu.europeana.entitymanagement.vocabulary.AgentSolrFields;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
+import org.apache.commons.collections.MapUtils;
+import org.apache.solr.client.solrj.beans.Field;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.collections.MapUtils;
-import org.apache.solr.client.solrj.beans.Field;
 
 public abstract class SolrEntity<T extends Entity> {
 
-  private T entity;
+    private T entity;
 
-  @Field(EntitySolrFields.TYPE)
-  private String type;
+    @Field(EntitySolrFields.TYPE)
+    private String type;
 
-  @Field(EntitySolrFields.ID)
-  private String entityId;
+    @Field(EntitySolrFields.ID)
+    private String entityId;
 
-  @Field(EntitySolrFields.DEPICTION)
-  private String depiction;
+    @Field(EntitySolrFields.DEPICTION)
+    private String depiction;
 
-  @Field(EntitySolrFields.NOTE_ALL)
-  private Map<String, List<String>> note;
+    @Field(EntitySolrFields.NOTE_ALL)
+    private Map<String, List<String>> note;
 
-  @Field(EntitySolrFields.PREF_LABEL_ALL)
-  private Map<String, String> prefLabel;
+    @Field(EntitySolrFields.PREF_LABEL_ALL)
+    private Map<String, String> prefLabel;
 
-  @Field(EntitySolrFields.ALT_LABEL_ALL)
-  private Map<String, List<String>> altLabel;
+    @Field(EntitySolrFields.ALT_LABEL_ALL)
+    private Map<String, List<String>> altLabel;
 
-  @Field(EntitySolrFields.HIDDEN_LABEL)
-  private Map<String, List<String>> hiddenLabel;
+    @Field(EntitySolrFields.HIDDEN_LABEL)
+    private Map<String, List<String>> hiddenLabel;
 
-  @Field(EntitySolrFields.IDENTIFIER)
-  private List<String> identifier;
+    @Field(EntitySolrFields.IDENTIFIER)
+    private List<String> identifier;
 
-  @Field(EntitySolrFields.IS_RELATED_TO)
-  private List<String> isRelatedTo;
+    @Field(EntitySolrFields.IS_RELATED_TO)
+    private List<String> isRelatedTo;
 
-  @Field(EntitySolrFields.HAS_PART)
-  private List<String> hasPart;
+    @Field(EntitySolrFields.HAS_PART)
+    private List<String> hasPart;
 
-  @Field(EntitySolrFields.IS_PART_OF)
-  private List<String> isPartOf;
+    @Field(EntitySolrFields.IS_PART_OF)
+    private List<String> isPartOf;
 
-  @Field(EntitySolrFields.PAYLOAD)
-  private String payload;
+    @Field(EntitySolrFields.PAYLOAD)
+    private String payload;
 
-  @Field(EntitySolrFields.IS_SHOWN_BY_ALL)
-  private Map<String, String> isShownBy;
+    @Field(EntitySolrFields.IS_SHOWN_BY_ALL)
+    private Map<String, String> isShownBy;
 
-  public SolrEntity(T entity) {
-    this.type = entity.getType();
-    this.entityId = entity.getEntityId();
-    if (entity.getDepiction() != null) {
-      this.depiction = entity.getDepiction().getId();
+    public SolrEntity(T entity) {
+        this.type = entity.getType();
+        this.entityId = entity.getEntityId();
+        if(entity.getDepiction() != null){
+            this.depiction = entity.getDepiction().getId();
+        }
+        setNote(entity.getNote());
+        setPrefLabelStringMap(entity.getPrefLabel());
+        setAltLabel(entity.getAltLabel());
+        setHiddenLabel(entity.getHiddenLabel());
+        setIsShownBy(entity.getIsShownBy());
+        if(entity.getIdentifier()!=null) this.identifier = new ArrayList<>(entity.getIdentifier());
+        if(entity.getSameReferenceLinks() != null) this.setSameReferenceLinks(new ArrayList<>(entity.getSameReferenceLinks()));
+        if(entity.getIsRelatedTo()!=null) this.isRelatedTo = new ArrayList<>(entity.getIsRelatedTo());
+        if(entity.getHasPart()!=null) this.hasPart = new ArrayList<>(entity.getHasPart());
+        if(entity.getIsPartOfArray()!=null) this.isPartOf = new ArrayList<>(entity.getIsPartOfArray());
+
+        this.entity = entity;
     }
-    setNote(entity.getNote());
-    setPrefLabelStringMap(entity.getPrefLabel());
-    setAltLabel(entity.getAltLabel());
-    setHiddenLabel(entity.getHiddenLabel());
-    setIsShownBy(entity.getIsShownBy());
-    if (entity.getIdentifier() != null) this.identifier = new ArrayList<>(entity.getIdentifier());
-    if (entity.getSameReferenceLinks() != null)
-      this.setSameReferenceLinks(new ArrayList<>(entity.getSameReferenceLinks()));
-    if (entity.getIsRelatedTo() != null)
-      this.isRelatedTo = new ArrayList<>(entity.getIsRelatedTo());
-    if (entity.getHasPart() != null) this.hasPart = new ArrayList<>(entity.getHasPart());
-    if (entity.getIsPartOfArray() != null)
-      this.isPartOf = new ArrayList<>(entity.getIsPartOfArray());
 
-    this.entity = entity;
-  }
-
-  public SolrEntity() {
+    public SolrEntity() {
     // no-arg constructor
-  }
-
-  public void setPayload(String payload) {
-    this.payload = payload;
-  }
-
-  private void setPrefLabelStringMap(Map<String, String> prefLabel) {
-    if (MapUtils.isNotEmpty(prefLabel)) {
-      this.prefLabel =
-          new HashMap<>(
-              SolrUtils.normalizeStringMapByAddingPrefix(
-                  AgentSolrFields.PREF_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
-                  prefLabel));
-    }
-  }
-
-  private void setAltLabel(Map<String, List<String>> altLabel) {
-    if (MapUtils.isNotEmpty(altLabel)) {
-      this.altLabel =
-          new HashMap<>(
-              SolrUtils.normalizeStringListMapByAddingPrefix(
-                  AgentSolrFields.ALT_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, altLabel));
-    }
-  }
-
-  private void setHiddenLabel(Map<String, List<String>> hiddenLabel) {
-    if (MapUtils.isNotEmpty(hiddenLabel)) {
-      this.hiddenLabel =
-          new HashMap<>(
-              SolrUtils.normalizeStringListMapByAddingPrefix(
-                  AgentSolrFields.HIDDEN_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
-                  hiddenLabel));
-    }
-  }
-
-  private void setNote(Map<String, List<String>> note) {
-    if (MapUtils.isNotEmpty(note)) {
-      this.note =
-          new HashMap<>(
-              SolrUtils.normalizeStringListMapByAddingPrefix(
-                  AgentSolrFields.NOTE + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, note));
-    }
-  }
-
-  private void setIsShownBy(WebResource webResource) {
-    if (webResource == null) {
-      return;
     }
 
-    this.isShownBy = new HashMap<>();
-    this.isShownBy.put(EntitySolrFields.IS_SHOWN_BY, webResource.getId());
-    this.isShownBy.put(EntitySolrFields.IS_SHOWN_BY_SOURCE, webResource.getSource());
-    this.isShownBy.put(EntitySolrFields.IS_SHOWN_BY_THUMBNAIL, webResource.getThumbnail());
-  }
+    public void setPayload(String payload) {
+        this.payload = payload;
+    }
 
-  public String getType() {
-    return type;
-  }
+    private void setPrefLabelStringMap(Map<String, String> prefLabel) {
+    	if (MapUtils.isNotEmpty(prefLabel)) {
+    		this.prefLabel = new HashMap<>(SolrUtils.normalizeStringMapByAddingPrefix(
+                AgentSolrFields.PREF_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, prefLabel));
+    	}
+    }
 
-  public String getEntityId() {
-    return entityId;
-  }
+    private void setAltLabel(Map<String, List<String>> altLabel) {
+    	if (MapUtils.isNotEmpty(altLabel)) {
+    		this.altLabel = new HashMap<>(SolrUtils.normalizeStringListMapByAddingPrefix(
+                AgentSolrFields.ALT_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, altLabel));
+    	}
+    }
 
-  public String getDepiction() {
-    return depiction;
-  }
+    private void setHiddenLabel(Map<String, List<String>> hiddenLabel) {
+    	if (MapUtils.isNotEmpty(hiddenLabel)) {
+    		this.hiddenLabel = new HashMap<>(SolrUtils.normalizeStringListMapByAddingPrefix(
+                AgentSolrFields.HIDDEN_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, hiddenLabel));
+    	}
+    }
 
-  public Map<String, List<String>> getNote() {
-    return note;
-  }
+    private void setNote(Map<String, List<String>> note) {
+    	if (MapUtils.isNotEmpty(note)) {
+    		this.note = new HashMap<>(SolrUtils.normalizeStringListMapByAddingPrefix(
+                AgentSolrFields.NOTE + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, note));
+    	}
+    }
 
-  public Map<String, String> getPrefLabel() {
-    return prefLabel;
-  }
+    private void setIsShownBy(WebResource webResource) {
+        if (webResource == null) {
+            return;
+        }
 
-  public Map<String, List<String>> getAltLabel() {
-    return altLabel;
-  }
+        this.isShownBy = new HashMap<>();
+        this.isShownBy.put(EntitySolrFields.IS_SHOWN_BY, webResource.getId());
+        this.isShownBy.put(EntitySolrFields.IS_SHOWN_BY_SOURCE, webResource.getSource());
+        this.isShownBy.put(EntitySolrFields.IS_SHOWN_BY_THUMBNAIL, webResource.getThumbnail());
+    }
 
-  public Map<String, List<String>> getHiddenLabel() {
-    return hiddenLabel;
-  }
+    public String getType() {
+        return type;
+    }
 
-  public List<String> getIdentifier() {
-    return identifier;
-  }
+    public String getEntityId() {
+        return entityId;
+    }
 
-  public List<String> getIsRelatedTo() {
-    return isRelatedTo;
-  }
+    public String getDepiction() {
+        return depiction;
+    }
 
-  public List<String> getHasPart() {
-    return hasPart;
-  }
+    public Map<String, List<String>> getNote() {
+        return note;
+    }
 
-  public List<String> getIsPartOf() {
-    return isPartOf;
-  }
+    public Map<String, String> getPrefLabel() {
+        return prefLabel;
+    }
 
-  public String getPayload() {
-    return payload;
-  }
+    public Map<String, List<String>> getAltLabel() {
+        return altLabel;
+    }
 
-  public T getEntity() {
-    return entity;
-  }
+    public Map<String, List<String>> getHiddenLabel() {
+        return hiddenLabel;
+    }
 
-  protected abstract void setSameReferenceLinks(ArrayList<String> uris);
+    public List<String> getIdentifier() {
+        return identifier;
+    }
+
+    public List<String> getIsRelatedTo() {
+        return isRelatedTo;
+    }
+
+    public List<String> getHasPart() {
+        return hasPart;
+    }
+
+    public List<String> getIsPartOf() {
+        return isPartOf;
+    }
+
+    public String getPayload() {
+        return payload;
+    }
+
+    public T getEntity() {
+        return entity;
+    }
+
+    protected abstract void setSameReferenceLinks(ArrayList<String> uris);
 }

@@ -19,13 +19,13 @@ public class XmlTimespanImpl extends XmlBaseEntityImpl<Timespan> {
   @XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.XML_SAME_AS)
   private List<LabelledResource> sameAs = new ArrayList<>();
 
-  @XmlElement(namespace = NAMESPACE_SKOS, name = HIDDEN_LABEL)
+  @XmlElement(namespace = NAMESPACE_SKOS, name =  HIDDEN_LABEL)
   private List<LabelledResource> hiddenLabel = new ArrayList<>();
 
-  @XmlElement(namespace = NAMESPACE_EDM, name = XML_BEGIN)
+  @XmlElement(namespace = NAMESPACE_EDM, name =  XML_BEGIN)
   private String begin;
 
-  @XmlElement(namespace = NAMESPACE_EDM, name = XML_END)
+  @XmlElement(namespace = NAMESPACE_EDM, name =  XML_END)
   private String end;
 
   @XmlElement(namespace = NAMESPACE_SKOS, name = NOTE)
@@ -37,35 +37,37 @@ public class XmlTimespanImpl extends XmlBaseEntityImpl<Timespan> {
   @XmlElement(namespace = NAMESPACE_DC_TERMS, name = XML_IS_PART_OF)
   private List<LabelledResource> isPartOf = new ArrayList<>();
 
-  @XmlElement(namespace = NAMESPACE_EDM, name = XML_IS_NEXT_IN_SEQUENCE)
+  @XmlElement(namespace = NAMESPACE_EDM, name =  XML_IS_NEXT_IN_SEQUENCE)
   private List<LabelledResource> isNextInSequence;
+        
+    	public XmlTimespanImpl(Timespan timespan) {
+    	    super(timespan);
+    	    this.hiddenLabel = RdfXmlUtils.convertToXmlMultilingualString(timespan.getHiddenLabel());
+                this.begin = timespan.getBeginString();
+                this.end = timespan.getEndString();
+            this.note = RdfXmlUtils.convertToXmlMultilingualString(timespan.getNote());
+            this.hasPart = RdfXmlUtils.convertToRdfResource(timespan.getHasPart());
+            this.isPartOf = RdfXmlUtils.convertToRdfResource(timespan.getIsPartOfArray());
+            this.isNextInSequence = RdfXmlUtils.convertToRdfResource(timespan.getIsNextInSequence());
+            
+    	}
+            
 
-  public XmlTimespanImpl(Timespan timespan) {
-    super(timespan);
-    this.hiddenLabel = RdfXmlUtils.convertToXmlMultilingualString(timespan.getHiddenLabel());
-    this.begin = timespan.getBeginString();
-    this.end = timespan.getEndString();
-    this.note = RdfXmlUtils.convertToXmlMultilingualString(timespan.getNote());
-    this.hasPart = RdfXmlUtils.convertToRdfResource(timespan.getHasPart());
-    this.isPartOf = RdfXmlUtils.convertToRdfResource(timespan.getIsPartOfArray());
-    this.isNextInSequence = RdfXmlUtils.convertToRdfResource(timespan.getIsNextInSequence());
-  }
-
-  public XmlTimespanImpl() {
-    // default constructor
-  }
-
-  public Timespan toEntityModel() throws EntityCreationException {
-    super.toEntityModel();
-    entity.setHiddenLabel(RdfXmlUtils.toLanguageMapList(hiddenLabel));
-    entity.setBeginString(begin);
-    entity.setEndString(end);
-    entity.setNote(RdfXmlUtils.toLanguageMapList(note));
-    entity.setHasPart(RdfXmlUtils.toStringList(hasPart));
-    entity.setIsPartOfArray(RdfXmlUtils.toStringList(isPartOf));
-    entity.setIsNextInSequence(RdfXmlUtils.toStringList(isNextInSequence));
-    return entity;
-  }
+	public XmlTimespanImpl() {
+		// default constructor
+	}
+	
+	public Timespan toEntityModel() throws EntityCreationException {
+            super.toEntityModel();
+            entity.setHiddenLabel(RdfXmlUtils.toLanguageMapList(hiddenLabel));
+            entity.setBeginString(begin);
+            entity.setEndString(end);
+            entity.setNote(RdfXmlUtils.toLanguageMapList(note));
+            entity.setHasPart(RdfXmlUtils.toStringList(hasPart));
+            entity.setIsPartOfArray(RdfXmlUtils.toStringList(isPartOf));
+            entity.setIsNextInSequence(RdfXmlUtils.toStringList(isNextInSequence));
+            return entity;
+        }
 
   public List<LabelledResource> getHiddenLabel() {
     return hiddenLabel;
@@ -96,9 +98,9 @@ public class XmlTimespanImpl extends XmlBaseEntityImpl<Timespan> {
   }
 
   @Override
-  protected EntityTypes getTypeEnum() {
-    return EntityTypes.Timespan;
-  }
+	protected EntityTypes getTypeEnum() {
+	    return EntityTypes.Timespan;
+	}
 
   @Override
   public List<LabelledResource> getSameReferenceLinks() {

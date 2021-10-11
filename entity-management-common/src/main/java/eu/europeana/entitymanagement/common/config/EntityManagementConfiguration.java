@@ -8,64 +8,62 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 
 /**
- * Container for all settings that we load from the entitymanagement.properties file and optionally
- * override from entitymanagement.user.properties file
+ * Container for all settings that we load from the entitymanagement.properties
+ * file and optionally override from entitymanagement.user.properties file
  */
 @Configuration
-@PropertySources({
-  @PropertySource("classpath:entitymanagement.properties"),
-  @PropertySource(
-      value = "classpath:entitymanagement.user.properties",
-      ignoreResourceNotFound = true)
-})
-public class EntityManagementConfiguration {
+@PropertySources({ @PropertySource("classpath:entitymanagement.properties"),
+	@PropertySource(value = "classpath:entitymanagement.user.properties", ignoreResourceNotFound = true) })
+public class EntityManagementConfiguration  {
 
-  private static final Logger LOG = LogManager.getLogger(EntityManagementConfiguration.class);
+    private static final Logger LOG = LogManager.getLogger(EntityManagementConfiguration.class);
 
-  @Value("${datasources.config}")
-  private String datasourcesXMLConfig;
+    @Value("${datasources.config}")
+    private String datasourcesXMLConfig;
 
-  @Value("${languagecodes.config}")
-  private String languagecodesXMLConfig;
+    @Value("${languagecodes.config}")
+    private String languagecodesXMLConfig;
 
-  @Value("${europeana.apikey.jwttoken.signaturekey}")
-  private String apiKeyPublicKey;
+    @Value("${europeana.apikey.jwttoken.signaturekey}")
+    private String apiKeyPublicKey;
 
-  @Value("${europeana.thumbnail.urlPrefix}")
-  private String thumbnailBaseUrl;
+    @Value("${europeana.thumbnail.urlPrefix}")
+    private String thumbnailBaseUrl;
 
-  @Value("${europeana.apikey.serviceurl}")
-  private String apiKeyUrl;
+    @Value("${europeana.apikey.serviceurl}")
+    private String apiKeyUrl;
 
-  @Value("${entitymanagement.solr.pr.url}")
-  private String prSolrUrl;
+    @Value("${entitymanagement.solr.pr.url}")
+    private String prSolrUrl;
 
-  @Value("${europeana.searchapi.urlPrefix}")
-  private String searchApiUrlPrefix;
+    @Value("${europeana.searchapi.urlPrefix}")
+    private String searchApiUrlPrefix;
+
 
   @Value("${europeana.searchapi.enrichments.contentTier}")
   private String enrichmentsQueryContentTier;
 
-  @Value("${entitymanagement.solr.indexing.url}")
-  private String indexingSolrUrl;
+    @Value("${entitymanagement.solr.indexing.url}")
+    private String indexingSolrUrl;
 
-  @Value("${entitymanagement.solr.indexing.explicitCommits: false}")
-  private boolean explicitCommitsEnabled;
+    @Value("${entitymanagement.solr.indexing.explicitCommits: false}")
+    private boolean explicitCommitsEnabled;
 
-  @Value("${entitymanagement.solr.indexing.query.maxPageSize: 100}")
-  private int solrQueryMaxPageSize;
+    @Value("${entitymanagement.solr.indexing.query.maxPageSize: 100}")
+    private int solrQueryMaxPageSize;
 
-  @Value("${entitymanagement.solr.searchapi.hits.query}")
-  private String hitsQuery;
 
-  @Value("${authorization.api.name}")
-  private String authorizationApiName;
+    @Value("${entitymanagement.solr.searchapi.hits.query}")
+    private String hitsQuery;
 
-  @Value("${metis.baseUrl}")
-  private String metisBaseUrl;
+    @Value("${authorization.api.name}")
+    private String authorizationApiName;
 
-  @Value("${batch.step.chunkSize: 10}")
-  private int batchChunkSize;
+    @Value("${metis.baseUrl}")
+    private String metisBaseUrl;
+
+    @Value("${batch.step.chunkSize: 10}")
+    private int batchChunkSize;
 
   @Value("${batch.step.executor.corePool: 10}")
   private int batchStepExecutorCorePool;
@@ -94,45 +92,56 @@ public class EntityManagementConfiguration {
   @Value("${metis.proxy.url:}")
   private String metisProxyUrl;
 
+
   public EntityManagementConfiguration() {
-    LOG.info("Initializing EntityManagementConfiguration bean as: configuration");
-  }
+	LOG.info("Initializing EntityManagementConfiguration bean as: configuration");
+    }
 
-  public String getPrSolrUrl() {
-    return prSolrUrl;
-  }
+    
+    public String getPrSolrUrl() {
+	return prSolrUrl;
+    }
 
-  public String getSearchApiUrlPrefix() {
-    return searchApiUrlPrefix;
-  }
+    
+    public String getSearchApiUrlPrefix() {
+	return searchApiUrlPrefix;
+    }
 
-  public String getHitsQuery() {
-    return hitsQuery;
-  }
+    
+    public String getHitsQuery() {
+	return hitsQuery;
+    }
+
 
   public String getApiKeyPublicKey() {
     return apiKeyPublicKey;
   }
 
+
   public String getApiKeyUrl() {
     return apiKeyUrl;
   }
 
-  public String getAuthorizationApiName() {
-    return authorizationApiName;
-  }
+    
+    public String getAuthorizationApiName() {
+	return authorizationApiName;
+    }
 
-  public String getMetisBaseUrl() {
-    return metisBaseUrl;
-  }
+    
+    public String getMetisBaseUrl() {
+	return metisBaseUrl;
+    }
 
-  public String getDatasourcesXMLConfig() {
-    return datasourcesXMLConfig;
-  }
+    
+    public String getDatasourcesXMLConfig() {
+	return datasourcesXMLConfig;
+    }
 
-  public String getLanguagecodesXMLConfig() {
-    return languagecodesXMLConfig;
-  }
+    
+    public String getLanguagecodesXMLConfig() {
+	return languagecodesXMLConfig;
+    }
+
 
   public int getBatchChunkSize() {
     return batchChunkSize;
@@ -166,29 +175,30 @@ public class EntityManagementConfiguration {
     return batchStepThrottleLimit;
   }
 
-  public String getIndexingSolrUrl() {
-    return indexingSolrUrl;
-  }
 
-  public boolean explicitCommitsEnabled() {
-    return explicitCommitsEnabled;
-  }
+public String getIndexingSolrUrl() {
+	return indexingSolrUrl;
+}
 
-  public int getSolrQueryMaxPageSize() {
-    return solrQueryMaxPageSize;
-  }
+    public boolean explicitCommitsEnabled() {
+        return explicitCommitsEnabled;
+    }
 
-  public boolean useMetisProxy() {
-    return useMetisProxy;
-  }
+    public int getSolrQueryMaxPageSize() {
+      return solrQueryMaxPageSize;
+    }
 
-  public String getMetisProxyUrl() {
-    return metisProxyUrl;
-  }
+    public boolean useMetisProxy() {
+        return useMetisProxy;
+    }
 
-  public String getThumbnailBaseUrl() {
-    return thumbnailBaseUrl;
-  }
+    public String getMetisProxyUrl() {
+        return metisProxyUrl;
+    }
+
+    public String getThumbnailBaseUrl() {
+        return thumbnailBaseUrl;
+    }
 
   public String getEnrichmentsQueryContentTier() {
     return enrichmentsQueryContentTier;

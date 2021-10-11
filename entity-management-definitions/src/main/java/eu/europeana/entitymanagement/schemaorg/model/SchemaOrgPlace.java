@@ -6,15 +6,15 @@ import eu.europeana.entitymanagement.utils.SchemaOrgUtils;
 
 public class SchemaOrgPlace extends SchemaOrgEntity<Place> {
 
-  private final eu.europeana.corelib.edm.model.schemaorg.Place schemaOrgPlace;
+    private final eu.europeana.corelib.edm.model.schemaorg.Place schemaOrgPlace;
 
-  public SchemaOrgPlace(Place place) {
-    schemaOrgPlace = new eu.europeana.corelib.edm.model.schemaorg.Place();
-    SchemaOrgUtils.processEntity(place, schemaOrgPlace);
-  }
+    public SchemaOrgPlace(Place place) {
+        schemaOrgPlace = new eu.europeana.corelib.edm.model.schemaorg.Place();
+        SchemaOrgUtils.processEntity(place, schemaOrgPlace);        
+    }
 
-  @Override
-  public ContextualEntity get() {
-    return schemaOrgPlace;
-  }
+    @Override
+    public ContextualEntity get() {
+        return schemaOrgPlace;
+    }
 }

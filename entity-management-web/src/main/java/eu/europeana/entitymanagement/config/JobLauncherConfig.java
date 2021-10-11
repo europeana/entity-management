@@ -1,7 +1,5 @@
 package eu.europeana.entitymanagement.config;
 
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.*;
-
 import eu.europeana.entitymanagement.batch.config.MongoBatchConfigurer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
@@ -10,6 +8,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.task.TaskExecutor;
+
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.*;
 
 @Configuration
 public class JobLauncherConfig {
@@ -38,4 +38,5 @@ public class JobLauncherConfig {
     jobLauncher.afterPropertiesSet();
     return jobLauncher;
   }
+
 }

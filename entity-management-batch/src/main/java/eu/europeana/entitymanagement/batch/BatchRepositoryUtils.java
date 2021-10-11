@@ -22,8 +22,8 @@ public class BatchRepositoryUtils {
     Map<String, JobParameter> jobParams = jobParameters.getParameters();
     Map<String, Object> paramMap = new HashMap<>(jobParams.size());
     for (Map.Entry<String, JobParameter> entry : jobParams.entrySet()) {
-      paramMap.put(
-          entry.getKey().replaceAll(DOT_STRING, DOT_ESCAPE_STRING), entry.getValue().getValue());
+      paramMap.put(entry.getKey().replaceAll(DOT_STRING, DOT_ESCAPE_STRING),
+          entry.getValue().getValue());
     }
     return paramMap;
   }

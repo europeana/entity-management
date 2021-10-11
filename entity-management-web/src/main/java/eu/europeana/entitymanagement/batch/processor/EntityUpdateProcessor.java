@@ -9,73 +9,73 @@ import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatorGroup;
 import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorGroup;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
-import java.util.Set;
-import javax.validation.ConstraintViolation;
-import javax.validation.ValidatorFactory;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
-/** This {@link ItemProcessor} updates Entity metadata. */
+import javax.validation.ConstraintViolation;
+import javax.validation.ValidatorFactory;
+import java.util.Set;
+
+/**
+ * This {@link ItemProcessor} updates Entity metadata.
+ */
 @Component
 public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, EntityRecord> {
-  private final EntityRecordService entityRecordService;
-  private final ValidatorFactory emValidatorFactory;
+    private final EntityRecordService entityRecordService;
+    private final ValidatorFactory emValidatorFactory;
 
-  private final EntityFieldsCleaner emEntityFieldCleaner;
+    private final EntityFieldsCleaner emEntityFieldCleaner;
 
-  public EntityUpdateProcessor(
-      EntityRecordService entityRecordService,
-      ValidatorFactory emValidatorFactory,
-      EntityFieldsCleaner emEntityFieldCleaner) {
-    this.entityRecordService = entityRecordService;
-    this.emValidatorFactory = emValidatorFactory;
-    this.emEntityFieldCleaner = emEntityFieldCleaner;
-  }
 
-  @Override
-  public EntityRecord process(@NonNull EntityRecord entityRecord) throws EuropeanaApiException {
-
-    EntityProxy europeanaProxy = entityRecord.getEuropeanaProxy();
-    // TODO: Support multiple external proxies (EA:2706)
-    EntityProxy externalProxy = entityRecord.getExternalProxies().get(0);
-    if (europeanaProxy == null || externalProxy == null) {
-      throw new EuropeanaApiException(
-          String.format(
-              "Unable to process entity record with id: %s. Europeana proxy or external proxy is not available in the record!",
-              entityRecord.getEntityId()));
+    public EntityUpdateProcessor(EntityRecordService entityRecordService,
+        ValidatorFactory emValidatorFactory, 
+        EntityFieldsCleaner emEntityFieldCleaner) {
+        this.entityRecordService = entityRecordService;
+        this.emValidatorFactory = emValidatorFactory;
+        this.emEntityFieldCleaner = emEntityFieldCleaner;
     }
 
-    Entity europeanaEntity = europeanaProxy.getEntity();
-    Entity externalEntity = externalProxy.getEntity();
+    @Override
+    public EntityRecord process(@NonNull EntityRecord entityRecord) throws EuropeanaApiException {
+        
 
-    validateMinimalConstraints(externalEntity);
-    Entity consolidatedEntity = entityRecordService.mergeEntities(europeanaEntity, externalEntity);
-    emEntityFieldCleaner.cleanAndNormalize(consolidatedEntity);
-    entityRecordService.performReferentialIntegrity(consolidatedEntity);
-    validateCompleteConstraints(consolidatedEntity);
-    entityRecordService.updateConsolidatedVersion(entityRecord, consolidatedEntity);
+        EntityProxy europeanaProxy = entityRecord.getEuropeanaProxy();
+        // TODO: Support multiple external proxies (EA:2706)
+        EntityProxy externalProxy = entityRecord.getExternalProxies().get(0);
+        if (europeanaProxy == null || externalProxy == null) {
+            throw new EuropeanaApiException(String.format(
+                    "Unable to process entity record with id: %s. Europeana proxy or external proxy is not available in the record!",
+                    entityRecord.getEntityId()));
+        }
 
-    return entityRecord;
-  }
+        Entity europeanaEntity = europeanaProxy.getEntity();
+        Entity externalEntity = externalProxy.getEntity();
 
-  private void validateCompleteConstraints(Entity entity) throws EntityValidationException {
-    Set<ConstraintViolation<Entity>> violations =
-        emValidatorFactory
-            .getValidator()
-            .validate(entity, EntityFieldsCompleteValidatorGroup.class);
-    if (!violations.isEmpty()) {
-      throw new EntityValidationException(
-          "The consolidated entity contains invalid data!", violations);
+        validateMinimalConstraints(externalEntity);
+        Entity consolidatedEntity = entityRecordService.mergeEntities(europeanaEntity, externalEntity);
+        emEntityFieldCleaner.cleanAndNormalize(consolidatedEntity);
+        entityRecordService.performReferentialIntegrity(consolidatedEntity);
+        validateCompleteConstraints(consolidatedEntity);
+        entityRecordService.updateConsolidatedVersion(entityRecord, consolidatedEntity);
+        
+   
+        return entityRecord;
     }
-  }
 
-  private void validateMinimalConstraints(Entity entity) throws EntityValidationException {
-    Set<ConstraintViolation<Entity>> violations =
-        emValidatorFactory.getValidator().validate(entity, EntityFieldsMinimalValidatorGroup.class);
-    if (!violations.isEmpty()) {
-      throw new EntityValidationException(
-          "The entity from the external source contains invalid data!", violations);
+    private void validateCompleteConstraints(Entity entity) throws EntityValidationException  {
+        Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entity, EntityFieldsCompleteValidatorGroup.class);
+        if (!violations.isEmpty()) {
+            throw new EntityValidationException("The consolidated entity contains invalid data!", violations);
+        }
     }
-  }
+    
+    private void validateMinimalConstraints(Entity entity) throws EntityValidationException  {
+        Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entity, EntityFieldsMinimalValidatorGroup.class);
+        if (!violations.isEmpty()) {
+            throw new EntityValidationException("The entity from the external source contains invalid data!", violations);
+        }
+    }
+    
+    
 }

@@ -6,15 +6,15 @@ import eu.europeana.entitymanagement.utils.SchemaOrgUtils;
 
 public class SchemaOrgTimespan extends SchemaOrgEntity<Timespan> {
 
-  private final eu.europeana.corelib.edm.model.schemaorg.Timespan schemaOrgTimespan;
+    private final eu.europeana.corelib.edm.model.schemaorg.Timespan schemaOrgTimespan;
 
-  public SchemaOrgTimespan(Timespan timespan) {
-    schemaOrgTimespan = new eu.europeana.corelib.edm.model.schemaorg.Timespan();
-    SchemaOrgUtils.processEntity(timespan, schemaOrgTimespan);
-  }
+    public SchemaOrgTimespan(Timespan timespan) {
+    	schemaOrgTimespan = new eu.europeana.corelib.edm.model.schemaorg.Timespan();
+        SchemaOrgUtils.processEntity(timespan, schemaOrgTimespan);
+    }
 
-  @Override
-  public ContextualEntity get() {
-    return schemaOrgTimespan;
-  }
+    @Override
+    public ContextualEntity get() {
+        return schemaOrgTimespan;
+    }
 }

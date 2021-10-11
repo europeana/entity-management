@@ -6,6 +6,7 @@ import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationExcept
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -14,6 +15,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(namespace = NAMESPACE_EDM, name = XML_AGENT)
 @XmlAccessorType(XmlAccessType.FIELD)
+
 public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
 
   @XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.XML_SAME_AS)
@@ -91,18 +93,20 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
     this.hasMet = RdfXmlUtils.convertToRdfResource(agent.getHasMet());
     this.isRelatedTo = RdfXmlUtils.convertToRdfResource(agent.getIsRelatedTo());
     this.name = RdfXmlUtils.convertMapToXmlMultilingualString(agent.getName());
-    this.biographicalInformation =
-        RdfXmlUtils.convertToXmlMultilingualString(agent.getBiographicalInformation());
+    this.biographicalInformation = RdfXmlUtils
+        .convertToXmlMultilingualString(agent.getBiographicalInformation());
     this.dateOfBirth = agent.getDateOfBirth();
     this.dateOfDeath = agent.getDateOfDeath();
     this.dateOfEstablishment = agent.getDateOfEstablishment();
     this.dateOfTermination = agent.getDateOfTermination();
     this.dcDate = agent.getDate();
     this.gender = agent.getGender();
-    this.placeOfBirth = RdfXmlUtils.convertToRdfResource(agent.getPlaceOfBirth());
-    this.placeOfDeath = RdfXmlUtils.convertToRdfResource(agent.getPlaceOfDeath());
-    this.professionOrOccupation =
-        RdfXmlUtils.convertToRdfResource(agent.getProfessionOrOccupation());
+    this.placeOfBirth = RdfXmlUtils
+        .convertToRdfResource(agent.getPlaceOfBirth());
+    this.placeOfDeath = RdfXmlUtils
+        .convertToRdfResource(agent.getPlaceOfDeath());
+    this.professionOrOccupation = RdfXmlUtils
+        .convertToRdfResource(agent.getProfessionOrOccupation());
   }
 
   public XmlAgentImpl() {
@@ -184,6 +188,7 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
     return biographicalInformation;
   }
 
+
   public List<String> getDateOfBirth() {
     return dateOfBirth;
   }
@@ -231,17 +236,18 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
     this.sameAs = uris;
   }
 
-  private <T> T getFirstValue(List<T> list) {
-    if (list == null) {
-      return null;
-    }
-    return list.get(0);
+  private<T> T getFirstValue(List<T> list){
+     if(list == null) {
+       return null;
+     }
+     return list.get(0);
   }
 
   private <T> List<T> toList(T field) {
-    if (field == null) {
+    if (field == null){
       return null;
     }
     return List.of(field);
   }
+
 }

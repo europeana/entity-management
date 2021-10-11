@@ -24,17 +24,12 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 public class RdfBaseWrapper {
 
-  @XmlElements(
-      value = {
-        @XmlElement(name = XML_CONCEPT, namespace = NAMESPACE_SKOS, type = XmlConceptImpl.class),
-        @XmlElement(name = XML_AGENT, namespace = NAMESPACE_EDM, type = XmlAgentImpl.class),
-        @XmlElement(name = XML_PLACE, namespace = NAMESPACE_EDM, type = XmlPlaceImpl.class),
-        @XmlElement(
-            name = XML_ORGANIZATION,
-            namespace = NAMESPACE_EDM,
-            type = XmlOrganizationImpl.class),
-        @XmlElement(name = XML_TIMESPAN, namespace = NAMESPACE_EDM, type = XmlTimespanImpl.class)
-      })
+  @XmlElements(value = {
+      @XmlElement(name = XML_CONCEPT, namespace = NAMESPACE_SKOS, type = XmlConceptImpl.class),
+      @XmlElement(name = XML_AGENT, namespace = NAMESPACE_EDM, type = XmlAgentImpl.class),
+      @XmlElement(name = XML_PLACE, namespace = NAMESPACE_EDM, type = XmlPlaceImpl.class),
+      @XmlElement(name = XML_ORGANIZATION, namespace = NAMESPACE_EDM, type = XmlOrganizationImpl.class),
+      @XmlElement(name = XML_TIMESPAN, namespace = NAMESPACE_EDM, type = XmlTimespanImpl.class)})
   private XmlBaseEntityImpl<?> xmlEntity;
 
   public RdfBaseWrapper() {

@@ -5,5 +5,6 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 
 public abstract class SchemaOrgEntity<T extends Entity> {
 
-  public abstract ContextualEntity get();
+    public abstract ContextualEntity get();
+
 }

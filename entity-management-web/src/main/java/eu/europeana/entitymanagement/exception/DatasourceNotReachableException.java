@@ -3,7 +3,9 @@ package eu.europeana.entitymanagement.exception;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import org.springframework.http.HttpStatus;
 
-/** Exception thrown during dereferencing when external datasource is down */
+/**
+ * Exception thrown during dereferencing when external datasource is down
+ */
 public class DatasourceNotReachableException extends EuropeanaApiException {
 
   public DatasourceNotReachableException(String msg) {
