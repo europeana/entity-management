@@ -9,9 +9,7 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.lang.NonNull;
 
-/**
- * Listens for Step execution lifecycle events.
- */
+/** Listens for Step execution lifecycle events. */
 public class EntityUpdateStepListener implements StepExecutionListener {
 
   private static final Logger logger = LogManager.getLogger(EntityUpdateStepListener.class);
@@ -19,14 +17,11 @@ public class EntityUpdateStepListener implements StepExecutionListener {
   private final ScheduledTaskService scheduledTaskService;
   private final BatchUpdateType updateType;
 
-
   public EntityUpdateStepListener(
-      ScheduledTaskService scheduledTaskService,
-      BatchUpdateType updateType) {
+      ScheduledTaskService scheduledTaskService, BatchUpdateType updateType) {
     this.scheduledTaskService = scheduledTaskService;
     this.updateType = updateType;
   }
-
 
   /**
    * Cleanup processed tasks before every update run, in case job was terminated before completion

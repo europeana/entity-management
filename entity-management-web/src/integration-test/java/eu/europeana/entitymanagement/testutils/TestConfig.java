@@ -21,16 +21,17 @@ public class TestConfig {
   @Primary
   @Bean
   public ZohoAccessConfiguration configureZoho() throws Exception {
-    ZohoAccessConfiguration zohoAccessConfiguration = Mockito.mock(
-        ZohoAccessConfiguration.class);
+    ZohoAccessConfiguration zohoAccessConfiguration = Mockito.mock(ZohoAccessConfiguration.class);
     ZohoAccessClient zohoClient = Mockito.mock(ZohoAccessClient.class);
     Mockito.when(zohoAccessConfiguration.getZohoAccessClient()).thenReturn(zohoClient);
 
     // find matching JSON file based on zohoId argument, then create a Record object for it
-    Mockito.doAnswer((Answer<Optional<Record>>) invocation -> {
-          String zohoId = invocation.getArgument(0);
-          return BaseMvcTestUtils.getZohoOrganizationRecord(zohoId);
-        })
+    Mockito.doAnswer(
+            (Answer<Optional<Record>>)
+                invocation -> {
+                  String zohoId = invocation.getArgument(0);
+                  return BaseMvcTestUtils.getZohoOrganizationRecord(zohoId);
+                })
         .when(zohoClient)
         .getZohoRecordOrganizationById(ArgumentMatchers.any(String.class));
 

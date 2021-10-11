@@ -17,67 +17,66 @@ import org.springframework.batch.core.repository.ExecutionContextSerializer;
 import org.springframework.batch.item.ExecutionContext;
 
 @Entity("ExecutionContext")
-@Indexes({
-    @Index(fields = {@Field(EXECUTION_CTX_ID_KEY), @Field(EXECUTION_CTX_TYPE_KEY)})
-})
+@Indexes({@Index(fields = {@Field(EXECUTION_CTX_ID_KEY), @Field(EXECUTION_CTX_TYPE_KEY)})})
 public class ExecutionContextEntity {
-    @Id
-    private ObjectId _id;
+  @Id private ObjectId _id;
 
-    private long executionId;
+  private long executionId;
 
-    private String serializedContext;
+  private String serializedContext;
 
-    private ExecutionContextEntityType type;
+  private ExecutionContextEntityType type;
 
-    public long getExecutionId() {
-        return executionId;
+  public long getExecutionId() {
+    return executionId;
+  }
+
+  public String getSerializedContext() {
+    return serializedContext;
+  }
+
+  public ExecutionContextEntityType getType() {
+    return type;
+  }
+
+  public ExecutionContextEntity() {
+    // default empty constructor
+  }
+
+  public ExecutionContextEntity(
+      ExecutionContextEntityType type, long executionId, String serializedContext) {
+    this.type = type;
+    this.executionId = executionId;
+    this.serializedContext = serializedContext;
+  }
+
+  public static ExecutionContextEntity toEntity(
+      ExecutionContextEntityType type, Long executionId, String serializedContext) {
+    return new ExecutionContextEntity(type, executionId, serializedContext);
+  }
+
+  public static ExecutionContext fromEntity(
+      ExecutionContextEntity entity, ExecutionContextSerializer serializer) {
+    ExecutionContext executionContext = new ExecutionContext();
+
+    if (entity == null) {
+      return executionContext;
     }
 
-    public String getSerializedContext() {
-        return serializedContext;
+    String serializedContext = entity.getSerializedContext();
+
+    // reproduced from JdbcExecutionContextDao (in Spring batch core)
+    Map<String, Object> map;
+    try {
+      ByteArrayInputStream in =
+          new ByteArrayInputStream(serializedContext.getBytes(StandardCharsets.UTF_8));
+      map = serializer.deserialize(in);
+    } catch (IOException ioe) {
+      throw new IllegalArgumentException("Unable to deserialize the execution context", ioe);
     }
-
-    public ExecutionContextEntityType getType() {
-        return type;
+    for (Map.Entry<String, Object> entry : map.entrySet()) {
+      executionContext.put(entry.getKey(), entry.getValue());
     }
-
-    public ExecutionContextEntity() {
-        // default empty constructor
-    }
-
-    public ExecutionContextEntity(ExecutionContextEntityType type, long executionId, String serializedContext) {
-        this.type = type;
-        this.executionId = executionId;
-        this.serializedContext = serializedContext;
-    }
-
-    public static ExecutionContextEntity toEntity(ExecutionContextEntityType type, Long executionId, String serializedContext) {
-        return new ExecutionContextEntity(type, executionId, serializedContext);
-    }
-
-
-    public static ExecutionContext fromEntity(ExecutionContextEntity entity, ExecutionContextSerializer serializer) {
-        ExecutionContext executionContext = new ExecutionContext();
-
-        if (entity == null) {
-            return executionContext;
-        }
-
-        String serializedContext = entity.getSerializedContext();
-
-        // reproduced from JdbcExecutionContextDao (in Spring batch core)
-        Map<String, Object> map;
-        try {
-            ByteArrayInputStream in = new ByteArrayInputStream(serializedContext.getBytes(StandardCharsets.UTF_8));
-            map = serializer.deserialize(in);
-        } catch (IOException ioe) {
-            throw new IllegalArgumentException("Unable to deserialize the execution context", ioe);
-        }
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            executionContext.put(entry.getKey(), entry.getValue());
-        }
-        return executionContext;
-    }
-
+    return executionContext;
+  }
 }

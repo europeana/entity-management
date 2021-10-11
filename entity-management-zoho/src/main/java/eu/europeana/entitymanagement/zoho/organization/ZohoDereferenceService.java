@@ -12,16 +12,15 @@ public class ZohoDereferenceService implements Dereferencer {
 
   private final ZohoAccessConfiguration zohoAccessConfiguration;
 
-  public ZohoDereferenceService(
-      ZohoAccessConfiguration zohoAccessConfiguration) {
+  public ZohoDereferenceService(ZohoAccessConfiguration zohoAccessConfiguration) {
     this.zohoAccessConfiguration = zohoAccessConfiguration;
   }
 
   @Override
-  public Optional<Entity> dereferenceEntityById(@NonNull String id) throws Exception{
+  public Optional<Entity> dereferenceEntityById(@NonNull String id) throws Exception {
 
-    Optional<Record> zohoOrganization = zohoAccessConfiguration.getZohoAccessClient()
-        .getZohoRecordOrganizationById(id);
+    Optional<Record> zohoOrganization =
+        zohoAccessConfiguration.getZohoAccessClient().getZohoRecordOrganizationById(id);
 
     return zohoOrganization.map(ZohoOrganizationConverter::convertToOrganizationEntity);
   }

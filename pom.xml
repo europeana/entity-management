@@ -17,7 +17,7 @@
         <artifactId>europeana-parent-pom</artifactId>
         <version>2.2</version>
     </parent>
-    
+
     <repositories>
 		<repository>
 			<id>libs-release-local</id>
@@ -30,7 +30,7 @@
 			<url>http://artifactory.eanadev.org/artifactory/libs-snapshot</url>
 		</repository>
 	</repositories>
-    
+
 
     <groupId>eu.europeana.api</groupId>
     <artifactId>entity-management</artifactId>
@@ -50,7 +50,7 @@
         <junit.version>5.7.0</junit.version>
         <jackson.version>2.11.4</jackson.version>
         <version.commonsLang3>3.0</version.commonsLang3>
-        <!-- 
+        <!--
         <version.annotationLd>1.1.6</version.annotationLd>
          -->
         <spring-boot.version>2.4.0</spring-boot.version>
@@ -70,6 +70,7 @@
 		<version.jakarta>2.3.3</version.jakarta>
 		<version.jaxb>2.3.3</version.jaxb>
 		<version.saxon-he>10.5</version.saxon-he>
+    <git-code-format.version>3.1</git-code-format.version>
     </properties>
 
     <dependencyManagement>
@@ -119,7 +120,7 @@
 
         </dependencies>
     </dependencyManagement>
-    
+
       <build>
     <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
       <plugins>
@@ -198,7 +199,10 @@
                   <executions>
                       <execution>
                           <id>add-integration-test-source</id>
-                          <phase>generate-test-sources</phase>
+                        <!-- Normally this would be attached to the generate-test-source phase,
+                          however we attach to generate-sources so that the git-code-format plugin can pick
+                          up integration test source files (see plugin config above) -->
+                        <phase>generate-sources</phase>
                           <goals>
                               <goal>add-test-source</goal>
                           </goals>
@@ -227,6 +231,37 @@
                       </execution>
                   </executions>
               </plugin>
+            <plugin>
+              <groupId>com.cosium.code</groupId>
+              <artifactId>git-code-format-maven-plugin</artifactId>
+              <version>${git-code-format.version}</version>
+              <executions>
+                <!-- Install git pre-commit hook -->
+                <execution>
+                  <id>install-formatter-hook</id>
+                  <goals>
+                    <goal>install-hooks</goal>
+                  </goals>
+                </execution>
+                <!-- Format source files -->
+                <execution>
+                  <id>format-code</id>
+                  <phase>process-sources</phase>
+                  <goals>
+                    <goal>format-code</goal>
+                  </goals>
+                </execution>
+                <!-- On Maven verify phase, fail if any file
+                (including unmodified) is badly formatted -->
+                <execution>
+                  <id>validate-code-format</id>
+                  <phase>verify</phase>
+                  <goals>
+                    <goal>validate-code-format</goal>
+                  </goals>
+                </execution>
+              </executions>
+            </plugin>
           </plugins>
   </build>
 </project>

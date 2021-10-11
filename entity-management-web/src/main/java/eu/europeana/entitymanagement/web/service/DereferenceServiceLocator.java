@@ -25,9 +25,7 @@ public class DereferenceServiceLocator {
     this.wikidataDereferenceService = wikidataDereferenceService;
   }
 
-  /**
-   * Gets the {@link Dereferencer} implementation that is applicable for the given id and type
-   */
+  /** Gets the {@link Dereferencer} implementation that is applicable for the given id and type */
   public Dereferencer getDereferencer(String id, String entityType) {
 
     if (WikidataUtils.isWikidataOrganization(id, entityType)) {

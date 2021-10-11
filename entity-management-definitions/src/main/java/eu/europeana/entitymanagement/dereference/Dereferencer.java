@@ -8,10 +8,9 @@ public interface Dereferencer {
   /**
    * Dereferences the entity with the given id from the external data source.
    *
-   * @param id         external ID for entity
+   * @param id external ID for entity
    * @return An optional containing the de-referenced entity, or an empty optional if no match
-   * found.
-   **/
+   *     found.
+   */
   Optional<Entity> dereferenceEntityById(String id) throws Exception;
-
 }

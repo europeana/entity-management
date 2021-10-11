@@ -1,22 +1,25 @@
 package eu.europeana.entitymanagement.web.auth;
 
-
 import eu.europeana.api.commons.definitions.vocabulary.Role;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
 
-/**
- * Mapping between user role and operations
- * Reproduced from Sets API
- */
+/** Mapping between user role and operations Reproduced from Sets API */
 public enum Roles implements Role {
-
-  ANONYMOUS(new String[]{Operations.RETRIEVE}),
-  EDITOR(new String[]{Operations.RETRIEVE, Operations.CREATE, Operations.DELETE, Operations.UPDATE}),
-  ADMIN(new String[]{Operations.RETRIEVE, Operations.CREATE, Operations.DELETE, Operations.UPDATE, Operations.ADMIN_ALL});
+  ANONYMOUS(new String[] {Operations.RETRIEVE}),
+  EDITOR(
+      new String[] {Operations.RETRIEVE, Operations.CREATE, Operations.DELETE, Operations.UPDATE}),
+  ADMIN(
+      new String[] {
+        Operations.RETRIEVE,
+        Operations.CREATE,
+        Operations.DELETE,
+        Operations.UPDATE,
+        Operations.ADMIN_ALL
+      });
 
   String[] operations;
 
-  Roles (String[] operations){
+  Roles(String[] operations) {
     this.operations = operations;
   }
 
@@ -42,8 +45,8 @@ public enum Roles implements Role {
    */
   public static Role getRoleByName(String name) {
     Role userRole = null;
-    for(Roles role : Roles.values()) {
-      if(role.name().equalsIgnoreCase(name)) {
+    for (Roles role : Roles.values()) {
+      if (role.name().equalsIgnoreCase(name)) {
         userRole = role;
         break;
       }

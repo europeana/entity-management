@@ -11,23 +11,29 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Helper class to deserialize JSON into Zoho {@link Record} to make testing easier
- */
+/** Helper class to deserialize JSON into Zoho {@link Record} to make testing easier */
 public class ZohoRecordTestDeserializer extends StdDeserializer<Record> {
 
   /**
    * Contains list of fields to read from JSON file.
-   * <p>
-   * Fields with numeric suffixes (sameAs, lang code) and ID field are handled separately
+   *
+   * <p>Fields with numeric suffixes (sameAs, lang code) and ID field are handled separately
    */
-  private static final List<String> ZOHO_JSON_FIELDS = List.of(ORGANIZATION_ROLE_FIELD,
-      LANG_ORGANIZATION_NAME_FIELD,
-      LANG_ACRONYM_FIELD, ACRONYM_FIELD, LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD, WEBSITE_FIELD,
-      DOMAIN_FIELD, GEOGRAPHIC_LEVEL_FIELD,
-      ORGANIZATION_COUNTRY_FIELD, CITY_FIELD, ADDRESS_COUNTRY_FIELD, ZIP_CODE_FIELD,
-      PO_BOX_FIELD
-  );
+  private static final List<String> ZOHO_JSON_FIELDS =
+      List.of(
+          ORGANIZATION_ROLE_FIELD,
+          LANG_ORGANIZATION_NAME_FIELD,
+          LANG_ACRONYM_FIELD,
+          ACRONYM_FIELD,
+          LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD,
+          WEBSITE_FIELD,
+          DOMAIN_FIELD,
+          GEOGRAPHIC_LEVEL_FIELD,
+          ORGANIZATION_COUNTRY_FIELD,
+          CITY_FIELD,
+          ADDRESS_COUNTRY_FIELD,
+          ZIP_CODE_FIELD,
+          PO_BOX_FIELD);
 
   public ZohoRecordTestDeserializer() {
     this(null);
@@ -38,8 +44,7 @@ public class ZohoRecordTestDeserializer extends StdDeserializer<Record> {
   }
 
   @Override
-  public Record deserialize(JsonParser p, DeserializationContext ctxt)
-      throws IOException {
+  public Record deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
     JsonNode node = p.getCodec().readTree(p);
     Record record = new Record();
 
@@ -70,7 +75,6 @@ public class ZohoRecordTestDeserializer extends StdDeserializer<Record> {
 
     return record;
   }
-
 
   private void addMultiField(JsonNode node, Record record, String fieldName, int length) {
     for (int i = 1; i <= length; i++) {
