@@ -65,7 +65,7 @@
         ]
     },
     "date": [
-    	"1452-04-15", "http://data.europeana.eu/timespan/15", "1519-05-02", "http://data.europeana.eu/timespan/16"
+    	"1452-04-15", "1519-05-02", "http://data.europeana.eu/timespan/16"
     ],
     "dateOfBirth": [
         "1452-04-15", "http://semium.org/time/14xx"

@@ -41,7 +41,6 @@
     <description>Parent module for the Entity Management API</description>
 
     <properties>
-    	  <version.entitymanagementApi>0.0.1-SNAPSHOT</version.entitymanagementApi>
         <java.version>11</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
@@ -59,6 +58,7 @@
 		    <zoho-sdk.version>3.0.1</zoho-sdk.version>
 		    <jaxb.version>2.3.3</jaxb.version>
 		    <saxon-he.version>10.5</saxon-he.version>
+        <git-code-format.version>3.1</git-code-format.version>
     </properties>
 
     <dependencyManagement>
@@ -99,7 +99,7 @@
 
         </dependencies>
     </dependencyManagement>
-    
+
       <build>
           <!--  allow Maven to manipulate resource files as a part of the build process.
                  build.properties by default is expanded by spring-boot-maven-plugin
@@ -131,7 +131,10 @@
                   <executions>
                       <execution>
                           <id>add-integration-test-source</id>
-                          <phase>generate-test-sources</phase>
+                        <!-- Normally this would be attached to the generate-test-source phase,
+                          however we attach to generate-sources so that the git-code-format plugin can pick
+                          up integration test source files (see plugin config above) -->
+                        <phase>generate-sources</phase>
                           <goals>
                               <goal>add-test-source</goal>
                           </goals>
@@ -160,6 +163,37 @@
                       </execution>
                   </executions>
               </plugin>
+            <plugin>
+              <groupId>com.cosium.code</groupId>
+              <artifactId>git-code-format-maven-plugin</artifactId>
+              <version>${git-code-format.version}</version>
+              <executions>
+                <!-- Install git pre-commit hook -->
+                <execution>
+                  <id>install-formatter-hook</id>
+                  <goals>
+                    <goal>install-hooks</goal>
+                  </goals>
+                </execution>
+                <!-- Format source files -->
+                <execution>
+                  <id>format-code</id>
+                  <phase>process-sources</phase>
+                  <goals>
+                    <goal>format-code</goal>
+                  </goals>
+                </execution>
+                <!-- On Maven verify phase, fail if any file
+                (including unmodified) is badly formatted -->
+                <execution>
+                  <id>validate-code-format</id>
+                  <phase>verify</phase>
+                  <goals>
+                    <goal>validate-code-format</goal>
+                  </goals>
+                </execution>
+              </executions>
+            </plugin>
           </plugins>
   </build>
 </project>

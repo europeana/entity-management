@@ -6,12 +6,12 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class SequenceRepository extends AbstractRepository {
-    public SequenceRepository(Datastore datastore) {
-        super(datastore);
-    }
+  public SequenceRepository(Datastore datastore) {
+    super(datastore);
+  }
 
-    @Override
-    public void drop() {
-        dropCollection(SequenceGenerator.class);
-    }
+  @Override
+  public void drop() {
+    dropCollection(SequenceGenerator.class);
+  }
 }

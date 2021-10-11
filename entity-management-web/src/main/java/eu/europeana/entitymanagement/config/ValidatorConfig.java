@@ -28,23 +28,24 @@ public class ValidatorConfig {
   private final EntityManagementConfiguration emConfiguration;
 
   @Autowired
-  public ValidatorConfig(@Qualifier(BEAN_XML_MAPPER) XmlMapper xmlMapper,
+  public ValidatorConfig(
+      @Qualifier(BEAN_XML_MAPPER) XmlMapper xmlMapper,
       EntityManagementConfiguration emConfiguration) {
     this.xmlMapper = xmlMapper;
     this.emConfiguration = emConfiguration;
   }
 
-  @Bean(name=BEAN_EM_VALIDATOR_FACTORY)
+  @Bean(name = BEAN_EM_VALIDATOR_FACTORY)
   public ValidatorFactory getValidatorFactoryBean() {
     return new LocalValidatorFactoryBean();
   }
 
-  @Bean(name=BEAN_EM_ENTITY_FIELD_CLEANER)
+  @Bean(name = BEAN_EM_ENTITY_FIELD_CLEANER)
   public EntityFieldsCleaner getEntityFieldsCleanerBean() throws IOException {
     return new EntityFieldsCleaner(getLanguageCodes(), emConfiguration.getThumbnailBaseUrl());
   }
 
-  @Bean(name=BEAN_EM_LANGUAGE_CODES)
+  @Bean(name = BEAN_EM_LANGUAGE_CODES)
   public LanguageCodes getLanguageCodes() throws IOException {
     String languagecodesXMLConfig = emConfiguration.getLanguagecodesXMLConfig();
     try (InputStream inputStream = getClass().getResourceAsStream(languagecodesXMLConfig)) {

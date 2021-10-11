@@ -9,73 +9,79 @@ import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatorGroup;
 import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorGroup;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
+import java.util.List;
+import java.util.Set;
+import javax.validation.ConstraintViolation;
+import javax.validation.ValidatorFactory;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ValidatorFactory;
-import java.util.Set;
-
-/**
- * This {@link ItemProcessor} updates Entity metadata.
- */
+/** This {@link ItemProcessor} updates Entity metadata. */
 @Component
 public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, EntityRecord> {
-    private final EntityRecordService entityRecordService;
-    private final ValidatorFactory emValidatorFactory;
+  private final EntityRecordService entityRecordService;
+  private final ValidatorFactory emValidatorFactory;
 
-    private final EntityFieldsCleaner emEntityFieldCleaner;
+  private final EntityFieldsCleaner emEntityFieldCleaner;
 
+  public EntityUpdateProcessor(
+      EntityRecordService entityRecordService,
+      ValidatorFactory emValidatorFactory,
+      EntityFieldsCleaner emEntityFieldCleaner) {
+    this.entityRecordService = entityRecordService;
+    this.emValidatorFactory = emValidatorFactory;
+    this.emEntityFieldCleaner = emEntityFieldCleaner;
+  }
 
-    public EntityUpdateProcessor(EntityRecordService entityRecordService,
-        ValidatorFactory emValidatorFactory, 
-        EntityFieldsCleaner emEntityFieldCleaner) {
-        this.entityRecordService = entityRecordService;
-        this.emValidatorFactory = emValidatorFactory;
-        this.emEntityFieldCleaner = emEntityFieldCleaner;
+  @Override
+  public EntityRecord process(@NonNull EntityRecord entityRecord) throws EuropeanaApiException {
+
+    List<EntityProxy> externalProxies = entityRecord.getExternalProxies();
+
+    Entity externalProxyEntity = externalProxies.get(0).getEntity();
+    validateMinimalConstraints(externalProxyEntity);
+
+    if (externalProxies.size() > 1) {
+      // cumulatively merge all external proxies
+      for (int i = 1; i < externalProxies.size(); i++) {
+        Entity secondaryProxyEntity = externalProxies.get(i).getEntity();
+        // validate each proxy's metadata before merging
+        validateMinimalConstraints(secondaryProxyEntity);
+        externalProxyEntity =
+            entityRecordService.mergeEntities(externalProxyEntity, secondaryProxyEntity);
+      }
     }
 
-    @Override
-    public EntityRecord process(@NonNull EntityRecord entityRecord) throws EuropeanaApiException {
-        
+    Entity europeanaProxyEntity = entityRecord.getEuropeanaProxy().getEntity();
 
-        EntityProxy europeanaProxy = entityRecord.getEuropeanaProxy();
-        // TODO: Support multiple external proxies (EA:2706)
-        EntityProxy externalProxy = entityRecord.getExternalProxies().get(0);
-        if (europeanaProxy == null || externalProxy == null) {
-            throw new EuropeanaApiException(String.format(
-                    "Unable to process entity record with id: %s. Europeana proxy or external proxy is not available in the record!",
-                    entityRecord.getEntityId()));
-        }
+    Entity consolidatedEntity =
+        entityRecordService.mergeEntities(europeanaProxyEntity, externalProxyEntity);
+    emEntityFieldCleaner.cleanAndNormalize(consolidatedEntity);
+    entityRecordService.performReferentialIntegrity(consolidatedEntity);
+    validateCompleteConstraints(consolidatedEntity);
+    entityRecordService.updateConsolidatedVersion(entityRecord, consolidatedEntity);
 
-        Entity europeanaEntity = europeanaProxy.getEntity();
-        Entity externalEntity = externalProxy.getEntity();
+    return entityRecord;
+  }
 
-        validateMinimalConstraints(externalEntity);
-        Entity consolidatedEntity = entityRecordService.mergeEntities(europeanaEntity, externalEntity);
-        emEntityFieldCleaner.cleanAndNormalize(consolidatedEntity);
-        entityRecordService.performReferentialIntegrity(consolidatedEntity);
-        validateCompleteConstraints(consolidatedEntity);
-        entityRecordService.updateConsolidatedVersion(entityRecord, consolidatedEntity);
-        
-   
-        return entityRecord;
+  private void validateCompleteConstraints(Entity entity) throws EntityValidationException {
+    Set<ConstraintViolation<Entity>> violations =
+        emValidatorFactory
+            .getValidator()
+            .validate(entity, EntityFieldsCompleteValidatorGroup.class);
+    if (!violations.isEmpty()) {
+      throw new EntityValidationException(
+          "The consolidated entity contains invalid data!", violations);
     }
+  }
 
-    private void validateCompleteConstraints(Entity entity) throws EntityValidationException  {
-        Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entity, EntityFieldsCompleteValidatorGroup.class);
-        if (!violations.isEmpty()) {
-            throw new EntityValidationException("The consolidated entity contains invalid data!", violations);
-        }
+  private void validateMinimalConstraints(Entity entity) throws EntityValidationException {
+    Set<ConstraintViolation<Entity>> violations =
+        emValidatorFactory.getValidator().validate(entity, EntityFieldsMinimalValidatorGroup.class);
+    if (!violations.isEmpty()) {
+      throw new EntityValidationException(
+          "The entity from the external source contains invalid data!", violations);
     }
-    
-    private void validateMinimalConstraints(Entity entity) throws EntityValidationException  {
-        Set<ConstraintViolation<Entity>> violations = emValidatorFactory.getValidator().validate(entity, EntityFieldsMinimalValidatorGroup.class);
-        if (!violations.isEmpty()) {
-            throw new EntityValidationException("The entity from the external source contains invalid data!", violations);
-        }
-    }
-    
-    
+  }
 }
