@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElements;
-import javax.xml.bind.annotation.XmlRootElement;
 
 import eu.europeana.entitymanagement.web.xml.model.XmlAgentImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
@@ -21,7 +20,6 @@ import eu.europeana.entitymanagement.web.xml.model.XmlTimespanImpl;
 /**
  * Root element for Metis de-reference response
  */
-//@XmlRootElement(namespace = "http://www.europeana.eu/schemas/metis", name = "result")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class EnrichmentResultBaseWrapper {
 
@@ -30,7 +28,7 @@ public class EnrichmentResultBaseWrapper {
             @XmlElement(name = "Agent", namespace = "http://www.europeana.eu/schemas/edm/", type = XmlAgentImpl.class),
             @XmlElement(name = "Place", namespace = "http://www.europeana.eu/schemas/edm/", type = XmlPlaceImpl.class),
             @XmlElement(name = "Organization", namespace = "http://www.europeana.eu/schemas/edm/", type = XmlOrganizationImpl.class),
-            @XmlElement(name = "Timespan", namespace = "http://www.europeana.eu/schemas/edm/", type = XmlTimespanImpl.class)})
+            @XmlElement(name = "TimeSpan", namespace = "http://www.europeana.eu/schemas/edm/", type = XmlTimespanImpl.class)})
     private List<XmlBaseEntityImpl<?>> xmlEntities = new ArrayList<>();
 
 

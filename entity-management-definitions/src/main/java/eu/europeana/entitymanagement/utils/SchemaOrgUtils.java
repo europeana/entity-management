@@ -103,7 +103,7 @@ public final class SchemaOrgUtils {
                                          eu.europeana.corelib.edm.model.schemaorg.ContextualEntity conceptObject, String entityPageType) {
         if (StringUtils.startsWithIgnoreCase(entity.getAbout(), URL_PREFIX)) {
             String entityPageUrl = String.format(SchemaOrgConstants.ENTITY_PAGE_URL_PATTERN, entityPageType,
-            		EntityRecordUtils.getIdFromUrl(entity.getEntityId()));
+                    EntityRecordUtils.getIdFromUrl(entity.getEntityId()));
             conceptObject.setEntityPageUrl(entityPageUrl);
         }
     }

@@ -84,8 +84,7 @@ public class EMController extends BaseRest {
 	}
 
 	@ApiOperation(value = "Disable an entity", nickname = "disableEntity", response = java.lang.Void.class)
-    @RequestMapping(value = { "/{type}/base/{identifier}",
-	    "/{type}/{identifier}" }, method = RequestMethod.DELETE, produces = {HttpHeaders.CONTENT_TYPE_JSONLD,
+    @RequestMapping(value = {"/{type}/{identifier}" }, method = RequestMethod.DELETE, produces = {HttpHeaders.CONTENT_TYPE_JSONLD,
 			MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<String> disableEntity(
 	    @RequestHeader(value = "If-Match", required = false) String ifMatchHeader,
@@ -112,8 +111,7 @@ public class EMController extends BaseRest {
 	}
 
 	@ApiOperation(value = "Re-enable an entity", nickname = "enableEntity", response = java.lang.Void.class)
-	@RequestMapping(value = { "/{type}/base/{identifier}",
-			"/{type}/{identifier}" }, method = RequestMethod.POST, produces = {HttpHeaders.CONTENT_TYPE_JSONLD,
+	@RequestMapping(value = { "/{type}/{identifier}" }, method = RequestMethod.POST, produces = {HttpHeaders.CONTENT_TYPE_JSONLD,
 			MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<String> enableEntity(
 			@RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
@@ -138,7 +136,7 @@ public class EMController extends BaseRest {
 	}
 
     @ApiOperation(value = "Update an entity", nickname = "updateEntity", response = java.lang.Void.class)
-    @RequestMapping(value = { "/{type}/base/{identifier}", "/{type}/{identifier}" },method = RequestMethod.PUT, produces = {
+    @RequestMapping(value = { "/{type}/{identifier}" },method = RequestMethod.PUT, produces = {
 	    HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<String> updateEntity(
     	@RequestHeader(value = "If-Match", required = false) String ifMatchHeader,
@@ -252,7 +250,7 @@ public class EMController extends BaseRest {
 
 	@ApiOperation(value = "Retrieve a known entity", nickname = "getEntityJsonLd", response = java.lang.Void.class)
     @GetMapping(value = { "/{type}/base/{identifier}.jsonld",
-	    "/{type}/{identifier}.jsonld", "/{type}/{identifier}" }, produces = {HttpHeaders.CONTENT_TYPE_JSONLD,
+	    "/{type}/{identifier}.jsonld",  "/{type}/base/{identifier}", "/{type}/{identifier}" }, produces = {HttpHeaders.CONTENT_TYPE_JSONLD,
 			MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<String> getJsonLdEntity(
 	    @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
@@ -273,7 +271,7 @@ public class EMController extends BaseRest {
 
     @ApiOperation(value = "Retrieve a known entity", nickname = "getEntityXml", response = java.lang.Void.class)
     @RequestMapping(value = { "/{type}/base/{identifier}.xml",
-	    "/{type}/{identifier}.xml", "/{type}/{identifier}" }, method = RequestMethod.GET, produces = {
+	    "/{type}/{identifier}.xml", "/{type}/{identifier}", "/{type}/{identifier}" }, method = RequestMethod.GET, produces = {
 			MediaType.APPLICATION_XML_VALUE,
 		    HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML, HttpHeaders.CONTENT_TYPE_RDF_XML})
     public ResponseEntity<String> getXmlEntity(

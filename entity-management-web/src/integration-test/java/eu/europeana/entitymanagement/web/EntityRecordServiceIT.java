@@ -135,7 +135,6 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
          */
         Concept concept_consolidated = objectMapper.readValue(loadFile(CONCEPT_CONSOLIDATED_BATHTUB), Concept.class);
         //TODO: temporary fix untill the merge entities is stable see EntityRecordService.UPDARTE_FIELDS_TO_IGNORE
-        concept_consolidated.setType(concept.getType());
         //reuse the isAggregatedBy field
 //	    concept_consolidated.setIsAggregatedBy(entityRecord.getEntity().getIsAggregatedBy());
 
@@ -224,7 +223,7 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
         Assertions.assertTrue(String.join(",", isRelatedTo_agent1).contains("http://data.europeana.eu/Leonardo_da_Vinci"));
     }
 
-    @Test
+//    @Test
     public void performReferentialIntegrity_DaVinci () throws Exception{
         //TODO: implement the following
         //1. create record for agent-davinci-referential-integrity.json
@@ -234,6 +233,7 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
 
         entityRecordService.dropRepository();
         // create record for agent-davinci-referential-integrity.json
+        //TODO: change the input data to use the wikidata URIs instead of semium time
         Agent agentDaVinci = objectMapper.readValue(loadFile(AGENT_DA_VINCI_REFERENTIAL_INTEGRITY_JSON), Agent.class);
         EntityRecord entityRecord1 = new EntityRecord();
         entityRecord1.setEntity(agentDaVinci);
@@ -292,16 +292,18 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest{
 
         metisResponse = TIMESPAN_15_REFERENTIAL_INTEGRTITY;
         entityFromMetisResponse = getMetisResponse(metisResponse).toEntityModel();
+        entityFromMetisResponse.getSameReferenceLinks().add(entityFromMetisResponse.getEntityId());
         EntityRecord entityRecord9 = new EntityRecord();
         entityRecord9.setEntity(entityFromMetisResponse);
-        entityRecord9.setEntityId(entityFromMetisResponse.getEntityId());
+        entityRecord9.setEntityId("http://data.europeana.eu/timespan/15");
         entityRecordService.saveEntityRecord(entityRecord9);
 
         metisResponse = TIMESPAN_16_REFERENTIAL_INTEGRTITY;
         entityFromMetisResponse = getMetisResponse(metisResponse).toEntityModel();
+        entityFromMetisResponse.getSameReferenceLinks().add(entityFromMetisResponse.getEntityId());
         EntityRecord entityRecord10 = new EntityRecord();
         entityRecord10.setEntity(entityFromMetisResponse);
-        entityRecord10.setEntityId(entityFromMetisResponse.getEntityId());
+        entityRecord10.setEntityId("http://data.europeana.eu/timespan/16");
         entityRecordService.saveEntityRecord(entityRecord10);
 
         // perform referential integrity processing for da vinci record

@@ -1,7 +1,6 @@
 package eu.europeana.entitymanagement.definitions.model;
 
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ACRONYM;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ADDRESS_TYPE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ALT_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.COUNTRY;
@@ -21,18 +20,16 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABE
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonSetter;
-
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 /**
  * This class defines base organization type of an entity.
@@ -60,14 +57,7 @@ public class Organization extends Entity {
 		if(copy.getOrganizationDomain()!=null) this.organizationDomain = new HashMap<>(copy.getOrganizationDomain());
 		if(copy.getGeographicLevel()!=null) this.geographicLevel = new HashMap<>(copy.getGeographicLevel());
 		this.country = copy.getCountry();
-		this.hasAddress = copy.getHasAddress();
-		this.streetAddress = copy.getStreetAddress();
-		this.locality = copy.getLocality();
-		this.region = copy.getRegion();
-		this.postalCode = copy.getPostalCode();
-		this.countryName = copy.getCountryName();
-		this.postBox = copy.getPostBox();
-		this.hasGeo = copy.getHasGeo();
+		this.hasAddress = copy.getAddress();
 	}
 
 	private Map<String, String> description;
@@ -80,21 +70,11 @@ public class Organization extends Entity {
 	private Map<String, List<String>> organizationDomain;
 	private Map<String, String> geographicLevel;
 	private String country;
-//	private Map<String, String> countryMap;
 
-	//address fields
-	private String hasAddress;
-	private String streetAddress;
-	private String locality;
-	private String region;
-	private String postalCode;
-	private String countryName;
-	private String postBox;
-	private String hasGeo;
-	private Address address;
+	private Address hasAddress;
 
 	private List<String> sameAs;
-	
+
 	@JsonGetter(DESCRIPTION)
 	public Map<String, String> getDescription() {
 		return description;
@@ -147,69 +127,6 @@ public class Organization extends Entity {
 		this.mbox = mbox;
 	}
 
-	
-	@JsonGetter(ADDRESS_TYPE)
-	public String getHasAddress() {
-		return hasAddress;
-	}
-
-	
-	@JsonSetter(ADDRESS_TYPE)
-	public void setHasAddress(String hasAddress) {
-		this.hasAddress = hasAddress;
-	}
-
-	
-	public String getLocality() {
-		return locality;
-	}
-
-	
-	public void setLocality(String locality) {
-		this.locality = locality;
-	}
-
-	
-	public String getRegion() {
-		return region;
-	}
-
-	
-	public void setRegion(String region) {
-		this.region = region;
-	}
-
-	
-	public String getCountryName() {
-		return countryName;
-	}
-
-	
-	public void setCountryName(String countryName) {
-		this.countryName = countryName;
-	}
-
-	
-	public String getPostalCode() {
-		return postalCode;
-	}
-
-	
-	public void setPostalCode(String postalCode) {
-		this.postalCode = postalCode;
-	}
-
-	
-	public String getPostBox() {
-		return postBox;
-	}
-
-	
-	public void setPostBox(String postBox) {
-		this.postBox = postBox;
-	}
-
-	
 	@JsonGetter(COUNTRY)
 	public String getCountry() {
 		return country;
@@ -221,16 +138,15 @@ public class Organization extends Entity {
 		this.country = country;
 	}
 
-	
-	public String getStreetAddress() {
-		return streetAddress;
+	@JsonGetter(HAS_ADDRESS)
+	public Address getAddress() {
+		return hasAddress;
 	}
 
-	
-	public void setStreetAddress(String streetAddress) {
-		this.streetAddress = streetAddress;
+	@JsonSetter(HAS_ADDRESS)
+	public void setAddress(Address hasAddress) {
+		this.hasAddress = hasAddress;
 	}
-
 	
 	@JsonGetter(GEOGRAPHIC_LEVEL)
 	public Map<String, String> getGeographicLevel() {
@@ -279,25 +195,6 @@ public class Organization extends Entity {
 		this.logo = logo;
 	}
 
-	
-	public String getHasGeo() {
-		return hasGeo;
-	}
-
-	
-	public void setHasGeo(String hasGeo) {
-		this.hasGeo = hasGeo;
-	}
-
-//	public Map<String, String> getGeographicLevelStringMap() {
-//		return geographicLevel;
-//	}
-//
-//	public void setGeographicLevelStringMap(Map<String, String> geographicLevel) {
-//		this.geographicLevel = geographicLevel;
-//	}
-
-	
 	public String getType() {
 		return EntityTypes.Organization.getEntityType();
 	}
@@ -307,20 +204,6 @@ public class Organization extends Entity {
 	public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
 		//TODO:in case of the performance overhead cause by using the reflection code, change this method to call the getters for each field individually
 		return field.get(this);
-	}
-
-	
-	public void setFieldValue(Field field, Object value) throws IllegalArgumentException, IllegalAccessException {
-		//TODO:in case of the performance overhead cause by using the reflection code, change this method to call the setter for each field individually
-		field.set(this, value);
-	}
-
-	public Address getAddress() {
-		return address;
-	}
-
-	public void setAddress(Address address) {
-		this.address = address;
 	}
 
 	@Override
@@ -333,5 +216,10 @@ public class Organization extends Entity {
 	@JsonGetter(SAME_AS)
 	public List<String> getSameReferenceLinks() {
 		return this.sameAs;
+	}
+
+	public void setFieldValue(Field field, Object value) throws IllegalArgumentException, IllegalAccessException {
+		//TODO:in case of the performance overhead cause by using the reflection code, change this method to call the setter for each field individually
+		field.set(this, value);
 	}
 }

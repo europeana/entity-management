@@ -15,7 +15,7 @@ public final class XmlConstants extends XmlFields{
     public static final String NAMESPACE_DC_TERMS = "http://purl.org/dc/terms/";
     public static final String NAMESPACE_XML = "http://www.w3.org/XML/1998/namespace";
     public static final String NAMESPACE_WGS84_POS = "http://www.w3.org/2003/01/geo/wgs84_pos#";
-    public static final String NAMESPACE_VCARD = "https://www.w3.org/2006/vcard/";
+    public static final String NAMESPACE_VCARD = "http://www.w3.org/2006/vcard/ns#";
 
     public static final String RDF = "RDF";
     public static final String XML = "xml";

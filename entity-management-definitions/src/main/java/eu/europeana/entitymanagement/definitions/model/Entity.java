@@ -2,31 +2,17 @@ package eu.europeana.entitymanagement.definitions.model;
 
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.ENTITY_CONTEXT;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ALT_LABEL;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_PART;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HIDDEN_LABEL;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NOTE;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IDENTIFIER;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_RELATED_TO;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_PART;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_PART_OF;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DEPICTION;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_SHOWN_BY;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_AGGREGATED_BY;
-
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.bson.types.ObjectId;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_PART_OF;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_RELATED_TO;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_SHOWN_BY;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NOTE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -36,13 +22,19 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
-
-import dev.morphia.annotations.Transient;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatorGroup;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatorInterface;
 import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorGroup;
 import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorInterface;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import org.bson.types.ObjectId;
 
 @dev.morphia.annotations.Embedded
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -87,12 +79,9 @@ public abstract class Entity {
 		this.payload = copy.getPayload();
 	}
 
-
-	protected String type;
+	protected String type = getType();
 	protected String entityId;
 	// ID of entityRecord in database
-	@Transient
-	protected String entityIdentifier;
 
 	protected Map<String, List<String>> note;
 	protected Map<String, String> prefLabel;
@@ -157,20 +146,8 @@ public abstract class Entity {
 		this.note = note;
 	}
 
-
 	@JsonGetter(TYPE)
-	public String getType() {
-		return type;
-	}
-
-
-	@JsonSetter(TYPE)
-	public void setType(String type) {
-		this.type=type;
-	}
-
-
-
+	public abstract String getType();
 
 	@JsonGetter(ID)
 	public String getEntityId() {
@@ -201,7 +178,6 @@ public abstract class Entity {
 
 	public void setAbout(String about) {
 		setEntityId(about);
-		setEntityIdentifier();
 	}
 
 	@JsonGetter(IS_RELATED_TO)
@@ -265,11 +241,6 @@ public abstract class Entity {
 	}
 
 
-	public String getEntityIdentifier() {
-		return this.entityIdentifier;
-	}
-
-
 	@JsonGetter(WebEntityFields.IS_SHOWN_BY)
 	public WebResource getIsShownBy() {
 		return isShownBy;
@@ -313,11 +284,6 @@ public abstract class Entity {
 	@JsonSetter(IS_AGGREGATED_BY)
 	public void setIsAggregatedBy(Aggregation isAggregatedBy) {
 		this.isAggregatedBy = isAggregatedBy;
-	}
-	
-	private void setEntityIdentifier(){
-		String[] splitArray = this.getAbout().split("/");
-		this.entityIdentifier =  splitArray[splitArray.length-1];
 	}
 
 	@JsonIgnore

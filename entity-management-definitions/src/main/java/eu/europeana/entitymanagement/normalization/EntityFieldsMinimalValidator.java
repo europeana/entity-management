@@ -28,7 +28,7 @@ public class EntityFieldsMinimalValidator implements ConstraintValidator<EntityF
 			return false;
 		}
 		
-		boolean returnValue=true;
+		boolean isValid=true;
 		
 		List<Field> entityFields = EntityUtils.getAllFields(entity.getClass());
 		
@@ -44,9 +44,7 @@ public class EntityFieldsMinimalValidator implements ConstraintValidator<EntityF
 				if (fieldValue == null) {
 					if (EntityFieldsTypes.isMandatory(fieldName)) {
 						addConstraint(context, "The mandatory field: " + fieldName + " cannot be NULL.");
-						if (returnValue) {
-							returnValue = false;
-						}
+						isValid = false;
 					}
 
 					continue;
@@ -60,6 +58,7 @@ public class EntityFieldsMinimalValidator implements ConstraintValidator<EntityF
 									&& ((Map<?, ?>) fieldValue).size() < minContentCount)) {
 						addConstraint(context,
 								fieldName + " must have at least " + minContentCount + " values");
+							isValid = false;
 					}
 				}
 			}
@@ -70,7 +69,7 @@ public class EntityFieldsMinimalValidator implements ConstraintValidator<EntityF
 		    throw new EntityFieldAccessException("During the validation of the entity fields an illegal access to some method or field has happened.", e);
 		}
 		
-		return returnValue;
+		return isValid;
     }
     
     private void addConstraint(ConstraintValidatorContext context, String messageTemplate) {

@@ -51,7 +51,7 @@ public class EntityRecordService {
 	 * Fields to ignore when updating entities from user request
 	 */
 	private final List<String> UPDATE_FIELDS_TO_IGNORE = List
-			.of(ID, TYPE, ENTITY_ID, ENTITY_IDENTIFIER,
+			.of(ID, TYPE, ENTITY_ID,
 					IS_AGGREGATED_BY);
 
 	@Autowired
@@ -179,7 +179,6 @@ public class EntityRecordService {
 		Entity europeanaProxyMetadata = EntityObjectFactory.createProxyEntityObject(type);
 		// copy metadata from request into entity
 		europeanaProxyMetadata.setEntityId(entityId);
-		europeanaProxyMetadata.setType(type);
 		copyPreviewMetadata(europeanaProxyMetadata, entityCreationRequest);
 		setEuropeanaMetadata(europeanaProxyMetadata, entityId, entityRecord, timestamp);
 
@@ -234,7 +233,6 @@ public class EntityRecordService {
         Entity europeanaProxyMetadata = EntityObjectFactory.createProxyEntityObject(datasourceResponse.getType());
 				// copy metadata from request into entity
 				europeanaProxyMetadata.setEntityId(entityId);
-				europeanaProxyMetadata.setType(datasourceResponse.getType());
 				copyPreviewMetadata(europeanaProxyMetadata, entityCreationRequest);
         setEuropeanaMetadata(europeanaProxyMetadata, entityId, entityRecord, timestamp);
 
@@ -491,8 +489,6 @@ public class EntityRecordService {
             /*
              * isAggregatedBy isn't set on Europeana Proxy, so it won't be copied to the
              * consolidatedEntity We add it separately here
-             * 
-             * TODO: WebResource objects (currently only the fields that are not of the Class type are merged)
              */
             Aggregation aggregation = entityRecord.getEntity().getIsAggregatedBy();
             aggregation.setModified(new Date());
@@ -624,14 +620,22 @@ public class EntityRecordService {
 
 			} else if (Map.class.isAssignableFrom(fieldType)) {
 					combineEntities(consolidatedEntity, primary, secondary, prefLabelsForAltLabels, field, fieldName, accumulate);
-
-			} else if(WebResource.class.isAssignableFrom(fieldType)) {
+			}
+			else if(WebResource.class.isAssignableFrom(fieldType)) {
 				WebResource primaryWebResource = (WebResource) primary.getFieldValue(field);
 				WebResource secondaryWebResource = (WebResource) secondary.getFieldValue(field);
 				if (primaryWebResource == null && secondaryWebResource != null) {
 					consolidatedEntity.setFieldValue(field, new WebResource(secondaryWebResource));
 				} else if (primaryWebResource != null) {
 					consolidatedEntity.setFieldValue(field, new WebResource(primaryWebResource));
+				}
+			} else if (Address.class.isAssignableFrom(fieldType)) {
+				Address primaryAddress = (Address) primary.getFieldValue(field);
+				Address secondaryAddress = (Address) secondary.getFieldValue(field);
+				if (primaryAddress == null && secondaryAddress != null) {
+					consolidatedEntity.setFieldValue(field, new Address(secondaryAddress));
+				} else if (primaryAddress != null) {
+					consolidatedEntity.setFieldValue(field, new Address(primaryAddress));
 				}
 			}
 
