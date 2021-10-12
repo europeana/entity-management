@@ -1,0 +1,22 @@
+{
+  "Industry": "Museum",
+  "id": "1482250000000370517",
+  "DEA_Sent": true,
+  "City": "Leiden",
+  "Image_service_Opt_in": false,
+  "Country": "Netherlands",
+  "Geographic_Level": [],
+  "Website": "https://www.naturalis.nl/nl/",
+  "Lang_Organisation_Name": "EN(English)",
+  "DEA_Signed": true,
+  "Country1": "Netherlands, NL",
+  "Account_Name": "Naturalis Biodiversity Center",
+  "Sector": "Cultural Heritage",
+  "SameAs_1": "http://www.wikidata.org/entity/Q641676",
+  "SameAs_2": "http://isni.org/isni/000000012159802X",
+  "Organisation_Role2": [
+    "Data Provider"
+  ],
+  "Tag": [],
+  "Acronym": null
+}

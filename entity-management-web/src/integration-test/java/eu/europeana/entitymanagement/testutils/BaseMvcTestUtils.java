@@ -1,9 +1,15 @@
 package eu.europeana.entitymanagement.testutils;
 
+import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.zoho.crm.api.record.Record;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import org.apache.commons.io.IOUtils;
 
 public class BaseMvcTestUtils {
@@ -45,8 +51,6 @@ public class BaseMvcTestUtils {
   public static final String AGENT_REGISTER_STALIN_JSON = "/content/agent_register_stalin.json";
   public static final String AGENT_REGISTER_JAN_VERMEER =
       "/content/agent_register_jan_vermeer.json";
-  public static final String ORGANIZATION_REGISTER_BNF_JSON =
-      "/content/organization_register_bnf.json";
   public static final String ORGANIZATION_REGISTER_BNF_ZOHO_JSON =
       "/content/organization_register_zoho_bnf.json";
   public static final String PLACE_REGISTER_PARIS_JSON = "/content/place_register_paris.json";
@@ -112,7 +116,6 @@ public class BaseMvcTestUtils {
   public static final String AGENT_JAN_VERMEER_VIAF_URI = "http://viaf.org/viaf/51961439";
   public static final String AGENT_JAN_VERMEER_WIKIDATA_URI =
       "http://www.wikidata.org/entity/Q41264";
-  public static final String ORGANIZATION_BNF_URI = "http://www.wikidata.org/entity/Q193563";
   public static final String PLACE_PARIS_URI = "https://sws.geonames.org/2988507/";
   public static final String TIMESPAN_1ST_CENTURY_URI = "http://www.wikidata.org/entity/Q8106";
 
@@ -121,22 +124,55 @@ public class BaseMvcTestUtils {
   public static final String VALID_MIGRATION_ID = "http://www.wikidata.org/entity/testing";
   public static final String INVALID_MIGRATION_ID = "http://www.testing.org/entity/testing";
 
+  public static final String ORGANIZATION_BNF_URI_ZOHO =
+      "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000000370517";
+  public static final String ORGANIZATION_BNF_URI_WIKIDATA_PATH_SUFFIX = "/entity/Q641676";
+  public static final String ORGANIZATION_BNF_ZOHO_RESPONSE =
+      "/zoho-deref/organization_zoho_bnf_response.json";
+  public static final String ORGANIZATION_BNF_WIKIDATA_RESPONSE_XML =
+      "/wikidata-deref/organization_wikidata_bnf_response.xml";
+
+  /** Creates an ObjectMapper specifically for handling Mock zoho responses */
+  private static final ObjectMapper zohoResponseObjectMapper =
+      new ObjectMapper()
+          .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+          .registerModule(
+              new SimpleModule(
+                  "SimpleModule",
+                  Version.unknownVersion(),
+                  Map.of(Record.class, new ZohoRecordTestDeserializer())));
+
+  /** Maps ZOHO organization URIs to mocked JSON responses */
+  public static Map<String, String> ZOHO_RESPONSE_MAP =
+      Map.of(ORGANIZATION_BNF_URI_ZOHO, ORGANIZATION_BNF_ZOHO_RESPONSE);
+
   /** Maps Metis dereferenciation URIs to mocked XML responses */
   public static final Map<String, String> METIS_RESPONSE_MAP =
       Map.of(
-          AGENT_DA_VINCI_URI, AGENT_DA_VINCI_XML,
-          AGENT_STALIN_URI, AGENT_STALIN_XML,
-          ORGANIZATION_BNF_URI, ORGANIZATION_BNF_XML,
-          PLACE_PARIS_URI, PLACE_PARIS_XML,
-          TIMESPAN_1ST_CENTURY_URI, TIMESPAN_1ST_CENTURY_XML,
-          CONCEPT_BATHTUB_URI, CONCEPT_BATHTUB_XML,
-          AGENT_JAN_VERMEER_VIAF_URI, AGENT_JAN_VERMEER_XML_VIAF,
-          AGENT_JAN_VERMEER_WIKIDATA_URI, AGENT_JAN_VERMEER_XML_WIKIDATA);
+          AGENT_DA_VINCI_URI,
+          AGENT_DA_VINCI_XML,
+          AGENT_STALIN_URI,
+          AGENT_STALIN_XML,
+          PLACE_PARIS_URI,
+          PLACE_PARIS_XML,
+          TIMESPAN_1ST_CENTURY_URI,
+          TIMESPAN_1ST_CENTURY_XML,
+          CONCEPT_BATHTUB_URI,
+          CONCEPT_BATHTUB_XML,
+          AGENT_JAN_VERMEER_VIAF_URI,
+          AGENT_JAN_VERMEER_XML_VIAF,
+          AGENT_JAN_VERMEER_WIKIDATA_URI,
+          AGENT_JAN_VERMEER_XML_WIKIDATA);
 
   public static String loadFile(String resourcePath) throws IOException {
     return IOUtils.toString(
             Objects.requireNonNull(BaseMvcTestUtils.class.getResourceAsStream(resourcePath)),
             StandardCharsets.UTF_8)
         .replace("\n", "");
+  }
+
+  public static Optional<Record> getZohoOrganizationRecord(String zohoId) throws Exception {
+    String zohoResponseData = loadFile(ZOHO_RESPONSE_MAP.get(zohoId));
+    return Optional.ofNullable(zohoResponseObjectMapper.readValue(zohoResponseData, Record.class));
   }
 }
