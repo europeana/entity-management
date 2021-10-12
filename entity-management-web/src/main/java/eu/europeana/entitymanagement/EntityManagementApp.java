@@ -36,8 +36,8 @@ public class EntityManagementApp extends SpringBootServletInitializer {
     // When deploying to Cloud Foundry, this will log the instance index number, IP and GUID
     LogManager.getLogger(EntityManagementApp.class)
         .info(
-            "CF_INSTANCE_INDEX  = {}, CF_INSTANCE_GUID = {}, CF_INSTANCE_IP  = {}",
-            System.getenv("CF_INSTANCE_INDEX"),
+   "CF_INSTANCE_INDEX  = {}, CF_INSTANCE_GUID = {}, CF_INSTANCE_IP  = {}",
+    System.getenv("CF_INSTANCE_INDEX"),
             System.getenv("CF_INSTANCE_GUID"),
             System.getenv("CF_INSTANCE_IP"));
 
