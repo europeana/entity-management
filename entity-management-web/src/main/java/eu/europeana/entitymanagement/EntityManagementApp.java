@@ -43,7 +43,7 @@ public class EntityManagementApp extends SpringBootServletInitializer {
 
     // Activate socks proxy (if your application requires it)
     SocksProxyActivator.activate(
-        new SocksProxyConfig("entitymanagement.properties", "entitymanagement.user.properties"));
+    new SocksProxyConfig("entitymanagement.properties", "entitymanagement.user.properties"));
 
     SpringApplication.run(EntityManagementApp.class, args);
   }
