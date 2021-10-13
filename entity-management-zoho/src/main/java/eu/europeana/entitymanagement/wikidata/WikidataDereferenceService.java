@@ -78,14 +78,14 @@ public class WikidataDereferenceService implements Dereferencer, InitializingBea
    * (see e.g. https://community.oracle.com/tech/developers/discussion/1627333/premature-end-of-file-error-using-same-inputstream-from-two-functions)
    */
   private void setupXsltTransformer() {
-    InputStream transformerXSL =
-        WikidataDereferenceService.class.getResourceAsStream("/wkd2org.xsl");
     TransformerFactory transformerFactory = new net.sf.saxon.TransformerFactoryImpl();
 
     this.transformer =
         ThreadLocal.withInitial(
             () -> {
               try {
+                InputStream transformerXSL =
+                    WikidataDereferenceService.class.getResourceAsStream("/wkd2org.xsl");
                 Transformer newTransformer =
                     transformerFactory.newTransformer(new StreamSource(transformerXSL));
                 newTransformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");

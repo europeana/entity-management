@@ -1,11 +1,12 @@
 package eu.europeana.entitymanagement.zoho.utils;
 
+import eu.europeana.api.commons.error.EuropeanaApiException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 /** Exception for describing zoho type of exceptions. */
 @ResponseStatus(value = HttpStatus.NOT_ACCEPTABLE, reason = "Bad Content")
-public class ZohoException extends Exception {
+public class ZohoException extends EuropeanaApiException {
 
   private static final long serialVersionUID = -3332292346834265371L;
 
