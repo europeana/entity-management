@@ -14,6 +14,7 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.definitions.model.TimeSpan;
 import eu.europeana.entitymanagement.solr.SolrEntitySuggesterMixins;
+import eu.europeana.entitymanagement.solr.SolrEntitySuggesterMixins.TimeSpanSuggesterMixin;
 import eu.europeana.entitymanagement.solr.SolrSearchCursorIterator;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.solr.model.SolrAgent;
@@ -73,7 +74,7 @@ public class SolrService implements InitializingBean {
     payloadMapper.addMixIn(Agent.class, SolrEntitySuggesterMixins.AgentSuggesterMixin.class);
     payloadMapper.addMixIn(
         Organization.class, SolrEntitySuggesterMixins.OrganizationSuggesterMixin.class);
-    payloadMapper.addMixIn(TimeSpan.class, SolrEntitySuggesterMixins.TimespanSuggesterMixin.class);
+    payloadMapper.addMixIn(TimeSpan.class, TimeSpanSuggesterMixin.class);
     payloadMapper.setFilterProvider(solrEntityFilter);
   }
 

@@ -14,7 +14,7 @@ import eu.europeana.entitymanagement.schemaorg.model.SchemaOrgConcept;
 import eu.europeana.entitymanagement.schemaorg.model.SchemaOrgEntity;
 import eu.europeana.entitymanagement.schemaorg.model.SchemaOrgOrganization;
 import eu.europeana.entitymanagement.schemaorg.model.SchemaOrgPlace;
-import eu.europeana.entitymanagement.schemaorg.model.SchemaOrgTimespan;
+import eu.europeana.entitymanagement.schemaorg.model.SchemaOrgTimeSpan;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.xml.model.XmlAgentImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
@@ -95,7 +95,7 @@ public class EntityObjectFactory {
       case Organization:
         return (SchemaOrgEntity<T>) new SchemaOrgOrganization((Organization) entity);
       case TimeSpan:
-        return (SchemaOrgEntity<T>) new SchemaOrgTimespan((TimeSpan) entity);
+        return (SchemaOrgEntity<T>) new SchemaOrgTimeSpan((TimeSpan) entity);
       default:
         throw new EntityManagementRuntimeException(
             String.format(
