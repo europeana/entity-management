@@ -24,6 +24,7 @@ import com.zoho.crm.api.record.RecordOperations.SearchRecordsParam;
 import com.zoho.crm.api.record.ResponseHandler;
 import com.zoho.crm.api.record.ResponseWrapper;
 import com.zoho.crm.api.util.APIResponse;
+import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 import java.time.OffsetDateTime;
@@ -150,8 +151,9 @@ public class ZohoAccessClient {
     return Collections.emptyList();
   }
 
-  public Optional<Record> getZohoRecordOrganizationById(String organizationId)
-      throws ZohoException {
+  public Optional<Record> getZohoRecordOrganizationById(String zohoUrl) throws ZohoException {
+
+    String zohoId = EntityRecordUtils.getIdFromUrl(zohoUrl);
     try {
       RecordOperations recordOperations = new RecordOperations();
       ParameterMap paramInstance = new ParameterMap();
@@ -161,7 +163,7 @@ public class ZohoAccessClient {
               ZohoConstants.ZOHO_OPERATION_FORMAT_STRING,
               ZohoConstants.ID_FIELD,
               ZohoConstants.EQUALS_OPERATION,
-              organizationId));
+              zohoId));
 
       APIResponse<ResponseHandler> response =
           recordOperations.searchRecords(ZohoConstants.ACCOUNTS_MODULE_NAME, paramInstance);
