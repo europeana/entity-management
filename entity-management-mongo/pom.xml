@@ -10,10 +10,6 @@
   <artifactId>entity-management-mongo</artifactId>
   
   <name>entity-management-mongo</name>
-  <description>A simple entity-management-mongo.</description>
-  <!-- FIXME change it to the project's website -->
-  <url>http://www.example.com</url>
-
   <dependencies>
     
 	<dependency>
@@ -45,9 +41,6 @@
 	<dependency>
 		<groupId>org.springframework</groupId>
 		<artifactId>spring-context</artifactId>
-		<!-- 
-		<version>${version.spring}</version>
-		 -->
 	</dependency>
 	
     
