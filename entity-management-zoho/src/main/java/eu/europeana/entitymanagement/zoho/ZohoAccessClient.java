@@ -46,7 +46,7 @@ public class ZohoAccessClient {
    * @param zohoEmail the zoho email
    * @param clientId the zoho client id
    * @param clientSecret the zoho client secret
-   * @param refreshToken the zoho initial grant token
+   * @param refreshToken the zoho initial refresh token
    * @param redirectUrl the registered zoho redirect url
    */
   public ZohoAccessClient(
@@ -55,7 +55,8 @@ public class ZohoAccessClient {
       String clientId,
       String clientSecret,
       String refreshToken,
-      String redirectUrl) {
+      String redirectUrl)
+      throws ZohoException {
     try {
       UserSignature userSignature = new UserSignature(zohoEmail);
       Token token =
@@ -68,7 +69,7 @@ public class ZohoAccessClient {
       Initializer.initialize(
           userSignature, environment, token, tokenStore, sdkConfig, resourcePath);
     } catch (SDKException e) {
-      LOGGER.warn("Exception during initialize", e);
+      throw new ZohoException("Error initializing ZohoAccessClient", e);
     }
   }
 

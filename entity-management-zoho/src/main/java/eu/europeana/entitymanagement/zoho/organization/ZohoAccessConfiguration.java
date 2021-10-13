@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement.zoho.organization;
 
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.zoho.ZohoAccessClient;
+import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 import eu.europeana.entitymanagement.zoho.utils.ZohoInMemoryTokenStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -28,7 +29,7 @@ public class ZohoAccessConfiguration {
 
   private volatile ZohoAccessClient zohoAccessClient;
 
-  public ZohoAccessClient getZohoAccessClient() {
+  public ZohoAccessClient getZohoAccessClient() throws ZohoException {
     if (zohoAccessClient == null) {
       synchronized (this) {
         if (zohoAccessClient == null) {
