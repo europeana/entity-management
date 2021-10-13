@@ -1,5 +1,9 @@
 package eu.europeana.entitymanagement.zoho.utils;
 
+import com.zoho.crm.api.record.Record;
+import com.zoho.crm.api.record.ResponseHandler;
+import com.zoho.crm.api.record.ResponseWrapper;
+import com.zoho.crm.api.util.APIResponse;
 import com.zoho.crm.api.util.Choice;
 import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
@@ -293,5 +297,17 @@ public final class ZohoUtils {
   public static boolean isZohoOrganization(String id, String entityType) {
     return EntityTypes.Organization.getEntityType().equals(entityType)
         && id.contains(DataSources.ZOHO_ID);
+  }
+
+  public static List<Record> getZohoRecords(APIResponse<ResponseHandler> response) {
+    if (response != null && response.isExpected()) {
+      // Get the object from response
+      ResponseHandler responseHandler = response.getObject();
+      if (responseHandler instanceof ResponseWrapper) {
+        ResponseWrapper responseWrapper = (ResponseWrapper) responseHandler;
+        return responseWrapper.getData();
+      }
+    }
+    return Collections.emptyList();
   }
 }
