@@ -20,5 +20,5 @@ public class SolrEntitySuggesterMixins {
   public static class OrganizationSuggesterMixin {}
 
   @JsonFilter(SOLR_TIMESPAN_SUGGESTER_FILTER)
-  public static class TimespanSuggesterMixin {}
+  public static class TimeSpanSuggesterMixin {}
 }

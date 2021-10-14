@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.Timespan;
+import eu.europeana.entitymanagement.definitions.model.TimeSpan;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import java.util.Map;
@@ -129,7 +129,7 @@ public class EntityUpdateIT extends BaseWebControllerTest {
 
     Optional<EntityRecord> entityRecordUpdated = retrieveEntity(entityRecord.getEntityId());
     Assertions.assertTrue(entityRecordUpdated.isPresent());
-    Timespan timespan = (Timespan) (entityRecordUpdated.get().getEntity());
+    TimeSpan timespan = (TimeSpan) (entityRecordUpdated.get().getEntity());
     Assertions.assertNotNull(timespan.getPrefLabel());
     Assertions.assertFalse(timespan.getPrefLabel().isEmpty());
     Assertions.assertNotNull(timespan.getAltLabel());

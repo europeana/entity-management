@@ -287,7 +287,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(entityId)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Timespan.name())));
+        .andExpect(jsonPath("$.type", is(EntityTypes.TimeSpan.name())));
   }
 
   @Test

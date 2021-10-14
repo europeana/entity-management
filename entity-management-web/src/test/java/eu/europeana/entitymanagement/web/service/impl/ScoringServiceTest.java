@@ -116,7 +116,7 @@ public class ScoringServiceTest {
     assertNotNull(maxValues.maxValues(EntityTypes.Place));
     assertNotNull(maxValues.maxValues(EntityTypes.Concept));
     assertNotNull(maxValues.maxValues(EntityTypes.Organization));
-    assertNotNull(maxValues.maxValues(EntityTypes.Timespan));
+    assertNotNull(maxValues.maxValues(EntityTypes.TimeSpan));
   }
 
   @Test

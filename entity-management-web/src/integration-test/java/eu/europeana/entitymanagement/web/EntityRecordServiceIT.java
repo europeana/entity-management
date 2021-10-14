@@ -226,7 +226,7 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest {
             .contains("http://data.europeana.eu/Leonardo_da_Vinci"));
   }
 
-  //    @Test
+  @Test
   public void performReferentialIntegrity_DaVinci() throws Exception {
     // TODO: implement the following
     // 1. create record for agent-davinci-referential-integrity.json

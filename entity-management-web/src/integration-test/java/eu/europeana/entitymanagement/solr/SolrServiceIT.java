@@ -60,10 +60,10 @@ public class SolrServiceIT extends AbstractIntegrationTest {
   @Test
   public void storeTimespanInSolr() throws Exception {
 
-    Timespan timespan = objectMapper.readValue(loadFile(TIMESPAN_JSON), Timespan.class);
+    TimeSpan timespan = objectMapper.readValue(loadFile(TIMESPAN_JSON), TimeSpan.class);
     emSolrService.storeEntity(SolrUtils.createSolrEntity(timespan));
-    SolrTimespan storedTimespan =
-        emSolrService.searchById(SolrTimespan.class, timespan.getEntityId());
+    SolrTimeSpan storedTimespan =
+        emSolrService.searchById(SolrTimeSpan.class, timespan.getEntityId());
     Assertions.assertNotNull(storedTimespan);
     Assertions.assertEquals(timespan.getEntityId(), storedTimespan.getEntityId());
   }
