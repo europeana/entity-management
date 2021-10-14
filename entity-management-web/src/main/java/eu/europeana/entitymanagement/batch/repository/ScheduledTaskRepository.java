@@ -14,8 +14,8 @@ import com.mongodb.client.model.WriteModel;
 import dev.morphia.Datastore;
 import dev.morphia.query.FindOptions;
 import dev.morphia.query.experimental.filters.Filter;
-import eu.europeana.entitymanagement.batch.model.BatchUpdateType;
 import eu.europeana.entitymanagement.batch.model.ScheduledTask;
+import eu.europeana.entitymanagement.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import java.util.ArrayList;
@@ -51,7 +51,7 @@ public class ScheduledTaskRepository implements InitializingBean {
    * @param tasks list of scheduled tasks
    * @return BulkWriteResult of db query
    */
-  public BulkWriteResult markAsProcessed(BatchUpdateType updateType, List<ScheduledTask> tasks) {
+  public BulkWriteResult markAsProcessed(ScheduledTaskType updateType, List<ScheduledTask> tasks) {
     List<WriteModel<ScheduledTask>> updates = new ArrayList<>();
     for (ScheduledTask task : tasks) {
       updates.add(
@@ -89,7 +89,7 @@ public class ScheduledTaskRepository implements InitializingBean {
               // manually set Morphia discriminator as we're bypassing its API for this query
               .append(MORPHIA_DISCRIMINATOR, SCHEDULED_TASK_CLASSNAME);
 
-      boolean shouldChangeUpdateType = task.getUpdateType() == BatchUpdateType.FULL;
+      boolean shouldChangeUpdateType = task.getUpdateType() == ScheduledTaskType.FULL_UPDATE;
       /*
        * If entity is being scheduled for a full update, this:
        *  - changes the current updateType from METRICS to FULL; or
@@ -120,7 +120,7 @@ public class ScheduledTaskRepository implements InitializingBean {
    * @param updateType updateType to filter on
    * @return number of deleted entries
    */
-  public long removeProcessedTasks(BatchUpdateType updateType) {
+  public long removeProcessedTasks(ScheduledTaskType updateType) {
     return datastore
         .find(ScheduledTask.class)
         .filter(eq(HAS_BEEN_PROCESSED, true), eq(UPDATE_TYPE, updateType))

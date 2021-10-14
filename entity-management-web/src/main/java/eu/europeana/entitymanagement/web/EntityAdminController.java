@@ -6,10 +6,11 @@ import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
+import eu.europeana.entitymanagement.batch.model.ScheduledTaskType;
+import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
-import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
@@ -17,6 +18,7 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import io.swagger.annotations.ApiOperation;
+import java.util.Collections;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.LogManager;
@@ -37,18 +39,16 @@ public class EntityAdminController extends BaseRest {
   private static final Logger LOG = LogManager.getLogger(EntityAdminController.class);
 
   private final EntityRecordService entityRecordService;
-
-  private final SolrService solrService;
-
+  private final EntityUpdateService entityUpdateService;
   private final EntityManagementConfiguration emConfig;
 
   @Autowired
   public EntityAdminController(
       EntityRecordService entityRecordService,
-      SolrService solrService,
+      EntityUpdateService entityUpdateService,
       EntityManagementConfiguration emConfig) {
     this.entityRecordService = entityRecordService;
-    this.solrService = solrService;
+    this.entityUpdateService = entityUpdateService;
     this.emConfig = emConfig;
   }
 
@@ -86,8 +86,9 @@ public class EntityAdminController extends BaseRest {
     EntityRecord entityRecord = entityRecordOptional.get();
 
     LOG.info("Permanently deleting entityId={}", entityRecord.getEntityId());
-    entityRecordService.delete(entityRecord.getEntityId());
-    solrService.deleteById(entityRecord.getEntityId());
+    entityUpdateService.scheduleTasks(
+        Collections.singletonList(entityRecord.getEntityId()),
+        ScheduledTaskType.PERMANENT_DELETION);
 
     return noContentResponse(request);
   }

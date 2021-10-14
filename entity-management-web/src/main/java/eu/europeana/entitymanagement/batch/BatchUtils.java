@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.batch;
 
-import eu.europeana.entitymanagement.batch.model.BatchUpdateType;
 import eu.europeana.entitymanagement.batch.model.JobParameter;
+import eu.europeana.entitymanagement.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import java.util.Date;
 import java.util.List;
@@ -26,7 +26,7 @@ public class BatchUtils {
    * @return JobParameters with trigger time and entityId
    */
   public static JobParameters createJobParameters(
-      @Nullable String entityId, Date runTime, BatchUpdateType updateType) {
+      @Nullable String entityId, Date runTime, ScheduledTaskType updateType) {
     JobParametersBuilder jobParametersBuilder =
         new JobParametersBuilder()
             .addDate(JobParameter.CURRENT_START_TIME.key(), runTime)

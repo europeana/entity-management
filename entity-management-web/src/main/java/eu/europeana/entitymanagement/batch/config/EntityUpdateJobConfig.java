@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.batch.config;
 
 import static eu.europeana.entitymanagement.batch.BatchUtils.*;
-import static eu.europeana.entitymanagement.batch.model.BatchUpdateType.FULL;
+import static eu.europeana.entitymanagement.batch.model.ScheduledTaskType.FULL_UPDATE;
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.STEP_EXECUTOR;
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.WEB_REQUEST_JOB_EXECUTOR;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_ID;
@@ -10,7 +10,7 @@ import dev.morphia.query.experimental.filters.Filters;
 import eu.europeana.entitymanagement.batch.EMBatchConstants;
 import eu.europeana.entitymanagement.batch.listener.EntityUpdateItemListener;
 import eu.europeana.entitymanagement.batch.listener.EntityUpdateStepListener;
-import eu.europeana.entitymanagement.batch.model.BatchUpdateType;
+import eu.europeana.entitymanagement.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.batch.processor.EntityDereferenceProcessor;
 import eu.europeana.entitymanagement.batch.processor.EntityMetricsProcessor;
 import eu.europeana.entitymanagement.batch.processor.EntityUpdateProcessor;
@@ -161,10 +161,10 @@ public class EntityUpdateJobConfig {
   private EntityUpdateItemListener entityUpdateListener(
       @Value("#{jobParameters[updateType]}") String updateType) {
     return new EntityUpdateItemListener(
-        failedTaskService, scheduledTaskService, BatchUpdateType.valueOf(updateType));
+        failedTaskService, scheduledTaskService, ScheduledTaskType.valueOf(updateType));
   }
 
-  private StepExecutionListener updateEntityStepListener(BatchUpdateType updateType) {
+  private StepExecutionListener updateEntityStepListener(ScheduledTaskType updateType) {
     return new EntityUpdateStepListener(scheduledTaskService, updateType);
   }
 
@@ -204,7 +204,7 @@ public class EntityUpdateJobConfig {
    * @return step
    */
   private Step updateEntity(
-      BatchUpdateType updateType,
+      ScheduledTaskType updateType,
       int chunkSize,
       TaskExecutor executor,
       ItemReader<EntityRecord> reader) {
@@ -214,7 +214,7 @@ public class EntityUpdateJobConfig {
             .<EntityRecord, EntityRecord>chunk(chunkSize)
             .reader(reader);
     // set processor based on the update type
-    step.processor(updateType == FULL ? compositeUpdateProcessor() : entityMetricsProcessor);
+    step.processor(updateType == FULL_UPDATE ? compositeUpdateProcessor() : entityMetricsProcessor);
 
     return step.writer(compositeEntityWriter())
         .listener((ItemProcessListener<? super EntityRecord, ? super EntityRecord>) itemListener)
@@ -239,7 +239,7 @@ public class EntityUpdateJobConfig {
         .incrementer(new RunIdIncrementer())
         // this job is always launched from web requests, so synchronousTaskExecutor is used. It
         // also directly retrieves entities from the EntityRecord database.
-        .start(updateEntity(FULL, 1, synchronousTaskExecutor, singleEntityRecordReader))
+        .start(updateEntity(FULL_UPDATE, 1, synchronousTaskExecutor, singleEntityRecordReader))
         .build();
   }
 
@@ -247,7 +247,7 @@ public class EntityUpdateJobConfig {
    * Job for updating entities scheduled via the ScheduledTasks collection Expects
    * `currentStartTime` date and `updateType` string in JobParameters.
    */
-  public Job updateScheduledEntities(BatchUpdateType updateType) {
+  public Job updateScheduledEntities(ScheduledTaskType updateType) {
     return this.jobBuilderFactory
         .get(JOB_UPDATE_SCHEDULED_ENTITIES)
         // This job is always launched via a @Scheduled method.

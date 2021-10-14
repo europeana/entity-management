@@ -27,7 +27,7 @@ public class ScheduledTask {
   private Instant created;
 
   private Instant modified;
-  private BatchUpdateType updateType;
+  private ScheduledTaskType updateType;
   private boolean hasBeenProcessed;
 
   private ScheduledTask() {
@@ -35,7 +35,7 @@ public class ScheduledTask {
   }
 
   public ScheduledTask(
-      String entityId, BatchUpdateType updateType, Instant modified, boolean hasBeenProcessed) {
+      String entityId, ScheduledTaskType updateType, Instant modified, boolean hasBeenProcessed) {
     this.entityId = entityId;
     this.updateType = updateType;
     this.modified = modified;
@@ -54,7 +54,7 @@ public class ScheduledTask {
     return modified;
   }
 
-  public BatchUpdateType getUpdateType() {
+  public ScheduledTaskType getUpdateType() {
     return updateType;
   }
 
@@ -64,11 +64,11 @@ public class ScheduledTask {
 
   public static class Builder {
     private final String entityId;
-    private final BatchUpdateType updateType;
+    private final ScheduledTaskType updateType;
     private Instant modified;
     private boolean hasBeenProcessed;
 
-    public Builder(String entityId, BatchUpdateType updateType) {
+    public Builder(String entityId, ScheduledTaskType updateType) {
       this.entityId = entityId;
       this.updateType = updateType;
     }

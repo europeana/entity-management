@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.batch.config;
 
-import static eu.europeana.entitymanagement.batch.model.BatchUpdateType.FULL;
-import static eu.europeana.entitymanagement.batch.model.BatchUpdateType.METRICS;
+import static eu.europeana.entitymanagement.batch.model.ScheduledTaskType.FULL_UPDATE;
+import static eu.europeana.entitymanagement.batch.model.ScheduledTaskType.METRICS_UPDATE;
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.SCHEDULED_JOB_LAUNCHER;
 
 import eu.europeana.entitymanagement.batch.BatchUtils;
@@ -76,8 +76,8 @@ public class EntityUpdateSchedulingConfig implements InitializingBean {
   private void runScheduledFullUpdate() throws Exception {
     logger.info("Triggering scheduled full update for entities");
     scheduledJobLauncher.run(
-        updateJobConfig.updateScheduledEntities(FULL),
-        BatchUtils.createJobParameters(null, Date.from(Instant.now()), FULL));
+        updateJobConfig.updateScheduledEntities(FULL_UPDATE),
+        BatchUtils.createJobParameters(null, Date.from(Instant.now()), FULL_UPDATE));
   }
 
   /** Periodically run metrics updates. */
@@ -87,8 +87,8 @@ public class EntityUpdateSchedulingConfig implements InitializingBean {
   private void runScheduledMetricsUpdate() throws Exception {
     logger.info("Triggering scheduled metrics update for entities");
     scheduledJobLauncher.run(
-        updateJobConfig.updateScheduledEntities(METRICS),
-        BatchUtils.createJobParameters(null, Date.from(Instant.now()), METRICS));
+        updateJobConfig.updateScheduledEntities(METRICS_UPDATE),
+        BatchUtils.createJobParameters(null, Date.from(Instant.now()), METRICS_UPDATE));
   }
 
   /** Converts milliseconds to "x min, y sec" */

@@ -1,6 +1,6 @@
 package eu.europeana.entitymanagement.batch.listener;
 
-import eu.europeana.entitymanagement.batch.model.BatchUpdateType;
+import eu.europeana.entitymanagement.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,10 +15,10 @@ public class EntityUpdateStepListener implements StepExecutionListener {
   private static final Logger logger = LogManager.getLogger(EntityUpdateStepListener.class);
 
   private final ScheduledTaskService scheduledTaskService;
-  private final BatchUpdateType updateType;
+  private final ScheduledTaskType updateType;
 
   public EntityUpdateStepListener(
-      ScheduledTaskService scheduledTaskService, BatchUpdateType updateType) {
+      ScheduledTaskService scheduledTaskService, ScheduledTaskType updateType) {
     this.scheduledTaskService = scheduledTaskService;
     this.updateType = updateType;
   }
