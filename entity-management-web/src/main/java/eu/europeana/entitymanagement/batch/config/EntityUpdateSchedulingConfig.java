@@ -1,8 +1,11 @@
 package eu.europeana.entitymanagement.batch.config;
 
+import static eu.europeana.entitymanagement.batch.model.ScheduledTaskType.DEPRECATION;
 import static eu.europeana.entitymanagement.batch.model.ScheduledTaskType.FULL_UPDATE;
 import static eu.europeana.entitymanagement.batch.model.ScheduledTaskType.METRICS_UPDATE;
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.SCHEDULED_JOB_LAUNCHER;
+import static eu.europeana.entitymanagement.batch.model.ScheduledTaskType.PERMANENT_DELETION;
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.ENTITY_DELETIONS_JOB_LAUNCHER;
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.ENTITY_UPDATE_JOB_LAUNCHER;
 
 import eu.europeana.entitymanagement.batch.BatchUtils;
 import java.time.Instant;
@@ -37,7 +40,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 public class EntityUpdateSchedulingConfig implements InitializingBean {
 
   private static final Logger logger = LogManager.getLogger(EntityUpdateSchedulingConfig.class);
-  private final JobLauncher scheduledJobLauncher;
+  private final JobLauncher entityUpdateJobLauncher;
+  private final JobLauncher entityDeletionsJobLauncher;
   private final EntityUpdateJobConfig updateJobConfig;
 
   /**
@@ -54,14 +58,16 @@ public class EntityUpdateSchedulingConfig implements InitializingBean {
   private long fixedDelay;
 
   public EntityUpdateSchedulingConfig(
-      @Qualifier(SCHEDULED_JOB_LAUNCHER) JobLauncher scheduledJobLauncher,
+      @Qualifier(ENTITY_UPDATE_JOB_LAUNCHER) JobLauncher entityUpdateJobLauncher,
+      @Qualifier(ENTITY_DELETIONS_JOB_LAUNCHER) JobLauncher entityDeletionsJobLauncher,
       EntityUpdateJobConfig batchUpdateConfig) {
-    this.scheduledJobLauncher = scheduledJobLauncher;
+    this.entityUpdateJobLauncher = entityUpdateJobLauncher;
+    this.entityDeletionsJobLauncher = entityDeletionsJobLauncher;
     this.updateJobConfig = batchUpdateConfig;
   }
 
   @Override
-  public void afterPropertiesSet() throws Exception {
+  public void afterPropertiesSet() {
     logger.info(
         "Batch scheduling initialized – metricsInitialDelay: {}; fullInitialDelay: {}; fixedDelay: {}",
         toMinutesAndSeconds(metricsInitialDelay),
@@ -75,7 +81,7 @@ public class EntityUpdateSchedulingConfig implements InitializingBean {
       fixedDelayString = "${batch.scheduling.fixedDelayMillis}")
   private void runScheduledFullUpdate() throws Exception {
     logger.info("Triggering scheduled full update for entities");
-    scheduledJobLauncher.run(
+    entityUpdateJobLauncher.run(
         updateJobConfig.updateScheduledEntities(FULL_UPDATE),
         BatchUtils.createJobParameters(null, Date.from(Instant.now()), FULL_UPDATE));
   }
@@ -86,9 +92,31 @@ public class EntityUpdateSchedulingConfig implements InitializingBean {
       fixedDelayString = "${batch.scheduling.fixedDelayMillis}")
   private void runScheduledMetricsUpdate() throws Exception {
     logger.info("Triggering scheduled metrics update for entities");
-    scheduledJobLauncher.run(
+    entityUpdateJobLauncher.run(
         updateJobConfig.updateScheduledEntities(METRICS_UPDATE),
         BatchUtils.createJobParameters(null, Date.from(Instant.now()), METRICS_UPDATE));
+  }
+
+  /** Periodically run deletions */
+  @Scheduled(
+      initialDelayString = "${batch.scheduling.deletion.initialDelayMillis}",
+      fixedDelayString = "${batch.scheduling.fixedDelayMillis}")
+  private void runScheduledDeletions() throws Exception {
+    logger.info("Triggering scheduled deletions for entities");
+    entityDeletionsJobLauncher.run(
+        updateJobConfig.updateScheduledEntities(PERMANENT_DELETION),
+        BatchUtils.createJobParameters(null, Date.from(Instant.now()), PERMANENT_DELETION));
+  }
+
+  /** Periodically run deprecation */
+  @Scheduled(
+      initialDelayString = "${batch.scheduling.deprecation.initialDelayMillis}",
+      fixedDelayString = "${batch.scheduling.fixedDelayMillis}")
+  private void runScheduledDeprecation() throws Exception {
+    logger.info("Triggering scheduled deprecation for entities");
+    entityDeletionsJobLauncher.run(
+        updateJobConfig.updateScheduledEntities(DEPRECATION),
+        BatchUtils.createJobParameters(null, Date.from(Instant.now()), DEPRECATION));
   }
 
   /** Converts milliseconds to "x min, y sec" */

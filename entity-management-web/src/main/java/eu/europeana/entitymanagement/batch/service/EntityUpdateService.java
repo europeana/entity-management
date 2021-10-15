@@ -1,6 +1,6 @@
 package eu.europeana.entitymanagement.batch.service;
 
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.SYNC_JOB_LAUNCHER;
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.SYNC_WEB_REQUEST_JOB_LAUNCHER;
 
 import eu.europeana.entitymanagement.batch.BatchUtils;
 import eu.europeana.entitymanagement.batch.config.EntityUpdateJobConfig;
@@ -29,7 +29,7 @@ public class EntityUpdateService {
   private static final Logger logger = LogManager.getLogger(EntityUpdateService.class);
 
   private final EntityUpdateJobConfig entityUpdateJobConfig;
-  private final JobLauncher synchronousJobLauncher;
+  private final JobLauncher syncWebRequestLauncher;
 
   private final ScheduledTaskService scheduledTaskService;
   private final SolrService solrService;
@@ -37,12 +37,12 @@ public class EntityUpdateService {
   @Autowired
   public EntityUpdateService(
       EntityUpdateJobConfig entityUpdateJobConfig,
-      @Qualifier(SYNC_JOB_LAUNCHER) JobLauncher synchronousJobLauncher,
+      @Qualifier(SYNC_WEB_REQUEST_JOB_LAUNCHER) JobLauncher syncWebRequestLauncher,
       ScheduledTaskService scheduledTaskService,
       SolrService solrService) {
     this.entityUpdateJobConfig = entityUpdateJobConfig;
     this.scheduledTaskService = scheduledTaskService;
-    this.synchronousJobLauncher = synchronousJobLauncher;
+    this.syncWebRequestLauncher = syncWebRequestLauncher;
     this.solrService = solrService;
   }
 
@@ -54,7 +54,7 @@ public class EntityUpdateService {
    */
   public void runSynchronousUpdate(String entityId) throws Exception {
     logger.info("Triggering synchronous update for entityId={}", entityId);
-    synchronousJobLauncher.run(
+    syncWebRequestLauncher.run(
         entityUpdateJobConfig.updateSingleEntity(),
         BatchUtils.createJobParameters(
             entityId, Date.from(Instant.now()), ScheduledTaskType.FULL_UPDATE));

@@ -15,26 +15,38 @@ import org.springframework.core.task.TaskExecutor;
 public class JobLauncherConfig {
 
   private final MongoBatchConfigurer mongoBatchConfigurer;
-  private final TaskExecutor synchronousTaskExecutor;
+  private final TaskExecutor synchronousWebRequestExecutor;
+  private final TaskExecutor deletionsTaskExecutor;
 
   public JobLauncherConfig(
       MongoBatchConfigurer mongoBatchConfigurer,
-      @Qualifier(WEB_REQUEST_JOB_EXECUTOR) TaskExecutor synchronousTaskExecutor) {
+      @Qualifier(WEB_REQUEST_JOB_EXECUTOR) TaskExecutor webRequestJobExecutor,
+      @Qualifier(SCHEDULED_DELETION_TASK_EXECUTOR) TaskExecutor deletionsTaskExecutor) {
     this.mongoBatchConfigurer = mongoBatchConfigurer;
-    this.synchronousTaskExecutor = synchronousTaskExecutor;
+    this.synchronousWebRequestExecutor = webRequestJobExecutor;
+    this.deletionsTaskExecutor = deletionsTaskExecutor;
   }
 
-  @Bean(name = SCHEDULED_JOB_LAUNCHER)
+  @Bean(name = ENTITY_UPDATE_JOB_LAUNCHER)
   @Primary
   public JobLauncher defaultJobLauncher() throws Exception {
     return mongoBatchConfigurer.getJobLauncher();
   }
 
-  @Bean(name = SYNC_JOB_LAUNCHER)
+  @Bean(ENTITY_DELETIONS_JOB_LAUNCHER)
+  public JobLauncher entityDeletionJobLauncher() throws Exception {
+    SimpleJobLauncher jobLauncher = new SimpleJobLauncher();
+    jobLauncher.setJobRepository(mongoBatchConfigurer.getJobRepository());
+    jobLauncher.setTaskExecutor(deletionsTaskExecutor);
+    jobLauncher.afterPropertiesSet();
+    return jobLauncher;
+  }
+
+  @Bean(name = SYNC_WEB_REQUEST_JOB_LAUNCHER)
   public JobLauncher synchronousJobLauncher() throws Exception {
     SimpleJobLauncher jobLauncher = new SimpleJobLauncher();
     jobLauncher.setJobRepository(mongoBatchConfigurer.getJobRepository());
-    jobLauncher.setTaskExecutor(synchronousTaskExecutor);
+    jobLauncher.setTaskExecutor(synchronousWebRequestExecutor);
     jobLauncher.afterPropertiesSet();
     return jobLauncher;
   }

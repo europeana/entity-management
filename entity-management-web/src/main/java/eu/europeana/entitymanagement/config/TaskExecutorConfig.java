@@ -19,14 +19,20 @@ public class TaskExecutorConfig {
   }
 
   /**
-   * Creates a JobLauncher to be used for scheduled entity updates. This is a singleThreadExecutor,
+   * Returns a TaskExecutor to be used for scheduled entity updates. This is a singleThreadExecutor,
    * so updates cannot run simultaneously.
    */
-  @Bean(SCHEDULED_JOB_EXECUTOR)
-  public TaskExecutor jobLauncherExecutor() {
+  @Bean(SCHEDULED_UPDATE_TASK_EXECUTOR)
+  public TaskExecutor scheduledUpdateExecutor() {
     /*
      * launch all scheduled jobs within the Spring scheduling thread
      */
+    return new SyncTaskExecutor();
+  }
+
+  /** Returns a TaskExecutor to be used for scheduled deletions / deprecation of entities. */
+  @Bean(SCHEDULED_DELETION_TASK_EXECUTOR)
+  public TaskExecutor scheduledDeletionsExecutor() {
     return new SyncTaskExecutor();
   }
 
