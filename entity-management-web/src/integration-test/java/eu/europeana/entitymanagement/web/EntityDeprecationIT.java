@@ -4,6 +4,7 @@ import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import eu.europeana.entitymanagement.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.solr.model.SolrConcept;
 import org.junit.jupiter.api.Assertions;
@@ -32,7 +33,7 @@ public class EntityDeprecationIT extends BaseWebControllerTest {
         .perform(delete(BASE_SERVICE_URL + "/" + requestPath).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
-    assertDisabled(entityRecord.getEntityId());
+    assertedTaskScheduled(entityRecord.getEntityId(), ScheduledTaskType.DEPRECATION);
   }
 
   @Test

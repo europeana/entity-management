@@ -165,4 +165,8 @@ public class ScheduledTaskRepository implements InitializingBean {
   public ScheduledTask getTask(String entityId) {
     return datastore.find(ScheduledTask.class).filter(eq(ENTITY_ID, entityId)).first();
   }
+
+  public void dropCollection() {
+    datastore.getMapper().getCollection(ScheduledTask.class).drop();
+  }
 }

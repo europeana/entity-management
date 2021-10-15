@@ -8,6 +8,7 @@ import eu.europeana.entitymanagement.batch.repository.ScheduledTaskRepository;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -78,6 +79,16 @@ public class ScheduledTaskService {
     return repository.getEntityRecordsForTasks(start, count, queryFilters);
   }
 
+  /**
+   * Gets the ScheduledTask with the given entityId from the database
+   *
+   * @param entityId entityId
+   * @return true if exists, false otherwise
+   */
+  public Optional<ScheduledTask> getTask(String entityId) {
+    return Optional.ofNullable(repository.getTask(entityId));
+  }
+
   /** Helper method to instantiate ScheduledTasks from list of entityIds */
   private List<ScheduledTask> createScheduledTasks(
       List<String> entityIds, ScheduledTaskType updateType, boolean hasBeenProcessed) {
@@ -91,5 +102,9 @@ public class ScheduledTaskService {
                     .modified(now)
                     .build())
         .collect(Collectors.toList());
+  }
+
+  public void dropRepository() {
+    this.repository.dropCollection();
   }
 }

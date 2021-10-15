@@ -10,11 +10,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zoho.crm.api.record.Record;
 import eu.europeana.entitymanagement.AbstractIntegrationTest;
+import eu.europeana.entitymanagement.batch.model.ScheduledTask;
+import eu.europeana.entitymanagement.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
+import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
-import eu.europeana.entitymanagement.solr.model.SolrConcept;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.testutils.TestConfig;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
@@ -46,6 +48,8 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
 
   @Autowired protected SolrService solrService;
 
+  @Autowired protected ScheduledTaskService scheduledTaskService;
+
   @Autowired private EntityUpdateService entityUpdateService;
 
   @Qualifier(AppConfigConstants.BEAN_JSON_MAPPER)
@@ -55,11 +59,12 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
   @Autowired private WebApplicationContext webApplicationContext;
 
   @BeforeEach
-  protected void setup() throws Exception {
+  protected void setup() {
     this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
 
     // ensure a clean db between test runs
     this.entityRecordService.dropRepository();
+    this.scheduledTaskService.dropRepository();
   }
 
   protected static String loadFile(String resourcePath) throws IOException {
@@ -164,18 +169,11 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
     return entityRecordService.retrieveByEntityId(entityId);
   }
 
-  protected void assertDisabled(String entityId) throws Exception {
+  protected void assertedTaskScheduled(String entityId, ScheduledTaskType taskType) {
     // check that record is disabled
-    Optional<EntityRecord> dbRecordOptional = retrieveEntity(entityId);
+    Optional<ScheduledTask> scheduledTask = scheduledTaskService.getTask(entityId);
+    Assertions.assertTrue(scheduledTask.isPresent());
 
-    Assertions.assertTrue(dbRecordOptional.isPresent());
-
-    EntityRecord entityRecord = dbRecordOptional.get();
-
-    Assertions.assertTrue(entityRecord.isDisabled());
-
-    // check that Solr document is also deleted
-    SolrConcept solrConcept = solrService.searchById(SolrConcept.class, entityId);
-    Assertions.assertNull(solrConcept);
+    Assertions.assertEquals(taskType, scheduledTask.get().getUpdateType());
   }
 }

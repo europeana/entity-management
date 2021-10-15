@@ -1,12 +1,19 @@
 package eu.europeana.entitymanagement.web;
 
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.*;
-import static org.hamcrest.Matchers.*;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BASE_ADMIN_URL;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BASE_SERVICE_URL;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_BATHTUB_URI;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_BATHTUB_XML;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_REGISTER_BATHTUB_JSON;
+import static org.hamcrest.Matchers.any;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import eu.europeana.entitymanagement.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.solr.model.SolrConcept;
 import eu.europeana.entitymanagement.testutils.BaseMvcTestUtils;
@@ -44,7 +51,7 @@ public class EntityAdminControllerIT extends BaseWebControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
-    assertDeletion(entityRecord.getEntityId());
+    assertedTaskScheduled(entityRecord.getEntityId(), ScheduledTaskType.PERMANENT_DELETION);
   }
 
   @Test
@@ -63,7 +70,7 @@ public class EntityAdminControllerIT extends BaseWebControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
-    assertDeletion(entityRecord.getEntityId());
+    assertedTaskScheduled(entityRecord.getEntityId(), ScheduledTaskType.PERMANENT_DELETION);
   }
 
   @Disabled
@@ -133,15 +140,5 @@ public class EntityAdminControllerIT extends BaseWebControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .content(requestBody))
         .andExpect(status().isBadRequest());
-  }
-
-  private void assertDeletion(String entityId) throws Exception {
-    // check that record is deleted
-    Optional<EntityRecord> dbRecordOptional = retrieveEntity(entityId);
-    Assertions.assertTrue(dbRecordOptional.isEmpty());
-
-    // check that Solr document is also deleted
-    SolrConcept solrConcept = solrService.searchById(SolrConcept.class, entityId);
-    Assertions.assertNull(solrConcept);
   }
 }
