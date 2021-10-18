@@ -106,7 +106,7 @@ public class EnrichmentCountQueryService {
    */
   private String getEntityIdForQuery(String entityId, String type) {
     // not applicable for organizations and timespans
-    if (EntityTypes.Timespan.getEntityType().equals(type)
+    if (EntityTypes.TimeSpan.getEntityType().equals(type)
         || EntityTypes.Organization.getEntityType().equals(type)) {
       return entityId;
     }
