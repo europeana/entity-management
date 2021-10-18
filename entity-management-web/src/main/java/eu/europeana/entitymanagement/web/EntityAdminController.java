@@ -7,11 +7,14 @@ import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
+import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
@@ -121,8 +124,12 @@ public class EntityAdminController extends BaseRest {
       // verifyWriteAccess(Operations.CREATE, request);
       verifyMigrationAccess(request);
     }
-    // camel case the type to match enum Constants
-    type = StringUtils.capitalize(type);
+    try {
+        //get the entity type based on path param
+        type = EntityTypes.getByEntityType(type).getEntityType();
+    } catch (UnsupportedEntityTypeException e) {
+        throw new EntityCreationException("Entity type invalid or not supported: " +type, e);
+    }
 
     EntityRecord savedEntityRecord =
         entityRecordService.createEntityFromMigrationRequest(
