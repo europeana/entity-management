@@ -1,5 +1,8 @@
 package eu.europeana.entitymanagement.web.service;
 
+import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPath;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_BASE_NS_URL_PREFIX;
+
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.exception.ScoringComputationException;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
@@ -49,7 +52,9 @@ public class EnrichmentCountQueryService {
    */
   public int getEnrichmentCount(String entityId, String type) {
     String searchQuery =
-        String.format("%s:\"%s\" ", ENRICHMENT_QUERY_FIELD_MAP.get(type), entityId);
+        String.format(
+            "%s:\"%s\" ",
+            ENRICHMENT_QUERY_FIELD_MAP.get(type), getEntityIdForQuery(entityId, type));
 
     if (!EntityTypes.Organization.getEntityType().equals(type)) {
       searchQuery = searchQuery + contentTier;
@@ -90,5 +95,21 @@ public class EnrichmentCountQueryService {
     }
 
     return response.getTotalResults();
+  }
+
+  /**
+   * EntityID format is different in Search API. So we need to add the /base/ namespace when
+   * querying for enrichment counts.
+   *
+   * <p>TODO: This should be changed when entities are re-indexed in Search API with the "correct"
+   * ids
+   */
+  private String getEntityIdForQuery(String entityId, String type) {
+    // not applicable for organizations and timespans
+    if (EntityTypes.Timespan.getEntityType().equals(type)
+        || EntityTypes.Organization.getEntityType().equals(type)) {
+      return entityId;
+    }
+    return ENTITY_BASE_NS_URL_PREFIX + getEntityRequestPath(entityId);
   }
 }
