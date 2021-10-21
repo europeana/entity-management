@@ -79,19 +79,19 @@ public class EntityManagementConfiguration {
   @Value("${batch.step.updates.executor.queueSize: 50}")
   private int batchUpdatesQueueSize;
 
-  @Value("${batch.step.removals.executor.corePool: 10}")
-  private int batchRemovalsCorePoolSize;
-
-  @Value("${batch.step.removals.executor.maxPool: 100}")
-  private int batchRemovalsMaxPoolSize;
-
-  @Value("${batch.step.removals.executor.queueSize: 50}")
-  private int batchRemovalsQueueSize;
-
   @Value("${batch.step.updates.throttleLimit: 10}")
   private int batchUpdatesThrottleLimit;
 
-  @Value("${batch.step.removals.throttleLimit: 10}")
+  @Value("${batch.step.removals.executor.corePool: 2}")
+  private int batchRemovalsCorePoolSize;
+
+  @Value("${batch.step.removals.executor.maxPool: 10}")
+  private int batchRemovalsMaxPoolSize;
+
+  @Value("${batch.step.removals.executor.queueSize: 5}")
+  private int batchRemovalsQueueSize;
+
+  @Value("${batch.step.removals.throttleLimit: 2}")
   private int batchRemovalsThrottleLimit;
 
   @Value("${batch.computeMetrics: false}")

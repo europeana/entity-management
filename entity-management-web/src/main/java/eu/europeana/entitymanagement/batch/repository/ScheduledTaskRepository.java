@@ -58,7 +58,8 @@ public class ScheduledTaskRepository implements InitializingBean {
       updates.add(
           new UpdateOneModel<>(
               // query filters on updateType
-              new Document(ENTITY_ID, task.getEntityId()).append(UPDATE_TYPE, updateType),
+              new Document(ENTITY_ID, task.getEntityId())
+                  .append(UPDATE_TYPE, updateType.getValue()),
               new Document(
                   DOC_SET,
                   new Document(HAS_BEEN_PROCESSED, task.hasBeenProcessed())
@@ -124,7 +125,7 @@ public class ScheduledTaskRepository implements InitializingBean {
   public long removeProcessedTasks(ScheduledTaskType updateType) {
     return datastore
         .find(ScheduledTask.class)
-        .filter(eq(HAS_BEEN_PROCESSED, true), eq(UPDATE_TYPE, updateType))
+        .filter(eq(HAS_BEEN_PROCESSED, true), eq(UPDATE_TYPE, updateType.getValue()))
         .delete(MULTI_DELETE_OPTS)
         .getDeletedCount();
   }
