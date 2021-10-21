@@ -33,7 +33,7 @@ public class RdfBaseWrapper {
             name = XML_ORGANIZATION,
             namespace = NAMESPACE_EDM,
             type = XmlOrganizationImpl.class),
-        @XmlElement(name = XML_TIMESPAN, namespace = NAMESPACE_EDM, type = XmlTimespanImpl.class)
+        @XmlElement(name = XML_TIMESPAN, namespace = NAMESPACE_EDM, type = XmlTimeSpanImpl.class)
       })
   private XmlBaseEntityImpl<?> xmlEntity;
 

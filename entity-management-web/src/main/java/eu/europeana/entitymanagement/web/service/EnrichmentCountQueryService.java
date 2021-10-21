@@ -1,5 +1,8 @@
 package eu.europeana.entitymanagement.web.service;
 
+import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPath;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BASE_DATA_EUROPEANA_URI;
+
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.exception.ScoringComputationException;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
@@ -22,7 +25,7 @@ public class EnrichmentCountQueryService {
           EntityTypes.Agent.getEntityType(), "edm_agent",
           EntityTypes.Concept.getEntityType(), "skos_concept",
           EntityTypes.Place.getEntityType(), "edm_place",
-          EntityTypes.Timespan.getEntityType(), "edm_timespan",
+          EntityTypes.TimeSpan.getEntityType(), "edm_timespan",
           EntityTypes.Organization.getEntityType(), "foaf_organization");
 
   private static final Logger logger = LogManager.getLogger(EnrichmentCountQueryService.class);
@@ -49,7 +52,9 @@ public class EnrichmentCountQueryService {
    */
   public int getEnrichmentCount(String entityId, String type) {
     String searchQuery =
-        String.format("%s:\"%s\" ", ENRICHMENT_QUERY_FIELD_MAP.get(type), entityId);
+        String.format(
+            "%s:\"%s\" ",
+            ENRICHMENT_QUERY_FIELD_MAP.get(type), getEntityIdForQuery(entityId, type));
 
     if (!EntityTypes.Organization.getEntityType().equals(type)) {
       searchQuery = searchQuery + contentTier;
@@ -90,5 +95,21 @@ public class EnrichmentCountQueryService {
     }
 
     return response.getTotalResults();
+  }
+
+  /**
+   * EntityID format is different in Search API. So we need to add the /base/ namespace when
+   * querying for enrichment counts.
+   *
+   * <p>TODO: This should be changed when entities are re-indexed in Search API with the "correct"
+   * ids
+   */
+  private String getEntityIdForQuery(String entityId, String type) {
+    // not applicable for organizations and timespans
+    if (EntityTypes.TimeSpan.getEntityType().equals(type)
+        || EntityTypes.Organization.getEntityType().equals(type)) {
+      return entityId;
+    }
+    return BASE_DATA_EUROPEANA_URI + getEntityRequestPath(entityId);
   }
 }

@@ -94,8 +94,8 @@ class MetisResponseDeserializerTest {
   @Test
   void shouldDeserializeTimespan() throws Exception {
     String uri = "http://www.wikidata.org/entity/Q8106";
-    XmlTimespanImpl timespan =
-        (XmlTimespanImpl)
+    XmlTimeSpanImpl timespan =
+        (XmlTimeSpanImpl)
             MetisDereferenceUtils.parseMetisResponse(
                 unmarshaller, uri, loadFile("/metis-deref/timespan_1st_century.xml"));
     assert timespan != null;
@@ -104,8 +104,6 @@ class MetisResponseDeserializerTest {
 
     assertEquals(1, timespan.getIsPartOf().size());
     assertEquals("0001-01-01T00:00:00Z", timespan.getBegin());
-    // assertEquals("0100-12-31T00:00:00Z", timespan.getEnd());
-    // TODO: fix by replacing with the line above when the Metis issue is fixed
     assertEquals("0100-12-30T00:00:00Z", timespan.getEnd());
 
     // TODO: assert other properties

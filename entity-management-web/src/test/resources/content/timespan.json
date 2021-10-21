@@ -1,8 +1,8 @@
 {
-"type":"Timespan",
+"type":"TimeSpan",
 "timestamp":"2020-12-10T19:42:56.163Z",
 "text":["000-tal","1:a seklet","1:a århundradet","000-talet","I wiek","1. århundrede","1. století","1. gadsimts","1. stoljeće","I amžius","1 век","1. század","1. Jahrhundert","século I","segle I dC","I secolo","1st century","siglo I","1. sajand","1ος αιώνας","I Secolo D.C.","Primo secolo","I Secolo","Secolo I","1° secolo","I sec. d.C.","I secolo d.C.","1st-century","1e eeuw","Secolul I","Ier siècle","Ensimmäinen vuosisata","I век","1 век","1ú haois","1. storočie","1. stoletje","segle I"],
-"suggest_filters":["Timespan"],
+"suggest_filters":["TimeSpan"],
 "prefLabel":
 {
 "sv":"000-talet",
@@ -82,7 +82,7 @@
 "isShownBy.source":"http://data.europeana.eu/item/90402/RP_P_OB_76_852",
 "id":"https://lh4.ggpht.com/6F6o5WKGTq8XtisUEXLjwnd0kA5cdTuXZ8HC1zScDFMuCt8--djkmPyDsHevbkefcF6FL2ikEZ-pFRHcepouGjmvW54=s0"
 },
-"internal_type":"Timespan",
+"internal_type":"TimeSpan",
 "id":"http://data.europeana.eu/timespan/1",
 "europeana_term_hits":57922,
 "europeana_doc_count":0,

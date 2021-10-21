@@ -5,7 +5,7 @@ import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlOrganizationImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlPlaceImpl;
-import eu.europeana.entitymanagement.web.xml.model.XmlTimespanImpl;
+import eu.europeana.entitymanagement.web.xml.model.XmlTimeSpanImpl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -40,7 +40,7 @@ public class EnrichmentResultBaseWrapper {
         @XmlElement(
             name = "TimeSpan",
             namespace = "http://www.europeana.eu/schemas/edm/",
-            type = XmlTimespanImpl.class)
+            type = XmlTimeSpanImpl.class)
       })
   private List<XmlBaseEntityImpl<?>> xmlEntities = new ArrayList<>();
 

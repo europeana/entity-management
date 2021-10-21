@@ -17,7 +17,7 @@ import eu.europeana.entitymanagement.definitions.model.Concept;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.definitions.model.Place;
-import eu.europeana.entitymanagement.definitions.model.Timespan;
+import eu.europeana.entitymanagement.definitions.model.TimeSpan;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
@@ -62,8 +62,8 @@ public final class SchemaOrgUtils {
       SchemaOrgUtils.processOrganization((Organization) entity, contextualEntity);
     } else if (entity instanceof Agent) {
       SchemaOrgUtils.processAgent((Agent) entity, contextualEntity);
-    } else if (entity instanceof Timespan) {
-      SchemaOrgUtils.processTimespan((Timespan) entity, contextualEntity);
+    } else if (entity instanceof TimeSpan) {
+      SchemaOrgUtils.processTimespan((TimeSpan) entity, contextualEntity);
     }
   }
 
@@ -362,12 +362,12 @@ public final class SchemaOrgUtils {
   }
 
   /**
-   * Update properties of the given Schema.Org entity using data from the given EDM Timespan
+   * Update properties of the given Schema.Org entity using data from the given EDM TimeSpan
    *
    * @param timespanObject Schema.Org Contextual Entity object to update
    * @param time source EDM timespan
    */
-  public static void processTimespan(Timespan time, ContextualEntity timespanObject) {
+  public static void processTimespan(TimeSpan time, ContextualEntity timespanObject) {
     // @id
     timespanObject.setId(time.getAbout());
 

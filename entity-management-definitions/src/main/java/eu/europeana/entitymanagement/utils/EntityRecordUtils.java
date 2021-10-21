@@ -47,4 +47,12 @@ public class EntityRecordUtils {
       return uriParts[uriParts.length - 1];
     }
   }
+
+  /** Gets the "{type}/base/{identifier}" from an EntityId string */
+  public static String getEntityRequestPath(String entityId) {
+    // entity id is "http://data.europeana.eu/{type}/{identifier}"
+    String[] parts = entityId.split("/");
+
+    return parts[parts.length - 2] + "/base/" + parts[parts.length - 1];
+  }
 }

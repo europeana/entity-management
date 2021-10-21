@@ -6,7 +6,7 @@ import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.Timespan;
+import eu.europeana.entitymanagement.definitions.model.TimeSpan;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ class EntityRecordRepositoryIT extends AbstractIntegrationTest {
 
     String entityId = "http://data.europeana.eu/timespan/base/1";
 
-    Timespan entity = new Timespan();
+    TimeSpan entity = new TimeSpan();
     entity.setEntityId(entityId);
     //        entity.setType("TimeSpan");
     entity.setBeginString("0001-01-01");

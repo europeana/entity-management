@@ -44,7 +44,7 @@ public final class XmlConstants extends XmlFields {
   public static final String NOTATION = "notation";
   public static final String IN_SCHEMA = "inScheme";
 
-  public static final String XML_TIMESPAN = "Timespan";
+  public static final String XML_TIMESPAN = "TimeSpan";
 
   public static final String XML_AGENT = "Agent";
   public static final String XML_DATE = "date";

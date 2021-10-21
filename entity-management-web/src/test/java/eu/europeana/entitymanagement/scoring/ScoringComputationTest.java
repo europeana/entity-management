@@ -28,7 +28,7 @@ public class ScoringComputationTest {
     maxMetrics.addMetrics(createMetricsObject(EntityTypes.Place.name(), 24772, 3065416, 24576199));
     maxMetrics.addMetrics(createMetricsObject(EntityTypes.Concept.name(), 4055, 1448506, 8106790));
     maxMetrics.addMetrics(createMetricsObject(EntityTypes.Organization.name(), 244, 1, 8977503));
-    maxMetrics.addMetrics(createMetricsObject(EntityTypes.Timespan.name(), 3912, 1, 8977503));
+    maxMetrics.addMetrics(createMetricsObject(EntityTypes.TimeSpan.name(), 3912, 1, 8977503));
 
     String maxMetricsXml = objectMapper.writeValueAsString(maxMetrics);
     System.out.println(maxMetricsXml);
@@ -38,13 +38,13 @@ public class ScoringComputationTest {
     assertTrue(maxMetricsXml.contains(EntityTypes.Place.name()));
     assertTrue(maxMetricsXml.contains(EntityTypes.Concept.name()));
     assertTrue(maxMetricsXml.contains(EntityTypes.Organization.name()));
-    assertTrue(maxMetricsXml.contains(EntityTypes.Timespan.name()));
+    assertTrue(maxMetricsXml.contains(EntityTypes.TimeSpan.name()));
   }
 
   @Test
   public void testParseMaxMetricsValues() throws Exception {
     String serializedMaxValues =
-        "<metrics><maxValues><enrichmentCount>31734</enrichmentCount><hitCount>2297502</hitCount><pageRank>1204</pageRank><entityId>Agent</entityId><entityType>Agent</entityType></maxValues><maxValues><enrichmentCount>3065416</enrichmentCount><hitCount>24576199</hitCount><pageRank>24772</pageRank><entityId>Place</entityId><entityType>Place</entityType></maxValues><maxValues><enrichmentCount>1448506</enrichmentCount><hitCount>8106790</hitCount><pageRank>4055</pageRank><entityId>Concept</entityId><entityType>Concept</entityType></maxValues><maxValues><enrichmentCount>1</enrichmentCount><hitCount>8977503</hitCount><pageRank>244</pageRank><entityId>Organization</entityId><entityType>Organization</entityType></maxValues><maxValues><enrichmentCount>1</enrichmentCount><hitCount>8977503</hitCount><pageRank>3912</pageRank><entityId>Timespan</entityId><entityType>Timespan</entityType></maxValues></metrics>";
+        "<metrics><maxValues><enrichmentCount>31734</enrichmentCount><hitCount>2297502</hitCount><pageRank>1204</pageRank><entityId>Agent</entityId><entityType>Agent</entityType></maxValues><maxValues><enrichmentCount>3065416</enrichmentCount><hitCount>24576199</hitCount><pageRank>24772</pageRank><entityId>Place</entityId><entityType>Place</entityType></maxValues><maxValues><enrichmentCount>1448506</enrichmentCount><hitCount>8106790</hitCount><pageRank>4055</pageRank><entityId>Concept</entityId><entityType>Concept</entityType></maxValues><maxValues><enrichmentCount>1</enrichmentCount><hitCount>8977503</hitCount><pageRank>244</pageRank><entityId>Organization</entityId><entityType>Organization</entityType></maxValues><maxValues><enrichmentCount>1</enrichmentCount><hitCount>8977503</hitCount><pageRank>3912</pageRank><entityId>TimeSpan</entityId><entityType>TimeSpan</entityType></maxValues></metrics>";
     XmlMapper xmlMapper = new XmlMapper();
     MaxEntityMetrics maxMetrics = xmlMapper.readValue(serializedMaxValues, MaxEntityMetrics.class);
 
@@ -61,7 +61,7 @@ public class ScoringComputationTest {
     assertNotNull(maxMetrics.maxValues(EntityTypes.Place));
     assertNotNull(maxMetrics.maxValues(EntityTypes.Concept));
     assertNotNull(maxMetrics.maxValues(EntityTypes.Organization));
-    assertNotNull(maxMetrics.maxValues(EntityTypes.Timespan));
+    assertNotNull(maxMetrics.maxValues(EntityTypes.TimeSpan));
   }
 
   private EntityMetrics createMetricsObject(

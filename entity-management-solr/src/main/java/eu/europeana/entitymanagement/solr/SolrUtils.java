@@ -17,7 +17,7 @@ public class SolrUtils {
 
   public static final String SOLR_AGENT_SUGGESTER_FILTER = "solrAgentFilter";
   public static final String SOLR_ORGANIZATION_SUGGESTER_FILTER = "solrOrganizationFilter";
-  public static final String SOLR_TIMESPAN_SUGGESTER_FILTER = "solrTimespanFilter";
+  public static final String SOLR_TIMESPAN_SUGGESTER_FILTER = "solrTimeSpanFilter";
 
   /**
    * This method adds prefixes to the fields in format Map<String, List<String>> languageMap e.g.
@@ -88,8 +88,8 @@ public class SolrUtils {
       return (Class<U>) SolrOrganization.class;
     } else if (solrType.equals(EntityTypes.Place.getEntityType())) {
       return (Class<U>) SolrPlace.class;
-    } else if (solrType.equals(EntityTypes.Timespan.getEntityType())) {
-      return (Class<U>) SolrTimespan.class;
+    } else if (solrType.equals(EntityTypes.TimeSpan.getEntityType())) {
+      return (Class<U>) SolrTimeSpan.class;
     }
 
     throw new IllegalArgumentException(
@@ -106,8 +106,8 @@ public class SolrUtils {
       return new SolrOrganization((Organization) entity);
     } else if (entity instanceof Place) {
       return new SolrPlace((Place) entity);
-    } else if (entity instanceof Timespan) {
-      return new SolrTimespan((Timespan) entity);
+    } else if (entity instanceof TimeSpan) {
+      return new SolrTimeSpan((TimeSpan) entity);
     }
 
     // All possible types have been checked

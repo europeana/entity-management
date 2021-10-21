@@ -28,7 +28,7 @@ public abstract class XmlFields {
   public static final String XML_SKOS_NOTATION = "skos:notation";
   public static final String XML_SKOS_IN_SCHEMA = "skos:inSchema";
 
-  public static final String XML_EDM_TIMESPAN = "edm:Timespan";
+  public static final String XML_EDM_TIMESPAN = "edm:TimeSpan";
 
   public static final String XML_EDM_AGENT = "edm:Agent";
   public static final String XML_DC_DATE = "dc:date";

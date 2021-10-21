@@ -81,8 +81,8 @@ public class EntityUpdateSchedulingConfig implements InitializingBean {
   @Override
   public void afterPropertiesSet() {
     logger.info(
-        "Batch scheduling initialized – updateMetricsInitialDelay: {}; updateFullInitialDelay: {}; "
-            + "removalDeletionInitialDelay: {}; removalDeprecationInitialDelay: {}"
+        "Batch scheduling initialized – metricsUpdateInitialDelay: {}; fullUpdateInitialDelay: {}; "
+            + "deletionInitialDelay: {}; deprecationInitialDelay: {}"
             + "interval: {}",
         toMinutesAndSeconds(metricsUpdateInitialDelay),
         toMinutesAndSeconds(fullUpdateInitialDelay),
