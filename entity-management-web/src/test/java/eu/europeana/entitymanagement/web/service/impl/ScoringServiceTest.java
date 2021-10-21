@@ -45,7 +45,7 @@ public class ScoringServiceTest {
   public void testComputeMetrics() throws Exception {
 
     Agent agent = new Agent();
-    String entityId = "http://data.europeana.eu/agent/base/146741";
+    String entityId = "http://data.europeana.eu/agent/146741";
     agent.setEntityId(entityId);
     List<String> sameAs =
         List.of(
@@ -69,11 +69,11 @@ public class ScoringServiceTest {
     assertTrue(metrics.getPageRank() == 304);
     // value may increase in time, currently
     // before last reindexing was 750, let's see if the reindexing is complete
-    assertTrue(metrics.getEnrichmentCount() >= 747);
+    assertTrue(metrics.getEnrichmentCount() >= 705);
     // value may increase in time, for provided labelts it is currently 2555
     //	assertTrue(metrics.getHitCount() > 1000);
 
-    assertTrue(metrics.getScore() > 975000);
+    assertTrue(metrics.getScore() > 970000);
   }
 
   @Test

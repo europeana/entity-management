@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.web.service;
 
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPath;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_BASE_NS_URL_PREFIX;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BASE_DATA_EUROPEANA_URI;
 
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.exception.ScoringComputationException;
@@ -110,6 +110,6 @@ public class EnrichmentCountQueryService {
         || EntityTypes.Organization.getEntityType().equals(type)) {
       return entityId;
     }
-    return ENTITY_BASE_NS_URL_PREFIX + getEntityRequestPath(entityId);
+    return BASE_DATA_EUROPEANA_URI + getEntityRequestPath(entityId);
   }
 }

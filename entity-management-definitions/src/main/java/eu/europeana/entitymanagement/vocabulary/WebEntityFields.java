@@ -9,8 +9,6 @@ public interface WebEntityFields {
   public static final String LANGUAGE_EN = "en";
   public static final String BASE_DATA_EUROPEANA_URI = "http://data.europeana.eu/";
 
-  public static final String ENTITY_BASE_NS_URL_PREFIX = "http://data.europeana.eu/base/";
-
   // common fields
   public static final String ID = "id";
   public static final String ID_SCHEMA = "@id";
