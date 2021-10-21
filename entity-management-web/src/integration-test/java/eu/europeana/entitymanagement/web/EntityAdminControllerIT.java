@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.web;
 
+import static eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType.PERMANENT_DELETION;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BASE_ADMIN_URL;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BASE_SERVICE_URL;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_BATHTUB_URI;
@@ -13,7 +14,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import eu.europeana.entitymanagement.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.solr.model.SolrConcept;
 import eu.europeana.entitymanagement.testutils.BaseMvcTestUtils;
@@ -51,7 +51,7 @@ public class EntityAdminControllerIT extends BaseWebControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
-    assertedTaskScheduled(entityRecord.getEntityId(), ScheduledTaskType.PERMANENT_DELETION);
+    assertedTaskScheduled(entityRecord.getEntityId(), PERMANENT_DELETION);
   }
 
   @Test
@@ -70,7 +70,7 @@ public class EntityAdminControllerIT extends BaseWebControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
-    assertedTaskScheduled(entityRecord.getEntityId(), ScheduledTaskType.PERMANENT_DELETION);
+    assertedTaskScheduled(entityRecord.getEntityId(), PERMANENT_DELETION);
   }
 
   @Disabled

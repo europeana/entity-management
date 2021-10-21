@@ -11,10 +11,12 @@ import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
-import eu.europeana.entitymanagement.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -115,7 +117,7 @@ public class EMController extends BaseRest {
     checkIfMatchHeaderWithQuotes(etag, request);
 
     entityUpdateService.scheduleTasks(
-        Collections.singletonList(entityRecord.getEntityId()), ScheduledTaskType.DEPRECATION);
+        Collections.singletonList(entityRecord.getEntityId()), ScheduledRemovalType.DEPRECATION);
 
     return noContentResponse(request);
   }
@@ -256,7 +258,7 @@ public class EMController extends BaseRest {
 
     // query param takes precedence over request body
     if (StringUtils.hasLength(query)) {
-      entityUpdateService.scheduleUpdatesWithSearch(query, ScheduledTaskType.FULL_UPDATE);
+      entityUpdateService.scheduleUpdatesWithSearch(query, ScheduledUpdateType.FULL_UPDATE);
       return returnEmptyAcceptedResponse(request);
     }
 
@@ -264,7 +266,7 @@ public class EMController extends BaseRest {
       throw new HttpBadRequestException(INVALID_UPDATE_REQUEST_MSG);
     }
 
-    return scheduleBatchUpdates(request, entityIds, ScheduledTaskType.FULL_UPDATE);
+    return scheduleBatchUpdates(request, entityIds, ScheduledUpdateType.FULL_UPDATE);
   }
 
   @ApiOperation(
@@ -285,7 +287,7 @@ public class EMController extends BaseRest {
 
     // query param takes precedence over request body
     if (StringUtils.hasLength(query)) {
-      entityUpdateService.scheduleUpdatesWithSearch(query, ScheduledTaskType.METRICS_UPDATE);
+      entityUpdateService.scheduleUpdatesWithSearch(query, ScheduledUpdateType.METRICS_UPDATE);
       return returnEmptyAcceptedResponse(request);
     }
 
@@ -293,7 +295,7 @@ public class EMController extends BaseRest {
       throw new HttpBadRequestException(INVALID_UPDATE_REQUEST_MSG);
     }
 
-    return scheduleBatchUpdates(request, entityIds, ScheduledTaskType.METRICS_UPDATE);
+    return scheduleBatchUpdates(request, entityIds, ScheduledUpdateType.METRICS_UPDATE);
   }
 
   @ApiOperation(

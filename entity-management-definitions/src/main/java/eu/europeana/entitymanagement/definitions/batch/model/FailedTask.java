@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.batch.model;
+package eu.europeana.entitymanagement.definitions.batch.model;
 
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;

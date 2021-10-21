@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.batch.reader;
 
 import dev.morphia.query.experimental.filters.Filter;
-import eu.europeana.entitymanagement.batch.BatchUtils;
+import eu.europeana.entitymanagement.batch.utils.BatchUtils;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import java.util.Arrays;

@@ -1,13 +1,12 @@
 package eu.europeana.entitymanagement.batch.config;
 
-import static eu.europeana.entitymanagement.batch.model.ScheduledTaskType.DEPRECATION;
-import static eu.europeana.entitymanagement.batch.model.ScheduledTaskType.FULL_UPDATE;
-import static eu.europeana.entitymanagement.batch.model.ScheduledTaskType.METRICS_UPDATE;
-import static eu.europeana.entitymanagement.batch.model.ScheduledTaskType.PERMANENT_DELETION;
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.ENTITY_DELETIONS_JOB_LAUNCHER;
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.ENTITY_UPDATE_JOB_LAUNCHER;
+import static eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType.DEPRECATION;
+import static eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType.PERMANENT_DELETION;
 
-import eu.europeana.entitymanagement.batch.BatchUtils;
+import eu.europeana.entitymanagement.batch.utils.BatchUtils;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import java.time.Instant;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -49,10 +48,16 @@ public class EntityUpdateSchedulingConfig implements InitializingBean {
    * annotation though.
    */
   @Value("${batch.scheduling.metrics.initialDelayMillis}")
-  private long metricsInitialDelay;
+  private long updateMetricsInitialDelay;
 
   @Value("${batch.scheduling.full.initialDelayMillis}")
-  private long fullInitialDelay;
+  private long updateFullInitialDelay;
+
+  @Value("${batch.scheduling.deletion.initialDelayMillis}")
+  private long removalDeletionInitialDelay;
+
+  @Value("${batch.scheduling.deprecation.initialDelayMillis}")
+  private long removalDeprecationInitialDelay;
 
   @Value("${batch.scheduling.fixedDelayMillis}")
   private long fixedDelay;
@@ -69,9 +74,13 @@ public class EntityUpdateSchedulingConfig implements InitializingBean {
   @Override
   public void afterPropertiesSet() {
     logger.info(
-        "Batch scheduling initialized – metricsInitialDelay: {}; fullInitialDelay: {}; fixedDelay: {}",
-        toMinutesAndSeconds(metricsInitialDelay),
-        toMinutesAndSeconds(fullInitialDelay),
+        "Batch scheduling initialized – updateMetricsInitialDelay: {}; updateFullInitialDelay: {}; "
+            + "removalDeletionInitialDelay: {}; removalDeprecationInitialDelay: {}"
+            + "interval: {}",
+        toMinutesAndSeconds(updateMetricsInitialDelay),
+        toMinutesAndSeconds(updateFullInitialDelay),
+        toMinutesAndSeconds(removalDeletionInitialDelay),
+        toMinutesAndSeconds(removalDeprecationInitialDelay),
         toMinutesAndSeconds(fixedDelay));
   }
 
@@ -82,8 +91,9 @@ public class EntityUpdateSchedulingConfig implements InitializingBean {
   private void runScheduledFullUpdate() throws Exception {
     logger.info("Triggering scheduled full update for entities");
     entityUpdateJobLauncher.run(
-        updateJobConfig.updateScheduledEntities(FULL_UPDATE),
-        BatchUtils.createJobParameters(null, Date.from(Instant.now()), FULL_UPDATE));
+        updateJobConfig.updateScheduledEntities(ScheduledUpdateType.FULL_UPDATE),
+        BatchUtils.createJobParameters(
+            null, Date.from(Instant.now()), ScheduledUpdateType.FULL_UPDATE));
   }
 
   /** Periodically run metrics updates. */
@@ -93,8 +103,9 @@ public class EntityUpdateSchedulingConfig implements InitializingBean {
   private void runScheduledMetricsUpdate() throws Exception {
     logger.info("Triggering scheduled metrics update for entities");
     entityUpdateJobLauncher.run(
-        updateJobConfig.updateScheduledEntities(METRICS_UPDATE),
-        BatchUtils.createJobParameters(null, Date.from(Instant.now()), METRICS_UPDATE));
+        updateJobConfig.updateScheduledEntities(ScheduledUpdateType.METRICS_UPDATE),
+        BatchUtils.createJobParameters(
+            null, Date.from(Instant.now()), ScheduledUpdateType.METRICS_UPDATE));
   }
 
   /** Periodically run deletions */
@@ -104,7 +115,7 @@ public class EntityUpdateSchedulingConfig implements InitializingBean {
   private void runScheduledDeletions() throws Exception {
     logger.info("Triggering scheduled deletions for entities");
     entityDeletionsJobLauncher.run(
-        updateJobConfig.updateScheduledEntities(PERMANENT_DELETION),
+        updateJobConfig.removeScheduledEntities(PERMANENT_DELETION),
         BatchUtils.createJobParameters(null, Date.from(Instant.now()), PERMANENT_DELETION));
   }
 
@@ -115,7 +126,7 @@ public class EntityUpdateSchedulingConfig implements InitializingBean {
   private void runScheduledDeprecation() throws Exception {
     logger.info("Triggering scheduled deprecation for entities");
     entityDeletionsJobLauncher.run(
-        updateJobConfig.updateScheduledEntities(DEPRECATION),
+        updateJobConfig.removeScheduledEntities(DEPRECATION),
         BatchUtils.createJobParameters(null, Date.from(Instant.now()), DEPRECATION));
   }
 

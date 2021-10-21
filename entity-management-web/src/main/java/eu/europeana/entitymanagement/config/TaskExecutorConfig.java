@@ -36,12 +36,30 @@ public class TaskExecutorConfig {
     return new SyncTaskExecutor();
   }
 
-  @Bean(STEP_EXECUTOR)
-  public TaskExecutor stepExecutor() {
+  /**
+   * Executor used for Steps when running Scheduled Updates. The configures the concurrency settings
+   * for Full and Metrics updates.
+   */
+  @Bean(UPDATES_STEP_EXECUTOR)
+  public TaskExecutor updatesStepExecutor() {
     ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-    taskExecutor.setCorePoolSize(emConfig.getBatchStepExecutorCorePool());
-    taskExecutor.setMaxPoolSize(emConfig.getBatchStepExecutorMaxPool());
-    taskExecutor.setQueueCapacity(emConfig.getBatchStepExecutorQueueSize());
+    taskExecutor.setCorePoolSize(emConfig.getBatchUpdatesCorePoolSize());
+    taskExecutor.setMaxPoolSize(emConfig.getBatchUpdatesMaxPoolSize());
+    taskExecutor.setQueueCapacity(emConfig.getBatchUpdatesQueueSize());
+
+    return taskExecutor;
+  }
+
+  /**
+   * Executor used for Steps when running Scheduled Removals. The configures the concurrency
+   * settings for Deprecations and Permanent Deletions
+   */
+  @Bean(REMOVALS_STEP_EXECUTOR)
+  public TaskExecutor removalsStepExecutor() {
+    ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+    taskExecutor.setCorePoolSize(emConfig.getBatchRemovalsCorePoolSize());
+    taskExecutor.setMaxPoolSize(emConfig.getBatchRemovalsMaxPoolSize());
+    taskExecutor.setQueueCapacity(emConfig.getBatchRemovalsQueueSize());
 
     return taskExecutor;
   }

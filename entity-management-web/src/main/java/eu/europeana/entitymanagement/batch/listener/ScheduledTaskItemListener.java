@@ -1,10 +1,10 @@
 package eu.europeana.entitymanagement.batch.listener;
 
-import static eu.europeana.entitymanagement.batch.BatchUtils.getEntityIds;
+import static eu.europeana.entitymanagement.batch.utils.BatchUtils.getEntityIds;
 
-import eu.europeana.entitymanagement.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.batch.service.FailedTaskService;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,15 +15,15 @@ import org.springframework.batch.core.listener.ItemListenerSupport;
 import org.springframework.lang.NonNull;
 
 /** Listens for Read, Processing and Write operations during Entity Update steps. */
-public class EntityUpdateItemListener extends ItemListenerSupport<EntityRecord, EntityRecord> {
+public class ScheduledTaskItemListener extends ItemListenerSupport<EntityRecord, EntityRecord> {
 
-  private static final Logger logger = LogManager.getLogger(EntityUpdateItemListener.class);
+  private static final Logger logger = LogManager.getLogger(ScheduledTaskItemListener.class);
 
   private final FailedTaskService failedTaskService;
   private final ScheduledTaskService scheduledTaskService;
   private final ScheduledTaskType updateType;
 
-  public EntityUpdateItemListener(
+  public ScheduledTaskItemListener(
       FailedTaskService failedTaskService,
       ScheduledTaskService scheduledTaskService,
       ScheduledTaskType updateType) {

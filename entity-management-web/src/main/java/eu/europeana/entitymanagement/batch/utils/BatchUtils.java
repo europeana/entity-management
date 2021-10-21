@@ -1,7 +1,7 @@
-package eu.europeana.entitymanagement.batch;
+package eu.europeana.entitymanagement.batch.utils;
 
 import eu.europeana.entitymanagement.batch.model.JobParameter;
-import eu.europeana.entitymanagement.batch.model.ScheduledTaskType;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import java.util.Date;
 import java.util.List;
@@ -15,7 +15,9 @@ public class BatchUtils {
   // Batch jobs and steps
   public static String JOB_UPDATE_SINGLE_ENTITY = "update-single-entity-job";
   public static String STEP_UPDATE_ENTITY = "update-entity-step";
+  public static String STEP_REMOVE_ENTITY = "remove-entity-step";
   public static String JOB_UPDATE_SCHEDULED_ENTITIES = "update-scheduled-entities-job";
+  public static String JOB_REMOVE_SCHEDULED_ENTITIES = "remove-scheduled-entities-job";
 
   /**
    * Creates JobParameters for triggering the Spring Batch update job for specific entities
@@ -30,7 +32,7 @@ public class BatchUtils {
     JobParametersBuilder jobParametersBuilder =
         new JobParametersBuilder()
             .addDate(JobParameter.CURRENT_START_TIME.key(), runTime)
-            .addString(JobParameter.UPDATE_TYPE.key(), updateType.name());
+            .addString(JobParameter.UPDATE_TYPE.key(), updateType.getValue());
 
     if (StringUtils.hasLength(entityId)) {
       jobParametersBuilder.addString(JobParameter.ENTITY_ID.key(), entityId);

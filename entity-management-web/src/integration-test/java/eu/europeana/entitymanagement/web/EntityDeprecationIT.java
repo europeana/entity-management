@@ -1,10 +1,13 @@
 package eu.europeana.entitymanagement.web;
 
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.*;
+import static eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType.DEPRECATION;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BASE_SERVICE_URL;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_BATHTUB_URI;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_BATHTUB_XML;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_REGISTER_BATHTUB_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import eu.europeana.entitymanagement.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.solr.model.SolrConcept;
 import org.junit.jupiter.api.Assertions;
@@ -33,7 +36,7 @@ public class EntityDeprecationIT extends BaseWebControllerTest {
         .perform(delete(BASE_SERVICE_URL + "/" + requestPath).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
-    assertedTaskScheduled(entityRecord.getEntityId(), ScheduledTaskType.DEPRECATION);
+    assertedTaskScheduled(entityRecord.getEntityId(), DEPRECATION);
   }
 
   @Test

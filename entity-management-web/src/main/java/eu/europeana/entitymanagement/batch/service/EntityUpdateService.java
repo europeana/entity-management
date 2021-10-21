@@ -2,9 +2,10 @@ package eu.europeana.entitymanagement.batch.service;
 
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.SYNC_WEB_REQUEST_JOB_LAUNCHER;
 
-import eu.europeana.entitymanagement.batch.BatchUtils;
 import eu.europeana.entitymanagement.batch.config.EntityUpdateJobConfig;
-import eu.europeana.entitymanagement.batch.model.ScheduledTaskType;
+import eu.europeana.entitymanagement.batch.utils.BatchUtils;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.solr.SolrSearchCursorIterator;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
@@ -57,7 +58,7 @@ public class EntityUpdateService {
     syncWebRequestLauncher.run(
         entityUpdateJobConfig.updateSingleEntity(),
         BatchUtils.createJobParameters(
-            entityId, Date.from(Instant.now()), ScheduledTaskType.FULL_UPDATE));
+            entityId, Date.from(Instant.now()), ScheduledUpdateType.FULL_UPDATE));
   }
 
   /**

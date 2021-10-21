@@ -1,13 +1,21 @@
 package eu.europeana.entitymanagement.mongo.config;
 
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import dev.morphia.Datastore;
 import dev.morphia.Morphia;
 import dev.morphia.mapping.MapperOptions;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.definitions.batch.codec.ScheduledTaskTypeCodec;
+import eu.europeana.entitymanagement.definitions.batch.codec.ScheduledTaskTypeCodecProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bson.codecs.configuration.CodecProvider;
+import org.bson.codecs.configuration.CodecRegistries;
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.codecs.pojo.PojoCodecProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,7 +41,23 @@ public class DataSourceConfig {
 
   @Bean
   public MongoClient mongoClient() {
-    return MongoClients.create(hostUri);
+    ConnectionString connectionString = new ConnectionString(hostUri);
+
+    // Configure custom codecs
+    CodecProvider pojoCodecProvider =
+        PojoCodecProvider.builder().register(new ScheduledTaskTypeCodecProvider()).build();
+
+    CodecRegistry codecRegistry =
+        CodecRegistries.fromRegistries(
+            CodecRegistries.fromCodecs(new ScheduledTaskTypeCodec()),
+            CodecRegistries.fromProviders(pojoCodecProvider),
+            MongoClientSettings.getDefaultCodecRegistry());
+
+    return MongoClients.create(
+        MongoClientSettings.builder()
+            .applyConnectionString(connectionString)
+            .codecRegistry(codecRegistry)
+            .build());
   }
 
   @Primary

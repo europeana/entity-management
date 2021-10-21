@@ -4,8 +4,10 @@ import static eu.europeana.entitymanagement.utils.EntityRecordUtils.*;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 import static java.time.Instant.now;
 
+import com.mongodb.client.result.UpdateResult;
 import dev.morphia.query.experimental.filters.Filter;
 import eu.europeana.api.commons.error.EuropeanaApiException;
+import eu.europeana.entitymanagement.batch.utils.BatchUtils;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
@@ -31,6 +33,8 @@ import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +46,8 @@ public class EntityRecordService {
   final EntityManagementConfiguration emConfiguration;
 
   private final DataSources datasources;
+
+  private static final Logger logger = LogManager.getLogger(EntityRecordService.class);
 
   private static final String ENTITY_ID_REMOVED_MSG = "Entity '%s' has been removed";
 
@@ -82,6 +88,7 @@ public class EntityRecordService {
       List<String> entityIds, boolean excludeDisabled) {
     return entityRecordRepository.getEntityIds(entityIds, excludeDisabled);
   }
+
   /**
    * Gets coreferenced entity with the given id (sameAs or exactMatch value in the Consolidated
    * version)
@@ -99,13 +106,26 @@ public class EntityRecordService {
 
   @SuppressWarnings("unchecked")
   public List<? extends EntityRecord> saveBulkEntityRecords(List<? extends EntityRecord> records) {
-    // TODO: this is a code smell. Simplify EntityRecord vs EntityRecordImpl structure
     return entityRecordRepository.saveBulk((List<EntityRecord>) records);
   }
 
-  public EntityRecord disableEntityRecord(EntityRecord er) {
+  public void deleteBulk(List<? extends EntityRecord> entityRecords) {
+    String[] entityIds = BatchUtils.getEntityIds(entityRecords);
+    long deleteCount = entityRecordRepository.deleteBulk(List.of(entityIds));
+    if (deleteCount > 0) {
+      logger.info("Deleted {} entityRecords from database: entityIds={}", deleteCount, entityIds);
+    }
+  }
+
+  public void disableBulk(List<? extends EntityRecord> entityRecords) {
+    String[] entityIds = BatchUtils.getEntityIds(entityRecords);
+    UpdateResult updateResult = entityRecordRepository.disableBulk(List.of(entityIds));
+    logger.info("Deprecated {} entities: entityIds={}", updateResult.getModifiedCount(), entityIds);
+  }
+
+  public void disableEntityRecord(EntityRecord er) {
     er.setDisabled(true);
-    return saveEntityRecord(er);
+    saveEntityRecord(er);
   }
 
   /**
@@ -742,7 +762,9 @@ public class EntityRecordService {
           for (Object elemSecondaryList : listSecondaryObject) {
             if (!listPrimaryObject.contains(elemSecondaryList)) {
               listPrimaryObject.add(elemSecondaryList);
-              if (listPrimaryObjectChanged == false) listPrimaryObjectChanged = true;
+              if (listPrimaryObjectChanged == false) {
+                listPrimaryObjectChanged = true;
+              }
             }
           }
 
@@ -787,9 +809,11 @@ public class EntityRecordService {
           Map<Object, Object> altLabelConsolidatedMap =
               (Map<Object, Object>) consilidatedEntity.getFieldValue(field);
           Map<Object, Object> altLabelPrimaryObject = null;
-          if (altLabelConsolidatedMap != null)
+          if (altLabelConsolidatedMap != null) {
             altLabelPrimaryObject = new HashMap<>(altLabelConsolidatedMap);
-          else altLabelPrimaryObject = new HashMap<>();
+          } else {
+            altLabelPrimaryObject = new HashMap<>();
+          }
 
           boolean altLabelPrimaryValueChanged = false;
           for (Map.Entry<Object, Object> prefLabel : prefLabelsForAltLabels.entrySet()) {

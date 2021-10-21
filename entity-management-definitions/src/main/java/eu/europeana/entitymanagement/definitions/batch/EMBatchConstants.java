@@ -1,7 +1,7 @@
-package eu.europeana.entitymanagement.batch;
+package eu.europeana.entitymanagement.definitions.batch;
 
-import eu.europeana.entitymanagement.batch.model.FailedTask;
-import eu.europeana.entitymanagement.batch.model.ScheduledTask;
+import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
 
 public class EMBatchConstants {
 

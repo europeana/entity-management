@@ -2,9 +2,9 @@ package eu.europeana.entitymanagement.batch.service;
 
 import com.mongodb.bulk.BulkWriteResult;
 import dev.morphia.query.experimental.filters.Filter;
-import eu.europeana.entitymanagement.batch.model.ScheduledTask;
-import eu.europeana.entitymanagement.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.batch.repository.ScheduledTaskRepository;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import java.time.Instant;
 import java.util.List;

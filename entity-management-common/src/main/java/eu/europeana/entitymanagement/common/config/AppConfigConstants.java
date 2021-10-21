@@ -19,7 +19,8 @@ public class AppConfigConstants {
   public static final String BEAN_AUTHORIZATION_SERVICE = "authorizationService";
   public static final String SCHEDULED_UPDATE_TASK_EXECUTOR = "scheduledUpdateTaskExecutor";
   public static final String SCHEDULED_DELETION_TASK_EXECUTOR = "scheduledUpdateTaskExecutor";
-  public static final String STEP_EXECUTOR = "stepTaskExecutor";
+  public static final String UPDATES_STEP_EXECUTOR = "updatesStepExecutor";
+  public static final String REMOVALS_STEP_EXECUTOR = "removalsStepExecutor";
   public static final String WEB_REQUEST_JOB_EXECUTOR = "webRequestTaskExecutor";
   public static final String ENTITY_UPDATE_JOB_LAUNCHER = "entityUpdateJobLauncher";
   public static final String ENTITY_DELETIONS_JOB_LAUNCHER = "entityDeletionsJobLauncher";

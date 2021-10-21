@@ -1,18 +1,19 @@
-package eu.europeana.entitymanagement.batch.model;
-
-import static eu.europeana.entitymanagement.batch.EMBatchConstants.*;
+package eu.europeana.entitymanagement.definitions.batch.model;
 
 import dev.morphia.annotations.*;
+import eu.europeana.entitymanagement.definitions.batch.EMBatchConstants;
 import java.time.Instant;
 import org.bson.types.ObjectId;
 
 @Entity("ScheduledTasks")
 @Indexes({
-  @Index(fields = {@Field(CREATED), @Field(UPDATE_TYPE)}),
+  @Index(fields = {@Field(EMBatchConstants.CREATED), @Field(EMBatchConstants.UPDATE_TYPE)}),
   // only index records where hasBeenProcessed = true
   @Index(
-      options = @IndexOptions(partialFilter = "{" + HAS_BEEN_PROCESSED + " : { $eq : true } }"),
-      fields = {@Field(HAS_BEEN_PROCESSED)})
+      options =
+          @IndexOptions(
+              partialFilter = "{" + EMBatchConstants.HAS_BEEN_PROCESSED + " : { $eq : true } }"),
+      fields = {@Field(EMBatchConstants.HAS_BEEN_PROCESSED)})
 })
 public class ScheduledTask {
 

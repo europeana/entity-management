@@ -10,11 +10,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zoho.crm.api.record.Record;
 import eu.europeana.entitymanagement.AbstractIntegrationTest;
-import eu.europeana.entitymanagement.batch.model.ScheduledTask;
-import eu.europeana.entitymanagement.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
@@ -25,6 +25,7 @@ import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.Optional;
 import javax.xml.bind.JAXBContext;
 import org.apache.commons.io.IOUtils;
@@ -162,7 +163,7 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
 
   protected void deprecateEntity(EntityRecord entityRecord) throws SolrServiceException {
     entityRecordService.disableEntityRecord(entityRecord);
-    solrService.deleteById(entityRecord.getEntityId());
+    solrService.deleteById(Collections.singletonList(entityRecord.getEntityId()));
   }
 
   protected Optional<EntityRecord> retrieveEntity(String entityId) {

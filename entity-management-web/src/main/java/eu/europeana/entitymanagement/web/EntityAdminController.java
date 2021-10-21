@@ -6,9 +6,9 @@ import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
-import eu.europeana.entitymanagement.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
@@ -88,7 +88,7 @@ public class EntityAdminController extends BaseRest {
     LOG.info("Permanently deleting entityId={}", entityRecord.getEntityId());
     entityUpdateService.scheduleTasks(
         Collections.singletonList(entityRecord.getEntityId()),
-        ScheduledTaskType.PERMANENT_DELETION);
+        ScheduledRemovalType.PERMANENT_DELETION);
 
     return noContentResponse(request);
   }
