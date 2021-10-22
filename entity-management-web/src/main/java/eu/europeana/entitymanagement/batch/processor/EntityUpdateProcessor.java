@@ -11,6 +11,7 @@ import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorG
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.validation.ConstraintViolation;
 import javax.validation.ValidatorFactory;
 import org.springframework.batch.item.ItemProcessor;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Component;
 /** This {@link ItemProcessor} updates Entity metadata. */
 @Component
 public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, EntityRecord> {
+
   private final EntityRecordService entityRecordService;
   private final ValidatorFactory emValidatorFactory;
 
@@ -57,6 +59,12 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
 
     Entity consolidatedEntity =
         entityRecordService.mergeEntities(europeanaProxyEntity, externalProxyEntity);
+
+    // add external proxyIds to sameAs / exactMatch
+    entityRecordService.addSameReferenceLinks(
+        consolidatedEntity,
+        externalProxies.stream().map(EntityProxy::getProxyId).collect(Collectors.toList()));
+
     emEntityFieldCleaner.cleanAndNormalize(consolidatedEntity);
     entityRecordService.performReferentialIntegrity(consolidatedEntity);
     validateCompleteConstraints(consolidatedEntity);

@@ -33,6 +33,7 @@ import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -695,17 +696,6 @@ public class EntityRecordService {
           "Metadata consolidation failed to access required properties!", e);
     }
 
-    // Add external proxy id to consolidated entity sameAs / exactMatch
-    String externalProxyId = secondary.getEntityId();
-    List<String> consolidatedEntitySameRefs = consolidatedEntity.getSameReferenceLinks();
-
-    if (consolidatedEntitySameRefs == null) {
-      // sameAs is mutable here as we might need to add more values to it later
-      consolidatedEntity.setSameReferenceLinks(new ArrayList<>(List.of(externalProxyId)));
-    } else if (!consolidatedEntitySameRefs.contains(externalProxyId)) {
-      consolidatedEntitySameRefs.add(externalProxyId);
-    }
-
     return consolidatedEntity;
   }
 
@@ -1003,5 +993,27 @@ public class EntityRecordService {
         externalDatasourceOptional.get(),
         entityRecord,
         new Date());
+  }
+
+  /**
+   * Adds the specified uris to the entity's exactMatch / sameAs
+   *
+   * @param entity entity to update
+   * @param uris uris to add to entity's sameAs / exactMatch
+   */
+  public void addSameReferenceLinks(Entity entity, List<String> uris) {
+    List<String> entitySameReferenceLinks = entity.getSameReferenceLinks();
+
+    if (entitySameReferenceLinks == null) {
+      // sameAs is mutable here as we might need to add more values to it later
+      entity.setSameReferenceLinks(new ArrayList<>(uris));
+      return;
+    }
+
+    // combine uris with existing sameReferenceLinks, minus duplicates
+    entity.setSameReferenceLinks(
+        Stream.concat(entitySameReferenceLinks.stream(), uris.stream())
+            .distinct()
+            .collect(Collectors.toList()));
   }
 }

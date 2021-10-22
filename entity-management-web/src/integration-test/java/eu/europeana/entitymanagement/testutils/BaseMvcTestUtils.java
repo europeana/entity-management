@@ -127,6 +127,8 @@ public class BaseMvcTestUtils {
   public static final String ORGANIZATION_BNF_URI_ZOHO =
       "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000000370517";
   public static final String ORGANIZATION_BNF_URI_WIKIDATA_PATH_SUFFIX = "/entity/Q641676";
+  public static final String ORGANIZATION_BNF_URI_WIKIDATA_URI =
+      "http://www.wikidata.org" + ORGANIZATION_BNF_URI_WIKIDATA_PATH_SUFFIX;
   public static final String ORGANIZATION_BNF_ZOHO_RESPONSE =
       "/zoho-deref/organization_zoho_bnf_response.json";
   public static final String ORGANIZATION_BNF_WIKIDATA_RESPONSE_XML =
