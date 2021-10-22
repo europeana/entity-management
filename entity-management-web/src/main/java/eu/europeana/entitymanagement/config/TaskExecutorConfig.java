@@ -19,23 +19,47 @@ public class TaskExecutorConfig {
   }
 
   /**
-   * Creates a JobLauncher to be used for scheduled entity updates. This is a singleThreadExecutor,
+   * Returns a TaskExecutor to be used for scheduled entity updates. This is a singleThreadExecutor,
    * so updates cannot run simultaneously.
    */
-  @Bean(SCHEDULED_JOB_EXECUTOR)
-  public TaskExecutor jobLauncherExecutor() {
+  @Bean(SCHEDULED_UPDATE_TASK_EXECUTOR)
+  public TaskExecutor scheduledUpdateExecutor() {
     /*
      * launch all scheduled jobs within the Spring scheduling thread
      */
     return new SyncTaskExecutor();
   }
 
-  @Bean(STEP_EXECUTOR)
-  public TaskExecutor stepExecutor() {
+  /** Returns a TaskExecutor to be used for scheduled deletions / deprecation of entities. */
+  @Bean(SCHEDULED_DELETION_TASK_EXECUTOR)
+  public TaskExecutor scheduledDeletionsExecutor() {
+    return new SyncTaskExecutor();
+  }
+
+  /**
+   * Executor used for Steps when running Scheduled Updates. The configures the concurrency settings
+   * for Full and Metrics updates.
+   */
+  @Bean(UPDATES_STEP_EXECUTOR)
+  public TaskExecutor updatesStepExecutor() {
     ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-    taskExecutor.setCorePoolSize(emConfig.getBatchStepExecutorCorePool());
-    taskExecutor.setMaxPoolSize(emConfig.getBatchStepExecutorMaxPool());
-    taskExecutor.setQueueCapacity(emConfig.getBatchStepExecutorQueueSize());
+    taskExecutor.setCorePoolSize(emConfig.getBatchUpdatesCorePoolSize());
+    taskExecutor.setMaxPoolSize(emConfig.getBatchUpdatesMaxPoolSize());
+    taskExecutor.setQueueCapacity(emConfig.getBatchUpdatesQueueSize());
+
+    return taskExecutor;
+  }
+
+  /**
+   * Executor used for Steps when running Scheduled Removals. The configures the concurrency
+   * settings for Deprecations and Permanent Deletions
+   */
+  @Bean(REMOVALS_STEP_EXECUTOR)
+  public TaskExecutor removalsStepExecutor() {
+    ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+    taskExecutor.setCorePoolSize(emConfig.getBatchRemovalsCorePoolSize());
+    taskExecutor.setMaxPoolSize(emConfig.getBatchRemovalsMaxPoolSize());
+    taskExecutor.setQueueCapacity(emConfig.getBatchRemovalsQueueSize());
 
     return taskExecutor;
   }

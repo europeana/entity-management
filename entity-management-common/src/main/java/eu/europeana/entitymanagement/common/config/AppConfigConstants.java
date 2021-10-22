@@ -17,11 +17,17 @@ public class AppConfigConstants {
   public static final String BEAN_METIS_DEREF_SERVICE = "metisDerefService";
   public static final String BEAN_EM_BUILD_INFO = "emBuildInfo";
   public static final String BEAN_AUTHORIZATION_SERVICE = "authorizationService";
-  public static final String SCHEDULED_JOB_EXECUTOR = "scheduledUpdateTaskExecutor";
-  public static final String STEP_EXECUTOR = "stepTaskExecutor";
+  public static final String SCHEDULED_UPDATE_TASK_EXECUTOR = "scheduledUpdateTaskExecutor";
+  public static final String SCHEDULED_DELETION_TASK_EXECUTOR = "scheduledUpdateTaskExecutor";
+  public static final String UPDATES_STEP_EXECUTOR = "updatesStepExecutor";
+  public static final String REMOVALS_STEP_EXECUTOR = "removalsStepExecutor";
   public static final String WEB_REQUEST_JOB_EXECUTOR = "webRequestTaskExecutor";
-  public static final String SCHEDULED_JOB_LAUNCHER = "scheduledJobLauncher";
-  public static final String SYNC_JOB_LAUNCHER = "syncJobLauncher";
+  public static final String ENTITY_UPDATE_JOB_LAUNCHER = "entityUpdateJobLauncher";
+  public static final String ENTITY_DELETIONS_JOB_LAUNCHER = "entityDeletionsJobLauncher";
+  public static final String SYNC_WEB_REQUEST_JOB_LAUNCHER = "synchronousWebRequestJobLauncher";
+
+  public static final String PERIODIC_UPDATES_SCHEDULER = "periodicUpdatesScheduler";
+  public static final String PERIODIC_REMOVALS_SCHEDULER = "periodicRemovalsScheduler";
 
   public static final String BEAN_XML_MAPPER = "emXmlMapper";
   public static final String BEAN_JSON_MAPPER = "emJsonMapper";

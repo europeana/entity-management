@@ -70,17 +70,29 @@ public class EntityManagementConfiguration {
   @Value("${batch.step.chunkSize: 10}")
   private int batchChunkSize;
 
-  @Value("${batch.step.executor.corePool: 10}")
-  private int batchStepExecutorCorePool;
+  @Value("${batch.step.updates.executor.corePool: 10}")
+  private int batchUpdatesCorePoolSize;
 
-  @Value("${batch.step.executor.maxPool: 100}")
-  private int batchStepExecutorMaxPool;
+  @Value("${batch.step.updates.executor.maxPool: 100}")
+  private int batchUpdatesMaxPoolSize;
 
-  @Value("${batch.step.executor.queueSize: 50}")
-  private int batchStepExecutorQueueSize;
+  @Value("${batch.step.updates.executor.queueSize: 50}")
+  private int batchUpdatesQueueSize;
 
-  @Value("${batch.step.throttleLimit: 10}")
-  private int batchStepThrottleLimit;
+  @Value("${batch.step.updates.throttleLimit: 10}")
+  private int batchUpdatesThrottleLimit;
+
+  @Value("${batch.step.removals.executor.corePool: 2}")
+  private int batchRemovalsCorePoolSize;
+
+  @Value("${batch.step.removals.executor.maxPool: 10}")
+  private int batchRemovalsMaxPoolSize;
+
+  @Value("${batch.step.removals.executor.queueSize: 5}")
+  private int batchRemovalsQueueSize;
+
+  @Value("${batch.step.removals.throttleLimit: 2}")
+  private int batchRemovalsThrottleLimit;
 
   @Value("${batch.computeMetrics: false}")
   private boolean batchComputeMetrics;
@@ -141,16 +153,16 @@ public class EntityManagementConfiguration {
     return batchChunkSize;
   }
 
-  public int getBatchStepExecutorCorePool() {
-    return batchStepExecutorCorePool;
+  public int getBatchUpdatesCorePoolSize() {
+    return batchUpdatesCorePoolSize;
   }
 
-  public int getBatchStepExecutorMaxPool() {
-    return batchStepExecutorMaxPool;
+  public int getBatchUpdatesMaxPoolSize() {
+    return batchUpdatesMaxPoolSize;
   }
 
-  public int getBatchStepExecutorQueueSize() {
-    return batchStepExecutorQueueSize;
+  public int getBatchUpdatesQueueSize() {
+    return batchUpdatesQueueSize;
   }
 
   public boolean shouldComputeMetrics() {
@@ -165,8 +177,8 @@ public class EntityManagementConfiguration {
     return enrichmentsMigrationPassword;
   }
 
-  public int getBatchStepThrottleLimit() {
-    return batchStepThrottleLimit;
+  public int getBatchUpdatesThrottleLimit() {
+    return batchUpdatesThrottleLimit;
   }
 
   public String getIndexingSolrUrl() {
@@ -203,5 +215,21 @@ public class EntityManagementConfiguration {
    */
   public String getWikidataBaseUrl() {
     return wikidataBaseUrl;
+  }
+
+  public int getBatchRemovalsCorePoolSize() {
+    return batchRemovalsCorePoolSize;
+  }
+
+  public int getBatchRemovalsMaxPoolSize() {
+    return batchRemovalsMaxPoolSize;
+  }
+
+  public int getBatchRemovalsQueueSize() {
+    return batchRemovalsQueueSize;
+  }
+
+  public int getBatchRemovalsThrottleLimit() {
+    return batchRemovalsThrottleLimit;
   }
 }

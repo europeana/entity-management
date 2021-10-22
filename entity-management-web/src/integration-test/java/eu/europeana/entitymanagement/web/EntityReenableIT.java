@@ -28,7 +28,6 @@ public class EntityReenableIT extends BaseWebControllerTest {
 
     EntityRecord entityRecord = createEntity(europeanaMetadata, metisResponse, CONCEPT_BATHTUB_URI);
     deprecateEntity(entityRecord);
-    assertDisabled(entityRecord.getEntityId());
 
     String requestPath = getEntityRequestPath(entityRecord.getEntityId());
     mockMvc

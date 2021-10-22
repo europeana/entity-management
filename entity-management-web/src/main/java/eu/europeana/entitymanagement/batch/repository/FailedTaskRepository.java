@@ -3,7 +3,7 @@ package eu.europeana.entitymanagement.batch.repository;
 import static dev.morphia.query.Sort.ascending;
 import static dev.morphia.query.experimental.filters.Filters.eq;
 import static dev.morphia.query.experimental.filters.Filters.in;
-import static eu.europeana.entitymanagement.batch.EMBatchConstants.*;
+import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.*;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_DELETE_OPTS;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.UPSERT_OPTS;
 
@@ -16,8 +16,8 @@ import dev.morphia.Datastore;
 import dev.morphia.query.FindOptions;
 import dev.morphia.query.experimental.filters.Filter;
 import dev.morphia.query.experimental.updates.UpdateOperators;
-import eu.europeana.entitymanagement.batch.model.FailedTask;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import java.util.ArrayList;
 import java.util.List;

@@ -1,18 +1,19 @@
-package eu.europeana.entitymanagement.batch.model;
-
-import static eu.europeana.entitymanagement.batch.EMBatchConstants.*;
+package eu.europeana.entitymanagement.definitions.batch.model;
 
 import dev.morphia.annotations.*;
+import eu.europeana.entitymanagement.definitions.batch.EMBatchConstants;
 import java.time.Instant;
 import org.bson.types.ObjectId;
 
 @Entity("ScheduledTasks")
 @Indexes({
-  @Index(fields = {@Field(CREATED), @Field(UPDATE_TYPE)}),
+  @Index(fields = {@Field(EMBatchConstants.CREATED), @Field(EMBatchConstants.UPDATE_TYPE)}),
   // only index records where hasBeenProcessed = true
   @Index(
-      options = @IndexOptions(partialFilter = "{" + HAS_BEEN_PROCESSED + " : { $eq : true } }"),
-      fields = {@Field(HAS_BEEN_PROCESSED)})
+      options =
+          @IndexOptions(
+              partialFilter = "{" + EMBatchConstants.HAS_BEEN_PROCESSED + " : { $eq : true } }"),
+      fields = {@Field(EMBatchConstants.HAS_BEEN_PROCESSED)})
 })
 public class ScheduledTask {
 
@@ -27,7 +28,7 @@ public class ScheduledTask {
   private Instant created;
 
   private Instant modified;
-  private BatchUpdateType updateType;
+  private ScheduledTaskType updateType;
   private boolean hasBeenProcessed;
 
   private ScheduledTask() {
@@ -35,7 +36,7 @@ public class ScheduledTask {
   }
 
   public ScheduledTask(
-      String entityId, BatchUpdateType updateType, Instant modified, boolean hasBeenProcessed) {
+      String entityId, ScheduledTaskType updateType, Instant modified, boolean hasBeenProcessed) {
     this.entityId = entityId;
     this.updateType = updateType;
     this.modified = modified;
@@ -54,7 +55,7 @@ public class ScheduledTask {
     return modified;
   }
 
-  public BatchUpdateType getUpdateType() {
+  public ScheduledTaskType getUpdateType() {
     return updateType;
   }
 
@@ -64,11 +65,11 @@ public class ScheduledTask {
 
   public static class Builder {
     private final String entityId;
-    private final BatchUpdateType updateType;
+    private final ScheduledTaskType updateType;
     private Instant modified;
     private boolean hasBeenProcessed;
 
-    public Builder(String entityId, BatchUpdateType updateType) {
+    public Builder(String entityId, ScheduledTaskType updateType) {
       this.entityId = entityId;
       this.updateType = updateType;
     }

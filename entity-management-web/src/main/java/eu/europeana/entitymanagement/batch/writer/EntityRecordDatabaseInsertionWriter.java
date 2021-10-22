@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component;
 
 /** This {@link ItemWriter} saves EntityRecords to the database. */
 @Component
-public class EntityRecordDatabaseWriter implements ItemWriter<EntityRecord> {
+public class EntityRecordDatabaseInsertionWriter implements ItemWriter<EntityRecord> {
 
   private final EntityRecordService entityRecordService;
 
-  public EntityRecordDatabaseWriter(EntityRecordService entityRecordService) {
+  public EntityRecordDatabaseInsertionWriter(EntityRecordService entityRecordService) {
     this.entityRecordService = entityRecordService;
   }
 

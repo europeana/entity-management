@@ -3,8 +3,10 @@ package eu.europeana.entitymanagement.mongo.repository;
 import static dev.morphia.query.Sort.ascending;
 import static dev.morphia.query.experimental.filters.Filters.*;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.*;
+import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_UPDATE_OPTS;
 
 import com.mongodb.client.model.ReturnDocument;
+import com.mongodb.client.result.UpdateResult;
 import dev.morphia.Datastore;
 import dev.morphia.ModifyOptions;
 import dev.morphia.query.FindOptions;
@@ -14,6 +16,7 @@ import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.EntityRecordFields;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
+import eu.europeana.entitymanagement.mongo.utils.MorphiaUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -192,5 +195,21 @@ public class EntityRecordRepository {
         .filter(filters)
         .iterator(new FindOptions().skip(start).sort(ascending(ENTITY_MODIFIED)).limit(count))
         .toList();
+  }
+
+  public long deleteBulk(List<String> entityIds) {
+    return datastore
+        .find(EntityRecord.class)
+        .filter(in(ENTITY_ID, entityIds))
+        .delete(MorphiaUtils.MULTI_DELETE_OPTS)
+        .getDeletedCount();
+  }
+
+  public UpdateResult disableBulk(List<String> entityIds) {
+    return datastore
+        .find(EntityRecord.class)
+        .filter(in(ENTITY_ID, entityIds))
+        .update(UpdateOperators.set(DISABLED, true))
+        .execute(MULTI_UPDATE_OPTS);
   }
 }

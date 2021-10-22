@@ -3,7 +3,7 @@ package eu.europeana.entitymanagement.batch.repository;
 import static dev.morphia.query.Sort.ascending;
 import static dev.morphia.query.experimental.filters.Filters.eq;
 import static dev.morphia.query.experimental.filters.Filters.in;
-import static eu.europeana.entitymanagement.batch.EMBatchConstants.*;
+import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.*;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_DELETE_OPTS;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.UPSERT_OPTS;
 
@@ -14,9 +14,10 @@ import com.mongodb.client.model.WriteModel;
 import dev.morphia.Datastore;
 import dev.morphia.query.FindOptions;
 import dev.morphia.query.experimental.filters.Filter;
-import eu.europeana.entitymanagement.batch.model.BatchUpdateType;
-import eu.europeana.entitymanagement.batch.model.ScheduledTask;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,13 +52,14 @@ public class ScheduledTaskRepository implements InitializingBean {
    * @param tasks list of scheduled tasks
    * @return BulkWriteResult of db query
    */
-  public BulkWriteResult markAsProcessed(BatchUpdateType updateType, List<ScheduledTask> tasks) {
+  public BulkWriteResult markAsProcessed(ScheduledTaskType updateType, List<ScheduledTask> tasks) {
     List<WriteModel<ScheduledTask>> updates = new ArrayList<>();
     for (ScheduledTask task : tasks) {
       updates.add(
           new UpdateOneModel<>(
               // query filters on updateType
-              new Document(ENTITY_ID, task.getEntityId()).append(UPDATE_TYPE, updateType),
+              new Document(ENTITY_ID, task.getEntityId())
+                  .append(UPDATE_TYPE, updateType.getValue()),
               new Document(
                   DOC_SET,
                   new Document(HAS_BEEN_PROCESSED, task.hasBeenProcessed())
@@ -89,17 +91,17 @@ public class ScheduledTaskRepository implements InitializingBean {
               // manually set Morphia discriminator as we're bypassing its API for this query
               .append(MORPHIA_DISCRIMINATOR, SCHEDULED_TASK_CLASSNAME);
 
-      boolean shouldChangeUpdateType = task.getUpdateType() == BatchUpdateType.FULL;
+      boolean shouldChangeUpdateType = task.getUpdateType() == ScheduledUpdateType.FULL_UPDATE;
       /*
        * If entity is being scheduled for a full update, this:
        *  - changes the current updateType from METRICS to FULL; or
        *  - leaves current updateType as FULL (no change) otherwise
        */
       if (shouldChangeUpdateType) {
-        updateDoc.append(UPDATE_TYPE, task.getUpdateType().name());
+        updateDoc.append(UPDATE_TYPE, task.getUpdateType().getValue());
       } else {
         // only include updateType in $setOnInsert if it isn't added in $set
-        setOnInsertDoc.append(UPDATE_TYPE, task.getUpdateType().name());
+        setOnInsertDoc.append(UPDATE_TYPE, task.getUpdateType().getValue());
       }
 
       updates.add(
@@ -120,10 +122,10 @@ public class ScheduledTaskRepository implements InitializingBean {
    * @param updateType updateType to filter on
    * @return number of deleted entries
    */
-  public long removeProcessedTasks(BatchUpdateType updateType) {
+  public long removeProcessedTasks(ScheduledTaskType updateType) {
     return datastore
         .find(ScheduledTask.class)
-        .filter(eq(HAS_BEEN_PROCESSED, true), eq(UPDATE_TYPE, updateType))
+        .filter(eq(HAS_BEEN_PROCESSED, true), eq(UPDATE_TYPE, updateType.getValue()))
         .delete(MULTI_DELETE_OPTS)
         .getDeletedCount();
   }
@@ -164,5 +166,9 @@ public class ScheduledTaskRepository implements InitializingBean {
 
   public ScheduledTask getTask(String entityId) {
     return datastore.find(ScheduledTask.class).filter(eq(ENTITY_ID, entityId)).first();
+  }
+
+  public void dropCollection() {
+    datastore.getMapper().getCollection(ScheduledTask.class).drop();
   }
 }

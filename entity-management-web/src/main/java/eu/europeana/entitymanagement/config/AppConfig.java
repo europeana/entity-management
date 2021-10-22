@@ -32,8 +32,8 @@ public class AppConfig extends AppConfigConstants {
   @Resource(name = BEAN_XML_MAPPER)
   private XmlMapper xmlMapper;
 
-  @Resource(name = SCHEDULED_JOB_EXECUTOR)
-  private TaskExecutor jobLauncherExecutor;
+  @Resource(name = SCHEDULED_UPDATE_TASK_EXECUTOR)
+  private TaskExecutor defaultTaskExecutor;
 
   public AppConfig() {
     LOG.info("Initializing EntityManagementConfiguration bean as: configuration");
@@ -78,7 +78,7 @@ public class AppConfig extends AppConfigConstants {
   @Bean
   public MongoBatchConfigurer mongoBatchConfigurer(
       @Qualifier(BEAN_BATCH_DATA_STORE) Datastore datastore) {
-    return new MongoBatchConfigurer(datastore, jobLauncherExecutor);
+    return new MongoBatchConfigurer(datastore, defaultTaskExecutor);
   }
 
   @Bean

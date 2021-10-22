@@ -12,10 +12,10 @@ import org.springframework.stereotype.Component;
 
 /** Saves Entities to Solr */
 @Component
-public class EntitySolrWriter implements ItemWriter<EntityRecord> {
+public class EntitySolrInsertionWriter implements ItemWriter<EntityRecord> {
   private final SolrService solrService;
 
-  public EntitySolrWriter(SolrService solrService) {
+  public EntitySolrInsertionWriter(SolrService solrService) {
     this.solrService = solrService;
   }
 

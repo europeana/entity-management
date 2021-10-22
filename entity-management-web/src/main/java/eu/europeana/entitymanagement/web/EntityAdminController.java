@@ -6,12 +6,13 @@ import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
+import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
-import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
@@ -20,6 +21,7 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import io.swagger.annotations.ApiOperation;
+import java.util.Collections;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.LogManager;
@@ -30,7 +32,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Validated
@@ -40,18 +48,16 @@ public class EntityAdminController extends BaseRest {
   private static final Logger LOG = LogManager.getLogger(EntityAdminController.class);
 
   private final EntityRecordService entityRecordService;
-
-  private final SolrService solrService;
-
+  private final EntityUpdateService entityUpdateService;
   private final EntityManagementConfiguration emConfig;
 
   @Autowired
   public EntityAdminController(
       EntityRecordService entityRecordService,
-      SolrService solrService,
+      EntityUpdateService entityUpdateService,
       EntityManagementConfiguration emConfig) {
     this.entityRecordService = entityRecordService;
-    this.solrService = solrService;
+    this.entityUpdateService = entityUpdateService;
     this.emConfig = emConfig;
   }
 
@@ -89,8 +95,9 @@ public class EntityAdminController extends BaseRest {
     EntityRecord entityRecord = entityRecordOptional.get();
 
     LOG.info("Permanently deleting entityId={}", entityRecord.getEntityId());
-    entityRecordService.delete(entityRecord.getEntityId());
-    solrService.deleteById(entityRecord.getEntityId());
+    entityUpdateService.scheduleTasks(
+        Collections.singletonList(entityRecord.getEntityId()),
+        ScheduledRemovalType.PERMANENT_DELETION);
 
     return noContentResponse(request);
   }
@@ -125,10 +132,10 @@ public class EntityAdminController extends BaseRest {
       verifyMigrationAccess(request);
     }
     try {
-        //get the entity type based on path param
-        type = EntityTypes.getByEntityType(type).getEntityType();
+      // get the entity type based on path param
+      type = EntityTypes.getByEntityType(type).getEntityType();
     } catch (UnsupportedEntityTypeException e) {
-        throw new EntityCreationException("Entity type invalid or not supported: " +type, e);
+      throw new EntityCreationException("Entity type invalid or not supported: " + type, e);
     }
 
     EntityRecord savedEntityRecord =

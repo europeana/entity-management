@@ -1,10 +1,15 @@
 package eu.europeana.entitymanagement.batch.config;
 
-import static eu.europeana.entitymanagement.batch.model.BatchUpdateType.FULL;
-import static eu.europeana.entitymanagement.batch.model.BatchUpdateType.METRICS;
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.SCHEDULED_JOB_LAUNCHER;
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.ENTITY_DELETIONS_JOB_LAUNCHER;
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.ENTITY_UPDATE_JOB_LAUNCHER;
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.PERIODIC_REMOVALS_SCHEDULER;
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.PERIODIC_UPDATES_SCHEDULER;
+import static eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType.DEPRECATION;
+import static eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType.PERMANENT_DELETION;
 
-import eu.europeana.entitymanagement.batch.BatchUtils;
+import eu.europeana.entitymanagement.batch.utils.BatchUtils;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -18,8 +23,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 
 @Configuration
 @PropertySources({
@@ -37,66 +43,140 @@ import org.springframework.scheduling.annotation.Scheduled;
 public class EntityUpdateSchedulingConfig implements InitializingBean {
 
   private static final Logger logger = LogManager.getLogger(EntityUpdateSchedulingConfig.class);
-  private final JobLauncher scheduledJobLauncher;
+  private final JobLauncher entityUpdateJobLauncher;
+  private final JobLauncher entityDeletionsJobLauncher;
   private final EntityUpdateJobConfig updateJobConfig;
 
-  /**
-   * Inject batch scheduling configs so they can be logged. Variables can't be used in @Scheduled
-   * annotation though.
-   */
-  @Value("${batch.scheduling.metrics.initialDelayMillis}")
-  private long metricsInitialDelay;
+  private final TaskScheduler updatesScheduler;
+  private final TaskScheduler removalsScheduler;
 
-  @Value("${batch.scheduling.full.initialDelayMillis}")
-  private long fullInitialDelay;
+  @Value("${batch.scheduling.metrics.initialDelaySeconds}")
+  private long metricsUpdateInitialDelay;
 
-  @Value("${batch.scheduling.fixedDelayMillis}")
-  private long fixedDelay;
+  @Value("${batch.scheduling.full.initialDelaySeconds}")
+  private long fullUpdateInitialDelay;
+
+  @Value("${batch.scheduling.deletion.initialDelaySeconds}")
+  private long deletionInitialDelay;
+
+  @Value("${batch.scheduling.deprecation.initialDelaySeconds}")
+  private long deprecationInitialDelay;
+
+  @Value("${batch.scheduling.intervalSeconds}")
+  private long interval;
 
   public EntityUpdateSchedulingConfig(
-      @Qualifier(SCHEDULED_JOB_LAUNCHER) JobLauncher scheduledJobLauncher,
-      EntityUpdateJobConfig batchUpdateConfig) {
-    this.scheduledJobLauncher = scheduledJobLauncher;
+      @Qualifier(ENTITY_UPDATE_JOB_LAUNCHER) JobLauncher entityUpdateJobLauncher,
+      @Qualifier(ENTITY_DELETIONS_JOB_LAUNCHER) JobLauncher entityDeletionsJobLauncher,
+      EntityUpdateJobConfig batchUpdateConfig,
+      @Qualifier(PERIODIC_UPDATES_SCHEDULER) TaskScheduler updatesScheduler,
+      @Qualifier(PERIODIC_REMOVALS_SCHEDULER) TaskScheduler removalsScheduler) {
+    this.entityUpdateJobLauncher = entityUpdateJobLauncher;
+    this.entityDeletionsJobLauncher = entityDeletionsJobLauncher;
     this.updateJobConfig = batchUpdateConfig;
+    this.updatesScheduler = updatesScheduler;
+    this.removalsScheduler = removalsScheduler;
   }
 
   @Override
-  public void afterPropertiesSet() throws Exception {
+  public void afterPropertiesSet() {
     logger.info(
-        "Batch scheduling initialized – metricsInitialDelay: {}; fullInitialDelay: {}; fixedDelay: {}",
-        toMinutesAndSeconds(metricsInitialDelay),
-        toMinutesAndSeconds(fullInitialDelay),
-        toMinutesAndSeconds(fixedDelay));
+        "Batch scheduling initialized – metricsUpdateInitialDelay: {}; fullUpdateInitialDelay: {}; "
+            + "deletionInitialDelay: {}; deprecationInitialDelay: {}"
+            + "interval: {}",
+        toMinutesAndSeconds(metricsUpdateInitialDelay),
+        toMinutesAndSeconds(fullUpdateInitialDelay),
+        toMinutesAndSeconds(deletionInitialDelay),
+        toMinutesAndSeconds(deprecationInitialDelay),
+        toMinutesAndSeconds(interval));
+
+    schedulePeriodicUpdates();
+    schedulePeriodicDeletions();
+  }
+
+  private void schedulePeriodicDeletions() {
+    removalsScheduler.scheduleWithFixedDelay(
+        this::runScheduledDeprecation,
+        Instant.now().plusSeconds(deprecationInitialDelay),
+        Duration.ofSeconds(interval));
+
+    removalsScheduler.scheduleWithFixedDelay(
+        this::runScheduledDeletions,
+        Instant.now().plusSeconds(deletionInitialDelay),
+        Duration.ofSeconds(interval));
+  }
+
+  private void schedulePeriodicUpdates() {
+    updatesScheduler.scheduleWithFixedDelay(
+        this::runScheduledFullUpdate,
+        Instant.now().plusSeconds(fullUpdateInitialDelay),
+        Duration.ofSeconds(interval));
+
+    updatesScheduler.scheduleWithFixedDelay(
+        this::runScheduledMetricsUpdate,
+        Instant.now().plusSeconds(metricsUpdateInitialDelay),
+        Duration.ofSeconds(interval));
   }
 
   /** Periodically run full entity updates. */
-  @Scheduled(
-      initialDelayString = "${batch.scheduling.full.initialDelayMillis}",
-      fixedDelayString = "${batch.scheduling.fixedDelayMillis}")
-  private void runScheduledFullUpdate() throws Exception {
+  @Async
+  void runScheduledFullUpdate() {
     logger.info("Triggering scheduled full update for entities");
-    scheduledJobLauncher.run(
-        updateJobConfig.updateScheduledEntities(FULL),
-        BatchUtils.createJobParameters(null, Date.from(Instant.now()), FULL));
+    try {
+      entityUpdateJobLauncher.run(
+          updateJobConfig.updateScheduledEntities(ScheduledUpdateType.FULL_UPDATE),
+          BatchUtils.createJobParameters(
+              null, Date.from(Instant.now()), ScheduledUpdateType.FULL_UPDATE));
+    } catch (Exception e) {
+      logger.warn("Error running scheduled full update", e);
+    }
   }
 
   /** Periodically run metrics updates. */
-  @Scheduled(
-      initialDelayString = "${batch.scheduling.metrics.initialDelayMillis}",
-      fixedDelayString = "${batch.scheduling.fixedDelayMillis}")
-  private void runScheduledMetricsUpdate() throws Exception {
+  @Async
+  void runScheduledMetricsUpdate() {
     logger.info("Triggering scheduled metrics update for entities");
-    scheduledJobLauncher.run(
-        updateJobConfig.updateScheduledEntities(METRICS),
-        BatchUtils.createJobParameters(null, Date.from(Instant.now()), METRICS));
+    try {
+      entityUpdateJobLauncher.run(
+          updateJobConfig.updateScheduledEntities(ScheduledUpdateType.METRICS_UPDATE),
+          BatchUtils.createJobParameters(
+              null, Date.from(Instant.now()), ScheduledUpdateType.METRICS_UPDATE));
+    } catch (Exception e) {
+      logger.warn("Error running scheduled metrics update", e);
+    }
   }
 
-  /** Converts milliseconds to "x min, y sec" */
-  private String toMinutesAndSeconds(long millis) {
+  /** Periodically run deletions */
+  @Async
+  void runScheduledDeletions() {
+    logger.info("Triggering scheduled deletions for entities");
+    try {
+      entityDeletionsJobLauncher.run(
+          updateJobConfig.removeScheduledEntities(PERMANENT_DELETION),
+          BatchUtils.createJobParameters(null, Date.from(Instant.now()), PERMANENT_DELETION));
+    } catch (Exception e) {
+      logger.warn("Error running scheduled deletion", e);
+    }
+  }
+
+  /** Periodically run deprecation */
+  @Async
+  void runScheduledDeprecation() {
+    logger.info("Triggering scheduled deprecation for entities");
+    try {
+      entityDeletionsJobLauncher.run(
+          updateJobConfig.removeScheduledEntities(DEPRECATION),
+          BatchUtils.createJobParameters(null, Date.from(Instant.now()), DEPRECATION));
+    } catch (Exception e) {
+      logger.warn("Error running scheduled deprecation", e);
+    }
+  }
+
+  /** Converts Seconds to "x min, y sec" */
+  private String toMinutesAndSeconds(long seconds) {
     return String.format(
         "%d min, %d sec",
-        TimeUnit.MILLISECONDS.toMinutes(millis),
-        TimeUnit.MILLISECONDS.toSeconds(millis)
-            - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
+        TimeUnit.SECONDS.toMinutes(seconds),
+        seconds - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(seconds)));
   }
 }

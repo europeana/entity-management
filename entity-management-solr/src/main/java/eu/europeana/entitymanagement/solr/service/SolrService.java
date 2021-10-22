@@ -219,18 +219,21 @@ public class SolrService implements InitializingBean {
   /**
    * Deletes the document whose id matches the specified entityId value
    *
-   * @param entityId entity id
+   * @param entityIds entity id list
    * @throws SolrServiceException on error
    */
-  public void deleteById(String entityId) throws SolrServiceException {
+  public void deleteById(List<String> entityIds) throws SolrServiceException {
     try {
-      solrClient.deleteById(entityId);
+      UpdateResponse updateResponse = solrClient.deleteById(entityIds);
       if (isExplicitCommitsEnabled) {
         solrClient.commit();
       }
-      log.info("Deleted document from Solr; entityId={}", entityId);
+      log.info(
+          "Deleted {} documents from Solr; entityIds={}",
+          updateResponse.getResponse().size(),
+          entityIds);
     } catch (SolrServerException | IOException e) {
-      throw new SolrServiceException(String.format("Error deleting entityId=%s", entityId), e);
+      throw new SolrServiceException(String.format("Error deleting entityId=%s", entityIds), e);
     }
   }
 
