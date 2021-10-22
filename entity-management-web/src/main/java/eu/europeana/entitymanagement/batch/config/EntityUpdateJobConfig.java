@@ -89,7 +89,8 @@ public class EntityUpdateJobConfig {
 
   private final int chunkSize;
 
-  private final int throttleLimit;
+  private final int updatesThrottleLimit;
+  private final int removalsThrottleLimit;
 
   /** SkipPolicy to ignore all failures when executing jobs, as they can be handled later */
   private final SkipPolicy noopSkipPolicy = (Throwable t, int skipCount) -> true;
@@ -137,7 +138,8 @@ public class EntityUpdateJobConfig {
     this.removalsStepExecutor = removalsStepExecutor;
     this.synchronousTaskExecutor = synchronousTaskExecutor;
     this.chunkSize = emConfig.getBatchChunkSize();
-    this.throttleLimit = emConfig.getBatchUpdatesThrottleLimit();
+    this.updatesThrottleLimit = emConfig.getBatchUpdatesThrottleLimit();
+    removalsThrottleLimit = emConfig.getBatchRemovalsThrottleLimit();
   }
 
   /** Makes ItemReader thread-safe */
@@ -258,7 +260,7 @@ public class EntityUpdateJobConfig {
         .faultTolerant()
         .skipPolicy(noopSkipPolicy)
         .taskExecutor(executor)
-        .throttleLimit(throttleLimit)
+        .throttleLimit(updatesThrottleLimit)
         .listener(stepExecutionListener(updateType))
         .build();
   }
@@ -292,7 +294,7 @@ public class EntityUpdateJobConfig {
         .faultTolerant()
         .skipPolicy(noopSkipPolicy)
         .taskExecutor(executor)
-        .throttleLimit(throttleLimit)
+        .throttleLimit(removalsThrottleLimit)
         .listener(stepExecutionListener(removalType))
         .build();
   }
