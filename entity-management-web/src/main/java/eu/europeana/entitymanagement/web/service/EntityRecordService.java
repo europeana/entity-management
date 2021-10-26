@@ -209,9 +209,8 @@ public class EntityRecordService {
         entityId,
         externalDatasource,
         entityRecord,
-        timestamp);
-    //		createExternalProxy(metisEntity, entityCreationRequest.getId(), entityId,
-    // externalDatasource, entityRecord, timestamp);
+        timestamp,
+        1);
 
     setEntityAggregation(entityRecord, entityId, timestamp);
     return entityRecordRepository.save(entityRecord);
@@ -268,10 +267,10 @@ public class EntityRecordService {
         entityId,
         externalDatasource,
         entityRecord,
-        timestamp);
-    //	createExternalProxy(datasourceResponse, externalProxyId, entityId, externalDatasource,
-    // entityRecord, timestamp);
+        timestamp,
+        1);
 
+    setEntityAggregation(entityRecord, entityId, timestamp);
     // for Zoho organizations, create second proxy for Wikidata metadata
     Optional<String> wikidataId;
     if (isZohoOrg
@@ -290,13 +289,15 @@ public class EntityRecordService {
           entityId,
           wikidataDatasource.get(),
           entityRecord,
-          timestamp);
+          timestamp,
+          2);
 
       // add wikidata uri to entity sameAs
       entity.getSameReferenceLinks().add(wikidataId.get());
+      // add to entityIsAggregatedBy
+      entity.getIsAggregatedBy().getAggregates().add(getDatasourceAggregationId(entityId, 2));
     }
 
-    setEntityAggregation(entityRecord, entityId, timestamp);
     return entityRecordRepository.save(entityRecord);
   }
 
@@ -909,8 +910,12 @@ public class EntityRecordService {
     isAggregatedBy.setId(getIsAggregatedById(entityId));
     isAggregatedBy.setCreated(timestamp);
     isAggregatedBy.setModified(timestamp);
-    isAggregatedBy.setAggregates(
-        Arrays.asList(getEuropeanaAggregationId(entityId), getDatasourceAggregationId(entityId)));
+
+    // aggregates is mutable in case we need to append to it later
+    List<String> aggregates = new ArrayList<>();
+    aggregates.add(getEuropeanaAggregationId(entityId));
+    aggregates.add(getDatasourceAggregationId(entityId, 1));
+    isAggregatedBy.setAggregates(aggregates);
 
     entityRecord.getEntity().setIsAggregatedBy(isAggregatedBy);
   }
@@ -942,9 +947,10 @@ public class EntityRecordService {
       String entityId,
       DataSource externalDatasource,
       EntityRecord entityRecord,
-      Date timestamp) {
+      Date timestamp,
+      int aggregationId) {
     Aggregation datasourceAggr = new Aggregation();
-    datasourceAggr.setId(getDatasourceAggregationId(entityId));
+    datasourceAggr.setId(getDatasourceAggregationId(entityId, aggregationId));
     datasourceAggr.setCreated(timestamp);
     datasourceAggr.setModified(timestamp);
     datasourceAggr.setRights(externalDatasource.getRights());
@@ -992,7 +998,8 @@ public class EntityRecordService {
         entityRecord.getEntityId(),
         externalDatasourceOptional.get(),
         entityRecord,
-        new Date());
+        new Date(),
+        1);
   }
 
   /**

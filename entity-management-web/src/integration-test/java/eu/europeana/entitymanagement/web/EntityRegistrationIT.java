@@ -124,6 +124,14 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         .andExpect(jsonPath("$.id", is(expectedId)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
+        // isAggregatedBy should contain 3 aggregates (for Europeana, zoho and wikidata proxies)
+        .andExpect(
+            jsonPath(
+                "$.isAggregatedBy.aggregates",
+                containsInAnyOrder(
+                    EntityRecordUtils.getEuropeanaAggregationId(expectedId),
+                    EntityRecordUtils.getDatasourceAggregationId(expectedId, 1),
+                    EntityRecordUtils.getDatasourceAggregationId(expectedId, 2))))
         // sameAs contains Wikidata and Zoho uris
         .andExpect(
             jsonPath(
