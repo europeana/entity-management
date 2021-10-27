@@ -20,6 +20,7 @@ public class EntityPreview {
   private Map<String, String> prefLabel;
   private Map<String, List<String>> altLabel;
   private WebResource depiction;
+  private WebResource isShownBy;
 
   public EntityPreview() {
     // create explicit empty constructor
@@ -30,12 +31,14 @@ public class EntityPreview {
       String context,
       Map<String, String> prefLabel,
       Map<String, List<String>> altLabel,
-      WebResource depiction) {
+      WebResource depiction,
+      WebResource isShownBy) {
     this.id = id;
     this.context = context;
     this.prefLabel = prefLabel;
     this.altLabel = altLabel;
     this.depiction = depiction;
+    this.isShownBy = isShownBy;
   }
 
   public void setId(String id) {
@@ -80,5 +83,9 @@ public class EntityPreview {
 
   public String getType() {
     return type.getEntityType();
+  }
+
+  public WebResource getIsShownBy() {
+    return isShownBy;
   }
 }

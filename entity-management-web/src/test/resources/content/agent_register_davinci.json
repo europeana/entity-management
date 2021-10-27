@@ -10,5 +10,11 @@
   "depiction": {
     "id":"https://commons.wikimedia.org/wiki/Leonardo_da_Vinci#/media/File:Francesco_Melzi_-_Portrait_of_Leonardo.png",
     "source": "http://valid-uri-for-testing"
+  },
+  "isShownBy": {
+    "id": "http://fileshare.mauritshuis.nl/collectie/0670_repro.jpg",
+    "type": "WebResource",
+    "source": "http://data.europeana.eu/item/2021672/resource_document_mauritshuis_670",
+    "thumbnail": "https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri=http%3A%2F%2Ffileshare.mauritshuis.nl%2Fcollectie%2F0670_repro.jpg&type=IMAGE"
   }
 }

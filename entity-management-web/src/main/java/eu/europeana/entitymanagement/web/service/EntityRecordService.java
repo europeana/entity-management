@@ -331,6 +331,7 @@ public class EntityRecordService {
     entity.setPrefLabel(entityCreationRequest.getPrefLabel());
     entity.setAltLabel(entityCreationRequest.getAltLabel());
     entity.setDepiction(entityCreationRequest.getDepiction());
+    entity.setIsShownBy(entityCreationRequest.getIsShownBy());
   }
 
   /**
