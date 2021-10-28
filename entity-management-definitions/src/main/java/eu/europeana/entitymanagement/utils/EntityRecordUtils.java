@@ -27,8 +27,8 @@ public class EntityRecordUtils {
     return entityId + "#aggr_europeana";
   }
 
-  public static String getDatasourceAggregationId(String entityId) {
-    return entityId + "#aggr_source_1";
+  public static String getDatasourceAggregationId(String entityId, int aggregationId) {
+    return entityId + "#aggr_source_" + aggregationId;
   }
 
   public static String getIsAggregatedById(String entityId) {

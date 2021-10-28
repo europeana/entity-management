@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement.web;
 
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.*;
 import static org.hamcrest.Matchers.any;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -126,8 +127,19 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         .andExpect(jsonPath("$.id", is(expectedId)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
+        // isAggregatedBy should contain 3 aggregates (for Europeana, zoho and wikidata proxies)
+        .andExpect(
+            jsonPath(
+                "$.isAggregatedBy.aggregates",
+                containsInAnyOrder(
+                    EntityRecordUtils.getEuropeanaAggregationId(expectedId),
+                    EntityRecordUtils.getDatasourceAggregationId(expectedId, 1),
+                    EntityRecordUtils.getDatasourceAggregationId(expectedId, 2))))
         // sameAs contains Wikidata and Zoho uris
-        .andExpect(jsonPath("$.sameAs", hasSize(2)))
+        .andExpect(
+            jsonPath(
+                "$.sameAs",
+                containsInAnyOrder(ORGANIZATION_BNF_URI_ZOHO, ORGANIZATION_BNF_URI_WIKIDATA_URI)))
         // should have Europeana, Zoho and Wikidata proxies
         .andExpect(jsonPath("$.proxies", hasSize(3)));
   }
