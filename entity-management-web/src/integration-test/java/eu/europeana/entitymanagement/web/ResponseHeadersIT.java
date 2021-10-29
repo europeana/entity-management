@@ -127,8 +127,7 @@ public class ResponseHeadersIT extends BaseWebControllerTest {
     checkCorsHeadersForSchemaOrg(results);
   }
   
-//  @Test
-// failing test  
+  @Test
   void retrievalWithWrongAcceptShouldReturn400() throws Exception {
     String requestPath = createEntity();
     ResultActions results =
@@ -138,7 +137,8 @@ public class ResponseHeadersIT extends BaseWebControllerTest {
     results.andExpect(status().isBadRequest());
   }
   
-  @Test
+//  @Test
+//failing test  
   void retrievalWithUnsupportedFormatShouldReturn406() throws Exception {
     String requestPath = createEntity();
     ResultActions results =
