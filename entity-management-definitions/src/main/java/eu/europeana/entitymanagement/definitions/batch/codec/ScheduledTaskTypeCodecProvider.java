@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.definitions.batch.codec;
 
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import org.bson.codecs.Codec;
 import org.bson.codecs.pojo.PropertyCodecProvider;
 import org.bson.codecs.pojo.PropertyCodecRegistry;
@@ -12,7 +13,7 @@ public final class ScheduledTaskTypeCodecProvider implements PropertyCodecProvid
   public <T> Codec<T> get(
       final TypeWithTypeParameters<T> type, final PropertyCodecRegistry propertyCodecRegistry) {
     Class<T> clazz = type.getType();
-    if (Enum.class.isAssignableFrom(clazz)) {
+    if (ScheduledTaskType.class.isAssignableFrom(clazz)) {
       new ScheduledTaskTypeCodec();
     }
     return null;

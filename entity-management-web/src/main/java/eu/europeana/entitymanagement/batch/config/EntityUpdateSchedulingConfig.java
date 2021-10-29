@@ -1,6 +1,6 @@
 package eu.europeana.entitymanagement.batch.config;
 
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.ENTITY_DELETIONS_JOB_LAUNCHER;
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.ENTITY_REMOVALS_JOB_LAUNCHER;
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.ENTITY_UPDATE_JOB_LAUNCHER;
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.PERIODIC_REMOVALS_SCHEDULER;
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.PERIODIC_UPDATES_SCHEDULER;
@@ -67,7 +67,7 @@ public class EntityUpdateSchedulingConfig implements InitializingBean {
 
   public EntityUpdateSchedulingConfig(
       @Qualifier(ENTITY_UPDATE_JOB_LAUNCHER) JobLauncher entityUpdateJobLauncher,
-      @Qualifier(ENTITY_DELETIONS_JOB_LAUNCHER) JobLauncher entityDeletionsJobLauncher,
+      @Qualifier(ENTITY_REMOVALS_JOB_LAUNCHER) JobLauncher entityDeletionsJobLauncher,
       EntityUpdateJobConfig batchUpdateConfig,
       @Qualifier(PERIODIC_UPDATES_SCHEDULER) TaskScheduler updatesScheduler,
       @Qualifier(PERIODIC_REMOVALS_SCHEDULER) TaskScheduler removalsScheduler) {

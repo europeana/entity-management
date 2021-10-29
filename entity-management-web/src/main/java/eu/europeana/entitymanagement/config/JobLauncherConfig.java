@@ -21,7 +21,7 @@ public class JobLauncherConfig {
   public JobLauncherConfig(
       MongoBatchConfigurer mongoBatchConfigurer,
       @Qualifier(WEB_REQUEST_JOB_EXECUTOR) TaskExecutor webRequestJobExecutor,
-      @Qualifier(SCHEDULED_DELETION_TASK_EXECUTOR) TaskExecutor deletionsTaskExecutor) {
+      @Qualifier(SCHEDULED_REMOVAL_TASK_EXECUTOR) TaskExecutor deletionsTaskExecutor) {
     this.mongoBatchConfigurer = mongoBatchConfigurer;
     this.synchronousWebRequestExecutor = webRequestJobExecutor;
     this.deletionsTaskExecutor = deletionsTaskExecutor;
@@ -33,7 +33,7 @@ public class JobLauncherConfig {
     return mongoBatchConfigurer.getJobLauncher();
   }
 
-  @Bean(ENTITY_DELETIONS_JOB_LAUNCHER)
+  @Bean(ENTITY_REMOVALS_JOB_LAUNCHER)
   public JobLauncher entityDeletionJobLauncher() throws Exception {
     SimpleJobLauncher jobLauncher = new SimpleJobLauncher();
     jobLauncher.setJobRepository(mongoBatchConfigurer.getJobRepository());

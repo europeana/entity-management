@@ -31,7 +31,7 @@ public class TaskExecutorConfig {
   }
 
   /** Returns a TaskExecutor to be used for scheduled deletions / deprecation of entities. */
-  @Bean(SCHEDULED_DELETION_TASK_EXECUTOR)
+  @Bean(SCHEDULED_REMOVAL_TASK_EXECUTOR)
   public TaskExecutor scheduledDeletionsExecutor() {
     return new SyncTaskExecutor();
   }
