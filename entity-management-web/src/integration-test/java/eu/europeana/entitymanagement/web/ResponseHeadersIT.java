@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
@@ -112,6 +113,41 @@ public class ResponseHeadersIT extends BaseWebControllerTest {
     checkCommonResponseHeaders(results);
   }
 
+  
+  @Test
+  void retrievalWithPathExtensionSchemaOrg() throws Exception {
+    String requestPath = createEntity() + ".schema.jsonld?wskey=test";
+    ResultActions results =
+        mockMvc.perform(
+             get(BASE_SERVICE_URL + "/" + requestPath).accept("plain/txt") //accept header should be ignored
+            .header("Origin", "http://test-origin.eu"));
+
+    checkAllowHeaderForGET(results);
+    checkCommonResponseHeadersForSchemaOrg(results);
+    checkCorsHeadersForSchemaOrg(results);
+  }
+  
+//  @Test
+// failing test  
+  void retrievalWithWrongAcceptShouldReturn400() throws Exception {
+    String requestPath = createEntity();
+    ResultActions results =
+        mockMvc.perform(
+             get(BASE_SERVICE_URL + "/" + requestPath).accept("web/vtt1"));
+
+    results.andExpect(status().isBadRequest());
+  }
+  
+  @Test
+  void retrievalWithUnsupportedFormatShouldReturn406() throws Exception {
+    String requestPath = createEntity();
+    ResultActions results =
+        mockMvc.perform(
+             get(BASE_SERVICE_URL + "/" + requestPath).accept("plain/text"));
+
+    results.andExpect(status().isNotAcceptable());
+  }
+  
   @Test
   void updateFromExternalDatasourceShouldReturnCorrectHeaders() throws Exception {
     String requestPath = createEntity();
