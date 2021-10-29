@@ -13,9 +13,13 @@ public class FailedTask {
 
   @Indexed private String entityId;
 
-  // default values saved if they're not overwritten
-  private String errorMessage = "No error message";
-  private String stackTrace = "No stacktrace";
+  private String errorMessage;
+  private String stackTrace;
+
+  /**
+   * FailureCount not explicitly set. Value is updated during Mongo upserts via the $inc operator
+   */
+  private int failureCount = 1;
 
   /* Created is not explicitly set on instantiation.
    * During upserts, we use the "modified" value if the record doesn't already exist.
@@ -54,13 +58,18 @@ public class FailedTask {
     return modified;
   }
 
+  public int getFailureCount() {
+    return failureCount;
+  }
+
   public static class Builder {
 
     private final String entityId;
 
     private Instant modified;
-    private String errorMessage;
-    private String stackTrace;
+    // default values saved if they're not overwritten
+    private String errorMessage = "No error message";
+    private String stackTrace = "No stacktrace";
 
     public Builder(String entityId) {
       this.entityId = entityId;

@@ -8,6 +8,7 @@ public class EMBatchConstants {
   // Document ops
   public static final String DOC_SET = "$set";
   public static final String DOC_SET_ON_INSERT = "$setOnInsert";
+  public static final String DOC_INCREMENT = "$inc";
 
   // Common field names
   public static final String ENTITY_ID = "entityId";
@@ -17,6 +18,7 @@ public class EMBatchConstants {
   // Error handling field-specific fields
   public static final String ERROR_MSG = "errorMessage";
   public static final String STACKTRACE = "stackTrace";
+  public static final String FAILURE_COUNT = "failureCount";
 
   // ScheduledTask
   public static final String UPDATE_TYPE = "updateType";
