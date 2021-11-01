@@ -97,6 +97,9 @@ public class EntityManagementConfiguration {
   @Value("${batch.computeMetrics: false}")
   private boolean batchComputeMetrics;
 
+  @Value("${batch.maxFailedTaskRetries: 3}")
+  private int maxFailedTaskRetries;
+
   @Value("${auth.enabled: true}")
   private boolean authEnabled;
 
@@ -231,5 +234,9 @@ public class EntityManagementConfiguration {
 
   public int getBatchRemovalsThrottleLimit() {
     return batchRemovalsThrottleLimit;
+  }
+
+  public int getMaxFailedTaskRetries() {
+    return maxFailedTaskRetries;
   }
 }

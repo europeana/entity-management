@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement.batch.repository;
 
 import static dev.morphia.query.Sort.ascending;
 import static dev.morphia.query.experimental.filters.Filters.eq;
+import static dev.morphia.query.experimental.filters.Filters.gte;
 import static dev.morphia.query.experimental.filters.Filters.in;
 import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.*;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_DELETE_OPTS;
@@ -12,9 +13,14 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.UpdateOneModel;
 import com.mongodb.client.model.WriteModel;
 import dev.morphia.Datastore;
+import dev.morphia.aggregation.experimental.stages.Lookup;
+import dev.morphia.aggregation.experimental.stages.Projection;
+import dev.morphia.aggregation.experimental.stages.Unwind;
 import dev.morphia.query.FindOptions;
 import dev.morphia.query.experimental.filters.Filter;
+import dev.morphia.query.internal.MorphiaCursor;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
@@ -130,6 +136,10 @@ public class ScheduledTaskRepository implements InitializingBean {
         .getDeletedCount();
   }
 
+  public void deleteScheduledTask(String entityId) {
+    datastore.find(ScheduledTask.class).filter(eq(ENTITY_ID, entityId)).delete();
+  }
+
   /**
    * Queries the ScheduledTasks collection for records that match the given filter(s). Then
    * retrieves the matching EntityRecords Results are sorted in ascending order of created
@@ -168,7 +178,33 @@ public class ScheduledTaskRepository implements InitializingBean {
     return datastore.find(ScheduledTask.class).filter(eq(ENTITY_ID, entityId)).first();
   }
 
+  public List<ScheduledTask> getTasks(List<String> entityIds) {
+    return datastore.find(ScheduledTask.class).filter(in(ENTITY_ID, entityIds)).iterator().toList();
+  }
+
   public void dropCollection() {
     datastore.getMapper().getCollection(ScheduledTask.class).drop();
+  }
+
+  /**
+   * Gets all ScheduledTasks with failures, whose failureCount is above the maxFailedTaskRetries
+   * value. Note: this method returns a cursor, which callers are responsible for closing
+   */
+  public MorphiaCursor<ScheduledTask> getTasksWithFailures(int maxFailedTaskRetries) {
+
+    return datastore
+        .aggregate(ScheduledTask.class)
+        .match(eq(HAS_BEEN_PROCESSED, false))
+        // both collections use the same entityId field name
+        .lookup(
+            Lookup.from(FailedTask.class)
+                .localField(ENTITY_ID)
+                .foreignField(ENTITY_ID)
+                .as("failed_tasks_lookup"))
+        .unwind(Unwind.on("failed_tasks_lookup"))
+        .match(gte("failed_tasks_lookup.failureCount", maxFailedTaskRetries))
+        // we only care about the entityId for this query
+        .project(Projection.of().include(ENTITY_ID))
+        .execute(ScheduledTask.class);
   }
 }

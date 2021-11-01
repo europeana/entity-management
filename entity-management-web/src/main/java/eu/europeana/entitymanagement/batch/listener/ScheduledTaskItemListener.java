@@ -7,7 +7,6 @@ import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -45,6 +44,7 @@ public class ScheduledTaskItemListener extends ItemListenerSupport<EntityRecord,
 
     // Remove entries from the FailedTask collection if exists
     failedTaskService.removeFailures(Arrays.asList(entityIds));
+
     scheduledTaskService.markAsProcessed(Arrays.asList(entityIds), updateType);
   }
 
@@ -58,8 +58,7 @@ public class ScheduledTaskItemListener extends ItemListenerSupport<EntityRecord,
   public void onProcessError(@NonNull EntityRecord entityRecord, @NonNull Exception e) {
     String entityId = entityRecord.getEntityId();
     logger.warn("onProcessError: entityId={}", entityId, e);
-    failedTaskService.persistFailure(entityId, e);
-    scheduledTaskService.markAsProcessed(Collections.singletonList(entityId), updateType);
+    failedTaskService.persistFailure(entityId, updateType, e);
   }
 
   @Override
@@ -68,7 +67,6 @@ public class ScheduledTaskItemListener extends ItemListenerSupport<EntityRecord,
     String[] entityIds = getEntityIds(entityRecords);
 
     logger.warn("onWriteError: entityIds={}", entityIds, e);
-    failedTaskService.persistFailureBulk(entityRecords, e);
-    scheduledTaskService.markAsProcessed(Arrays.asList(entityIds), updateType);
+    failedTaskService.persistFailureBulk(List.of(entityIds), updateType, e);
   }
 }

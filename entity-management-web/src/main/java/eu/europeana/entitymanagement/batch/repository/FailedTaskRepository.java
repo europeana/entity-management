@@ -62,6 +62,7 @@ public class FailedTaskRepository implements InitializingBean {
             UpdateOperators.set(STACKTRACE, failure.getStackTrace()),
             UpdateOperators.set(ERROR_MSG, failure.getErrorMessage()),
             UpdateOperators.set(MODIFIED, failure.getModified()),
+            UpdateOperators.set(UPDATE_TYPE, failure.getUpdateType().getValue()),
             // increment failureCount
             UpdateOperators.inc(FAILURE_COUNT, 1),
             // set "created" value if this a new doc. Also make failureCount=0
@@ -157,6 +158,10 @@ public class FailedTaskRepository implements InitializingBean {
         .filter(in(ENTITY_ID, matchingIds))
         .iterator()
         .toList();
+  }
+
+  public FailedTask getFailure(String entityId) {
+    return datastore.find(FailedTask.class).filter(eq(ENTITY_ID, entityId)).first();
   }
 
   public List<FailedTask> getFailures(List<String> entityIds) {

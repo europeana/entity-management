@@ -92,6 +92,8 @@ public class EntityUpdateJobConfig {
   private final int updatesThrottleLimit;
   private final int removalsThrottleLimit;
 
+  private final int maxFailedTaskRetries;
+
   /** SkipPolicy to ignore all failures when executing jobs, as they can be handled later */
   private final SkipPolicy noopSkipPolicy = (Throwable t, int skipCount) -> true;
 
@@ -140,6 +142,7 @@ public class EntityUpdateJobConfig {
     this.chunkSize = emConfig.getBatchChunkSize();
     this.updatesThrottleLimit = emConfig.getBatchUpdatesThrottleLimit();
     removalsThrottleLimit = emConfig.getBatchRemovalsThrottleLimit();
+    maxFailedTaskRetries = emConfig.getMaxFailedTaskRetries();
   }
 
   /** Makes ItemReader thread-safe */
@@ -183,7 +186,7 @@ public class EntityUpdateJobConfig {
   }
 
   private StepExecutionListener stepExecutionListener(ScheduledTaskType updateType) {
-    return new EntityUpdateStepListener(scheduledTaskService, updateType);
+    return new EntityUpdateStepListener(scheduledTaskService, updateType, maxFailedTaskRetries);
   }
 
   /**

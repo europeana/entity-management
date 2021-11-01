@@ -17,10 +17,16 @@ public class EntityUpdateStepListener implements StepExecutionListener {
   private final ScheduledTaskService scheduledTaskService;
   private final ScheduledTaskType updateType;
 
+  private final int maxFailedTaskRetries;
+
   public EntityUpdateStepListener(
-      ScheduledTaskService scheduledTaskService, ScheduledTaskType updateType) {
+      ScheduledTaskService scheduledTaskService,
+      ScheduledTaskType updateType,
+      int maxFailedTaskRetries) {
     this.scheduledTaskService = scheduledTaskService;
     this.updateType = updateType;
+
+    this.maxFailedTaskRetries = maxFailedTaskRetries;
   }
 
   /**
@@ -29,17 +35,20 @@ public class EntityUpdateStepListener implements StepExecutionListener {
   @Override
   public void beforeStep(@NonNull StepExecution stepExecution) {
     logger.debug("Cleaning up processed tasks before step execution. updateType={}", updateType);
-    cleanupProcessedTasks();
+    // remove processed tasks here, in case application restarted before step finished execution
+    scheduledTaskService.removeProcessedTasks(updateType);
   }
 
   @Override
   public ExitStatus afterStep(@NonNull StepExecution stepExecution) {
-    logger.debug("Cleaning up processed tasks after step execution. updateType={}", updateType);
-    cleanupProcessedTasks();
-    return ExitStatus.COMPLETED;
-  }
+    /*
+     * By default, we always retry ScheduledTasks with failures (hasBeenProcessed=false)
+     *
+     * Tasks with failuresCount >= maxFailedTaskRetries are removed here, instead of the beforeStep, as we still want to process
+     * them if they're manually scheduled again.
+     */
 
-  private void cleanupProcessedTasks() {
-    scheduledTaskService.removeProcessedTasks(updateType);
+    scheduledTaskService.removeScheduledTasksWithFailures(maxFailedTaskRetries);
+    return ExitStatus.COMPLETED;
   }
 }
