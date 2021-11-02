@@ -6,8 +6,7 @@
         <module>entity-management-common</module>
         <module>entity-management-web</module>
         <module>entity-management-mongo</module>
-        <module>entity-management-batch</module>
-      <module>entity-management-enrichment</module>
+        <module>entity-management-enrichment</module>
     <module>entity-management-solr</module>
      <module>entity-management-zoho</module>
   </modules>
@@ -22,12 +21,12 @@
 		<repository>
 			<id>libs-release-local</id>
 			<name>europeana-releases</name>
-			<url>http://artifactory.eanadev.org/artifactory/libs-release</url>
+			<url>https://artifactory.eanadev.org/artifactory/libs-release</url>
 		</repository>
 		<repository>
 			<id>libs-snapshots-local</id>
 			<name>europeana-snapshots</name>
-			<url>http://artifactory.eanadev.org/artifactory/libs-snapshot</url>
+			<url>https://artifactory.eanadev.org/artifactory/libs-snapshot</url>
 		</repository>
 	</repositories>
     
@@ -45,6 +44,7 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <api.commons.version>0.3.8</api.commons.version>
+        <springbatch.mongo.version>1.0.0</springbatch.mongo.version>
         <corelib.version>2.14.1-SNAPSHOT</corelib.version>
         <jackson.version>2.11.4</jackson.version>
         <spring-boot.version>2.5.5</spring-boot.version>
