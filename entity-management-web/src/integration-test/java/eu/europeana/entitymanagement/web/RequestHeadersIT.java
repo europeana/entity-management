@@ -17,43 +17,38 @@ import org.springframework.test.web.servlet.ResultActions;
 @AutoConfigureMockMvc
 public class RequestHeadersIT extends BaseWebControllerTest {
 
-  
-  
   @Test
   void retrievalWithPathExtensionShouldIgnoreAcceptHeader() throws Exception {
     String requestPath = createEntity() + ".schema.jsonld?wskey=test";
     ResultActions results =
         mockMvc.perform(
-             get(BASE_SERVICE_URL + "/" + requestPath).accept("application/xml") //accept header should be ignored
-            .header("Origin", "http://test-origin.eu"));
+            get(BASE_SERVICE_URL + "/" + requestPath)
+                .accept("application/xml") // accept header should be ignored
+                .header("Origin", "http://test-origin.eu"));
 
     checkAllowHeaderForGET(results);
     checkCommonResponseHeadersForSchemaOrg(results);
     checkCorsHeadersForSchemaOrg(results);
   }
 
-  
   @Test
   void retrievalWithWrongAcceptShouldReturn400() throws Exception {
     String requestPath = createEntity();
     ResultActions results =
-        mockMvc.perform(
-             get(BASE_SERVICE_URL + "/" + requestPath).accept("web/vtt1"));
+        mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath).accept("web/vtt1"));
 
     results.andExpect(status().isBadRequest());
   }
-  
+
   @Test
   void retrievalWithUnsupportedFormatShouldReturn406() throws Exception {
     String requestPath = createEntity();
     ResultActions results =
-        mockMvc.perform(
-             get(BASE_SERVICE_URL + "/" + requestPath).accept("plain/text"));
+        mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath).accept("plain/text"));
 
     results.andExpect(status().isNotAcceptable());
   }
-  
- 
+
   private String createEntity() throws Exception {
     String europeanaMetadata = loadFile(CONCEPT_REGISTER_BATHTUB_JSON);
     String metisResponse = loadFile(CONCEPT_BATHTUB_XML);

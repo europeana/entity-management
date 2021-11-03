@@ -2,7 +2,6 @@ package eu.europeana.entitymanagement.config;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -14,9 +13,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
-  MediaType jsonLdMediaType = MediaType.valueOf(eu.europeana.api.commons.web.http.HttpHeaders.CONTENT_TYPE_JSONLD);  
-  Map<String, MediaType> mediaTypesMaping = new HashMap<String, MediaType>(); 
-      
+  MediaType jsonLdMediaType =
+      MediaType.valueOf(eu.europeana.api.commons.web.http.HttpHeaders.CONTENT_TYPE_JSONLD);
+  Map<String, MediaType> mediaTypesMaping = new HashMap<String, MediaType>();
+
   /** Setup CORS for all GET, HEAD and OPTIONS, requests. */
   @Override
   public void addCorsMappings(CorsRegistry registry) {
@@ -41,35 +41,33 @@ public class WebMvcConfig implements WebMvcConfigurer {
     // (see also https://github.com/spring-projects/spring-framework/issues/24179), so it may not
     // work in future
     // releases
-    //TODO: replace with configurer.strategies(null)
+    // TODO: replace with configurer.strategies(null)
     configurer.favorPathExtension(true);
-    
-    //use registered extensions instead of defaults
+
+    // use registered extensions instead of defaults
     configurer.useRegisteredExtensionsOnly(true);
 
     configurer.mediaTypes(getMediaTypesMapping());
-    
+
     // use application/ld+json if no Content-Type is specified
     configurer.defaultContentType(
         MediaType.valueOf(eu.europeana.api.commons.web.http.HttpHeaders.CONTENT_TYPE_JSONLD));
   }
-  
+
   private Map<String, MediaType> getMediaTypesMapping() {
 
-      //json
-      mediaTypesMaping.put("json", MediaType.APPLICATION_JSON);
-      
-      //jsonld covers also schema.jsonld
-      mediaTypesMaping.put("jsonld", jsonLdMediaType);
+    // json
+    mediaTypesMaping.put("json", MediaType.APPLICATION_JSON);
 
-      //xml
-      mediaTypesMaping.put("xml", MediaType.APPLICATION_XML);
-      
-      //in case we want to support the .rdf extention later
-//      mediaTypesMaping.put("rdf", MediaType.APPLICATION_XML);
-      
-      
-      return mediaTypesMaping;
+    // jsonld covers also schema.jsonld
+    mediaTypesMaping.put("jsonld", jsonLdMediaType);
+
+    // xml
+    mediaTypesMaping.put("xml", MediaType.APPLICATION_XML);
+
+    // in case we want to support the .rdf extention later
+    //      mediaTypesMaping.put("rdf", MediaType.APPLICATION_XML);
+
+    return mediaTypesMaping;
   }
-  
 }

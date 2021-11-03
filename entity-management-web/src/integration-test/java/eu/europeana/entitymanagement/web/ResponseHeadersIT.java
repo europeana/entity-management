@@ -16,7 +16,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
@@ -113,21 +112,18 @@ public class ResponseHeadersIT extends BaseWebControllerTest {
     checkCommonResponseHeaders(results);
   }
 
-  
   @Test
   void retrievalWithPathExtensionSchemaOrg() throws Exception {
     String requestPath = createEntity() + ".schema.jsonld?wskey=test";
     ResultActions results =
         mockMvc.perform(
-             get(BASE_SERVICE_URL + "/" + requestPath)
-            .header("Origin", "http://test-origin.eu"));
+            get(BASE_SERVICE_URL + "/" + requestPath).header("Origin", "http://test-origin.eu"));
 
     checkAllowHeaderForGET(results);
     checkCommonResponseHeadersForSchemaOrg(results);
     checkCorsHeadersForSchemaOrg(results);
   }
-  
-  
+
   @Test
   void updateFromExternalDatasourceShouldReturnCorrectHeaders() throws Exception {
     String requestPath = createEntity();
