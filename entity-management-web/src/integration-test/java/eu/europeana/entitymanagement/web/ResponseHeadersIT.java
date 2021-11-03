@@ -119,7 +119,7 @@ public class ResponseHeadersIT extends BaseWebControllerTest {
     String requestPath = createEntity() + ".schema.jsonld?wskey=test";
     ResultActions results =
         mockMvc.perform(
-             get(BASE_SERVICE_URL + "/" + requestPath).accept("plain/txt") //accept header should be ignored
+             get(BASE_SERVICE_URL + "/" + requestPath)
             .header("Origin", "http://test-origin.eu"));
 
     checkAllowHeaderForGET(results);
@@ -127,26 +127,6 @@ public class ResponseHeadersIT extends BaseWebControllerTest {
     checkCorsHeadersForSchemaOrg(results);
   }
   
-  @Test
-  void retrievalWithWrongAcceptShouldReturn400() throws Exception {
-    String requestPath = createEntity();
-    ResultActions results =
-        mockMvc.perform(
-             get(BASE_SERVICE_URL + "/" + requestPath).accept("web/vtt1"));
-
-    results.andExpect(status().isBadRequest());
-  }
-  
-//  @Test
-//failing test  
-  void retrievalWithUnsupportedFormatShouldReturn406() throws Exception {
-    String requestPath = createEntity();
-    ResultActions results =
-        mockMvc.perform(
-             get(BASE_SERVICE_URL + "/" + requestPath).accept("plain/text"));
-
-    results.andExpect(status().isNotAcceptable());
-  }
   
   @Test
   void updateFromExternalDatasourceShouldReturnCorrectHeaders() throws Exception {
