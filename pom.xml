@@ -44,6 +44,7 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <api.commons.version>0.3.10-SNAPSHOT</api.commons.version>
+        <springbatch.mongo.version>1.0.3</springbatch.mongo.version>
         <corelib.version>2.14.1-SNAPSHOT</corelib.version>
         <jackson.version>2.11.4</jackson.version>
         <spring-boot.version>2.5.5</spring-boot.version>
