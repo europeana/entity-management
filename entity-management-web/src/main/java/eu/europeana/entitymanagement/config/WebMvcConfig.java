@@ -44,7 +44,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
     //TODO: replace with configurer.strategies(null)
     configurer.favorPathExtension(true);
     
-//    configurer.useRegisteredExtensionsOnly(true);
+    //use registered extensions instead of defaults
+    configurer.useRegisteredExtensionsOnly(true);
 
     configurer.mediaTypes(getMediaTypesMapping());
     
@@ -58,14 +59,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
       //json
       mediaTypesMaping.put("json", MediaType.APPLICATION_JSON);
       
-      //jsonld
-//       new MediaType("application", "ld+json");
+      //jsonld covers also schema.jsonld
       mediaTypesMaping.put("jsonld", jsonLdMediaType);
-      mediaTypesMaping.put("schema.jsonld", jsonLdMediaType);
 
       //xml
       mediaTypesMaping.put("xml", MediaType.APPLICATION_XML);
-//      mediaTypesMaping.put("rdf.xml", MediaType.APPLICATION_XML);
+      
+      //in case we want to support the .rdf extention later
 //      mediaTypesMaping.put("rdf", MediaType.APPLICATION_XML);
       
       
