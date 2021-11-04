@@ -7,6 +7,7 @@ import com.mongodb.client.MongoClients;
 import dev.morphia.Datastore;
 import dev.morphia.Morphia;
 import dev.morphia.mapping.MapperOptions;
+import eu.europeana.batch.entity.JobExecutionEntity;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.batch.codec.ScheduledTaskTypeCodec;
 import eu.europeana.entitymanagement.definitions.batch.codec.ScheduledTaskTypeCodecProvider;
@@ -83,8 +84,9 @@ public class DataSourceConfig {
   public Datastore batchDataStore(MongoClient mongoClient) {
     logger.info("Configuring Batch database: {}", batchDatabase);
     Datastore datastore = Morphia.createDatastore(mongoClient, batchDatabase);
-    // Indexes aren't created unless Entity classes are explicitly mapped.
-    datastore.getMapper().mapPackage("eu.europeana.entitymanagement.batch.entity");
+    // Indexes aren't created unless Entity classes are explicitly mapped. Class arbitrarily picked
+    // from package
+    datastore.getMapper().mapPackage(JobExecutionEntity.class.getPackageName());
     datastore.ensureIndexes();
     return datastore;
   }
