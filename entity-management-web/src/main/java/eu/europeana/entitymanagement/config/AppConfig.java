@@ -3,7 +3,7 @@ package eu.europeana.entitymanagement.config;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import dev.morphia.Datastore;
 import eu.europeana.api.commons.oauth2.service.impl.EuropeanaClientDetailsService;
-import eu.europeana.entitymanagement.batch.config.MongoBatchConfigurer;
+import eu.europeana.batch.config.MongoBatchConfigurer;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;

@@ -42,7 +42,13 @@
 		<groupId>org.springframework</groupId>
 		<artifactId>spring-context</artifactId>
 	</dependency>
-	
-    
-  </dependencies>
+		<dependency>
+			<groupId>eu.europeana.api</groupId>
+			<artifactId>spring-batch-mongo</artifactId>
+			<version>${springbatch.mongo.version}</version>
+			<scope>compile</scope>
+		</dependency>
+
+
+	</dependencies>
 </project>
