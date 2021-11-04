@@ -31,13 +31,16 @@ public class SerializationConfig {
   @Primary
   @Bean(AppConfigConstants.BEAN_JSON_MAPPER)
   public ObjectMapper mapper() {
-    return new Jackson2ObjectMapperBuilder()
-        .defaultUseWrapper(false)
-        .dateFormat(dateFormat)
-        .featuresToEnable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
-        .serializationInclusion(JsonInclude.Include.NON_NULL)
-        .mixIn(ConsolidatedAgent.class, ConsolidatedAgentMixin.class)
-        .build();
+    ObjectMapper mapper =
+        new Jackson2ObjectMapperBuilder()
+            .defaultUseWrapper(false)
+            .dateFormat(dateFormat)
+            .featuresToEnable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
+            .serializationInclusion(JsonInclude.Include.NON_NULL)
+            .mixIn(ConsolidatedAgent.class, ConsolidatedAgentMixin.class)
+            .build();
+    mapper.findAndRegisterModules();
+    return mapper;
   }
 
   @Bean(AppConfigConstants.BEAN_XML_MAPPER)

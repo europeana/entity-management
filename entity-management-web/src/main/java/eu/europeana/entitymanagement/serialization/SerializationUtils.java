@@ -1,9 +1,12 @@
 package eu.europeana.entitymanagement.serialization;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -12,7 +15,10 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
+import java.util.Optional;
+import org.springframework.stereotype.Component;
 
+@Component
 public class SerializationUtils {
 
   public static void serializeInternalJson(
@@ -26,6 +32,17 @@ public class SerializationUtils {
       Writer writer, ObjectMapper mapper, EntityRecord record, FormatTypes format)
       throws IOException {
     mapper.writeValue(writer, getExternalJsonNode(mapper, record, format));
+  }
+
+  public static void serializeDebugJson(
+      Writer writer,
+      ObjectMapper mapper,
+      EntityRecord record,
+      FormatTypes format,
+      Optional<FailedTask> failedTask)
+      throws IOException {
+    JsonNode result = getDebugJsonNode(mapper, record, format, failedTask);
+    mapper.writeValue(writer, result);
   }
 
   private static ObjectNode getExternalJsonNode(
@@ -57,6 +74,27 @@ public class SerializationUtils {
     }
 
     return SerializationUtils.combineNestedNode(mapper, entityNode, proxyNode, "proxies");
+  }
+
+  private static JsonNode getDebugJsonNode(
+      ObjectMapper mapper, EntityRecord record, FormatTypes format, Optional<FailedTask> failedTask)
+      throws JsonMappingException, JsonProcessingException {
+
+    ObjectNode result = mapper.createObjectNode();
+    ObjectNode entityNode = mapper.valueToTree(record.getEntity());
+    ObjectNode lastFailedEntityTaskNode;
+    if (failedTask.isPresent()) lastFailedEntityTaskNode = mapper.valueToTree(failedTask.get());
+    else lastFailedEntityTaskNode = mapper.createObjectNode();
+    JsonNode isAggregatedByJsonNode = entityNode.get(WebEntityFields.IS_AGGREGATED_BY);
+    JsonNode isAggregatedByJsonNodeWithFailures =
+        SerializationUtils.combineNestedNode(
+            mapper,
+            (ObjectNode) isAggregatedByJsonNode,
+            lastFailedEntityTaskNode,
+            WebEntityFields.FAILURES);
+    result.setAll(entityNode);
+    result.set(WebEntityFields.IS_AGGREGATED_BY, isAggregatedByJsonNodeWithFailures);
+    return result;
   }
 
   /**

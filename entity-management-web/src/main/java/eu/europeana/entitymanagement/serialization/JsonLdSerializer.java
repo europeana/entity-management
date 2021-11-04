@@ -3,7 +3,9 @@ package eu.europeana.entitymanagement.serialization;
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_JSON_MAPPER;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.europeana.entitymanagement.batch.service.FailedTaskService;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
@@ -12,6 +14,8 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
+import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -20,9 +24,15 @@ public class JsonLdSerializer {
 
   private final ObjectMapper mapper;
 
+  private FailedTaskService failedTaskService;
+
   public static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
 
-  public JsonLdSerializer(@Qualifier(BEAN_JSON_MAPPER) ObjectMapper objectMapper) {
+  @Autowired
+  public JsonLdSerializer(
+      @Qualifier(BEAN_JSON_MAPPER) ObjectMapper objectMapper,
+      FailedTaskService failedTaskServiceParam) {
+    failedTaskService = failedTaskServiceParam;
     mapper = objectMapper.copy();
     SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH);
     mapper.setDateFormat(df);
@@ -43,6 +53,9 @@ public class JsonLdSerializer {
       case external:
         res = serializeExternal(record, format);
         break;
+      case debug:
+        res = serializeDebug(record, format, failedTaskService.getFailure(record.getEntityId()));
+        break;
       default:
         throw new EntityManagementRuntimeException(
             "Serialization not supported for profile:" + profile);
@@ -57,7 +70,7 @@ public class JsonLdSerializer {
       SerializationUtils.serializeExternalJson(buffer, mapper, record, format);
     } catch (IOException e) {
       throw new EntityManagementRuntimeException(
-          "Unexpected exception occurred when serializing entity to the external format", e);
+          "Unexpected exception occurred when serializing entity to the external profile", e);
     }
     return buffer.toString();
   }
@@ -69,7 +82,20 @@ public class JsonLdSerializer {
       SerializationUtils.serializeInternalJson(buffer, mapper, record, format);
     } catch (IOException e) {
       throw new EntityManagementRuntimeException(
-          "Unexpected exception occurred when serializing entity to the internal format!", e);
+          "Unexpected exception occurred when serializing entity to the internal profile!", e);
+    }
+    return buffer.toString();
+  }
+
+  private String serializeDebug(
+      EntityRecord record, FormatTypes format, Optional<FailedTask> failedTask)
+      throws EntityManagementRuntimeException {
+    final StringWriter buffer = new StringWriter();
+    try {
+      SerializationUtils.serializeDebugJson(buffer, mapper, record, format, failedTask);
+    } catch (IOException e) {
+      throw new EntityManagementRuntimeException(
+          "Unexpected exception occurred when serializing entity to the debug profile", e);
     }
     return buffer.toString();
   }

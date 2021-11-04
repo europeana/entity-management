@@ -13,6 +13,7 @@ import com.zoho.crm.api.record.Record;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import java.util.Optional;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -99,6 +100,27 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(entityId)));
+  }
+
+  @Test
+  void retrieveConceptJsonProfileDebug() throws Exception {
+
+    String europeanaMetadata = loadFile(CONCEPT_REGISTER_BATHTUB_JSON);
+    String metisResponse = loadFile(CONCEPT_BATHTUB_XML);
+
+    String entityId =
+        createEntity(europeanaMetadata, metisResponse, CONCEPT_BATHTUB_URI).getEntityId();
+
+    String requestPath = getEntityRequestPath(entityId);
+    mockMvc
+        .perform(
+            get(BASE_SERVICE_URL + "/" + requestPath + ".jsonld")
+                .param(WebEntityConstants.QUERY_PARAM_PROFILE, "debug")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(
+            jsonPath("$." + WebEntityFields.IS_AGGREGATED_BY + "." + WebEntityFields.FAILURES)
+                .exists());
   }
 
   @Test

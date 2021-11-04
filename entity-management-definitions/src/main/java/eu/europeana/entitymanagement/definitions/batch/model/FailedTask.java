@@ -1,17 +1,27 @@
 package eu.europeana.entitymanagement.definitions.batch.model;
 
+import static eu.europeana.entitymanagement.vocabulary.FailedTaskFields.DATE;
+import static eu.europeana.entitymanagement.vocabulary.FailedTaskFields.MESSAGE;
+import static eu.europeana.entitymanagement.vocabulary.FailedTaskFields.STACKTRACE;
+import static eu.europeana.entitymanagement.vocabulary.FailedTaskFields.TYPE;
+
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
 import dev.morphia.annotations.Indexed;
+import eu.europeana.entitymanagement.vocabulary.FailedTaskFields;
 import java.time.Instant;
 import org.bson.types.ObjectId;
 
 @Entity("FailedTasks")
+@JsonPropertyOrder({MESSAGE, STACKTRACE, DATE, TYPE})
 public class FailedTask {
 
-  @Id private ObjectId dbId;
+  @JsonIgnore @Id private ObjectId dbId;
 
-  @Indexed private String entityId;
+  @JsonIgnore @Indexed private String entityId;
 
   private String errorMessage;
   private String stackTrace;
@@ -21,13 +31,14 @@ public class FailedTask {
   /**
    * FailureCount not explicitly set. Value is updated during Mongo upserts via the $inc operator
    */
-  private int failureCount = 1;
+  @JsonIgnore private int failureCount = 1;
 
   /* Created is not explicitly set on instantiation.
    * During upserts, we use the "modified" value if the record doesn't already exist.
    */
   private Instant created;
-  private Instant modified;
+
+  @JsonIgnore private Instant modified;
 
   private FailedTask() {
     // default constructor
@@ -50,14 +61,17 @@ public class FailedTask {
     return entityId;
   }
 
+  @JsonGetter(FailedTaskFields.DATE)
   public Instant getCreated() {
     return created;
   }
 
+  @JsonGetter(FailedTaskFields.MESSAGE)
   public String getErrorMessage() {
     return errorMessage;
   }
 
+  @JsonGetter(FailedTaskFields.STACKTRACE)
   public String getStackTrace() {
     return stackTrace;
   }
@@ -70,6 +84,7 @@ public class FailedTask {
     return failureCount;
   }
 
+  @JsonGetter(FailedTaskFields.TYPE)
   public ScheduledTaskType getUpdateType() {
     return updateType;
   }
