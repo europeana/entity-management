@@ -34,13 +34,13 @@ public class RequestHeadersIT extends BaseWebControllerTest {
 
   
   @Test
-  void retrievalWithWrongAcceptShouldReturn400() throws Exception {
+  void retrievalWithWrongAcceptShouldReturn406() throws Exception {
     String requestPath = createEntity();
     ResultActions results =
         mockMvc.perform(
              get(BASE_SERVICE_URL + "/" + requestPath).accept("web/vtt1"));
 
-    results.andExpect(status().isBadRequest());
+    results.andExpect(status().isNotAcceptable());
   }
   
   @Test
