@@ -135,11 +135,11 @@ public abstract class BaseRest extends BaseRestController {
 
     // Access-Control-Expose-Headers only set for CORS requests
     if (StringUtils.hasLength(request.getHeader(org.springframework.http.HttpHeaders.ORIGIN))) {
-      if (!outFormat.equals(FormatTypes.schema)) {
+      if (outFormat.equals(FormatTypes.schema)) {
+        headers.setAccessControlExposeHeaders(List.of(HttpHeaders.ETAG, HttpHeaders.VARY));
+      } else {
         headers.setAccessControlExposeHeaders(
             List.of(HttpHeaders.ETAG, HttpHeaders.LINK, HttpHeaders.VARY));
-      } else {
-        headers.setAccessControlExposeHeaders(List.of(HttpHeaders.ETAG, HttpHeaders.VARY));
       }
     }
 

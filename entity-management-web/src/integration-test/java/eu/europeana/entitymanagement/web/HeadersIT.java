@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
@@ -27,10 +28,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-/** Standalone test to check for response headers */
+/** Standalone test for checking behaviour of headers */
 @SpringBootTest
 @AutoConfigureMockMvc
-public class ResponseHeadersIT extends BaseWebControllerTest {
+public class HeadersIT extends BaseWebControllerTest {
 
   @Test
   void registrationShouldReturnCorrectHeaders() throws Exception {
@@ -116,8 +117,10 @@ public class ResponseHeadersIT extends BaseWebControllerTest {
   void retrievalWithPathExtensionSchemaOrg() throws Exception {
     String requestPath = createEntity() + ".schema.jsonld?wskey=test";
     ResultActions results =
-        mockMvc.perform(
-            get(BASE_SERVICE_URL + "/" + requestPath).header("Origin", "http://test-origin.eu"));
+        mockMvc
+            .perform(
+                get(BASE_SERVICE_URL + "/" + requestPath).header("Origin", "http://test-origin.eu"))
+            .andExpect(status().isOk());
 
     checkAllowHeaderForGET(results);
     checkCommonResponseHeadersForSchemaOrg(results);
@@ -128,11 +131,13 @@ public class ResponseHeadersIT extends BaseWebControllerTest {
   void updateFromExternalDatasourceShouldReturnCorrectHeaders() throws Exception {
     String requestPath = createEntity();
     ResultActions resultActions =
-        mockMvc.perform(
-            MockMvcRequestBuilders.put(BASE_SERVICE_URL + "/" + requestPath)
-                .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
-                .content(loadFile(CONCEPT_UPDATE_BATHTUB_JSON))
-                .contentType(MediaType.APPLICATION_JSON));
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.put(BASE_SERVICE_URL + "/" + requestPath)
+                    .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                    .content(loadFile(CONCEPT_UPDATE_BATHTUB_JSON))
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isAccepted());
 
     checkAllowHeaderForPOST(resultActions);
     checkCommonResponseHeaders(resultActions);
@@ -143,11 +148,13 @@ public class ResponseHeadersIT extends BaseWebControllerTest {
     String requestPath = createEntity();
 
     ResultActions resultActions =
-        mockMvc.perform(
-            MockMvcRequestBuilders.put(BASE_SERVICE_URL + "/" + requestPath)
-                .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
-                .content(loadFile(CONCEPT_BATHTUB_EMPTY_UPDATE_JSON))
-                .contentType(MediaType.APPLICATION_JSON));
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.put(BASE_SERVICE_URL + "/" + requestPath)
+                    .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                    .content(loadFile(CONCEPT_BATHTUB_EMPTY_UPDATE_JSON))
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isAccepted());
     checkAllowHeaderForDPGP(resultActions);
     checkCommonResponseHeaders(resultActions);
   }
@@ -160,6 +167,7 @@ public class ResponseHeadersIT extends BaseWebControllerTest {
         .perform(
             delete(BASE_SERVICE_URL + "/" + requestPath + BASE_ADMIN_URL)
                 .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent())
         .andExpect(
             header()
                 .stringValues(
@@ -180,6 +188,7 @@ public class ResponseHeadersIT extends BaseWebControllerTest {
 
     mockMvc
         .perform(delete(BASE_SERVICE_URL + "/" + requestPath).accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent())
         .andExpect(
             header()
                 .stringValues(
@@ -205,10 +214,45 @@ public class ResponseHeadersIT extends BaseWebControllerTest {
     String requestPath = getEntityRequestPath(entityRecord.getEntityId());
 
     ResultActions resultActions =
-        mockMvc.perform(
-            post(BASE_SERVICE_URL + "/" + requestPath).accept(MediaType.APPLICATION_JSON));
+        mockMvc
+            .perform(post(BASE_SERVICE_URL + "/" + requestPath).accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
     checkCommonResponseHeaders(resultActions);
     checkAllowHeaderForDPGP(resultActions);
+  }
+
+  @Test
+  void retrievalWithPathExtensionShouldIgnoreAcceptHeader() throws Exception {
+    String requestPath = createEntity() + ".schema.jsonld?wskey=test";
+    ResultActions results =
+        mockMvc
+            .perform(
+                get(BASE_SERVICE_URL + "/" + requestPath)
+                    .accept("application/xml") // accept header should be ignored
+                    .header("Origin", "http://test-origin.eu"))
+            .andExpect(status().isOk());
+
+    checkAllowHeaderForGET(results);
+    checkCommonResponseHeadersForSchemaOrg(results);
+    checkCorsHeadersForSchemaOrg(results);
+  }
+
+  @Test
+  void retrievalWithWrongAcceptShouldReturn406() throws Exception {
+    String requestPath = createEntity();
+    ResultActions results =
+        mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath).accept("web/vtt1"));
+
+    results.andExpect(status().isNotAcceptable());
+  }
+
+  @Test
+  void retrievalWithUnsupportedFormatShouldReturn406() throws Exception {
+    String requestPath = createEntity();
+    ResultActions results =
+        mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath).accept("plain/text"));
+
+    results.andExpect(status().isNotAcceptable());
   }
 
   private String createEntity() throws Exception {
