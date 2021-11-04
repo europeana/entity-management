@@ -127,16 +127,22 @@ public abstract class BaseRest extends BaseRestController {
     String etag = computeEtag(timestamp, outFormat.name(), getApiVersion());
 
     org.springframework.http.HttpHeaders headers = createAllowHeader(request);
+
     if (!outFormat.equals(FormatTypes.schema)) {
       headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
       headers.add(HttpHeaders.LINK, HttpHeaders.VALUE_LDP_RESOURCE);
+    }
 
-      // Access-Control-Expose-Headers only set for CORS requests
-      if (StringUtils.hasLength(request.getHeader(org.springframework.http.HttpHeaders.ORIGIN))) {
+    // Access-Control-Expose-Headers only set for CORS requests
+    if (StringUtils.hasLength(request.getHeader(org.springframework.http.HttpHeaders.ORIGIN))) {
+      if (outFormat.equals(FormatTypes.schema)) {
+        headers.setAccessControlExposeHeaders(List.of(HttpHeaders.ETAG, HttpHeaders.VARY));
+      } else {
         headers.setAccessControlExposeHeaders(
             List.of(HttpHeaders.ETAG, HttpHeaders.LINK, HttpHeaders.VARY));
       }
     }
+
     if (contentType != null && !contentType.isEmpty())
       headers.add(HttpHeaders.CONTENT_TYPE, contentType);
 
