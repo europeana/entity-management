@@ -82,9 +82,9 @@ public class SerializationUtils {
 
     ObjectNode result = mapper.createObjectNode();
     ObjectNode entityNode = mapper.valueToTree(record.getEntity());
-    ObjectNode lastFailedEntityTaskNode;
-    if (failedTask.isPresent()) lastFailedEntityTaskNode = mapper.valueToTree(failedTask.get());
-    else lastFailedEntityTaskNode = mapper.createObjectNode();
+    ObjectNode lastFailedEntityTaskNode =
+        failedTask.isPresent() ? mapper.valueToTree(failedTask.get()) : mapper.createObjectNode();
+
     JsonNode isAggregatedByJsonNode = entityNode.get(WebEntityFields.IS_AGGREGATED_BY);
     JsonNode isAggregatedByJsonNodeWithFailures =
         SerializationUtils.combineNestedNode(
