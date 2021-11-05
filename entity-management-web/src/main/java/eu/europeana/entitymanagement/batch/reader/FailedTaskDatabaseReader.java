@@ -9,27 +9,36 @@ import java.util.Iterator;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Component;
 
 /** Reads Failures from the FailedTasks collection, then retrieves the matching EntityRecords */
+@Component
 public class FailedTaskDatabaseReader extends BaseDatabaseReader<EntityRecord> {
 
   private static final Logger logger = LogManager.getLogger(FailedTaskDatabaseReader.class);
+
   private final FailedTaskService failureService;
 
   private final Filter[] failureQueryFilter;
 
-  public FailedTaskDatabaseReader(
-      FailedTaskService failureService, int pageSize, Filter... failureQueryFilter) {
-    super(pageSize);
+  @Autowired
+  public FailedTaskDatabaseReader(FailedTaskService failureService, Filter... failureQueryFilter) {
+    super(10);
     this.failureService = failureService;
     this.failureQueryFilter = failureQueryFilter;
+  }
+
+  public void setPageAndPageSize(int page, int pageSize) {
+    this.page = page;
+    this.pageSize = pageSize;
   }
 
   @Override
   @NonNull
   @SuppressWarnings("unchecked")
-  protected Iterator<EntityRecord> doPageRead() {
+  public Iterator<EntityRecord> doPageRead() {
     int start = page * pageSize;
     List<? extends EntityRecord> failedRecords =
         failureService.getEntityRecordsForFailures(start, pageSize, failureQueryFilter);

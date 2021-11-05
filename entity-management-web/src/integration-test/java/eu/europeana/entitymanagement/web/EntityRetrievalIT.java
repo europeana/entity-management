@@ -4,6 +4,7 @@ import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.*;
 import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -21,10 +22,40 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 public class EntityRetrievalIT extends BaseWebControllerTest {
+
+  @Test
+  public void retrieveFailedUpdatesEntities() throws Exception {
+    String europeanaMetadata = loadFile(CONCEPT_REGISTER_BATHTUB_JSON);
+    String metisResponse = loadFile(CONCEPT_BATHTUB_XML);
+
+    EntityRecord entityRecord = createEntity(europeanaMetadata, metisResponse, CONCEPT_BATHTUB_URI);
+
+    String requestPath = getEntityRequestPath(entityRecord.getEntityId());
+    mockMvc.perform(
+        MockMvcRequestBuilders.put(BASE_SERVICE_URL + "/" + requestPath)
+            .content(loadFile(CONCEPT_UPDATE_FAILED_BATHTUB_JSON))
+            .contentType(MediaType.APPLICATION_JSON));
+
+    ResultActions resultsFailedUpdates =
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.get(BASE_SERVICE_URL + BASE_FAILED_UPDATES)
+                    .content(loadFile(CONCEPT_UPDATE_FAILED_BATHTUB_JSON))
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+    assertTrue(
+        resultsFailedUpdates
+            .andReturn()
+            .getResponse()
+            .getContentAsString()
+            .contains(entityRecord.getEntityId()));
+  }
 
   @Test
   void retrieveWithInvalidProfileShouldReturn400() throws Exception {

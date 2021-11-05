@@ -3,6 +3,8 @@ package eu.europeana.entitymanagement.serialization;
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_JSON_MAPPER;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import eu.europeana.entitymanagement.batch.reader.FailedTaskDatabaseReader;
 import eu.europeana.entitymanagement.batch.service.FailedTaskService;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
@@ -13,6 +15,7 @@ import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,13 +29,17 @@ public class JsonLdSerializer {
 
   private FailedTaskService failedTaskService;
 
+  private FailedTaskDatabaseReader failedTaskDatabaseReader;
+
   public static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
 
   @Autowired
   public JsonLdSerializer(
       @Qualifier(BEAN_JSON_MAPPER) ObjectMapper objectMapper,
-      FailedTaskService failedTaskServiceParam) {
+      FailedTaskService failedTaskServiceParam,
+      FailedTaskDatabaseReader failedTaskDatabaseReaderParam) {
     failedTaskService = failedTaskServiceParam;
+    failedTaskDatabaseReader = failedTaskDatabaseReaderParam;
     mapper = objectMapper.copy();
     SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH);
     mapper.setDateFormat(df);
@@ -61,6 +68,18 @@ public class JsonLdSerializer {
             "Serialization not supported for profile:" + profile);
     }
     return res;
+  }
+
+  public String serializeFailedUpdates(int page, int pageSize) {
+    failedTaskDatabaseReader.setPageAndPageSize(page, pageSize);
+    Iterator<EntityRecord> failedEntityRecords = failedTaskDatabaseReader.doPageRead();
+    ArrayNode arrayNode = mapper.createArrayNode();
+    while (failedEntityRecords.hasNext()) {
+      EntityRecord record = failedEntityRecords.next();
+      String resultItem = record.getEntityId() + "?profile=debug";
+      arrayNode.add(resultItem);
+    }
+    return arrayNode.toString();
   }
 
   private String serializeExternal(EntityRecord record, FormatTypes format)

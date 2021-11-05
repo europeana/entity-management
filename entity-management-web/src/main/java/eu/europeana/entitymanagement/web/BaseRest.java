@@ -98,6 +98,23 @@ public abstract class BaseRest extends BaseRestController {
     return responseBody;
   }
 
+  protected ResponseEntity<String> generateResponseFailedUpdates(
+      HttpServletRequest request, int page, int pageSize, String contentType, HttpStatus status)
+      throws EuropeanaApiException {
+
+    org.springframework.http.HttpHeaders headers = createAllowHeader(request);
+    // Access-Control-Expose-Headers only set for CORS requests
+    if (StringUtils.hasLength(request.getHeader(org.springframework.http.HttpHeaders.ORIGIN))) {
+      headers.setAccessControlExposeHeaders(
+          List.of(HttpHeaders.ETAG, HttpHeaders.LINK, HttpHeaders.VARY));
+    }
+    if (contentType != null && !contentType.isEmpty())
+      headers.add(HttpHeaders.CONTENT_TYPE, contentType);
+    String body = jsonLdSerializer.serializeFailedUpdates(page, pageSize);
+    headers.setContentLength(body.getBytes().length);
+    return ResponseEntity.status(status).headers(headers).body(body);
+  }
+
   /**
    * Generates serialised EntityRecord Response entity along with Http status and headers
    *
