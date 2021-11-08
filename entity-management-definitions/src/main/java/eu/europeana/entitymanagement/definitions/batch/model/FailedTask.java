@@ -13,9 +13,15 @@ public class FailedTask {
 
   @Indexed private String entityId;
 
-  // default values saved if they're not overwritten
-  private String errorMessage = "No error message";
-  private String stackTrace = "No stacktrace";
+  private String errorMessage;
+  private String stackTrace;
+
+  private ScheduledTaskType updateType;
+
+  /**
+   * FailureCount not explicitly set. Value is updated during Mongo upserts via the $inc operator
+   */
+  private int failureCount = 1;
 
   /* Created is not explicitly set on instantiation.
    * During upserts, we use the "modified" value if the record doesn't already exist.
@@ -27,11 +33,17 @@ public class FailedTask {
     // default constructor
   }
 
-  public FailedTask(String entityId, Instant modified, String errorMessage, String stackTrace) {
+  public FailedTask(
+      String entityId,
+      Instant modified,
+      String errorMessage,
+      String stackTrace,
+      ScheduledTaskType updateType) {
     this.entityId = entityId;
     this.modified = modified;
     this.errorMessage = errorMessage;
     this.stackTrace = stackTrace;
+    this.updateType = updateType;
   }
 
   public String getEntityId() {
@@ -54,16 +66,27 @@ public class FailedTask {
     return modified;
   }
 
+  public int getFailureCount() {
+    return failureCount;
+  }
+
+  public ScheduledTaskType getUpdateType() {
+    return updateType;
+  }
+
   public static class Builder {
 
     private final String entityId;
+    private final ScheduledTaskType updateType;
 
     private Instant modified;
-    private String errorMessage;
-    private String stackTrace;
+    // default values saved if they're not overwritten
+    private String errorMessage = "No error message";
+    private String stackTrace = "No stacktrace";
 
-    public Builder(String entityId) {
+    public Builder(String entityId, ScheduledTaskType updateType) {
       this.entityId = entityId;
+      this.updateType = updateType;
     }
 
     public Builder modified(Instant modified) {
@@ -82,7 +105,7 @@ public class FailedTask {
     }
 
     public FailedTask build() {
-      return new FailedTask(entityId, modified, errorMessage, stackTrace);
+      return new FailedTask(entityId, modified, errorMessage, stackTrace, updateType);
     }
   }
 

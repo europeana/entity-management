@@ -65,7 +65,7 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
 
     // ensure a clean db between test runs
     this.entityRecordService.dropRepository();
-    this.scheduledTaskService.dropRepository();
+    this.scheduledTaskService.dropCollection();
   }
 
   protected static String loadFile(String resourcePath) throws IOException {

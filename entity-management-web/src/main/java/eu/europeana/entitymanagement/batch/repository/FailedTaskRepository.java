@@ -62,7 +62,10 @@ public class FailedTaskRepository implements InitializingBean {
             UpdateOperators.set(STACKTRACE, failure.getStackTrace()),
             UpdateOperators.set(ERROR_MSG, failure.getErrorMessage()),
             UpdateOperators.set(MODIFIED, failure.getModified()),
-            // set "created" value if this a new doc
+            UpdateOperators.set(UPDATE_TYPE, failure.getUpdateType().getValue()),
+            // increment failureCount
+            UpdateOperators.inc(FAILURE_COUNT, 1),
+            // set "created" value if this a new doc. Also make failureCount=0
             UpdateOperators.setOnInsert(Map.of(CREATED, failure.getModified())))
         .execute(UPSERT_OPTS);
   }
@@ -88,10 +91,19 @@ public class FailedTaskRepository implements InitializingBean {
                           .append(MODIFIED, failure.getModified())
                           .append(ERROR_MSG, failure.getErrorMessage())
                           .append(STACKTRACE, failure.getStackTrace()))
+                  // increment failureCount by 1
+                  .append(DOC_INCREMENT, new Document(FAILURE_COUNT, 1))
                   // set "created" if this is a new document
-                  .append(DOC_SET_ON_INSERT, new Document(CREATED, failure.getModified()))
-                  // add discriminator manually as we're bypassing Morphia for this db query
-                  .append(MORPHIA_DISCRIMINATOR, FAILED_TASK_CLASSNAME),
+                  .append(
+                      DOC_SET_ON_INSERT,
+                      new Document(
+                          Map.of(
+                              CREATED,
+                              failure.getModified(),
+                              // add discriminator manually as we're bypassing Morphia for this
+                              // query
+                              MORPHIA_DISCRIMINATOR,
+                              FAILED_TASK_CLASSNAME))),
               UPSERT_OPTS));
     }
 
@@ -146,5 +158,18 @@ public class FailedTaskRepository implements InitializingBean {
         .filter(in(ENTITY_ID, matchingIds))
         .iterator()
         .toList();
+  }
+
+  public FailedTask getFailure(String entityId) {
+    return datastore.find(FailedTask.class).filter(eq(ENTITY_ID, entityId)).first();
+  }
+
+  public List<FailedTask> getFailures(List<String> entityIds) {
+    return datastore.find(FailedTask.class).filter(in(ENTITY_ID, entityIds)).iterator().toList();
+  }
+
+  /** Drops the FailedTask collection */
+  public void dropCollection() {
+    datastore.getMapper().getCollection(FailedTask.class).drop();
   }
 }
