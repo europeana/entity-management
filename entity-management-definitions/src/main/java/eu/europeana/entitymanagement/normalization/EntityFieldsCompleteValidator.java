@@ -81,7 +81,7 @@ public class EntityFieldsCompleteValidator
           returnValueLocal = validateDateField(context, field, fieldValue);
         } else if (FIELD_TYPE_EMAIL.equals(EntityFieldsTypes.getFieldType(fieldName))) {
           returnValueLocal = validateEmailField(context, field, fieldValue);
-        } else if (fieldType.isAssignableFrom(String.class)) {
+        } else if (fieldType.isAssignableFrom(String.class) && !fieldValue.toString().isBlank()) {
           // Text or Keyword, not multilingual
           returnValueLocal = validateStringValue(context, field, (String) fieldValue, null);
         } else if (WebResource.class.isAssignableFrom(fieldType)) {
