@@ -30,6 +30,9 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
   @BeforeEach
   void setUp() {
     service.dropCollection();
+    // ensure a clean FailedTasks collection
+    failedTaskRepository.dropCollection();
+
   }
 
   private static final String entityId1 = "http://data.europeana.eu/agent/1";
@@ -63,9 +66,7 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
 
   @Test
   void shouldRemoveScheduledTasksWithFailures() {
-    // ensure a clean FailedTasks collection
-    failedTaskRepository.dropCollection();
-
+    
     // create scheduledTasks for entityId1 and entityId2
     List<String> entityIds = List.of(ScheduledTaskServiceIT.entityId1, entityId2);
     service.scheduleTasksForEntities(entityIds, testUpdateType);
