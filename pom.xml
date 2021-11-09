@@ -59,6 +59,7 @@
 		    <jaxb.version>2.3.3</jaxb.version>
 		    <saxon-he.version>10.5</saxon-he.version>
         <git-code-format.version>3.1</git-code-format.version>
+        <apache-commons-csv.version>1.9.0</apache-commons-csv.version>
     </properties>
 
     <dependencyManagement>
