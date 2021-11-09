@@ -40,7 +40,9 @@ public class SolrServiceIT extends AbstractIntegrationTest {
   @Test
   public void storeAgentInSolr() throws Exception {
     Agent agent = objectMapper.readValue(loadFile(AGENT_JSON), Agent.class);
-    emSolrService.storeEntity(SolrUtils.createSolrEntity(agent));
+    EntityRecord record = new EntityRecord();
+    record.setEntity(agent);
+    emSolrService.storeEntity(SolrUtils.createSolrEntity(record));
     SolrAgent storedAgent = emSolrService.searchById(SolrAgent.class, agent.getEntityId());
     Assertions.assertNotNull(storedAgent);
     Assertions.assertEquals(agent.getEntityId(), storedAgent.getEntityId());
@@ -50,7 +52,9 @@ public class SolrServiceIT extends AbstractIntegrationTest {
   public void storeOrganizationInSolr() throws Exception {
     Organization organization =
         objectMapper.readValue(loadFile(ORGANIZATION_JSON), Organization.class);
-    emSolrService.storeEntity(SolrUtils.createSolrEntity(organization));
+    EntityRecord record = new EntityRecord();
+    record.setEntity(organization);
+    emSolrService.storeEntity(SolrUtils.createSolrEntity(record));
     SolrOrganization storedOrganization =
         emSolrService.searchById(SolrOrganization.class, organization.getEntityId());
     Assertions.assertNotNull(storedOrganization);
@@ -61,7 +65,9 @@ public class SolrServiceIT extends AbstractIntegrationTest {
   public void storeTimespanInSolr() throws Exception {
 
     TimeSpan timespan = objectMapper.readValue(loadFile(TIMESPAN_JSON), TimeSpan.class);
-    emSolrService.storeEntity(SolrUtils.createSolrEntity(timespan));
+    EntityRecord record = new EntityRecord();
+    record.setEntity(timespan);
+    emSolrService.storeEntity(SolrUtils.createSolrEntity(record));
     SolrTimeSpan storedTimespan =
         emSolrService.searchById(SolrTimeSpan.class, timespan.getEntityId());
     Assertions.assertNotNull(storedTimespan);
@@ -72,7 +78,9 @@ public class SolrServiceIT extends AbstractIntegrationTest {
   public void storeConceptInSolr() throws Exception {
 
     Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
-    emSolrService.storeEntity(SolrUtils.createSolrEntity(concept));
+    EntityRecord record = new EntityRecord();
+    record.setEntity(concept);
+    emSolrService.storeEntity(SolrUtils.createSolrEntity(record));
     SolrConcept storedConcept = emSolrService.searchById(SolrConcept.class, concept.getEntityId());
     Assertions.assertNotNull(storedConcept);
     Assertions.assertEquals(concept.getEntityId(), storedConcept.getEntityId());
@@ -81,7 +89,9 @@ public class SolrServiceIT extends AbstractIntegrationTest {
   @Test
   public void storePlaceInSolr() throws Exception {
     Place place = objectMapper.readValue(loadFile(PLACE_JSON), Place.class);
-    emSolrService.storeEntity(SolrUtils.createSolrEntity(place));
+    EntityRecord record = new EntityRecord();
+    record.setEntity(place);
+    emSolrService.storeEntity(SolrUtils.createSolrEntity(record));
     SolrPlace storedPlace = emSolrService.searchById(SolrPlace.class, place.getEntityId());
     Assertions.assertNotNull(storedPlace);
     Assertions.assertEquals(place.getEntityId(), storedPlace.getEntityId());
@@ -90,11 +100,18 @@ public class SolrServiceIT extends AbstractIntegrationTest {
   @Test
   void shouldSearchByQuery() throws Exception {
     Agent agent = objectMapper.readValue(loadFile(AGENT_JSON), Agent.class);
+    EntityRecord agentRecord = new EntityRecord();
+    agentRecord.setEntity(agent);
     Place place = objectMapper.readValue(loadFile(PLACE_JSON), Place.class);
+    EntityRecord placeRecord = new EntityRecord();
+    placeRecord.setEntity(place);
     Concept concept = objectMapper.readValue(loadFile(CONCEPT_JSON), Concept.class);
+    EntityRecord conceptRecord = new EntityRecord();
+    conceptRecord.setEntity(concept);
+    
 
     List<SolrEntity<? extends Entity>> solrEntities =
-        List.of(agent, place, concept).stream()
+        List.of(agentRecord, placeRecord, conceptRecord).stream()
             .map(SolrUtils::createSolrEntity)
             .collect(Collectors.toList());
 

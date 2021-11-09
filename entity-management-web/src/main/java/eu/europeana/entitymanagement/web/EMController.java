@@ -157,7 +157,7 @@ public class EMController extends BaseRest {
     }
     logger.info("Re-enabling entityId={}", entityRecord.getEntityId());
     entityRecordService.enableEntityRecord(entityRecord);
-    solrService.storeEntity(createSolrEntity(entityRecord.getEntity()));
+    solrService.storeEntity(createSolrEntity(entityRecord));
 
     return createResponse(
         request,
@@ -213,7 +213,7 @@ public class EMController extends BaseRest {
     entityRecordService.update(entityRecord);
 
     // this replaces the existing entity
-    solrService.storeEntity(createSolrEntity(entityRecord.getEntity()));
+    solrService.storeEntity(createSolrEntity(entityRecord));
     logger.info("Updated Solr document for entityId={}", entityRecord.getEntityId());
 
     return launchTaskAndRetrieveEntity(request, type, identifier, entityRecord, profile);

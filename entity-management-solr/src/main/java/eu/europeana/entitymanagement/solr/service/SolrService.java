@@ -160,7 +160,7 @@ public class SolrService implements InitializingBean {
 
     QueryResponse rsp;
     SolrQuery query = new SolrQuery();
-    query.set("q", EntitySolrFields.ID + ":\"" + entityId + "\"");
+    query.setQuery(EntitySolrFields.ID + ":\"" + entityId + "\"");
     try {
       rsp = solrClient.query(query);
       if (log.isDebugEnabled()) {
@@ -244,7 +244,7 @@ public class SolrService implements InitializingBean {
     log.info("Deleted all documents from Solr in {}ms", response.getElapsedTime());
   }
 
-  private String createSolrSuggesterField(SolrEntity<? extends Entity> solrEntity)
+  private String createPayload(SolrEntity<? extends Entity> solrEntity)
       throws JsonProcessingException {
 
     /*
@@ -271,7 +271,7 @@ public class SolrService implements InitializingBean {
 
   private void setPayload(SolrEntity<? extends Entity> solrEntity) throws SolrServiceException {
     try {
-      solrEntity.setPayload(createSolrSuggesterField(solrEntity));
+      solrEntity.setPayload(createPayload(solrEntity));
     } catch (JsonProcessingException e) {
       throw new SolrServiceException(
           String.format("Error generating Solr payload for entityId=%s", solrEntity.getEntityId()),
