@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement.batch.service;
 
 import com.mongodb.bulk.BulkWriteResult;
 import dev.morphia.query.experimental.filters.Filter;
+import dev.morphia.query.internal.MorphiaCursor;
 import eu.europeana.entitymanagement.batch.repository.ScheduledTaskRepository;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 public class ScheduledTaskService {
 
   private final ScheduledTaskRepository repository;
+
   private static final Logger logger = LogManager.getLogger(ScheduledTaskService.class);
 
   @Autowired
@@ -74,6 +76,23 @@ public class ScheduledTaskService {
     }
   }
 
+  /**
+   * Removes unprocessed entries from the ScheduledTasks collection if the FailedTasks retryCount is
+   * equal or greater than the max number of retries allowed.
+   *
+   * <p>TODO: investigate if this can be replace with a delete query
+   */
+  public void removeScheduledTasksWithFailures(int maxFailedTaskRetries) {
+
+    try (MorphiaCursor<ScheduledTask> cursor =
+        repository.getTasksWithFailures(maxFailedTaskRetries)) {
+
+      while (cursor.hasNext()) {
+        repository.deleteScheduledTask(cursor.next().getEntityId());
+      }
+    }
+  }
+
   public List<? extends EntityRecord> getEntityRecordsForTasks(
       int start, int count, Filter[] queryFilters) {
     return repository.getEntityRecordsForTasks(start, count, queryFilters);
@@ -87,6 +106,10 @@ public class ScheduledTaskService {
    */
   public Optional<ScheduledTask> getTask(String entityId) {
     return Optional.ofNullable(repository.getTask(entityId));
+  }
+
+  public List<ScheduledTask> getTasks(List<String> entityIds) {
+    return repository.getTasks(entityIds);
   }
 
   /** Helper method to instantiate ScheduledTasks from list of entityIds */
@@ -104,7 +127,7 @@ public class ScheduledTaskService {
         .collect(Collectors.toList());
   }
 
-  public void dropRepository() {
+  public void dropCollection() {
     this.repository.dropCollection();
   }
 }

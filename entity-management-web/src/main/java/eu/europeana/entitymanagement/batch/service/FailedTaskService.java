@@ -5,9 +5,11 @@ import com.mongodb.client.result.UpdateResult;
 import dev.morphia.query.experimental.filters.Filter;
 import eu.europeana.entitymanagement.batch.repository.FailedTaskRepository;
 import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
@@ -30,13 +32,18 @@ public class FailedTaskService {
    * Creates a {@link FailedTask} instance for this entity, and then persists it
    *
    * @param entityId entityId
+   * @param updateType
    * @param e exception
    */
-  public void persistFailure(String entityId, Exception e) {
+  public void persistFailure(String entityId, ScheduledTaskType updateType, Exception e) {
     UpdateResult result =
         failureRepository.upsert(
             createUpdateFailure(
-                entityId, Instant.now(), e.getMessage(), ExceptionUtils.getStackTrace(e)));
+                entityId,
+                updateType,
+                Instant.now(),
+                e.getMessage(),
+                ExceptionUtils.getStackTrace(e)));
 
     logger.info(
         "Persisted update failure to db. entityId={} matched={}, modified={}",
@@ -48,18 +55,19 @@ public class FailedTaskService {
   /**
    * Creates {@link FailedTask} instances for all entities, and then saves them to the database
    *
-   * @param entityRecords list of entity records to be saved
+   * @param entityIds list of entity records to be saved
    * @param e exception
    */
-  public void persistFailureBulk(List<? extends EntityRecord> entityRecords, Exception e) {
+  public void persistFailureBulk(
+      List<String> entityIds, ScheduledTaskType updateType, Exception e) {
     String message = e.getMessage();
     String stackTrace = ExceptionUtils.getStackTrace(e);
     Instant now = Instant.now();
 
     // create FailedTask instance for each entityRecord
     List<FailedTask> failures =
-        entityRecords.stream()
-            .map(r -> createUpdateFailure(r.getEntityId(), now, message, stackTrace))
+        entityIds.stream()
+            .map(entityId -> createUpdateFailure(entityId, updateType, now, message, stackTrace))
             .collect(Collectors.toList());
 
     BulkWriteResult writeResult = failureRepository.upsertBulk(failures);
@@ -88,10 +96,26 @@ public class FailedTaskService {
     return failureRepository.getEntityRecordsForFailures(start, count, queryFilters);
   }
 
+  public void dropCollection() {
+    failureRepository.dropCollection();
+  }
+
+  public Optional<FailedTask> getFailure(String entityId) {
+    return Optional.ofNullable(failureRepository.getFailure(entityId));
+  }
+
+  public List<FailedTask> getFailures(List<String> entityIds) {
+    return failureRepository.getFailures(entityIds);
+  }
+
   /** Helper method to instantiate {@link FailedTask} instances */
   private FailedTask createUpdateFailure(
-      String entityId, Instant modified, String message, String stacktrace) {
-    return new FailedTask.Builder(entityId)
+      String entityId,
+      ScheduledTaskType updateType,
+      Instant modified,
+      String message,
+      String stacktrace) {
+    return new FailedTask.Builder(entityId, updateType)
         .modified(modified)
         .message(message)
         .stackTrace(stacktrace)

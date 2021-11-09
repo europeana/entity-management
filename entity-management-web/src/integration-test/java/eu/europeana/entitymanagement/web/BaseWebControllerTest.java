@@ -65,7 +65,7 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
 
     // ensure a clean db between test runs
     this.entityRecordService.dropRepository();
-    this.scheduledTaskService.dropRepository();
+    this.scheduledTaskService.dropCollection();
   }
 
   protected static String loadFile(String resourcePath) throws IOException {
@@ -91,6 +91,25 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
         .andExpect(header().string(HttpHeaders.LINK, is(VALUE_LDP_RESOURCE)))
         .andExpect(
             header().stringValues(HttpHeaders.VARY, hasItems(containsString(HttpHeaders.ACCEPT))));
+  }
+
+  protected void checkCommonResponseHeadersForSchemaOrg(ResultActions results) throws Exception {
+    results
+        .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(CONTENT_TYPE_JSONLD_UTF8)))
+        .andExpect(header().exists(HttpHeaders.ETAG));
+  }
+
+  protected void checkCorsHeadersForSchemaOrg(ResultActions results) throws Exception {
+    results
+        .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, is("*")))
+        .andExpect(
+            header()
+                .stringValues(
+                    HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,
+                    hasItems(
+                        containsString(HttpHeaders.ALLOW),
+                        containsString(HttpHeaders.ETAG),
+                        containsString(HttpHeaders.VARY))));
   }
 
   protected void checkCorsHeaders(ResultActions results) throws Exception {
