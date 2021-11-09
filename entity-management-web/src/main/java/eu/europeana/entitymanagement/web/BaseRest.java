@@ -3,7 +3,9 @@ package eu.europeana.entitymanagement.web;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.api.commons.web.controller.BaseRestController;
 import eu.europeana.api.commons.web.http.HttpHeaders;
+import eu.europeana.entitymanagement.batch.service.FailedTaskService;
 import eu.europeana.entitymanagement.common.config.BuildInfo;
+import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
@@ -15,6 +17,7 @@ import eu.europeana.entitymanagement.serialization.JsonLdSerializer;
 import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
+import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.web.service.AuthorizationService;
 import eu.europeana.entitymanagement.web.service.RequestPathMethodService;
@@ -51,6 +54,8 @@ public abstract class BaseRest extends BaseRestController {
 
   @Autowired private RequestPathMethodService requestMethodService;
 
+  @Autowired private FailedTaskService failedTaskService;
+
   protected Logger logger = LogManager.getLogger(getClass());
 
   public BaseRest() {
@@ -70,31 +75,37 @@ public abstract class BaseRest extends BaseRestController {
    *
    * @param entityRecord The entity
    * @param format The format extension
+   * @param profiles
    * @return entity in jsonLd format
    * @throws EntityManagementRuntimeException
    */
-  protected String serialize(EntityRecord entityRecord, FormatTypes format, String profile)
+  protected String serialize(
+      EntityRecord entityRecord, FormatTypes format, List<EntityProfile> profiles)
       throws EuropeanaApiException {
 
     String responseBody = null;
+    try {
+      if (FormatTypes.jsonld.equals(format)) {
+        boolean includeFailure = profiles.contains(EntityProfile.debug);
+        Optional<FailedTask> failure =
+            includeFailure
+                ? failedTaskService.getFailure(entityRecord.getEntityId())
+                : Optional.empty();
 
-    if (FormatTypes.jsonld.equals(format)) {
-      responseBody = jsonLdSerializer.serialize(entityRecord, format, profile);
-    } else if (FormatTypes.xml.equals(format)) {
-      XmlBaseEntityImpl<?> xmlEntity =
-          EntityObjectFactory.createXmlEntity(entityRecord.getEntity());
-      responseBody = entityXmlSerializer.serializeXmlExternal(new RdfBaseWrapper(xmlEntity));
-    } else if (FormatTypes.schema.equals(format)) {
-      SchemaOrgEntity<?> schemaOrgEntity =
-          EntityObjectFactory.createSchemaOrgEntity(entityRecord.getEntity());
-      try {
+        responseBody = jsonLdSerializer.serialize(entityRecord, profiles, includeFailure, failure);
+      } else if (FormatTypes.xml.equals(format)) {
+        XmlBaseEntityImpl<?> xmlEntity =
+            EntityObjectFactory.createXmlEntity(entityRecord.getEntity());
+        responseBody = entityXmlSerializer.serializeXmlExternal(new RdfBaseWrapper(xmlEntity));
+      } else if (FormatTypes.schema.equals(format)) {
+        SchemaOrgEntity<?> schemaOrgEntity =
+            EntityObjectFactory.createSchemaOrgEntity(entityRecord.getEntity());
+
         responseBody = corelibJsonLdSerializer.serialize(schemaOrgEntity.get());
-      } catch (IOException e) {
-        throw new EuropeanaApiException(
-            "Unexpected exception occurred when serializing the schemaorg entity.", e);
       }
+    } catch (IOException e) {
+      throw new EuropeanaApiException("Error serializing entity", e);
     }
-
     return responseBody;
   }
 
@@ -110,7 +121,10 @@ public abstract class BaseRest extends BaseRestController {
     }
     if (contentType != null && !contentType.isEmpty())
       headers.add(HttpHeaders.CONTENT_TYPE, contentType);
-    String body = jsonLdSerializer.serializeFailedUpdates(page, pageSize);
+
+    String body =
+        jsonLdSerializer.serializeFailedUpdates(
+            failedTaskService.getEntityRecordsIdsForFailures(page * pageSize, pageSize));
     headers.setContentLength(body.getBytes().length);
     return ResponseEntity.status(status).headers(headers).body(body);
   }
@@ -119,7 +133,7 @@ public abstract class BaseRest extends BaseRestController {
    * Generates serialised EntityRecord Response entity along with Http status and headers
    *
    * @param request
-   * @param profile
+   * @param profiles
    * @param outFormat
    * @param contentType
    * @param entityRecord
@@ -129,7 +143,7 @@ public abstract class BaseRest extends BaseRestController {
    */
   protected ResponseEntity<String> generateResponseEntity(
       HttpServletRequest request,
-      String profile,
+      List<EntityProfile> profiles,
       FormatTypes outFormat,
       String languages,
       String contentType,
@@ -144,22 +158,28 @@ public abstract class BaseRest extends BaseRestController {
     String etag = computeEtag(timestamp, outFormat.name(), getApiVersion());
 
     org.springframework.http.HttpHeaders headers = createAllowHeader(request);
+
     if (!outFormat.equals(FormatTypes.schema)) {
       headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
       headers.add(HttpHeaders.LINK, HttpHeaders.VALUE_LDP_RESOURCE);
+    }
 
-      // Access-Control-Expose-Headers only set for CORS requests
-      if (StringUtils.hasLength(request.getHeader(org.springframework.http.HttpHeaders.ORIGIN))) {
+    // Access-Control-Expose-Headers only set for CORS requests
+    if (StringUtils.hasLength(request.getHeader(org.springframework.http.HttpHeaders.ORIGIN))) {
+      if (outFormat.equals(FormatTypes.schema)) {
+        headers.setAccessControlExposeHeaders(List.of(HttpHeaders.ETAG, HttpHeaders.VARY));
+      } else {
         headers.setAccessControlExposeHeaders(
             List.of(HttpHeaders.ETAG, HttpHeaders.LINK, HttpHeaders.VARY));
       }
     }
+
     if (contentType != null && !contentType.isEmpty())
       headers.add(HttpHeaders.CONTENT_TYPE, contentType);
 
     processLanguage(entityRecord.getEntity(), languages);
 
-    String body = serialize(entityRecord, outFormat, profile);
+    String body = serialize(entityRecord, outFormat, profiles);
     return ResponseEntity.status(status).headers(headers).eTag(etag).body(body);
   }
 

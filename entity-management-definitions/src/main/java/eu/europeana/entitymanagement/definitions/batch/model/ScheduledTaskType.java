@@ -1,9 +1,10 @@
 package eu.europeana.entitymanagement.definitions.batch.model;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import eu.europeana.entitymanagement.serialization.ScheduledTaskTypeDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import eu.europeana.entitymanagement.serialization.ScheduledTaskTypeSerializer;
 
-@JsonDeserialize(using = ScheduledTaskTypeDeserializer.class)
+@JsonSerialize(using = ScheduledTaskTypeSerializer.class)
 public interface ScheduledTaskType {
+
   String getValue();
 }

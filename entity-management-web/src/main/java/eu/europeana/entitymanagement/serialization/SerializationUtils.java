@@ -13,6 +13,7 @@ import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.util.List;
 import java.util.Optional;
@@ -21,17 +22,29 @@ import org.springframework.stereotype.Component;
 @Component
 public class SerializationUtils {
 
-  public static void serializeInternalJson(
-      Writer writer, ObjectMapper mapper, EntityRecord record, FormatTypes format)
+  public static String serializeInternalJson(
+      ObjectMapper mapper,
+      EntityRecord record,
+      boolean includeFailure,
+      Optional<FailedTask> failure)
       throws IOException {
-    JsonNode result = getInternalJsonNode(mapper, record, format);
-    mapper.writeValue(writer, result);
+
+    final StringWriter buffer = new StringWriter();
+
+    mapper.writeValue(buffer, getInternalJsonNode(mapper, record, includeFailure, failure));
+    return buffer.toString();
   }
 
-  public static void serializeExternalJson(
-      Writer writer, ObjectMapper mapper, EntityRecord record, FormatTypes format)
+  public static String serializeExternalJson(
+      ObjectMapper mapper,
+      EntityRecord record,
+      boolean includeFailure,
+      Optional<FailedTask> failure)
       throws IOException {
-    mapper.writeValue(writer, getExternalJsonNode(mapper, record, format));
+    final StringWriter buffer = new StringWriter();
+    mapper.writeValue(buffer, getExternalJsonNode(mapper, record, includeFailure, failure));
+
+    return buffer.toString();
   }
 
   public static void serializeDebugJson(
@@ -46,15 +59,46 @@ public class SerializationUtils {
   }
 
   private static ObjectNode getExternalJsonNode(
-      ObjectMapper mapper, EntityRecord record, FormatTypes format)
+      ObjectMapper mapper,
+      EntityRecord record,
+      boolean includeFailure,
+      Optional<FailedTask> failure)
       throws EntityManagementRuntimeException {
-    return mapper.valueToTree(record.getEntity());
+    ObjectNode entityNode = mapper.valueToTree(record.getEntity());
+
+    if (includeFailure) {
+      addFailureToEntityNode(mapper, entityNode, failure);
+    }
+
+    return entityNode;
+  }
+
+  private static void addFailureToEntityNode(
+      ObjectMapper mapper, ObjectNode entityNode, Optional<FailedTask> failedTask) {
+    ObjectNode lastFailedEntityTaskNode =
+        failedTask.isPresent() ? mapper.valueToTree(failedTask.get()) : mapper.createObjectNode();
+
+    JsonNode isAggregatedByJsonNodeWithFailures =
+        SerializationUtils.combineNestedNode(
+            mapper,
+            (ObjectNode) entityNode.get(WebEntityFields.IS_AGGREGATED_BY),
+            lastFailedEntityTaskNode,
+            WebEntityFields.FAILURES);
+
+    entityNode.set(WebEntityFields.IS_AGGREGATED_BY, isAggregatedByJsonNodeWithFailures);
   }
 
   private static JsonNode getInternalJsonNode(
-      ObjectMapper mapper, EntityRecord record, FormatTypes format) {
-    ObjectNode entityNode = null;
-    entityNode = mapper.valueToTree(record.getEntity());
+      ObjectMapper mapper,
+      EntityRecord record,
+      boolean includeFailure,
+      Optional<FailedTask> failure) {
+    ObjectNode entityNode = mapper.valueToTree(record.getEntity());
+    ;
+
+    if (includeFailure) {
+      addFailureToEntityNode(mapper, entityNode, failure);
+    }
 
     List<EntityProxy> recordProxies = record.getProxies();
 
@@ -82,9 +126,9 @@ public class SerializationUtils {
 
     ObjectNode result = mapper.createObjectNode();
     ObjectNode entityNode = mapper.valueToTree(record.getEntity());
-    ObjectNode lastFailedEntityTaskNode;
-    if (failedTask.isPresent()) lastFailedEntityTaskNode = mapper.valueToTree(failedTask.get());
-    else lastFailedEntityTaskNode = mapper.createObjectNode();
+    ObjectNode lastFailedEntityTaskNode =
+        failedTask.isPresent() ? mapper.valueToTree(failedTask.get()) : mapper.createObjectNode();
+
     JsonNode isAggregatedByJsonNode = entityNode.get(WebEntityFields.IS_AGGREGATED_BY);
     JsonNode isAggregatedByJsonNodeWithFailures =
         SerializationUtils.combineNestedNode(

@@ -79,11 +79,13 @@
 
             <xsl:copy-of select="@rdf:about"/>
 
+            <!-- EA-2669 not allowed anymore 
             <xsl:for-each select="wdt:P18[1]">
                 <xsl:element name="foaf:depiction">
                     <xsl:copy-of select="@rdf:resource"/>
                 </xsl:element>
             </xsl:for-each>
+             -->
 
             <!-- labels -->
             <xsl:call-template name="labels">

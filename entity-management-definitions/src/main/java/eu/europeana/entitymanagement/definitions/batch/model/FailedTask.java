@@ -1,7 +1,9 @@
 package eu.europeana.entitymanagement.definitions.batch.model;
 
-import static eu.europeana.entitymanagement.vocabulary.FailedTaskFields.DATE;
+import static eu.europeana.entitymanagement.vocabulary.FailedTaskFields.COUNT;
+import static eu.europeana.entitymanagement.vocabulary.FailedTaskFields.CREATED;
 import static eu.europeana.entitymanagement.vocabulary.FailedTaskFields.MESSAGE;
+import static eu.europeana.entitymanagement.vocabulary.FailedTaskFields.MODIFIED;
 import static eu.europeana.entitymanagement.vocabulary.FailedTaskFields.STACKTRACE;
 import static eu.europeana.entitymanagement.vocabulary.FailedTaskFields.TYPE;
 
@@ -16,7 +18,7 @@ import java.time.Instant;
 import org.bson.types.ObjectId;
 
 @Entity("FailedTasks")
-@JsonPropertyOrder({MESSAGE, STACKTRACE, DATE, TYPE})
+@JsonPropertyOrder({TYPE, MESSAGE, COUNT, CREATED, MODIFIED, STACKTRACE})
 public class FailedTask {
 
   @JsonIgnore @Id private ObjectId dbId;
@@ -31,14 +33,14 @@ public class FailedTask {
   /**
    * FailureCount not explicitly set. Value is updated during Mongo upserts via the $inc operator
    */
-  @JsonIgnore private int failureCount = 1;
+  private int failureCount = 1;
 
   /* Created is not explicitly set on instantiation.
    * During upserts, we use the "modified" value if the record doesn't already exist.
    */
   private Instant created;
 
-  @JsonIgnore private Instant modified;
+  private Instant modified;
 
   private FailedTask() {
     // default constructor
@@ -61,7 +63,7 @@ public class FailedTask {
     return entityId;
   }
 
-  @JsonGetter(FailedTaskFields.DATE)
+  @JsonGetter(FailedTaskFields.CREATED)
   public Instant getCreated() {
     return created;
   }
@@ -76,10 +78,12 @@ public class FailedTask {
     return stackTrace;
   }
 
+  @JsonGetter(FailedTaskFields.MODIFIED)
   public Instant getModified() {
     return modified;
   }
 
+  @JsonGetter(FailedTaskFields.COUNT)
   public int getFailureCount() {
     return failureCount;
   }

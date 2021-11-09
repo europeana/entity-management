@@ -22,6 +22,7 @@ import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import io.swagger.annotations.ApiOperation;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.LogManager;
@@ -147,7 +148,7 @@ public class EntityAdminController extends BaseRest {
         savedEntityRecord.getEntityId());
     return generateResponseEntity(
         request,
-        EntityProfile.internal.toString(),
+        List.of(EntityProfile.internal),
         FormatTypes.jsonld,
         null,
         null,

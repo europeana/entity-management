@@ -14,7 +14,6 @@ import com.mongodb.client.model.WriteModel;
 import com.mongodb.client.result.UpdateResult;
 import dev.morphia.Datastore;
 import dev.morphia.query.FindOptions;
-import dev.morphia.query.experimental.filters.Filter;
 import dev.morphia.query.experimental.updates.UpdateOperators;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
@@ -126,18 +125,16 @@ public class FailedTaskRepository implements InitializingBean {
   }
 
   /**
-   * Queries the FailedTasks collection for records that match the given filter(s). Then retrieves
-   * the matching EntityRecords Results are sorted in ascending order of created
+   * Queries the FailedTasks collection and retrieves the matching entity ids that still exist in
+   * the EntityRecord db, sorted in the ascending order of created.
    *
    * @param filters Query filters
    * @return List with results
    */
-  public List<? extends EntityRecord> getEntityRecordsForFailures(
-      int start, int count, Filter[] filters) {
+  public List<String> getEntityRecordsIdsForFailures(int start, int count) {
     List<FailedTask> failedTasks =
         datastore
             .find(FailedTask.class)
-            .filter(filters)
             .iterator(
                 new FindOptions()
                     // we only care about the EntityID
@@ -147,17 +144,24 @@ public class FailedTaskRepository implements InitializingBean {
                     .sort(ascending(CREATED))
                     .limit(count))
             .toList();
-
     List<String> matchingIds =
         failedTasks.stream().map(FailedTask::getEntityId).collect(Collectors.toList());
 
-    // then fetch matching EntityRecords
+    // then fetch matching EntityRecordsIds from the EntityRecord db
     // TODO: see if this can be done with a single query
-    return datastore
-        .find(EntityRecord.class)
-        .filter(in(ENTITY_ID, matchingIds))
-        .iterator()
-        .toList();
+    List<EntityRecord> entityRecordsForFailedTasks =
+        datastore
+            .find(EntityRecord.class)
+            .filter(in(ENTITY_ID, matchingIds))
+            .iterator(
+                new FindOptions()
+                    // we only care about the EntityID
+                    .projection()
+                    .include(ENTITY_ID))
+            .toList();
+    return entityRecordsForFailedTasks.stream()
+        .map(EntityRecord::getEntityId)
+        .collect(Collectors.toList());
   }
 
   public FailedTask getFailure(String entityId) {
