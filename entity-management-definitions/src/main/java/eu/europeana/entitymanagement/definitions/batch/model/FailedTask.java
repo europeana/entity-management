@@ -1,11 +1,11 @@
 package eu.europeana.entitymanagement.definitions.batch.model;
 
-import static eu.europeana.entitymanagement.vocabulary.FailedTaskFields.COUNT;
-import static eu.europeana.entitymanagement.vocabulary.FailedTaskFields.CREATED;
-import static eu.europeana.entitymanagement.vocabulary.FailedTaskFields.MESSAGE;
-import static eu.europeana.entitymanagement.vocabulary.FailedTaskFields.MODIFIED;
-import static eu.europeana.entitymanagement.vocabulary.FailedTaskFields.STACKTRACE;
-import static eu.europeana.entitymanagement.vocabulary.FailedTaskFields.TYPE;
+import static eu.europeana.entitymanagement.vocabulary.FailedTaskJsonFields.FIRST_TIME;
+import static eu.europeana.entitymanagement.vocabulary.FailedTaskJsonFields.LAST_TIME;
+import static eu.europeana.entitymanagement.vocabulary.FailedTaskJsonFields.MESSAGE;
+import static eu.europeana.entitymanagement.vocabulary.FailedTaskJsonFields.OCCURENCES;
+import static eu.europeana.entitymanagement.vocabulary.FailedTaskJsonFields.STACKTRACE;
+import static eu.europeana.entitymanagement.vocabulary.FailedTaskJsonFields.TYPE;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -13,12 +13,12 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
 import dev.morphia.annotations.Indexed;
-import eu.europeana.entitymanagement.vocabulary.FailedTaskFields;
+import eu.europeana.entitymanagement.vocabulary.FailedTaskJsonFields;
 import java.time.Instant;
 import org.bson.types.ObjectId;
 
 @Entity("FailedTasks")
-@JsonPropertyOrder({TYPE, MESSAGE, COUNT, CREATED, MODIFIED, STACKTRACE})
+@JsonPropertyOrder({TYPE, MESSAGE, OCCURENCES, FIRST_TIME, LAST_TIME, STACKTRACE})
 public class FailedTask {
 
   @JsonIgnore @Id private ObjectId dbId;
@@ -63,32 +63,32 @@ public class FailedTask {
     return entityId;
   }
 
-  @JsonGetter(FailedTaskFields.CREATED)
+  @JsonGetter(FailedTaskJsonFields.FIRST_TIME)
   public Instant getCreated() {
     return created;
   }
 
-  @JsonGetter(FailedTaskFields.MESSAGE)
+  @JsonGetter(FailedTaskJsonFields.MESSAGE)
   public String getErrorMessage() {
     return errorMessage;
   }
 
-  @JsonGetter(FailedTaskFields.STACKTRACE)
+  @JsonGetter(FailedTaskJsonFields.STACKTRACE)
   public String getStackTrace() {
     return stackTrace;
   }
 
-  @JsonGetter(FailedTaskFields.MODIFIED)
+  @JsonGetter(FailedTaskJsonFields.LAST_TIME)
   public Instant getModified() {
     return modified;
   }
 
-  @JsonGetter(FailedTaskFields.COUNT)
+  @JsonGetter(FailedTaskJsonFields.OCCURENCES)
   public int getFailureCount() {
     return failureCount;
   }
 
-  @JsonGetter(FailedTaskFields.TYPE)
+  @JsonGetter(FailedTaskJsonFields.TYPE)
   public ScheduledTaskType getUpdateType() {
     return updateType;
   }

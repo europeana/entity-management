@@ -15,7 +15,9 @@ import eu.europeana.entitymanagement.batch.service.FailedTaskService;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.FailedTaskJsonFields;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import java.util.Optional;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -157,14 +159,39 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
                 .param(WebEntityConstants.QUERY_PARAM_PROFILE, "internal,debug")
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.isAggregatedBy.failures").exists())
+        .andExpect(jsonPath("$.isAggregatedBy." + WebEntityFields.FAILURES).exists())
         .andExpect(
             jsonPath(
-                "$.isAggregatedBy.failures.type", is(ScheduledUpdateType.FULL_UPDATE.getValue())))
-        .andExpect(jsonPath("$.isAggregatedBy.failures.message").isNotEmpty())
-        .andExpect(jsonPath("$.isAggregatedBy.failures.created").isNotEmpty())
-        .andExpect(jsonPath("$.isAggregatedBy.failures.modified").isNotEmpty())
-        .andExpect(jsonPath("$.isAggregatedBy.failures.stacktrace").isNotEmpty());
+                "$.isAggregatedBy." + WebEntityFields.FAILURES + "." + FailedTaskJsonFields.TYPE,
+                is(ScheduledUpdateType.FULL_UPDATE.getValue())))
+        .andExpect(
+            jsonPath(
+                    "$.isAggregatedBy."
+                        + WebEntityFields.FAILURES
+                        + "."
+                        + FailedTaskJsonFields.MESSAGE)
+                .isNotEmpty())
+        .andExpect(
+            jsonPath(
+                    "$.isAggregatedBy."
+                        + WebEntityFields.FAILURES
+                        + "."
+                        + FailedTaskJsonFields.FIRST_TIME)
+                .isNotEmpty())
+        .andExpect(
+            jsonPath(
+                    "$.isAggregatedBy."
+                        + WebEntityFields.FAILURES
+                        + "."
+                        + FailedTaskJsonFields.LAST_TIME)
+                .isNotEmpty())
+        .andExpect(
+            jsonPath(
+                    "$.isAggregatedBy."
+                        + WebEntityFields.FAILURES
+                        + "."
+                        + FailedTaskJsonFields.STACKTRACE)
+                .isNotEmpty());
   }
 
   @Test
