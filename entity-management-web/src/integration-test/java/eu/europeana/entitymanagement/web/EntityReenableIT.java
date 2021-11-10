@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.web;
 
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.*;
+import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPath;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;

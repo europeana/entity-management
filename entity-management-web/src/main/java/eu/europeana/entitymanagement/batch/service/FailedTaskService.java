@@ -89,8 +89,8 @@ public class FailedTaskService {
     }
   }
 
-  public List<String> getEntityRecordsIdsForFailures(int start, int count) {
-    return failureRepository.getEntityRecordsIdsForFailures(start, count);
+  public List<String> getEntityIdsWithFailures(int start, int count) {
+    return failureRepository.getEntityIdsWithFailures(start, count);
   }
 
   public void dropCollection() {

@@ -3,7 +3,6 @@ package eu.europeana.entitymanagement.serialization;
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_JSON_MAPPER;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -48,12 +47,7 @@ public class JsonLdSerializer {
     return response;
   }
 
-  public String serializeFailedUpdates(List<String> entityIds) {
-    ArrayNode arrayNode = mapper.createArrayNode();
-    for (String id : entityIds) {
-      String resultItem = id + "?profile=debug";
-      arrayNode.add(resultItem);
-    }
-    return arrayNode.toString();
+  public String serializeFailedUpdates(List<String> pathUrls) throws IOException {
+    return mapper.writeValueAsString(pathUrls);
   }
 }

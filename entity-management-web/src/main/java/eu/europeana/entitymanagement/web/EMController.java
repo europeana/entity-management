@@ -299,37 +299,6 @@ public class EMController extends BaseRest {
   }
 
   @ApiOperation(
-      value = "Retrieve a list of entities for which an update failed.",
-      nickname = "getEntitiesUpdateFailedJsonLd",
-      response = java.lang.Void.class)
-  @GetMapping(
-      value = {"/management/failed"},
-      produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
-  public ResponseEntity<String> getEntitiesUpdateFailedJsonLd(
-      @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
-      @RequestParam(
-              value = WebEntityConstants.QUERY_PARAM_PAGE,
-              required = false,
-              defaultValue = "0")
-          int page,
-      @RequestParam(
-              value = WebEntityConstants.QUERY_PARAM_PAGE_SIZE,
-              required = false,
-              defaultValue = "10")
-          int pageSize,
-      HttpServletRequest request)
-      throws EuropeanaApiException, HttpException {
-
-    if (emConfig.isAuthEnabled()) {
-      verifyReadAccess(request);
-    }
-    if (pageSize > 1000) pageSize = 1000;
-
-    return generateResponseFailedUpdates(
-        request, page, pageSize, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, HttpStatus.OK);
-  }
-
-  @ApiOperation(
       value = "Retrieve a known entity",
       nickname = "getEntityJsonLd",
       response = java.lang.Void.class)

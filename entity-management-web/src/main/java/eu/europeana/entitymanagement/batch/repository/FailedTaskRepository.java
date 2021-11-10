@@ -17,7 +17,6 @@ import dev.morphia.query.FindOptions;
 import dev.morphia.query.experimental.updates.UpdateOperators;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -125,13 +124,13 @@ public class FailedTaskRepository implements InitializingBean {
   }
 
   /**
-   * Queries the FailedTasks collection and retrieves the matching entity ids that still exist in
-   * the EntityRecord db, sorted in the ascending order of created.
+   * Gets entityIds of entities with failures
    *
-   * @param filters Query filters
+   * @param start number of documents to skip
+   * @param count number of documents to fetch
    * @return List with results
    */
-  public List<String> getEntityRecordsIdsForFailures(int start, int count) {
+  public List<String> getEntityIdsWithFailures(int start, int count) {
     List<FailedTask> failedTasks =
         datastore
             .find(FailedTask.class)
@@ -144,24 +143,7 @@ public class FailedTaskRepository implements InitializingBean {
                     .sort(ascending(CREATED))
                     .limit(count))
             .toList();
-    List<String> matchingIds =
-        failedTasks.stream().map(FailedTask::getEntityId).collect(Collectors.toList());
-
-    // then fetch matching EntityRecordsIds from the EntityRecord db
-    // TODO: see if this can be done with a single query
-    List<EntityRecord> entityRecordsForFailedTasks =
-        datastore
-            .find(EntityRecord.class)
-            .filter(in(ENTITY_ID, matchingIds))
-            .iterator(
-                new FindOptions()
-                    // we only care about the EntityID
-                    .projection()
-                    .include(ENTITY_ID))
-            .toList();
-    return entityRecordsForFailedTasks.stream()
-        .map(EntityRecord::getEntityId)
-        .collect(Collectors.toList());
+    return failedTasks.stream().map(FailedTask::getEntityId).collect(Collectors.toList());
   }
 
   public FailedTask getFailure(String entityId) {
