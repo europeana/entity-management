@@ -61,7 +61,7 @@ public abstract class SolrEntity<T extends Entity> {
   private List<String> suggestFilters;
   
   @Field(EntitySolrFields.RIGHTS)
-  private String rights;
+  private List<String> rights;
   
   @Field(EntitySolrFields.EUROPEANA_DOC_COUNT)
   private int docCount;
@@ -213,11 +213,11 @@ public abstract class SolrEntity<T extends Entity> {
       this.suggestFilters = suggestFilters;
   }
 
-  public String getRights() {
+  public List<String> getRights() {
       return rights;
   }
 
-  public void setRights(String rights) {
+  public void setRights(List<String> rights) {
       this.rights = rights;
   }
 

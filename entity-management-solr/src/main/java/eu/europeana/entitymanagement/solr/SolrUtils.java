@@ -149,7 +149,8 @@ public class SolrUtils {
                 //TODO: change data types when solr schema will be updated
                 solrEntity.setPageRank((float) aggregation.getPageRank());
                 solrEntity.setDerivedScore((float) aggregation.getScore());
-                solrEntity.setRights(aggregation.getRights());
+                //TODO: change data type to String when solr schema will be updated
+                solrEntity.setRights(List.of(aggregation.getRights()));
             }
         }
     
