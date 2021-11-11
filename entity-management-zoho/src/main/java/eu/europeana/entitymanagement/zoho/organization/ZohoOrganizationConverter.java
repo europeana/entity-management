@@ -8,7 +8,6 @@ import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -25,15 +24,11 @@ public class ZohoOrganizationConverter {
     Organization org = new Organization();
     org.setAbout(ZohoConstants.URL_ORGANIZATION_PREFFIX + record.getId());
     org.setIdentifier(ZohoUtils.stringListSupplier(List.of(Long.toString(record.getId()))));
-    String isoLanguage =
-        toIsoLanguage(
-            ZohoUtils.stringFieldSupplier(
-                record.getKeyValue(ZohoConstants.LANG_ORGANIZATION_NAME_FIELD)));
-    org.setPrefLabel(
-        ZohoUtils.createMap(
-            isoLanguage,
-            ZohoUtils.stringFieldSupplier(record.getKeyValue(ZohoConstants.ACCOUNT_NAME_FIELD))));
-    org.setAltLabel(getAllAltLabel(record));
+
+    Map<String, String> prefLabel = getPrefLabel(record);
+    Map<String, List<String>> altLabel = getAllAltLabel(record, prefLabel);
+    if (prefLabel.size() > 0) org.setPrefLabel(prefLabel);
+    if (altLabel.size() > 0) org.setAltLabel(altLabel);
 
     String acronym = ZohoUtils.stringFieldSupplier(record.getKeyValue(ZohoConstants.ACRONYM_FIELD));
     String langAcronym =
@@ -89,19 +84,45 @@ public class ZohoOrganizationConverter {
     return org;
   }
 
-  private static Map<String, List<String>> getAllAltLabel(Record record) {
+  private static Map<String, List<String>> getAllAltLabel(
+      Record record, Map<String, String> prefLabel) {
     Map<String, List<String>> altLabelMap = new HashMap<>();
     for (int i = 0; i < ZohoConstants.LANGUAGE_CODE_LENGTH; i++) {
       String label =
           ZohoUtils.stringFieldSupplier(
-              record.getKeyValue(ZohoConstants.ALTERNATIVE_FIELD + "_" + i));
+              record.getKeyValue(ZohoConstants.ALTERNATIVE_FIELD + "_" + (i + 1)));
       if (label != null) {
-        String lang = ZohoConstants.LANG_ALTERNATIVE_FIELD + "_" + i;
+        String lang = ZohoConstants.LANG_ALTERNATIVE_FIELD + "_" + (i + 1);
         String isoLanguage = toIsoLanguage(ZohoUtils.stringFieldSupplier(record.getKeyValue(lang)));
-        altLabelMap.put(isoLanguage, Collections.singletonList(label));
+        // if there is a key in the pref label put the value in the alt label
+        if (prefLabel.containsKey(isoLanguage)) {
+          // if there is a key in the alt label, append the value if it is not in the list
+          if (altLabelMap.containsKey(isoLanguage)) {
+            if (!altLabelMap.get(isoLanguage).contains(label))
+              altLabelMap.get(isoLanguage).add(label);
+          } else {
+            List<String> altLabelValue = new ArrayList<String>();
+            altLabelValue.add(label);
+            altLabelMap.put(isoLanguage, altLabelValue);
+          }
+        } else {
+          prefLabel.put(isoLanguage, label);
+        }
       }
     }
     return altLabelMap;
+  }
+
+  private static Map<String, String> getPrefLabel(Record record) {
+    Map<String, String> prefLabel = new HashMap<String, String>();
+    String isoLanguage =
+        toIsoLanguage(
+            ZohoUtils.stringFieldSupplier(
+                record.getKeyValue(ZohoConstants.LANG_ORGANIZATION_NAME_FIELD)));
+    String accountName =
+        ZohoUtils.stringFieldSupplier(record.getKeyValue(ZohoConstants.ACCOUNT_NAME_FIELD));
+    if (accountName != null) prefLabel.put(isoLanguage, accountName);
+    return prefLabel;
   }
 
   private static List<String> getAllSameAs(Record record) {
