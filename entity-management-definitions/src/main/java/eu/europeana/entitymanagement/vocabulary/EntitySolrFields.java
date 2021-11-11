@@ -34,7 +34,7 @@ public interface EntitySolrFields {
 
   public static final String IN_SCHEME = "skos_inScheme";
   public static final String SUGGEST_FILTERS = "suggest_filters";
-  public static final String SUGGEST_FILTER_EUROPEANA = "in_europeana";
+  public static final String SUGGEST_FILTER_EUROPEANA = "europeana";
   
 
   public static final String IS_SHOWN_BY = "isShownBy";

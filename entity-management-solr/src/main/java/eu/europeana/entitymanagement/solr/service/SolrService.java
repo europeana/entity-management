@@ -1,31 +1,16 @@
 package eu.europeana.entitymanagement.solr.service;
 
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.*;
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_INDEXING_SOLR_CLIENT;
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_JSON_MAPPER;
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_SOLR_ENTITY_SUGGESTER_FILTER;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.ser.FilterProvider;
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.definitions.model.Agent;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.Organization;
-import eu.europeana.entitymanagement.definitions.model.TimeSpan;
-import eu.europeana.entitymanagement.solr.SolrEntitySuggesterMixins;
-import eu.europeana.entitymanagement.solr.SolrEntitySuggesterMixins.TimeSpanSuggesterMixin;
-import eu.europeana.entitymanagement.solr.SolrSearchCursorIterator;
-import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
-import eu.europeana.entitymanagement.solr.model.SolrAgent;
-import eu.europeana.entitymanagement.solr.model.SolrEntity;
-import eu.europeana.entitymanagement.solr.model.SolrOrganization;
-import eu.europeana.entitymanagement.solr.model.SolrTimeSpan;
-import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.solr.client.solrj.SolrClient;
@@ -41,6 +26,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+
+import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.definitions.model.Agent;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.definitions.model.TimeSpan;
+import eu.europeana.entitymanagement.solr.SolrEntitySuggesterMixins;
+import eu.europeana.entitymanagement.solr.SolrEntitySuggesterMixins.TimeSpanSuggesterMixin;
+import eu.europeana.entitymanagement.solr.SolrSearchCursorIterator;
+import eu.europeana.entitymanagement.solr.SolrUtils;
+import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
+import eu.europeana.entitymanagement.solr.model.SolrAgent;
+import eu.europeana.entitymanagement.solr.model.SolrEntity;
+import eu.europeana.entitymanagement.solr.model.SolrOrganization;
+import eu.europeana.entitymanagement.solr.model.SolrTimeSpan;
+import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 
 @Service(AppConfigConstants.BEAN_EM_SOLR_SERVICE)
 public class SolrService implements InitializingBean {
@@ -185,6 +193,40 @@ public class SolrService implements InitializingBean {
     return binder.getBean(classType, doc);
   }
 
+  
+//  @SuppressWarnings({ "rawtypes", "unchecked" })
+public List<SolrEntity<Entity>> search(
+          SolrQuery query) throws SolrServiceException {
+
+        QueryResponse rsp;
+        try {
+          rsp = solrClient.query(query);
+          if (log.isDebugEnabled()) {
+            log.debug(
+                "Performed Solr search query in {}ms:  query={}",
+                rsp.getElapsedTime(),
+                query);
+          }
+
+        } catch (IOException | SolrServerException ex) {
+          throw new SolrServiceException(
+              String.format("Error while searching Solr with query:", query), ex);
+        }
+        SolrDocumentList docList = rsp.getResults();
+        if (docList == null || docList.size() == 0) return null;
+         
+        DocumentObjectBinder binder = new DocumentObjectBinder();
+        List<SolrEntity<Entity>> res = new ArrayList<SolrEntity<Entity>>();
+        
+        for (SolrDocument solrDocument : docList){
+            String entityType = (String) solrDocument.getFieldValue(EntitySolrFields.TYPE);
+            Class<SolrEntity<Entity>> solrEntityClass = SolrUtils.getSolrEntityClass(entityType);
+            res.add((SolrEntity<Entity>)binder.getBean(solrEntityClass, solrDocument));
+        }
+        return res;
+      }
+  
+  
   /**
    * Fetches all documents matching the query string using a cursor.
    *
