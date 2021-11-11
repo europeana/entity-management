@@ -1,43 +1,104 @@
 package eu.europeana.entitymanagement.serialization;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.util.List;
+import java.util.Optional;
+import org.springframework.stereotype.Component;
 
+@Component
 public class SerializationUtils {
 
-  public static void serializeInternalJson(
-      Writer writer, ObjectMapper mapper, EntityRecord record, FormatTypes format)
+  public static String serializeInternalJson(
+      ObjectMapper mapper,
+      EntityRecord record,
+      boolean includeFailure,
+      Optional<FailedTask> failure)
       throws IOException {
-    JsonNode result = getInternalJsonNode(mapper, record, format);
+
+    final StringWriter buffer = new StringWriter();
+
+    mapper.writeValue(buffer, getInternalJsonNode(mapper, record, includeFailure, failure));
+    return buffer.toString();
+  }
+
+  public static String serializeExternalJson(
+      ObjectMapper mapper,
+      EntityRecord record,
+      boolean includeFailure,
+      Optional<FailedTask> failure)
+      throws IOException {
+    final StringWriter buffer = new StringWriter();
+    mapper.writeValue(buffer, getExternalJsonNode(mapper, record, includeFailure, failure));
+
+    return buffer.toString();
+  }
+
+  public static void serializeDebugJson(
+      Writer writer,
+      ObjectMapper mapper,
+      EntityRecord record,
+      FormatTypes format,
+      Optional<FailedTask> failedTask)
+      throws IOException {
+    JsonNode result = getDebugJsonNode(mapper, record, format, failedTask);
     mapper.writeValue(writer, result);
   }
 
-  public static void serializeExternalJson(
-      Writer writer, ObjectMapper mapper, EntityRecord record, FormatTypes format)
-      throws IOException {
-    mapper.writeValue(writer, getExternalJsonNode(mapper, record, format));
+  private static ObjectNode getExternalJsonNode(
+      ObjectMapper mapper,
+      EntityRecord record,
+      boolean includeFailure,
+      Optional<FailedTask> failure)
+      throws EntityManagementRuntimeException {
+    ObjectNode entityNode = mapper.valueToTree(record.getEntity());
+
+    if (includeFailure) {
+      addFailureToEntityNode(mapper, entityNode, failure);
+    }
+
+    return entityNode;
   }
 
-  private static ObjectNode getExternalJsonNode(
-      ObjectMapper mapper, EntityRecord record, FormatTypes format)
-      throws EntityManagementRuntimeException {
-    return mapper.valueToTree(record.getEntity());
+  private static void addFailureToEntityNode(
+      ObjectMapper mapper, ObjectNode entityNode, Optional<FailedTask> failedTask) {
+    ObjectNode lastFailedEntityTaskNode =
+        failedTask.isPresent() ? mapper.valueToTree(failedTask.get()) : mapper.createObjectNode();
+
+    JsonNode isAggregatedByJsonNodeWithFailures =
+        SerializationUtils.combineNestedNode(
+            mapper,
+            (ObjectNode) entityNode.get(WebEntityFields.IS_AGGREGATED_BY),
+            lastFailedEntityTaskNode,
+            WebEntityFields.FAILURES);
+
+    entityNode.set(WebEntityFields.IS_AGGREGATED_BY, isAggregatedByJsonNodeWithFailures);
   }
 
   private static JsonNode getInternalJsonNode(
-      ObjectMapper mapper, EntityRecord record, FormatTypes format) {
-    ObjectNode entityNode = null;
-    entityNode = mapper.valueToTree(record.getEntity());
+      ObjectMapper mapper,
+      EntityRecord record,
+      boolean includeFailure,
+      Optional<FailedTask> failure) {
+    ObjectNode entityNode = mapper.valueToTree(record.getEntity());
+    ;
+
+    if (includeFailure) {
+      addFailureToEntityNode(mapper, entityNode, failure);
+    }
 
     List<EntityProxy> recordProxies = record.getProxies();
 
@@ -57,6 +118,27 @@ public class SerializationUtils {
     }
 
     return SerializationUtils.combineNestedNode(mapper, entityNode, proxyNode, "proxies");
+  }
+
+  private static JsonNode getDebugJsonNode(
+      ObjectMapper mapper, EntityRecord record, FormatTypes format, Optional<FailedTask> failedTask)
+      throws JsonMappingException, JsonProcessingException {
+
+    ObjectNode result = mapper.createObjectNode();
+    ObjectNode entityNode = mapper.valueToTree(record.getEntity());
+    ObjectNode lastFailedEntityTaskNode =
+        failedTask.isPresent() ? mapper.valueToTree(failedTask.get()) : mapper.createObjectNode();
+
+    JsonNode isAggregatedByJsonNode = entityNode.get(WebEntityFields.IS_AGGREGATED_BY);
+    JsonNode isAggregatedByJsonNodeWithFailures =
+        SerializationUtils.combineNestedNode(
+            mapper,
+            (ObjectNode) isAggregatedByJsonNode,
+            lastFailedEntityTaskNode,
+            WebEntityFields.FAILURES);
+    result.setAll(entityNode);
+    result.set(WebEntityFields.IS_AGGREGATED_BY, isAggregatedByJsonNodeWithFailures);
+    return result;
   }
 
   /**

@@ -6,6 +6,7 @@ import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BASE_SERV
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_BATHTUB_URI;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_BATHTUB_XML;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_REGISTER_BATHTUB_JSON;
+import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPath;
 import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;

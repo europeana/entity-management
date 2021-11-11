@@ -23,6 +23,8 @@ public interface WebEntityConstants extends WebEntityFields {
   public static final String QUERY_PARAM_PROFILE = "profile";
   public static final String QUERY_PARAM_LANGUAGE = "lang";
   public static final String QUERY_PARAM_QUERY = "query";
+  public static final String QUERY_PARAM_PAGE = "page";
+  public static final String QUERY_PARAM_PAGE_SIZE = "pageSize";
 
   public static final String PARAM_TYPE_ALL = "All";
   public static final String PARAM_LANGUAGE_ALL = "all";
@@ -65,7 +67,6 @@ public interface WebEntityConstants extends WebEntityFields {
   public static final String TOTAL = "total";
 
   // Page fields
-  public static final String PART_OF = "partOf";
   public static final String PREV = "prev";
   public static final String NEXT = "next";
   public static final String FACETS = "facets";

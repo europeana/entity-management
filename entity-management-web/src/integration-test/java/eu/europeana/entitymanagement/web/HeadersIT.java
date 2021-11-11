@@ -9,6 +9,7 @@ import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_B
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_BATHTUB_XML;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_REGISTER_BATHTUB_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_UPDATE_BATHTUB_JSON;
+import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPath;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
