@@ -2,12 +2,6 @@ package eu.europeana.entitymanagement.vocabulary;
 
 public interface WebEntityConstants extends WebEntityFields {
 
-  // REST API query
-  public static final String SLASH = "/";
-  public static final String PAR_CHAR = "?";
-  public static final String PAR_ASSIGNMENT = "=";
-  public static final String PAR_CONCATENATION = "&";
-
   public static final String PATH_PARAM_TYPE = "type";
   public static final String PATH_PARAM_NAMESPACE = "namespace";
   public static final String PATH_PARAM_IDENTIFIER = "identifier";

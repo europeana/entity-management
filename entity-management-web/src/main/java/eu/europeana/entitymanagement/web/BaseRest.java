@@ -132,27 +132,19 @@ public abstract class BaseRest extends BaseRestController {
      */
     String entityUriPrefix = requestUrl.subSequence(0, requestUrl.length() - 17).toString();
     // convert entityId to navigable URL
+
+    String wskeyParam =
+        StringUtils.hasLength(wskey)
+            ? String.format("&%s=%s", WebEntityConstants.QUERY_PARAM_WSKEY, wskey)
+            : "";
+
+    // browsers attempt to load xml by default, so specify .jsonld in url
+    String entityUrlSuffix = ".jsonld?profile=debug" + wskeyParam;
     List<String> pathUrls =
         entityIds.stream()
             .map(
                 id ->
-                    (wskey != null)
-                        ? (entityUriPrefix
-                            + EntityRecordUtils.getEntityRequestPath(id)
-                            + WebEntityConstants.PAR_CHAR
-                            + WebEntityConstants.QUERY_PARAM_PROFILE
-                            + WebEntityConstants.PAR_ASSIGNMENT
-                            + EntityProfile.debug.toString()
-                            + WebEntityConstants.PAR_CONCATENATION
-                            + WebEntityConstants.QUERY_PARAM_WSKEY
-                            + WebEntityConstants.PAR_ASSIGNMENT
-                            + wskey)
-                        : entityUriPrefix
-                            + EntityRecordUtils.getEntityRequestPath(id)
-                            + WebEntityConstants.PAR_CHAR
-                            + WebEntityConstants.QUERY_PARAM_PROFILE
-                            + WebEntityConstants.PAR_ASSIGNMENT
-                            + EntityProfile.debug.toString())
+                    entityUriPrefix + EntityRecordUtils.getEntityRequestPath(id) + entityUrlSuffix)
             .collect(Collectors.toList());
     try {
 
