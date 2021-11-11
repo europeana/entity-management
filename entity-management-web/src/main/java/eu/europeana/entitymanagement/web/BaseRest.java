@@ -1,5 +1,25 @@
 package eu.europeana.entitymanagement.web;
 
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
+
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.api.commons.web.controller.BaseRestController;
 import eu.europeana.api.commons.web.http.HttpHeaders;
@@ -24,23 +44,6 @@ import eu.europeana.entitymanagement.web.service.AuthorizationService;
 import eu.europeana.entitymanagement.web.service.RequestPathMethodService;
 import eu.europeana.entitymanagement.web.xml.model.RdfBaseWrapper;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 
 public abstract class BaseRest extends BaseRestController {
 
@@ -174,21 +177,23 @@ public abstract class BaseRest extends BaseRestController {
 
     String etag = computeEtag(timestamp, outFormat.name(), getApiVersion());
 
+    boolean hasPathExtension = request.getPathInfo().contains(".");
+    
+    //HttpHeaders.ALLOW
     org.springframework.http.HttpHeaders headers = createAllowHeader(request);
-
-    if (!outFormat.equals(FormatTypes.schema)) {
-      headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
-      headers.add(HttpHeaders.LINK, HttpHeaders.VALUE_LDP_RESOURCE);
+    headers.add(HttpHeaders.LINK, HttpHeaders.VALUE_LDP_RESOURCE);
+    //ETAG set directly to response
+    if (!hasPathExtension) {
+      headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);    
     }
-
     // Access-Control-Expose-Headers only set for CORS requests
     if (StringUtils.hasLength(request.getHeader(org.springframework.http.HttpHeaders.ORIGIN))) {
-      if (outFormat.equals(FormatTypes.schema)) {
-        headers.setAccessControlExposeHeaders(List.of(HttpHeaders.ETAG, HttpHeaders.VARY));
-      } else {
-        headers.setAccessControlExposeHeaders(
-            List.of(HttpHeaders.ETAG, HttpHeaders.LINK, HttpHeaders.VARY));
+      //HttpHeaders.ALLOW is added by default, avoid duplication
+      headers.add(org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.LINK);
+      if (!hasPathExtension) {
+          headers.add(org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.VARY);
       }
+      headers.add(org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.ETAG); 
     }
 
     if (contentType != null && !contentType.isEmpty()) {
