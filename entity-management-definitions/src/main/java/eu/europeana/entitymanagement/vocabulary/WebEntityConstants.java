@@ -5,6 +5,8 @@ public interface WebEntityConstants extends WebEntityFields {
   // REST API query
   public static final String SLASH = "/";
   public static final String PAR_CHAR = "?";
+  public static final String PAR_ASSIGNMENT = "=";
+  public static final String PAR_CONCATENATION = "&";
 
   public static final String PATH_PARAM_TYPE = "type";
   public static final String PATH_PARAM_NAMESPACE = "namespace";
@@ -25,6 +27,7 @@ public interface WebEntityConstants extends WebEntityFields {
   public static final String QUERY_PARAM_QUERY = "query";
   public static final String QUERY_PARAM_PAGE = "page";
   public static final String QUERY_PARAM_PAGE_SIZE = "pageSize";
+  public static final String QUERY_PARAM_WSKEY = "wskey";
 
   public static final String PARAM_TYPE_ALL = "All";
   public static final String PARAM_LANGUAGE_ALL = "all";
