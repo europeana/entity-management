@@ -10,12 +10,18 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.dereference.Dereferencer;
 import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
+import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
+import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.zoho.crm.api.record.Record;
+import com.zoho.crm.api.util.Choice;
+
 
 /** JUnit test for testing the EMControllerTest class */
 // EntityManagementApp.class
@@ -24,7 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 //        SerializationConfig.class, MetisDereferenceService.class, })
 // @ExtendWith(SpringExtension.class)
 @Disabled("Excluded from automated runs as this depends on Metis")
-public class MetisDereferenceServiceTest extends AbstractIntegrationTest {
+public class DereferenceServiceTest extends AbstractIntegrationTest {
 
   @Autowired private DereferenceServiceLocator dereferenceServiceLocator;
 
@@ -80,6 +86,26 @@ public class MetisDereferenceServiceTest extends AbstractIntegrationTest {
     Assertions.assertNotNull(org.getLogo());
     Assertions.assertNotNull(org.getAddress().getVcardStreetAddress());
     Assertions.assertNotNull(org.getAddress().getVcardCountryName());
+  }
+
+  //@Test
+  public void zohoOrganizationDereferenceLabelsTest() throws Exception {
+    String organizationId = "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000002112001";
+    Dereferencer dereferencer =
+        dereferenceServiceLocator.getDereferencer(organizationId, "Organization");
+    Optional<Entity> orgOptional = dereferencer.dereferenceEntityById(organizationId);
+    
+    Record record=new Record();
+    Choice<String> choice = new Choice<String>("EN");
+    record.addKeyValue(ZohoConstants.LANG_ORGANIZATION_NAME_FIELD,choice);
+    record.addKeyValue(ZohoConstants.ACCOUNT_NAME_FIELD,"Austrian Institute of Technology");
+    
+    record.addKeyValue(ZohoConstants.ALTERNATIVE_FIELD + "_1","Аустријски институт за технологију");
+    choice = new Choice<String>("SR");
+    record.addKeyValue(ZohoConstants.LANG_ALTERNATIVE_FIELD + "_1",choice);
+    
+    Organization org = ZohoOrganizationConverter.convertToOrganizationEntity(record);
+
   }
 
   @Test
