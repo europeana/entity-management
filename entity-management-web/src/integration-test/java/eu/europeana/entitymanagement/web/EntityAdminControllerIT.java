@@ -40,7 +40,7 @@ public class EntityAdminControllerIT extends BaseWebControllerTest {
     EntityRecord entityRecord = createEntity(europeanaMetadata, metisResponse, CONCEPT_BATHTUB_URI);
 
     // confirm that Solr document is saved
-    SolrConcept solrConcept = solrService.searchById(SolrConcept.class, entityRecord.getEntityId());
+    SolrConcept solrConcept = (SolrConcept) solrService.searchById(entityRecord.getEntityId());
     Assertions.assertNotNull(solrConcept);
 
     String requestPath = getEntityRequestPath(entityRecord.getEntityId());

@@ -163,8 +163,7 @@ public class SolrService implements InitializingBean {
    * @return SolrEntity instance
    * @throws SolrServiceException if error occurs while executing query
    */
-  public <T extends Entity, U extends SolrEntity<T>> U searchById(
-      Class<U> classType, String entityId) throws SolrServiceException {
+  public SolrEntity<? extends Entity> searchById(String entityId) throws SolrServiceException {
 
     QueryResponse rsp;
     SolrQuery query = new SolrQuery();
@@ -173,9 +172,8 @@ public class SolrService implements InitializingBean {
       rsp = solrClient.query(query);
       if (log.isDebugEnabled()) {
         log.debug(
-            "Performed Solr search query in {}ms:  type={}, entityId={}",
+            "Performed Solr search query in {}ms:  entityId={}",
             rsp.getElapsedTime(),
-            classType.getSimpleName(),
             entityId);
       }
 
@@ -184,47 +182,47 @@ public class SolrService implements InitializingBean {
           String.format("Error while searching Solr for entityId=%s", entityId), ex);
     }
 
-    DocumentObjectBinder binder = new DocumentObjectBinder();
     SolrDocumentList docList = rsp.getResults();
-
     if (docList == null || docList.size() == 0) return null;
 
     SolrDocument doc = docList.get(0);
-    return binder.getBean(classType, doc);
+    return toSolrEntity(new DocumentObjectBinder(), doc);
   }
 
   
 //  @SuppressWarnings({ "rawtypes", "unchecked" })
-public List<SolrEntity<Entity>> search(
-          SolrQuery query) throws SolrServiceException {
+  public List<SolrEntity<? extends Entity>> search(SolrQuery query) throws SolrServiceException {
 
-        QueryResponse rsp;
-        try {
+      QueryResponse rsp;
+      try {
           rsp = solrClient.query(query);
           if (log.isDebugEnabled()) {
-            log.debug(
-                "Performed Solr search query in {}ms:  query={}",
-                rsp.getElapsedTime(),
-                query);
+              log.debug("Performed Solr search query in {}ms:  query={}", rsp.getElapsedTime(), query);
           }
 
-        } catch (IOException | SolrServerException ex) {
-          throw new SolrServiceException(
-              String.format("Error while searching Solr with query:", query), ex);
-        }
-        SolrDocumentList docList = rsp.getResults();
-        if (docList == null || docList.size() == 0) return null;
-         
-        DocumentObjectBinder binder = new DocumentObjectBinder();
-        List<SolrEntity<Entity>> res = new ArrayList<SolrEntity<Entity>>();
-        
-        for (SolrDocument solrDocument : docList){
-            String entityType = (String) solrDocument.getFieldValue(EntitySolrFields.TYPE);
-            Class<SolrEntity<Entity>> solrEntityClass = SolrUtils.getSolrEntityClass(entityType);
-            res.add((SolrEntity<Entity>)binder.getBean(solrEntityClass, solrDocument));
-        }
-        return res;
+      } catch (IOException | SolrServerException ex) {
+          throw new SolrServiceException(String.format("Error while searching Solr with query:", query), ex);
       }
+      SolrDocumentList docList = rsp.getResults();
+      if (docList == null || docList.size() == 0)
+          return null;
+
+      DocumentObjectBinder binder = new DocumentObjectBinder();
+      List<SolrEntity<? extends Entity>> res = new ArrayList<SolrEntity<? extends Entity>>();
+
+      for (SolrDocument solrDocument : docList) {
+          SolrEntity<Entity> bean = toSolrEntity(binder, solrDocument);
+        res.add((SolrEntity<Entity>) bean);
+      }
+      return res;
+  }
+
+SolrEntity<Entity> toSolrEntity(DocumentObjectBinder binder, SolrDocument solrDocument) {
+    String entityType = (String) solrDocument.getFieldValue(EntitySolrFields.TYPE);
+      Class<SolrEntity<Entity>> solrEntityClass = SolrUtils.getSolrEntityClass(entityType);
+      SolrEntity<Entity> bean = binder.getBean(solrEntityClass, solrDocument);
+    return bean;
+}
   
   
   /**

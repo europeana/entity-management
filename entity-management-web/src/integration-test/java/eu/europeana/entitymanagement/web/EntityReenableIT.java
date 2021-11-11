@@ -45,7 +45,7 @@ public class EntityReenableIT extends BaseWebControllerTest {
         .andExpect(jsonPath("$.type", is(EntityTypes.Concept.name())));
 
     // confirm that Solr document now exists
-    SolrConcept solrConcept = solrService.searchById(SolrConcept.class, entityRecord.getEntityId());
+    SolrConcept solrConcept = (SolrConcept) solrService.searchById(entityRecord.getEntityId());
     Assertions.assertNotNull(solrConcept);
   }
 }
