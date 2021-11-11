@@ -15,6 +15,7 @@ import eu.europeana.entitymanagement.schemaorg.model.SchemaOrgEntity;
 import eu.europeana.entitymanagement.serialization.EntityXmlSerializer;
 import eu.europeana.entitymanagement.serialization.JsonLdSerializer;
 import eu.europeana.entitymanagement.utils.EntityObjectFactory;
+import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
@@ -31,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.LogManager;
@@ -54,7 +56,7 @@ public abstract class BaseRest extends BaseRestController {
 
   @Autowired private RequestPathMethodService requestMethodService;
 
-  @Autowired private FailedTaskService failedTaskService;
+  @Autowired protected FailedTaskService failedTaskService;
 
   protected Logger logger = LogManager.getLogger(getClass());
 
@@ -109,6 +111,41 @@ public abstract class BaseRest extends BaseRestController {
     return responseBody;
   }
 
+  protected ResponseEntity<String> generateResponseFailedUpdates(
+      HttpServletRequest request, List<String> entityIds) throws EuropeanaApiException {
+
+    org.springframework.http.HttpHeaders headers = createAllowHeader(request);
+    // Access-Control-Expose-Headers only set for CORS requests
+    if (StringUtils.hasLength(request.getHeader(org.springframework.http.HttpHeaders.ORIGIN))) {
+      headers.setAccessControlExposeHeaders(List.of(HttpHeaders.ETAG, HttpHeaders.VARY));
+    }
+
+    headers.add(HttpHeaders.CONTENT_TYPE, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
+
+    StringBuffer requestUrl = request.getRequestURL();
+
+    /*
+     * RequestURL always ends with "/entity/management/failed" and doesn't contain query params.
+     * App could be running on localhost:8080 or behind a proxy, so we use the requestUrl as-is
+     */
+    String entityUriPrefix = requestUrl.subSequence(0, requestUrl.length() - 17).toString();
+    // convert entityId to navigable URL
+    List<String> pathUrls =
+        entityIds.stream()
+            .map(
+                id ->
+                    entityUriPrefix + EntityRecordUtils.getEntityRequestPath(id) + "?profile=debug")
+            .collect(Collectors.toList());
+    try {
+
+      String body = jsonLdSerializer.serializeFailedUpdates(pathUrls);
+      headers.setContentLength(body.getBytes().length);
+      return ResponseEntity.status(HttpStatus.OK).headers(headers).body(body);
+    } catch (IOException e) {
+      throw new EuropeanaApiException("Error serializing failed tasks", e);
+    }
+  }
+
   /**
    * Generates serialised EntityRecord Response entity along with Http status and headers
    *
@@ -154,8 +191,9 @@ public abstract class BaseRest extends BaseRestController {
       }
     }
 
-    if (contentType != null && !contentType.isEmpty())
+    if (contentType != null && !contentType.isEmpty()) {
       headers.add(HttpHeaders.CONTENT_TYPE, contentType);
+    }
 
     processLanguage(entityRecord.getEntity(), languages);
 

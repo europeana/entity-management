@@ -1,7 +1,9 @@
 package eu.europeana.entitymanagement.web;
 
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.*;
+import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPath;
 import static org.hamcrest.Matchers.any;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -31,6 +33,29 @@ import org.springframework.test.web.servlet.ResultActions;
 public class EntityRetrievalIT extends BaseWebControllerTest {
 
   @Autowired private FailedTaskService failedTaskService;
+
+  @Test
+  public void shouldRetrieveEntitiesWithFailures() throws Exception {
+    String europeanaMetadata = loadFile(CONCEPT_REGISTER_BATHTUB_JSON);
+    String metisResponse = loadFile(CONCEPT_BATHTUB_XML);
+
+    EntityRecord entityRecord = createEntity(europeanaMetadata, metisResponse, CONCEPT_BATHTUB_URI);
+
+    // create failed task for entity
+    Exception testException = new Exception("TestMessage");
+    failedTaskService.persistFailure(
+        entityRecord.getEntityId(), ScheduledUpdateType.FULL_UPDATE, testException);
+
+    // MockMvc requests use "localhost" without a port
+    String clickableUrl =
+        "http://localhost/entity/"
+            + getEntityRequestPath(entityRecord.getEntityId() + "?profile=debug");
+    mockMvc
+        .perform(get(BASE_SERVICE_URL + "/management/failed").accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", hasSize(1)))
+        .andExpect(jsonPath("$", containsInAnyOrder(clickableUrl)));
+  }
 
   @Test
   void retrieveWithInvalidProfileShouldReturn400() throws Exception {

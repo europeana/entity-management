@@ -46,4 +46,8 @@ public class JsonLdSerializer {
     }
     return response;
   }
+
+  public String serializeFailedUpdates(List<String> pathUrls) throws IOException {
+    return mapper.writeValueAsString(pathUrls);
+  }
 }

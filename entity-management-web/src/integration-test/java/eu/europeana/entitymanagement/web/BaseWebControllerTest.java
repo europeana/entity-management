@@ -74,15 +74,6 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
     return IOUtils.toString(is, StandardCharsets.UTF_8).replace("\n", "");
   }
 
-  /** Gets the "{type}/{identifier}" from an EntityId string */
-  protected String getEntityRequestPath(String entityId) {
-    // entity id is "http://data.europeana.eu/{type}/{identifier}"
-    String[] parts = entityId.split("/");
-
-    // namespace is always base
-    return parts[parts.length - 2] + "/" + parts[parts.length - 1];
-  }
-
   /** Checks common response headers. Allow header checked within each test method. */
   protected void checkCommonResponseHeaders(ResultActions results) throws Exception {
     results

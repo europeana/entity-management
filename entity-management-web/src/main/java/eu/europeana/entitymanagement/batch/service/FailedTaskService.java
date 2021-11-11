@@ -2,11 +2,9 @@ package eu.europeana.entitymanagement.batch.service;
 
 import com.mongodb.bulk.BulkWriteResult;
 import com.mongodb.client.result.UpdateResult;
-import dev.morphia.query.experimental.filters.Filter;
 import eu.europeana.entitymanagement.batch.repository.FailedTaskRepository;
 import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -91,9 +89,8 @@ public class FailedTaskService {
     }
   }
 
-  public List<? extends EntityRecord> getEntityRecordsForFailures(
-      int start, int count, Filter[] queryFilters) {
-    return failureRepository.getEntityRecordsForFailures(start, count, queryFilters);
+  public List<String> getEntityIdsWithFailures(int start, int count) {
+    return failureRepository.getEntityIdsWithFailures(start, count);
   }
 
   public void dropCollection() {
