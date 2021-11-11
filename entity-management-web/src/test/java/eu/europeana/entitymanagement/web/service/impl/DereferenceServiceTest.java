@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.zoho.crm.api.record.Record;
+import com.zoho.crm.api.util.Choice;
 import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import eu.europeana.entitymanagement.definitions.model.Concept;
 import eu.europeana.entitymanagement.definitions.model.Entity;
@@ -15,13 +17,8 @@ import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import com.zoho.crm.api.record.Record;
-import com.zoho.crm.api.util.Choice;
-
 
 /** JUnit test for testing the EMControllerTest class */
 // EntityManagementApp.class
@@ -29,12 +26,12 @@ import com.zoho.crm.api.util.Choice;
 // AppConfig.class, EnrichmentConfig.class, ValidatorConfig.class,
 //        SerializationConfig.class, MetisDereferenceService.class, })
 // @ExtendWith(SpringExtension.class)
-@Disabled("Excluded from automated runs as this depends on Metis")
+// @Disabled("Excluded from automated runs as this depends on Metis")
 public class DereferenceServiceTest extends AbstractIntegrationTest {
 
   @Autowired private DereferenceServiceLocator dereferenceServiceLocator;
 
-  @Test
+  // @Test
   public void dereferenceConceptById() throws Exception {
 
     // bathtube
@@ -65,7 +62,7 @@ public class DereferenceServiceTest extends AbstractIntegrationTest {
     assertEquals(8, entity.getNote().size());
   }
 
-  @Test
+  // @Test
   public void zohoOrganizationDereferenceTest() throws Exception {
     String organizationId = "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000002112001";
     Dereferencer dereferencer =
@@ -88,27 +85,42 @@ public class DereferenceServiceTest extends AbstractIntegrationTest {
     Assertions.assertNotNull(org.getAddress().getVcardCountryName());
   }
 
-  //@Test
+  @Test
   public void zohoOrganizationDereferenceLabelsTest() throws Exception {
-    String organizationId = "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000002112001";
-    Dereferencer dereferencer =
-        dereferenceServiceLocator.getDereferencer(organizationId, "Organization");
-    Optional<Entity> orgOptional = dereferencer.dereferenceEntityById(organizationId);
-    
-    Record record=new Record();
+
+    Record record = new Record();
+    record.setId((long) 1);
     Choice<String> choice = new Choice<String>("EN");
-    record.addKeyValue(ZohoConstants.LANG_ORGANIZATION_NAME_FIELD,choice);
-    record.addKeyValue(ZohoConstants.ACCOUNT_NAME_FIELD,"Austrian Institute of Technology");
-    
-    record.addKeyValue(ZohoConstants.ALTERNATIVE_FIELD + "_1","Аустријски институт за технологију");
+    record.addKeyValue(ZohoConstants.LANG_ORGANIZATION_NAME_FIELD, choice);
+    record.addKeyValue(ZohoConstants.ACCOUNT_NAME_FIELD, "Austrian Institute of Technology");
+
+    record.addKeyValue(
+        ZohoConstants.ALTERNATIVE_FIELD + "_1", "Аустријски институт за технологију");
     choice = new Choice<String>("SR");
-    record.addKeyValue(ZohoConstants.LANG_ALTERNATIVE_FIELD + "_1",choice);
-    
+    record.addKeyValue(ZohoConstants.LANG_ALTERNATIVE_FIELD + "_1", choice);
+
+    record.addKeyValue(
+        ZohoConstants.ALTERNATIVE_FIELD + "_2", "AIT - Austrian Institute of Technology");
+    choice = new Choice<String>("EN");
+    record.addKeyValue(ZohoConstants.LANG_ALTERNATIVE_FIELD + "_2", choice);
+
+    record.addKeyValue(
+        ZohoConstants.ALTERNATIVE_FIELD + "_3", "Austrian Institute of Technology - AIT");
+    choice = new Choice<String>("EN");
+    record.addKeyValue(ZohoConstants.LANG_ALTERNATIVE_FIELD + "_3", choice);
+
+    record.addKeyValue(ZohoConstants.ALTERNATIVE_FIELD + "_4", "Austrian Institute of Technology");
+    choice = new Choice<String>("EN");
+    record.addKeyValue(ZohoConstants.LANG_ALTERNATIVE_FIELD + "_4", choice);
+
     Organization org = ZohoOrganizationConverter.convertToOrganizationEntity(record);
 
+    Assertions.assertTrue(org.getPrefLabel().size() == 2);
+    Assertions.assertTrue(org.getAltLabel().size() == 1);
+    Assertions.assertTrue(org.getAltLabel().get("en").size() == 2);
   }
 
-  @Test
+  // @Test
   public void wikidataOrganizationDereferenceTest() throws ZohoException, Exception {
     String organizationId = "http://www.wikidata.org/entity/Q1781094";
     Dereferencer dereferencer =

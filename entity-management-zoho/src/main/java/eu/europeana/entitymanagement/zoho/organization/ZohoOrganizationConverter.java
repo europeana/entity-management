@@ -3,7 +3,6 @@ package eu.europeana.entitymanagement.zoho.organization;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoUtils.toIsoLanguage;
 
 import com.zoho.crm.api.record.Record;
-
 import eu.europeana.entitymanagement.definitions.model.Address;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
@@ -95,8 +94,10 @@ public class ZohoOrganizationConverter {
       if (label != null) {
         String lang = ZohoConstants.LANG_ALTERNATIVE_FIELD + "_" + (i + 1);
         String isoLanguage = toIsoLanguage(ZohoUtils.stringFieldSupplier(record.getKeyValue(lang)));
-        // if there is a key in the pref label put the value in the alt label
-        if (prefLabel.containsKey(isoLanguage)) {
+        // if there is a key in the pref label and the value for that key is different, put the
+        // value in the alt label
+        if (prefLabel.containsKey(isoLanguage)
+            && prefLabel.get(isoLanguage).compareTo(label) != 0) {
           // if there is a key in the alt label, append the value if it is not in the list
           if (altLabelMap.containsKey(isoLanguage)) {
             if (!altLabelMap.get(isoLanguage).contains(label))
@@ -106,7 +107,7 @@ public class ZohoOrganizationConverter {
             altLabelValue.add(label);
             altLabelMap.put(isoLanguage, altLabelValue);
           }
-        } else {
+        } else if (!prefLabel.containsKey(isoLanguage)) {
           prefLabel.put(isoLanguage, label);
         }
       }
