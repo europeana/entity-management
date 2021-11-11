@@ -26,7 +26,7 @@ class FailedTaskServiceIT extends AbstractIntegrationTest {
 
   private static final Exception testException = new Exception("Exception Message");
   private static final Exception secondException = new Exception("Second Exception Message");
-  
+
   private static final ScheduledTaskType testUpdateType = PERMANENT_DELETION;
 
   @BeforeEach

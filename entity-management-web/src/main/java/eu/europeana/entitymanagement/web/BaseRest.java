@@ -20,6 +20,7 @@ import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.web.service.AuthorizationService;
 import eu.europeana.entitymanagement.web.service.RequestPathMethodService;
 import eu.europeana.entitymanagement.web.xml.model.RdfBaseWrapper;
@@ -112,7 +113,8 @@ public abstract class BaseRest extends BaseRestController {
   }
 
   protected ResponseEntity<String> generateResponseFailedUpdates(
-      HttpServletRequest request, List<String> entityIds) throws EuropeanaApiException {
+      HttpServletRequest request, List<String> entityIds, String wskey)
+      throws EuropeanaApiException {
 
     org.springframework.http.HttpHeaders headers = createAllowHeader(request);
     // Access-Control-Expose-Headers only set for CORS requests
@@ -134,7 +136,23 @@ public abstract class BaseRest extends BaseRestController {
         entityIds.stream()
             .map(
                 id ->
-                    entityUriPrefix + EntityRecordUtils.getEntityRequestPath(id) + "?profile=debug")
+                    (wskey != null)
+                        ? (entityUriPrefix
+                            + EntityRecordUtils.getEntityRequestPath(id)
+                            + WebEntityConstants.PAR_CHAR
+                            + WebEntityConstants.QUERY_PARAM_PROFILE
+                            + WebEntityConstants.PAR_ASSIGNMENT
+                            + EntityProfile.debug.toString()
+                            + WebEntityConstants.PAR_CONCATENATION
+                            + WebEntityConstants.QUERY_PARAM_WSKEY
+                            + WebEntityConstants.PAR_ASSIGNMENT
+                            + wskey)
+                        : entityUriPrefix
+                            + EntityRecordUtils.getEntityRequestPath(id)
+                            + WebEntityConstants.PAR_CHAR
+                            + WebEntityConstants.QUERY_PARAM_PROFILE
+                            + WebEntityConstants.PAR_ASSIGNMENT
+                            + EntityProfile.debug.toString())
             .collect(Collectors.toList());
     try {
 

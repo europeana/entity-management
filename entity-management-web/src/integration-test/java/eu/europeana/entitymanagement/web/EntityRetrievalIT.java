@@ -15,6 +15,7 @@ import com.zoho.crm.api.record.Record;
 import eu.europeana.entitymanagement.batch.service.FailedTaskService;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.FailedTaskJsonFields;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
@@ -43,13 +44,19 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
 
     // create failed task for entity
     Exception testException = new Exception("TestMessage");
+    failedTaskService.dropCollection();
     failedTaskService.persistFailure(
         entityRecord.getEntityId(), ScheduledUpdateType.FULL_UPDATE, testException);
 
     // MockMvc requests use "localhost" without a port
     String clickableUrl =
         "http://localhost/entity/"
-            + getEntityRequestPath(entityRecord.getEntityId() + "?profile=debug");
+            + getEntityRequestPath(entityRecord.getEntityId())
+            + WebEntityConstants.PAR_CHAR
+            + WebEntityConstants.QUERY_PARAM_PROFILE
+            + WebEntityConstants.PAR_ASSIGNMENT
+            + EntityProfile.debug.toString();
+
     mockMvc
         .perform(get(BASE_SERVICE_URL + "/management/failed").accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())

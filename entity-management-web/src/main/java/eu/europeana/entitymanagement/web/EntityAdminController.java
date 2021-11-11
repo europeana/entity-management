@@ -189,7 +189,7 @@ public class EntityAdminController extends BaseRest {
 
     List<String> entityIds = failedTaskService.getEntityIdsWithFailures(page * pageSize, pageSize);
 
-    return generateResponseFailedUpdates(request, entityIds);
+    return generateResponseFailedUpdates(request, entityIds, wskey);
   }
 
   /**
