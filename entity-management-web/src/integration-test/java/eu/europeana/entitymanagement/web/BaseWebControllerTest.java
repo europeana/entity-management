@@ -29,7 +29,6 @@ import java.util.Collections;
 import java.util.Optional;
 import javax.xml.bind.JAXBContext;
 import org.apache.commons.io.IOUtils;
-import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +37,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -77,44 +75,49 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
   }
 
   /** Checks common response headers. Allow header checked within each test method. */
-  protected void checkCommonResponseHeaders(ResultActions results, boolean hasPathExtension) throws Exception {
-      checkCommonResponseHeaders(results, hasPathExtension, false);
+  protected void checkCommonResponseHeaders(ResultActions results, boolean hasPathExtension)
+      throws Exception {
+    checkCommonResponseHeaders(results, hasPathExtension, false);
   }
- 
-  protected void checkCommonResponseHeaders(ResultActions results, boolean hasPathExtension, boolean hasXmlResponse) throws Exception {
-          results
-          .andExpect(header().exists(HttpHeaders.ETAG))
-          .andExpect(header().string(HttpHeaders.LINK, is(VALUE_LDP_RESOURCE)));
-      if(!hasPathExtension) {
-          results.andExpect(
-              header().stringValues(HttpHeaders.VARY, hasItems(containsString(HttpHeaders.ACCEPT))));
-      }
-      if(hasXmlResponse) {
-          results
-          .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(CONTENT_TYPE_APPLICATION_RDF_XML)));
-      }else {
-          results
-          .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(CONTENT_TYPE_JSONLD_UTF8)));       
-      }
-          
-      
-    }
-  
-  
-  protected void checkCorsHeaders(ResultActions results, boolean hasPathExtension) throws Exception {
+
+  protected void checkCommonResponseHeaders(
+      ResultActions results, boolean hasPathExtension, boolean hasXmlResponse) throws Exception {
     results
-        .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, is("*")));
-    
-    if(hasPathExtension) {
-        results
-        .andExpect(header().stringValues(
-            HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,
-            HttpHeaders.ALLOW, HttpHeaders.LINK, HttpHeaders.ETAG));//NO Vary
+        .andExpect(header().exists(HttpHeaders.ETAG))
+        .andExpect(header().string(HttpHeaders.LINK, is(VALUE_LDP_RESOURCE)));
+    if (!hasPathExtension) {
+      results.andExpect(
+          header().stringValues(HttpHeaders.VARY, hasItems(containsString(HttpHeaders.ACCEPT))));
+    }
+    if (hasXmlResponse) {
+      results.andExpect(
+          header().string(HttpHeaders.CONTENT_TYPE, is(CONTENT_TYPE_APPLICATION_RDF_XML)));
     } else {
-        results
-        .andExpect(header().stringValues(
-                HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,
-                HttpHeaders.ALLOW, HttpHeaders.LINK, HttpHeaders.VARY, HttpHeaders.ETAG));
+      results.andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(CONTENT_TYPE_JSONLD_UTF8)));
+    }
+  }
+
+  protected void checkCorsHeaders(ResultActions results, boolean hasPathExtension)
+      throws Exception {
+    results.andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, is("*")));
+
+    if (hasPathExtension) {
+      results.andExpect(
+          header()
+              .stringValues(
+                  HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,
+                  HttpHeaders.ALLOW,
+                  HttpHeaders.LINK,
+                  HttpHeaders.ETAG)); // NO Vary
+    } else {
+      results.andExpect(
+          header()
+              .stringValues(
+                  HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,
+                  HttpHeaders.ALLOW,
+                  HttpHeaders.LINK,
+                  HttpHeaders.VARY,
+                  HttpHeaders.ETAG));
     }
   }
 
@@ -123,7 +126,7 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
   }
 
   protected void checkAllowHeaderForGET(ResultActions results) throws Exception {
-     results.andExpect(header().stringValues(HttpHeaders.ALLOW, hasItems(containsString("GET"))));     
+    results.andExpect(header().stringValues(HttpHeaders.ALLOW, hasItems(containsString("GET"))));
   }
 
   /** Expects Allow header in response to contain DELETE,POST,GET,PUT */
