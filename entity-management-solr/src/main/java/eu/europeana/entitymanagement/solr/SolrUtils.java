@@ -1,13 +1,29 @@
 package eu.europeana.entitymanagement.solr;
 
-import eu.europeana.entitymanagement.definitions.model.*;
-import eu.europeana.entitymanagement.solr.model.*;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import org.apache.commons.collections.MapUtils;
+
+import eu.europeana.entitymanagement.definitions.model.Agent;
+import eu.europeana.entitymanagement.definitions.model.Aggregation;
+import eu.europeana.entitymanagement.definitions.model.Concept;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.definitions.model.Place;
+import eu.europeana.entitymanagement.definitions.model.TimeSpan;
+import eu.europeana.entitymanagement.solr.model.SolrAgent;
+import eu.europeana.entitymanagement.solr.model.SolrConcept;
+import eu.europeana.entitymanagement.solr.model.SolrEntity;
+import eu.europeana.entitymanagement.solr.model.SolrOrganization;
+import eu.europeana.entitymanagement.solr.model.SolrPlace;
+import eu.europeana.entitymanagement.solr.model.SolrTimeSpan;
+import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 /**
  * This class implements supporting methods for Solr*Impl classes e.g. normalization of the content
@@ -96,24 +112,57 @@ public class SolrUtils {
         String.format(
             "Unrecognized entity type while determining Solr entity class: %s ", solrType));
   }
+  
+  public static SolrEntity<? extends Entity> createSolrEntity(EntityRecord record) {
+      final Entity entity = record.getEntity();
+      SolrEntity<? extends Entity> solrEntity = null;
+      if (entity instanceof Agent) {
+          solrEntity =  new SolrAgent((Agent) entity);
+      } else if (entity instanceof Concept) {
+          solrEntity =  new SolrConcept((Concept) entity);
+      } else if (entity instanceof Organization) {
+          solrEntity =  new SolrOrganization((Organization) entity);
+      } else if (entity instanceof Place) {
+          solrEntity =  new SolrPlace((Place) entity);
+      } else if (entity instanceof TimeSpan) {
+          solrEntity =  new SolrTimeSpan((TimeSpan) entity);
+      }
 
-  public static SolrEntity<? extends Entity> createSolrEntity(Entity entity) {
-    if (entity instanceof Agent) {
-      return new SolrAgent((Agent) entity);
-    } else if (entity instanceof Concept) {
-      return new SolrConcept((Concept) entity);
-    } else if (entity instanceof Organization) {
-      return new SolrOrganization((Organization) entity);
-    } else if (entity instanceof Place) {
-      return new SolrPlace((Place) entity);
-    } else if (entity instanceof TimeSpan) {
-      return new SolrTimeSpan((TimeSpan) entity);
-    }
-
-    // All possible types have been checked
-    throw new IllegalArgumentException(
-        String.format(
-            "Unrecognized entity type while creating SolrEntity: %s ",
-            entity.getClass().getName()));
-  }
+      // All possible types have been checked
+      if(solrEntity == null) {
+      throw new IllegalArgumentException(
+          String.format(
+              "Unrecognized entity type while creating SolrEntity: %s ",
+              entity.getClass().getName()));
+      }
+    
+    setMetricsAndFilters(solrEntity, record);
+    
+    return solrEntity;
 }
+
+    private static void setMetricsAndFilters(SolrEntity<? extends Entity> solrEntity, EntityRecord record) {
+        if (record.getEuropeanaProxy() != null) {
+            Aggregation aggregation = record.getEuropeanaProxy().getProxyIn();
+            if (aggregation != null) {
+                solrEntity.setDocCount(aggregation.getRecordCount());
+                //TODO: change data types when solr schema will be updated
+                solrEntity.setPageRank((float) aggregation.getPageRank());
+                solrEntity.setDerivedScore((float) aggregation.getScore());
+                //TODO: change data type to String when solr schema will be updated
+                solrEntity.setRights(List.of(aggregation.getRights()));
+            }
+        }
+    
+        if (solrEntity.getDocCount() > 0) {
+            // set type & in_europeana filter
+            solrEntity.setSuggestFilters(
+                    Arrays.asList(new String[] { solrEntity.getType(), EntitySolrFields.SUGGEST_FILTER_EUROPEANA }));
+        } else {
+            // set type only
+            solrEntity.setSuggestFilters(Arrays.asList(new String[] { solrEntity.getType() }));
+        }
+    }
+}
+    
+
