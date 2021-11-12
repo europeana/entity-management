@@ -122,6 +122,6 @@ public class SolrConcept extends SolrEntity<Concept> {
 
   @Override
   protected void setSameReferenceLinks(ArrayList<String> uris) {
-    this.exactMatch = exactMatch;
+    this.exactMatch = uris;
   }
 }
