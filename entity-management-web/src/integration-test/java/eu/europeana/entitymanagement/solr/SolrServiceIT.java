@@ -78,6 +78,14 @@ public class SolrServiceIT extends AbstractIntegrationTest {
   EntityRecord buildAgentRecord()
       throws JsonProcessingException, JsonMappingException, IOException {
     Agent agent = objectMapper.readValue(loadFile(AGENT_JSON), Agent.class);
+    // metrics are set in isAggregatedBy
+    Aggregation isAggregatedBy = new Aggregation();
+    isAggregatedBy.setPageRank(304d);
+    isAggregatedBy.setRecordCount(705);
+    isAggregatedBy.setScore(970000);
+
+    agent.setIsAggregatedBy(isAggregatedBy);
+
     EntityRecord record = new EntityRecord();
     record.setEntity(agent);
     record.setEntityId(agent.getEntityId());
@@ -85,9 +93,7 @@ public class SolrServiceIT extends AbstractIntegrationTest {
     europeanaProxy.setProxyId(EntityRecordUtils.getEuropeanaProxyId(record.getEntityId()));
     europeanaProxy.setEntity(agent);
     Aggregation proxyIn = new Aggregation();
-    proxyIn.setPageRank(304d);
-    proxyIn.setRecordCount(705);
-    proxyIn.setScore(970000);
+    // rights are set on  EuropeanaProxy proxyIn
     proxyIn.setRights(RIGHTS_PD);
     europeanaProxy.setProxyIn(proxyIn);
     record.addProxy(europeanaProxy);
@@ -198,9 +204,7 @@ public class SolrServiceIT extends AbstractIntegrationTest {
     assertThat(results, hasSize(1));
   }
 
-  /**
-   * Helper method to retrieve SolrEntities via search query
-   */
+  /** Helper method to retrieve SolrEntities via search query */
   private List<SolrEntity<?>> getSolrEntities(String searchQuery) throws Exception {
     List<SolrEntity<?>> solrEntities = new ArrayList<>();
     SolrSearchCursorIterator iterator = emSolrService.getSearchIterator(searchQuery);
