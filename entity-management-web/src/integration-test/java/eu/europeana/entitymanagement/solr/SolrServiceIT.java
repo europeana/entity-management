@@ -73,7 +73,7 @@ public class SolrServiceIT extends AbstractIntegrationTest {
     public void storeAgentInSolr() throws Exception {
         EntityRecord record = buildAgentRecord();
         emSolrService.storeEntity(SolrUtils.createSolrEntity(record));
-        SolrAgent storedAgent = (SolrAgent)emSolrService.searchById(record.getEntity().getEntityId());
+        SolrAgent storedAgent = emSolrService.searchById(SolrAgent.class, record.getEntity().getEntityId());
         Assertions.assertNotNull(storedAgent);
         Assertions.assertEquals(record.getEntity().getEntityId(), storedAgent.getEntityId());
     }
@@ -100,8 +100,9 @@ public class SolrServiceIT extends AbstractIntegrationTest {
     public void searchAgentInEuropeana() throws Exception {
         EntityRecord record = buildAgentRecord();
         emSolrService.storeEntity(SolrUtils.createSolrEntity(record));
-        SolrQuery query = new SolrQuery(SUGGEST_FILTERS + ":" + SUGGEST_FILTER_EUROPEANA + " AND " + SUGGEST_FILTERS + ":"+record.getEntity().getType());
-        List<SolrEntity<? extends Entity>> agents = emSolrService.search(query);
+        String searchQuery = SUGGEST_FILTERS + ":" + SUGGEST_FILTER_EUROPEANA + " AND " + SUGGEST_FILTERS + ":"+record.getEntity().getType();
+        
+        List<SolrEntity<?>> agents = getSolrEntities(searchQuery);
         Assertions.assertNotNull(agents);
         Assertions.assertNotNull(agents.get(0));
         Assertions.assertEquals(record.getEntity().getEntityId(), agents.get(0).getEntityId());
@@ -111,8 +112,8 @@ public class SolrServiceIT extends AbstractIntegrationTest {
     public void searchAgentWithRights() throws Exception {
         EntityRecord record = buildAgentRecord();
         emSolrService.storeEntity(SolrUtils.createSolrEntity(record));
-        SolrQuery query = new SolrQuery(TYPE + ":" + record.getEntity().getType() + " AND " + RIGHTS + ":\"" + RIGHTS_PD + "\"" );
-        List<SolrEntity<? extends Entity>> agents = emSolrService.search(query);
+        String searchQuery = TYPE + ":" + record.getEntity().getType() + " AND " + RIGHTS + ":\"" + RIGHTS_PD + "\"";
+        List<SolrEntity<?>> agents = getSolrEntities(searchQuery);
         Assertions.assertNotNull(agents);
         Assertions.assertNotNull(agents.get(0));
         Assertions.assertEquals(record.getEntity().getEntityId(), agents.get(0).getEntityId());
@@ -124,7 +125,7 @@ public class SolrServiceIT extends AbstractIntegrationTest {
         EntityRecord record = new EntityRecord();
         record.setEntity(organization);
         emSolrService.storeEntity(SolrUtils.createSolrEntity(record));
-        SolrOrganization storedOrganization = (SolrOrganization) emSolrService.searchById(organization.getEntityId());
+        SolrOrganization storedOrganization = emSolrService.searchById(SolrOrganization.class, organization.getEntityId());
         Assertions.assertNotNull(storedOrganization);
         Assertions.assertEquals(organization.getEntityId(), storedOrganization.getEntityId());
     }
@@ -136,7 +137,7 @@ public class SolrServiceIT extends AbstractIntegrationTest {
         EntityRecord record = new EntityRecord();
         record.setEntity(timespan);
         emSolrService.storeEntity(SolrUtils.createSolrEntity(record));
-        SolrTimeSpan storedTimespan = (SolrTimeSpan) emSolrService.searchById(timespan.getEntityId());
+        SolrTimeSpan storedTimespan = emSolrService.searchById(SolrTimeSpan.class, timespan.getEntityId());
         Assertions.assertNotNull(storedTimespan);
         Assertions.assertEquals(timespan.getEntityId(), storedTimespan.getEntityId());
     }
@@ -148,7 +149,7 @@ public class SolrServiceIT extends AbstractIntegrationTest {
         EntityRecord record = new EntityRecord();
         record.setEntity(concept);
         emSolrService.storeEntity(SolrUtils.createSolrEntity(record));
-        SolrConcept storedConcept = (SolrConcept) emSolrService.searchById(concept.getEntityId());
+        SolrConcept storedConcept = emSolrService.searchById(SolrConcept.class, concept.getEntityId());
         Assertions.assertNotNull(storedConcept);
         Assertions.assertEquals(concept.getEntityId(), storedConcept.getEntityId());
     }
@@ -159,7 +160,7 @@ public class SolrServiceIT extends AbstractIntegrationTest {
         EntityRecord record = new EntityRecord();
         record.setEntity(place);
         emSolrService.storeEntity(SolrUtils.createSolrEntity(record));
-        SolrPlace storedPlace = (SolrPlace) emSolrService.searchById(place.getEntityId());
+        SolrPlace storedPlace = emSolrService.searchById(SolrPlace.class, place.getEntityId());
         Assertions.assertNotNull(storedPlace);
         Assertions.assertEquals(place.getEntityId(), storedPlace.getEntityId());
     }

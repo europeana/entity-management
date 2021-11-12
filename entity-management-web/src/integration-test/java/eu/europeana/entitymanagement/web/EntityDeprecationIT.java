@@ -27,7 +27,7 @@ public class EntityDeprecationIT extends BaseWebControllerTest {
 
     EntityRecord entityRecord = createEntity(europeanaMetadata, metisResponse, CONCEPT_BATHTUB_URI);
     // confirm that Solr document is saved
-    SolrConcept solrConcept = (SolrConcept) solrService.searchById(entityRecord.getEntityId());
+    SolrConcept solrConcept = solrService.searchById(SolrConcept.class, entityRecord.getEntityId());
     Assertions.assertNotNull(solrConcept);
 
     String requestPath = getEntityRequestPath(entityRecord.getEntityId());
