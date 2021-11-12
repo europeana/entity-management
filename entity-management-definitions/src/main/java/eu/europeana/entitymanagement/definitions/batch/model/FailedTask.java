@@ -1,17 +1,29 @@
 package eu.europeana.entitymanagement.definitions.batch.model;
 
+import static eu.europeana.entitymanagement.vocabulary.FailedTaskJsonFields.FIRST_TIME;
+import static eu.europeana.entitymanagement.vocabulary.FailedTaskJsonFields.LAST_TIME;
+import static eu.europeana.entitymanagement.vocabulary.FailedTaskJsonFields.MESSAGE;
+import static eu.europeana.entitymanagement.vocabulary.FailedTaskJsonFields.OCCURENCES;
+import static eu.europeana.entitymanagement.vocabulary.FailedTaskJsonFields.STACKTRACE;
+import static eu.europeana.entitymanagement.vocabulary.FailedTaskJsonFields.TYPE;
+
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
 import dev.morphia.annotations.Indexed;
+import eu.europeana.entitymanagement.vocabulary.FailedTaskJsonFields;
 import java.time.Instant;
 import org.bson.types.ObjectId;
 
 @Entity("FailedTasks")
+@JsonPropertyOrder({TYPE, MESSAGE, OCCURENCES, FIRST_TIME, LAST_TIME, STACKTRACE})
 public class FailedTask {
 
-  @Id private ObjectId dbId;
+  @JsonIgnore @Id private ObjectId dbId;
 
-  @Indexed private String entityId;
+  @JsonIgnore @Indexed private String entityId;
 
   private String errorMessage;
   private String stackTrace;
@@ -27,6 +39,7 @@ public class FailedTask {
    * During upserts, we use the "modified" value if the record doesn't already exist.
    */
   private Instant created;
+
   private Instant modified;
 
   private FailedTask() {
@@ -50,26 +63,32 @@ public class FailedTask {
     return entityId;
   }
 
+  @JsonGetter(FailedTaskJsonFields.FIRST_TIME)
   public Instant getCreated() {
     return created;
   }
 
+  @JsonGetter(FailedTaskJsonFields.MESSAGE)
   public String getErrorMessage() {
     return errorMessage;
   }
 
+  @JsonGetter(FailedTaskJsonFields.STACKTRACE)
   public String getStackTrace() {
     return stackTrace;
   }
 
+  @JsonGetter(FailedTaskJsonFields.LAST_TIME)
   public Instant getModified() {
     return modified;
   }
 
+  @JsonGetter(FailedTaskJsonFields.OCCURENCES)
   public int getFailureCount() {
     return failureCount;
   }
 
+  @JsonGetter(FailedTaskJsonFields.TYPE)
   public ScheduledTaskType getUpdateType() {
     return updateType;
   }

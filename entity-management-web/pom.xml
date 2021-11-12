@@ -210,6 +210,12 @@
 			<version>4.1.69.Final</version>
 			<classifier>osx-aarch_64</classifier>
 		</dependency>
+		
+		<!--	Java 8 Date/time	-->
+		<dependency>
+		    <groupId>com.fasterxml.jackson.datatype</groupId>
+		    <artifactId>jackson-datatype-jsr310</artifactId>
+		</dependency>
 
 	</dependencies>
 	<build>

@@ -22,6 +22,7 @@ import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import io.swagger.annotations.ApiOperation;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.LogManager;
@@ -33,6 +34,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -147,12 +149,47 @@ public class EntityAdminController extends BaseRest {
         savedEntityRecord.getEntityId());
     return generateResponseEntity(
         request,
-        EntityProfile.internal.toString(),
+        List.of(EntityProfile.internal),
         FormatTypes.jsonld,
         null,
         null,
         savedEntityRecord,
         HttpStatus.ACCEPTED);
+  }
+
+  @ApiOperation(
+      value = "Retrieve a list of entities for which an update failed.",
+      nickname = "getEntitiesUpdateFailedJsonLd",
+      response = java.lang.Void.class)
+  @GetMapping(
+      value = {"/management/failed"},
+      produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
+  public ResponseEntity<String> getEntitiesUpdateFailedJsonLd(
+      @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
+      @RequestParam(
+              value = WebEntityConstants.QUERY_PARAM_PAGE,
+              required = false,
+              defaultValue = "0")
+          int page,
+      @RequestParam(
+              value = WebEntityConstants.QUERY_PARAM_PAGE_SIZE,
+              required = false,
+              defaultValue = "10")
+          int pageSize,
+      HttpServletRequest request)
+      throws HttpException, EuropeanaApiException {
+
+    if (emConfig.isAuthEnabled()) {
+      verifyReadAccess(request);
+    }
+
+    if (pageSize > 1000) {
+      pageSize = 1000;
+    }
+
+    List<String> entityIds = failedTaskService.getEntityIdsWithFailures(page * pageSize, pageSize);
+
+    return generateResponseFailedUpdates(request, entityIds, wskey);
   }
 
   /**

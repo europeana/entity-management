@@ -1,6 +1,6 @@
 package eu.europeana.entitymanagement.web;
 
-import static eu.europeana.api.commons.web.http.HttpHeaders.CONTENT_TYPE_JSONLD_UTF8;
+import static eu.europeana.api.commons.web.http.HttpHeaders.*;
 import static eu.europeana.api.commons.web.http.HttpHeaders.VALUE_LDP_RESOURCE;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.hasItems;
@@ -74,56 +74,51 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
     return IOUtils.toString(is, StandardCharsets.UTF_8).replace("\n", "");
   }
 
-  /** Gets the "{type}/{identifier}" from an EntityId string */
-  protected String getEntityRequestPath(String entityId) {
-    // entity id is "http://data.europeana.eu/{type}/{identifier}"
-    String[] parts = entityId.split("/");
-
-    // namespace is always base
-    return parts[parts.length - 2] + "/" + parts[parts.length - 1];
-  }
-
   /** Checks common response headers. Allow header checked within each test method. */
-  protected void checkCommonResponseHeaders(ResultActions results) throws Exception {
+  protected void checkCommonResponseHeaders(ResultActions results, boolean hasPathExtension)
+      throws Exception {
+    checkCommonResponseHeaders(results, hasPathExtension, false);
+  }
+
+  protected void checkCommonResponseHeaders(
+      ResultActions results, boolean hasPathExtension, boolean hasXmlResponse) throws Exception {
     results
-        .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(CONTENT_TYPE_JSONLD_UTF8)))
         .andExpect(header().exists(HttpHeaders.ETAG))
-        .andExpect(header().string(HttpHeaders.LINK, is(VALUE_LDP_RESOURCE)))
-        .andExpect(
-            header().stringValues(HttpHeaders.VARY, hasItems(containsString(HttpHeaders.ACCEPT))));
+        .andExpect(header().string(HttpHeaders.LINK, is(VALUE_LDP_RESOURCE)));
+    if (!hasPathExtension) {
+      results.andExpect(
+          header().stringValues(HttpHeaders.VARY, hasItems(containsString(HttpHeaders.ACCEPT))));
+    }
+    if (hasXmlResponse) {
+      results.andExpect(
+          header().string(HttpHeaders.CONTENT_TYPE, is(CONTENT_TYPE_APPLICATION_RDF_XML)));
+    } else {
+      results.andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(CONTENT_TYPE_JSONLD_UTF8)));
+    }
   }
 
-  protected void checkCommonResponseHeadersForSchemaOrg(ResultActions results) throws Exception {
-    results
-        .andExpect(header().string(HttpHeaders.CONTENT_TYPE, is(CONTENT_TYPE_JSONLD_UTF8)))
-        .andExpect(header().exists(HttpHeaders.ETAG));
-  }
+  protected void checkCorsHeaders(ResultActions results, boolean hasPathExtension)
+      throws Exception {
+    results.andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, is("*")));
 
-  protected void checkCorsHeadersForSchemaOrg(ResultActions results) throws Exception {
-    results
-        .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, is("*")))
-        .andExpect(
-            header()
-                .stringValues(
-                    HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,
-                    hasItems(
-                        containsString(HttpHeaders.ALLOW),
-                        containsString(HttpHeaders.ETAG),
-                        containsString(HttpHeaders.VARY))));
-  }
-
-  protected void checkCorsHeaders(ResultActions results) throws Exception {
-    results
-        .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, is("*")))
-        .andExpect(
-            header()
-                .stringValues(
-                    HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,
-                    hasItems(
-                        containsString(HttpHeaders.ALLOW),
-                        containsString(HttpHeaders.ETAG),
-                        containsString(HttpHeaders.LINK),
-                        containsString(HttpHeaders.VARY))));
+    if (hasPathExtension) {
+      results.andExpect(
+          header()
+              .stringValues(
+                  HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,
+                  HttpHeaders.ALLOW,
+                  HttpHeaders.LINK,
+                  HttpHeaders.ETAG)); // NO Vary
+    } else {
+      results.andExpect(
+          header()
+              .stringValues(
+                  HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,
+                  HttpHeaders.ALLOW,
+                  HttpHeaders.LINK,
+                  HttpHeaders.VARY,
+                  HttpHeaders.ETAG));
+    }
   }
 
   protected void checkAllowHeaderForPOST(ResultActions results) throws Exception {

@@ -16,6 +16,7 @@ public class BaseMvcTestUtils {
 
   public static final String BASE_SERVICE_URL = "/entity/";
   public static final String BASE_ADMIN_URL = "/management";
+  public static final String BASE_FAILED_UPDATES = "management/failed";
 
   public static final String BATHTUB_DEREF = "/content/deref_bathtub.xml";
 
@@ -56,6 +57,8 @@ public class BaseMvcTestUtils {
   public static final String PLACE_REGISTER_PARIS_JSON = "/content/place_register_paris.json";
 
   public static final String CONCEPT_UPDATE_BATHTUB_JSON = "/content/concept_update_bathtub.json";
+  public static final String CONCEPT_UPDATE_FAILED_BATHTUB_JSON =
+      "/content/concept_update_failed_bathtub.json";
   public static final String TIMESPAN_UPDATE_JSON = "/content/timespan_update.json";
 
   public static final String CONCEPT_VALIDATE_FIELDS_JSON = "/content/concept-validate-fields.json";

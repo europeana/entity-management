@@ -40,6 +40,7 @@ public interface WebEntityFields {
   public static final String PAGE_RANK = "pageRank";
   public static final String RECORD_COUNT = "recordCount";
   public static final String SCORE = "score";
+  public static final String FAILURES = "failures";
 
   // concept fields
   public static final String NOTATION = "notation";
