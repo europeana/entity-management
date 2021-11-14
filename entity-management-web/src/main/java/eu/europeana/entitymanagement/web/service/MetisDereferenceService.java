@@ -3,7 +3,6 @@ package eu.europeana.entitymanagement.web.service;
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.METIS_DEREF_PATH;
 import static eu.europeana.entitymanagement.web.MetisDereferenceUtils.parseMetisResponse;
 
-import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.model.Entity;
@@ -107,7 +106,8 @@ public class MetisDereferenceService implements InitializingBean, Dereferencer {
               // return 500 for everything else
               .onStatus(
                   HttpStatus::isError,
-                  response -> response.bodyToMono(String.class).map(DatasourceUpstreamServerError::new))
+                  response ->
+                      response.bodyToMono(String.class).map(DatasourceUpstreamServerError::new))
               .bodyToMono(String.class)
               .block();
     }
