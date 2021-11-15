@@ -146,14 +146,13 @@ public class SolrUtils {
     Aggregation aggregation = record.getEntity().getIsAggregatedBy();
 
     if (aggregation != null) {
-      solrEntity.setDocCount(
-          aggregation.getRecordCount());
+      solrEntity.setDocCount(aggregation.getRecordCount());
       // TODO: change data types when solr schema will be updated
       if (aggregation.getPageRank() != null) {
-          solrEntity.setPageRank(aggregation.getPageRank().floatValue());
+        solrEntity.setPageRank(aggregation.getPageRank().floatValue());
       }
       if (aggregation.getScore() != null) {
-          solrEntity.setDerivedScore(aggregation.getScore().floatValue());
+        solrEntity.setDerivedScore(aggregation.getScore().floatValue());
       }
     }
 
