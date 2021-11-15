@@ -1,18 +1,16 @@
 package eu.europeana.entitymanagement.solr.model;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.collections.MapUtils;
-import org.apache.solr.client.solrj.beans.Field;
-
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.solr.SolrUtils;
 import eu.europeana.entitymanagement.vocabulary.AgentSolrFields;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.apache.commons.collections.MapUtils;
+import org.apache.solr.client.solrj.beans.Field;
 
 public abstract class SolrEntity<T extends Entity> {
 
@@ -56,23 +54,22 @@ public abstract class SolrEntity<T extends Entity> {
 
   @Field(EntitySolrFields.IS_SHOWN_BY_ALL)
   private Map<String, String> isShownBy;
-  
+
   @Field(EntitySolrFields.SUGGEST_FILTERS)
   private List<String> suggestFilters;
-  
+
   @Field(EntitySolrFields.RIGHTS)
   private List<String> rights;
-  
+
   @Field(EntitySolrFields.EUROPEANA_DOC_COUNT)
-  private int docCount;
-  
+  private Integer docCount;
+
   @Field(EntitySolrFields.PAGERANK)
-  private float pageRank;
-  
+  private Float pageRank;
+
   @Field(EntitySolrFields.DERIVED_SCORE)
-  private float derivedScore;
-  
-  
+  private Float derivedScore;
+
   public SolrEntity(T entity) {
     this.type = entity.getType();
     this.entityId = entity.getEntityId();
@@ -92,7 +89,7 @@ public abstract class SolrEntity<T extends Entity> {
     if (entity.getHasPart() != null) this.hasPart = new ArrayList<>(entity.getHasPart());
     if (entity.getIsPartOfArray() != null)
       this.isPartOf = new ArrayList<>(entity.getIsPartOfArray());
-    
+
     this.entity = entity;
   }
 
@@ -206,45 +203,44 @@ public abstract class SolrEntity<T extends Entity> {
   }
 
   public List<String> getSuggestFilters() {
-      return suggestFilters;
+    return suggestFilters;
   }
 
   public void setSuggestFilters(List<String> suggestFilters) {
-      this.suggestFilters = suggestFilters;
+    this.suggestFilters = suggestFilters;
   }
 
   public List<String> getRights() {
-      return rights;
+    return rights;
   }
 
   public void setRights(List<String> rights) {
-      this.rights = rights;
+    this.rights = rights;
   }
 
-  public int getDocCount() {
-      return docCount;
+  public Integer getDocCount() {
+    return docCount;
   }
 
-  public void setDocCount(int docCount) {
-      this.docCount = docCount;
+  public void setDocCount(Integer docCount) {
+    this.docCount = docCount;
   }
 
   public Float getPageRank() {
-      return pageRank;
+    return pageRank;
   }
 
-  public void setPageRank(float pageRank) {
-      this.pageRank = pageRank;
+  public void setPageRank(Float pageRank) {
+    this.pageRank = pageRank;
   }
 
-  public float getDerivedScore() {
-      return derivedScore;
+  public Float getDerivedScore() {
+    return derivedScore;
   }
 
-  public void setDerivedScore(float derivedScore) {
-      this.derivedScore = derivedScore;
+  public void setDerivedScore(Float derivedScore) {
+    this.derivedScore = derivedScore;
   }
 
   protected abstract void setSameReferenceLinks(ArrayList<String> uris);
-
 }
