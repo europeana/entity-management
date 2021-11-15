@@ -19,6 +19,8 @@ import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 
 public class ZohoOrganizationConverter {
 
+  private static final String POSITION_SEPARATOR = "_";
+   
   private ZohoOrganizationConverter() {
     // private constructor to prevent instantiation
   }
@@ -119,7 +121,7 @@ public class ZohoOrganizationConverter {
         addLabel(record, allLabels, ZohoConstants.LANG_ORGANIZATION_NAME_FIELD, ZohoConstants.ACCOUNT_NAME_FIELD);    
         //read alternative zoho labels
         for (int i = 1; i <= ZohoConstants.LANGUAGE_CODE_LENGTH; i++) {
-            addLabel(record, allLabels, ZohoConstants.LANG_ALTERNATIVE_FIELD + "_" + i, ZohoConstants.ALTERNATIVE_FIELD + "_" + i);    
+            addLabel(record, allLabels, ZohoConstants.LANG_ALTERNATIVE_FIELD + POSITION_SEPARATOR + i, ZohoConstants.ALTERNATIVE_FIELD + POSITION_SEPARATOR + i);    
         }
         return allLabels;
   }

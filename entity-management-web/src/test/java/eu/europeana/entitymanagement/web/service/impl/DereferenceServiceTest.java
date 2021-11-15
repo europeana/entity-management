@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement.web.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.zoho.crm.api.record.Record;
@@ -62,7 +63,7 @@ public class DereferenceServiceTest extends AbstractIntegrationTest {
     assertEquals(8, entity.getNote().size());
   }
 
-  // @Test
+  @Test
   public void zohoOrganizationDereferenceTest() throws Exception {
     String organizationId = "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000002112001";
     Dereferencer dereferencer =
@@ -72,8 +73,8 @@ public class DereferenceServiceTest extends AbstractIntegrationTest {
     Assertions.assertTrue(orgOptional.isPresent());
 
     Organization org = (Organization) orgOptional.get();
-    assertEquals(1, org.getPrefLabel().size());
-    assertEquals(1, org.getAltLabel().size());
+    assertEquals(2, org.getPrefLabel().size());
+    assertNull(org.getAltLabel());
     assertEquals(1, org.getAcronym().size());
     assertEquals(1, org.getEuropeanaRole().size());
     assertEquals(1, org.getGeographicLevel().size());
@@ -109,15 +110,15 @@ public class DereferenceServiceTest extends AbstractIntegrationTest {
     choice = new Choice<String>("EN");
     record.addKeyValue(ZohoConstants.LANG_ALTERNATIVE_FIELD + "_3", choice);
 
-    record.addKeyValue(ZohoConstants.ALTERNATIVE_FIELD + "_4", "Austrian Institute of Technology");
-    choice = new Choice<String>("EN");
-    record.addKeyValue(ZohoConstants.LANG_ALTERNATIVE_FIELD + "_4", choice);
+//    record.addKeyValue(ZohoConstants.ALTERNATIVE_FIELD + "_4", "Austrian Institute of Technology");
+//    choice = new Choice<String>("EN");
+//    record.addKeyValue(ZohoConstants.LANG_ALTERNATIVE_FIELD + "_4", choice);
 
     Organization org = ZohoOrganizationConverter.convertToOrganizationEntity(record);
 
-    Assertions.assertTrue(org.getPrefLabel().size() == 2);
-    Assertions.assertTrue(org.getAltLabel().size() == 1);
-    Assertions.assertTrue(org.getAltLabel().get("en").size() == 2);
+    Assertions.assertEquals(2, org.getPrefLabel().size());
+    Assertions.assertEquals(1, org.getAltLabel().size());
+    Assertions.assertEquals(2, org.getAltLabel().get("en").size());
   }
 
   // @Test
