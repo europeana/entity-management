@@ -62,13 +62,13 @@ public abstract class SolrEntity<T extends Entity> {
   private List<String> rights;
 
   @Field(EntitySolrFields.EUROPEANA_DOC_COUNT)
-  private int docCount;
+  private Integer docCount;
 
   @Field(EntitySolrFields.PAGERANK)
-  private float pageRank;
+  private Float pageRank;
 
   @Field(EntitySolrFields.DERIVED_SCORE)
-  private float derivedScore;
+  private Float derivedScore;
 
   public SolrEntity(T entity) {
     this.type = entity.getType();
@@ -218,11 +218,11 @@ public abstract class SolrEntity<T extends Entity> {
     this.rights = rights;
   }
 
-  public int getDocCount() {
+  public Integer getDocCount() {
     return docCount;
   }
 
-  public void setDocCount(int docCount) {
+  public void setDocCount(Integer docCount) {
     this.docCount = docCount;
   }
 
@@ -230,15 +230,15 @@ public abstract class SolrEntity<T extends Entity> {
     return pageRank;
   }
 
-  public void setPageRank(float pageRank) {
+  public void setPageRank(Float pageRank) {
     this.pageRank = pageRank;
   }
 
-  public float getDerivedScore() {
+  public Float getDerivedScore() {
     return derivedScore;
   }
 
-  public void setDerivedScore(float derivedScore) {
+  public void setDerivedScore(Float derivedScore) {
     this.derivedScore = derivedScore;
   }
 

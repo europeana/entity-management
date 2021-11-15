@@ -4,6 +4,7 @@ import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Concept;
 import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.definitions.model.Place;
@@ -141,26 +142,33 @@ public class SolrUtils {
 
   private static void setMetricsAndFilters(
       SolrEntity<? extends Entity> solrEntity, EntityRecord record) {
-    if (record.getEuropeanaProxy() != null) {
-      Aggregation aggregation = record.getEuropeanaProxy().getProxyIn();
-      if (aggregation != null) {
-        solrEntity.setDocCount(aggregation.getRecordCount());
-        // TODO: change data types when solr schema will be updated
-        solrEntity.setPageRank((float) aggregation.getPageRank());
-        solrEntity.setDerivedScore((float) aggregation.getScore());
-        // TODO: change data type to String when solr schema will be updated
-        solrEntity.setRights(List.of(aggregation.getRights()));
+    // metrics only set in entity isAggregatedBy
+    Aggregation aggregation = record.getEntity().getIsAggregatedBy();
+
+    if (aggregation != null) {
+      solrEntity.setDocCount(aggregation.getRecordCount());
+      // TODO: change data types when solr schema will be updated
+      if (aggregation.getPageRank() != null) {
+        solrEntity.setPageRank(aggregation.getPageRank().floatValue());
+      }
+      if (aggregation.getScore() != null) {
+        solrEntity.setDerivedScore(aggregation.getScore().floatValue());
       }
     }
 
-    if (solrEntity.getDocCount() > 0) {
+    EntityProxy europeanaProxy = record.getEuropeanaProxy();
+    if (europeanaProxy != null) {
+      // rights only set in Europeana proxy
+      solrEntity.setRights(List.of(europeanaProxy.getProxyIn().getRights()));
+    }
+
+    if (solrEntity.getDocCount() != null && solrEntity.getDocCount() > 0) {
       // set type & in_europeana filter
       solrEntity.setSuggestFilters(
-          Arrays.asList(
-              new String[] {solrEntity.getType(), EntitySolrFields.SUGGEST_FILTER_EUROPEANA}));
+          Arrays.asList(solrEntity.getType(), EntitySolrFields.SUGGEST_FILTER_EUROPEANA));
     } else {
       // set type only
-      solrEntity.setSuggestFilters(Arrays.asList(new String[] {solrEntity.getType()}));
+      solrEntity.setSuggestFilters(List.of(solrEntity.getType()));
     }
   }
 }
