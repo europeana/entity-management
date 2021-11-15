@@ -147,12 +147,14 @@ public class SolrUtils {
 
     if (aggregation != null) {
       solrEntity.setDocCount(
-          aggregation.getRecordCount() != null ? aggregation.getRecordCount() : 0);
+          aggregation.getRecordCount());
       // TODO: change data types when solr schema will be updated
-      solrEntity.setPageRank(
-          aggregation.getPageRank() != null ? aggregation.getPageRank().floatValue() : 0f);
-      solrEntity.setDerivedScore(
-          aggregation.getScore() != null ? aggregation.getScore().floatValue() : 0f);
+      if (aggregation.getPageRank() != null) {
+          solrEntity.setPageRank(aggregation.getPageRank().floatValue());
+      }
+      if (aggregation.getScore() != null) {
+          solrEntity.setDerivedScore(aggregation.getScore().floatValue());
+      }
     }
 
     EntityProxy europeanaProxy = record.getEuropeanaProxy();
