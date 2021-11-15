@@ -65,7 +65,7 @@ public abstract class SolrEntity<T extends Entity> {
   private Integer docCount;
 
   @Field(EntitySolrFields.PAGERANK)
-  private float pageRank;
+  private Float pageRank;
 
   @Field(EntitySolrFields.DERIVED_SCORE)
   private Float derivedScore;
