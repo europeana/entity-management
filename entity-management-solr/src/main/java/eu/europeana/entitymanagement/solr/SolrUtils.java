@@ -163,7 +163,7 @@ public class SolrUtils {
       solrEntity.setRights(List.of(europeanaProxy.getProxyIn().getRights()));
     }
 
-    if (solrEntity.getDocCount() > 0) {
+    if (solrEntity.getDocCount() != null && solrEntity.getDocCount() > 0) {
       // set type & in_europeana filter
       solrEntity.setSuggestFilters(
           Arrays.asList(solrEntity.getType(), EntitySolrFields.SUGGEST_FILTER_EUROPEANA));
