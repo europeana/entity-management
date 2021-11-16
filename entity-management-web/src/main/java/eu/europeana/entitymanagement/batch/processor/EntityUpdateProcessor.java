@@ -1,6 +1,8 @@
 package eu.europeana.entitymanagement.batch.processor;
 
 import eu.europeana.api.commons.error.EuropeanaApiException;
+import eu.europeana.entitymanagement.common.config.DataSource;
+import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -8,8 +10,10 @@ import eu.europeana.entitymanagement.exception.ingestion.EntityValidationExcepti
 import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatorGroup;
 import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorGroup;
+import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.validation.ConstraintViolation;
@@ -26,14 +30,16 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
   private final ValidatorFactory emValidatorFactory;
 
   private final EntityFieldsCleaner emEntityFieldCleaner;
+  private final DataSources datasources;
 
   public EntityUpdateProcessor(
       EntityRecordService entityRecordService,
       ValidatorFactory emValidatorFactory,
-      EntityFieldsCleaner emEntityFieldCleaner) {
+      EntityFieldsCleaner emEntityFieldCleaner, DataSources datasources) {
     this.entityRecordService = entityRecordService;
     this.emValidatorFactory = emValidatorFactory;
     this.emEntityFieldCleaner = emEntityFieldCleaner;
+    this.datasources = datasources;
   }
 
   @Override
@@ -42,8 +48,16 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
     List<EntityProxy> externalProxies = entityRecord.getExternalProxies();
 
     Entity externalProxyEntity = externalProxies.get(0).getEntity();
-    validateMinimalConstraints(externalProxyEntity);
+    String proxyId = externalProxies.get(0).getProxyId();
+    Optional<DataSource> dataSource = datasources.getDatasource(proxyId);
+    boolean isStaticDataSource = dataSource.isPresent() && dataSource.get().isStatic();
 
+    //do not validate static data sources
+    if(!isStaticDataSource) {
+        validateMinimalConstraints(externalProxyEntity);
+    }
+
+    //entities from static datasources should not have multiple proxies 
     if (externalProxies.size() > 1) {
       // cumulatively merge all external proxies
       for (int i = 1; i < externalProxies.size(); i++) {
@@ -57,8 +71,12 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
 
     Entity europeanaProxyEntity = entityRecord.getEuropeanaProxy().getEntity();
 
-    Entity consolidatedEntity =
-        entityRecordService.mergeEntities(europeanaProxyEntity, externalProxyEntity);
+    Entity consolidatedEntity = null;
+    if(isStaticDataSource) {
+        consolidatedEntity = EntityObjectFactory.createConsolidatedEntityObject(europeanaProxyEntity);
+    }else {
+        consolidatedEntity = entityRecordService.mergeEntities(europeanaProxyEntity, externalProxyEntity);
+    }
 
     // add external proxyIds to sameAs / exactMatch
     entityRecordService.addSameReferenceLinks(

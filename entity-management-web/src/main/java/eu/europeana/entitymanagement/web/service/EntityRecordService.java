@@ -1,10 +1,36 @@
 package eu.europeana.entitymanagement.web.service;
 
-import static eu.europeana.entitymanagement.utils.EntityRecordUtils.*;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
+import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getDatasourceAggregationId;
+import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEuropeanaAggregationId;
+import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEuropeanaProxyId;
+import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getIsAggregatedById;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_ID;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_AGGREGATED_BY;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
 import static java.time.Instant.now;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.mongodb.client.result.UpdateResult;
+
 import dev.morphia.query.experimental.filters.Filter;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.batch.utils.BatchUtils;
@@ -13,13 +39,23 @@ import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
-import eu.europeana.entitymanagement.definitions.model.*;
+import eu.europeana.entitymanagement.definitions.model.Address;
+import eu.europeana.entitymanagement.definitions.model.Agent;
+import eu.europeana.entitymanagement.definitions.model.Aggregation;
+import eu.europeana.entitymanagement.definitions.model.Concept;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.EntityProxy;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.model.Place;
+import eu.europeana.entitymanagement.definitions.model.TimeSpan;
+import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
 import eu.europeana.entitymanagement.exception.DatasourceNotKnownException;
 import eu.europeana.entitymanagement.exception.EntityAlreadyExistsException;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
+import eu.europeana.entitymanagement.exception.HttpNotAcceptableRequestException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.utils.EntityObjectFactory;
@@ -30,14 +66,6 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
-import java.lang.reflect.Field;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 @Service(AppConfig.BEAN_ENTITY_RECORD_SERVICE)
 public class EntityRecordService {
@@ -169,12 +197,14 @@ public class EntityRecordService {
    * @param identifier id of entity
    * @return Saved Entity record
    * @throws EntityCreationException if an error occurs
+ * @throws HttpNotAcceptableRequestException 
+ * @throws HttpBadRequestException 
    */
   public EntityRecord createEntityFromMigrationRequest(
       EntityPreview entityCreationRequest, String type, String identifier)
-      throws EntityCreationException, EntityAlreadyExistsException {
+      throws EntityCreationException, EntityAlreadyExistsException, HttpBadRequestException, HttpNotAcceptableRequestException {
     // Fail quick if no datasource is configured
-    Optional<DataSource> externalDatasourceOptional = getDataSource(entityCreationRequest.getId());
+    DataSource externalDatasource = verifyDataSource(entityCreationRequest.getId(), true);
 
     Date timestamp = new Date();
     Entity entity = EntityObjectFactory.createProxyEntityObject(type);
@@ -202,7 +232,6 @@ public class EntityRecordService {
     // create metis Entity
     Entity metisEntity = EntityObjectFactory.createProxyEntityObject(type);
 
-    DataSource externalDatasource = externalDatasourceOptional.get();
     setExternalProxyMetadata(
         metisEntity,
         entityCreationRequest.getId(),
@@ -216,6 +245,25 @@ public class EntityRecordService {
     return entityRecordRepository.save(entityRecord);
   }
 
+  public DataSource verifyDataSource(String creationRequestId, boolean allowStatic)
+          throws HttpBadRequestException, HttpNotAcceptableRequestException {
+      Optional<DataSource> dataSource = datasources.getDatasource(creationRequestId);  
+      // return 400 error if ID does not match a configured datasource
+      if (dataSource.isEmpty()) {
+        throw new HttpBadRequestException(
+            String.format("id %s does not match a configured datasource", creationRequestId));
+      }
+      
+      // return 406 error if datasource is static
+      if (!allowStatic && dataSource.get().isStatic()) {
+          throw new HttpNotAcceptableRequestException(
+              String.format("Entity registration not permitted. id %s matches a static datasource.", creationRequestId));
+      }
+      return dataSource.get();
+  }
+
+  
+  
   /**
    * Creates an {@link EntityRecord} from an {@link EntityPreview}, which is then persisted.
    *
@@ -961,6 +1009,10 @@ public class EntityRecordService {
     datasourceProxy.setProxyId(proxyId);
     datasourceProxy.setProxyFor(entityId);
     datasourceProxy.setProxyIn(datasourceAggr);
+    //set external id
+//    if(metisResponse.getEntityId() == null) {
+//        metisResponse.setEntityId(entityId);
+//    }
     datasourceProxy.setEntity(metisResponse);
 
     entityRecord.addProxy(datasourceProxy);
