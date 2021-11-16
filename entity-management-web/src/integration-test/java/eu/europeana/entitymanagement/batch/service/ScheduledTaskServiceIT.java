@@ -1,8 +1,15 @@
 package eu.europeana.entitymanagement.batch.service;
 
+import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.ENTITY_ID;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_BATHTUB_URI;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_BATHTUB_XML;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_REGISTER_BATHTUB_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import dev.morphia.query.experimental.filters.Filter;
+import dev.morphia.query.experimental.filters.Filters;
 import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import eu.europeana.entitymanagement.batch.repository.FailedTaskRepository;
 import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
@@ -10,6 +17,8 @@ import eu.europeana.entitymanagement.definitions.batch.model.FailedTask.Builder;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,11 +36,15 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
   /** Used for testing deletion based on failureCount */
   @Autowired private FailedTaskRepository failedTaskRepository;
 
+  /** Used for testing EntityRecord retrieval via ScheduledTask */
+  @Autowired private EntityRecordRepository entityRecordRepository;
+
   @BeforeEach
   void setUp() {
     service.dropCollection();
     // ensure a clean FailedTasks collection
     failedTaskRepository.dropCollection();
+    entityRecordRepository.dropCollection();
   }
 
   private static final String entityId1 = "http://data.europeana.eu/agent/1";
@@ -46,6 +59,31 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
 
     List<ScheduledTask> tasks = service.getTasks(entityIds);
     assertEquals(2, tasks.size());
+  }
+
+  @Test
+  void shouldFetchRecordsForTasks() throws Exception {
+    String europeanaMetadata = loadFile(CONCEPT_REGISTER_BATHTUB_JSON);
+    String metisResponse = loadFile(CONCEPT_BATHTUB_XML);
+
+    // create EntityRecord then create a ScheduledTask for it
+    EntityRecord savedEntityRecord =
+        createEntity(europeanaMetadata, metisResponse, CONCEPT_BATHTUB_URI);
+    String entityId = savedEntityRecord.getEntityId();
+    service.scheduleTasksForEntities(List.of(entityId), testUpdateType);
+
+    List<? extends EntityRecord> retrievedRecords =
+        service.getEntityRecordsForTasks(0, 1, new Filter[] {Filters.eq(ENTITY_ID, entityId)});
+
+    assertEquals(1, retrievedRecords.size());
+    EntityRecord retrievedEntityRecord = retrievedRecords.get(0);
+
+    assertEquals(entityId, retrievedEntityRecord.getEntityId());
+
+    // No need doing a deep comparison here. Just ensure that other fields exist besides entityId
+    assertEquals(savedEntityRecord.getProxies().size(), retrievedEntityRecord.getProxies().size());
+    assertEquals(
+        savedEntityRecord.getCreated().getTime(), retrievedEntityRecord.getCreated().getTime());
   }
 
   @Test
