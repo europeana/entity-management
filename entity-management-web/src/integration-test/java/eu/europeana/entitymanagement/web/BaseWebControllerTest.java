@@ -13,6 +13,7 @@ import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -52,7 +53,7 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
   @Autowired protected ScheduledTaskService scheduledTaskService;
 
   @Autowired private EntityUpdateService entityUpdateService;
-
+  
   @Qualifier(AppConfigConstants.BEAN_JSON_MAPPER)
   @Autowired
   private ObjectMapper objectMapper;
@@ -150,8 +151,9 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
             jaxbContext.createUnmarshaller(), externalId, metisResponse);
 
     assert xmlBaseEntity != null;
+    DataSource dataSource = entityRecordService.verifyDataSource(externalId, false);
     EntityRecord savedRecord =
-        entityRecordService.createEntityFromRequest(entityPreview, xmlBaseEntity.toEntityModel());
+        entityRecordService.createEntityFromRequest(entityPreview, xmlBaseEntity.toEntityModel(), dataSource);
 
     // trigger update to generate consolidated entity
     entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId());
@@ -164,9 +166,10 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
       throws Exception {
     EntityPreview entityPreview = objectMapper.readValue(europeanaMetadata, EntityPreview.class);
 
+    DataSource dataSource = entityRecordService.verifyDataSource(entityPreview.getId(), false);
     EntityRecord savedRecord =
         entityRecordService.createEntityFromRequest(
-            entityPreview, ZohoOrganizationConverter.convertToOrganizationEntity(zohoOrganization));
+            entityPreview, ZohoOrganizationConverter.convertToOrganizationEntity(zohoOrganization), dataSource);
 
     // trigger update to generate consolidated entity
     entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId());

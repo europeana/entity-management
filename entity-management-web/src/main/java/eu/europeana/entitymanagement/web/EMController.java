@@ -255,6 +255,8 @@ public class EMController extends BaseRest {
       verifyWriteAccess(Operations.UPDATE, request);
     }
     EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
+    //update from external data source is not available for static data sources
+    entityRecordService.verifyDataSource(entityRecord.getExternalProxies().get(0).getProxyId(), false);
     return launchTaskAndRetrieveEntity(request, type, identifier, entityRecord, profile);
   }
 
@@ -284,6 +286,7 @@ public class EMController extends BaseRest {
       throw new HttpBadRequestException(INVALID_UPDATE_REQUEST_MSG);
     }
 
+    //TODO: consider removing entities from static data sources  
     return scheduleBatchUpdates(request, entityIds, ScheduledUpdateType.FULL_UPDATE);
   }
 
@@ -455,7 +458,7 @@ public class EMController extends BaseRest {
       return response;
     }
 
-    DataSource externalDatasource = entityRecordService.verifyDataSource(entityCreationRequest.getId(), false);
+    DataSource dataSource = entityRecordService.verifyDataSource(entityCreationRequest.getId(), false);
     
     // in case of Organization it must be the zoho Organization
     String creationRequestType = entityCreationRequest.getType();
@@ -479,7 +482,7 @@ public class EMController extends BaseRest {
     }
 
     EntityRecord savedEntityRecord =
-        entityRecordService.createEntityFromRequest(entityCreationRequest, datasourceResponse);
+        entityRecordService.createEntityFromRequest(entityCreationRequest, datasourceResponse, dataSource);
     logger.info(
         "Created Entity record for externalId={}; entityId={}",
         creationRequestId,

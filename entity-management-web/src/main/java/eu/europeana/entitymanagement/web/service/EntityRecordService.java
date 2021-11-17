@@ -50,7 +50,6 @@ import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.definitions.model.TimeSpan;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
-import eu.europeana.entitymanagement.exception.DatasourceNotKnownException;
 import eu.europeana.entitymanagement.exception.EntityAlreadyExistsException;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
@@ -269,16 +268,16 @@ public class EntityRecordService {
    *
    * @param entityCreationRequest de-referenced XML response instance from Metis
    * @param datasourceResponse Entity obtained from de-referencing
+   * @param dataSource the data source identified for the given entity id 
    * @return Saved Entity record
    * @throws EntityCreationException if an error occurs
    */
   public EntityRecord createEntityFromRequest(
-      EntityPreview entityCreationRequest, Entity datasourceResponse)
+      EntityPreview entityCreationRequest, Entity datasourceResponse, DataSource dataSource)
       throws EntityCreationException {
     // Fail quick if no datasource is configured
     String externalProxyId = entityCreationRequest.getId();
-    Optional<DataSource> externalDatasourceOptional = getDataSource(externalProxyId);
-
+    
     Date timestamp = new Date();
     Entity entity =
         EntityObjectFactory.createConsolidatedEntityObject(datasourceResponse.getType());
@@ -307,13 +306,12 @@ public class EntityRecordService {
     copyPreviewMetadata(europeanaProxyMetadata, entityCreationRequest);
     setEuropeanaMetadata(europeanaProxyMetadata, entityId, entityRecord, timestamp);
 
-    DataSource externalDatasource = externalDatasourceOptional.get();
     // create default external proxy
     setExternalProxyMetadata(
         datasourceResponse,
         entityCreationRequest.getId(),
         entityId,
-        externalDatasource,
+        dataSource,
         entityRecord,
         timestamp,
         1);
@@ -1027,11 +1025,8 @@ public class EntityRecordService {
    */
   public void changeExternalProxy(EntityRecord entityRecord, String newProxyId)
       throws EuropeanaApiException {
-    Optional<DataSource> externalDatasourceOptional = datasources.getDatasource(newProxyId);
-    if (externalDatasourceOptional.isEmpty()) {
-      throw new DatasourceNotKnownException("No configured datasource for url " + newProxyId);
-    }
-
+    
+    DataSource dataSource = verifyDataSource(newProxyId, true);
     List<EntityProxy> externalProxies = entityRecord.getExternalProxies();
 
     if (externalProxies.size() > 1) {
@@ -1049,7 +1044,7 @@ public class EntityRecordService {
         EntityObjectFactory.createProxyEntityObject(entityType),
         newProxyId,
         entityRecord.getEntityId(),
-        externalDatasourceOptional.get(),
+        dataSource,
         entityRecord,
         new Date(),
         1);
