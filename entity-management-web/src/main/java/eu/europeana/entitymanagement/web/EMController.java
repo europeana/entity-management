@@ -175,6 +175,7 @@ public class EMController extends BaseRest {
     }
     logger.info("Re-enabling entityId={}", entityRecord.getEntityId());
     entityRecordService.enableEntityRecord(entityRecord);
+    //entity needs to be added back to the solr index
     solrService.storeEntity(createSolrEntity(entityRecord));
 
     return createResponse(
@@ -230,10 +231,7 @@ public class EMController extends BaseRest {
     entityRecordService.replaceEuropeanaProxy(updateRequestEntity, entityRecord);
     entityRecordService.update(entityRecord);
 
-    // this replaces the existing entity
-    solrService.storeEntity(createSolrEntity(entityRecord));
-    logger.info("Updated Solr document for entityId={}", entityRecord.getEntityId());
-
+    //update the consolidated version in mongo and solr
     return launchTaskAndRetrieveEntity(request, type, identifier, entityRecord, profile);
   }
 
