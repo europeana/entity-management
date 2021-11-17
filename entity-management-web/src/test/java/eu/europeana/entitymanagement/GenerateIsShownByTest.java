@@ -17,15 +17,26 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+/**
+ * This class acts as a convenience script for populating isShownBy data on entities.
+ *
+ * <p>To use, put correct values in baseUrl and jwtToken, then run the submitIsShownBy() test
+ */
 public class GenerateIsShownByTest {
 
   private static final Logger logger = LogManager.getLogger(GenerateIsShownByTest.class);
-  public static final String IS_SHOWN_BY_CSV = "src/test/resources/is_shown_by.csv";
+  private static final String IS_SHOWN_BY_CSV = "src/test/resources/is_shown_by.csv";
+
+  // replace this with url to Entity Management instance
+  private final String baseUrl = "http://entity-management-test.eanadev.org/";
+
+  // put token here
+  private final String jwtToken = "";
 
   private final WebClient webClient =
       WebClient.builder()
-          .baseUrl("http://localhost:8080")
-          .defaultHeaders(header -> header.setBearerAuth(""))
+          .baseUrl(baseUrl)
+          .defaultHeaders(header -> header.setBearerAuth(jwtToken))
           .build();
 
   @Test
@@ -45,6 +56,7 @@ public class GenerateIsShownByTest {
               .put()
               .uri("/entity/" + requestPath)
               .accept(MediaType.APPLICATION_JSON)
+              .contentType(MediaType.APPLICATION_JSON)
               .body(
                   BodyInserters.fromValue(
                       createRequestBody(
@@ -67,11 +79,11 @@ public class GenerateIsShownByTest {
       String entityId, String isShownById, String isShownBySource, String isShownByThumbnail) {
     return String.format(
         "{"
-            + "\"@context\": \"http://www.europeana.eu/schemas/context/entity.jsonld\" "
-            + "\"type\": \"%s\""
+            + "\"@context\": \"http://www.europeana.eu/schemas/context/entity.jsonld\", "
+            + "\"type\": \"%s\","
             + "\"isShownBy\": {"
-            + "\"id\": \"%s\""
-            + "\"source\": \"%s\""
+            + "\"id\": \"%s\","
+            + "\"source\": \"%s\","
             + "\"thumbnail\": \"%s\""
             + "}"
             + "}",
