@@ -3,12 +3,12 @@ package eu.europeana.entitymanagement.web.service;
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.METIS_DEREF_PATH;
 import static eu.europeana.entitymanagement.web.MetisDereferenceUtils.parseMetisResponse;
 
-import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.dereference.Dereferencer;
 import eu.europeana.entitymanagement.exception.DatasourceNotReachableException;
+import eu.europeana.entitymanagement.exception.DatasourceUpstreamServerError;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
@@ -106,7 +106,8 @@ public class MetisDereferenceService implements InitializingBean, Dereferencer {
               // return 500 for everything else
               .onStatus(
                   HttpStatus::isError,
-                  response -> response.bodyToMono(String.class).map(EuropeanaApiException::new))
+                  response ->
+                      response.bodyToMono(String.class).map(DatasourceUpstreamServerError::new))
               .bodyToMono(String.class)
               .block();
     }
@@ -132,8 +133,8 @@ public class MetisDereferenceService implements InitializingBean, Dereferencer {
         throw new HttpBadRequestException(t.getMessage());
       }
 
-      if (t instanceof EuropeanaApiException) {
-        throw new EuropeanaApiException(t.getMessage());
+      if (t instanceof DatasourceUpstreamServerError) {
+        throw new DatasourceUpstreamServerError(t.getMessage());
       }
 
       throw new Exception(t);

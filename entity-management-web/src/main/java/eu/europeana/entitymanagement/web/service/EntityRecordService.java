@@ -907,7 +907,7 @@ public class EntityRecordService {
   }
 
   private void setEntityAggregation(EntityRecord entityRecord, String entityId, Date timestamp) {
-    Aggregation isAggregatedBy = new Aggregation(true);
+    Aggregation isAggregatedBy = new Aggregation();
     isAggregatedBy.setId(getIsAggregatedById(entityId));
     isAggregatedBy.setCreated(timestamp);
     isAggregatedBy.setModified(timestamp);

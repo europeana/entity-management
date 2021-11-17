@@ -20,6 +20,7 @@ import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.web.service.AuthorizationService;
 import eu.europeana.entitymanagement.web.service.RequestPathMethodService;
 import eu.europeana.entitymanagement.web.xml.model.RdfBaseWrapper;
@@ -112,7 +113,8 @@ public abstract class BaseRest extends BaseRestController {
   }
 
   protected ResponseEntity<String> generateResponseFailedUpdates(
-      HttpServletRequest request, List<String> entityIds) throws EuropeanaApiException {
+      HttpServletRequest request, List<String> entityIds, String wskey)
+      throws EuropeanaApiException {
 
     org.springframework.http.HttpHeaders headers = createAllowHeader(request);
     // Access-Control-Expose-Headers only set for CORS requests
@@ -130,11 +132,19 @@ public abstract class BaseRest extends BaseRestController {
      */
     String entityUriPrefix = requestUrl.subSequence(0, requestUrl.length() - 17).toString();
     // convert entityId to navigable URL
+
+    String wskeyParam =
+        StringUtils.hasLength(wskey)
+            ? String.format("&%s=%s", WebEntityConstants.QUERY_PARAM_WSKEY, wskey)
+            : "";
+
+    // browsers attempt to load xml by default, so specify .jsonld in url
+    String entityUrlSuffix = ".jsonld?profile=debug" + wskeyParam;
     List<String> pathUrls =
         entityIds.stream()
             .map(
                 id ->
-                    entityUriPrefix + EntityRecordUtils.getEntityRequestPath(id) + "?profile=debug")
+                    entityUriPrefix + EntityRecordUtils.getEntityRequestPath(id) + entityUrlSuffix)
             .collect(Collectors.toList());
     try {
 
@@ -174,21 +184,30 @@ public abstract class BaseRest extends BaseRestController {
 
     String etag = computeEtag(timestamp, outFormat.name(), getApiVersion());
 
+    // use request.getRequestURI() as Spring returns null for request.getPathInfo()
+    // see: https://stackoverflow.com/a/8080548/14530159
+    String requestUri = request.getRequestURI();
+    boolean hasPathExtension =
+        requestUri.endsWith("." + FormatTypes.jsonld) || requestUri.endsWith("." + FormatTypes.xml);
+
+    // HttpHeaders.ALLOW
     org.springframework.http.HttpHeaders headers = createAllowHeader(request);
-
-    if (!outFormat.equals(FormatTypes.schema)) {
+    headers.add(HttpHeaders.LINK, HttpHeaders.VALUE_LDP_RESOURCE);
+    // ETAG set directly to response
+    if (!hasPathExtension) {
       headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
-      headers.add(HttpHeaders.LINK, HttpHeaders.VALUE_LDP_RESOURCE);
     }
-
     // Access-Control-Expose-Headers only set for CORS requests
     if (StringUtils.hasLength(request.getHeader(org.springframework.http.HttpHeaders.ORIGIN))) {
-      if (outFormat.equals(FormatTypes.schema)) {
-        headers.setAccessControlExposeHeaders(List.of(HttpHeaders.ETAG, HttpHeaders.VARY));
-      } else {
-        headers.setAccessControlExposeHeaders(
-            List.of(HttpHeaders.ETAG, HttpHeaders.LINK, HttpHeaders.VARY));
+      // HttpHeaders.ALLOW is added by default, avoid duplication
+      headers.add(
+          org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.LINK);
+      if (!hasPathExtension) {
+        headers.add(
+            org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.VARY);
       }
+      headers.add(
+          org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.ETAG);
     }
 
     if (contentType != null && !contentType.isEmpty()) {

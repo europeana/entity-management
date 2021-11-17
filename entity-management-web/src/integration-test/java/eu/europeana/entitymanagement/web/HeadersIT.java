@@ -43,7 +43,7 @@ public class HeadersIT extends BaseWebControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
 
     checkAllowHeaderForPOST(results);
-    checkCommonResponseHeaders(results);
+    checkCommonResponseHeaders(results, false);
   }
 
   @Test
@@ -57,8 +57,8 @@ public class HeadersIT extends BaseWebControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
 
     checkAllowHeaderForPOST(results);
-    checkCommonResponseHeaders(results);
-    checkCorsHeaders(results);
+    checkCommonResponseHeaders(results, false);
+    checkCorsHeaders(results, false);
   }
 
   @Test
@@ -67,7 +67,7 @@ public class HeadersIT extends BaseWebControllerTest {
     ResultActions results = mockMvc.perform(get(BASE_SERVICE_URL + "/" + requestPath + ".jsonld"));
 
     checkAllowHeaderForGET(results);
-    checkCommonResponseHeaders(results);
+    checkCommonResponseHeaders(results, true);
   }
 
   @Test
@@ -80,8 +80,8 @@ public class HeadersIT extends BaseWebControllerTest {
                 .header("Origin", "http://test-origin.eu"));
 
     checkAllowHeaderForGET(results);
-    checkCommonResponseHeaders(results);
-    checkCorsHeaders(results);
+    checkCommonResponseHeaders(results, true);
+    checkCorsHeaders(results, true);
   }
 
   @Test
@@ -95,12 +95,10 @@ public class HeadersIT extends BaseWebControllerTest {
             .andExpect(
                 header().string(HttpHeaders.CONTENT_TYPE, is(CONTENT_TYPE_APPLICATION_RDF_XML)))
             .andExpect(header().exists(HttpHeaders.ETAG))
-            .andExpect(header().string(HttpHeaders.LINK, is(VALUE_LDP_RESOURCE)))
-            .andExpect(
-                header()
-                    .stringValues(HttpHeaders.VARY, hasItems(containsString(HttpHeaders.ACCEPT))));
+            .andExpect(header().string(HttpHeaders.LINK, is(VALUE_LDP_RESOURCE)));
 
     checkAllowHeaderForGET(results);
+    checkCommonResponseHeaders(results, true, true);
   }
 
   @Test
@@ -110,8 +108,8 @@ public class HeadersIT extends BaseWebControllerTest {
         mockMvc.perform(
             get(BASE_SERVICE_URL + "/" + requestPath).accept(MediaType.APPLICATION_JSON));
 
-    checkAllowHeaderForGET(results);
-    checkCommonResponseHeaders(results);
+    checkAllowHeaderForDPGP(results);
+    checkCommonResponseHeaders(results, false);
   }
 
   @Test
@@ -124,8 +122,8 @@ public class HeadersIT extends BaseWebControllerTest {
             .andExpect(status().isOk());
 
     checkAllowHeaderForGET(results);
-    checkCommonResponseHeadersForSchemaOrg(results);
-    checkCorsHeadersForSchemaOrg(results);
+    checkCommonResponseHeaders(results, true);
+    checkCorsHeaders(results, true);
   }
 
   @Test
@@ -141,7 +139,7 @@ public class HeadersIT extends BaseWebControllerTest {
             .andExpect(status().isAccepted());
 
     checkAllowHeaderForPOST(resultActions);
-    checkCommonResponseHeaders(resultActions);
+    checkCommonResponseHeaders(resultActions, false);
   }
 
   @Test
@@ -157,7 +155,7 @@ public class HeadersIT extends BaseWebControllerTest {
                     .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isAccepted());
     checkAllowHeaderForDPGP(resultActions);
-    checkCommonResponseHeaders(resultActions);
+    checkCommonResponseHeaders(resultActions, false);
   }
 
   @Test
@@ -218,7 +216,7 @@ public class HeadersIT extends BaseWebControllerTest {
         mockMvc
             .perform(post(BASE_SERVICE_URL + "/" + requestPath).accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
-    checkCommonResponseHeaders(resultActions);
+    checkCommonResponseHeaders(resultActions, false);
     checkAllowHeaderForDPGP(resultActions);
   }
 
@@ -234,8 +232,8 @@ public class HeadersIT extends BaseWebControllerTest {
             .andExpect(status().isOk());
 
     checkAllowHeaderForGET(results);
-    checkCommonResponseHeadersForSchemaOrg(results);
-    checkCorsHeadersForSchemaOrg(results);
+    checkCommonResponseHeaders(results, true);
+    checkCorsHeaders(results, true);
   }
 
   @Test

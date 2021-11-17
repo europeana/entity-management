@@ -43,15 +43,21 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
 
     // create failed task for entity
     Exception testException = new Exception("TestMessage");
+    failedTaskService.dropCollection();
     failedTaskService.persistFailure(
         entityRecord.getEntityId(), ScheduledUpdateType.FULL_UPDATE, testException);
 
     // MockMvc requests use "localhost" without a port
     String clickableUrl =
         "http://localhost/entity/"
-            + getEntityRequestPath(entityRecord.getEntityId() + "?profile=debug");
+            + getEntityRequestPath(entityRecord.getEntityId())
+            + ".jsonld?profile=debug&wskey=testKey";
+
     mockMvc
-        .perform(get(BASE_SERVICE_URL + "/management/failed").accept(MediaType.APPLICATION_JSON))
+        .perform(
+            get(BASE_SERVICE_URL + "/management/failed")
+                .accept(MediaType.APPLICATION_JSON)
+                .param(WebEntityConstants.QUERY_PARAM_WSKEY, "testKey"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(1)))
         .andExpect(jsonPath("$", containsInAnyOrder(clickableUrl)));
