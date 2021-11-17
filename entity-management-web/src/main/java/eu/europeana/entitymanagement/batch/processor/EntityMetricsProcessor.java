@@ -76,7 +76,7 @@ public class EntityMetricsProcessor implements ItemProcessor<EntityRecord, Entit
     // cannot be null here as it's set in process()
     Aggregation aggregation = entity.getIsAggregatedBy();
 
-    aggregation.setPageRank(metrics.getPageRank());
+    aggregation.setPageRank((double) metrics.getPageRank());
     aggregation.setRecordCount(metrics.getEnrichmentCount());
     aggregation.setScore(metrics.getScore());
   }

@@ -1,7 +1,9 @@
 package eu.europeana.entitymanagement.web;
 
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.*;
+import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPath;
 import static org.hamcrest.Matchers.any;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -10,12 +12,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.zoho.crm.api.record.Record;
+import eu.europeana.entitymanagement.batch.service.FailedTaskService;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.FailedTaskJsonFields;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import java.util.Optional;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -24,6 +31,37 @@ import org.springframework.test.web.servlet.ResultActions;
 @SpringBootTest
 @AutoConfigureMockMvc
 public class EntityRetrievalIT extends BaseWebControllerTest {
+
+  @Autowired private FailedTaskService failedTaskService;
+
+  @Test
+  public void shouldRetrieveEntitiesWithFailures() throws Exception {
+    String europeanaMetadata = loadFile(CONCEPT_REGISTER_BATHTUB_JSON);
+    String metisResponse = loadFile(CONCEPT_BATHTUB_XML);
+
+    EntityRecord entityRecord = createEntity(europeanaMetadata, metisResponse, CONCEPT_BATHTUB_URI);
+
+    // create failed task for entity
+    Exception testException = new Exception("TestMessage");
+    failedTaskService.dropCollection();
+    failedTaskService.persistFailure(
+        entityRecord.getEntityId(), ScheduledUpdateType.FULL_UPDATE, testException);
+
+    // MockMvc requests use "localhost" without a port
+    String clickableUrl =
+        "http://localhost/entity/"
+            + getEntityRequestPath(entityRecord.getEntityId())
+            + ".jsonld?profile=debug&wskey=testKey";
+
+    mockMvc
+        .perform(
+            get(BASE_SERVICE_URL + "/management/failed")
+                .accept(MediaType.APPLICATION_JSON)
+                .param(WebEntityConstants.QUERY_PARAM_WSKEY, "testKey"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", hasSize(1)))
+        .andExpect(jsonPath("$", containsInAnyOrder(clickableUrl)));
+  }
 
   @Test
   void retrieveWithInvalidProfileShouldReturn400() throws Exception {
@@ -99,6 +137,61 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(entityId)));
+  }
+
+  @Test
+  void retrievalWithDebugProfileShouldIncludeFailedTask() throws Exception {
+
+    String europeanaMetadata = loadFile(CONCEPT_REGISTER_BATHTUB_JSON);
+    String metisResponse = loadFile(CONCEPT_BATHTUB_XML);
+
+    String entityId =
+        createEntity(europeanaMetadata, metisResponse, CONCEPT_BATHTUB_URI).getEntityId();
+
+    // create FailedTask for entityId
+    Exception testException = new Exception("TestMessage");
+    failedTaskService.persistFailure(entityId, ScheduledUpdateType.FULL_UPDATE, testException);
+
+    String requestPath = getEntityRequestPath(entityId);
+    mockMvc
+        .perform(
+            get(BASE_SERVICE_URL + "/" + requestPath + ".jsonld")
+                .param(WebEntityConstants.QUERY_PARAM_PROFILE, "internal,debug")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.isAggregatedBy." + WebEntityFields.FAILURES).exists())
+        .andExpect(
+            jsonPath(
+                "$.isAggregatedBy." + WebEntityFields.FAILURES + "." + FailedTaskJsonFields.TYPE,
+                is(ScheduledUpdateType.FULL_UPDATE.getValue())))
+        .andExpect(
+            jsonPath(
+                    "$.isAggregatedBy."
+                        + WebEntityFields.FAILURES
+                        + "."
+                        + FailedTaskJsonFields.MESSAGE)
+                .isNotEmpty())
+        .andExpect(
+            jsonPath(
+                    "$.isAggregatedBy."
+                        + WebEntityFields.FAILURES
+                        + "."
+                        + FailedTaskJsonFields.FIRST_TIME)
+                .isNotEmpty())
+        .andExpect(
+            jsonPath(
+                    "$.isAggregatedBy."
+                        + WebEntityFields.FAILURES
+                        + "."
+                        + FailedTaskJsonFields.LAST_TIME)
+                .isNotEmpty())
+        .andExpect(
+            jsonPath(
+                    "$.isAggregatedBy."
+                        + WebEntityFields.FAILURES
+                        + "."
+                        + FailedTaskJsonFields.STACKTRACE)
+                .isNotEmpty());
   }
 
   @Test

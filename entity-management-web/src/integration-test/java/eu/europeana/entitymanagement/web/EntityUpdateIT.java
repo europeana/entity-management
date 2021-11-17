@@ -1,15 +1,7 @@
 package eu.europeana.entitymanagement.web;
 
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.BASE_SERVICE_URL;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_BATHTUB_EMPTY_UPDATE_JSON;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_BATHTUB_URI;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_BATHTUB_XML;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_REGISTER_BATHTUB_JSON;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_UPDATE_BATHTUB_JSON;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.IS_SHOWN_BY_CSV;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_1ST_CENTURY_URI;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_1ST_CENTURY_XML;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_REGISTER_1ST_CENTURY_JSON;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.*;
+import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPath;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -19,38 +11,17 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.TimeSpan;
-import eu.europeana.entitymanagement.definitions.model.WebResource;
-import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
-import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
-import java.io.File;
-import java.io.FileReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Optional;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -58,9 +29,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @AutoConfigureMockMvc
 public class EntityUpdateIT extends BaseWebControllerTest {
 
-  @Qualifier(AppConfigConstants.BEAN_JSON_MAPPER)
-  @Autowired
-  private ObjectMapper mapper;
+  private final ObjectMapper mapper = new ObjectMapper();
 
   @Test
   public void updatingNonExistingEntityShouldReturn404() throws Exception {
@@ -245,51 +214,5 @@ public class EntityUpdateIT extends BaseWebControllerTest {
     Assertions.assertNull(europeanaProxyEntity.getAltLabel());
     Assertions.assertNull(europeanaProxyEntity.getNote());
     Assertions.assertNull(europeanaProxyEntity.getDepiction());
-  }
-
-  // @Test
-  void updateIsShownByFromCSVFile() throws Exception {
-
-    String baseUrl = "https://entity-management-test.eanadev.org";
-    //	  String baseUrl = "http://localhost:8080";
-    try (Reader inputCsv = new FileReader(new File(IS_SHOWN_BY_CSV), StandardCharsets.UTF_8);
-        CSVParser csvParser = new CSVParser(inputCsv, CSVFormat.DEFAULT); ) {
-
-      for (CSVRecord record : csvParser) {
-        String entityId = record.get(0);
-        String isShownById = record.get(1);
-        String isShownBySource = record.get(2);
-        String isShownByThumbnail = record.get(3);
-
-        WebResource isShownBy = new WebResource();
-        isShownBy.setId(isShownById);
-        isShownBy.setSource(isShownBySource);
-        isShownBy.setThumbnail(isShownByThumbnail);
-
-        Entity entity =
-            EntityObjectFactory.createProxyEntityObject(EntityTypes.getByEntityId(entityId).name());
-        entity.setIsShownBy(isShownBy);
-        ObjectNode updateApiBodyNode = mapper.valueToTree(entity);
-        String requestPath = getEntityRequestPath(entityId);
-
-        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-          HttpPut request = new HttpPut(baseUrl + "/entity/" + requestPath);
-          request.addHeader("Content-Type", "application/json");
-          HttpEntity httpEntity =
-              new ByteArrayEntity(updateApiBodyNode.toString().getBytes("UTF-8"));
-          request.setEntity(httpEntity);
-          try (CloseableHttpResponse response = httpClient.execute(request)) {
-            HttpEntity responseHttpEntity = response.getEntity();
-            String result = EntityUtils.toString(responseHttpEntity);
-            Assertions.assertTrue(
-                response.getStatusLine().getStatusCode() == HttpStatus.ACCEPTED.value());
-            Assertions.assertTrue(result.contains(WebEntityFields.IS_SHOWN_BY));
-            Assertions.assertTrue(result.contains(isShownById));
-            Assertions.assertTrue(result.contains(isShownBySource));
-            Assertions.assertTrue(result.contains(isShownByThumbnail));
-          }
-        }
-      }
-    }
   }
 }

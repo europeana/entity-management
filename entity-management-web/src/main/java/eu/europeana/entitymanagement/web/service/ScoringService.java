@@ -69,7 +69,7 @@ public class ScoringService {
     }
 
     PageRank pr = getPageRank(entity);
-    if (pr != null) {
+    if (pr != null && pr.getPageRank() != null) {
       metrics.setPageRank(pr.getPageRank().intValue());
     }
 

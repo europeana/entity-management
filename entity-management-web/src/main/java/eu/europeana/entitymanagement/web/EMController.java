@@ -1,6 +1,5 @@
 package eu.europeana.entitymanagement.web;
 
-import static eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants.PROFILE_DEBUG;
 import static eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants.QUERY_PARAM_PROFILE_SEPARATOR;
 import static eu.europeana.entitymanagement.solr.SolrUtils.createSolrEntity;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.QUERY_PARAM_QUERY;
@@ -71,7 +70,7 @@ public class EMController extends BaseRest {
       "Request must either specify a 'query' param or contain entity identifiers in body";
 
   // profile used if none included in request
-  public static final String DEFAULT_REQUEST_PROFILE = EntityProfile.external.name();
+  public static final EntityProfile DEFAULT_REQUEST_PROFILE = EntityProfile.external;
 
   @Autowired
   public EMController(
@@ -139,6 +138,7 @@ public class EMController extends BaseRest {
       HttpServletRequest request)
       throws HttpException, EuropeanaApiException {
 
+    List<EntityProfile> entityProfile = getEntityProfile(profile);
     if (emConfig.isAuthEnabled()) {
       verifyWriteAccess(Operations.UPDATE, request);
     }
@@ -148,7 +148,7 @@ public class EMController extends BaseRest {
 
       return createResponse(
           request,
-          profile,
+          entityProfile,
           type,
           null,
           identifier,
@@ -157,11 +157,11 @@ public class EMController extends BaseRest {
     }
     logger.info("Re-enabling entityId={}", entityRecord.getEntityId());
     entityRecordService.enableEntityRecord(entityRecord);
-    solrService.storeEntity(createSolrEntity(entityRecord.getEntity()));
+    solrService.storeEntity(createSolrEntity(entityRecord));
 
     return createResponse(
         request,
-        profile,
+        entityProfile,
         type,
         null,
         identifier,
@@ -213,7 +213,7 @@ public class EMController extends BaseRest {
     entityRecordService.update(entityRecord);
 
     // this replaces the existing entity
-    solrService.storeEntity(createSolrEntity(entityRecord.getEntity()));
+    solrService.storeEntity(createSolrEntity(entityRecord));
     logger.info("Updated Solr document for entityId={}", entityRecord.getEntityId());
 
     return launchTaskAndRetrieveEntity(request, type, identifier, entityRecord, profile);
@@ -320,12 +320,14 @@ public class EMController extends BaseRest {
       @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
       HttpServletRequest request)
       throws EuropeanaApiException, HttpException {
+
+    List<EntityProfile> entityProfile = getEntityProfile(profile);
     if (emConfig.isAuthEnabled()) {
       verifyReadAccess(request);
     }
     return createResponse(
         request,
-        profile,
+        entityProfile,
         type,
         languages,
         identifier,
@@ -361,6 +363,7 @@ public class EMController extends BaseRest {
       @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
       HttpServletRequest request)
       throws EuropeanaApiException, HttpException {
+    List<EntityProfile> entityProfile = getEntityProfile(profile);
     if (emConfig.isAuthEnabled()) {
       verifyReadAccess(request);
     }
@@ -368,7 +371,7 @@ public class EMController extends BaseRest {
     // always return application/rdf+xml Content-Type
     return createResponse(
         request,
-        profile,
+        entityProfile,
         type,
         languages,
         identifier,
@@ -393,12 +396,14 @@ public class EMController extends BaseRest {
       @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
       HttpServletRequest request)
       throws EuropeanaApiException, HttpException {
+
+    List<EntityProfile> entityProfile = getEntityProfile(profile);
     if (emConfig.isAuthEnabled()) {
       verifyReadAccess(request);
     }
     return createResponse(
         request,
-        profile,
+        entityProfile,
         type,
         languages,
         identifier,
@@ -519,7 +524,7 @@ public class EMController extends BaseRest {
 
   private ResponseEntity<String> createResponse(
       HttpServletRequest request,
-      String profileParam,
+      List<EntityProfile> entityProfile,
       String type,
       String languages,
       String identifier,
@@ -527,7 +532,6 @@ public class EMController extends BaseRest {
       String contentType)
       throws EuropeanaApiException {
     // validate profile
-    String entityProfile = getEntityProfile(profileParam);
 
     EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
     // if request doesn't specify a valid EntityProfile, use external by default
@@ -541,27 +545,28 @@ public class EMController extends BaseRest {
    * @param profileParamString profile request query param
    * @return valid EntityProfile in request
    */
-  private String getEntityProfile(String profileParamString) throws HttpBadRequestException {
-    if (StringUtils.hasLength(profileParamString)) {
-      List<String> profiles = List.of(profileParamString.split(QUERY_PARAM_PROFILE_SEPARATOR));
-      List<String> entityProfiles =
-          Arrays.stream(EntityProfile.values()).map(Enum::name).collect(Collectors.toList());
+  private List<EntityProfile> getEntityProfile(String profileParamString)
+      throws HttpBadRequestException {
 
-      for (String profileValue : profiles) {
-        if (entityProfiles.contains(profileValue)) {
-          return profileValue;
-        }
-      }
-
-      // no valid EntityProfile found. If profile param contains anything other than debug, throw an
-      // error
-      if (profiles.size() > 1 || !profiles.contains(PROFILE_DEBUG)) {
-        throw new HttpBadRequestException("No valid EntityProfile in request");
-      }
+    if (!StringUtils.hasLength(profileParamString)) {
+      return List.of(DEFAULT_REQUEST_PROFILE);
     }
 
-    // use default profile if none specified
-    return DEFAULT_REQUEST_PROFILE;
+    List<String> requestProfiles =
+        new ArrayList<>(List.of((profileParamString.split(QUERY_PARAM_PROFILE_SEPARATOR))));
+
+    List<String> validProfiles =
+        Arrays.stream(EntityProfile.values()).map(Enum::name).collect(Collectors.toList());
+
+    requestProfiles.retainAll(validProfiles);
+
+    // profile string contains an invalid value, or is internal,external (which can't be specified
+    // together)
+    if (requestProfiles.isEmpty()
+        || (requestProfiles.size() > 1 && !requestProfiles.contains(EntityProfile.debug.name()))) {
+      throw new HttpBadRequestException("Invalid profile query param " + profileParamString);
+    }
+    return requestProfiles.stream().map(EntityProfile::valueOf).collect(Collectors.toList());
   }
 
   private ResponseEntity<String> launchTaskAndRetrieveEntity(
@@ -575,11 +580,9 @@ public class EMController extends BaseRest {
     launchUpdateTask(entityRecord.getEntityId());
     entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
 
-    String profileValue = getEntityProfile(profile);
-
     return generateResponseEntity(
         request,
-        profileValue,
+        getEntityProfile(profile),
         FormatTypes.jsonld,
         null,
         HttpHeaders.CONTENT_TYPE_JSONLD_UTF8,

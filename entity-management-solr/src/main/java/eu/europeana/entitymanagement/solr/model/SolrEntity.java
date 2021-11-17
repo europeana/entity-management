@@ -55,6 +55,21 @@ public abstract class SolrEntity<T extends Entity> {
   @Field(EntitySolrFields.IS_SHOWN_BY_ALL)
   private Map<String, String> isShownBy;
 
+  @Field(EntitySolrFields.SUGGEST_FILTERS)
+  private List<String> suggestFilters;
+
+  @Field(EntitySolrFields.RIGHTS)
+  private List<String> rights;
+
+  @Field(EntitySolrFields.EUROPEANA_DOC_COUNT)
+  private Integer docCount;
+
+  @Field(EntitySolrFields.PAGERANK)
+  private Float pageRank;
+
+  @Field(EntitySolrFields.DERIVED_SCORE)
+  private Float derivedScore;
+
   public SolrEntity(T entity) {
     this.type = entity.getType();
     this.entityId = entity.getEntityId();
@@ -185,6 +200,46 @@ public abstract class SolrEntity<T extends Entity> {
 
   public T getEntity() {
     return entity;
+  }
+
+  public List<String> getSuggestFilters() {
+    return suggestFilters;
+  }
+
+  public void setSuggestFilters(List<String> suggestFilters) {
+    this.suggestFilters = suggestFilters;
+  }
+
+  public List<String> getRights() {
+    return rights;
+  }
+
+  public void setRights(List<String> rights) {
+    this.rights = rights;
+  }
+
+  public Integer getDocCount() {
+    return docCount;
+  }
+
+  public void setDocCount(Integer docCount) {
+    this.docCount = docCount;
+  }
+
+  public Float getPageRank() {
+    return pageRank;
+  }
+
+  public void setPageRank(Float pageRank) {
+    this.pageRank = pageRank;
+  }
+
+  public Float getDerivedScore() {
+    return derivedScore;
+  }
+
+  public void setDerivedScore(Float derivedScore) {
+    this.derivedScore = derivedScore;
   }
 
   protected abstract void setSameReferenceLinks(ArrayList<String> uris);

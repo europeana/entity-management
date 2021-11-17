@@ -1,6 +1,8 @@
 package eu.europeana.entitymanagement.solr.service;
 
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.*;
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_INDEXING_SOLR_CLIENT;
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_JSON_MAPPER;
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_SOLR_ENTITY_SUGGESTER_FILTER;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -244,7 +246,7 @@ public class SolrService implements InitializingBean {
     log.info("Deleted all documents from Solr in {}ms", response.getElapsedTime());
   }
 
-  private String createSolrSuggesterField(SolrEntity<? extends Entity> solrEntity)
+  private String createPayload(SolrEntity<? extends Entity> solrEntity)
       throws JsonProcessingException {
 
     /*
@@ -271,7 +273,7 @@ public class SolrService implements InitializingBean {
 
   private void setPayload(SolrEntity<? extends Entity> solrEntity) throws SolrServiceException {
     try {
-      solrEntity.setPayload(createSolrSuggesterField(solrEntity));
+      solrEntity.setPayload(createPayload(solrEntity));
     } catch (JsonProcessingException e) {
       throw new SolrServiceException(
           String.format("Error generating Solr payload for entityId=%s", solrEntity.getEntityId()),

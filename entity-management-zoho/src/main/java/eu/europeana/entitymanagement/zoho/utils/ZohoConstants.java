@@ -55,7 +55,7 @@ public final class ZohoConstants {
   public static final String UNDEFINED_LANGUAGE_KEY = "def";
 
   public static final int LANGUAGE_CODE_LENGTH = 5;
-  public static final int SAME_AS_CODE_LENGTH = 2;
+  public static final int SAME_AS_CODE_LENGTH = 3;
 
   private ZohoConstants() {}
 }

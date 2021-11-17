@@ -23,7 +23,7 @@ public class EntitySolrInsertionWriter implements ItemWriter<EntityRecord> {
   public void write(List<? extends EntityRecord> entityRecords) throws Exception {
     List<SolrEntity<?>> solrEntities =
         entityRecords.stream()
-            .map(entityRecord -> createSolrEntity(entityRecord.getEntity()))
+            .map(entityRecord -> createSolrEntity(entityRecord))
             .collect(Collectors.toList());
 
     solrService.storeMultipleEntities(solrEntities);
