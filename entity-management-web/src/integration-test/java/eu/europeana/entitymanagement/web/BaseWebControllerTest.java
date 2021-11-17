@@ -53,7 +53,7 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
   @Autowired protected ScheduledTaskService scheduledTaskService;
 
   @Autowired private EntityUpdateService entityUpdateService;
-  
+
   @Qualifier(AppConfigConstants.BEAN_JSON_MAPPER)
   @Autowired
   private ObjectMapper objectMapper;
