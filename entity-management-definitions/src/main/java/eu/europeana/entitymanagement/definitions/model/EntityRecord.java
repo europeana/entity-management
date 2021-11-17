@@ -35,7 +35,7 @@ public class EntityRecord {
 
   @JsonIgnore private Date created;
 
-  @JsonIgnore @Indexed private Date modified;
+  @JsonIgnore private Date modified;
 
   @JsonGetter
   public Entity getEntity() {
