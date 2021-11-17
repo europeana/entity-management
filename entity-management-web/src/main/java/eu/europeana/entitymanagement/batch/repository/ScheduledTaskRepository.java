@@ -1,6 +1,6 @@
 package eu.europeana.entitymanagement.batch.repository;
 
-import static dev.morphia.aggregation.experimental.expressions.Expressions.field;
+import static dev.morphia.query.Sort.ascending;
 import static dev.morphia.query.experimental.filters.Filters.eq;
 import static dev.morphia.query.experimental.filters.Filters.gte;
 import static dev.morphia.query.experimental.filters.Filters.in;
@@ -15,9 +15,8 @@ import com.mongodb.client.model.WriteModel;
 import dev.morphia.Datastore;
 import dev.morphia.aggregation.experimental.stages.Lookup;
 import dev.morphia.aggregation.experimental.stages.Projection;
-import dev.morphia.aggregation.experimental.stages.ReplaceRoot;
-import dev.morphia.aggregation.experimental.stages.Sort;
 import dev.morphia.aggregation.experimental.stages.Unwind;
+import dev.morphia.query.FindOptions;
 import dev.morphia.query.experimental.filters.Filter;
 import dev.morphia.query.internal.MorphiaCursor;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
@@ -28,6 +27,7 @@ import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.bson.Document;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -149,23 +149,28 @@ public class ScheduledTaskRepository implements InitializingBean {
    */
   public List<? extends EntityRecord> getEntityRecordsForTasks(
       int start, int count, Filter[] filters) {
+    List<ScheduledTask> scheduledTasks =
+        datastore
+            .find(ScheduledTask.class)
+            .filter(filters)
+            .iterator(
+                new FindOptions()
+                    // we only care about the EntityID
+                    .projection()
+                    .include(ENTITY_ID)
+                    .skip(start)
+                    // matches the index sort order defined in ScheduledTask
+                    .sort(ascending(CREATED))
+                    .limit(count))
+            .toList();
+
+    List<String> matchingIds =
+        scheduledTasks.stream().map(ScheduledTask::getEntityId).collect(Collectors.toList());
+
     return datastore
-        .aggregate(ScheduledTask.class)
-        .match(filters)
-        .lookup(
-            Lookup.from(EntityRecord.class)
-                // both collections use the same entityId field name
-                .localField(ENTITY_ID)
-                .foreignField(ENTITY_ID)
-                .as("entity_record_lookup"))
-        .unwind(Unwind.on("entity_record_lookup"))
-        .replaceRoot(ReplaceRoot.with(field("entity_record_lookup")))
-        // Sort order required for pagination. EntityRecord.entityId is already indexed, so we use
-        // it
-        .sort(Sort.on().ascending(ENTITY_ID))
-        .skip(start)
-        .limit(count)
-        .execute(EntityRecord.class)
+        .find(EntityRecord.class)
+        .filter(in(ENTITY_ID, matchingIds))
+        .iterator()
         .toList();
   }
 
