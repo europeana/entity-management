@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,6 +38,14 @@ public class AppConfig extends AppConfigConstants {
 
   public AppConfig() {
     LOG.info("Initializing EntityManagementConfiguration bean as: configuration");
+  }
+
+  @PostConstruct
+  public void init() {
+    String jwtTokenSignatureKey = emConfiguration.getApiKeyPublicKey();
+    if (jwtTokenSignatureKey == null || jwtTokenSignatureKey.isBlank()) {
+      throw new IllegalStateException("The jwt token signature key cannot be null or empty.");
+    }
   }
 
   @Bean(name = BEAN_EM_DATA_SOURCES)
