@@ -11,6 +11,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -40,6 +41,7 @@ public class GenerateIsShownByTest {
           .build();
 
   @Test
+  @Disabled("Excluded from automated runs")
   void submitIsShownBy() throws IOException {
     try (Reader inputCsv = new FileReader(IS_SHOWN_BY_CSV, StandardCharsets.UTF_8);
         CSVParser csvParser = new CSVParser(inputCsv, CSVFormat.DEFAULT)) {

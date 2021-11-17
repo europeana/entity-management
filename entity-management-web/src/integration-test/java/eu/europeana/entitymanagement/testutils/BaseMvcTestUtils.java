@@ -25,8 +25,6 @@ public class BaseMvcTestUtils {
   public static final String ORGANIZATION_JSON = "/content/organization.json";
   public static final String PLACE_JSON = "/content/place.json";
 
-  public static final String IS_SHOWN_BY_CSV = "src/test/resources/is_shown_by.csv";
-
   @Deprecated
   /** @deprecated incorrect data representation use TIMESPAN_REGISTER_1ST_CENTURY_JSON */
   public static final String TIMESPAN_JSON = "/content/timespan.json";
