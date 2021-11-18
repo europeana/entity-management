@@ -84,19 +84,21 @@ public class EntityObjectFactory {
   }
 
   public static <T extends Entity> T createConsolidatedEntityObject(Entity entity)
-          throws EntityCreationException {
+      throws EntityCreationException {
 
-      try {
-          @SuppressWarnings("unchecked")
-          Class<T> entityClass = (Class<T>) consolidatedEntityTypesClassMap.get(EntityTypes.valueOf(entity.getType()));
-          // entityClass cannot be null here as map contains all possible types
-          return entityClass.getDeclaredConstructor(entityClass).newInstance(entity);
+    try {
+      @SuppressWarnings("unchecked")
+      Class<T> entityClass =
+          (Class<T>) consolidatedEntityTypesClassMap.get(EntityTypes.valueOf(entity.getType()));
+      // entityClass cannot be null here as map contains all possible types
+      return entityClass.getDeclaredConstructor(entityClass).newInstance(entity);
 
-        } catch (Exception e) {
-          throw new EntityCreationException("Error when creating consolidated copy from enitity " + entity.getEntityId(), e);
-        }
-      }
-  
+    } catch (Exception e) {
+      throw new EntityCreationException(
+          "Error when creating consolidated copy from enitity " + entity.getEntityId(), e);
+    }
+  }
+
   @SuppressWarnings("unchecked")
   public static <T extends Entity> SchemaOrgEntity<T> createSchemaOrgEntity(Entity entity) {
     switch (EntityTypes.valueOf(entity.getType())) {

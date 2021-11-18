@@ -189,7 +189,8 @@ public abstract class AbstractIntegrationTest {
     assert xmlBaseEntity != null;
     DataSource dataSource = entityRecordService.verifyDataSource(externalId, false);
     EntityRecord savedRecord =
-        entityRecordService.createEntityFromRequest(entityPreview, xmlBaseEntity.toEntityModel(), dataSource);
+        entityRecordService.createEntityFromRequest(
+            entityPreview, xmlBaseEntity.toEntityModel(), dataSource);
 
     // trigger update to generate consolidated entity
     entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId());

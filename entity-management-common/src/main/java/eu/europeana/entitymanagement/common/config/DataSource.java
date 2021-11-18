@@ -7,7 +7,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 public class DataSource {
 
   public static final String FREQ_STATIC = "static";
-  
+
   @JacksonXmlProperty(isAttribute = true)
   private String url;
 
@@ -28,16 +28,15 @@ public class DataSource {
     return rights;
   }
 
-  
   public String getId() {
     return id;
   }
 
   public String getFrequency() {
-      return frequency;
+    return frequency;
   }
-  
+
   public boolean isStatic() {
-      return FREQ_STATIC.equals(getFrequency());
+    return FREQ_STATIC.equals(getFrequency());
   }
 }

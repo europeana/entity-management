@@ -34,7 +34,8 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
   private final DataSources datasources;
 
   @Autowired
-  public EntityDereferenceProcessor(DereferenceServiceLocator dereferenceServiceLocator, DataSources datasources) {
+  public EntityDereferenceProcessor(
+      DereferenceServiceLocator dereferenceServiceLocator, DataSources datasources) {
     this.dereferenceServiceLocator = dereferenceServiceLocator;
     this.entityComparator = new EntityComparator();
     this.datasources = datasources;
@@ -45,10 +46,10 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
     String entityId = entityRecord.getEntityId();
     for (EntityProxy externalProxy : entityRecord.getExternalProxies()) {
       String proxyId = externalProxy.getProxyId();
-      //do not update external proxy for static data sources
+      // do not update external proxy for static data sources
       Optional<DataSource> dataSource = datasources.getDatasource(proxyId);
-      if(dataSource.isPresent() && dataSource.get().isStatic()) {
-          continue;
+      if (dataSource.isPresent() && dataSource.get().isStatic()) {
+        continue;
       }
 
       Dereferencer dereferencer =

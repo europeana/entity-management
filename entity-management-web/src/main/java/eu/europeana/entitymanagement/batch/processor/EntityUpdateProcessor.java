@@ -35,7 +35,8 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
   public EntityUpdateProcessor(
       EntityRecordService entityRecordService,
       ValidatorFactory emValidatorFactory,
-      EntityFieldsCleaner emEntityFieldCleaner, DataSources datasources) {
+      EntityFieldsCleaner emEntityFieldCleaner,
+      DataSources datasources) {
     this.entityRecordService = entityRecordService;
     this.emValidatorFactory = emValidatorFactory;
     this.emEntityFieldCleaner = emEntityFieldCleaner;
@@ -52,12 +53,12 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
     Optional<DataSource> dataSource = datasources.getDatasource(proxyId);
     boolean isStaticDataSource = dataSource.isPresent() && dataSource.get().isStatic();
 
-    //do not validate static data sources
-    if(!isStaticDataSource) {
-        validateMinimalConstraints(externalProxyEntity);
+    // do not validate static data sources
+    if (!isStaticDataSource) {
+      validateMinimalConstraints(externalProxyEntity);
     }
 
-    //entities from static datasources should not have multiple proxies 
+    // entities from static datasources should not have multiple proxies
     if (externalProxies.size() > 1) {
       // cumulatively merge all external proxies
       for (int i = 1; i < externalProxies.size(); i++) {
@@ -72,10 +73,11 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
     Entity europeanaProxyEntity = entityRecord.getEuropeanaProxy().getEntity();
 
     Entity consolidatedEntity = null;
-    if(isStaticDataSource) {
-        consolidatedEntity = EntityObjectFactory.createConsolidatedEntityObject(europeanaProxyEntity);
-    }else {
-        consolidatedEntity = entityRecordService.mergeEntities(europeanaProxyEntity, externalProxyEntity);
+    if (isStaticDataSource) {
+      consolidatedEntity = EntityObjectFactory.createConsolidatedEntityObject(europeanaProxyEntity);
+    } else {
+      consolidatedEntity =
+          entityRecordService.mergeEntities(europeanaProxyEntity, externalProxyEntity);
     }
 
     // add external proxyIds to sameAs / exactMatch
