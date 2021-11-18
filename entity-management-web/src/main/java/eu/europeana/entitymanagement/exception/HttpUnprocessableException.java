@@ -5,8 +5,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 /** Exception thrown when an a request is not accepted to be processed by the server. */
-@ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
-public class HttpNotAcceptableRequestException extends EuropeanaApiException {
+@ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+public class HttpUnprocessableException extends EuropeanaApiException {
 
   /** */
   private static final long serialVersionUID = -4536642651964523519L;
@@ -16,7 +16,7 @@ public class HttpNotAcceptableRequestException extends EuropeanaApiException {
    *
    * @param msg error message
    */
-  public HttpNotAcceptableRequestException(String msg) {
+  public HttpUnprocessableException(String msg) {
     super(msg);
   }
 
@@ -25,7 +25,7 @@ public class HttpNotAcceptableRequestException extends EuropeanaApiException {
    *
    * @param msg error message
    */
-  public HttpNotAcceptableRequestException(String msg, Throwable th) {
+  public HttpUnprocessableException(String msg, Throwable th) {
     super(msg, th);
   }
 
@@ -35,7 +35,7 @@ public class HttpNotAcceptableRequestException extends EuropeanaApiException {
    * @param msg error message
    * @param errorCode error code
    */
-  public HttpNotAcceptableRequestException(String msg, String errorCode) {
+  public HttpUnprocessableException(String msg, String errorCode) {
     super(msg, errorCode);
   }
 
@@ -51,6 +51,6 @@ public class HttpNotAcceptableRequestException extends EuropeanaApiException {
 
   @Override
   public HttpStatus getResponseStatus() {
-    return HttpStatus.NOT_ACCEPTABLE;
+    return HttpStatus.UNPROCESSABLE_ENTITY;
   }
 }

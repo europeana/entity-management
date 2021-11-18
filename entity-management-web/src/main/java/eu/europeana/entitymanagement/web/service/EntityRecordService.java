@@ -34,7 +34,7 @@ import eu.europeana.entitymanagement.exception.EntityAlreadyExistsException;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
-import eu.europeana.entitymanagement.exception.HttpNotAcceptableRequestException;
+import eu.europeana.entitymanagement.exception.HttpUnprocessableException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.utils.EntityObjectFactory;
@@ -193,13 +193,13 @@ public class EntityRecordService {
    * @param identifier id of entity
    * @return Saved Entity record
    * @throws EntityCreationException if an error occurs
-   * @throws HttpNotAcceptableRequestException
+   * @throws HttpUnprocessableException
    * @throws HttpBadRequestException
    */
   public EntityRecord createEntityFromMigrationRequest(
       EntityPreview entityCreationRequest, String type, String identifier)
       throws EntityCreationException, EntityAlreadyExistsException, HttpBadRequestException,
-          HttpNotAcceptableRequestException {
+          HttpUnprocessableException {
     // Fail quick if no datasource is configured
     DataSource externalDatasource = verifyDataSource(entityCreationRequest.getId(), true);
 
@@ -243,7 +243,7 @@ public class EntityRecordService {
   }
 
   public DataSource verifyDataSource(String creationRequestId, boolean allowStatic)
-      throws HttpBadRequestException, HttpNotAcceptableRequestException {
+      throws HttpBadRequestException, HttpUnprocessableException {
     Optional<DataSource> dataSource = datasources.getDatasource(creationRequestId);
     // return 400 error if ID does not match a configured datasource
     if (dataSource.isEmpty()) {
@@ -253,7 +253,7 @@ public class EntityRecordService {
 
     // return 406 error if datasource is static
     if (!allowStatic && dataSource.get().isStatic()) {
-      throw new HttpNotAcceptableRequestException(
+      throw new HttpUnprocessableException(
           String.format(
               "Entity registration not permitted. id %s matches a static datasource.",
               creationRequestId));
