@@ -9,6 +9,7 @@ import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.testutils.MongoContainer;
 import eu.europeana.entitymanagement.testutils.SolrContainer;
@@ -186,8 +187,10 @@ public abstract class AbstractIntegrationTest {
             jaxbContext.createUnmarshaller(), externalId, metisResponse);
 
     assert xmlBaseEntity != null;
+    DataSource dataSource = entityRecordService.verifyDataSource(externalId, false);
     EntityRecord savedRecord =
-        entityRecordService.createEntityFromRequest(entityPreview, xmlBaseEntity.toEntityModel());
+        entityRecordService.createEntityFromRequest(
+            entityPreview, xmlBaseEntity.toEntityModel(), dataSource);
 
     // trigger update to generate consolidated entity
     entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId());

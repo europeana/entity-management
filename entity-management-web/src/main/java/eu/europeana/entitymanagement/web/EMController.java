@@ -11,6 +11,7 @@ import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
+import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType;
@@ -36,7 +37,12 @@ import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import io.swagger.annotations.ApiOperation;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -47,7 +53,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
@@ -157,6 +172,7 @@ public class EMController extends BaseRest {
     }
     logger.info("Re-enabling entityId={}", entityRecord.getEntityId());
     entityRecordService.enableEntityRecord(entityRecord);
+    // entity needs to be added back to the solr index
     solrService.storeEntity(createSolrEntity(entityRecord));
 
     return createResponse(
@@ -212,10 +228,7 @@ public class EMController extends BaseRest {
     entityRecordService.replaceEuropeanaProxy(updateRequestEntity, entityRecord);
     entityRecordService.update(entityRecord);
 
-    // this replaces the existing entity
-    solrService.storeEntity(createSolrEntity(entityRecord));
-    logger.info("Updated Solr document for entityId={}", entityRecord.getEntityId());
-
+    // update the consolidated version in mongo and solr
     return launchTaskAndRetrieveEntity(request, type, identifier, entityRecord, profile);
   }
 
@@ -237,6 +250,9 @@ public class EMController extends BaseRest {
       verifyWriteAccess(Operations.UPDATE, request);
     }
     EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
+    // update from external data source is not available for static data sources
+    entityRecordService.verifyDataSource(
+        entityRecord.getExternalProxies().get(0).getProxyId(), false);
     return launchTaskAndRetrieveEntity(request, type, identifier, entityRecord, profile);
   }
 
@@ -266,6 +282,7 @@ public class EMController extends BaseRest {
       throw new HttpBadRequestException(INVALID_UPDATE_REQUEST_MSG);
     }
 
+    // TODO: consider removing entities from static data sources
     return scheduleBatchUpdates(request, entityIds, ScheduledUpdateType.FULL_UPDATE);
   }
 
@@ -437,11 +454,9 @@ public class EMController extends BaseRest {
       return response;
     }
 
-    // return 400 error if ID does not match a configured datasource
-    if (!datasources.hasDataSource(creationRequestId)) {
-      throw new HttpBadRequestException(
-          String.format("id %s does not match a configured datasource", creationRequestId));
-    }
+    DataSource dataSource =
+        entityRecordService.verifyDataSource(entityCreationRequest.getId(), false);
+
     // in case of Organization it must be the zoho Organization
     String creationRequestType = entityCreationRequest.getType();
     if (EntityTypes.Organization.getEntityType().equals(creationRequestType)
@@ -451,6 +466,36 @@ public class EMController extends BaseRest {
               "The Organization entity should come from Zoho and have the corresponding id format containing: %s",
               DataSources.ZOHO_ID));
     }
+
+    Entity datasourceResponse = dereferenceEntity(creationRequestId, creationRequestType);
+
+    if (datasourceResponse != null && datasourceResponse.getSameReferenceLinks() != null) {
+      existingEntity =
+          entityRecordService.findMatchingCoreference(datasourceResponse.getSameReferenceLinks());
+      response = checkExistingEntity(existingEntity, creationRequestId);
+      if (response != null) {
+        return response;
+      }
+    }
+
+    EntityRecord savedEntityRecord =
+        entityRecordService.createEntityFromRequest(
+            entityCreationRequest, datasourceResponse, dataSource);
+    logger.info(
+        "Created Entity record for externalId={}; entityId={}",
+        creationRequestId,
+        savedEntityRecord.getEntityId());
+
+    return launchTaskAndRetrieveEntity(
+        request,
+        savedEntityRecord.getEntity().getType(),
+        getDatabaseIdentifier(savedEntityRecord.getEntityId()),
+        savedEntityRecord,
+        EntityProfile.internal.toString());
+  }
+
+  Entity dereferenceEntity(String creationRequestId, String creationRequestType)
+      throws Exception, DatasourceNotKnownException, EntityMismatchException {
 
     Dereferencer dereferenceService =
         dereferenceServiceLocator.getDereferencer(creationRequestId, creationRequestType);
@@ -471,29 +516,7 @@ public class EMController extends BaseRest {
               "Datasource type '%s' does not match type '%s' in request",
               datasourceResponse.getType(), creationRequestType));
     }
-
-    if (datasourceResponse.getSameReferenceLinks() != null) {
-      existingEntity =
-          entityRecordService.findMatchingCoreference(datasourceResponse.getSameReferenceLinks());
-      response = checkExistingEntity(existingEntity, creationRequestId);
-      if (response != null) {
-        return response;
-      }
-    }
-
-    EntityRecord savedEntityRecord =
-        entityRecordService.createEntityFromRequest(entityCreationRequest, datasourceResponse);
-    logger.info(
-        "Created Entity record for externalId={}; entityId={}",
-        creationRequestId,
-        savedEntityRecord.getEntityId());
-
-    return launchTaskAndRetrieveEntity(
-        request,
-        savedEntityRecord.getEntity().getType(),
-        getDatabaseIdentifier(savedEntityRecord.getEntityId()),
-        savedEntityRecord,
-        EntityProfile.internal.toString());
+    return datasourceResponse;
   }
 
   @ApiOperation(value = "Change provenance for an Entity", nickname = "changeProvenance")
