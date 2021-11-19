@@ -7,6 +7,8 @@ import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_B
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_BATHTUB_XML;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.CONCEPT_REGISTER_BATHTUB_JSON;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPath;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.PARAM_PROFILE_SYNC;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.QUERY_PARAM_PROFILE;
 import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -59,6 +61,33 @@ public class EntityAdminControllerIT extends BaseWebControllerTest {
         .andExpect(status().isNoContent());
 
     assertedTaskScheduled(entityRecord.getEntityId(), PERMANENT_DELETION);
+  }
+
+  @Test
+  void permanentDeletionWithSyncProfileShouldBeSuccessful() throws Exception {
+    String europeanaMetadata = loadFile(CONCEPT_REGISTER_BATHTUB_JSON);
+    String metisResponse = loadFile(CONCEPT_BATHTUB_XML);
+
+    EntityRecord entityRecord = createEntity(europeanaMetadata, metisResponse, CONCEPT_BATHTUB_URI);
+
+    // confirm that Solr document is saved
+    SolrConcept solrConcept = solrService.searchById(SolrConcept.class, entityRecord.getEntityId());
+    Assertions.assertNotNull(solrConcept);
+
+    String requestPath = getEntityRequestPath(entityRecord.getEntityId());
+
+    mockMvc
+        .perform(
+            delete(BASE_SERVICE_URL + "/" + requestPath + BASE_ADMIN_URL)
+                .param(QUERY_PARAM_PROFILE, PARAM_PROFILE_SYNC)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent());
+
+    Optional<EntityRecord> dbRecordOptional = retrieveEntity(entityRecord.getEntityId());
+    Assertions.assertTrue(dbRecordOptional.isEmpty());
+
+    // confirm that Solr document no longer exists
+    Assertions.assertNull(solrService.searchById(SolrConcept.class, entityRecord.getEntityId()));
   }
 
   @Test
@@ -125,10 +154,6 @@ public class EntityAdminControllerIT extends BaseWebControllerTest {
         .andExpect(jsonPath("$.type", is(EntityTypes.Concept.name())))
         .andExpect(jsonPath("$.prefLabel[*]", hasSize(11))) // 4 labels removed through cleaning
         .andExpect(jsonPath("$.altLabel[*]", hasSize(1)));
-
-    // check that record is present
-    //    Optional<EntityRecord> dbRecordOptional = retrieveEntity(entityId);
-    //    Assertions.assertFalse(dbRecordOptional.isEmpty());
   }
 
   String migrateStaticDataSource() throws Exception {

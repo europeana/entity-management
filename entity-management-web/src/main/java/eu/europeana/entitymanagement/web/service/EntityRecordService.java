@@ -90,6 +90,10 @@ public class EntityRecordService {
     this.datasources = datasources;
   }
 
+  public boolean existsByEntityId(String entityId) {
+    return entityRecordRepository.existsByEntityId(entityId);
+  }
+
   public Optional<EntityRecord> retrieveByEntityId(String entityId) {
     return Optional.ofNullable(entityRecordRepository.findByEntityId(entityId));
   }
