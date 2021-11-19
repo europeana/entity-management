@@ -13,6 +13,7 @@ import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationExcept
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
+import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
@@ -23,7 +24,6 @@ import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import io.swagger.annotations.ApiOperation;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,6 +50,7 @@ public class EntityAdminController extends BaseRest {
   private static final Logger LOG = LogManager.getLogger(EntityAdminController.class);
 
   private final EntityRecordService entityRecordService;
+  private final SolrService solrService;
   private final EntityUpdateService entityUpdateService;
   private final EntityManagementConfiguration emConfig;
 
@@ -57,26 +58,15 @@ public class EntityAdminController extends BaseRest {
   public EntityAdminController(
       EntityRecordService entityRecordService,
       EntityUpdateService entityUpdateService,
+      SolrService solrService,
       EntityManagementConfiguration emConfig) {
     this.entityRecordService = entityRecordService;
     this.entityUpdateService = entityUpdateService;
+    this.solrService = solrService;
     this.emConfig = emConfig;
   }
 
-  /**
-   * Method to publish to Enrichment
-   *
-   * @param wskey
-   * @param type type of entity
-   * @param identifier entity id
-   * @param request
-   * @return
-   * @throws HttpException
-   */
-  @ApiOperation(
-      value = "Permanent Deletion of Entity",
-      nickname = "deleteEntity",
-      response = java.lang.Void.class)
+  @ApiOperation(value = "Permanent Deletion of Entity", nickname = "deleteEntity")
   @DeleteMapping(
       value = "/{type}/{identifier}/management",
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
@@ -84,22 +74,30 @@ public class EntityAdminController extends BaseRest {
       @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
       @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
       @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
+      @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = false)
+          String profile,
       HttpServletRequest request)
       throws HttpException, EuropeanaApiException {
     if (emConfig.isAuthEnabled()) {
       verifyWriteAccess(Operations.DELETE, request);
     }
     String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
-    Optional<EntityRecord> entityRecordOptional = entityRecordService.retrieveByEntityId(entityUri);
-    if (entityRecordOptional.isEmpty()) {
+    if (!entityRecordService.existsByEntityId(entityUri)) {
       throw new EntityNotFoundException(entityUri);
     }
-    EntityRecord entityRecord = entityRecordOptional.get();
 
-    LOG.info("Permanently deleting entityId={}", entityRecord.getEntityId());
-    entityUpdateService.scheduleTasks(
-        Collections.singletonList(entityRecord.getEntityId()),
-        ScheduledRemovalType.PERMANENT_DELETION);
+    boolean isSynchronous = WebEntityConstants.PARAM_PROFILE_SYNC.equals(profile);
+
+    LOG.info("Permanently deleting entityId={}, isSynchronous={}", entityUri, isSynchronous);
+
+    if (isSynchronous) {
+      // delete from Solr before Mongo, so Solr errors won't leave DB in an inconsistent state
+      solrService.deleteById(List.of(entityUri));
+      entityRecordService.delete(entityUri);
+    } else {
+      entityUpdateService.scheduleTasks(
+          Collections.singletonList(entityUri), ScheduledRemovalType.PERMANENT_DELETION);
+    }
 
     return noContentResponse(request);
   }
