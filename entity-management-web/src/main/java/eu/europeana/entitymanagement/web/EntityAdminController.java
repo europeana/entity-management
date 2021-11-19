@@ -22,6 +22,7 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import io.swagger.annotations.ApiOperation;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -86,7 +87,10 @@ public class EntityAdminController extends BaseRest {
       throw new EntityNotFoundException(entityUri);
     }
 
-    boolean isSynchronous = WebEntityConstants.PARAM_PROFILE_SYNC.equals(profile);
+    // profile can be "debug,sync"
+    boolean isSynchronous =
+        StringUtils.hasLength(profile)
+            && Arrays.asList(profile.split(",")).contains(WebEntityConstants.PARAM_PROFILE_SYNC);
 
     LOG.info("Permanently deleting entityId={}, isSynchronous={}", entityUri, isSynchronous);
 
