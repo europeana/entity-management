@@ -118,15 +118,15 @@ public class EntityFieldsCompleteValidator
       return false;
     } else {
       EntityFieldsTypes fieldType = EntityFieldsTypes.valueOf(field.getName());
-      boolean isUri = EntityUtils.isUri(fieldValue);
-      if (!"".equals(key) && isUri) {
+      boolean isUrl = EntityUtils.isUrl(fieldValue);
+      if (!"".equals(key) && isUrl) {
         // do not allow URIs for other key than empty keys
         addUriNotAllowedConstraint(context, field, fieldValue, key);
         return false;
-      } else if ("".equals(key) && isUri) {
+      } else if ("".equals(key) && isUrl) {
         // key "", allow URIs only for field type TEXT OR URI
         if (EntityFieldsTypes.FIELD_TYPE_TEXT_OR_URI.equals(fieldType.getFieldType())) {
-          return validateURIField(context, field, fieldValue);
+          return validateURIFormat(context, field, fieldValue);
         } else {
           addUriNotAllowedConstraint(context, field, fieldValue, key);
           return false;
@@ -260,7 +260,7 @@ public class EntityFieldsCompleteValidator
     if (field.getType().isAssignableFrom(ArrayList.class)) {
       returnValue = validateURIListField(context, field, (List<String>) fieldValue);
     } else if (field.getType().isAssignableFrom(String.class)) {
-      returnValue = validateURIField(context, field, (String) fieldValue);
+      returnValue = validateURIFormat(context, field, (String) fieldValue);
     }
     return returnValue;
   }
@@ -276,31 +276,14 @@ public class EntityFieldsCompleteValidator
       return false;
     }
     for (String fieldValueElem : fieldValues) {
-      if (!validateURIField(context, field, fieldValueElem)) {
+      if (!validateURIFormat(context, field, fieldValueElem)) {
         returnValue = false;
       }
     }
     return returnValue;
   }
 
-  boolean validateURIField(ConstraintValidatorContext context, Field field, String fieldValue) {
-    if (EntityUtils.isUri(fieldValue)) {
-      return validateUriFormat(context, field, fieldValue);
-    } else {
-      addConstraint(
-          context,
-          "The entity field: "
-              + field.getName()
-              + " is of type: "
-              + EntityFieldsTypes.getFieldType(field.getName())
-              + " but it's value: "
-              + fieldValue
-              + " does not have the URI form.");
-      return false;
-    }
-  }
-
-  boolean validateUriFormat(ConstraintValidatorContext context, Field field, String fieldValue) {
+  boolean validateURIFormat(ConstraintValidatorContext context, Field field, String fieldValue) {
     // validate URI Format
     try {
       new URI(fieldValue);
@@ -394,7 +377,7 @@ public class EntityFieldsCompleteValidator
       String multilingualValue,
       String fieldType) {
     if ("".equals(key) && FIELD_TYPE_TEXT_OR_URI.equals(fieldType)) {
-      return validateUriFormat(context, field, multilingualValue);
+      return validateURIFormat(context, field, multilingualValue);
     } else {
       return validateStringValue(context, field, multilingualValue, key);
     }
@@ -425,19 +408,19 @@ public class EntityFieldsCompleteValidator
       ConstraintValidatorContext context, Field field, WebResource webResource) {
     boolean isValid = true;
 
-    if (webResource.getId() == null || !validateURIField(context, field, webResource.getId())) {
+    if (webResource.getId() == null || !validateURIFormat(context, field, webResource.getId())) {
       addConstraint(context, "Field " + field.getName() + " has an invalid id value");
       isValid = false;
     }
     if (webResource.getSource() == null
-        || !validateURIField(context, field, webResource.getSource())) {
+        || !validateURIFormat(context, field, webResource.getSource())) {
       addConstraint(context, "Field " + field.getName() + " has an invalid source value");
       isValid = false;
     }
 
     // thumbnail can be empty
     if (StringUtils.hasLength(webResource.getThumbnail())
-        && !validateURIField(context, field, webResource.getThumbnail())) {
+        && !validateURIFormat(context, field, webResource.getThumbnail())) {
       addConstraint(context, "Field " + field.getName() + " has an invalid thumbnail value");
       isValid = false;
     }

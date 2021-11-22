@@ -537,7 +537,7 @@ public class EntityRecordService {
   }
 
   private void addValueOrInternalReference(List<String> updatedReferences, String value) {
-    if (!EntityUtils.isUri(value) || value.startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI)) {
+    if (!EntityUtils.isUrl(value) || value.startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI)) {
       // value is not a reference or it is an internal referece
       updatedReferences.add(value);
     } else {

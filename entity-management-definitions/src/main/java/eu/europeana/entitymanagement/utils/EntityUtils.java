@@ -33,7 +33,7 @@ public class EntityUtils {
     }
   }
 
-  public static boolean isUri(String value) {
+  public static boolean isUrl(String value) {
     if (value.startsWith("http://") || value.startsWith("https://")) {
       return true;
     } else {
