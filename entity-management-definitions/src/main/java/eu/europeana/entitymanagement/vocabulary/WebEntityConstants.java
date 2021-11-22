@@ -23,6 +23,8 @@ public interface WebEntityConstants extends WebEntityFields {
   public static final String QUERY_PARAM_PAGE_SIZE = "pageSize";
   public static final String QUERY_PARAM_WSKEY = "wskey";
 
+  public static final String PARAM_PROFILE_SYNC = "sync";
+
   public static final String PARAM_TYPE_ALL = "All";
   public static final String PARAM_LANGUAGE_ALL = "all";
   public static final String PARAM_LANGUAGE_EN = "en";

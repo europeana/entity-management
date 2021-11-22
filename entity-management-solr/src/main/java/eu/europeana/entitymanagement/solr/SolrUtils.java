@@ -4,7 +4,6 @@ import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Concept;
 import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.definitions.model.Place;
@@ -156,11 +155,12 @@ public class SolrUtils {
       }
     }
 
-    EntityProxy europeanaProxy = record.getEuropeanaProxy();
-    if (europeanaProxy != null) {
-      // rights only set in Europeana proxy
-      solrEntity.setRights(List.of(europeanaProxy.getProxyIn().getRights()));
-    }
+    // NOTE:  Commented out as not supported in the MVP, needs to be re-assessed for future versions
+    //    EntityProxy europeanaProxy = record.getEuropeanaProxy();
+    //    if (europeanaProxy != null) {
+    //      // rights only set in Europeana proxy
+    //      solrEntity.setRights(List.of(europeanaProxy.getProxyIn().getRights()));
+    //    }
 
     if (solrEntity.getDocCount() != null && solrEntity.getDocCount() > 0) {
       // set type & in_europeana filter

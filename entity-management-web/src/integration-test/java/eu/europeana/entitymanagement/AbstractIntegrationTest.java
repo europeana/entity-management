@@ -6,11 +6,20 @@ import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZAT
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_BNF_WIKIDATA_RESPONSE_XML;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
+import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.common.config.DataSource;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.testutils.MongoContainer;
 import eu.europeana.entitymanagement.testutils.SolrContainer;
+import eu.europeana.entitymanagement.web.MetisDereferenceUtils;
+import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
+import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import java.io.IOException;
 import java.util.Objects;
+import javax.xml.bind.JAXBContext;
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -21,6 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
@@ -36,6 +46,14 @@ public abstract class AbstractIntegrationTest {
   private static final Logger logger = LogManager.getLogger(AbstractIntegrationTest.class);
   private static final MongoContainer MONGO_CONTAINER;
   private static final SolrContainer SOLR_CONTAINER;
+
+  @Autowired protected JAXBContext jaxbContext;
+
+  @Qualifier(AppConfigConstants.BEAN_JSON_MAPPER)
+  @Autowired
+  protected ObjectMapper objectMapper;
+
+  @Autowired protected EntityUpdateService entityUpdateService;
 
   static {
     MONGO_CONTAINER =
@@ -159,5 +177,25 @@ public abstract class AbstractIntegrationTest {
         return new MockResponse().setResponseCode(404);
       }
     };
+  }
+
+  protected EntityRecord createEntity(
+      String europeanaMetadata, String metisResponse, String externalId) throws Exception {
+    EntityPreview entityPreview = objectMapper.readValue(europeanaMetadata, EntityPreview.class);
+    XmlBaseEntityImpl<?> xmlBaseEntity =
+        MetisDereferenceUtils.parseMetisResponse(
+            jaxbContext.createUnmarshaller(), externalId, metisResponse);
+
+    assert xmlBaseEntity != null;
+    DataSource dataSource = entityRecordService.verifyDataSource(externalId, false);
+    EntityRecord savedRecord =
+        entityRecordService.createEntityFromRequest(
+            entityPreview, xmlBaseEntity.toEntityModel(), dataSource);
+
+    // trigger update to generate consolidated entity
+    entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId());
+
+    // return entityRecord version with consolidated entity
+    return entityRecordService.retrieveByEntityId(savedRecord.getEntityId()).orElseThrow();
   }
 }

@@ -142,7 +142,7 @@ public class ScheduledTaskRepository implements InitializingBean {
 
   /**
    * Queries the ScheduledTasks collection for records that match the given filter(s). Then
-   * retrieves the matching EntityRecords Results are sorted in ascending order of created
+   * retrieves the matching EntityRecords. Results are sorted in ascending order of entityId.
    *
    * @param filters Query filters
    * @return List with results

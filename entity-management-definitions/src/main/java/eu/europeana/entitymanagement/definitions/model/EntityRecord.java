@@ -18,13 +18,7 @@ import org.bson.types.ObjectId;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @dev.morphia.annotations.Entity("EntityRecord")
-@Indexes({
-  @Index(fields = {@Field(ENTITY_EXACT_MATCH)}),
-  @Index(fields = {@Field(ENTITY_SAME_AS)}),
-
-  // temporary index for migration
-  @Index(fields = @Field(ENTITY_TYPE))
-})
+@Indexes({@Index(fields = {@Field(ENTITY_EXACT_MATCH)}), @Index(fields = {@Field(ENTITY_SAME_AS)})})
 @EntityListeners(EntityRecordWatcher.class)
 public class EntityRecord {
 
@@ -41,7 +35,7 @@ public class EntityRecord {
 
   @JsonIgnore private Date created;
 
-  @JsonIgnore @Indexed private Date modified;
+  @JsonIgnore private Date modified;
 
   @JsonGetter
   public Entity getEntity() {

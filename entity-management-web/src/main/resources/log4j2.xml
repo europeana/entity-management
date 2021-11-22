@@ -21,5 +21,8 @@
         See https://stackoverflow.com/questions/23780587/spring-batch-reader-in-multi-threader-job -->
         <Logger name="org.springframework.batch.core.step" level="ERROR"/>
         
+        <!-- Suppress "Invalid cookie header" warnings during Wikidata dereferencing         -->
+        <Logger name="org.apache.http.client.protocol.ResponseProcessCookies" level="ERROR"/>
+
     </Loggers>
 </Configuration>

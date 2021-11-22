@@ -1,0 +1,32 @@
+{
+  "id": "http://data.europeana.eu/concept/base/1689",
+  "type": "Concept",
+  "prefLabel": {
+    "bg": "Негативен отпечатък",
+    "ca": "Negatiu en paper",
+    "da": "Negative udskrifter",
+    "de": "Negativ-Abzüge",
+    "en": "Negative prints",
+    "es": "Impresiones negativas",
+    "fr": "Épreuve négative",
+    "it": "Stampe negative",
+    "lt": "Negatyvo atspaudai",
+    "nl": "Negatiefdruk",
+    "pl": "Odbitki negatywowe",
+    "ru": "Оттиск негатива",
+    "sl": "Tlač z negatívu",
+    "uk": "Відтиснення негативу",
+    "zh": "负片"
+  },
+  "altLabel": {
+    "de": [
+      "Negativ prints"
+    ]
+  },
+  "broader": [
+    "http://data.europeana.eu/concept/base/1720"
+  ],
+  "exactMatch": [
+    "http://bib.arts.kuleuven.be/photoVocabulary/-photoVocabulary-11008"
+  ]
+}

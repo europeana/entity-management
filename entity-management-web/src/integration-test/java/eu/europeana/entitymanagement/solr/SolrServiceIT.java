@@ -6,10 +6,8 @@ import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZAT
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.PLACE_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.TIMESPAN_JSON;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
-import static eu.europeana.entitymanagement.vocabulary.EntitySolrFields.RIGHTS;
 import static eu.europeana.entitymanagement.vocabulary.EntitySolrFields.SUGGEST_FILTERS;
 import static eu.europeana.entitymanagement.vocabulary.EntitySolrFields.SUGGEST_FILTER_EUROPEANA;
-import static eu.europeana.entitymanagement.vocabulary.EntitySolrFields.TYPE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 
@@ -50,7 +48,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 public class SolrServiceIT extends AbstractIntegrationTest {
 
-  private static final String RIGHTS_PD = "https://creativecommons.org/publicdomain/zero/1.0/";
+  //  private static final String RIGHTS_PD = "https://creativecommons.org/publicdomain/zero/1.0/";
 
   @Qualifier(AppConfig.BEAN_EM_SOLR_SERVICE)
   @Autowired
@@ -93,8 +91,6 @@ public class SolrServiceIT extends AbstractIntegrationTest {
     europeanaProxy.setProxyId(EntityRecordUtils.getEuropeanaProxyId(record.getEntityId()));
     europeanaProxy.setEntity(agent);
     Aggregation proxyIn = new Aggregation();
-    // rights are set on  EuropeanaProxy proxyIn
-    proxyIn.setRights(RIGHTS_PD);
     europeanaProxy.setProxyIn(proxyIn);
     record.addProxy(europeanaProxy);
     return record;
@@ -113,18 +109,6 @@ public class SolrServiceIT extends AbstractIntegrationTest {
             + ":"
             + record.getEntity().getType();
 
-    List<SolrEntity<?>> agents = getSolrEntities(searchQuery);
-    Assertions.assertNotNull(agents);
-    Assertions.assertNotNull(agents.get(0));
-    Assertions.assertEquals(record.getEntity().getEntityId(), agents.get(0).getEntityId());
-  }
-
-  @Test
-  public void searchAgentWithRights() throws Exception {
-    EntityRecord record = buildAgentRecord();
-    emSolrService.storeEntity(SolrUtils.createSolrEntity(record));
-    String searchQuery =
-        TYPE + ":" + record.getEntity().getType() + " AND " + RIGHTS + ":\"" + RIGHTS_PD + "\"";
     List<SolrEntity<?>> agents = getSolrEntities(searchQuery);
     Assertions.assertNotNull(agents);
     Assertions.assertNotNull(agents.get(0));

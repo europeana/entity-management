@@ -1,5 +1,7 @@
 package eu.europeana.entitymanagement.batch.processor;
 
+import eu.europeana.entitymanagement.common.config.DataSource;
+import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -29,11 +31,14 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
   private static final Logger logger = LogManager.getLogger(EntityDereferenceProcessor.class);
   private final DereferenceServiceLocator dereferenceServiceLocator;
   private final EntityComparator entityComparator;
+  private final DataSources datasources;
 
   @Autowired
-  public EntityDereferenceProcessor(DereferenceServiceLocator dereferenceServiceLocator) {
+  public EntityDereferenceProcessor(
+      DereferenceServiceLocator dereferenceServiceLocator, DataSources datasources) {
     this.dereferenceServiceLocator = dereferenceServiceLocator;
     this.entityComparator = new EntityComparator();
+    this.datasources = datasources;
   }
 
   @Override
@@ -41,6 +46,11 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
     String entityId = entityRecord.getEntityId();
     for (EntityProxy externalProxy : entityRecord.getExternalProxies()) {
       String proxyId = externalProxy.getProxyId();
+      // do not update external proxy for static data sources
+      Optional<DataSource> dataSource = datasources.getDatasource(proxyId);
+      if (dataSource.isPresent() && dataSource.get().isStatic()) {
+        continue;
+      }
 
       Dereferencer dereferencer =
           dereferenceServiceLocator.getDereferencer(proxyId, entityRecord.getEntity().getType());
