@@ -16,35 +16,24 @@ public class SolrEntitySuggesterFilterConfig {
   @Bean(BEAN_SOLR_ENTITY_SUGGESTER_FILTER)
   public FilterProvider solrEntitySuggesterFilter() {
     SimpleFilterProvider filterProvider = new SimpleFilterProvider();
-    filterProvider.addFilter(
-        SOLR_AGENT_SUGGESTER_FILTER,
-        SimpleBeanPropertyFilter.filterOutAllExcept(
-            "id",
-            "type",
-            "isShownBy",
-            "prefLabel",
-            "altLabel",
-            "hiddenLabel",
-            "dateOfBirth",
-            "dateOfDeath",
-            "dateOfEstablishment",
+    filterProvider.addFilter(SOLR_AGENT_SUGGESTER_FILTER,
+        SimpleBeanPropertyFilter.filterOutAllExcept("id", "type", "isShownBy", "prefLabel",
+            "altLabel", "hiddenLabel", "dateOfBirth", "dateOfDeath", "dateOfEstablishment",
             "dateOfTermination"));
-    filterProvider.addFilter(
-        SOLR_ORGANIZATION_SUGGESTER_FILTER,
-        SimpleBeanPropertyFilter.filterOutAllExcept(
-            "id",
-            "type",
-            "isShownBy",
-            "prefLabel",
-            "altLabel",
-            "hiddenLabel",
-            "acronym",
-            "organizationDomain",
-            "country"));
-    filterProvider.addFilter(
-        SOLR_TIMESPAN_SUGGESTER_FILTER,
-        SimpleBeanPropertyFilter.filterOutAllExcept(
-            "id", "type", "isShownBy", "prefLabel", "altLabel", "hiddenLabel", "begin", "end"));
+    filterProvider.addFilter(SOLR_ORGANIZATION_SUGGESTER_FILTER,
+        SimpleBeanPropertyFilter.filterOutAllExcept("id", "type", "isShownBy", "prefLabel",
+            "altLabel", "hiddenLabel", "acronym", "organizationDomain", "country"));
+    filterProvider.addFilter(SOLR_TIMESPAN_SUGGESTER_FILTER,
+        SimpleBeanPropertyFilter.filterOutAllExcept("id", "type", "isShownBy", "prefLabel",
+            "altLabel", "hiddenLabel", "begin", "end"));
+    filterProvider.addFilter(SOLR_PLACE_SUGGESTER_FILTER,
+        SimpleBeanPropertyFilter.filterOutAllExcept("id", "type", "isShownBy", "prefLabel",
+            "altLabel", "hiddenLabel"));
+    filterProvider.addFilter(SOLR_CONCEPT_SUGGESTER_FILTER,
+        SimpleBeanPropertyFilter.filterOutAllExcept("id", "type", "isShownBy", "prefLabel",
+            "altLabel", "hiddenLabel"));
+    
+    
     return filterProvider;
   }
 }
