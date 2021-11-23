@@ -21,6 +21,7 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import java.util.Optional;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -140,6 +141,34 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
   }
 
   @Test
+  void retrieveConceptXmlExternalShouldBeSuccessful() throws Exception {
+
+    String europeanaMetadata = loadFile(CONCEPT_REGISTER_BATHTUB_JSON);
+    String metisResponse = loadFile(CONCEPT_BATHTUB_XML);
+
+    String entityId =
+        createEntity(europeanaMetadata, metisResponse, CONCEPT_BATHTUB_URI).getEntityId();
+
+    String requestPath = getEntityRequestPath(entityId);
+    ResultActions resultActions =
+        mockMvc
+            .perform(
+                get(BASE_SERVICE_URL + "/" + requestPath + ".xml")
+                    .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                    .accept(MediaType.APPLICATION_XML))
+            .andExpect(status().isOk());
+
+    Assertions.assertTrue(
+        resultActions.andReturn().getResponse().getContentAsString().contains(entityId));
+    Assertions.assertTrue(
+        resultActions
+            .andReturn()
+            .getResponse()
+            .getContentAsString()
+            .contains(EntityTypes.Concept.name()));
+  }
+
+  @Test
   void retrievalWithDebugProfileShouldIncludeFailedTask() throws Exception {
 
     String europeanaMetadata = loadFile(CONCEPT_REGISTER_BATHTUB_JSON);
@@ -233,6 +262,33 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(entityId)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())));
+  }
+
+  @Test
+  public void retrieveAgentXmlExternalShouldBeSuccessful() throws Exception {
+    String europeanaMetadata = loadFile(AGENT_REGISTER_DAVINCI_JSON);
+    String metisResponse = loadFile(AGENT_DA_VINCI_XML);
+
+    String entityId =
+        createEntity(europeanaMetadata, metisResponse, AGENT_DA_VINCI_URI).getEntityId();
+
+    String requestPath = getEntityRequestPath(entityId);
+    ResultActions resultActions =
+        mockMvc
+            .perform(
+                get(BASE_SERVICE_URL + "/" + requestPath + ".xml")
+                    .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                    .accept(MediaType.APPLICATION_XML))
+            .andExpect(status().isOk());
+
+    Assertions.assertTrue(
+        resultActions.andReturn().getResponse().getContentAsString().contains(entityId));
+    Assertions.assertTrue(
+        resultActions
+            .andReturn()
+            .getResponse()
+            .getContentAsString()
+            .contains(EntityTypes.Agent.name()));
   }
 
   @Test
@@ -347,6 +403,41 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
   }
 
   @Test
+  public void retrieveOrganizationXmlExternalShouldBeSuccessful() throws Exception {
+    // id in JSON matches ORGANIZATION_BNF_URI_ZOHO value
+    String europeanaMetadata = loadFile(ORGANIZATION_REGISTER_BNF_ZOHO_JSON);
+    Optional<Record> zohoRecord = getZohoOrganizationRecord(ORGANIZATION_BNF_URI_ZOHO);
+
+    assert zohoRecord.isPresent() : "Mocked Zoho response not loaded";
+    EntityRecord entityRecord = createOrganization(europeanaMetadata, zohoRecord.get());
+    String entityId = entityRecord.getEntityId();
+
+    String requestPath = getEntityRequestPath(entityId);
+    ResultActions resultActions =
+        mockMvc
+            .perform(
+                get(BASE_SERVICE_URL + "/" + requestPath + ".xml")
+                    .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                    .accept(MediaType.APPLICATION_XML))
+            .andExpect(status().isOk());
+
+    Assertions.assertTrue(
+        resultActions.andReturn().getResponse().getContentAsString().contains(entityId));
+    Assertions.assertTrue(
+        resultActions
+            .andReturn()
+            .getResponse()
+            .getContentAsString()
+            .contains(EntityTypes.Organization.name()));
+    if (entityRecord.getEntity().getIsAggregatedBy() != null) {
+      for (String aggregate : entityRecord.getEntity().getIsAggregatedBy().getAggregates()) {
+        Assertions.assertTrue(
+            resultActions.andReturn().getResponse().getContentAsString().contains(aggregate));
+      }
+    }
+  }
+
+  @Test
   public void retrievePlaceJsonExternalShouldBeSuccessful() throws Exception {
     String europeanaMetadata = loadFile(PLACE_REGISTER_PARIS_JSON);
     String metisResponse = loadFile(PLACE_PARIS_XML);
@@ -362,6 +453,32 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(entityId)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Place.name())));
+  }
+
+  @Test
+  public void retrievePlaceXmlExternalShouldBeSuccessful() throws Exception {
+    String europeanaMetadata = loadFile(PLACE_REGISTER_PARIS_JSON);
+    String metisResponse = loadFile(PLACE_PARIS_XML);
+
+    String entityId = createEntity(europeanaMetadata, metisResponse, PLACE_PARIS_URI).getEntityId();
+
+    String requestPath = getEntityRequestPath(entityId);
+    ResultActions resultActions =
+        mockMvc
+            .perform(
+                get(BASE_SERVICE_URL + "/" + requestPath + ".xml")
+                    .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                    .accept(MediaType.APPLICATION_XML))
+            .andExpect(status().isOk());
+
+    Assertions.assertTrue(
+        resultActions.andReturn().getResponse().getContentAsString().contains(entityId));
+    Assertions.assertTrue(
+        resultActions
+            .andReturn()
+            .getResponse()
+            .getContentAsString()
+            .contains(EntityTypes.Place.name()));
   }
 
   @Test
@@ -384,7 +501,34 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
   }
 
   @Test
-  public void retrieveEntityInternalShouldBeSuccessful() throws Exception {
+  public void retrieveTimespanXmlExternalShouldBeSuccessful() throws Exception {
+    String europeanaMetadata = loadFile(TIMESPAN_REGISTER_1ST_CENTURY_JSON);
+    String metisResponse = loadFile(TIMESPAN_1ST_CENTURY_XML);
+
+    String entityId =
+        createEntity(europeanaMetadata, metisResponse, TIMESPAN_1ST_CENTURY_URI).getEntityId();
+
+    String requestPath = getEntityRequestPath(entityId);
+    ResultActions resultActions =
+        mockMvc
+            .perform(
+                get(BASE_SERVICE_URL + "/" + requestPath + ".xml")
+                    .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                    .accept(MediaType.APPLICATION_XML))
+            .andExpect(status().isOk());
+
+    Assertions.assertTrue(
+        resultActions.andReturn().getResponse().getContentAsString().contains(entityId));
+    Assertions.assertTrue(
+        resultActions
+            .andReturn()
+            .getResponse()
+            .getContentAsString()
+            .contains(EntityTypes.TimeSpan.name()));
+  }
+
+  @Test
+  public void retrieveEntityInternalJsonShouldBeSuccessful() throws Exception {
     String europeanaMetadata = loadFile(CONCEPT_REGISTER_BATHTUB_JSON);
     String metisResponse = loadFile(CONCEPT_BATHTUB_XML);
 

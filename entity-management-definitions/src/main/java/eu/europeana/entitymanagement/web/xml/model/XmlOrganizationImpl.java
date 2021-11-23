@@ -76,7 +76,9 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     }
     this.phone = organization.getPhone();
     this.mbox = organization.getMbox();
-    this.hasAddress = new XmlAddresses(List.of(new XmlAddressImpl(organization.getAddress())));
+    if (organization.getAddress() != null) {
+      this.hasAddress = new XmlAddresses(List.of(new XmlAddressImpl(organization.getAddress())));
+    }
     this.identifier = organization.getIdentifier();
   }
 
