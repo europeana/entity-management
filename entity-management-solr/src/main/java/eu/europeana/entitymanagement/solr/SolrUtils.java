@@ -34,7 +34,7 @@ public class SolrUtils {
   public static final String SOLR_TIMESPAN_SUGGESTER_FILTER = "solrTimeSpanFilter";
   public static final String SOLR_PLACE_SUGGESTER_FILTER = "solrPlaceFilter";
   public static final String SOLR_CONCEPT_SUGGESTER_FILTER = "solrConceptFilter";
-  
+
   /**
    * This method adds prefixes to the fields in format Map<String, List<String>> languageMap e.g.
    * "skos_prefLabel"

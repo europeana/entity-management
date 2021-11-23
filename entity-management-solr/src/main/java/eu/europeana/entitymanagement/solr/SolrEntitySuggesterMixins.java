@@ -21,10 +21,10 @@ public class SolrEntitySuggesterMixins {
 
   @JsonFilter(SOLR_TIMESPAN_SUGGESTER_FILTER)
   public static class TimeSpanSuggesterMixin {}
-  
+
   @JsonFilter(SOLR_PLACE_SUGGESTER_FILTER)
   public static class PlaceSuggesterMixin {}
-  
+
   @JsonFilter(SOLR_CONCEPT_SUGGESTER_FILTER)
   public static class ConceptSuggesterMixin {}
 }

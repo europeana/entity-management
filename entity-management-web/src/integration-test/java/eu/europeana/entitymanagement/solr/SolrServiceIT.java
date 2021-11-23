@@ -11,18 +11,7 @@ import static eu.europeana.entitymanagement.vocabulary.EntitySolrFields.SUGGEST_
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.context.SpringBootTest;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,6 +36,18 @@ import eu.europeana.entitymanagement.solr.model.SolrTimeSpan;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 public class SolrServiceIT extends AbstractIntegrationTest {
@@ -81,23 +82,23 @@ public class SolrServiceIT extends AbstractIntegrationTest {
   void verifyPayload(SolrEntity<?> entity) {
     String payload = entity.getPayload();
     Assertions.assertNotNull(payload);
-    //mandatory fields
+    // mandatory fields
     assertThat(payload, Matchers.containsString("\"prefLabel\""));
     assertThat(payload, Matchers.containsString("\"type\""));
-    
-    //for organizations verify country
-    if(EntityTypes.Organization.getEntityType().equals(entity.getType())) {
+
+    // for organizations verify country
+    if (EntityTypes.Organization.getEntityType().equals(entity.getType())) {
       assertThat(payload, Matchers.containsString("\"country\""));
-      assertThat(payload, Matchers.containsString("\"organizationDomain\""));  
+      assertThat(payload, Matchers.containsString("\"organizationDomain\""));
     }
   }
 
   void verifyIsShownBy(String payload) {
-    //verify isShownBy
+    // verify isShownBy
     assertThat(payload, Matchers.containsString("\"isShownBy\""));
     assertThat(payload, Matchers.containsString("\"source\""));
     assertThat(payload, Matchers.containsString("\"thumbnail\""));
-    //id and isShownBy.id
+    // id and isShownBy.id
     assertEquals(2, StringUtils.countMatches(payload, "\"id\""));
   }
 
@@ -143,7 +144,7 @@ public class SolrServiceIT extends AbstractIntegrationTest {
     Assertions.assertNotNull(agents.get(0).getPayload());
     verifyPayload(agents.get(0));
     verifyIsShownBy(agents.get(0).getPayload());
-    
+
     Assertions.assertEquals(record.getEntity().getEntityId(), agents.get(0).getEntityId());
   }
 
@@ -186,7 +187,6 @@ public class SolrServiceIT extends AbstractIntegrationTest {
     Assertions.assertNotNull(storedConcept);
     verifyPayload(storedConcept);
     Assertions.assertEquals(concept.getEntityId(), storedConcept.getEntityId());
-    
   }
 
   @Test
@@ -225,7 +225,6 @@ public class SolrServiceIT extends AbstractIntegrationTest {
     assertThat(results, hasSize(1));
     verifyPayload(results.get(0));
     verifyIsShownBy(results.get(0).getPayload());
-    
   }
 
   /** Helper method to retrieve SolrEntities via search query */
