@@ -655,7 +655,7 @@ public class EMController extends BaseRest {
     Map<Boolean, List<EntityIdDisabledStatus>> entityIdsByDisabled =
         statusList.stream().collect(groupingBy(EntityIdDisabledStatus::isDisabled));
 
-    // get entityIds that can be scheduled (disabled = false)
+    // get entityIds that can be scheduled (they are not disabled)
     List<EntityIdDisabledStatus> nonDisabledEntities = entityIdsByDisabled.get(false);
     List<String> toBeScheduled =
         CollectionUtils.isEmpty(nonDisabledEntities)

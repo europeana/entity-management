@@ -153,7 +153,7 @@ public class EntityRecordService {
   }
 
   public void disableEntityRecord(EntityRecord er) {
-    er.setDisabled(true);
+    er.setDisabled(new Date());
     saveEntityRecord(er);
   }
 
@@ -164,7 +164,7 @@ public class EntityRecordService {
    * @return Re-Enabled entity
    */
   public EntityRecord enableEntityRecord(EntityRecord entityRecord) {
-    entityRecord.setDisabled(false);
+    entityRecord.setDisabled(null);
     return saveEntityRecord(entityRecord);
   }
 

@@ -67,7 +67,9 @@ public class DataSourceConfig {
     logger.info("Configuring Entity Management database: {}", emDatabase);
     Datastore datastore =
         Morphia.createDatastore(
-            mongoClient, emDatabase, MapperOptions.builder().mapSubPackages(true).build());
+            mongoClient,
+            emDatabase,
+            MapperOptions.builder().mapSubPackages(true).storeNulls(true).build());
     // EA-2520: explicit package mapping required to prevent EntityDecoder error
     datastore.getMapper().mapPackage("eu.europeana.entitymanagement.definitions.model");
     datastore.ensureIndexes();
