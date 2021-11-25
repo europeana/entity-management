@@ -41,6 +41,7 @@ import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.GeneralConstants;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
@@ -164,7 +165,7 @@ public class EntityRecordService {
    * @return Re-Enabled entity
    */
   public EntityRecord enableEntityRecord(EntityRecord entityRecord) {
-    entityRecord.setDisabled(null);
+    entityRecord.setDisabled(GeneralConstants.ENABLED_RECORD_DATE);
     return saveEntityRecord(entityRecord);
   }
 

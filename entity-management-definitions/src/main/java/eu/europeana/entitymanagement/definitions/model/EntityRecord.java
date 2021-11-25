@@ -17,6 +17,7 @@ import dev.morphia.annotations.IndexOptions;
 import dev.morphia.annotations.Indexed;
 import dev.morphia.annotations.Indexes;
 import eu.europeana.entitymanagement.utils.EntityRecordWatcher;
+import eu.europeana.entitymanagement.vocabulary.GeneralConstants;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -83,8 +84,12 @@ public class EntityRecord {
   }
 
   public boolean isDisabled() {
-    if (this.disabled != null) return true;
-    else return false;
+    if (this.disabled != null
+        && this.disabled.compareTo(GeneralConstants.ENABLED_RECORD_DATE) != 0) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   public void setDisabled(Date disabledParam) {
