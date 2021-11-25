@@ -4,7 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
+import java.util.Optional;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import com.zoho.crm.api.record.Record;
 import com.zoho.crm.api.util.Choice;
 import eu.europeana.entitymanagement.AbstractIntegrationTest;
@@ -12,22 +16,17 @@ import eu.europeana.entitymanagement.definitions.model.Concept;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.dereference.Dereferencer;
+import eu.europeana.entitymanagement.testutils.BaseMvcTestUtils;
 import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
-import java.util.Optional;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
-/** JUnit test for testing the EMControllerTest class */
-// EntityManagementApp.class
-// @ContextConfiguration(classes = { JobLauncherConfig.class, EntityManagementConfiguration.class,
-// AppConfig.class, EnrichmentConfig.class, ValidatorConfig.class,
-//        SerializationConfig.class, MetisDereferenceService.class, })
-// @ExtendWith(SpringExtension.class)
-// @Disabled("Excluded from automated runs as this depends on Metis")
+/** JUnit test for testing the DereferenceService class */
+//enable test config to use zoho mocking
+//@Import(TestConfig.class)
+//enable tests only on local machine
+//@Disabled
 public class DereferenceServiceTest extends AbstractIntegrationTest {
 
   @Autowired private DereferenceServiceLocator dereferenceServiceLocator;
@@ -63,9 +62,9 @@ public class DereferenceServiceTest extends AbstractIntegrationTest {
     assertEquals(8, entity.getNote().size());
   }
 
-  @Test
+//  @Test
   public void zohoOrganizationDereferenceTest() throws Exception {
-    String organizationId = "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000002112001";
+    String organizationId = BaseMvcTestUtils.ORGANIZATION_BNF_URI_ZOHO;
     Dereferencer dereferencer =
         dereferenceServiceLocator.getDereferencer(organizationId, "Organization");
     Optional<Entity> orgOptional = dereferencer.dereferenceEntityById(organizationId);
@@ -86,7 +85,29 @@ public class DereferenceServiceTest extends AbstractIntegrationTest {
     Assertions.assertNotNull(org.getAddress().getVcardCountryName());
   }
 
-  @Test
+//  @Test
+  public void zohoOrganizationDereferenceGFMTest() throws Exception {
+    String organizationId = BaseMvcTestUtils.ORGANIZATION_GFM_URI_ZOHO;
+    Dereferencer dereferencer =
+        dereferenceServiceLocator.getDereferencer(organizationId, "Organization");
+    Optional<Entity> orgOptional = dereferencer.dereferenceEntityById(organizationId);
+
+    Assertions.assertTrue(orgOptional.isPresent());
+
+    Organization org = (Organization) orgOptional.get();
+    assertEquals(2, org.getPrefLabel().size());
+    assertNotNull(org.getSameReferenceLinks());
+//    assertEquals(1, org.getAcronym().size());
+//    assertEquals(1, org.getEuropeanaRole().size());
+//    assertEquals(1, org.getGeographicLevel().size());
+//    assertEquals(1, org.getAcronym().size());
+//    assertEquals("FR", org.getCountry());
+//    Assertions.assertNotNull(org.getHomepage());
+//    Assertions.assertNotNull(org.getLogo());
+//    Assertions.assertNotNull(org.getAddress().getVcardStreetAddress());
+//    Assertions.assertNotNull(org.getAddress().getVcardCountryName());
+  }
+//  @Test
   public void zohoOrganizationDereferenceLabelsTest() throws Exception {
 
     Record record = new Record();
@@ -122,12 +143,24 @@ public class DereferenceServiceTest extends AbstractIntegrationTest {
     Assertions.assertEquals(2, org.getAltLabel().get("en").size());
   }
 
-  // @Test
+  @Test
   public void wikidataOrganizationDereferenceTest() throws ZohoException, Exception {
-    String organizationId = "http://www.wikidata.org/entity/Q1781094";
+    // Naturalis
+    dereferenceWikidataOrganization(BaseMvcTestUtils.ORGANIZATION_NATURALIS_URI_WIKIDATA_URI);
+  }
+
+  @Test
+  public void wikidataOrganizationGFMDereferenceTest() throws ZohoException, Exception {
+    // GFM
+    dereferenceWikidataOrganization(BaseMvcTestUtils.ORGANIZATION_GFM_URI_WIKIDATA_URI);
+  }
+  
+  void dereferenceWikidataOrganization(String organizationId) throws Exception {
     Dereferencer dereferencer =
         dereferenceServiceLocator.getDereferencer(organizationId, "Organization");
     Optional<Entity> orgOptional = dereferencer.dereferenceEntityById(organizationId);
     Assertions.assertTrue(orgOptional.isPresent());
+    Assertions.assertNotNull(orgOptional.get().getPrefLabel());
+    
   }
 }

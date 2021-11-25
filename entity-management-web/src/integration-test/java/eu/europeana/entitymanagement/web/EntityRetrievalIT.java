@@ -288,7 +288,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
   public void retrieveOrganizationExternalSchemaOrgShouldBeSuccessful() throws Exception {
     // id in JSON matches ORGANIZATION_BNF_URI_ZOHO value
     String europeanaMetadata = loadFile(ORGANIZATION_REGISTER_BNF_ZOHO_JSON);
-    Optional<Record> zohoRecord = getZohoOrganizationRecord(ORGANIZATION_BNF_URI_ZOHO);
+    Optional<Record> zohoRecord = getZohoOrganizationRecord(ORGANIZATION_NATURALIS_URI_ZOHO);
 
     assert zohoRecord.isPresent() : "Mocked Zoho response not loaded";
 
@@ -329,7 +329,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
   public void retrieveOrganizationJsonExternalShouldBeSuccessful() throws Exception {
     // id in JSON matches ORGANIZATION_BNF_URI_ZOHO value
     String europeanaMetadata = loadFile(ORGANIZATION_REGISTER_BNF_ZOHO_JSON);
-    Optional<Record> zohoRecord = getZohoOrganizationRecord(ORGANIZATION_BNF_URI_ZOHO);
+    Optional<Record> zohoRecord = getZohoOrganizationRecord(ORGANIZATION_NATURALIS_URI_ZOHO);
 
     assert zohoRecord.isPresent() : "Mocked Zoho response not loaded";
     String entityId = createOrganization(europeanaMetadata, zohoRecord.get()).getEntityId();

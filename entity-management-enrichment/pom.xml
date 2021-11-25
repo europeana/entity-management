@@ -8,6 +8,7 @@
     <groupId>eu.europeana.api</groupId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
+  
 
   <artifactId>entity-management-enrichment</artifactId>
   <dependencies>

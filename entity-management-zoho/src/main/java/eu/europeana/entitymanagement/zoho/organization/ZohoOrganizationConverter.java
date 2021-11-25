@@ -1,18 +1,17 @@
 package eu.europeana.entitymanagement.zoho.organization;
 
 import static eu.europeana.entitymanagement.zoho.utils.ZohoUtils.toIsoLanguage;
-
-import com.zoho.crm.api.record.Record;
-import eu.europeana.entitymanagement.definitions.model.Address;
-import eu.europeana.entitymanagement.definitions.model.Organization;
-import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
-import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
+import com.zoho.crm.api.record.Record;
+import eu.europeana.entitymanagement.definitions.model.Address;
+import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
+import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 
 public class ZohoOrganizationConverter {
 
@@ -77,7 +76,7 @@ public class ZohoOrganizationConverter {
     address.setVcardLocality(
         ZohoUtils.stringFieldSupplier(record.getKeyValue(ZohoConstants.CITY_FIELD)));
     address.setVcardCountryName(
-        ZohoUtils.stringFieldSupplier(record.getKeyValue(ZohoConstants.ADDRESS_COUNTRY_FIELD)));
+        ZohoUtils.stringFieldSupplier(record.getKeyValue(ZohoConstants.COUNTRY_FIELD)));
     address.setVcardPostalCode(
         ZohoUtils.stringFieldSupplier(record.getKeyValue(ZohoConstants.ZIP_CODE_FIELD)));
     address.setVcardPostOfficeBox(

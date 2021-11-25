@@ -37,7 +37,7 @@ public final class ZohoConstants {
   public static final String SAME_AS_FIELD = "SameAs";
   public static final String STREET_FIELD = "Street";
   public static final String CITY_FIELD = "City";
-  public static final String ADDRESS_COUNTRY_FIELD = "Country";
+  public static final String COUNTRY_FIELD = "Country";
   public static final String ZIP_CODE_FIELD = "ZIP_code";
   public static final String PO_BOX_FIELD = "PO_box";
   public static final String LAST_ACTIVITY_TIME_FIELD = "Last_Activity_Time";
