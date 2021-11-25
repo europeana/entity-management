@@ -17,7 +17,6 @@ import eu.europeana.entitymanagement.definitions.EntityRecordFields;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
 import eu.europeana.entitymanagement.mongo.utils.MorphiaUtils;
-import eu.europeana.entitymanagement.vocabulary.GeneralConstants;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -73,9 +72,9 @@ public class EntityRecordRepository {
     List<Filter> filters = new ArrayList<>();
     filters.add(in(ENTITY_ID, entityIds));
 
-    // only fetch active records
+    // Only fetch active records. Disabled records have a date value
     if (excludeDisabled) {
-      filters.add(eq(DISABLED, GeneralConstants.ENABLED_RECORD_DATE));
+      filters.add(eq(DISABLED, null));
     }
 
     List<EntityRecord> entityRecords =

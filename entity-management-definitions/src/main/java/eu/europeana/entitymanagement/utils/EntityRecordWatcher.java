@@ -2,7 +2,6 @@ package eu.europeana.entitymanagement.utils;
 
 import dev.morphia.annotations.PrePersist;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.vocabulary.GeneralConstants;
 import java.util.Date;
 
 /** Watches for Database operations on the EntityRecord collection */
@@ -21,8 +20,5 @@ public class EntityRecordWatcher {
       record.setCreated(now);
     }
     record.setModified(now);
-    if (record.getDisabled() == null) {
-      record.setDisabled(GeneralConstants.ENABLED_RECORD_DATE);
-    }
   }
 }
