@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.DataSource;
+import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.testutils.MongoContainer;
 import eu.europeana.entitymanagement.testutils.SolrContainer;
@@ -56,6 +57,8 @@ public abstract class AbstractIntegrationTest {
   protected ObjectMapper objectMapper;
 
   @Autowired protected EntityUpdateService entityUpdateService;
+  @Autowired protected DataSources datasources;
+  
 
   static {
     MONGO_CONTAINER =
@@ -193,7 +196,7 @@ public abstract class AbstractIntegrationTest {
             jaxbContext.createUnmarshaller(), externalId, metisResponse);
 
     assert xmlBaseEntity != null;
-    DataSource dataSource = entityRecordService.verifyDataSource(externalId, false);
+    DataSource dataSource = datasources.verifyDataSource(externalId, false);
     EntityRecord savedRecord =
         entityRecordService.createEntityFromRequest(
             entityPreview, xmlBaseEntity.toEntityModel(), dataSource);

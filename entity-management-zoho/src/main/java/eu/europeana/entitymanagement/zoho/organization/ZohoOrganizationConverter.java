@@ -24,7 +24,8 @@ public class ZohoOrganizationConverter {
   public static Organization convertToOrganizationEntity(Record record) {
     Organization org = new Organization();
     org.setAbout(ZohoConstants.URL_ORGANIZATION_PREFFIX + record.getId());
-    org.setIdentifier(ZohoUtils.stringListSupplier(List.of(Long.toString(record.getId()))));
+//    org.setIdentifier(ZohoUtils.stringListSupplier(List.of(Long.toString(record.getId()))));
+    org.setIdentifier(List.of(Long.toString(record.getId())));
 
     // extract language maps
     Map<String, List<String>> allLabels = getAllRecordLabels(record);

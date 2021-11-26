@@ -26,7 +26,7 @@ import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 //enable test config to use zoho mocking
 //@Import(TestConfig.class)
 //enable tests only on local machine
-//@Disabled
+@Disabled
 public class DereferenceServiceTest extends AbstractIntegrationTest {
 
   @Autowired private DereferenceServiceLocator dereferenceServiceLocator;

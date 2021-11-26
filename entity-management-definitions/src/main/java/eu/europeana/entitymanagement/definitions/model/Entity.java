@@ -292,4 +292,19 @@ public abstract class Entity {
    * @param uris List of entity uris
    */
   public abstract void setSameReferenceLinks(List<String> uris);
+  
+  /**
+   * adds the provided uri to the same reference list if not allready included
+   * @param uris
+   */
+  public void addSameReferenceLink(String uri) {
+    if(getSameReferenceLinks() == null) {
+      setSameReferenceLinks(new ArrayList<>());
+    }
+    if(!getSameReferenceLinks().contains(uri)) {
+      getSameReferenceLinks().add(uri);
+    }
+  }
+  
+  
 }

@@ -21,6 +21,7 @@ public class ZohoRecordTestDeserializer extends StdDeserializer<Record> {
    */
   private static final List<String> ZOHO_JSON_FIELDS =
       List.of(
+          ID_FIELD,
           ACCOUNT_NAME_FIELD,
           ORGANIZATION_ROLE_FIELD,
           LANG_ORGANIZATION_NAME_FIELD,

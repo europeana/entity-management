@@ -3,6 +3,7 @@ package eu.europeana.entitymanagement.web;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.*;
 import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -149,9 +150,8 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
   @Test
   public void registerZohoOrganizationGFMShouldBeSuccessful() throws Exception {
 
-    String expectedId =
-        "http://data.europeana.eu/organization/"
-            + EntityRecordUtils.getIdFromUrl(ORGANIZATION_GFM_URI_ZOHO);
+    String expectedId = EntityRecordUtils.buildEntityIdUri("organization",
+            EntityRecordUtils.getIdFromUrl(ORGANIZATION_GFM_URI_ZOHO));
 
     ResultActions response = mockMvc
         .perform(
@@ -175,11 +175,14 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         .andExpect(
             jsonPath(
                 "$.sameAs",
-                containsInAnyOrder(ORGANIZATION_GFM_URI_ZOHO, ORGANIZATION_GFM_URI_WIKIDATA_URI)))
+                containsInRelativeOrder(ORGANIZATION_GFM_OLD_URI_WIKIDATA_URI, ORGANIZATION_GFM_URI_ZOHO, ORGANIZATION_GFM_URI_WIKIDATA_URI)))
+        .andExpect(jsonPath("$.prefLabel[*]", hasSize(3)))
+        .andExpect(jsonPath("$.altLabel[*]", hasSize(3)))
         // should have Europeana, Zoho and Wikidata proxies
-        .andExpect(jsonPath("$.proxies", hasSize(3)));
-    //TODO: add pref label verification for wikidata
-  }
+        .andExpect(jsonPath("$.proxies", hasSize(3)))
+        //3 labels available in wikidata proxy
+        .andExpect(jsonPath("$.proxies[2].prefLabel[*]", hasSize(3)));
+      }
   
   
   @Test

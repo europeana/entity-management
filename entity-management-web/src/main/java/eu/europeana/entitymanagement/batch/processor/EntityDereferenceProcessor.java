@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.batch.processor;
 
 import eu.europeana.entitymanagement.common.config.DataSource;
-import eu.europeana.entitymanagement.common.config.DataSources;
+import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -81,17 +81,28 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
           entity.getIsAggregatedBy().getCreated().equals(entity.getIsAggregatedBy().getModified());
 
       if (isEntityNew || !datasourceResponseMatchesExternalProxy(externalProxy, proxyResponse)) {
-        if (logger.isTraceEnabled()) {
-          logger.trace(
+        logger.trace(
               "Storing de-referenced metadata in external proxy for entityId={}", entityId);
-        }
         // replace external proxy with proxy response
         externalProxy.setEntity(proxyResponse);
+        handleDatasourceRedirections(externalProxy, proxyResponse);
         externalProxy.getProxyIn().setModified(new Date());
       }
     }
 
     return entityRecord;
+  }
+
+  void handleDatasourceRedirections(EntityProxy externalProxy, Entity proxyResponse) {
+    // in case of redirections also update proxy id
+    if(!externalProxy.getProxyId().equals(proxyResponse.getEntityId())) {
+      if(datasources.hasDataSource(proxyResponse.getEntityId())){
+        //do not allow redirection to unknow data sources
+      }
+      proxyResponse.addSameReferenceLink(externalProxy.getProxyId());
+      externalProxy.setProxyId(proxyResponse.getEntityId());
+      logger.info("Updated proxy id with the actual value from the external entity {} -> {}", externalProxy.getProxyId(), proxyResponse.getEntityId());
+    }
   }
 
   /** Checks if Datasource response matches metadata in external proxy */

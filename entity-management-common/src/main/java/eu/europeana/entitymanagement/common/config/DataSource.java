@@ -7,6 +7,10 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 public class DataSource {
 
   public static final String FREQ_STATIC = "static";
+  public static final String EUROPEANA_ID = "europeana";
+  public static final String ZOHO_ID = "crm.zoho.com";
+  public static final String WIKIDATA_ID = "www.wikidata.org";
+
 
   @JacksonXmlProperty(isAttribute = true)
   private String url;

@@ -1,9 +1,9 @@
 package eu.europeana.entitymanagement.zoho.utils;
 
-import eu.europeana.entitymanagement.common.config.DataSources;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.List;
 import java.util.Optional;
+import eu.europeana.entitymanagement.common.config.DataSource;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 public class WikidataUtils {
 
@@ -16,7 +16,7 @@ public class WikidataUtils {
    */
   public static boolean isWikidataOrganization(String id, String entityType) {
     return EntityTypes.Organization.getEntityType().equals(entityType)
-        && id.contains(DataSources.WIKIDATA_ID);
+        && id.contains(DataSource.WIKIDATA_ID);
   }
 
   /**
@@ -27,7 +27,7 @@ public class WikidataUtils {
    */
   public static Optional<String> getWikidataId(List<String> uriList) {
     if (uriList != null) {
-      return uriList.stream().filter(s -> s.contains(DataSources.WIKIDATA_ID)).findFirst();
+      return uriList.stream().filter(s -> s.contains(DataSource.WIKIDATA_ID)).findFirst();
     }
     return Optional.empty();
   }
