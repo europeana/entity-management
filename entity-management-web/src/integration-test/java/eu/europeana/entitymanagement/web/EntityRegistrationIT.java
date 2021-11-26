@@ -142,7 +142,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         .andExpect(
             jsonPath(
                 "$.sameAs",
-                containsInAnyOrder(ORGANIZATION_NATURALIS_URI_ZOHO, ORGANIZATION_NATURALIS_URI_WIKIDATA_URI)))
+                containsInRelativeOrder(ORGANIZATION_NATURALIS_URI_WIKIDATA_URI, ORGANIZATION_NATURALIS_URI_ZOHO)))
         // should have Europeana, Zoho and Wikidata proxies
         .andExpect(jsonPath("$.proxies", hasSize(3)));
   }
