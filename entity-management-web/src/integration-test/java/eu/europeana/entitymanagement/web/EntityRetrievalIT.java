@@ -14,12 +14,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.zoho.crm.api.record.Record;
 import eu.europeana.entitymanagement.batch.service.FailedTaskService;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
+import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.FailedTaskJsonFields;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
+import eu.europeana.entitymanagement.web.xml.model.RdfBaseWrapper;
+import eu.europeana.entitymanagement.web.xml.model.XmlAgentImpl;
+import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
+import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
+import eu.europeana.entitymanagement.web.xml.model.XmlOrganizationImpl;
+import eu.europeana.entitymanagement.web.xml.model.XmlPlaceImpl;
+import eu.europeana.entitymanagement.web.xml.model.XmlTimeSpanImpl;
+import java.io.StringReader;
 import java.util.Optional;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -158,14 +170,10 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
                     .accept(MediaType.APPLICATION_XML))
             .andExpect(status().isOk());
 
-    Assertions.assertTrue(
-        resultActions.andReturn().getResponse().getContentAsString().contains(entityId));
-    Assertions.assertTrue(
-        resultActions
-            .andReturn()
-            .getResponse()
-            .getContentAsString()
-            .contains(EntityTypes.Concept.name()));
+    validateXmlOutput(
+        resultActions.andReturn().getResponse().getContentAsString(),
+        entityId,
+        XmlConceptImpl.class);
   }
 
   @Test
@@ -281,14 +289,8 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
                     .accept(MediaType.APPLICATION_XML))
             .andExpect(status().isOk());
 
-    Assertions.assertTrue(
-        resultActions.andReturn().getResponse().getContentAsString().contains(entityId));
-    Assertions.assertTrue(
-        resultActions
-            .andReturn()
-            .getResponse()
-            .getContentAsString()
-            .contains(EntityTypes.Agent.name()));
+    validateXmlOutput(
+        resultActions.andReturn().getResponse().getContentAsString(), entityId, XmlAgentImpl.class);
   }
 
   @Test
@@ -421,20 +423,10 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
                     .accept(MediaType.APPLICATION_XML))
             .andExpect(status().isOk());
 
-    Assertions.assertTrue(
-        resultActions.andReturn().getResponse().getContentAsString().contains(entityId));
-    Assertions.assertTrue(
-        resultActions
-            .andReturn()
-            .getResponse()
-            .getContentAsString()
-            .contains(EntityTypes.Organization.name()));
-    if (entityRecord.getEntity().getIsAggregatedBy() != null) {
-      for (String aggregate : entityRecord.getEntity().getIsAggregatedBy().getAggregates()) {
-        Assertions.assertTrue(
-            resultActions.andReturn().getResponse().getContentAsString().contains(aggregate));
-      }
-    }
+    validateXmlOutput(
+        resultActions.andReturn().getResponse().getContentAsString(),
+        entityId,
+        XmlOrganizationImpl.class);
   }
 
   @Test
@@ -471,14 +463,8 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
                     .accept(MediaType.APPLICATION_XML))
             .andExpect(status().isOk());
 
-    Assertions.assertTrue(
-        resultActions.andReturn().getResponse().getContentAsString().contains(entityId));
-    Assertions.assertTrue(
-        resultActions
-            .andReturn()
-            .getResponse()
-            .getContentAsString()
-            .contains(EntityTypes.Place.name()));
+    validateXmlOutput(
+        resultActions.andReturn().getResponse().getContentAsString(), entityId, XmlPlaceImpl.class);
   }
 
   @Test
@@ -517,14 +503,10 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
                     .accept(MediaType.APPLICATION_XML))
             .andExpect(status().isOk());
 
-    Assertions.assertTrue(
-        resultActions.andReturn().getResponse().getContentAsString().contains(entityId));
-    Assertions.assertTrue(
-        resultActions
-            .andReturn()
-            .getResponse()
-            .getContentAsString()
-            .contains(EntityTypes.TimeSpan.name()));
+    validateXmlOutput(
+        resultActions.andReturn().getResponse().getContentAsString(),
+        entityId,
+        XmlTimeSpanImpl.class);
   }
 
   @Test
@@ -580,4 +562,15 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
         .andExpect(jsonPath("$.proxies[1].proxyIn.score").doesNotExist());
   }
   // TODO: add tests for XML retrieval
+
+  private void validateXmlOutput(
+      String xml, String entityId, Class<? extends XmlBaseEntityImpl<? extends Entity>> objectType)
+      throws JAXBException {
+    Unmarshaller jaxbUnmarshaller =
+        JAXBContext.newInstance(RdfBaseWrapper.class).createUnmarshaller();
+    RdfBaseWrapper xmlRdfBaseWrapper =
+        (RdfBaseWrapper) jaxbUnmarshaller.unmarshal(new StringReader(xml));
+    Assertions.assertTrue(xmlRdfBaseWrapper.getXmlEntity().getAbout().equals(entityId));
+    Assertions.assertTrue(xmlRdfBaseWrapper.getXmlEntity().getClass().isAssignableFrom(objectType));
+  }
 }
