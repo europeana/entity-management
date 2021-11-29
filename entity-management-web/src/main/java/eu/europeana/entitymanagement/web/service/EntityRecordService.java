@@ -153,7 +153,7 @@ public class EntityRecordService {
   }
 
   public void disableEntityRecord(EntityRecord er) {
-    er.setDisabled(true);
+    er.setDisabled(new Date());
     saveEntityRecord(er);
   }
 
@@ -161,11 +161,11 @@ public class EntityRecordService {
    * Re-Enable an already existing entity record.
    *
    * @param entityRecord entity record to update
-   * @return Re-Enabled entity
    */
-  public EntityRecord enableEntityRecord(EntityRecord entityRecord) {
-    entityRecord.setDisabled(false);
-    return saveEntityRecord(entityRecord);
+  public void enableEntityRecord(EntityRecord entityRecord) {
+    // disabled records have a date value (indicating when they were disabled)
+    entityRecord.setDisabled(null);
+    saveEntityRecord(entityRecord);
   }
 
   /**
