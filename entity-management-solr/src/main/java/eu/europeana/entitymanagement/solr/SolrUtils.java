@@ -32,6 +32,8 @@ public class SolrUtils {
   public static final String SOLR_AGENT_SUGGESTER_FILTER = "solrAgentFilter";
   public static final String SOLR_ORGANIZATION_SUGGESTER_FILTER = "solrOrganizationFilter";
   public static final String SOLR_TIMESPAN_SUGGESTER_FILTER = "solrTimeSpanFilter";
+  public static final String SOLR_PLACE_SUGGESTER_FILTER = "solrPlaceFilter";
+  public static final String SOLR_CONCEPT_SUGGESTER_FILTER = "solrConceptFilter";
 
   /**
    * This method adds prefixes to the fields in format Map<String, List<String>> languageMap e.g.

@@ -25,7 +25,8 @@ public class ZohoOrganizationConverter {
   public static Organization convertToOrganizationEntity(Record record) {
     Organization org = new Organization();
     org.setAbout(ZohoConstants.URL_ORGANIZATION_PREFFIX + record.getId());
-    org.setIdentifier(ZohoUtils.stringListSupplier(List.of(Long.toString(record.getId()))));
+    //    org.setIdentifier(ZohoUtils.stringListSupplier(List.of(Long.toString(record.getId()))));
+    org.setIdentifier(List.of(Long.toString(record.getId())));
 
     // extract language maps
     Map<String, List<String>> allLabels = getAllRecordLabels(record);
@@ -77,7 +78,7 @@ public class ZohoOrganizationConverter {
     address.setVcardLocality(
         ZohoUtils.stringFieldSupplier(record.getKeyValue(ZohoConstants.CITY_FIELD)));
     address.setVcardCountryName(
-        ZohoUtils.stringFieldSupplier(record.getKeyValue(ZohoConstants.ADDRESS_COUNTRY_FIELD)));
+        ZohoUtils.stringFieldSupplier(record.getKeyValue(ZohoConstants.COUNTRY_FIELD)));
     address.setVcardPostalCode(
         ZohoUtils.stringFieldSupplier(record.getKeyValue(ZohoConstants.ZIP_CODE_FIELD)));
     address.setVcardPostOfficeBox(

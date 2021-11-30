@@ -1,0 +1,14 @@
+{
+  "type": "Organization",
+  "id": "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000000370517",
+  "prefLabel": {
+    "fr": "Nauralis"
+  },
+  "altLabel": {
+    "fr": [ "Naturalis"]
+  },
+  "depiction": {
+  	"id":"http://www.biodiversitylibrary.org/pageimage/43089072",
+  	"source":"http://data.europeana.eu/item/08711/bibliography_64232"	
+  }
+}

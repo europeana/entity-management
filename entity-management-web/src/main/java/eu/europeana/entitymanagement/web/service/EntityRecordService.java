@@ -15,9 +15,9 @@ import dev.morphia.query.experimental.filters.Filter;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.batch.utils.BatchUtils;
 import eu.europeana.entitymanagement.common.config.DataSource;
-import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.AppConfig;
+import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
 import eu.europeana.entitymanagement.definitions.model.Address;
 import eu.europeana.entitymanagement.definitions.model.Agent;
@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -153,7 +154,7 @@ public class EntityRecordService {
   }
 
   public void disableEntityRecord(EntityRecord er) {
-    er.setDisabled(true);
+    er.setDisabled(new Date());
     saveEntityRecord(er);
   }
 
@@ -161,11 +162,11 @@ public class EntityRecordService {
    * Re-Enable an already existing entity record.
    *
    * @param entityRecord entity record to update
-   * @return Re-Enabled entity
    */
-  public EntityRecord enableEntityRecord(EntityRecord entityRecord) {
-    entityRecord.setDisabled(false);
-    return saveEntityRecord(entityRecord);
+  public void enableEntityRecord(EntityRecord entityRecord) {
+    // disabled records have a date value (indicating when they were disabled)
+    entityRecord.setDisabled(null);
+    saveEntityRecord(entityRecord);
   }
 
   /**
@@ -205,7 +206,8 @@ public class EntityRecordService {
       throws EntityCreationException, EntityAlreadyExistsException, HttpBadRequestException,
           HttpUnprocessableException {
     // Fail quick if no datasource is configured
-    DataSource externalDatasource = verifyDataSource(entityCreationRequest.getId(), true);
+    DataSource externalDatasource =
+        datasources.verifyDataSource(entityCreationRequest.getId(), true);
 
     Date timestamp = new Date();
     Entity entity = EntityObjectFactory.createProxyEntityObject(type);
@@ -233,7 +235,7 @@ public class EntityRecordService {
     // create metis Entity
     Entity metisEntity = EntityObjectFactory.createProxyEntityObject(type);
 
-    setExternalProxyMetadata(
+    setExternalProxy(
         metisEntity,
         entityCreationRequest.getId(),
         entityId,
@@ -244,25 +246,6 @@ public class EntityRecordService {
 
     setEntityAggregation(entityRecord, entityId, timestamp);
     return entityRecordRepository.save(entityRecord);
-  }
-
-  public DataSource verifyDataSource(String creationRequestId, boolean allowStatic)
-      throws HttpBadRequestException, HttpUnprocessableException {
-    Optional<DataSource> dataSource = datasources.getDatasource(creationRequestId);
-    // return 400 error if ID does not match a configured datasource
-    if (dataSource.isEmpty()) {
-      throw new HttpBadRequestException(
-          String.format("id %s does not match a configured datasource", creationRequestId));
-    }
-
-    // return 406 error if datasource is static
-    if (!allowStatic && dataSource.get().isStatic()) {
-      throw new HttpUnprocessableException(
-          String.format(
-              "Entity registration not permitted. id %s matches a static datasource.",
-              creationRequestId));
-    }
-    return dataSource.get();
   }
 
   /**
@@ -285,20 +268,18 @@ public class EntityRecordService {
         EntityObjectFactory.createConsolidatedEntityObject(datasourceResponse.getType());
 
     boolean isZohoOrg = ZohoUtils.isZohoOrganization(externalProxyId, datasourceResponse.getType());
+    String entityId = generateEntityId(datasourceResponse, isZohoOrg);
 
     EntityRecord entityRecord = new EntityRecord();
-    // only in case of Zoho Organization use the provided id from de-referencing
-    String entityId =
-        isZohoOrg ? datasourceResponse.getEntityId() : generateEntityId(entity.getType(), null);
-
     entityRecord.setEntityId(entityId);
     entity.setEntityId(entityId);
+
     /*
      * sameAs will be replaced during consolidation; however we set this here to prevent duplicate
      * registrations if consolidation fails
      */
-
-    entity.setSameReferenceLinks(new ArrayList<>(List.of(externalProxyId)));
+    List<String> sameAs = buildSameAsReferenceLinks(externalProxyId, datasourceResponse);
+    entity.setSameReferenceLinks(sameAs);
     entityRecord.setEntity(entity);
 
     Entity europeanaProxyMetadata =
@@ -309,7 +290,7 @@ public class EntityRecordService {
     setEuropeanaMetadata(europeanaProxyMetadata, entityId, entityRecord, timestamp);
 
     // create default external proxy
-    setExternalProxyMetadata(
+    setExternalProxy(
         datasourceResponse,
         entityCreationRequest.getId(),
         entityId,
@@ -331,7 +312,7 @@ public class EntityRecordService {
 
       Optional<DataSource> wikidataDatasource = getDataSource(wikidataId.get());
       // exception is thrown in factory method if wikidataDatasource is empty
-      setExternalProxyMetadata(
+      setExternalProxy(
           wikidataProxyEntity,
           wikidataId.get(),
           entityId,
@@ -347,6 +328,29 @@ public class EntityRecordService {
     }
 
     return entityRecordRepository.save(entityRecord);
+  }
+
+  String generateEntityId(Entity datasourceResponse, boolean isZohoOrg) {
+    // only in case of Zoho Organization use the provided id from de-referencing
+    String entityId = null;
+    if (isZohoOrg) {
+      // zoho id is mandatory and unique identifier for zoho Organizations
+      String zohoId = EntityRecordUtils.getIdFromUrl(datasourceResponse.getEntityId());
+      entityId = EntityRecordUtils.buildEntityIdUri(datasourceResponse.getType(), zohoId);
+    } else {
+      entityId = generateEntityId(datasourceResponse.getType(), null);
+    }
+    return entityId;
+  }
+
+  List<String> buildSameAsReferenceLinks(String externalProxyId, Entity datasourceResponse) {
+    // entity id might be different than proxyId in case of redirections
+    SortedSet<String> sameAsUrls = new TreeSet<String>();
+    sameAsUrls.add(datasourceResponse.getEntityId());
+    sameAsUrls.add(externalProxyId);
+    sameAsUrls.addAll(datasourceResponse.getSameReferenceLinks());
+    List<String> sameAs = new ArrayList<String>(sameAsUrls);
+    return sameAs;
   }
 
   private Optional<DataSource> getDataSource(String externalProxyId)
@@ -990,7 +994,7 @@ public class EntityRecordService {
     entityRecord.addProxy(europeanaProxy);
   }
 
-  private void setExternalProxyMetadata(
+  private void setExternalProxy(
       Entity metisResponse,
       String proxyId,
       String entityId,
@@ -1024,7 +1028,7 @@ public class EntityRecordService {
   public void changeExternalProxy(EntityRecord entityRecord, String newProxyId)
       throws EuropeanaApiException {
 
-    DataSource dataSource = verifyDataSource(newProxyId, true);
+    DataSource dataSource = datasources.verifyDataSource(newProxyId, true);
     List<EntityProxy> externalProxies = entityRecord.getExternalProxies();
 
     if (externalProxies.size() > 1) {
@@ -1038,7 +1042,7 @@ public class EntityRecordService {
 
     entityRecord.getProxies().remove(externalProxy);
 
-    setExternalProxyMetadata(
+    setExternalProxy(
         EntityObjectFactory.createProxyEntityObject(entityType),
         newProxyId,
         entityRecord.getEntityId(),

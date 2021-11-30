@@ -5,7 +5,7 @@ import com.zoho.crm.api.record.ResponseHandler;
 import com.zoho.crm.api.record.ResponseWrapper;
 import com.zoho.crm.api.util.APIResponse;
 import com.zoho.crm.api.util.Choice;
-import eu.europeana.entitymanagement.common.config.DataSources;
+import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.ArrayList;
@@ -296,7 +296,7 @@ public final class ZohoUtils {
    */
   public static boolean isZohoOrganization(String id, String entityType) {
     return EntityTypes.Organization.getEntityType().equals(entityType)
-        && id.contains(DataSources.ZOHO_ID);
+        && id.contains(DataSource.ZOHO_ID);
   }
 
   public static List<Record> getZohoRecords(APIResponse<ResponseHandler> response) {

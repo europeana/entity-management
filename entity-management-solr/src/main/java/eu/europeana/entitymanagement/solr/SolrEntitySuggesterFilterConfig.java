@@ -45,6 +45,15 @@ public class SolrEntitySuggesterFilterConfig {
         SOLR_TIMESPAN_SUGGESTER_FILTER,
         SimpleBeanPropertyFilter.filterOutAllExcept(
             "id", "type", "isShownBy", "prefLabel", "altLabel", "hiddenLabel", "begin", "end"));
+    filterProvider.addFilter(
+        SOLR_PLACE_SUGGESTER_FILTER,
+        SimpleBeanPropertyFilter.filterOutAllExcept(
+            "id", "type", "isShownBy", "prefLabel", "altLabel", "hiddenLabel"));
+    filterProvider.addFilter(
+        SOLR_CONCEPT_SUGGESTER_FILTER,
+        SimpleBeanPropertyFilter.filterOutAllExcept(
+            "id", "type", "isShownBy", "prefLabel", "altLabel", "hiddenLabel"));
+
     return filterProvider;
   }
 }

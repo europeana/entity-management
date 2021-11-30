@@ -1,6 +1,12 @@
 package eu.europeana.entitymanagement.definitions.batch.model;
 
-import dev.morphia.annotations.*;
+import dev.morphia.annotations.Entity;
+import dev.morphia.annotations.Field;
+import dev.morphia.annotations.Id;
+import dev.morphia.annotations.Index;
+import dev.morphia.annotations.IndexOptions;
+import dev.morphia.annotations.Indexed;
+import dev.morphia.annotations.Indexes;
 import eu.europeana.entitymanagement.definitions.batch.EMBatchConstants;
 import java.time.Instant;
 import org.bson.types.ObjectId;

@@ -151,7 +151,7 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
             jaxbContext.createUnmarshaller(), externalId, metisResponse);
 
     assert xmlBaseEntity != null;
-    DataSource dataSource = entityRecordService.verifyDataSource(externalId, false);
+    DataSource dataSource = datasources.verifyDataSource(externalId, false);
     EntityRecord savedRecord =
         entityRecordService.createEntityFromRequest(
             entityPreview, xmlBaseEntity.toEntityModel(), dataSource);
@@ -167,7 +167,7 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
       throws Exception {
     EntityPreview entityPreview = objectMapper.readValue(europeanaMetadata, EntityPreview.class);
 
-    DataSource dataSource = entityRecordService.verifyDataSource(entityPreview.getId(), false);
+    DataSource dataSource = datasources.verifyDataSource(entityPreview.getId(), false);
     EntityRecord savedRecord =
         entityRecordService.createEntityFromRequest(
             entityPreview,

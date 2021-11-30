@@ -3,7 +3,7 @@
   Document   : wkd2org.xsl
   Author     : hmanguinhas
   Created on : March 17, 2018
-  Updated on : March 17, 2018
+  Updated on : July 23, 2021
 -->
 <xsl:stylesheet version="2.0"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -30,7 +30,8 @@
 
     <xsl:output indent="yes" encoding="UTF-8"/>
 
-    <xsl:param name="rdf_about"/>
+    <xsl:param name="targetId"/>
+    <xsl:param name="coref"    select="true()"/>
     <xsl:param name="deref"    />
     <xsl:param name="address"  select="true()"/>
 
@@ -44,8 +45,66 @@
     <xsl:variable name="langs">bg,ca,cs,da,de,el,en,es,et,eu,fi,fr,ga,gd,he,hr,hu,ie,is,it,ka,lt,lv,mk,mt,mul,nl,no,pl,pt,ro,ru,sk,sl,sr,sv,tr,uk,yi,cy,sq,hy,az,be,bs,gl,ja,ar,ko,zh,hi</xsl:variable>
  -->
 
+    <!-- Co-reference mapping table -->
+    <xsl:variable name="map">
+        <entry key="P214">http://viaf.org/viaf/$1</entry>
+        <entry key="P227">http://d-nb.info/gnd/$1</entry>
+        <entry key="P244">http://id.loc.gov/authorities/names/$1</entry>
+        <entry key="P245">http://vocab.getty.edu/ulan/$1</entry>
+        <entry key="P268">http://data.bnf.fr/ark:/12148/cb$1</entry>
+        <entry key="P269">http://www.idref.fr/$1/id</entry>
+        <entry key="P349">http://id.ndl.go.jp/auth/ndlna/$1</entry>
+        <entry key="P486">http://id.nlm.nih.gov/mesh/$1</entry>
+        <entry key="P508">http://purl.org/bncf/tid/$1</entry>
+        <entry key="P646">https://www.freebase.com$1</entry>
+        <entry key="P646">https://g.co/kg$1</entry>
+        <entry key="P648">http://openlibrary.org/works/$1</entry>
+        <entry key="P672">http://id.nlm.nih.gov/mesh/$1</entry>
+        <entry key="P906">http://libris.kb.se/resource/auth/$1</entry>
+        <entry key="P950">http://datos.bne.es/resource/$1</entry>
+        <entry key="P1006">http://data.bibliotheken.nl/id/thes/p$1</entry>
+        <entry key="P1014">http://vocab.getty.edu/aat/$1</entry>
+        <entry key="P1015">https://livedata.bibsys.no/authority/$1</entry>
+        <entry key="P1036">http://dewey.info/class/$1/</entry>
+        <entry key="P1256">http://iconclass.org/$1</entry>
+        <entry key="P1260">http://kulturarvsdata.se/$1</entry>
+        <entry key="P1422">http://ta.sandrart.net/-person-$1</entry>
+        <entry key="P1566">https://sws.geonames.org/$1/</entry>
+        <entry key="P1584">http://pleiades.stoa.org/places/$1/rdf</entry>
+        <entry key="P1667">http://vocab.getty.edu/tgn/$1</entry>
+        <entry key="P1802">urn:uuid:$1</entry>
+        <entry key="P1936">http://dare.ht.lu.se/places/$1</entry>
+        <entry key="P2163">http://id.worldcat.org/fast/$1</entry>
+        <entry key="P2347">http://www.yso.fi/onto/yso/p$1</entry>
+        <entry key="P2452">http://www.geonames.org/ontology#$1</entry>
+        <entry key="P2581">http://babelnet.org/rdf/s$1</entry>
+        <entry key="P2671">http://g.co/kg$1</entry>
+        <entry key="P2799">http://data.cervantesvirtual.com/person/$1</entry>
+        <entry key="P2950">http://nomisma.org/id/$1</entry>
+        <entry key="P3120">http://data.ordnancesurvey.co.uk/id/$1</entry>
+        <entry key="P3348">http://nlg.okfn.gr/resource/authority/record$1</entry>
+        <entry key="P3832">http://thesaurus.europeanafashion.eu/thesaurus/$1</entry>
+        <entry key="P3911">http://zbw.eu/stw/descriptor/$1</entry>
+        <entry key="P3916">http://vocabularies.unesco.org/thesaurus/$1</entry>
+        <entry key="P4104">http://data.carnegiehall.org/names/$1</entry>
+        <entry key="P4307">https://id.erfgoed.net/thesauri/erfgoedtypes/$1</entry>
+        <entry key="P4953">http://id.loc.gov/authorities/genreForms/$1</entry>
+        <entry key="P5034">http://lod.nl.go.kr/resource/$1</entry>
+        <entry key="P5429">http://cv.iptc.org/newscodes/$1</entry>
+        <entry key="P5587">https://libris.kb.se/$1</entry>
+        <entry key="P5748">http://uri.gbv.de/terminology/bk/$1</entry>
+        <entry key="P6293">http://www.yso.fi/onto/ysa/$1</entry>
+    </xsl:variable>
+
     <xsl:variable name="articles" 
                   select="/rdf:RDF/rdf:Description[rdf:type/@rdf:resource='http://schema.org/Article']"/>
+
+    <xsl:variable name="statements" 
+                  select="/rdf:RDF/rdf:Description[rdf:type/@rdf:resource='http://wikiba.se/ontology#Statement']"/>
+
+
+
+    <!--+++++++++++++++++++++++++++++++ Rules +++++++++++++++++++++++++++++++-->
 
     <xsl:template match="/">
         <xsl:apply-templates select="rdf:RDF"/>
@@ -53,90 +112,102 @@
 
     <xsl:template match="rdf:RDF">
 
-        <xsl:variable name="props" select="rdf:Description[@rdf:about=$rdf_about]/*"/>
+        <xsl:variable name="props" select="rdf:Description[@rdf:about=$targetId]/*"/>
 
         <xsl:if test="$props">
             <xsl:variable name="entity">
-                <rdf:Description>
-                    <xsl:attribute name="rdf:about" select="$rdf_about"/>
-                    <xsl:copy-of select="$props"/>                
-                </rdf:Description>
+              <xsl:choose>
+                <!-- 
+                <xsl:when test="$props[name()='wdt:P31']/@rdf:resource = 'http://www.wikidata.org/entity/Q17362920'">
+                </xsl:when>
+                 -->
+                <xsl:when test="$props[name()='wdt:P31']/@rdf:resource = 'http://www.wikidata.org/entity/Q22808320'">
+                </xsl:when>
+                <xsl:when test="$props[name()='wdt:P31']/@rdf:resource = 'http://www.wikidata.org/entity/Q4167410'">
+                </xsl:when>
+                <xsl:when test="$props[name()!='owl:sameAs']">
+                  <rdf:Description>
+                      <xsl:attribute name="rdf:about" select="$targetId"/>
+                      <xsl:copy-of select="$props"/>
+                  </rdf:Description>
+                </xsl:when>
+                <xsl:otherwise>
+                  <!-- Redirection case -->
+                  <xsl:variable name="newId" select="$props[name()='owl:sameAs']/@rdf:resource"/>
+                  <rdf:Description>
+                      <xsl:attribute name="rdf:about" select="$newId"/>
+                      <xsl:copy-of select="rdf:Description[@rdf:about=$newId]/*"/>
+                      <xsl:element name="owl:sameAs">
+                        <xsl:attribute name="rdf:resource"><xsl:value-of select="$targetId"/></xsl:attribute>
+                      </xsl:element>
+                  </rdf:Description>
+                </xsl:otherwise>
+              </xsl:choose>
             </xsl:variable>
 
             <rdf:RDF>
 	            <xsl:for-each select="$entity/rdf:Description">
 	                <xsl:call-template name="Entity"/>
 	            </xsl:for-each>
-            </rdf:RDF>
+	        </rdf:RDF>
         </xsl:if>
 
     </xsl:template>
 
     <xsl:template name="Entity">
+
         <xsl:variable name="wkdURI" select="string(@rdf:about)"/>
 
         <foaf:Organization>
 
             <xsl:copy-of select="@rdf:about"/>
 
-            <!-- EA-2669 not allowed anymore 
+<!-- 
             <xsl:for-each select="wdt:P18[1]">
                 <xsl:element name="foaf:depiction">
                     <xsl:copy-of select="@rdf:resource"/>
                 </xsl:element>
             </xsl:for-each>
-             -->
-
-            <!-- labels -->
+-->
+ 
+             <!-- labels -->
             <xsl:call-template name="labels">
                 <xsl:with-param name="alt" select="skos:altLabel"/>
             </xsl:call-template>
-
-<!-- 
-            <xsl:for-each select="rdfs:label">
-                <xsl:call-template name="label">
-                    <xsl:with-param name="property" select="'skos:prefLabel'"/>
-                </xsl:call-template>
-            </xsl:for-each>
-
-            <xsl:for-each select="skos:altLabel">
-                <xsl:call-template name="label">
-                    <xsl:with-param name="property" select="'skos:altLabel'"/>
-                </xsl:call-template>
-            </xsl:for-each>
- -->
- 
+  
+             <!-- descriptions -->
             <xsl:for-each select="schema:description">
-                <xsl:if test="contains($langs,@xml:lang)">
-                    <xsl:element name="dc:description">
-                        <xsl:copy-of select="@xml:lang"/>
-                        <xsl:value-of select="."/>
-                    </xsl:element>
+                <xsl:if test="lib:isAcceptableLang(@xml:lang) and lib:isAcceptableLabel(.)">
+                    <xsl:call-template name="LangLiteral">
+                        <xsl:with-param name="prop" select="'dc:description'"/>
+                    </xsl:call-template>
                 </xsl:if>
             </xsl:for-each>
-
+ 
             <xsl:for-each select="wdt:P856">
-                <xsl:element name="foaf:homepage">
-                    <xsl:copy-of select="@rdf:resource"/>
-                </xsl:element>
+                <xsl:call-template name="Reference">
+                    <xsl:with-param name="prop" select="'foaf:homepage'"/>
+                </xsl:call-template>
             </xsl:for-each>
 
             <xsl:for-each select="wdt:P154">
-                <xsl:element name="foaf:logo">
-                    <xsl:copy-of select="@rdf:resource"/>
-                </xsl:element>
+                <xsl:call-template name="Reference">
+                    <xsl:with-param name="prop" select="'foaf:logo'"/>
+                </xsl:call-template>
             </xsl:for-each>
 
             <xsl:for-each select="wdt:P968">
-                <xsl:element name="foaf:mbox">
-                    <xsl:value-of select="replace(@rdf:resource,'mailto:','')"/>
-                </xsl:element>
+                <xsl:if test="@rdf:resource">
+	                <xsl:element name="foaf:mbox">
+	                    <xsl:value-of select="replace(@rdf:resource,'mailto:','')"/>
+	                </xsl:element>
+                </xsl:if>
             </xsl:for-each>
 
             <xsl:for-each select="wdt:P1329">
-                <xsl:element name="foaf:phone">
-                    <xsl:value-of select="."/>
-                </xsl:element>
+                <xsl:call-template name="Literal">
+                    <xsl:with-param name="prop" select="'foaf:phone'"/>
+                </xsl:call-template>
             </xsl:for-each>
 
             <xsl:variable name="country" select="lib:toISO639_2(wdt:P17[1]/@rdf:resource)"/>
@@ -216,148 +287,63 @@
                 </xsl:element>
             </xsl:if>
 
-        <!-- Co-referencing -->
+            <!-- Co-referencing -->
+            <xsl:if test="$coref">
+                <xsl:for-each select="owl:sameAs | wdt:P1709 | wdt:P2888">
+                    <xsl:element name="owl:sameAs">
+                        <xsl:copy-of select="@rdf:resource"/>
+                    </xsl:element>
+                </xsl:for-each>
+                <xsl:call-template name="coref">
+                    <xsl:with-param name="current" select="."/>
+                    <xsl:with-param name="target" select="'owl:sameAs'"/>
+                </xsl:call-template>
+            </xsl:if>
 
             <xsl:call-template name="DBpedia">
                 <xsl:with-param name="uri" select="@rdf:about"/>
             </xsl:call-template>
 
-            <!-- ISNI -->
-            <xsl:for-each select="wdt:P213">
-                <xsl:element name="owl:sameAs">
-                    <xsl:attribute name="rdf:resource">http://isni.org/isni/<xsl:value-of select="translate(text(),' ','')"/></xsl:attribute>
-                </xsl:element>
-            </xsl:for-each>
-
-            <!-- VIAF ID -->
-            <xsl:for-each select="wdt:P214">
-                <xsl:element name="owl:sameAs">
-                    <xsl:attribute name="rdf:resource">http://viaf.org/viaf/<xsl:value-of select="text()"/></xsl:attribute>
-                </xsl:element>
-            </xsl:for-each>
-
-            <!-- Freebase ID -->
-            <xsl:for-each select="wdt:P646">
-                <xsl:element name="owl:sameAs">
-                    <xsl:attribute name="rdf:resource">https://www.freebase.com<xsl:value-of select="text()"/></xsl:attribute>
-                </xsl:element>
-                <xsl:element name="owl:sameAs">
-                    <xsl:attribute name="rdf:resource">https://g.co/kg<xsl:value-of select="text()"/></xsl:attribute>
-                </xsl:element>
-            </xsl:for-each>
-
-            <!-- GND ID -->
-            <xsl:for-each select="wdt:P227">
-                <xsl:element name="owl:sameAs">
-                    <xsl:attribute name="rdf:resource">http://d-nb.info/gnd/<xsl:value-of select="text()"/></xsl:attribute>
-                </xsl:element>
-            </xsl:for-each>
-
-            <!-- BNF Identitier -->
-            <xsl:for-each select="wdt:P268">
-                <xsl:element name="owl:sameAs">
-                    <xsl:attribute name="rdf:resource">http://data.bnf.fr/ark:/12148/cb<xsl:value-of select="text()"/></xsl:attribute>
-                </xsl:element>
-            </xsl:for-each>
-
-            <!-- LCAuth identifier -->
-            <xsl:for-each select="wdt:P244">
-                <xsl:element name="owl:sameAs">
-                    <xsl:attribute name="rdf:resource">http://id.loc.gov/authorities/names/<xsl:value-of select="text()"/></xsl:attribute>
-                </xsl:element>
-            </xsl:for-each>
-
-            <!-- ULAN identifier -->
-            <xsl:for-each select="wdt:P245">
-                <xsl:element name="owl:sameAs">
-                    <xsl:attribute name="rdf:resource">http://vocab.getty.edu/ulan/<xsl:value-of select="text()"/></xsl:attribute>
-                </xsl:element>
-            </xsl:for-each>
-
-            <!-- Geonames ID -->
-            <xsl:for-each select="wdt:P1566">
-                <xsl:element name="owl:sameAs">
-                    <xsl:attribute name="rdf:resource">http://sws.geonames.org/<xsl:value-of select="text()"/>/</xsl:attribute>
-                </xsl:element>
-            </xsl:for-each>
-
-            <!-- BabelNet ID -->
-            <xsl:for-each select="wdt:P2581">
-                <xsl:element name="owl:sameAs">
-                    <xsl:attribute name="rdf:resource">http://babelnet.org/rdf/s<xsl:value-of select="text()"/></xsl:attribute>
-                </xsl:element>
-            </xsl:for-each>
-
-            <!-- BNE ID -->
-            <xsl:for-each select="wdt:P950">
-                <xsl:element name="owl:sameAs">
-                    <xsl:attribute name="rdf:resource">http://datos.bne.es/resource/<xsl:value-of select="text()"/></xsl:attribute>
-                </xsl:element>
-            </xsl:for-each>
-
-            <!-- Nomisma ID -->
-            <xsl:for-each select="wdt:P2950">
-                <xsl:element name="owl:sameAs">
-                    <xsl:attribute name="rdf:resource">http://nomisma.org/id/<xsl:value-of select="text()"/></xsl:attribute>
-                </xsl:element>
-            </xsl:for-each>
  
         </foaf:Organization>
 
     </xsl:template>
 
-<!-- 
-    <xsl:template name="label">
-        <xsl:param name="property"/>
-
-        <xsl:choose>
-            <xsl:when test="not(contains($langs,@xml:lang))"/>
-            <xsl:when test="fn:matches(string(.),'^\s*([A-Z]+[.]*)+\s*$')">
-                <xsl:element name="edm:acronym">
-                    <xsl:copy-of select="@xml:lang"/>
-                    <xsl:value-of select="."/>
-                </xsl:element>
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:element name="{$property}">
-                    <xsl:copy-of select="@xml:lang"/>
-                    <xsl:value-of select="."/>
-                </xsl:element>
-            </xsl:otherwise>
-        </xsl:choose>
-    </xsl:template>
- -->
+    <!--+++++++++++++++++++++++++++ FUNCTIONS +++++++++++++++++++++++++++++++-->
  
-                            <!-- Geo Coordinates -->
+    <xsl:template name="Literal">
+        <xsl:param name="prop"/>
 
-    <xsl:function name="lib:getGeoURI" as="xs:string">
-        <xsl:param name="arg"/>
+        <xsl:if test="text()[string-length(.) &gt; 0]">
+            <xsl:element name="{$prop}">
+                <xsl:value-of select="."/>
+            </xsl:element>
+        </xsl:if>
+    </xsl:template>
 
-        <xsl:choose>
-            <xsl:when test="$arg/@rdf:datatype='http://www.opengis.net/ont/geosparql#wktLiteral'">
-                <xsl:value-of select="lib:getGeoURIFromGeoSPARQL($arg/text())"/>
-            </xsl:when>
-            <xsl:otherwise><xsl:value-of select="''"/></xsl:otherwise>
-        </xsl:choose>
-    </xsl:function>
+    <xsl:template name="LangLiteral">
+        <xsl:param name="prop"/>
 
-    <!-- 
-        Point(2.3758 48.8336) => geo:48.8336,2.3758
-        Altitudde and Longitude are inverted
-    -->
-    <xsl:function name="lib:getGeoURIFromGeoSPARQL" as="xs:string">
-        <xsl:param    name="arg"/>
-        <xsl:variable name="value" select="fn:normalize-space($arg)"/>
-        <xsl:variable name="pattern_point" select="'Point[(]([-]?[0-9]+([.][0-9]+)?)[ ]([-]?[0-9]+([.][0-9]+)?)[)]'"/>
-        <xsl:choose>
-            <xsl:when test="fn:matches($value,$pattern_point)">
-                <xsl:value-of select="fn:replace($value,$pattern_point,'geo:$3,$1')"/>
-            </xsl:when>
-            <xsl:otherwise><xsl:value-of select="''"/></xsl:otherwise>
-        </xsl:choose>
-     </xsl:function>
+        <xsl:if test="text()[string-length(.) &gt; 0]">
+            <xsl:element name="{$prop}">
+                <xsl:copy-of select="@xml:lang"/>
+                <xsl:value-of select="."/>
+            </xsl:element>
+        </xsl:if>
+    </xsl:template>
 
-                            <!-- Labels -->
+    <xsl:template name="Reference">
+        <xsl:param name="prop"/>
+
+        <xsl:if test="@rdf:resource">
+            <xsl:element name="{$prop}">
+                <xsl:copy-of select="@rdf:resource"/>
+            </xsl:element>
+        </xsl:if>
+    </xsl:template>
+
+
+    <!--+++++++++++++++++++++++++++++ LABELS ++++++++++++++++++++++++++++++++-->
 
     <xsl:template name="labels">
         <xsl:param name="alt"/>
@@ -420,21 +406,38 @@
         <xsl:sequence select="matches($string,'[\p{L}\p{N}]')"/>
     </xsl:function>
 
-                            <!-- Utilities -->
+ 
+    <!--++++++++++++++++++++++++ GEO COORDINATES ++++++++++++++++++++++++++++-->
 
-    <xsl:template name="DBpedia">
-        <xsl:param name="uri"/>
+    <xsl:function name="lib:getGeoURI" as="xs:string">
+        <xsl:param name="arg"/>
 
-        <xsl:for-each select="$articles[schema:about/@rdf:resource=$uri
-                                    and contains(@rdf:about,$wiki)]">
-            <xsl:element name="owl:sameAs">
-                <xsl:attribute name="rdf:resource">
-                    <xsl:value-of select="replace(@rdf:about,$wiki,$dbp)"/>
-                </xsl:attribute>
-            </xsl:element>
-        </xsl:for-each>
+        <xsl:choose>
+            <xsl:when test="$arg/@rdf:datatype='http://www.opengis.net/ont/geosparql#wktLiteral'">
+                <xsl:value-of select="lib:getGeoURIFromGeoSPARQL($arg/text())"/>
+            </xsl:when>
+            <xsl:otherwise><xsl:value-of select="''"/></xsl:otherwise>
+        </xsl:choose>
+    </xsl:function>
 
-     </xsl:template>
+    <!-- 
+        Point(2.3758 48.8336) => geo:48.8336,2.3758
+        Altitudde and Longitude are inverted
+    -->
+    <xsl:function name="lib:getGeoURIFromGeoSPARQL" as="xs:string">
+        <xsl:param    name="arg"/>
+        <xsl:variable name="value" select="fn:normalize-space($arg)"/>
+        <xsl:variable name="pattern_point" select="'Point[(]([-]?[0-9]+([.][0-9]+)?)[ ]([-]?[0-9]+([.][0-9]+)?)[)]'"/>
+        <xsl:choose>
+            <xsl:when test="fn:matches($value,$pattern_point)">
+                <xsl:value-of select="fn:replace($value,$pattern_point,'geo:$3,$1')"/>
+            </xsl:when>
+            <xsl:otherwise><xsl:value-of select="''"/></xsl:otherwise>
+        </xsl:choose>
+     </xsl:function>
+
+
+    <!--++++++++++++++++++++++++++ DEREFERENCING ++++++++++++++++++++++++++++-->
 
     <xsl:function name="lib:getLabel" as="xs:string">
         <xsl:param name="uri"/>
@@ -455,6 +458,57 @@
             </xsl:otherwise>
         </xsl:choose>
     </xsl:function>
+
+
+    <!--++++++++++++++++++++++++++ COREFERENCING ++++++++++++++++++++++++++++-->
+
+    <xsl:template name="coref">
+        <xsl:param name="current"/>
+        <xsl:param name="target"/>
+        <xsl:for-each select="$map/entry">
+            <xsl:variable name="property" select="string(@key)"/>
+            <xsl:variable name="pattern"  select="string(text())"/>
+            <xsl:for-each select="$current/*[local-name()=$property and namespace-uri()=$namespace]">
+                <xsl:element name="{$target}">
+                    <xsl:attribute name="rdf:resource">
+                        <xsl:value-of select="lib:mapLD($pattern,string(text()))"/>
+                    </xsl:attribute>
+                </xsl:element>
+            </xsl:for-each>
+        </xsl:for-each>
+    </xsl:template>
+ 
+     <xsl:function name="lib:mapLD" as="xs:string">
+        <xsl:param    name="pattern"/>
+        <xsl:param    name="value"/>
+
+        <xsl:variable name="base"  select="substring-before($pattern, '$1')"/>
+
+        <xsl:choose>
+            <xsl:when test="starts-with($value,$base)">
+               <xsl:value-of select="$value"/>
+            </xsl:when>
+            <xsl:otherwise>
+               <xsl:value-of select="fn:replace($pattern,'[$]1',$value)"/>
+            </xsl:otherwise>
+        </xsl:choose>
+
+     </xsl:function>
+
+    <xsl:template name="DBpedia">
+        <xsl:param name="uri"/>
+
+        <xsl:for-each select="$articles[schema:about/@rdf:resource=$uri
+                                    and contains(@rdf:about,$wiki)]">
+            <xsl:element name="owl:sameAs">
+                <xsl:attribute name="rdf:resource">
+                    <xsl:value-of select="replace(@rdf:about,$wiki,$dbp)"/>
+                </xsl:attribute>
+            </xsl:element>
+        </xsl:for-each>
+
+    </xsl:template>
+
 
     <!-- Country Codes -->
     <xsl:function name="lib:toISO639_2" as="xs:string">

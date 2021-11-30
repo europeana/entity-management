@@ -5,7 +5,7 @@ import dev.morphia.Datastore;
 import eu.europeana.api.commons.oauth2.service.impl.EuropeanaClientDetailsService;
 import eu.europeana.batch.config.MongoBatchConfigurer;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
-import eu.europeana.entitymanagement.common.config.DataSources;
+import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -67,7 +67,7 @@ public class AppConfig extends AppConfigConstants {
       throw new IllegalStateException(
           String.format(
               "Datasource must be configured with id='%s' in %s",
-              DataSources.EUROPEANA_ID, datasourcesXMLConfigFile));
+              DataSource.EUROPEANA_ID, datasourcesXMLConfigFile));
     }
 
     return dataSources;

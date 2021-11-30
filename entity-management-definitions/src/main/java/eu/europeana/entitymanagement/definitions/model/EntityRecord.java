@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.definitions.model;
 
-import static eu.europeana.entitymanagement.definitions.EntityRecordFields.*;
+import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_EXACT_MATCH;
+import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_SAME_AS;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BASE_DATA_EUROPEANA_URI;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
 
@@ -8,7 +9,13 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import dev.morphia.annotations.*;
+import dev.morphia.annotations.EntityListeners;
+import dev.morphia.annotations.Field;
+import dev.morphia.annotations.Id;
+import dev.morphia.annotations.Index;
+import dev.morphia.annotations.IndexOptions;
+import dev.morphia.annotations.Indexed;
+import dev.morphia.annotations.Indexes;
 import eu.europeana.entitymanagement.utils.EntityRecordWatcher;
 import java.util.ArrayList;
 import java.util.Date;
@@ -31,7 +38,7 @@ public class EntityRecord {
 
   private final List<EntityProxy> proxies = new ArrayList<>();
 
-  @JsonIgnore private boolean disabled;
+  @JsonIgnore private Date disabled;
 
   @JsonIgnore private Date created;
 
@@ -76,10 +83,10 @@ public class EntityRecord {
   }
 
   public boolean isDisabled() {
-    return this.disabled;
+    return disabled != null;
   }
 
-  public void setDisabled(boolean disabledParam) {
+  public void setDisabled(Date disabledParam) {
     this.disabled = disabledParam;
   }
 
