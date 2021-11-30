@@ -33,4 +33,6 @@ public class XmlAggregationImpl {
             .map(LabelledResource::new)
             .collect(Collectors.toList());
   }
+
+  public XmlAggregationImpl() {}
 }

@@ -4,12 +4,14 @@ import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.*;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPath;
 import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
 
 import com.zoho.crm.api.record.Record;
 import eu.europeana.entitymanagement.batch.service.FailedTaskService;
@@ -19,6 +21,8 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.FailedTaskJsonFields;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
+import eu.europeana.entitymanagement.web.xml.model.XmlConstants;
+import java.util.Map;
 import java.util.Optional;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -33,6 +37,11 @@ import org.springframework.test.web.servlet.ResultActions;
 public class EntityRetrievalIT extends BaseWebControllerTest {
 
   @Autowired private FailedTaskService failedTaskService;
+  Map<String, String> xmlNamespaces =
+      Map.of(
+          "edm", XmlConstants.NAMESPACE_EDM,
+          "rdf", XmlConstants.NAMESPACE_RDF,
+          "skos", XmlConstants.NAMESPACE_SKOS);
 
   @Test
   public void shouldRetrieveEntitiesWithFailures() throws Exception {
@@ -140,6 +149,30 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
   }
 
   @Test
+  void retrieveConceptXmlExternalShouldBeSuccessful() throws Exception {
+
+    String europeanaMetadata = loadFile(CONCEPT_REGISTER_BATHTUB_JSON);
+    String metisResponse = loadFile(CONCEPT_BATHTUB_XML);
+
+    String entityId =
+        createEntity(europeanaMetadata, metisResponse, CONCEPT_BATHTUB_URI).getEntityId();
+
+    String requestPath = getEntityRequestPath(entityId);
+    String entityBaseXpath = "/rdf:RDF/skos:Concept";
+    ResultActions resultActions =
+        mockMvc
+            .perform(
+                get(BASE_SERVICE_URL + "/" + requestPath + ".xml")
+                    .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                    .accept(MediaType.APPLICATION_XML))
+            .andExpect(status().isOk())
+            .andExpect(xpath(entityBaseXpath + "/@rdf:about", xmlNamespaces).string(entityId))
+            .andExpect(
+                xpath(entityBaseXpath + "/skos:prefLabel", xmlNamespaces)
+                    .nodeCount(greaterThan(0)));
+  }
+
+  @Test
   void retrievalWithDebugProfileShouldIncludeFailedTask() throws Exception {
 
     String europeanaMetadata = loadFile(CONCEPT_REGISTER_BATHTUB_JSON);
@@ -236,6 +269,28 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
   }
 
   @Test
+  public void retrieveAgentXmlExternalShouldBeSuccessful() throws Exception {
+    String europeanaMetadata = loadFile(AGENT_REGISTER_DAVINCI_JSON);
+    String metisResponse = loadFile(AGENT_DA_VINCI_XML);
+
+    String entityId =
+        createEntity(europeanaMetadata, metisResponse, AGENT_DA_VINCI_URI).getEntityId();
+
+    String requestPath = getEntityRequestPath(entityId);
+    String entityBaseXpath = "/rdf:RDF/edm:Agent";
+
+    mockMvc
+        .perform(
+            get(BASE_SERVICE_URL + "/" + requestPath + ".xml")
+                .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                .accept(MediaType.APPLICATION_XML))
+        .andExpect(status().isOk())
+        .andExpect(xpath(entityBaseXpath + "/@rdf:about", xmlNamespaces).string(entityId))
+        .andExpect(
+            xpath(entityBaseXpath + "/skos:prefLabel", xmlNamespaces).nodeCount(greaterThan(0)));
+  }
+
+  @Test
   void retrieveConceptJsonExternalSchemaOrgShouldBeSuccessful() throws Exception {
 
     String europeanaMetadata = loadFile(CONCEPT_REGISTER_BATHTUB_JSON);
@@ -287,8 +342,8 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
   @Test
   public void retrieveOrganizationExternalSchemaOrgShouldBeSuccessful() throws Exception {
     // id in JSON matches ORGANIZATION_BNF_URI_ZOHO value
-    String europeanaMetadata = loadFile(ORGANIZATION_REGISTER_BNF_ZOHO_JSON);
-    Optional<Record> zohoRecord = getZohoOrganizationRecord(ORGANIZATION_NATURALIS_URI_ZOHO);
+    String europeanaMetadata = loadFile(ORGANIZATION_REGISTER_GFM_ZOHO_JSON);
+    Optional<Record> zohoRecord = getZohoOrganizationRecord(ORGANIZATION_GFM_URI_ZOHO);
 
     assert zohoRecord.isPresent() : "Mocked Zoho response not loaded";
 
@@ -328,8 +383,8 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
   @Test
   public void retrieveOrganizationJsonExternalShouldBeSuccessful() throws Exception {
     // id in JSON matches ORGANIZATION_BNF_URI_ZOHO value
-    String europeanaMetadata = loadFile(ORGANIZATION_REGISTER_BNF_ZOHO_JSON);
-    Optional<Record> zohoRecord = getZohoOrganizationRecord(ORGANIZATION_NATURALIS_URI_ZOHO);
+    String europeanaMetadata = loadFile(ORGANIZATION_REGISTER_GFM_ZOHO_JSON);
+    Optional<Record> zohoRecord = getZohoOrganizationRecord(ORGANIZATION_GFM_URI_ZOHO);
 
     assert zohoRecord.isPresent() : "Mocked Zoho response not loaded";
     String entityId = createOrganization(europeanaMetadata, zohoRecord.get()).getEntityId();
@@ -344,6 +399,29 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
         .andExpect(jsonPath("$.id", is(entityId)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())))
         .andExpect(jsonPath("$.sameAs").isNotEmpty());
+  }
+
+  @Test
+  public void retrieveOrganizationXmlExternalShouldBeSuccessful() throws Exception {
+    // id in JSON matches ORGANIZATION_BNF_URI_ZOHO value
+    String europeanaMetadata = loadFile(ORGANIZATION_REGISTER_GFM_ZOHO_JSON);
+    Optional<Record> zohoRecord = getZohoOrganizationRecord(ORGANIZATION_GFM_URI_ZOHO);
+
+    assert zohoRecord.isPresent() : "Mocked Zoho response not loaded";
+    String entityId = createOrganization(europeanaMetadata, zohoRecord.get()).getEntityId();
+
+    String entityBaseXpath = "/rdf:RDF/edm:Organization";
+
+    String requestPath = getEntityRequestPath(entityId);
+    mockMvc
+        .perform(
+            get(BASE_SERVICE_URL + "/" + requestPath + ".xml")
+                .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(xpath(entityBaseXpath + "/@rdf:about", xmlNamespaces).string(entityId))
+        .andExpect(
+            xpath(entityBaseXpath + "/skos:prefLabel", xmlNamespaces).nodeCount(greaterThan(0)));
   }
 
   @Test
@@ -362,6 +440,26 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(entityId)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Place.name())));
+  }
+
+  @Test
+  public void retrievePlaceXmlExternalShouldBeSuccessful() throws Exception {
+    String europeanaMetadata = loadFile(PLACE_REGISTER_PARIS_JSON);
+    String metisResponse = loadFile(PLACE_PARIS_XML);
+
+    String entityId = createEntity(europeanaMetadata, metisResponse, PLACE_PARIS_URI).getEntityId();
+    String requestPath = getEntityRequestPath(entityId);
+
+    String entityBaseXpath = "/rdf:RDF/edm:Place";
+    mockMvc
+        .perform(
+            get(BASE_SERVICE_URL + "/" + requestPath + ".xml")
+                .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                .accept(MediaType.APPLICATION_XML))
+        .andExpect(status().isOk())
+        .andExpect(xpath(entityBaseXpath + "/@rdf:about", xmlNamespaces).string(entityId))
+        .andExpect(
+            xpath(entityBaseXpath + "/skos:prefLabel", xmlNamespaces).nodeCount(greaterThan(0)));
   }
 
   @Test
@@ -384,7 +482,29 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
   }
 
   @Test
-  public void retrieveEntityInternalShouldBeSuccessful() throws Exception {
+  public void retrieveTimespanXmlExternalShouldBeSuccessful() throws Exception {
+    String europeanaMetadata = loadFile(TIMESPAN_REGISTER_1ST_CENTURY_JSON);
+    String metisResponse = loadFile(TIMESPAN_1ST_CENTURY_XML);
+
+    String entityId =
+        createEntity(europeanaMetadata, metisResponse, TIMESPAN_1ST_CENTURY_URI).getEntityId();
+
+    String requestPath = getEntityRequestPath(entityId);
+    String entityBaseXpath = "/rdf:RDF/edm:TimeSpan";
+
+    mockMvc
+        .perform(
+            get(BASE_SERVICE_URL + "/" + requestPath + ".xml")
+                .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                .accept(MediaType.APPLICATION_XML))
+        .andExpect(status().isOk())
+        .andExpect(xpath(entityBaseXpath + "/@rdf:about", xmlNamespaces).string(entityId))
+        .andExpect(
+            xpath(entityBaseXpath + "/skos:prefLabel", xmlNamespaces).nodeCount(greaterThan(0)));
+  }
+
+  @Test
+  public void retrieveEntityInternalJsonShouldBeSuccessful() throws Exception {
     String europeanaMetadata = loadFile(CONCEPT_REGISTER_BATHTUB_JSON);
     String metisResponse = loadFile(CONCEPT_BATHTUB_XML);
 
