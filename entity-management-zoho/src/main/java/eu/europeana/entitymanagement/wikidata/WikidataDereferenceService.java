@@ -126,7 +126,7 @@ public class WikidataDereferenceService implements Dereferencer, InitializingBea
     if (StringUtils.hasLength(entityResponse)) {
       try (InputStream stream =
           new ByteArrayInputStream(entityResponse.getBytes(StandardCharsets.UTF_8))) {
-        transformer.get().setParameter("rdf_about", uri);
+        transformer.get().setParameter("targetId", uri);
         transformer.get().transform(new StreamSource(stream), wikidataRes);
 
       } catch (TransformerException | IOException e) {
