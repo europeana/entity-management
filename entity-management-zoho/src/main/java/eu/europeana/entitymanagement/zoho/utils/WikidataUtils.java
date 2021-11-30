@@ -1,9 +1,9 @@
 package eu.europeana.entitymanagement.zoho.utils;
 
-import java.util.List;
-import java.util.Optional;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import java.util.List;
+import java.util.Optional;
 
 public class WikidataUtils {
 

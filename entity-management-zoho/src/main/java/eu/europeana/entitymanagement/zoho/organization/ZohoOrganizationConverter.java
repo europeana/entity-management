@@ -1,17 +1,18 @@
 package eu.europeana.entitymanagement.zoho.organization;
 
 import static eu.europeana.entitymanagement.zoho.utils.ZohoUtils.toIsoLanguage;
+
+import com.zoho.crm.api.record.Record;
+import eu.europeana.entitymanagement.definitions.model.Address;
+import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
+import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
-import com.zoho.crm.api.record.Record;
-import eu.europeana.entitymanagement.definitions.model.Address;
-import eu.europeana.entitymanagement.definitions.model.Organization;
-import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
-import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 
 public class ZohoOrganizationConverter {
 
@@ -24,7 +25,7 @@ public class ZohoOrganizationConverter {
   public static Organization convertToOrganizationEntity(Record record) {
     Organization org = new Organization();
     org.setAbout(ZohoConstants.URL_ORGANIZATION_PREFFIX + record.getId());
-//    org.setIdentifier(ZohoUtils.stringListSupplier(List.of(Long.toString(record.getId()))));
+    //    org.setIdentifier(ZohoUtils.stringListSupplier(List.of(Long.toString(record.getId()))));
     org.setIdentifier(List.of(Long.toString(record.getId())));
 
     // extract language maps

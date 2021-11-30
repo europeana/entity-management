@@ -11,7 +11,6 @@ public class DataSource {
   public static final String ZOHO_ID = "crm.zoho.com";
   public static final String WIKIDATA_ID = "www.wikidata.org";
 
-
   @JacksonXmlProperty(isAttribute = true)
   private String url;
 

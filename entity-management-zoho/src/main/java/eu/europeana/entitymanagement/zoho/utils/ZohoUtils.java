@@ -1,5 +1,13 @@
 package eu.europeana.entitymanagement.zoho.utils;
 
+import com.zoho.crm.api.record.Record;
+import com.zoho.crm.api.record.ResponseHandler;
+import com.zoho.crm.api.record.ResponseWrapper;
+import com.zoho.crm.api.util.APIResponse;
+import com.zoho.crm.api.util.Choice;
+import eu.europeana.entitymanagement.common.config.DataSource;
+import eu.europeana.entitymanagement.definitions.model.WebResource;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,14 +24,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
-import com.zoho.crm.api.record.Record;
-import com.zoho.crm.api.record.ResponseHandler;
-import com.zoho.crm.api.record.ResponseWrapper;
-import com.zoho.crm.api.util.APIResponse;
-import com.zoho.crm.api.util.Choice;
-import eu.europeana.entitymanagement.common.config.DataSource;
-import eu.europeana.entitymanagement.definitions.model.WebResource;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 public final class ZohoUtils {
 

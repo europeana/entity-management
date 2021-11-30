@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement.web.service;
 
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPathWithBase;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BASE_DATA_EUROPEANA_URI;
+
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.exception.ScoringComputationException;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;

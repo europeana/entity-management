@@ -1,13 +1,13 @@
 package eu.europeana.entitymanagement.config;
 
-import java.util.List;
-import java.util.Optional;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
 import eu.europeana.entitymanagement.exception.HttpUnprocessableException;
+import java.util.List;
+import java.util.Optional;
 
 @JacksonXmlRootElement(localName = "config")
 public class DataSources {

@@ -140,14 +140,14 @@ public class BaseMvcTestUtils {
   public static final String ORGANIZATION_NATURALIS_URI_WIKIDATA_PATH_SUFFIX = "/entity/Q641676";
   public static final String ORGANIZATION_NATURALIS_URI_WIKIDATA_URI =
       "http://www.wikidata.org" + ORGANIZATION_NATURALIS_URI_WIKIDATA_PATH_SUFFIX;
-  
+
   public static final String ORGANIZATION_GFM_OLD_URI_WIKIDATA_PATH_SUFFIX = "/entity/Q28933300";
   public static final String ORGANIZATION_GFM_URI_WIKIDATA_PATH_SUFFIX = "/entity/Q18290171";
   public static final String ORGANIZATION_GFM_URI_WIKIDATA_URI =
       "http://www.wikidata.org" + ORGANIZATION_GFM_URI_WIKIDATA_PATH_SUFFIX;
   public static final String ORGANIZATION_GFM_OLD_URI_WIKIDATA_URI =
       "http://www.wikidata.org" + ORGANIZATION_GFM_OLD_URI_WIKIDATA_PATH_SUFFIX;
-  
+
   public static final String ORGANIZATION_NATURALIS_ZOHO_RESPONSE =
       "/zoho-deref/organization_zoho_naturalis_response.json";
   public static final String ORGANIZATION_GFM_ZOHO_RESPONSE =
@@ -156,7 +156,6 @@ public class BaseMvcTestUtils {
       "/wikidata-deref/organization_wikidata_naturalis_response.xml";
   public static final String ORGANIZATION_GFM_WIKIDATA_RESPONSE_XML =
       "/wikidata-deref/organization_wikidata_gfm_response.xml";
-
 
   /** Creates an ObjectMapper specifically for handling Mock zoho responses */
   private static final ObjectMapper zohoResponseObjectMapper =
@@ -170,8 +169,11 @@ public class BaseMvcTestUtils {
 
   /** Maps ZOHO organization URIs to mocked JSON responses */
   public static Map<String, String> ZOHO_RESPONSE_MAP =
-      Map.of(ORGANIZATION_NATURALIS_URI_ZOHO, ORGANIZATION_NATURALIS_ZOHO_RESPONSE, 
-          ORGANIZATION_GFM_URI_ZOHO, ORGANIZATION_GFM_ZOHO_RESPONSE);
+      Map.of(
+          ORGANIZATION_NATURALIS_URI_ZOHO,
+          ORGANIZATION_NATURALIS_ZOHO_RESPONSE,
+          ORGANIZATION_GFM_URI_ZOHO,
+          ORGANIZATION_GFM_ZOHO_RESPONSE);
 
   /** Maps Metis dereferenciation URIs to mocked XML responses */
   public static final Map<String, String> METIS_RESPONSE_MAP =

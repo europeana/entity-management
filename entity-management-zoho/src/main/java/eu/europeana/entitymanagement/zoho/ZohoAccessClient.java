@@ -1,10 +1,7 @@
 package eu.europeana.entitymanagement.zoho;
 
 import static eu.europeana.entitymanagement.zoho.utils.ZohoUtils.getZohoRecords;
-import java.util.Optional;
-import org.apache.commons.lang3.SystemUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+
 import com.zoho.api.authenticator.OAuthToken;
 import com.zoho.api.authenticator.OAuthToken.TokenType;
 import com.zoho.api.authenticator.Token;
@@ -24,6 +21,10 @@ import com.zoho.crm.api.util.APIResponse;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
+import java.util.Optional;
+import org.apache.commons.lang3.SystemUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ZohoAccessClient {
 

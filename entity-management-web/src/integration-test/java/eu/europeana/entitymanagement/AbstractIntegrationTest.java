@@ -8,9 +8,26 @@ import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZAT
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_NATURALIS_URI_WIKIDATA_PATH_SUFFIX;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_NATURALIS_WIKIDATA_RESPONSE_XML;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
+import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.common.config.DataSource;
+import eu.europeana.entitymanagement.config.DataSources;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.testutils.MongoContainer;
+import eu.europeana.entitymanagement.testutils.SolrContainer;
+import eu.europeana.entitymanagement.web.MetisDereferenceUtils;
+import eu.europeana.entitymanagement.web.model.EntityPreview;
+import eu.europeana.entitymanagement.web.service.EntityRecordService;
+import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import java.io.IOException;
 import java.util.Objects;
 import javax.xml.bind.JAXBContext;
+import okhttp3.mockwebserver.Dispatcher;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -25,22 +42,6 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.output.ToStringConsumer;
 import org.testcontainers.containers.output.WaitingConsumer;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
-import eu.europeana.entitymanagement.common.config.DataSource;
-import eu.europeana.entitymanagement.config.DataSources;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.testutils.MongoContainer;
-import eu.europeana.entitymanagement.testutils.SolrContainer;
-import eu.europeana.entitymanagement.web.MetisDereferenceUtils;
-import eu.europeana.entitymanagement.web.model.EntityPreview;
-import eu.europeana.entitymanagement.web.service.EntityRecordService;
-import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
-import okhttp3.mockwebserver.Dispatcher;
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
-import okhttp3.mockwebserver.RecordedRequest;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -58,7 +59,6 @@ public abstract class AbstractIntegrationTest {
 
   @Autowired protected EntityUpdateService entityUpdateService;
   @Autowired protected DataSources datasources;
-  
 
   static {
     MONGO_CONTAINER =
@@ -174,7 +174,7 @@ public abstract class AbstractIntegrationTest {
           if (ORGANIZATION_NATURALIS_URI_WIKIDATA_PATH_SUFFIX.equals(request.getPath())) {
             String responseBody = loadFile(ORGANIZATION_NATURALIS_WIKIDATA_RESPONSE_XML);
             return new MockResponse().setResponseCode(200).setBody(responseBody);
-          }else if (ORGANIZATION_GFM_URI_WIKIDATA_PATH_SUFFIX.equals(request.getPath())
+          } else if (ORGANIZATION_GFM_URI_WIKIDATA_PATH_SUFFIX.equals(request.getPath())
               || ORGANIZATION_GFM_OLD_URI_WIKIDATA_PATH_SUFFIX.equals(request.getPath())) {
             String responseBody = loadFile(ORGANIZATION_GFM_WIKIDATA_RESPONSE_XML);
             return new MockResponse().setResponseCode(200).setBody(responseBody);

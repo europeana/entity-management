@@ -81,8 +81,7 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
           entity.getIsAggregatedBy().getCreated().equals(entity.getIsAggregatedBy().getModified());
 
       if (isEntityNew || !datasourceResponseMatchesExternalProxy(externalProxy, proxyResponse)) {
-        logger.trace(
-              "Storing de-referenced metadata in external proxy for entityId={}", entityId);
+        logger.trace("Storing de-referenced metadata in external proxy for entityId={}", entityId);
         // replace external proxy with proxy response
         externalProxy.setEntity(proxyResponse);
         handleDatasourceRedirections(externalProxy, proxyResponse);
@@ -95,13 +94,16 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
 
   void handleDatasourceRedirections(EntityProxy externalProxy, Entity proxyResponse) {
     // in case of redirections also update proxy id
-    if(!externalProxy.getProxyId().equals(proxyResponse.getEntityId())) {
-      if(datasources.hasDataSource(proxyResponse.getEntityId())){
-        //do not allow redirection to unknow data sources
+    if (!externalProxy.getProxyId().equals(proxyResponse.getEntityId())) {
+      if (datasources.hasDataSource(proxyResponse.getEntityId())) {
+        // do not allow redirection to unknow data sources
       }
       proxyResponse.addSameReferenceLink(externalProxy.getProxyId());
       externalProxy.setProxyId(proxyResponse.getEntityId());
-      logger.info("Updated proxy id with the actual value from the external entity {} -> {}", externalProxy.getProxyId(), proxyResponse.getEntityId());
+      logger.info(
+          "Updated proxy id with the actual value from the external entity {} -> {}",
+          externalProxy.getProxyId(),
+          proxyResponse.getEntityId());
     }
   }
 

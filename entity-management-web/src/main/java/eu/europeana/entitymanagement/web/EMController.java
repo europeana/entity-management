@@ -251,8 +251,7 @@ public class EMController extends BaseRest {
     }
     EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
     // update from external data source is not available for static data sources
-    datasources.verifyDataSource(
-        entityRecord.getExternalProxies().get(0).getProxyId(), false);
+    datasources.verifyDataSource(entityRecord.getExternalProxies().get(0).getProxyId(), false);
     return launchTaskAndRetrieveEntity(request, type, identifier, entityRecord, profile);
   }
 
@@ -454,8 +453,7 @@ public class EMController extends BaseRest {
       return response;
     }
 
-    DataSource dataSource =
-        datasources.verifyDataSource(entityCreationRequest.getId(), false);
+    DataSource dataSource = datasources.verifyDataSource(entityCreationRequest.getId(), false);
 
     // in case of Organization it must be the zoho Organization
     String creationRequestType = entityCreationRequest.getType();

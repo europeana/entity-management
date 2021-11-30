@@ -120,8 +120,8 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         "http://data.europeana.eu/organization/"
             + EntityRecordUtils.getIdFromUrl(ORGANIZATION_NATURALIS_URI_ZOHO);
 
-    ResultActions response = mockMvc
-        .perform(
+    ResultActions response =
+        mockMvc.perform(
             post(BASE_SERVICE_URL)
                 .content(loadFile(ORGANIZATION_REGISTER_NATURALIS_ZOHO_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
@@ -142,7 +142,8 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         .andExpect(
             jsonPath(
                 "$.sameAs",
-                containsInRelativeOrder(ORGANIZATION_NATURALIS_URI_WIKIDATA_URI, ORGANIZATION_NATURALIS_URI_ZOHO)))
+                containsInRelativeOrder(
+                    ORGANIZATION_NATURALIS_URI_WIKIDATA_URI, ORGANIZATION_NATURALIS_URI_ZOHO)))
         // should have Europeana, Zoho and Wikidata proxies
         .andExpect(jsonPath("$.proxies", hasSize(3)));
   }
@@ -150,11 +151,12 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
   @Test
   public void registerZohoOrganizationGFMShouldBeSuccessful() throws Exception {
 
-    String expectedId = EntityRecordUtils.buildEntityIdUri("organization",
-            EntityRecordUtils.getIdFromUrl(ORGANIZATION_GFM_URI_ZOHO));
+    String expectedId =
+        EntityRecordUtils.buildEntityIdUri(
+            "organization", EntityRecordUtils.getIdFromUrl(ORGANIZATION_GFM_URI_ZOHO));
 
-    ResultActions response = mockMvc
-        .perform(
+    ResultActions response =
+        mockMvc.perform(
             post(BASE_SERVICE_URL)
                 .content(loadFile(ORGANIZATION_REGISTER_GFM_ZOHO_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
@@ -175,16 +177,18 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         .andExpect(
             jsonPath(
                 "$.sameAs",
-                containsInRelativeOrder(ORGANIZATION_GFM_OLD_URI_WIKIDATA_URI, ORGANIZATION_GFM_URI_ZOHO, ORGANIZATION_GFM_URI_WIKIDATA_URI)))
+                containsInRelativeOrder(
+                    ORGANIZATION_GFM_OLD_URI_WIKIDATA_URI,
+                    ORGANIZATION_GFM_URI_ZOHO,
+                    ORGANIZATION_GFM_URI_WIKIDATA_URI)))
         .andExpect(jsonPath("$.prefLabel[*]", hasSize(3)))
         .andExpect(jsonPath("$.altLabel[*]", hasSize(3)))
         // should have Europeana, Zoho and Wikidata proxies
         .andExpect(jsonPath("$.proxies", hasSize(3)))
-        //3 labels available in wikidata proxy
+        // 3 labels available in wikidata proxy
         .andExpect(jsonPath("$.proxies[2].prefLabel[*]", hasSize(3)));
-      }
-  
-  
+  }
+
   @Test
   public void registrationForExistingCoreferenceShouldReturn301() throws Exception {
     String europeanaMetadata = loadFile(CONCEPT_REGISTER_BATHTUB_JSON);

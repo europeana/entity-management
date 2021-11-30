@@ -1,5 +1,12 @@
 package eu.europeana.entitymanagement.config;
 
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import dev.morphia.Datastore;
+import eu.europeana.api.commons.oauth2.service.impl.EuropeanaClientDetailsService;
+import eu.europeana.batch.config.MongoBatchConfigurer;
+import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.common.config.DataSource;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,13 +21,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.web.filter.ShallowEtagHeaderFilter;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import dev.morphia.Datastore;
-import eu.europeana.api.commons.oauth2.service.impl.EuropeanaClientDetailsService;
-import eu.europeana.batch.config.MongoBatchConfigurer;
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
-import eu.europeana.entitymanagement.common.config.DataSource;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 
 /** @author GordeaS */
 @Configuration

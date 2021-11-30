@@ -126,7 +126,7 @@ public class EntityFieldsCleaner {
 
     // generate missing thumbnail for Europeana resources
     if (StringUtils.isEmpty(webResource.getThumbnail())
-        && StringUtils.isNotBlank(webResource.getSource()) 
+        && StringUtils.isNotBlank(webResource.getSource())
         && webResource.getSource().startsWith(BASE_DATA_EUROPEANA_URI)) {
       webResource.setThumbnail(
           thumbnailBaseUrl + URLEncoder.encode(webResource.getId(), StandardCharsets.UTF_8));

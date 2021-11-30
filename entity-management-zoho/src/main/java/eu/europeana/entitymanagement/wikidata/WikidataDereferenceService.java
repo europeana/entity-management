@@ -1,5 +1,12 @@
 package eu.europeana.entitymanagement.wikidata;
 
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.dereference.Dereferencer;
+import eu.europeana.entitymanagement.utils.EntityRecordUtils;
+import eu.europeana.entitymanagement.web.xml.model.WikidataOrganization;
+import eu.europeana.entitymanagement.zoho.utils.WikidataAccessException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,13 +34,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.dereference.Dereferencer;
-import eu.europeana.entitymanagement.utils.EntityRecordUtils;
-import eu.europeana.entitymanagement.web.xml.model.WikidataOrganization;
-import eu.europeana.entitymanagement.zoho.utils.WikidataAccessException;
 
 @Service
 public class WikidataDereferenceService implements Dereferencer, InitializingBean {

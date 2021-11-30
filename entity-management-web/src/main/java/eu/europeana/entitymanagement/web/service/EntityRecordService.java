@@ -9,24 +9,7 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_AGGREGATED_BY;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
 import static java.time.Instant.now;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+
 import com.mongodb.client.result.UpdateResult;
 import dev.morphia.query.experimental.filters.Filter;
 import eu.europeana.api.commons.error.EuropeanaApiException;
@@ -62,6 +45,24 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service(AppConfig.BEAN_ENTITY_RECORD_SERVICE)
 public class EntityRecordService {
@@ -205,7 +206,8 @@ public class EntityRecordService {
       throws EntityCreationException, EntityAlreadyExistsException, HttpBadRequestException,
           HttpUnprocessableException {
     // Fail quick if no datasource is configured
-    DataSource externalDatasource = datasources.verifyDataSource(entityCreationRequest.getId(), true);
+    DataSource externalDatasource =
+        datasources.verifyDataSource(entityCreationRequest.getId(), true);
 
     Date timestamp = new Date();
     Entity entity = EntityObjectFactory.createProxyEntityObject(type);
@@ -267,16 +269,16 @@ public class EntityRecordService {
 
     boolean isZohoOrg = ZohoUtils.isZohoOrganization(externalProxyId, datasourceResponse.getType());
     String entityId = generateEntityId(datasourceResponse, isZohoOrg);
-    
+
     EntityRecord entityRecord = new EntityRecord();
     entityRecord.setEntityId(entityId);
     entity.setEntityId(entityId);
-    
+
     /*
      * sameAs will be replaced during consolidation; however we set this here to prevent duplicate
      * registrations if consolidation fails
      */
-    List<String> sameAs = buildSameAsReferenceLinks(externalProxyId, datasourceResponse); 
+    List<String> sameAs = buildSameAsReferenceLinks(externalProxyId, datasourceResponse);
     entity.setSameReferenceLinks(sameAs);
     entityRecord.setEntity(entity);
 
@@ -331,18 +333,18 @@ public class EntityRecordService {
   String generateEntityId(Entity datasourceResponse, boolean isZohoOrg) {
     // only in case of Zoho Organization use the provided id from de-referencing
     String entityId = null;
-    if(isZohoOrg) {
-      //zoho id is mandatory and unique identifier for zoho Organizations
+    if (isZohoOrg) {
+      // zoho id is mandatory and unique identifier for zoho Organizations
       String zohoId = EntityRecordUtils.getIdFromUrl(datasourceResponse.getEntityId());
-      entityId = EntityRecordUtils.buildEntityIdUri(datasourceResponse.getType(), zohoId); 
+      entityId = EntityRecordUtils.buildEntityIdUri(datasourceResponse.getType(), zohoId);
     } else {
-      entityId = generateEntityId(datasourceResponse.getType(), null); 
+      entityId = generateEntityId(datasourceResponse.getType(), null);
     }
     return entityId;
   }
 
   List<String> buildSameAsReferenceLinks(String externalProxyId, Entity datasourceResponse) {
-    //entity id might be different than proxyId in case of redirections
+    // entity id might be different than proxyId in case of redirections
     SortedSet<String> sameAsUrls = new TreeSet<String>();
     sameAsUrls.add(datasourceResponse.getEntityId());
     sameAsUrls.add(externalProxyId);
