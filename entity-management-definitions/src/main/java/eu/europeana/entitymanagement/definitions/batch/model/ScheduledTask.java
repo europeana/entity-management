@@ -4,7 +4,6 @@ import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Field;
 import dev.morphia.annotations.Id;
 import dev.morphia.annotations.Index;
-import dev.morphia.annotations.IndexOptions;
 import dev.morphia.annotations.Indexed;
 import dev.morphia.annotations.Indexes;
 import eu.europeana.entitymanagement.definitions.batch.EMBatchConstants;
@@ -13,13 +12,12 @@ import org.bson.types.ObjectId;
 
 @Entity("ScheduledTasks")
 @Indexes({
-  @Index(fields = {@Field(EMBatchConstants.CREATED), @Field(EMBatchConstants.UPDATE_TYPE)}),
-  // only index records where hasBeenProcessed = true
   @Index(
-      options =
-          @IndexOptions(
-              partialFilter = "{" + EMBatchConstants.HAS_BEEN_PROCESSED + " : { $eq : true } }"),
-      fields = {@Field(EMBatchConstants.HAS_BEEN_PROCESSED)})
+      fields = {
+        @Field(value = EMBatchConstants.CREATED),
+        @Field(EMBatchConstants.UPDATE_TYPE),
+        @Field(EMBatchConstants.HAS_BEEN_PROCESSED)
+      }),
 })
 public class ScheduledTask {
 

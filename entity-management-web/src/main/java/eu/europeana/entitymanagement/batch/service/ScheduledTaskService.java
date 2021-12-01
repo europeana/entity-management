@@ -80,12 +80,13 @@ public class ScheduledTaskService {
    * Removes unprocessed entries from the ScheduledTasks collection if the FailedTasks retryCount is
    * equal or greater than the max number of retries allowed.
    *
-   * <p>TODO: investigate if this can be replace with a delete query
+   * <p>TODO: investigate if this can be replaced with a delete query
    */
-  public void removeScheduledTasksWithFailures(int maxFailedTaskRetries) {
+  public void removeScheduledTasksWithFailures(
+      int maxFailedTaskRetries, ScheduledTaskType updateType) {
 
     try (MorphiaCursor<ScheduledTask> cursor =
-        repository.getTasksWithFailures(maxFailedTaskRetries)) {
+        repository.getTasksWithFailures(maxFailedTaskRetries, updateType)) {
 
       while (cursor.hasNext()) {
         repository.deleteScheduledTask(cursor.next().getEntityId());
