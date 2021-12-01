@@ -28,11 +28,16 @@ public class BatchUtils {
    * @return JobParameters with trigger time and entityId
    */
   public static JobParameters createJobParameters(
-      @Nullable String entityId, Date runTime, ScheduledTaskType updateType) {
+      @Nullable String entityId,
+      Date runTime,
+      ScheduledTaskType updateType,
+      boolean isSynchronous) {
     JobParametersBuilder jobParametersBuilder =
         new JobParametersBuilder()
             .addDate(JobParameter.CURRENT_START_TIME.key(), runTime)
-            .addString(JobParameter.UPDATE_TYPE.key(), updateType.getValue());
+            .addString(JobParameter.UPDATE_TYPE.key(), updateType.getValue())
+            // boolean parameters not supported
+            .addString(JobParameter.IS_SYNCHRONOUS.key(), String.valueOf(isSynchronous));
 
     if (StringUtils.hasLength(entityId)) {
       jobParametersBuilder.addString(JobParameter.ENTITY_ID.key(), entityId);

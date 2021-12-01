@@ -21,14 +21,17 @@ public class ScheduledTaskItemListener extends ItemListenerSupport<EntityRecord,
   private final FailedTaskService failedTaskService;
   private final ScheduledTaskService scheduledTaskService;
   private final ScheduledTaskType updateType;
+  private final boolean isSynchronous;
 
   public ScheduledTaskItemListener(
       FailedTaskService failedTaskService,
       ScheduledTaskService scheduledTaskService,
-      ScheduledTaskType updateType) {
+      ScheduledTaskType updateType,
+      boolean isSynchronous) {
     this.failedTaskService = failedTaskService;
     this.scheduledTaskService = scheduledTaskService;
     this.updateType = updateType;
+    this.isSynchronous = isSynchronous;
   }
 
   @Override
@@ -45,7 +48,10 @@ public class ScheduledTaskItemListener extends ItemListenerSupport<EntityRecord,
     // Remove entries from the FailedTask collection if exists
     failedTaskService.removeFailures(Arrays.asList(entityIds));
 
-    scheduledTaskService.markAsProcessed(Arrays.asList(entityIds), updateType);
+    // ScheduledTasks cleanup not required for synchronous execution
+    if (!isSynchronous) {
+      scheduledTaskService.markAsProcessed(Arrays.asList(entityIds), updateType);
+    }
   }
 
   @Override

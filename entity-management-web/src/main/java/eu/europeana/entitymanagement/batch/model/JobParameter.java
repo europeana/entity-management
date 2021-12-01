@@ -4,7 +4,8 @@ package eu.europeana.entitymanagement.batch.model;
 public enum JobParameter {
   CURRENT_START_TIME("currentStartTime"),
   ENTITY_ID("entityId"),
-  UPDATE_TYPE("updateType");
+  UPDATE_TYPE("updateType"),
+  IS_SYNCHRONOUS("isSynchronous");
 
   private final String key;
 

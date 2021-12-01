@@ -126,7 +126,7 @@ public class EntityUpdateSchedulingConfig implements InitializingBean {
       entityUpdateJobLauncher.run(
           updateJobConfig.updateScheduledEntities(ScheduledUpdateType.FULL_UPDATE),
           BatchUtils.createJobParameters(
-              null, Date.from(Instant.now()), ScheduledUpdateType.FULL_UPDATE));
+              null, Date.from(Instant.now()), ScheduledUpdateType.FULL_UPDATE, false));
     } catch (Exception e) {
       logger.warn("Error running scheduled full update", e);
     }
@@ -140,7 +140,7 @@ public class EntityUpdateSchedulingConfig implements InitializingBean {
       entityUpdateJobLauncher.run(
           updateJobConfig.updateScheduledEntities(ScheduledUpdateType.METRICS_UPDATE),
           BatchUtils.createJobParameters(
-              null, Date.from(Instant.now()), ScheduledUpdateType.METRICS_UPDATE));
+              null, Date.from(Instant.now()), ScheduledUpdateType.METRICS_UPDATE, false));
     } catch (Exception e) {
       logger.warn("Error running scheduled metrics update", e);
     }
@@ -153,7 +153,8 @@ public class EntityUpdateSchedulingConfig implements InitializingBean {
     try {
       entityDeletionsJobLauncher.run(
           updateJobConfig.removeScheduledEntities(PERMANENT_DELETION),
-          BatchUtils.createJobParameters(null, Date.from(Instant.now()), PERMANENT_DELETION));
+          BatchUtils.createJobParameters(
+              null, Date.from(Instant.now()), PERMANENT_DELETION, false));
     } catch (Exception e) {
       logger.warn("Error running scheduled deletion", e);
     }
@@ -166,7 +167,7 @@ public class EntityUpdateSchedulingConfig implements InitializingBean {
     try {
       entityDeletionsJobLauncher.run(
           updateJobConfig.removeScheduledEntities(DEPRECATION),
-          BatchUtils.createJobParameters(null, Date.from(Instant.now()), DEPRECATION));
+          BatchUtils.createJobParameters(null, Date.from(Instant.now()), DEPRECATION, false));
     } catch (Exception e) {
       logger.warn("Error running scheduled deprecation", e);
     }
