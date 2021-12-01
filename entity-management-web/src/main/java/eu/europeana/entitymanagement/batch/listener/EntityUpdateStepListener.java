@@ -48,7 +48,7 @@ public class EntityUpdateStepListener implements StepExecutionListener {
      * them if they're manually scheduled again.
      */
 
-    scheduledTaskService.removeScheduledTasksWithFailures(maxFailedTaskRetries);
+    scheduledTaskService.removeScheduledTasksWithFailures(maxFailedTaskRetries, updateType);
     return ExitStatus.COMPLETED;
   }
 }
