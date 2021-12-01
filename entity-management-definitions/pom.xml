@@ -86,7 +86,13 @@
     	<artifactId>spring-web</artifactId>
 	</dependency>
 
-        
+	<!-- https://mvnrepository.com/artifact/org.apache.jena/jena-iri -->
+	<dependency>
+	    <groupId>org.apache.jena</groupId>
+	    <artifactId>jena-iri</artifactId>
+	    <version>${jena-iri.version}</version>
+	</dependency>
+       
 	</dependencies>
 
 

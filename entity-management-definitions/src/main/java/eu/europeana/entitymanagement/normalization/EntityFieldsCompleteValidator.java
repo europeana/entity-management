@@ -12,7 +12,6 @@ import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 import java.lang.reflect.Field;
-import java.net.URI;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -23,6 +22,8 @@ import javax.annotation.Resource;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import org.apache.commons.validator.routines.EmailValidator;
+import org.apache.jena.iri.IRI;
+import org.apache.jena.iri.IRIFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -32,6 +33,8 @@ public class EntityFieldsCompleteValidator
 
   @Resource(name = "emLanguageCodes")
   LanguageCodes emLanguageCodes;
+
+  private final IRIFactory iriFactory = IRIFactory.iriImplementation();
 
   public void initialize(EntityFieldsCompleteValidatorInterface constraint) {
     //        System.out.println();
@@ -284,11 +287,9 @@ public class EntityFieldsCompleteValidator
   }
 
   boolean validateURIFormat(ConstraintValidatorContext context, Field field, String fieldValue) {
-    // validate URI Format
-    try {
-      new URI(fieldValue);
-      return true;
-    } catch (Exception e) {
+    // validate IRI Format
+    IRI iri = iriFactory.create(fieldValue);
+    if (iri.hasViolation(false)) {
       addConstraint(
           context,
           "The entity field: "
@@ -297,8 +298,10 @@ public class EntityFieldsCompleteValidator
               + EntityFieldsTypes.getFieldType(field.getName())
               + " but the value: "
               + fieldValue
-              + " does not have a proper URI form.");
+              + " does not have the proper IRI form.");
       return false;
+    } else {
+      return true;
     }
   }
 
