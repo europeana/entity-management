@@ -307,4 +307,10 @@ public abstract class BaseRest extends BaseRestController {
           "If-Match header value does not match generated ETag for entity");
     }
   }
+
+  protected boolean containsSyncProfile(String profile) {
+    // profile can be "debug,sync"
+    return StringUtils.hasLength(profile)
+        && Arrays.asList(profile.split(",")).contains(WebEntityConstants.PARAM_PROFILE_SYNC);
+  }
 }
