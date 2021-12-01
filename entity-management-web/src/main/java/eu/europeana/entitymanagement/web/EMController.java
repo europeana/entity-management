@@ -116,6 +116,8 @@ public class EMController extends BaseRest {
       @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
       @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
       @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
+      @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = false)
+          String profile,
       HttpServletRequest request)
       throws HttpException, EuropeanaApiException {
     if (emConfig.isAuthEnabled()) {
@@ -130,8 +132,18 @@ public class EMController extends BaseRest {
     String etag = computeEtag(timestamp, FormatTypes.jsonld.name(), getApiVersion());
     checkIfMatchHeaderWithQuotes(etag, request);
 
-    entityUpdateService.scheduleTasks(
-        Collections.singletonList(entityRecord.getEntityId()), ScheduledRemovalType.DEPRECATION);
+    boolean isSynchronous = containsSyncProfile(profile);
+    String entityId = entityRecord.getEntityId();
+    logger.info("Deprecating entityId={}, isSynchronous={}", entityId, isSynchronous);
+
+    if (isSynchronous) {
+      // delete from Solr before Mongo, so Solr errors won't leave DB in an inconsistent state
+      solrService.deleteById(List.of(entityId));
+      entityRecordService.disableEntityRecord(entityRecord);
+    } else {
+      entityUpdateService.scheduleTasks(
+          Collections.singletonList(entityId), ScheduledRemovalType.DEPRECATION);
+    }
 
     return noContentResponse(request);
   }
