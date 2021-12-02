@@ -171,7 +171,7 @@ public class FotoConsortiumDataImportTest {
     String apiKey = "<APIKEY>";
     for (Map.Entry<String, String> entry : entities.entrySet()) {
       String identifier = EntityRecordUtils.getIdFromUrl(entry.getKey());
-      System.out.println(emBaseUrl + "/entity/concept/" + identifier + "?wskey="+apiKey );
+      System.out.println(emBaseUrl + "/entity/concept/" + identifier + ".jsonld?profile=internal,debug&wskey="+apiKey );
     } 
   }
 }
