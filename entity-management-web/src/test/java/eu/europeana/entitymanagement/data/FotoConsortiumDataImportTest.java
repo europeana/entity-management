@@ -24,9 +24,9 @@ public class FotoConsortiumDataImportTest {
   // test environment
   String emBaseUrl = "https://entity-management-test.eanadev.org";
   // migration environment
-  // String emBaseUrl = "https://entity-management-test2.eanadev.org";
+//  String emBaseUrl = "https://entity-management-test2.eanadev.org";
   WebClient entityWebClient;
-  String entityBaseUrl = "https://entity-api-test.eanadev.org";
+  String entityBaseUrl = "https://entity-api-production.eanadev.org";
 
   @Test
   public void migrateEntitiesTest() throws IOException, URISyntaxException {
@@ -44,7 +44,7 @@ public class FotoConsortiumDataImportTest {
     Map<String, String> entities = new LinkedHashMap<String, String>();
     for (String line : lines) {
       parts = line.split(",");
-      entities.put(parts[0], parts[1]);
+      entities.put(parts[1], parts[0]);
     }
     return entities;
   }
@@ -53,7 +53,9 @@ public class FotoConsortiumDataImportTest {
     String identifier = EntityRecordUtils.getIdFromUrl(id);
     String body = "{" + "  \"id\": \"" + externalId + "\"," + "  \"type\":\"Concept\"}";
     // TODO: update token before running the test
-    String token = "<ADMIN TOKEN>";
+//    String token = "<ADMIN TOKEN>";
+    String token = "";
+    
 
     String apiResponse;
     apiResponse = getEmWebClient().post()
@@ -160,5 +162,16 @@ public class FotoConsortiumDataImportTest {
       entityWebClient = configureWebClient(entityBaseUrl);
     }
     return entityWebClient;
+  }
+  
+//  @Test
+  public void generateMigratedEntyUrls() throws IOException, URISyntaxException {
+    Map<String, String> entities = getEntityMap();
+    //TODO: update the value before running the script
+    String apiKey = "<APIKEY>";
+    for (Map.Entry<String, String> entry : entities.entrySet()) {
+      String identifier = EntityRecordUtils.getIdFromUrl(entry.getKey());
+      System.out.println(emBaseUrl + "/entity/concept/" + identifier + "?wskey="+apiKey );
+    } 
   }
 }
