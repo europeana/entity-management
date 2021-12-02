@@ -21,7 +21,10 @@ import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 public class FotoConsortiumDataImportTest {
 
   WebClient emWebClient;
+  // test environment
   String emBaseUrl = "https://entity-management-test.eanadev.org";
+  // migration environment
+  // String emBaseUrl = "https://entity-management-test2.eanadev.org";
   WebClient entityWebClient;
   String entityBaseUrl = "https://entity-api-test.eanadev.org";
 
@@ -49,12 +52,14 @@ public class FotoConsortiumDataImportTest {
   private void migrateEntity(String id, String externalId) throws MalformedURLException {
     String identifier = EntityRecordUtils.getIdFromUrl(id);
     String body = "{" + "  \"id\": \"" + externalId + "\"," + "  \"type\":\"Concept\"}";
+    // TODO: update token before running the test
+    String token = "<ADMIN TOKEN>";
 
     String apiResponse;
     apiResponse = getEmWebClient().post()
         .uri(uriBuilder -> uriBuilder.path("/entity/concept/" + identifier + "/management").build())
         .accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
-        .header("Authorization", "Bearer <ADMIN TOKEN>").bodyValue(body).retrieve()
+        .header("Authorization", "Bearer " + token).bodyValue(body).retrieve()
         // return 500 for everything else
         .bodyToMono(String.class)
         .onErrorReturn(WebClientException.class, "Failed to migrate entity: " + identifier).block();
@@ -72,9 +77,11 @@ public class FotoConsortiumDataImportTest {
 
   private void generateEntityFile(String id, String externalId) throws IOException {
     String identifier = EntityRecordUtils.getIdFromUrl(id);
+    // TODO: update before running the script
+    String apiKey = "<APIKEY>";
     String apiResponse = getEntityWebClient().get()
         .uri(uriBuilder -> uriBuilder.path("/entity/concept/base/" + identifier)
-            .queryParam("wskey", "<APIKEY>").build())
+            .queryParam("wskey", apiKey).build())
         .accept(MediaType.APPLICATION_JSON).retrieve()
         // return 500 for everything else
         .bodyToMono(String.class).onErrorReturn(WebClientException.class,
@@ -111,24 +118,28 @@ public class FotoConsortiumDataImportTest {
   }
 
 
-  private void updateEntity(String id, String externalId) throws MalformedURLException {
+  private void updateEntity(String id, String externalId) throws IOException, URISyntaxException {
     String identifier = EntityRecordUtils.getIdFromUrl(id);
 
     String body = getEntityMetadata(id);
 
+    // TODO: update the ticket wit hthe correct value when running the script
+    String token = "";
+
     String apiResponse = getEmWebClient().put()
         .uri(uriBuilder -> uriBuilder.path("/entity/concept/" + identifier).build())
         .accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
-        .header("Authorization", "Bearer <USER TOKEN>").bodyValue(body).retrieve()
+        .header("Authorization", "Bearer " + token).bodyValue(body).retrieve()
         // return 500 for everything else
         .bodyToMono(String.class)
         .onErrorReturn(WebClientException.class, "Failed to update entity: " + identifier).block();
     System.out.println(apiResponse);
   }
 
-  private String getEntityMetadata(String id) {
-    // TODO Auto-generated method stub
-    return null;
+  private String getEntityMetadata(String id) throws IOException, URISyntaxException {
+    String identifier = EntityRecordUtils.getIdFromUrl(id);
+    URL fileLocation = getClass().getResource("/fotoconsortium/" + identifier + ".json");
+    return FileUtils.readFileToString(new File(fileLocation.toURI()), StandardCharsets.UTF_8);
   }
 
   private WebClient configureWebClient(String baseUrl) throws MalformedURLException {
