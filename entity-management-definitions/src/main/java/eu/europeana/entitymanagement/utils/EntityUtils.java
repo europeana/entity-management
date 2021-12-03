@@ -32,12 +32,4 @@ public class EntityUtils {
       getAllFieldsRecursively(fields, type.getSuperclass());
     }
   }
-
-  public static boolean isUrl(String value) {
-    if (value.startsWith("http://") || value.startsWith("https://")) {
-      return true;
-    } else {
-      return false;
-    }
-  }
 }

@@ -34,7 +34,7 @@ public class EntityFieldsCompleteValidator
   @Resource(name = "emLanguageCodes")
   LanguageCodes emLanguageCodes;
 
-  private final IRIFactory iriFactory = IRIFactory.iriImplementation();
+  private static final IRIFactory iriFactory = IRIFactory.iriImplementation();
 
   public void initialize(EntityFieldsCompleteValidatorInterface constraint) {
     //        System.out.println();
@@ -121,12 +121,12 @@ public class EntityFieldsCompleteValidator
       return false;
     } else {
       EntityFieldsTypes fieldType = EntityFieldsTypes.valueOf(field.getName());
-      boolean isUrl = EntityUtils.isUrl(fieldValue);
-      if (!"".equals(key) && isUrl) {
+      boolean isUri = isIri(fieldValue);
+      if (!"".equals(key) && isUri) {
         // do not allow URIs for other key than empty keys
         addUriNotAllowedConstraint(context, field, fieldValue, key);
         return false;
-      } else if ("".equals(key) && isUrl) {
+      } else if ("".equals(key) && isUri) {
         // key "", allow URIs only for field type TEXT OR URI
         if (EntityFieldsTypes.FIELD_TYPE_TEXT_OR_URI.equals(fieldType.getFieldType())) {
           return validateURIFormat(context, field, fieldValue);
@@ -288,8 +288,7 @@ public class EntityFieldsCompleteValidator
 
   boolean validateURIFormat(ConstraintValidatorContext context, Field field, String fieldValue) {
     // validate IRI Format
-    IRI iri = iriFactory.create(fieldValue);
-    if (iri.hasViolation(false)) {
+    if (isIri(fieldValue)) {
       addConstraint(
           context,
           "The entity field: "
@@ -305,6 +304,11 @@ public class EntityFieldsCompleteValidator
     }
   }
 
+  public static synchronized boolean isIri(String value) {
+    IRI iri = iriFactory.create(value);
+    return iri.hasViolation(false);
+  }
+  
   @SuppressWarnings("unchecked")
   boolean validateMultilingualField(
       ConstraintValidatorContext context, Field field, Object fieldValue) {
