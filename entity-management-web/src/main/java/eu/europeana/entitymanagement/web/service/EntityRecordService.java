@@ -537,14 +537,20 @@ public class EntityRecordService {
   }
 
   private void addValueOrInternalReference(List<String> updatedReferences, String value) {
-    if (value.startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI) || !EntityFieldsCompleteValidator.isIri(value)) {
-      // value is not a reference or it is an internal referece
+    if (value.startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI) || !EntityFieldsCompleteValidator.isUri(value)) {
+      // value is internal reference or string literal
       updatedReferences.add(value);
     } else {
       // value is external URI, replace it with internal reference if they are accessible
       Optional<EntityRecord> record = findMatchingCoreference(Collections.singletonList(value));
       record.ifPresent(entityRecord -> updatedReferences.add(entityRecord.getEntityId()));
     }
+  }
+  
+  
+  boolean isHttpUrl(String value) {
+    //quick check if is http(s) url
+    return value.startsWith("http:") || value.startsWith("https:"); 
   }
 
   /**
