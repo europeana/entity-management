@@ -87,7 +87,7 @@ public class EntityUpdateJobConfig {
   private final TaskExecutor removalsStepExecutor;
   private final TaskExecutor synchronousTaskExecutor;
 
-  private final int chunkSize;
+  private final int configuredBatchChunkSize;
 
   private final int updatesThrottleLimit;
   private final int removalsThrottleLimit;
@@ -139,7 +139,7 @@ public class EntityUpdateJobConfig {
     this.updatesStepExecutor = updatesStepExecutor;
     this.removalsStepExecutor = removalsStepExecutor;
     this.synchronousTaskExecutor = synchronousTaskExecutor;
-    this.chunkSize = emConfig.getBatchChunkSize();
+    this.configuredBatchChunkSize = emConfig.getBatchChunkSize();
     this.updatesThrottleLimit = emConfig.getBatchUpdatesThrottleLimit();
     removalsThrottleLimit = emConfig.getBatchRemovalsThrottleLimit();
     maxFailedTaskRetries = emConfig.getMaxFailedTaskRetries();
@@ -159,7 +159,7 @@ public class EntityUpdateJobConfig {
   private EntityRecordDatabaseReader singleEntityRecordReader(
       @Value("#{jobParameters[entityId]}") String entityIdString) {
     return new EntityRecordDatabaseReader(
-        entityRecordService, chunkSize, Filters.eq(ENTITY_ID, entityIdString));
+        entityRecordService, configuredBatchChunkSize, Filters.eq(ENTITY_ID, entityIdString));
   }
 
   @Bean(name = SCHEDULED_TASK_READER)
@@ -170,7 +170,7 @@ public class EntityUpdateJobConfig {
     ScheduledTaskDatabaseReader reader =
         new ScheduledTaskDatabaseReader(
             scheduledTaskService,
-            chunkSize,
+            configuredBatchChunkSize,
             Filters.lte(EMBatchConstants.CREATED, currentStartTime),
             Filters.eq(EMBatchConstants.UPDATE_TYPE, updateType));
 
@@ -179,12 +179,22 @@ public class EntityUpdateJobConfig {
 
   @Bean
   @StepScope
+  /*
+   * Creates a listener that's called while processing a single item
+   *
+   * JobParameters cannot be boolean, so the isSynchronous value is converted from its string representation
+   */
   private ScheduledTaskItemListener entityUpdateListener(
-      @Value("#{jobParameters[updateType]}") String updateType) {
+      @Value("#{jobParameters[updateType]}") String updateType,
+      @Value("#{jobParameters[updateType]}") String isSynchronousString) {
     return new ScheduledTaskItemListener(
-        failedTaskService, scheduledTaskService, scheduledTaskTypeValueOf(updateType));
+        failedTaskService,
+        scheduledTaskService,
+        scheduledTaskTypeValueOf(updateType),
+        Boolean.parseBoolean(isSynchronousString));
   }
 
+  /** Creates a StepExecutionListener that's called before / after the step runs */
   private StepExecutionListener stepExecutionListener(ScheduledTaskType updateType) {
     return new EntityUpdateStepListener(scheduledTaskService, updateType, maxFailedTaskRetries);
   }
@@ -229,17 +239,18 @@ public class EntityUpdateJobConfig {
    * updateType.
    *
    * @param updateType type of update – either METRICS or FULL
-   * @param chunkSize chunk size for step
-   * @param executor task executor to use. If chunkSize is 1, this should typically be a synchronous
-   *     executor.
-   * @param reader ItemReader to use in step.
+   * @param isSynchronous indicates whether this update is executed synchronously or async
    * @return step
    */
-  private Step updateEntity(
-      ScheduledUpdateType updateType,
-      int chunkSize,
-      TaskExecutor executor,
-      ItemReader<EntityRecord> reader) {
+  private Step updateEntity(ScheduledUpdateType updateType, boolean isSynchronous) {
+
+    // use different thread executor, reader and chunkSize for sync / async requests
+    ItemReader<EntityRecord> reader =
+        isSynchronous ? singleEntityRecordReader : scheduledTaskReader;
+    TaskExecutor executor = isSynchronous ? synchronousTaskExecutor : updatesStepExecutor;
+    // synchronous requests only update a single entity
+    int chunkSize = isSynchronous ? 1 : configuredBatchChunkSize;
+
     SimpleStepBuilder<EntityRecord, EntityRecord> step =
         this.stepBuilderFactory
             .get(STEP_UPDATE_ENTITY)
@@ -258,14 +269,19 @@ public class EntityUpdateJobConfig {
         throw new IllegalStateException("No processor configured for updateType " + updateType);
     }
 
-    return step.writer(compositeEntityInsertionWriter())
+    step.writer(compositeEntityInsertionWriter())
         .listener((ItemProcessListener<? super EntityRecord, ? super EntityRecord>) itemListener)
         .faultTolerant()
         .skipPolicy(noopSkipPolicy)
         .taskExecutor(executor)
-        .throttleLimit(updatesThrottleLimit)
-        .listener(stepExecutionListener(updateType))
-        .build();
+        .throttleLimit(updatesThrottleLimit);
+
+    // This listener cleans up ScheduledTasks. Not required for synchronous updates
+    if (!isSynchronous) {
+      step.listener(stepExecutionListener(updateType));
+    }
+
+    return step.build();
   }
 
   private Step removeEntity(
@@ -312,12 +328,7 @@ public class EntityUpdateJobConfig {
         .incrementer(new RunIdIncrementer())
         // this job is always launched from web requests, so synchronousTaskExecutor is used. It
         // also directly retrieves entities from the EntityRecord database.
-        .start(
-            updateEntity(
-                ScheduledUpdateType.FULL_UPDATE,
-                1,
-                synchronousTaskExecutor,
-                singleEntityRecordReader))
+        .start(updateEntity(ScheduledUpdateType.FULL_UPDATE, true))
         .build();
   }
 
@@ -329,14 +340,16 @@ public class EntityUpdateJobConfig {
     return this.jobBuilderFactory
         .get(JOB_UPDATE_SCHEDULED_ENTITIES)
         // This job is always launched via a @Scheduled method.
-        .start(updateEntity(updateType, chunkSize, updatesStepExecutor, scheduledTaskReader))
+        .start(updateEntity(updateType, false))
         .build();
   }
 
   public Job removeScheduledEntities(ScheduledRemovalType removalType) {
     return this.jobBuilderFactory
         .get(JOB_REMOVE_SCHEDULED_ENTITIES)
-        .start(removeEntity(removalType, chunkSize, removalsStepExecutor, scheduledTaskReader))
+        .start(
+            removeEntity(
+                removalType, configuredBatchChunkSize, removalsStepExecutor, scheduledTaskReader))
         .build();
   }
 }

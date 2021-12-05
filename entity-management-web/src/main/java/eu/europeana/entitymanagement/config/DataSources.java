@@ -1,17 +1,16 @@
-package eu.europeana.entitymanagement.common.config;
+package eu.europeana.entitymanagement.config;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import eu.europeana.entitymanagement.common.config.DataSource;
+import eu.europeana.entitymanagement.exception.HttpBadRequestException;
+import eu.europeana.entitymanagement.exception.HttpUnprocessableException;
 import java.util.List;
 import java.util.Optional;
 
 @JacksonXmlRootElement(localName = "config")
 public class DataSources {
-
-  public static final String EUROPEANA_ID = "europeana";
-  public static final String ZOHO_ID = "crm.zoho.com";
-  public static final String WIKIDATA_ID = "www.wikidata.org";
 
   @JacksonXmlElementWrapper(useWrapping = false)
   @JacksonXmlProperty(localName = "source")
@@ -42,6 +41,25 @@ public class DataSources {
   }
 
   public Optional<DataSource> getEuropeanaDatasource() {
-    return datasources.stream().filter(s -> EUROPEANA_ID.equals(s.getId())).findFirst();
+    return datasources.stream().filter(s -> DataSource.EUROPEANA_ID.equals(s.getId())).findFirst();
+  }
+
+  public DataSource verifyDataSource(String creationRequestId, boolean allowStatic)
+      throws HttpBadRequestException, HttpUnprocessableException {
+    Optional<DataSource> dataSource = getDatasource(creationRequestId);
+    // return 400 error if ID does not match a configured datasource
+    if (dataSource.isEmpty()) {
+      throw new HttpBadRequestException(
+          String.format("id %s does not match a configured datasource", creationRequestId));
+    }
+
+    // return 406 error if datasource is static
+    if (!allowStatic && dataSource.get().isStatic()) {
+      throw new HttpUnprocessableException(
+          String.format(
+              "Entity registration not permitted. id %s matches a static datasource.",
+              creationRequestId));
+    }
+    return dataSource.get();
   }
 }

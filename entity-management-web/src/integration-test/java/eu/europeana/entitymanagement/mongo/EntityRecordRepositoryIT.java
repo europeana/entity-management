@@ -1,6 +1,8 @@
 package eu.europeana.entitymanagement.mongo;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
@@ -33,7 +35,25 @@ class EntityRecordRepositoryIT extends AbstractIntegrationTest {
 
   @Test
   public void shouldCorrectlyInsertAndRetrieve() {
+    EntityRecord savedRecord = createEntityRecord();
+    EntityRecord retrievedRecord = entityRecordRepository.findByEntityId(savedRecord.getEntityId());
 
+    assertEquals(retrievedRecord.getEntityId(), savedRecord.getEntityId());
+
+    // by default EntityRecords should be enabled
+    assertFalse(retrievedRecord.isDisabled());
+  }
+
+  @Test
+  void shouldDisableEntities() {
+    EntityRecord savedRecord = createEntityRecord();
+    entityRecordRepository.disableBulk(List.of(savedRecord.getEntityId()));
+
+    EntityRecord retrievedRecord = entityRecordRepository.findByEntityId(savedRecord.getEntityId());
+    assertTrue(retrievedRecord.isDisabled());
+  }
+
+  private EntityRecord createEntityRecord() {
     String entityId = "http://data.europeana.eu/timespan/base/1";
 
     TimeSpan entity = new TimeSpan();
@@ -71,15 +91,12 @@ class EntityRecordRepositoryIT extends AbstractIntegrationTest {
     aggregation2.setAggregates(aggregartes2);
     proxy.setProxyIn(aggregation2);
 
-    EntityRecord entityRecordImpl = new EntityRecord();
-    entityRecordImpl.setEntity(entity);
-    entityRecordImpl.setEntityId(entity.getEntityId());
-    entityRecordImpl.getEntity().setIsAggregatedBy(aggregation);
-    entityRecordImpl.addProxy(proxy);
+    EntityRecord entityRecord = new EntityRecord();
+    entityRecord.setEntity(entity);
+    entityRecord.setEntityId(entity.getEntityId());
+    entityRecord.getEntity().setIsAggregatedBy(aggregation);
+    entityRecord.addProxy(proxy);
 
-    entityRecordRepository.save(entityRecordImpl);
-
-    EntityRecord er = entityRecordRepository.findByEntityId(entityId);
-    assertEquals(er.getEntityId(), entityId);
+    return entityRecordRepository.save(entityRecord);
   }
 }

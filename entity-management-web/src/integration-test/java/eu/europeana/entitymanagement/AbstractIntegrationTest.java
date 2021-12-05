@@ -2,14 +2,18 @@ package eu.europeana.entitymanagement;
 
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.EMPTY_METIS_RESPONSE;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.METIS_RESPONSE_MAP;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_BNF_URI_WIKIDATA_PATH_SUFFIX;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_BNF_WIKIDATA_RESPONSE_XML;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_GFM_OLD_URI_WIKIDATA_PATH_SUFFIX;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_GFM_URI_WIKIDATA_PATH_SUFFIX;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_GFM_WIKIDATA_RESPONSE_XML;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_NATURALIS_URI_WIKIDATA_PATH_SUFFIX;
+import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_NATURALIS_WIKIDATA_RESPONSE_XML;
 import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.DataSource;
+import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.testutils.MongoContainer;
 import eu.europeana.entitymanagement.testutils.SolrContainer;
@@ -54,6 +58,7 @@ public abstract class AbstractIntegrationTest {
   protected ObjectMapper objectMapper;
 
   @Autowired protected EntityUpdateService entityUpdateService;
+  @Autowired protected DataSources datasources;
 
   static {
     MONGO_CONTAINER =
@@ -166,8 +171,12 @@ public abstract class AbstractIntegrationTest {
       @Override
       public MockResponse dispatch(@NotNull RecordedRequest request) {
         try {
-          if (ORGANIZATION_BNF_URI_WIKIDATA_PATH_SUFFIX.equals(request.getPath())) {
-            String responseBody = loadFile(ORGANIZATION_BNF_WIKIDATA_RESPONSE_XML);
+          if (ORGANIZATION_NATURALIS_URI_WIKIDATA_PATH_SUFFIX.equals(request.getPath())) {
+            String responseBody = loadFile(ORGANIZATION_NATURALIS_WIKIDATA_RESPONSE_XML);
+            return new MockResponse().setResponseCode(200).setBody(responseBody);
+          } else if (ORGANIZATION_GFM_URI_WIKIDATA_PATH_SUFFIX.equals(request.getPath())
+              || ORGANIZATION_GFM_OLD_URI_WIKIDATA_PATH_SUFFIX.equals(request.getPath())) {
+            String responseBody = loadFile(ORGANIZATION_GFM_WIKIDATA_RESPONSE_XML);
             return new MockResponse().setResponseCode(200).setBody(responseBody);
           }
         } catch (IOException e) {
@@ -187,7 +196,7 @@ public abstract class AbstractIntegrationTest {
             jaxbContext.createUnmarshaller(), externalId, metisResponse);
 
     assert xmlBaseEntity != null;
-    DataSource dataSource = entityRecordService.verifyDataSource(externalId, false);
+    DataSource dataSource = datasources.verifyDataSource(externalId, false);
     EntityRecord savedRecord =
         entityRecordService.createEntityFromRequest(
             entityPreview, xmlBaseEntity.toEntityModel(), dataSource);

@@ -118,7 +118,7 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
     failedTaskRepository.upsert(failedTask1);
 
     // remove scheduled tasks with failureCount >= 2
-    service.removeScheduledTasksWithFailures(2);
+    service.removeScheduledTasksWithFailures(2, testUpdateType);
 
     List<ScheduledTask> tasks = service.getTasks(entityIds);
 

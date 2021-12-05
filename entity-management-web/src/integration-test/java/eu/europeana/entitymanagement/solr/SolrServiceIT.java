@@ -10,6 +10,7 @@ import static eu.europeana.entitymanagement.vocabulary.EntitySolrFields.SUGGEST_
 import static eu.europeana.entitymanagement.vocabulary.EntitySolrFields.SUGGEST_FILTER_EUROPEANA;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -34,10 +35,13 @@ import eu.europeana.entitymanagement.solr.model.SolrPlace;
 import eu.europeana.entitymanagement.solr.model.SolrTimeSpan;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -70,7 +74,32 @@ public class SolrServiceIT extends AbstractIntegrationTest {
     SolrAgent storedAgent =
         emSolrService.searchById(SolrAgent.class, record.getEntity().getEntityId());
     Assertions.assertNotNull(storedAgent);
+    verifyPayload(storedAgent);
+    verifyIsShownBy(storedAgent.getPayload());
     Assertions.assertEquals(record.getEntity().getEntityId(), storedAgent.getEntityId());
+  }
+
+  void verifyPayload(SolrEntity<?> entity) {
+    String payload = entity.getPayload();
+    Assertions.assertNotNull(payload);
+    // mandatory fields
+    assertThat(payload, Matchers.containsString("\"prefLabel\""));
+    assertThat(payload, Matchers.containsString("\"type\""));
+
+    // for organizations verify country
+    if (EntityTypes.Organization.getEntityType().equals(entity.getType())) {
+      assertThat(payload, Matchers.containsString("\"country\""));
+      assertThat(payload, Matchers.containsString("\"organizationDomain\""));
+    }
+  }
+
+  void verifyIsShownBy(String payload) {
+    // verify isShownBy
+    assertThat(payload, Matchers.containsString("\"isShownBy\""));
+    assertThat(payload, Matchers.containsString("\"source\""));
+    assertThat(payload, Matchers.containsString("\"thumbnail\""));
+    // id and isShownBy.id
+    assertEquals(2, StringUtils.countMatches(payload, "\"id\""));
   }
 
   EntityRecord buildAgentRecord()
@@ -112,6 +141,10 @@ public class SolrServiceIT extends AbstractIntegrationTest {
     List<SolrEntity<?>> agents = getSolrEntities(searchQuery);
     Assertions.assertNotNull(agents);
     Assertions.assertNotNull(agents.get(0));
+    Assertions.assertNotNull(agents.get(0).getPayload());
+    verifyPayload(agents.get(0));
+    verifyIsShownBy(agents.get(0).getPayload());
+
     Assertions.assertEquals(record.getEntity().getEntityId(), agents.get(0).getEntityId());
   }
 
@@ -125,6 +158,7 @@ public class SolrServiceIT extends AbstractIntegrationTest {
     SolrOrganization storedOrganization =
         emSolrService.searchById(SolrOrganization.class, organization.getEntityId());
     Assertions.assertNotNull(storedOrganization);
+    verifyPayload(storedOrganization);
     Assertions.assertEquals(organization.getEntityId(), storedOrganization.getEntityId());
   }
 
@@ -138,6 +172,7 @@ public class SolrServiceIT extends AbstractIntegrationTest {
     SolrTimeSpan storedTimespan =
         emSolrService.searchById(SolrTimeSpan.class, timespan.getEntityId());
     Assertions.assertNotNull(storedTimespan);
+    verifyPayload(storedTimespan);
     Assertions.assertEquals(timespan.getEntityId(), storedTimespan.getEntityId());
   }
 
@@ -150,6 +185,7 @@ public class SolrServiceIT extends AbstractIntegrationTest {
     emSolrService.storeEntity(SolrUtils.createSolrEntity(record));
     SolrConcept storedConcept = emSolrService.searchById(SolrConcept.class, concept.getEntityId());
     Assertions.assertNotNull(storedConcept);
+    verifyPayload(storedConcept);
     Assertions.assertEquals(concept.getEntityId(), storedConcept.getEntityId());
   }
 
@@ -161,6 +197,7 @@ public class SolrServiceIT extends AbstractIntegrationTest {
     emSolrService.storeEntity(SolrUtils.createSolrEntity(record));
     SolrPlace storedPlace = emSolrService.searchById(SolrPlace.class, place.getEntityId());
     Assertions.assertNotNull(storedPlace);
+    verifyPayload(storedPlace);
     Assertions.assertEquals(place.getEntityId(), storedPlace.getEntityId());
   }
 
@@ -186,6 +223,8 @@ public class SolrServiceIT extends AbstractIntegrationTest {
 
     results = getSolrEntities("type:Agent");
     assertThat(results, hasSize(1));
+    verifyPayload(results.get(0));
+    verifyIsShownBy(results.get(0).getPayload());
   }
 
   /** Helper method to retrieve SolrEntities via search query */

@@ -12,8 +12,8 @@ import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.common.config.DataSource;
-import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
@@ -116,6 +116,8 @@ public class EMController extends BaseRest {
       @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
       @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
       @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
+      @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = false)
+          String profile,
       HttpServletRequest request)
       throws HttpException, EuropeanaApiException {
     if (emConfig.isAuthEnabled()) {
@@ -130,8 +132,18 @@ public class EMController extends BaseRest {
     String etag = computeEtag(timestamp, FormatTypes.jsonld.name(), getApiVersion());
     checkIfMatchHeaderWithQuotes(etag, request);
 
-    entityUpdateService.scheduleTasks(
-        Collections.singletonList(entityRecord.getEntityId()), ScheduledRemovalType.DEPRECATION);
+    boolean isSynchronous = containsSyncProfile(profile);
+    String entityId = entityRecord.getEntityId();
+    logger.info("Deprecating entityId={}, isSynchronous={}", entityId, isSynchronous);
+
+    if (isSynchronous) {
+      // delete from Solr before Mongo, so Solr errors won't leave DB in an inconsistent state
+      solrService.deleteById(List.of(entityId));
+      entityRecordService.disableEntityRecord(entityRecord);
+    } else {
+      entityUpdateService.scheduleTasks(
+          Collections.singletonList(entityId), ScheduledRemovalType.DEPRECATION);
+    }
 
     return noContentResponse(request);
   }
@@ -251,8 +263,7 @@ public class EMController extends BaseRest {
     }
     EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
     // update from external data source is not available for static data sources
-    entityRecordService.verifyDataSource(
-        entityRecord.getExternalProxies().get(0).getProxyId(), false);
+    datasources.verifyDataSource(entityRecord.getExternalProxies().get(0).getProxyId(), false);
     return launchTaskAndRetrieveEntity(request, type, identifier, entityRecord, profile);
   }
 
@@ -454,17 +465,16 @@ public class EMController extends BaseRest {
       return response;
     }
 
-    DataSource dataSource =
-        entityRecordService.verifyDataSource(entityCreationRequest.getId(), false);
+    DataSource dataSource = datasources.verifyDataSource(entityCreationRequest.getId(), false);
 
     // in case of Organization it must be the zoho Organization
     String creationRequestType = entityCreationRequest.getType();
     if (EntityTypes.Organization.getEntityType().equals(creationRequestType)
-        && !creationRequestId.contains(DataSources.ZOHO_ID)) {
+        && !creationRequestId.contains(DataSource.ZOHO_ID)) {
       throw new HttpBadRequestException(
           String.format(
               "The Organization entity should come from Zoho and have the corresponding id format containing: %s",
-              DataSources.ZOHO_ID));
+              DataSource.ZOHO_ID));
     }
 
     Entity datasourceResponse = dereferenceEntity(creationRequestId, creationRequestType);
@@ -655,7 +665,7 @@ public class EMController extends BaseRest {
     Map<Boolean, List<EntityIdDisabledStatus>> entityIdsByDisabled =
         statusList.stream().collect(groupingBy(EntityIdDisabledStatus::isDisabled));
 
-    // get entityIds that can be scheduled (disabled = false)
+    // get entityIds that can be scheduled (they are not disabled)
     List<EntityIdDisabledStatus> nonDisabledEntities = entityIdsByDisabled.get(false);
     List<String> toBeScheduled =
         CollectionUtils.isEmpty(nonDisabledEntities)

@@ -190,11 +190,12 @@ public class ScheduledTaskRepository implements InitializingBean {
    * Gets all ScheduledTasks with failures, whose failureCount is above the maxFailedTaskRetries
    * value. Note: this method returns a cursor, which callers are responsible for closing
    */
-  public MorphiaCursor<ScheduledTask> getTasksWithFailures(int maxFailedTaskRetries) {
+  public MorphiaCursor<ScheduledTask> getTasksWithFailures(
+      int maxFailedTaskRetries, ScheduledTaskType updateType) {
 
     return datastore
         .aggregate(ScheduledTask.class)
-        .match(eq(HAS_BEEN_PROCESSED, false))
+        .match(eq(HAS_BEEN_PROCESSED, false), eq(UPDATE_TYPE, updateType.getValue()))
         // both collections use the same entityId field name
         .lookup(
             Lookup.from(FailedTask.class)

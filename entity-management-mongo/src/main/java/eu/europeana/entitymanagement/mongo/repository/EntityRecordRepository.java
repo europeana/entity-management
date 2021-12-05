@@ -18,6 +18,7 @@ import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
 import eu.europeana.entitymanagement.mongo.utils.MorphiaUtils;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -71,9 +72,9 @@ public class EntityRecordRepository {
     List<Filter> filters = new ArrayList<>();
     filters.add(in(ENTITY_ID, entityIds));
 
-    // only fetch records where disabled flag isn't set
+    // Only fetch active records. Disabled records have a date value
     if (excludeDisabled) {
-      filters.add(eq(DISABLED, false));
+      filters.add(eq(DISABLED, null));
     }
 
     List<EntityRecord> entityRecords =
@@ -206,10 +207,11 @@ public class EntityRecordRepository {
   }
 
   public UpdateResult disableBulk(List<String> entityIds) {
+    Date disablingDate = new Date();
     return datastore
         .find(EntityRecord.class)
         .filter(in(ENTITY_ID, entityIds))
-        .update(UpdateOperators.set(DISABLED, true))
+        .update(UpdateOperators.set(DISABLED, disablingDate))
         .execute(MULTI_UPDATE_OPTS);
   }
 }
