@@ -568,12 +568,6 @@ public class EntityRecordService {
     }
   }
   
-  
-  boolean isHttpUrl(String value) {
-    //quick check if is http(s) url
-    return value.startsWith("http:") || value.startsWith("https:"); 
-  }
-
   /**
    * This function merges the metadata data from the provided entities and returns the consolidated
    * version
