@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+  <metis:results xmlns:dcterms="http://purl.org/dc/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:edm="http://www.europeana.eu/schemas/edm/" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema" xmlns:cc="http://creativecommons.org/ns" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdaGr2="http://rdvocab.info/ElementsGr2/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:wgs84_pos="http://www.w3.org/2003/01/geo/wgs84_pos#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:metis="http://www.europeana.eu/schemas/metis" xmlns:ns13="http://www.w3.org/2006/vcard/ns#">
+    <metis:result>
+      <edm:Agent rdf:about="http://www.wikidata.org/entity/Q110854">
+        <skos:altLabel xml:lang="de">Jakob Schegk</skos:altLabel>
+        <skos:altLabel xml:lang="de">Johann Jacob Brucker Schegk</skos:altLabel>
+        <skos:altLabel xml:lang="de">Jakob Scheckius</skos:altLabel>
+        <skos:altLabel xml:lang="en">Scheggius</skos:altLabel>
+        <skos:altLabel xml:lang="en">Schegkius</skos:altLabel>
+        <skos:altLabel xml:lang="cs">Jacob Degen</skos:altLabel>
+        <skos:altLabel xml:lang="cs">Jacobus Scheckius</skos:altLabel>
+        <skos:altLabel xml:lang="cs">Jacobus Scheggius</skos:altLabel>
+        <skos:altLabel xml:lang="cs">Jacobus Schegkius</skos:altLabel>
+        <skos:prefLabel xml:lang="de">Jakob Degen</skos:prefLabel>
+        <skos:prefLabel xml:lang="en">Jakob Schegk</skos:prefLabel>
+        <skos:prefLabel xml:lang="es">Jakob Schegk</skos:prefLabel>
+        <skos:prefLabel xml:lang="nl">Jakob Schegk</skos:prefLabel>
+        <skos:prefLabel xml:lang="da">Jakob Degen</skos:prefLabel>
+        <skos:prefLabel xml:lang="sv">Jakob Degen</skos:prefLabel>
+        <skos:prefLabel xml:lang="fr">Jacob Schegk</skos:prefLabel>
+        <skos:prefLabel xml:lang="el">Γιάκομπ Σεγκ</skos:prefLabel>
+        <skos:prefLabel xml:lang="sl">Jakob Schegk</skos:prefLabel>
+        <skos:prefLabel xml:lang="pt">Jakob Degen</skos:prefLabel>
+        <skos:prefLabel xml:lang="ca">Jacob Schegk</skos:prefLabel>
+        <skos:prefLabel xml:lang="it">Jakob Schegk</skos:prefLabel>
+        <skos:prefLabel xml:lang="cs">Jacob Degen Schegk</skos:prefLabel>
+        <skos:note xml:lang="de">deutscher Jurist, Mediziner, Philosoph und Metaphysiker</skos:note>
+        <skos:note xml:lang="en">German physician and philosopher (1511 – 1587)</skos:note>
+        <skos:note xml:lang="nl">Duits filosoof (1511-1587)</skos:note>
+        <skos:note xml:lang="es">médico alemán</skos:note>
+        <skos:note xml:lang="ca">metge alemany</skos:note>
+        <skos:note xml:lang="fr">médecin allemand</skos:note>
+        <skos:note xml:lang="el">Γερμανός φιλόσοφος</skos:note>
+        <skos:note xml:lang="ro">medic german</skos:note>
+        <skos:note xml:lang="et">Saksamaa arst</skos:note>
+        <skos:note xml:lang="da">tysk professor</skos:note>
+        <skos:note xml:lang="sv">tysk professor</skos:note>
+        <skos:note xml:lang="pt">professor académico alemão</skos:note>
+        <skos:note xml:lang="ga">dochtúir Gearmánach</skos:note>
+        <skos:note xml:lang="it">medico tedesco</skos:note>
+        <edm:hasMet rdf:resource="http://www.wikidata.org/entity/Q55791242"/>
+        <rdaGr2:placeOfBirth rdf:resource="http://www.wikidata.org/entity/Q14882">
+        </rdaGr2:placeOfBirth>
+        <rdaGr2:placeOfDeath rdf:resource="http://www.wikidata.org/entity/Q3806">
+        </rdaGr2:placeOfDeath>
+        <rdaGr2:dateOfBirth>1511-06-16T00:00:00Z</rdaGr2:dateOfBirth>
+        <rdaGr2:dateOfDeath>1587-05-09T00:00:00Z</rdaGr2:dateOfDeath>
+        <rdaGr2:professionOrOccupation rdf:resource="http://www.wikidata.org/entity/Q4964182">
+        </rdaGr2:professionOrOccupation>
+        <rdaGr2:professionOrOccupation rdf:resource="http://www.wikidata.org/entity/Q1622272">
+        </rdaGr2:professionOrOccupation>
+        <owl:sameAs rdf:resource="http://viaf.org/viaf/12358901"/>
+        <owl:sameAs rdf:resource="http://d-nb.info/gnd/118606875"/>
+        <owl:sameAs rdf:resource="http://id.loc.gov/authorities/names/n86113744"/>
+        <owl:sameAs rdf:resource="http://data.bnf.fr/ark:/12148/cb122185578"/>
+        <owl:sameAs rdf:resource="http://www.idref.fr/030853060/id"/>
+        <owl:sameAs rdf:resource="https://www.freebase.com/m/0dgq85p"/>
+        <owl:sameAs rdf:resource="https://g.co/kg/m/0dgq85p"/>
+        <owl:sameAs rdf:resource="http://openlibrary.org/works/OL4849626A"/>
+        <owl:sameAs rdf:resource="http://libris.kb.se/resource/auth/282965"/>
+        <owl:sameAs rdf:resource="http://data.bibliotheken.nl/id/thes/p069117853"/>
+        <owl:sameAs rdf:resource="urn:uuid:387a0a33-bc8e-4bfd-8bbc-439691b63546"/>
+        <owl:sameAs rdf:resource="http://id.worldcat.org/fast/201611"/>
+        <owl:sameAs rdf:resource="https://libris.kb.se/mkz25mk52l3wsd2"/>
+        <owl:sameAs rdf:resource="http://dbpedia.org/resource/Jakob_Schegk"/>
+      </edm:Agent>
+    </metis:result>
+  </metis:results>
