@@ -2,11 +2,17 @@ package eu.europeana.entitymanagement.normalization;
 
 import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_DATE;
 import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_EMAIL;
-import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_TEXT_OR_URI;
 import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_URI;
+
+import eu.europeana.entitymanagement.common.config.LanguageCodes;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityFieldAccessException;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.WebResource;
+import eu.europeana.entitymanagement.utils.EntityUtils;
+import eu.europeana.entitymanagement.utils.UriValidator;
+import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 import java.lang.reflect.Field;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -17,16 +23,8 @@ import javax.annotation.Resource;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import org.apache.commons.validator.routines.EmailValidator;
-import org.apache.jena.iri.IRI;
-import org.apache.jena.iri.IRIFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import eu.europeana.entitymanagement.common.config.LanguageCodes;
-import eu.europeana.entitymanagement.definitions.exceptions.EntityFieldAccessException;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.WebResource;
-import eu.europeana.entitymanagement.utils.EntityUtils;
-import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 
 @Component
 public class EntityFieldsCompleteValidator
@@ -34,8 +32,6 @@ public class EntityFieldsCompleteValidator
 
   @Resource(name = "emLanguageCodes")
   LanguageCodes emLanguageCodes;
-
-  private final IRIFactory iriFactory = IRIFactory.iriImplementation();
 
   public void initialize(EntityFieldsCompleteValidatorInterface constraint) {
     //        System.out.println();
@@ -120,20 +116,14 @@ public class EntityFieldsCompleteValidator
               + fieldValue
               + ".");
       return false;
-    } else {
-      EntityFieldsTypes fieldType = EntityFieldsTypes.valueOf(field.getName());
-      boolean isUri = isUri(fieldValue);
-      if(isUri) {
-        // allow URIs for field type TEXT OR URI but only for empty languge codes
-        if("".equals(key) && EntityFieldsTypes.FIELD_TYPE_TEXT_OR_URI.equals(fieldType.getFieldType())) {
-            return validateIRIFormat(context, field, fieldValue);
-        }else {
-          addUriNotAllowedConstraint(context, field, fieldValue, key);
-          return false;
-        }
-      }
-      return true;
     }
+
+    EntityFieldsTypes fieldType = EntityFieldsTypes.valueOf(field.getName());
+    if (isUriField(key, fieldType.getFieldType()) && !UriValidator.isValidUri(fieldValue)) {
+      addUriNotAllowedConstraint(context, field, fieldValue, key);
+      return false;
+    }
+    return true;
   }
 
   void addUriNotAllowedConstraint(
@@ -260,7 +250,7 @@ public class EntityFieldsCompleteValidator
     if (field.getType().isAssignableFrom(ArrayList.class)) {
       returnValue = validateURIListField(context, field, (List<String>) fieldValue);
     } else if (field.getType().isAssignableFrom(String.class)) {
-      returnValue = validateIRIFormat(context, field, (String) fieldValue);
+      returnValue = validateUri(context, field, (String) fieldValue);
     }
     return returnValue;
   }
@@ -276,16 +266,16 @@ public class EntityFieldsCompleteValidator
       return false;
     }
     for (String fieldValueElem : fieldValues) {
-      if (!validateIRIFormat(context, field, fieldValueElem)) {
+      if (!validateUri(context, field, fieldValueElem)) {
         returnValue = false;
       }
     }
     return returnValue;
   }
 
-  boolean validateIRIFormat(ConstraintValidatorContext context, Field field, String fieldValue) {
-    // validate IRI Format
-    if (!isValidIri(fieldValue)) {
+  private boolean validateUri(ConstraintValidatorContext context, Field field, String fieldValue) {
+    // validate URI Format
+    if (!UriValidator.isValidUri(fieldValue)) {
       addConstraint(
           context,
           "The entity field: "
@@ -303,17 +293,12 @@ public class EntityFieldsCompleteValidator
 
   public static boolean isUri(String value) {
     try {
-      return URI.create(value).isAbsolute();    
+      return URI.create(value).isAbsolute();
     } catch (IllegalArgumentException e) {
       return false;
     }
   }
-   
-  private boolean isValidIri(String value) {
-    IRI iri = iriFactory.create(value);
-    return iri.isAbsolute() && !iri.hasViolation(false);
-  }
-  
+
   @SuppressWarnings("unchecked")
   boolean validateMultilingualField(
       ConstraintValidatorContext context, Field field, Object fieldValue) {
@@ -388,8 +373,8 @@ public class EntityFieldsCompleteValidator
       String key,
       String multilingualValue,
       String fieldType) {
-    if ("".equals(key) && FIELD_TYPE_TEXT_OR_URI.equals(fieldType)) {
-      return validateIRIFormat(context, field, multilingualValue);
+    if (isUriField(key, fieldType)) {
+      return validateUri(context, field, multilingualValue);
     } else {
       return validateStringValue(context, field, multilingualValue, key);
     }
@@ -420,19 +405,18 @@ public class EntityFieldsCompleteValidator
       ConstraintValidatorContext context, Field field, WebResource webResource) {
     boolean isValid = true;
 
-    if (webResource.getId() == null || !validateIRIFormat(context, field, webResource.getId())) {
+    if (webResource.getId() == null || !validateUri(context, field, webResource.getId())) {
       addConstraint(context, "Field " + field.getName() + " has an invalid id value");
       isValid = false;
     }
-    if (webResource.getSource() == null
-        || !validateIRIFormat(context, field, webResource.getSource())) {
+    if (webResource.getSource() == null || !validateUri(context, field, webResource.getSource())) {
       addConstraint(context, "Field " + field.getName() + " has an invalid source value");
       isValid = false;
     }
 
     // thumbnail can be empty
     if (StringUtils.hasLength(webResource.getThumbnail())
-        && !validateIRIFormat(context, field, webResource.getThumbnail())) {
+        && !validateUri(context, field, webResource.getThumbnail())) {
       addConstraint(context, "Field " + field.getName() + " has an invalid thumbnail value");
       isValid = false;
     }
@@ -441,5 +425,9 @@ public class EntityFieldsCompleteValidator
 
   private void addConstraint(ConstraintValidatorContext context, String messageTemplate) {
     context.buildConstraintViolationWithTemplate(messageTemplate).addConstraintViolation();
+  }
+
+  private boolean isUriField(String key, String fieldType) {
+    return "".equals(key) && EntityFieldsTypes.FIELD_TYPE_TEXT_OR_URI.equals(fieldType);
   }
 }
