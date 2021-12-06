@@ -85,25 +85,6 @@ public abstract class AbstractIntegrationTest {
   public static void setupAll() throws IOException {
     mockMetis = new MockWebServer();
     mockMetis.setDispatcher(setupMetisDispatcher());
-
-    final Dispatcher dispatcher =
-        new Dispatcher() {
-          @NotNull
-          @Override
-          public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
-            String externalId =
-                Objects.requireNonNull(request.getRequestUrl()).queryParameter("uri");
-            try {
-              String responseBody =
-                  loadFile(METIS_RESPONSE_MAP.getOrDefault(externalId, EMPTY_METIS_RESPONSE));
-              return new MockResponse().setResponseCode(200).setBody(responseBody);
-            } catch (Exception e) {
-              throw new RuntimeException(e);
-            }
-          }
-        };
-
-    mockMetis.setDispatcher(dispatcher);
     mockMetis.start();
 
     mockWikidata = new MockWebServer();

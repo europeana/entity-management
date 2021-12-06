@@ -126,7 +126,7 @@ public class EntityFieldsCompleteValidator
       if(isUri) {
         // allow URIs for field type TEXT OR URI but only for empty languge codes
         if("".equals(key) && EntityFieldsTypes.FIELD_TYPE_TEXT_OR_URI.equals(fieldType.getFieldType())) {
-            return validateIRIFormat(context, field, fieldValue, Boolean.valueOf(isUri));
+            return validateIRIFormat(context, field, fieldValue);
         }else {
           addUriNotAllowedConstraint(context, field, fieldValue, key);
           return false;
@@ -284,15 +284,8 @@ public class EntityFieldsCompleteValidator
   }
 
   boolean validateIRIFormat(ConstraintValidatorContext context, Field field, String fieldValue) {
-    return validateIRIFormat(context, field, fieldValue, null);
-  }
-  
-  boolean validateIRIFormat(ConstraintValidatorContext context, Field field, String fieldValue, Boolean isUri) {
-    if(isUri == null) {
-      isUri = isUri(fieldValue);
-    }
     // validate IRI Format
-    if (!isUri || !isValidIri(fieldValue)) {
+    if (!isValidIri(fieldValue)) {
       addConstraint(
           context,
           "The entity field: "
@@ -310,20 +303,15 @@ public class EntityFieldsCompleteValidator
 
   public static boolean isUri(String value) {
     try {
-      URI uri = new URI(value);
-      //URIs must have a scheme, prevent the string literals to be recognized as valid URIs 
-      if(uri.getScheme() == null) {
-        return false;
-      }
-    } catch (URISyntaxException e) {
+      return URI.create(value).isAbsolute();    
+    } catch (IllegalArgumentException e) {
       return false;
     }
-    return true;
   }
    
-  public boolean isValidIri(String value) {
+  private boolean isValidIri(String value) {
     IRI iri = iriFactory.create(value);
-    return !iri.hasViolation(false);
+    return iri.isAbsolute() && !iri.hasViolation(false);
   }
   
   @SuppressWarnings("unchecked")

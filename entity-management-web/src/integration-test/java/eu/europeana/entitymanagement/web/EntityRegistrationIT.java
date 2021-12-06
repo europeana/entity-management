@@ -80,6 +80,29 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         // should have Europeana and Datasource proxies
         .andExpect(jsonPath("$.proxies", hasSize(2)));
   }
+  
+  @Test
+  void registerAgentSchegkWithURNReferenceShouldBeSuccessful() throws Exception {
+    ResultActions response =
+        mockMvc.perform(post(BASE_SERVICE_URL).content(loadFile(AGENT_REGISTER_SCHEGK_JSON))
+            .contentType(MediaType.APPLICATION_JSON_VALUE));
+
+    response.andExpect(status().isAccepted()).andExpect(jsonPath("$.id", any(String.class)))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())))
+        .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
+        // fields to be serialized as string
+        .andExpect(jsonPath("$.dateOfBirth", any(String.class)))
+        .andExpect(jsonPath("$.dateOfDeath", any(String.class)))
+        .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
+        // should have Europeana and Datasource proxies
+        .andExpect(jsonPath("$.proxies", hasSize(2)))
+        //
+        .andExpect(jsonPath("$.sameAs",
+            containsInRelativeOrder("urn:uuid:387a0a33-bc8e-4bfd-8bbc-439691b63546")));
+
+  }
+  
+  
 
   @Test
   void registerPlaceShouldBeSuccessful() throws Exception {

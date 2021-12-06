@@ -50,6 +50,8 @@ public class BaseMvcTestUtils {
       "/content/concept_register_bathtub.json";
   public static final String AGENT_REGISTER_DAVINCI_JSON = "/content/agent_register_davinci.json";
   public static final String AGENT_REGISTER_STALIN_JSON = "/content/agent_register_stalin.json";
+  public static final String AGENT_REGISTER_SCHEGK_JSON = "/content/agent_register_schegk.json";
+  
   public static final String AGENT_REGISTER_JAN_VERMEER =
       "/content/agent_register_jan_vermeer.json";
   public static final String ORGANIZATION_REGISTER_BNF_ZOHO_JSON =
@@ -81,6 +83,7 @@ public class BaseMvcTestUtils {
 
   public static final String AGENT_DA_VINCI_XML = "/metis-deref/agent_da_vinci.xml";
   public static final String AGENT_STALIN_XML = "/metis-deref/agent_stalin.xml";
+  public static final String AGENT_SCHEGK_XML = "/metis-deref/agent_schegk.xml";
   public static final String AGENT_JAN_VERMEER_XML_VIAF = "/metis-deref/agent_jan_vermeer_viaf.xml";
   public static final String AGENT_JAN_VERMEER_XML_WIKIDATA =
       "/metis-deref/agent_jan_vermeer_wikidata.xml";
@@ -120,6 +123,7 @@ public class BaseMvcTestUtils {
 
   public static final String AGENT_DA_VINCI_URI = "http://www.wikidata.org/entity/Q762";
   public static final String AGENT_STALIN_URI = "http://www.wikidata.org/entity/Q855";
+  public static final String AGENT_SCHEGK_URI = "http://www.wikidata.org/entity/Q110854";
   public static final String AGENT_JAN_VERMEER_VIAF_URI = "http://viaf.org/viaf/51961439";
   public static final String AGENT_JAN_VERMEER_WIKIDATA_URI =
       "http://www.wikidata.org/entity/Q41264";
@@ -184,7 +188,9 @@ public class BaseMvcTestUtils {
           TIMESPAN_1ST_CENTURY_URI, TIMESPAN_1ST_CENTURY_XML,
           CONCEPT_BATHTUB_URI, CONCEPT_BATHTUB_XML,
           AGENT_JAN_VERMEER_VIAF_URI, AGENT_JAN_VERMEER_XML_VIAF,
-          AGENT_JAN_VERMEER_WIKIDATA_URI, AGENT_JAN_VERMEER_XML_WIKIDATA);
+          AGENT_JAN_VERMEER_WIKIDATA_URI, AGENT_JAN_VERMEER_XML_WIKIDATA,
+          AGENT_SCHEGK_URI, AGENT_SCHEGK_XML
+          );
 
   public static String loadFile(String resourcePath) throws IOException {
     return IOUtils.toString(
