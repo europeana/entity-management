@@ -51,7 +51,7 @@ public class BaseMvcTestUtils {
   public static final String AGENT_REGISTER_DAVINCI_JSON = "/content/agent_register_davinci.json";
   public static final String AGENT_REGISTER_STALIN_JSON = "/content/agent_register_stalin.json";
   public static final String AGENT_REGISTER_SCHEGK_JSON = "/content/agent_register_schegk.json";
-  
+
   public static final String AGENT_REGISTER_JAN_VERMEER =
       "/content/agent_register_jan_vermeer.json";
   public static final String ORGANIZATION_REGISTER_BNF_ZOHO_JSON =
@@ -189,8 +189,7 @@ public class BaseMvcTestUtils {
           CONCEPT_BATHTUB_URI, CONCEPT_BATHTUB_XML,
           AGENT_JAN_VERMEER_VIAF_URI, AGENT_JAN_VERMEER_XML_VIAF,
           AGENT_JAN_VERMEER_WIKIDATA_URI, AGENT_JAN_VERMEER_XML_WIKIDATA,
-          AGENT_SCHEGK_URI, AGENT_SCHEGK_XML
-          );
+          AGENT_SCHEGK_URI, AGENT_SCHEGK_XML);
 
   public static String loadFile(String resourcePath) throws IOException {
     return IOUtils.toString(
