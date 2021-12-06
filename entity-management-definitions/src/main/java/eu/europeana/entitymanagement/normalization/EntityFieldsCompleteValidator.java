@@ -4,9 +4,15 @@ import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_T
 import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_EMAIL;
 import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_TEXT_OR_URI;
 import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_URI;
+
+import eu.europeana.entitymanagement.common.config.LanguageCodes;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityFieldAccessException;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.WebResource;
+import eu.europeana.entitymanagement.utils.EntityUtils;
+import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 import java.lang.reflect.Field;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -21,12 +27,6 @@ import org.apache.jena.iri.IRI;
 import org.apache.jena.iri.IRIFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import eu.europeana.entitymanagement.common.config.LanguageCodes;
-import eu.europeana.entitymanagement.definitions.exceptions.EntityFieldAccessException;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.WebResource;
-import eu.europeana.entitymanagement.utils.EntityUtils;
-import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 
 @Component
 public class EntityFieldsCompleteValidator
@@ -123,11 +123,12 @@ public class EntityFieldsCompleteValidator
     } else {
       EntityFieldsTypes fieldType = EntityFieldsTypes.valueOf(field.getName());
       boolean isUri = isUri(fieldValue);
-      if(isUri) {
+      if (isUri) {
         // allow URIs for field type TEXT OR URI but only for empty languge codes
-        if("".equals(key) && EntityFieldsTypes.FIELD_TYPE_TEXT_OR_URI.equals(fieldType.getFieldType())) {
-            return validateIRIFormat(context, field, fieldValue);
-        }else {
+        if ("".equals(key)
+            && EntityFieldsTypes.FIELD_TYPE_TEXT_OR_URI.equals(fieldType.getFieldType())) {
+          return validateIRIFormat(context, field, fieldValue);
+        } else {
           addUriNotAllowedConstraint(context, field, fieldValue, key);
           return false;
         }
@@ -303,17 +304,17 @@ public class EntityFieldsCompleteValidator
 
   public static boolean isUri(String value) {
     try {
-      return URI.create(value).isAbsolute();    
+      return URI.create(value).isAbsolute();
     } catch (IllegalArgumentException e) {
       return false;
     }
   }
-   
+
   private boolean isValidIri(String value) {
     IRI iri = iriFactory.create(value);
     return iri.isAbsolute() && !iri.hasViolation(false);
   }
-  
+
   @SuppressWarnings("unchecked")
   boolean validateMultilingualField(
       ConstraintValidatorContext context, Field field, Object fieldValue) {
