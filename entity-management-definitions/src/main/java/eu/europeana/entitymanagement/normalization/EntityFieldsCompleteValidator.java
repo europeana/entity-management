@@ -118,10 +118,20 @@ public class EntityFieldsCompleteValidator
     }
 
     EntityFieldsTypes fieldType = EntityFieldsTypes.valueOf(field.getName());
-    if (isUriField(key, fieldType.getFieldType()) && !UriValidator.isUri(fieldValue)) {
+    boolean isUriField = isUriField(key, fieldType.getFieldType());
+    boolean isUriValue = UriValidator.isUri(fieldValue);
+
+    // URI fields must have a valid URI value
+    if (isUriField && !isUriValue) {
+      addUriConstraint(context, field, fieldValue);
+      return false;
+
+      // URI values in non-URI fields aren't allowed
+    } else if (isUriValue && !isUriField) {
       addUriNotAllowedConstraint(context, field, fieldValue, key);
       return false;
     }
+
     return true;
   }
 
@@ -275,19 +285,24 @@ public class EntityFieldsCompleteValidator
   private boolean validateUri(ConstraintValidatorContext context, Field field, String fieldValue) {
     // validate URI Format
     if (!UriValidator.isUri(fieldValue)) {
-      addConstraint(
-          context,
-          "The entity field: "
-              + field.getName()
-              + " is of type: "
-              + EntityFieldsTypes.getFieldType(field.getName())
-              + " but the value: "
-              + fieldValue
-              + " does not have the proper IRI form.");
+      addUriConstraint(context, field, fieldValue);
       return false;
     } else {
       return true;
     }
+  }
+
+  private void addUriConstraint(
+      ConstraintValidatorContext context, Field field, String fieldValue) {
+    addConstraint(
+        context,
+        "The entity field: "
+            + field.getName()
+            + " is of type: "
+            + EntityFieldsTypes.getFieldType(field.getName())
+            + " but the value: "
+            + fieldValue
+            + " does not have the proper IRI form.");
   }
 
   @SuppressWarnings("unchecked")
