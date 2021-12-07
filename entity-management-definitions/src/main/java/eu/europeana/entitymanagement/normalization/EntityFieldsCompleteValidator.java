@@ -12,7 +12,6 @@ import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.utils.UriValidator;
 import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 import java.lang.reflect.Field;
-import java.net.URI;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -119,7 +118,7 @@ public class EntityFieldsCompleteValidator
     }
 
     EntityFieldsTypes fieldType = EntityFieldsTypes.valueOf(field.getName());
-    if (isUriField(key, fieldType.getFieldType()) && !UriValidator.isValidUri(fieldValue)) {
+    if (isUriField(key, fieldType.getFieldType()) && !UriValidator.isUri(fieldValue)) {
       addUriNotAllowedConstraint(context, field, fieldValue, key);
       return false;
     }
@@ -275,7 +274,7 @@ public class EntityFieldsCompleteValidator
 
   private boolean validateUri(ConstraintValidatorContext context, Field field, String fieldValue) {
     // validate URI Format
-    if (!UriValidator.isValidUri(fieldValue)) {
+    if (!UriValidator.isUri(fieldValue)) {
       addConstraint(
           context,
           "The entity field: "
@@ -288,14 +287,6 @@ public class EntityFieldsCompleteValidator
       return false;
     } else {
       return true;
-    }
-  }
-
-  public static boolean isUri(String value) {
-    try {
-      return URI.create(value).isAbsolute();
-    } catch (IllegalArgumentException e) {
-      return false;
     }
   }
 
