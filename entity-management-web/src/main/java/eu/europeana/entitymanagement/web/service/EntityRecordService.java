@@ -37,10 +37,10 @@ import eu.europeana.entitymanagement.exception.HttpBadRequestException;
 import eu.europeana.entitymanagement.exception.HttpUnprocessableException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
-import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidator;
 import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.utils.EntityUtils;
+import eu.europeana.entitymanagement.utils.UriValidator;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.web.model.EntityPreview;
@@ -542,8 +542,7 @@ public class EntityRecordService {
   }
 
   private void addValueOrInternalReference(List<String> updatedReferences, String value) {
-    if (value.startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI)
-        || !EntityFieldsCompleteValidator.isUri(value)) {
+    if (value.startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI) || !UriValidator.isUri(value)) {
       // value is internal reference or string literal
       updatedReferences.add(value);
     } else {
