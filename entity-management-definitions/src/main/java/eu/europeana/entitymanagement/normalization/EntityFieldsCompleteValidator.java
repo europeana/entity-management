@@ -118,16 +118,16 @@ public class EntityFieldsCompleteValidator
     }
 
     EntityFieldsTypes fieldType = EntityFieldsTypes.valueOf(field.getName());
-    boolean isUriField = isUriField(key, fieldType.getFieldType());
+    boolean isUriRequired = isUriRequired(key, fieldType.getFieldType());
     boolean isUriValue = UriValidator.isUri(fieldValue);
 
     // URI fields must have a valid URI value
-    if (isUriField && !isUriValue) {
+    if (isUriRequired && !isUriValue) {
       addInvalidUriConstraint(context, field, fieldValue);
       return false;
 
       // URI values in non-URI fields aren't allowed
-    } else if (isUriValue && !isUriField) {
+    } else if (isUriValue && !isUriRequired) {
       addUriNotAllowedConstraint(context, field, fieldValue, key);
       return false;
     }
@@ -379,7 +379,7 @@ public class EntityFieldsCompleteValidator
       String key,
       String multilingualValue,
       String fieldType) {
-    if (isUriField(key, fieldType)) {
+    if (isUriRequired(key, fieldType)) {
       return validateUri(context, field, multilingualValue);
     } else {
       return validateStringValue(context, field, multilingualValue, key);
@@ -433,7 +433,7 @@ public class EntityFieldsCompleteValidator
     context.buildConstraintViolationWithTemplate(messageTemplate).addConstraintViolation();
   }
 
-  private boolean isUriField(String key, String fieldType) {
+  private boolean isUriRequired(String key, String fieldType) {
     return "".equals(key) && EntityFieldsTypes.FIELD_TYPE_TEXT_OR_URI.equals(fieldType);
   }
 }
