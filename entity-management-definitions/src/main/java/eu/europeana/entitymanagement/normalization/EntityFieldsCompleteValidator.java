@@ -123,7 +123,7 @@ public class EntityFieldsCompleteValidator
 
     // URI fields must have a valid URI value
     if (isUriField && !isUriValue) {
-      addUriConstraint(context, field, fieldValue);
+      addInvalidUriConstraint(context, field, fieldValue);
       return false;
 
       // URI values in non-URI fields aren't allowed
@@ -285,14 +285,14 @@ public class EntityFieldsCompleteValidator
   private boolean validateUri(ConstraintValidatorContext context, Field field, String fieldValue) {
     // validate URI Format
     if (!UriValidator.isUri(fieldValue)) {
-      addUriConstraint(context, field, fieldValue);
+      addInvalidUriConstraint(context, field, fieldValue);
       return false;
     } else {
       return true;
     }
   }
 
-  private void addUriConstraint(
+  private void addInvalidUriConstraint(
       ConstraintValidatorContext context, Field field, String fieldValue) {
     addConstraint(
         context,
