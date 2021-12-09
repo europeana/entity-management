@@ -1,6 +1,6 @@
 package eu.europeana.entitymanagement.validation;
 
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
+import static eu.europeana.entitymanagement.testutils.UnitTestUtils.loadFile;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
@@ -26,7 +26,8 @@ import org.springframework.boot.test.context.SpringBootTest;
     })
 public class EntityFieldsCleanerTest {
 
-  private static final String AGENT_STALIN_CLEANING_XML = "/metis-deref/agent_stalin_cleaning.xml";
+  private static final String AGENT_STALIN_CLEANING_XML =
+      "/metis-deref-unittest/agent_stalin_cleaning.xml";
 
   @Autowired private LanguageCodes emLanguageCodes;
 

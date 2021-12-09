@@ -9,8 +9,6 @@ import org.springframework.boot.actuate.autoconfigure.security.servlet.Managemen
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
 /**
  * Main application. Allows deploying as a war and logs instance data when deployed in Cloud Foundry
@@ -25,7 +23,7 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
       DataSourceAutoConfiguration.class
     })
 @EnableBatchProcessing
-public class EntityManagementApp extends SpringBootServletInitializer {
+public class EntityManagementApp {
 
   /**
    * Main entry point of this application
@@ -46,10 +44,5 @@ public class EntityManagementApp extends SpringBootServletInitializer {
         new SocksProxyConfig("entitymanagement.properties", "entitymanagement.user.properties"));
 
     SpringApplication.run(EntityManagementApp.class, args);
-  }
-
-  @Override
-  protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-    return application.sources(EntityManagementApp.class);
   }
 }

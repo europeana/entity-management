@@ -1,6 +1,6 @@
 package eu.europeana.entitymanagement.web.model.metis;
 
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
+import static eu.europeana.entitymanagement.testutils.UnitTestUtils.loadFile;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -29,7 +29,7 @@ class MetisResponseDeserializerTest {
     XmlConceptImpl xmlEntity =
         (XmlConceptImpl)
             MetisDereferenceUtils.parseMetisResponse(
-                unmarshaller, uri, loadFile("/metis-deref/concept-response.xml"));
+                unmarshaller, uri, loadFile("/metis-deref-unittest/concept-response.xml"));
     assert xmlEntity != null;
     assertEquals(uri, xmlEntity.getAbout());
 
@@ -68,7 +68,7 @@ class MetisResponseDeserializerTest {
     XmlAgentImpl xmlEntity =
         (XmlAgentImpl)
             MetisDereferenceUtils.parseMetisResponse(
-                unmarshaller, uri, loadFile("/metis-deref/agent_da_vinci.xml"));
+                unmarshaller, uri, loadFile("/metis-deref-unittest/agent_da_vinci.xml"));
     assert xmlEntity != null;
 
     assertEquals(uri, xmlEntity.getAbout());
@@ -97,7 +97,7 @@ class MetisResponseDeserializerTest {
     XmlTimeSpanImpl timespan =
         (XmlTimeSpanImpl)
             MetisDereferenceUtils.parseMetisResponse(
-                unmarshaller, uri, loadFile("/metis-deref/timespan_1st_century.xml"));
+                unmarshaller, uri, loadFile("/metis-deref-unittest/timespan_1st_century.xml"));
     assert timespan != null;
 
     assertEquals("http://www.wikidata.org/entity/Q8106", timespan.getAbout());
@@ -115,7 +115,7 @@ class MetisResponseDeserializerTest {
     XmlPlaceImpl place =
         (XmlPlaceImpl)
             MetisDereferenceUtils.parseMetisResponse(
-                unmarshaller, uri, loadFile("/metis-deref/place_paris.xml"));
+                unmarshaller, uri, loadFile("/metis-deref-unittest/place_paris.xml"));
     assert place != null;
 
     assertEquals("https://sws.geonames.org/2988507/", place.getAbout());
@@ -134,7 +134,7 @@ class MetisResponseDeserializerTest {
     XmlOrganizationImpl organization =
         (XmlOrganizationImpl)
             MetisDereferenceUtils.parseMetisResponse(
-                unmarshaller, uri, loadFile("/metis-deref/organization_bnf.xml"));
+                unmarshaller, uri, loadFile("/metis-deref-unittest/organization_bnf.xml"));
     assert organization != null;
     assertEquals("http://www.wikidata.org/entity/Q193563", organization.getAbout());
     assertEquals(72, organization.getAltLabel().size());

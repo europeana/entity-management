@@ -1,10 +1,10 @@
 package eu.europeana.entitymanagement.validation;
 
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_EM_VALIDATOR_FACTORY;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_VALIDATE_FIELDS_EMPTY_PREFLABEL_JSON;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.AGENT_VALIDATE_FIELDS_JSON;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.ORGANIZATION_VALIDATE_FIELDS_JSON;
-import static eu.europeana.entitymanagement.testutils.BaseMvcTestUtils.loadFile;
+import static eu.europeana.entitymanagement.testutils.UnitTestUtils.AGENT_VALIDATE_FIELDS_EMPTY_PREFLABEL_JSON;
+import static eu.europeana.entitymanagement.testutils.UnitTestUtils.AGENT_VALIDATE_FIELDS_JSON;
+import static eu.europeana.entitymanagement.testutils.UnitTestUtils.ORGANIZATION_VALIDATE_FIELDS_JSON;
+import static eu.europeana.entitymanagement.testutils.UnitTestUtils.loadFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;

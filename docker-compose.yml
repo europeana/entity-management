@@ -27,7 +27,7 @@ version: "3.9"
 services:
   db:
     build:
-      context: ./entity-management-web/src/integration-test/resources/mongo-docker
+      context: ./entity-management-tests/src/integration-test/resources/mongo-docker
       dockerfile: Dockerfile
     container_name: mongodb
     ports:
@@ -43,7 +43,7 @@ services:
 
   solr:
     build:
-      context: ./entity-management-web/src/integration-test/resources/solr-docker
+      context: ./entity-management-tests/src/integration-test/resources/solr-docker
       dockerfile: Dockerfile
     container_name: solr
     ports:

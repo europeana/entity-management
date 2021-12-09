@@ -9,7 +9,8 @@
         <module>entity-management-enrichment</module>
     <module>entity-management-solr</module>
      <module>entity-management-zoho</module>
-  </modules>
+      <module>entity-management-tests</module>
+    </modules>
 
     <parent>
         <groupId>eu.europeana</groupId>

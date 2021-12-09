@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+  <metis:results xmlns:dcterms="http://purl.org/dc/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:edm="http://www.europeana.eu/schemas/edm/" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema" xmlns:cc="http://creativecommons.org/ns" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdaGr2="http://rdvocab.info/ElementsGr2/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:wgs84_pos="http://www.w3.org/2003/01/geo/wgs84_pos#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:metis="http://www.europeana.eu/schemas/metis" xmlns:ns13="http://www.w3.org/2006/vcard/ns#">
+    <metis:result>
+      <edm:TimeSpan rdf:about="http://www.wikidata.org/entity/Q8106">
+        <skos:altLabel xml:lang="it">1° secolo</skos:altLabel>
+        <skos:altLabel xml:lang="it">Secolo I</skos:altLabel>
+        <skos:altLabel xml:lang="it">I Secolo</skos:altLabel>
+        <skos:altLabel xml:lang="it">I secolo d.C.</skos:altLabel>
+        <skos:altLabel xml:lang="it">Primo secolo</skos:altLabel>
+        <skos:altLabel xml:lang="it">I sec. d.C.</skos:altLabel>
+        <skos:altLabel xml:lang="it">I Secolo D.C.</skos:altLabel>
+        <skos:altLabel xml:lang="ru">1 век</skos:altLabel>
+        <skos:altLabel xml:lang="en">1st-century</skos:altLabel>
+        <skos:altLabel xml:lang="sv">000-tal</skos:altLabel>
+        <skos:altLabel xml:lang="sv">1:a århundradet</skos:altLabel>
+        <skos:altLabel xml:lang="sv">1:a seklet</skos:altLabel>
+        <skos:altLabel xml:lang="ca">segle I dC</skos:altLabel>
+        <skos:prefLabel xml:lang="nl">1e eeuw</skos:prefLabel>
+        <skos:prefLabel xml:lang="en">1st century</skos:prefLabel>
+        <skos:prefLabel xml:lang="de">1. Jahrhundert</skos:prefLabel>
+        <skos:prefLabel xml:lang="bg">1 век</skos:prefLabel>
+        <skos:prefLabel xml:lang="ca">segle I</skos:prefLabel>
+        <skos:prefLabel xml:lang="cs">1. století</skos:prefLabel>
+        <skos:prefLabel xml:lang="da">1. århundrede</skos:prefLabel>
+        <skos:prefLabel xml:lang="el">1ος αιώνας</skos:prefLabel>
+        <skos:prefLabel xml:lang="es">siglo I</skos:prefLabel>
+        <skos:prefLabel xml:lang="et">1. sajand</skos:prefLabel>
+        <skos:prefLabel xml:lang="fi">Ensimmäinen vuosisata</skos:prefLabel>
+        <skos:prefLabel xml:lang="fr">Ier siècle</skos:prefLabel>
+        <skos:prefLabel xml:lang="ga">1ú haois</skos:prefLabel>
+        <skos:prefLabel xml:lang="hr">1. stoljeće</skos:prefLabel>
+        <skos:prefLabel xml:lang="hu">1. század</skos:prefLabel>
+        <skos:prefLabel xml:lang="it">I secolo</skos:prefLabel>
+        <skos:prefLabel xml:lang="lt">I amžius</skos:prefLabel>
+        <skos:prefLabel xml:lang="lv">1. gadsimts</skos:prefLabel>
+        <skos:prefLabel xml:lang="pl">I wiek</skos:prefLabel>
+        <skos:prefLabel xml:lang="pt">século I</skos:prefLabel>
+        <skos:prefLabel xml:lang="ro">Secolul I</skos:prefLabel>
+        <skos:prefLabel xml:lang="ru">I век</skos:prefLabel>
+        <skos:prefLabel xml:lang="sk">1. storočie</skos:prefLabel>
+        <skos:prefLabel xml:lang="sl">1. stoletje</skos:prefLabel>
+        <skos:prefLabel xml:lang="sv">000-talet</skos:prefLabel>
+        <dcterms:isPartOf rdf:resource="http://www.wikidata.org/entity/Q25868">
+        </dcterms:isPartOf>
+        <owl:sameAs rdf:resource="https://www.freebase.com/m/08bzp"/>
+        <owl:sameAs rdf:resource="https://g.co/kg/m/08bzp"/>
+        <owl:sameAs rdf:resource="http://vocab.getty.edu/aat/300404493"/>
+        <owl:sameAs rdf:resource="http://babelnet.org/rdf/s02820627n"/>
+        <owl:sameAs rdf:resource="http://dbpedia.org/resource/1st_century"/>
+        <edm:begin>0001-01-01T00:00:00Z</edm:begin>
+        <edm:end>0100-12-30T00:00:00Z</edm:end>
+        <edm:isNextInSequence rdf:resource="http://www.wikidata.org/entity/Q25297"/>
+      </edm:TimeSpan>
+    </metis:result>
+  </metis:results>
