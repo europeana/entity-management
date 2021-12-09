@@ -185,8 +185,9 @@ public class EntityUpdateJobConfig {
    * JobParameters cannot be boolean, so the isSynchronous value is converted from its string representation
    */
   private ScheduledTaskItemListener entityUpdateListener(
+      // see JobParameter enum for string values
       @Value("#{jobParameters[updateType]}") String updateType,
-      @Value("#{jobParameters[updateType]}") String isSynchronousString) {
+      @Value("#{jobParameters[isSynchronous]}") String isSynchronousString) {
     return new ScheduledTaskItemListener(
         failedTaskService,
         scheduledTaskService,
@@ -195,8 +196,10 @@ public class EntityUpdateJobConfig {
   }
 
   /** Creates a StepExecutionListener that's called before / after the step runs */
-  private StepExecutionListener stepExecutionListener(ScheduledTaskType updateType) {
-    return new EntityUpdateStepListener(scheduledTaskService, updateType, maxFailedTaskRetries);
+  private StepExecutionListener stepExecutionListener(
+      ScheduledTaskType updateType, boolean isSynchronous) {
+    return new EntityUpdateStepListener(
+        scheduledTaskService, updateType, isSynchronous, maxFailedTaskRetries);
   }
 
   /**
@@ -269,19 +272,14 @@ public class EntityUpdateJobConfig {
         throw new IllegalStateException("No processor configured for updateType " + updateType);
     }
 
-    step.writer(compositeEntityInsertionWriter())
+    return step.writer(compositeEntityInsertionWriter())
         .listener((ItemProcessListener<? super EntityRecord, ? super EntityRecord>) itemListener)
         .faultTolerant()
         .skipPolicy(noopSkipPolicy)
         .taskExecutor(executor)
-        .throttleLimit(updatesThrottleLimit);
-
-    // This listener cleans up ScheduledTasks. Not required for synchronous updates
-    if (!isSynchronous) {
-      step.listener(stepExecutionListener(updateType));
-    }
-
-    return step.build();
+        .throttleLimit(updatesThrottleLimit)
+        .listener(stepExecutionListener(updateType, isSynchronous))
+        .build();
   }
 
   private Step removeEntity(
@@ -314,7 +312,8 @@ public class EntityUpdateJobConfig {
         .skipPolicy(noopSkipPolicy)
         .taskExecutor(executor)
         .throttleLimit(removalsThrottleLimit)
-        .listener(stepExecutionListener(removalType))
+        // removal steps are always async
+        .listener(stepExecutionListener(removalType, false))
         .build();
   }
 

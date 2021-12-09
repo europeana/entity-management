@@ -18,13 +18,16 @@ public class EntityUpdateStepListener implements StepExecutionListener {
   private final ScheduledTaskType updateType;
 
   private final int maxFailedTaskRetries;
+  private final boolean isSynchronous;
 
   public EntityUpdateStepListener(
       ScheduledTaskService scheduledTaskService,
       ScheduledTaskType updateType,
+      boolean isSynchronous,
       int maxFailedTaskRetries) {
     this.scheduledTaskService = scheduledTaskService;
     this.updateType = updateType;
+    this.isSynchronous = isSynchronous;
 
     this.maxFailedTaskRetries = maxFailedTaskRetries;
   }
@@ -34,13 +37,21 @@ public class EntityUpdateStepListener implements StepExecutionListener {
    */
   @Override
   public void beforeStep(@NonNull StepExecution stepExecution) {
-    logger.debug("Cleaning up processed tasks before step execution. updateType={}", updateType);
-    // remove processed tasks here, in case application restarted before step finished execution
-    scheduledTaskService.removeProcessedTasks(updateType);
+    // for now, we don't need any cleanup for synchronous steps
+    if (!isSynchronous) {
+      logger.debug("Cleaning up processed tasks before step execution. updateType={}", updateType);
+      // remove processed tasks here, in case application restarted before step finished execution
+      scheduledTaskService.removeProcessedTasks(updateType);
+    }
   }
 
   @Override
   public ExitStatus afterStep(@NonNull StepExecution stepExecution) {
+    // no cleanup needed for synchronous steps
+    if (isSynchronous) {
+      return ExitStatus.NOOP;
+    }
+
     /*
      * By default, we always retry ScheduledTasks with failures (hasBeenProcessed=false)
      *
