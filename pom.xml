@@ -60,6 +60,8 @@
 		    <jaxb.version>2.3.3</jaxb.version>
 		    <saxon-he.version>10.5</saxon-he.version>
         <git-code-format.version>3.1</git-code-format.version>
+        <surefire.version>3.0.0-M5</surefire.version>
+        <failsafe.version>3.0.0-M5</failsafe.version>
     </properties>
 
     <dependencyManagement>
@@ -115,7 +117,7 @@
               <plugin>
                   <groupId>org.apache.maven.plugins</groupId>
                   <artifactId>maven-failsafe-plugin</artifactId>
-                  <version>3.0.0-M5</version>
+                  <version>${failsafe.version}</version>
                   <executions>
                       <execution>
                           <goals>
@@ -124,6 +126,11 @@
                           </goals>
                       </execution>
                   </executions>
+                <configuration>
+                  <!-- Fixes Integration test not finding beans. May be removed with 3.0.0-M6 is available
+                    See: https://stackoverflow.com/a/65806777/14530159 -->
+                  <useModulePath>false</useModulePath>
+                </configuration>
               </plugin>
               <plugin>
                   <groupId>org.codehaus.mojo</groupId>
@@ -230,7 +237,7 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
             <!-- JUnit 5 requires Surefire version 2.22.0 or higher -->
-            <version>3.0.0-M5</version>
+            <version>${surefire.version}</version>
           </plugin>
 				</plugins>
     	</pluginManagement>
