@@ -1,13 +1,5 @@
 name: Build, Run Tests and Sonar Analysis
-on:
-  # Trigger code analysis on push or pull request,
-  # but only for the develop branch
-  push:
-    branches:
-      - develop
-  pull_request:
-    branches:
-      - develop
+on: push
 
 jobs:
   build:
