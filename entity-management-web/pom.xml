@@ -13,6 +13,10 @@
 	<description>The Web Module of the Entity Management API</description>
 	<packaging>jar</packaging>
 
+	<properties>
+		<sonar.coverage.jacoco.xmlReportPaths>${basedir}/../${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -204,6 +208,7 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
+				<version>${spring-boot.version}</version>
         <executions>
           <execution>
             <goals>

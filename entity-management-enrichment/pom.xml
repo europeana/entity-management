@@ -11,6 +11,10 @@
   
 
   <artifactId>entity-management-enrichment</artifactId>
+  <properties>
+    <sonar.coverage.jacoco.xmlReportPaths>${basedir}/../${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
+  </properties>
+
   <dependencies>
 
     <dependency>

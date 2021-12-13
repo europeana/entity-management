@@ -11,6 +11,10 @@
 	<artifactId>entity-management-definitions</artifactId>
 	<packaging>jar</packaging>
 
+	<properties>
+		<sonar.coverage.jacoco.xmlReportPaths>${basedir}/../${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
+	</properties>
+
 	<dependencies>
 		<dependency>
 		    <groupId>com.fasterxml.jackson.dataformat</groupId>
