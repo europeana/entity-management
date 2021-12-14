@@ -1,5 +1,7 @@
 # Europeana Entity Management API
 
+[![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=europeana_entity-management)](https://sonarcloud.io/summary/new_code?id=europeana_entity-management)
+
 Spring-Boot2 web application for curating and harvesting entity data from external sources.
 
 ## Prerequisites
