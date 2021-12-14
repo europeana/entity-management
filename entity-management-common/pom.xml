@@ -4,13 +4,18 @@
   <parent>
     <artifactId>entity-management</artifactId>
     <groupId>eu.europeana.api</groupId>
-    <version>0.0.1-SNAPSHOT</version>
+		<version>${revision}</version>
   </parent>
 
   <artifactId>entity-management-common</artifactId>
   
   <name>entity-management-common</name>
   <description>Common functionality to be reused by individual Entity Management Modules</description>
+
+	<properties>
+		<sonar.coverage.jacoco.xmlReportPaths>${basedir}/../${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
+	</properties>
+
   <dependencies>
    <dependency>
 		<groupId>org.springframework</groupId>

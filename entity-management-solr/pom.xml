@@ -4,21 +4,23 @@
   <parent>
     <artifactId>entity-management</artifactId>
     <groupId>eu.europeana.api</groupId>
-    <version>0.0.1-SNAPSHOT</version>
+		<version>${revision}</version>
   </parent>
 
   <artifactId>entity-management-solr</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
 
   <name>entity-management-solr</name>
   <description>A simple entity-management-solr.</description>
 
+	<properties>
+		<sonar.coverage.jacoco.xmlReportPaths>${basedir}/../${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
+	</properties>
+
   <dependencies>
-  
   	<dependency>
 		<groupId>eu.europeana.api</groupId>
 		<artifactId>entity-management-definitions</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>${project.version}</version>
 	</dependency>
 	
 	 <dependency>

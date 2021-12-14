@@ -9,7 +9,8 @@
         <module>entity-management-enrichment</module>
     <module>entity-management-solr</module>
      <module>entity-management-zoho</module>
-  </modules>
+      <module>entity-management-tests</module>
+    </modules>
 
     <parent>
         <groupId>eu.europeana</groupId>
@@ -33,7 +34,7 @@
 
     <groupId>eu.europeana.api</groupId>
     <artifactId>entity-management</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>${revision}</version>
     <packaging>pom</packaging>
 
     <name>Entity Management</name>
@@ -43,6 +44,11 @@
         <java.version>11</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
+        <revision>0.0.1-SNAPSHOT</revision>
+        <aggregate.report.xml>entity-management-tests/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.xml>
+        <sonar.coverage.jacoco.xmlReportPaths>${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.organization>europeana</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <api.commons.version>0.3.11</api.commons.version>
         <springbatch.mongo.version>1.0.3</springbatch.mongo.version>
         <corelib.version>2.14.1-SNAPSHOT</corelib.version>
@@ -59,6 +65,11 @@
 		    <jaxb.version>2.3.3</jaxb.version>
 		    <saxon-he.version>10.5</saxon-he.version>
         <git-code-format.version>3.1</git-code-format.version>
+        <surefire.version>3.0.0-M5</surefire.version>
+        <failsafe.version>3.0.0-M5</failsafe.version>
+        <jacoco-plugin.version>0.8.7</jacoco-plugin.version>
+        <sonar-plugin.version>3.7.0.1746</sonar-plugin.version>
+
     </properties>
 
     <dependencyManagement>
@@ -114,7 +125,7 @@
               <plugin>
                   <groupId>org.apache.maven.plugins</groupId>
                   <artifactId>maven-failsafe-plugin</artifactId>
-                  <version>3.0.0-M5</version>
+                  <version>${failsafe.version}</version>
                   <executions>
                       <execution>
                           <goals>
@@ -123,6 +134,11 @@
                           </goals>
                       </execution>
                   </executions>
+                <configuration>
+                  <!-- Fixes Integration test not finding beans. May be removed with 3.0.0-M6 is available
+                    See: https://stackoverflow.com/a/65806777/14530159 -->
+                  <useModulePath>false</useModulePath>
+                </configuration>
               </plugin>
               <plugin>
                   <groupId>org.codehaus.mojo</groupId>
@@ -229,9 +245,42 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
             <!-- JUnit 5 requires Surefire version 2.22.0 or higher -->
-            <version>3.0.0-M5</version>
+            <version>${surefire.version}</version>
+          </plugin>
+          <plugin>
+            <groupId>org.sonarsource.scanner.maven</groupId>
+            <artifactId>sonar-maven-plugin</artifactId>
+            <version>${sonar-plugin.version}</version>
+          </plugin>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>${jacoco-plugin.version}</version>
           </plugin>
 				</plugins>
     	</pluginManagement>
   </build>
+
+  <profiles>
+    <profile>
+      <id>coverage</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>${jacoco-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>prepare-agent</id>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

@@ -5,13 +5,17 @@
 	<parent>
 		<artifactId>entity-management</artifactId>
 		<groupId>eu.europeana.api</groupId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>${revision}</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>entity-management-web</artifactId>
 	<description>The Web Module of the Entity Management API</description>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
+
+	<properties>
+		<sonar.coverage.jacoco.xmlReportPaths>${basedir}/../${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
+	</properties>
 
 	<dependencies>
 		<dependency>
@@ -98,19 +102,19 @@
 		<dependency>
 			<groupId>eu.europeana.api</groupId>
 			<artifactId>entity-management-definitions</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>eu.europeana.api</groupId>
 			<artifactId>entity-management-common</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>eu.europeana.api</groupId>
 			<artifactId>entity-management-mongo</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
@@ -122,19 +126,19 @@
 		<dependency>
 			<groupId>eu.europeana.api</groupId>
 			<artifactId>entity-management-enrichment</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>eu.europeana.api</groupId>
 			<artifactId>entity-management-solr</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>eu.europeana.api</groupId>
 			<artifactId>entity-management-zoho</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
@@ -174,17 +178,6 @@
 			</exclusions>
 		</dependency>
 
-		<!--testcontainers for integration testing-->
-		<dependency>
-			<groupId>org.testcontainers</groupId>
-			<artifactId>testcontainers</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.testcontainers</groupId>
-			<artifactId>junit-jupiter</artifactId>
-			<scope>test</scope>
-		</dependency>
 
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
@@ -192,17 +185,6 @@
 			<scope>test</scope>
 		</dependency>
 
-
-		<dependency>
-			<groupId>com.squareup.okhttp3</groupId>
-			<artifactId>okhttp</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.squareup.okhttp3</groupId>
-			<artifactId>mockwebserver</artifactId>
-			<scope>test</scope>
-		</dependency>
 		<!-- Fixes DNS resolution issues on Apple Silicon  -->
 		<dependency>
 			<groupId>io.netty</groupId>
@@ -210,7 +192,7 @@
 			<version>4.1.69.Final</version>
 			<classifier>osx-aarch_64</classifier>
 		</dependency>
-		
+
 		<!--	Java 8 Date/time	-->
 		<dependency>
 		    <groupId>com.fasterxml.jackson.datatype</groupId>
@@ -223,19 +205,22 @@
 		<finalName>${project.artifactId}</finalName>
 
 		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
 				<version>${spring-boot.version}</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>repackage</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
+        <executions>
+          <execution>
+            <goals>
+              <goal>repackage</goal>
+            </goals>
+            <configuration>
+              <classifier>executable</classifier>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
 	</build>
 
 </project>
