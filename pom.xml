@@ -34,7 +34,7 @@
 
     <groupId>eu.europeana.api</groupId>
     <artifactId>entity-management</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>${revision}</version>
     <packaging>pom</packaging>
 
     <name>Entity Management</name>
@@ -44,6 +44,7 @@
         <java.version>11</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
+        <revision>0.0.1-SNAPSHOT</revision>
         <aggregate.report.xml>entity-management-tests/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.xml>
         <sonar.coverage.jacoco.xmlReportPaths>${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
         <sonar.organization>europeana</sonar.organization>
@@ -68,6 +69,7 @@
         <failsafe.version>3.0.0-M5</failsafe.version>
         <jacoco-plugin.version>0.8.7</jacoco-plugin.version>
         <sonar-plugin.version>3.7.0.1746</sonar-plugin.version>
+
     </properties>
 
     <dependencyManagement>

@@ -6,7 +6,7 @@
   <parent>
     <artifactId>entity-management</artifactId>
     <groupId>eu.europeana.api</groupId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>${revision}</version>
   </parent>
   
 
@@ -25,13 +25,13 @@
     <dependency>
       <groupId>eu.europeana.api</groupId>
       <artifactId>entity-management-definitions</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>eu.europeana.api</groupId>
       <artifactId>entity-management-mongo</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
