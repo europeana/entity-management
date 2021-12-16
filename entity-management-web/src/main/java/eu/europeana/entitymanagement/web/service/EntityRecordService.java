@@ -43,7 +43,6 @@ import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.utils.UriValidator;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
-import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 import java.lang.reflect.Field;
@@ -191,10 +190,10 @@ public class EntityRecordService {
   }
 
   /**
-   * Creates an {@link EntityRecord} from an {@link EntityPreview}, which is then persisted. Note :
-   * This method is used for creating Entity for Migration requests
+   * Creates an {@link EntityRecord} from an {@link Entity}, which is then persisted. Note : This
+   * method is used for creating Entity for Migration requests
    *
-   * @param entityCreationRequest
+   * @param europeanaProxyEntity
    * @param type type of entity
    * @param identifier id of entity
    * @return Saved Entity record
@@ -203,70 +202,63 @@ public class EntityRecordService {
    * @throws HttpBadRequestException
    */
   public EntityRecord createEntityFromMigrationRequest(
-      EntityPreview entityCreationRequest, String type, String identifier)
+      Entity europeanaProxyEntity, String type, String identifier)
       throws EntityCreationException, EntityAlreadyExistsException, HttpBadRequestException,
           HttpUnprocessableException {
+
+    String externalProxyId = europeanaProxyEntity.getEntityId();
+
     // Fail quick if no datasource is configured
-    DataSource externalDatasource =
-        datasources.verifyDataSource(entityCreationRequest.getId(), true);
+    DataSource externalDatasource = datasources.verifyDataSource(externalProxyId, true);
 
     Date timestamp = new Date();
-    Entity entity = EntityObjectFactory.createProxyEntityObject(type);
-    EntityRecord entityRecord = new EntityRecord();
+
+    Entity entity = EntityObjectFactory.createConsolidatedEntityObject(type);
     String entityId = generateEntityId(entity.getType(), identifier);
     // check if entity already exists
     // this is avoid MongoDb exception for duplicate key
     checkIfEntityAlreadyExists(entityId);
-
-    entityRecord.setEntityId(entityId);
     entity.setEntityId(entityId);
     /*
      * sameAs will be replaced during consolidation; however we set this here to prevent duplicate
      * registrations if consolidation fails
      */
-    entity.setSameReferenceLinks(new ArrayList<>(List.of(entityCreationRequest.getId())));
+    entity.setSameReferenceLinks(new ArrayList<>(List.of(externalProxyId)));
+    EntityRecord entityRecord = new EntityRecord();
+    entityRecord.setEntityId(entityId);
     entityRecord.setEntity(entity);
 
-    Entity europeanaProxyMetadata = EntityObjectFactory.createProxyEntityObject(type);
-    // copy metadata from request into entity
-    europeanaProxyMetadata.setEntityId(entityId);
-    copyPreviewMetadata(europeanaProxyMetadata, entityCreationRequest);
-    setEuropeanaMetadata(europeanaProxyMetadata, entityId, entityRecord, timestamp);
+    europeanaProxyEntity.setEntityId(entityId);
+    setEuropeanaMetadata(europeanaProxyEntity, entityId, entityRecord, timestamp);
 
     // create metis Entity
     Entity metisEntity = EntityObjectFactory.createProxyEntityObject(type);
 
     setExternalProxy(
-        metisEntity,
-        entityCreationRequest.getId(),
-        entityId,
-        externalDatasource,
-        entityRecord,
-        timestamp,
-        1);
+        metisEntity, externalProxyId, entityId, externalDatasource, entityRecord, timestamp, 1);
 
     setEntityAggregation(entityRecord, entityId, timestamp);
     return entityRecordRepository.save(entityRecord);
   }
 
   /**
-   * Creates an {@link EntityRecord} from an {@link EntityPreview}, which is then persisted.
+   * Creates an {@link EntityRecord} from an {@link Entity}, which is then persisted.
    *
-   * @param entityCreationRequest de-referenced XML response instance from Metis
+   * @param europeanaProxyEntity Entity for the europeana proxy
    * @param datasourceResponse Entity obtained from de-referencing
    * @param dataSource the data source identified for the given entity id
    * @return Saved Entity record
    * @throws EntityCreationException if an error occurs
    */
   public EntityRecord createEntityFromRequest(
-      EntityPreview entityCreationRequest, Entity datasourceResponse, DataSource dataSource)
+      Entity europeanaProxyEntity, Entity datasourceResponse, DataSource dataSource)
       throws EntityCreationException {
+
     // Fail quick if no datasource is configured
-    String externalProxyId = entityCreationRequest.getId();
+    String externalProxyId = europeanaProxyEntity.getEntityId();
 
     Date timestamp = new Date();
-    Entity entity =
-        EntityObjectFactory.createConsolidatedEntityObject(datasourceResponse.getType());
+    Entity entity = EntityObjectFactory.createConsolidatedEntityObject(europeanaProxyEntity);
 
     boolean isZohoOrg = ZohoUtils.isZohoOrganization(externalProxyId, datasourceResponse.getType());
     String entityId = generateEntityId(datasourceResponse, isZohoOrg);
@@ -283,22 +275,13 @@ public class EntityRecordService {
     entity.setSameReferenceLinks(sameAs);
     entityRecord.setEntity(entity);
 
-    Entity europeanaProxyMetadata =
-        EntityObjectFactory.createProxyEntityObject(datasourceResponse.getType());
-    // copy metadata from request into entity
-    europeanaProxyMetadata.setEntityId(entityId);
-    copyPreviewMetadata(europeanaProxyMetadata, entityCreationRequest);
-    setEuropeanaMetadata(europeanaProxyMetadata, entityId, entityRecord, timestamp);
+    // copy the newly generated europeana id
+    europeanaProxyEntity.setEntityId(entityId);
+    setEuropeanaMetadata(europeanaProxyEntity, entityId, entityRecord, timestamp);
 
     // create default external proxy
     setExternalProxy(
-        datasourceResponse,
-        entityCreationRequest.getId(),
-        entityId,
-        dataSource,
-        entityRecord,
-        timestamp,
-        1);
+        datasourceResponse, externalProxyId, entityId, dataSource, entityRecord, timestamp, 1);
 
     setEntityAggregation(entityRecord, entityId, timestamp);
     // for Zoho organizations, create second proxy for Wikidata metadata
@@ -374,19 +357,6 @@ public class EntityRecordService {
     if (entityRecordOptional.isPresent()) {
       throw new EntityAlreadyExistsException(entityId);
     }
-  }
-
-  /**
-   * Copies metadata provided during Entity creation, into the created Entity
-   *
-   * @param entity entity
-   * @param entityCreationRequest entity creation request
-   */
-  private void copyPreviewMetadata(Entity entity, EntityPreview entityCreationRequest) {
-    entity.setPrefLabel(entityCreationRequest.getPrefLabel());
-    entity.setAltLabel(entityCreationRequest.getAltLabel());
-    entity.setDepiction(entityCreationRequest.getDepiction());
-    entity.setIsShownBy(entityCreationRequest.getIsShownBy());
   }
 
   /**

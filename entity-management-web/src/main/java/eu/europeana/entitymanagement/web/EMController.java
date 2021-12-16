@@ -33,7 +33,6 @@ import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
-import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import io.swagger.annotations.ApiOperation;
@@ -447,13 +446,13 @@ public class EMController extends BaseRest {
       value = "/",
       produces = {MediaType.APPLICATION_JSON_VALUE, HttpHeaders.CONTENT_TYPE_JSONLD})
   public ResponseEntity<String> registerEntity(
-      @Valid @RequestBody EntityPreview entityCreationRequest, HttpServletRequest request)
+      @Valid @RequestBody Entity europeanaProxyEntity, HttpServletRequest request)
       throws Exception {
 
     if (emConfig.isAuthEnabled()) {
       verifyWriteAccess(Operations.CREATE, request);
     }
-    String creationRequestId = entityCreationRequest.getId();
+    String creationRequestId = europeanaProxyEntity.getEntityId();
     logger.info("Registering new entity: externalId={}", creationRequestId);
 
     // check if id is already being used, if so return a 301
@@ -465,10 +464,10 @@ public class EMController extends BaseRest {
       return response;
     }
 
-    DataSource dataSource = datasources.verifyDataSource(entityCreationRequest.getId(), false);
+    DataSource dataSource = datasources.verifyDataSource(creationRequestId, false);
 
     // in case of Organization it must be the zoho Organization
-    String creationRequestType = entityCreationRequest.getType();
+    String creationRequestType = europeanaProxyEntity.getType();
     if (EntityTypes.Organization.getEntityType().equals(creationRequestType)
         && !creationRequestId.contains(DataSource.ZOHO_ID)) {
       throw new HttpBadRequestException(
@@ -490,7 +489,7 @@ public class EMController extends BaseRest {
 
     EntityRecord savedEntityRecord =
         entityRecordService.createEntityFromRequest(
-            entityCreationRequest, datasourceResponse, dataSource);
+            europeanaProxyEntity, datasourceResponse, dataSource);
     logger.info(
         "Created Entity record for externalId={}; entityId={}",
         creationRequestId,

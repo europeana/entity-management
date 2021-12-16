@@ -177,7 +177,7 @@ public class EntityAdminControllerIT extends BaseWebControllerTest {
 
     String entityId = "http://data.europeana.eu/concept/" + STATIC_ENTITY_IDENTIFIER;
 
-    String requestBody = "{\"id\" : \"" + STATIC_ENTITY_EXTERNAL_ID + "\"}";
+    String requestBody = "{\"type\" : \"Concept\", \"id\" : \"" + STATIC_ENTITY_EXTERNAL_ID + "\"}";
     ResultActions results =
         mockMvc
             .perform(
