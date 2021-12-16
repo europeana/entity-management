@@ -27,6 +27,7 @@ import eu.europeana.entitymanagement.exception.DatasourceNotKnownException;
 import eu.europeana.entitymanagement.exception.EntityMismatchException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
+import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatorGroup;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
@@ -42,8 +43,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -217,6 +220,9 @@ public class EMController extends BaseRest {
     if (emConfig.isAuthEnabled()) {
       verifyWriteAccess(Operations.UPDATE, request);
     }
+    
+    validateBodyEntity(updateRequestEntity);
+    
     EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
 
     // TODO: Re-enable authentication
@@ -452,6 +458,9 @@ public class EMController extends BaseRest {
     if (emConfig.isAuthEnabled()) {
       verifyWriteAccess(Operations.CREATE, request);
     }
+    
+    validateBodyEntity(europeanaProxyEntity);
+
     String creationRequestId = europeanaProxyEntity.getEntityId();
     logger.info("Registering new entity: externalId={}", creationRequestId);
 
@@ -708,5 +717,21 @@ public class EMController extends BaseRest {
   private String getDatabaseIdentifier(String entityId) {
     // entity id is "http://data.europeana.eu/{type}/{identifier}"
     return entityId.substring(entityId.lastIndexOf("/") + 1);
+  }
+  
+  private void validateBodyEntity (Entity entity) throws HttpBadRequestException {
+	Set<ConstraintViolation<Entity>> violations =
+	    emValidatorFactory
+	        .getValidator()
+	        .validate(entity, EntityFieldsCompleteValidatorGroup.class);
+	if (!violations.isEmpty()) {
+	  String responseInvalidRequestEntity = "";
+	  for (ConstraintViolation<Entity> violation : violations) {
+	    responseInvalidRequestEntity += " "+violation.getMessage();
+	  }
+	  throw new HttpBadRequestException(
+	      String.format(
+	          "The request entity has an invalid format for one or more fields. %s", responseInvalidRequestEntity));
+	}
   }
 }

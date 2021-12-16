@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ValidatorFactory;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,6 +59,8 @@ public abstract class BaseRest extends BaseRestController {
   @Autowired private RequestPathMethodService requestMethodService;
 
   @Autowired protected FailedTaskService failedTaskService;
+
+  @Autowired protected ValidatorFactory emValidatorFactory;
 
   protected Logger logger = LogManager.getLogger(getClass());
 
