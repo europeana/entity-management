@@ -268,7 +268,7 @@ public class EntityFieldsDatatypeValidation {
     // validate language codes
     boolean returnValue = validateLanguageCodes(context, fieldName, fieldValueMap.keySet());
 
-    boolean definitionIsList = EntityFieldsTypes.isList(fieldName);
+    boolean definitionIsList = EntityFieldsTypes.isListOrMap(fieldName);
 
     // validate values
     boolean localReturnValue;
@@ -286,7 +286,7 @@ public class EntityFieldsDatatypeValidation {
                   + fieldName
                   + " cardinality: "
                   + EntityFieldsTypes.getFieldCardinality(fieldName)
-                  + " and must not be represented as list");
+                  + " and must be represented as list");
           localReturnValue = false;
         } else {
           List<String> values = (List<String>) fieldValueMapElem.getValue();
@@ -346,8 +346,8 @@ public class EntityFieldsDatatypeValidation {
   private boolean validateLanguageCodes(
       ConstraintValidatorContext context, String fieldName, Set<String> keySet) {
 
-    //		if (emLanguageCodes==null) return true;
-    //		if (emLanguageCodes.getLanguages()==null) return true;
+    // if (emLanguageCodes==null) return true;
+    // if (emLanguageCodes.getLanguages()==null) return true;
     boolean isValid = true;
     for (String key : keySet) {
       if (!emLanguageCodes.isValidLanguageCode(key)
@@ -375,25 +375,19 @@ public class EntityFieldsDatatypeValidation {
 
   public boolean valildateMandatoryField(
       ConstraintValidatorContext context, String fieldName, Object fieldValue) {
-    if (fieldValue == null) {
-      if (EntityFieldsTypes.isMandatory(fieldName)) {
+    if (EntityFieldsTypes.isMandatory(fieldName)) {
+      if (fieldValue == null) {
         addConstraint(context, "The mandatory field: " + fieldName + " cannot be NULL.");
         return false;
-      }
-    }
-    // validating the minimal content for the mandatory fields
-    int minContentCount = EntityFieldsTypes.getMinContentCount(fieldName);
-    if (minContentCount > 0) {
-      if ((List.class.isAssignableFrom(fieldValue.getClass())
-              && ((List<?>) fieldValue).size() < minContentCount)
+      } else if ((List.class.isAssignableFrom(fieldValue.getClass())
+              && ((List<?>) fieldValue).size() < 1)
           || (Map.class.isAssignableFrom(fieldValue.getClass())
-              && ((Map<?, ?>) fieldValue).size() < minContentCount)) {
-        addConstraint(context, fieldName + " must have at least " + minContentCount + " values");
+              && ((Map<?, ?>) fieldValue).size() < 1)) {
+        addConstraint(
+            context, "The mandatory field: " + fieldName + " must have at least 1 value.");
         return false;
-      }
-    }
-
-    return true;
+      } else return true;
+    } else return true;
   }
 
   public boolean validateDatatypeCompliance(

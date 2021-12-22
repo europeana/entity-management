@@ -22,8 +22,8 @@ public enum EntityFieldsTypes {
       EntityFieldsTypes.FIELD_TYPE_WEB_RESOURCE, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
   isShownBy(
       EntityFieldsTypes.FIELD_TYPE_WEB_RESOURCE, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
-  // there must be at least 1 prefLabel
-  prefLabel(EntityFieldsTypes.FIELD_TYPE_TEXT, true, EntityFieldsTypes.FIELD_CARDINALITY_0_1, 1),
+  // the cardinality of the multilingual fields, means the number of values for one language
+  prefLabel(EntityFieldsTypes.FIELD_TYPE_TEXT, true, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
   altLabel(EntityFieldsTypes.FIELD_TYPE_TEXT, true, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
   hiddenLabel(
       EntityFieldsTypes.FIELD_TYPE_TEXT, true, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
@@ -54,8 +54,9 @@ public enum EntityFieldsTypes {
       EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
   gender(EntityFieldsTypes.FIELD_TYPE_TEXT, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
   /*
-   * TODO: change the professionOrOccupation field to be multilingual if the type of the field in the class changes to Map.
-   * According to the specifications this field is multilingual but for now we keep it not.
+   * TODO: change the professionOrOccupation field to be multilingual if the type of the field in
+   * the class changes to Map. According to the specifications this field is multilingual but for
+   * now we keep it not.
    */
   professionOrOccupation(
       EntityFieldsTypes.FIELD_TYPE_TEXT_OR_URI,
@@ -152,20 +153,12 @@ public enum EntityFieldsTypes {
   private final boolean fieldIsmultilingual;
   private final String fieldCardinality;
 
-  private final int minContentCount;
-
   private EntityFieldsTypes(
       String fieldType, boolean fieldIsmultilingual, String fieldCardinality) {
-    this(fieldType, fieldIsmultilingual, fieldCardinality, 0);
-  }
-
-  private EntityFieldsTypes(
-      String fieldType, boolean fieldIsmultilingual, String fieldCardinality, int minContentCount) {
 
     this.fieldType = fieldType;
     this.fieldIsmultilingual = fieldIsmultilingual;
     this.fieldCardinality = fieldCardinality;
-    this.minContentCount = minContentCount;
   }
 
   public String getFieldType() {
@@ -223,7 +216,7 @@ public enum EntityFieldsTypes {
     return null;
   }
 
-  public static boolean isList(String fieldName) {
+  public static boolean isListOrMap(String fieldName) {
     try {
       String cardinality = valueOf(fieldName).getFieldCardinality();
       return FIELD_CARDINALITY_0_INFINITE.equals(cardinality)
@@ -251,10 +244,6 @@ public enum EntityFieldsTypes {
     } catch (IllegalArgumentException e) {
       throw new EntityFieldAccessException("Unknown field: " + fieldName, e);
     }
-  }
-
-  public static int getMinContentCount(String fieldName) {
-    return valueOf(fieldName).minContentCount;
   }
 
   boolean getFieldIsmultilingual() {
