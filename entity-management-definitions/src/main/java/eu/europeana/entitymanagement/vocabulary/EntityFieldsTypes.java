@@ -193,9 +193,9 @@ public enum EntityFieldsTypes {
     return hasTypeDefinition(fieldName) && valueOf(fieldName).getFieldIsmultilingual();
   }
 
-  //checks if the object type is equal to one of the fields types, meaning that it is an object. 
+  // checks if the object type is equal to one of the fields types, meaning that it is an object.
   public static boolean hasClassTypeOfField(Class<?> objectClass) {
-	if(objectClass==null) return false;
+    if (objectClass == null) return false;
     for (EntityFieldsTypes type : EntityFieldsTypes.values()) {
       if (GeneralUtils.getSimpleClassName(objectClass.toString()).equals(type.getFieldType())) {
         return true;

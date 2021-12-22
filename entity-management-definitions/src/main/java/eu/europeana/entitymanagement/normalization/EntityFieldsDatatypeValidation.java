@@ -4,6 +4,9 @@ import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_T
 import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_EMAIL;
 import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_URI;
 
+import eu.europeana.entitymanagement.common.config.LanguageCodes;
+import eu.europeana.entitymanagement.utils.UriValidator;
+import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -11,14 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.validation.ConstraintValidatorContext;
-
 import org.apache.commons.validator.routines.EmailValidator;
-
-import eu.europeana.entitymanagement.common.config.LanguageCodes;
-import eu.europeana.entitymanagement.utils.UriValidator;
-import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 
 public class EntityFieldsDatatypeValidation {
 
@@ -362,7 +359,7 @@ public class EntityFieldsDatatypeValidation {
                 + " contains the language code: "
                 + key
                 + " that does not belong to the Europena languge codes.");
-        if(isValid) isValid = false;
+        if (isValid) isValid = false;
       }
     }
     return isValid;
@@ -398,39 +395,34 @@ public class EntityFieldsDatatypeValidation {
 
     return true;
   }
-  
-  public boolean validateDatatypeCompliance (ConstraintValidatorContext context, Field field, Object fieldValue) {
-	  
-	  if (fieldValue == null) {
-          return true;
-      }
-	  
-	  Class<?> fieldJavaType = field.getType();
-      String fieldName = field.getName();
-      String fieldInternalType = EntityFieldsTypes.valueOf(fieldName).getFieldType();
-      
-      /*
-       * validating the fields' type compliance
-       */
-      if (EntityFieldsTypes.isMultilingual(fieldName)) {
-        return validateMultilingualField(
-                context, fieldName, fieldInternalType, fieldValue);
-      } else if (FIELD_TYPE_URI.equals(EntityFieldsTypes.getFieldType(fieldName))) {
-        return validateURIField(
-                context, fieldName, fieldJavaType, fieldValue);
-      } else if (FIELD_TYPE_DATE.equals(EntityFieldsTypes.getFieldType(fieldName))) {
-        return validateDateField(
-                context, fieldName, fieldJavaType, fieldValue);
-      } else if (FIELD_TYPE_EMAIL.equals(EntityFieldsTypes.getFieldType(fieldName))) {
-        return validateEmailField(
-                context, fieldName, fieldJavaType, fieldValue);
-      } else if (fieldJavaType.isAssignableFrom(String.class)
-          && !fieldValue.toString().isBlank()) {
-        // Text or Keyword, not multilingual
-        return validateStringValue(
-                context, fieldName, fieldInternalType, (String) fieldValue, null);
-      }
-      
+
+  public boolean validateDatatypeCompliance(
+      ConstraintValidatorContext context, Field field, Object fieldValue) {
+
+    if (fieldValue == null) {
       return true;
+    }
+
+    Class<?> fieldJavaType = field.getType();
+    String fieldName = field.getName();
+    String fieldInternalType = EntityFieldsTypes.valueOf(fieldName).getFieldType();
+
+    /*
+     * validating the fields' type compliance
+     */
+    if (EntityFieldsTypes.isMultilingual(fieldName)) {
+      return validateMultilingualField(context, fieldName, fieldInternalType, fieldValue);
+    } else if (FIELD_TYPE_URI.equals(EntityFieldsTypes.getFieldType(fieldName))) {
+      return validateURIField(context, fieldName, fieldJavaType, fieldValue);
+    } else if (FIELD_TYPE_DATE.equals(EntityFieldsTypes.getFieldType(fieldName))) {
+      return validateDateField(context, fieldName, fieldJavaType, fieldValue);
+    } else if (FIELD_TYPE_EMAIL.equals(EntityFieldsTypes.getFieldType(fieldName))) {
+      return validateEmailField(context, fieldName, fieldJavaType, fieldValue);
+    } else if (fieldJavaType.isAssignableFrom(String.class) && !fieldValue.toString().isBlank()) {
+      // Text or Keyword, not multilingual
+      return validateStringValue(context, fieldName, fieldInternalType, (String) fieldValue, null);
+    }
+
+    return true;
   }
 }
