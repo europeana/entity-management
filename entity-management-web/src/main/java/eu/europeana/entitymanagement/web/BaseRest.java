@@ -11,6 +11,9 @@ import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EtagMismatchException;
+import eu.europeana.entitymanagement.exception.HttpBadRequestException;
+import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
+import eu.europeana.entitymanagement.normalization.EntityFieldsEuropeanaProxyValidationGroup;
 import eu.europeana.entitymanagement.schemaorg.model.SchemaOrgEntity;
 import eu.europeana.entitymanagement.serialization.EntityXmlSerializer;
 import eu.europeana.entitymanagement.serialization.JsonLdSerializer;
@@ -33,8 +36,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolation;
 import javax.validation.ValidatorFactory;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.LogManager;
@@ -61,6 +66,8 @@ public abstract class BaseRest extends BaseRestController {
   @Autowired protected FailedTaskService failedTaskService;
 
   @Autowired protected ValidatorFactory emValidatorFactory;
+  
+  @Autowired protected EntityFieldsCleaner emEntityFieldCleaner;
 
   protected Logger logger = LogManager.getLogger(getClass());
 
@@ -259,7 +266,7 @@ public abstract class BaseRest extends BaseRestController {
     if (languages == null || languages.isEmpty()) return;
 
     List<String> languagesList = Arrays.asList(languages.split(",", -1));
-    List<Field> entityFields = EntityUtils.getAllFields(entity.getClass());
+    List<Field> entityFields = EntityUtils.getAllFieldsIncludingInherited(entity.getClass());
     Map<String, Object> currentFieldValue;
     String fieldName = null;
     try {
@@ -315,5 +322,22 @@ public abstract class BaseRest extends BaseRestController {
     // profile can be "debug,sync"
     return StringUtils.hasLength(profile)
         && Arrays.asList(profile.split(",")).contains(WebEntityConstants.PARAM_PROFILE_SYNC);
+  }
+  
+  protected void validateBodyEntity(Entity entity) throws HttpBadRequestException {
+    Set<ConstraintViolation<Entity>> violations =
+        emValidatorFactory
+            .getValidator()
+            .validate(entity, EntityFieldsEuropeanaProxyValidationGroup.class);
+    if (!violations.isEmpty()) {
+      String responseInvalidRequestEntity = "";
+      for (ConstraintViolation<Entity> violation : violations) {
+        responseInvalidRequestEntity += " " + violation.getMessage();
+      }
+      throw new HttpBadRequestException(
+          String.format(
+              "The request entity has an invalid format for one or more fields. %s",
+              responseInvalidRequestEntity));
+    }
   }
 }

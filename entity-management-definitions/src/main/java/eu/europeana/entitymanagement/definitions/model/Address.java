@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import dev.morphia.annotations.Embedded;
+import java.lang.reflect.Field;
 
 @Embedded
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
@@ -116,5 +117,11 @@ public class Address {
   @JsonSetter(HAS_GEO)
   public void setVcardHasGeo(String hasGeo) {
     this.hasGeo = hasGeo;
+  }
+
+  public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
+    // TODO:in case of the performance overhead cause by using the reflecion code, change this
+    // method to call the getters for each field individually
+    return field.get(this);
   }
 }

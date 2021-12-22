@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import dev.morphia.annotations.Embedded;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
+import java.lang.reflect.Field;
 import java.util.Objects;
 
 @Embedded
@@ -94,5 +95,11 @@ public class WebResource {
     result = prime * result + ((thumbnail == null) ? 0 : thumbnail.hashCode());
     result = prime * result + ((source == null) ? 0 : source.hashCode());
     return result;
+  }
+
+  public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
+    // TODO:in case of the performance overhead cause by using the reflecion code, change this
+    // method to call the getters for each field individually
+    return field.get(this);
   }
 }

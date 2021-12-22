@@ -85,7 +85,6 @@ public class EntityObjectFactory {
 
   public static <T extends Entity> T createConsolidatedEntityObject(Entity entity)
       throws EntityCreationException {
-
     try {
       @SuppressWarnings("unchecked")
       Class<T> consolidatedEntityClass =

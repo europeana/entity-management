@@ -209,6 +209,12 @@
                   </goals>
                 </execution>
               </executions>
+              <configuration>
+                <skip>${skipFormatCode}</skip>
+                <googleJavaFormatOptions>
+                    <aosp>true</aosp>
+                </googleJavaFormatOptions>
+           	</configuration>
             </plugin>
           </plugins>
           <pluginManagement>

@@ -1,7 +1,17 @@
 package eu.europeana.entitymanagement.vocabulary;
 
+import eu.europeana.entitymanagement.common.config.GeneralUtils;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityFieldAccessException;
+import eu.europeana.entitymanagement.definitions.model.Address;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.WebResource;
+import java.lang.reflect.Field;
 
+/**
+ * When updating the class with the new fields
+ *
+ * @author StevaneticS
+ */
 public enum EntityFieldsTypes {
 
   // General fields
@@ -109,7 +119,7 @@ public enum EntityFieldsTypes {
   postBox(EntityFieldsTypes.FIELD_TYPE_KEYWORD, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
   locality(EntityFieldsTypes.FIELD_TYPE_TEXT, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
   countryName(EntityFieldsTypes.FIELD_TYPE_TEXT, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
-  hasGeo(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
+  hasGeo(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
 
   source(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
   thumbnail(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
@@ -183,6 +193,36 @@ public enum EntityFieldsTypes {
     return hasTypeDefinition(fieldName) && valueOf(fieldName).getFieldIsmultilingual();
   }
 
+  //checks if the object type is equal to one of the fields types, meaning that it is an object. 
+  public static boolean hasClassTypeOfField(Class<?> objectClass) {
+	if(objectClass==null) return false;
+    for (EntityFieldsTypes type : EntityFieldsTypes.values()) {
+      if (GeneralUtils.getSimpleClassName(objectClass.toString()).equals(type.getFieldType())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /*
+   * Gets the field value from the object for the fields that are of type Class
+   */
+  public static Object getFieldValue(Object object, Field field)
+      throws IllegalArgumentException, IllegalAccessException {
+    if (Entity.class.isAssignableFrom(object.getClass())) {
+      return ((Entity) object).getFieldValue(field);
+    }
+
+    switch (GeneralUtils.getSimpleClassName(object.getClass().toString())) {
+      case (EntityFieldsTypes.FIELD_TYPE_WEB_RESOURCE):
+        return ((WebResource) object).getFieldValue(field);
+      case (EntityFieldsTypes.FIELD_TYPE_ADDRESS):
+        return ((Address) object).getFieldValue(field);
+    }
+
+    return null;
+  }
+
   public static boolean isList(String fieldName) {
     try {
       String cardinality = valueOf(fieldName).getFieldCardinality();
@@ -221,7 +261,15 @@ public enum EntityFieldsTypes {
     return fieldIsmultilingual;
   }
 
-  public String getFieldCardinality() {
+  private String getFieldCardinality() {
     return fieldCardinality;
+  }
+
+  public static String getFieldCardinality(String fieldName) {
+    try {
+      return valueOf(fieldName).getFieldCardinality();
+    } catch (IllegalArgumentException e) {
+      throw new EntityFieldAccessException("Unknown field: " + fieldName, e);
+    }
   }
 }

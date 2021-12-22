@@ -4,13 +4,6 @@ import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_T
 import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_EMAIL;
 import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_URI;
 
-import eu.europeana.entitymanagement.common.config.LanguageCodes;
-import eu.europeana.entitymanagement.definitions.exceptions.EntityFieldAccessException;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.WebResource;
-import eu.europeana.entitymanagement.utils.EntityUtils;
-import eu.europeana.entitymanagement.utils.UriValidator;
-import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -18,98 +11,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.annotation.Resource;
-import javax.validation.ConstraintValidator;
+
 import javax.validation.ConstraintValidatorContext;
+
 import org.apache.commons.validator.routines.EmailValidator;
-import org.springframework.stereotype.Component;
 
-@Component
-public class EntityFieldsCompleteValidator
-    implements ConstraintValidator<EntityFieldsCompleteValidatorInterface, Entity> {
+import eu.europeana.entitymanagement.common.config.LanguageCodes;
+import eu.europeana.entitymanagement.utils.UriValidator;
+import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 
-  // used to separate the nested field within a parent field
-  private static final String NESTED_FIELD_SEPARATOR = ".";
+public class EntityFieldsDatatypeValidation {
 
-  @Resource(name = "emLanguageCodes")
-  LanguageCodes emLanguageCodes;
+  private final LanguageCodes emLanguageCodes;
 
-  public void initialize(EntityFieldsCompleteValidatorInterface constraint) {
-    //        System.out.println();
+  public EntityFieldsDatatypeValidation(LanguageCodes emLanguageCodes) {
+    this.emLanguageCodes = emLanguageCodes;
   }
 
-  @Override
-  public boolean isValid(Entity entity, ConstraintValidatorContext context) {
-
-    if (entity == null) {
-      return false;
-    }
-
-    boolean returnValue = true;
-
-    List<Field> entityFields = EntityUtils.getAllFields(entity.getClass());
-
-    for (Field field : entityFields) {
-      try {
-        String fieldName = field.getName();
-        if (!EntityFieldsTypes.hasTypeDefinition(fieldName)) {
-          // there is no type definition to validate against
-          continue;
-        }
-
-        Object fieldValue = entity.getFieldValue(field);
-        if (fieldValue == null) {
-          /*
-           * TODO: enable the code below if there is a need to check the mandatory fields in this validator
-           */
-          //					addConstraint(context, "The mandatory field: "+field.getName()+" cannot be NULL.");
-          //	                if(returnValue==true) {
-          //	                	returnValue=false;
-          //	                }
-          continue;
-        }
-        boolean returnValueLocal = true;
-
-        Class<?> fieldJavaType = field.getType();
-        String fieldInternalType = EntityFieldsTypes.valueOf(fieldName).getFieldType();
-        /*
-         * the validation rules are implemented here
-         */
-        if (EntityFieldsTypes.isMultilingual(fieldName)) {
-          returnValueLocal =
-              validateMultilingualField(context, fieldName, fieldInternalType, fieldValue);
-        } else if (FIELD_TYPE_URI.equals(EntityFieldsTypes.getFieldType(fieldName))) {
-          returnValueLocal = validateURIField(context, fieldName, fieldJavaType, fieldValue);
-        } else if (FIELD_TYPE_DATE.equals(EntityFieldsTypes.getFieldType(fieldName))) {
-          returnValueLocal = validateDateField(context, fieldName, fieldJavaType, fieldValue);
-        } else if (FIELD_TYPE_EMAIL.equals(EntityFieldsTypes.getFieldType(fieldName))) {
-          returnValueLocal = validateEmailField(context, fieldName, fieldJavaType, fieldValue);
-        } else if (fieldJavaType.isAssignableFrom(String.class)
-            && !fieldValue.toString().isBlank()) {
-          // Text or Keyword, not multilingual
-          returnValueLocal =
-              validateStringValue(context, fieldName, fieldInternalType, (String) fieldValue, null);
-        } else if (WebResource.class.isAssignableFrom(fieldJavaType)) {
-          returnValueLocal = validateWebResourceField(context, fieldName, (WebResource) fieldValue);
-        }
-
-        // update global return value
-        returnValue = returnValue && returnValueLocal;
-
-      } catch (IllegalArgumentException e) {
-        throw new EntityFieldAccessException(
-            "During the validation of the entity fields an illegal or inappropriate argument exception has happened.",
-            e);
-      } catch (IllegalAccessException e) {
-        throw new EntityFieldAccessException(
-            "During the validation of the entity fields an illegal access to some method or field has happened.",
-            e);
-      }
-    }
-    return returnValue;
-  }
-
-  boolean validateStringValue(
+  public boolean validateStringValue(
       ConstraintValidatorContext context,
       String fieldName,
       String fieldInternalType,
@@ -143,7 +62,7 @@ public class EntityFieldsCompleteValidator
     return true;
   }
 
-  void addUriNotAllowedConstraint(
+  private void addUriNotAllowedConstraint(
       ConstraintValidatorContext context, String fieldName, String fieldValue, String key) {
     String messageTemplate =
         "The entity field: " + fieldName + ", must not contain URI: " + fieldValue + ".";
@@ -154,7 +73,7 @@ public class EntityFieldsCompleteValidator
   }
 
   @SuppressWarnings("unchecked")
-  boolean validateEmailField(
+  public boolean validateEmailField(
       ConstraintValidatorContext context,
       String fieldName,
       Class<?> fieldJavaType,
@@ -168,7 +87,7 @@ public class EntityFieldsCompleteValidator
     return returnValue;
   }
 
-  boolean validateEmailListField(
+  private boolean validateEmailListField(
       ConstraintValidatorContext context, String fieldName, List<String> fieldValues) {
     boolean returnValue = true;
     if (fieldValues.isEmpty()) {
@@ -186,7 +105,7 @@ public class EntityFieldsCompleteValidator
     return returnValue;
   }
 
-  boolean hasFieldCardinalityViolation(
+  private boolean hasFieldCardinalityViolation(
       ConstraintValidatorContext context, String fieldName, List<String> fieldValues) {
     if (EntityFieldsTypes.isSingleValueField(fieldName) && fieldValues.size() > 1) {
       addConstraint(context, "The entity field: " + fieldName + " cannot have more than one value");
@@ -195,7 +114,7 @@ public class EntityFieldsCompleteValidator
     return false;
   }
 
-  boolean checkEmailFormat(
+  private boolean checkEmailFormat(
       ConstraintValidatorContext context, String fieldName, String fieldValue) {
     EmailValidator validator = EmailValidator.getInstance();
     if (validator.isValid(fieldValue)) {
@@ -213,7 +132,7 @@ public class EntityFieldsCompleteValidator
   }
 
   @SuppressWarnings("unchecked")
-  boolean validateDateField(
+  public boolean validateDateField(
       ConstraintValidatorContext context,
       String fieldName,
       Class<?> fieldJavaType,
@@ -227,7 +146,7 @@ public class EntityFieldsCompleteValidator
     return returnValue;
   }
 
-  boolean validateDateListField(
+  private boolean validateDateListField(
       ConstraintValidatorContext context, String fieldName, List<String> fieldValues) {
     boolean returnValue = true;
     if (fieldValues.isEmpty()) {
@@ -245,7 +164,7 @@ public class EntityFieldsCompleteValidator
     return returnValue;
   }
 
-  boolean checkDateFormatISO8601(
+  private boolean checkDateFormatISO8601(
       ConstraintValidatorContext context, String fieldName, String fieldValue) {
     try {
       // LocalDate.parse(fieldValue.toString(),
@@ -271,7 +190,7 @@ public class EntityFieldsCompleteValidator
   }
 
   @SuppressWarnings("unchecked")
-  boolean validateURIField(
+  public boolean validateURIField(
       ConstraintValidatorContext context,
       String fieldName,
       Class<?> fieldJavaType,
@@ -282,15 +201,12 @@ public class EntityFieldsCompleteValidator
     } else if (fieldJavaType.isAssignableFrom(String.class)) {
       returnValue =
           validateUri(
-              context,
-              fieldName,
-              EntityFieldsTypes.valueOf(fieldName).getFieldType(),
-              (String) fieldValue);
+              context, fieldName, EntityFieldsTypes.getFieldType(fieldName), (String) fieldValue);
     }
     return returnValue;
   }
 
-  boolean validateURIListField(
+  private boolean validateURIListField(
       ConstraintValidatorContext context, String fieldName, List<String> fieldValues) {
     boolean returnValue = true;
     if (fieldValues.isEmpty()) {
@@ -302,10 +218,7 @@ public class EntityFieldsCompleteValidator
     }
     for (String fieldValueElem : fieldValues) {
       if (!validateUri(
-          context,
-          fieldName,
-          EntityFieldsTypes.valueOf(fieldName).getFieldType(),
-          fieldValueElem)) {
+          context, fieldName, EntityFieldsTypes.getFieldType(fieldName), fieldValueElem)) {
         returnValue = false;
       }
     }
@@ -343,7 +256,7 @@ public class EntityFieldsCompleteValidator
   }
 
   @SuppressWarnings("unchecked")
-  boolean validateMultilingualField(
+  public boolean validateMultilingualField(
       ConstraintValidatorContext context,
       String fieldName,
       String fieldInternalType,
@@ -375,7 +288,7 @@ public class EntityFieldsCompleteValidator
               "The entity field: "
                   + fieldName
                   + " cardinality: "
-                  + EntityFieldsTypes.valueOf(fieldName).getFieldCardinality()
+                  + EntityFieldsTypes.getFieldCardinality(fieldName)
                   + " and must not be represented as list");
           localReturnValue = false;
         } else {
@@ -400,7 +313,7 @@ public class EntityFieldsCompleteValidator
               "The entity field: "
                   + fieldName
                   + " cardinality: "
-                  + EntityFieldsTypes.valueOf(fieldName).getFieldCardinality()
+                  + EntityFieldsTypes.getFieldCardinality(fieldName)
                   + " and must not be represented as list");
           localReturnValue = false;
         } else {
@@ -427,16 +340,13 @@ public class EntityFieldsCompleteValidator
       String fieldInternalType) {
     if (isUriRequired(key, fieldInternalType)) {
       return validateUri(
-          context,
-          fieldName,
-          EntityFieldsTypes.valueOf(fieldName).getFieldType(),
-          multilingualValue);
+          context, fieldName, EntityFieldsTypes.getFieldType(fieldName), multilingualValue);
     } else {
       return validateStringValue(context, fieldName, fieldInternalType, multilingualValue, key);
     }
   }
 
-  boolean validateLanguageCodes(
+  private boolean validateLanguageCodes(
       ConstraintValidatorContext context, String fieldName, Set<String> keySet) {
 
     //		if (emLanguageCodes==null) return true;
@@ -452,40 +362,8 @@ public class EntityFieldsCompleteValidator
                 + " contains the language code: "
                 + key
                 + " that does not belong to the Europena languge codes.");
+        if(isValid) isValid = false;
       }
-    }
-    return isValid;
-  }
-
-  private boolean validateWebResourceField(
-      ConstraintValidatorContext context, String fieldName, WebResource webResource) {
-    boolean isValid = true;
-
-    if (webResource.getId() != null
-        && !validateUri(
-            context,
-            fieldName + NESTED_FIELD_SEPARATOR + EntityFieldsTypes.id.name(),
-            EntityFieldsTypes.id.getFieldType(),
-            webResource.getId())) {
-      isValid = false;
-    }
-    if (webResource.getSource() != null
-        && !validateUri(
-            context,
-            fieldName + NESTED_FIELD_SEPARATOR + EntityFieldsTypes.source.name(),
-            EntityFieldsTypes.source.getFieldType(),
-            webResource.getSource())) {
-      isValid = false;
-    }
-
-    // thumbnail can be empty
-    if (webResource.getThumbnail() != null
-        && !validateUri(
-            context,
-            fieldName + NESTED_FIELD_SEPARATOR + EntityFieldsTypes.thumbnail.name(),
-            EntityFieldsTypes.thumbnail.getFieldType(),
-            webResource.getThumbnail())) {
-      isValid = false;
     }
     return isValid;
   }
@@ -496,5 +374,63 @@ public class EntityFieldsCompleteValidator
 
   private boolean isUriRequired(String key, String fieldType) {
     return "".equals(key) && EntityFieldsTypes.FIELD_TYPE_TEXT_OR_URI.equals(fieldType);
+  }
+
+  public boolean valildateMandatoryField(
+      ConstraintValidatorContext context, String fieldName, Object fieldValue) {
+    if (fieldValue == null) {
+      if (EntityFieldsTypes.isMandatory(fieldName)) {
+        addConstraint(context, "The mandatory field: " + fieldName + " cannot be NULL.");
+        return false;
+      }
+    }
+    // validating the minimal content for the mandatory fields
+    int minContentCount = EntityFieldsTypes.getMinContentCount(fieldName);
+    if (minContentCount > 0) {
+      if ((List.class.isAssignableFrom(fieldValue.getClass())
+              && ((List<?>) fieldValue).size() < minContentCount)
+          || (Map.class.isAssignableFrom(fieldValue.getClass())
+              && ((Map<?, ?>) fieldValue).size() < minContentCount)) {
+        addConstraint(context, fieldName + " must have at least " + minContentCount + " values");
+        return false;
+      }
+    }
+
+    return true;
+  }
+  
+  public boolean validateDatatypeCompliance (ConstraintValidatorContext context, Field field, Object fieldValue) {
+	  
+	  if (fieldValue == null) {
+          return true;
+      }
+	  
+	  Class<?> fieldJavaType = field.getType();
+      String fieldName = field.getName();
+      String fieldInternalType = EntityFieldsTypes.valueOf(fieldName).getFieldType();
+      
+      /*
+       * validating the fields' type compliance
+       */
+      if (EntityFieldsTypes.isMultilingual(fieldName)) {
+        return validateMultilingualField(
+                context, fieldName, fieldInternalType, fieldValue);
+      } else if (FIELD_TYPE_URI.equals(EntityFieldsTypes.getFieldType(fieldName))) {
+        return validateURIField(
+                context, fieldName, fieldJavaType, fieldValue);
+      } else if (FIELD_TYPE_DATE.equals(EntityFieldsTypes.getFieldType(fieldName))) {
+        return validateDateField(
+                context, fieldName, fieldJavaType, fieldValue);
+      } else if (FIELD_TYPE_EMAIL.equals(EntityFieldsTypes.getFieldType(fieldName))) {
+        return validateEmailField(
+                context, fieldName, fieldJavaType, fieldValue);
+      } else if (fieldJavaType.isAssignableFrom(String.class)
+          && !fieldValue.toString().isBlank()) {
+        // Text or Keyword, not multilingual
+        return validateStringValue(
+                context, fieldName, fieldInternalType, (String) fieldValue, null);
+      }
+      
+      return true;
   }
 }

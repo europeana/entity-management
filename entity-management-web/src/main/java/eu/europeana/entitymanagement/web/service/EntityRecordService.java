@@ -536,7 +536,7 @@ public class EntityRecordService {
      * The primary entity corresponds to the entity in the Europeana proxy. The
      * secondary entity corresponds to the entity in the external proxy.
      */
-    List<Field> fieldsToCombine = EntityUtils.getAllFields(primary.getClass());
+    List<Field> fieldsToCombine = EntityUtils.getAllFieldsIncludingInherited(primary.getClass());
     return combineEntities(primary, secondary, fieldsToCombine, true);
   }
 
@@ -583,7 +583,7 @@ public class EntityRecordService {
       throws Exception {
     EntityProxy europeanaProxy = entityRecord.getEuropeanaProxy();
 
-    List<Field> allFields = EntityUtils.getAllFields(updateEntity.getClass());
+    List<Field> allFields = EntityUtils.getAllFieldsIncludingInherited(updateEntity.getClass());
 
     List<Field> filteredList =
         allFields.stream()

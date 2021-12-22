@@ -14,8 +14,8 @@ import javax.validation.Payload;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = EntityFieldsCompleteValidator.class)
-public @interface EntityFieldsCompleteValidatorInterface {
+@Constraint(validatedBy = EntityFieldsCompleteValidationValidator.class)
+public @interface EntityFieldsCompleteValidationInterface {
 
   String message() default "";
 

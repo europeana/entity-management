@@ -14,8 +14,8 @@ import javax.validation.Payload;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = EntityFieldsMinimalValidator.class)
-public @interface EntityFieldsMinimalValidatorInterface {
+@Constraint(validatedBy = EntityFieldsDataSourceProxyValidationValidator.class)
+public @interface EntityFieldsDataSourceProxyValidationInterface {
 
   String message() default "";
 

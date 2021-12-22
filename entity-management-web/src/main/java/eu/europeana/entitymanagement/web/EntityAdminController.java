@@ -131,6 +131,9 @@ public class EntityAdminController extends BaseRest {
       // verifyWriteAccess(Operations.CREATE, request);
       verifyMigrationAccess(request);
     }
+    
+    validateBodyEntity(europeanaProxyEntity);
+
     try {
       // get the entity type based on path param
       type = EntityTypes.getByEntityType(type).getEntityType();
