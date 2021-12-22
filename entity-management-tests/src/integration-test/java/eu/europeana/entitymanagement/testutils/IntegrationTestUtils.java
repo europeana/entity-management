@@ -49,6 +49,7 @@ public class IntegrationTestUtils {
   public static final String CONCEPT_REGISTER_BATHTUB_JSON =
       "/content/concept_register_bathtub.json";
   public static final String AGENT_REGISTER_DAVINCI_JSON = "/content/agent_register_davinci.json";
+  public static final String AGENT_REGISTER_BIRCH_REDIRECTION_JSON = "/content/agent_register_birch_redirection.json";
   public static final String AGENT_REGISTER_STALIN_JSON = "/content/agent_register_stalin.json";
   public static final String AGENT_REGISTER_SCHEGK_JSON = "/content/agent_register_schegk.json";
 
@@ -61,6 +62,7 @@ public class IntegrationTestUtils {
   public static final String ORGANIZATION_REGISTER_GFM_ZOHO_JSON =
       "/content/organization_register_zoho_gfm.json";
   public static final String PLACE_REGISTER_PARIS_JSON = "/content/place_register_paris.json";
+  public static final String PLACE_REGISTER_HAGENBACH_JSON = "/content/place_register_hagenbach.json";
 
   public static final String CONCEPT_UPDATE_BATHTUB_JSON = "/content/concept_update_bathtub.json";
   public static final String CONCEPT_UPDATE_FAILED_BATHTUB_JSON =
@@ -76,6 +78,7 @@ public class IntegrationTestUtils {
   public static final String CONCEPT_ERROR_CHECK_1_XML = "/metis-deref/concept-error-check-1.xml";
 
   public static final String AGENT_DA_VINCI_XML = "/metis-deref/agent_da_vinci.xml";
+  public static final String AGENT_BIRCH_XML = "/metis-deref/agent_birch.xml";
   public static final String AGENT_STALIN_XML = "/metis-deref/agent_stalin.xml";
   public static final String AGENT_SCHEGK_XML = "/metis-deref/agent_schegk.xml";
   public static final String AGENT_JAN_VERMEER_XML_VIAF = "/metis-deref/agent_jan_vermeer_viaf.xml";
@@ -83,6 +86,8 @@ public class IntegrationTestUtils {
       "/metis-deref/agent_jan_vermeer_wikidata.xml";
   public static final String ORGANIZATION_BNF_XML = "/metis-deref/organization_bnf.xml";
   public static final String PLACE_PARIS_XML = "/metis-deref/place_paris.xml";
+  public static final String PLACE_HAGENBACH_XML = "/metis-deref/place_hagenbach_redirect.xml";
+  
   public static final String TIMESPAN_1ST_CENTURY_XML = "/metis-deref/timespan_1st_century.xml";
 
   public static final String AGENT1_REFERENTIAL_INTEGRITY_JSON =
@@ -105,6 +110,8 @@ public class IntegrationTestUtils {
       "/ref-integrity/references/place_florence_143905.xml";
   public static final String PLACE_FRANCE_REFERENTIAL_INTEGRTITY =
       "/ref-integrity/references/place_france_85.xml";
+  
+  
   public static final String PLACE_SFORZA_CASTLE_REFERENTIAL_INTEGRTITY =
       "/ref-integrity/references/place_sforza_castle_143289.xml";
   public static final String TIMESPAN_15_REFERENTIAL_INTEGRTITY =
@@ -116,12 +123,20 @@ public class IntegrationTestUtils {
       "/content/place-referential-integrity.json";
 
   public static final String AGENT_DA_VINCI_URI = "http://www.wikidata.org/entity/Q762";
+  public static final String AGENT_BIRCH_URI = "http://www.wikidata.org/entity/Q5485322";
+  public static final String AGENT_BIRCH_UPDATED_URI = "http://www.wikidata.org/entity/Q14819199";
+  
   public static final String AGENT_STALIN_URI = "http://www.wikidata.org/entity/Q855";
   public static final String AGENT_SCHEGK_URI = "http://www.wikidata.org/entity/Q110854";
+  
   public static final String AGENT_JAN_VERMEER_VIAF_URI = "http://viaf.org/viaf/51961439";
   public static final String AGENT_JAN_VERMEER_WIKIDATA_URI =
       "http://www.wikidata.org/entity/Q41264";
   public static final String PLACE_PARIS_URI = "https://sws.geonames.org/2988507/";
+  public static final String PLACE_HAGENBACH_URI = "http://www.wikidata.org/entity/Q32050320";
+  public static final String PLACE_HAGENBACH_UPDATED_URI = "http://www.wikidata.org/entity/Q541669";
+   
+  
   public static final String TIMESPAN_1ST_CENTURY_URI = "http://www.wikidata.org/entity/Q8106";
 
   public static final String CONCEPT_BATHTUB_URI = "http://www.wikidata.org/entity/Q152095";
@@ -179,11 +194,13 @@ public class IntegrationTestUtils {
           AGENT_DA_VINCI_URI, AGENT_DA_VINCI_XML,
           AGENT_STALIN_URI, AGENT_STALIN_XML,
           PLACE_PARIS_URI, PLACE_PARIS_XML,
+          PLACE_HAGENBACH_URI, PLACE_HAGENBACH_XML,
           TIMESPAN_1ST_CENTURY_URI, TIMESPAN_1ST_CENTURY_XML,
           CONCEPT_BATHTUB_URI, CONCEPT_BATHTUB_XML,
           AGENT_JAN_VERMEER_VIAF_URI, AGENT_JAN_VERMEER_XML_VIAF,
           AGENT_JAN_VERMEER_WIKIDATA_URI, AGENT_JAN_VERMEER_XML_WIKIDATA,
-          AGENT_SCHEGK_URI, AGENT_SCHEGK_XML);
+          AGENT_SCHEGK_URI, AGENT_SCHEGK_XML,
+          AGENT_BIRCH_URI, AGENT_BIRCH_XML);
 
   public static String loadFile(String resourcePath) throws IOException {
     return IOUtils.toString(

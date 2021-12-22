@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+  <metis:results xmlns:dcterms="http://purl.org/dc/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:edm="http://www.europeana.eu/schemas/edm/" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema" xmlns:cc="http://creativecommons.org/ns" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdaGr2="http://rdvocab.info/ElementsGr2/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:wgs84_pos="http://www.w3.org/2003/01/geo/wgs84_pos#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:metis="http://www.europeana.eu/schemas/metis" xmlns:ns13="http://www.w3.org/2006/vcard/ns#">
+    <metis:result>
+      <edm:Place rdf:about="http://www.wikidata.org/entity/Q541669">
+        <skos:prefLabel xml:lang="pt">Hagenbach</skos:prefLabel>
+        <skos:prefLabel xml:lang="pl">Hagenbach</skos:prefLabel>
+        <skos:prefLabel xml:lang="fr">Hagenbach</skos:prefLabel>
+        <skos:prefLabel xml:lang="ru">Хагенбах</skos:prefLabel>
+        <skos:prefLabel xml:lang="en">Hagenbach</skos:prefLabel>
+        <skos:prefLabel xml:lang="ro">Hagenbach</skos:prefLabel>
+        <skos:prefLabel xml:lang="it">Hagenbach</skos:prefLabel>
+        <skos:prefLabel xml:lang="de">Hagenbach</skos:prefLabel>
+        <skos:prefLabel xml:lang="nl">Hagenbach</skos:prefLabel>
+        <skos:prefLabel xml:lang="es">Hagenbach</skos:prefLabel>
+        <skos:prefLabel xml:lang="hu">Hagenbach</skos:prefLabel>
+        <skos:prefLabel xml:lang="ca">Hagenbach</skos:prefLabel>
+        <skos:prefLabel xml:lang="cs">Hagenbach</skos:prefLabel>
+        <skos:prefLabel xml:lang="da">Hagenbach</skos:prefLabel>
+        <skos:prefLabel xml:lang="et">Hagenbach</skos:prefLabel>
+        <skos:prefLabel xml:lang="fi">Hagenbach</skos:prefLabel>
+        <skos:prefLabel xml:lang="ga">Hagenbach</skos:prefLabel>
+        <skos:prefLabel xml:lang="hr">Hagenbach</skos:prefLabel>
+        <skos:prefLabel xml:lang="sk">Hagenbach</skos:prefLabel>
+        <skos:prefLabel xml:lang="sl">Hagenbach</skos:prefLabel>
+        <skos:prefLabel xml:lang="sv">Hagenbach</skos:prefLabel>
+        <skos:note xml:lang="es">localidad de Renania-Palatinado, Alemania</skos:note>
+        <skos:note xml:lang="nl">Rijnland-Palts</skos:note>
+        <skos:note xml:lang="de">Gemeinde im Landkreis Germersheim, Rheinland-Pfalz</skos:note>
+        <skos:note xml:lang="fr">commune allemande</skos:note>
+        <skos:note xml:lang="en">municipality of Germany</skos:note>
+        <skos:note xml:lang="cs">obec v zemském okresu Germersheim v Německu</skos:note>
+        <skos:note xml:lang="ru">Город в Германии</skos:note>
+        <skos:note xml:lang="it">Luogo in Renania-Palatinato, Germania</skos:note>
+        <skos:note xml:lang="hu">település Németországban</skos:note>
+        <dcterms:isPartOf rdf:resource="http://www.wikidata.org/entity/Q183">
+        </dcterms:isPartOf>
+        <owl:sameAs rdf:resource="http://www.wikidata.org/entity/Q32050320"/>
+        <owl:sameAs rdf:resource="http://viaf.org/viaf/142030058"/>
+        <owl:sameAs rdf:resource="http://d-nb.info/gnd/4022924-5"/>
+        <owl:sameAs rdf:resource="http://id.loc.gov/authorities/names/n91004824"/>
+        <owl:sameAs rdf:resource="https://www.freebase.com/m/0br64x"/>
+        <owl:sameAs rdf:resource="https://g.co/kg/m/0br64x"/>
+        <owl:sameAs rdf:resource="https://sws.geonames.org/6555006/"/>
+        <owl:sameAs rdf:resource="http://dbpedia.org/resource/Hagenbach"/>
+        <wgs84_pos:lat>49.020555555556</wgs84_pos:lat>
+        <wgs84_pos:long>8.2483333333333</wgs84_pos:long>
+        <wgs84_pos:alt>+104</wgs84_pos:alt>
+      </edm:Place>
+    </metis:result>
+  </metis:results>
