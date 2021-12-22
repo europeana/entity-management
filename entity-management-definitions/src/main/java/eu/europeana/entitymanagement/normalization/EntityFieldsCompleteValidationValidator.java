@@ -1,9 +1,5 @@
 package eu.europeana.entitymanagement.normalization;
 
-import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_DATE;
-import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_EMAIL;
-import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_URI;
-
 import eu.europeana.entitymanagement.definitions.exceptions.EntityFieldAccessException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.utils.EntityUtils;
@@ -58,12 +54,14 @@ public class EntityFieldsCompleteValidationValidator
         Object fieldValue = entityFieldIncludingInheritedAndNestedValues.get(i);
 
         // validating the mandatory fields
-        boolean returnValueLocal = emEntityFieldDatatypeValidation.valildateMandatoryField(context, fieldName, fieldValue);
-        
-        returnValue = returnValue && returnValueLocal;        
-        
-        //validating the field datatype compliance
-        returnValueLocal = emEntityFieldDatatypeValidation.validateDatatypeCompliance(context, field, fieldValue);
+        boolean returnValueLocal =
+            emEntityFieldDatatypeValidation.valildateMandatoryField(context, fieldName, fieldValue);
+
+        returnValue = returnValue && returnValueLocal;
+
+        // validating the field datatype compliance
+        returnValueLocal =
+            emEntityFieldDatatypeValidation.validateDatatypeCompliance(context, field, fieldValue);
 
         returnValue = returnValue && returnValueLocal;
       }

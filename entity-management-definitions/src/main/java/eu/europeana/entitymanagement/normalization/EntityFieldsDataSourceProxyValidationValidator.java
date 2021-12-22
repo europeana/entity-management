@@ -4,11 +4,6 @@ import eu.europeana.entitymanagement.definitions.exceptions.EntityFieldAccessExc
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
-
-import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_DATE;
-import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_EMAIL;
-import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_URI;
-
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +46,7 @@ public class EntityFieldsDataSourceProxyValidationValidator
       for (int i = 0; i < entityFieldsIncludingInheritedAndNested.size(); i++) {
 
         Field field = entityFieldsIncludingInheritedAndNested.get(i);
-        
+
         String fieldName = field.getName();
         if (!EntityFieldsTypes.hasTypeDefinition(fieldName)) {
           // there is no type definition to validate against
@@ -60,11 +55,11 @@ public class EntityFieldsDataSourceProxyValidationValidator
 
         Object fieldValue = entityFieldIncludingInheritedAndNestedValues.get(i);
 
-        //validating the field datatype compliance
-        boolean returnValueLocal = emEntityFieldDatatypeValidation.validateDatatypeCompliance(context, field, fieldValue);
+        // validating the field datatype compliance
+        boolean returnValueLocal =
+            emEntityFieldDatatypeValidation.validateDatatypeCompliance(context, field, fieldValue);
 
         returnValue = returnValue && returnValueLocal;
-
       }
     } catch (IllegalArgumentException e) {
       throw new EntityFieldAccessException(

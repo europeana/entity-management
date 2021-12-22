@@ -131,7 +131,7 @@ public class EntityAdminController extends BaseRest {
       // verifyWriteAccess(Operations.CREATE, request);
       verifyMigrationAccess(request);
     }
-    
+
     validateBodyEntity(europeanaProxyEntity);
 
     try {
@@ -204,6 +204,7 @@ public class EntityAdminController extends BaseRest {
   private void verifyMigrationAccess(HttpServletRequest request)
       throws ApplicationAuthenticationException {
     String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
+
     if (!StringUtils.hasLength(authorization) || !authorization.startsWith("Bearer")) {
       throw new ApplicationAuthenticationException(
           "User is not authorised to perform this action", null);

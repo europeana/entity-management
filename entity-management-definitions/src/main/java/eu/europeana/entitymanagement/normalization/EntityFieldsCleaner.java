@@ -93,7 +93,8 @@ public class EntityFieldsCleaner {
           // remove spaces from the List<String> fields
           List<String> normalizedList = normalizeValues(field.getName(), fieldValueList);
 
-          // if Entity field is supposed to contain a single element, remove all elements except the
+          // if Entity field is supposed to contain a single element, remove all elements
+          // except the
           // first
           if (SINGLE_ELEMENT_LIST_FIELDS.containsKey(entity.getClass())
               && SINGLE_ELEMENT_LIST_FIELDS.get(entity.getClass()).contains(field.getName())

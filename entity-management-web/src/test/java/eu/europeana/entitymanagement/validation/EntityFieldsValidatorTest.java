@@ -18,7 +18,6 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidationGroup;
-import eu.europeana.entitymanagement.normalization.EntityFieldsDataSourceProxyValidationGroup;
 import java.io.IOException;
 import java.util.Set;
 import javax.annotation.Resource;

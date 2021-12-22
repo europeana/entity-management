@@ -76,9 +76,7 @@ public class Organization extends Entity {
     if (copy.getGeographicLevel() != null)
       this.geographicLevel = new HashMap<>(copy.getGeographicLevel());
     this.country = copy.getCountry();
-    if (copy.getAddress()!=null)
-      this.hasAddress = new Address(copy.getAddress());  
-    
+    if (copy.getAddress() != null) this.hasAddress = new Address(copy.getAddress());
   }
 
   private Map<String, String> description;

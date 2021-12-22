@@ -66,7 +66,7 @@ public abstract class BaseRest extends BaseRestController {
   @Autowired protected FailedTaskService failedTaskService;
 
   @Autowired protected ValidatorFactory emValidatorFactory;
-  
+
   @Autowired protected EntityFieldsCleaner emEntityFieldCleaner;
 
   protected Logger logger = LogManager.getLogger(getClass());
@@ -323,7 +323,7 @@ public abstract class BaseRest extends BaseRestController {
     return StringUtils.hasLength(profile)
         && Arrays.asList(profile.split(",")).contains(WebEntityConstants.PARAM_PROFILE_SYNC);
   }
-  
+
   protected void validateBodyEntity(Entity entity) throws HttpBadRequestException {
     Set<ConstraintViolation<Entity>> violations =
         emValidatorFactory
