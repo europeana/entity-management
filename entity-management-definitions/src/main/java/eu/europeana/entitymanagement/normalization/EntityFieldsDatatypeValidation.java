@@ -5,9 +5,9 @@ import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_T
 import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_URI;
 
 import eu.europeana.entitymanagement.common.config.LanguageCodes;
+import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.utils.UriValidator;
 import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
-import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.validation.ConstraintValidatorContext;
 import org.apache.commons.validator.routines.EmailValidator;
+import org.springframework.util.StringUtils;
 
 public class EntityFieldsDatatypeValidation {
 
@@ -102,6 +103,39 @@ public class EntityFieldsDatatypeValidation {
     return returnValue;
   }
 
+  private boolean validateWebResourceField(
+      ConstraintValidatorContext context, String fieldName, WebResource webResource) {
+    boolean isValid = true;
+
+    if (webResource.getId() == null
+        || !validateUri(
+            context, fieldName, EntityFieldsTypes.getFieldType(fieldName), webResource.getId())) {
+      addConstraint(context, "Field " + fieldName + " has an invalid or empty id value");
+      isValid = false;
+    }
+    if (webResource.getSource() == null
+        || !validateUri(
+            context,
+            fieldName,
+            EntityFieldsTypes.getFieldType(fieldName),
+            webResource.getSource())) {
+      addConstraint(context, "Field " + fieldName + " has an invalid or empty source value");
+      isValid = false;
+    }
+
+    // thumbnail can be empty
+    if (StringUtils.hasLength(webResource.getThumbnail())
+        && !validateUri(
+            context,
+            fieldName,
+            EntityFieldsTypes.getFieldType(fieldName),
+            webResource.getThumbnail())) {
+      addConstraint(context, "Field " + fieldName + " has an invalid or empty thumbnail value");
+      isValid = false;
+    }
+    return isValid;
+  }
+
   private boolean hasFieldCardinalityViolation(
       ConstraintValidatorContext context, String fieldName, List<String> fieldValues) {
     if (EntityFieldsTypes.isSingleValueField(fieldName) && fieldValues.size() > 1) {
@@ -145,7 +179,7 @@ public class EntityFieldsDatatypeValidation {
 
   private boolean validateDateListField(
       ConstraintValidatorContext context, String fieldName, List<String> fieldValues) {
-    boolean returnValue = true;
+    boolean isValid = true;
     if (fieldValues.isEmpty()) {
       return true;
     }
@@ -153,12 +187,9 @@ public class EntityFieldsDatatypeValidation {
       return false;
     }
     for (String fieldValueElem : fieldValues) {
-      if (checkDateFormatISO8601(context, fieldName, fieldValueElem) == false
-          && returnValue == true) {
-        returnValue = false;
-      }
+      isValid = isValid && checkDateFormatISO8601(context, fieldName, fieldValueElem);
     }
-    return returnValue;
+    return isValid;
   }
 
   private boolean checkDateFormatISO8601(
@@ -373,32 +404,35 @@ public class EntityFieldsDatatypeValidation {
     return "".equals(key) && EntityFieldsTypes.FIELD_TYPE_TEXT_OR_URI.equals(fieldType);
   }
 
-  public boolean valildateMandatoryField(
+  public boolean validateMandatoryFields(
       ConstraintValidatorContext context, String fieldName, Object fieldValue) {
-    if (EntityFieldsTypes.isMandatory(fieldName)) {
-      if (fieldValue == null) {
-        addConstraint(context, "The mandatory field: " + fieldName + " cannot be NULL.");
-        return false;
-      } else if ((List.class.isAssignableFrom(fieldValue.getClass())
-              && ((List<?>) fieldValue).size() < 1)
+    if (EntityFieldsTypes.isMandatory(fieldName) && fieldValue == null) {
+      addConstraint(context, "The mandatory field: " + fieldName + " cannot be NULL.");
+      return false;
+    }
+
+    int minContentCount = EntityFieldsTypes.getMinContentCount(fieldName);
+    if (minContentCount > 0) {
+      if ((List.class.isAssignableFrom(fieldValue.getClass())
+              && ((List<?>) fieldValue).size() < minContentCount)
           || (Map.class.isAssignableFrom(fieldValue.getClass())
-              && ((Map<?, ?>) fieldValue).size() < 1)) {
-        addConstraint(
-            context, "The mandatory field: " + fieldName + " must have at least 1 value.");
+              && ((Map<?, ?>) fieldValue).size() < minContentCount)) {
+        addConstraint(context, fieldName + " must have at least " + minContentCount + " value(s)");
         return false;
-      } else return true;
-    } else return true;
+      }
+    }
+
+    // no violations
+    return true;
   }
 
-  public boolean validateDatatypeCompliance(
-      ConstraintValidatorContext context, Field field, Object fieldValue) {
+  public boolean validateMetadataFields(
+      ConstraintValidatorContext context, String fieldName, Object fieldValue, Class<?> fieldType) {
 
     if (fieldValue == null) {
       return true;
     }
 
-    Class<?> fieldJavaType = field.getType();
-    String fieldName = field.getName();
     String fieldInternalType = EntityFieldsTypes.valueOf(fieldName).getFieldType();
 
     /*
@@ -407,14 +441,26 @@ public class EntityFieldsDatatypeValidation {
     if (EntityFieldsTypes.isMultilingual(fieldName)) {
       return validateMultilingualField(context, fieldName, fieldInternalType, fieldValue);
     } else if (FIELD_TYPE_URI.equals(EntityFieldsTypes.getFieldType(fieldName))) {
-      return validateURIField(context, fieldName, fieldJavaType, fieldValue);
+      return validateURIField(context, fieldName, fieldType, fieldValue);
     } else if (FIELD_TYPE_DATE.equals(EntityFieldsTypes.getFieldType(fieldName))) {
-      return validateDateField(context, fieldName, fieldJavaType, fieldValue);
+      return validateDateField(context, fieldName, fieldType, fieldValue);
     } else if (FIELD_TYPE_EMAIL.equals(EntityFieldsTypes.getFieldType(fieldName))) {
-      return validateEmailField(context, fieldName, fieldJavaType, fieldValue);
-    } else if (fieldJavaType.isAssignableFrom(String.class) && !fieldValue.toString().isBlank()) {
+      return validateEmailField(context, fieldName, fieldType, fieldValue);
+    } else if (fieldType.isAssignableFrom(String.class) && !fieldValue.toString().isBlank()) {
       // Text or Keyword, not multilingual
       return validateStringValue(context, fieldName, fieldInternalType, (String) fieldValue, null);
+    }
+
+    return true;
+  }
+
+  public boolean validateMetadataObjects(
+      ConstraintValidatorContext context, String fieldName, Object fieldValue, Class<?> fieldType) {
+    // mandatory fields handled before this method is called
+    if (fieldValue != null) {
+      if (WebResource.class.isAssignableFrom(fieldType)) {
+        return validateWebResourceField(context, fieldName, (WebResource) fieldValue);
+      }
     }
 
     return true;

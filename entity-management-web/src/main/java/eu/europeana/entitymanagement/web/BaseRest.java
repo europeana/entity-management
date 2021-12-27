@@ -330,10 +330,8 @@ public abstract class BaseRest extends BaseRestController {
             .getValidator()
             .validate(entity, EntityFieldsEuropeanaProxyValidationGroup.class);
     if (!violations.isEmpty()) {
-      String responseInvalidRequestEntity = "";
-      for (ConstraintViolation<Entity> violation : violations) {
-        responseInvalidRequestEntity += " " + violation.getMessage();
-      }
+      String responseInvalidRequestEntity =
+          violations.stream().map(ConstraintViolation::getMessage).collect(Collectors.joining(" "));
       throw new HttpBadRequestException(
           String.format(
               "The request entity has an invalid format for one or more fields. %s",

@@ -224,4 +224,26 @@ public class EntityUpdateIT extends BaseWebControllerTest {
     Assertions.assertNull(europeanaProxyEntity.getNote());
     Assertions.assertNull(europeanaProxyEntity.getDepiction());
   }
+
+  @Test
+  void updateWithInvalidEntityShouldReturn400() throws Exception {
+    String europeanaMetadata = loadFile(IntegrationTestUtils.CONCEPT_REGISTER_BATHTUB_JSON);
+    String metisResponse = loadFile(IntegrationTestUtils.CONCEPT_BATHTUB_XML);
+
+    EntityRecord savedRecord =
+        createEntity(europeanaMetadata, metisResponse, IntegrationTestUtils.CONCEPT_BATHTUB_URI);
+
+    // check that consolidation is successful during registration
+    Assertions.assertNotNull(savedRecord.getEntity().getDepiction());
+
+    String requestPath = getEntityRequestPath(savedRecord.getEntityId());
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.put(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath)
+                .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                .content(
+                    loadFile(IntegrationTestUtils.CONCEPT_REGISTER_BATHTUB_JSON_INVALID_ISSHOWNBY))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+  }
 }

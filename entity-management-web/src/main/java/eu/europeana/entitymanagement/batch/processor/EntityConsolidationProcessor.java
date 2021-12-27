@@ -22,9 +22,12 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
-/** This {@link ItemProcessor} updates Entity metadata. */
+/**
+ * This {@link ItemProcessor} validates Entity metadata, then creates a consolidated entity by
+ * merging the metadata from all data sources .
+ */
 @Component
-public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, EntityRecord> {
+public class EntityConsolidationProcessor implements ItemProcessor<EntityRecord, EntityRecord> {
 
   private final EntityRecordService entityRecordService;
   private final ValidatorFactory emValidatorFactory;
@@ -32,7 +35,7 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
   private final EntityFieldsCleaner emEntityFieldCleaner;
   private final DataSources datasources;
 
-  public EntityUpdateProcessor(
+  public EntityConsolidationProcessor(
       EntityRecordService entityRecordService,
       ValidatorFactory emValidatorFactory,
       EntityFieldsCleaner emEntityFieldCleaner,

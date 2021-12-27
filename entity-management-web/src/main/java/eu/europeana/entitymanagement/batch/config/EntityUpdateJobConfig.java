@@ -10,9 +10,9 @@ import static eu.europeana.entitymanagement.definitions.batch.ScheduledTaskUtils
 import dev.morphia.query.experimental.filters.Filters;
 import eu.europeana.entitymanagement.batch.listener.EntityUpdateStepListener;
 import eu.europeana.entitymanagement.batch.listener.ScheduledTaskItemListener;
+import eu.europeana.entitymanagement.batch.processor.EntityConsolidationProcessor;
 import eu.europeana.entitymanagement.batch.processor.EntityDereferenceProcessor;
 import eu.europeana.entitymanagement.batch.processor.EntityMetricsProcessor;
-import eu.europeana.entitymanagement.batch.processor.EntityUpdateProcessor;
 import eu.europeana.entitymanagement.batch.reader.EntityRecordDatabaseReader;
 import eu.europeana.entitymanagement.batch.reader.ScheduledTaskDatabaseReader;
 import eu.europeana.entitymanagement.batch.service.FailedTaskService;
@@ -68,7 +68,7 @@ public class EntityUpdateJobConfig {
 
   private final ItemReader<EntityRecord> scheduledTaskReader;
   private final EntityDereferenceProcessor dereferenceProcessor;
-  private final EntityUpdateProcessor entityUpdateProcessor;
+  private final EntityConsolidationProcessor entityUpdateProcessor;
   private final EntityMetricsProcessor entityMetricsProcessor;
   private final EntityRecordDatabaseInsertionWriter dbInsertionWriter;
   private final EntitySolrInsertionWriter solrInsertionWriter;
@@ -105,7 +105,7 @@ public class EntityUpdateJobConfig {
       @Qualifier(SINGLE_ENTITY_RECORD_READER) ItemReader<EntityRecord> singleEntityRecordReader,
       @Qualifier(SCHEDULED_TASK_READER) ItemReader<EntityRecord> scheduledTaskReader,
       EntityDereferenceProcessor dereferenceProcessor,
-      EntityUpdateProcessor entityUpdateProcessor,
+      EntityConsolidationProcessor entityUpdateProcessor,
       EntityMetricsProcessor entityMetricsProcessor,
       EntityRecordDatabaseInsertionWriter dbInsertionWriter,
       EntitySolrInsertionWriter solrInsertionWriter,

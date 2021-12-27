@@ -23,7 +23,7 @@ public enum EntityFieldsTypes {
   isShownBy(
       EntityFieldsTypes.FIELD_TYPE_WEB_RESOURCE, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
   // the cardinality of the multilingual fields, means the number of values for one language
-  prefLabel(EntityFieldsTypes.FIELD_TYPE_TEXT, true, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
+  prefLabel(EntityFieldsTypes.FIELD_TYPE_TEXT, true, EntityFieldsTypes.FIELD_CARDINALITY_1_1, 1),
   altLabel(EntityFieldsTypes.FIELD_TYPE_TEXT, true, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
   hiddenLabel(
       EntityFieldsTypes.FIELD_TYPE_TEXT, true, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
@@ -152,13 +152,19 @@ public enum EntityFieldsTypes {
   private final String fieldType;
   private final boolean fieldIsmultilingual;
   private final String fieldCardinality;
+  private final int minContentCount;
 
-  private EntityFieldsTypes(
-      String fieldType, boolean fieldIsmultilingual, String fieldCardinality) {
+  EntityFieldsTypes(String fieldType, boolean fieldIsmultilingual, String fieldCardinality) {
+    this(fieldType, fieldIsmultilingual, fieldCardinality, 0);
+  }
+
+  EntityFieldsTypes(
+      String fieldType, boolean fieldIsmultilingual, String fieldCardinality, int minContentCount) {
 
     this.fieldType = fieldType;
     this.fieldIsmultilingual = fieldIsmultilingual;
     this.fieldCardinality = fieldCardinality;
+    this.minContentCount = minContentCount;
   }
 
   public String getFieldType() {
@@ -250,8 +256,12 @@ public enum EntityFieldsTypes {
     return fieldIsmultilingual;
   }
 
-  private String getFieldCardinality() {
+  public String getFieldCardinality() {
     return fieldCardinality;
+  }
+
+  public static int getMinContentCount(String fieldName) {
+    return valueOf(fieldName).minContentCount;
   }
 
   public static String getFieldCardinality(String fieldName) {
