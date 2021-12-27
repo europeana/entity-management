@@ -266,7 +266,7 @@ public abstract class BaseRest extends BaseRestController {
     if (languages == null || languages.isEmpty()) return;
 
     List<String> languagesList = Arrays.asList(languages.split(",", -1));
-    List<Field> entityFields = EntityUtils.getAllFieldsIncludingInherited(entity.getClass());
+    List<Field> entityFields = EntityUtils.getAllFields(entity.getClass());
     Map<String, Object> currentFieldValue;
     String fieldName = null;
     try {
