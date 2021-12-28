@@ -79,7 +79,7 @@
 "isShownBy":
 {
 "thumbnail":"https://api.europeana.eu/thumbnail/v2/url.json?uri=https%3A%2F%2Flh4.ggpht.com%2F6F6o5WKGTq8XtisUEXLjwnd0kA5cdTuXZ8HC1zScDFMuCt8--djkmPyDsHevbkefcF6FL2ikEZ-pFRHcepouGjmvW54%3Ds0&type=IMAGE",
-"isShownBy.source":"http://data.europeana.eu/item/90402/RP_P_OB_76_852",
+"source":"http://data.europeana.eu/item/90402/RP_P_OB_76_852",
 "id":"https://lh4.ggpht.com/6F6o5WKGTq8XtisUEXLjwnd0kA5cdTuXZ8HC1zScDFMuCt8--djkmPyDsHevbkefcF6FL2ikEZ-pFRHcepouGjmvW54=s0"
 },
 "internal_type":"TimeSpan",

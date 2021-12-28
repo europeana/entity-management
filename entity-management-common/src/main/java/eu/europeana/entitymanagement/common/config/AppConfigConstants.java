@@ -8,6 +8,8 @@ public class AppConfigConstants {
   public static final String BEAN_EM_LANGUAGE_CODES = "emLanguageCodes";
   public static final String BEAN_EM_VALIDATOR_FACTORY = "emValidatorFactory";
   public static final String BEAN_EM_ENTITY_FIELD_CLEANER = "emEntityFieldCleaner";
+  public static final String BEAN_EM_ENTITY_FIELD_DATATYPE_VALIDATION =
+      "emEntityFieldDatatypeValidation";
   public static final String BEAN_EM_SCORING_SERVICE = "emScoringService";
   public static final String BEAN_CLIENT_DETAILS_SERVICE = "clientDetailsService";
   public static final String BEAN_ENTITY_RECORD_REPO = "emEntityRecordRepo";

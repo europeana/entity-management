@@ -48,6 +48,8 @@ public class IntegrationTestUtils {
       "/content/concept_register_unknown.json";
   public static final String CONCEPT_REGISTER_BATHTUB_JSON =
       "/content/concept_register_bathtub.json";
+  public static final String CONCEPT_REGISTER_BATHTUB_JSON_INVALID =
+      "/content/concept_register_bathtub_invalid.json";
   public static final String AGENT_REGISTER_DAVINCI_JSON = "/content/agent_register_davinci.json";
   public static final String AGENT_REGISTER_STALIN_JSON = "/content/agent_register_stalin.json";
   public static final String AGENT_REGISTER_SCHEGK_JSON = "/content/agent_register_schegk.json";
@@ -69,6 +71,9 @@ public class IntegrationTestUtils {
 
   public static final String CONCEPT_BATHTUB_EMPTY_UPDATE_JSON =
       "/content/concept_update_bathtub_empty.json";
+
+  public static final String CONCEPT_BATHTUB_INVALID_ISSHOWNBY_UPDATE_JSON =
+      "/content/concept_update_bathtub_invalid_isshownby.json";
 
   public static final String CONCEPT_MACHINE_XML = "/metis-deref/concept_machine.xml";
   public static final String CONCEPT_BATHTUB_XML = "/metis-deref/concept-metis-bathtub.xml";

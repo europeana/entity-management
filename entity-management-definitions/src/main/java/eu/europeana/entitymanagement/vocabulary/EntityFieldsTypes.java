@@ -2,6 +2,11 @@ package eu.europeana.entitymanagement.vocabulary;
 
 import eu.europeana.entitymanagement.definitions.exceptions.EntityFieldAccessException;
 
+/**
+ * When updating the class with the new fields
+ *
+ * @author StevaneticS
+ */
 public enum EntityFieldsTypes {
 
   // General fields
@@ -12,8 +17,8 @@ public enum EntityFieldsTypes {
       EntityFieldsTypes.FIELD_TYPE_WEB_RESOURCE, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
   isShownBy(
       EntityFieldsTypes.FIELD_TYPE_WEB_RESOURCE, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
-  // there must be at least 1 prefLabel
-  prefLabel(EntityFieldsTypes.FIELD_TYPE_TEXT, true, EntityFieldsTypes.FIELD_CARDINALITY_0_1, 1),
+  // the cardinality of the multilingual fields, means the number of values for one language
+  prefLabel(EntityFieldsTypes.FIELD_TYPE_TEXT, true, EntityFieldsTypes.FIELD_CARDINALITY_1_1, 1),
   altLabel(EntityFieldsTypes.FIELD_TYPE_TEXT, true, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
   hiddenLabel(
       EntityFieldsTypes.FIELD_TYPE_TEXT, true, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
@@ -44,8 +49,9 @@ public enum EntityFieldsTypes {
       EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
   gender(EntityFieldsTypes.FIELD_TYPE_TEXT, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
   /*
-   * TODO: change the professionOrOccupation field to be multilingual if the type of the field in the class changes to Map.
-   * According to the specifications this field is multilingual but for now we keep it not.
+   * TODO: change the professionOrOccupation field to be multilingual if the type of the field in
+   * the class changes to Map. According to the specifications this field is multilingual but for
+   * now we keep it not.
    */
   professionOrOccupation(
       EntityFieldsTypes.FIELD_TYPE_TEXT_OR_URI,
@@ -109,7 +115,7 @@ public enum EntityFieldsTypes {
   postBox(EntityFieldsTypes.FIELD_TYPE_KEYWORD, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
   locality(EntityFieldsTypes.FIELD_TYPE_TEXT, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
   countryName(EntityFieldsTypes.FIELD_TYPE_TEXT, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
-  hasGeo(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
+  hasGeo(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
 
   source(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
   thumbnail(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
@@ -137,19 +143,18 @@ public enum EntityFieldsTypes {
   public static final String FIELD_CARDINALITY_0_1 = "0..1";
   public static final String FIELD_CARDINALITY_0_INFINITE = "0..*";
   public static final String FIELD_CARDINALITY_1_INFINITE = "1..*";
+  public static final String UNKNOWN_FIELD_STRING = "Unknown field: ";
 
   private final String fieldType;
   private final boolean fieldIsmultilingual;
   private final String fieldCardinality;
-
   private final int minContentCount;
 
-  private EntityFieldsTypes(
-      String fieldType, boolean fieldIsmultilingual, String fieldCardinality) {
+  EntityFieldsTypes(String fieldType, boolean fieldIsmultilingual, String fieldCardinality) {
     this(fieldType, fieldIsmultilingual, fieldCardinality, 0);
   }
 
-  private EntityFieldsTypes(
+  EntityFieldsTypes(
       String fieldType, boolean fieldIsmultilingual, String fieldCardinality, int minContentCount) {
 
     this.fieldType = fieldType;
@@ -175,7 +180,7 @@ public enum EntityFieldsTypes {
     try {
       return valueOf(fieldName).getFieldType();
     } catch (IllegalArgumentException e) {
-      throw new EntityFieldAccessException("Unknown field: " + fieldName, e);
+      throw new EntityFieldAccessException(UNKNOWN_FIELD_STRING + fieldName, e);
     }
   }
 
@@ -183,13 +188,13 @@ public enum EntityFieldsTypes {
     return hasTypeDefinition(fieldName) && valueOf(fieldName).getFieldIsmultilingual();
   }
 
-  public static boolean isList(String fieldName) {
+  public static boolean isListOrMap(String fieldName) {
     try {
       String cardinality = valueOf(fieldName).getFieldCardinality();
       return FIELD_CARDINALITY_0_INFINITE.equals(cardinality)
           || FIELD_CARDINALITY_1_INFINITE.equals(cardinality);
     } catch (IllegalArgumentException e) {
-      throw new EntityFieldAccessException("Unknown field: " + fieldName, e);
+      throw new EntityFieldAccessException(UNKNOWN_FIELD_STRING + fieldName, e);
     }
   }
 
@@ -199,7 +204,7 @@ public enum EntityFieldsTypes {
       return FIELD_CARDINALITY_1_INFINITE.equals(cardinality)
           || FIELD_CARDINALITY_1_1.equals(cardinality);
     } catch (IllegalArgumentException e) {
-      throw new EntityFieldAccessException("Unknown field: " + fieldName, e);
+      throw new EntityFieldAccessException(UNKNOWN_FIELD_STRING + fieldName, e);
     }
   }
 
@@ -209,12 +214,8 @@ public enum EntityFieldsTypes {
       String cardinality = valueOf(fieldName).getFieldCardinality();
       return FIELD_CARDINALITY_0_1.equals(cardinality) || FIELD_CARDINALITY_1_1.equals(cardinality);
     } catch (IllegalArgumentException e) {
-      throw new EntityFieldAccessException("Unknown field: " + fieldName, e);
+      throw new EntityFieldAccessException(UNKNOWN_FIELD_STRING + fieldName, e);
     }
-  }
-
-  public static int getMinContentCount(String fieldName) {
-    return valueOf(fieldName).minContentCount;
   }
 
   boolean getFieldIsmultilingual() {
@@ -223,5 +224,17 @@ public enum EntityFieldsTypes {
 
   public String getFieldCardinality() {
     return fieldCardinality;
+  }
+
+  public static int getMinContentCount(String fieldName) {
+    return valueOf(fieldName).minContentCount;
+  }
+
+  public static String getFieldCardinality(String fieldName) {
+    try {
+      return valueOf(fieldName).getFieldCardinality();
+    } catch (IllegalArgumentException e) {
+      throw new EntityFieldAccessException(UNKNOWN_FIELD_STRING + fieldName, e);
+    }
   }
 }

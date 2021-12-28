@@ -276,4 +276,14 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isBadRequest());
   }
+
+  @Test
+  void registrationWithInvalidEntityShouldReturn400() throws Exception {
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL)
+                .content(loadFile(IntegrationTestUtils.CONCEPT_REGISTER_BATHTUB_JSON_INVALID))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().isBadRequest());
+  }
 }

@@ -85,14 +85,37 @@ public class EntityObjectFactory {
 
   public static <T extends Entity> T createConsolidatedEntityObject(Entity entity)
       throws EntityCreationException {
-
     try {
       @SuppressWarnings("unchecked")
-      Class<T> entityClass =
+      Class<T> consolidatedEntityClass =
           (Class<T>) consolidatedEntityTypesClassMap.get(EntityTypes.valueOf(entity.getType()));
-      // entityClass cannot be null here as map contains all possible types
-      return entityClass.getDeclaredConstructor(entityClass).newInstance(entity);
-
+      switch (EntityTypes.valueOf(entity.getType())) {
+        case Place:
+          return consolidatedEntityClass
+              .getDeclaredConstructor(consolidatedEntityClass)
+              .newInstance((Place) entity);
+        case Agent:
+          return consolidatedEntityClass
+              .getDeclaredConstructor(Agent.class)
+              .newInstance((Agent) entity);
+        case Concept:
+          return consolidatedEntityClass
+              .getDeclaredConstructor(consolidatedEntityClass)
+              .newInstance((Concept) entity);
+        case Organization:
+          return consolidatedEntityClass
+              .getDeclaredConstructor(consolidatedEntityClass)
+              .newInstance((Organization) entity);
+        case TimeSpan:
+          return consolidatedEntityClass
+              .getDeclaredConstructor(consolidatedEntityClass)
+              .newInstance((TimeSpan) entity);
+        default:
+          throw new EntityManagementRuntimeException(
+              String.format(
+                  "Encountered invalid entityType %s in entityId=%s",
+                  entity.getType(), entity.getEntityId()));
+      }
     } catch (Exception e) {
       throw new EntityCreationException(
           "Error when creating consolidated copy from enitity " + entity.getEntityId(), e);

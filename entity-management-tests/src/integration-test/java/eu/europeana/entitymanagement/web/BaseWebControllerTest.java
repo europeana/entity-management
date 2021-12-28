@@ -17,11 +17,11 @@ import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
+import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.testutils.TestConfig;
-import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
 import java.io.IOException;
@@ -142,8 +142,8 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
   }
 
   protected EntityRecord createEntity(
-      String europeanaMetadata, String metisResponse, String externalId) throws Exception {
-    EntityPreview entityPreview = objectMapper.readValue(europeanaMetadata, EntityPreview.class);
+      String europeanaProxyEntityStr, String metisResponse, String externalId) throws Exception {
+    Entity europeanaProxyEntity = objectMapper.readValue(europeanaProxyEntityStr, Entity.class);
     XmlBaseEntityImpl<?> xmlBaseEntity =
         MetisDereferenceUtils.parseMetisResponse(
             jaxbContext.createUnmarshaller(), externalId, metisResponse);
@@ -152,7 +152,7 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
     DataSource dataSource = datasources.verifyDataSource(externalId, false);
     EntityRecord savedRecord =
         entityRecordService.createEntityFromRequest(
-            entityPreview, xmlBaseEntity.toEntityModel(), dataSource);
+            europeanaProxyEntity, xmlBaseEntity.toEntityModel(), dataSource);
 
     // trigger update to generate consolidated entity
     entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId());
@@ -161,14 +161,13 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
     return entityRecordService.retrieveByEntityId(savedRecord.getEntityId()).orElseThrow();
   }
 
-  protected EntityRecord createOrganization(String europeanaMetadata, Record zohoOrganization)
+  protected EntityRecord createOrganization(String europeanaProxyEntityStr, Record zohoOrganization)
       throws Exception {
-    EntityPreview entityPreview = objectMapper.readValue(europeanaMetadata, EntityPreview.class);
-
-    DataSource dataSource = datasources.verifyDataSource(entityPreview.getId(), false);
+    Entity europeanaProxyEntity = objectMapper.readValue(europeanaProxyEntityStr, Entity.class);
+    DataSource dataSource = datasources.verifyDataSource(europeanaProxyEntity.getEntityId(), false);
     EntityRecord savedRecord =
         entityRecordService.createEntityFromRequest(
-            entityPreview,
+            europeanaProxyEntity,
             ZohoOrganizationConverter.convertToOrganizationEntity(zohoOrganization),
             dataSource);
 
