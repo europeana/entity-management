@@ -241,8 +241,7 @@ public class EntityUpdateIT extends BaseWebControllerTest {
         .perform(
             MockMvcRequestBuilders.put(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath)
                 .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
-                .content(
-                    loadFile(IntegrationTestUtils.CONCEPT_REGISTER_BATHTUB_JSON_INVALID_ISSHOWNBY))
+                .content(loadFile(IntegrationTestUtils.CONCEPT_REGISTER_BATHTUB_JSON_INVALID))
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }

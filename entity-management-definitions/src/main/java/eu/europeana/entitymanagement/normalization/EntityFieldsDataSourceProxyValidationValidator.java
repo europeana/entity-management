@@ -23,6 +23,7 @@ public class EntityFieldsDataSourceProxyValidationValidator
 
   @Override
   public boolean isValid(Entity entity, ConstraintValidatorContext context) {
+    context.disableDefaultConstraintViolation();
     return EntityUtils.validateEntity(
         entity, context, emEntityFieldDatatypeValidation, false, false);
   }

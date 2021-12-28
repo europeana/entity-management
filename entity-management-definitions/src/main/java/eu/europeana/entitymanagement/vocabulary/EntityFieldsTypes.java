@@ -1,11 +1,6 @@
 package eu.europeana.entitymanagement.vocabulary;
 
-import eu.europeana.entitymanagement.common.config.GeneralUtils;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityFieldAccessException;
-import eu.europeana.entitymanagement.definitions.model.Address;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.WebResource;
-import java.lang.reflect.Field;
 
 /**
  * When updating the class with the new fields
@@ -148,6 +143,7 @@ public enum EntityFieldsTypes {
   public static final String FIELD_CARDINALITY_0_1 = "0..1";
   public static final String FIELD_CARDINALITY_0_INFINITE = "0..*";
   public static final String FIELD_CARDINALITY_1_INFINITE = "1..*";
+  public static final String UNKNOWN_FIELD_STRING = "Unknown field: ";
 
   private final String fieldType;
   private final boolean fieldIsmultilingual;
@@ -184,42 +180,12 @@ public enum EntityFieldsTypes {
     try {
       return valueOf(fieldName).getFieldType();
     } catch (IllegalArgumentException e) {
-      throw new EntityFieldAccessException("Unknown field: " + fieldName, e);
+      throw new EntityFieldAccessException(UNKNOWN_FIELD_STRING + fieldName, e);
     }
   }
 
   public static boolean isMultilingual(String fieldName) {
     return hasTypeDefinition(fieldName) && valueOf(fieldName).getFieldIsmultilingual();
-  }
-
-  // checks if the object type is equal to one of the fields types, meaning that it is an object.
-  public static boolean hasClassTypeOfField(Class<?> objectClass) {
-    if (objectClass == null) return false;
-    for (EntityFieldsTypes type : EntityFieldsTypes.values()) {
-      if (GeneralUtils.getSimpleClassName(objectClass.toString()).equals(type.getFieldType())) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /*
-   * Gets the field value from the object for the fields that are of type Class
-   */
-  public static Object getFieldValue(Object object, Field field)
-      throws IllegalArgumentException, IllegalAccessException {
-    if (Entity.class.isAssignableFrom(object.getClass())) {
-      return ((Entity) object).getFieldValue(field);
-    }
-
-    switch (GeneralUtils.getSimpleClassName(object.getClass().toString())) {
-      case (EntityFieldsTypes.FIELD_TYPE_WEB_RESOURCE):
-        return ((WebResource) object).getFieldValue(field);
-      case (EntityFieldsTypes.FIELD_TYPE_ADDRESS):
-        return ((Address) object).getFieldValue(field);
-    }
-
-    return null;
   }
 
   public static boolean isListOrMap(String fieldName) {
@@ -228,7 +194,7 @@ public enum EntityFieldsTypes {
       return FIELD_CARDINALITY_0_INFINITE.equals(cardinality)
           || FIELD_CARDINALITY_1_INFINITE.equals(cardinality);
     } catch (IllegalArgumentException e) {
-      throw new EntityFieldAccessException("Unknown field: " + fieldName, e);
+      throw new EntityFieldAccessException(UNKNOWN_FIELD_STRING + fieldName, e);
     }
   }
 
@@ -238,7 +204,7 @@ public enum EntityFieldsTypes {
       return FIELD_CARDINALITY_1_INFINITE.equals(cardinality)
           || FIELD_CARDINALITY_1_1.equals(cardinality);
     } catch (IllegalArgumentException e) {
-      throw new EntityFieldAccessException("Unknown field: " + fieldName, e);
+      throw new EntityFieldAccessException(UNKNOWN_FIELD_STRING + fieldName, e);
     }
   }
 
@@ -248,7 +214,7 @@ public enum EntityFieldsTypes {
       String cardinality = valueOf(fieldName).getFieldCardinality();
       return FIELD_CARDINALITY_0_1.equals(cardinality) || FIELD_CARDINALITY_1_1.equals(cardinality);
     } catch (IllegalArgumentException e) {
-      throw new EntityFieldAccessException("Unknown field: " + fieldName, e);
+      throw new EntityFieldAccessException(UNKNOWN_FIELD_STRING + fieldName, e);
     }
   }
 
@@ -268,7 +234,7 @@ public enum EntityFieldsTypes {
     try {
       return valueOf(fieldName).getFieldCardinality();
     } catch (IllegalArgumentException e) {
-      throw new EntityFieldAccessException("Unknown field: " + fieldName, e);
+      throw new EntityFieldAccessException(UNKNOWN_FIELD_STRING + fieldName, e);
     }
   }
 }

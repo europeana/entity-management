@@ -63,7 +63,7 @@ public class EntityFieldsDatatypeValidation {
   private void addUriNotAllowedConstraint(
       ConstraintValidatorContext context, String fieldName, String fieldValue, String key) {
     String messageTemplate =
-        "The entity field: " + fieldName + ", must not contain URI: " + fieldValue + ".";
+        "The entity field '" + fieldName + "' must not contain URI: " + fieldValue + ".";
     if (key != null) {
       messageTemplate += " for key: " + key;
     }
@@ -110,7 +110,7 @@ public class EntityFieldsDatatypeValidation {
     if (webResource.getId() == null
         || !validateUri(
             context, fieldName, EntityFieldsTypes.getFieldType(fieldName), webResource.getId())) {
-      addConstraint(context, "Field " + fieldName + " has an invalid or empty id value");
+      addConstraint(context, "Field '" + fieldName + "' has an invalid or empty id value.");
       isValid = false;
     }
     if (webResource.getSource() == null
@@ -119,7 +119,7 @@ public class EntityFieldsDatatypeValidation {
             fieldName,
             EntityFieldsTypes.getFieldType(fieldName),
             webResource.getSource())) {
-      addConstraint(context, "Field " + fieldName + " has an invalid or empty source value");
+      addConstraint(context, "Field '" + fieldName + "' has an invalid or empty source value.");
       isValid = false;
     }
 
@@ -130,7 +130,7 @@ public class EntityFieldsDatatypeValidation {
             fieldName,
             EntityFieldsTypes.getFieldType(fieldName),
             webResource.getThumbnail())) {
-      addConstraint(context, "Field " + fieldName + " has an invalid or empty thumbnail value");
+      addConstraint(context, "Field '" + fieldName + "' has an invalid or empty thumbnail value.");
       isValid = false;
     }
     return isValid;
@@ -139,7 +139,8 @@ public class EntityFieldsDatatypeValidation {
   private boolean hasFieldCardinalityViolation(
       ConstraintValidatorContext context, String fieldName, List<String> fieldValues) {
     if (EntityFieldsTypes.isSingleValueField(fieldName) && fieldValues.size() > 1) {
-      addConstraint(context, "The entity field: " + fieldName + " cannot have more than one value");
+      addConstraint(
+          context, "The entity field '" + fieldName + "' cannot have more than one value");
       return true;
     }
     return false;
@@ -153,9 +154,9 @@ public class EntityFieldsDatatypeValidation {
     } else {
       addConstraint(
           context,
-          "The entity field: "
+          "The entity field '"
               + fieldName
-              + " is of type Email and contains inappropriate characters: "
+              + "' is of type Email and contains inappropriate characters: "
               + fieldValue
               + ".");
       return false;
@@ -208,9 +209,9 @@ public class EntityFieldsDatatypeValidation {
     } catch (DateTimeParseException e) {
       addConstraint(
           context,
-          "The entity field: "
+          "The entity field '"
               + fieldName
-              + " is of type Date and does not comply with the ISO-8601 format: "
+              + "' is of type Date and does not comply with the ISO-8601 format: "
               + fieldValue
               + ".");
       return false;
@@ -274,9 +275,9 @@ public class EntityFieldsDatatypeValidation {
       String fieldValue) {
     addConstraint(
         context,
-        "The entity field: "
+        "The entity field '"
             + fieldName
-            + " is of type: "
+            + "' is of type: "
             + fieldInternalType
             + " but the value it contains: "
             + fieldValue
@@ -313,9 +314,9 @@ public class EntityFieldsDatatypeValidation {
           // check cardinality for list
           addConstraint(
               context,
-              "The entity field: "
+              "The entity field '"
                   + fieldName
-                  + " cardinality: "
+                  + "' cardinality: "
                   + EntityFieldsTypes.getFieldCardinality(fieldName)
                   + " and must be represented as list");
           localReturnValue = false;
@@ -338,9 +339,9 @@ public class EntityFieldsDatatypeValidation {
           // check cardinality for single valued
           addConstraint(
               context,
-              "The entity field: "
+              "The entity field '"
                   + fieldName
-                  + " cardinality: "
+                  + "' cardinality: "
                   + EntityFieldsTypes.getFieldCardinality(fieldName)
                   + " and must not be represented as list");
           localReturnValue = false;
@@ -385,9 +386,9 @@ public class EntityFieldsDatatypeValidation {
           && !emLanguageCodes.isValidAltLanguageCode(key)) {
         addConstraint(
             context,
-            "The entity field: "
+            "The entity field '"
                 + fieldName
-                + " contains the language code: "
+                + "' contains the language code: "
                 + key
                 + " that does not belong to the Europena languge codes.");
         if (isValid) isValid = false;

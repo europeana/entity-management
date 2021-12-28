@@ -23,7 +23,7 @@ public class EntityFieldsCompleteValidationValidator
 
   @Override
   public boolean isValid(Entity entity, ConstraintValidatorContext context) {
-
+    context.disableDefaultConstraintViolation();
     return EntityUtils.validateEntity(entity, context, emEntityFieldDatatypeValidation, true, true);
   }
 }
