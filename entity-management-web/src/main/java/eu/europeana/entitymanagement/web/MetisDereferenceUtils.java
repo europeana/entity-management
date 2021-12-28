@@ -48,7 +48,7 @@ public class MetisDereferenceUtils {
         derefResult.getEnrichmentBaseResultWrapperList().get(0).getEnrichmentBaseList().stream()
             // Metis sometimes returns multiple entities in result. Make sure the correct one is
             // picked.
-            .filter(e -> id.equals(e.getAbout()))
+            .filter(e -> (id.equals(e.getAbout()) || e.hasCoref(id)))
             .findFirst();
 
     if (entityOptional.isEmpty()) {

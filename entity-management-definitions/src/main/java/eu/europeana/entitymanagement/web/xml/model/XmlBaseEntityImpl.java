@@ -106,4 +106,12 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
   public abstract List<LabelledResource> getSameReferenceLinks();
 
   public abstract void setSameReferenceLinks(List<LabelledResource> uris);
+  
+  public boolean hasCoref(String uri) {
+    if(uri == null || getSameReferenceLinks() == null || getSameReferenceLinks().isEmpty()) {
+      return false;
+    }
+    
+    return getSameReferenceLinks().stream().anyMatch(e -> uri.equals(e.getResource()));
+  }
 }
