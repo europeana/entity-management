@@ -20,7 +20,6 @@
       <groupId>eu.europeana.api</groupId>
       <artifactId>entity-management-web</artifactId>
       <version>${project.version}</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>eu.europeana.api</groupId>
