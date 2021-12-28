@@ -4,10 +4,6 @@ import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getDatasourc
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEuropeanaAggregationId;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEuropeanaProxyId;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getIsAggregatedById;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_ID;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_AGGREGATED_BY;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
 import static java.time.Instant.now;
 
 import com.mongodb.client.result.UpdateResult;
@@ -19,16 +15,7 @@ import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
-import eu.europeana.entitymanagement.definitions.model.Address;
-import eu.europeana.entitymanagement.definitions.model.Agent;
-import eu.europeana.entitymanagement.definitions.model.Aggregation;
-import eu.europeana.entitymanagement.definitions.model.Concept;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.EntityProxy;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.Place;
-import eu.europeana.entitymanagement.definitions.model.TimeSpan;
-import eu.europeana.entitymanagement.definitions.model.WebResource;
+import eu.europeana.entitymanagement.definitions.model.*;
 import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
 import eu.europeana.entitymanagement.exception.EntityAlreadyExistsException;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
@@ -43,21 +30,10 @@ import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.utils.UriValidator;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
-import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
@@ -77,10 +53,6 @@ public class EntityRecordService {
   private static final Logger logger = LogManager.getLogger(EntityRecordService.class);
 
   private static final String ENTITY_ID_REMOVED_MSG = "Entity '%s' has been removed";
-
-  /** Fields to ignore when updating entities from user request */
-  private final List<String> UPDATE_FIELDS_TO_IGNORE =
-      List.of(ID, TYPE, ENTITY_ID, IS_AGGREGATED_BY);
 
   @Autowired
   public EntityRecordService(
@@ -191,10 +163,10 @@ public class EntityRecordService {
   }
 
   /**
-   * Creates an {@link EntityRecord} from an {@link EntityPreview}, which is then persisted. Note :
-   * This method is used for creating Entity for Migration requests
+   * Creates an {@link EntityRecord} from an {@link Entity}, which is then persisted. Note : This
+   * method is used for creating Entity for Migration requests
    *
-   * @param entityCreationRequest
+   * @param europeanaProxyEntity
    * @param type type of entity
    * @param identifier id of entity
    * @return Saved Entity record
@@ -203,70 +175,63 @@ public class EntityRecordService {
    * @throws HttpBadRequestException
    */
   public EntityRecord createEntityFromMigrationRequest(
-      EntityPreview entityCreationRequest, String type, String identifier)
+      Entity europeanaProxyEntity, String type, String identifier)
       throws EntityCreationException, EntityAlreadyExistsException, HttpBadRequestException,
           HttpUnprocessableException {
+
+    String externalProxyId = europeanaProxyEntity.getEntityId();
+
     // Fail quick if no datasource is configured
-    DataSource externalDatasource =
-        datasources.verifyDataSource(entityCreationRequest.getId(), true);
+    DataSource externalDatasource = datasources.verifyDataSource(externalProxyId, true);
 
     Date timestamp = new Date();
-    Entity entity = EntityObjectFactory.createProxyEntityObject(type);
-    EntityRecord entityRecord = new EntityRecord();
+
+    Entity entity = EntityObjectFactory.createConsolidatedEntityObject(type);
     String entityId = generateEntityId(entity.getType(), identifier);
     // check if entity already exists
     // this is avoid MongoDb exception for duplicate key
     checkIfEntityAlreadyExists(entityId);
-
-    entityRecord.setEntityId(entityId);
     entity.setEntityId(entityId);
     /*
      * sameAs will be replaced during consolidation; however we set this here to prevent duplicate
      * registrations if consolidation fails
      */
-    entity.setSameReferenceLinks(new ArrayList<>(List.of(entityCreationRequest.getId())));
+    entity.setSameReferenceLinks(new ArrayList<>(List.of(externalProxyId)));
+    EntityRecord entityRecord = new EntityRecord();
+    entityRecord.setEntityId(entityId);
     entityRecord.setEntity(entity);
 
-    Entity europeanaProxyMetadata = EntityObjectFactory.createProxyEntityObject(type);
-    // copy metadata from request into entity
-    europeanaProxyMetadata.setEntityId(entityId);
-    copyPreviewMetadata(europeanaProxyMetadata, entityCreationRequest);
-    setEuropeanaMetadata(europeanaProxyMetadata, entityId, entityRecord, timestamp);
+    europeanaProxyEntity.setEntityId(entityId);
+    setEuropeanaMetadata(europeanaProxyEntity, entityId, entityRecord, timestamp);
 
     // create metis Entity
     Entity metisEntity = EntityObjectFactory.createProxyEntityObject(type);
 
     setExternalProxy(
-        metisEntity,
-        entityCreationRequest.getId(),
-        entityId,
-        externalDatasource,
-        entityRecord,
-        timestamp,
-        1);
+        metisEntity, externalProxyId, entityId, externalDatasource, entityRecord, timestamp, 1);
 
     setEntityAggregation(entityRecord, entityId, timestamp);
     return entityRecordRepository.save(entityRecord);
   }
 
   /**
-   * Creates an {@link EntityRecord} from an {@link EntityPreview}, which is then persisted.
+   * Creates an {@link EntityRecord} from an {@link Entity}, which is then persisted.
    *
-   * @param entityCreationRequest de-referenced XML response instance from Metis
+   * @param europeanaProxyEntity Entity for the europeana proxy
    * @param datasourceResponse Entity obtained from de-referencing
    * @param dataSource the data source identified for the given entity id
    * @return Saved Entity record
    * @throws EntityCreationException if an error occurs
    */
   public EntityRecord createEntityFromRequest(
-      EntityPreview entityCreationRequest, Entity datasourceResponse, DataSource dataSource)
+      Entity europeanaProxyEntity, Entity datasourceResponse, DataSource dataSource)
       throws EntityCreationException {
+
     // Fail quick if no datasource is configured
-    String externalProxyId = entityCreationRequest.getId();
+    String externalProxyId = europeanaProxyEntity.getEntityId();
 
     Date timestamp = new Date();
-    Entity entity =
-        EntityObjectFactory.createConsolidatedEntityObject(datasourceResponse.getType());
+    Entity entity = EntityObjectFactory.createConsolidatedEntityObject(europeanaProxyEntity);
 
     boolean isZohoOrg = ZohoUtils.isZohoOrganization(externalProxyId, datasourceResponse.getType());
     String entityId = generateEntityId(datasourceResponse, isZohoOrg);
@@ -283,22 +248,13 @@ public class EntityRecordService {
     entity.setSameReferenceLinks(sameAs);
     entityRecord.setEntity(entity);
 
-    Entity europeanaProxyMetadata =
-        EntityObjectFactory.createProxyEntityObject(datasourceResponse.getType());
-    // copy metadata from request into entity
-    europeanaProxyMetadata.setEntityId(entityId);
-    copyPreviewMetadata(europeanaProxyMetadata, entityCreationRequest);
-    setEuropeanaMetadata(europeanaProxyMetadata, entityId, entityRecord, timestamp);
+    // copy the newly generated europeana id
+    europeanaProxyEntity.setEntityId(entityId);
+    setEuropeanaMetadata(europeanaProxyEntity, entityId, entityRecord, timestamp);
 
     // create default external proxy
     setExternalProxy(
-        datasourceResponse,
-        entityCreationRequest.getId(),
-        entityId,
-        dataSource,
-        entityRecord,
-        timestamp,
-        1);
+        datasourceResponse, externalProxyId, entityId, dataSource, entityRecord, timestamp, 1);
 
     setEntityAggregation(entityRecord, entityId, timestamp);
     // for Zoho organizations, create second proxy for Wikidata metadata
@@ -374,19 +330,6 @@ public class EntityRecordService {
     if (entityRecordOptional.isPresent()) {
       throw new EntityAlreadyExistsException(entityId);
     }
-  }
-
-  /**
-   * Copies metadata provided during Entity creation, into the created Entity
-   *
-   * @param entity entity
-   * @param entityCreationRequest entity creation request
-   */
-  private void copyPreviewMetadata(Entity entity, EntityPreview entityCreationRequest) {
-    entity.setPrefLabel(entityCreationRequest.getPrefLabel());
-    entity.setAltLabel(entityCreationRequest.getAltLabel());
-    entity.setDepiction(entityCreationRequest.getDepiction());
-    entity.setIsShownBy(entityCreationRequest.getIsShownBy());
   }
 
   /**
@@ -600,49 +543,6 @@ public class EntityRecordService {
     europeanaProxy.getEntity().setEntityId(entityId);
 
     europeanaProxy.getProxyIn().setModified(Date.from(now()));
-  }
-
-  /**
-   * Updates Europeana proxy metadata with the provided entity metadata.
-   *
-   * @param updateEntity entity to copy metadata from
-   * @param entityRecord entity record
-   * @throws Exception if error occurs
-   */
-  public void updateEuropeanaProxy(Entity updateEntity, EntityRecord entityRecord)
-      throws Exception {
-    EntityProxy europeanaProxy = entityRecord.getEuropeanaProxy();
-
-    List<Field> allFields = EntityUtils.getAllFields(updateEntity.getClass());
-
-    List<Field> filteredList =
-        allFields.stream()
-            .filter(field -> !UPDATE_FIELDS_TO_IGNORE.contains(field.getName()))
-            .collect(Collectors.toUnmodifiableList());
-
-    Entity europeanaProxyEntity = europeanaProxy.getEntity();
-    /*
-     * updateEntity considered as "primary", since its values take precedence over existing metadata.
-     * We also overwrite collection fields, instead of concatenating them
-     */
-
-    Entity updatedEntity = combineEntities(updateEntity, europeanaProxyEntity, filteredList, false);
-
-    // finally copy over ignored fields from the existing metadata
-    List<Field> ignoredFields =
-        allFields.stream()
-            .filter(field -> UPDATE_FIELDS_TO_IGNORE.contains(field.getName()))
-            .collect(Collectors.toUnmodifiableList());
-
-    for (Field field : ignoredFields) {
-      updatedEntity.setFieldValue(field, europeanaProxyEntity.getFieldValue(field));
-    }
-
-    europeanaProxy.setEntity(updatedEntity);
-
-    if (europeanaProxy.getProxyIn() != null) {
-      europeanaProxy.getProxyIn().setModified(new Date());
-    }
   }
 
   /**

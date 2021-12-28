@@ -8,8 +8,8 @@ import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.ingestion.EntityValidationException;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
-import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatorGroup;
-import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorGroup;
+import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidationGroup;
+import eu.europeana.entitymanagement.normalization.EntityFieldsDataSourceProxyValidationGroup;
 import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import java.util.List;
@@ -22,9 +22,12 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
-/** This {@link ItemProcessor} updates Entity metadata. */
+/**
+ * This {@link ItemProcessor} validates Entity metadata, then creates a consolidated entity by
+ * merging the metadata from all data sources .
+ */
 @Component
-public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, EntityRecord> {
+public class EntityConsolidationProcessor implements ItemProcessor<EntityRecord, EntityRecord> {
 
   private final EntityRecordService entityRecordService;
   private final ValidatorFactory emValidatorFactory;
@@ -32,7 +35,7 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
   private final EntityFieldsCleaner emEntityFieldCleaner;
   private final DataSources datasources;
 
-  public EntityUpdateProcessor(
+  public EntityConsolidationProcessor(
       EntityRecordService entityRecordService,
       ValidatorFactory emValidatorFactory,
       EntityFieldsCleaner emEntityFieldCleaner,
@@ -55,7 +58,7 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
 
     // do not validate static data sources
     if (!isStaticDataSource) {
-      validateMinimalConstraints(externalProxyEntity);
+      validateDataSourceProxyConstraints(externalProxyEntity);
     }
 
     // entities from static datasources should not have multiple proxies
@@ -64,7 +67,7 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
       for (int i = 1; i < externalProxies.size(); i++) {
         Entity secondaryProxyEntity = externalProxies.get(i).getEntity();
         // validate each proxy's metadata before merging
-        validateMinimalConstraints(secondaryProxyEntity);
+        validateDataSourceProxyConstraints(secondaryProxyEntity);
         externalProxyEntity =
             entityRecordService.mergeEntities(externalProxyEntity, secondaryProxyEntity);
       }
@@ -87,29 +90,32 @@ public class EntityUpdateProcessor implements ItemProcessor<EntityRecord, Entity
 
     emEntityFieldCleaner.cleanAndNormalize(consolidatedEntity);
     entityRecordService.performReferentialIntegrity(consolidatedEntity);
-    validateCompleteConstraints(consolidatedEntity);
+    validateCompleteValidationConstraints(consolidatedEntity);
     entityRecordService.updateConsolidatedVersion(entityRecord, consolidatedEntity);
 
     return entityRecord;
   }
 
-  private void validateCompleteConstraints(Entity entity) throws EntityValidationException {
+  private void validateCompleteValidationConstraints(Entity entity)
+      throws EntityValidationException {
     Set<ConstraintViolation<Entity>> violations =
         emValidatorFactory
             .getValidator()
-            .validate(entity, EntityFieldsCompleteValidatorGroup.class);
+            .validate(entity, EntityFieldsCompleteValidationGroup.class);
     if (!violations.isEmpty()) {
       throw new EntityValidationException(
           "The consolidated entity contains invalid data!", violations);
     }
   }
 
-  private void validateMinimalConstraints(Entity entity) throws EntityValidationException {
+  private void validateDataSourceProxyConstraints(Entity entity) throws EntityValidationException {
     Set<ConstraintViolation<Entity>> violations =
-        emValidatorFactory.getValidator().validate(entity, EntityFieldsMinimalValidatorGroup.class);
+        emValidatorFactory
+            .getValidator()
+            .validate(entity, EntityFieldsDataSourceProxyValidationGroup.class);
     if (!violations.isEmpty()) {
       throw new EntityValidationException(
-          "The entity from the external source contains invalid data!", violations);
+          "The entity from the external data source contains invalid data!", violations);
     }
   }
 }

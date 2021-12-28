@@ -11,6 +11,7 @@ import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
+import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
@@ -19,7 +20,6 @@ import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
-import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import io.swagger.annotations.ApiOperation;
 import java.util.Collections;
@@ -123,7 +123,7 @@ public class EntityAdminController extends BaseRest {
       @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
       @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
       @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
-      @RequestBody EntityPreview entityCreationRequest,
+      @RequestBody Entity europeanaProxyEntity,
       HttpServletRequest request)
       throws HttpException, EuropeanaApiException {
     if (emConfig.isAuthEnabled()) {
@@ -131,6 +131,9 @@ public class EntityAdminController extends BaseRest {
       // verifyWriteAccess(Operations.CREATE, request);
       verifyMigrationAccess(request);
     }
+
+    validateBodyEntity(europeanaProxyEntity);
+
     try {
       // get the entity type based on path param
       type = EntityTypes.getByEntityType(type).getEntityType();
@@ -140,10 +143,10 @@ public class EntityAdminController extends BaseRest {
 
     EntityRecord savedEntityRecord =
         entityRecordService.createEntityFromMigrationRequest(
-            entityCreationRequest, type, identifier);
+            europeanaProxyEntity, type, identifier);
     LOG.info(
         "Created Entity record for {}; entityId={}",
-        entityCreationRequest.getId(),
+        europeanaProxyEntity.getEntityId(),
         savedEntityRecord.getEntityId());
     return generateResponseEntity(
         request,
@@ -201,6 +204,7 @@ public class EntityAdminController extends BaseRest {
   private void verifyMigrationAccess(HttpServletRequest request)
       throws ApplicationAuthenticationException {
     String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
+
     if (!StringUtils.hasLength(authorization) || !authorization.startsWith("Bearer")) {
       throw new ApplicationAuthenticationException(
           "User is not authorised to perform this action", null);

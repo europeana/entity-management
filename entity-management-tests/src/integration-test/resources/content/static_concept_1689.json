@@ -3,7 +3,6 @@
   "type": "Concept",
   "prefLabel": {
     "bg": "Негативен отпечатък",
-    "ca": "Negatiu en paper",
     "da": "Negative udskrifter",
     "de": "Negativ-Abzüge",
     "en": "Negative prints",
@@ -13,10 +12,7 @@
     "lt": "Negatyvo atspaudai",
     "nl": "Negatiefdruk",
     "pl": "Odbitki negatywowe",
-    "ru": "Оттиск негатива",
-    "sl": "Tlač z negatívu",
-    "uk": "Відтиснення негативу",
-    "zh": "负片"
+    "sl": "Tlač z negatívu"
   },
   "altLabel": {
     "de": [

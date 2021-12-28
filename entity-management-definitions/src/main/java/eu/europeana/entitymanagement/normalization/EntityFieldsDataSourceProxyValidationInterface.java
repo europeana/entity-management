@@ -14,10 +14,10 @@ import javax.validation.Payload;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = EntityFieldsMinimalValidator.class)
-public @interface EntityFieldsMinimalValidatorInterface {
+@Constraint(validatedBy = EntityFieldsDataSourceProxyValidationValidator.class)
+public @interface EntityFieldsDataSourceProxyValidationInterface {
 
-  String message() default "The entity medatada is not valid. See constraint validation list.";
+  String message() default "";
 
   Class<?>[] groups() default {};
 

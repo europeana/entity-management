@@ -5,13 +5,13 @@ import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.config.DataSources;
+import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
 import eu.europeana.entitymanagement.testutils.MongoContainer;
 import eu.europeana.entitymanagement.testutils.SolrContainer;
 import eu.europeana.entitymanagement.web.MetisDereferenceUtils;
-import eu.europeana.entitymanagement.web.model.EntityPreview;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import java.io.IOException;
@@ -173,8 +173,8 @@ public abstract class AbstractIntegrationTest {
   }
 
   protected EntityRecord createEntity(
-      String europeanaMetadata, String metisResponse, String externalId) throws Exception {
-    EntityPreview entityPreview = objectMapper.readValue(europeanaMetadata, EntityPreview.class);
+      String europeanaProxyEntityStr, String metisResponse, String externalId) throws Exception {
+    Entity europeanaProxyEntity = objectMapper.readValue(europeanaProxyEntityStr, Entity.class);
     XmlBaseEntityImpl<?> xmlBaseEntity =
         MetisDereferenceUtils.parseMetisResponse(
             jaxbContext.createUnmarshaller(), externalId, metisResponse);
@@ -183,7 +183,7 @@ public abstract class AbstractIntegrationTest {
     DataSource dataSource = datasources.verifyDataSource(externalId, false);
     EntityRecord savedRecord =
         entityRecordService.createEntityFromRequest(
-            entityPreview, xmlBaseEntity.toEntityModel(), dataSource);
+            europeanaProxyEntity, xmlBaseEntity.toEntityModel(), dataSource);
 
     // trigger update to generate consolidated entity
     entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId());

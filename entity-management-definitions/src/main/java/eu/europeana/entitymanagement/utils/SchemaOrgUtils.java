@@ -539,13 +539,15 @@ public final class SchemaOrgUtils {
 
     for (String value : entry) {
       if (EuropeanaUriUtils.isUri(value)) {
-        // while creating reference for about, contributor, creator, publisher reference class
+        // while creating reference for about, contributor, creator, publisher reference
+        // class
         // should be null.
         // Only for values NOT starting with http://data.europeana.eu
         if (referenceNull(propertyName, value)) {
           referenceClass = null;
         } else {
-          // for value starting with http://data.europeana.eu, assign correct reference class
+          // for value starting with http://data.europeana.eu, assign correct reference
+          // class
           referenceClass = getReferenceClass(value);
         }
         addProperty(object, value, "", propertyName, referenceClass, linkedContextualEntities);

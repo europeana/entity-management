@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.config;
 
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_EM_ENTITY_FIELD_CLEANER;
+import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_EM_ENTITY_FIELD_DATATYPE_VALIDATION;
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_EM_LANGUAGE_CODES;
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_EM_VALIDATOR_FACTORY;
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_XML_MAPPER;
@@ -9,6 +10,7 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.common.config.LanguageCodes;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
+import eu.europeana.entitymanagement.normalization.EntityFieldsDatatypeValidation;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,6 +45,11 @@ public class ValidatorConfig {
   @Bean(name = BEAN_EM_ENTITY_FIELD_CLEANER)
   public EntityFieldsCleaner getEntityFieldsCleanerBean() throws IOException {
     return new EntityFieldsCleaner(getLanguageCodes(), emConfiguration.getThumbnailBaseUrl());
+  }
+
+  @Bean(name = BEAN_EM_ENTITY_FIELD_DATATYPE_VALIDATION)
+  public EntityFieldsDatatypeValidation getEntityFieldsDatatypeValidationBean() throws IOException {
+    return new EntityFieldsDatatypeValidation(getLanguageCodes());
   }
 
   @Bean(name = BEAN_EM_LANGUAGE_CODES)

@@ -3,7 +3,6 @@ package eu.europeana.entitymanagement.definitions.model;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SOURCE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.THUMBNAIL;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -15,17 +14,16 @@ import java.util.Objects;
 
 @Embedded
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({ID, TYPE, SOURCE, THUMBNAIL})
+@JsonPropertyOrder({ID, WebEntityFields.TYPE, SOURCE, THUMBNAIL})
 public class WebResource {
 
-  public static final String type = "WebResource";
+  public static final String TYPE = "WebResource";
   private String source;
   private String id;
   private String thumbnail;
 
   public WebResource() {
     super();
-    // TODO Auto-generated constructor stub
   }
 
   public WebResource(WebResource copy) {
@@ -57,7 +55,7 @@ public class WebResource {
 
   @JsonGetter(WebEntityFields.TYPE)
   public String getType() {
-    return type;
+    return TYPE;
   }
 
   @JsonSetter(THUMBNAIL)

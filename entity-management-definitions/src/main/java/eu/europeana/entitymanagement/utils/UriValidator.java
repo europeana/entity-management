@@ -10,7 +10,7 @@ public class UriValidator {
   private static final Predicate<String> URI_PATTERN =
       Pattern.compile(
               // scheme
-              "^(https?|urn):"
+              "^(https?|urn|geo):"
                   + // user
                   "(?://((([^/?#@]*)@)?"
                   + // host

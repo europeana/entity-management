@@ -22,10 +22,12 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
-import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatorGroup;
-import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatorInterface;
-import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorGroup;
-import eu.europeana.entitymanagement.normalization.EntityFieldsMinimalValidatorInterface;
+import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidationGroup;
+import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidationInterface;
+import eu.europeana.entitymanagement.normalization.EntityFieldsDataSourceProxyValidationGroup;
+import eu.europeana.entitymanagement.normalization.EntityFieldsDataSourceProxyValidationInterface;
+import eu.europeana.entitymanagement.normalization.EntityFieldsEuropeanaProxyValidationGroup;
+import eu.europeana.entitymanagement.normalization.EntityFieldsEuropeanaProxyValidationInterface;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -47,8 +49,11 @@ import org.bson.types.ObjectId;
   @JsonSubTypes.Type(value = TimeSpan.class, name = "TimeSpan")
 })
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@EntityFieldsCompleteValidatorInterface(groups = {EntityFieldsCompleteValidatorGroup.class})
-@EntityFieldsMinimalValidatorInterface(groups = {EntityFieldsMinimalValidatorGroup.class})
+@EntityFieldsCompleteValidationInterface(groups = {EntityFieldsCompleteValidationGroup.class})
+@EntityFieldsEuropeanaProxyValidationInterface(
+    groups = {EntityFieldsEuropeanaProxyValidationGroup.class})
+@EntityFieldsDataSourceProxyValidationInterface(
+    groups = {EntityFieldsDataSourceProxyValidationGroup.class})
 public abstract class Entity {
 
   public Entity() {}

@@ -11,6 +11,9 @@ import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EtagMismatchException;
+import eu.europeana.entitymanagement.exception.HttpBadRequestException;
+import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
+import eu.europeana.entitymanagement.normalization.EntityFieldsEuropeanaProxyValidationGroup;
 import eu.europeana.entitymanagement.schemaorg.model.SchemaOrgEntity;
 import eu.europeana.entitymanagement.serialization.EntityXmlSerializer;
 import eu.europeana.entitymanagement.serialization.JsonLdSerializer;
@@ -33,8 +36,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolation;
+import javax.validation.ValidatorFactory;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,6 +64,10 @@ public abstract class BaseRest extends BaseRestController {
   @Autowired private RequestPathMethodService requestMethodService;
 
   @Autowired protected FailedTaskService failedTaskService;
+
+  @Autowired protected ValidatorFactory emValidatorFactory;
+
+  @Autowired protected EntityFieldsCleaner emEntityFieldCleaner;
 
   protected Logger logger = LogManager.getLogger(getClass());
 
@@ -312,5 +322,17 @@ public abstract class BaseRest extends BaseRestController {
     // profile can be "debug,sync"
     return StringUtils.hasLength(profile)
         && Arrays.asList(profile.split(",")).contains(WebEntityConstants.PARAM_PROFILE_SYNC);
+  }
+
+  protected void validateBodyEntity(Entity entity) throws HttpBadRequestException {
+    Set<ConstraintViolation<Entity>> violations =
+        emValidatorFactory
+            .getValidator()
+            .validate(entity, EntityFieldsEuropeanaProxyValidationGroup.class);
+    if (!violations.isEmpty()) {
+      String requestEntityViolations =
+          violations.stream().map(ConstraintViolation::getMessage).collect(Collectors.joining(" "));
+      throw new HttpBadRequestException(requestEntityViolations);
+    }
   }
 }
