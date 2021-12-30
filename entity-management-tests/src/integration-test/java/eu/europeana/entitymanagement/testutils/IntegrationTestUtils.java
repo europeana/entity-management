@@ -51,7 +51,8 @@ public class IntegrationTestUtils {
   public static final String CONCEPT_REGISTER_BATHTUB_JSON_INVALID =
       "/content/concept_register_bathtub_invalid.json";
   public static final String AGENT_REGISTER_DAVINCI_JSON = "/content/agent_register_davinci.json";
-  public static final String AGENT_REGISTER_BIRCH_REDIRECTION_JSON = "/content/agent_register_birch_redirection.json";
+  public static final String AGENT_REGISTER_BIRCH_REDIRECTION_JSON =
+      "/content/agent_register_birch_redirection.json";
   public static final String AGENT_REGISTER_STALIN_JSON = "/content/agent_register_stalin.json";
   public static final String AGENT_REGISTER_SCHEGK_JSON = "/content/agent_register_schegk.json";
 
@@ -63,8 +64,11 @@ public class IntegrationTestUtils {
       "/content/organization_register_zoho_naturalis.json";
   public static final String ORGANIZATION_REGISTER_GFM_ZOHO_JSON =
       "/content/organization_register_zoho_gfm.json";
+  public static final String ORGANIZATION_REGISTER_PCCE_ZOHO_JSON =
+      "/content/organization_register_zoho_pcce.json";
   public static final String PLACE_REGISTER_PARIS_JSON = "/content/place_register_paris.json";
-  public static final String PLACE_REGISTER_HAGENBACH_JSON = "/content/place_register_hagenbach.json";
+  public static final String PLACE_REGISTER_HAGENBACH_JSON =
+      "/content/place_register_hagenbach.json";
 
   public static final String CONCEPT_UPDATE_BATHTUB_JSON = "/content/concept_update_bathtub.json";
   public static final String CONCEPT_UPDATE_FAILED_BATHTUB_JSON =
@@ -92,7 +96,7 @@ public class IntegrationTestUtils {
   public static final String ORGANIZATION_BNF_XML = "/metis-deref/organization_bnf.xml";
   public static final String PLACE_PARIS_XML = "/metis-deref/place_paris.xml";
   public static final String PLACE_HAGENBACH_XML = "/metis-deref/place_hagenbach_redirect.xml";
-  
+
   public static final String TIMESPAN_1ST_CENTURY_XML = "/metis-deref/timespan_1st_century.xml";
 
   public static final String AGENT1_REFERENTIAL_INTEGRITY_JSON =
@@ -115,8 +119,7 @@ public class IntegrationTestUtils {
       "/ref-integrity/references/place_florence_143905.xml";
   public static final String PLACE_FRANCE_REFERENTIAL_INTEGRTITY =
       "/ref-integrity/references/place_france_85.xml";
-  
-  
+
   public static final String PLACE_SFORZA_CASTLE_REFERENTIAL_INTEGRTITY =
       "/ref-integrity/references/place_sforza_castle_143289.xml";
   public static final String TIMESPAN_15_REFERENTIAL_INTEGRTITY =
@@ -130,18 +133,17 @@ public class IntegrationTestUtils {
   public static final String AGENT_DA_VINCI_URI = "http://www.wikidata.org/entity/Q762";
   public static final String AGENT_BIRCH_URI = "http://www.wikidata.org/entity/Q5485322";
   public static final String AGENT_BIRCH_UPDATED_URI = "http://www.wikidata.org/entity/Q14819199";
-  
+
   public static final String AGENT_STALIN_URI = "http://www.wikidata.org/entity/Q855";
   public static final String AGENT_SCHEGK_URI = "http://www.wikidata.org/entity/Q110854";
-  
+
   public static final String AGENT_JAN_VERMEER_VIAF_URI = "http://viaf.org/viaf/51961439";
   public static final String AGENT_JAN_VERMEER_WIKIDATA_URI =
       "http://www.wikidata.org/entity/Q41264";
   public static final String PLACE_PARIS_URI = "https://sws.geonames.org/2988507/";
   public static final String PLACE_HAGENBACH_URI = "http://www.wikidata.org/entity/Q32050320";
   public static final String PLACE_HAGENBACH_UPDATED_URI = "http://www.wikidata.org/entity/Q541669";
-   
-  
+
   public static final String TIMESPAN_1ST_CENTURY_URI = "http://www.wikidata.org/entity/Q8106";
 
   public static final String CONCEPT_BATHTUB_URI = "http://www.wikidata.org/entity/Q152095";
@@ -153,6 +155,8 @@ public class IntegrationTestUtils {
       "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000002112001";
   public static final String ORGANIZATION_NATURALIS_URI_ZOHO =
       "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000000370517";
+  public static final String ORGANIZATION_PCCE_URI_ZOHO =
+      "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000000338555";
   public static final String ORGANIZATION_GFM_URI_ZOHO =
       "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000004503618";
   public static final String ORGANIZATION_NATURALIS_URI_WIKIDATA_PATH_SUFFIX = "/entity/Q641676";
@@ -170,6 +174,8 @@ public class IntegrationTestUtils {
       "/zoho-deref/organization_zoho_naturalis_response.json";
   public static final String ORGANIZATION_GFM_ZOHO_RESPONSE =
       "/zoho-deref/organization_zoho_gfm_response.json";
+  public static final String ORGANIZATION_PCCE_ZOHO_RESPONSE =
+      "/zoho-deref/organization_zoho_pcce_response.json";
   public static final String ORGANIZATION_NATURALIS_WIKIDATA_RESPONSE_XML =
       "/wikidata-deref/organization_wikidata_naturalis_response.xml";
   public static final String ORGANIZATION_GFM_WIKIDATA_RESPONSE_XML =
@@ -191,7 +197,9 @@ public class IntegrationTestUtils {
           ORGANIZATION_NATURALIS_URI_ZOHO,
           ORGANIZATION_NATURALIS_ZOHO_RESPONSE,
           ORGANIZATION_GFM_URI_ZOHO,
-          ORGANIZATION_GFM_ZOHO_RESPONSE);
+          ORGANIZATION_GFM_ZOHO_RESPONSE,
+          ORGANIZATION_PCCE_URI_ZOHO,
+          ORGANIZATION_PCCE_ZOHO_RESPONSE);
 
   /** Maps Metis dereferenciation URIs to mocked XML responses */
   public static final Map<String, String> METIS_RESPONSE_MAP =
