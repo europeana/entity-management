@@ -22,14 +22,13 @@ public class ZohoOrganizationConverter {
     // private constructor to prevent instantiation
   }
 
-  public static Organization convertToOrganizationEntity(Record record) {
+  public static Organization convertToOrganizationEntity(Record zohoRecord) {
     Organization org = new Organization();
-    org.setAbout(ZohoConstants.URL_ORGANIZATION_PREFFIX + record.getId());
-    //    org.setIdentifier(ZohoUtils.stringListSupplier(List.of(Long.toString(record.getId()))));
-    org.setIdentifier(List.of(Long.toString(record.getId())));
+    org.setAbout(ZohoConstants.URL_ORGANIZATION_PREFFIX + zohoRecord.getId());
+    org.setIdentifier(List.of(Long.toString(zohoRecord.getId())));
 
     // extract language maps
-    Map<String, List<String>> allLabels = getAllRecordLabels(record);
+    Map<String, List<String>> allLabels = getAllRecordLabels(zohoRecord);
     Map<String, String> prefLabel = getPrefLabel(allLabels);
     Map<String, List<String>> altLabel = getAltLabel(allLabels);
 
@@ -39,13 +38,13 @@ public class ZohoOrganizationConverter {
       org.setAltLabel(altLabel);
     }
 
-    String acronym = getStringFieldValue(record, ZohoConstants.ACRONYM_FIELD);
-    String langAcronym = getStringFieldValue(record, ZohoConstants.LANG_ACRONYM_FIELD);
+    String acronym = getStringFieldValue(zohoRecord, ZohoConstants.ACRONYM_FIELD);
+    String langAcronym = getStringFieldValue(zohoRecord, ZohoConstants.LANG_ACRONYM_FIELD);
     org.setAcronym(ZohoUtils.createLanguageMapOfStringList(langAcronym, acronym));
-    org.setLogo(getStringFieldValue(record, ZohoConstants.LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD));
-    org.setHomepage(getStringFieldValue(record, ZohoConstants.WEBSITE_FIELD));
+    org.setLogo(getStringFieldValue(zohoRecord, ZohoConstants.LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD));
+    org.setHomepage(getStringFieldValue(zohoRecord, ZohoConstants.WEBSITE_FIELD));
     List<String> organizationRoleStringList =
-        ZohoUtils.stringListSupplier(record.getKeyValue(ZohoConstants.ORGANIZATION_ROLE_FIELD));
+        ZohoUtils.stringListSupplier(zohoRecord.getKeyValue(ZohoConstants.ORGANIZATION_ROLE_FIELD));
     if (!organizationRoleStringList.isEmpty()) {
       org.setEuropeanaRole(
           ZohoUtils.createLanguageMapOfStringList(
@@ -54,49 +53,46 @@ public class ZohoOrganizationConverter {
     org.setOrganizationDomain(
         ZohoUtils.createMapWithLists(
             Locale.ENGLISH.getLanguage(),
-            ZohoUtils.stringFieldSupplier(record.getKeyValue(ZohoConstants.DOMAIN_FIELD))));
+            ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.DOMAIN_FIELD))));
 
     List<String> geographicLevel =
-        ZohoUtils.stringListSupplier(record.getKeyValue(ZohoConstants.GEOGRAPHIC_LEVEL_FIELD));
+        ZohoUtils.stringListSupplier(zohoRecord.getKeyValue(ZohoConstants.GEOGRAPHIC_LEVEL_FIELD));
     if (!geographicLevel.isEmpty()) {
       org.setGeographicLevel(
           ZohoUtils.createMap(Locale.ENGLISH.getLanguage(), geographicLevel.get(0)));
     }
 
     String organizationCountry =
-        toEdmCountry(getStringFieldValue(record, ZohoConstants.ORGANIZATION_COUNTRY_FIELD));
+        toEdmCountry(getStringFieldValue(zohoRecord, ZohoConstants.ORGANIZATION_COUNTRY_FIELD));
     org.setCountry(organizationCountry);
-    List<String> sameAs = getAllSameAs(record);
-    if (!sameAs.isEmpty()) {
-      org.setSameReferenceLinks(sameAs);
-    }
+    org.setSameReferenceLinks(getAllSameAs(zohoRecord));
 
     Address address = new Address();
     address.setAbout(org.getAbout() + ZohoConstants.ADDRESS_ABOUT);
     address.setVcardStreetAddress(
-        ZohoUtils.stringFieldSupplier(record.getKeyValue(ZohoConstants.STREET_FIELD)));
+        ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.STREET_FIELD)));
     address.setVcardLocality(
-        ZohoUtils.stringFieldSupplier(record.getKeyValue(ZohoConstants.CITY_FIELD)));
+        ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.CITY_FIELD)));
     address.setVcardCountryName(
-        ZohoUtils.stringFieldSupplier(record.getKeyValue(ZohoConstants.COUNTRY_FIELD)));
+        ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.COUNTRY_FIELD)));
     address.setVcardPostalCode(
-        ZohoUtils.stringFieldSupplier(record.getKeyValue(ZohoConstants.ZIP_CODE_FIELD)));
+        ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.ZIP_CODE_FIELD)));
     address.setVcardPostOfficeBox(
-        ZohoUtils.stringFieldSupplier(record.getKeyValue(ZohoConstants.PO_BOX_FIELD)));
+        ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.PO_BOX_FIELD)));
     org.setAddress(address);
 
     return org;
   }
 
   private static Map<String, String> getPrefLabel(Map<String, List<String>> allLabels) {
-    Map<String, String> prefLabel = new LinkedHashMap<String, String>(allLabels.size());
+    Map<String, String> prefLabel = new LinkedHashMap<>(allLabels.size());
     // first label for each language goes to prefLabel map
     allLabels.forEach((key, value) -> prefLabel.put(key, value.get(0)));
     return prefLabel;
   }
 
   private static Map<String, List<String>> getAltLabel(Map<String, List<String>> allLabels) {
-    Map<String, List<String>> altLabel = new LinkedHashMap<String, List<String>>();
+    Map<String, List<String>> altLabel = new LinkedHashMap<>();
     for (Map.Entry<String, List<String>> entry : allLabels.entrySet()) {
       int size = entry.getValue().size();
       // starting with second entry for each language, everything goes to altLabel map
@@ -107,19 +103,19 @@ public class ZohoOrganizationConverter {
     return altLabel;
   }
 
-  private static Map<String, List<String>> getAllRecordLabels(Record record) {
-    Map<String, List<String>> allLabels = new LinkedHashMap<String, List<String>>();
+  private static Map<String, List<String>> getAllRecordLabels(Record zohoRecord) {
+    Map<String, List<String>> allLabels = new LinkedHashMap<>();
 
     // read account name first
     addLabel(
-        record,
+        zohoRecord,
         allLabels,
         ZohoConstants.LANG_ORGANIZATION_NAME_FIELD,
         ZohoConstants.ACCOUNT_NAME_FIELD);
     // read alternative zoho labels
     for (int i = 1; i <= ZohoConstants.LANGUAGE_CODE_LENGTH; i++) {
       addLabel(
-          record,
+          zohoRecord,
           allLabels,
           ZohoConstants.LANG_ALTERNATIVE_FIELD + POSITION_SEPARATOR + i,
           ZohoConstants.ALTERNATIVE_FIELD + POSITION_SEPARATOR + i);
@@ -128,36 +124,34 @@ public class ZohoOrganizationConverter {
   }
 
   static void addLabel(
-      Record record,
+      Record zohoRecord,
       Map<String, List<String>> allLabels,
       String langFieldName,
       String labelFiedName) {
-    String isoLanguage = getIsoLanguage(record, langFieldName);
-    String label = getStringFieldValue(record, labelFiedName);
+    String isoLanguage = getIsoLanguage(zohoRecord, langFieldName);
+    String label = getStringFieldValue(zohoRecord, labelFiedName);
     if (label != null) {
       addLabel(allLabels, isoLanguage, label);
     }
   }
 
-  static String getStringFieldValue(Record record, String zohoFieldName) {
-    return ZohoUtils.stringFieldSupplier(record.getKeyValue(zohoFieldName));
+  static String getStringFieldValue(Record zohoRecord, String zohoFieldName) {
+    return ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(zohoFieldName));
   }
 
-  static String getIsoLanguage(Record record, String zohoLangFieldName) {
-    return toIsoLanguage(getStringFieldValue(record, zohoLangFieldName));
+  static String getIsoLanguage(Record zohoRecord, String zohoLangFieldName) {
+    return toIsoLanguage(getStringFieldValue(zohoRecord, zohoLangFieldName));
   }
 
   static void addLabel(Map<String, List<String>> allLabels, String isoLanguage, String label) {
-    if (!allLabels.containsKey(isoLanguage)) {
-      allLabels.put(isoLanguage, new ArrayList<String>());
-    }
+    allLabels.computeIfAbsent(isoLanguage, k -> new ArrayList<>());
     allLabels.get(isoLanguage).add(label);
   }
 
-  private static List<String> getAllSameAs(Record record) {
+  private static List<String> getAllSameAs(Record zohoRecord) {
     List<String> sameAsList = new ArrayList<>();
     for (int i = 1; i <= ZohoConstants.SAME_AS_CODE_LENGTH; i++) {
-      String sameAs = getStringFieldValue(record, ZohoConstants.SAME_AS_FIELD + "_" + i);
+      String sameAs = getStringFieldValue(zohoRecord, ZohoConstants.SAME_AS_FIELD + "_" + i);
       if (sameAs != null) {
         sameAsList.add(sameAs);
       }
