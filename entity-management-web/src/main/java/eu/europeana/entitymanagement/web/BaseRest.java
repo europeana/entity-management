@@ -149,7 +149,7 @@ public abstract class BaseRest extends BaseRestController {
             : "";
 
     // browsers attempt to load xml by default, so specify .jsonld in url
-    String entityUrlSuffix = ".jsonld?profile=debug" + wskeyParam;
+    String entityUrlSuffix = ".jsonld?profile=debug,internal" + wskeyParam;
     List<String> pathUrls =
         entityIds.stream()
             .map(
