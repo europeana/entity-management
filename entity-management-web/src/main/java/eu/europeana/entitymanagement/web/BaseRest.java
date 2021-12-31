@@ -24,7 +24,7 @@ import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
-import eu.europeana.entitymanagement.web.service.AuthorizationService;
+import eu.europeana.entitymanagement.web.service.EMAuthorizationService;
 import eu.europeana.entitymanagement.web.service.RequestPathMethodService;
 import eu.europeana.entitymanagement.web.xml.model.RdfBaseWrapper;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
@@ -51,7 +51,7 @@ import org.springframework.util.StringUtils;
 
 public abstract class BaseRest extends BaseRestController {
 
-  @Autowired private AuthorizationService emAuthorizationService;
+  @Autowired private EMAuthorizationService emAuthorizationService;
 
   @Autowired private BuildInfo emBuildInfo;
 
@@ -75,7 +75,7 @@ public abstract class BaseRest extends BaseRestController {
     super();
   }
 
-  public AuthorizationService getAuthorizationService() {
+  public EMAuthorizationService getAuthorizationService() {
     return emAuthorizationService;
   }
 

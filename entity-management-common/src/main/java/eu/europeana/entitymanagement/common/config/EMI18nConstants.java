@@ -1,7 +1,11 @@
 package eu.europeana.entitymanagement.common.config;
 
-public abstract class I18nConstants
+public abstract class EMI18nConstants
     implements eu.europeana.api.commons.definitions.config.i18n.I18nConstants {
+
+  private EMI18nConstants() {
+    // private constructor to hide implicit one
+  }
 
   // shared error messages
 

@@ -443,6 +443,8 @@ public class EntityRecordService {
     entity.setIsNextInSequence(replaceWithInternalReferences(isNextInSequenceField));
   }
 
+  /** @deprecated */
+  @Deprecated(since = "", forRemoval = false)
   private Map<String, List<String>> replaceWithInternalReferences(
       Map<String, List<String>> originalReferences) {
     if (originalReferences == null) {
@@ -626,21 +628,9 @@ public class EntityRecordService {
               fieldName,
               accumulate);
         } else if (WebResource.class.isAssignableFrom(fieldType)) {
-          WebResource primaryWebResource = (WebResource) primary.getFieldValue(field);
-          WebResource secondaryWebResource = (WebResource) secondary.getFieldValue(field);
-          if (primaryWebResource == null && secondaryWebResource != null) {
-            consolidatedEntity.setFieldValue(field, new WebResource(secondaryWebResource));
-          } else if (primaryWebResource != null) {
-            consolidatedEntity.setFieldValue(field, new WebResource(primaryWebResource));
-          }
+          mergeWebResources(primary, secondary, field, consolidatedEntity);
         } else if (Address.class.isAssignableFrom(fieldType)) {
-          Address primaryAddress = (Address) primary.getFieldValue(field);
-          Address secondaryAddress = (Address) secondary.getFieldValue(field);
-          if (primaryAddress == null && secondaryAddress != null) {
-            consolidatedEntity.setFieldValue(field, new Address(secondaryAddress));
-          } else if (primaryAddress != null) {
-            consolidatedEntity.setFieldValue(field, new Address(primaryAddress));
-          }
+          mergeAddress(primary, secondary, field, consolidatedEntity);
         }
       }
 
@@ -654,13 +644,54 @@ public class EntityRecordService {
     return consolidatedEntity;
   }
 
+  /**
+   * Will merge the Web Resources
+   *
+   * @param primary
+   * @param secondary
+   * @param field
+   * @param consolidatedEntity
+   * @throws IllegalAccessException
+   */
+  private void mergeWebResources(
+      Entity primary, Entity secondary, Field field, Entity consolidatedEntity)
+      throws IllegalAccessException {
+    WebResource primaryWebResource = (WebResource) primary.getFieldValue(field);
+    WebResource secondaryWebResource = (WebResource) secondary.getFieldValue(field);
+    if (primaryWebResource == null && secondaryWebResource != null) {
+      consolidatedEntity.setFieldValue(field, new WebResource(secondaryWebResource));
+    } else if (primaryWebResource != null) {
+      consolidatedEntity.setFieldValue(field, new WebResource(primaryWebResource));
+    }
+  }
+  /**
+   * Will combine the address
+   *
+   * @param primary
+   * @param secondary
+   * @param field
+   * @param consolidatedEntity
+   * @throws IllegalAccessException
+   */
+  private void mergeAddress(
+      Entity primary, Entity secondary, Field field, Entity consolidatedEntity)
+      throws IllegalAccessException {
+    Address primaryAddress = (Address) primary.getFieldValue(field);
+    Address secondaryAddress = (Address) secondary.getFieldValue(field);
+    if (primaryAddress == null && secondaryAddress != null) {
+      consolidatedEntity.setFieldValue(field, new Address(secondaryAddress));
+    } else if (primaryAddress != null) {
+      consolidatedEntity.setFieldValue(field, new Address(primaryAddress));
+    }
+  }
+
   boolean isStringOrPrimitive(Class<?> fieldType) {
     //        System.out.println(fieldType + " is primitive: " + fieldType.isPrimitive());
     return String.class.isAssignableFrom(fieldType)
         || fieldType.isPrimitive()
         || Float.class.isAssignableFrom(fieldType)
-        || Integer.class.isAssignableFrom(fieldType)
         || Integer.class.isAssignableFrom(fieldType);
+    //        || Integer.class.isAssignableFrom(fieldType);
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -679,14 +710,9 @@ public class EntityRecordService {
         (Map<Object, Object>) primary.getFieldValue(field);
     Map<Object, Object> fieldValueSecondaryObjectMap =
         (Map<Object, Object>) secondary.getFieldValue(field);
-    Map<Object, Object> fieldValuePrimaryObject = null;
-    Map<Object, Object> fieldValueSecondaryObject = null;
-    if (fieldValuePrimaryObjectMap != null) {
-      fieldValuePrimaryObject = new HashMap<>(fieldValuePrimaryObjectMap);
-    }
-    if (fieldValueSecondaryObjectMap != null) {
-      fieldValueSecondaryObject = new HashMap<>(fieldValueSecondaryObjectMap);
-    }
+    Map<Object, Object> fieldValuePrimaryObject = initialiseObjectMap(fieldValuePrimaryObjectMap);
+    Map<Object, Object> fieldValueSecondaryObject =
+        initialiseObjectMap(fieldValueSecondaryObjectMap);
 
     if (fieldValuePrimaryObject == null && fieldValueSecondaryObject != null) {
       fieldValuePrimaryObject = new HashMap<>();
@@ -698,43 +724,69 @@ public class EntityRecordService {
          * if the map value is a list, merge the lists of the primary and the secondary
          * object without duplicates
          */
-        if (fieldValuePrimaryObject.containsKey(key)
-            && List.class.isAssignableFrom(elemSecondary.getValue().getClass())) {
-          List<Object> listSecondaryObject = (List<Object>) elemSecondary.getValue();
-          List<Object> listPrimaryObject =
-              new ArrayList<>((List<Object>) fieldValuePrimaryObject.get(key));
-          boolean listPrimaryObjectChanged = false;
-          for (Object elemSecondaryList : listSecondaryObject) {
-            if (!listPrimaryObject.contains(elemSecondaryList)) {
-              listPrimaryObject.add(elemSecondaryList);
-              if (listPrimaryObjectChanged == false) {
-                listPrimaryObjectChanged = true;
-              }
-            }
-          }
-
-          if (listPrimaryObjectChanged) {
-            fieldValuePrimaryObject.put(key, listPrimaryObject);
-          }
-        }
-        // keep the different preferred labels in the secondary object for the
-        // alternative label in the consolidated object
-        else if (fieldValuePrimaryObject.containsKey(key)
-            && fieldName.toLowerCase().contains("pref")
-            && fieldName.toLowerCase().contains("label")) {
-          Object primaryObjectPrefLabel = fieldValuePrimaryObject.get(key);
-          if (!primaryObjectPrefLabel.equals(elemSecondary.getValue())) {
-            prefLabelsForAltLabels.put(key, elemSecondary.getValue());
-          }
-        } else if (!fieldValuePrimaryObject.containsKey(key)) {
-          fieldValuePrimaryObject.put(key, elemSecondary.getValue());
-        }
+        mergePrimrySecndryListWoDuplicates(
+            fieldValuePrimaryObject, key, elemSecondary, fieldName, prefLabelsForAltLabels);
       }
     }
 
     if (fieldValuePrimaryObject != null) {
       consolidatedEntity.setFieldValue(field, fieldValuePrimaryObject);
     }
+  }
+
+  /**
+   * Merges the Primary and secondary list without duplicates
+   *
+   * @param fieldValuePrimaryObject
+   * @param key
+   * @param elemSecondary
+   * @param fieldName
+   * @param prefLabelsForAltLabels
+   */
+  private void mergePrimrySecndryListWoDuplicates(
+      Map<Object, Object> fieldValuePrimaryObject,
+      Object key,
+      Map.Entry elemSecondary,
+      String fieldName,
+      Map<Object, Object> prefLabelsForAltLabels) {
+    if (fieldValuePrimaryObject.containsKey(key)
+        && List.class.isAssignableFrom(elemSecondary.getValue().getClass())) {
+      List<Object> listSecondaryObject = (List<Object>) elemSecondary.getValue();
+      List<Object> listPrimaryObject =
+          new ArrayList<>((List<Object>) fieldValuePrimaryObject.get(key));
+      boolean listPrimaryObjectChanged = false;
+      for (Object elemSecondaryList : listSecondaryObject) {
+        if (!listPrimaryObject.contains(elemSecondaryList)) {
+          listPrimaryObject.add(elemSecondaryList);
+          if (listPrimaryObjectChanged == false) {
+            listPrimaryObjectChanged = true;
+          }
+        }
+      }
+
+      if (listPrimaryObjectChanged) {
+        fieldValuePrimaryObject.put(key, listPrimaryObject);
+      }
+    }
+    // keep the different preferred labels in the secondary object for the
+    // alternative label in the consolidated object
+    else if (fieldValuePrimaryObject.containsKey(key)
+        && fieldName.toLowerCase().contains("pref")
+        && fieldName.toLowerCase().contains("label")) {
+      Object primaryObjectPrefLabel = fieldValuePrimaryObject.get(key);
+      if (!primaryObjectPrefLabel.equals(elemSecondary.getValue())) {
+        prefLabelsForAltLabels.put(key, elemSecondary.getValue());
+      }
+    } else if (!fieldValuePrimaryObject.containsKey(key)) {
+      fieldValuePrimaryObject.put(key, elemSecondary.getValue());
+    }
+  }
+
+  private Map<Object, Object> initialiseObjectMap(Map<Object, Object> fieldValueObjectMap) {
+    if (fieldValueObjectMap != null) {
+      return new HashMap<>(fieldValueObjectMap);
+    }
+    return null;
   }
 
   @SuppressWarnings("unchecked")
@@ -753,25 +805,14 @@ public class EntityRecordService {
         if (fieldName.toLowerCase().contains("alt") && fieldName.toLowerCase().contains("label")) {
           Map<Object, Object> altLabelConsolidatedMap =
               (Map<Object, Object>) consilidatedEntity.getFieldValue(field);
-          Map<Object, Object> altLabelPrimaryObject = null;
-          if (altLabelConsolidatedMap != null) {
-            altLabelPrimaryObject = new HashMap<>(altLabelConsolidatedMap);
-          } else {
-            altLabelPrimaryObject = new HashMap<>();
-          }
-
+          Map<Object, Object> altLabelPrimaryObject =
+              initialiseAltLabelMap(altLabelConsolidatedMap);
           boolean altLabelPrimaryValueChanged = false;
           for (Map.Entry<Object, Object> prefLabel : prefLabelsForAltLabels.entrySet()) {
             String keyPrefLabel = (String) prefLabel.getKey();
             List<Object> altLabelPrimaryObjectList =
                 (List<Object>) altLabelPrimaryObject.get(keyPrefLabel);
-            List<Object> altLabelPrimaryValue = null;
-            if (altLabelPrimaryObjectList != null) {
-              altLabelPrimaryValue = new ArrayList<>(altLabelPrimaryObjectList);
-            } else {
-              altLabelPrimaryValue = new ArrayList<>();
-            }
-
+            List<Object> altLabelPrimaryValue = initialiseAltLabelList(altLabelPrimaryObjectList);
             if (altLabelPrimaryValue.size() == 0
                 || (altLabelPrimaryValue.size() > 0
                     && !altLabelPrimaryValue.contains(prefLabel.getValue()))) {
@@ -790,6 +831,20 @@ public class EntityRecordService {
         }
       }
     }
+  }
+
+  private Map<Object, Object> initialiseAltLabelMap(Map<Object, Object> altLabelConsolidatedMap) {
+    if (altLabelConsolidatedMap != null) {
+      return new HashMap<>(altLabelConsolidatedMap);
+    }
+    return new HashMap<>();
+  }
+
+  private List<Object> initialiseAltLabelList(List<Object> altLabelPrimaryObjectList) {
+    if (altLabelPrimaryObjectList != null) {
+      return new ArrayList<>(altLabelPrimaryObjectList);
+    }
+    return new ArrayList<>();
   }
 
   void mergeList(

@@ -52,6 +52,13 @@ import java.util.Map;
 })
 public class Place extends Entity {
 
+  private List<String> isNextInSequence;
+  private Float latitude, longitude, altitude;
+  private List<String> sameAs;
+
+  private Map<String, List<String>> tmpIsPartOf;
+  private Map<String, List<String>> tmpHasPart;
+
   public Place(Place copy) {
     super(copy);
     if (copy.getIsNextInSequence() != null)
@@ -65,13 +72,6 @@ public class Place extends Entity {
     super();
     // TODO Auto-generated constructor stub
   }
-
-  private List<String> isNextInSequence;
-  private Float latitude, longitude, altitude;
-  private List<String> sameAs;
-
-  private Map<String, List<String>> tmpIsPartOf;
-  private Map<String, List<String>> tmpHasPart;
 
   @JsonGetter(IS_NEXT_IN_SEQUENCE)
   @JacksonXmlProperty(localName = XmlFields.XML_EDM_IS_NEXT_IN_SEQUENCE)

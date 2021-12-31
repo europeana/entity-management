@@ -124,7 +124,10 @@ public class ScoringService {
 
     long coordinationFactor = (maxValueOverall) / maxValueForType;
     double normalizedValue =
-        1 + (trust * RANGE_EXTENSION_FACTOR * Math.log(coordinationFactor * metricValue));
+        1
+            + (trust
+                * RANGE_EXTENSION_FACTOR
+                * Math.log(coordinationFactor * ((double) metricValue)));
     return (int) normalizedValue;
   }
 

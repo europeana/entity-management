@@ -56,6 +56,21 @@ import java.util.Map;
 })
 public class Organization extends Entity {
 
+  private Map<String, String> description;
+  private Map<String, List<String>> acronym;
+  private String logo;
+  private String homepage;
+  private List<String> phone;
+  private List<String> mbox;
+  private Map<String, List<String>> europeanaRole;
+  private Map<String, List<String>> organizationDomain;
+  private Map<String, String> geographicLevel;
+  private String country;
+
+  private Address hasAddress;
+
+  private List<String> sameAs;
+
   public Organization() {
     super();
     // TODO Auto-generated constructor stub
@@ -78,21 +93,6 @@ public class Organization extends Entity {
     this.country = copy.getCountry();
     if (copy.getAddress() != null) this.hasAddress = new Address(copy.getAddress());
   }
-
-  private Map<String, String> description;
-  private Map<String, List<String>> acronym;
-  private String logo;
-  private String homepage;
-  private List<String> phone;
-  private List<String> mbox;
-  private Map<String, List<String>> europeanaRole;
-  private Map<String, List<String>> organizationDomain;
-  private Map<String, String> geographicLevel;
-  private String country;
-
-  private Address hasAddress;
-
-  private List<String> sameAs;
 
   @JsonGetter(DESCRIPTION)
   public Map<String, String> getDescription() {
@@ -214,7 +214,6 @@ public class Organization extends Entity {
     return field.get(this);
   }
 
-  @Override
   @JsonSetter(SAME_AS)
   public void setSameReferenceLinks(List<String> uris) {
     this.sameAs = uris;
@@ -226,6 +225,7 @@ public class Organization extends Entity {
     return this.sameAs;
   }
 
+  @Override
   public void setFieldValue(Field field, Object value)
       throws IllegalArgumentException, IllegalAccessException {
     // TODO:in case of the performance overhead cause by using the reflection code, change this

@@ -37,6 +37,18 @@ import java.util.Map;
 })
 public class Concept extends Entity {
 
+  private List<String> broader;
+  private List<String> narrower;
+  private List<String> related;
+  private List<String> broadMatch;
+  private List<String> narrowMatch;
+  private List<String> exactMatch;
+  private List<String> coref;
+  private List<String> relatedMatch;
+  private List<String> closeMatch;
+  private List<String> inScheme;
+  private Map<String, List<String>> notation;
+
   public Concept() {
     super();
   }
@@ -54,18 +66,6 @@ public class Concept extends Entity {
     if (copy.getInScheme() != null) this.inScheme = new ArrayList<>(copy.getInScheme());
     if (copy.getNotation() != null) this.notation = new HashMap<>(copy.getNotation());
   }
-
-  private List<String> broader;
-  private List<String> narrower;
-  private List<String> related;
-  private List<String> broadMatch;
-  private List<String> narrowMatch;
-  private List<String> exactMatch;
-  private List<String> coref;
-  private List<String> relatedMatch;
-  private List<String> closeMatch;
-  private List<String> inScheme;
-  private Map<String, List<String>> notation;
 
   @JsonGetter(BROADER)
   public List<String> getBroader() {

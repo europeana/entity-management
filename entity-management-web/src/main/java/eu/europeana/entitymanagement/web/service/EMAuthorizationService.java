@@ -13,7 +13,7 @@ import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.stereotype.Component;
 
 @Component(AppConfig.BEAN_AUTHORIZATION_SERVICE)
-public class AuthorizationService extends BaseAuthorizationService
+public class EMAuthorizationService extends BaseAuthorizationService
     implements eu.europeana.api.commons.service.authorization.AuthorizationService {
 
   protected final Logger logger = LogManager.getLogger(getClass());
@@ -22,7 +22,7 @@ public class AuthorizationService extends BaseAuthorizationService
   private final EuropeanaClientDetailsService clientDetailsService;
 
   @Autowired
-  public AuthorizationService(
+  public EMAuthorizationService(
       EntityManagementConfiguration emConfiguration,
       EuropeanaClientDetailsService clientDetailsService) {
     this.emConfiguration = emConfiguration;
