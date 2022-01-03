@@ -40,6 +40,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service(AppConfig.BEAN_ENTITY_RECORD_SERVICE)
 public class EntityRecordService {
@@ -686,12 +687,10 @@ public class EntityRecordService {
   }
 
   boolean isStringOrPrimitive(Class<?> fieldType) {
-    //        System.out.println(fieldType + " is primitive: " + fieldType.isPrimitive());
     return String.class.isAssignableFrom(fieldType)
         || fieldType.isPrimitive()
         || Float.class.isAssignableFrom(fieldType)
         || Integer.class.isAssignableFrom(fieldType);
-    //        || Integer.class.isAssignableFrom(fieldType);
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -714,10 +713,13 @@ public class EntityRecordService {
     Map<Object, Object> fieldValueSecondaryObject =
         initialiseObjectMap(fieldValueSecondaryObjectMap);
 
-    if (fieldValuePrimaryObject == null && fieldValueSecondaryObject != null) {
-      fieldValuePrimaryObject = new HashMap<>();
+    if (CollectionUtils.isEmpty(fieldValuePrimaryObject)
+        && !CollectionUtils.isEmpty(fieldValueSecondaryObject)) {
       fieldValuePrimaryObject.putAll(fieldValueSecondaryObject);
-    } else if (fieldValuePrimaryObject != null && fieldValueSecondaryObject != null && accumulate) {
+
+    } else if (!CollectionUtils.isEmpty(fieldValuePrimaryObject)
+        && !CollectionUtils.isEmpty(fieldValueSecondaryObject)
+        && accumulate) {
       for (Map.Entry elemSecondary : fieldValueSecondaryObject.entrySet()) {
         Object key = elemSecondary.getKey();
         /*
@@ -728,8 +730,7 @@ public class EntityRecordService {
             fieldValuePrimaryObject, key, elemSecondary, fieldName, prefLabelsForAltLabels);
       }
     }
-
-    if (fieldValuePrimaryObject != null) {
+    if (!CollectionUtils.isEmpty(fieldValuePrimaryObject)) {
       consolidatedEntity.setFieldValue(field, fieldValuePrimaryObject);
     }
   }
@@ -786,7 +787,7 @@ public class EntityRecordService {
     if (fieldValueObjectMap != null) {
       return new HashMap<>(fieldValueObjectMap);
     }
-    return null;
+    return new HashMap<>();
   }
 
   @SuppressWarnings("unchecked")
