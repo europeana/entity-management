@@ -1,34 +1,22 @@
 {
-"_version_":1685721580845400064,
-"coref":["http://sws.geonames.org/3177088/"],
-"isPartOf":["http://data.europeana.eu/place/base/92"],
-"derived_score":4675028.0,
-"entity_uri":"http://data.europeana.eu/place/base/143914",
-"europeana_doc_count":661,
-"europeana_term_hits":5540,
-"id":"http://data.europeana.eu/place/143914",
-"internal_type":"Place",
-"label":
-{
-"fr":["Ferrare"],
-"it":["Ferrara","Provincia di Ferrara"]
-},
-"sameAs":["http://sws.geonames.org/3177088/"],
-"pagerank":25.592215,
-"altLabel":
-{
-"it":["Provincia di Ferrara"]
-},
-"prefLabel":
-{
-"fr":"Ferrare",
-"it":"Ferrara",
-"it":"Provincia di Ferrara"
-},
-"suggest_filters":["Place","in_europeana"],
-"text":["Provincia di Ferrara","Ferrara","Ferrare","Provincia di Ferrara","Ferrara","Provincia di Ferrara"],
-"timestamp":"2020-12-10T19:42:56.265Z",
-"type":"Place",
-"lat":44.8,
-"long":11.83333
+  "@context": "http://www.europeana.eu/schemas/context/entity.jsonld",
+  "id": "http://data.europeana.eu/place/143914",
+  "type": "Place",
+  "prefLabel": {
+    "fr": "Ferrare",
+    "it": "Provincia di Ferrara"
+  },
+  "altLabel": {
+    "it": [
+      "Provincia di Ferrara"
+    ]
+  },
+  "lat": 44.8,
+  "long": 11.83333,
+  "isPartOf": [
+    "http://data.europeana.eu/place/base/92"
+  ],
+  "sameAs": [
+    "http://sws.geonames.org/3177088/"
+  ]
 }
