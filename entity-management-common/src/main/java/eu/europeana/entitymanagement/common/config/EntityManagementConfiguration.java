@@ -103,9 +103,6 @@ public class EntityManagementConfiguration {
   @Value("${auth.enabled: true}")
   private boolean authEnabled;
 
-  @Value("${enrichmentMigrationPassword}")
-  private String enrichmentsMigrationPassword;
-
   @Value("${metis.proxy.enabled: false}")
   private boolean useMetisProxy;
 
@@ -174,10 +171,6 @@ public class EntityManagementConfiguration {
 
   public boolean isAuthEnabled() {
     return authEnabled;
-  }
-
-  public String getEnrichmentsMigrationPassword() {
-    return enrichmentsMigrationPassword;
   }
 
   public int getBatchUpdatesThrottleLimit() {

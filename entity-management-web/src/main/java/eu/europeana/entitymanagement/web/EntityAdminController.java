@@ -2,7 +2,6 @@ package eu.europeana.entitymanagement.web;
 
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.error.EuropeanaApiException;
-import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
@@ -31,7 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -127,9 +125,7 @@ public class EntityAdminController extends BaseRest {
       HttpServletRequest request)
       throws HttpException, EuropeanaApiException {
     if (emConfig.isAuthEnabled()) {
-      // TODO later change the verification method once DB migration is done
-      // verifyWriteAccess(Operations.CREATE, request);
-      verifyMigrationAccess(request);
+      verifyWriteAccess(Operations.CREATE, request);
     }
 
     validateBodyEntity(europeanaProxyEntity);
@@ -191,29 +187,5 @@ public class EntityAdminController extends BaseRest {
     List<String> entityIds = failedTaskService.getEntityIdsWithFailures(page * pageSize, pageSize);
 
     return generateResponseFailedUpdates(request, entityIds, wskey);
-  }
-
-  /**
-   * Method will authenticate Migration requests. This is done to avoid the expiration of tokens
-   *
-   * <p>TODO remove after DB migration
-   *
-   * @param request
-   * @throws ApplicationAuthenticationException
-   */
-  private void verifyMigrationAccess(HttpServletRequest request)
-      throws ApplicationAuthenticationException {
-    String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
-
-    if (!StringUtils.hasLength(authorization) || !authorization.startsWith("Bearer")) {
-      throw new ApplicationAuthenticationException(
-          "User is not authorised to perform this action", null);
-    }
-
-    // Authorization header is "Bearer <token_value>"
-    if (!authorization.substring(7).equals(emConfig.getEnrichmentsMigrationPassword())) {
-      throw new ApplicationAuthenticationException(
-          "Invalid token for migrating existing entity", null, null, HttpStatus.FORBIDDEN);
-    }
   }
 }
