@@ -62,7 +62,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
     String clickableUrl =
         "http://localhost/entity/"
             + getEntityRequestPath(entityRecord.getEntityId())
-            + ".jsonld?profile=debug&wskey=testKey";
+            + ".jsonld?profile=debug,internal&wskey=testKey";
 
     mockMvc
         .perform(

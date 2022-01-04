@@ -61,25 +61,31 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         // should have Europeana and Datasource proxies
         .andExpect(jsonPath("$.proxies", hasSize(2)));
   }
-  
+
   @Test
   void registerAgentWithRedirectionShouldBeSuccessful() throws Exception {
 
     ResultActions response =
-        mockMvc.perform(MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL)
-            .content(loadFile(IntegrationTestUtils.AGENT_REGISTER_BIRCH_REDIRECTION_JSON))
-            .contentType(MediaType.APPLICATION_JSON_VALUE));
-    response.andExpect(status().isAccepted()).andExpect(jsonPath("$.id", any(String.class)))
+        mockMvc.perform(
+            MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL)
+                .content(loadFile(IntegrationTestUtils.AGENT_REGISTER_BIRCH_REDIRECTION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE));
+    response
+        .andExpect(status().isAccepted())
+        .andExpect(jsonPath("$.id", any(String.class)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
         // should have Europeana and Datasource proxies
         .andExpect(jsonPath("$.proxies", hasSize(2)))
-        .andExpect(jsonPath("$.sameAs",
-            Matchers.containsInRelativeOrder(IntegrationTestUtils.AGENT_BIRCH_URI, IntegrationTestUtils.AGENT_BIRCH_UPDATED_URI)))
+        .andExpect(
+            jsonPath(
+                "$.sameAs",
+                Matchers.containsInRelativeOrder(
+                    IntegrationTestUtils.AGENT_BIRCH_URI,
+                    IntegrationTestUtils.AGENT_BIRCH_UPDATED_URI)))
         .andExpect(jsonPath("$.proxies[1].id", is(IntegrationTestUtils.AGENT_BIRCH_UPDATED_URI)));
   }
-  
 
   @Test
   void registerAgentStalinShouldBeSuccessful() throws Exception {
@@ -147,21 +153,28 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
   void registerPlaceWithRedirectionShouldBeSuccessful() throws Exception {
 
     ResultActions response =
-        mockMvc.perform(MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL)
-            .content(loadFile(IntegrationTestUtils.PLACE_REGISTER_HAGENBACH_JSON))
-            .contentType(MediaType.APPLICATION_JSON_VALUE));
-    response.andExpect(status().isAccepted()).andExpect(jsonPath("$.id", any(String.class)))
+        mockMvc.perform(
+            MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL)
+                .content(loadFile(IntegrationTestUtils.PLACE_REGISTER_HAGENBACH_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE));
+    response
+        .andExpect(status().isAccepted())
+        .andExpect(jsonPath("$.id", any(String.class)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Place.name())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
         // should have Europeana and Datasource proxies
         .andExpect(jsonPath("$.proxies", hasSize(2)))
-        .andExpect(jsonPath("$.sameAs",
-            Matchers.containsInRelativeOrder(IntegrationTestUtils.PLACE_HAGENBACH_URI, IntegrationTestUtils.PLACE_HAGENBACH_UPDATED_URI)))
-        .andExpect(jsonPath("$.proxies[1].id", is(IntegrationTestUtils.PLACE_HAGENBACH_UPDATED_URI)));
+        .andExpect(
+            jsonPath(
+                "$.sameAs",
+                Matchers.containsInRelativeOrder(
+                    IntegrationTestUtils.PLACE_HAGENBACH_URI,
+                    IntegrationTestUtils.PLACE_HAGENBACH_UPDATED_URI)))
+        .andExpect(
+            jsonPath("$.proxies[1].id", is(IntegrationTestUtils.PLACE_HAGENBACH_UPDATED_URI)));
   }
-  
-  
+
   @Test
   void registerTimespanShouldBeSuccessful() throws Exception {
     mockMvc
@@ -254,6 +267,39 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         .andExpect(jsonPath("$.proxies", hasSize(3)))
         // 3 labels available in wikidata proxy
         .andExpect(jsonPath("$.proxies[2].prefLabel[*]", hasSize(3)));
+  }
+
+  @Test
+  void registerOrganizationWithoutWikidataSameAsShouldBeSuccessful() throws Exception {
+    String expectedId =
+        EntityRecordUtils.buildEntityIdUri(
+            "organization",
+            EntityRecordUtils.getIdFromUrl(IntegrationTestUtils.ORGANIZATION_PCCE_URI_ZOHO));
+
+    ResultActions response =
+        mockMvc.perform(
+            MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL)
+                .content(loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_PCCE_ZOHO_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE));
+    response
+        .andExpect(status().isAccepted())
+        .andExpect(jsonPath("$.id", is(expectedId)))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())))
+        .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
+        // isAggregatedBy should contain 2 aggregates (for Europeana and zoho proxies). No wikidata
+        // sameAs for this org
+        .andExpect(
+            jsonPath(
+                "$.isAggregatedBy.aggregates",
+                containsInAnyOrder(
+                    EntityRecordUtils.getEuropeanaAggregationId(expectedId),
+                    EntityRecordUtils.getDatasourceAggregationId(expectedId, 1))))
+        // sameAs contains Zoho uri
+        .andExpect(
+            jsonPath(
+                "$.sameAs", Matchers.contains(IntegrationTestUtils.ORGANIZATION_PCCE_URI_ZOHO)))
+        // should have Europeana and Zoho proxies
+        .andExpect(jsonPath("$.proxies", hasSize(2)));
   }
 
   @Test
