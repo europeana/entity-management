@@ -17,7 +17,7 @@
         <artifactId>europeana-parent-pom</artifactId>
         <version>2.2</version>
     </parent>
-    
+
     <repositories>
 		<repository>
 			<id>libs-release-local</id>
@@ -30,7 +30,7 @@
 			<url>https://artifactory.eanadev.org/artifactory/libs-snapshot</url>
 		</repository>
 	</repositories>
-    
+
 
     <groupId>eu.europeana.api</groupId>
     <artifactId>entity-management</artifactId>
@@ -49,6 +49,8 @@
         <sonar.coverage.jacoco.xmlReportPaths>${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
         <sonar.organization>europeana</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <!-- Exclude POJOs code duplication analysis -->
+        <sonar.cpd.exclusions>**/model/**/*</sonar.cpd.exclusions>
         <api.commons.version>0.3.11</api.commons.version>
         <springbatch.mongo.version>1.0.3</springbatch.mongo.version>
         <corelib.version>2.14.1-SNAPSHOT</corelib.version>
@@ -213,7 +215,7 @@
           </plugins>
           <pluginManagement>
 				<plugins>
-					<!--This plugin's configuration is used to store Eclipse m2e settings only. 
+					<!--This plugin's configuration is used to store Eclipse m2e settings only.
 						It has no influence on the Maven build itself. -->
 					<plugin>
 						<groupId>org.eclipse.m2e</groupId>
