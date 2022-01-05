@@ -55,6 +55,9 @@ public class EntityRecordService {
 
   private static final String ENTITY_ID_REMOVED_MSG = "Entity '%s' has been removed";
 
+  // Fields to be ignored during consolidation ("type" is final, so it cannot be updated)
+  private static final List<String> ignoredMergeFields = List.of("type");
+
   @Autowired
   public EntityRecordService(
       EntityRecordRepository entityRecordRepository,
@@ -512,7 +515,10 @@ public class EntityRecordService {
      * The primary entity corresponds to the entity in the Europeana proxy. The
      * secondary entity corresponds to the entity in the external proxy.
      */
-    List<Field> fieldsToCombine = EntityUtils.getAllFields(primary.getClass());
+    List<Field> fieldsToCombine =
+        EntityUtils.getAllFields(primary.getClass()).stream()
+            .filter(f -> !ignoredMergeFields.contains(f.getName()))
+            .collect(Collectors.toList());
     return combineEntities(primary, secondary, fieldsToCombine, true);
   }
 
