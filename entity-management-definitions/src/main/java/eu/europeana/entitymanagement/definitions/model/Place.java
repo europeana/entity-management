@@ -28,7 +28,6 @@ import eu.europeana.entitymanagement.vocabulary.XmlFields;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
@@ -52,12 +51,12 @@ import java.util.Map;
 })
 public class Place extends Entity {
 
+  private String type = EntityTypes.Place.name();
   private List<String> isNextInSequence;
-  private Float latitude, longitude, altitude;
+  private Float latitude;
+  private Float longitude;
+  private Float altitude;
   private List<String> sameAs;
-
-  private Map<String, List<String>> tmpIsPartOf;
-  private Map<String, List<String>> tmpHasPart;
 
   public Place(Place copy) {
     super(copy);
@@ -66,11 +65,11 @@ public class Place extends Entity {
     this.latitude = copy.getLatitude();
     this.longitude = copy.getLongitude();
     this.altitude = copy.getAltitude();
+    if (copy.sameAs != null) this.sameAs = (new ArrayList<>(copy.sameAs));
   }
 
   public Place() {
     super();
-    // TODO Auto-generated constructor stub
   }
 
   @JsonGetter(IS_NEXT_IN_SEQUENCE)
@@ -130,7 +129,7 @@ public class Place extends Entity {
   }
 
   public String getType() {
-    return EntityTypes.Place.getEntityType();
+    return type;
   }
 
   public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {

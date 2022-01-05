@@ -37,6 +37,7 @@ import java.util.Map;
 })
 public class Concept extends Entity {
 
+  private String type = EntityTypes.Concept.name();
   private List<String> broader;
   private List<String> narrower;
   private List<String> related;
@@ -65,6 +66,7 @@ public class Concept extends Entity {
     if (copy.getCloseMatch() != null) this.closeMatch = new ArrayList<>(copy.getCloseMatch());
     if (copy.getInScheme() != null) this.inScheme = new ArrayList<>(copy.getInScheme());
     if (copy.getNotation() != null) this.notation = new HashMap<>(copy.getNotation());
+    if (copy.exactMatch != null) this.exactMatch = (new ArrayList<>(copy.exactMatch));
   }
 
   @JsonGetter(BROADER)
@@ -166,18 +168,18 @@ public class Concept extends Entity {
   }
 
   public String getType() {
-    return EntityTypes.Concept.getEntityType();
+    return type;
   }
 
+  @Override
   public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
-    // TODO:in case of the performance overhead cause by using the reflecion code, change this
     // method to call the getters for each field individually
     return field.get(this);
   }
 
+  @Override
   public void setFieldValue(Field field, Object value)
       throws IllegalArgumentException, IllegalAccessException {
-    // TODO:in case of the performance overhead cause by using the reflecion code, change this
     // method to call the setter for each field individually
     field.set(this, value);
   }

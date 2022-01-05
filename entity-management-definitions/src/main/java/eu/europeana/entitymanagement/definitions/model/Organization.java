@@ -56,6 +56,7 @@ import java.util.Map;
 })
 public class Organization extends Entity {
 
+  private String type = EntityTypes.Organization.getEntityType();
   private Map<String, String> description;
   private Map<String, List<String>> acronym;
   private String logo;
@@ -73,7 +74,6 @@ public class Organization extends Entity {
 
   public Organization() {
     super();
-    // TODO Auto-generated constructor stub
   }
 
   public Organization(Organization copy) {
@@ -92,6 +92,7 @@ public class Organization extends Entity {
       this.geographicLevel = new HashMap<>(copy.getGeographicLevel());
     this.country = copy.getCountry();
     if (copy.getAddress() != null) this.hasAddress = new Address(copy.getAddress());
+    if (copy.sameAs != null) this.sameAs = (new ArrayList<>(copy.sameAs));
   }
 
   @JsonGetter(DESCRIPTION)
@@ -205,11 +206,11 @@ public class Organization extends Entity {
   }
 
   public String getType() {
-    return EntityTypes.Organization.getEntityType();
+    return type;
   }
 
+  @Override
   public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
-    // TODO:in case of the performance overhead cause by using the reflection code, change this
     // method to call the getters for each field individually
     return field.get(this);
   }
@@ -228,7 +229,6 @@ public class Organization extends Entity {
   @Override
   public void setFieldValue(Field field, Object value)
       throws IllegalArgumentException, IllegalAccessException {
-    // TODO:in case of the performance overhead cause by using the reflection code, change this
     // method to call the setter for each field individually
     field.set(this, value);
   }

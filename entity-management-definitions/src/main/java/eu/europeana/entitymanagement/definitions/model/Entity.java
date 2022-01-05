@@ -36,7 +36,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.bson.types.ObjectId;
 
 @dev.morphia.annotations.Embedded
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -56,7 +55,6 @@ import org.bson.types.ObjectId;
     groups = {EntityFieldsDataSourceProxyValidationGroup.class})
 public abstract class Entity {
 
-  protected String type = getType();
   protected String entityId;
   // ID of entityRecord in database
 
@@ -80,13 +78,7 @@ public abstract class Entity {
 
   protected Entity() {}
 
-  protected Entity(Entity copy) {
-
-    if (!copy.getType().equals(getType())) {
-      throw new IllegalArgumentException("Cannot copy " + copy.getType() + " into " + getType());
-    }
-
-    this.type = copy.getType();
+  protected <T extends Entity> Entity(T copy) {
     this.entityId = copy.getEntityId();
     this.depiction = copy.getDepiction();
     if (copy.getNote() != null) this.note = new HashMap<>(copy.getNote());
@@ -94,8 +86,6 @@ public abstract class Entity {
     if (copy.getAltLabel() != null) this.altLabel = new HashMap<>(copy.getAltLabel());
     if (copy.getHiddenLabel() != null) this.hiddenLabel = new HashMap<>(copy.getHiddenLabel());
     if (copy.getIdentifier() != null) this.identifier = new ArrayList<>(copy.getIdentifier());
-    if (copy.getSameReferenceLinks() != null)
-      this.setSameReferenceLinks(new ArrayList<>(copy.getSameReferenceLinks()));
     if (copy.getIsRelatedTo() != null) this.isRelatedTo = new ArrayList<>(copy.getIsRelatedTo());
     if (copy.getHasPart() != null) this.hasPart = new ArrayList<>(copy.getHasPart());
     if (copy.getIsPartOfArray() != null) this.isPartOf = new ArrayList<>(copy.getIsPartOfArray());
@@ -218,20 +208,6 @@ public abstract class Entity {
     this.depiction = depiction;
   }
 
-  /** @deprecated */
-  @Deprecated(since = "", forRemoval = true)
-  public ObjectId getId() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /** @deprecated */
-  @Deprecated(since = "", forRemoval = true)
-  @JsonIgnore
-  public void setId(ObjectId id) {
-    // TODO Auto-generated method stub
-  }
-
   @JsonGetter(WebEntityFields.IS_SHOWN_BY)
   public WebResource getIsShownBy() {
     return isShownBy;
@@ -243,14 +219,12 @@ public abstract class Entity {
   }
 
   public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
-    // TODO:in case of the performance overhead cause by using the reflecion code, change this
     // method to call the getters for each field individually
     return field.get(this);
   }
 
   public void setFieldValue(Field field, Object value)
       throws IllegalArgumentException, IllegalAccessException {
-    // TODO:in case of the performance overhead cause by using the reflecion code, change this
     // method to call the setter for each field individually
     field.set(this, value);
   }

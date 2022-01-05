@@ -25,7 +25,6 @@ import eu.europeana.entitymanagement.vocabulary.XmlFields;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
@@ -46,6 +45,7 @@ import java.util.Map;
 })
 public class TimeSpan extends Entity {
 
+  private String type = EntityTypes.TimeSpan.name();
   private List<String> isNextInSequence;
   private String begin;
   private String end;
@@ -57,11 +57,11 @@ public class TimeSpan extends Entity {
       this.isNextInSequence = new ArrayList<>(copy.getIsNextInSequence());
     this.begin = copy.getBeginString();
     this.end = copy.getEndString();
+    if (copy.sameAs != null) this.sameAs = (new ArrayList<>(copy.sameAs));
   }
 
   public TimeSpan() {
     super();
-    // TODO Auto-generated constructor stub
   }
 
   @JsonGetter(IS_NEXT_IN_SEQUENCE)
@@ -97,74 +97,19 @@ public class TimeSpan extends Entity {
     return end;
   }
 
-  /** @deprecated */
-  @Deprecated(since = "", forRemoval = true)
-  public void setIsPartOf(Map<String, List<String>> isPartOf) {
-    // TODO Auto-generated method stub
-  }
-
-  /** @deprecated */
-  @Deprecated(since = "", forRemoval = true)
-  public Map<String, List<String>> getBegin() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /** @deprecated */
-  @Deprecated(since = "", forRemoval = true)
-  public Map<String, List<String>> getDctermsHasPart() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /** @deprecated */
-  @Deprecated(since = "", forRemoval = true)
-  public Map<String, List<String>> getEnd() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /** @deprecated */
-  @Deprecated(since = "", forRemoval = true)
-  public Map<String, List<String>> getIsPartOf() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /** @deprecated */
-  @Deprecated(since = "", forRemoval = true)
-  public void setBegin(Map<String, List<String>> arg0) {
-    // TODO Auto-generated method stub
-
-  }
-
-  /** @deprecated */
-  @Deprecated(since = "", forRemoval = true)
-  public void setDctermsHasPart(Map<String, List<String>> arg0) {
-    // TODO Auto-generated method stub
-
-  }
-
-  /** @deprecated */
-  @Deprecated(since = "", forRemoval = true)
-  public void setEnd(Map<String, List<String>> arg0) {
-    // TODO Auto-generated method stub
-
-  }
-
   public String getType() {
-    return EntityTypes.TimeSpan.getEntityType();
+    return type;
   }
 
+  @Override
   public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
-    // TODO:in case of the performance overhead cause by using the reflecion code, change this
     // method to call the getters for each field individually
     return field.get(this);
   }
 
+  @Override
   public void setFieldValue(Field field, Object value)
       throws IllegalArgumentException, IllegalAccessException {
-    // TODO:in case of the performance overhead cause by using the reflecion code, change this
     // method to call the setter for each field individually
     field.set(this, value);
   }

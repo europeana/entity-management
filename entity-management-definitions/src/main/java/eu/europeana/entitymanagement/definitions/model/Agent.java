@@ -47,7 +47,7 @@ import java.util.Map;
 })
 public class Agent extends Entity {
 
-  // TODO: fix cardinality, change to list
+  private String type = EntityTypes.Agent.name();
   private List<String> date; // format "YYYY"
   private List<String> begin; // format "YYYY-MM-DD"
   private List<String> end; // format "YYYY-MM-DD"
@@ -87,7 +87,7 @@ public class Agent extends Entity {
     this.dateOfEstablishment = copy.getDateOfEstablishment();
     this.dateOfTermination = copy.getDateOfTermination();
     this.gender = copy.getGender();
-    this.sameAs = copy.sameAs;
+    if (copy.sameAs != null) this.sameAs = (new ArrayList<>(copy.sameAs));
   }
 
   public Agent() {
@@ -245,18 +245,18 @@ public class Agent extends Entity {
   }
 
   public String getType() {
-    return EntityTypes.Agent.getEntityType();
+    return type;
   }
 
+  @Override
   public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
-    // TODO:in case of the performance overhead cause by using the reflecion code, change this
     // method to call the getters for each field individually
     return field.get(this);
   }
 
+  @Override
   public void setFieldValue(Field field, Object value)
       throws IllegalArgumentException, IllegalAccessException {
-    // TODO:in case of the performance overhead cause by using the reflecion code, change this
     // method to call the setter for each field individually
     field.set(this, value);
   }
