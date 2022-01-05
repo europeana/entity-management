@@ -47,6 +47,27 @@ import java.util.Map;
 })
 public class Agent extends Entity {
 
+  // TODO: fix cardinality, change to list
+  private List<String> date; // format "YYYY"
+  private List<String> begin; // format "YYYY-MM-DD"
+  private List<String> end; // format "YYYY-MM-DD"
+  private List<String> dateOfBirth; // format "YYYY-MM-DD"
+  private List<String> dateOfDeath; // format "YYYY"
+  private List<String> wasPresentAt;
+  private List<String> hasMet;
+  private Map<String, String> name;
+  private Map<String, List<String>> biographicalInformation;
+  // TODO: clarify format. Right now Metis returns a list of Resources
+  private List<String> professionOrOccupation;
+  private List<String> placeOfBirth;
+  private List<String> placeOfDeath;
+
+  private List<String> dateOfEstablishment;
+  private List<String> dateOfTermination;
+  private List<String> gender;
+
+  private List<String> sameAs;
+
   public Agent(Agent copy) {
     super(copy);
     if (copy.getDate() != null) this.date = new ArrayList<>(copy.getDate());
@@ -72,27 +93,6 @@ public class Agent extends Entity {
   public Agent() {
     super();
   }
-
-  // TODO: fix cardinality, change to list
-  private List<String> date; // format "YYYY"
-  private List<String> begin; // format "YYYY-MM-DD"
-  private List<String> end; // format "YYYY-MM-DD"
-  private List<String> dateOfBirth; // format "YYYY-MM-DD"
-  private List<String> dateOfDeath; // format "YYYY"
-  private List<String> wasPresentAt;
-  private List<String> hasMet;
-  private Map<String, String> name;
-  private Map<String, List<String>> biographicalInformation;
-  // TODO: clarify format. Right now Metis returns a list of Resources
-  private List<String> professionOrOccupation;
-  private List<String> placeOfBirth;
-  private List<String> placeOfDeath;
-
-  private List<String> dateOfEstablishment;
-  private List<String> dateOfTermination;
-  private List<String> gender;
-
-  private List<String> sameAs;
 
   @JsonGetter(WAS_PRESENT_AT)
   public List<String> getWasPresentAt() {

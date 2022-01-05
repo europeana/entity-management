@@ -16,21 +16,6 @@ import java.util.List;
 @JsonPropertyOrder({ID, TYPE, CREATED, MODIFIED, PAGE_RANK, RECORD_COUNT, SCORE, AGGREGATES})
 public class Aggregation {
 
-  public Aggregation() {}
-
-  public Aggregation(Aggregation copy) {
-    this.id = copy.getId();
-    this.type = copy.getType();
-    this.rights = copy.getRights();
-    this.source = copy.getSource();
-    this.created = copy.getCreated();
-    this.modified = copy.getModified();
-    this.score = copy.getScore();
-    this.recordCount = copy.getRecordCount();
-    this.pageRank = copy.getPageRank();
-    if (copy.getAggregates() != null) this.aggregates = new ArrayList<>(copy.getAggregates());
-  }
-
   private String id;
   private String type;
   private String rights;
@@ -45,6 +30,21 @@ public class Aggregation {
 
   private List<String> aggregates;
 
+  public Aggregation() {}
+
+  public Aggregation(Aggregation copy) {
+    this.id = copy.getId();
+    this.type = copy.getAggregationType();
+    this.rights = copy.getRights();
+    this.source = copy.getSource();
+    this.created = copy.getCreated();
+    this.modified = copy.getModified();
+    this.score = copy.getScore();
+    this.recordCount = copy.getRecordCount();
+    this.pageRank = copy.getPageRank();
+    if (copy.getAggregates() != null) this.aggregates = new ArrayList<>(copy.getAggregates());
+  }
+
   @JsonGetter(ID)
   public String getId() {
     return id;
@@ -56,7 +56,7 @@ public class Aggregation {
   }
 
   @JsonGetter(TYPE)
-  public String getType() {
+  public String getAggregationType() {
     return AGGREGATION;
   }
 

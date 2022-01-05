@@ -46,6 +46,11 @@ import java.util.Map;
 })
 public class TimeSpan extends Entity {
 
+  private List<String> isNextInSequence;
+  private String begin;
+  private String end;
+  private List<String> sameAs;
+
   public TimeSpan(TimeSpan copy) {
     super(copy);
     if (copy.getIsNextInSequence() != null)
@@ -58,11 +63,6 @@ public class TimeSpan extends Entity {
     super();
     // TODO Auto-generated constructor stub
   }
-
-  private List<String> isNextInSequence;
-  private String begin;
-  private String end;
-  private List<String> sameAs;
 
   @JsonGetter(IS_NEXT_IN_SEQUENCE)
   @JacksonXmlProperty(localName = XmlFields.XML_EDM_IS_NEXT_IN_SEQUENCE)
@@ -97,48 +97,56 @@ public class TimeSpan extends Entity {
     return end;
   }
 
-  @Deprecated
+  /** @deprecated */
+  @Deprecated(since = "", forRemoval = true)
   public void setIsPartOf(Map<String, List<String>> isPartOf) {
     // TODO Auto-generated method stub
   }
 
-  @Deprecated
+  /** @deprecated */
+  @Deprecated(since = "", forRemoval = true)
   public Map<String, List<String>> getBegin() {
     // TODO Auto-generated method stub
     return null;
   }
 
-  @Deprecated
+  /** @deprecated */
+  @Deprecated(since = "", forRemoval = true)
   public Map<String, List<String>> getDctermsHasPart() {
     // TODO Auto-generated method stub
     return null;
   }
 
-  @Deprecated
+  /** @deprecated */
+  @Deprecated(since = "", forRemoval = true)
   public Map<String, List<String>> getEnd() {
     // TODO Auto-generated method stub
     return null;
   }
 
-  @Deprecated
+  /** @deprecated */
+  @Deprecated(since = "", forRemoval = true)
   public Map<String, List<String>> getIsPartOf() {
     // TODO Auto-generated method stub
     return null;
   }
 
-  @Deprecated
+  /** @deprecated */
+  @Deprecated(since = "", forRemoval = true)
   public void setBegin(Map<String, List<String>> arg0) {
     // TODO Auto-generated method stub
 
   }
 
-  @Deprecated
+  /** @deprecated */
+  @Deprecated(since = "", forRemoval = true)
   public void setDctermsHasPart(Map<String, List<String>> arg0) {
     // TODO Auto-generated method stub
 
   }
 
-  @Deprecated
+  /** @deprecated */
+  @Deprecated(since = "", forRemoval = true)
   public void setEnd(Map<String, List<String>> arg0) {
     // TODO Auto-generated method stub
 

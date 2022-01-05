@@ -106,7 +106,7 @@ public abstract class SolrEntity<T extends Entity> {
       this.prefLabel =
           new HashMap<>(
               SolrUtils.normalizeStringMapByAddingPrefix(
-                  AgentSolrFields.PREF_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
+                  EntitySolrFields.PREF_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
                   prefLabel));
     }
   }
@@ -116,7 +116,7 @@ public abstract class SolrEntity<T extends Entity> {
       this.altLabel =
           new HashMap<>(
               SolrUtils.normalizeStringListMapByAddingPrefix(
-                  AgentSolrFields.ALT_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, altLabel));
+                  EntitySolrFields.ALT_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, altLabel));
     }
   }
 
@@ -135,7 +135,7 @@ public abstract class SolrEntity<T extends Entity> {
       this.note =
           new HashMap<>(
               SolrUtils.normalizeStringListMapByAddingPrefix(
-                  AgentSolrFields.NOTE + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, note));
+                  EntitySolrFields.NOTE + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, note));
     }
   }
 

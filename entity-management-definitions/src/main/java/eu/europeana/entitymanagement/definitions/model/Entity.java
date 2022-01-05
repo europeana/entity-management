@@ -56,33 +56,6 @@ import org.bson.types.ObjectId;
     groups = {EntityFieldsDataSourceProxyValidationGroup.class})
 public abstract class Entity {
 
-  public Entity() {}
-
-  public Entity(Entity copy) {
-
-    if (!copy.getType().equals(getType())) {
-      throw new IllegalArgumentException("Cannot copy " + copy.getType() + " into " + getType());
-    }
-
-    this.type = copy.getType();
-    this.entityId = copy.getEntityId();
-    this.depiction = copy.getDepiction();
-    if (copy.getNote() != null) this.note = new HashMap<>(copy.getNote());
-    if (copy.getPrefLabel() != null) this.prefLabel = new HashMap<>(copy.getPrefLabel());
-    if (copy.getAltLabel() != null) this.altLabel = new HashMap<>(copy.getAltLabel());
-    if (copy.getHiddenLabel() != null) this.hiddenLabel = new HashMap<>(copy.getHiddenLabel());
-    if (copy.getIdentifier() != null) this.identifier = new ArrayList<>(copy.getIdentifier());
-    if (copy.getSameReferenceLinks() != null)
-      this.setSameReferenceLinks(new ArrayList<>(copy.getSameReferenceLinks()));
-    if (copy.getIsRelatedTo() != null) this.isRelatedTo = new ArrayList<>(copy.getIsRelatedTo());
-    if (copy.getHasPart() != null) this.hasPart = new ArrayList<>(copy.getHasPart());
-    if (copy.getIsPartOfArray() != null) this.isPartOf = new ArrayList<>(copy.getIsPartOfArray());
-    if (copy.getIsAggregatedBy() != null)
-      this.isAggregatedBy = new Aggregation(copy.getIsAggregatedBy());
-    if (copy.getIsShownBy() != null) this.isShownBy = new WebResource(copy.getIsShownBy());
-    this.payload = copy.getPayload();
-  }
-
   protected String type = getType();
   protected String entityId;
   // ID of entityRecord in database
@@ -104,6 +77,34 @@ public abstract class Entity {
   protected WebResource isShownBy;
   protected WebResource depiction;
   protected String payload;
+
+  protected Entity() {}
+
+  protected Entity(Entity copy) {
+
+    if (!copy.getType().equals(getType())) {
+      throw new IllegalArgumentException("Cannot copy " + copy.getType() + " into " + getType());
+    }
+
+    this.type = copy.getType();
+    this.entityId = copy.getEntityId();
+    this.depiction = copy.getDepiction();
+    if (copy.getNote() != null) this.note = new HashMap<>(copy.getNote());
+    if (copy.getPrefLabel() != null) this.prefLabel = new HashMap<>(copy.getPrefLabel());
+    if (copy.getAltLabel() != null) this.altLabel = new HashMap<>(copy.getAltLabel());
+    if (copy.getHiddenLabel() != null) this.hiddenLabel = new HashMap<>(copy.getHiddenLabel());
+    if (copy.getIdentifier() != null) this.identifier = new ArrayList<>(copy.getIdentifier());
+    if (copy.getSameReferenceLinks() != null)
+      this.setSameReferenceLinks(new ArrayList<>(copy.getSameReferenceLinks()));
+    if (copy.getIsRelatedTo() != null) this.isRelatedTo = new ArrayList<>(copy.getIsRelatedTo());
+    if (copy.getHasPart() != null) this.hasPart = new ArrayList<>(copy.getHasPart());
+    if (copy.getIsPartOfArray() != null) this.isPartOf = new ArrayList<>(copy.getIsPartOfArray());
+    if (copy.getIsAggregatedBy() != null)
+      this.isAggregatedBy = new Aggregation(copy.getIsAggregatedBy());
+    if (copy.getIsShownBy() != null) this.isShownBy = new WebResource(copy.getIsShownBy());
+
+    this.payload = copy.getPayload();
+  }
 
   @JsonGetter(WebEntityFields.PREF_LABEL)
   public Map<String, String> getPrefLabel() {
@@ -217,13 +218,15 @@ public abstract class Entity {
     this.depiction = depiction;
   }
 
-  @Deprecated
+  /** @deprecated */
+  @Deprecated(since = "", forRemoval = true)
   public ObjectId getId() {
     // TODO Auto-generated method stub
     return null;
   }
 
-  @Deprecated
+  /** @deprecated */
+  @Deprecated(since = "", forRemoval = true)
   @JsonIgnore
   public void setId(ObjectId id) {
     // TODO Auto-generated method stub
@@ -299,9 +302,9 @@ public abstract class Entity {
   public abstract void setSameReferenceLinks(List<String> uris);
 
   /**
-   * adds the provided uri to the same reference list if not allready included
+   * adds the provided uri to the same reference list if not already included
    *
-   * @param uris
+   * @param uri uri to check
    */
   public void addSameReferenceLink(String uri) {
     if (getSameReferenceLinks() == null) {
