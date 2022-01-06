@@ -27,12 +27,12 @@ import eu.europeana.entitymanagement.exception.DatasourceNotKnownException;
 import eu.europeana.entitymanagement.exception.EntityMismatchException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
+import eu.europeana.entitymanagement.solr.SolrSearchCursorIterator;
+import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
+import eu.europeana.entitymanagement.solr.model.SolrEntity;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
-import eu.europeana.entitymanagement.vocabulary.EntityProfile;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.vocabulary.FormatTypes;
-import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
+import eu.europeana.entitymanagement.vocabulary.*;
 import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import io.swagger.annotations.ApiOperation;
@@ -286,8 +286,7 @@ public class EMController extends BaseRest {
 
     // query param takes precedence over request body
     if (StringUtils.hasLength(query)) {
-      entityUpdateService.scheduleUpdatesWithSearch(query, ScheduledUpdateType.FULL_UPDATE);
-      return returnEmptyAcceptedResponse(request);
+      return scheduleUpdatesWithSearch(request, query, ScheduledUpdateType.FULL_UPDATE);
     }
 
     if (CollectionUtils.isEmpty(entityIds)) {
@@ -316,8 +315,7 @@ public class EMController extends BaseRest {
 
     // query param takes precedence over request body
     if (StringUtils.hasLength(query)) {
-      entityUpdateService.scheduleUpdatesWithSearch(query, ScheduledUpdateType.METRICS_UPDATE);
-      return returnEmptyAcceptedResponse(request);
+      return scheduleUpdatesWithSearch(request, query, ScheduledUpdateType.METRICS_UPDATE);
     }
 
     if (CollectionUtils.isEmpty(entityIds)) {
@@ -653,6 +651,55 @@ public class EMController extends BaseRest {
 
   private ResponseEntity<EntityIdResponse> scheduleBatchUpdates(
       HttpServletRequest request, List<String> entityIds, ScheduledTaskType updateType) {
+    // get the entities to be scheduled, failed and skipped for update
+    EntityIdResponse entityIdResponse = generateEntityIdResponse(entityIds);
+    entityUpdateService.scheduleTasks(entityIdResponse.getSuccessful(), updateType);
+
+    // set required headers for this endpoint
+    org.springframework.http.HttpHeaders httpHeaders = createAllowHeader(request);
+    httpHeaders.add(HttpHeaders.CONTENT_TYPE, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
+    return ResponseEntity.accepted().headers(httpHeaders).body(entityIdResponse);
+  }
+
+  /**
+   * Schedules entity updates using a search query
+   *
+   * @param query search query
+   * @param updateType update type to schedule
+   * @throws SolrServiceException if error occurs during search
+   */
+  public ResponseEntity<EntityIdResponse> scheduleUpdatesWithSearch(
+      HttpServletRequest request, String query, ScheduledTaskType updateType)
+      throws SolrServiceException {
+    SolrSearchCursorIterator iterator =
+        solrService.getSearchIterator(query, List.of(EntitySolrFields.TYPE, EntitySolrFields.ID));
+
+    // get all the entity Ids for update from solr response
+    List<String> entityIds = new ArrayList<>();
+    while (iterator.hasNext()) {
+      List<SolrEntity<Entity>> solrEntities = iterator.next();
+      entityIds.addAll(
+          solrEntities.stream().map(SolrEntity::getEntityId).collect(Collectors.toList()));
+    }
+    logger.info("Found {} entities for update for search query : {}.", entityIds.size(), query);
+
+    // get the entities to be scheduled, failed and skipped for update
+    EntityIdResponse entityIdResponse = generateEntityIdResponse(entityIds);
+    entityUpdateService.scheduleTasks(entityIdResponse.getSuccessful(), updateType);
+
+    // set required headers for this endpoint
+    org.springframework.http.HttpHeaders httpHeaders = createAllowHeader(request);
+    httpHeaders.add(HttpHeaders.CONTENT_TYPE, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
+    return ResponseEntity.accepted().headers(httpHeaders).body(entityIdResponse);
+  }
+
+  /**
+   * Generate the EntityIdResponse based on entity Ids to be processed for update
+   *
+   * @param entityIds
+   * @return
+   */
+  private EntityIdResponse generateEntityIdResponse(List<String> entityIds) {
     // Get all existing EntityIds and their disabled status
     List<EntityIdDisabledStatus> statusList =
         entityRecordService.retrieveMultipleByEntityId(entityIds, false);
@@ -686,21 +733,7 @@ public class EMController extends BaseRest {
                 .map(EntityIdDisabledStatus::getEntityId)
                 .collect(Collectors.toList());
 
-    entityUpdateService.scheduleTasks(toBeScheduled, updateType);
-
-    // set required headers for this endpoint
-    org.springframework.http.HttpHeaders httpHeaders = createAllowHeader(request);
-    httpHeaders.add(HttpHeaders.CONTENT_TYPE, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
-    return ResponseEntity.accepted()
-        .headers(httpHeaders)
-        .body(new EntityIdResponse(entityIds.size(), toBeScheduled, failures, skipped));
-  }
-
-  private ResponseEntity<EntityIdResponse> returnEmptyAcceptedResponse(HttpServletRequest request) {
-    // set required headers
-    org.springframework.http.HttpHeaders httpHeaders = createAllowHeader(request);
-    httpHeaders.add(HttpHeaders.CONTENT_TYPE, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
-    return ResponseEntity.accepted().headers(httpHeaders).build();
+    return new EntityIdResponse(entityIds.size(), toBeScheduled, failures, skipped);
   }
 
   private void launchUpdateTask(String entityId) throws Exception {
