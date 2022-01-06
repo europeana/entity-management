@@ -95,7 +95,7 @@ public class SolrAgent extends SolrEntity<Agent> {
     this.dateOfTermination = CollectionUtils.lastElement(agent.getDateOfTermination());
     this.gender = CollectionUtils.lastElement(agent.getGender());
     if (agent.getSameReferenceLinks() != null) {
-      this.setSameReferenceLinks(new ArrayList<>(agent.getSameReferenceLinks()));
+      this.sameAs = new ArrayList<>(agent.getSameReferenceLinks());
     }
   }
 

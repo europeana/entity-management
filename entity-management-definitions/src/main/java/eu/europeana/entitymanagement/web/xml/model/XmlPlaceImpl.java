@@ -45,7 +45,7 @@ public class XmlPlaceImpl extends XmlBaseEntityImpl<Place> {
 
   public XmlPlaceImpl(Place place) {
     super(place);
-    setSameReferenceLinks(RdfXmlUtils.convertToRdfResource(place.getSameReferenceLinks()));
+    this.sameAs = RdfXmlUtils.convertToRdfResource(place.getSameReferenceLinks());
     this.latitude = place.getLatitude();
     this.longitude = place.getLongitude();
     this.altitude = place.getAltitude();

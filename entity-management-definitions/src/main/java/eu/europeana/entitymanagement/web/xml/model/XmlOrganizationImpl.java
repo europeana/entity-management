@@ -58,7 +58,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
 
   public XmlOrganizationImpl(Organization organization) {
     super(organization);
-    setSameReferenceLinks(RdfXmlUtils.convertToRdfResource(organization.getSameReferenceLinks()));
+    this.sameAs = RdfXmlUtils.convertToRdfResource(organization.getSameReferenceLinks());
     this.acronym = RdfXmlUtils.convertToXmlMultilingualString(organization.getAcronym());
     this.description = RdfXmlUtils.convertMapToXmlMultilingualString(organization.getDescription());
     if (organization.getLogo() != null) {

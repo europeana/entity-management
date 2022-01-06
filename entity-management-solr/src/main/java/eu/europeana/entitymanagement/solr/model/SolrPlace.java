@@ -40,7 +40,7 @@ public class SolrPlace extends SolrEntity<Place> {
     this.longitude = place.getLongitude();
     this.altitude = place.getAltitude();
     if (place.getSameReferenceLinks() != null) {
-      this.setSameReferenceLinks(new ArrayList<>(place.getSameReferenceLinks()));
+      this.sameAs = new ArrayList<>(place.getSameReferenceLinks());
     }
   }
 

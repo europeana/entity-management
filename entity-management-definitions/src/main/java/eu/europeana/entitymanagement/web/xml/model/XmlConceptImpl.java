@@ -59,7 +59,7 @@ public class XmlConceptImpl extends XmlBaseEntityImpl<Concept> {
 
   public XmlConceptImpl(Concept concept) {
     super(concept);
-    setSameReferenceLinks(RdfXmlUtils.convertToRdfResource(concept.getSameReferenceLinks()));
+    this.exactMatch = RdfXmlUtils.convertToRdfResource(concept.getSameReferenceLinks());
     this.related = RdfXmlUtils.convertToRdfResource(concept.getRelated());
     this.narrower = RdfXmlUtils.convertToRdfResource(concept.getNarrower());
     this.broader = RdfXmlUtils.convertToRdfResource(concept.getBroader());

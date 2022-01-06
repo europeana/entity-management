@@ -36,7 +36,7 @@ public class SolrTimeSpan extends SolrEntity<TimeSpan> {
     this.begin = timespan.getBeginString();
     this.end = timespan.getEndString();
     if (timespan.getSameReferenceLinks() != null) {
-      this.setSameReferenceLinks(new ArrayList<>(timespan.getSameReferenceLinks()));
+      this.sameAs = new ArrayList<>(timespan.getSameReferenceLinks());
     }
   }
 

@@ -42,7 +42,7 @@ public class XmlTimeSpanImpl extends XmlBaseEntityImpl<TimeSpan> {
 
   public XmlTimeSpanImpl(TimeSpan timespan) {
     super(timespan);
-    setSameReferenceLinks(RdfXmlUtils.convertToRdfResource(timespan.getSameReferenceLinks()));
+    this.sameAs = RdfXmlUtils.convertToRdfResource(timespan.getSameReferenceLinks());
     this.hiddenLabel = RdfXmlUtils.convertToXmlMultilingualString(timespan.getHiddenLabel());
     this.begin = timespan.getBeginString();
     this.end = timespan.getEndString();

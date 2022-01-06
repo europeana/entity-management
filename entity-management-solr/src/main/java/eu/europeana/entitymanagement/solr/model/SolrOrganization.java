@@ -89,7 +89,7 @@ public class SolrOrganization extends SolrEntity<Organization> {
     setGeographicLevel(organization.getGeographicLevel());
     this.country = organization.getCountry();
     if (organization.getSameReferenceLinks() != null) {
-      this.setSameReferenceLinks(new ArrayList<>(organization.getSameReferenceLinks()));
+      this.sameAs = new ArrayList<>(organization.getSameReferenceLinks());
     }
     Address organizationAddress = organization.getAddress();
     if (organizationAddress != null) {
