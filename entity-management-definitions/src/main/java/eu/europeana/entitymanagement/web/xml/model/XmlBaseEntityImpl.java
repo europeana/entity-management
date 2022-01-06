@@ -33,7 +33,7 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
   @XmlElement(namespace = XmlConstants.NAMESPACE_ORE, name = XmlConstants.IS_AGGREGATED_BY)
   private XmlAggregationImpl isAggregatedBy;
 
-  public XmlBaseEntityImpl() {
+  protected XmlBaseEntityImpl() {
     // default constructor
   }
 
@@ -41,14 +41,11 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
     return isShownBy;
   }
 
-  public XmlBaseEntityImpl(T entity) {
+  protected XmlBaseEntityImpl(T entity) {
     this.entity = entity;
     this.about = entity.getAbout();
     this.prefLabel = RdfXmlUtils.convertMapToXmlMultilingualString(entity.getPrefLabel());
     this.altLabel = RdfXmlUtils.convertToXmlMultilingualString(entity.getAltLabel());
-    setSameReferenceLinks(RdfXmlUtils.convertToRdfResource(entity.getSameReferenceLinks()));
-    // isAggregatedBy not always set in tests
-    // TODO: fix tests, then remove null check here
     if (entity.getIsAggregatedBy() != null) {
       this.isAggregatedBy = new XmlAggregationImpl(entity.getIsAggregatedBy());
     }

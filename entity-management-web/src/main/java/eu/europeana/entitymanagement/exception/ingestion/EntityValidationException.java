@@ -10,7 +10,7 @@ public class EntityValidationException extends EuropeanaApiException {
   /** */
   private static final long serialVersionUID = 4490232069167863982L;
 
-  Set<ConstraintViolation<Entity>> validationErrors;
+  private final transient Set<ConstraintViolation<Entity>> validationErrors;
 
   public EntityValidationException(
       String message, Set<ConstraintViolation<Entity>> validationErrors) {

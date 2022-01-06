@@ -81,6 +81,7 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
 
   public XmlAgentImpl(Agent agent) {
     super(agent);
+    setSameReferenceLinks(RdfXmlUtils.convertToRdfResource(agent.getSameReferenceLinks()));
     this.hiddenLabel = RdfXmlUtils.convertToXmlMultilingualString(agent.getHiddenLabel());
     this.note = RdfXmlUtils.convertToXmlMultilingualString(agent.getNote());
     this.identifier = agent.getIdentifier();
@@ -109,6 +110,7 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
     // default constructor
   }
 
+  @Override
   public Agent toEntityModel() throws EntityCreationException {
     super.toEntityModel();
 

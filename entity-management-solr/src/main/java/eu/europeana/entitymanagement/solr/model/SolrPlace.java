@@ -39,6 +39,9 @@ public class SolrPlace extends SolrEntity<Place> {
     this.latitude = place.getLatitude();
     this.longitude = place.getLongitude();
     this.altitude = place.getAltitude();
+    if (place.getSameReferenceLinks() != null) {
+      this.setSameReferenceLinks(new ArrayList<>(place.getSameReferenceLinks()));
+    }
   }
 
   public List<String> getIsNextInSequence() {
