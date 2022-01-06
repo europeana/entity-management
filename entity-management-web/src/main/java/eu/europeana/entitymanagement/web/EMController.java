@@ -681,8 +681,6 @@ public class EMController extends BaseRest {
       entityIds.addAll(
           solrEntities.stream().map(SolrEntity::getEntityId).collect(Collectors.toList()));
     }
-    logger.info("Found {} entities for update for search query : {}.", entityIds.size(), query);
-
     // get the entities to be scheduled, failed and skipped for update
     EntityIdResponse entityIdResponse = generateEntityIdResponse(entityIds);
     entityUpdateService.scheduleTasks(entityIdResponse.getSuccessful(), updateType);
