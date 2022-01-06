@@ -5,8 +5,9 @@ import eu.europeana.corelib.edm.utils.TextSerializer;
 
 public class EMTextSerializer extends TextSerializer {
 
+  private static final long serialVersionUID = -936926496910746163L;
+
   public EMTextSerializer(Class<Text> t) {
     super(t);
-    // TODO Auto-generated constructor stub
   }
 }

@@ -2,9 +2,6 @@ package eu.europeana.entitymanagement.web.service;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.common.config.LanguageCodes;
-import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
@@ -29,32 +26,24 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-@Service(AppConfig.BEAN_EM_SCORING_SERVICE)
+@Service(AppConfigConstants.BEAN_EM_SCORING_SERVICE)
 public class ScoringService {
   private static final Logger logger = LogManager.getLogger(ScoringService.class);
 
   private final EnrichmentCountQueryService enrichmentCountQueryService;
   private final SolrClient prSolrClient;
 
-  private static MaxEntityMetrics maxEntityMetrics;
-  private static EntityMetrics maxOverallMetrics;
+  private MaxEntityMetrics maxEntityMetrics;
+  private EntityMetrics maxOverallMetrics;
 
   private static final int RANGE_EXTENSION_FACTOR = 100;
-
-  private EntityManagementConfiguration emConfiguration;
-
-  private LanguageCodes emLanguageCodes;
 
   public static final String WIKIDATA_PREFFIX = "http://www.wikidata.org/entity/";
   public static final String WIKIDATA_DBPEDIA_PREFIX = "http://wikidata.dbpedia.org/resource/";
 
   public ScoringService(
-      EntityManagementConfiguration emConfiguration,
-      LanguageCodes emLanguageCodes,
       EnrichmentCountQueryService enrichmentCountQueryService,
       @Qualifier(AppConfigConstants.BEAN_PR_SOLR_CLIENT) SolrClient prSolrClient) {
-    this.emConfiguration = emConfiguration;
-    this.emLanguageCodes = emLanguageCodes;
     this.enrichmentCountQueryService = enrichmentCountQueryService;
     this.prSolrClient = prSolrClient;
   }
@@ -74,13 +63,13 @@ public class ScoringService {
     }
 
     metrics.setEnrichmentCount(getEnrichmentCount(entity));
-    //	metrics.setHitCount(getHitCount(entity));
     computeScore(metrics);
     return metrics;
   }
 
   private void computeScore(EntityMetrics metrics) throws FunctionalRuntimeException {
-    int normalizedPR = 0, normalizedEC = 0;
+    int normalizedPR = 0;
+    int normalizedEC = 0;
 
     try {
       normalizedPR = computeNormalizedMetricValue(metrics, "pageRank");
@@ -108,7 +97,6 @@ public class ScoringService {
         if (metricValue <= 1) return 1;
         maxValueForType = getMaxEntityMetrics().maxValues(metrics.getEntityType()).getPageRank();
         maxValueOverall = getMaxOverallMetrics().getPageRank();
-        // trust = 1;
         break;
       case "enrichmentCount":
         metricValue = metrics.getEnrichmentCount();
@@ -168,7 +156,6 @@ public class ScoringService {
     }
 
     query.setQuery("page_url:\"" + wikidataUrl + "\"");
-    //	getLogger().trace("query: " + query);
 
     try {
       Instant start = Instant.now();
@@ -198,12 +185,10 @@ public class ScoringService {
     }
     List<String> values = entity.getSameReferenceLinks();
 
-    String wikidataUri =
-        values.stream()
-            .filter(value -> value.startsWith(WIKIDATA_PREFFIX))
-            .findFirst()
-            .orElse(null);
-    return wikidataUri;
+    return values.stream()
+        .filter(value -> value.startsWith(WIKIDATA_PREFFIX))
+        .findFirst()
+        .orElse(null);
   }
 
   public MaxEntityMetrics getMaxEntityMetrics() throws IOException {
