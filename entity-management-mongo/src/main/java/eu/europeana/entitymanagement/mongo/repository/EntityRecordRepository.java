@@ -4,7 +4,7 @@ import static dev.morphia.query.Sort.ascending;
 import static dev.morphia.query.experimental.filters.Filters.*;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.*;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_UPDATE_OPTS;
-
+import com.mongodb.WriteConcern;
 import com.mongodb.client.model.ReturnDocument;
 import com.mongodb.client.result.UpdateResult;
 import dev.morphia.Datastore;
@@ -139,12 +139,12 @@ public class EntityRecordRepository {
    */
   public synchronized long generateAutoIncrement(String internalType) {
     // Get the given key from the auto increment entity and try to increment it.
+    ModifyOptions executionConcerns = new ModifyOptions().returnDocument(ReturnDocument.AFTER)
+        .writeConcern(WriteConcern.MAJORITY);
+
     EntityIdGenerator autoIncrement =
-        datastore
-            .find(EntityIdGenerator.class)
-            .filter(eq("_id", internalType))
-            .modify(UpdateOperators.inc("value"))
-            .execute(new ModifyOptions().returnDocument(ReturnDocument.AFTER));
+        datastore.find(EntityIdGenerator.class).filter(eq("_id", internalType))
+            .modify(UpdateOperators.inc("value")).execute(executionConcerns);
 
     // If none is found, we need to create one for the given key.
     if (autoIncrement == null) {
