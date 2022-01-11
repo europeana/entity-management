@@ -1,1 +1,36 @@
-{"@context":"http://www.europeana.eu/schemas/context/entity.jsonld","type":"Concept","isShownBy":{"id":"https://images.memorix.nl/rce/thumb/fullsize/b0bb5db7-2688-a33e-ff85-3aaceeae37d8.jpg","type":"WebResource","source":"http://data.europeana.eu/item/2020704/resource_document_rce_beeldbank_837866ec_3f22_11e4_9dc7_3b4bf4a0ed46_78aeec9a_c6e7_c8df_dddb_f39def58827a","thumbnail":"https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri\u003dhttps%3A%2F%2Fimages.memorix.nl%2Frce%2Fthumb%2Ffullsize%2Fb0bb5db7-2688-a33e-ff85-3aaceeae37d8.jpg\u0026type\u003dIMAGE"},"prefLabel":{"bg":"Диапозитив","ca":"Diapositiva","da":"Dias","de":"Dias","en":"Slides","es":"Diapositivas","fr":"Diapositive","it":"Diapositive","lt":"Skaidrės","nl":"Dia","pl":"Przeźrocza","ru":"Слайды","sl":"Diapozitívy","uk":"Слайди","zh":"幻灯片"},"altLabel":{"es":["Diapositivas (fotografías)"]},"broader":["http://data.europeana.eu/concept/1675"],"narrower":["http://data.europeana.eu/concept/1707","http://data.europeana.eu/concept/1706"],"id":"http://bib.arts.kuleuven.be/photoVocabulary/-photoVocabulary-13008"}
+{
+    "@context": "http://www.europeana.eu/schemas/context/entity.jsonld",
+    "type": "Concept",
+    "isShownBy": {
+        "id": "https://images.memorix.nl/rce/thumb/fullsize/b0bb5db7-2688-a33e-ff85-3aaceeae37d8.jpg",
+        "type": "WebResource",
+        "source": "http://data.europeana.eu/item/2020704/resource_document_rce_beeldbank_837866ec_3f22_11e4_9dc7_3b4bf4a0ed46_78aeec9a_c6e7_c8df_dddb_f39def58827a",
+        "thumbnail": "https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri\u003dhttps%3A%2F%2Fimages.memorix.nl%2Frce%2Fthumb%2Ffullsize%2Fb0bb5db7-2688-a33e-ff85-3aaceeae37d8.jpg\u0026type\u003dIMAGE"
+    },
+    "prefLabel": {
+        "bg": "Диапозитив",
+        "da": "Dias",
+        "de": "Dias",
+        "en": "Slides",
+        "es": "Diapositivas",
+        "fr": "Diapositive",
+        "it": "Diapositive",
+        "lt": "Skaidrės",
+        "nl": "Dia",
+        "pl": "Przeźrocza",
+        "sl": "Diapozitívy"
+    },
+    "altLabel": {
+        "es": [
+            "Diapositivas (fotografías)"
+        ]
+    },
+    "broader": [
+        "http://data.europeana.eu/concept/1675"
+    ],
+    "narrower": [
+        "http://data.europeana.eu/concept/1707",
+        "http://data.europeana.eu/concept/1706"
+    ],
+    "id": "http://bib.arts.kuleuven.be/photoVocabulary/-photoVocabulary-13008"
+}

@@ -1,1 +1,32 @@
-{"@context":"http://www.europeana.eu/schemas/context/entity.jsonld","type":"Concept","isShownBy":{"id":"http://europeana.parisiennedephotographie.fr/SSEU/Files/a44e93ae7b503ba7022cf9d8588acb0d86cf44d48b635cd310b96a004f26c2c2","type":"WebResource","source":"http://data.europeana.eu/item/2024913/photography_ProvidedCHO_Parisienne_de_Photographie_47775_11","thumbnail":"https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri\u003dhttp%3A%2F%2Feuropeana.parisiennedephotographie.fr%2FSSEU%2FFiles%2Fa44e93ae7b503ba7022cf9d8588acb0d86cf44d48b635cd310b96a004f26c2c2\u0026type\u003dIMAGE"},"prefLabel":{"bg":"Черно-бял отпечатък","ca":"Còpia blanc i negre","da":"Sort-hvide prints","de":"Schwarz-weiß Abzüge","en":"Black-and-white prints","es":"Estampas en blanco y negro","fr":"Épreuve en noir et blanc","it":"Stampe in bianco e nero","lt":"Baltai juodi atspaudai","nl":"Zwart-wit afdruk","pl":"Wydruki czarno-białe","ru":"Чёрно-белые отпечатки (оттиски)","sl":"Čiernobiela tlač","uk":"Чорно-білі відбитки (відтиски)","zh":"黑白打印"},"altLabel":{"de":["Schwarz-weiss prints"]},"broader":["http://data.europeana.eu/concept/1720"],"id":"http://bib.arts.kuleuven.be/photoVocabulary/-photoVocabulary-11009"}
+{
+    "@context": "http://www.europeana.eu/schemas/context/entity.jsonld",
+    "type": "Concept",
+    "isShownBy": {
+        "id": "http://europeana.parisiennedephotographie.fr/SSEU/Files/a44e93ae7b503ba7022cf9d8588acb0d86cf44d48b635cd310b96a004f26c2c2",
+        "type": "WebResource",
+        "source": "http://data.europeana.eu/item/2024913/photography_ProvidedCHO_Parisienne_de_Photographie_47775_11",
+        "thumbnail": "https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri\u003dhttp%3A%2F%2Feuropeana.parisiennedephotographie.fr%2FSSEU%2FFiles%2Fa44e93ae7b503ba7022cf9d8588acb0d86cf44d48b635cd310b96a004f26c2c2\u0026type\u003dIMAGE"
+    },
+    "prefLabel": {
+        "bg": "Черно-бял отпечатък",
+        "da": "Sort-hvide prints",
+        "de": "Schwarz-weiß Abzüge",
+        "en": "Black-and-white prints",
+        "es": "Estampas en blanco y negro",
+        "fr": "Épreuve en noir et blanc",
+        "it": "Stampe in bianco e nero",
+        "lt": "Baltai juodi atspaudai",
+        "nl": "Zwart-wit afdruk",
+        "pl": "Wydruki czarno-białe",
+        "sl": "Čiernobiela tlač"
+    },
+    "altLabel": {
+        "de": [
+            "Schwarz-weiss prints"
+        ]
+    },
+    "broader": [
+        "http://data.europeana.eu/concept/1720"
+    ],
+    "id": "http://bib.arts.kuleuven.be/photoVocabulary/-photoVocabulary-11009"
+}

@@ -1,1 +1,32 @@
-{"@context":"http://www.europeana.eu/schemas/context/entity.jsonld","type":"Concept","isShownBy":{"id":"http://europeana.parisiennedephotographie.fr/SSEU/Files/1d195369871b3ffdcea0cfae11614c742d308581175c8c5ba09bdbb16b9d9461","type":"WebResource","source":"http://data.europeana.eu/item/2024913/photography_ProvidedCHO_Parisienne_de_Photographie_82037_12","thumbnail":"https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri\u003dhttp%3A%2F%2Feuropeana.parisiennedephotographie.fr%2FSSEU%2FFiles%2F1d195369871b3ffdcea0cfae11614c742d308581175c8c5ba09bdbb16b9d9461\u0026type\u003dIMAGE"},"prefLabel":{"bg":"Цветоразделни негативи","ca":"Negatiu de separació de color","da":"Farveadskillelse negativer","de":"Color separation Negative","en":"Color separation negatives","es":"Negativo de separación de color","fr":"Color separation negatives","it":"Negativi a separazione di colori","lt":"Spalvų atskyrimo negatyvai","nl":"Kleurgescheiden negatief","pl":"Wyciągi negatywowe barwne","ru":"Негативы после цветоделения","sl":"Farebne oddelený negatív","uk":"Негативи після кольороподілення","zh":"分色底片"},"altLabel":{"es":["Negativos de separación de colores"]},"broader":["http://data.europeana.eu/concept/1665"],"id":"http://bib.arts.kuleuven.be/photoVocabulary/-photoVocabulary-12001"}
+{
+    "@context": "http://www.europeana.eu/schemas/context/entity.jsonld",
+    "type": "Concept",
+    "isShownBy": {
+        "id": "http://europeana.parisiennedephotographie.fr/SSEU/Files/1d195369871b3ffdcea0cfae11614c742d308581175c8c5ba09bdbb16b9d9461",
+        "type": "WebResource",
+        "source": "http://data.europeana.eu/item/2024913/photography_ProvidedCHO_Parisienne_de_Photographie_82037_12",
+        "thumbnail": "https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri\u003dhttp%3A%2F%2Feuropeana.parisiennedephotographie.fr%2FSSEU%2FFiles%2F1d195369871b3ffdcea0cfae11614c742d308581175c8c5ba09bdbb16b9d9461\u0026type\u003dIMAGE"
+    },
+    "prefLabel": {
+        "bg": "Цветоразделни негативи",
+        "da": "Farveadskillelse negativer",
+        "de": "Color separation Negative",
+        "en": "Color separation negatives",
+        "es": "Negativo de separación de color",
+        "fr": "Color separation negatives",
+        "it": "Negativi a separazione di colori",
+        "lt": "Spalvų atskyrimo negatyvai",
+        "nl": "Kleurgescheiden negatief",
+        "pl": "Wyciągi negatywowe barwne",
+        "sl": "Farebne oddelený negatív"
+    },
+    "altLabel": {
+        "es": [
+            "Negativos de separación de colores"
+        ]
+    },
+    "broader": [
+        "http://data.europeana.eu/concept/1665"
+    ],
+    "id": "http://bib.arts.kuleuven.be/photoVocabulary/-photoVocabulary-12001"
+}

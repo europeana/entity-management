@@ -1,1 +1,32 @@
-{"@context":"http://www.europeana.eu/schemas/context/entity.jsonld","type":"Concept","isShownBy":{"id":"http://europeana.parisiennedephotographie.fr/SSEU/Files/bea68908f9201773624731a6be20e818069ba19a02ccc7cf82f5d5958626783e","type":"WebResource","source":"http://data.europeana.eu/item/2024913/photography_ProvidedCHO_Parisienne_de_Photographie_14656_16","thumbnail":"https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri\u003dhttp%3A%2F%2Feuropeana.parisiennedephotographie.fr%2FSSEU%2FFiles%2Fbea68908f9201773624731a6be20e818069ba19a02ccc7cf82f5d5958626783e\u0026type\u003dIMAGE"},"prefLabel":{"bg":"Черно-бял негатив","ca":"Negatiu blanc i negre","da":"Sort-hvide negativer","de":"Schwarz-weiß Negative","en":"Black-and-white negatives","es":"Negativos blanco y negro","fr":"Négatif en noir et blanc","it":"Negativo in bianco e nero","lt":"Baltai juodi negatyvai","nl":"Zwart-wit negatief","pl":"Negatywy czarno-białe","ru":"Черно-белые негативы","sl":"Čiernobiele negatívy","uk":"Чорно-білі негативи","zh":"白色底片"},"altLabel":{"de":["Schwarz-weiss Negative"]},"broader":["http://data.europeana.eu/concept/1665"],"id":"http://bib.arts.kuleuven.be/photoVocabulary/-photoVocabulary-12003"}
+{
+    "@context": "http://www.europeana.eu/schemas/context/entity.jsonld",
+    "type": "Concept",
+    "isShownBy": {
+        "id": "http://europeana.parisiennedephotographie.fr/SSEU/Files/bea68908f9201773624731a6be20e818069ba19a02ccc7cf82f5d5958626783e",
+        "type": "WebResource",
+        "source": "http://data.europeana.eu/item/2024913/photography_ProvidedCHO_Parisienne_de_Photographie_14656_16",
+        "thumbnail": "https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri\u003dhttp%3A%2F%2Feuropeana.parisiennedephotographie.fr%2FSSEU%2FFiles%2Fbea68908f9201773624731a6be20e818069ba19a02ccc7cf82f5d5958626783e\u0026type\u003dIMAGE"
+    },
+    "prefLabel": {
+        "bg": "Черно-бял негатив",
+        "da": "Sort-hvide negativer",
+        "de": "Schwarz-weiß Negative",
+        "en": "Black-and-white negatives",
+        "es": "Negativos blanco y negro",
+        "fr": "Négatif en noir et blanc",
+        "it": "Negativo in bianco e nero",
+        "lt": "Baltai juodi negatyvai",
+        "nl": "Zwart-wit negatief",
+        "pl": "Negatywy czarno-białe",
+        "sl": "Čiernobiele negatívy"
+    },
+    "altLabel": {
+        "de": [
+            "Schwarz-weiss Negative"
+        ]
+    },
+    "broader": [
+        "http://data.europeana.eu/concept/1665"
+    ],
+    "id": "http://bib.arts.kuleuven.be/photoVocabulary/-photoVocabulary-12003"
+}

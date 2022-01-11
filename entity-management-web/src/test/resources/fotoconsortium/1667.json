@@ -1,1 +1,36 @@
-{"@context":"http://www.europeana.eu/schemas/context/entity.jsonld","type":"Concept","isShownBy":{"id":"http://europeana.parisiennedephotographie.fr/SSEU/Files/1d195369871b3ffdcea0cfae11614c742d308581175c8c5ba09bdbb16b9d9461","type":"WebResource","source":"http://data.europeana.eu/item/2024913/photography_ProvidedCHO_Parisienne_de_Photographie_82037_12","thumbnail":"https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri\u003dhttp%3A%2F%2Feuropeana.parisiennedephotographie.fr%2FSSEU%2FFiles%2F1d195369871b3ffdcea0cfae11614c742d308581175c8c5ba09bdbb16b9d9461\u0026type\u003dIMAGE"},"prefLabel":{"bg":"Полутонови негативи","ca":"Negatiu de mitja tinta","da":"Halvtone negativer","de":"Halftone Negative","en":"Halftone negatives","es":"Negativos mediotono","fr":"Halftone negatives","it":"Negativi ai mezzi toni","lt":"Pustoniniai negatyvai","nl":"Rasternegatief","pl":"Negatywy półtonowe","ru":"Полутоновые негативы","sl":"Polotónový negatív","uk":"Полутонові негативи","zh":"半色调底片"},"altLabel":{"de":["Halbton-Negative","Raster-Negative"],"es":["Negativos de medio tono"]},"broader":["http://data.europeana.eu/concept/1665"],"id":"http://bib.arts.kuleuven.be/photoVocabulary/-photoVocabulary-12002"}
+{
+    "@context": "http://www.europeana.eu/schemas/context/entity.jsonld",
+    "type": "Concept",
+    "isShownBy": {
+        "id": "http://europeana.parisiennedephotographie.fr/SSEU/Files/1d195369871b3ffdcea0cfae11614c742d308581175c8c5ba09bdbb16b9d9461",
+        "type": "WebResource",
+        "source": "http://data.europeana.eu/item/2024913/photography_ProvidedCHO_Parisienne_de_Photographie_82037_12",
+        "thumbnail": "https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri\u003dhttp%3A%2F%2Feuropeana.parisiennedephotographie.fr%2FSSEU%2FFiles%2F1d195369871b3ffdcea0cfae11614c742d308581175c8c5ba09bdbb16b9d9461\u0026type\u003dIMAGE"
+    },
+    "prefLabel": {
+        "bg": "Полутонови негативи",
+        "da": "Halvtone negativer",
+        "de": "Halftone Negative",
+        "en": "Halftone negatives",
+        "es": "Negativos mediotono",
+        "fr": "Halftone negatives",
+        "it": "Negativi ai mezzi toni",
+        "lt": "Pustoniniai negatyvai",
+        "nl": "Rasternegatief",
+        "pl": "Negatywy półtonowe",
+        "sl": "Polotónový negatív"
+    },
+    "altLabel": {
+        "de": [
+            "Halbton-Negative",
+            "Raster-Negative"
+        ],
+        "es": [
+            "Negativos de medio tono"
+        ]
+    },
+    "broader": [
+        "http://data.europeana.eu/concept/1665"
+    ],
+    "id": "http://bib.arts.kuleuven.be/photoVocabulary/-photoVocabulary-12002"
+}

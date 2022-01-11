@@ -1,1 +1,22 @@
-{"@context":"http://www.europeana.eu/schemas/context/entity.jsonld","type":"Concept","isShownBy":{"id":"https://lh4.ggpht.com/JQFgwv0B808YLs4-clbMLmWxeIJeeiTf5KrMIIMOjkkWHrXWlCYfpNSJoA5-I4HGgP2jPVcCtE8dCrqQ68OgyjDVEyDv\u003ds0","type":"WebResource","source":"http://data.europeana.eu/item/90402/RP_F_F00645","thumbnail":"https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri\u003dhttps%3A%2F%2Flh4.ggpht.com%2FJQFgwv0B808YLs4-clbMLmWxeIJeeiTf5KrMIIMOjkkWHrXWlCYfpNSJoA5-I4HGgP2jPVcCtE8dCrqQ68OgyjDVEyDv%3Ds0\u0026type\u003dIMAGE"},"prefLabel":{"bg":"Паладиев отпечатък","ca":"Paper al pal·ladi","da":"Palladium prints","de":"Palladium-Abzüge","en":"Palladium prints","es":"Copias al paladio","fr":"Palladiotype","it":"Palladiotipia, stampe al palladio","lt":"Paladžio atspaudai","nl":"Palladiumdruk","pl":"Odbitki palladowe","ru":"Отпечатки - палладиеваяй печать","sl":"Paládiová tlač","uk":"Відбитки - паладієвий друк","zh":"钯打印"},"altLabel":{"de":["Palladium-Fotos","Palladium prints"]},"broader":["http://data.europeana.eu/concept/1720"],"id":"http://bib.arts.kuleuven.be/photoVocabulary/-photoVocabulary-11018"}
+{
+    "@context": "http://www.europeana.eu/schemas/context/entity.jsonld",
+    "type": "Concept",
+    "isShownBy": {
+        "id": "https://lh4.ggpht.com/JQFgwv0B808YLs4-clbMLmWxeIJeeiTf5KrMIIMOjkkWHrXWlCYfpNSJoA5-I4HGgP2jPVcCtE8dCrqQ68OgyjDVEyDv\u003ds0",
+        "type": "WebResource",
+        "source": "http://data.europeana.eu/item/90402/RP_F_F00645",
+        "thumbnail": "https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri\u003dhttps%3A%2F%2Flh4.ggpht.com%2FJQFgwv0B808YLs4-clbMLmWxeIJeeiTf5KrMIIMOjkkWHrXWlCYfpNSJoA5-I4HGgP2jPVcCtE8dCrqQ68OgyjDVEyDv%3Ds0\u0026type\u003dIMAGE"
+    },
+    "prefLabel": {
+        "bg": "Паладиев отпечатък",
+        "da": "Palladium prints",
+        "de": "Palladium-Abzüge",
+        "en": "Palladium prints",
+        "es": "Copias al paladio",
+        "fr": "Palladiotype",
+        "it": "Palladiotipia, stampe al palladio",
+        "lt": "Paladžio atspaudai",
+        "nl": "Palladiumdruk",
+        "pl": "Odbitki palladowe"
+    }
+}

@@ -1,1 +1,33 @@
-{"@context":"http://www.europeana.eu/schemas/context/entity.jsonld","type":"Concept","isShownBy":{"id":"http://europeana.parisiennedephotographie.fr/SSEU/Files/d94caec27421a9753e637041d25b2c00b62d17c757bb870728284527a614ae45","type":"WebResource","source":"http://data.europeana.eu/item/2024913/photography_ProvidedCHO_Parisienne_de_Photographie_5280_3","thumbnail":"https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri\u003dhttp%3A%2F%2Feuropeana.parisiennedephotographie.fr%2FSSEU%2FFiles%2Fd94caec27421a9753e637041d25b2c00b62d17c757bb870728284527a614ae45\u0026type\u003dIMAGE"},"prefLabel":{"bg":"Близък план","ca":"Retrat de primeríssim primer pla","da":"Nærbillede","de":"Close up","en":"Close up","es":"Primerísimo primer plano","fr":"En gros plan","it":"Primissimo piano","lt":"Nuotrauka iš arti","nl":"Close up","pl":"Zbliżenie","ru":"Крупный план","sl":"Detailný záber","uk":"Крупний план","zh":"近摄"},"altLabel":{"de":["Gross-Aufnahme","Großaufnahme"]},"broader":["http://data.europeana.eu/concept/106"],"id":"http://bib.arts.kuleuven.be/photoVocabulary/-photoVocabulary-21004"}
+{
+    "@context": "http://www.europeana.eu/schemas/context/entity.jsonld",
+    "type": "Concept",
+    "isShownBy": {
+        "id": "http://europeana.parisiennedephotographie.fr/SSEU/Files/d94caec27421a9753e637041d25b2c00b62d17c757bb870728284527a614ae45",
+        "type": "WebResource",
+        "source": "http://data.europeana.eu/item/2024913/photography_ProvidedCHO_Parisienne_de_Photographie_5280_3",
+        "thumbnail": "https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri\u003dhttp%3A%2F%2Feuropeana.parisiennedephotographie.fr%2FSSEU%2FFiles%2Fd94caec27421a9753e637041d25b2c00b62d17c757bb870728284527a614ae45\u0026type\u003dIMAGE"
+    },
+    "prefLabel": {
+        "bg": "Близък план",
+        "da": "Nærbillede",
+        "de": "Close up",
+        "en": "Close up",
+        "es": "Primerísimo primer plano",
+        "fr": "En gros plan",
+        "it": "Primissimo piano",
+        "lt": "Nuotrauka iš arti",
+        "nl": "Close up",
+        "pl": "Zbliżenie",
+        "sl": "Detailný záber"
+    },
+    "altLabel": {
+        "de": [
+            "Gross-Aufnahme",
+            "Großaufnahme"
+        ]
+    },
+    "broader": [
+        "http://data.europeana.eu/concept/106"
+    ],
+    "id": "http://bib.arts.kuleuven.be/photoVocabulary/-photoVocabulary-21004"
+}

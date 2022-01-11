@@ -1,1 +1,36 @@
-{"@context":"http://www.europeana.eu/schemas/context/entity.jsonld","type":"Concept","isShownBy":{"id":"https://lh4.ggpht.com/5oasrmPJuBdiRwJYLsHCbP1e6ME7U2vucyn_9xmf1OEGs9IncrmlpLa7LYHGThJLhVBW0SLKcFW8KBaht2SsrqqukpU\u003ds0","type":"WebResource","source":"http://data.europeana.eu/item/90402/RP_F_F80447","thumbnail":"https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri\u003dhttps%3A%2F%2Fwww.rijksmuseum.nl%2Fassetimage2.jsp%3Fid%3DRP-F-F80447\u0026type\u003dIMAGE"},"prefLabel":{"bg":"Колодиев отпечатък","ca":"Paper al col·lodió","da":"Kollodium prints","de":"Kollodium-Abzüge","en":"Collodion prints","es":"Copias colodón","fr":"Épreuve au collodion","it":"Stampe al collodio","lt":"Kolodiniai antspaudai","nl":"Daglichtcollodiumzilverdruk","pl":"Odbitki kolodionowe","ru":"Отпечатки - коллодионная печать","sl":"Kolódiová tlač","uk":"Відбитки - коллодійний друк","zh":"火棉胶打印"},"altLabel":{"de":["Kollodium prints","Kollodium-Fotos"],"es":["Copias al colodión"]},"broader":["http://data.europeana.eu/concept/1720"],"id":"http://bib.arts.kuleuven.be/photoVocabulary/-photoVocabulary-11014"}
+{
+    "@context": "http://www.europeana.eu/schemas/context/entity.jsonld",
+    "type": "Concept",
+    "isShownBy": {
+        "id": "https://lh4.ggpht.com/5oasrmPJuBdiRwJYLsHCbP1e6ME7U2vucyn_9xmf1OEGs9IncrmlpLa7LYHGThJLhVBW0SLKcFW8KBaht2SsrqqukpU\u003ds0",
+        "type": "WebResource",
+        "source": "http://data.europeana.eu/item/90402/RP_F_F80447",
+        "thumbnail": "https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri\u003dhttps%3A%2F%2Fwww.rijksmuseum.nl%2Fassetimage2.jsp%3Fid%3DRP-F-F80447\u0026type\u003dIMAGE"
+    },
+    "prefLabel": {
+        "bg": "Колодиев отпечатък",
+        "da": "Kollodium prints",
+        "de": "Kollodium-Abzüge",
+        "en": "Collodion prints",
+        "es": "Copias colodón",
+        "fr": "Épreuve au collodion",
+        "it": "Stampe al collodio",
+        "lt": "Kolodiniai antspaudai",
+        "nl": "Daglichtcollodiumzilverdruk",
+        "pl": "Odbitki kolodionowe",
+        "sl": "Kolódiová tlač"
+    },
+    "altLabel": {
+        "de": [
+            "Kollodium prints",
+            "Kollodium-Fotos"
+        ],
+        "es": [
+            "Copias al colodión"
+        ]
+    },
+    "broader": [
+        "http://data.europeana.eu/concept/1720"
+    ],
+    "id": "http://bib.arts.kuleuven.be/photoVocabulary/-photoVocabulary-11014"
+}

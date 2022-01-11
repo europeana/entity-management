@@ -1,1 +1,32 @@
-{"@context":"http://www.europeana.eu/schemas/context/entity.jsonld","type":"Concept","isShownBy":{"id":"http://mm.dimu.org/image/022wZVoosZwD?dimension\u003d1200x1200","type":"WebResource","source":"http://data.europeana.eu/item/916118/S_TEK_photo_TEKA0142480","thumbnail":"https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri\u003dhttp%3A%2F%2Fmm.dimu.org%2Fimage%2F022wZVoosZwD%3Fdimension%3D1200x1200\u0026type\u003dIMAGE"},"prefLabel":{"bg":"Цветен негатив","ca":"Negatiu color","da":"Farvenegativer","de":"Farb-Negative","en":"Color negatives","es":"Negativos color","fr":"Négatif en couleur","it":"Negativo a colori","lt":"Spalvoti negatyvai","nl":"Kleurennegatief","pl":"Negatywy kolorowe","ru":"Цветные негативы","sl":"Farebný negatív","uk":"Кольорові негативи","zh":"彩色底片"},"altLabel":{"de":["Farbnegative"]},"broader":["http://data.europeana.eu/concept/1665"],"id":"http://bib.arts.kuleuven.be/photoVocabulary/-photoVocabulary-12004"}
+{
+    "@context": "http://www.europeana.eu/schemas/context/entity.jsonld",
+    "type": "Concept",
+    "isShownBy": {
+        "id": "http://mm.dimu.org/image/022wZVoosZwD?dimension\u003d1200x1200",
+        "type": "WebResource",
+        "source": "http://data.europeana.eu/item/916118/S_TEK_photo_TEKA0142480",
+        "thumbnail": "https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri\u003dhttp%3A%2F%2Fmm.dimu.org%2Fimage%2F022wZVoosZwD%3Fdimension%3D1200x1200\u0026type\u003dIMAGE"
+    },
+    "prefLabel": {
+        "bg": "Цветен негатив",
+        "da": "Farvenegativer",
+        "de": "Farb-Negative",
+        "en": "Color negatives",
+        "es": "Negativos color",
+        "fr": "Négatif en couleur",
+        "it": "Negativo a colori",
+        "lt": "Spalvoti negatyvai",
+        "nl": "Kleurennegatief",
+        "pl": "Negatywy kolorowe",
+        "sl": "Farebný negatív"
+    },
+    "altLabel": {
+        "de": [
+            "Farbnegative"
+        ]
+    },
+    "broader": [
+        "http://data.europeana.eu/concept/1665"
+    ],
+    "id": "http://bib.arts.kuleuven.be/photoVocabulary/-photoVocabulary-12004"
+}

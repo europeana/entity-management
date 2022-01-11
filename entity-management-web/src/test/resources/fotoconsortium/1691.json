@@ -1,1 +1,32 @@
-{"@context":"http://www.europeana.eu/schemas/context/entity.jsonld","type":"Concept","isShownBy":{"id":"http://iiif.archivelab.org/iiif/coloredplatebook00harp$1/full/full/0/default.jpg","type":"WebResource","source":"http://data.europeana.eu/item/08711/item_62743","thumbnail":"https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri\u003dhttp%3A%2F%2Fiiif.archivelab.org%2Fiiif%2Fcoloredplatebook00harp%241%2Ffull%2Ffull%2F0%2Fdefault.jpg\u0026type\u003dTEXT"},"prefLabel":{"bg":"Цветен отпечатък","ca":"Còpia color","da":"Farveudskrifter","de":"Farbabzüge","en":"Color prints","es":"Copias a color","fr":"Épreuve en couleur","it":"Stampe a colori","lt":"Spalvoti atspaudai","nl":"Kleurenafdruk","pl":"Wydruki kolorowe","ru":"Цветные отпечатки (оттиски)","sl":"Farebná tlač","uk":"Кольорові відбитки (відтиски)","zh":"彩色打印"},"altLabel":{"de":["Farbfotos"]},"broader":["http://data.europeana.eu/concept/1720"],"id":"http://bib.arts.kuleuven.be/photoVocabulary/-photoVocabulary-11010"}
+{
+    "@context": "http://www.europeana.eu/schemas/context/entity.jsonld",
+    "type": "Concept",
+    "isShownBy": {
+        "id": "http://iiif.archivelab.org/iiif/coloredplatebook00harp$1/full/full/0/default.jpg",
+        "type": "WebResource",
+        "source": "http://data.europeana.eu/item/08711/item_62743",
+        "thumbnail": "https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri\u003dhttp%3A%2F%2Fiiif.archivelab.org%2Fiiif%2Fcoloredplatebook00harp%241%2Ffull%2Ffull%2F0%2Fdefault.jpg\u0026type\u003dTEXT"
+    },
+    "prefLabel": {
+        "bg": "Цветен отпечатък",
+        "da": "Farveudskrifter",
+        "de": "Farbabzüge",
+        "en": "Color prints",
+        "es": "Copias a color",
+        "fr": "Épreuve en couleur",
+        "it": "Stampe a colori",
+        "lt": "Spalvoti atspaudai",
+        "nl": "Kleurenafdruk",
+        "pl": "Wydruki kolorowe",
+        "sl": "Farebná tlač"
+    },
+    "altLabel": {
+        "de": [
+            "Farbfotos"
+        ]
+    },
+    "broader": [
+        "http://data.europeana.eu/concept/1720"
+    ],
+    "id": "http://bib.arts.kuleuven.be/photoVocabulary/-photoVocabulary-11010"
+}
