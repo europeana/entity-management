@@ -143,13 +143,12 @@ public class EntityFieldsDatatypeValidation {
   private boolean validateAddressField(
       ConstraintValidatorContext context, String fieldName, Address address) {
     boolean isValid = true;
-    //    if (address.getAbout() == null
-    //        || !validateUri(
-    //            context, fieldName, EntityFieldsTypes.getFieldType(fieldName),
-    // address.getAbout())) {
-    //      addConstraint(context, "Field '" + fieldName + "' has an invalid or empty id value.");
-    //      isValid = false;
-    //    }
+    if (address.getAbout() == null
+        || !validateUri(
+            context, fieldName, EntityFieldsTypes.getFieldType(fieldName), address.getAbout())) {
+      addConstraint(context, "Field '" + fieldName + "' has an invalid or empty id value.");
+      isValid = false;
+    }
     if (address.getVcardCountryName() == null
         || address.getVcardCountryName().isBlank()
         || !validateStringValue(
