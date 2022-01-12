@@ -54,9 +54,11 @@ public class EntityUtils {
 
     for (Field field : entityFields) {
       try {
-        String fieldName = field.getName();
+        String fieldSimpleName = field.getName();
+        String fieldFullNameAll = field.toString();
+        String fieldFullName = fieldFullNameAll.substring(fieldFullNameAll.lastIndexOf(" ") + 1);
 
-        if (!EntityFieldsTypes.hasTypeDefinition(fieldName)) {
+        if (!EntityFieldsTypes.hasTypeDefinition(fieldSimpleName)) {
           // there is no type definition to validate against
           continue;
         }
@@ -67,7 +69,7 @@ public class EntityUtils {
           // ordering of "and" operands ensures mandatory fields are validated if isValid=false here
           isValid =
               emEntityFieldDatatypeValidation.validateMandatoryFields(
-                      context, fieldName, fieldValue)
+                      context, fieldFullName, fieldValue)
                   && isValid;
         }
 
@@ -76,14 +78,14 @@ public class EntityUtils {
           // here
           isValid =
               emEntityFieldDatatypeValidation.validateMetadataFields(
-                      context, fieldName, fieldValue, field.getType())
+                      context, fieldFullName, fieldValue, field.getType())
                   && isValid;
         }
 
         // validate metadata objects
         isValid =
             emEntityFieldDatatypeValidation.validateMetadataObjects(
-                    context, fieldName, fieldValue, field.getType())
+                    context, fieldFullName, fieldValue, field.getType())
                 && isValid;
       } catch (IllegalArgumentException e) {
         throw new EntityFieldAccessException(
