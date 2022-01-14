@@ -35,6 +35,9 @@ public class SolrTimeSpan extends SolrEntity<TimeSpan> {
     this.isNextInSequence = timespan.getIsNextInSequence();
     this.begin = timespan.getBeginString();
     this.end = timespan.getEndString();
+    if (timespan.getSameReferenceLinks() != null) {
+      this.sameAs = new ArrayList<>(timespan.getSameReferenceLinks());
+    }
   }
 
   public List<String> getIsNextInSequence() {

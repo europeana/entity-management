@@ -4,11 +4,10 @@ import org.springframework.batch.item.data.AbstractPaginatedDataItemReader;
 
 public abstract class BaseDatabaseReader<T> extends AbstractPaginatedDataItemReader<T> {
 
-  public BaseDatabaseReader(int pageSize) {
-    setPageSize(pageSize);
-    // Non-restartable, as we expect this to run in multi-threaded steps.
-    // see: https://stackoverflow.com/a/20002493
-    setSaveState(false);
+  private final int readerPageSize;
+
+  protected BaseDatabaseReader(int pageSize) {
+    this.readerPageSize = pageSize;
   }
 
   abstract String getClassName();
@@ -16,6 +15,10 @@ public abstract class BaseDatabaseReader<T> extends AbstractPaginatedDataItemRea
   @Override
   protected void doOpen() throws Exception {
     super.doOpen();
+    // Non-restartable, as we expect this to run in multi-threaded steps.
+    // see: https://stackoverflow.com/a/20002493
+    setSaveState(false);
+    setPageSize(readerPageSize);
     setName(getClassName());
   }
 }

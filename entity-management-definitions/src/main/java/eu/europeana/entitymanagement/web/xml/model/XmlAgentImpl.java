@@ -81,6 +81,7 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
 
   public XmlAgentImpl(Agent agent) {
     super(agent);
+    this.sameAs = RdfXmlUtils.convertToRdfResource(agent.getSameReferenceLinks());
     this.hiddenLabel = RdfXmlUtils.convertToXmlMultilingualString(agent.getHiddenLabel());
     this.note = RdfXmlUtils.convertToXmlMultilingualString(agent.getNote());
     this.identifier = agent.getIdentifier();
@@ -109,6 +110,7 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
     // default constructor
   }
 
+  @Override
   public Agent toEntityModel() throws EntityCreationException {
     super.toEntityModel();
 
@@ -229,19 +231,5 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
   @Override
   public void setSameReferenceLinks(List<LabelledResource> uris) {
     this.sameAs = uris;
-  }
-
-  private <T> T getFirstValue(List<T> list) {
-    if (list == null) {
-      return null;
-    }
-    return list.get(0);
-  }
-
-  private <T> List<T> toList(T field) {
-    if (field == null) {
-      return null;
-    }
-    return List.of(field);
   }
 }

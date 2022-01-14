@@ -94,6 +94,9 @@ public class SolrAgent extends SolrEntity<Agent> {
     this.dateOfEstablishment = CollectionUtils.lastElement(agent.getDateOfEstablishment());
     this.dateOfTermination = CollectionUtils.lastElement(agent.getDateOfTermination());
     this.gender = CollectionUtils.lastElement(agent.getGender());
+    if (agent.getSameReferenceLinks() != null) {
+      this.sameAs = new ArrayList<>(agent.getSameReferenceLinks());
+    }
   }
 
   private void setBiographicalInformation(Map<String, List<String>> biographicalInformation) {

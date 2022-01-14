@@ -82,8 +82,6 @@ public abstract class SolrEntity<T extends Entity> {
     setHiddenLabel(entity.getHiddenLabel());
     setIsShownBy(entity.getIsShownBy());
     if (entity.getIdentifier() != null) this.identifier = new ArrayList<>(entity.getIdentifier());
-    if (entity.getSameReferenceLinks() != null)
-      this.setSameReferenceLinks(new ArrayList<>(entity.getSameReferenceLinks()));
     if (entity.getIsRelatedTo() != null)
       this.isRelatedTo = new ArrayList<>(entity.getIsRelatedTo());
     if (entity.getHasPart() != null) this.hasPart = new ArrayList<>(entity.getHasPart());

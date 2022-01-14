@@ -55,10 +55,10 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
 
   @XmlElement(namespace = NAMESPACE_DC, name = XML_IDENTIFIER)
   private List<String> identifier;
-  // TODO: implement support for address when available in Metis
 
   public XmlOrganizationImpl(Organization organization) {
     super(organization);
+    this.sameAs = RdfXmlUtils.convertToRdfResource(organization.getSameReferenceLinks());
     this.acronym = RdfXmlUtils.convertToXmlMultilingualString(organization.getAcronym());
     this.description = RdfXmlUtils.convertMapToXmlMultilingualString(organization.getDescription());
     if (organization.getLogo() != null) {
@@ -82,6 +82,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     this.identifier = organization.getIdentifier();
   }
 
+  @Override
   public Organization toEntityModel() throws EntityCreationException {
     super.toEntityModel();
     entity.setAcronym(RdfXmlUtils.toLanguageMapList(getAcronym()));

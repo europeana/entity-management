@@ -65,6 +65,9 @@ public class SolrConcept extends SolrEntity<Concept> {
     if (concept.getCloseMatch() != null) this.closeMatch = new ArrayList<>(concept.getCloseMatch());
     if (concept.getInScheme() != null) this.inScheme = new ArrayList<>(concept.getInScheme());
     setNotation(concept.getNotation());
+    if (concept.getSameReferenceLinks() != null) {
+      this.exactMatch = new ArrayList<>(concept.getSameReferenceLinks());
+    }
   }
 
   private void setNotation(Map<String, List<String>> notation) {
