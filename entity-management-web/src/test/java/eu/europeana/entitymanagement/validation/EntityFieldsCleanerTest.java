@@ -46,8 +46,8 @@ public class EntityFieldsCleanerTest {
     EntityFieldsCleaner fieldCleaner =
         new EntityFieldsCleaner(emLanguageCodes, "http://thumbnail.url");
     fieldCleaner.cleanAndNormalize(agent);
-    assertEquals(24, agent.getPrefLabel().size());
-    assertEquals(12, agent.getAltLabel().size());
+    assertEquals(26, agent.getPrefLabel().size());
+    assertEquals(14, agent.getAltLabel().size());
 
     assertEquals(1, agent.getDateOfBirth().size());
     assertEquals(1, agent.getDateOfDeath().size());
