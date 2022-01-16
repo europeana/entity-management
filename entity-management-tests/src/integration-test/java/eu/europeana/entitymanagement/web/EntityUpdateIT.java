@@ -1,6 +1,8 @@
 package eu.europeana.entitymanagement.web;
 
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPath;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -27,12 +29,12 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class EntityUpdateIT extends BaseWebControllerTest {
+class EntityUpdateIT extends BaseWebControllerTest {
 
   private final ObjectMapper mapper = new ObjectMapper();
 
   @Test
-  public void updatingNonExistingEntityShouldReturn404() throws Exception {
+  void updatingNonExistingEntityShouldReturn404() throws Exception {
     /*
      * check the error if the entity does not exist prior to its update
      */
@@ -45,12 +47,8 @@ public class EntityUpdateIT extends BaseWebControllerTest {
   }
 
   @Test
-  public void updatingDeprecatedEntityShouldReturn410() throws Exception {
-    String europeanaMetadata = loadFile(IntegrationTestUtils.CONCEPT_REGISTER_BATHTUB_JSON);
-    String metisResponse = loadFile(IntegrationTestUtils.CONCEPT_BATHTUB_XML);
-
-    EntityRecord entityRecord =
-        createEntity(europeanaMetadata, metisResponse, IntegrationTestUtils.CONCEPT_BATHTUB_URI);
+  void updatingDeprecatedEntityShouldReturn410() throws Exception {
+    EntityRecord entityRecord = createConcept();
     deprecateEntity(entityRecord);
 
     String requestPath = getEntityRequestPath(entityRecord.getEntityId());
@@ -65,7 +63,7 @@ public class EntityUpdateIT extends BaseWebControllerTest {
   }
 
   @Test
-  public void updatingNonExistingEntityFromExternalSourceShouldReturn404() throws Exception {
+  void updatingNonExistingEntityFromExternalSourceShouldReturn404() throws Exception {
     /*
      * check the error if the entity does not exist
      */
@@ -79,12 +77,8 @@ public class EntityUpdateIT extends BaseWebControllerTest {
   }
 
   @Test
-  public void updatingDeprecatedEntityFromExternalSourceShouldReturn410() throws Exception {
-    String europeanaMetadata = loadFile(IntegrationTestUtils.CONCEPT_REGISTER_BATHTUB_JSON);
-    String metisResponse = loadFile(IntegrationTestUtils.CONCEPT_BATHTUB_XML);
-
-    EntityRecord entityRecord =
-        createEntity(europeanaMetadata, metisResponse, IntegrationTestUtils.CONCEPT_BATHTUB_URI);
+  void updatingDeprecatedEntityFromExternalSourceShouldReturn410() throws Exception {
+    EntityRecord entityRecord = createConcept();
     deprecateEntity(entityRecord);
 
     String requestPath = getEntityRequestPath(entityRecord.getEntityId());
@@ -98,11 +92,7 @@ public class EntityUpdateIT extends BaseWebControllerTest {
 
   @Test
   void updateFromExternalDatasourceShouldBeSuccessful() throws Exception {
-    String europeanaMetadata = loadFile(IntegrationTestUtils.CONCEPT_REGISTER_BATHTUB_JSON);
-    String metisResponse = loadFile(IntegrationTestUtils.CONCEPT_BATHTUB_XML);
-
-    EntityRecord entityRecord =
-        createEntity(europeanaMetadata, metisResponse, IntegrationTestUtils.CONCEPT_BATHTUB_URI);
+    EntityRecord entityRecord = createConcept();
 
     String requestPath = getEntityRequestPath(entityRecord.getEntityId());
 
@@ -117,12 +107,7 @@ public class EntityUpdateIT extends BaseWebControllerTest {
 
   @Test
   void updateTimespanShouldBeSuccessful() throws Exception {
-    String europeanaMetadata = loadFile(IntegrationTestUtils.TIMESPAN_REGISTER_1ST_CENTURY_JSON);
-    String metisResponse = loadFile(IntegrationTestUtils.TIMESPAN_1ST_CENTURY_XML);
-
-    EntityRecord entityRecord =
-        createEntity(
-            europeanaMetadata, metisResponse, IntegrationTestUtils.TIMESPAN_1ST_CENTURY_URI);
+    EntityRecord entityRecord = createTimeSpan();
 
     String requestPath = getEntityRequestPath(entityRecord.getEntityId());
 
@@ -130,7 +115,7 @@ public class EntityUpdateIT extends BaseWebControllerTest {
         .perform(
             MockMvcRequestBuilders.put(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath)
                 .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
-                .content(europeanaMetadata)
+                .content(loadFile(IntegrationTestUtils.TIMESPAN_UPDATE_1ST_CENTURY_JSON))
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isAccepted());
 
@@ -143,18 +128,11 @@ public class EntityUpdateIT extends BaseWebControllerTest {
     Assertions.assertNotNull(timespan.getBeginString());
     Assertions.assertNotNull(timespan.getEndString());
     Assertions.assertFalse(timespan.getAltLabel().isEmpty());
-
-    //        Assertions.assertNotNull(timespan.getIsPartOfArray());
-    //        Assertions.assertNotNull(timespan.getIsNextInSequence());
   }
 
   @Test
-  public void updateConceptShouldBeSuccessful() throws Exception {
-    String europeanaMetadata = loadFile(IntegrationTestUtils.CONCEPT_REGISTER_BATHTUB_JSON);
-    String metisResponse = loadFile(IntegrationTestUtils.CONCEPT_BATHTUB_XML);
-
-    EntityRecord entityRecord =
-        createEntity(europeanaMetadata, metisResponse, IntegrationTestUtils.CONCEPT_BATHTUB_URI);
+  void updateConceptShouldBeSuccessful() throws Exception {
+    EntityRecord entityRecord = createConcept();
 
     String requestPath = getEntityRequestPath(entityRecord.getEntityId());
     mockMvc
@@ -190,11 +168,7 @@ public class EntityUpdateIT extends BaseWebControllerTest {
 
   @Test
   void updatePUTShouldReplaceEuropeanaProxy() throws Exception {
-    String europeanaMetadata = loadFile(IntegrationTestUtils.CONCEPT_REGISTER_BATHTUB_JSON);
-    String metisResponse = loadFile(IntegrationTestUtils.CONCEPT_BATHTUB_XML);
-
-    EntityRecord savedRecord =
-        createEntity(europeanaMetadata, metisResponse, IntegrationTestUtils.CONCEPT_BATHTUB_URI);
+    EntityRecord savedRecord = createConcept();
 
     // assert content of Europeana proxy
     Entity europeanaProxyEntity = savedRecord.getEuropeanaProxy().getEntity();
@@ -227,11 +201,7 @@ public class EntityUpdateIT extends BaseWebControllerTest {
 
   @Test
   void updateWithInvalidEntityShouldReturn400() throws Exception {
-    String europeanaMetadata = loadFile(IntegrationTestUtils.CONCEPT_REGISTER_BATHTUB_JSON);
-    String metisResponse = loadFile(IntegrationTestUtils.CONCEPT_BATHTUB_XML);
-
-    EntityRecord savedRecord =
-        createEntity(europeanaMetadata, metisResponse, IntegrationTestUtils.CONCEPT_BATHTUB_URI);
+    EntityRecord savedRecord = createConcept();
 
     // check that consolidation is successful during registration
     Assertions.assertNotNull(savedRecord.getEntity().getDepiction());
@@ -244,5 +214,58 @@ public class EntityUpdateIT extends BaseWebControllerTest {
                 .content(loadFile(IntegrationTestUtils.CONCEPT_REGISTER_BATHTUB_JSON_INVALID))
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void schedulingFullUpdateViaSearchShouldBeSuccessful() throws Exception {
+    EntityRecord concept = createConcept();
+    createTimeSpan();
+
+    // solr query to fetch all concepts
+    String solrSearchQuery = "id:http\\:\\/\\/data.europeana.eu\\/concept\\/*";
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post(
+                    IntegrationTestUtils.BASE_SERVICE_URL + "/management/update")
+                .param(WebEntityConstants.QUERY_PARAM_QUERY, solrSearchQuery))
+        .andExpect(status().isAccepted())
+        .andExpect(jsonPath("$.expected", is(1)))
+        .andExpect(jsonPath("$.successful", hasSize(1)))
+        .andExpect(jsonPath("$.successful", contains(concept.getEntityId())));
+  }
+
+  @Test
+  void schedulingMetricsUpdateViaSearchShouldBeSuccessful() throws Exception {
+    createConcept();
+    EntityRecord timeSpan = createTimeSpan();
+
+    // solr query to fetch all timespans
+    String solrSearchQuery = "id:http\\:\\/\\/data.europeana.eu\\/timespan\\/*";
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post(
+                    IntegrationTestUtils.BASE_SERVICE_URL + "/management/metrics")
+                .param(WebEntityConstants.QUERY_PARAM_QUERY, solrSearchQuery))
+        .andExpect(status().isAccepted())
+        .andExpect(jsonPath("$.expected", is(1)))
+        .andExpect(jsonPath("$.successful", hasSize(1)))
+        .andExpect(jsonPath("$.successful", contains(timeSpan.getEntityId())));
+  }
+
+  private EntityRecord createConcept() throws Exception {
+    String europeanaMetadata = loadFile(IntegrationTestUtils.CONCEPT_REGISTER_BATHTUB_JSON);
+    String metisResponse = loadFile(IntegrationTestUtils.CONCEPT_BATHTUB_XML);
+
+    return createEntity(europeanaMetadata, metisResponse, IntegrationTestUtils.CONCEPT_BATHTUB_URI);
+  }
+
+  private EntityRecord createTimeSpan() throws Exception {
+    String europeanaMetadata = loadFile(IntegrationTestUtils.TIMESPAN_REGISTER_1ST_CENTURY_JSON);
+    String metisResponse = loadFile(IntegrationTestUtils.TIMESPAN_1ST_CENTURY_XML);
+
+    return createEntity(
+        europeanaMetadata, metisResponse, IntegrationTestUtils.TIMESPAN_1ST_CENTURY_URI);
   }
 }
