@@ -6,17 +6,10 @@ import eu.europeana.entitymanagement.batch.config.EntityUpdateJobConfig;
 import eu.europeana.entitymanagement.batch.utils.BatchUtils;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.solr.SolrSearchCursorIterator;
-import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
-import eu.europeana.entitymanagement.solr.model.SolrEntity;
-import eu.europeana.entitymanagement.solr.service.SolrService;
-import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.launch.JobLauncher;
@@ -33,18 +26,15 @@ public class EntityUpdateService {
   private final JobLauncher syncWebRequestLauncher;
 
   private final ScheduledTaskService scheduledTaskService;
-  private final SolrService solrService;
 
   @Autowired
   public EntityUpdateService(
       EntityUpdateJobConfig entityUpdateJobConfig,
       @Qualifier(SYNC_WEB_REQUEST_JOB_LAUNCHER) JobLauncher syncWebRequestLauncher,
-      ScheduledTaskService scheduledTaskService,
-      SolrService solrService) {
+      ScheduledTaskService scheduledTaskService) {
     this.entityUpdateJobConfig = entityUpdateJobConfig;
     this.scheduledTaskService = scheduledTaskService;
     this.syncWebRequestLauncher = syncWebRequestLauncher;
-    this.solrService = solrService;
   }
 
   /**
@@ -77,25 +67,5 @@ public class EntityUpdateService {
         entityIds.size(),
         updateType);
     scheduledTaskService.scheduleTasksForEntities(entityIds, updateType);
-  }
-
-  /**
-   * Schedules entity updates using a search query
-   *
-   * @param query search query
-   * @param updateType update type to schedule
-   * @throws SolrServiceException if error occurs during search
-   */
-  public void scheduleUpdatesWithSearch(String query, ScheduledTaskType updateType)
-      throws SolrServiceException {
-    SolrSearchCursorIterator iterator =
-        solrService.getSearchIterator(query, List.of(EntitySolrFields.TYPE, EntitySolrFields.ID));
-
-    while (iterator.hasNext()) {
-      List<SolrEntity<Entity>> solrEntities = iterator.next();
-      scheduleTasks(
-          solrEntities.stream().map(SolrEntity::getEntityId).collect(Collectors.toList()),
-          updateType);
-    }
   }
 }
