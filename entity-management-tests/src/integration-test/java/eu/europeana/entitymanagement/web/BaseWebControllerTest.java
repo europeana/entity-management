@@ -15,6 +15,7 @@ import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.DataSource;
+import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.model.Entity;
@@ -56,15 +57,21 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
   @Autowired
   private ObjectMapper objectMapper;
 
+  @Qualifier(AppConfig.BEAN_EM_SOLR_SERVICE)
+  @Autowired
+  private SolrService emSolrService;
+
   @Autowired private WebApplicationContext webApplicationContext;
 
   @BeforeEach
-  protected void setup() {
+  protected void setup() throws Exception {
     this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
 
     // ensure a clean db between test runs
     this.entityRecordService.dropRepository();
     this.scheduledTaskService.dropCollection();
+
+    emSolrService.deleteAllDocuments();
   }
 
   protected static String loadFile(String resourcePath) throws IOException {
