@@ -102,4 +102,22 @@
     <altLang code="est"/>
     <altLang code="et-ee"/>
 </language>
+    <!-- 4 non-EU languages -->
+    <language code="no">
+        <altLang code="nor"/>
+        <altLang code="no-no"/>
+    </language>
+    <language code="ca">
+        <altLang code="cat"/>
+        <altLang code="ca-es"/>
+    </language>
+    <language code="ru">
+        <altLang code="rus"/>
+        <altLang code="ru-ru"/>
+    </language>
+    <language code="eu">
+        <altLang code="baq"/>
+        <altLang code="eus"/>
+        <altLang code="ru-es"/>
+    </language>
 </languages>
