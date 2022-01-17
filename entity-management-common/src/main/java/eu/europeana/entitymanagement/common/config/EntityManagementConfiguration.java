@@ -52,7 +52,7 @@ public class EntityManagementConfiguration {
   @Value("${entitymanagement.solr.indexing.explicitCommits: false}")
   private boolean explicitCommitsEnabled;
 
-  @Value("${entitymanagement.solr.indexing.query.maxPageSize: 100}")
+  @Value("${entitymanagement.solr.indexing.query.maxPageSize: 300}")
   private int solrQueryMaxPageSize;
 
   @Value("${entitymanagement.solr.searchapi.hits.query}")
@@ -108,6 +108,9 @@ public class EntityManagementConfiguration {
 
   @Value("${metis.proxy.url:}")
   private String metisProxyUrl;
+
+  @Value("${entitymanagement.entityIdResponseMaxSize: 100}")
+  private int entityIdResponseMaxSize;
 
   public EntityManagementConfiguration() {
     LOG.info("Initializing EntityManagementConfiguration bean as: configuration");
@@ -231,5 +234,9 @@ public class EntityManagementConfiguration {
 
   public int getMaxFailedTaskRetries() {
     return maxFailedTaskRetries;
+  }
+
+  public int getEntityIdResponseMaxSize() {
+    return entityIdResponseMaxSize;
   }
 }
