@@ -105,4 +105,14 @@ public class XmlAddressImpl {
 
     return address;
   }
+
+  /** Checks that this Address metadata properties set. 'about' field not included in this check. */
+  public boolean hasMetadataProperties() {
+    return StringUtils.hasLength(streetAddress)
+        || StringUtils.hasLength(postalCode)
+        || StringUtils.hasLength(postBox)
+        || StringUtils.hasLength(locality)
+        || StringUtils.hasLength(countryName)
+        || hasGeo != null;
+  }
 }
