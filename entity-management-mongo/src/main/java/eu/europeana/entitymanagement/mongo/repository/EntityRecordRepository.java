@@ -3,12 +3,11 @@ package eu.europeana.entitymanagement.mongo.repository;
 import static dev.morphia.query.Sort.ascending;
 import static dev.morphia.query.experimental.filters.Filters.*;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.*;
+import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MAJORITY_WRITE_MODIFY_OPTS;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_UPDATE_OPTS;
 
-import com.mongodb.client.model.ReturnDocument;
 import com.mongodb.client.result.UpdateResult;
 import dev.morphia.Datastore;
-import dev.morphia.ModifyOptions;
 import dev.morphia.query.FindOptions;
 import dev.morphia.query.experimental.filters.Filter;
 import dev.morphia.query.experimental.updates.UpdateOperators;
@@ -102,7 +101,6 @@ public class EntityRecordRepository {
    * @param entityId ID of the dataset to be deleted
    * @return the number of deleted objects
    */
-  // TODO move this to the loader?
   public long deleteForGood(String entityId) {
     return datastore
         .find(EntityRecord.class)
@@ -119,15 +117,6 @@ public class EntityRecordRepository {
    * @return saved entity
    */
   public EntityRecord save(EntityRecord entityRecord) {
-    // check the validation of the entity fields
-    // Temporarily disabled until the implementation is complete and correct
-    //        Set<ConstraintViolation<Entity>> violations =
-    // emValidatorFactory.getValidator().validate(entityRecord.getEntity());
-    //        for (ConstraintViolation<Entity> violation : violations) {
-    //            logger.error(violation.getMessage());
-    //            //TODO: do something besides logging warning!
-    //        }
-
     return datastore.save(entityRecord);
   }
 
@@ -137,16 +126,23 @@ public class EntityRecordRepository {
    * @param internalType internal type for Entity
    * @return autoincrement value
    */
-  public synchronized long generateAutoIncrement(String internalType) {
-    // Get the given key from the auto increment entity and try to increment it.
+  public long generateAutoIncrement(String internalType) {
+    /*
+     * Get the given key from the auto increment entity and try to increment it.
+     * Synchronization occurs on the DB-level, so we don't need to synchronize this code block.
+     */
+
     EntityIdGenerator autoIncrement =
         datastore
             .find(EntityIdGenerator.class)
             .filter(eq("_id", internalType))
             .modify(UpdateOperators.inc("value"))
-            .execute(new ModifyOptions().returnDocument(ReturnDocument.AFTER));
+            .execute(MAJORITY_WRITE_MODIFY_OPTS);
 
-    // If none is found, we need to create one for the given key.
+    /*
+     * If none is found, we need to create one for the given key. This shouldn't happen in
+     * production as the db is pre-populated with entities
+     */
     if (autoIncrement == null) {
       autoIncrement = new EntityIdGenerator(internalType, 1L);
       datastore.save(autoIncrement);
@@ -190,7 +186,7 @@ public class EntityRecordRepository {
    * @param filters Query filters
    * @return List with results
    */
-  public List<? extends EntityRecord> findWithFilters(int start, int count, Filter[] filters) {
+  public List<EntityRecord> findWithFilters(int start, int count, Filter[] filters) {
     return datastore
         .find(EntityRecord.class)
         .filter(filters)

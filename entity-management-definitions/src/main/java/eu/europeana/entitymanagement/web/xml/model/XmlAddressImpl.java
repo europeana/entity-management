@@ -7,6 +7,7 @@ import eu.europeana.entitymanagement.definitions.model.Address;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import org.springframework.util.StringUtils;
@@ -21,8 +22,8 @@ import org.springframework.util.StringUtils;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class XmlAddressImpl {
 
-  @XmlElement(namespace = NAMESPACE_RDF, name = XmlConstants.ABOUT)
-  private LabelledResource about;
+  @XmlAttribute(namespace = NAMESPACE_RDF, name = XmlConstants.ABOUT)
+  private String about;
 
   @XmlElement(namespace = NAMESPACE_VCARD, name = XmlConstants.XML_STREET_ADDRESS)
   private String streetAddress;
@@ -48,7 +49,7 @@ public class XmlAddressImpl {
 
   public XmlAddressImpl(Address address) {
     if (StringUtils.hasLength(address.getAbout())) {
-      this.about = new LabelledResource(address.getAbout());
+      this.about = address.getAbout();
     }
     this.streetAddress = address.getVcardStreetAddress();
     this.locality = address.getVcardLocality();
@@ -62,7 +63,7 @@ public class XmlAddressImpl {
     }
   }
 
-  public LabelledResource getAbout() {
+  public String getAbout() {
     return about;
   }
 
@@ -92,9 +93,7 @@ public class XmlAddressImpl {
 
   public Address toAddress() {
     Address address = new Address();
-    if (about != null) {
-      address.setAbout(about.getResource());
-    }
+    address.setAbout(about);
     address.setVcardStreetAddress(streetAddress);
     address.setVcardPostalCode(postalCode);
     address.setVcardPostOfficeBox(postBox);
@@ -105,5 +104,15 @@ public class XmlAddressImpl {
     }
 
     return address;
+  }
+
+  /** Checks that this Address metadata properties set. 'about' field not included in this check. */
+  public boolean hasMetadataProperties() {
+    return StringUtils.hasLength(streetAddress)
+        || StringUtils.hasLength(postalCode)
+        || StringUtils.hasLength(postBox)
+        || StringUtils.hasLength(locality)
+        || StringUtils.hasLength(countryName)
+        || hasGeo != null;
   }
 }

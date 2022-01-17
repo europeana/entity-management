@@ -30,6 +30,9 @@ public class IntegrationTestUtils {
   public static final String TIMESPAN_REGISTER_1ST_CENTURY_JSON =
       "/content/timespan_register_1st_century.json";
 
+  public static final String TIMESPAN_UPDATE_1ST_CENTURY_JSON =
+      "/content/timespan_update_1st_century.json";
+
   public static final String CONCEPT_REGISTER_METIS_ERROR_JSON =
       "/content/concept_register_metis_error.json";
   public static final String CONCEPT_REGISTER_ERROR_CHECK_1_JSON =
@@ -71,8 +74,6 @@ public class IntegrationTestUtils {
   public static final String CONCEPT_UPDATE_BATHTUB_JSON = "/content/concept_update_bathtub.json";
   public static final String CONCEPT_UPDATE_FAILED_BATHTUB_JSON =
       "/content/concept_update_failed_bathtub.json";
-  public static final String TIMESPAN_UPDATE_JSON = "/content/timespan_update.json";
-
   public static final String CONCEPT_BATHTUB_EMPTY_UPDATE_JSON =
       "/content/concept_update_bathtub_empty.json";
 

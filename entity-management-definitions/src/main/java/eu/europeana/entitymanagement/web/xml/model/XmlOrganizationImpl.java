@@ -99,7 +99,9 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     }
     entity.setPhone(getPhone());
     entity.setMbox(getMbox());
-    if (hasAddress != null && !CollectionUtils.isEmpty(hasAddress.getVcardAddressesList())) {
+    if (hasAddress != null
+        && !CollectionUtils.isEmpty(hasAddress.getVcardAddressesList())
+        && hasAddress.getVcardAddressesList().get(0).hasMetadataProperties()) {
       entity.setAddress(hasAddress.getVcardAddressesList().get(0).toAddress());
     }
     entity.setIdentifier(getIdentifier());

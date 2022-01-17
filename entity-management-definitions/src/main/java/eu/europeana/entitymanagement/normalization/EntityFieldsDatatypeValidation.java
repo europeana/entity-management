@@ -5,9 +5,14 @@ import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_T
 import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_URI;
 
 import eu.europeana.entitymanagement.common.config.LanguageCodes;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityFieldAccessException;
+import eu.europeana.entitymanagement.definitions.model.Address;
+import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
+import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.utils.UriValidator;
 import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
+import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -106,7 +111,6 @@ public class EntityFieldsDatatypeValidation {
   private boolean validateWebResourceField(
       ConstraintValidatorContext context, String fieldName, WebResource webResource) {
     boolean isValid = true;
-
     if (webResource.getId() == null
         || !validateUri(
             context, fieldName, EntityFieldsTypes.getFieldType(fieldName), webResource.getId())) {
@@ -131,6 +135,29 @@ public class EntityFieldsDatatypeValidation {
             EntityFieldsTypes.getFieldType(fieldName),
             webResource.getThumbnail())) {
       addConstraint(context, "Field '" + fieldName + "' has an invalid or empty thumbnail value.");
+      isValid = false;
+    }
+    return isValid;
+  }
+
+  private boolean validateAddressField(
+      ConstraintValidatorContext context, String fieldName, Address address) {
+    boolean isValid = true;
+    if (address.getAbout() == null
+        || !validateUri(
+            context, fieldName, EntityFieldsTypes.getFieldType(fieldName), address.getAbout())) {
+      addConstraint(context, "Field '" + fieldName + "' has an invalid or empty id value.");
+      isValid = false;
+    }
+    if (address.getVcardCountryName() == null
+        || address.getVcardCountryName().isBlank()
+        || !validateStringValue(
+            context,
+            fieldName,
+            EntityFieldsTypes.getFieldType(fieldName),
+            address.getVcardCountryName(),
+            null)) {
+      addConstraint(context, "Field '" + fieldName + "' has an invalid or empty country name.");
       isValid = false;
     }
     return isValid;
@@ -245,6 +272,7 @@ public class EntityFieldsDatatypeValidation {
     if (hasFieldCardinalityViolation(context, fieldName, fieldValues)) {
       return false;
     }
+
     for (String fieldValueElem : fieldValues) {
       if (!validateUri(
           context, fieldName, EntityFieldsTypes.getFieldType(fieldName), fieldValueElem)) {
@@ -405,7 +433,7 @@ public class EntityFieldsDatatypeValidation {
     return "".equals(key) && EntityFieldsTypes.FIELD_TYPE_TEXT_OR_URI.equals(fieldType);
   }
 
-  public boolean validateMandatoryFields(
+  private boolean validateMandatoryFields(
       ConstraintValidatorContext context, String fieldName, Object fieldValue) {
     if (EntityFieldsTypes.isMandatory(fieldName) && fieldValue == null) {
       addConstraint(context, "The mandatory field: " + fieldName + " cannot be NULL.");
@@ -427,7 +455,7 @@ public class EntityFieldsDatatypeValidation {
     return true;
   }
 
-  public boolean validateMetadataFields(
+  private boolean validateMetadataFields(
       ConstraintValidatorContext context, String fieldName, Object fieldValue, Class<?> fieldType) {
 
     if (fieldValue == null) {
@@ -455,15 +483,71 @@ public class EntityFieldsDatatypeValidation {
     return true;
   }
 
-  public boolean validateMetadataObjects(
+  private boolean validateMetadataObjects(
       ConstraintValidatorContext context, String fieldName, Object fieldValue, Class<?> fieldType) {
     // mandatory fields handled before this method is called
     if (fieldValue != null) {
       if (WebResource.class.isAssignableFrom(fieldType)) {
         return validateWebResourceField(context, fieldName, (WebResource) fieldValue);
+      } else if (Address.class.isAssignableFrom(fieldType)) {
+        return validateAddressField(context, fieldName, (Address) fieldValue);
       }
     }
 
     return true;
+  }
+
+  public boolean validateEntity(
+      Entity entity,
+      ConstraintValidatorContext context,
+      boolean validateMandatoryFields,
+      boolean validateMetadataFields) {
+    if (entity == null) {
+      return false;
+    }
+
+    boolean isValid = true;
+
+    List<Field> entityFields = EntityUtils.getAllFields(entity.getClass());
+
+    for (Field field : entityFields) {
+      try {
+
+        String fieldName = field.getName();
+
+        if (!EntityFieldsTypes.hasTypeDefinition(fieldName)) {
+          // there is no type definition to validate against
+          continue;
+        }
+
+        Object fieldValue = entity.getFieldValue(field);
+
+        if (validateMandatoryFields) {
+          // ordering of "and" operands ensures mandatory fields are validated if isValid=false here
+          isValid = validateMandatoryFields(context, fieldName, fieldValue) && isValid;
+        }
+
+        if (validateMetadataFields) {
+          // ordering of "and" operands ensures datatype compliance is validated if isValid=false
+          // here
+          isValid =
+              validateMetadataFields(context, fieldName, fieldValue, field.getType()) && isValid;
+        }
+
+        // validate metadata objects
+        isValid =
+            validateMetadataObjects(context, fieldName, fieldValue, field.getType()) && isValid;
+      } catch (IllegalArgumentException e) {
+        throw new EntityFieldAccessException(
+            "During the validation of the entity fields an illegal or inappropriate argument exception has happened.",
+            e);
+      } catch (IllegalAccessException e) {
+        throw new EntityFieldAccessException(
+            "During the validation of the entity fields an illegal access to some method or field has happened.",
+            e);
+      }
+    }
+
+    return isValid;
   }
 }
