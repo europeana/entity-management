@@ -261,12 +261,9 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                     IntegrationTestUtils.ORGANIZATION_GFM_OLD_URI_WIKIDATA_URI,
                     IntegrationTestUtils.ORGANIZATION_GFM_URI_ZOHO,
                     IntegrationTestUtils.ORGANIZATION_GFM_URI_WIKIDATA_URI)))
-        .andExpect(jsonPath("$.prefLabel[*]", hasSize(3)))
-        .andExpect(jsonPath("$.altLabel[*]", hasSize(3)))
+        .andExpect(jsonPath("$.prefLabel[*]", hasSize(2)))
         // should have Europeana, Zoho and Wikidata proxies
-        .andExpect(jsonPath("$.proxies", hasSize(3)))
-        // 3 labels available in wikidata proxy
-        .andExpect(jsonPath("$.proxies[2].prefLabel[*]", hasSize(3)));
+        .andExpect(jsonPath("$.proxies", hasSize(3)));
   }
 
   @Test

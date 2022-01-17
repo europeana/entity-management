@@ -31,9 +31,10 @@
     <xsl:output indent="yes" encoding="UTF-8"/>
 
     <xsl:param name="targetId"/>
-    <xsl:param name="coref"    select="true()"/>
-    <xsl:param name="deref"    />
-    <xsl:param name="address"  select="true()"/>
+    <xsl:param name="coref"     select="true()"/>
+    <xsl:param name="deref"     />
+    <xsl:param name="address"   select="true()"/>
+    <xsl:param name="setLabels" select="false()"/>
 
     <xsl:variable name="namespace" select="'http://www.wikidata.org/prop/direct/'"/>
     <xsl:variable name="wiki"      select="'https://en.wikipedia.org/wiki/'"/>
@@ -171,9 +172,11 @@
 -->
  
              <!-- labels -->
-            <xsl:call-template name="labels">
-                <xsl:with-param name="alt" select="skos:altLabel"/>
-            </xsl:call-template>
+            <xsl:if test="$setLabels">
+	            <xsl:call-template name="labels">
+	                <xsl:with-param name="alt" select="skos:altLabel"/>
+	            </xsl:call-template>
+            </xsl:if>
   
              <!-- descriptions -->
             <xsl:for-each select="schema:description">
@@ -308,6 +311,7 @@
         </foaf:Organization>
 
     </xsl:template>
+
 
     <!--+++++++++++++++++++++++++++ FUNCTIONS +++++++++++++++++++++++++++++++-->
  
@@ -509,6 +513,8 @@
 
     </xsl:template>
 
+
+    <!--++++++++++++++++++++++++++ UTILITY CODES ++++++++++++++++++++++++++++-->
 
     <!-- Country Codes -->
     <xsl:function name="lib:toISO639_2" as="xs:string">
