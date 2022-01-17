@@ -109,6 +109,9 @@ public class EntityManagementConfiguration {
   @Value("${metis.proxy.url:}")
   private String metisProxyUrl;
 
+  @Value("${entitymanagement.entityIdResponseMaxSize: 100}")
+  private int entityIdResponseMaxSize;
+
   public EntityManagementConfiguration() {
     LOG.info("Initializing EntityManagementConfiguration bean as: configuration");
   }
@@ -231,5 +234,9 @@ public class EntityManagementConfiguration {
 
   public int getMaxFailedTaskRetries() {
     return maxFailedTaskRetries;
+  }
+
+  public int getEntityIdResponseMaxSize() {
+    return entityIdResponseMaxSize;
   }
 }

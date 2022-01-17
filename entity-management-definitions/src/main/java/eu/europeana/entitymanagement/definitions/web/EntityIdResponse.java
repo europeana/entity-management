@@ -1,5 +1,7 @@
 package eu.europeana.entitymanagement.definitions.web;
 
+import static eu.europeana.entitymanagement.utils.EMCollectionUtils.addToList;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,10 +45,15 @@ public class EntityIdResponse {
   }
 
   public void updateValues(
-      int expected, List<String> successful, List<String> failed, List<String> skipped) {
+      int expected,
+      List<String> successfulToAdd,
+      List<String> failedToAdd,
+      List<String> skippedToAdd,
+      int maxSize) {
     this.expected += expected;
-    this.successful.addAll(successful);
-    this.failed.addAll(failed);
-    this.skipped.addAll(skipped);
+
+    addToList(this.successful, successfulToAdd, maxSize);
+    addToList(this.failed, failedToAdd, maxSize);
+    addToList(this.skipped, skippedToAdd, maxSize);
   }
 }

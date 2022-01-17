@@ -733,7 +733,8 @@ public class EMController extends BaseRest {
                 .map(EntityIdDisabledStatus::getEntityId)
                 .collect(Collectors.toList());
 
-    entityIdResponse.updateValues(entityIds.size(), toBeScheduled, failures, skipped);
+    entityIdResponse.updateValues(
+        entityIds.size(), toBeScheduled, failures, skipped, emConfig.getEntityIdResponseMaxSize());
     return toBeScheduled;
   }
 
