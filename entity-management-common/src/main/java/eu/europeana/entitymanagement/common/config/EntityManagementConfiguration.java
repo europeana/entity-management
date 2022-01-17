@@ -52,7 +52,7 @@ public class EntityManagementConfiguration {
   @Value("${entitymanagement.solr.indexing.explicitCommits: false}")
   private boolean explicitCommitsEnabled;
 
-  @Value("${entitymanagement.solr.indexing.query.maxPageSize: 100}")
+  @Value("${entitymanagement.solr.indexing.query.maxPageSize: 300}")
   private int solrQueryMaxPageSize;
 
   @Value("${entitymanagement.solr.searchapi.hits.query}")
