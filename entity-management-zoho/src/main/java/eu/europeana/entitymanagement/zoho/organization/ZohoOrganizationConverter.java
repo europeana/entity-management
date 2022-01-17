@@ -68,7 +68,6 @@ public class ZohoOrganizationConverter {
     org.setSameReferenceLinks(getAllSameAs(zohoRecord));
 
     Address address = new Address();
-    address.setAbout(org.getAbout() + ZohoConstants.ADDRESS_ABOUT);
     address.setVcardStreetAddress(
         ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.STREET_FIELD)));
     address.setVcardLocality(
@@ -79,7 +78,12 @@ public class ZohoOrganizationConverter {
         ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.ZIP_CODE_FIELD)));
     address.setVcardPostOfficeBox(
         ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.PO_BOX_FIELD)));
-    org.setAddress(address);
+
+    // only set address if it contains metadata properties.
+    if (address.hasMetadataProperties()) {
+      address.setAbout(org.getAbout() + ZohoConstants.ADDRESS_ABOUT);
+      org.setAddress(address);
+    }
 
     return org;
   }

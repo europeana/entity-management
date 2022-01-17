@@ -1,7 +1,6 @@
 package eu.europeana.entitymanagement.normalization;
 
 import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.utils.EntityUtils;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import org.springframework.stereotype.Component;
@@ -24,6 +23,6 @@ public class EntityFieldsCompleteValidationValidator
   @Override
   public boolean isValid(Entity entity, ConstraintValidatorContext context) {
     context.disableDefaultConstraintViolation();
-    return EntityUtils.validateEntity(entity, context, emEntityFieldDatatypeValidation, true, true);
+    return emEntityFieldDatatypeValidation.validateEntity(entity, context, true, true);
   }
 }
