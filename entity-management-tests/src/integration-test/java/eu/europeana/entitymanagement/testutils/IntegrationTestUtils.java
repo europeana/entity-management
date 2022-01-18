@@ -14,6 +14,7 @@ import org.apache.commons.io.IOUtils;
 
 public class IntegrationTestUtils {
 
+  private static final String WIKIDATA_BASE_URI = "http://www.wikidata.org";
   public static final String BASE_SERVICE_URL = "/entity/";
   public static final String BASE_ADMIN_URL = "/management";
   public static final String BASE_FAILED_UPDATES = "management/failed";
@@ -65,6 +66,8 @@ public class IntegrationTestUtils {
       "/content/organization_register_zoho_naturalis.json";
   public static final String ORGANIZATION_REGISTER_GFM_ZOHO_JSON =
       "/content/organization_register_zoho_gfm.json";
+  public static final String ORGANIZATION_REGISTER_BERGER_MUSEUM_ZOHO_JSON =
+      "/content/organization_register_zoho_berger_museum.json";
   public static final String ORGANIZATION_REGISTER_PCCE_ZOHO_JSON =
       "/content/organization_register_zoho_pcce.json";
   public static final String PLACE_REGISTER_PARIS_JSON = "/content/place_register_paris.json";
@@ -158,27 +161,41 @@ public class IntegrationTestUtils {
       "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000000338555";
   public static final String ORGANIZATION_GFM_URI_ZOHO =
       "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000004503618";
+  public static final String ORGANIZATION_BERGER_MUSEUM_URI_ZOHO =
+      "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000004477407";
   public static final String ORGANIZATION_NATURALIS_URI_WIKIDATA_PATH_SUFFIX = "/entity/Q641676";
   public static final String ORGANIZATION_NATURALIS_URI_WIKIDATA_URI =
-      "http://www.wikidata.org" + ORGANIZATION_NATURALIS_URI_WIKIDATA_PATH_SUFFIX;
+      WIKIDATA_BASE_URI + ORGANIZATION_NATURALIS_URI_WIKIDATA_PATH_SUFFIX;
 
-  public static final String ORGANIZATION_GFM_OLD_URI_WIKIDATA_PATH_SUFFIX = "/entity/Q28933300";
-  public static final String ORGANIZATION_GFM_URI_WIKIDATA_PATH_SUFFIX = "/entity/Q18290171";
+  public static final String ORGANIZATION_GFM_OLD_WIKIDATA_URI_PATH_SUFFIX = "/entity/Q28933300";
+  public static final String ORGANIZATION_GFM_WIKIDATA_URI_PATH_SUFFIX = "/entity/Q18290171";
   public static final String ORGANIZATION_GFM_URI_WIKIDATA_URI =
-      "http://www.wikidata.org" + ORGANIZATION_GFM_URI_WIKIDATA_PATH_SUFFIX;
+      WIKIDATA_BASE_URI + ORGANIZATION_GFM_WIKIDATA_URI_PATH_SUFFIX;
+  
+  public static final String ORGANIZATION_BERGER_MUSEUM_WIKIDATA_URI_PATH_SUFFIX = "/entity/Q23014463";
+  public static final String ORGANIZATION_BERGER_MUSEUM_WIKIDATA_URI = 
+      WIKIDATA_BASE_URI + ORGANIZATION_BERGER_MUSEUM_WIKIDATA_URI_PATH_SUFFIX;
+  
+  
   public static final String ORGANIZATION_GFM_OLD_URI_WIKIDATA_URI =
-      "http://www.wikidata.org" + ORGANIZATION_GFM_OLD_URI_WIKIDATA_PATH_SUFFIX;
+      WIKIDATA_BASE_URI + ORGANIZATION_GFM_OLD_WIKIDATA_URI_PATH_SUFFIX;
 
   public static final String ORGANIZATION_NATURALIS_ZOHO_RESPONSE =
       "/zoho-deref/organization_zoho_naturalis_response.json";
   public static final String ORGANIZATION_GFM_ZOHO_RESPONSE =
       "/zoho-deref/organization_zoho_gfm_response.json";
+  public static final String ORGANIZATION_BERGER_MUSEUM_ZOHO_RESPONSE =
+      "/zoho-deref/organization_zoho_berger_museum_response.json";
   public static final String ORGANIZATION_PCCE_ZOHO_RESPONSE =
       "/zoho-deref/organization_zoho_pcce_response.json";
   public static final String ORGANIZATION_NATURALIS_WIKIDATA_RESPONSE_XML =
       "/wikidata-deref/organization_wikidata_naturalis_response.xml";
   public static final String ORGANIZATION_GFM_WIKIDATA_RESPONSE_XML =
       "/wikidata-deref/organization_wikidata_gfm_response.xml";
+  
+  public static final String ORGANIZATION_BERGER_MUSEUM_WIKIDATA_RESPONSE_XML =
+      "/wikidata-deref/organization_wikidata_berger_museum_response.xml";
+  
 
   /** Creates an ObjectMapper specifically for handling Mock zoho responses */
   private static final ObjectMapper zohoResponseObjectMapper =
@@ -198,7 +215,10 @@ public class IntegrationTestUtils {
           ORGANIZATION_GFM_URI_ZOHO,
           ORGANIZATION_GFM_ZOHO_RESPONSE,
           ORGANIZATION_PCCE_URI_ZOHO,
-          ORGANIZATION_PCCE_ZOHO_RESPONSE);
+          ORGANIZATION_PCCE_ZOHO_RESPONSE,
+          ORGANIZATION_BERGER_MUSEUM_URI_ZOHO,
+          ORGANIZATION_BERGER_MUSEUM_ZOHO_RESPONSE
+          );
 
   /** Maps Metis dereferenciation URIs to mocked XML responses */
   public static final Map<String, String> METIS_RESPONSE_MAP =

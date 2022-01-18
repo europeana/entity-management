@@ -4,7 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
+import java.util.Optional;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import com.zoho.crm.api.record.Record;
 import com.zoho.crm.api.util.Choice;
 import eu.europeana.entitymanagement.AbstractIntegrationTest;
@@ -13,21 +18,18 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.dereference.Dereferencer;
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
+import eu.europeana.entitymanagement.testutils.TestConfig;
 import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
-import java.util.Optional;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /** JUnit test for testing the DereferenceService class */
 // enable test config to use zoho mocking
-// @Import(TestConfig.class)
+@Import(TestConfig.class)
 // enable tests only on local machine
-@Disabled
+//@Disabled
+@SpringBootTest
 public class DereferenceServiceTest extends AbstractIntegrationTest {
 
   @Autowired private DereferenceServiceLocator dereferenceServiceLocator;
@@ -98,16 +100,10 @@ public class DereferenceServiceTest extends AbstractIntegrationTest {
     Organization org = (Organization) orgOptional.get();
     assertEquals(2, org.getPrefLabel().size());
     assertNotNull(org.getSameReferenceLinks());
-    //    assertEquals(1, org.getAcronym().size());
-    //    assertEquals(1, org.getEuropeanaRole().size());
-    //    assertEquals(1, org.getGeographicLevel().size());
-    //    assertEquals(1, org.getAcronym().size());
-    //    assertEquals("FR", org.getCountry());
-    //    Assertions.assertNotNull(org.getHomepage());
-    //    Assertions.assertNotNull(org.getLogo());
-    //    Assertions.assertNotNull(org.getAddress().getVcardStreetAddress());
-    //    Assertions.assertNotNull(org.getAddress().getVcardCountryName());
   }
+  
+ 
+  
   //  @Test
   public void zohoOrganizationDereferenceLabelsTest() throws Exception {
 
@@ -149,6 +145,13 @@ public class DereferenceServiceTest extends AbstractIntegrationTest {
     // Naturalis
     dereferenceWikidataOrganization(IntegrationTestUtils.ORGANIZATION_NATURALIS_URI_WIKIDATA_URI);
   }
+  
+  @Test
+  public void wikidataOrganizationBergerMuseumDereferenceTest() throws ZohoException, Exception {
+    // Berger Museum
+    dereferenceWikidataOrganization(IntegrationTestUtils.ORGANIZATION_BERGER_MUSEUM_WIKIDATA_URI);
+  }
+  
 
   @Test
   public void wikidataOrganizationGFMDereferenceTest() throws ZohoException, Exception {

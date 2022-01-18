@@ -117,9 +117,15 @@ public abstract class AbstractIntegrationTest {
     // override setting in .properties file in case this is enabled
     registry.add("metis.proxy.enabled", () -> false);
 
+//could be used to fix eclipse issues    
+    registry.add("scmBranch", () -> "dev");
+    registry.add("buildNumber", () -> "99");
+    registry.add("timestamp", () -> System.currentTimeMillis());
+    
     logger.info("MONGO_CONTAINER : {}", MONGO_CONTAINER.getConnectionUrl());
     logger.info("SOLR_CONTAINER : {}", SOLR_CONTAINER.getConnectionUrl());
     logger.info("METIS SERVER : host = {}; port={}", mockMetis.getHostName(), mockMetis.getPort());
+   
   }
 
   private static Dispatcher setupMetisDispatcher() {
@@ -154,13 +160,19 @@ public abstract class AbstractIntegrationTest {
                 IntegrationTestUtils.loadFile(
                     IntegrationTestUtils.ORGANIZATION_NATURALIS_WIKIDATA_RESPONSE_XML);
             return new MockResponse().setResponseCode(200).setBody(responseBody);
-          } else if (IntegrationTestUtils.ORGANIZATION_GFM_URI_WIKIDATA_PATH_SUFFIX.equals(
+          } else if (IntegrationTestUtils.ORGANIZATION_GFM_WIKIDATA_URI_PATH_SUFFIX.equals(
                   request.getPath())
-              || IntegrationTestUtils.ORGANIZATION_GFM_OLD_URI_WIKIDATA_PATH_SUFFIX.equals(
+              || IntegrationTestUtils.ORGANIZATION_GFM_OLD_WIKIDATA_URI_PATH_SUFFIX.equals(
                   request.getPath())) {
             String responseBody =
                 IntegrationTestUtils.loadFile(
                     IntegrationTestUtils.ORGANIZATION_GFM_WIKIDATA_RESPONSE_XML);
+            return new MockResponse().setResponseCode(200).setBody(responseBody);
+          } else if (IntegrationTestUtils.ORGANIZATION_BERGER_MUSEUM_WIKIDATA_URI_PATH_SUFFIX.equals(
+              request.getPath())) {
+            String responseBody =
+                IntegrationTestUtils.loadFile(
+                    IntegrationTestUtils.ORGANIZATION_BERGER_MUSEUM_WIKIDATA_RESPONSE_XML);
             return new MockResponse().setResponseCode(200).setBody(responseBody);
           }
         } catch (IOException e) {
