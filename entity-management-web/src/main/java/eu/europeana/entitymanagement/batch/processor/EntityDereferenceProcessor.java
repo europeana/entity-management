@@ -8,7 +8,6 @@ import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.dereference.Dereferencer;
 import eu.europeana.entitymanagement.exception.DatasourceNotKnownException;
 import eu.europeana.entitymanagement.exception.EntityMismatchException;
-import eu.europeana.entitymanagement.utils.EntityComparator;
 import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
 import java.util.Date;
 import java.util.Optional;
@@ -30,14 +29,12 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
       "DataSource type %s does not match entity type %s for entityId=%s, proxyId=%s";
   private static final Logger logger = LogManager.getLogger(EntityDereferenceProcessor.class);
   private final DereferenceServiceLocator dereferenceServiceLocator;
-  private final EntityComparator entityComparator;
   private final DataSources datasources;
 
   @Autowired
   public EntityDereferenceProcessor(
       DereferenceServiceLocator dereferenceServiceLocator, DataSources datasources) {
     this.dereferenceServiceLocator = dereferenceServiceLocator;
-    this.entityComparator = new EntityComparator();
     this.datasources = datasources;
   }
 
@@ -72,21 +69,10 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
                 MISMATCH_EXCEPTION_STRING, proxyResponseType, entityType, entityId, proxyId));
       }
 
-      /*
-       * Entity is newly created if its isAggregatedBy creation and last modified time are the same
-       * It needs to be processed at least once, which would update the last modified time.
-       * See EntityRecordService.mergeEntities()
-       */
-      boolean isEntityNew =
-          entity.getIsAggregatedBy().getCreated().equals(entity.getIsAggregatedBy().getModified());
-
-      if (isEntityNew || !datasourceResponseMatchesExternalProxy(externalProxy, proxyResponse)) {
-        logger.trace("Storing de-referenced metadata in external proxy for entityId={}", entityId);
-        // replace external proxy with proxy response
-        externalProxy.setEntity(proxyResponse);
-        handleDatasourceRedirections(externalProxy, proxyResponse);
-        externalProxy.getProxyIn().setModified(new Date());
-      }
+      // always replace external proxy with proxy response
+      externalProxy.setEntity(proxyResponse);
+      handleDatasourceRedirections(externalProxy, proxyResponse);
+      externalProxy.getProxyIn().setModified(new Date());
     }
 
     return entityRecord;
@@ -105,11 +91,5 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
           externalProxy.getProxyId(),
           proxyResponse.getEntityId());
     }
-  }
-
-  /** Checks if Datasource response matches metadata in external proxy */
-  private boolean datasourceResponseMatchesExternalProxy(
-      EntityProxy entityProxy, Entity metisResponse) {
-    return entityComparator.compare(entityProxy.getEntity(), metisResponse) == 0;
   }
 }
