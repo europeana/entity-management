@@ -332,6 +332,19 @@
             <configuration>
               <!--We just want the reports; build should still pass -->
               <failOnError>false</failOnError>
+              <!-- Import additional rules from plugins -->
+              <plugins>
+                <plugin>
+                  <groupId>com.h3xstream.findsecbugs</groupId>
+                  <artifactId>findsecbugs-plugin</artifactId>
+                  <version>1.10.1</version>
+                </plugin>
+                <plugin>
+                  <groupId>com.mebigfatguy.fb-contrib</groupId>
+                  <artifactId>fb-contrib</artifactId>
+                  <version>7.4.7</version>
+                </plugin>
+              </plugins>
             </configuration>
           </plugin>
         </plugins>
