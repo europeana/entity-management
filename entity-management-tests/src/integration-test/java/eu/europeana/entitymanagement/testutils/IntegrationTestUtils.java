@@ -171,12 +171,12 @@ public class IntegrationTestUtils {
   public static final String ORGANIZATION_GFM_WIKIDATA_URI_PATH_SUFFIX = "/entity/Q18290171";
   public static final String ORGANIZATION_GFM_URI_WIKIDATA_URI =
       WIKIDATA_BASE_URI + ORGANIZATION_GFM_WIKIDATA_URI_PATH_SUFFIX;
-  
-  public static final String ORGANIZATION_BERGER_MUSEUM_WIKIDATA_URI_PATH_SUFFIX = "/entity/Q23014463";
-  public static final String ORGANIZATION_BERGER_MUSEUM_WIKIDATA_URI = 
+
+  public static final String ORGANIZATION_BERGER_MUSEUM_WIKIDATA_URI_PATH_SUFFIX =
+      "/entity/Q23014463";
+  public static final String ORGANIZATION_BERGER_MUSEUM_WIKIDATA_URI =
       WIKIDATA_BASE_URI + ORGANIZATION_BERGER_MUSEUM_WIKIDATA_URI_PATH_SUFFIX;
-  
-  
+
   public static final String ORGANIZATION_GFM_OLD_URI_WIKIDATA_URI =
       WIKIDATA_BASE_URI + ORGANIZATION_GFM_OLD_WIKIDATA_URI_PATH_SUFFIX;
 
@@ -192,10 +192,9 @@ public class IntegrationTestUtils {
       "/wikidata-deref/organization_wikidata_naturalis_response.xml";
   public static final String ORGANIZATION_GFM_WIKIDATA_RESPONSE_XML =
       "/wikidata-deref/organization_wikidata_gfm_response.xml";
-  
+
   public static final String ORGANIZATION_BERGER_MUSEUM_WIKIDATA_RESPONSE_XML =
       "/wikidata-deref/organization_wikidata_berger_museum_response.xml";
-  
 
   /** Creates an ObjectMapper specifically for handling Mock zoho responses */
   private static final ObjectMapper zohoResponseObjectMapper =
@@ -217,8 +216,7 @@ public class IntegrationTestUtils {
           ORGANIZATION_PCCE_URI_ZOHO,
           ORGANIZATION_PCCE_ZOHO_RESPONSE,
           ORGANIZATION_BERGER_MUSEUM_URI_ZOHO,
-          ORGANIZATION_BERGER_MUSEUM_ZOHO_RESPONSE
-          );
+          ORGANIZATION_BERGER_MUSEUM_ZOHO_RESPONSE);
 
   /** Maps Metis dereferenciation URIs to mocked XML responses */
   public static final Map<String, String> METIS_RESPONSE_MAP =

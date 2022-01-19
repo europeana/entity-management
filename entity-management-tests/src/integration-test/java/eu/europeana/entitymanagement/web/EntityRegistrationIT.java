@@ -10,6 +10,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.solr.model.SolrOrganization;
+import eu.europeana.entitymanagement.solr.service.SolrService;
+import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
+import eu.europeana.entitymanagement.utils.EntityRecordUtils;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,20 +26,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.solr.model.SolrOrganization;
-import eu.europeana.entitymanagement.solr.service.SolrService;
-import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
-import eu.europeana.entitymanagement.utils.EntityRecordUtils;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 public class EntityRegistrationIT extends BaseWebControllerTest {
 
-  @Autowired
-  SolrService solrService;
-  
+  @Autowired SolrService solrService;
+
   @Test
   public void registerConceptShouldBeSuccessful() throws Exception {
 
@@ -279,12 +279,14 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
     String expectedId =
         EntityRecordUtils.buildEntityIdUri(
             "organization",
-            EntityRecordUtils.getIdFromUrl(IntegrationTestUtils.ORGANIZATION_BERGER_MUSEUM_URI_ZOHO));
+            EntityRecordUtils.getIdFromUrl(
+                IntegrationTestUtils.ORGANIZATION_BERGER_MUSEUM_URI_ZOHO));
 
     ResultActions response =
         mockMvc.perform(
             MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL)
-                .content(loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_BERGER_MUSEUM_ZOHO_JSON))
+                .content(
+                    loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_BERGER_MUSEUM_ZOHO_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
     response
         .andExpect(status().isAccepted())
@@ -309,15 +311,13 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         .andExpect(jsonPath("$.prefLabel[*]", hasSize(1)))
         // should have Europeana, Zoho and Wikidata proxies
         .andExpect(jsonPath("$.proxies", hasSize(3)));
-    
-    //check if indexing is successfull by searching the organization in solr
+
+    // check if indexing is successfull by searching the organization in solr
     SolrOrganization org = solrService.searchById(SolrOrganization.class, expectedId);
     assertNotNull(org.getHasGeo());
     assertFalse(org.getHasGeo().startsWith("geo:"));
-    
   }
-  
-  
+
   @Test
   void registerOrganizationWithoutWikidataSameAsShouldBeSuccessful() throws Exception {
     String expectedId =

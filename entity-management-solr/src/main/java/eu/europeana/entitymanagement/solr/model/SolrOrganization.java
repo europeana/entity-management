@@ -106,7 +106,7 @@ public class SolrOrganization extends SolrEntity<Organization> {
   }
 
   String toLatLongValue(String geoUrl) {
-    if(geoUrl == null) {
+    if (geoUrl == null) {
       return null;
     }
     return geoUrl.replaceFirst(GEO_URI_SCHEMA, "");
