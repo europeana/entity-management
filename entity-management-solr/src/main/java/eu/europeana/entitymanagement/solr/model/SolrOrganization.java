@@ -14,6 +14,8 @@ import org.apache.solr.client.solrj.beans.Field;
 
 public class SolrOrganization extends SolrEntity<Organization> {
 
+  private static final String GEO_URI_SCHEMA = "geo:";
+
   @Field(EntitySolrFields.SAME_AS)
   private List<String> sameAs;
 
@@ -99,8 +101,15 @@ public class SolrOrganization extends SolrEntity<Organization> {
       this.postalCode = organizationAddress.getVcardPostalCode();
       this.countryName = organizationAddress.getVcardCountryName();
       this.postBox = organizationAddress.getVcardPostOfficeBox();
-      this.hasGeo = organizationAddress.getVcardHasGeo();
+      this.hasGeo = toLatLongValue(organizationAddress.getVcardHasGeo());
     }
+  }
+
+  String toLatLongValue(String geoUrl) {
+    if(geoUrl == null) {
+      return null;
+    }
+    return geoUrl.replaceFirst(GEO_URI_SCHEMA, "");
   }
 
   private void setDescription(Map<String, String> dcDescription) {
