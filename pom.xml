@@ -292,6 +292,7 @@
               <dependency>
                 <groupId>org.eclipse.sisu</groupId>
                 <artifactId>org.eclipse.sisu.plexus</artifactId>
+                <version>0.0.0.M2a</version>
                 <exclusions>
                   <exclusion>
                     <groupId>asm</groupId>
