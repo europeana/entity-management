@@ -1,7 +1,8 @@
-package eu.europeana.entitymanagement.mongo.repository;
+package eu.europeana.entitymanagement.definitions.model;
 
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Id;
+import dev.morphia.annotations.Indexed;
 
 /**
  * Mongo generates a hexadecimal value by default for ObjectIds This class (and its corresponding
@@ -10,24 +11,26 @@ import dev.morphia.annotations.Id;
 @Entity(useDiscriminator = false, value = "EntityIdGenerator")
 public class EntityIdGenerator {
 
-  @Id protected String internalType;
+  // @Indexed annotation added so Morphia can map this collection on startup (if it doesn't
+  // already exist)
+  @Id @Indexed private String internalType;
 
-  protected Long value = 1L;
+  private long value = 1L;
 
-  protected EntityIdGenerator() {
-    super();
+  public EntityIdGenerator() {
+    // default constructor
   }
 
   public EntityIdGenerator(final String internalType) {
     this.internalType = internalType;
   }
 
-  public EntityIdGenerator(final String internalType, final Long startValue) {
+  public EntityIdGenerator(final String internalType, final long startValue) {
     this(internalType);
     value = startValue;
   }
 
-  public Long getValue() {
+  public long getValue() {
     return value;
   }
 }
