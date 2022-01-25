@@ -5,7 +5,6 @@ import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_T
 import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_URI;
 
 import eu.europeana.entitymanagement.common.config.LanguageCodes;
-import eu.europeana.entitymanagement.definitions.exceptions.EntityFieldAccessException;
 import eu.europeana.entitymanagement.definitions.model.Address;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
@@ -538,13 +537,19 @@ public class EntityFieldsDatatypeValidation {
         isValid =
             validateMetadataObjects(context, fieldName, fieldValue, field.getType()) && isValid;
       } catch (IllegalArgumentException e) {
-        throw new EntityFieldAccessException(
-            "During the validation of the entity fields an illegal or inappropriate argument exception has happened.",
-            e);
+        addConstraint(
+            context,
+            "During the validation of the entity field: "
+                + field.getName()
+                + ", an illegal or inappropriate argument exception has happened. The exception stack trace is:"
+                + e.getStackTrace());
       } catch (IllegalAccessException e) {
-        throw new EntityFieldAccessException(
-            "During the validation of the entity fields an illegal access to some method or field has happened.",
-            e);
+        addConstraint(
+            context,
+            "During the validation of the entity field: "
+                + field.getName()
+                + ", an illegal access to some method or field has happened. The exception stack trace is:"
+                + e.getStackTrace());
       }
     }
 
