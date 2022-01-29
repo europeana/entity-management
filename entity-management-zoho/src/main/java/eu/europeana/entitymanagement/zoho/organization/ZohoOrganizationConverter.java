@@ -1,18 +1,18 @@
 package eu.europeana.entitymanagement.zoho.organization;
 
 import static eu.europeana.entitymanagement.zoho.utils.ZohoUtils.toIsoLanguage;
-
-import com.zoho.crm.api.record.Record;
-import eu.europeana.entitymanagement.definitions.model.Address;
-import eu.europeana.entitymanagement.definitions.model.Organization;
-import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
-import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
+import com.zoho.crm.api.record.Record;
+import com.zoho.crm.api.users.User;
+import eu.europeana.entitymanagement.definitions.model.Address;
+import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
+import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 
 public class ZohoOrganizationConverter {
 
@@ -24,8 +24,9 @@ public class ZohoOrganizationConverter {
 
   public static Organization convertToOrganizationEntity(Record zohoRecord) {
     Organization org = new Organization();
-    org.setAbout(ZohoConstants.URL_ORGANIZATION_PREFFIX + zohoRecord.getId());
-    org.setIdentifier(List.of(Long.toString(zohoRecord.getId())));
+    Long zohoId = zohoRecord.getId();
+    org.setAbout(ZohoUtils.buildZohoOrganizationId(zohoRecord.getId()));
+    org.setIdentifier(List.of(Long.toString(zohoId)));
 
     // extract language maps
     Map<String, List<String>> allLabels = getAllRecordLabels(zohoRecord);
@@ -178,5 +179,15 @@ public class ZohoOrganizationConverter {
 
       return isoCode;
     }
+  }
+  
+  /**
+   * The method is to process the ZOHO_OWNER_FIELD name value
+   *
+   * @param recordOrganization
+   * @return
+   */
+  public static String getOwnerName(Record recordOrganization) {
+     return ((User) recordOrganization.getKeyValue(ZohoConstants.ZOHO_OWNER_FIELD)).getName();
   }
 }

@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.batch.writer;
 
+import eu.europeana.entitymanagement.batch.utils.BatchUtils;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import java.util.List;
@@ -19,6 +20,7 @@ public class EntityRecordDatabaseRemovalWriter implements ItemWriter<EntityRecor
 
   @Override
   public void write(@NonNull List<? extends EntityRecord> entityRecords) throws Exception {
-    entityRecordService.deleteBulk(entityRecords);
+    List<String> ids = List.of(BatchUtils.getEntityIds(entityRecords));
+    entityRecordService.deleteBulk(ids);
   }
 }

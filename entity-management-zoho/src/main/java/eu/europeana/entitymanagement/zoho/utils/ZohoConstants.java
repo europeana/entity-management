@@ -58,5 +58,9 @@ public final class ZohoConstants {
   public static final int LANGUAGE_CODE_LENGTH = 5;
   public static final int SAME_AS_CODE_LENGTH = 3;
 
+  //constants for filtering by Owner
+  public static final String ZOHO_OWNER_FIELD = "Owner";
+  public static final String ZOHO_OWNER_CRITERIA = "Owner.name";
+  
   private ZohoConstants() {}
 }

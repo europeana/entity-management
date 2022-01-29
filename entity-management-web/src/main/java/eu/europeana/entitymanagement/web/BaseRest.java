@@ -24,6 +24,7 @@ import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
+import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
 import eu.europeana.entitymanagement.web.service.EMAuthorizationService;
 import eu.europeana.entitymanagement.web.service.RequestPathMethodService;
 import eu.europeana.entitymanagement.web.xml.model.RdfBaseWrapper;
@@ -165,6 +166,23 @@ public abstract class BaseRest extends BaseRestController {
       throw new EuropeanaApiException("Error serializing failed tasks", e);
     }
   }
+  
+  
+  protected ResponseEntity<String> generateZohoSyncResponse(
+      HttpServletRequest request, ZohoSyncReport zohoSyncReport)
+      throws EuropeanaApiException {
+
+    org.springframework.http.HttpHeaders headers = createAllowHeader(request);
+    headers.add(HttpHeaders.CONTENT_TYPE, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
+
+    try {
+      String body = jsonLdSerializer.serializeObject(zohoSyncReport);
+      return ResponseEntity.status(HttpStatus.OK).headers(headers).body(body);
+    } catch (IOException e) {
+      throw new EuropeanaApiException("Error serializing failed tasks", e);
+    }
+  }
+
 
   /**
    * Generates serialised EntityRecord Response entity along with Http status and headers

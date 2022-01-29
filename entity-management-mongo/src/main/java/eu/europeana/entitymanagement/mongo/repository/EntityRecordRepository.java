@@ -187,7 +187,7 @@ public class EntityRecordRepository {
    * @param filters Query filters
    * @return List with results
    */
-  public List<EntityRecord> findWithFilters(int start, int count, Filter[] filters) {
+  public List<EntityRecord> findWithFilters(int start, int count, Filter... filters) {
     return datastore
         .find(EntityRecord.class)
         .filter(filters)
