@@ -258,6 +258,9 @@ public class ZohoSyncService {
   private void performCreateOperation(SortedSet<Operation> createOperations,
       ZohoSyncReport zohoSyncReport) throws EntityCreationException {
 
+    if(createOperations == null || createOperations.isEmpty()) {
+      return;
+    }
     List<String> entitiesToUpdate = performEntityRegistration(createOperations, zohoSyncReport);
     // schedule updates
     entityUpdateService.scheduleTasks(entitiesToUpdate, ScheduledUpdateType.FULL_UPDATE);
@@ -363,13 +366,14 @@ public class ZohoSyncService {
       emOperation = Operations.UPDATE;
     } else if (entityRecordOptional.isPresent() && !hasDpsOwner) {
       // Zoho entry has changed, but DPS ownership lost
+      //TODO: Add handling for deprecated in Zoho 
       emOperation = Operations.DELETE;
     }
 
     if (emOperation != null) {
       // only if there is an operation to perform in EM
       Operation operation =
-          new Operation(entityId, Operations.CREATE, zohoOrg, entityRecordOptional);
+          new Operation(entityId, emOperation, zohoOrg, entityRecordOptional);
       operations.addOperation(operation);
     } else {
       logger.info(

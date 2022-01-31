@@ -64,7 +64,7 @@ public class ZohoSyncReport {
   
   @Override
   public String toString() {
-    return String.format("created: {},\n updated: {},\n deprecated:{},\n deleted:{},\n executionStatus:{}", getCreated(), getUpdated(), getDeprecated(), getDeleted(), getExecutionStatus());
+    return String.format("created: %d,\n updated: %d,\n deprecated: %d,\n deleted: %d,\n executionStatus: %d", getCreated(), getUpdated(), getDeprecated(), getDeleted(), getExecutionStatus());
   }
   public Throwable getError() {
     return error;

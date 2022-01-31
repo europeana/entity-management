@@ -8,7 +8,6 @@ public enum Roles implements Role {
   ANONYMOUS(new String[] {Operations.RETRIEVE}),
   EDITOR(
       new String[] {Operations.RETRIEVE, Operations.CREATE, Operations.DELETE, Operations.UPDATE}),
-  MANAGER(new String[] {EMOperations.OPERATION_ZOHO_SYNC}),
   ADMIN(
       new String[] {
         Operations.RETRIEVE,
