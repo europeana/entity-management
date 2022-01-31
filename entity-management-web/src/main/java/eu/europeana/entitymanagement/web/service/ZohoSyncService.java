@@ -43,6 +43,7 @@ import eu.europeana.entitymanagement.web.model.BatchOperations;
 import eu.europeana.entitymanagement.web.model.Operation;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
 import eu.europeana.entitymanagement.zoho.ZohoAccessClient;
+import eu.europeana.entitymanagement.zoho.organization.ZohoAccessConfiguration;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
@@ -63,7 +64,7 @@ public class ZohoSyncService {
 
   private DataSource zohoDataSource;
 
-  private final ZohoAccessClient zohoAccessClient;
+  private final ZohoAccessConfiguration zohoAccessConfiguration;
 
   private final SolrService solrService;
 
@@ -77,13 +78,13 @@ public class ZohoSyncService {
   public ZohoSyncService(EntityRecordService entityRecordService,
       EntityUpdateService entityUpdateService, EntityRecordRepository entityRecordRepository,
       EntityManagementConfiguration emConfiguration, DataSources datasources,
-      ZohoAccessClient zohoAccessClient, SolrService solrService) {
+      ZohoAccessConfiguration zohoAccessConfiguration, SolrService solrService) {
     this.entityRecordService = entityRecordService;
     this.entityUpdateService = entityUpdateService;
     this.entityRecordRepository = entityRecordRepository;
     this.emConfiguration = emConfiguration;
     this.datasources = datasources;
-    this.zohoAccessClient = zohoAccessClient;
+    this.zohoAccessConfiguration = zohoAccessConfiguration;
     this.solrService = solrService;
 
   }
@@ -114,7 +115,7 @@ public class ZohoSyncService {
         // retrieve modified organizations
         // OffsetDateTime offsetDateTime = modifiedSince.toInstant()
         // .atOffset(ZoneOffset.UTC);
-        orgList = zohoAccessClient.getZcrmRecordOrganizations(page, pageSize, modifiedSince,
+        orgList = zohoAccessConfiguration.getZohoAccessClient().getZcrmRecordOrganizations(page, pageSize, modifiedSince,
             getSearchCriteria(), null);
         logExecutionProgress(orgList, page, pageSize);
 
@@ -165,7 +166,7 @@ public class ZohoSyncService {
       while (hasNext) {
         // list of (europeana) organizations ids
         deletedRecordsInZoho =
-            zohoAccessClient.getZohoDeletedRecordOrganizations(startPage, pageSize);
+            zohoAccessConfiguration.getZohoAccessClient().getZohoDeletedRecordOrganizations(startPage, pageSize);
 
         // check exists in Metis (Note: zoho doesn't support filtering by lastModified for deleted
         // entities)
@@ -204,13 +205,16 @@ public class ZohoSyncService {
 
     // schedule updates
     performUpdateOperations(operations.getUpdateOperations(), zohoSyncReport);
+    performDeprecationOperations(operations.getDeleteOperations(), zohoSyncReport);
 
-    SortedSet<Operation> deprecateOperations = operations.getDeleteOperations();
-    performDeprecationOperations(deprecateOperations, zohoSyncReport);
-
-
-    SortedSet<Operation> permanentDeleteOperations = operations.getPermanentDeleteOperations();
     // per deletion
+    performPermanentDeleteOperations(operations.getPermanentDeleteOperations(), zohoSyncReport);
+  }
+
+  void performPermanentDeleteOperations(SortedSet<Operation> permanentDeleteOperations, ZohoSyncReport zohoSyncReport) {
+    if (permanentDeleteOperations == null || permanentDeleteOperations.isEmpty()) {
+      return;
+    }
     List<String> entitiesToDelete = permanentDeleteOperations.stream()
         .map(permDelete -> permDelete.getOrganizationId()).collect(Collectors.toList());
     runPermanentDelete(entitiesToDelete, zohoSyncReport);
@@ -218,6 +222,9 @@ public class ZohoSyncService {
 
   void performDeprecationOperations(SortedSet<Operation> deprecateOperations,
       ZohoSyncReport zohoSyncReport) throws SolrServiceException {
+    if (deprecateOperations == null || deprecateOperations.isEmpty()) {
+      return;
+    }
     EntityRecord record;
     Organization zohoOrganization;
     for (Operation operation : deprecateOperations) {
@@ -267,6 +274,7 @@ public class ZohoSyncService {
           ZohoOrganizationConverter.convertToOrganizationEntity(operation.getZohoRecord());
       allCorefs = new ArrayList<String>();
       allCorefs.add(operation.getOrganizationId());
+      allCorefs.add(zohoOrganization.getAbout());
       allCorefs.addAll(zohoOrganization.getSameReferenceLinks());
 
       Optional<EntityRecord> existingEntity =
@@ -280,14 +288,12 @@ public class ZohoSyncService {
         // create shell
         Organization europeanaProxyEntity = new Organization();
         // set zoho URL
-        String externalOrganizationId =
-            ZohoUtils.buildZohoOrganizationId(operation.getZohoRecord().getId());
-        europeanaProxyEntity.setAbout(externalOrganizationId);
+        europeanaProxyEntity.setAbout(zohoOrganization.getAbout());
 
         EntityRecord savedEntityRecord = entityRecordService
             .createEntityFromRequest(europeanaProxyEntity, zohoOrganization, getZohoDataSource());
         entitiesToUpdate.add(savedEntityRecord.getEntityId());
-        logger.info("Created Entity record for externalId={}; entityId={}", externalOrganizationId,
+        logger.info("Created Entity record for externalId={}; entityId={}", zohoOrganization.getAbout(),
             savedEntityRecord.getEntityId());
       }
     }
@@ -447,7 +453,7 @@ public class ZohoSyncService {
 
   public DataSource getZohoDataSource() {
     if (zohoDataSource == null) {
-      zohoDataSource = datasources.getDatasource(DataSource.ZOHO_ID).get();
+      zohoDataSource = datasources.getDatasourceById(DataSource.ZOHO_ID).get();
     }
 
     return zohoDataSource;

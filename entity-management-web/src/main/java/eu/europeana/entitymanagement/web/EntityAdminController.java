@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement.web;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -231,7 +232,7 @@ public class EntityAdminController extends BaseRest {
 
   private OffsetDateTime validateSince(String since) throws HttpBadRequestException {
     if (since == null) {
-      return OffsetDateTime.from(Instant.EPOCH);
+      return Instant.EPOCH.atOffset(ZoneOffset.UTC);
     }
 
     try {

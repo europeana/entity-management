@@ -56,7 +56,7 @@ public class Operation implements Comparable<Operation>{
   
   @Override
   public String toString() {
-    return String.format("organizationId: {}, action:{} ", getOrganizationId(), getAction());
+    return String.format("organizationId: %s, action: %s", getOrganizationId(), getAction());
   }
  
   @Override
