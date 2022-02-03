@@ -48,6 +48,7 @@ import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.web.service.ZohoSyncService;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 @RestController
 @Validated
@@ -216,7 +217,8 @@ public class EntityAdminController extends BaseRest {
       response = java.lang.Void.class)
   @PostMapping(value = "/management/zohosync", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<String> zohoSync(
-      @RequestParam(value = WebEntityConstants.SINCE, required = false) String since,
+      @ApiParam(name=WebEntityConstants.SINCE, required = true, format = "ISO DateTime", example = "1970-01-01T00:00:00Z") @RequestParam String since,
+      
       HttpServletRequest request)
       throws HttpException, EuropeanaApiException {
 

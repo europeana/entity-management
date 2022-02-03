@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement.web.service;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -10,7 +11,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -27,7 +27,6 @@ import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.config.DataSources;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -42,12 +41,10 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.web.model.BatchOperations;
 import eu.europeana.entitymanagement.web.model.Operation;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
-import eu.europeana.entitymanagement.zoho.ZohoAccessClient;
 import eu.europeana.entitymanagement.zoho.organization.ZohoAccessConfiguration;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
-import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 
 @Service(AppConfig.BEAN_ZOHO_SYNC_SERVICE)
 public class ZohoSyncService {
@@ -70,10 +67,6 @@ public class ZohoSyncService {
 
   private static final Logger logger = LogManager.getLogger(EntityRecordService.class);
 
-  private Map<String, String> searchCriteria = new HashMap<>();
-
-  final int pageSize = 100;
-
   @Autowired
   public ZohoSyncService(EntityRecordService entityRecordService,
       EntityUpdateService entityUpdateService, EntityRecordRepository entityRecordRepository,
@@ -90,8 +83,7 @@ public class ZohoSyncService {
   }
 
   public ZohoSyncReport synchronizeZohoOrganizations(@NotNull OffsetDateTime modifiedSince) {
-    initSearchCriteria();
-    ZohoSyncReport zohoSyncReport = new ZohoSyncReport();
+    ZohoSyncReport zohoSyncReport = new ZohoSyncReport(new Date());
     // synchronize updated
     synchronizeZohoOrganizations(modifiedSince, zohoSyncReport);
 
@@ -108,6 +100,7 @@ public class ZohoSyncService {
     BatchOperations operations;
 
     int page = 1;
+    int pageSize = emConfiguration.getZohoSyncBatchSize();
     boolean hasNext = true;
     // Zoho doesn't return the number of organizations in get response.
     try {
@@ -115,8 +108,7 @@ public class ZohoSyncService {
         // retrieve modified organizations
         // OffsetDateTime offsetDateTime = modifiedSince.toInstant()
         // .atOffset(ZoneOffset.UTC);
-        orgList = zohoAccessConfiguration.getZohoAccessClient().getZcrmRecordOrganizations(page, pageSize, modifiedSince,
-            getSearchCriteria(), null);
+        orgList = zohoAccessConfiguration.getZohoAccessClient().getZcrmRecordOrganizations(page, pageSize, modifiedSince);
         logExecutionProgress(orgList, page, pageSize);
 
         // collect operations to be run on Metis and Entity API
@@ -159,6 +151,7 @@ public class ZohoSyncService {
     // organizations
     List<DeletedRecord> deletedRecordsInZoho;
     int startPage = 1;
+    int pageSize = emConfiguration.getZohoSyncBatchSize();
     boolean hasNext = true;
     List<String> entitiesDeletedInZoho;
     try {
@@ -284,7 +277,7 @@ public class ZohoSyncService {
           entityRecordService.findMatchingCoreference(allCorefs);
       if (existingEntity.isPresent()) {
         // skipp processing
-        zohoSyncReport.addSkippedDupplicate(operation.getOrganizationId(),
+        zohoSyncReport.addSkippedDupplicate(zohoOrganization.getAbout(),
             existingEntity.get().getEntityId());
         continue;
       } else {
@@ -302,17 +295,7 @@ public class ZohoSyncService {
     }
     return entitiesToUpdate;
   }
-
-
-  private Map<String, String> getSearchCriteria() {
-    // search criteria is mandatory to avoid retrieval of all available Zoho Organization in case of
-    // missing configurations
-    if (searchCriteria == null || searchCriteria.isEmpty()) {
-      initSearchCriteria();
-    }
-    return searchCriteria;
-  }
-
+ 
 
   /**
    * This method performs synchronization of organizations between Zoho and Entity API database
@@ -437,22 +420,6 @@ public class ZohoSyncService {
   boolean isLastPage(int currentPageSize, int maxItemsPerPage) {
     // END LOOP: if no more organizations exist in Zoho
     return currentPageSize < maxItemsPerPage;
-  }
-
-  /**
-   * Builds a search criteria Map : [Owner.name:<ownerFilter>]
-   */
-  private void initSearchCriteria() {
-    String owner = emConfiguration.getZohoSyncOwnerFilter();
-
-    if (StringUtils.isNotEmpty(owner)) {
-      logger.debug("apply filter for Zoho search criteria owner : {}", owner);
-      searchCriteria.put(ZohoConstants.ZOHO_OWNER_CRITERIA, owner);
-    }
-    if (searchCriteria.isEmpty()) {
-      throw new FunctionalRuntimeException(
-          "Application configuration error. There is no zoho search criteria defined for retrieving ZohoOrganizations!");
-    }
   }
 
   public DataSource getZohoDataSource() {

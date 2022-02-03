@@ -11,9 +11,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.SystemUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.http.HttpStatus;
 import com.zoho.api.authenticator.OAuthToken;
 import com.zoho.api.authenticator.OAuthToken.TokenType;
 import com.zoho.api.authenticator.Token;
@@ -42,10 +39,6 @@ import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 
 public class ZohoAccessClient {
-
-  private static final Logger LOGGER = LogManager.getLogger(ZohoAccessClient.class);
-  private static final int ITEMS_PER_PAGE = 200;
-
 
   /**
    * Constructor with all parameters.
@@ -117,15 +110,11 @@ public class ZohoAccessClient {
    * @param page first index starts with 1
    * @param pageSize the number of entries to be returned, Zoho will have an upper limit.
    * @param modifiedDate the date of last modification to check
-   * @param searchCriteria the searchCriteria to apply during the Zoho search
-   * @param criteriaOperator the criteriaOperator used for each parameter, can be one of {@link
-   * ZohoConstants#EQUALS_OPERATION},{@link ZohoConstants#STARTS_WITH_OPERATION}. If not provided or
-   * wrong value, it will default to {@link ZohoConstants#EQUALS_OPERATION}.
-   * @return the list of Zoho Organizations
+   * @return the list of Zoho Records (Organizations)
    * @throws ZohoException if an error occurred during accessing Zoho
    */
   public List<Record> getZcrmRecordOrganizations(int page, int pageSize,
-      OffsetDateTime modifiedDate, Map<String, String> searchCriteria, String criteriaOperator)
+      OffsetDateTime modifiedDate)
       throws ZohoException {
 
     if (page < 1 || pageSize < 1) {
@@ -133,12 +122,11 @@ public class ZohoAccessClient {
           new IllegalArgumentException(
               String.format("Provided page: %s, and pageSize: %s", page, pageSize)));
     }
-
+    
     try {
       APIResponse<ResponseHandler> response;
       RecordOperations recordOperations = new RecordOperations();
       ParameterMap paramInstance = new ParameterMap();
-      if (isNullOrEmpty(searchCriteria)) {//No searchCriteria available
         paramInstance.add(GetRecordsParam.PAGE, page);
         paramInstance.add(GetRecordsParam.PER_PAGE, pageSize);
         HeaderMap headerInstance = new HeaderMap();
@@ -146,16 +134,7 @@ public class ZohoAccessClient {
         response = recordOperations
             .getRecords(ZohoConstants.ACCOUNTS_MODULE_NAME, paramInstance, headerInstance);
 
-      } else {
-        paramInstance.add(SearchRecordsParam.PAGE, page);
-        paramInstance.add(SearchRecordsParam.PER_PAGE, pageSize);
-        paramInstance.add(SearchRecordsParam.CRITERIA,
-            createZohoCriteriaString(searchCriteria, criteriaOperator));
-
-        response = recordOperations
-            .searchRecords(ZohoConstants.ACCOUNTS_MODULE_NAME, paramInstance);
-      }
-      return getZohoRecords(response);
+        return getZohoRecords(response);
     } catch (SDKException e) {
       throw new ZohoException(
           "Cannot get organization list page: " + page + " pageSize :" + pageSize, e);
@@ -173,7 +152,7 @@ public class ZohoAccessClient {
    * wrong value, it will default to {@link ZohoConstants#EQUALS_OPERATION}.
    * @return the created criteria in the format Zoho accepts
    */
-  private String createZohoCriteriaString(Map<String, String> searchCriteria,
+   String createZohoCriteriaString(Map<String, String> searchCriteria,
       String criteriaOperator) {
     if (isNullOrEmpty(searchCriteria)) {
       searchCriteria = new HashMap<>();
@@ -230,11 +209,6 @@ public class ZohoAccessClient {
       }
     }
     return Collections.emptyList();
-  }
-  
-  private boolean isEmptyContent(APIResponse<ResponseHandler> response) {
-    return Arrays.asList(HttpStatus.NO_CONTENT.value(), HttpStatus.NOT_MODIFIED.value())
-        .contains(response.getStatusCode());
   }
   
   /**
