@@ -33,4 +33,8 @@ public class EntityIdGenerator {
   public long getValue() {
     return value;
   }
+
+  public String getInternalType() {
+    return internalType;
+  }
 }

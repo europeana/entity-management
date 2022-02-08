@@ -1,8 +1,14 @@
 package eu.europeana.entitymanagement.mongo.repository;
 
 import static dev.morphia.query.Sort.ascending;
-import static dev.morphia.query.experimental.filters.Filters.*;
-import static eu.europeana.entitymanagement.definitions.EntityRecordFields.*;
+import static dev.morphia.query.experimental.filters.Filters.eq;
+import static dev.morphia.query.experimental.filters.Filters.in;
+import static dev.morphia.query.experimental.filters.Filters.or;
+import static eu.europeana.entitymanagement.definitions.EntityRecordFields.DISABLED;
+import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_EXACT_MATCH;
+import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_ID;
+import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_MODIFIED;
+import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_SAME_AS;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MAJORITY_WRITE_MODIFY_OPTS;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_UPDATE_OPTS;
 
@@ -23,7 +29,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
-import javax.validation.ValidatorFactory;
 import org.springframework.stereotype.Repository;
 
 /** Repository for retrieving the EntityRecord objects. */
@@ -32,9 +37,6 @@ public class EntityRecordRepository {
 
   @Resource(name = AppConfigConstants.BEAN_EM_DATA_STORE)
   private Datastore datastore;
-
-  @Resource(name = "emValidatorFactory")
-  private ValidatorFactory emValidatorFactory;
 
   /** @return the total number of resources in the database */
   public long count() {
