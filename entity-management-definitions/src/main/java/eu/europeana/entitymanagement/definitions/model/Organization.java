@@ -6,6 +6,7 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.COUNTRY;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DEPICTION;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DESCRIPTION;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.EDM_LANGUAGE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.EUROPEANA_ROLE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_HOMEPAGE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_LOGO;
@@ -52,7 +53,8 @@ import java.util.Map;
   FOAF_MBOX,
   HAS_ADDRESS,
   IDENTIFIER,
-  SAME_AS
+  SAME_AS,
+  EDM_LANGUAGE
 })
 public class Organization extends Entity {
 
@@ -67,10 +69,9 @@ public class Organization extends Entity {
   private Map<String, List<String>> organizationDomain;
   private Map<String, String> geographicLevel;
   private String country;
-
   private Address hasAddress;
-
   private List<String> sameAs;
+  private List<String> edmLanguage;
 
   public Organization() {
     super();
@@ -93,6 +94,7 @@ public class Organization extends Entity {
     this.country = copy.getCountry();
     if (copy.getAddress() != null) this.hasAddress = new Address(copy.getAddress());
     if (copy.sameAs != null) this.sameAs = (new ArrayList<>(copy.sameAs));
+    if (copy.edmLanguage != null) this.edmLanguage = (new ArrayList<>(copy.edmLanguage));
   }
 
   @JsonGetter(DESCRIPTION)
@@ -231,5 +233,15 @@ public class Organization extends Entity {
       throws IllegalArgumentException, IllegalAccessException {
     // method to call the setter for each field individually
     field.set(this, value);
+  }
+
+  @JsonGetter(EDM_LANGUAGE)
+  public List<String> getEdmLanguage() {
+    return edmLanguage;
+  }
+
+  @JsonSetter(EDM_LANGUAGE)
+  public void setEdmLanguage(List<String> edmLanguage) {
+    this.edmLanguage = edmLanguage;
   }
 }

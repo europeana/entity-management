@@ -56,6 +56,12 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
   @XmlElement(namespace = NAMESPACE_DC, name = XML_IDENTIFIER)
   private List<String> identifier;
 
+  @XmlElement(namespace = NAMESPACE_DC, name = XML_IDENTIFIER)
+  private List<String> language;
+
+  @XmlElement(namespace = NAMESPACE_EDM, name = XML_LANGUAGE)
+  private List<String> edmLanguage;
+
   public XmlOrganizationImpl(Organization organization) {
     super(organization);
     this.sameAs = RdfXmlUtils.convertToRdfResource(organization.getSameReferenceLinks());
@@ -80,6 +86,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
       this.hasAddress = new XmlAddresses(List.of(new XmlAddressImpl(organization.getAddress())));
     }
     this.identifier = organization.getIdentifier();
+    this.edmLanguage = organization.getEdmLanguage();
   }
 
   @Override
@@ -105,6 +112,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
       entity.setAddress(hasAddress.getVcardAddressesList().get(0).toAddress());
     }
     entity.setIdentifier(getIdentifier());
+    entity.setEdmLanguage(getEdmLanguage());
     return entity;
   }
 
@@ -173,5 +181,9 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
   @Override
   public void setSameReferenceLinks(List<LabelledResource> uris) {
     this.sameAs = uris;
+  }
+
+  public List<String> getEdmLanguage() {
+    return edmLanguage;
   }
 }
