@@ -79,12 +79,16 @@ public class Organization extends Entity {
 
   public Organization(Organization copy) {
     super(copy);
-    if (copy.getDescription() != null) this.description = new HashMap<>(copy.getDescription());
-    if (copy.getAcronym() != null) this.acronym = new HashMap<>(copy.getAcronym());
+    if (copy.getDescription() != null) 
+      this.description = new HashMap<>(copy.getDescription());
+    if (copy.getAcronym() != null) 
+      this.acronym = new HashMap<>(copy.getAcronym());
     this.logo = copy.getLogo();
     this.homepage = copy.getHomepage();
-    if (copy.getPhone() != null) this.phone = new ArrayList<>(copy.getPhone());
-    if (copy.getMbox() != null) this.mbox = new ArrayList<>(copy.getMbox());
+    if (copy.getPhone() != null) 
+      this.phone = new ArrayList<>(copy.getPhone());
+    if (copy.getMbox() != null) 
+      this.mbox = new ArrayList<>(copy.getMbox());
     if (copy.getEuropeanaRole() != null)
       this.europeanaRole = new HashMap<>(copy.getEuropeanaRole());
     if (copy.getOrganizationDomain() != null)
@@ -92,9 +96,12 @@ public class Organization extends Entity {
     if (copy.getGeographicLevel() != null)
       this.geographicLevel = new HashMap<>(copy.getGeographicLevel());
     this.country = copy.getCountry();
-    if (copy.getAddress() != null) this.hasAddress = new Address(copy.getAddress());
-    if (copy.sameAs != null) this.sameAs = (new ArrayList<>(copy.sameAs));
-    if (copy.edmLanguage != null) this.edmLanguage = (new ArrayList<>(copy.edmLanguage));
+    if (copy.getAddress() != null) 
+      this.hasAddress = new Address(copy.getAddress());
+    if (copy.sameAs != null) 
+      this.sameAs = (new ArrayList<>(copy.sameAs));
+    if (copy.edmLanguage != null) 
+      this.edmLanguage = (new ArrayList<>(copy.edmLanguage));
   }
 
   @JsonGetter(DESCRIPTION)
