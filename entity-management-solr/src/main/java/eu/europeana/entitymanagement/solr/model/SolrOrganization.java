@@ -73,6 +73,9 @@ public class SolrOrganization extends SolrEntity<Organization> {
   @Field(OrganizationSolrFields.VCARD_HAS_GEO)
   private String hasGeo;
 
+  @Field(OrganizationSolrFields.EDM_LANGUAGE)
+  private List<String> language;
+
   public SolrOrganization() {
     super();
   }
@@ -102,6 +105,9 @@ public class SolrOrganization extends SolrEntity<Organization> {
       this.countryName = organizationAddress.getVcardCountryName();
       this.postBox = organizationAddress.getVcardPostOfficeBox();
       this.hasGeo = toLatLongValue(organizationAddress.getVcardHasGeo());
+    }
+    if (organization.getEdmLanguage() != null) {
+      this.language = new ArrayList<>(organization.getEdmLanguage());
     }
   }
 
@@ -239,5 +245,9 @@ public class SolrOrganization extends SolrEntity<Organization> {
   @Override
   protected void setSameReferenceLinks(ArrayList<String> uris) {
     this.sameAs = uris;
+  }
+
+  public List<String> getLanguage() {
+    return language;
   }
 }
