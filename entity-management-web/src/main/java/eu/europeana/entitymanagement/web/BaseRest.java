@@ -4,7 +4,6 @@ import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.api.commons.web.controller.BaseRestController;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.entitymanagement.batch.service.FailedTaskService;
-import eu.europeana.entitymanagement.common.config.BuildInfo;
 import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
@@ -45,6 +44,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -53,7 +53,7 @@ public abstract class BaseRest extends BaseRestController {
 
   @Autowired private EMAuthorizationService emAuthorizationService;
 
-  @Autowired private BuildInfo emBuildInfo;
+  @Autowired private BuildProperties emBuildInfo;
 
   @Autowired private EntityXmlSerializer entityXmlSerializer;
 
@@ -80,7 +80,7 @@ public abstract class BaseRest extends BaseRestController {
   }
 
   public String getApiVersion() {
-    return emBuildInfo.getAppVersion();
+    return emBuildInfo.getVersion();
   }
 
   /**
