@@ -1,0 +1,17 @@
+1. Saving the zoho organization response for the integration tests.
+In the method Optional<Entity> eu.europeana.entitymanagement.zoho.organization.ZohoDereferenceService.dereferenceEntityById(@NonNull String id) throws Exception,
+add the following code:
+
+HashMap<String, Object> keyValues = zohoOrganization.get().getKeyValues();
+System.out.println(objectMapper.writeValueAsString(keyValues));
+
+The objectMapper used across the entire application can be injected into the constructor:
+
+private ObjectMapper objectMapper;  
+public ZohoDereferenceService(ZohoAccessConfiguration zohoAccessConfiguration,
+      @Qualifier(BEAN_JSON_MAPPER) ObjectMapper objectMapper) {
+    this.zohoAccessConfiguration = zohoAccessConfiguration;
+    this.objectMapper = objectMapper;
+}
+
+The printed response can then be saved to a file in test/resources. Also make sure to adjust the fields to be either string or list type (no map).

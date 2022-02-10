@@ -29,5 +29,4 @@ public interface OrganizationSolrFields extends EntitySolrFields {
   public static final String VCARD_COUNTRYNAME = "vcard_countryName.1";
   public static final String VCARD_POST_OFFICE_BOX = "vcard_postOfficeBox.1";
   public static final String VCARD_HAS_GEO = "hasGeo";
-  public static final String EDM_LANGUAGE = "edm_language";
 }

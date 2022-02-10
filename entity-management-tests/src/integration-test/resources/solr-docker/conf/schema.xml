@@ -541,9 +541,6 @@
 			language-specific values for individual fields are also assigned to a language-specific 
 			text 'copyfield' in the import pipeline -->
 
-		<field name="edm_language" type="string" indexed="false"
-			stored="true" multiValued="true" />
-
 		<field name="text" type="text" indexed="true" stored="true"
 			multiValued="true" />
 		<dynamicField name="text.*" type="text" indexed="true"

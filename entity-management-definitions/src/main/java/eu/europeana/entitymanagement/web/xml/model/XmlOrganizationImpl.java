@@ -56,9 +56,6 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
   @XmlElement(namespace = NAMESPACE_DC, name = XML_IDENTIFIER)
   private List<String> identifier;
 
-  @XmlElement(namespace = NAMESPACE_DC, name = XML_IDENTIFIER)
-  private List<String> language;
-
   @XmlElement(namespace = NAMESPACE_EDM, name = XML_LANGUAGE)
   private List<String> edmLanguage;
 

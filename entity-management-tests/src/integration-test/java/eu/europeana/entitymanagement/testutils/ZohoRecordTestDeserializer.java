@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.zoho.crm.api.record.Record;
+import com.zoho.crm.api.util.Choice;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +36,8 @@ public class ZohoRecordTestDeserializer extends StdDeserializer<Record> {
           CITY_FIELD,
           COUNTRY_FIELD,
           ZIP_CODE_FIELD,
-          PO_BOX_FIELD);
+          PO_BOX_FIELD,
+          OFFICIAL_LANGUAGE_FIELD);
 
   public ZohoRecordTestDeserializer() {
     this(null);
@@ -61,8 +63,8 @@ public class ZohoRecordTestDeserializer extends StdDeserializer<Record> {
       if (currentNode.isTextual()) {
         record.addKeyValue(key, currentNode.asText());
       } else if (currentNode.isArray()) {
-        List<String> values = new ArrayList<>();
-        currentNode.elements().forEachRemaining(v -> values.add(v.asText()));
+        List<Choice<?>> values = new ArrayList<Choice<?>>();
+        currentNode.elements().forEachRemaining(v -> values.add(new Choice<String>(v.asText())));
         record.addKeyValue(key, values);
       }
     }
