@@ -172,10 +172,10 @@
                       </goals>
                       <configuration>
                         <additionalProperties>
-                          <project.description>${pom.description}</project.description>
+                          <project.description>${project.description}</project.description>
                           <!-- For some reason BuildProperties.getName() doesn't return the correct value,
                            so we set the name under a different property                      -->
-                          <project.name>${pom.name}</project.name>
+                          <project.name>${project.name}</project.name>
                         </additionalProperties>
                       </configuration>
                     </execution>
