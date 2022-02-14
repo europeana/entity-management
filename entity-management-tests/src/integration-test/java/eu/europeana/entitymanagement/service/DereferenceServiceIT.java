@@ -31,7 +31,7 @@ import org.springframework.context.annotation.Import;
 // enable tests only on local machine
 // @Disabled
 @SpringBootTest
-public class DereferenceServiceTest extends AbstractIntegrationTest {
+class DereferenceServiceIT extends AbstractIntegrationTest {
 
   @Autowired private DereferenceServiceLocator dereferenceServiceLocator;
 
