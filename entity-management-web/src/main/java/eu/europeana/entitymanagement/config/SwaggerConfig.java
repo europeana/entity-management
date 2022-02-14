@@ -1,7 +1,8 @@
 package eu.europeana.entitymanagement.config;
 
-import eu.europeana.entitymanagement.common.config.BuildInfo;
 import java.util.Collections;
+import org.springframework.boot.info.BuildProperties;
+import org.springframework.boot.info.GitProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.PathSelectors;
@@ -20,15 +21,18 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 public class SwaggerConfig {
 
-  private final BuildInfo buildInfo;
+  private final BuildProperties buildInfo;
+  private final GitProperties gitProperties;
 
   /**
    * Initialize Swagger with API build information
    *
    * @param buildInfo object for retrieving build information
+   * @param gitProperties git properties file
    */
-  public SwaggerConfig(BuildInfo buildInfo) {
+  public SwaggerConfig(BuildProperties buildInfo, GitProperties gitProperties) {
     this.buildInfo = buildInfo;
+    this.gitProperties = gitProperties;
   }
 
   /**
@@ -48,9 +52,11 @@ public class SwaggerConfig {
 
   private ApiInfo apiInfo() {
     return new ApiInfo(
-        buildInfo.getAppName(),
-        buildInfo.getAppDescription(),
-        buildInfo.getAppVersion() + "(build " + buildInfo.getBuildNumber() + ")",
+        // buildInfo.getName() returns incorrect value
+        buildInfo.get("project.name"),
+        buildInfo.get("project.description"),
+        // gitProperties.getCommitId() returns null
+        buildInfo.getVersion() + "(build " + gitProperties.get("commit.id.abbrev") + ")",
         null,
         new Contact("API team", "https://api.europeana.eu", "api@europeana.eu"),
         "EUPL 1.2",
