@@ -6,7 +6,6 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.COUNTRY;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DEPICTION;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DESCRIPTION;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.EDM_LANGUAGE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.EUROPEANA_ROLE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_HOMEPAGE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_LOGO;
@@ -16,6 +15,7 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.GEOGRAPHI
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_ADDRESS;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IDENTIFIER;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.LANGUAGE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ORGANIZATION_DOMAIN;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
@@ -54,7 +54,7 @@ import java.util.Map;
   HAS_ADDRESS,
   IDENTIFIER,
   SAME_AS,
-  EDM_LANGUAGE
+  LANGUAGE
 })
 public class Organization extends Entity {
 
@@ -71,7 +71,7 @@ public class Organization extends Entity {
   private String country;
   private Address hasAddress;
   private List<String> sameAs;
-  private List<String> edmLanguage;
+  private List<String> language;
 
   public Organization() {
     super();
@@ -79,16 +79,12 @@ public class Organization extends Entity {
 
   public Organization(Organization copy) {
     super(copy);
-    if (copy.getDescription() != null) 
-      this.description = new HashMap<>(copy.getDescription());
-    if (copy.getAcronym() != null) 
-      this.acronym = new HashMap<>(copy.getAcronym());
+    if (copy.getDescription() != null) this.description = new HashMap<>(copy.getDescription());
+    if (copy.getAcronym() != null) this.acronym = new HashMap<>(copy.getAcronym());
     this.logo = copy.getLogo();
     this.homepage = copy.getHomepage();
-    if (copy.getPhone() != null) 
-      this.phone = new ArrayList<>(copy.getPhone());
-    if (copy.getMbox() != null) 
-      this.mbox = new ArrayList<>(copy.getMbox());
+    if (copy.getPhone() != null) this.phone = new ArrayList<>(copy.getPhone());
+    if (copy.getMbox() != null) this.mbox = new ArrayList<>(copy.getMbox());
     if (copy.getEuropeanaRole() != null)
       this.europeanaRole = new HashMap<>(copy.getEuropeanaRole());
     if (copy.getOrganizationDomain() != null)
@@ -96,12 +92,9 @@ public class Organization extends Entity {
     if (copy.getGeographicLevel() != null)
       this.geographicLevel = new HashMap<>(copy.getGeographicLevel());
     this.country = copy.getCountry();
-    if (copy.getAddress() != null) 
-      this.hasAddress = new Address(copy.getAddress());
-    if (copy.sameAs != null) 
-      this.sameAs = (new ArrayList<>(copy.sameAs));
-    if (copy.edmLanguage != null) 
-      this.edmLanguage = (new ArrayList<>(copy.edmLanguage));
+    if (copy.getAddress() != null) this.hasAddress = new Address(copy.getAddress());
+    if (copy.sameAs != null) this.sameAs = (new ArrayList<>(copy.sameAs));
+    if (copy.language != null) this.language = (new ArrayList<>(copy.language));
   }
 
   @JsonGetter(DESCRIPTION)
@@ -242,13 +235,13 @@ public class Organization extends Entity {
     field.set(this, value);
   }
 
-  @JsonGetter(EDM_LANGUAGE)
-  public List<String> getEdmLanguage() {
-    return edmLanguage;
+  @JsonGetter(LANGUAGE)
+  public List<String> getLanguage() {
+    return language;
   }
 
-  @JsonSetter(EDM_LANGUAGE)
-  public void setEdmLanguage(List<String> edmLanguage) {
-    this.edmLanguage = edmLanguage;
+  @JsonSetter(LANGUAGE)
+  public void setLanguage(List<String> edmLanguage) {
+    this.language = edmLanguage;
   }
 }

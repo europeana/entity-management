@@ -319,17 +319,16 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
   }
 
   @Test
-  void registerOrganizationWithoutWikidataSameAsAndWithEdmLanguageShouldBeSuccessful()
-      throws Exception {
+  void registerOrganizationWithoutWikidataSameAsShouldBeSuccessful() throws Exception {
     String expectedId =
         EntityRecordUtils.buildEntityIdUri(
             "organization",
-            EntityRecordUtils.getIdFromUrl(IntegrationTestUtils.ORGANIZATION_BYZART_URI_ZOHO));
+            EntityRecordUtils.getIdFromUrl(IntegrationTestUtils.ORGANIZATION_PCCE_URI_ZOHO));
 
     ResultActions response =
         mockMvc.perform(
             MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL)
-                .content(loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_BYZART_ZOHO_JSON))
+                .content(loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_PCCE_ZOHO_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
     response
         .andExpect(status().isAccepted())
@@ -347,10 +346,23 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         // sameAs contains Zoho uri
         .andExpect(
             jsonPath(
-                "$.sameAs", Matchers.contains(IntegrationTestUtils.ORGANIZATION_BYZART_URI_ZOHO)))
+                "$.sameAs", Matchers.contains(IntegrationTestUtils.ORGANIZATION_PCCE_URI_ZOHO)))
         // should have Europeana and Zoho proxies
-        .andExpect(jsonPath("$.proxies", hasSize(2)))
-        .andExpect(jsonPath("$.edmLanguage", hasSize(1)));
+        .andExpect(jsonPath("$.proxies", hasSize(2)));
+  }
+
+  @Test
+  void registerOrganizationWithLanguageShouldBeSuccessful() throws Exception {
+    EntityRecordUtils.buildEntityIdUri(
+        "organization",
+        EntityRecordUtils.getIdFromUrl(IntegrationTestUtils.ORGANIZATION_BYZART_URI_ZOHO));
+
+    ResultActions response =
+        mockMvc.perform(
+            MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL)
+                .content(loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_BYZART_ZOHO_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE));
+    response.andExpect(status().isAccepted()).andExpect(jsonPath("$.language", hasSize(1)));
   }
 
   @Test

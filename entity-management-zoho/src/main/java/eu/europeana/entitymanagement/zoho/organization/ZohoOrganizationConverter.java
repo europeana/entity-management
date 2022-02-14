@@ -87,7 +87,9 @@ public class ZohoOrganizationConverter {
 
     List<String> edmLanguage =
         ZohoUtils.stringListSupplier(zohoRecord.getKeyValue(ZohoConstants.OFFICIAL_LANGUAGE_FIELD));
-    if (!edmLanguage.isEmpty()) org.setEdmLanguage(edmLanguage);
+    if (!edmLanguage.isEmpty()) {
+      org.setLanguage(edmLanguage);
+    }
 
     return org;
   }

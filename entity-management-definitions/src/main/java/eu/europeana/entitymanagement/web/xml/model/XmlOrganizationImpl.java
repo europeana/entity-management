@@ -57,7 +57,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
   private List<String> identifier;
 
   @XmlElement(namespace = NAMESPACE_EDM, name = XML_LANGUAGE)
-  private List<String> edmLanguage;
+  private List<String> language;
 
   public XmlOrganizationImpl(Organization organization) {
     super(organization);
@@ -83,7 +83,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
       this.hasAddress = new XmlAddresses(List.of(new XmlAddressImpl(organization.getAddress())));
     }
     this.identifier = organization.getIdentifier();
-    this.edmLanguage = organization.getEdmLanguage();
+    this.language = organization.getLanguage();
   }
 
   @Override
@@ -109,7 +109,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
       entity.setAddress(hasAddress.getVcardAddressesList().get(0).toAddress());
     }
     entity.setIdentifier(getIdentifier());
-    entity.setEdmLanguage(getEdmLanguage());
+    entity.setLanguage(getLanguage());
     return entity;
   }
 
@@ -180,7 +180,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     this.sameAs = uris;
   }
 
-  public List<String> getEdmLanguage() {
-    return edmLanguage;
+  public List<String> getLanguage() {
+    return language;
   }
 }
