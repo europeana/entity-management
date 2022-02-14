@@ -78,6 +78,10 @@ public class ZohoOrganizationConverter {
         ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.ZIP_CODE_FIELD)));
     address.setVcardPostOfficeBox(
         ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.PO_BOX_FIELD)));
+    address.setVcardHasGeo(
+        ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.LATITUDE_FIELD))
+            + ","
+            + ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.LONGITUDE_FIELD)));
 
     // only set address if it contains metadata properties.
     if (address.hasMetadataProperties()) {

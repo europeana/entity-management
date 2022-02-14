@@ -14,10 +14,13 @@
  "Website": "https://byzart.eu",
  "Lang_Organisation_Name": "EN(English)",
  "DEA_Signed": false,
+ "Country": "Italy",
  "Country1": "Italy, IT",
  "Account_Name": "Byzantine Art and Archaeology on Europeana",
  "Sector": "Cultural Heritage",
  "Organisation_Role2": [],
  "Tag": [],
- "Acronym": "BYZART"
+ "Acronym": "BYZART",
+ "Latitude": "-1",
+ "Longitude": "-1"
 }

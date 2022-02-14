@@ -41,6 +41,8 @@ public final class ZohoConstants {
   public static final String COUNTRY_FIELD = "Country";
   public static final String ZIP_CODE_FIELD = "ZIP_code";
   public static final String PO_BOX_FIELD = "PO_box";
+  public static final String LATITUDE_FIELD = "Latitude";
+  public static final String LONGITUDE_FIELD = "Longitude";
   public static final String LAST_ACTIVITY_TIME_FIELD = "Last_Activity_Time";
   public static final String URL_ORGANIZATION_PREFFIX =
       "https://crm.zoho.com/crm/org51823723/tab/Accounts/";

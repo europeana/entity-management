@@ -1,0 +1,39 @@
+{
+	"Official_Language": [],
+	"Latitude": "48.8336111",
+	"Last_Activity_Time": "2022-02-14T17:09:22+01:00",
+	"Lang_Acronym": "FR(French)",
+	"Street": "Quai François Mauriac",
+	"id": "1482250000002112001",
+	"DEA_Sent": true,
+	"Content_language_2": [],
+	"Created_Time": "2016-12-22T14:24:44+01:00",
+	"Alternative_1": "FR(French)",
+	"City": "Paris",
+	"Longitude": "2.3758333",
+	"Country": "France",
+	"Description": "The Bibliothèque nationale de France (BnF; French: [bi.bli.jɔ.tɛk na.sjɔ.nal də fʁɑ̃s]) is the National Library of France, located in Paris. It is the national repository of all that is published in France and also holds extensive historical collections.",
+	"Geographic_Level": [
+		"National"
+	],
+	"Logo_link_to_WikimediaCommons": "http://commons.wikimedia.org/wiki/Special:FilePath/Logo_BnF.svg",
+	"Alternative_1": "Bibliothèque nationale de France",
+	"Website": "http://www.bnf.fr",
+	"Lang_Organisation_Name": "EN(English)",
+	"DEA_Signed": true,
+	"Country1": "France, FR",
+	"ZIP_code": "75706",
+	"Account_Name": "National Library of France",
+	"Hidden_1": "Bibliothèque nationale",
+	"Sector": "Cultural Heritage",
+	"SameAs_2": "http://isni.org/isni/0000000123531945",
+	"Industry_2": [
+		"Library"
+	],
+	"Organisation_Role2": [
+		"Data Provider",
+		"Provider"
+	],
+	"Tag": [],
+	"Acronym": "BnF"
+}

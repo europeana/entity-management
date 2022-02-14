@@ -319,7 +319,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
   }
 
   @Test
-  void registerOrganizationWithoutWikidataSameAsShouldBeSuccessful() throws Exception {
+  void registerZohoOrganizationWithoutWikidataSameAsShouldBeSuccessful() throws Exception {
     String expectedId =
         EntityRecordUtils.buildEntityIdUri(
             "organization",
@@ -352,7 +352,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
   }
 
   @Test
-  void registerOrganizationWithLanguageShouldBeSuccessful() throws Exception {
+  void registerZohoOrganizationWithLanguageShouldBeSuccessful() throws Exception {
     EntityRecordUtils.buildEntityIdUri(
         "organization",
         EntityRecordUtils.getIdFromUrl(IntegrationTestUtils.ORGANIZATION_BYZART_URI_ZOHO));
@@ -363,6 +363,22 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                 .content(loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_BYZART_ZOHO_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
     response.andExpect(status().isAccepted()).andExpect(jsonPath("$.language", hasSize(1)));
+  }
+
+  @Test
+  void registerZohoOrganizationWithGeoCoordinatesShouldBeSuccessful() throws Exception {
+    EntityRecordUtils.buildEntityIdUri(
+        "organization",
+        EntityRecordUtils.getIdFromUrl(IntegrationTestUtils.ORGANIZATION_BNF_URI_ZOHO));
+
+    ResultActions response =
+        mockMvc.perform(
+            MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL)
+                .content(loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_BNF_ZOHO_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE));
+    response
+        .andExpect(status().isAccepted())
+        .andExpect(jsonPath("$.hasAddress.hasGeo").isNotEmpty());
   }
 
   @Test

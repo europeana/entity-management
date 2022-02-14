@@ -37,7 +37,9 @@ public class ZohoRecordTestDeserializer extends StdDeserializer<Record> {
           COUNTRY_FIELD,
           ZIP_CODE_FIELD,
           PO_BOX_FIELD,
-          OFFICIAL_LANGUAGE_FIELD);
+          OFFICIAL_LANGUAGE_FIELD,
+          LATITUDE_FIELD,
+          LONGITUDE_FIELD);
 
   public ZohoRecordTestDeserializer() {
     this(null);
