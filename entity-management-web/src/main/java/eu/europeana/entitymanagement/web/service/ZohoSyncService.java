@@ -3,16 +3,13 @@ package eu.europeana.entitymanagement.web.service;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +40,6 @@ import eu.europeana.entitymanagement.web.model.Operation;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
 import eu.europeana.entitymanagement.zoho.organization.ZohoAccessConfiguration;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
-import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 
 @Service(AppConfig.BEAN_ZOHO_SYNC_SERVICE)
@@ -59,7 +55,7 @@ public class ZohoSyncService {
 
   private final DataSources datasources;
 
-  private DataSource zohoDataSource;
+  private final DataSource zohoDataSource;
 
   private final ZohoAccessConfiguration zohoAccessConfiguration;
 
@@ -79,7 +75,17 @@ public class ZohoSyncService {
     this.datasources = datasources;
     this.zohoAccessConfiguration = zohoAccessConfiguration;
     this.solrService = solrService;
+    
+    this.zohoDataSource = initZohoDataSource(datasources);
 
+  }
+
+  DataSource initZohoDataSource(DataSources datasources) {
+    Optional<DataSource> zohoDatasource = datasources.getDatasourceById(DataSource.ZOHO_ID);
+    if(zohoDatasource.isEmpty()) {
+      throw new FunctionalRuntimeException("No zoho data source found! Zoho data source must be present in configurations with id: " + DataSource.ZOHO_ID); 
+    }
+    return zohoDatasource.get();
   }
 
   public ZohoSyncReport synchronizeZohoOrganizations(@NotNull OffsetDateTime modifiedSince) {
@@ -321,7 +327,11 @@ public class ZohoSyncService {
       zohoId = zohoOrg.getId().toString();
       // organizationId = EntityRecordUtils.buildEntityIdUri(EntityTypes.Organization, zohoId);
       Optional<EntityRecord> entityRecordOptional = findRecordInList(zohoId, existingRecords);
-      addOperation(operations, zohoId, zohoOrg, entityRecordOptional.get());
+      EntityRecord entityRecord = null;
+      if(entityRecordOptional.isPresent()) {
+        entityRecord = entityRecordOptional.get();
+      }
+      addOperation(operations, zohoId, zohoOrg, entityRecord);
     }
     return operations;
   }
@@ -423,17 +433,7 @@ public class ZohoSyncService {
   }
 
   public DataSource getZohoDataSource() {
-    if (zohoDataSource == null) {
-      synchronized(this) {
-        Optional<DataSource> zohoDatasource = datasources.getDatasourceById(DataSource.ZOHO_ID);
-        if(zohoDatasource.isEmpty()) {
-          throw new FunctionalRuntimeException("No zoho data source found! Zoho data source must be present in configurations with id: " + DataSource.ZOHO_ID); 
-        }
-        zohoDataSource = zohoDatasource.get();
-      }
-    }
-
-    return zohoDataSource;
+     return zohoDataSource;
   }
 
 }
