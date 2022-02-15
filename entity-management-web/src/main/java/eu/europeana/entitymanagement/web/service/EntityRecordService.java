@@ -934,7 +934,14 @@ public class EntityRecordService {
     this.entityRecordRepository.dropCollection();
   }
 
-  //TODO: add disabled filter
+  /**
+   * @deprecated the service should add the deprecated filter, eventually by adding a boolean parameter
+   * @param start
+   * @param count
+   * @param queryFilters
+   * @return
+   * 
+   */
   @Deprecated
   public List<? extends EntityRecord> findEntitiesWithFilter(
       int start, int count, Filter[] queryFilters) {

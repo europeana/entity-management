@@ -32,6 +32,12 @@ public class ZohoSyncReport {
     this.lastSyncDate = lastSyncDate;
   }
 
+  @SuppressWarnings("unused")
+  private ZohoSyncReport() {
+    this(new Date(0));
+  }
+
+  
   @JsonProperty(CREATED)
   public long getCreated() {
     return created;
@@ -96,7 +102,7 @@ public class ZohoSyncReport {
   @Override
   public String toString() {
     return String.format(
-        "lastSyncDate: %s,\n created: %d,\n updated: %d,\n deprecated: %d,\n deleted: %d,\n executionStatus: %s",
+        "lastSyncDate: %s,%n created: %d,%n updated: %d,%n deprecated: %d,%n deleted: %d,%n executionStatus: %s",
         DateUtils.convertDateToStr(getLastSyncDate()), getCreated(), getUpdated(), getDeprecated(),
         getDeleted(), getExecutionStatus());
   }

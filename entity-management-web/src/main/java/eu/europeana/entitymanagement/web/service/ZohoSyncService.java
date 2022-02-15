@@ -159,7 +159,7 @@ public class ZohoSyncService {
       while (hasNext) {
         // list of (europeana) organizations ids
         deletedRecordsInZoho =
-            zohoAccessConfiguration.getZohoAccessClient().getZohoDeletedRecordOrganizations(startPage, pageSize);
+            zohoAccessConfiguration.getZohoAccessClient().getZohoDeletedRecordOrganizations(modifiedSince, startPage, pageSize);
 
         // check exists in Metis (Note: zoho doesn't support filtering by lastModified for deleted
         // entities)
@@ -287,8 +287,10 @@ public class ZohoSyncService {
         EntityRecord savedEntityRecord = entityRecordService
             .createEntityFromRequest(europeanaProxyEntity, zohoOrganization, getZohoDataSource());
         entitiesToUpdate.add(savedEntityRecord.getEntityId());
-        logger.info("Created Entity record for externalId={}; entityId={}", zohoOrganization.getAbout(),
-            savedEntityRecord.getEntityId());
+        if(logger.isInfoEnabled()) {
+          logger.info("Created Entity record for externalId={}; entityId={}", zohoOrganization.getAbout(),
+              savedEntityRecord.getEntityId());
+        }
       }
     }
     return entitiesToUpdate;
@@ -319,7 +321,7 @@ public class ZohoSyncService {
       zohoId = zohoOrg.getId().toString();
       // organizationId = EntityRecordUtils.buildEntityIdUri(EntityTypes.Organization, zohoId);
       Optional<EntityRecord> entityRecordOptional = findRecordInList(zohoId, existingRecords);
-      addOperation(operations, zohoId, zohoOrg, entityRecordOptional);
+      addOperation(operations, zohoId, zohoOrg, entityRecordOptional.get());
     }
     return operations;
   }
@@ -331,20 +333,21 @@ public class ZohoSyncService {
   }
 
   private void addOperation(BatchOperations operations, String zohoId, Record zohoOrg,
-      Optional<EntityRecord> entityRecordOptional) {
+      EntityRecord entityRecord) {
 
     String entityId = EntityRecordUtils.buildEntityIdUri(EntityTypes.Organization, zohoId);
 
     boolean hasDpsOwner = hasRequiredOwnership(zohoOrg);
     String emOperation = null;
-    if (entityRecordOptional.isEmpty() && hasDpsOwner) {
+    if (entityRecord == null && hasDpsOwner) {
       // entity not in entity management database,
       // create operation if ownership is correct
       emOperation = Operations.CREATE;
-    } else if (entityRecordOptional.isPresent() && hasDpsOwner) {
+    } else if (entityRecord != null && hasDpsOwner) {
       // Zoho entry has changed
       emOperation = Operations.UPDATE;
-    } else if (entityRecordOptional.isPresent() && !hasDpsOwner) {
+    } else if (entityRecord != null) {
+       //&& !hasDpsOwner
       // Zoho entry has changed, but DPS ownership lost
       //TODO: Add handling for deprecated in Zoho 
       emOperation = Operations.DELETE;
@@ -353,7 +356,7 @@ public class ZohoSyncService {
     if (emOperation != null) {
       // only if there is an operation to perform in EM
       Operation operation =
-          new Operation(entityId, emOperation, zohoOrg, entityRecordOptional.get());
+          new Operation(entityId, emOperation, zohoOrg, entityRecord);
       operations.addOperation(operation);
     } else {
       logger.info(

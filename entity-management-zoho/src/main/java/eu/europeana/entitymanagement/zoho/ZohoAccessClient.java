@@ -174,13 +174,14 @@ public class ZohoAccessClient {
   
   /**
    * Get deleted organization items paged.
+   * @param modifiedSince 
    *
    * @param startPage The number of the item from which the paging should start. First item is at
    * number 1. Uses default number of items per page.
    * @return the list of deleted Zoho Organizations
    * @throws ZohoException if an error occurred during accessing Zoho
    */
-  public List<DeletedRecord> getZohoDeletedRecordOrganizations(int startPage, int pageSize) throws ZohoException {
+  public List<DeletedRecord> getZohoDeletedRecordOrganizations(OffsetDateTime modifiedSince, int startPage, int pageSize) throws ZohoException {
     if (startPage < 1) {
       throw new ZohoException("Invalid start page index. Index must be >= 1",
           new IllegalArgumentException("start page: " + startPage));
@@ -191,8 +192,12 @@ public class ZohoAccessClient {
       paramInstance.add(GetDeletedRecordsParam.TYPE, "permanent");//all, recycle, permanent
       paramInstance.add(GetDeletedRecordsParam.PAGE, 1);
       paramInstance.add(GetDeletedRecordsParam.PER_PAGE, pageSize);
+      HeaderMap headersMap = new HeaderMap();
+      if(modifiedSince != null) {
+        headersMap.add(GetRecordsHeader.IF_MODIFIED_SINCE, modifiedSince);
+      }
       APIResponse<DeletedRecordsHandler> response = recordOperations
-          .getDeletedRecords(ZohoConstants.ACCOUNTS_MODULE_NAME, paramInstance, new HeaderMap());
+          .getDeletedRecords(ZohoConstants.ACCOUNTS_MODULE_NAME, paramInstance, headersMap);
       return getZohoDeletedRecords(response);
     } catch (SDKException e) {
       throw new ZohoException("Cannot get deleted organization list from: " + startPage, e);
