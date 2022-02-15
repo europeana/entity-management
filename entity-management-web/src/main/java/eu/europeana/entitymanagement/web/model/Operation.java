@@ -61,8 +61,13 @@ public class Operation implements Comparable<Operation>{
  
   @Override
   public boolean equals(Object obj) {
-    if (obj instanceof Operation)
+    if(obj == null) {
       return false;
+    }
+    
+    if (!(obj instanceof Operation)) {
+      return false;
+    }
 
     Operation op2 = (Operation) obj;
     return getOrganizationId().equals(op2.getOrganizationId()) && getAction().equals(op2.getAction());

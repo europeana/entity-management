@@ -65,7 +65,7 @@ public class ZohoSyncService {
 
   private final SolrService solrService;
 
-  private static final Logger logger = LogManager.getLogger(EntityRecordService.class);
+  private static final Logger logger = LogManager.getLogger(ZohoSyncService.class);
 
   @Autowired
   public ZohoSyncService(EntityRecordService entityRecordService,
@@ -221,6 +221,11 @@ public class ZohoSyncService {
     EntityRecord record;
     Organization zohoOrganization;
     for (Operation operation : deprecateOperations) {
+      if(operation.getEntityRecord().isEmpty()) {
+        //the record must not be empty for deprecate operations
+        logger.info("Deprecation operation skipped, no entity record available: {}", operation);
+        continue;
+      }
       record = operation.getEntityRecord().get();
       zohoOrganization =
           ZohoOrganizationConverter.convertToOrganizationEntity(operation.getZohoRecord());
@@ -262,7 +267,7 @@ public class ZohoSyncService {
 
   List<String> performEntityRegistration(SortedSet<Operation> createOperations,
       ZohoSyncReport zohoSyncReport) throws EntityCreationException {
-    List<String> entitiesToUpdate = new ArrayList<String>();
+    List<String> entitiesToUpdate = new ArrayList<String>(createOperations.size());
     List<String> allCorefs;
     // register new entitities
     for (Operation operation : createOperations) {
@@ -328,9 +333,8 @@ public class ZohoSyncService {
 
   List<EntityRecord> findEntityRecordsById(Set<String> modifiedInZoho) {
     Filter entityIdsFilter = Filters.in(WebEntityFields.ENTITY_ID, modifiedInZoho);
-    List<EntityRecord> existingRecords =
+    return 
         entityRecordRepository.findWithFilters(0, modifiedInZoho.size(), entityIdsFilter);
-    return existingRecords;
   }
 
   private void addOperation(BatchOperations operations, String zohoId, Record zohoOrg,
@@ -424,7 +428,13 @@ public class ZohoSyncService {
 
   public DataSource getZohoDataSource() {
     if (zohoDataSource == null) {
-      zohoDataSource = datasources.getDatasourceById(DataSource.ZOHO_ID).get();
+      synchronized(this) {
+        Optional<DataSource> zohoDatasource = datasources.getDatasourceById(DataSource.ZOHO_ID);
+        if(zohoDatasource.isEmpty()) {
+          throw new FunctionalRuntimeException("No zoho data source found! Zoho data source must be present in configurations with id: " + DataSource.ZOHO_ID); 
+        }
+        zohoDataSource = zohoDatasource.get();
+      }
     }
 
     return zohoDataSource;
