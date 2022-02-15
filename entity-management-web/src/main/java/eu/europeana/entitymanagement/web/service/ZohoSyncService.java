@@ -76,11 +76,11 @@ public class ZohoSyncService {
     this.zohoAccessConfiguration = zohoAccessConfiguration;
     this.solrService = solrService;
     
-    this.zohoDataSource = initZohoDataSource(datasources);
+    this.zohoDataSource = initZohoDataSource();
 
   }
 
-  DataSource initZohoDataSource(DataSources datasources) {
+  DataSource initZohoDataSource() {
     Optional<DataSource> zohoDatasource = datasources.getDatasourceById(DataSource.ZOHO_ID);
     if(zohoDatasource.isEmpty()) {
       throw new FunctionalRuntimeException("No zoho data source found! Zoho data source must be present in configurations with id: " + DataSource.ZOHO_ID); 
