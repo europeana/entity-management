@@ -221,12 +221,13 @@ public class ZohoSyncService {
     EntityRecord record;
     Organization zohoOrganization;
     for (Operation operation : deprecateOperations) {
-      if(operation.getEntityRecord().isEmpty()) {
+      if(operation.getEntityRecord().isPresent()) {
+        record = operation.getEntityRecord().get();
+      } else {
         //the record must not be empty for deprecate operations
         logger.info("Deprecation operation skipped, no entity record available: {}", operation);
         continue;
       }
-      record = operation.getEntityRecord().get();
       zohoOrganization =
           ZohoOrganizationConverter.convertToOrganizationEntity(operation.getZohoRecord());
       // update sameAs

@@ -65,7 +65,11 @@ public class Operation implements Comparable<Operation>{
       return false;
     }
     
-    if (!(obj instanceof Operation)) {
+    if(this == obj) {
+      return true;
+    }
+    
+    if (this.getClass() !=  obj.getClass()) {
       return false;
     }
 
