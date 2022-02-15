@@ -218,25 +218,17 @@ public class ZohoSyncService {
     if (deprecateOperations == null || deprecateOperations.isEmpty()) {
       return;
     }
-    EntityRecord record;
     Organization zohoOrganization;
     for (Operation operation : deprecateOperations) {
-      if(operation.getEntityRecord().isPresent()) {
-        record = operation.getEntityRecord().get();
-      } else {
-        //the record must not be empty for deprecate operations
-        logger.info("Deprecation operation skipped, no entity record available: {}", operation);
-        continue;
-      }
       zohoOrganization =
           ZohoOrganizationConverter.convertToOrganizationEntity(operation.getZohoRecord());
       // update sameAs
-      entityRecordService.addSameReferenceLinks(record.getEntity(),
+      entityRecordService.addSameReferenceLinks(operation.getEntityRecord().getEntity(),
           zohoOrganization.getSameReferenceLinks());
 
       // deprecate
-      solrService.deleteById(List.of(record.getEntityId()));
-      entityRecordService.disableEntityRecord(record);
+      solrService.deleteById(List.of(operation.getEntityRecord().getEntityId()));
+      entityRecordService.disableEntityRecord(operation.getEntityRecord());
       zohoSyncReport.increaseDeprecated(1);
     }
   }
@@ -361,7 +353,7 @@ public class ZohoSyncService {
     if (emOperation != null) {
       // only if there is an operation to perform in EM
       Operation operation =
-          new Operation(entityId, emOperation, zohoOrg, entityRecordOptional);
+          new Operation(entityId, emOperation, zohoOrg, entityRecordOptional.get());
       operations.addOperation(operation);
     } else {
       logger.info(

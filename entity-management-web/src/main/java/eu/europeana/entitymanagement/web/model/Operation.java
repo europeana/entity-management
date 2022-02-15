@@ -15,9 +15,9 @@ public class Operation implements Comparable<Operation>{
   
   private Record zohoRecord;
   private Date modified;
-  Optional<EntityRecord> entityRecord;
+  EntityRecord entityRecord;
 
-  public Operation(String organizationId, String action, Record zohoRecord, Optional<EntityRecord> entityRecord) {
+  public Operation(String organizationId, String action, Record zohoRecord, EntityRecord entityRecord) {
     this.organizationId = organizationId;
     this.action = action;
     this.zohoRecord = zohoRecord;
@@ -98,7 +98,7 @@ public class Operation implements Comparable<Operation>{
     return zohoRecord;
   }
 
-  public Optional<EntityRecord> getEntityRecord() {
+  public EntityRecord getEntityRecord() {
     return entityRecord;
   }
 
