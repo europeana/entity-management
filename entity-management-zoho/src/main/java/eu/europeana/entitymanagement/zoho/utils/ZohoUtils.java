@@ -45,6 +45,10 @@ public final class ZohoUtils {
     return null;
   }
 
+  public static String buildZohoOrganizationId(Long zohoId) {
+    return ZohoConstants.URL_ORGANIZATION_PREFFIX + zohoId;
+  }
+  
   /**
    * Method that would check if the object provided is of type {@link JSONObject.Null} and will
    * return a correct representation of {@link List} with {@link String} items or empty list.
@@ -296,7 +300,7 @@ public final class ZohoUtils {
    */
   public static boolean isZohoOrganization(String id, String entityType) {
     return EntityTypes.Organization.getEntityType().equals(entityType)
-        && id.contains(DataSource.ZOHO_ID);
+        && id.contains(DataSource.ZOHO_HOST);
   }
 
   public static List<Record> getZohoRecords(APIResponse<ResponseHandler> response) {

@@ -112,6 +112,13 @@ public class EntityManagementConfiguration {
   @Value("${entitymanagement.entityIdResponseMaxSize: 100}")
   private int entityIdResponseMaxSize;
 
+  @Value("${zoho.sync.filter.owner:}")
+  private String zohoSyncOwnerFilter;
+
+  @Value("${zoho.sync.batch.size: 100}")
+  private int zohoSyncBatchSize;
+
+  
   public EntityManagementConfiguration() {
     LOG.info("Initializing EntityManagementConfiguration bean as: configuration");
   }
@@ -238,5 +245,13 @@ public class EntityManagementConfiguration {
 
   public int getEntityIdResponseMaxSize() {
     return entityIdResponseMaxSize;
+  }
+
+  public String getZohoSyncOwnerFilter() {
+     return zohoSyncOwnerFilter;
+  }
+
+  public int getZohoSyncBatchSize() {
+    return zohoSyncBatchSize;
   }
 }

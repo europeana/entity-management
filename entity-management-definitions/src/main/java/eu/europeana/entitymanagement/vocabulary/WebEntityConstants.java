@@ -32,8 +32,10 @@ public interface WebEntityConstants extends WebEntityFields {
   public static final String PARAM_TYPE_AGENT = "agent";
   public static final String PARAM_TYPE_PLACE = "place";
   public static final String PARAM_TYPE_CONCEPT = "concept";
+  public static final String PARAM_TYPE_TIMESPAN = "timespan";
+  public static final String PARAM_TYPE_ORGANIZATION = "organization";
+  
   public static final String PARAM_SCOPE_EUROPEANA = "europeana";
-  //	public static final String PARAM_TIMESPAN = "timespan";
   public static final String PARAM_DEFAULT_ROWS = "10";
 
   public static final String PARAM_PROFILE_FACETS = "facets";
@@ -88,6 +90,5 @@ public interface WebEntityConstants extends WebEntityFields {
   public static final String ENTITY_API_RESOURCE = "entity";
 
   // Web application
-  public static final String CONCEPT_SCHEME = "conceptScheme";
-  public static final String CONCEPT_SCHEME_APPLICATION_NAME = "webConceptScheme";
+  public static final String SINCE = "since";
 }

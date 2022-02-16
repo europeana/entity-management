@@ -1,26 +1,8 @@
 package eu.europeana.entitymanagement.web;
 
-import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.api.commons.error.EuropeanaApiException;
-import eu.europeana.api.commons.web.exception.HttpException;
-import eu.europeana.api.commons.web.http.HttpHeaders;
-import eu.europeana.api.commons.web.model.vocabulary.Operations;
-import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType;
-import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
-import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.exception.EntityNotFoundException;
-import eu.europeana.entitymanagement.solr.service.SolrService;
-import eu.europeana.entitymanagement.utils.EntityRecordUtils;
-import eu.europeana.entitymanagement.vocabulary.EntityProfile;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.vocabulary.FormatTypes;
-import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
-import eu.europeana.entitymanagement.web.service.EntityRecordService;
-import io.swagger.annotations.ApiOperation;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -39,6 +21,34 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import eu.europeana.api.commons.definitions.exception.DateParsingException;
+import eu.europeana.api.commons.definitions.utils.DateUtils;
+import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons.error.EuropeanaApiException;
+import eu.europeana.api.commons.web.exception.HttpException;
+import eu.europeana.api.commons.web.http.HttpHeaders;
+import eu.europeana.api.commons.web.model.vocabulary.Operations;
+import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
+import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.exception.EntityNotFoundException;
+import eu.europeana.entitymanagement.exception.HttpBadRequestException;
+import eu.europeana.entitymanagement.solr.service.SolrService;
+import eu.europeana.entitymanagement.utils.EntityRecordUtils;
+import eu.europeana.entitymanagement.vocabulary.EntityProfile;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.FormatTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
+import eu.europeana.entitymanagement.web.auth.EMOperations;
+import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
+import eu.europeana.entitymanagement.web.service.EntityRecordService;
+import eu.europeana.entitymanagement.web.service.ZohoSyncService;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 @RestController
 @Validated
@@ -48,6 +58,7 @@ public class EntityAdminController extends BaseRest {
   private static final Logger LOG = LogManager.getLogger(EntityAdminController.class);
 
   private final EntityRecordService entityRecordService;
+  private final ZohoSyncService zohoSyncService;
   private final SolrService solrService;
   private final EntityUpdateService entityUpdateService;
   private final EntityManagementConfiguration emConfig;
@@ -56,10 +67,12 @@ public class EntityAdminController extends BaseRest {
   public EntityAdminController(
       EntityRecordService entityRecordService,
       EntityUpdateService entityUpdateService,
+      ZohoSyncService zohoSyncService,
       SolrService solrService,
       EntityManagementConfiguration emConfig) {
     this.entityRecordService = entityRecordService;
     this.entityUpdateService = entityUpdateService;
+    this.zohoSyncService = zohoSyncService;
     this.solrService = solrService;
     this.emConfig = emConfig;
   }
@@ -187,5 +200,47 @@ public class EntityAdminController extends BaseRest {
     List<String> entityIds = failedTaskService.getEntityIdsWithFailures(page * pageSize, pageSize);
 
     return generateResponseFailedUpdates(request, entityIds, wskey);
+  }
+
+  /**
+   * Synchronize Organizations from Zoho
+   *
+   * @param type type of entity
+   * @param identifier entity id
+   * @param request
+   * @return
+   * @throws HttpException
+   */
+  @ApiOperation(
+      value = "Synchronize Organizations from Zoho",
+      nickname = "zohoSync",
+      response = java.lang.Void.class)
+  @PostMapping(value = "/management/zohosync", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<String> zohoSync(
+      @ApiParam(name=WebEntityConstants.SINCE, required = true, format = "ISO DateTime", example = "1970-01-01T00:00:00Z") @RequestParam String since,
+      
+      HttpServletRequest request)
+      throws HttpException, EuropeanaApiException {
+
+    if (emConfig.isAuthEnabled()) {
+      verifyWriteAccess(EMOperations.OPERATION_ZOHO_SYNC, request);
+    }
+    
+    OffsetDateTime modifiedSince = validateSince(since);
+    ZohoSyncReport zohoSyncReport = zohoSyncService.synchronizeZohoOrganizations(modifiedSince);
+    
+    return generateZohoSyncResponse(request, zohoSyncReport);
+ }
+
+  private OffsetDateTime validateSince(String since) throws HttpBadRequestException {
+    if (since == null) {
+      return Instant.EPOCH.atOffset(ZoneOffset.UTC);
+    }
+
+    try {
+      return DateUtils.parseToOffsetDateTime(since);
+    } catch (DateParsingException e) {
+      throw new HttpBadRequestException("Request param 'since' is not an ISO DateTime: " + since , e);
+    }
   }
 }

@@ -50,4 +50,8 @@ public class JsonLdSerializer {
   public String serializeFailedUpdates(List<String> pathUrls) throws IOException {
     return mapper.writeValueAsString(pathUrls);
   }
+  
+  public String serializeObject(Object obj) throws IOException {
+    return mapper.writeValueAsString(obj);
+  }
 }

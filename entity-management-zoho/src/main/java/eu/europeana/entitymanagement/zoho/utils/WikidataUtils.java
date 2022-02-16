@@ -16,7 +16,7 @@ public class WikidataUtils {
    */
   public static boolean isWikidataOrganization(String id, String entityType) {
     return EntityTypes.Organization.getEntityType().equals(entityType)
-        && id.contains(DataSource.WIKIDATA_ID);
+        && id.contains(DataSource.WIKIDATA_HOST);
   }
 
   /**
@@ -27,7 +27,7 @@ public class WikidataUtils {
    */
   public static Optional<String> getWikidataId(List<String> uriList) {
     if (uriList != null) {
-      return uriList.stream().filter(s -> s.contains(DataSource.WIKIDATA_ID)).findFirst();
+      return uriList.stream().filter(s -> s.contains(DataSource.WIKIDATA_HOST)).findFirst();
     }
     return Optional.empty();
   }

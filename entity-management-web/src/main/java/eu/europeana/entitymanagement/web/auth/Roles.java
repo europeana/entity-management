@@ -14,7 +14,9 @@ public enum Roles implements Role {
         Operations.CREATE,
         Operations.DELETE,
         Operations.UPDATE,
-        Operations.ADMIN_ALL
+        Operations.ADMIN_ALL,
+        EMOperations.OPERATION_ZOHO_SYNC,
+        EMOperations.OPERATION_PERM_DELETE
       });
 
   String[] operations;

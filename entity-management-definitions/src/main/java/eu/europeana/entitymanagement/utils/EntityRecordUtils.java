@@ -1,7 +1,8 @@
 package eu.europeana.entitymanagement.utils;
 
-import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import org.apache.commons.lang3.StringUtils;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 
 public class EntityRecordUtils {
 
@@ -9,6 +10,10 @@ public class EntityRecordUtils {
     // private constructor to prevent instantiation
   }
 
+  public static String buildEntityIdUri(EntityTypes type, String identifier) {
+    return buildEntityIdUri(type.getEntityType(), identifier);
+  }
+  
   public static String buildEntityIdUri(String type, String identifier) {
     StringBuilder stringBuilder = new StringBuilder();
 

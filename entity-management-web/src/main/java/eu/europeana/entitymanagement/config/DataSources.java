@@ -41,9 +41,14 @@ public class DataSources {
   }
 
   public Optional<DataSource> getEuropeanaDatasource() {
-    return datasources.stream().filter(s -> DataSource.EUROPEANA_ID.equals(s.getId())).findFirst();
+    return getDatasourceById(DataSource.EUROPEANA_ID);
   }
 
+  public Optional<DataSource> getDatasourceById(String dataSourceId) {
+    return datasources.stream().filter(
+        s -> s.getId().equals(dataSourceId)).findFirst();
+  }
+  
   public DataSource verifyDataSource(String creationRequestId, boolean allowStatic)
       throws HttpBadRequestException, HttpUnprocessableException {
     Optional<DataSource> dataSource = getDatasource(creationRequestId);
