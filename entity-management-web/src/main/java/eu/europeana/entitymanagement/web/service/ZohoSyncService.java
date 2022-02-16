@@ -339,7 +339,7 @@ public class ZohoSyncService {
   List<EntityRecord> findEntityRecordsById(Set<String> modifiedInZoho) {
     Filter entityIdsFilter = Filters.in(WebEntityFields.ENTITY_ID, modifiedInZoho);
     return 
-        entityRecordRepository.findWithFilters(0, modifiedInZoho.size(), entityIdsFilter);
+        entityRecordRepository.findWithFilters(0, modifiedInZoho.size(), new Filter[] {entityIdsFilter});
   }
 
   private void addOperation(BatchOperations operations, String zohoId, Record zohoOrg,
