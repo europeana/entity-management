@@ -9,7 +9,7 @@ The objectMapper used across the entire application can be injected into the con
 
 private ObjectMapper objectMapper;  
 public ZohoDereferenceService(ZohoAccessConfiguration zohoAccessConfiguration,
-      @Qualifier(BEAN_JSON_MAPPER) ObjectMapper objectMapper) {
+      @Qualifier(AppConfigConstants.BEAN_JSON_MAPPER) ObjectMapper objectMapper) {
     this.zohoAccessConfiguration = zohoAccessConfiguration;
     this.objectMapper = objectMapper;
 }

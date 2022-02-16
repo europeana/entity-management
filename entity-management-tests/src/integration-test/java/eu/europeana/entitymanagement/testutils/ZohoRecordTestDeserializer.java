@@ -39,7 +39,11 @@ public class ZohoRecordTestDeserializer extends StdDeserializer<Record> {
           PO_BOX_FIELD,
           OFFICIAL_LANGUAGE_FIELD,
           LATITUDE_FIELD,
-          LONGITUDE_FIELD);
+          LONGITUDE_FIELD,
+          HIDDEN_LABEL1_FIELD,
+          HIDDEN_LABEL2_FIELD,
+          HIDDEN_LABEL3_FIELD,
+          HIDDEN_LABEL4_FIELD);
 
   public ZohoRecordTestDeserializer() {
     this(null);

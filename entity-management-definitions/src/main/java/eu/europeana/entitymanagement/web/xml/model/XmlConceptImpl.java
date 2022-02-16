@@ -47,7 +47,7 @@ public class XmlConceptImpl extends XmlBaseEntityImpl<Concept> {
   private List<LabelledResource> notation;
 
   @XmlElement(namespace = NAMESPACE_SKOS, name = HIDDEN_LABEL)
-  private List<LabelledResource> hiddenLabel;
+  private List<String> hiddenLabel;
 
   @XmlElement(namespace = NAMESPACE_SKOS, name = IN_SCHEMA)
   private List<LabelledResource> inScheme;
@@ -69,7 +69,9 @@ public class XmlConceptImpl extends XmlBaseEntityImpl<Concept> {
     this.closeMatch = RdfXmlUtils.convertToRdfResource(concept.getCloseMatch());
     this.note = RdfXmlUtils.convertToXmlMultilingualString(concept.getNote());
     this.notation = RdfXmlUtils.convertToXmlMultilingualString(concept.getNotation());
-    this.hiddenLabel = RdfXmlUtils.convertToXmlMultilingualString(concept.getHiddenLabel());
+    if (concept.getHiddenLabel() != null) {
+      this.hiddenLabel = new ArrayList<String>(concept.getHiddenLabel());
+    }
     this.inScheme = RdfXmlUtils.convertToRdfResource(concept.getInScheme());
   }
 
@@ -87,7 +89,7 @@ public class XmlConceptImpl extends XmlBaseEntityImpl<Concept> {
     entity.setInScheme(RdfXmlUtils.toStringList(getInScheme()));
     entity.setNote(RdfXmlUtils.toLanguageMapList(getNote()));
     entity.setNotation(RdfXmlUtils.toLanguageMapList(getNotation()));
-    entity.setHiddenLabel(RdfXmlUtils.toLanguageMapList(getHiddenLabel()));
+    entity.setHiddenLabel(getHiddenLabel());
     this.inScheme = RdfXmlUtils.convertToRdfResource(entity.getInScheme());
 
     return entity;
@@ -129,7 +131,7 @@ public class XmlConceptImpl extends XmlBaseEntityImpl<Concept> {
     return this.notation;
   }
 
-  public List<LabelledResource> getHiddenLabel() {
+  public List<String> getHiddenLabel() {
     return this.hiddenLabel;
   }
 

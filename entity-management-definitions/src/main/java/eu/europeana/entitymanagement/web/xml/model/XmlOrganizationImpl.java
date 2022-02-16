@@ -77,13 +77,21 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     if (organization.getHomepage() != null) {
       this.homepage = new LabelledResource(organization.getHomepage());
     }
-    this.phone = organization.getPhone();
-    this.mbox = organization.getMbox();
+    if (organization.getPhone() != null) {
+      this.phone = new ArrayList<String>(organization.getPhone());
+    }
+    if (organization.getMbox() != null) {
+      this.mbox = new ArrayList<String>(organization.getMbox());
+    }
     if (organization.getAddress() != null) {
       this.hasAddress = new XmlAddresses(List.of(new XmlAddressImpl(organization.getAddress())));
     }
-    this.identifier = organization.getIdentifier();
-    this.language = organization.getLanguage();
+    if (organization.getIdentifier() != null) {
+      this.identifier = new ArrayList<String>(organization.getIdentifier());
+    }
+    if (this.getLanguage() != null) {
+      this.language = new ArrayList<String>(organization.getLanguage());
+    }
   }
 
   @Override

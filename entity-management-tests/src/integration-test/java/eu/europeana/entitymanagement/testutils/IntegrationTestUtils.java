@@ -70,8 +70,6 @@ public class IntegrationTestUtils {
       "/content/organization_register_zoho_berger_museum.json";
   public static final String ORGANIZATION_REGISTER_PCCE_ZOHO_JSON =
       "/content/organization_register_zoho_pcce.json";
-  public static final String ORGANIZATION_REGISTER_BYZART_ZOHO_JSON =
-      "/content/organization_register_zoho_byzart.json";
   public static final String PLACE_REGISTER_PARIS_JSON = "/content/place_register_paris.json";
   public static final String PLACE_REGISTER_HAGENBACH_JSON =
       "/content/place_register_hagenbach.json";
@@ -161,8 +159,6 @@ public class IntegrationTestUtils {
       "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000000370517";
   public static final String ORGANIZATION_PCCE_URI_ZOHO =
       "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000000338555";
-  public static final String ORGANIZATION_BYZART_URI_ZOHO =
-      "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000042591010";
   public static final String ORGANIZATION_GFM_URI_ZOHO =
       "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000004503618";
   public static final String ORGANIZATION_BERGER_MUSEUM_URI_ZOHO =
@@ -192,8 +188,6 @@ public class IntegrationTestUtils {
       "/zoho-deref/organization_zoho_berger_museum_response.json";
   public static final String ORGANIZATION_PCCE_ZOHO_RESPONSE =
       "/zoho-deref/organization_zoho_pcce_response.json";
-  public static final String ORGANIZATION_BYZART_ZOHO_RESPONSE =
-      "/zoho-deref/organization_zoho_byzart_response.json";
   public static final String ORGANIZATION_BNF_ZOHO_RESPONSE =
       "/zoho-deref/organization_zoho_bnf_response.json";
   public static final String ORGANIZATION_NATURALIS_WIKIDATA_RESPONSE_XML =
@@ -225,8 +219,6 @@ public class IntegrationTestUtils {
           ORGANIZATION_GFM_ZOHO_RESPONSE,
           ORGANIZATION_PCCE_URI_ZOHO,
           ORGANIZATION_PCCE_ZOHO_RESPONSE,
-          ORGANIZATION_BYZART_URI_ZOHO,
-          ORGANIZATION_BYZART_ZOHO_RESPONSE,
           ORGANIZATION_BERGER_MUSEUM_URI_ZOHO,
           ORGANIZATION_BERGER_MUSEUM_ZOHO_RESPONSE);
 

@@ -47,6 +47,10 @@ public final class ZohoConstants {
   public static final String URL_ORGANIZATION_PREFFIX =
       "https://crm.zoho.com/crm/org51823723/tab/Accounts/";
   public static final String ADDRESS_ABOUT = "#address";
+  public static final String HIDDEN_LABEL1_FIELD = "Hidden_1";
+  public static final String HIDDEN_LABEL2_FIELD = "Hidden_2";
+  public static final String HIDDEN_LABEL3_FIELD = "Hidden_3";
+  public static final String HIDDEN_LABEL4_FIELD = "Hidden_4";
 
   // Operations
   public static final String EQUALS_OPERATION = "equals";

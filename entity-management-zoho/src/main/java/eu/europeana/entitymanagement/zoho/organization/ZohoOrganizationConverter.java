@@ -95,6 +95,25 @@ public class ZohoOrganizationConverter {
       org.setLanguage(edmLanguage);
     }
 
+    List<String> hiddenLabels = new ArrayList<String>();
+    String hiddenLabel1 = getStringFieldValue(zohoRecord, ZohoConstants.HIDDEN_LABEL1_FIELD);
+    if (hiddenLabel1 != null) {
+      hiddenLabels.add(hiddenLabel1);
+    }
+    String hiddenLabel2 = getStringFieldValue(zohoRecord, ZohoConstants.HIDDEN_LABEL2_FIELD);
+    if (hiddenLabel2 != null) {
+      hiddenLabels.add(hiddenLabel2);
+    }
+    String hiddenLabel3 = getStringFieldValue(zohoRecord, ZohoConstants.HIDDEN_LABEL3_FIELD);
+    if (hiddenLabel3 != null) {
+      hiddenLabels.add(hiddenLabel3);
+    }
+    String hiddenLabel4 = getStringFieldValue(zohoRecord, ZohoConstants.HIDDEN_LABEL4_FIELD);
+    if (hiddenLabel4 != null) {
+      hiddenLabels.add(hiddenLabel4);
+    }
+    org.setHiddenLabel(hiddenLabels);
+
     return org;
   }
 

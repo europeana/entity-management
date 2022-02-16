@@ -61,7 +61,7 @@ public abstract class Entity {
   protected Map<String, List<String>> note;
   protected Map<String, String> prefLabel;
   protected Map<String, List<String>> altLabel;
-  protected Map<String, List<String>> hiddenLabel;
+  protected List<String> hiddenLabel;
 
   protected List<String> identifier;
   protected List<String> isRelatedTo;
@@ -84,7 +84,7 @@ public abstract class Entity {
     if (copy.getNote() != null) this.note = new HashMap<>(copy.getNote());
     if (copy.getPrefLabel() != null) this.prefLabel = new HashMap<>(copy.getPrefLabel());
     if (copy.getAltLabel() != null) this.altLabel = new HashMap<>(copy.getAltLabel());
-    if (copy.getHiddenLabel() != null) this.hiddenLabel = new HashMap<>(copy.getHiddenLabel());
+    if (copy.getHiddenLabel() != null) this.hiddenLabel = new ArrayList<>(copy.getHiddenLabel());
     if (copy.getIdentifier() != null) this.identifier = new ArrayList<>(copy.getIdentifier());
     if (copy.getIsRelatedTo() != null) this.isRelatedTo = new ArrayList<>(copy.getIsRelatedTo());
     if (copy.getHasPart() != null) this.hasPart = new ArrayList<>(copy.getHasPart());
@@ -117,12 +117,12 @@ public abstract class Entity {
   }
 
   @JsonGetter(HIDDEN_LABEL)
-  public Map<String, List<String>> getHiddenLabel() {
+  public List<String> getHiddenLabel() {
     return hiddenLabel;
   }
 
   @JsonSetter(HIDDEN_LABEL)
-  public void setHiddenLabel(Map<String, List<String>> hiddenLabel) {
+  public void setHiddenLabel(List<String> hiddenLabel) {
     this.hiddenLabel = hiddenLabel;
   }
 

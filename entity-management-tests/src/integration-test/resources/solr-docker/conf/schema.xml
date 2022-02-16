@@ -146,8 +146,8 @@
 			indexed="false" stored="true" multiValued="false" docValues="true"/>
 		<dynamicField name="skos_altLabel.*" type="string"
 			indexed="false" stored="true" multiValued="true" docValues="true"/>
-		<dynamicField name="skos_hiddenLabel.*" type="string"
-			indexed="false" stored="true" multiValued="true"/>
+		<field name="skos_hiddenLabel" type="string" indexed="false"
+			stored="true" multiValued="true" />
 		<dynamicField name="skos_note.*" type="string"
 			indexed="false" stored="true" multiValued="true" />
 		<field name="label" type="proper_name_sortable" indexed="true"

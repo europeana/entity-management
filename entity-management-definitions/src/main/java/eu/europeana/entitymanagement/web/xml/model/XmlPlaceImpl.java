@@ -17,7 +17,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class XmlPlaceImpl extends XmlBaseEntityImpl<Place> {
 
   @XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.XML_SAME_AS)
-  private List<LabelledResource> sameAs = new ArrayList<>();
+  private List<LabelledResource> sameAs;
 
   @XmlElement(namespace = NAMESPACE_WGS84_POS, name = XML_WGS84_POS_LAT)
   private Float latitude;
@@ -29,16 +29,16 @@ public class XmlPlaceImpl extends XmlBaseEntityImpl<Place> {
   private Float altitude;
 
   @XmlElement(namespace = NAMESPACE_SKOS, name = HIDDEN_LABEL)
-  private List<LabelledResource> hiddenLabel = new ArrayList<>();
+  private List<String> hiddenLabel;
 
   @XmlElement(namespace = NAMESPACE_SKOS, name = NOTE)
-  private List<LabelledResource> note = new ArrayList<>();
+  private List<LabelledResource> note;
 
   @XmlElement(namespace = NAMESPACE_DC_TERMS, name = XML_HAS_PART)
-  private List<LabelledResource> hasPart = new ArrayList<>();
+  private List<LabelledResource> hasPart;
 
   @XmlElement(namespace = NAMESPACE_DC_TERMS, name = XML_IS_PART_OF)
-  private List<LabelledResource> isPartOf = new ArrayList<>();
+  private List<LabelledResource> isPartOf;
 
   @XmlElement(namespace = NAMESPACE_EDM, name = XML_IS_NEXT_IN_SEQUENCE)
   private List<LabelledResource> isNextInSequence;
@@ -49,7 +49,9 @@ public class XmlPlaceImpl extends XmlBaseEntityImpl<Place> {
     this.latitude = place.getLatitude();
     this.longitude = place.getLongitude();
     this.altitude = place.getAltitude();
-    this.hiddenLabel = RdfXmlUtils.convertToXmlMultilingualString(place.getHiddenLabel());
+    if (place.getHiddenLabel() != null) {
+      this.hiddenLabel = new ArrayList<String>(place.getHiddenLabel());
+    }
     this.note = RdfXmlUtils.convertToXmlMultilingualString(place.getNote());
     this.hasPart = RdfXmlUtils.convertToRdfResource(place.getHasPart());
     this.isPartOf = RdfXmlUtils.convertToRdfResource(place.getIsPartOfArray());
@@ -67,7 +69,7 @@ public class XmlPlaceImpl extends XmlBaseEntityImpl<Place> {
     entity.setLatitude(getLatitude());
     entity.setLongitude(getLongitude());
     entity.setAltitude(getAltitude());
-    entity.setHiddenLabel(RdfXmlUtils.toLanguageMapList(getHiddenLabel()));
+    entity.setHiddenLabel(getHiddenLabel());
     entity.setNote(RdfXmlUtils.toLanguageMapList(getNote()));
     entity.setHasPart(RdfXmlUtils.toStringList(getHasPart()));
     entity.setIsPartOfArray(RdfXmlUtils.toStringList(getIsPartOf()));
@@ -88,7 +90,7 @@ public class XmlPlaceImpl extends XmlBaseEntityImpl<Place> {
     return altitude;
   }
 
-  public List<LabelledResource> getHiddenLabel() {
+  public List<String> getHiddenLabel() {
     return hiddenLabel;
   }
 

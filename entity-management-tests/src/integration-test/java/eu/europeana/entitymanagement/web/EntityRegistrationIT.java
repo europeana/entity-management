@@ -352,21 +352,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
   }
 
   @Test
-  void registerZohoOrganizationWithLanguageShouldBeSuccessful() throws Exception {
-    EntityRecordUtils.buildEntityIdUri(
-        "organization",
-        EntityRecordUtils.getIdFromUrl(IntegrationTestUtils.ORGANIZATION_BYZART_URI_ZOHO));
-
-    ResultActions response =
-        mockMvc.perform(
-            MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL)
-                .content(loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_BYZART_ZOHO_JSON))
-                .contentType(MediaType.APPLICATION_JSON_VALUE));
-    response.andExpect(status().isAccepted()).andExpect(jsonPath("$.language", hasSize(1)));
-  }
-
-  @Test
-  void registerZohoOrganizationWithGeoCoordinatesShouldBeSuccessful() throws Exception {
+  void registerZohoOrganizationBnfWithNewFieldsShouldBeSuccessful() throws Exception {
     EntityRecordUtils.buildEntityIdUri(
         "organization",
         EntityRecordUtils.getIdFromUrl(IntegrationTestUtils.ORGANIZATION_BNF_URI_ZOHO));
@@ -378,7 +364,9 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
     response
         .andExpect(status().isAccepted())
-        .andExpect(jsonPath("$.hasAddress.hasGeo").isNotEmpty());
+        .andExpect(jsonPath("$.hasAddress.hasGeo").isNotEmpty())
+        .andExpect(jsonPath("$.language", hasSize(1)))
+        .andExpect(jsonPath("$.hiddenLabel", hasSize(1)));
   }
 
   @Test
