@@ -38,7 +38,7 @@
     <packaging>pom</packaging>
 
     <name>Entity Management</name>
-    <description>Parent module for the Entity Management API</description>
+    <description>Service for managing entity data from external sources and internal curation</description>
 
     <properties>
         <java.version>11</java.version>
@@ -69,6 +69,7 @@
 		    <jaxb.version>2.3.3</jaxb.version>
 		    <saxon-he.version>10.5</saxon-he.version>
         <git-code-format.version>3.1</git-code-format.version>
+        <git-commit-id.version>5.0.0</git-commit-id.version>
         <surefire.version>3.0.0-M5</surefire.version>
         <failsafe.version>3.0.0-M5</failsafe.version>
         <jacoco-plugin.version>0.8.7</jacoco-plugin.version>
@@ -137,7 +138,50 @@
               </resource>
           </resources>
           <plugins>
-              <plugin>
+            <plugin>
+              <groupId>io.github.git-commit-id</groupId>
+              <artifactId>git-commit-id-maven-plugin</artifactId>
+              <version>${git-commit-id.version}</version>
+              <executions>
+                <execution>
+                  <id>get-the-git-infos</id>
+                  <goals>
+                    <goal>revision</goal>
+                  </goals>
+                  <phase>initialize</phase>
+                </execution>
+              </executions>
+              <configuration>
+                <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
+                <includeOnlyProperties>
+                  <includeOnlyProperty>^git.build.(time|version)$</includeOnlyProperty>
+                  <includeOnlyProperty>^git.commit.id.(abbrev|full)$</includeOnlyProperty>
+                </includeOnlyProperties>
+                <commitIdGenerationMode>full</commitIdGenerationMode>
+              </configuration>
+            </plugin>
+                <plugin>
+                  <groupId>org.springframework.boot</groupId>
+                  <artifactId>spring-boot-maven-plugin</artifactId>
+                  <version>${spring-boot.version}</version>
+                  <executions>
+                    <execution>
+                      <goals>
+                        <goal>build-info</goal>
+                      </goals>
+                      <configuration>
+                        <additionalProperties>
+                          <project.description>${project.description}</project.description>
+                          <!-- For some reason BuildProperties.getName() doesn't return the correct value,
+                           so we set the name under a different property                      -->
+                          <project.name>${project.name}</project.name>
+                        </additionalProperties>
+                      </configuration>
+                    </execution>
+                  </executions>
+                </plugin>
+            <plugin>
                   <groupId>org.apache.maven.plugins</groupId>
                   <artifactId>maven-failsafe-plugin</artifactId>
                   <version>${failsafe.version}</version>
@@ -275,6 +319,7 @@
 				</plugins>
     	</pluginManagement>
   </build>
+
 
   <profiles>
     <profile>
