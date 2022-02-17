@@ -8,6 +8,7 @@ import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -113,6 +114,14 @@ public class ZohoOrganizationConverter {
       hiddenLabels.add(hiddenLabel4);
     }
     org.setHiddenLabel(hiddenLabels);
+
+    List<String> industry =
+        ZohoUtils.stringListSupplier(zohoRecord.getKeyValue(ZohoConstants.INDUSTRY_FIELD));
+    if (!industry.isEmpty()) {
+      Map<String, List<String>> orgDomain = new HashMap<String, List<String>>();
+      orgDomain.put("en", industry);
+      org.setOrganizationDomain(orgDomain);
+    }
 
     return org;
   }
