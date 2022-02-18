@@ -232,4 +232,8 @@ public abstract class SolrEntity<T extends Entity> {
   }
 
   protected abstract void setSameReferenceLinks(ArrayList<String> uris);
+
+  public void setHiddenLabel(List<String> hiddenLabel) {
+    this.hiddenLabel = hiddenLabel;
+  }
 }
