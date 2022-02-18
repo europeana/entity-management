@@ -35,7 +35,7 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
   private List<LabelledResource> hasMet = new ArrayList<>();
 
   @XmlElement(name = HIDDEN_LABEL, namespace = NAMESPACE_SKOS)
-  private List<LabelledResource> hiddenLabel = new ArrayList<>();
+  private List<String> hiddenLabel = new ArrayList<>();
 
   @XmlElement(name = XML_BIOGRAPHICAL_INFORMATION, namespace = NAMESPACE_RDAGR2)
   private List<LabelledResource> biographicalInformation = new ArrayList<>();
@@ -82,24 +82,44 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
   public XmlAgentImpl(Agent agent) {
     super(agent);
     this.sameAs = RdfXmlUtils.convertToRdfResource(agent.getSameReferenceLinks());
-    this.hiddenLabel = RdfXmlUtils.convertToXmlMultilingualString(agent.getHiddenLabel());
+    if (agent.getHiddenLabel() != null) {
+      this.hiddenLabel = new ArrayList<String>(agent.getHiddenLabel());
+    }
     this.note = RdfXmlUtils.convertToXmlMultilingualString(agent.getNote());
-    this.identifier = agent.getIdentifier();
+    if (agent.getIdentifier() != null) {
+      this.identifier = agent.getIdentifier();
+    }
     this.hasPart = RdfXmlUtils.convertToRdfResource(agent.getHasPart());
     this.isPartOf = RdfXmlUtils.convertToRdfResource(agent.getIsPartOfArray());
-    this.begin = agent.getBegin();
-    this.end = agent.getEnd();
+    if (agent.getBegin() != null) {
+      this.begin = agent.getBegin();
+    }
+    if (agent.getEnd() != null) {
+      this.end = agent.getEnd();
+    }
     this.hasMet = RdfXmlUtils.convertToRdfResource(agent.getHasMet());
     this.isRelatedTo = RdfXmlUtils.convertToRdfResource(agent.getIsRelatedTo());
     this.name = RdfXmlUtils.convertMapToXmlMultilingualString(agent.getName());
     this.biographicalInformation =
         RdfXmlUtils.convertToXmlMultilingualString(agent.getBiographicalInformation());
-    this.dateOfBirth = agent.getDateOfBirth();
-    this.dateOfDeath = agent.getDateOfDeath();
-    this.dateOfEstablishment = agent.getDateOfEstablishment();
-    this.dateOfTermination = agent.getDateOfTermination();
-    this.dcDate = agent.getDate();
-    this.gender = agent.getGender();
+    if (agent.getDateOfBirth() != null) {
+      this.dateOfBirth = agent.getDateOfBirth();
+    }
+    if (agent.getDateOfDeath() != null) {
+      this.dateOfDeath = agent.getDateOfDeath();
+    }
+    if (agent.getDateOfEstablishment() != null) {
+      this.dateOfEstablishment = agent.getDateOfEstablishment();
+    }
+    if (agent.getDateOfTermination() != null) {
+      this.dateOfTermination = agent.getDateOfTermination();
+    }
+    if (agent.getDate() != null) {
+      this.dcDate = agent.getDate();
+    }
+    if (agent.getGender() != null) {
+      this.gender = agent.getGender();
+    }
     this.placeOfBirth = RdfXmlUtils.convertToRdfResource(agent.getPlaceOfBirth());
     this.placeOfDeath = RdfXmlUtils.convertToRdfResource(agent.getPlaceOfDeath());
     this.professionOrOccupation =
@@ -113,8 +133,7 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
   @Override
   public Agent toEntityModel() throws EntityCreationException {
     super.toEntityModel();
-
-    entity.setHiddenLabel(RdfXmlUtils.toLanguageMapList(hiddenLabel));
+    entity.setHiddenLabel(hiddenLabel);
     entity.setNote(RdfXmlUtils.toLanguageMapList(note));
     entity.setIdentifier(identifier);
     entity.setHasPart(RdfXmlUtils.toStringList(hasPart));
@@ -138,7 +157,7 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
     return entity;
   }
 
-  public List<LabelledResource> getHiddenLabel() {
+  public List<String> getHiddenLabel() {
     return hiddenLabel;
   }
 

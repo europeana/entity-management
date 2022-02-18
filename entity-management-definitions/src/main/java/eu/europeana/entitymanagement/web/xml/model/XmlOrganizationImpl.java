@@ -56,6 +56,9 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
   @XmlElement(namespace = NAMESPACE_DC, name = XML_IDENTIFIER)
   private List<String> identifier;
 
+  @XmlElement(namespace = NAMESPACE_EDM, name = XML_LANGUAGE)
+  private List<String> language;
+
   public XmlOrganizationImpl(Organization organization) {
     super(organization);
     this.sameAs = RdfXmlUtils.convertToRdfResource(organization.getSameReferenceLinks());
@@ -74,12 +77,21 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     if (organization.getHomepage() != null) {
       this.homepage = new LabelledResource(organization.getHomepage());
     }
-    this.phone = organization.getPhone();
-    this.mbox = organization.getMbox();
+    if (organization.getPhone() != null) {
+      this.phone = new ArrayList<String>(organization.getPhone());
+    }
+    if (organization.getMbox() != null) {
+      this.mbox = new ArrayList<String>(organization.getMbox());
+    }
     if (organization.getAddress() != null) {
       this.hasAddress = new XmlAddresses(List.of(new XmlAddressImpl(organization.getAddress())));
     }
-    this.identifier = organization.getIdentifier();
+    if (organization.getIdentifier() != null) {
+      this.identifier = new ArrayList<String>(organization.getIdentifier());
+    }
+    if (this.getLanguage() != null) {
+      this.language = new ArrayList<String>(organization.getLanguage());
+    }
   }
 
   @Override
@@ -105,6 +117,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
       entity.setAddress(hasAddress.getVcardAddressesList().get(0).toAddress());
     }
     entity.setIdentifier(getIdentifier());
+    entity.setLanguage(getLanguage());
     return entity;
   }
 
@@ -173,5 +186,9 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
   @Override
   public void setSameReferenceLinks(List<LabelledResource> uris) {
     this.sameAs = uris;
+  }
+
+  public List<String> getLanguage() {
+    return language;
   }
 }

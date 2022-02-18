@@ -14,17 +14,19 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class XmlAddresses {
 
+  @XmlElement(namespace = NAMESPACE_VCARD, name = XML_ADDRESS)
+  private List<XmlAddressImpl> vcardAddressesList;
+
   public XmlAddresses() {
     // default no-arg constructor
   }
 
   public XmlAddresses(List<XmlAddressImpl> vcardAddressesList) {
-    this.vcardAddressesList = vcardAddressesList;
+    if (vcardAddressesList != null) {
+      this.vcardAddressesList = new ArrayList<XmlAddressImpl>(vcardAddressesList);
+    }
   }
-
-  @XmlElement(namespace = NAMESPACE_VCARD, name = XML_ADDRESS)
-  private List<XmlAddressImpl> vcardAddressesList = new ArrayList<>();
-
+  
   public List<XmlAddressImpl> getVcardAddressesList() {
     return vcardAddressesList == null ? null : new ArrayList<>(vcardAddressesList);
   }

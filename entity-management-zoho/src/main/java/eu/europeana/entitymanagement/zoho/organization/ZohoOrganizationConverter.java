@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement.zoho.organization;
 
 import static eu.europeana.entitymanagement.zoho.utils.ZohoUtils.toIsoLanguage;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -79,11 +80,48 @@ public class ZohoOrganizationConverter {
         ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.ZIP_CODE_FIELD)));
     address.setVcardPostOfficeBox(
         ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.PO_BOX_FIELD)));
+    address.setVcardHasGeo(
+        ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.LATITUDE_FIELD))
+            + ","
+            + ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.LONGITUDE_FIELD)));
 
     // only set address if it contains metadata properties.
     if (address.hasMetadataProperties()) {
       address.setAbout(org.getAbout() + ZohoConstants.ADDRESS_ABOUT);
       org.setAddress(address);
+    }
+
+    List<String> edmLanguage =
+        ZohoUtils.stringListSupplier(zohoRecord.getKeyValue(ZohoConstants.OFFICIAL_LANGUAGE_FIELD));
+    if (!edmLanguage.isEmpty()) {
+      org.setLanguage(edmLanguage);
+    }
+
+    List<String> hiddenLabels = new ArrayList<String>();
+    String hiddenLabel1 = getStringFieldValue(zohoRecord, ZohoConstants.HIDDEN_LABEL1_FIELD);
+    if (hiddenLabel1 != null) {
+      hiddenLabels.add(hiddenLabel1);
+    }
+    String hiddenLabel2 = getStringFieldValue(zohoRecord, ZohoConstants.HIDDEN_LABEL2_FIELD);
+    if (hiddenLabel2 != null) {
+      hiddenLabels.add(hiddenLabel2);
+    }
+    String hiddenLabel3 = getStringFieldValue(zohoRecord, ZohoConstants.HIDDEN_LABEL3_FIELD);
+    if (hiddenLabel3 != null) {
+      hiddenLabels.add(hiddenLabel3);
+    }
+    String hiddenLabel4 = getStringFieldValue(zohoRecord, ZohoConstants.HIDDEN_LABEL4_FIELD);
+    if (hiddenLabel4 != null) {
+      hiddenLabels.add(hiddenLabel4);
+    }
+    org.setHiddenLabel(hiddenLabels);
+
+    List<String> industry =
+        ZohoUtils.stringListSupplier(zohoRecord.getKeyValue(ZohoConstants.INDUSTRY_FIELD));
+    if (!industry.isEmpty()) {
+      Map<String, List<String>> orgDomain = new HashMap<String, List<String>>();
+      orgDomain.put("en", industry);
+      org.setOrganizationDomain(orgDomain);
     }
 
     return org;

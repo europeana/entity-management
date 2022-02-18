@@ -188,6 +188,8 @@ public class IntegrationTestUtils {
       "/zoho-deref/organization_zoho_berger_museum_response.json";
   public static final String ORGANIZATION_PCCE_ZOHO_RESPONSE =
       "/zoho-deref/organization_zoho_pcce_response.json";
+  public static final String ORGANIZATION_BNF_ZOHO_RESPONSE =
+      "/zoho-deref/organization_zoho_bnf_response.json";
   public static final String ORGANIZATION_NATURALIS_WIKIDATA_RESPONSE_XML =
       "/wikidata-deref/organization_wikidata_naturalis_response.xml";
   public static final String ORGANIZATION_GFM_WIKIDATA_RESPONSE_XML =
@@ -211,6 +213,8 @@ public class IntegrationTestUtils {
       Map.of(
           ORGANIZATION_NATURALIS_URI_ZOHO,
           ORGANIZATION_NATURALIS_ZOHO_RESPONSE,
+          ORGANIZATION_BNF_URI_ZOHO,
+          ORGANIZATION_BNF_ZOHO_RESPONSE,
           ORGANIZATION_GFM_URI_ZOHO,
           ORGANIZATION_GFM_ZOHO_RESPONSE,
           ORGANIZATION_PCCE_URI_ZOHO,

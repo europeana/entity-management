@@ -25,5 +25,7 @@
   "Organisation_Role2": [
     "Data Provider"
   ],
-  "Tag": []
+  "Tag": [],
+  "Latitude": "-1",
+  "Longitude": "-1"
 }

@@ -327,7 +327,9 @@ public class EntityRecordService {
     SortedSet<String> sameAsUrls = new TreeSet<String>();
     sameAsUrls.add(datasourceResponse.getEntityId());
     sameAsUrls.add(externalProxyId);
-    sameAsUrls.addAll(datasourceResponse.getSameReferenceLinks());
+    if (datasourceResponse.getSameReferenceLinks() != null) {
+      sameAsUrls.addAll(datasourceResponse.getSameReferenceLinks());
+    }
     List<String> sameAs = new ArrayList<String>(sameAsUrls);
     return sameAs;
   }
@@ -888,23 +890,24 @@ public class EntityRecordService {
       fieldValueSecondaryObject = new ArrayList<Object>(fieldValueSecondaryObjectList);
     }
 
-    if (fieldValuePrimaryObject != null && !accumulate) {
-      // we're not appending items, so just return the primary field value
+    if (fieldValuePrimaryObject != null && fieldValueSecondaryObject != null) {
+      if (accumulate) {
+        for (Object secondaryObjectListObject : fieldValueSecondaryObject) {
+          if (!fieldValuePrimaryObject.contains(secondaryObjectListObject)) {
+            fieldValuePrimaryObject.add(secondaryObjectListObject);
+          }
+        }
+        consolidatedEntity.setFieldValue(field, fieldValuePrimaryObject);
+      } else {
+        consolidatedEntity.setFieldValue(field, fieldValuePrimaryObject);
+      }
+      return;
+    } else if (fieldValuePrimaryObject == null && fieldValueSecondaryObject != null) {
+      consolidatedEntity.setFieldValue(field, fieldValueSecondaryObject);
+      return;
+    } else if (fieldValuePrimaryObject != null && fieldValueSecondaryObject == null) {
       consolidatedEntity.setFieldValue(field, fieldValuePrimaryObject);
       return;
-    }
-
-    if (fieldValuePrimaryObject == null && fieldValueSecondaryObject != null) {
-      consolidatedEntity.setFieldValue(field, fieldValueSecondaryObject);
-    } else if (fieldValuePrimaryObject != null && fieldValueSecondaryObject != null) {
-
-      for (Object secondaryObjectListObject : fieldValueSecondaryObject) {
-        if (!fieldValuePrimaryObject.contains(secondaryObjectListObject)) {
-          fieldValuePrimaryObject.add(secondaryObjectListObject);
-        }
-      }
-
-      consolidatedEntity.setFieldValue(field, fieldValuePrimaryObject);
     }
   }
 
