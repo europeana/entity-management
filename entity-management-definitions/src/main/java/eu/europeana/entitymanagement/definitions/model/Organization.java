@@ -48,13 +48,13 @@ import java.util.Map;
   ORGANIZATION_DOMAIN,
   GEOGRAPHIC_LEVEL,
   COUNTRY,
+  LANGUAGE,
   FOAF_HOMEPAGE,
   FOAF_PHONE,
   FOAF_MBOX,
   HAS_ADDRESS,
   IDENTIFIER,
-  SAME_AS,
-  LANGUAGE
+  SAME_AS
 })
 public class Organization extends Entity {
 
