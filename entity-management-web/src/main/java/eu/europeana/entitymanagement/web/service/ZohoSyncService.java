@@ -1,19 +1,5 @@
 package eu.europeana.entitymanagement.web.service;
 
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.stream.Collectors;
-import javax.validation.constraints.NotNull;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import com.zoho.crm.api.record.DeletedRecord;
 import com.zoho.crm.api.record.Record;
 import dev.morphia.query.experimental.filters.Filter;
@@ -41,6 +27,20 @@ import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
 import eu.europeana.entitymanagement.zoho.organization.ZohoAccessConfiguration;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.stream.Collectors;
+import javax.validation.constraints.NotNull;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service(AppConfig.BEAN_ZOHO_SYNC_SERVICE)
 public class ZohoSyncService {
@@ -64,10 +64,14 @@ public class ZohoSyncService {
   private static final Logger logger = LogManager.getLogger(ZohoSyncService.class);
 
   @Autowired
-  public ZohoSyncService(EntityRecordService entityRecordService,
-      EntityUpdateService entityUpdateService, EntityRecordRepository entityRecordRepository,
-      EntityManagementConfiguration emConfiguration, DataSources datasources,
-      ZohoAccessConfiguration zohoAccessConfiguration, SolrService solrService) {
+  public ZohoSyncService(
+      EntityRecordService entityRecordService,
+      EntityUpdateService entityUpdateService,
+      EntityRecordRepository entityRecordRepository,
+      EntityManagementConfiguration emConfiguration,
+      DataSources datasources,
+      ZohoAccessConfiguration zohoAccessConfiguration,
+      SolrService solrService) {
     this.entityRecordService = entityRecordService;
     this.entityUpdateService = entityUpdateService;
     this.entityRecordRepository = entityRecordRepository;
@@ -75,15 +79,16 @@ public class ZohoSyncService {
     this.datasources = datasources;
     this.zohoAccessConfiguration = zohoAccessConfiguration;
     this.solrService = solrService;
-    
-    this.zohoDataSource = initZohoDataSource();
 
+    this.zohoDataSource = initZohoDataSource();
   }
 
   DataSource initZohoDataSource() {
     Optional<DataSource> zohoDatasource = datasources.getDatasourceById(DataSource.ZOHO_ID);
-    if(zohoDatasource.isEmpty()) {
-      throw new FunctionalRuntimeException("No zoho data source found! Zoho data source must be present in configurations with id: " + DataSource.ZOHO_ID); 
+    if (zohoDatasource.isEmpty()) {
+      throw new FunctionalRuntimeException(
+          "No zoho data source found! Zoho data source must be present in configurations with id: "
+              + DataSource.ZOHO_ID);
     }
     return zohoDatasource.get();
   }
@@ -100,8 +105,8 @@ public class ZohoSyncService {
     return zohoSyncReport;
   }
 
-  void synchronizeZohoOrganizations(@NotNull OffsetDateTime modifiedSince,
-      ZohoSyncReport zohoSyncReport) {
+  void synchronizeZohoOrganizations(
+      @NotNull OffsetDateTime modifiedSince, ZohoSyncReport zohoSyncReport) {
     List<Record> orgList;
     BatchOperations operations;
 
@@ -114,7 +119,10 @@ public class ZohoSyncService {
         // retrieve modified organizations
         // OffsetDateTime offsetDateTime = modifiedSince.toInstant()
         // .atOffset(ZoneOffset.UTC);
-        orgList = zohoAccessConfiguration.getZohoAccessClient().getZcrmRecordOrganizations(page, pageSize, modifiedSince);
+        orgList =
+            zohoAccessConfiguration
+                .getZohoAccessClient()
+                .getZcrmRecordOrganizations(page, pageSize, modifiedSince);
         logExecutionProgress(orgList, page, pageSize);
 
         // collect operations to be run on Metis and Entity API
@@ -138,19 +146,19 @@ public class ZohoSyncService {
       // sets also execution status
       zohoSyncReport.updateExecutionStatus(e);
     }
-     
-     logger.info("Zoho update operations completed successfully:\n {}", zohoSyncReport);
+
+    logger.info("Zoho update operations completed successfully:\n {}", zohoSyncReport);
   }
 
   /**
    * Retrieve deleted in Zoho organizations and removed from the Enrichment database
-   * 
+   *
    * @return the number of deleted from Enrichment database organizations
    * @throws ZohoException
    * @throws OrganizationImportException
    */
-  void synchronizeDeletedZohoOrganizations(OffsetDateTime modifiedSince,
-      ZohoSyncReport zohoSyncReport) {
+  void synchronizeDeletedZohoOrganizations(
+      OffsetDateTime modifiedSince, ZohoSyncReport zohoSyncReport) {
 
     // do not delete organizations for individual entity importer
     // in case of full import the database should be manually cleaned. No need to delete
@@ -165,7 +173,9 @@ public class ZohoSyncService {
       while (hasNext) {
         // list of (europeana) organizations ids
         deletedRecordsInZoho =
-            zohoAccessConfiguration.getZohoAccessClient().getZohoDeletedRecordOrganizations(modifiedSince, startPage, pageSize);
+            zohoAccessConfiguration
+                .getZohoAccessClient()
+                .getZohoDeletedRecordOrganizations(modifiedSince, startPage, pageSize);
 
         // check exists in Metis (Note: zoho doesn't support filtering by lastModified for deleted
         // entities)
@@ -210,17 +220,21 @@ public class ZohoSyncService {
     performPermanentDeleteOperations(operations.getPermanentDeleteOperations(), zohoSyncReport);
   }
 
-  void performPermanentDeleteOperations(SortedSet<Operation> permanentDeleteOperations, ZohoSyncReport zohoSyncReport) {
+  void performPermanentDeleteOperations(
+      SortedSet<Operation> permanentDeleteOperations, ZohoSyncReport zohoSyncReport) {
     if (permanentDeleteOperations == null || permanentDeleteOperations.isEmpty()) {
       return;
     }
-    List<String> entitiesToDelete = permanentDeleteOperations.stream()
-        .map(permDelete -> permDelete.getOrganizationId()).collect(Collectors.toList());
+    List<String> entitiesToDelete =
+        permanentDeleteOperations.stream()
+            .map(permDelete -> permDelete.getOrganizationId())
+            .collect(Collectors.toList());
     runPermanentDelete(entitiesToDelete, zohoSyncReport);
   }
 
-  void performDeprecationOperations(SortedSet<Operation> deprecateOperations,
-      ZohoSyncReport zohoSyncReport) throws SolrServiceException {
+  void performDeprecationOperations(
+      SortedSet<Operation> deprecateOperations, ZohoSyncReport zohoSyncReport)
+      throws SolrServiceException {
     if (deprecateOperations == null || deprecateOperations.isEmpty()) {
       return;
     }
@@ -229,8 +243,8 @@ public class ZohoSyncService {
       zohoOrganization =
           ZohoOrganizationConverter.convertToOrganizationEntity(operation.getZohoRecord());
       // update sameAs
-      entityRecordService.addSameReferenceLinks(operation.getEntityRecord().getEntity(),
-          zohoOrganization.getSameReferenceLinks());
+      entityRecordService.addSameReferenceLinks(
+          operation.getEntityRecord().getEntity(), zohoOrganization.getSameReferenceLinks());
 
       // deprecate
       solrService.deleteById(List.of(operation.getEntityRecord().getEntityId()));
@@ -239,23 +253,24 @@ public class ZohoSyncService {
     }
   }
 
-
-
-  void performUpdateOperations(SortedSet<Operation> updateOperations,
-      ZohoSyncReport zohoSyncReport) {
+  void performUpdateOperations(
+      SortedSet<Operation> updateOperations, ZohoSyncReport zohoSyncReport) {
     if (updateOperations == null || updateOperations.isEmpty()) {
       return;
     }
-    List<String> organizationIds = updateOperations.stream()
-        .map(operation -> operation.getOrganizationId()).collect(Collectors.toList());
+    List<String> organizationIds =
+        updateOperations.stream()
+            .map(operation -> operation.getOrganizationId())
+            .collect(Collectors.toList());
     entityUpdateService.scheduleTasks(organizationIds, ScheduledUpdateType.FULL_UPDATE);
     zohoSyncReport.increaseUpdated(updateOperations.size());
   }
 
-  private void performCreateOperation(SortedSet<Operation> createOperations,
-      ZohoSyncReport zohoSyncReport) throws EntityCreationException {
+  private void performCreateOperation(
+      SortedSet<Operation> createOperations, ZohoSyncReport zohoSyncReport)
+      throws EntityCreationException {
 
-    if(createOperations == null || createOperations.isEmpty()) {
+    if (createOperations == null || createOperations.isEmpty()) {
       return;
     }
     List<String> entitiesToUpdate = performEntityRegistration(createOperations, zohoSyncReport);
@@ -264,8 +279,9 @@ public class ZohoSyncService {
     zohoSyncReport.increaseCreated(entitiesToUpdate.size());
   }
 
-  List<String> performEntityRegistration(SortedSet<Operation> createOperations,
-      ZohoSyncReport zohoSyncReport) throws EntityCreationException {
+  List<String> performEntityRegistration(
+      SortedSet<Operation> createOperations, ZohoSyncReport zohoSyncReport)
+      throws EntityCreationException {
     List<String> entitiesToUpdate = new ArrayList<String>(createOperations.size());
     List<String> allCorefs;
     // register new entitities
@@ -281,8 +297,8 @@ public class ZohoSyncService {
           entityRecordService.findMatchingCoreference(allCorefs);
       if (existingEntity.isPresent()) {
         // skipp processing
-        zohoSyncReport.addSkippedDupplicate(zohoOrganization.getAbout(),
-            existingEntity.get().getEntityId());
+        zohoSyncReport.addSkippedDupplicate(
+            zohoOrganization.getAbout(), existingEntity.get().getEntityId());
         continue;
       } else {
         // create shell
@@ -290,29 +306,31 @@ public class ZohoSyncService {
         // set zoho URL
         europeanaProxyEntity.setAbout(zohoOrganization.getAbout());
 
-        EntityRecord savedEntityRecord = entityRecordService
-            .createEntityFromRequest(europeanaProxyEntity, zohoOrganization, getZohoDataSource());
+        EntityRecord savedEntityRecord =
+            entityRecordService.createEntityFromRequest(
+                europeanaProxyEntity, zohoOrganization, getZohoDataSource());
         entitiesToUpdate.add(savedEntityRecord.getEntityId());
-        if(logger.isInfoEnabled()) {
-          logger.info("Created Entity record for externalId={}; entityId={}", zohoOrganization.getAbout(),
+        if (logger.isInfoEnabled()) {
+          logger.info(
+              "Created Entity record for externalId={}; entityId={}",
+              zohoOrganization.getAbout(),
               savedEntityRecord.getEntityId());
         }
       }
     }
     return entitiesToUpdate;
   }
- 
 
   /**
    * This method performs synchronization of organizations between Zoho and Entity API database
    * addressing deleted and unwanted (defined by owner criteria) organizations. We separate to
    * update from to delete types
    *
-   * If full import -> only update/create else Update operation -> 1) search criteria is empty,
+   * <p>If full import -> only update/create else Update operation -> 1) search criteria is empty,
    * check if the owner is present in the zoho record 2) search criteria present, then zoho record
    * owner should match with the search filter ZOHO_OWNER_CRITERIA Delete the record if none of the
    * above matches.
-   * 
+   *
    * @param orgList The list of retrieved Zoho objects
    */
   BatchOperations fillOperations(final List<Record> orgList) {
@@ -328,7 +346,7 @@ public class ZohoSyncService {
       // organizationId = EntityRecordUtils.buildEntityIdUri(EntityTypes.Organization, zohoId);
       Optional<EntityRecord> entityRecordOptional = findRecordInList(zohoId, existingRecords);
       EntityRecord entityRecord = null;
-      if(entityRecordOptional.isPresent()) {
+      if (entityRecordOptional.isPresent()) {
         entityRecord = entityRecordOptional.get();
       }
       addOperation(operations, zohoId, zohoOrg, entityRecord);
@@ -338,40 +356,54 @@ public class ZohoSyncService {
 
   List<EntityRecord> findEntityRecordsById(Set<String> modifiedInZoho) {
     Filter entityIdsFilter = Filters.in(WebEntityFields.ENTITY_ID, modifiedInZoho);
-    return 
-        entityRecordRepository.findWithFilters(0, modifiedInZoho.size(), new Filter[] {entityIdsFilter});
+    return entityRecordRepository.findWithFilters(
+        0, modifiedInZoho.size(), new Filter[] {entityIdsFilter});
   }
 
-  private void addOperation(BatchOperations operations, String zohoId, Record zohoOrg,
-      EntityRecord entityRecord) {
+  private void addOperation(
+      BatchOperations operations, String zohoId, Record zohoOrg, EntityRecord entityRecord) {
 
     String entityId = EntityRecordUtils.buildEntityIdUri(EntityTypes.Organization, zohoId);
 
     boolean hasDpsOwner = hasRequiredOwnership(zohoOrg);
+    boolean markedForDeletion = ZohoOrganizationConverter.isMarkedForDeletion(zohoOrg);
     String emOperation = null;
-    if (entityRecord == null && hasDpsOwner) {
-      // entity not in entity management database,
-      // create operation if ownership is correct
-      emOperation = Operations.CREATE;
-    } else if (entityRecord != null && hasDpsOwner) {
-      // Zoho entry has changed
-      emOperation = Operations.UPDATE;
-    } else if (entityRecord != null) {
-       //&& !hasDpsOwner
-      // Zoho entry has changed, but DPS ownership lost
-      //TODO: Add handling for deprecated in Zoho 
-      emOperation = Operations.DELETE;
+    
+    if(entityRecord == null) {
+      if(hasDpsOwner && !markedForDeletion) {
+        // entity not in entity management database,
+        // create operation if ownership is correct
+        emOperation = Operations.CREATE;
+      } else if(markedForDeletion) {
+        //TODO: clarify what to do if marked for deletion?
+        if(logger.isInfoEnabled()) {
+          logger.info(
+              "Organization has changed in zoho, it is marked for deletion, but it does not exist in the database. Skipped update for Zoho id: {}",
+              zohoId);
+        }
+      }
+    } else {
+      //entity record not null, update or deletion
+      if(markedForDeletion || !hasDpsOwner){
+        //entity marked for deletion, or lost DPS ownerShip
+        //deprecate organization
+        emOperation = Operations.DELETE;
+      }else {
+        // Zoho entry has changed
+        emOperation = Operations.UPDATE;  
+      } 
     }
-
+ 
     if (emOperation != null) {
       // only if there is an operation to perform in EM
-      Operation operation =
-          new Operation(entityId, emOperation, zohoOrg, entityRecord);
+      Operation operation = new Operation(entityId, emOperation, zohoOrg, entityRecord);
       operations.addOperation(operation);
     } else {
-      logger.info(
-          "Organization has changed in zoho, but there is no operation to perform on entity database, probably becasue the zoho organization doesn't have the required role. Zoho id: {}",
-          zohoId);
+      if(logger.isInfoEnabled()) {
+        logger.info(
+            "Organization has changed in zoho, but there is no operation to perform on entity database, probably becasue the zoho organization doesn't have the required role or it was marked for deletion. Zoho id: {}",
+            zohoId);
+      }
     }
   }
 
@@ -386,32 +418,36 @@ public class ZohoSyncService {
     return ownerName.equals(emConfiguration.getZohoSyncOwnerFilter());
   }
 
-
   Set<String> getEntityIds(final List<Record> orgList) {
 
     Set<String> modifiedInZoho = new HashSet<String>();
     // get the id list from Zoho deleted Record
     if (!orgList.isEmpty()) {
-      orgList.forEach(updatedRecord -> modifiedInZoho.add(EntityRecordUtils
-          .buildEntityIdUri(EntityTypes.Organization, updatedRecord.getId().toString())));
+      orgList.forEach(
+          updatedRecord ->
+              modifiedInZoho.add(
+                  EntityRecordUtils.buildEntityIdUri(
+                      EntityTypes.Organization, updatedRecord.getId().toString())));
     }
     return modifiedInZoho;
   }
-
 
   List<String> getDeletedEntityIds(final List<DeletedRecord> deletedInZoho) {
 
     List<String> deletedEntityIds = new ArrayList<String>();
     // get the id list from Zoho deleted Record
     if (!deletedEntityIds.isEmpty()) {
-      deletedInZoho.forEach(deletedRecord -> deletedEntityIds.add(EntityRecordUtils
-          .buildEntityIdUri(EntityTypes.Organization, deletedRecord.getId().toString())));
+      deletedInZoho.forEach(
+          deletedRecord ->
+              deletedEntityIds.add(
+                  EntityRecordUtils.buildEntityIdUri(
+                      EntityTypes.Organization, deletedRecord.getId().toString())));
     }
     return deletedEntityIds;
   }
 
-  private Optional<EntityRecord> findRecordInList(String zohoId,
-      List<EntityRecord> existingRecords) {
+  private Optional<EntityRecord> findRecordInList(
+      String zohoId, List<EntityRecord> existingRecords) {
     if (existingRecords == null || existingRecords.isEmpty()) {
       return Optional.ofNullable(null);
     }
@@ -419,10 +455,8 @@ public class ZohoSyncService {
     return existingRecords.stream().filter(er -> er.getEntityId().endsWith(identifier)).findFirst();
   }
 
-
-
-  private void runPermanentDelete(List<String> entitiesDeletedInZoho,
-      ZohoSyncReport zohoSyncReport) {
+  private void runPermanentDelete(
+      List<String> entitiesDeletedInZoho, ZohoSyncReport zohoSyncReport) {
     long deleted = entityRecordService.deleteBulk(entitiesDeletedInZoho);
     zohoSyncReport.increaseDeleted(deleted);
   }
@@ -433,7 +467,6 @@ public class ZohoSyncService {
   }
 
   public DataSource getZohoDataSource() {
-     return zohoDataSource;
+    return zohoDataSource;
   }
-
 }
