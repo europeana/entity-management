@@ -14,6 +14,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class XmlAddresses {
 
+  @XmlElement(namespace = NAMESPACE_VCARD, name = XML_ADDRESS)
+  private List<XmlAddressImpl> vcardAddressesList;
+
   public XmlAddresses() {
     // default no-arg constructor
   }
@@ -23,10 +26,7 @@ public class XmlAddresses {
       this.vcardAddressesList = new ArrayList<XmlAddressImpl>(vcardAddressesList);
     }
   }
-
-  @XmlElement(namespace = NAMESPACE_VCARD, name = XML_ADDRESS)
-  private List<XmlAddressImpl> vcardAddressesList;
-
+  
   public List<XmlAddressImpl> getVcardAddressesList() {
     return vcardAddressesList == null ? null : new ArrayList<>(vcardAddressesList);
   }
