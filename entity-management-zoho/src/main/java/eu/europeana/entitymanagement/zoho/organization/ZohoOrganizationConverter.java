@@ -12,6 +12,7 @@ import com.zoho.crm.api.record.Record;
 import com.zoho.crm.api.users.User;
 import eu.europeana.entitymanagement.definitions.model.Address;
 import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 
@@ -80,11 +81,13 @@ public class ZohoOrganizationConverter {
         ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.ZIP_CODE_FIELD)));
     address.setVcardPostOfficeBox(
         ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.PO_BOX_FIELD)));
-    address.setVcardHasGeo(
-        ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.LATITUDE_FIELD))
-            + ","
-            + ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.LONGITUDE_FIELD)));
-
+    
+    String lat = ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.LATITUDE_FIELD));
+    String lon = ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.LONGITUDE_FIELD));
+    if(lat != null && lon != null) {
+      address.setVcardHasGeo(EntityUtils.toGeoUri(lat, lon));
+    }
+    
     // only set address if it contains metadata properties.
     if (address.hasMetadataProperties()) {
       address.setAbout(org.getAbout() + ZohoConstants.ADDRESS_ABOUT);
