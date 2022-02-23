@@ -45,10 +45,9 @@ public class DataSources {
   }
 
   public Optional<DataSource> getDatasourceById(String dataSourceId) {
-    return datasources.stream().filter(
-        s -> s.getId().equals(dataSourceId)).findFirst();
+    return datasources.stream().filter(s -> s.getId().equals(dataSourceId)).findFirst();
   }
-  
+
   public DataSource verifyDataSource(String creationRequestId, boolean allowStatic)
       throws HttpBadRequestException, HttpUnprocessableException {
     Optional<DataSource> dataSource = getDatasource(creationRequestId);

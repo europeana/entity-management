@@ -1,17 +1,17 @@
 package eu.europeana.entitymanagement.solr.model;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.apache.commons.collections.MapUtils;
-import org.apache.solr.client.solrj.beans.Field;
 import eu.europeana.entitymanagement.definitions.model.Address;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.solr.SolrUtils;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.apache.commons.collections.MapUtils;
+import org.apache.solr.client.solrj.beans.Field;
 
 public class SolrOrganization extends SolrEntity<Organization> {
 

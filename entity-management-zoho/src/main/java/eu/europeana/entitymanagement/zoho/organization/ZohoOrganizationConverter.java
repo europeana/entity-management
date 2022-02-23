@@ -1,13 +1,7 @@
 package eu.europeana.entitymanagement.zoho.organization;
 
 import static eu.europeana.entitymanagement.zoho.utils.ZohoUtils.toIsoLanguage;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
+
 import com.zoho.crm.api.record.Record;
 import com.zoho.crm.api.users.User;
 import eu.europeana.entitymanagement.definitions.model.Address;
@@ -15,6 +9,13 @@ import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 
 public class ZohoOrganizationConverter {
 
@@ -81,13 +82,15 @@ public class ZohoOrganizationConverter {
         ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.ZIP_CODE_FIELD)));
     address.setVcardPostOfficeBox(
         ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.PO_BOX_FIELD)));
-    
-    String lat = ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.LATITUDE_FIELD));
-    String lon = ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.LONGITUDE_FIELD));
-    if(lat != null && lon != null) {
+
+    String lat =
+        ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.LATITUDE_FIELD));
+    String lon =
+        ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.LONGITUDE_FIELD));
+    if (lat != null && lon != null) {
       address.setVcardHasGeo(EntityUtils.toGeoUri(lat, lon));
     }
-    
+
     // only set address if it contains metadata properties.
     if (address.hasMetadataProperties()) {
       address.setAbout(org.getAbout() + ZohoConstants.ADDRESS_ABOUT);
@@ -104,16 +107,18 @@ public class ZohoOrganizationConverter {
     String hiddenLabel2 = getStringFieldValue(zohoRecord, ZohoConstants.HIDDEN_LABEL2_FIELD);
     String hiddenLabel3 = getStringFieldValue(zohoRecord, ZohoConstants.HIDDEN_LABEL3_FIELD);
     String hiddenLabel4 = getStringFieldValue(zohoRecord, ZohoConstants.HIDDEN_LABEL4_FIELD);
-    
-    if(hiddenLabel1 != null || hiddenLabel2 != null
-        || hiddenLabel3 != null || hiddenLabel4 != null ) {
-      
+
+    if (hiddenLabel1 != null
+        || hiddenLabel2 != null
+        || hiddenLabel3 != null
+        || hiddenLabel4 != null) {
+
       List<String> hiddenLabels = new ArrayList<String>();
       addValueToList(hiddenLabel1, hiddenLabels);
       addValueToList(hiddenLabel2, hiddenLabels);
       addValueToList(hiddenLabel3, hiddenLabels);
       addValueToList(hiddenLabel4, hiddenLabels);
-      
+
       org.setHiddenLabel(hiddenLabels);
     }
 
@@ -128,8 +133,6 @@ public class ZohoOrganizationConverter {
     return org;
   }
 
-  
-  
   private static Map<String, String> getPrefLabel(Map<String, List<String>> allLabels) {
     Map<String, String> prefLabel = new LinkedHashMap<>(allLabels.size());
     // first label for each language goes to prefLabel map
@@ -190,11 +193,11 @@ public class ZohoOrganizationConverter {
   }
 
   static void addValueToList(String value, List<String> list) {
-    if(value != null) {
+    if (value != null) {
       list.add(value);
     }
   }
-  
+
   static void addLabel(Map<String, List<String>> allLabels, String isoLanguage, String label) {
     allLabels.computeIfAbsent(isoLanguage, k -> new ArrayList<>());
     allLabels.get(isoLanguage).add(label);
@@ -227,7 +230,7 @@ public class ZohoOrganizationConverter {
       return isoCode;
     }
   }
-  
+
   /**
    * The method is to process the ZOHO_OWNER_FIELD name value
    *
@@ -235,6 +238,6 @@ public class ZohoOrganizationConverter {
    * @return
    */
   public static String getOwnerName(Record recordOrganization) {
-     return ((User) recordOrganization.getKeyValue(ZohoConstants.ZOHO_OWNER_FIELD)).getName();
+    return ((User) recordOrganization.getKeyValue(ZohoConstants.ZOHO_OWNER_FIELD)).getName();
   }
 }

@@ -9,5 +9,4 @@ public class ZohoSyncReportFields {
   public static final String DELETED = "deleted";
   public static final String EXECUTION_STATUS = "executionStatus";
   public static final String SKIPPED_DUPPLICATES = "skippedDupplicates";
-  
 }

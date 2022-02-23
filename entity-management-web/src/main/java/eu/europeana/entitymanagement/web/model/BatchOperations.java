@@ -1,9 +1,9 @@
 package eu.europeana.entitymanagement.web.model;
 
-import java.util.SortedSet;
-import java.util.TreeSet;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class BatchOperations {
 

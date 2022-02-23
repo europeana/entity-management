@@ -26,7 +26,7 @@ public class XmlAddresses {
       this.vcardAddressesList = new ArrayList<XmlAddressImpl>(vcardAddressesList);
     }
   }
-  
+
   public List<XmlAddressImpl> getVcardAddressesList() {
     return vcardAddressesList == null ? null : new ArrayList<>(vcardAddressesList);
   }

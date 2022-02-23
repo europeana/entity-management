@@ -33,7 +33,7 @@ public abstract class SolrEntity<T extends Entity> {
   @Field(EntitySolrFields.ALT_LABEL_ALL)
   private Map<String, List<String>> altLabel;
 
-//  @Field(EntitySolrFields.HIDDEN_LABEL)
+  //  @Field(EntitySolrFields.HIDDEN_LABEL)
   private List<String> hiddenLabel;
 
   @Field(EntitySolrFields.IDENTIFIER)
@@ -78,9 +78,9 @@ public abstract class SolrEntity<T extends Entity> {
     setNote(entity.getNote());
     setPrefLabelStringMap(entity.getPrefLabel());
     setAltLabel(entity.getAltLabel());
-    
-//    if (entity.getHiddenLabel() != null)
-//      this.hiddenLabel = new ArrayList<>(entity.getHiddenLabel());
+
+    //    if (entity.getHiddenLabel() != null)
+    //      this.hiddenLabel = new ArrayList<>(entity.getHiddenLabel());
     setIsShownBy(entity.getIsShownBy());
     if (entity.getIdentifier() != null) this.identifier = new ArrayList<>(entity.getIdentifier());
     if (entity.getIsRelatedTo() != null)

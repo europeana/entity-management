@@ -48,7 +48,7 @@ public final class ZohoUtils {
   public static String buildZohoOrganizationId(Long zohoId) {
     return ZohoConstants.URL_ORGANIZATION_PREFFIX + zohoId;
   }
-  
+
   /**
    * Method that would check if the object provided is of type {@link JSONObject.Null} and will
    * return a correct representation of {@link List} with {@link String} items or empty list.

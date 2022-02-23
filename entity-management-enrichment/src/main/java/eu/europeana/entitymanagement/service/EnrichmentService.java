@@ -51,13 +51,13 @@ public class EnrichmentService {
       enrichmentEntity.setPrefLabel(
           Entity.toStringListMap(entityRecord.getEntity().getPrefLabel()));
       enrichmentEntity.setAltLabel(entityRecord.getEntity().getAltLabel());
-      if(entityRecord.getEntity().getHiddenLabel() != null) {
+      if (entityRecord.getEntity().getHiddenLabel() != null) {
         Map<String, List<String>> hiddenLabelEnrichment = new HashMap<String, List<String>>();
         hiddenLabelEnrichment.put(
             "def", new ArrayList<String>(entityRecord.getEntity().getHiddenLabel()));
         enrichmentEntity.setHiddenLabel(hiddenLabelEnrichment);
       }
-      
+
       enrichmentEntity.setNote(entityRecord.getEntity().getNote());
       if (!CollectionUtils.isEmpty(entityRecord.getEntity().getSameReferenceLinks())) {
         enrichmentEntity.setOwlSameAs(entityRecord.getEntity().getSameReferenceLinks());

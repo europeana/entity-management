@@ -1,17 +1,25 @@
 package eu.europeana.entitymanagement.web.model;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import static eu.europeana.entitymanagement.web.model.ZohoSyncReportFields.*;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import eu.europeana.api.commons.definitions.utils.DateUtils;
-import static eu.europeana.entitymanagement.web.model.ZohoSyncReportFields.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
-@JsonPropertyOrder({LAST_SYNC_DATE, CREATED, UPDATED, DEPRECATED, DELETED, EXECUTION_STATUS,
-    SKIPPED_DUPPLICATES})
+@JsonPropertyOrder({
+  LAST_SYNC_DATE,
+  CREATED,
+  UPDATED,
+  DEPRECATED,
+  DELETED,
+  EXECUTION_STATUS,
+  SKIPPED_DUPPLICATES
+})
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class ZohoSyncReport {
 
@@ -27,7 +35,6 @@ public class ZohoSyncReport {
   public static final String STATUS_COMPLETED = "completed";
   public static final String STATUS_INTERUPTED = "interuppted";
 
-
   public ZohoSyncReport(Date lastSyncDate) {
     this.lastSyncDate = lastSyncDate;
   }
@@ -37,7 +44,6 @@ public class ZohoSyncReport {
     this(new Date(0));
   }
 
-  
   @JsonProperty(CREATED)
   public long getCreated() {
     return created;
@@ -103,8 +109,12 @@ public class ZohoSyncReport {
   public String toString() {
     return String.format(
         "lastSyncDate: %s,%n created: %d,%n updated: %d,%n deprecated: %d,%n deleted: %d,%n executionStatus: %s",
-        DateUtils.convertDateToStr(getLastSyncDate()), getCreated(), getUpdated(), getDeprecated(),
-        getDeleted(), getExecutionStatus());
+        DateUtils.convertDateToStr(getLastSyncDate()),
+        getCreated(),
+        getUpdated(),
+        getDeprecated(),
+        getDeleted(),
+        getExecutionStatus());
   }
 
   public Throwable getError() {
@@ -138,7 +148,6 @@ public class ZohoSyncReport {
     }
     skippedDupplicates.put(creationRequestId, existingEntity);
   }
-
 
   @JsonProperty(LAST_SYNC_DATE)
   public Date getLastSyncDate() {

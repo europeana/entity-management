@@ -5,25 +5,7 @@ import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEuropeana
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEuropeanaProxyId;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getIsAggregatedById;
 import static java.time.Instant.now;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
+
 import com.mongodb.client.result.UpdateResult;
 import dev.morphia.query.experimental.filters.Filter;
 import eu.europeana.api.commons.error.EuropeanaApiException;
@@ -59,6 +41,25 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service(AppConfig.BEAN_ENTITY_RECORD_SERVICE)
 public class EntityRecordService {
@@ -938,12 +939,12 @@ public class EntityRecordService {
   }
 
   /**
-   * @deprecated the service should add the deprecated filter, eventually by adding a boolean parameter
+   * @deprecated the service should add the deprecated filter, eventually by adding a boolean
+   *     parameter
    * @param start
    * @param count
    * @param queryFilters
    * @return
-   * 
    */
   @Deprecated
   public List<? extends EntityRecord> findEntitiesWithFilter(

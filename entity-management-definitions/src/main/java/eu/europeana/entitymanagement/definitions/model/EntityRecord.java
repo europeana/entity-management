@@ -118,9 +118,9 @@ public class EntityRecord {
         .filter(s -> !s.getProxyId().startsWith(BASE_DATA_EUROPEANA_URI))
         .collect(Collectors.toList());
   }
-  
+
   @Override
   public String toString() {
-    return String.format("EntityRecord.entityTd: %s", getEntityId() );
+    return String.format("EntityRecord.entityTd: %s", getEntityId());
   }
 }

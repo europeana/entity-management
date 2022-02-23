@@ -1,26 +1,5 @@
 package eu.europeana.entitymanagement.web;
 
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.util.Collections;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import eu.europeana.api.commons.definitions.exception.DateParsingException;
 import eu.europeana.api.commons.definitions.utils.DateUtils;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
@@ -49,6 +28,27 @@ import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.web.service.ZohoSyncService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.Collections;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Validated
@@ -217,20 +217,25 @@ public class EntityAdminController extends BaseRest {
       response = java.lang.Void.class)
   @PostMapping(value = "/management/zohosync", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<String> zohoSync(
-      @ApiParam(name=WebEntityConstants.SINCE, required = true, format = "ISO DateTime", example = "1970-01-01T00:00:00Z") @RequestParam String since,
-      
+      @ApiParam(
+              name = WebEntityConstants.SINCE,
+              required = true,
+              format = "ISO DateTime",
+              example = "1970-01-01T00:00:00Z")
+          @RequestParam
+          String since,
       HttpServletRequest request)
       throws HttpException, EuropeanaApiException {
 
     if (emConfig.isAuthEnabled()) {
       verifyWriteAccess(EMOperations.OPERATION_ZOHO_SYNC, request);
     }
-    
+
     OffsetDateTime modifiedSince = validateSince(since);
     ZohoSyncReport zohoSyncReport = zohoSyncService.synchronizeZohoOrganizations(modifiedSince);
-    
+
     return generateZohoSyncResponse(request, zohoSyncReport);
- }
+  }
 
   private OffsetDateTime validateSince(String since) throws HttpBadRequestException {
     if (since == null) {
@@ -240,7 +245,8 @@ public class EntityAdminController extends BaseRest {
     try {
       return DateUtils.parseToOffsetDateTime(since);
     } catch (DateParsingException e) {
-      throw new HttpBadRequestException("Request param 'since' is not an ISO DateTime: " + since , e);
+      throw new HttpBadRequestException(
+          "Request param 'since' is not an ISO DateTime: " + since, e);
     }
   }
 }
