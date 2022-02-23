@@ -4,7 +4,7 @@
   <parent>
     <artifactId>entity-management</artifactId>
     <groupId>eu.europeana.api</groupId>
-		<version>${revision}</version>
+		<version>1.0.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>entity-management-mongo</artifactId>
