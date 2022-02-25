@@ -5,6 +5,7 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SOURCE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.THUMBNAIL;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
@@ -14,6 +15,7 @@ import java.util.Objects;
 
 @Embedded
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
+@JsonIgnoreProperties(ignoreUnknown = true)
 @JsonPropertyOrder({ID, WebEntityFields.TYPE, SOURCE, THUMBNAIL})
 public class WebResource {
 

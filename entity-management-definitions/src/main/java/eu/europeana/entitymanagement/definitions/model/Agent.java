@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import eu.europeana.entitymanagement.serialization.StringOrListConverter;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -49,21 +51,39 @@ public class Agent extends Entity {
 
   private String type = EntityTypes.Agent.name();
   private List<String> date; // format "YYYY"
+
+  @JsonDeserialize(converter = StringOrListConverter.class)
   private List<String> begin; // format "YYYY-MM-DD"
+
+  @JsonDeserialize(converter = StringOrListConverter.class)
   private List<String> end; // format "YYYY-MM-DD"
+
+  @JsonDeserialize(converter = StringOrListConverter.class)
   private List<String> dateOfBirth; // format "YYYY-MM-DD"
+
+  @JsonDeserialize(converter = StringOrListConverter.class)
   private List<String> dateOfDeath; // format "YYYY"
+
   private List<String> wasPresentAt;
   private List<String> hasMet;
   private Map<String, String> name;
   private Map<String, List<String>> biographicalInformation;
   // TODO: clarify format. Right now Metis returns a list of Resources
   private List<String> professionOrOccupation;
+
+  @JsonDeserialize(converter = StringOrListConverter.class)
   private List<String> placeOfBirth;
+
+  @JsonDeserialize(converter = StringOrListConverter.class)
   private List<String> placeOfDeath;
 
+  @JsonDeserialize(converter = StringOrListConverter.class)
   private List<String> dateOfEstablishment;
+
+  @JsonDeserialize(converter = StringOrListConverter.class)
   private List<String> dateOfTermination;
+
+  @JsonDeserialize(converter = StringOrListConverter.class)
   private List<String> gender;
 
   private List<String> sameAs;
