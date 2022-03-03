@@ -240,4 +240,14 @@ public class ZohoOrganizationConverter {
   public static String getOwnerName(Record recordOrganization) {
     return ((User) recordOrganization.getKeyValue(ZohoConstants.ZOHO_OWNER_FIELD)).getName();
   }
+
+  public static boolean isMarkedForDeletion(Record recordOrganization) {
+    Object scheduledDeletion =
+        recordOrganization.getKeyValue(ZohoConstants.ZOHO_SCHEDULED_DELETION);
+    if (scheduledDeletion == null) {
+      return false;
+    } else {
+      return ((Boolean) scheduledDeletion).booleanValue();
+    }
+  }
 }

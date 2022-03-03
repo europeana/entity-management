@@ -70,5 +70,8 @@ public final class ZohoConstants {
   public static final String ZOHO_OWNER_FIELD = "Owner";
   public static final String ZOHO_OWNER_CRITERIA = "Owner.name";
 
+  // scheduled for deleteion
+  public static final String ZOHO_SCHEDULED_DELETION = "Scheduled_for_deletion";
+
   private ZohoConstants() {}
 }
