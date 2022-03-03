@@ -13,6 +13,8 @@ public class UnitTestUtils {
   public static final String AGENT_VALIDATE_FIELDS_EMPTY_PREFLABEL_JSON =
       "/validation/agent-validation_empty_preflabel.json";
 
+  public static final String AGENT_EXTERNAL_PROFILE = "/deserialization/agent_matthew_paris.json";
+
   public static String loadFile(String resourcePath) throws IOException {
     return IOUtils.toString(
             Objects.requireNonNull(UnitTestUtils.class.getResourceAsStream(resourcePath)),

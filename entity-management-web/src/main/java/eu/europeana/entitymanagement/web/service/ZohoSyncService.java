@@ -368,38 +368,38 @@ public class ZohoSyncService {
     boolean hasDpsOwner = hasRequiredOwnership(zohoOrg);
     boolean markedForDeletion = ZohoOrganizationConverter.isMarkedForDeletion(zohoOrg);
     String emOperation = null;
-    
-    if(entityRecord == null) {
-      if(hasDpsOwner && !markedForDeletion) {
+
+    if (entityRecord == null) {
+      if (hasDpsOwner && !markedForDeletion) {
         // entity not in entity management database,
         // create operation if ownership is correct
         emOperation = Operations.CREATE;
-      } else if(markedForDeletion) {
-        //TODO: clarify what to do if marked for deletion?
-        if(logger.isInfoEnabled()) {
+      } else if (markedForDeletion) {
+        // TODO: clarify what to do if marked for deletion?
+        if (logger.isInfoEnabled()) {
           logger.info(
               "Organization has changed in zoho, it is marked for deletion, but it does not exist in the database. Skipped update for Zoho id: {}",
               zohoId);
         }
       }
     } else {
-      //entity record not null, update or deletion
-      if(markedForDeletion || !hasDpsOwner){
-        //entity marked for deletion, or lost DPS ownerShip
-        //deprecate organization
+      // entity record not null, update or deletion
+      if (markedForDeletion || !hasDpsOwner) {
+        // entity marked for deletion, or lost DPS ownerShip
+        // deprecate organization
         emOperation = Operations.DELETE;
-      }else {
+      } else {
         // Zoho entry has changed
-        emOperation = Operations.UPDATE;  
-      } 
+        emOperation = Operations.UPDATE;
+      }
     }
- 
+
     if (emOperation != null) {
       // only if there is an operation to perform in EM
       Operation operation = new Operation(entityId, emOperation, zohoOrg, entityRecord);
       operations.addOperation(operation);
     } else {
-      if(logger.isInfoEnabled()) {
+      if (logger.isInfoEnabled()) {
         logger.info(
             "Organization has changed in zoho, but there is no operation to perform on entity database, probably becasue the zoho organization doesn't have the required role or it was marked for deletion. Zoho id: {}",
             zohoId);

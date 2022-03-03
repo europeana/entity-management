@@ -15,6 +15,7 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.GEOGRAPHI
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_ADDRESS;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IDENTIFIER;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.LANGUAGE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ORGANIZATION_DOMAIN;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
@@ -47,6 +48,7 @@ import java.util.Map;
   ORGANIZATION_DOMAIN,
   GEOGRAPHIC_LEVEL,
   COUNTRY,
+  LANGUAGE,
   FOAF_HOMEPAGE,
   FOAF_PHONE,
   FOAF_MBOX,
@@ -67,10 +69,9 @@ public class Organization extends Entity {
   private Map<String, List<String>> organizationDomain;
   private Map<String, String> geographicLevel;
   private String country;
-
   private Address hasAddress;
-
   private List<String> sameAs;
+  private List<String> language;
 
   public Organization() {
     super();
@@ -93,6 +94,7 @@ public class Organization extends Entity {
     this.country = copy.getCountry();
     if (copy.getAddress() != null) this.hasAddress = new Address(copy.getAddress());
     if (copy.sameAs != null) this.sameAs = (new ArrayList<>(copy.sameAs));
+    if (copy.language != null) this.language = (new ArrayList<>(copy.language));
   }
 
   @JsonGetter(DESCRIPTION)
@@ -231,5 +233,15 @@ public class Organization extends Entity {
       throws IllegalArgumentException, IllegalAccessException {
     // method to call the setter for each field individually
     field.set(this, value);
+  }
+
+  @JsonGetter(LANGUAGE)
+  public List<String> getLanguage() {
+    return language;
+  }
+
+  @JsonSetter(LANGUAGE)
+  public void setLanguage(List<String> edmLanguage) {
+    this.language = edmLanguage;
   }
 }

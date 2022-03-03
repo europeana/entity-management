@@ -319,7 +319,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
   }
 
   @Test
-  void registerOrganizationWithoutWikidataSameAsShouldBeSuccessful() throws Exception {
+  void registerZohoOrganizationWithoutWikidataSameAsShouldBeSuccessful() throws Exception {
     String expectedId =
         EntityRecordUtils.buildEntityIdUri(
             "organization",
@@ -349,6 +349,25 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                 "$.sameAs", Matchers.contains(IntegrationTestUtils.ORGANIZATION_PCCE_URI_ZOHO)))
         // should have Europeana and Zoho proxies
         .andExpect(jsonPath("$.proxies", hasSize(2)));
+  }
+
+  @Test
+  void registerZohoOrganizationBnfWithNewFieldsShouldBeSuccessful() throws Exception {
+    EntityRecordUtils.buildEntityIdUri(
+        "organization",
+        EntityRecordUtils.getIdFromUrl(IntegrationTestUtils.ORGANIZATION_BNF_URI_ZOHO));
+
+    ResultActions response =
+        mockMvc.perform(
+            MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL)
+                .content(loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_BNF_ZOHO_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE));
+    response
+        .andExpect(status().isAccepted())
+        .andExpect(jsonPath("$.hasAddress.hasGeo").isNotEmpty())
+        .andExpect(jsonPath("$.language", hasSize(1)))
+        .andExpect(jsonPath("$.hiddenLabel", hasSize(1)))
+        .andExpect(jsonPath("$.organizationDomain[*]", hasSize(1)));
   }
 
   @Test

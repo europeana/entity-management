@@ -14,7 +14,28 @@ public class EntityUtils {
   }
 
   public static String toGeoUri(String latLon) {
+    if (latLon == null) {
+      return null;
+    }
+    if (latLon.startsWith(WebEntityConstants.PROTOCOL_GEO)) {
+      return latLon;
+    }
     return WebEntityConstants.PROTOCOL_GEO + latLon;
+  }
+
+  public static String toGeoUri(String lat, String lon) {
+    if (lat == null || lon == null) {
+      return null;
+    }
+
+    return toGeoUri(lat + "," + lon);
+  }
+
+  public static String toLatLongValue(String geoUri) {
+    if (geoUri == null) {
+      return null;
+    }
+    return geoUri.replaceFirst(WebEntityConstants.PROTOCOL_GEO, "");
   }
 
   /*

@@ -5,25 +5,7 @@ import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEuropeana
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEuropeanaProxyId;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getIsAggregatedById;
 import static java.time.Instant.now;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
+
 import com.mongodb.client.result.UpdateResult;
 import dev.morphia.query.experimental.filters.Filter;
 import eu.europeana.api.commons.error.EuropeanaApiException;
@@ -59,6 +41,25 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service(AppConfig.BEAN_ENTITY_RECORD_SERVICE)
 public class EntityRecordService {
@@ -327,7 +328,9 @@ public class EntityRecordService {
     SortedSet<String> sameAsUrls = new TreeSet<String>();
     sameAsUrls.add(datasourceResponse.getEntityId());
     sameAsUrls.add(externalProxyId);
-    sameAsUrls.addAll(datasourceResponse.getSameReferenceLinks());
+    if (datasourceResponse.getSameReferenceLinks() != null) {
+      sameAsUrls.addAll(datasourceResponse.getSameReferenceLinks());
+    }
     List<String> sameAs = new ArrayList<String>(sameAsUrls);
     return sameAs;
   }
@@ -888,23 +891,24 @@ public class EntityRecordService {
       fieldValueSecondaryObject = new ArrayList<Object>(fieldValueSecondaryObjectList);
     }
 
-    if (fieldValuePrimaryObject != null && !accumulate) {
-      // we're not appending items, so just return the primary field value
+    if (fieldValuePrimaryObject != null && fieldValueSecondaryObject != null) {
+      if (accumulate) {
+        for (Object secondaryObjectListObject : fieldValueSecondaryObject) {
+          if (!fieldValuePrimaryObject.contains(secondaryObjectListObject)) {
+            fieldValuePrimaryObject.add(secondaryObjectListObject);
+          }
+        }
+        consolidatedEntity.setFieldValue(field, fieldValuePrimaryObject);
+      } else {
+        consolidatedEntity.setFieldValue(field, fieldValuePrimaryObject);
+      }
+      return;
+    } else if (fieldValuePrimaryObject == null && fieldValueSecondaryObject != null) {
+      consolidatedEntity.setFieldValue(field, fieldValueSecondaryObject);
+      return;
+    } else if (fieldValuePrimaryObject != null && fieldValueSecondaryObject == null) {
       consolidatedEntity.setFieldValue(field, fieldValuePrimaryObject);
       return;
-    }
-
-    if (fieldValuePrimaryObject == null && fieldValueSecondaryObject != null) {
-      consolidatedEntity.setFieldValue(field, fieldValueSecondaryObject);
-    } else if (fieldValuePrimaryObject != null && fieldValueSecondaryObject != null) {
-
-      for (Object secondaryObjectListObject : fieldValueSecondaryObject) {
-        if (!fieldValuePrimaryObject.contains(secondaryObjectListObject)) {
-          fieldValuePrimaryObject.add(secondaryObjectListObject);
-        }
-      }
-
-      consolidatedEntity.setFieldValue(field, fieldValuePrimaryObject);
     }
   }
 
@@ -935,12 +939,12 @@ public class EntityRecordService {
   }
 
   /**
-   * @deprecated the service should add the deprecated filter, eventually by adding a boolean parameter
+   * @deprecated the service should add the deprecated filter, eventually by adding a boolean
+   *     parameter
    * @param start
    * @param count
    * @param queryFilters
    * @return
-   * 
    */
   @Deprecated
   public List<? extends EntityRecord> findEntitiesWithFilter(

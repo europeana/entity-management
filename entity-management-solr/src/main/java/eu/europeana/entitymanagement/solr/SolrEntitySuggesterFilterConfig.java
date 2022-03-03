@@ -24,7 +24,7 @@ public class SolrEntitySuggesterFilterConfig {
             "isShownBy",
             "prefLabel",
             "altLabel",
-            "hiddenLabel",
+            //            "hiddenLabel",
             "dateOfBirth",
             "dateOfDeath",
             "dateOfEstablishment",
@@ -37,22 +37,33 @@ public class SolrEntitySuggesterFilterConfig {
             "isShownBy",
             "prefLabel",
             "altLabel",
-            "hiddenLabel",
+            //            "hiddenLabel",
             "acronym",
             "organizationDomain",
             "country"));
     filterProvider.addFilter(
         SOLR_TIMESPAN_SUGGESTER_FILTER,
         SimpleBeanPropertyFilter.filterOutAllExcept(
-            "id", "type", "isShownBy", "prefLabel", "altLabel", "hiddenLabel", "begin", "end"));
+            "id",
+            "type",
+            "isShownBy",
+            "prefLabel",
+            "altLabel",
+            //            "hiddenLabel",
+            "begin",
+            "end"));
     filterProvider.addFilter(
         SOLR_PLACE_SUGGESTER_FILTER,
         SimpleBeanPropertyFilter.filterOutAllExcept(
-            "id", "type", "isShownBy", "prefLabel", "altLabel", "hiddenLabel"));
+            "id", "type", "isShownBy", "prefLabel", "altLabel"
+            //            "hiddenLabel"
+            ));
     filterProvider.addFilter(
         SOLR_CONCEPT_SUGGESTER_FILTER,
         SimpleBeanPropertyFilter.filterOutAllExcept(
-            "id", "type", "isShownBy", "prefLabel", "altLabel", "hiddenLabel"));
+            "id", "type", "isShownBy", "prefLabel", "altLabel"
+            //            , "hiddenLabel"
+            ));
 
     return filterProvider;
   }

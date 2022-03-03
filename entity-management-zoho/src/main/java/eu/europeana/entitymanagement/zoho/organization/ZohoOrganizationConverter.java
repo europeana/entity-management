@@ -1,18 +1,21 @@
 package eu.europeana.entitymanagement.zoho.organization;
 
 import static eu.europeana.entitymanagement.zoho.utils.ZohoUtils.toIsoLanguage;
+
+import com.zoho.crm.api.record.Record;
+import com.zoho.crm.api.users.User;
+import eu.europeana.entitymanagement.definitions.model.Address;
+import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.utils.EntityUtils;
+import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
+import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
-import com.zoho.crm.api.record.Record;
-import com.zoho.crm.api.users.User;
-import eu.europeana.entitymanagement.definitions.model.Address;
-import eu.europeana.entitymanagement.definitions.model.Organization;
-import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
-import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 
 public class ZohoOrganizationConverter {
 
@@ -80,10 +83,51 @@ public class ZohoOrganizationConverter {
     address.setVcardPostOfficeBox(
         ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.PO_BOX_FIELD)));
 
+    String lat =
+        ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.LATITUDE_FIELD));
+    String lon =
+        ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.LONGITUDE_FIELD));
+    if (lat != null && lon != null) {
+      address.setVcardHasGeo(EntityUtils.toGeoUri(lat, lon));
+    }
+
     // only set address if it contains metadata properties.
     if (address.hasMetadataProperties()) {
       address.setAbout(org.getAbout() + ZohoConstants.ADDRESS_ABOUT);
       org.setAddress(address);
+    }
+
+    List<String> edmLanguage =
+        ZohoUtils.stringListSupplier(zohoRecord.getKeyValue(ZohoConstants.OFFICIAL_LANGUAGE_FIELD));
+    if (!edmLanguage.isEmpty()) {
+      org.setLanguage(edmLanguage);
+    }
+
+    String hiddenLabel1 = getStringFieldValue(zohoRecord, ZohoConstants.HIDDEN_LABEL1_FIELD);
+    String hiddenLabel2 = getStringFieldValue(zohoRecord, ZohoConstants.HIDDEN_LABEL2_FIELD);
+    String hiddenLabel3 = getStringFieldValue(zohoRecord, ZohoConstants.HIDDEN_LABEL3_FIELD);
+    String hiddenLabel4 = getStringFieldValue(zohoRecord, ZohoConstants.HIDDEN_LABEL4_FIELD);
+
+    if (hiddenLabel1 != null
+        || hiddenLabel2 != null
+        || hiddenLabel3 != null
+        || hiddenLabel4 != null) {
+
+      List<String> hiddenLabels = new ArrayList<String>();
+      addValueToList(hiddenLabel1, hiddenLabels);
+      addValueToList(hiddenLabel2, hiddenLabels);
+      addValueToList(hiddenLabel3, hiddenLabels);
+      addValueToList(hiddenLabel4, hiddenLabels);
+
+      org.setHiddenLabel(hiddenLabels);
+    }
+
+    List<String> industry =
+        ZohoUtils.stringListSupplier(zohoRecord.getKeyValue(ZohoConstants.INDUSTRY_FIELD));
+    if (!industry.isEmpty()) {
+      Map<String, List<String>> orgDomain = new HashMap<String, List<String>>();
+      orgDomain.put("en", industry);
+      org.setOrganizationDomain(orgDomain);
     }
 
     return org;
@@ -148,6 +192,12 @@ public class ZohoOrganizationConverter {
     return toIsoLanguage(getStringFieldValue(zohoRecord, zohoLangFieldName));
   }
 
+  static void addValueToList(String value, List<String> list) {
+    if (value != null) {
+      list.add(value);
+    }
+  }
+
   static void addLabel(Map<String, List<String>> allLabels, String isoLanguage, String label) {
     allLabels.computeIfAbsent(isoLanguage, k -> new ArrayList<>());
     allLabels.get(isoLanguage).add(label);
@@ -180,7 +230,7 @@ public class ZohoOrganizationConverter {
       return isoCode;
     }
   }
-  
+
   /**
    * The method is to process the ZOHO_OWNER_FIELD name value
    *
@@ -188,15 +238,16 @@ public class ZohoOrganizationConverter {
    * @return
    */
   public static String getOwnerName(Record recordOrganization) {
-     return ((User) recordOrganization.getKeyValue(ZohoConstants.ZOHO_OWNER_FIELD)).getName();
+    return ((User) recordOrganization.getKeyValue(ZohoConstants.ZOHO_OWNER_FIELD)).getName();
   }
-  
+
   public static boolean isMarkedForDeletion(Record recordOrganization) {
-    Object scheduledDeletion = recordOrganization.getKeyValue(ZohoConstants.ZOHO_SCHEDULED_DELETION);
-    if(scheduledDeletion == null) {
+    Object scheduledDeletion =
+        recordOrganization.getKeyValue(ZohoConstants.ZOHO_SCHEDULED_DELETION);
+    if (scheduledDeletion == null) {
       return false;
-    }else {
-      return ((Boolean)scheduledDeletion).booleanValue();
+    } else {
+      return ((Boolean) scheduledDeletion).booleanValue();
     }
- }
+  }
 }

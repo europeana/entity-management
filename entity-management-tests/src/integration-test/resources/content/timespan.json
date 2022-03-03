@@ -68,15 +68,9 @@
     "http://babelnet.org/rdf/s02820627n",
     "http://semium.org/time/00xx"
   ],
-  "hiddenLabel": {
-    "ru": [
-      "1й век"
-    ],
-    "nl": [
-      "1ste eeuw"
-    ],
-    "fr": [
+  "hiddenLabel": [
+      "1й век",
+      "1ste eeuw",
       "1er siècle"
-    ]
-  }
+  ]
 }

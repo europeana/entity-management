@@ -1,16 +1,7 @@
 package eu.europeana.entitymanagement.zoho;
 
 import static eu.europeana.entitymanagement.zoho.utils.ZohoUtils.getZohoRecords;
-import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.SystemUtils;
+
 import com.zoho.api.authenticator.OAuthToken;
 import com.zoho.api.authenticator.OAuthToken.TokenType;
 import com.zoho.api.authenticator.Token;
@@ -37,6 +28,16 @@ import com.zoho.crm.api.util.APIResponse;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
+import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.SystemUtils;
 
 public class ZohoAccessClient {
 
@@ -103,7 +104,7 @@ public class ZohoAccessClient {
       throw new ZohoException("Zoho search organization by organization id threw an exception", e);
     }
   }
-  
+
   /**
    * Get organization items paged, filtering by modifiedDate date and searchCriteria.
    *
@@ -113,28 +114,29 @@ public class ZohoAccessClient {
    * @return the list of Zoho Records (Organizations)
    * @throws ZohoException if an error occurred during accessing Zoho
    */
-  public List<Record> getZcrmRecordOrganizations(int page, int pageSize,
-      OffsetDateTime modifiedDate)
-      throws ZohoException {
+  public List<Record> getZcrmRecordOrganizations(
+      int page, int pageSize, OffsetDateTime modifiedDate) throws ZohoException {
 
     if (page < 1 || pageSize < 1) {
-      throw new ZohoException("Invalid page or pageSize index. Index must be >= 1",
+      throw new ZohoException(
+          "Invalid page or pageSize index. Index must be >= 1",
           new IllegalArgumentException(
               String.format("Provided page: %s, and pageSize: %s", page, pageSize)));
     }
-    
+
     try {
       APIResponse<ResponseHandler> response;
       RecordOperations recordOperations = new RecordOperations();
       ParameterMap paramInstance = new ParameterMap();
-        paramInstance.add(GetRecordsParam.PAGE, page);
-        paramInstance.add(GetRecordsParam.PER_PAGE, pageSize);
-        HeaderMap headerInstance = new HeaderMap();
-        headerInstance.add(GetRecordsHeader.IF_MODIFIED_SINCE, modifiedDate);
-        response = recordOperations
-            .getRecords(ZohoConstants.ACCOUNTS_MODULE_NAME, paramInstance, headerInstance);
+      paramInstance.add(GetRecordsParam.PAGE, page);
+      paramInstance.add(GetRecordsParam.PER_PAGE, pageSize);
+      HeaderMap headerInstance = new HeaderMap();
+      headerInstance.add(GetRecordsHeader.IF_MODIFIED_SINCE, modifiedDate);
+      response =
+          recordOperations.getRecords(
+              ZohoConstants.ACCOUNTS_MODULE_NAME, paramInstance, headerInstance);
 
-        return getZohoRecords(response);
+      return getZohoRecords(response);
     } catch (SDKException e) {
       throw new ZohoException(
           "Cannot get organization list page: " + page + " pageSize :" + pageSize, e);
@@ -148,65 +150,75 @@ public class ZohoAccessClient {
    *
    * @param searchCriteria the search criteria map provided, values can be comma separated per key
    * @param criteriaOperator the criteriaOperator used for each parameter, can be one of {@link
-   * ZohoConstants#EQUALS_OPERATION},{@link ZohoConstants#STARTS_WITH_OPERATION}. If not provided or
-   * wrong value, it will default to {@link ZohoConstants#EQUALS_OPERATION}.
+   *     ZohoConstants#EQUALS_OPERATION},{@link ZohoConstants#STARTS_WITH_OPERATION}. If not
+   *     provided or wrong value, it will default to {@link ZohoConstants#EQUALS_OPERATION}.
    * @return the created criteria in the format Zoho accepts
    */
-   String createZohoCriteriaString(Map<String, String> searchCriteria,
-      String criteriaOperator) {
+  String createZohoCriteriaString(Map<String, String> searchCriteria, String criteriaOperator) {
     if (isNullOrEmpty(searchCriteria)) {
       searchCriteria = new HashMap<>();
     }
 
-    if (Objects.isNull(criteriaOperator) || (
-        !ZohoConstants.EQUALS_OPERATION.equals(criteriaOperator)
+    if (Objects.isNull(criteriaOperator)
+        || (!ZohoConstants.EQUALS_OPERATION.equals(criteriaOperator)
             && !ZohoConstants.STARTS_WITH_OPERATION.equals(criteriaOperator))) {
       criteriaOperator = ZohoConstants.EQUALS_OPERATION;
     }
 
     String finalCriteriaOperator = criteriaOperator;
-    return searchCriteria.entrySet().stream().map(
-        entry -> Arrays.stream(entry.getValue().split(ZohoConstants.DELIMITER_COMMA)).map(
-            value -> String.format(ZohoConstants.ZOHO_OPERATION_FORMAT_STRING, entry.getKey(),
-                finalCriteriaOperator, value.trim())).collect(Collectors.joining(ZohoConstants.OR)))
+    return searchCriteria.entrySet().stream()
+        .map(
+            entry ->
+                Arrays.stream(entry.getValue().split(ZohoConstants.DELIMITER_COMMA))
+                    .map(
+                        value ->
+                            String.format(
+                                ZohoConstants.ZOHO_OPERATION_FORMAT_STRING,
+                                entry.getKey(),
+                                finalCriteriaOperator,
+                                value.trim()))
+                    .collect(Collectors.joining(ZohoConstants.OR)))
         .collect(Collectors.joining(ZohoConstants.OR));
   }
-  
+
   /**
    * Get deleted organization items paged.
-   * @param modifiedSince 
    *
+   * @param modifiedSince
    * @param startPage The number of the item from which the paging should start. First item is at
-   * number 1. Uses default number of items per page.
+   *     number 1. Uses default number of items per page.
    * @return the list of deleted Zoho Organizations
    * @throws ZohoException if an error occurred during accessing Zoho
    */
-  public List<DeletedRecord> getZohoDeletedRecordOrganizations(OffsetDateTime modifiedSince, int startPage, int pageSize) throws ZohoException {
+  public List<DeletedRecord> getZohoDeletedRecordOrganizations(
+      OffsetDateTime modifiedSince, int startPage, int pageSize) throws ZohoException {
     if (startPage < 1) {
-      throw new ZohoException("Invalid start page index. Index must be >= 1",
+      throw new ZohoException(
+          "Invalid start page index. Index must be >= 1",
           new IllegalArgumentException("start page: " + startPage));
     }
     try {
       RecordOperations recordOperations = new RecordOperations();
       ParameterMap paramInstance = new ParameterMap();
-      paramInstance.add(GetDeletedRecordsParam.TYPE, "permanent");//all, recycle, permanent
+      paramInstance.add(GetDeletedRecordsParam.TYPE, "permanent"); // all, recycle, permanent
       paramInstance.add(GetDeletedRecordsParam.PAGE, 1);
       paramInstance.add(GetDeletedRecordsParam.PER_PAGE, pageSize);
       HeaderMap headersMap = new HeaderMap();
-      if(modifiedSince != null) {
+      if (modifiedSince != null) {
         headersMap.add(GetRecordsHeader.IF_MODIFIED_SINCE, modifiedSince);
       }
-      APIResponse<DeletedRecordsHandler> response = recordOperations
-          .getDeletedRecords(ZohoConstants.ACCOUNTS_MODULE_NAME, paramInstance, headersMap);
+      APIResponse<DeletedRecordsHandler> response =
+          recordOperations.getDeletedRecords(
+              ZohoConstants.ACCOUNTS_MODULE_NAME, paramInstance, headersMap);
       return getZohoDeletedRecords(response);
     } catch (SDKException e) {
       throw new ZohoException("Cannot get deleted organization list from: " + startPage, e);
     }
   }
-  
+
   private List<DeletedRecord> getZohoDeletedRecords(APIResponse<DeletedRecordsHandler> response) {
     if (response != null && response.isExpected()) {
-      //Get the object from response
+      // Get the object from response
       DeletedRecordsHandler deletedRecordsHandler = response.getObject();
       if (deletedRecordsHandler instanceof DeletedRecordsWrapper) {
         DeletedRecordsWrapper deletedRecordsWrapper = (DeletedRecordsWrapper) deletedRecordsHandler;
@@ -215,7 +227,7 @@ public class ZohoAccessClient {
     }
     return Collections.emptyList();
   }
-  
+
   /**
    * Check map for nullity or emptiness
    *
@@ -225,6 +237,4 @@ public class ZohoAccessClient {
   private static boolean isNullOrEmpty(final Map<?, ?> m) {
     return m == null || m.isEmpty();
   }
-  
-  
 }

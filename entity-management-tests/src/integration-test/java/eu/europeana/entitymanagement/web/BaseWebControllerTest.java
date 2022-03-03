@@ -8,12 +8,10 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zoho.crm.api.record.Record;
 import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
@@ -52,10 +50,6 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
   @Autowired protected ScheduledTaskService scheduledTaskService;
 
   @Autowired private EntityUpdateService entityUpdateService;
-
-  @Qualifier(AppConfigConstants.BEAN_JSON_MAPPER)
-  @Autowired
-  private ObjectMapper objectMapper;
 
   @Qualifier(AppConfig.BEAN_EM_SOLR_SERVICE)
   @Autowired

@@ -3,7 +3,6 @@ package eu.europeana.entitymanagement.solr.model;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.solr.SolrUtils;
-import eu.europeana.entitymanagement.vocabulary.AgentSolrFields;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,8 +33,8 @@ public abstract class SolrEntity<T extends Entity> {
   @Field(EntitySolrFields.ALT_LABEL_ALL)
   private Map<String, List<String>> altLabel;
 
-  @Field(EntitySolrFields.HIDDEN_LABEL)
-  private Map<String, List<String>> hiddenLabel;
+  //  @Field(EntitySolrFields.HIDDEN_LABEL)
+  private List<String> hiddenLabel;
 
   @Field(EntitySolrFields.IDENTIFIER)
   private List<String> identifier;
@@ -79,7 +78,9 @@ public abstract class SolrEntity<T extends Entity> {
     setNote(entity.getNote());
     setPrefLabelStringMap(entity.getPrefLabel());
     setAltLabel(entity.getAltLabel());
-    setHiddenLabel(entity.getHiddenLabel());
+
+    //    if (entity.getHiddenLabel() != null)
+    //      this.hiddenLabel = new ArrayList<>(entity.getHiddenLabel());
     setIsShownBy(entity.getIsShownBy());
     if (entity.getIdentifier() != null) this.identifier = new ArrayList<>(entity.getIdentifier());
     if (entity.getIsRelatedTo() != null)
@@ -115,16 +116,6 @@ public abstract class SolrEntity<T extends Entity> {
           new HashMap<>(
               SolrUtils.normalizeStringListMapByAddingPrefix(
                   EntitySolrFields.ALT_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, altLabel));
-    }
-  }
-
-  private void setHiddenLabel(Map<String, List<String>> hiddenLabel) {
-    if (MapUtils.isNotEmpty(hiddenLabel)) {
-      this.hiddenLabel =
-          new HashMap<>(
-              SolrUtils.normalizeStringListMapByAddingPrefix(
-                  AgentSolrFields.HIDDEN_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
-                  hiddenLabel));
     }
   }
 
@@ -172,7 +163,7 @@ public abstract class SolrEntity<T extends Entity> {
     return altLabel;
   }
 
-  public Map<String, List<String>> getHiddenLabel() {
+  public List<String> getHiddenLabel() {
     return hiddenLabel;
   }
 
@@ -241,4 +232,8 @@ public abstract class SolrEntity<T extends Entity> {
   }
 
   protected abstract void setSameReferenceLinks(ArrayList<String> uris);
+
+  public void setHiddenLabel(List<String> hiddenLabel) {
+    this.hiddenLabel = hiddenLabel;
+  }
 }

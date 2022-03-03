@@ -8,7 +8,11 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.model.EnrichmentEntity;
 import eu.europeana.entitymanagement.utils.EnrichmentConstants;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -47,7 +51,13 @@ public class EnrichmentService {
       enrichmentEntity.setPrefLabel(
           Entity.toStringListMap(entityRecord.getEntity().getPrefLabel()));
       enrichmentEntity.setAltLabel(entityRecord.getEntity().getAltLabel());
-      enrichmentEntity.setHiddenLabel(entityRecord.getEntity().getHiddenLabel());
+      if (entityRecord.getEntity().getHiddenLabel() != null) {
+        Map<String, List<String>> hiddenLabelEnrichment = new HashMap<String, List<String>>();
+        hiddenLabelEnrichment.put(
+            "def", new ArrayList<String>(entityRecord.getEntity().getHiddenLabel()));
+        enrichmentEntity.setHiddenLabel(hiddenLabelEnrichment);
+      }
+
       enrichmentEntity.setNote(entityRecord.getEntity().getNote());
       if (!CollectionUtils.isEmpty(entityRecord.getEntity().getSameReferenceLinks())) {
         enrichmentEntity.setOwlSameAs(entityRecord.getEntity().getSameReferenceLinks());

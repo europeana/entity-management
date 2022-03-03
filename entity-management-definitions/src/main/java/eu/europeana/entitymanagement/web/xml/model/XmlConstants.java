@@ -86,6 +86,7 @@ public final class XmlConstants extends XmlFields {
   public static final String XML_PHONE = "phone";
   public static final String XML_MBOX = "mbox";
   public static final String XML_HAS_ADDRESS = "hasAddress";
+  public static final String XML_LANGUAGE = "language";
 
   public static final String XML_ADDRESS = "Address";
   public static final String XML_STREET_ADDRESS = "street-address";

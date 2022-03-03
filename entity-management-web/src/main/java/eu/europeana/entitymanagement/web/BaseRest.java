@@ -166,11 +166,9 @@ public abstract class BaseRest extends BaseRestController {
       throw new EuropeanaApiException("Error serializing failed tasks", e);
     }
   }
-  
-  
+
   protected ResponseEntity<String> generateZohoSyncResponse(
-      HttpServletRequest request, ZohoSyncReport zohoSyncReport)
-      throws EuropeanaApiException {
+      HttpServletRequest request, ZohoSyncReport zohoSyncReport) throws EuropeanaApiException {
 
     org.springframework.http.HttpHeaders headers = createAllowHeader(request);
     headers.add(HttpHeaders.CONTENT_TYPE, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
@@ -182,7 +180,6 @@ public abstract class BaseRest extends BaseRestController {
       throw new EuropeanaApiException("Error serializing failed tasks", e);
     }
   }
-
 
   /**
    * Generates serialised EntityRecord Response entity along with Http status and headers

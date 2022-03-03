@@ -1,0 +1,124 @@
+{
+  "@context": "http://www.europeana.eu/schemas/context/entity.jsonld",
+  "id": "http://data.europeana.eu/agent/147355",
+  "type": "Agent",
+  "isShownBy": {
+    "id": "http://molcat1.bl.uk/IllImages/BLCD/big/c131/c13122-38.jpg",
+    "type": "WebResource",
+    "source": "http://data.europeana.eu/item/9200397/BibliographicResource_3000126259201",
+    "thumbnail": "https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri=http%3A%2F%2Fmolcat1.bl.uk%2FIllImages%2FBLCD%2Fbig%2Fc131%2Fc13122-38.jpg&type=IMAGE"
+  },
+  "prefLabel": {
+    "de": "Matthäus Paris",
+    "ru": "Матвей Парижский",
+    "sv": "Matthew Paris",
+    "pt": "Matthew Paris",
+    "el": "Μάθιου Πάρις",
+    "en": "Matthew Paris",
+    "it": "Matteo Paris",
+    "fr": "Matthieu Paris",
+    "hu": "Matthew Paris",
+    "es": "Mateo de París",
+    "cs": "Matthew Paris",
+    "sl": "Matthew Paris",
+    "pl": "Mateusz Paryżanin",
+    "da": "Matthew Paris",
+    "nl": "Matthew Paris",
+    "ca": "Mateu de París"
+  },
+  "altLabel": {
+    "cs": [
+      "Matthew of Westminster",
+      "Matthew of Paris",
+      "Matthieu Paris",
+      "Matthaeus Westmonasteriensis",
+      "Matvei Parizhskii",
+      "Matthaeus Parisiensis",
+      "Matteo di Parigi",
+      "Matthew Westminster",
+      "Mathieu Paris",
+      "Matvei Parizhski"
+    ],
+    "pt": [
+      "Mateus de Paris"
+    ],
+    "en": [
+      "Matthew of Paris",
+      "Matthaeus Parisiensis"
+    ],
+    "es": [
+      "Mateo de Paris"
+    ]
+  },
+  "gender": "Male",
+  "dateOfBirth": "1200-01-01",
+  "dateOfDeath": "1259-01-01",
+  "placeOfBirth": "http://data.europeana.eu/place/178373",
+  "placeOfDeath": "http://data.europeana.eu/place/176803",
+  "note": {
+    "cs": [
+      "Anglický benediktinský mnich, kronikář, iluminátor a kartograf"
+    ],
+    "de": [
+      "Heraldiker, Chronist, Kartograph und Benediktinermönch"
+    ],
+    "en": [
+      "Medieval English chronicler and artist (c.1200-1259)"
+    ],
+    "fr": [
+      "Artiste britannique"
+    ],
+    "ro": [
+      "Artist britanic"
+    ],
+    "hu": [
+      "Latin nyelven író középkori angol krónikaíró- és illusztrátor, kartográfus és irodalmár"
+    ],
+    "nl": [
+      "Brits cartograaf (1200-1259)"
+    ],
+    "ca": [
+      "Artista britànic"
+    ],
+    "es": [
+      "Artista británico"
+    ],
+    "et": [
+      "Suurbritannia kunstnik"
+    ]
+  },
+  "sameAs": [
+    "http://viaf.org/viaf/34451801",
+    "http://d-nb.info/gnd/118578987",
+    "http://id.loc.gov/authorities/names/n50066825",
+    "http://vocab.getty.edu/ulan/500006707",
+    "http://data.bnf.fr/ark:/12148/cb118872070",
+    "http://www.idref.fr/026667150/id",
+    "https://www.freebase.com/m/011_bc",
+    "https://g.co/kg/m/011_bc",
+    "http://openlibrary.org/works/OL115492A",
+    "http://libris.kb.se/resource/auth/308830",
+    "http://datos.bne.es/resource/XX1746478",
+    "http://data.bibliotheken.nl/id/thes/p071088792",
+    "https://livedata.bibsys.no/authority/90303498",
+    "urn:uuid:2c75595d-b82e-427c-8310-63effd876554",
+    "http://id.worldcat.org/fast/18983",
+    "http://nlg.okfn.gr/resource/authority/record145956",
+    "https://libris.kb.se/sq47crgb5c443pz",
+    "http://dbpedia.org/resource/Matthew_Paris",
+    "http://www.wikidata.org/entity/Q369366"
+  ],
+  "isAggregatedBy": {
+    "id": "http://data.europeana.eu/agent/147355#aggregation",
+    "type": "Aggregation",
+    "created": "2021-11-17T13:43:03Z",
+    "modified": "2022-01-18T01:34:48Z",
+    "pageRank": 5,
+    "recordCount": 145,
+    "score": 440255,
+    "aggregates": [
+      "http://data.europeana.eu/agent/147355#aggr_europeana",
+      "http://data.europeana.eu/agent/147355#aggr_source_1"
+    ]
+  }
+}

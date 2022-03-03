@@ -22,6 +22,7 @@ public final class ZohoConstants {
   public static final String ACCOUNT_ROLE_FIELD =
       "Pick_List_3"; // This is the Account/Organization Role field
   public static final String ORGANIZATION_ROLE_FIELD = "Organisation_Role2";
+  public static final String OFFICIAL_LANGUAGE_FIELD = "Official_Language";
   public static final String LANG_ORGANIZATION_NAME_FIELD = "Lang_Organisation_Name";
   public static final String LANG_ALTERNATIVE_FIELD = "Lang_Alternative";
   public static final String ALTERNATIVE_FIELD = "Alternative";
@@ -40,10 +41,17 @@ public final class ZohoConstants {
   public static final String COUNTRY_FIELD = "Country";
   public static final String ZIP_CODE_FIELD = "ZIP_code";
   public static final String PO_BOX_FIELD = "PO_box";
+  public static final String LATITUDE_FIELD = "Latitude";
+  public static final String LONGITUDE_FIELD = "Longitude";
   public static final String LAST_ACTIVITY_TIME_FIELD = "Last_Activity_Time";
   public static final String URL_ORGANIZATION_PREFFIX =
       "https://crm.zoho.com/crm/org51823723/tab/Accounts/";
   public static final String ADDRESS_ABOUT = "#address";
+  public static final String HIDDEN_LABEL1_FIELD = "Hidden_1";
+  public static final String HIDDEN_LABEL2_FIELD = "Hidden_2";
+  public static final String HIDDEN_LABEL3_FIELD = "Hidden_3";
+  public static final String HIDDEN_LABEL4_FIELD = "Hidden_4";
+  public static final String INDUSTRY_FIELD = "Industry_2";
 
   // Operations
   public static final String EQUALS_OPERATION = "equals";
@@ -58,13 +66,12 @@ public final class ZohoConstants {
   public static final int LANGUAGE_CODE_LENGTH = 5;
   public static final int SAME_AS_CODE_LENGTH = 3;
 
-  //constants for filtering by Owner
+  // constants for filtering by Owner
   public static final String ZOHO_OWNER_FIELD = "Owner";
   public static final String ZOHO_OWNER_CRITERIA = "Owner.name";
-  
-  //scheduled for deleteion
+
+  // scheduled for deleteion
   public static final String ZOHO_SCHEDULED_DELETION = "Scheduled_for_deletion";
-  
-  
+
   private ZohoConstants() {}
 }

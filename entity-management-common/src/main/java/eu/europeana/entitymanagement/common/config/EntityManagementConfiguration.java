@@ -118,7 +118,6 @@ public class EntityManagementConfiguration {
   @Value("${zoho.sync.batch.size: 100}")
   private int zohoSyncBatchSize;
 
-  
   public EntityManagementConfiguration() {
     LOG.info("Initializing EntityManagementConfiguration bean as: configuration");
   }
@@ -248,7 +247,7 @@ public class EntityManagementConfiguration {
   }
 
   public String getZohoSyncOwnerFilter() {
-     return zohoSyncOwnerFilter;
+    return zohoSyncOwnerFilter;
   }
 
   public int getZohoSyncBatchSize() {
