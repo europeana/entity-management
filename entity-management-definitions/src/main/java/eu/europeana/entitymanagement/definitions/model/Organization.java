@@ -13,6 +13,7 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_MBOX
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_PHONE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.GEOGRAPHIC_LEVEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_ADDRESS;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HIDDEN_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IDENTIFIER;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.LANGUAGE;
@@ -42,6 +43,7 @@ import java.util.Map;
   PREF_LABEL,
   ACRONYM,
   ALT_LABEL,
+  HIDDEN_LABEL,
   DESCRIPTION,
   FOAF_LOGO,
   EUROPEANA_ROLE,

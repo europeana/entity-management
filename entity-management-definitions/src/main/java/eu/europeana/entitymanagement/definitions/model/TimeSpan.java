@@ -6,6 +6,7 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DEPICTION;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.END;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_PART;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HIDDEN_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_NEXT_IN_SEQUENCE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_PART_OF;
@@ -14,7 +15,9 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NOTE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
-
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -22,9 +25,6 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
@@ -35,6 +35,7 @@ import java.util.List;
   IS_SHOWN_BY,
   PREF_LABEL,
   ALT_LABEL,
+  HIDDEN_LABEL,
   BEGIN,
   END,
   NOTE,

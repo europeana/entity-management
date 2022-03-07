@@ -1,26 +1,41 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.*;
-
-import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
-import eu.europeana.entitymanagement.definitions.model.TimeSpan;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import java.util.ArrayList;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_DC_TERMS;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_EDM;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_SKOS;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NOTE;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_BEGIN;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_END;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_HAS_PART;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IS_NEXT_IN_SEQUENCE;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IS_PART_OF;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_SAME_AS;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_TIMESPAN;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
+import eu.europeana.entitymanagement.definitions.model.TimeSpan;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @XmlRootElement(namespace = NAMESPACE_EDM, name = XML_TIMESPAN)
 @XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(propOrder={
+    XML_BEGIN,
+    XML_END,
+    NOTE,
+    XML_HAS_PART,
+    XML_IS_PART_OF,
+    XML_IS_NEXT_IN_SEQUENCE,
+    XML_SAME_AS
+})
 public class XmlTimeSpanImpl extends XmlBaseEntityImpl<TimeSpan> {
 
   @XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.XML_SAME_AS)
   private List<LabelledResource> sameAs;
-
-  @XmlElement(namespace = NAMESPACE_SKOS, name = HIDDEN_LABEL)
-  private List<String> hiddenLabel;
 
   @XmlElement(namespace = NAMESPACE_EDM, name = XML_BEGIN)
   private String begin;
@@ -43,9 +58,6 @@ public class XmlTimeSpanImpl extends XmlBaseEntityImpl<TimeSpan> {
   public XmlTimeSpanImpl(TimeSpan timespan) {
     super(timespan);
     this.sameAs = RdfXmlUtils.convertToRdfResource(timespan.getSameReferenceLinks());
-    if (timespan.getHiddenLabel() != null) {
-      this.hiddenLabel = new ArrayList<String>(timespan.getHiddenLabel());
-    }
     this.begin = timespan.getBeginString();
     this.end = timespan.getEndString();
     this.note = RdfXmlUtils.convertToXmlMultilingualString(timespan.getNote());
@@ -61,7 +73,6 @@ public class XmlTimeSpanImpl extends XmlBaseEntityImpl<TimeSpan> {
   @Override
   public TimeSpan toEntityModel() throws EntityCreationException {
     super.toEntityModel();
-    entity.setHiddenLabel(hiddenLabel);
     entity.setBeginString(begin);
     entity.setEndString(end);
     entity.setNote(RdfXmlUtils.toLanguageMapList(note));
@@ -69,10 +80,6 @@ public class XmlTimeSpanImpl extends XmlBaseEntityImpl<TimeSpan> {
     entity.setIsPartOfArray(RdfXmlUtils.toStringList(isPartOf));
     entity.setIsNextInSequence(RdfXmlUtils.toStringList(isNextInSequence));
     return entity;
-  }
-
-  public List<String> getHiddenLabel() {
-    return hiddenLabel;
   }
 
   public String getBegin() {

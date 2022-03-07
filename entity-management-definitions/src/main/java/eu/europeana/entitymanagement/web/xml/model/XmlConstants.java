@@ -42,7 +42,7 @@ public final class XmlConstants extends XmlFields {
   public static final String CLOSE_MATCH = "closeMatch";
   public static final String NOTE = "note";
   public static final String NOTATION = "notation";
-  public static final String IN_SCHEMA = "inScheme";
+  public static final String IN_SCHEME = "inScheme";
 
   public static final String XML_TIMESPAN = "TimeSpan";
 
@@ -72,6 +72,9 @@ public final class XmlConstants extends XmlFields {
   public static final String XML_WGS84_POS_LAT = "lat";
   public static final String XML_WGS84_POS_LONG = "long";
   public static final String XML_WGS84_POS_ALT = "alt";
+  public static final String XML_LATITUDE = "latitude";
+  public static final String XML_LONGITUDE = "longitude";
+  public static final String XML_ALTITUDE = "altitude";
   public static final String XML_IS_NEXT_IN_SEQUENCE = "isNextInSequence";
 
   public static final String XML_ORGANIZATION = "Organization";
