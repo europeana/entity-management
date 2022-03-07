@@ -13,6 +13,10 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NOTE;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.RELATED;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.RELATED_MATCH;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_CONCEPT;
+
+import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
+import eu.europeana.entitymanagement.definitions.model.Concept;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -20,25 +24,23 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
-import eu.europeana.entitymanagement.definitions.model.Concept;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @XmlRootElement(name = XML_CONCEPT)
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(propOrder={
-    NOTE,
-    NOTATION,
-    BROADER,
-    NARROWER,
-    RELATED,
-    BROAD_MATCH,
-    NARROW_MATCH,
-    RELATED_MATCH,
-    CLOSE_MATCH,
-    EXACT_MATCH,
-    IN_SCHEME    
-})
+@XmlType(
+    propOrder = {
+      NOTE,
+      NOTATION,
+      BROADER,
+      NARROWER,
+      RELATED,
+      BROAD_MATCH,
+      NARROW_MATCH,
+      RELATED_MATCH,
+      CLOSE_MATCH,
+      EXACT_MATCH,
+      IN_SCHEME
+    })
 public class XmlConceptImpl extends XmlBaseEntityImpl<Concept> {
 
   @XmlElement(namespace = NAMESPACE_SKOS, name = NARROWER)

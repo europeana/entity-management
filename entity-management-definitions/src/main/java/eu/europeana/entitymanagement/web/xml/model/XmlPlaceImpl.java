@@ -16,28 +16,30 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_SAME_
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_WGS84_POS_ALT;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_WGS84_POS_LAT;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_WGS84_POS_LONG;
+
+import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
+import eu.europeana.entitymanagement.definitions.model.Place;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
-import eu.europeana.entitymanagement.definitions.model.Place;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @XmlRootElement(namespace = NAMESPACE_EDM, name = XML_PLACE)
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(propOrder={
-    XML_LATITUDE,
-    XML_LONGITUDE,
-    XML_ALTITUDE,
-    NOTE,
-    XML_HAS_PART,
-    XML_IS_PART_OF,
-    XML_IS_NEXT_IN_SEQUENCE,
-    XML_SAME_AS
-})
+@XmlType(
+    propOrder = {
+      XML_LATITUDE,
+      XML_LONGITUDE,
+      XML_ALTITUDE,
+      NOTE,
+      XML_HAS_PART,
+      XML_IS_PART_OF,
+      XML_IS_NEXT_IN_SEQUENCE,
+      XML_SAME_AS
+    })
 public class XmlPlaceImpl extends XmlBaseEntityImpl<Place> {
 
   @XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.XML_SAME_AS)

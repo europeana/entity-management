@@ -10,6 +10,11 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_RDF;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_SKOS;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.PREF_LABEL;
+
+import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.utils.EntityObjectFactory;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -18,21 +23,18 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
-import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.utils.EntityObjectFactory;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(propOrder={
-    ABOUT,
-    DEPICTION,
-    IS_SHOWN_BY,
-    PREF_LABEL,
-    ALT_LABEL,
-    HIDDEN_LABEL,
-    IS_AGGREGATED_BY   
-})
+@XmlType(
+    propOrder = {
+      ABOUT,
+      DEPICTION,
+      IS_SHOWN_BY,
+      PREF_LABEL,
+      ALT_LABEL,
+      HIDDEN_LABEL,
+      IS_AGGREGATED_BY
+    })
 public abstract class XmlBaseEntityImpl<T extends Entity> {
 
   @XmlTransient protected T entity;
@@ -51,7 +53,7 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
 
   @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = PREF_LABEL)
   private List<LabelledResource> prefLabel = new ArrayList<>();
-  
+
   @XmlElement(namespace = NAMESPACE_SKOS, name = HIDDEN_LABEL)
   private List<String> hiddenLabel;
 
@@ -124,7 +126,7 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
   public List<LabelledResource> getAltLabel() {
     return this.altLabel;
   }
-  
+
   public List<String> getHiddenLabel() {
     return hiddenLabel;
   }

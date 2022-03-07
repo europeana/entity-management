@@ -19,6 +19,10 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ORGAN
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ORGANIZATION_DOMAIN;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PHONE;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_SAME_AS;
+
+import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
+import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -27,28 +31,26 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import org.springframework.util.CollectionUtils;
-import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
-import eu.europeana.entitymanagement.definitions.model.Organization;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @XmlRootElement(namespace = NAMESPACE_EDM, name = XML_ORGANIZATION)
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(propOrder={
-    XML_ACRONYM,
-    XML_DESCRIPTION,
-    XML_LOGO,
-    XML_EUROPEANA_ROLE,
-    XML_ORGANIZATION_DOMAIN,
-    XML_GEOGRAPHIC_LEVEL,
-    XML_COUNTRY,
-    XML_LANGUAGE,
-    XML_HOMEPAGE,
-    XML_PHONE,
-    XML_MBOX,
-    XML_HAS_ADDRESS,
-    XML_IDENTIFIER,
-    XML_SAME_AS
-})
+@XmlType(
+    propOrder = {
+      XML_ACRONYM,
+      XML_DESCRIPTION,
+      XML_LOGO,
+      XML_EUROPEANA_ROLE,
+      XML_ORGANIZATION_DOMAIN,
+      XML_GEOGRAPHIC_LEVEL,
+      XML_COUNTRY,
+      XML_LANGUAGE,
+      XML_HOMEPAGE,
+      XML_PHONE,
+      XML_MBOX,
+      XML_HAS_ADDRESS,
+      XML_IDENTIFIER,
+      XML_SAME_AS
+    })
 public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
 
   @XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.XML_SAME_AS)

@@ -11,27 +11,29 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IS_NE
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IS_PART_OF;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_SAME_AS;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_TIMESPAN;
+
+import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
+import eu.europeana.entitymanagement.definitions.model.TimeSpan;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
-import eu.europeana.entitymanagement.definitions.model.TimeSpan;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @XmlRootElement(namespace = NAMESPACE_EDM, name = XML_TIMESPAN)
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(propOrder={
-    XML_BEGIN,
-    XML_END,
-    NOTE,
-    XML_HAS_PART,
-    XML_IS_PART_OF,
-    XML_IS_NEXT_IN_SEQUENCE,
-    XML_SAME_AS
-})
+@XmlType(
+    propOrder = {
+      XML_BEGIN,
+      XML_END,
+      NOTE,
+      XML_HAS_PART,
+      XML_IS_PART_OF,
+      XML_IS_NEXT_IN_SEQUENCE,
+      XML_SAME_AS
+    })
 public class XmlTimeSpanImpl extends XmlBaseEntityImpl<TimeSpan> {
 
   @XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.XML_SAME_AS)

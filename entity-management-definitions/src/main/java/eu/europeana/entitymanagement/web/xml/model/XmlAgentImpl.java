@@ -28,6 +28,10 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PLACE
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PLACE_OF_DEATH;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PROFESSION_OR_OCCUPATION;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_SAME_AS;
+
+import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
+import eu.europeana.entitymanagement.definitions.model.Agent;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -35,35 +39,33 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
-import eu.europeana.entitymanagement.definitions.model.Agent;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @XmlRootElement(namespace = NAMESPACE_EDM, name = XML_AGENT)
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(propOrder={
-    XML_NAME,
-    XML_BEGIN,
-    XML_DATE_OF_BIRTH,
-    XML_DATE_OF_ESTABLISHMENT,
-    XML_END,
-    XML_DATE_OF_DEATH,
-    XML_DATE_OF_TERMINATION,
-    XML_DATE,
-    XML_PLACE_OF_BIRTH,
-    XML_PLACE_OF_DEATH,
-    XML_GENDER,
-    XML_PROFESSION_OR_OCCUPATION,
-    XML_BIOGRAPHICAL_INFORMATION,
-    NOTE,
-    XML_HAS_PART,
-    XML_IS_PART_OF,
-    XML_HASMET,
-    XML_IS_RELATED_TO,
-    XML_WAS_PRESENT_AT,
-    XML_IDENTIFIER,
-    XML_SAME_AS   
-})
+@XmlType(
+    propOrder = {
+      XML_NAME,
+      XML_BEGIN,
+      XML_DATE_OF_BIRTH,
+      XML_DATE_OF_ESTABLISHMENT,
+      XML_END,
+      XML_DATE_OF_DEATH,
+      XML_DATE_OF_TERMINATION,
+      XML_DATE,
+      XML_PLACE_OF_BIRTH,
+      XML_PLACE_OF_DEATH,
+      XML_GENDER,
+      XML_PROFESSION_OR_OCCUPATION,
+      XML_BIOGRAPHICAL_INFORMATION,
+      NOTE,
+      XML_HAS_PART,
+      XML_IS_PART_OF,
+      XML_HASMET,
+      XML_IS_RELATED_TO,
+      XML_WAS_PRESENT_AT,
+      XML_IDENTIFIER,
+      XML_SAME_AS
+    })
 public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
 
   @XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.XML_SAME_AS)
@@ -83,7 +85,7 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
 
   @XmlElement(name = XML_HASMET, namespace = NAMESPACE_EDM)
   private List<LabelledResource> hasMet = new ArrayList<>();
-  
+
   @XmlElement(name = XML_WAS_PRESENT_AT, namespace = NAMESPACE_EDM)
   private List<LabelledResource> wasPresentAt = new ArrayList<>();
 
@@ -240,7 +242,7 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
   public List<LabelledResource> getIsRelatedTo() {
     return isRelatedTo;
   }
-  
+
   public List<LabelledResource> getWasPresentAt() {
     return wasPresentAt;
   }
