@@ -15,6 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 public class ZohoOrganizationConverter {
@@ -100,7 +101,9 @@ public class ZohoOrganizationConverter {
     List<String> edmLanguage =
         ZohoUtils.stringListSupplier(zohoRecord.getKeyValue(ZohoConstants.OFFICIAL_LANGUAGE_FIELD));
     if (!edmLanguage.isEmpty()) {
-      org.setLanguage(edmLanguage);
+      List<String> edmISOLanguage =
+          edmLanguage.stream().map(ZohoUtils::toIsoLanguage).collect(Collectors.toList());
+      org.setLanguage(edmISOLanguage);
     }
 
     String hiddenLabel1 = getStringFieldValue(zohoRecord, ZohoConstants.HIDDEN_LABEL1_FIELD);

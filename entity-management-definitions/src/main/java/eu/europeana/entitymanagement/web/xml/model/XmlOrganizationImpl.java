@@ -125,7 +125,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     if (organization.getIdentifier() != null) {
       this.identifier = new ArrayList<String>(organization.getIdentifier());
     }
-    if (this.getLanguage() != null) {
+    if (organization.getLanguage() != null) {
       this.language = new ArrayList<String>(organization.getLanguage());
     }
   }
