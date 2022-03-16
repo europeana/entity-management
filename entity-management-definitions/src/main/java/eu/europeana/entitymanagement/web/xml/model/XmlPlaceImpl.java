@@ -1,19 +1,45 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.*;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_DC_TERMS;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_EDM;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_SKOS;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_WGS84_POS;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NOTE;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ALTITUDE;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_HAS_PART;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IS_NEXT_IN_SEQUENCE;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IS_PART_OF;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_LATITUDE;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_LONGITUDE;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PLACE;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_SAME_AS;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_WGS84_POS_ALT;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_WGS84_POS_LAT;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_WGS84_POS_LONG;
 
 import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
 import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement(namespace = NAMESPACE_EDM, name = XML_PLACE)
 @XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(
+    propOrder = {
+      XML_LATITUDE,
+      XML_LONGITUDE,
+      XML_ALTITUDE,
+      NOTE,
+      XML_HAS_PART,
+      XML_IS_PART_OF,
+      XML_IS_NEXT_IN_SEQUENCE,
+      XML_SAME_AS
+    })
 public class XmlPlaceImpl extends XmlBaseEntityImpl<Place> {
 
   @XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.XML_SAME_AS)
@@ -27,9 +53,6 @@ public class XmlPlaceImpl extends XmlBaseEntityImpl<Place> {
 
   @XmlElement(namespace = NAMESPACE_WGS84_POS, name = XML_WGS84_POS_ALT)
   private Float altitude;
-
-  @XmlElement(namespace = NAMESPACE_SKOS, name = HIDDEN_LABEL)
-  private List<String> hiddenLabel;
 
   @XmlElement(namespace = NAMESPACE_SKOS, name = NOTE)
   private List<LabelledResource> note;
@@ -49,9 +72,6 @@ public class XmlPlaceImpl extends XmlBaseEntityImpl<Place> {
     this.latitude = place.getLatitude();
     this.longitude = place.getLongitude();
     this.altitude = place.getAltitude();
-    if (place.getHiddenLabel() != null) {
-      this.hiddenLabel = new ArrayList<String>(place.getHiddenLabel());
-    }
     this.note = RdfXmlUtils.convertToXmlMultilingualString(place.getNote());
     this.hasPart = RdfXmlUtils.convertToRdfResource(place.getHasPart());
     this.isPartOf = RdfXmlUtils.convertToRdfResource(place.getIsPartOfArray());
@@ -69,7 +89,6 @@ public class XmlPlaceImpl extends XmlBaseEntityImpl<Place> {
     entity.setLatitude(getLatitude());
     entity.setLongitude(getLongitude());
     entity.setAltitude(getAltitude());
-    entity.setHiddenLabel(getHiddenLabel());
     entity.setNote(RdfXmlUtils.toLanguageMapList(getNote()));
     entity.setHasPart(RdfXmlUtils.toStringList(getHasPart()));
     entity.setIsPartOfArray(RdfXmlUtils.toStringList(getIsPartOf()));
@@ -88,10 +107,6 @@ public class XmlPlaceImpl extends XmlBaseEntityImpl<Place> {
 
   public Float getAltitude() {
     return altitude;
-  }
-
-  public List<String> getHiddenLabel() {
-    return hiddenLabel;
   }
 
   public List<LabelledResource> getNote() {

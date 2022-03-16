@@ -1,6 +1,15 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.*;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.ABOUT;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.ALT_LABEL;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.DEPICTION;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.HIDDEN_LABEL;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.IS_AGGREGATED_BY;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.IS_SHOWN_BY;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_FOAF;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_RDF;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_SKOS;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.PREF_LABEL;
 
 import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
@@ -8,9 +17,24 @@ import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(
+    propOrder = {
+      ABOUT,
+      DEPICTION,
+      IS_SHOWN_BY,
+      PREF_LABEL,
+      ALT_LABEL,
+      HIDDEN_LABEL,
+      IS_AGGREGATED_BY
+    })
 public abstract class XmlBaseEntityImpl<T extends Entity> {
 
   @XmlTransient protected T entity;
@@ -30,6 +54,9 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
   @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = PREF_LABEL)
   private List<LabelledResource> prefLabel = new ArrayList<>();
 
+  @XmlElement(namespace = NAMESPACE_SKOS, name = HIDDEN_LABEL)
+  private List<String> hiddenLabel;
+
   @XmlElement(namespace = XmlConstants.NAMESPACE_ORE, name = XmlConstants.IS_AGGREGATED_BY)
   private XmlAggregationImpl isAggregatedBy;
 
@@ -46,6 +73,9 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
     this.about = entity.getAbout();
     this.prefLabel = RdfXmlUtils.convertMapToXmlMultilingualString(entity.getPrefLabel());
     this.altLabel = RdfXmlUtils.convertToXmlMultilingualString(entity.getAltLabel());
+    if (entity.getHiddenLabel() != null) {
+      this.hiddenLabel = new ArrayList<String>(entity.getHiddenLabel());
+    }
     if (entity.getIsAggregatedBy() != null) {
       this.isAggregatedBy = new XmlAggregationImpl(entity.getIsAggregatedBy());
     }
@@ -66,6 +96,7 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
     entity.setEntityId(getAbout());
     entity.setPrefLabel(RdfXmlUtils.toLanguageMap(getPrefLabel()));
     entity.setAltLabel(RdfXmlUtils.toLanguageMapList(getAltLabel()));
+    entity.setHiddenLabel(getHiddenLabel());
     // sets sameAs or exactMatch values (for concepts)
     entity.setSameReferenceLinks(RdfXmlUtils.toStringList(getSameReferenceLinks()));
     if (depiction != null && !depiction.isEmpty()) {
@@ -94,6 +125,10 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
 
   public List<LabelledResource> getAltLabel() {
     return this.altLabel;
+  }
+
+  public List<String> getHiddenLabel() {
+    return hiddenLabel;
   }
 
   public T getEntity() {

@@ -1,6 +1,18 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.*;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.BROADER;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.BROAD_MATCH;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.CLOSE_MATCH;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.EXACT_MATCH;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.IN_SCHEME;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_SKOS;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NARROWER;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NARROW_MATCH;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NOTATION;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NOTE;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.RELATED;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.RELATED_MATCH;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_CONCEPT;
 
 import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
 import eu.europeana.entitymanagement.definitions.model.Concept;
@@ -11,9 +23,24 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement(name = XML_CONCEPT)
 @XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(
+    propOrder = {
+      NOTE,
+      NOTATION,
+      BROADER,
+      NARROWER,
+      RELATED,
+      BROAD_MATCH,
+      NARROW_MATCH,
+      RELATED_MATCH,
+      CLOSE_MATCH,
+      EXACT_MATCH,
+      IN_SCHEME
+    })
 public class XmlConceptImpl extends XmlBaseEntityImpl<Concept> {
 
   @XmlElement(namespace = NAMESPACE_SKOS, name = NARROWER)
@@ -46,10 +73,7 @@ public class XmlConceptImpl extends XmlBaseEntityImpl<Concept> {
   @XmlElement(namespace = NAMESPACE_SKOS, name = NOTATION)
   private List<LabelledResource> notation;
 
-  @XmlElement(namespace = NAMESPACE_SKOS, name = HIDDEN_LABEL)
-  private List<String> hiddenLabel;
-
-  @XmlElement(namespace = NAMESPACE_SKOS, name = IN_SCHEMA)
+  @XmlElement(namespace = NAMESPACE_SKOS, name = IN_SCHEME)
   private List<LabelledResource> inScheme;
 
   public XmlConceptImpl() {
@@ -69,9 +93,6 @@ public class XmlConceptImpl extends XmlBaseEntityImpl<Concept> {
     this.closeMatch = RdfXmlUtils.convertToRdfResource(concept.getCloseMatch());
     this.note = RdfXmlUtils.convertToXmlMultilingualString(concept.getNote());
     this.notation = RdfXmlUtils.convertToXmlMultilingualString(concept.getNotation());
-    if (concept.getHiddenLabel() != null) {
-      this.hiddenLabel = new ArrayList<String>(concept.getHiddenLabel());
-    }
     this.inScheme = RdfXmlUtils.convertToRdfResource(concept.getInScheme());
   }
 
@@ -89,7 +110,6 @@ public class XmlConceptImpl extends XmlBaseEntityImpl<Concept> {
     entity.setInScheme(RdfXmlUtils.toStringList(getInScheme()));
     entity.setNote(RdfXmlUtils.toLanguageMapList(getNote()));
     entity.setNotation(RdfXmlUtils.toLanguageMapList(getNotation()));
-    entity.setHiddenLabel(getHiddenLabel());
     this.inScheme = RdfXmlUtils.convertToRdfResource(entity.getInScheme());
 
     return entity;
@@ -129,10 +149,6 @@ public class XmlConceptImpl extends XmlBaseEntityImpl<Concept> {
 
   public List<LabelledResource> getNotation() {
     return this.notation;
-  }
-
-  public List<String> getHiddenLabel() {
-    return this.hiddenLabel;
   }
 
   public List<LabelledResource> getNote() {

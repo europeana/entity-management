@@ -6,6 +6,7 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DEPICTION;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.END;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_PART;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HIDDEN_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_NEXT_IN_SEQUENCE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_PART_OF;
@@ -35,6 +36,7 @@ import java.util.List;
   IS_SHOWN_BY,
   PREF_LABEL,
   ALT_LABEL,
+  HIDDEN_LABEL,
   BEGIN,
   END,
   NOTE,

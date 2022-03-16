@@ -1,6 +1,33 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.*;
+import static eu.europeana.entitymanagement.vocabulary.XmlFields.XML_WAS_PRESENT_AT;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_DC;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_DC_TERMS;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_EDM;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_FOAF;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_RDAGR2;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_SKOS;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NOTE;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_AGENT;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_BEGIN;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_BIOGRAPHICAL_INFORMATION;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_DATE;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_DATE_OF_BIRTH;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_DATE_OF_DEATH;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_DATE_OF_ESTABLISHMENT;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_DATE_OF_TERMINATION;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_END;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_GENDER;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_HASMET;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_HAS_PART;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IDENTIFIER;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IS_PART_OF;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IS_RELATED_TO;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_NAME;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PLACE_OF_BIRTH;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PLACE_OF_DEATH;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PROFESSION_OR_OCCUPATION;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_SAME_AS;
 
 import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
 import eu.europeana.entitymanagement.definitions.model.Agent;
@@ -11,9 +38,34 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement(namespace = NAMESPACE_EDM, name = XML_AGENT)
 @XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(
+    propOrder = {
+      XML_NAME,
+      XML_BEGIN,
+      XML_DATE_OF_BIRTH,
+      XML_DATE_OF_ESTABLISHMENT,
+      XML_END,
+      XML_DATE_OF_DEATH,
+      XML_DATE_OF_TERMINATION,
+      XML_DATE,
+      XML_PLACE_OF_BIRTH,
+      XML_PLACE_OF_DEATH,
+      XML_GENDER,
+      XML_PROFESSION_OR_OCCUPATION,
+      XML_BIOGRAPHICAL_INFORMATION,
+      NOTE,
+      XML_HAS_PART,
+      XML_IS_PART_OF,
+      XML_HASMET,
+      XML_IS_RELATED_TO,
+      XML_WAS_PRESENT_AT,
+      XML_IDENTIFIER,
+      XML_SAME_AS
+    })
 public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
 
   @XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.XML_SAME_AS)
@@ -34,8 +86,8 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
   @XmlElement(name = XML_HASMET, namespace = NAMESPACE_EDM)
   private List<LabelledResource> hasMet = new ArrayList<>();
 
-  @XmlElement(name = HIDDEN_LABEL, namespace = NAMESPACE_SKOS)
-  private List<String> hiddenLabel = new ArrayList<>();
+  @XmlElement(name = XML_WAS_PRESENT_AT, namespace = NAMESPACE_EDM)
+  private List<LabelledResource> wasPresentAt = new ArrayList<>();
 
   @XmlElement(name = XML_BIOGRAPHICAL_INFORMATION, namespace = NAMESPACE_RDAGR2)
   private List<LabelledResource> biographicalInformation = new ArrayList<>();
@@ -65,7 +117,7 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
   private List<String> dateOfTermination;
 
   @XmlElement(name = XML_DATE, namespace = NAMESPACE_DC)
-  private List<String> dcDate;
+  private List<String> date;
 
   @XmlElement(name = XML_GENDER, namespace = NAMESPACE_RDAGR2)
   private List<String> gender;
@@ -82,9 +134,6 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
   public XmlAgentImpl(Agent agent) {
     super(agent);
     this.sameAs = RdfXmlUtils.convertToRdfResource(agent.getSameReferenceLinks());
-    if (agent.getHiddenLabel() != null) {
-      this.hiddenLabel = new ArrayList<String>(agent.getHiddenLabel());
-    }
     this.note = RdfXmlUtils.convertToXmlMultilingualString(agent.getNote());
     if (agent.getIdentifier() != null) {
       this.identifier = agent.getIdentifier();
@@ -99,6 +148,7 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
     }
     this.hasMet = RdfXmlUtils.convertToRdfResource(agent.getHasMet());
     this.isRelatedTo = RdfXmlUtils.convertToRdfResource(agent.getIsRelatedTo());
+    this.wasPresentAt = RdfXmlUtils.convertToRdfResource(agent.getWasPresentAt());
     this.name = RdfXmlUtils.convertMapToXmlMultilingualString(agent.getName());
     this.biographicalInformation =
         RdfXmlUtils.convertToXmlMultilingualString(agent.getBiographicalInformation());
@@ -115,7 +165,7 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
       this.dateOfTermination = agent.getDateOfTermination();
     }
     if (agent.getDate() != null) {
-      this.dcDate = agent.getDate();
+      this.date = agent.getDate();
     }
     if (agent.getGender() != null) {
       this.gender = agent.getGender();
@@ -133,7 +183,6 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
   @Override
   public Agent toEntityModel() throws EntityCreationException {
     super.toEntityModel();
-    entity.setHiddenLabel(hiddenLabel);
     entity.setNote(RdfXmlUtils.toLanguageMapList(note));
     entity.setIdentifier(identifier);
     entity.setHasPart(RdfXmlUtils.toStringList(hasPart));
@@ -142,13 +191,14 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
     entity.setEnd(end);
     entity.setHasMet(RdfXmlUtils.toStringList(hasMet));
     entity.setIsRelatedTo(RdfXmlUtils.toStringList(isRelatedTo));
+    entity.setWasPresentAt(RdfXmlUtils.toStringList(wasPresentAt));
     entity.setName(RdfXmlUtils.toLanguageMap(name));
     entity.setBiographicalInformation(RdfXmlUtils.toLanguageMapList(biographicalInformation));
     entity.setDateOfBirth(dateOfBirth);
     entity.setDateOfDeath(dateOfDeath);
     entity.setDateOfEstablishment(dateOfEstablishment);
     entity.setDateOfTermination(dateOfTermination);
-    entity.setDate(dcDate);
+    entity.setDate(date);
     entity.setGender(gender);
     entity.setPlaceOfBirth(RdfXmlUtils.toStringList(placeOfBirth));
     entity.setPlaceOfDeath(RdfXmlUtils.toStringList(placeOfDeath));
@@ -157,16 +207,12 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
     return entity;
   }
 
-  public List<String> getHiddenLabel() {
-    return hiddenLabel;
-  }
-
   public List<LabelledResource> getNote() {
     return note;
   }
 
-  public List<String> getDcDate() {
-    return dcDate;
+  public List<String> getDate() {
+    return date;
   }
 
   public List<String> getIdentifier() {
@@ -195,6 +241,10 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
 
   public List<LabelledResource> getIsRelatedTo() {
     return isRelatedTo;
+  }
+
+  public List<LabelledResource> getWasPresentAt() {
+    return wasPresentAt;
   }
 
   public List<LabelledResource> getName() {
