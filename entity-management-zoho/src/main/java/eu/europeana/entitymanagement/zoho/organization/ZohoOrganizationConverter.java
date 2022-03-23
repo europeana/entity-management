@@ -6,6 +6,7 @@ import com.zoho.crm.api.record.Record;
 import com.zoho.crm.api.users.User;
 import eu.europeana.entitymanagement.definitions.model.Address;
 import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
@@ -46,7 +47,8 @@ public class ZohoOrganizationConverter {
     String acronym = getStringFieldValue(zohoRecord, ZohoConstants.ACRONYM_FIELD);
     String langAcronym = getStringFieldValue(zohoRecord, ZohoConstants.LANG_ACRONYM_FIELD);
     org.setAcronym(ZohoUtils.createLanguageMapOfStringList(langAcronym, acronym));
-    org.setLogo(getStringFieldValue(zohoRecord, ZohoConstants.LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD));
+    String logoFieldName = ZohoConstants.LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD;
+    org.setLogo(buildWebResource(zohoRecord, logoFieldName));
     org.setHomepage(getStringFieldValue(zohoRecord, ZohoConstants.WEBSITE_FIELD));
     List<String> organizationRoleStringList =
         ZohoUtils.stringListSupplier(zohoRecord.getKeyValue(ZohoConstants.ORGANIZATION_ROLE_FIELD));
@@ -134,6 +136,17 @@ public class ZohoOrganizationConverter {
     }
 
     return org;
+  }
+
+  static WebResource buildWebResource(Record zohoRecord, String logoFieldName) {
+    String id = getStringFieldValue(zohoRecord, logoFieldName);
+    if(id == null) {
+      return null;
+    }
+    WebResource resource = new WebResource();
+    resource.setId(id);
+    resource.setSource(EntityUtils.createWikimediaResourceString(id));
+    return resource;
   }
 
   private static Map<String, String> getPrefLabel(Map<String, List<String>> allLabels) {

@@ -9,8 +9,11 @@ import java.util.List;
 public class EntityUtils {
 
   public static String createWikimediaResourceString(String wikimediaCommonsId) {
-    assert wikimediaCommonsId.contains("Special:FilePath/");
-    return wikimediaCommonsId.replace("Special:FilePath/", "File:");
+    if (wikimediaCommonsId != null && wikimediaCommonsId.contains("/Special:FilePath/")) {
+      return wikimediaCommonsId.replace("/Special:FilePath/", "/File:");
+    }
+     
+    return null; 
   }
 
   public static String toGeoUri(String latLon) {
