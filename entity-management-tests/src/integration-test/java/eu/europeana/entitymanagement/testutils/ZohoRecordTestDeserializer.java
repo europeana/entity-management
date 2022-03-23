@@ -64,25 +64,15 @@ public class ZohoRecordTestDeserializer extends StdDeserializer<Record> {
 
       if (currentNode == null) {
         continue;
-      }else if(LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD.equals(key)) {
-        System.out.println(currentNode.isObject());
-        System.out.println(currentNode.getNodeType());
-        
       }
 
-      // JSON contains strings, arrays, or JSONObjects
+      // JSON contains strings, arrays
       if (currentNode.isTextual()) {
         record.addKeyValue(key, currentNode.asText());
       } else if (currentNode.isArray()) {
         List<Choice<?>> values = new ArrayList<Choice<?>>();
         currentNode.elements().forEachRemaining(v -> values.add(new Choice<String>(v.asText())));
         record.addKeyValue(key, values);
-      }else 
-//        if (currentNode.isObject())
-        {
-        //logo is object
-        System.out.println(currentNode.isObject());
-        System.out.println(currentNode.getNodeType());
       }
     }
 

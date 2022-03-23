@@ -146,6 +146,13 @@ class DereferenceServiceIT extends AbstractIntegrationTest {
   }
 
   @Test
+  public void wikidataOrganizationBNFDereferenceTest() throws ZohoException, Exception {
+    //BNF
+    dereferenceWikidataOrganization(IntegrationTestUtils.ORGANIZATION_BNF_URI_WIKIDATA_URI);
+  }
+
+
+  @Test
   public void wikidataOrganizationBergerMuseumDereferenceTest() throws ZohoException, Exception {
     // Berger Museum
     dereferenceWikidataOrganization(IntegrationTestUtils.ORGANIZATION_BERGER_MUSEUM_WIKIDATA_URI);
@@ -156,7 +163,7 @@ class DereferenceServiceIT extends AbstractIntegrationTest {
     // GFM
     dereferenceWikidataOrganization(IntegrationTestUtils.ORGANIZATION_GFM_URI_WIKIDATA_URI);
   }
-
+  
   void dereferenceWikidataOrganization(String organizationId) throws Exception {
     Dereferencer dereferencer =
         dereferenceServiceLocator.getDereferencer(organizationId, "Organization");
