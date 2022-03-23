@@ -63,7 +63,7 @@ public class XmlWebResourceImpl {
     WebResource webResource = new WebResource();
     webResource.setId(xmlWebResource.about);
 
-    if (xmlWebResource.source != null) {
+    if (xmlWebResource.source != null && StringUtils.hasLength(xmlWebResource.source.getResource())) {
       webResource.setSource(xmlWebResource.source.getResource());
     }else {
       webResource.setSource(EntityUtils.createWikimediaResourceString(webResource.getId()));

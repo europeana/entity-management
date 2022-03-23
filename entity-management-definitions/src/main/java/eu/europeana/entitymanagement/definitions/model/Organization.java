@@ -63,7 +63,6 @@ public class Organization extends Entity {
   private String type = EntityTypes.Organization.getEntityType();
   private Map<String, String> description;
   private Map<String, List<String>> acronym;
-//  private String logo;
   private WebResource logo;
   private String homepage;
   private List<String> phone;
