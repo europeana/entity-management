@@ -31,8 +31,12 @@ public class XmlWebResourceImpl {
 
   public XmlWebResourceImpl(String about, String source, String thumbnail) {
     this.about = about;
-    this.thumbnail = new LabelledResource(thumbnail);
-    this.source = new LabelledResource(source);
+    if(thumbnail != null) {
+      this.thumbnail = new LabelledResource(thumbnail);
+    }
+    if(source != null) {
+      this.source = new LabelledResource(source);
+    }
   }
 
   public String getAbout() {
