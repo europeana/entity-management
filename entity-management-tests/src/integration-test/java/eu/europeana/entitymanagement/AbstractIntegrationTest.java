@@ -173,8 +173,8 @@ public abstract class AbstractIntegrationTest {
                 IntegrationTestUtils.loadFile(
                     IntegrationTestUtils.ORGANIZATION_BERGER_MUSEUM_WIKIDATA_RESPONSE_XML);
             return new MockResponse().setResponseCode(200).setBody(responseBody);
-          } else if (IntegrationTestUtils.ORGANIZATION_BNF_WIKIDATA_URI_PATH_SUFFIX
-              .equals(request.getPath())) {
+          } else if (IntegrationTestUtils.ORGANIZATION_BNF_WIKIDATA_URI_PATH_SUFFIX.equals(
+              request.getPath())) {
             String responseBody =
                 IntegrationTestUtils.loadFile(
                     IntegrationTestUtils.ORGANIZATION_BNF_WIKIDATA_RESPONSE_XML);

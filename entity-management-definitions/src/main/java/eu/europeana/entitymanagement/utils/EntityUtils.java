@@ -12,8 +12,8 @@ public class EntityUtils {
     if (wikimediaCommonsId != null && wikimediaCommonsId.contains("/Special:FilePath/")) {
       return wikimediaCommonsId.replace("/Special:FilePath/", "/File:");
     }
-     
-    return null; 
+
+    return null;
   }
 
   public static String toGeoUri(String latLon) {

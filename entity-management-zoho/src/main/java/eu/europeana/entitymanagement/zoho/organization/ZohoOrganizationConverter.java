@@ -138,9 +138,9 @@ public class ZohoOrganizationConverter {
     return org;
   }
 
-  static WebResource buildWebResource(Record zohoRecord, String logoFieldName) {
+  private static WebResource buildWebResource(Record zohoRecord, String logoFieldName) {
     String id = getStringFieldValue(zohoRecord, logoFieldName);
-    if(id == null) {
+    if (id == null) {
       return null;
     }
     WebResource resource = new WebResource();

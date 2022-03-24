@@ -335,9 +335,11 @@ public final class SchemaOrgUtils {
         SchemaOrgConstants.PROPERTY_MAIN_ENTITY_OF_PAGE);
 
     // logo
-    if(organization.getLogo() != null) {
+    if (organization.getLogo() != null) {
       addTextProperties(
-          entityObject, Arrays.asList(organization.getLogo().getId()), SchemaOrgConstants.PROPERTY_LOGO);
+          entityObject,
+          Arrays.asList(organization.getLogo().getId()),
+          SchemaOrgConstants.PROPERTY_LOGO);
     }
 
     // telephone

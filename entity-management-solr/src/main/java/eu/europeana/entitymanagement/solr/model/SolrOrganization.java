@@ -81,8 +81,8 @@ public class SolrOrganization extends SolrEntity<Organization> {
 
     setDescription(organization.getDescription());
     setAcronym(organization.getAcronym());
-    if(organization.getLogo() != null) {
-      this.logo = organization.getLogo().getId();  
+    if (organization.getLogo() != null) {
+      this.logo = organization.getLogo().getId();
     }
     this.homepage = organization.getHomepage();
     this.phone = organization.getPhone();

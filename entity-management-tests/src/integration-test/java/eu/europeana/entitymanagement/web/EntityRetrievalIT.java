@@ -36,7 +36,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @AutoConfigureMockMvc
 public class EntityRetrievalIT extends BaseWebControllerTest {
 
-  private static final String BNF_LOGO = "http://commons.wikimedia.org/wiki/Special:FilePath/Logo_BnF.svg";
+  private static final String BNF_LOGO =
+      "http://commons.wikimedia.org/wiki/Special:FilePath/Logo_BnF.svg";
 
   @Autowired private FailedTaskService failedTaskService;
 
@@ -171,12 +172,12 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
     String requestPath = getEntityRequestPath(entityId);
     String entityBaseXpath = "/rdf:RDF/skos:Concept";
     ResultActions resultActions =
-        mockMvc
-            .perform(
-                get(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath + ".xml")
-                    .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
-                    .accept(MediaType.APPLICATION_XML));
-    resultActions.andExpect(status().isOk())
+        mockMvc.perform(
+            get(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath + ".xml")
+                .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                .accept(MediaType.APPLICATION_XML));
+    resultActions
+        .andExpect(status().isOk())
         .andExpect(xpath(entityBaseXpath + "/@rdf:about", xmlNamespaces).string(entityId))
         .andExpect(
             xpath(entityBaseXpath + "/skos:prefLabel", xmlNamespaces).nodeCount(greaterThan(0)));
@@ -435,20 +436,20 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
     String entityId = createOrganization(europeanaMetadata, zohoRecord.get()).getEntityId();
 
     String requestPath = getEntityRequestPath(entityId);
-    ResultActions result = mockMvc
-        .perform(
+    ResultActions result =
+        mockMvc.perform(
             get(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath + ".jsonld")
                 .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
                 .accept(MediaType.APPLICATION_JSON));
-    
-    result.andExpect(status().isOk())
+
+    result
+        .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(entityId)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())))
         .andExpect(jsonPath("$.logo.id", is(BNF_LOGO)))
         .andExpect(jsonPath("$.sameAs").isNotEmpty());
   }
 
-  
   @Test
   public void retrieveOrganizationXmlExternalShouldBeSuccessful() throws Exception {
     // id in JSON matches ORGANIZATION_GFM_URI_ZOHO value
@@ -463,12 +464,14 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
     String entityBaseXpath = "/rdf:RDF/edm:Organization";
 
     String requestPath = getEntityRequestPath(entityId);
-    ResultActions result = mockMvc
-        .perform(
+    ResultActions result =
+        mockMvc.perform(
             get(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath + ".xml")
                 .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
-                .accept(MediaType.APPLICATION_JSON)); //deliberately test the path extension precedence
-    result.andExpect(status().isOk())
+                .accept(
+                    MediaType.APPLICATION_JSON)); // deliberately test the path extension precedence
+    result
+        .andExpect(status().isOk())
         .andExpect(xpath(entityBaseXpath + "/@rdf:about", xmlNamespaces).string(entityId))
         .andExpect(xpath(entityBaseXpath + "/@rdf:about", xmlNamespaces).string(entityId))
         .andExpect(
@@ -489,18 +492,20 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
     String entityBaseXpath = "/rdf:RDF/edm:Organization";
 
     String requestPath = getEntityRequestPath(entityId);
-    ResultActions result = mockMvc
-        .perform(
+    ResultActions result =
+        mockMvc.perform(
             get(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath + ".xml")
                 .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
-                .accept(MediaType.APPLICATION_JSON)); //deliberately test the path extension precedence
-    result.andExpect(status().isOk())
+                .accept(
+                    MediaType.APPLICATION_JSON)); // deliberately test the path extension precedence
+    result
+        .andExpect(status().isOk())
         .andExpect(xpath(entityBaseXpath + "/@rdf:about", xmlNamespaces).string(entityId))
         .andExpect(xpath(entityBaseXpath + "/foaf:logo/@rdf:about", xmlNamespaces).string(BNF_LOGO))
         .andExpect(
             xpath(entityBaseXpath + "/skos:prefLabel", xmlNamespaces).nodeCount(greaterThan(0)));
   }
-  
+
   @Test
   public void retrievePlaceJsonExternalShouldBeSuccessful() throws Exception {
     String europeanaMetadata = loadFile(IntegrationTestUtils.PLACE_REGISTER_PARIS_JSON);

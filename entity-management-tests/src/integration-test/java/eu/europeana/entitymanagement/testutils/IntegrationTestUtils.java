@@ -179,11 +179,10 @@ public class IntegrationTestUtils {
   public static final String ORGANIZATION_BERGER_MUSEUM_WIKIDATA_URI =
       WIKIDATA_BASE_URI + ORGANIZATION_BERGER_MUSEUM_WIKIDATA_URI_PATH_SUFFIX;
 
-  public static final String ORGANIZATION_BNF_WIKIDATA_URI_PATH_SUFFIX =
-      "/entity/Q193563";
+  public static final String ORGANIZATION_BNF_WIKIDATA_URI_PATH_SUFFIX = "/entity/Q193563";
   public static final String ORGANIZATION_BNF_URI_WIKIDATA_URI =
       WIKIDATA_BASE_URI + ORGANIZATION_BNF_WIKIDATA_URI_PATH_SUFFIX;
-  
+
   public static final String ORGANIZATION_NATURALIS_ZOHO_RESPONSE =
       "/zoho-deref/organization_zoho_naturalis_response.json";
   public static final String ORGANIZATION_GFM_ZOHO_RESPONSE =
@@ -204,8 +203,6 @@ public class IntegrationTestUtils {
   public static final String ORGANIZATION_BNF_WIKIDATA_RESPONSE_XML =
       "/wikidata-deref/organization_wikidata_bnf_response.xml";
 
-
-  
   /** Creates an ObjectMapper specifically for handling Mock zoho responses */
   private static final ObjectMapper zohoResponseObjectMapper =
       new ObjectMapper()
