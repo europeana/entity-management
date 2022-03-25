@@ -76,7 +76,7 @@ public class ScoringServiceTest {
   }
 
   @Test
-//  @Disabled("Excluded from automated runs as this requires Search API")
+  @Disabled("Excluded from automated runs as this requires Search API")
   public void testComputeMetricsForTimeSpan() throws Exception {
 
     TimeSpan entity = new TimeSpan();
