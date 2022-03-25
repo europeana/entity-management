@@ -33,7 +33,7 @@ import org.springframework.context.annotation.PropertySource;
 public class DataSourceConfig {
 
   private static final Logger logger = LogManager.getLogger(DataSourceConfig.class);
-  long DEFAULT_MONGO_MAX_IDLE_TIME_MILLISEC = 60000;
+  private long defaultMongoMaxIdleTimeMillisec = 60000;
 
   @Value("${mongo.connectionUrl}")
   private String hostUri;
@@ -62,16 +62,21 @@ public class DataSourceConfig {
             MongoClientSettings.getDefaultCodecRegistry());
 
     if (mongoMaxIdleTimeMillisec <= 0) {
-      mongoMaxIdleTimeMillisec = DEFAULT_MONGO_MAX_IDLE_TIME_MILLISEC;
+      mongoMaxIdleTimeMillisec = defaultMongoMaxIdleTimeMillisec;
     }
 
     Block<ConnectionPoolSettings.Builder> connectionPoolSettingsBlockBuilder =
-        new Block<ConnectionPoolSettings.Builder>() {
-          @Override
-          public void apply(final ConnectionPoolSettings.Builder builder) {
-            builder.maxConnectionIdleTime(mongoMaxIdleTimeMillisec, TimeUnit.MILLISECONDS);
-          }
+        (ConnectionPoolSettings.Builder builder) -> {
+          builder.maxConnectionIdleTime(mongoMaxIdleTimeMillisec, TimeUnit.MILLISECONDS);
         };
+
+    //    Block<ConnectionPoolSettings.Builder> connectionPoolSettingsBlockBuilder =
+    //        new Block<ConnectionPoolSettings.Builder>() {
+    //          @Override
+    //          public void apply(final ConnectionPoolSettings.Builder builder) {
+    //            builder.maxConnectionIdleTime(mongoMaxIdleTimeMillisec, TimeUnit.MILLISECONDS);
+    //          }
+    //        };
 
     return MongoClients.create(
         MongoClientSettings.builder()
