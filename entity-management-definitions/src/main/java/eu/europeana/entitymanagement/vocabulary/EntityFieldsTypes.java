@@ -97,7 +97,7 @@ public enum EntityFieldsTypes {
   description(EntityFieldsTypes.FIELD_TYPE_TEXT, true, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
 
   // Organization-specific fields
-  logo(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
+  logo(EntityFieldsTypes.FIELD_TYPE_WEB_RESOURCE, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
   europeanaRole(
       EntityFieldsTypes.FIELD_TYPE_KEYWORD, true, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
   organizationDomain(

@@ -66,7 +66,7 @@ public class ZohoRecordTestDeserializer extends StdDeserializer<Record> {
         continue;
       }
 
-      // JSON only contains strings or arrays
+      // JSON contains strings, arrays
       if (currentNode.isTextual()) {
         record.addKeyValue(key, currentNode.asText());
       } else if (currentNode.isArray()) {

@@ -36,13 +36,17 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @AutoConfigureMockMvc
 public class EntityRetrievalIT extends BaseWebControllerTest {
 
+  private static final String BNF_LOGO =
+      "http://commons.wikimedia.org/wiki/Special:FilePath/Logo_BnF.svg";
+
   @Autowired private FailedTaskService failedTaskService;
 
   Map<String, String> xmlNamespaces =
       Map.of(
           "edm", XmlConstants.NAMESPACE_EDM,
           "rdf", XmlConstants.NAMESPACE_RDF,
-          "skos", XmlConstants.NAMESPACE_SKOS);
+          "skos", XmlConstants.NAMESPACE_SKOS,
+          "foaf", XmlConstants.NAMESPACE_FOAF);
 
   @Test
   public void shouldRetrieveEntitiesWithFailures() throws Exception {
@@ -168,16 +172,15 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
     String requestPath = getEntityRequestPath(entityId);
     String entityBaseXpath = "/rdf:RDF/skos:Concept";
     ResultActions resultActions =
-        mockMvc
-            .perform(
-                get(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath + ".xml")
-                    .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
-                    .accept(MediaType.APPLICATION_XML))
-            .andExpect(status().isOk())
-            .andExpect(xpath(entityBaseXpath + "/@rdf:about", xmlNamespaces).string(entityId))
-            .andExpect(
-                xpath(entityBaseXpath + "/skos:prefLabel", xmlNamespaces)
-                    .nodeCount(greaterThan(0)));
+        mockMvc.perform(
+            get(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath + ".xml")
+                .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                .accept(MediaType.APPLICATION_XML));
+    resultActions
+        .andExpect(status().isOk())
+        .andExpect(xpath(entityBaseXpath + "/@rdf:about", xmlNamespaces).string(entityId))
+        .andExpect(
+            xpath(entityBaseXpath + "/skos:prefLabel", xmlNamespaces).nodeCount(greaterThan(0)));
   }
 
   @Test
@@ -422,8 +425,34 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
   }
 
   @Test
-  public void retrieveOrganizationXmlExternalShouldBeSuccessful() throws Exception {
+  public void retrieveOrganizationJsonBNFShouldBeSuccessful() throws Exception {
     // id in JSON matches ORGANIZATION_BNF_URI_ZOHO value
+    String europeanaMetadata = loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_BNF_ZOHO_JSON);
+    Optional<Record> zohoRecord =
+        IntegrationTestUtils.getZohoOrganizationRecord(
+            IntegrationTestUtils.ORGANIZATION_BNF_URI_ZOHO);
+
+    assert zohoRecord.isPresent() : "Mocked Zoho response not loaded";
+    String entityId = createOrganization(europeanaMetadata, zohoRecord.get()).getEntityId();
+
+    String requestPath = getEntityRequestPath(entityId);
+    ResultActions result =
+        mockMvc.perform(
+            get(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath + ".jsonld")
+                .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                .accept(MediaType.APPLICATION_JSON));
+
+    result
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id", is(entityId)))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())))
+        .andExpect(jsonPath("$.logo.id", is(BNF_LOGO)))
+        .andExpect(jsonPath("$.sameAs").isNotEmpty());
+  }
+
+  @Test
+  public void retrieveOrganizationXmlExternalShouldBeSuccessful() throws Exception {
+    // id in JSON matches ORGANIZATION_GFM_URI_ZOHO value
     String europeanaMetadata = loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_GFM_ZOHO_JSON);
     Optional<Record> zohoRecord =
         IntegrationTestUtils.getZohoOrganizationRecord(
@@ -435,13 +464,44 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
     String entityBaseXpath = "/rdf:RDF/edm:Organization";
 
     String requestPath = getEntityRequestPath(entityId);
-    mockMvc
-        .perform(
+    ResultActions result =
+        mockMvc.perform(
             get(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath + ".xml")
                 .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
-                .accept(MediaType.APPLICATION_JSON))
+                .accept(
+                    MediaType.APPLICATION_JSON)); // deliberately test the path extension precedence
+    result
         .andExpect(status().isOk())
         .andExpect(xpath(entityBaseXpath + "/@rdf:about", xmlNamespaces).string(entityId))
+        .andExpect(xpath(entityBaseXpath + "/@rdf:about", xmlNamespaces).string(entityId))
+        .andExpect(
+            xpath(entityBaseXpath + "/skos:prefLabel", xmlNamespaces).nodeCount(greaterThan(0)));
+  }
+
+  @Test
+  public void retrieveOrganizationXmlBNFShouldBeSuccessful() throws Exception {
+    // id in JSON matches ORGANIZATION_BNF_URI_ZOHO value
+    String europeanaMetadata = loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_BNF_ZOHO_JSON);
+    Optional<Record> zohoRecord =
+        IntegrationTestUtils.getZohoOrganizationRecord(
+            IntegrationTestUtils.ORGANIZATION_BNF_URI_ZOHO);
+
+    assert zohoRecord.isPresent() : "Mocked Zoho response not loaded";
+    String entityId = createOrganization(europeanaMetadata, zohoRecord.get()).getEntityId();
+
+    String entityBaseXpath = "/rdf:RDF/edm:Organization";
+
+    String requestPath = getEntityRequestPath(entityId);
+    ResultActions result =
+        mockMvc.perform(
+            get(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath + ".xml")
+                .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                .accept(
+                    MediaType.APPLICATION_JSON)); // deliberately test the path extension precedence
+    result
+        .andExpect(status().isOk())
+        .andExpect(xpath(entityBaseXpath + "/@rdf:about", xmlNamespaces).string(entityId))
+        .andExpect(xpath(entityBaseXpath + "/foaf:logo/@rdf:about", xmlNamespaces).string(BNF_LOGO))
         .andExpect(
             xpath(entityBaseXpath + "/skos:prefLabel", xmlNamespaces).nodeCount(greaterThan(0)));
   }

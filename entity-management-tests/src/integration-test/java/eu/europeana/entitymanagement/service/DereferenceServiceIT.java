@@ -146,6 +146,12 @@ class DereferenceServiceIT extends AbstractIntegrationTest {
   }
 
   @Test
+  public void wikidataOrganizationBNFDereferenceTest() throws ZohoException, Exception {
+    // BNF
+    dereferenceWikidataOrganization(IntegrationTestUtils.ORGANIZATION_BNF_URI_WIKIDATA_URI);
+  }
+
+  @Test
   public void wikidataOrganizationBergerMuseumDereferenceTest() throws ZohoException, Exception {
     // Berger Museum
     dereferenceWikidataOrganization(IntegrationTestUtils.ORGANIZATION_BERGER_MUSEUM_WIKIDATA_URI);

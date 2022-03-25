@@ -6,6 +6,7 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_RDF;
 
 import eu.europeana.entitymanagement.definitions.model.WebResource;
+import eu.europeana.entitymanagement.utils.EntityUtils;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -31,8 +32,12 @@ public class XmlWebResourceImpl {
 
   public XmlWebResourceImpl(String about, String source, String thumbnail) {
     this.about = about;
-    this.thumbnail = new LabelledResource(thumbnail);
-    this.source = new LabelledResource(source);
+    if (thumbnail != null) {
+      this.thumbnail = new LabelledResource(thumbnail);
+    }
+    if (source != null) {
+      this.source = new LabelledResource(source);
+    }
   }
 
   public String getAbout() {
@@ -48,6 +53,9 @@ public class XmlWebResourceImpl {
   }
 
   public static XmlWebResourceImpl fromWebResource(WebResource webResource) {
+    if (webResource == null) {
+      return null;
+    }
     return new XmlWebResourceImpl(
         webResource.getId(), webResource.getSource(), webResource.getThumbnail());
   }
@@ -56,9 +64,13 @@ public class XmlWebResourceImpl {
     WebResource webResource = new WebResource();
     webResource.setId(xmlWebResource.about);
 
-    if (xmlWebResource.source != null) {
+    if (xmlWebResource.source != null
+        && StringUtils.hasLength(xmlWebResource.source.getResource())) {
       webResource.setSource(xmlWebResource.source.getResource());
+    } else {
+      webResource.setSource(EntityUtils.createWikimediaResourceString(webResource.getId()));
     }
+
     if (xmlWebResource.thumbnail != null) {
       webResource.setThumbnail(xmlWebResource.thumbnail.getResource());
     }
