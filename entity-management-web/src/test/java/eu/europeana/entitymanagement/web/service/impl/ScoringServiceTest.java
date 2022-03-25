@@ -3,13 +3,7 @@ package eu.europeana.entitymanagement.web.service.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.annotation.Resource;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.config.SerializationConfig;
@@ -23,6 +17,13 @@ import eu.europeana.entitymanagement.web.model.scoring.EntityMetrics;
 import eu.europeana.entitymanagement.web.model.scoring.MaxEntityMetrics;
 import eu.europeana.entitymanagement.web.service.EnrichmentCountQueryService;
 import eu.europeana.entitymanagement.web.service.ScoringService;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Resource;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
 /** Integration test for testing the ScoringService */
 // TODO: create a "proper" integration test with this
@@ -82,9 +83,7 @@ public class ScoringServiceTest {
     TimeSpan entity = new TimeSpan();
     String entityId = "http://data.europeana.eu/timespan/21";
     entity.setEntityId(entityId);
-    List<String> sameAs =
-        List.of(
-            "http://www.wikidata.org/entity/Q6939");
+    List<String> sameAs = List.of("http://www.wikidata.org/entity/Q6939");
     entity.setSameReferenceLinks(sameAs);
 
     Map<String, String> prefLabels = new HashMap<String, String>();
@@ -102,8 +101,7 @@ public class ScoringServiceTest {
     // value may increase in time, currently 2301560
     assertTrue(metrics.getScore() > 2301500);
   }
-  
-  
+
   @Test
   @Disabled("Excluded from automated runs as this requires Search API")
   public void testComputeMetricsForPlaces() throws Exception {

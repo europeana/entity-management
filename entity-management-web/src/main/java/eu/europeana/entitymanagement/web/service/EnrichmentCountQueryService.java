@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.web.service;
 
-import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPathWithBase;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPath;
+import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPathWithBase;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BASE_DATA_EUROPEANA_URI;
 
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
@@ -54,8 +54,7 @@ public class EnrichmentCountQueryService {
   public int getEnrichmentCount(String entityId, String type) {
     String searchQuery =
         String.format(
-            "%s:%s ",
-            ENRICHMENT_QUERY_FIELD_MAP.get(type), getEntityIdForQuery(entityId, type));
+            "%s:%s ", ENRICHMENT_QUERY_FIELD_MAP.get(type), getEntityIdForQuery(entityId, type));
 
     if (!EntityTypes.Organization.getEntityType().equals(type)) {
       searchQuery = searchQuery + contentTier;
@@ -109,14 +108,20 @@ public class EnrichmentCountQueryService {
     // not applicable for organizations and timespans
     if (EntityTypes.TimeSpan.getEntityType().equals(type)
         || EntityTypes.Organization.getEntityType().equals(type)) {
-      return "\""+entityId+"\"";
+      return "\"" + entityId + "\"";
     }
-    
-    //EA-2944 suport both URIs with and without /base/ in the path
+
+    // EA-2944 suport both URIs with and without /base/ in the path
     StringBuilder entityIdsBuilder = new StringBuilder("(\"");
-    entityIdsBuilder.append(BASE_DATA_EUROPEANA_URI).append(getEntityRequestPathWithBase(entityId)).append("\" OR \"");
-    entityIdsBuilder.append(BASE_DATA_EUROPEANA_URI).append(getEntityRequestPath(entityId)).append("\")");
-    
+    entityIdsBuilder
+        .append(BASE_DATA_EUROPEANA_URI)
+        .append(getEntityRequestPathWithBase(entityId))
+        .append("\" OR \"");
+    entityIdsBuilder
+        .append(BASE_DATA_EUROPEANA_URI)
+        .append(getEntityRequestPath(entityId))
+        .append("\")");
+
     return entityIdsBuilder.toString();
   }
 }
