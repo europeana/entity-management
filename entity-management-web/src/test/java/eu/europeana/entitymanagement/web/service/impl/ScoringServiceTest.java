@@ -11,6 +11,7 @@ import eu.europeana.entitymanagement.config.SolrConfig;
 import eu.europeana.entitymanagement.config.ValidatorConfig;
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Place;
+import eu.europeana.entitymanagement.definitions.model.TimeSpan;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.model.scoring.EntityMetrics;
 import eu.europeana.entitymanagement.web.model.scoring.MaxEntityMetrics;
@@ -67,13 +68,38 @@ public class ScoringServiceTest {
     assertEquals("Agent", metrics.getEntityType());
     //	actual value = 304.6025939567319
     assertTrue(metrics.getPageRank() == 304);
-    // value may increase in time, currently
-    // before last reindexing was 750, let's see if the reindexing is complete
-    assertTrue(metrics.getEnrichmentCount() >= 705);
+    // value may increase in time, currently 807
+    assertTrue(metrics.getEnrichmentCount() >= 807);
     // value may increase in time, for provided labelts it is currently 2555
     //	assertTrue(metrics.getHitCount() > 1000);
 
     assertTrue(metrics.getScore() > 970000);
+  }
+
+  @Test
+  @Disabled("Excluded from automated runs as this requires Search API")
+  public void testComputeMetricsForTimeSpan() throws Exception {
+
+    TimeSpan entity = new TimeSpan();
+    String entityId = "http://data.europeana.eu/timespan/21";
+    entity.setEntityId(entityId);
+    List<String> sameAs = List.of("http://www.wikidata.org/entity/Q6939");
+    entity.setSameReferenceLinks(sameAs);
+
+    Map<String, String> prefLabels = new HashMap<String, String>();
+    prefLabels.put("en", "21st Century");
+    entity.setPrefLabel(prefLabels);
+
+    EntityMetrics metrics = scoringService.computeMetrics(entity);
+
+    assertEquals(entityId, metrics.getEntityId());
+    assertEquals("TimeSpan", metrics.getEntityType());
+    //  actual value = 575.xxx
+    assertTrue(metrics.getPageRank() == 575);
+    // value may increase in time, currently 598943
+    assertTrue(metrics.getEnrichmentCount() >= 598943);
+    // value may increase in time, currently 2301560
+    assertTrue(metrics.getScore() > 2301500);
   }
 
   @Test
