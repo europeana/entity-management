@@ -1,9 +1,11 @@
 package eu.europeana.entitymanagement.mongo.config;
 
+import com.mongodb.Block;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
+import com.mongodb.connection.ConnectionPoolSettings;
 import dev.morphia.Datastore;
 import dev.morphia.Morphia;
 import dev.morphia.mapping.MapperOptions;
@@ -11,6 +13,7 @@ import eu.europeana.batch.entity.JobExecutionEntity;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.batch.codec.ScheduledTaskTypeCodec;
 import eu.europeana.entitymanagement.definitions.batch.codec.ScheduledTaskTypeCodecProvider;
+import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bson.codecs.configuration.CodecProvider;
@@ -30,9 +33,12 @@ import org.springframework.context.annotation.PropertySource;
 public class DataSourceConfig {
 
   private static final Logger logger = LogManager.getLogger(DataSourceConfig.class);
-
+  
   @Value("${mongo.connectionUrl}")
   private String hostUri;
+
+  @Value("${mongo.max.idle.time.millisec: 10000}")
+  private long mongoMaxIdleTimeMillisec;
 
   @Value("${mongo.em.database}")
   private String emDatabase;
@@ -54,9 +60,14 @@ public class DataSourceConfig {
             CodecRegistries.fromProviders(pojoCodecProvider),
             MongoClientSettings.getDefaultCodecRegistry());
 
+    Block<ConnectionPoolSettings.Builder> connectionPoolSettingsBlockBuilder =
+        (ConnectionPoolSettings.Builder builder) -> 
+        builder.maxConnectionIdleTime(mongoMaxIdleTimeMillisec, TimeUnit.MILLISECONDS);
+        
     return MongoClients.create(
         MongoClientSettings.builder()
             .applyConnectionString(connectionString)
+            .applyToConnectionPoolSettings(connectionPoolSettingsBlockBuilder)
             .codecRegistry(codecRegistry)
             .build());
   }
