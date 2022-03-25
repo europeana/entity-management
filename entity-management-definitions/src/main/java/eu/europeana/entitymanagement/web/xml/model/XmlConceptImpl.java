@@ -1,15 +1,22 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.ABOUT;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.ALT_LABEL;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.BROADER;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.BROAD_MATCH;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.CLOSE_MATCH;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.DEPICTION;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.EXACT_MATCH;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.HIDDEN_LABEL;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.IN_SCHEME;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.IS_AGGREGATED_BY;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.IS_SHOWN_BY;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_SKOS;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NARROWER;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NARROW_MATCH;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NOTATION;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NOTE;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.PREF_LABEL;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.RELATED;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.RELATED_MATCH;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_CONCEPT;
@@ -29,6 +36,12 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
     propOrder = {
+      ABOUT,
+      DEPICTION,
+      IS_SHOWN_BY,
+      PREF_LABEL,
+      ALT_LABEL,
+      HIDDEN_LABEL,
       NOTE,
       NOTATION,
       BROADER,
@@ -39,7 +52,8 @@ import javax.xml.bind.annotation.XmlType;
       RELATED_MATCH,
       CLOSE_MATCH,
       EXACT_MATCH,
-      IN_SCHEME
+      IN_SCHEME,
+      IS_AGGREGATED_BY
     })
 public class XmlConceptImpl extends XmlBaseEntityImpl<Concept> {
 

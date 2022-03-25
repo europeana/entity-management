@@ -1,10 +1,17 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.ABOUT;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.ALT_LABEL;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.DEPICTION;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.HIDDEN_LABEL;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.IS_AGGREGATED_BY;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.IS_SHOWN_BY;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_DC_TERMS;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_EDM;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_SKOS;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_WGS84_POS;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NOTE;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.PREF_LABEL;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ALTITUDE;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_HAS_PART;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IS_NEXT_IN_SEQUENCE;
@@ -31,6 +38,12 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
     propOrder = {
+      ABOUT,
+      DEPICTION,
+      IS_SHOWN_BY,
+      PREF_LABEL,
+      ALT_LABEL,
+      HIDDEN_LABEL,
       XML_LATITUDE,
       XML_LONGITUDE,
       XML_ALTITUDE,
@@ -38,7 +51,8 @@ import javax.xml.bind.annotation.XmlType;
       XML_HAS_PART,
       XML_IS_PART_OF,
       XML_IS_NEXT_IN_SEQUENCE,
-      XML_SAME_AS
+      XML_SAME_AS,
+      IS_AGGREGATED_BY
     })
 public class XmlPlaceImpl extends XmlBaseEntityImpl<Place> {
 

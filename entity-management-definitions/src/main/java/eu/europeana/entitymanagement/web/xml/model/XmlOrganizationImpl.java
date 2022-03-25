@@ -1,9 +1,16 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.ABOUT;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.ALT_LABEL;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.DEPICTION;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.HIDDEN_LABEL;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.IS_AGGREGATED_BY;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.IS_SHOWN_BY;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_DC;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_EDM;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_FOAF;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_VCARD;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.PREF_LABEL;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ACRONYM;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_COUNTRY;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_DESCRIPTION;
@@ -36,6 +43,12 @@ import org.springframework.util.CollectionUtils;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
     propOrder = {
+      ABOUT,
+      DEPICTION,
+      IS_SHOWN_BY,
+      PREF_LABEL,
+      ALT_LABEL,
+      HIDDEN_LABEL,
       XML_ACRONYM,
       XML_DESCRIPTION,
       XML_LOGO,
@@ -49,7 +62,8 @@ import org.springframework.util.CollectionUtils;
       XML_MBOX,
       XML_HAS_ADDRESS,
       XML_IDENTIFIER,
-      XML_SAME_AS
+      XML_SAME_AS,
+      IS_AGGREGATED_BY
     })
 public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
 

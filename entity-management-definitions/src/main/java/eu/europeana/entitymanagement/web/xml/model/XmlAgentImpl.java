@@ -1,6 +1,12 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
 import static eu.europeana.entitymanagement.vocabulary.XmlFields.XML_WAS_PRESENT_AT;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.ABOUT;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.ALT_LABEL;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.DEPICTION;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.HIDDEN_LABEL;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.IS_AGGREGATED_BY;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.IS_SHOWN_BY;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_DC;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_DC_TERMS;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_EDM;
@@ -8,6 +14,7 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_RDAGR2;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_SKOS;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NOTE;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.PREF_LABEL;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_AGENT;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_BEGIN;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_BIOGRAPHICAL_INFORMATION;
@@ -44,6 +51,12 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
     propOrder = {
+      ABOUT,
+      DEPICTION,
+      IS_SHOWN_BY,
+      PREF_LABEL,
+      ALT_LABEL,
+      HIDDEN_LABEL,
       XML_NAME,
       XML_BEGIN,
       XML_DATE_OF_BIRTH,
@@ -64,7 +77,8 @@ import javax.xml.bind.annotation.XmlType;
       XML_IS_RELATED_TO,
       XML_WAS_PRESENT_AT,
       XML_IDENTIFIER,
-      XML_SAME_AS
+      XML_SAME_AS,
+      IS_AGGREGATED_BY
     })
 public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
 
