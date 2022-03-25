@@ -1,6 +1,5 @@
 # mongodb
 mongo.connectionUrl = mongodb://<host>:<port>
-mongo.max.idle.time.millisec = <mongo-max-idle-time-in-millisec>
 mongo.em.database = <entity-management-db>
 mongo.batch.database = <spring-batch-db>
 

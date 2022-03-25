@@ -33,12 +33,11 @@ import org.springframework.context.annotation.PropertySource;
 public class DataSourceConfig {
 
   private static final Logger logger = LogManager.getLogger(DataSourceConfig.class);
-  private static final long defaultMongoMaxIdleTimeMillisec = 60000;
-
+  
   @Value("${mongo.connectionUrl}")
   private String hostUri;
 
-  @Value("${mongo.max.idle.time.millisec}")
+  @Value("${mongo.max.idle.time.millisec: 10000}")
   private long mongoMaxIdleTimeMillisec;
 
   @Value("${mongo.em.database}")
@@ -60,10 +59,6 @@ public class DataSourceConfig {
             CodecRegistries.fromCodecs(new ScheduledTaskTypeCodec()),
             CodecRegistries.fromProviders(pojoCodecProvider),
             MongoClientSettings.getDefaultCodecRegistry());
-
-    if (mongoMaxIdleTimeMillisec <= 0) {
-      mongoMaxIdleTimeMillisec = defaultMongoMaxIdleTimeMillisec;
-    }
 
     Block<ConnectionPoolSettings.Builder> connectionPoolSettingsBlockBuilder =
         (ConnectionPoolSettings.Builder builder) -> 
