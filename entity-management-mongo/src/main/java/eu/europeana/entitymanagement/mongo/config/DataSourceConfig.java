@@ -33,7 +33,7 @@ import org.springframework.context.annotation.PropertySource;
 public class DataSourceConfig {
 
   private static final Logger logger = LogManager.getLogger(DataSourceConfig.class);
-  private long defaultMongoMaxIdleTimeMillisec = 60000;
+  private final long defaultMongoMaxIdleTimeMillisec = 60000;
 
   @Value("${mongo.connectionUrl}")
   private String hostUri;
@@ -66,18 +66,9 @@ public class DataSourceConfig {
     }
 
     Block<ConnectionPoolSettings.Builder> connectionPoolSettingsBlockBuilder =
-        (ConnectionPoolSettings.Builder builder) -> {
-          builder.maxConnectionIdleTime(mongoMaxIdleTimeMillisec, TimeUnit.MILLISECONDS);
-        };
-
-    //    Block<ConnectionPoolSettings.Builder> connectionPoolSettingsBlockBuilder =
-    //        new Block<ConnectionPoolSettings.Builder>() {
-    //          @Override
-    //          public void apply(final ConnectionPoolSettings.Builder builder) {
-    //            builder.maxConnectionIdleTime(mongoMaxIdleTimeMillisec, TimeUnit.MILLISECONDS);
-    //          }
-    //        };
-
+        (ConnectionPoolSettings.Builder builder) -> 
+        builder.maxConnectionIdleTime(mongoMaxIdleTimeMillisec, TimeUnit.MILLISECONDS);
+        
     return MongoClients.create(
         MongoClientSettings.builder()
             .applyConnectionString(connectionString)
