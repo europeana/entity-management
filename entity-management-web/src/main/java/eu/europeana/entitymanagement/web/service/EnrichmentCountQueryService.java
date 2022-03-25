@@ -116,8 +116,7 @@ public class EnrichmentCountQueryService {
     entityIdsBuilder
         .append(BASE_DATA_EUROPEANA_URI)
         .append(getEntityRequestPathWithBase(entityId))
-        .append("\" OR \"");
-    entityIdsBuilder
+        .append("\" OR \"")
         .append(BASE_DATA_EUROPEANA_URI)
         .append(getEntityRequestPath(entityId))
         .append("\")");
