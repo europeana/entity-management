@@ -33,7 +33,7 @@ import org.springframework.context.annotation.PropertySource;
 public class DataSourceConfig {
 
   private static final Logger logger = LogManager.getLogger(DataSourceConfig.class);
-  private final long defaultMongoMaxIdleTimeMillisec = 60000;
+  private static final long defaultMongoMaxIdleTimeMillisec = 60000;
 
   @Value("${mongo.connectionUrl}")
   private String hostUri;
