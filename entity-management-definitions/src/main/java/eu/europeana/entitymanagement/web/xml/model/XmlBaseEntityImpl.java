@@ -1,10 +1,8 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.ABOUT;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.ALT_LABEL;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.DEPICTION;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.HIDDEN_LABEL;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.IS_AGGREGATED_BY;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.IS_SHOWN_BY;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_FOAF;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_RDF;
@@ -22,19 +20,9 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(
-    propOrder = {
-      ABOUT,
-      DEPICTION,
-      IS_SHOWN_BY,
-      PREF_LABEL,
-      ALT_LABEL,
-      HIDDEN_LABEL,
-      IS_AGGREGATED_BY
-    })
+@XmlTransient
 public abstract class XmlBaseEntityImpl<T extends Entity> {
 
   @XmlTransient protected T entity;

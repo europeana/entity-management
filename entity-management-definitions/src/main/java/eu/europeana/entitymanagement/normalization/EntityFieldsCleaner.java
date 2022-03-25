@@ -27,7 +27,9 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
@@ -35,6 +37,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class EntityFieldsCleaner {
+
+  private static final Set<String> ISO_LANGUAGES = Set.of(Locale.getISOLanguages());
 
   private static final Logger logger = LogManager.getLogger(EntityFieldsCleaner.class);
 
@@ -301,12 +305,15 @@ public class EntityFieldsCleaner {
    * @return
    */
   private String capitaliseTextFields(String fieldName, String fieldValue) {
-    if (EntityFieldsTypes.getFieldType(fieldName).equals(FIELD_TYPE_TEXT)) {
-      return StringUtils.capitalize(fieldValue.trim());
-    }
-    if (EntityFieldsTypes.getFieldType(fieldName).equals(FIELD_TYPE_TEXT_OR_URI)
-        && !(StringUtils.startsWithAny(fieldValue, "https://", "http://"))) {
-      return StringUtils.capitalize(fieldValue.trim());
+    // do not capitalize language code strings (e.g. en, de, fr)
+    if (!ISO_LANGUAGES.contains(fieldValue)) {
+      if (EntityFieldsTypes.getFieldType(fieldName).equals(FIELD_TYPE_TEXT)) {
+        return StringUtils.capitalize(fieldValue.trim());
+      }
+      if (EntityFieldsTypes.getFieldType(fieldName).equals(FIELD_TYPE_TEXT_OR_URI)
+          && !(StringUtils.startsWithAny(fieldValue, "https://", "http://"))) {
+        return StringUtils.capitalize(fieldValue.trim());
+      }
     }
     return fieldValue.trim();
   }

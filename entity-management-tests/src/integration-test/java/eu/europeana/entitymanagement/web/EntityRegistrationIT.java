@@ -3,8 +3,10 @@ package eu.europeana.entitymanagement.web;
 import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
+import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.matchesRegex;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -365,7 +367,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
     response
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.hasAddress.hasGeo").isNotEmpty())
-        .andExpect(jsonPath("$.language", hasSize(1)))
+        .andExpect(jsonPath("$.language", everyItem(matchesRegex("[a-z]+"))))
         .andExpect(jsonPath("$.hiddenLabel", hasSize(1)))
         .andExpect(jsonPath("$.organizationDomain[*]", hasSize(1)));
   }
