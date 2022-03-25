@@ -96,6 +96,7 @@ public abstract class AbstractIntegrationTest {
   @DynamicPropertySource
   static void setProperties(DynamicPropertyRegistry registry) {
     registry.add("mongo.connectionUrl", MONGO_CONTAINER::getConnectionUrl);
+    registry.add("mongo.max.idle.time.millisec", () -> 60000);
     registry.add("mongo.em.database", MONGO_CONTAINER::getEntityDb);
     registry.add("mongo.batch.database", MONGO_CONTAINER::getBatchDb);
     // enrichment database on the same test Mongo instance
