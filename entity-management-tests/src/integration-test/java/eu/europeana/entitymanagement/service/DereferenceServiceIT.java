@@ -150,6 +150,10 @@ class DereferenceServiceIT extends AbstractIntegrationTest {
     // BNF
     Organization org = dereferenceWikidataOrganization(IntegrationTestUtils.ORGANIZATION_BNF_URI_WIKIDATA_URI);
     Assertions.assertNotNull(org.getLogo());
+    Assertions.assertNotNull(org.getLogo());
+    Assertions.assertNotNull(org.getLogo().getId());
+    Assertions.assertNotNull(org.getLogo().getSource());
+
   }
 
   @Test
@@ -169,11 +173,7 @@ class DereferenceServiceIT extends AbstractIntegrationTest {
         dereferenceServiceLocator.getDereferencer(organizationId, "Organization");
     Optional<Entity> orgOptional = dereferencer.dereferenceEntityById(organizationId);
     Assertions.assertTrue(orgOptional.isPresent());
-    Organization org = (Organization) orgOptional.get();
-    Assertions.assertNotNull(org.getLogo());
-    Assertions.assertNotNull(org.getLogo().getId());
-    Assertions.assertNotNull(org.getLogo().getSource());
-    
+    Organization org = (Organization) orgOptional.get();    
     return org;
   }
 }
