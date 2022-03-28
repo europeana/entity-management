@@ -1,0 +1,6 @@
+#DELETE DISABLED
+db.getCollection('EntityRecord').deleteMany({"disabled":true})
+#if these records are still needed the disabled field could be set to a date 
+
+#UNSET DISABLED
+db.getCollection('EntityRecord').updateMany({},{$unset:{"disabled":null}})
