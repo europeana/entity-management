@@ -148,7 +148,8 @@ class DereferenceServiceIT extends AbstractIntegrationTest {
   @Test
   public void wikidataOrganizationBNFDereferenceTest() throws ZohoException, Exception {
     // BNF
-    dereferenceWikidataOrganization(IntegrationTestUtils.ORGANIZATION_BNF_URI_WIKIDATA_URI);
+    Organization org = dereferenceWikidataOrganization(IntegrationTestUtils.ORGANIZATION_BNF_URI_WIKIDATA_URI);
+    Assertions.assertNotNull(org.getLogo());
   }
 
   @Test
@@ -163,11 +164,16 @@ class DereferenceServiceIT extends AbstractIntegrationTest {
     dereferenceWikidataOrganization(IntegrationTestUtils.ORGANIZATION_GFM_URI_WIKIDATA_URI);
   }
 
-  void dereferenceWikidataOrganization(String organizationId) throws Exception {
+  Organization dereferenceWikidataOrganization(String organizationId) throws Exception {
     Dereferencer dereferencer =
         dereferenceServiceLocator.getDereferencer(organizationId, "Organization");
     Optional<Entity> orgOptional = dereferencer.dereferenceEntityById(organizationId);
     Assertions.assertTrue(orgOptional.isPresent());
-    Assertions.assertNotNull(orgOptional.get().getPrefLabel());
+    Organization org = (Organization) orgOptional.get();
+    Assertions.assertNotNull(org.getLogo());
+    Assertions.assertNotNull(org.getLogo().getId());
+    Assertions.assertNotNull(org.getLogo().getSource());
+    
+    return org;
   }
 }

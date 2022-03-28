@@ -77,7 +77,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
   private List<LabelledResource> description = new ArrayList<>();
 
   @XmlElement(namespace = NAMESPACE_FOAF, name = XML_LOGO)
-  private XmlWebResourceImpl logo;
+  private XmlWebResourceWrapper logo;
 
   @XmlElement(namespace = NAMESPACE_EDM, name = XML_EUROPEANA_ROLE)
   private List<LabelledResource> europeanaRole = new ArrayList<>();
@@ -115,7 +115,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     this.acronym = RdfXmlUtils.convertToXmlMultilingualString(organization.getAcronym());
     this.description = RdfXmlUtils.convertMapToXmlMultilingualString(organization.getDescription());
     if (organization.getLogo() != null) {
-      this.logo = XmlWebResourceImpl.fromWebResource(organization.getLogo());
+      this.logo = XmlWebResourceWrapper.fromWebResource(organization.getLogo());
     }
     this.europeanaRole =
         RdfXmlUtils.convertToXmlMultilingualString(organization.getEuropeanaRole());
@@ -149,9 +149,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     super.toEntityModel();
     entity.setAcronym(RdfXmlUtils.toLanguageMapList(getAcronym()));
     entity.setDescription(RdfXmlUtils.toLanguageMap(getDescription()));
-    if (getLogo() != null && !getLogo().isEmpty()) {
-      entity.setLogo(XmlWebResourceImpl.toWebResource(getLogo()));
-    }
+    entity.setLogo(XmlWebResourceWrapper.toWebResource(getLogo()));  
     entity.setEuropeanaRole(RdfXmlUtils.toLanguageMapList(getEuropeanaRole()));
     entity.setOrganizationDomain(RdfXmlUtils.toLanguageMapList(getOrganizationDomain()));
     entity.setGeographicLevel(RdfXmlUtils.toLanguageMap(getGeographicLevel()));
@@ -183,7 +181,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     return description;
   }
 
-  public XmlWebResourceImpl getLogo() {
+  public XmlWebResourceWrapper getLogo() {
     return logo;
   }
 

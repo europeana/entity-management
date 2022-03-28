@@ -8,11 +8,6 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_RDF;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_SKOS;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.PREF_LABEL;
-
-import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.utils.EntityObjectFactory;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -20,6 +15,10 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.utils.EntityObjectFactory;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlTransient
@@ -31,10 +30,10 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
   private String about;
 
   @XmlElement(namespace = XmlConstants.NAMESPACE_EDM, name = IS_SHOWN_BY)
-  private XmlWebResourceImpl isShownBy;
+  private XmlWebResourceWrapper isShownBy;
 
   @XmlElement(namespace = NAMESPACE_FOAF, name = DEPICTION)
-  private XmlWebResourceImpl depiction;
+  private XmlWebResourceWrapper depiction;
 
   @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = ALT_LABEL)
   private List<LabelledResource> altLabel = new ArrayList<>();
@@ -52,7 +51,7 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
     // default constructor
   }
 
-  public XmlWebResourceImpl getIsShownBy() {
+  public XmlWebResourceWrapper getIsShownBy() {
     return isShownBy;
   }
 
@@ -68,13 +67,8 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
       this.isAggregatedBy = new XmlAggregationImpl(entity.getIsAggregatedBy());
     }
 
-    if (entity.getIsShownBy() != null) {
-      isShownBy = XmlWebResourceImpl.fromWebResource(entity.getIsShownBy());
-    }
-
-    if (entity.getDepiction() != null) {
-      depiction = XmlWebResourceImpl.fromWebResource(entity.getDepiction());
-    }
+    this.isShownBy = XmlWebResourceWrapper.fromWebResource(entity.getIsShownBy());
+    this.depiction = XmlWebResourceWrapper.fromWebResource(entity.getDepiction());
   }
 
   public T toEntityModel() throws EntityCreationException {
@@ -87,9 +81,7 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
     entity.setHiddenLabel(getHiddenLabel());
     // sets sameAs or exactMatch values (for concepts)
     entity.setSameReferenceLinks(RdfXmlUtils.toStringList(getSameReferenceLinks()));
-    if (depiction != null && !depiction.isEmpty()) {
-      entity.setDepiction(XmlWebResourceImpl.toWebResource(depiction));
-    }
+    entity.setDepiction(XmlWebResourceWrapper.toWebResource(depiction));
     return entity;
   }
 
@@ -103,7 +95,7 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
     this.about = about;
   }
 
-  public XmlWebResourceImpl getDepiction() {
+  public XmlWebResourceWrapper getDepiction() {
     return depiction;
   }
 
