@@ -3,5 +3,8 @@ db.getCollection('EntityRecord').deleteMany({"entity.type":"Organization"})
 #if these annotations are still needed the disabled field could be set to a date 
 
 #UNSET DISABLED
+//consolidated version
+db.getCollection('EntityRecord').updateMany({"entity.type":"Organization"},{$unset:{"entity.logo":null}})
+//consolidated version proxies
 db.getCollection('EntityRecord').updateMany({"proxies.entity.logo":{$exists:true}},{$unset:{"proxies.$[].entity.logo":null}})
 
