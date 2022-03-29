@@ -4,6 +4,7 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_EDM;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_FOAF;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_RDF;
+
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -52,5 +53,4 @@ public class XmlWebResourceImpl {
   public boolean isEmpty() {
     return !StringUtils.hasLength(about) && (source == null) && (thumbnail == null);
   }
-
 }

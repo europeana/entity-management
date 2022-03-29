@@ -31,6 +31,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -298,20 +299,34 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
     String entityBaseXpath = "/rdf:RDF/edm:Agent";
 
     ResultActions result =
-        mockMvc.perform(get(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath + ".xml")
-            .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
-            .accept(MediaType.APPLICATION_XML));
-    result.andExpect(status().isOk())
-        .andExpect(xpath(entityBaseXpath + "/edm:isShownBy/edm:WebResource/@rdf:about", xmlNamespaces)
-            .nodeCount(greaterThan(0)))
-        .andExpect(xpath(entityBaseXpath + "/edm:isShownBy/edm:WebResource/dc:source/@rdf:resource",
-            xmlNamespaces).nodeCount(greaterThan(0)))
-        .andExpect(xpath(entityBaseXpath + "/edm:isShownBy/edm:WebResource/foaf:thumbnail/@rdf:resource",
-            xmlNamespaces).nodeCount(greaterThan(0)))        
-        .andExpect(xpath(entityBaseXpath + "/foaf:depiction/edm:WebResource/@rdf:about", xmlNamespaces)
-            .nodeCount(greaterThan(0)))
-        .andExpect(xpath(entityBaseXpath + "/foaf:depiction/edm:WebResource/dc:source/@rdf:resource",
-            xmlNamespaces).nodeCount(greaterThan(0)))
+        mockMvc.perform(
+            get(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath + ".xml")
+                .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                .accept(MediaType.APPLICATION_XML));
+    result
+        .andExpect(status().isOk())
+        .andDo(MockMvcResultHandlers.print())
+        .andExpect(
+            xpath(entityBaseXpath + "/edm:isShownBy/edm:WebResource/@rdf:about", xmlNamespaces)
+                .nodeCount(greaterThan(0)))
+        .andExpect(
+            xpath(
+                    entityBaseXpath + "/edm:isShownBy/edm:WebResource/dc:source/@rdf:resource",
+                    xmlNamespaces)
+                .nodeCount(greaterThan(0)))
+        .andExpect(
+            xpath(
+                    entityBaseXpath + "/edm:isShownBy/edm:WebResource/foaf:thumbnail/@rdf:resource",
+                    xmlNamespaces)
+                .nodeCount(greaterThan(0)))
+        .andExpect(
+            xpath(entityBaseXpath + "/foaf:depiction/edm:WebResource/@rdf:about", xmlNamespaces)
+                .nodeCount(greaterThan(0)))
+        .andExpect(
+            xpath(
+                    entityBaseXpath + "/foaf:depiction/edm:WebResource/dc:source/@rdf:resource",
+                    xmlNamespaces)
+                .nodeCount(greaterThan(0)))
         .andExpect(xpath(entityBaseXpath + "/@rdf:about", xmlNamespaces).string(entityId))
         .andExpect(
             xpath(entityBaseXpath + "/skos:prefLabel", xmlNamespaces).nodeCount(greaterThan(0)));
@@ -513,8 +528,14 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
     result
         .andExpect(status().isOk())
         .andExpect(xpath(entityBaseXpath + "/@rdf:about", xmlNamespaces).string(entityId))
-        .andExpect(xpath(entityBaseXpath + "/foaf:logo/edm:WebResource/@rdf:about", xmlNamespaces).string(BNF_LOGO))
-        .andExpect(xpath(entityBaseXpath + "/foaf:logo/edm:WebResource/dc:source/@rdf:resource", xmlNamespaces).string(BNF_LOGO_SOURCE))
+        .andExpect(
+            xpath(entityBaseXpath + "/foaf:logo/edm:WebResource/@rdf:about", xmlNamespaces)
+                .string(BNF_LOGO))
+        .andExpect(
+            xpath(
+                    entityBaseXpath + "/foaf:logo/edm:WebResource/dc:source/@rdf:resource",
+                    xmlNamespaces)
+                .string(BNF_LOGO_SOURCE))
         .andExpect(
             xpath(entityBaseXpath + "/skos:prefLabel", xmlNamespaces).nodeCount(greaterThan(0)));
   }
