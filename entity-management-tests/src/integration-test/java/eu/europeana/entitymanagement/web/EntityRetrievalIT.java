@@ -31,7 +31,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -305,7 +304,6 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
                 .accept(MediaType.APPLICATION_XML));
     result
         .andExpect(status().isOk())
-        .andDo(MockMvcResultHandlers.print())
         .andExpect(
             xpath(entityBaseXpath + "/edm:isShownBy/edm:WebResource/@rdf:about", xmlNamespaces)
                 .nodeCount(greaterThan(0)))
