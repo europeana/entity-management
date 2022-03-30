@@ -149,7 +149,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     super.toEntityModel();
     entity.setAcronym(RdfXmlUtils.toLanguageMapList(getAcronym()));
     entity.setDescription(RdfXmlUtils.toLanguageMap(getDescription()));
-    entity.setLogo(XmlWebResourceWrapper.toWebResource(getLogo()));  
+    entity.setLogo(XmlWebResourceWrapper.toWebResource(getLogo()));
     entity.setEuropeanaRole(RdfXmlUtils.toLanguageMapList(getEuropeanaRole()));
     entity.setOrganizationDomain(RdfXmlUtils.toLanguageMapList(getOrganizationDomain()));
     entity.setGeographicLevel(RdfXmlUtils.toLanguageMap(getGeographicLevel()));
