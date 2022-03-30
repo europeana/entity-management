@@ -9,27 +9,52 @@ import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 
 @XmlAccessorType(XmlAccessType.FIELD)
+/**
+ * Class used for serialization and deserialization of elements with embedded  web resources
+ * @author GordeaS
+ *
+ */
 public class XmlWebResourceWrapper {
 
   @XmlElement(namespace = NAMESPACE_EDM, name = XmlConstants.XML_EDM_WEB_RESOURCE)
   private XmlWebResourceImpl webResource;
 
-  public XmlWebResourceImpl getWebResource() {
-    return webResource;
-  }
-
-  public void setWebResource(XmlWebResourceImpl webResource) {
-    this.webResource = webResource;
-  }
-
+  /**
+   * Constructor using the embedded web resource
+   * @param webResource
+   */
   public XmlWebResourceWrapper(XmlWebResourceImpl webResource) {
     this.webResource = webResource;
   }
 
+  /**
+   * Default no arg constructor 
+   */
   public XmlWebResourceWrapper() {
     //no arg constructor
   }
-  
+
+  /**
+   * getter method for embedded web resource
+   * @return - the embedded XML web resource
+   */
+  public XmlWebResourceImpl getWebResource() {
+    return webResource;
+  }
+
+  /**
+   * setter method for embedded web resource
+   * @param webResource - the embedded XML web resource
+   */
+  public void setWebResource(XmlWebResourceImpl webResource) {
+    this.webResource = webResource;
+  }
+
+  /**
+   * Utility method to build the wrapper for a web resource (data model)  
+   * @param webResource
+   * @return
+   */
   public static XmlWebResourceWrapper fromWebResource(WebResource webResource) {
     if (webResource == null) {
       return null;
@@ -39,6 +64,11 @@ public class XmlWebResourceWrapper {
   }
   
 
+  /**
+   * utility method to extract the web resource (data model), from the deserialized wrapper element
+   * @param xmlWebResourceWrapper
+   * @return
+   */
   public static WebResource toWebResource(XmlWebResourceWrapper xmlWebResourceWrapper) {
     //id is mandatory for web resources
     if(xmlWebResourceWrapper == null || xmlWebResourceWrapper.getWebResource() == null || xmlWebResourceWrapper.getWebResource().getAbout() == null) {
