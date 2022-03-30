@@ -38,6 +38,8 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
 
   private static final String BNF_LOGO =
       "http://commons.wikimedia.org/wiki/Special:FilePath/Logo_BnF.svg";
+  private static final String BNF_LOGO_SOURCE =
+      "http://commons.wikimedia.org/wiki/File:Logo_BnF.svg";
 
   @Autowired private FailedTaskService failedTaskService;
 
@@ -46,7 +48,8 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
           "edm", XmlConstants.NAMESPACE_EDM,
           "rdf", XmlConstants.NAMESPACE_RDF,
           "skos", XmlConstants.NAMESPACE_SKOS,
-          "foaf", XmlConstants.NAMESPACE_FOAF);
+          "foaf", XmlConstants.NAMESPACE_FOAF,
+          "dc", XmlConstants.NAMESPACE_DC);
 
   @Test
   public void shouldRetrieveEntitiesWithFailures() throws Exception {
@@ -294,12 +297,34 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
     String requestPath = getEntityRequestPath(entityId);
     String entityBaseXpath = "/rdf:RDF/edm:Agent";
 
-    mockMvc
-        .perform(
+    ResultActions result =
+        mockMvc.perform(
             get(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath + ".xml")
                 .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
-                .accept(MediaType.APPLICATION_XML))
+                .accept(MediaType.APPLICATION_XML));
+    result
         .andExpect(status().isOk())
+        .andExpect(
+            xpath(entityBaseXpath + "/edm:isShownBy/edm:WebResource/@rdf:about", xmlNamespaces)
+                .nodeCount(greaterThan(0)))
+        .andExpect(
+            xpath(
+                    entityBaseXpath + "/edm:isShownBy/edm:WebResource/dc:source/@rdf:resource",
+                    xmlNamespaces)
+                .nodeCount(greaterThan(0)))
+        .andExpect(
+            xpath(
+                    entityBaseXpath + "/edm:isShownBy/edm:WebResource/foaf:thumbnail/@rdf:resource",
+                    xmlNamespaces)
+                .nodeCount(greaterThan(0)))
+        .andExpect(
+            xpath(entityBaseXpath + "/foaf:depiction/edm:WebResource/@rdf:about", xmlNamespaces)
+                .nodeCount(greaterThan(0)))
+        .andExpect(
+            xpath(
+                    entityBaseXpath + "/foaf:depiction/edm:WebResource/dc:source/@rdf:resource",
+                    xmlNamespaces)
+                .nodeCount(greaterThan(0)))
         .andExpect(xpath(entityBaseXpath + "/@rdf:about", xmlNamespaces).string(entityId))
         .andExpect(
             xpath(entityBaseXpath + "/skos:prefLabel", xmlNamespaces).nodeCount(greaterThan(0)));
@@ -501,7 +526,14 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
     result
         .andExpect(status().isOk())
         .andExpect(xpath(entityBaseXpath + "/@rdf:about", xmlNamespaces).string(entityId))
-        .andExpect(xpath(entityBaseXpath + "/foaf:logo/@rdf:about", xmlNamespaces).string(BNF_LOGO))
+        .andExpect(
+            xpath(entityBaseXpath + "/foaf:logo/edm:WebResource/@rdf:about", xmlNamespaces)
+                .string(BNF_LOGO))
+        .andExpect(
+            xpath(
+                    entityBaseXpath + "/foaf:logo/edm:WebResource/dc:source/@rdf:resource",
+                    xmlNamespaces)
+                .string(BNF_LOGO_SOURCE))
         .andExpect(
             xpath(entityBaseXpath + "/skos:prefLabel", xmlNamespaces).nodeCount(greaterThan(0)));
   }

@@ -31,10 +31,10 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
   private String about;
 
   @XmlElement(namespace = XmlConstants.NAMESPACE_EDM, name = IS_SHOWN_BY)
-  private XmlWebResourceImpl isShownBy;
+  private XmlWebResourceWrapper isShownBy;
 
   @XmlElement(namespace = NAMESPACE_FOAF, name = DEPICTION)
-  private XmlWebResourceImpl depiction;
+  private XmlWebResourceWrapper depiction;
 
   @XmlElement(namespace = XmlConstants.NAMESPACE_SKOS, name = ALT_LABEL)
   private List<LabelledResource> altLabel = new ArrayList<>();
@@ -52,7 +52,7 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
     // default constructor
   }
 
-  public XmlWebResourceImpl getIsShownBy() {
+  public XmlWebResourceWrapper getIsShownBy() {
     return isShownBy;
   }
 
@@ -68,13 +68,8 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
       this.isAggregatedBy = new XmlAggregationImpl(entity.getIsAggregatedBy());
     }
 
-    if (entity.getIsShownBy() != null) {
-      isShownBy = XmlWebResourceImpl.fromWebResource(entity.getIsShownBy());
-    }
-
-    if (entity.getDepiction() != null) {
-      depiction = XmlWebResourceImpl.fromWebResource(entity.getDepiction());
-    }
+    this.isShownBy = XmlWebResourceWrapper.fromWebResource(entity.getIsShownBy());
+    this.depiction = XmlWebResourceWrapper.fromWebResource(entity.getDepiction());
   }
 
   public T toEntityModel() throws EntityCreationException {
@@ -87,9 +82,7 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
     entity.setHiddenLabel(getHiddenLabel());
     // sets sameAs or exactMatch values (for concepts)
     entity.setSameReferenceLinks(RdfXmlUtils.toStringList(getSameReferenceLinks()));
-    if (depiction != null && !depiction.isEmpty()) {
-      entity.setDepiction(XmlWebResourceImpl.toWebResource(depiction));
-    }
+    entity.setDepiction(XmlWebResourceWrapper.toWebResource(depiction));
     return entity;
   }
 
@@ -103,7 +96,7 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
     this.about = about;
   }
 
-  public XmlWebResourceImpl getDepiction() {
+  public XmlWebResourceWrapper getDepiction() {
     return depiction;
   }
 

@@ -41,7 +41,7 @@
     <xsl:variable name="dbp"       select="'http://dbpedia.org/resource/'"/>
 
     <!-- Portal languages (27) -->
-    <xsl:variable name="langs">en,pl,de,nl,fr,it,da,sv,el,fi,hu,cs,sl,et,pt,es,lt,lv,bg,ro,sk,hr,ga,mt,no,ca,ru</xsl:variable>
+    <xsl:variable name="langs">en,pl,de,nl,fr,it,da,sv,el,fi,hu,cs,sl,et,pt,es,lt,lv,bg,ro,sk,hr,ga,mt,no,ca,ru,eu</xsl:variable>
 <!-- 
     <xsl:variable name="langs">bg,ca,cs,da,de,el,en,es,et,eu,fi,fr,ga,gd,he,hr,hu,ie,is,it,ka,lt,lv,mk,mt,mul,nl,no,pl,pt,ro,ru,sk,sl,sr,sv,tr,uk,yi,cy,sq,hy,az,be,bs,gl,ja,ar,ko,zh,hi</xsl:variable>
  -->
@@ -194,8 +194,9 @@
             </xsl:for-each>
 
             <xsl:for-each select="wdt:P154">
-                <xsl:call-template name="Reference">
+                <xsl:call-template name="WebResource">
                     <xsl:with-param name="prop" select="'foaf:logo'"/>
+                    <xsl:with-param name="url"  select="@rdf:resource"/>
                 </xsl:call-template>
             </xsl:for-each>
 
@@ -342,6 +343,29 @@
         <xsl:if test="@rdf:resource">
             <xsl:element name="{$prop}">
                 <xsl:copy-of select="@rdf:resource"/>
+            </xsl:element>
+        </xsl:if>
+    </xsl:template>
+
+
+    <!--++++++++++++++++++++++++++ WEB RESOURCE ++++++++++++++++++++++++++++++-->
+
+    <!-- 
+         src= http://commons.wikimedia.org/wiki/Special:FilePath/Logo%20BnF.svg 
+         http://commons.wikimedia.org/wiki/File:Logo_BnF.svg
+    -->
+    <xsl:template name="WebResource">
+        <xsl:param name="prop"/>
+        <xsl:param name="url"/>
+
+        <xsl:if test="$url">
+            <xsl:element name="{$prop}">
+                <xsl:element name="edm:WebResource">
+                    <xsl:attribute name="rdf:about" select="$url"/>
+                    <xsl:element name="dc:source">
+                        <xsl:attribute name="rdf:resource" select="fn:replace($url,'Special[:]FilePath/','File:')"/>
+                    </xsl:element>
+                </xsl:element>
             </xsl:element>
         </xsl:if>
     </xsl:template>

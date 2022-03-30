@@ -33,7 +33,7 @@ import org.springframework.context.annotation.PropertySource;
 public class DataSourceConfig {
 
   private static final Logger logger = LogManager.getLogger(DataSourceConfig.class);
-  
+
   @Value("${mongo.connectionUrl}")
   private String hostUri;
 
@@ -61,9 +61,9 @@ public class DataSourceConfig {
             MongoClientSettings.getDefaultCodecRegistry());
 
     Block<ConnectionPoolSettings.Builder> connectionPoolSettingsBlockBuilder =
-        (ConnectionPoolSettings.Builder builder) -> 
-        builder.maxConnectionIdleTime(mongoMaxIdleTimeMillisec, TimeUnit.MILLISECONDS);
-        
+        (ConnectionPoolSettings.Builder builder) ->
+            builder.maxConnectionIdleTime(mongoMaxIdleTimeMillisec, TimeUnit.MILLISECONDS);
+
     return MongoClients.create(
         MongoClientSettings.builder()
             .applyConnectionString(connectionString)
