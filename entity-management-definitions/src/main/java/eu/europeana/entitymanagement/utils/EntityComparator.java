@@ -162,7 +162,10 @@ public class EntityComparator implements Comparator<Entity>, Serializable {
       LOGGER.trace("Map size is not equal m1 size:{}, m2 size;{}!", m1.size(), m2.size());
       return 1;
     }
+    return getMapResults(m1, m2);
+  }
 
+  private int getMapResults(Map<Object, Object> m1, Map<Object, Object> m2) {
     for (Map.Entry<Object, Object> m1Elem : m1.entrySet()) {
       if (m2.containsKey(m1Elem.getKey())) {
         Object val1 = m1Elem.getValue();
@@ -185,7 +188,6 @@ public class EntityComparator implements Comparator<Entity>, Serializable {
         return 1;
       }
     }
-
     return 0;
   }
 }
