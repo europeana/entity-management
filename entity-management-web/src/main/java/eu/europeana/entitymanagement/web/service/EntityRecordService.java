@@ -836,7 +836,7 @@ public class EntityRecordService {
           Map<Object, Object> altLabelPrimaryObject =
               initialiseAltLabelMap(altLabelConsolidatedMap);
           boolean altLabelPrimaryValueChanged = false;
-          addValuesToAltLabel(
+          altLabelPrimaryValueChanged = addValuesToAltLabel(
               prefLabelsForAltLabels, altLabelPrimaryObject, altLabelPrimaryValueChanged);
           if (altLabelPrimaryValueChanged) {
             consilidatedEntity.setFieldValue(field, altLabelPrimaryObject);
@@ -847,7 +847,7 @@ public class EntityRecordService {
     }
   }
 
-  private void addValuesToAltLabel(
+  private boolean addValuesToAltLabel(
       Map<Object, Object> prefLabelsForAltLabels,
       Map<Object, Object> altLabelPrimaryObject,
       boolean altLabelPrimaryValueChanged) {
@@ -864,6 +864,7 @@ public class EntityRecordService {
         altLabelPrimaryObject.put(keyPrefLabel, altLabelPrimaryValue);
       }
     }
+    return altLabelPrimaryValueChanged;
   }
 
   private boolean isFieldAltLabel(String fieldName) {
