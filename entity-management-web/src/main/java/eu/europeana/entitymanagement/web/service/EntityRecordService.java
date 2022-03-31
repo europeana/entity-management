@@ -873,9 +873,7 @@ public class EntityRecordService {
 
   private boolean shouldValuesBeAddedToAltLabel(
       List<Object> altLabelPrimaryValue, Map.Entry<Object, Object> prefLabel) {
-    return altLabelPrimaryValue.size() == 0
-        || (altLabelPrimaryValue.size() > 0
-            && !altLabelPrimaryValue.contains(prefLabel.getValue()));
+    return altLabelPrimaryValue.isEmpty() || (!altLabelPrimaryValue.isEmpty() && !altLabelPrimaryValue.contains(prefLabel.getValue()));
   }
 
   private Map<Object, Object> initialiseAltLabelMap(Map<Object, Object> altLabelConsolidatedMap) {

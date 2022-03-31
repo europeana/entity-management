@@ -194,7 +194,7 @@ public class ZohoSyncService {
     } catch (ZohoException e) {
       logger.error(
           "Zoho synchronization exception occured when handling organizations deleted in Zoho, "
-              + "the execution was interupted without updating all organizations.:\n {}",
+              + "the execution was interupted without updating all organizations.",
           e);
       zohoSyncReport.updateExecutionStatus(e);
     }
