@@ -45,7 +45,8 @@ import java.util.Map;
   IS_RELATED_TO,
   WAS_PRESENT_AT,
   IDENTIFIER,
-  SAME_AS
+  SAME_AS,
+  IS_AGGREGATED_BY
 })
 public class Agent extends Entity {
 

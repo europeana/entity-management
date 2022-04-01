@@ -8,6 +8,7 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.END;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_PART;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HIDDEN_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_AGGREGATED_BY;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_NEXT_IN_SEQUENCE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_PART_OF;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_SHOWN_BY;
@@ -43,7 +44,8 @@ import java.util.List;
   HAS_PART,
   IS_PART_OF,
   IS_NEXT_IN_SEQUENCE,
-  SAME_AS
+  SAME_AS,
+  IS_AGGREGATED_BY
 })
 public class TimeSpan extends Entity {
 

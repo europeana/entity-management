@@ -33,7 +33,8 @@ import java.util.Map;
   RELATED_MATCH,
   CLOSE_MATCH,
   EXACT_MATCH,
-  IN_SCHEME
+  IN_SCHEME,
+  IS_AGGREGATED_BY
 })
 public class Concept extends Entity {
 
