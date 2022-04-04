@@ -79,11 +79,10 @@ public class ZohoSyncService {
     this.datasources = datasources;
     this.zohoAccessConfiguration = zohoAccessConfiguration;
     this.solrService = solrService;
-
     this.zohoDataSource = initZohoDataSource();
   }
 
-  DataSource initZohoDataSource() {
+  private DataSource initZohoDataSource() {
     Optional<DataSource> zohoDatasource = datasources.getDatasourceById(DataSource.ZOHO_ID);
     if (zohoDatasource.isEmpty()) {
       throw new FunctionalRuntimeException(
@@ -194,7 +193,8 @@ public class ZohoSyncService {
       }
     } catch (ZohoException e) {
       logger.error(
-          "Zoho synchronization exception occured when handling organizations deleted in Zoho, the execution was interupted without updating all organizations",
+          "Zoho synchronization exception occured when handling organizations deleted in Zoho, "
+              + "the execution was interupted without updating all organizations.",
           e);
       zohoSyncReport.updateExecutionStatus(e);
     }
@@ -374,13 +374,11 @@ public class ZohoSyncService {
         // entity not in entity management database,
         // create operation if ownership is correct
         emOperation = Operations.CREATE;
-      } else if (markedForDeletion) {
+      } else if (markedForDeletion && logger.isInfoEnabled()) {
         // TODO: clarify what to do if marked for deletion?
-        if (logger.isInfoEnabled()) {
-          logger.info(
-              "Organization has changed in zoho, it is marked for deletion, but it does not exist in the database. Skipped update for Zoho id: {}",
-              zohoId);
-        }
+        logger.info(
+            "Organization has changed in zoho, it is marked for deletion, but it does not exist in the database. Skipped update for Zoho id: {}",
+            zohoId);
       }
     } else {
       // entity record not null, update or deletion
@@ -401,7 +399,8 @@ public class ZohoSyncService {
     } else {
       if (logger.isInfoEnabled()) {
         logger.info(
-            "Organization has changed in zoho, but there is no operation to perform on entity database, probably becasue the zoho organization doesn't have the required role or it was marked for deletion. Zoho id: {}",
+            "Organization has changed in zoho, but there is no operation to perform on entity database, "
+                + "probably becasue the zoho organization doesn't have the required role or it was marked for deletion. Zoho id: {}",
             zohoId);
       }
     }

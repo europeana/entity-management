@@ -830,28 +830,15 @@ public class EntityRecordService {
     if (prefLabelsForAltLabels.size() > 0) {
       for (Field field : allEntityFields) {
         String fieldName = field.getName();
-        if (fieldName.toLowerCase().contains("alt") && fieldName.toLowerCase().contains("label")) {
+        if (isFieldAltLabel(fieldName)) {
           Map<Object, Object> altLabelConsolidatedMap =
               (Map<Object, Object>) consilidatedEntity.getFieldValue(field);
           Map<Object, Object> altLabelPrimaryObject =
               initialiseAltLabelMap(altLabelConsolidatedMap);
           boolean altLabelPrimaryValueChanged = false;
-          for (Map.Entry<Object, Object> prefLabel : prefLabelsForAltLabels.entrySet()) {
-            String keyPrefLabel = (String) prefLabel.getKey();
-            List<Object> altLabelPrimaryObjectList =
-                (List<Object>) altLabelPrimaryObject.get(keyPrefLabel);
-            List<Object> altLabelPrimaryValue = initialiseAltLabelList(altLabelPrimaryObjectList);
-            if (altLabelPrimaryValue.size() == 0
-                || (altLabelPrimaryValue.size() > 0
-                    && !altLabelPrimaryValue.contains(prefLabel.getValue()))) {
-              altLabelPrimaryValue.add(prefLabel.getValue());
-              if (altLabelPrimaryValueChanged == false) {
-                altLabelPrimaryValueChanged = true;
-              }
-
-              altLabelPrimaryObject.put(keyPrefLabel, altLabelPrimaryValue);
-            }
-          }
+          altLabelPrimaryValueChanged =
+              addValuesToAltLabel(
+                  prefLabelsForAltLabels, altLabelPrimaryObject, altLabelPrimaryValueChanged);
           if (altLabelPrimaryValueChanged) {
             consilidatedEntity.setFieldValue(field, altLabelPrimaryObject);
           }
@@ -859,6 +846,37 @@ public class EntityRecordService {
         }
       }
     }
+  }
+
+  private boolean addValuesToAltLabel(
+      Map<Object, Object> prefLabelsForAltLabels,
+      Map<Object, Object> altLabelPrimaryObject,
+      boolean altLabelPrimaryValueChanged) {
+    for (Map.Entry<Object, Object> prefLabel : prefLabelsForAltLabels.entrySet()) {
+      String keyPrefLabel = (String) prefLabel.getKey();
+      List<Object> altLabelPrimaryObjectList =
+          (List<Object>) altLabelPrimaryObject.get(keyPrefLabel);
+      List<Object> altLabelPrimaryValue = initialiseAltLabelList(altLabelPrimaryObjectList);
+      if (shouldValuesBeAddedToAltLabel(altLabelPrimaryValue, prefLabel)) {
+        altLabelPrimaryValue.add(prefLabel.getValue());
+        if (altLabelPrimaryValueChanged == false) {
+          altLabelPrimaryValueChanged = true;
+        }
+        altLabelPrimaryObject.put(keyPrefLabel, altLabelPrimaryValue);
+      }
+    }
+    return altLabelPrimaryValueChanged;
+  }
+
+  private boolean isFieldAltLabel(String fieldName) {
+    return fieldName.toLowerCase().contains("alt") && fieldName.toLowerCase().contains("label");
+  }
+
+  private boolean shouldValuesBeAddedToAltLabel(
+      List<Object> altLabelPrimaryValue, Map.Entry<Object, Object> prefLabel) {
+    return altLabelPrimaryValue.isEmpty()
+        || (!altLabelPrimaryValue.isEmpty()
+            && !altLabelPrimaryValue.contains(prefLabel.getValue()));
   }
 
   private Map<Object, Object> initialiseAltLabelMap(Map<Object, Object> altLabelConsolidatedMap) {
