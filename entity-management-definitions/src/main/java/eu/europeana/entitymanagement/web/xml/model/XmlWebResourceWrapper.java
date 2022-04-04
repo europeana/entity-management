@@ -1,19 +1,19 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_EDM;
+
+import eu.europeana.entitymanagement.definitions.model.WebResource;
+import eu.europeana.entitymanagement.utils.EntityUtils;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import org.springframework.util.StringUtils;
-import eu.europeana.entitymanagement.definitions.model.WebResource;
-import eu.europeana.entitymanagement.utils.EntityUtils;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 /**
  * Class used for serialization and deserialization of elements with embedded web resources
- * 
- * @author GordeaS
  *
+ * @author GordeaS
  */
 public class XmlWebResourceWrapper {
 
@@ -22,23 +22,21 @@ public class XmlWebResourceWrapper {
 
   /**
    * Constructor using the embedded web resource
-   * 
+   *
    * @param webResource
    */
   public XmlWebResourceWrapper(XmlWebResourceImpl webResource) {
     this.webResource = webResource;
   }
 
-  /**
-   * Default no arg constructor
-   */
+  /** Default no arg constructor */
   public XmlWebResourceWrapper() {
     // no arg constructor
   }
 
   /**
    * getter method for embedded web resource
-   * 
+   *
    * @return - the embedded XML web resource
    */
   public XmlWebResourceImpl getWebResource() {
@@ -47,7 +45,7 @@ public class XmlWebResourceWrapper {
 
   /**
    * setter method for embedded web resource
-   * 
+   *
    * @param webResource - the embedded XML web resource
    */
   public void setWebResource(XmlWebResourceImpl webResource) {
@@ -56,7 +54,7 @@ public class XmlWebResourceWrapper {
 
   /**
    * Utility method to build the wrapper for a web resource (data model)
-   * 
+   *
    * @param webResource
    * @return
    */
@@ -64,20 +62,21 @@ public class XmlWebResourceWrapper {
     if (webResource == null) {
       return null;
     }
-    return new XmlWebResourceWrapper(new XmlWebResourceImpl(webResource.getId(),
-        webResource.getSource(), webResource.getThumbnail()));
+    return new XmlWebResourceWrapper(
+        new XmlWebResourceImpl(
+            webResource.getId(), webResource.getSource(), webResource.getThumbnail()));
   }
-
 
   /**
    * utility method to extract the web resource (data model), from the deserialized wrapper element
-   * 
+   *
    * @param xmlWebResourceWrapper
    * @return
    */
   public static WebResource toWebResource(XmlWebResourceWrapper xmlWebResourceWrapper) {
     // id is mandatory for web resources
-    if (xmlWebResourceWrapper == null || xmlWebResourceWrapper.getWebResource() == null
+    if (xmlWebResourceWrapper == null
+        || xmlWebResourceWrapper.getWebResource() == null
         || xmlWebResourceWrapper.getWebResource().getAbout() == null) {
       return null;
     }
@@ -99,5 +98,4 @@ public class XmlWebResourceWrapper {
 
     return webResource;
   }
-
 }

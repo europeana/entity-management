@@ -82,7 +82,7 @@ public class ZohoSyncService {
     this.zohoDataSource = initZohoDataSource();
   }
 
-  final DataSource initZohoDataSource() {
+  private DataSource initZohoDataSource() {
     Optional<DataSource> zohoDatasource = datasources.getDatasourceById(DataSource.ZOHO_ID);
     if (zohoDatasource.isEmpty()) {
       throw new FunctionalRuntimeException(
