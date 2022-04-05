@@ -1,12 +1,6 @@
 package eu.europeana.entitymanagement.web.model;
 
-import static eu.europeana.entitymanagement.web.model.ZohoSyncReportFields.DELETED;
-import static eu.europeana.entitymanagement.web.model.ZohoSyncReportFields.DEPRECATED;
-import static eu.europeana.entitymanagement.web.model.ZohoSyncReportFields.EXECUTION_STATUS;
-import static eu.europeana.entitymanagement.web.model.ZohoSyncReportFields.FAILED;
-import static eu.europeana.entitymanagement.web.model.ZohoSyncReportFields.LAST_SYNC_DATE;
-import static eu.europeana.entitymanagement.web.model.ZohoSyncReportFields.NEW;
-import static eu.europeana.entitymanagement.web.model.ZohoSyncReportFields.UPDATED;
+import static eu.europeana.entitymanagement.web.model.ZohoSyncReportFields.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -26,7 +20,15 @@ import eu.europeana.api.commons.definitions.utils.DateUtils;
   FAILED
 })
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
+/**
+ * class used for serialization of zoho sync report
+ * @author GordeaS
+ *
+ */
 public class ZohoSyncReport {
+
+  public static final String STATUS_COMPLETED = "completed";
+  public static final String STATUS_INCOMPLETE = "incomplete";
 
   final Date lastSyncDate;
   long created = 0l;
@@ -35,9 +37,7 @@ public class ZohoSyncReport {
   long deleted = 0l;
   private List<FailedOperation> failed;
 
-  public static final String STATUS_COMPLETED = "completed";
-  public static final String STATUS_INCOMPLETE = "incomplete";
-
+  
   public ZohoSyncReport(Date lastSyncDate) {
     this.lastSyncDate = lastSyncDate;
   }
@@ -120,21 +120,38 @@ public class ZohoSyncReport {
   }
 
   @JsonProperty(LAST_SYNC_DATE)
+  /**
+   * getter method
+   * @return the date and time when the synchronization was run
+   */
   public Date getLastSyncDate() {
     return lastSyncDate;
   }
 
   private void addFailedOperation(FailedOperation operation) {
     if(failed == null) {
-      failed = new ArrayList<FailedOperation>();
+      failed = new ArrayList<>();
     }
     failed.add(operation);
   }
 
+  /**
+   * Utility method for registering a FailedOperation
+   * @param id - zoho organization id
+   * @param error - the label of the error
+   * @param th - the exception indicating the source of the processing error
+   */
   public void addFailedOperation(String id, String error, Throwable th) {
     addFailedOperation(id, error, th.getMessage(), th);
   }
   
+  /**
+   * Utility method for registering a FailedOperation
+   * @param id - zoho organization id
+   * @param error - the label of the error
+   * @param message - the message indicating the failed operations
+   * @param th - the exception indicating the source of the processing error
+   */
   public void addFailedOperation(String id, String error, String message, Throwable th) {
     String trace = ExceptionUtils.getStackTrace(th); 
     if(error == null) {
@@ -146,11 +163,12 @@ public class ZohoSyncReport {
   
   
   @JsonProperty(FAILED)
+  /**
+   * getter method
+   * @return the failed operations
+   */
   public List<FailedOperation> getFailed() {
     return failed;
   }
 
-  public void setFailed(List<FailedOperation> failed) {
-    this.failed = failed;
-  }
 }

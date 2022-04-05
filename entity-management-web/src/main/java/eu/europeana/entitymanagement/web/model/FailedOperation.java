@@ -1,9 +1,6 @@
 package eu.europeana.entitymanagement.web.model;
 
-import static eu.europeana.entitymanagement.web.model.ZohoSyncReportFields.ERROR;
-import static eu.europeana.entitymanagement.web.model.ZohoSyncReportFields.ID;
-import static eu.europeana.entitymanagement.web.model.ZohoSyncReportFields.MESSAGE;
-import static eu.europeana.entitymanagement.web.model.ZohoSyncReportFields.TRACE;
+import static eu.europeana.entitymanagement.web.model.ZohoSyncReportFields.*;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -15,6 +12,11 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
   TRACE
 })
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
+/**
+ * Class used for serialization of zoho sync errors
+ * @author GordeaS
+ *
+ */
 public class FailedOperation {
 
   private String zohoId;
@@ -22,6 +24,13 @@ public class FailedOperation {
   private String message;
   private String trace;
   
+  /**
+   * Main constructor
+   * @param zohoId - the zoho URI
+   * @param error - the label of the error
+   * @param message - the explicit message indicating the failed operation
+   * @param trace - the serialized stacktrace of the occured error
+   */
   public FailedOperation(String zohoId, String error, String message, String trace) {
     this.zohoId = zohoId;
     this.error = error;
