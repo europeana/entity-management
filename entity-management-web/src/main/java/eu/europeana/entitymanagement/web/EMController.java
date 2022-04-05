@@ -24,10 +24,7 @@ import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
 import eu.europeana.entitymanagement.definitions.web.EntityIdResponse;
 import eu.europeana.entitymanagement.dereference.Dereferencer;
-import eu.europeana.entitymanagement.exception.DatasourceNotKnownException;
-import eu.europeana.entitymanagement.exception.EntityMismatchException;
-import eu.europeana.entitymanagement.exception.EntityRemovedException;
-import eu.europeana.entitymanagement.exception.HttpBadRequestException;
+import eu.europeana.entitymanagement.exception.*;
 import eu.europeana.entitymanagement.solr.SolrSearchCursorIterator;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.solr.model.SolrEntity;
@@ -551,6 +548,38 @@ public class EMController extends BaseRest {
     entityRecordService.changeExternalProxy(entityRecord, url);
     entityRecordService.update(entityRecord);
     return launchTaskAndRetrieveEntity(request, type, identifier, entityRecord, profile);
+  }
+
+  @ApiOperation(value = "Retrieve multiple entities", nickname = "retrieveEntities")
+  @PostMapping(
+      value = "/retrieve",
+      produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
+  public ResponseEntity<String> retrieveEntities(
+      @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
+      @RequestBody List<String> urls,
+      HttpServletRequest request)
+      throws Exception {
+    if (emConfig.isAuthEnabled()) {
+      verifyWriteAccess(Operations.RETRIEVE, request);
+    }
+    return createResponseMultipleEntities(urls, request);
+  }
+
+  private ResponseEntity<String> createResponseMultipleEntities(
+      List<String> entityIds, HttpServletRequest request) throws EuropeanaApiException {
+    List<EntityRecord> entityRecords = entityRecordService.retrieveMultipleByEntityIds(entityIds);
+    if (entityRecords.isEmpty()) {
+      throw new EntityNotFoundException(entityIds.toString());
+    }
+
+    String contentType = HttpHeaders.CONTENT_TYPE_JSONLD_UTF8;
+    org.springframework.http.HttpHeaders headers = createAllowHeader(request);
+    if (contentType != null && !contentType.isEmpty()) {
+      headers.add(HttpHeaders.CONTENT_TYPE, contentType);
+    }
+
+    String body = serialize(entityRecords);
+    return ResponseEntity.status(HttpStatus.OK).headers(headers).body(body);
   }
 
   private ResponseEntity<String> createResponse(

@@ -95,6 +95,17 @@ public class EntityRecordService {
     return Optional.ofNullable(entityRecordRepository.findByEntityId(entityId));
   }
 
+  /**
+   * Retives Multiple Entities at a time. NOTE : If the entity does not exist or is deprecated, do
+   * not include it in the response hence, excludeDisabled is set to true.
+   *
+   * @param entityIds
+   * @return
+   */
+  public List<EntityRecord> retrieveMultipleByEntityIds(List<String> entityIds) {
+    return entityRecordRepository.findByEntityIds(entityIds, true, true);
+  }
+
   public EntityRecord retrieveEntityRecord(String type, String identifier, boolean retrieveDisabled)
       throws EuropeanaApiException {
     String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);

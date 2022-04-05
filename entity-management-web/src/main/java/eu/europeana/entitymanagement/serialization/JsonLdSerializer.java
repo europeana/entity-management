@@ -47,6 +47,17 @@ public class JsonLdSerializer {
     return response;
   }
 
+  /**
+   * Serialise the entities using the external profile and list them as a JSON array
+   *
+   * @param entityRecords
+   * @return
+   * @throws IOException
+   */
+  public String serializeEntities(List<EntityRecord> entityRecords) throws IOException {
+    return SerializationUtils.serializeExternalJson(mapper, entityRecords);
+  }
+
   public String serializeFailedUpdates(List<String> pathUrls) throws IOException {
     return mapper.writeValueAsString(pathUrls);
   }

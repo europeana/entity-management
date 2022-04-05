@@ -68,8 +68,16 @@ public class EntityRecordRepository {
     return datastore.find(EntityRecord.class).filter(eq(ENTITY_ID, entityId)).first();
   }
 
-  public List<EntityIdDisabledStatus> getEntityIds(
-      List<String> entityIds, boolean excludeDisabled) {
+  /**
+   * Find List of EntityRecord that matches the given entity ids
+   *
+   * @param entityIds
+   * @param excludeDisabled : fetch only active records, if set to true
+   * @param fetchFullRecord : fetch the full entity record, if set to true
+   * @return
+   */
+  public List<EntityRecord> findByEntityIds(
+      List<String> entityIds, boolean excludeDisabled, boolean fetchFullRecord) {
     // Get all EntityRecords that match the given entityIds
     List<Filter> filters = new ArrayList<>();
     filters.add(in(ENTITY_ID, entityIds));
@@ -79,18 +87,22 @@ public class EntityRecordRepository {
       filters.add(eq(DISABLED, null));
     }
 
-    List<EntityRecord> entityRecords =
-        datastore
-            .find(EntityRecord.class)
-            .filter(filters.toArray(Filter[]::new))
-            .iterator(
-                new FindOptions()
-                    // we only care about the entityId and disabled flag for this query
-                    .projection()
-                    .include(ENTITY_ID)
-                    .projection()
-                    .include(DISABLED))
-            .toList();
+    FindOptions findOptions = new FindOptions();
+    // if fetchFullRecord is set to false, we only care about the entityId and disabled flag for
+    // this query
+    if (!fetchFullRecord) {
+      findOptions.projection().include(ENTITY_ID).projection().include(DISABLED);
+    }
+    return datastore
+        .find(EntityRecord.class)
+        .filter(filters.toArray(Filter[]::new))
+        .iterator(findOptions)
+        .toList();
+  }
+
+  public List<EntityIdDisabledStatus> getEntityIds(
+      List<String> entityIds, boolean excludeDisabled) {
+    List<EntityRecord> entityRecords = findByEntityIds(entityIds, excludeDisabled, false);
     return entityRecords.stream()
         .map(
             entityRecord ->
