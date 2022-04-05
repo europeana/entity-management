@@ -153,7 +153,7 @@ public class ZohoSyncReport {
    * @param th - the exception indicating the source of the processing error
    */
   public void addFailedOperation(String id, String error, String message, Throwable th) {
-    String trace = ExceptionUtils.getStackTrace(th); 
+    String trace = (th == null) ? null : ExceptionUtils.getStackTrace(th); 
     if(error == null) {
       error = th.getClass().getSimpleName();
     }
