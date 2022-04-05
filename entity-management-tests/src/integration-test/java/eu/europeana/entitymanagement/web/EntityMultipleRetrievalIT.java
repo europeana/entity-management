@@ -59,7 +59,18 @@ public class EntityMultipleRetrievalIT extends BaseWebControllerTest{
                 .andExpect(
                         jsonPath(
                                 "$.entities", hasSize(2)));
+    }
 
-
+    @Test
+    public void multipleEntitiesRetrievedNotFound() throws Exception {
+        mockMvc
+                .perform(
+                        MockMvcRequestBuilders.post(
+                                        IntegrationTestUtils.BASE_SERVICE_URL
+                                                + "/"
+                                                + requestPath)
+                                .accept(MediaType.APPLICATION_JSON)
+                                .content("[ \"xyz\" , \"test\"]"))
+                .andExpect(status().isNotFound());
     }
 }
