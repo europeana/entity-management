@@ -10,7 +10,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +36,6 @@ import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.web.model.BatchOperations;
-import eu.europeana.entitymanagement.web.model.FailedOperation;
 import eu.europeana.entitymanagement.web.model.Operation;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReportFields;
@@ -207,7 +205,7 @@ public class ZohoSyncService {
   String buildErrorMessage(String message, List<String> ids) {
     if (ids != null) {
       StringBuilder builder = new StringBuilder(message);
-      builder.append(ids.toString());
+      builder.append(ids);
       message = builder.toString();
     }
     return message;

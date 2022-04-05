@@ -38,31 +38,69 @@ public class FailedOperation {
     this.trace = trace;
   }
   
-  @JsonProperty(ID)  
+  /**
+   * Getter method
+   * @return the zoho organization id
+   */
+  @JsonProperty(ID)
   public String getZohoId() {
     return zohoId;
   }
+  /**
+   * setter method
+   * @param zohoId - the zoho organization id
+   */
   public void setZohoId(String zohoId) {
     this.zohoId = zohoId;
   }
+  
+  /**
+   * getter method
+   * @return - the error label
+   */
   @JsonProperty(ERROR)
   public String getError() {
     return error;
   }
+  
+  /**
+   * setter method
+   * @param error - the error label
+   */
   public void setError(String error) {
     this.error = error;
   }
+  
+  /**
+   * Getter method
+   * @return the error message
+   */
   @JsonProperty(MESSAGE)
   public String getMessage() {
     return message;
   }
+  
+  /**
+   * setter method
+   * @param message the error message
+   */
   public void setMessage(String message) {
     this.message = message;
   }
+  
+  /**
+   * getter method
+   * @return the serialized stackTrace
+   */
   @JsonProperty(TRACE)
   public String getTrace() {
     return trace;
   }
+  
+  /**
+   * setter method
+   * @param trace the serilized stacktrace
+   */
   public void setTrace(String trace) {
     this.trace = trace;
   }
