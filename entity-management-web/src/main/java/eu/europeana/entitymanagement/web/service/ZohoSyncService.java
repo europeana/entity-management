@@ -188,11 +188,8 @@ public class ZohoSyncService {
         logger.error(
             "Zoho synchronization exception occured when handling organizations deleted in Zoho",
             e);
-        String mesage = "Unexpected error occured when deleting organizations with ids: ";
-        if (entitiesDeletedInZoho != null) {
-          mesage += entitiesDeletedInZoho.toArray();
-        }
-        zohoSyncReport.addFailedOperation(null, ZohoSyncReportFields.ENTITY_DELETION_ERROR, mesage,
+        String message = buildErrorMessage("Unexpected error occured when deleting organizations with ids: ", entitiesDeletedInZoho);
+        zohoSyncReport.addFailedOperation(null, ZohoSyncReportFields.ENTITY_DELETION_ERROR, message,
             e);
       }
 
@@ -205,6 +202,15 @@ public class ZohoSyncService {
       }
     }
 
+  }
+
+  String buildErrorMessage(String message, List<String> ids) {
+    if (ids != null) {
+      StringBuilder builder = new StringBuilder(message);
+      builder.append(ids.toString());
+      message = builder.toString();
+    }
+    return message;
   }
 
   void logExecutionProgress(List<Record> orgList, int page, final int pageSize) {
@@ -329,7 +335,7 @@ public class ZohoSyncService {
       List<String> entitiesToUpdate) {
     Organization zohoOrganization =
         ZohoOrganizationConverter.convertToOrganizationEntity(operation.getZohoRecord());
-    List<String> allCorefs = new ArrayList<String>();
+    List<String> allCorefs = new ArrayList<>();
     allCorefs.add(operation.getOrganizationId());
     allCorefs.add(zohoOrganization.getAbout());
     allCorefs.addAll(zohoOrganization.getSameReferenceLinks());
@@ -342,7 +348,6 @@ public class ZohoSyncService {
         // skipp processing
         zohoSyncReport.addFailedOperation(zohoOrganization.getAbout(), "Dupplicate entity error",
             "Dupplicate of :" + existingEntity.get().getEntityId(), null);
-        return;
       } else {
         // create shell
         Organization europeanaProxyEntity = new Organization();
@@ -359,7 +364,7 @@ public class ZohoSyncService {
       }
     } catch (EntityCreationException e) {
       zohoSyncReport.addFailedOperation(zohoOrganization.getAbout(),
-          ZohoSyncReportFields.CREATION_ERROR, e);
+          ZohoSyncReportFields.CREATION_ERROR, "Entity registration failed.",  e);
     } catch (RuntimeException e) {
       zohoSyncReport.addFailedOperation(zohoOrganization.getAbout(),
           ZohoSyncReportFields.CREATION_ERROR, e);
