@@ -169,9 +169,9 @@ public class ZohoSyncService {
         // list of (europeana) organizations ids
         deletedRecordsInZoho = zohoAccessConfiguration.getZohoAccessClient()
             .getZohoDeletedRecordOrganizations(modifiedSince, startPage, pageSize);
-
+        
         currentPageSize = deletedRecordsInZoho.size();
-        // check exists in Metis (Note: zoho doesn't support filtering by lastModified for deleted
+        // check exists in EM (Note: zoho doesn't support filtering by lastModified for deleted
         // entities)
         entitiesDeletedInZoho = getDeletedEntityIds(deletedRecordsInZoho);
 
@@ -482,7 +482,7 @@ public class ZohoSyncService {
 
     List<String> deletedEntityIds = new ArrayList<String>();
     // get the id list from Zoho deleted Record
-    if (!deletedEntityIds.isEmpty()) {
+    if (!deletedInZoho.isEmpty()) {
       deletedInZoho.forEach(deletedRecord -> deletedEntityIds.add(EntityRecordUtils
           .buildEntityIdUri(EntityTypes.Organization, deletedRecord.getId().toString())));
     }
