@@ -5,6 +5,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+/**
+ * Class used for serialization of zoho sync errors
+ * @author GordeaS
+ *
+ */
 @JsonPropertyOrder({
   ID,
   ERROR,
@@ -12,11 +17,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
   TRACE
 })
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-/**
- * Class used for serialization of zoho sync errors
- * @author GordeaS
- *
- */
 public class FailedOperation {
 
   private String zohoId;

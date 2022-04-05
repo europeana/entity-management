@@ -10,6 +10,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import eu.europeana.api.commons.definitions.utils.DateUtils;
 
+/**
+ * class used for serialization of zoho sync report
+ * @author GordeaS
+ *
+ */
 @JsonPropertyOrder({
   LAST_SYNC_DATE,
   EXECUTION_STATUS,
@@ -20,11 +25,6 @@ import eu.europeana.api.commons.definitions.utils.DateUtils;
   FAILED
 })
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-/**
- * class used for serialization of zoho sync report
- * @author GordeaS
- *
- */
 public class ZohoSyncReport {
 
   public static final String STATUS_COMPLETED = "completed";
