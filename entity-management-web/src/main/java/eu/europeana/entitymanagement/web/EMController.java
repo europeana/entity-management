@@ -571,12 +571,10 @@ public class EMController extends BaseRest {
     if (entityRecords.isEmpty()) {
       throw new EntityNotFoundException(entityIds.toString());
     }
-
+    // create response headers
     String contentType = HttpHeaders.CONTENT_TYPE_JSONLD_UTF8;
     org.springframework.http.HttpHeaders headers = createAllowHeader(request);
-    if (contentType != null && !contentType.isEmpty()) {
-      headers.add(HttpHeaders.CONTENT_TYPE, contentType);
-    }
+    headers.add(HttpHeaders.CONTENT_TYPE, contentType);
 
     String body = serialize(entityRecords);
     return ResponseEntity.status(HttpStatus.OK).headers(headers).body(body);

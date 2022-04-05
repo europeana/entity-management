@@ -71,10 +71,10 @@ public class EntityRecordRepository {
   /**
    * Find List of EntityRecord that matches the given entity ids
    *
-   * @param entityIds
+   * @param entityIds : list of entity id's to be fetched
    * @param excludeDisabled : fetch only active records, if set to true
    * @param fetchFullRecord : fetch the full entity record, if set to true
-   * @return
+   * @return list of Entity records matching entity Ids
    */
   public List<EntityRecord> findByEntityIds(
       List<String> entityIds, boolean excludeDisabled, boolean fetchFullRecord) {
