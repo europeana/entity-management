@@ -7,8 +7,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * Class used for serialization of zoho sync errors
- * @author GordeaS
- *
  */
 @JsonPropertyOrder({
   ID,

@@ -12,8 +12,6 @@ import eu.europeana.api.commons.definitions.utils.DateUtils;
 
 /**
  * class used for serialization of zoho sync report
- * @author GordeaS
- *
  */
 @JsonPropertyOrder({
   LAST_SYNC_DATE,
