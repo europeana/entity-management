@@ -24,7 +24,7 @@ public class EntityMultipleRetrievalIT extends BaseWebControllerTest{
     private static final String requestPath = "retrieve";
     private static List<String> entityIds = new ArrayList<>();
 
-    @BeforeEach
+    @BeforeAll
     public void setup() throws Exception {
         // create 1st entity
         String europeanaMetadata = loadFile(IntegrationTestUtils.CONCEPT_REGISTER_BATHTUB_JSON);
