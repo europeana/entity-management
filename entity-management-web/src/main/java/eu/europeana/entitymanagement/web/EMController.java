@@ -560,7 +560,7 @@ public class EMController extends BaseRest {
       HttpServletRequest request)
       throws Exception {
     if (emConfig.isAuthEnabled()) {
-      verifyWriteAccess(Operations.RETRIEVE, request);
+      verifyReadAccess(request);
     }
     return createResponseMultipleEntities(urls, request);
   }

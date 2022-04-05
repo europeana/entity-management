@@ -50,9 +50,9 @@ public class JsonLdSerializer {
   /**
    * Serialise the entities using the external profile and list them as a JSON array
    *
-   * @param entityRecords
-   * @return
-   * @throws IOException
+   * @param entityRecords entity Records to be serialised
+   * @return serialised response
+   * @throws IOException IOException
    */
   public String serializeEntities(List<EntityRecord> entityRecords) throws IOException {
     return SerializationUtils.serializeExternalJson(mapper, entityRecords);
