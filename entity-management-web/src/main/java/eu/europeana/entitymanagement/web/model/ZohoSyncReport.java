@@ -152,7 +152,7 @@ public class ZohoSyncReport {
    */
   public void addFailedOperation(String id, String error, String message, Throwable th) {
     String trace = (th == null) ? null : ExceptionUtils.getStackTrace(th); 
-    if(error == null) {
+    if(error == null && th != null) {
       error = th.getClass().getSimpleName();
     }
     FailedOperation failedOperation = new FailedOperation(id, error, message, trace); 
