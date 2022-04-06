@@ -200,7 +200,7 @@ public class ZohoAccessClient {
     try {
       RecordOperations recordOperations = new RecordOperations();
       ParameterMap paramInstance = new ParameterMap();
-      paramInstance.add(GetDeletedRecordsParam.TYPE, "permanent"); // all, recycle, permanent
+      paramInstance.add(GetDeletedRecordsParam.TYPE, "all"); // all, recycle, permanent
       paramInstance.add(GetDeletedRecordsParam.PAGE, 1);
       paramInstance.add(GetDeletedRecordsParam.PER_PAGE, pageSize);
       HeaderMap headersMap = new HeaderMap();
