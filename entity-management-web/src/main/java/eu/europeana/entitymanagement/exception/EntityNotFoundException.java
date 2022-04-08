@@ -9,7 +9,7 @@ public class EntityNotFoundException extends EuropeanaApiException {
   private static final long serialVersionUID = -2506967519765835153L;
 
   public EntityNotFoundException(String entityUri) {
-    super("No entity with uri '" + entityUri + "' found");
+    super("No entity found with for specified uri(s): '" + entityUri + "'");
   }
 
   @Override

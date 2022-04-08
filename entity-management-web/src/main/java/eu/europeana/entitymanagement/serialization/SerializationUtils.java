@@ -22,6 +22,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class SerializationUtils {
 
+  private SerializationUtils() {
+    // to hide implicit one
+  }
+
   public static String serializeInternalJson(
       ObjectMapper mapper,
       EntityRecord record,
@@ -44,6 +48,32 @@ public class SerializationUtils {
     final StringWriter buffer = new StringWriter();
     mapper.writeValue(buffer, getExternalJsonNode(mapper, record, includeFailure, failure));
 
+    return buffer.toString();
+  }
+
+  /**
+   * Serialises the List of Entity Records
+   *
+   * @param mapper
+   * @param entityRecords : list of entity records
+   * @return serialised string results
+   * @throws IOException
+   */
+  public static String serializeExternalJson(ObjectMapper mapper, List<EntityRecord> entityRecords)
+      throws IOException {
+    final StringWriter buffer = new StringWriter();
+    ArrayNode entities = mapper.createArrayNode();
+    entityRecords.stream()
+        .forEach(
+            entityRecord -> {
+              ObjectNode entityNode = getExternalJsonNode(mapper, entityRecord, false, null);
+              // Entity @context shouldn't appear in metadata
+              entityNode.remove(WebEntityFields.CONTEXT);
+              entities.add(entityNode);
+            });
+
+    ObjectNode result = mapper.createObjectNode().set("entities", entities);
+    mapper.writeValue(buffer, result);
     return buffer.toString();
   }
 
@@ -94,7 +124,6 @@ public class SerializationUtils {
       boolean includeFailure,
       Optional<FailedTask> failure) {
     ObjectNode entityNode = mapper.valueToTree(record.getEntity());
-    ;
 
     if (includeFailure) {
       addFailureToEntityNode(mapper, entityNode, failure);

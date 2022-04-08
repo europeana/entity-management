@@ -85,6 +85,22 @@ public abstract class BaseRest extends BaseRestController {
   }
 
   /**
+   * Serialise the entities using the external profile and list them as a JSON array
+   *
+   * @param entityRecords
+   * @return
+   * @throws EuropeanaApiException
+   */
+  protected String serialize(List<EntityRecord> entityRecords) throws EuropeanaApiException {
+    String responseBody = null;
+    try {
+      responseBody = jsonLdSerializer.serializeEntities(entityRecords);
+    } catch (IOException e) {
+      throw new EuropeanaApiException("Error serializing entities", e);
+    }
+    return responseBody;
+  }
+  /**
    * This method selects serialization method according to provided format.
    *
    * @param entityRecord The entity
