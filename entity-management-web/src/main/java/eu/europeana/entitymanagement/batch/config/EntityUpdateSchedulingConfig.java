@@ -34,11 +34,12 @@ import org.springframework.scheduling.annotation.EnableScheduling;
       value = "classpath:entitymanagement.user.properties",
       ignoreResourceNotFound = true)
 })
-@ConditionalOnProperty(
-    prefix = "batch.scheduling",
-    value = "enabled",
-    havingValue = "true",
-    matchIfMissing = true)
+//EA-2992
+//@ConditionalOnProperty(
+//    prefix = "batch.scheduling",
+//    value = "enabled",
+//    havingValue = "true",
+//    matchIfMissing = true)
 @EnableScheduling
 public class EntityUpdateSchedulingConfig implements InitializingBean {
 

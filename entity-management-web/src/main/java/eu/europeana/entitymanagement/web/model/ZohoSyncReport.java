@@ -1,40 +1,41 @@
 package eu.europeana.entitymanagement.web.model;
 
 import static eu.europeana.entitymanagement.web.model.ZohoSyncReportFields.*;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import eu.europeana.api.commons.definitions.utils.DateUtils;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
+/**
+ * class used for serialization of zoho sync report
+ */
 @JsonPropertyOrder({
   LAST_SYNC_DATE,
-  CREATED,
+  EXECUTION_STATUS,
+  NEW,
   UPDATED,
   DEPRECATED,
   DELETED,
-  EXECUTION_STATUS,
-  SKIPPED_DUPPLICATES
+  FAILED
 })
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class ZohoSyncReport {
+
+  public static final String STATUS_COMPLETED = "completed";
+  public static final String STATUS_INCOMPLETE = "incomplete";
 
   final Date lastSyncDate;
   long created = 0l;
   long updated = 0l;
   long deprecated = 0l;
   long deleted = 0l;
-  private String executionStatus;
-  Map<String, String> skippedDupplicates;
+  private List<FailedOperation> failed;
 
-  private Throwable error;
-  public static final String STATUS_COMPLETED = "completed";
-  public static final String STATUS_INTERUPTED = "interuppted";
-
+  
   public ZohoSyncReport(Date lastSyncDate) {
     this.lastSyncDate = lastSyncDate;
   }
@@ -44,7 +45,7 @@ public class ZohoSyncReport {
     this(new Date(0));
   }
 
-  @JsonProperty(CREATED)
+  @JsonProperty(NEW)
   public long getCreated() {
     return created;
   }
@@ -98,11 +99,10 @@ public class ZohoSyncReport {
 
   @JsonProperty(EXECUTION_STATUS)
   public String getExecutionStatus() {
-    return executionStatus;
-  }
-
-  public void setExecutionStatus(String executionStatus) {
-    this.executionStatus = executionStatus;
+    if(getFailed() == null || getFailed().isEmpty()) {
+      return STATUS_COMPLETED;
+    }
+    return STATUS_INCOMPLETE;
   }
 
   @Override
@@ -117,40 +117,56 @@ public class ZohoSyncReport {
         getExecutionStatus());
   }
 
-  public Throwable getError() {
-    return error;
-  }
-
-  void setError(Throwable error) {
-    this.error = error;
-  }
-
-  @JsonIgnore
-  public boolean isExecutionIntrerrupted() {
-    return STATUS_INTERUPTED.equals(getExecutionStatus());
-  }
-
-  public void updateExecutionStatus(Throwable error) {
-    if (error != null) {
-      setError(error);
-      setExecutionStatus(executionStatus);
-    }
-  }
-
-  @JsonProperty(SKIPPED_DUPPLICATES)
-  public Map<String, String> getSkippedDupplicates() {
-    return skippedDupplicates;
-  }
-
-  public void addSkippedDupplicate(String creationRequestId, String existingEntity) {
-    if (skippedDupplicates == null) {
-      skippedDupplicates = new HashMap<String, String>();
-    }
-    skippedDupplicates.put(creationRequestId, existingEntity);
-  }
-
   @JsonProperty(LAST_SYNC_DATE)
+  /**
+   * getter method
+   * @return the date and time when the synchronization was run
+   */
   public Date getLastSyncDate() {
     return lastSyncDate;
   }
+
+  private void addFailedOperation(FailedOperation operation) {
+    if(failed == null) {
+      failed = new ArrayList<>();
+    }
+    failed.add(operation);
+  }
+
+  /**
+   * Utility method for registering a FailedOperation
+   * @param id - zoho organization id
+   * @param error - the label of the error
+   * @param th - the exception indicating the source of the processing error
+   */
+  public void addFailedOperation(String id, String error, Throwable th) {
+    addFailedOperation(id, error, th.getMessage(), th);
+  }
+  
+  /**
+   * Utility method for registering a FailedOperation
+   * @param id - zoho organization id
+   * @param error - the label of the error
+   * @param message - the message indicating the failed operations
+   * @param th - the exception indicating the source of the processing error
+   */
+  public void addFailedOperation(String id, String error, String message, Throwable th) {
+    String trace = (th == null) ? null : ExceptionUtils.getStackTrace(th); 
+    if(error == null && th != null) {
+      error = th.getClass().getSimpleName();
+    }
+    FailedOperation failedOperation = new FailedOperation(id, error, message, trace); 
+    addFailedOperation(failedOperation);
+  }
+  
+  
+  @JsonProperty(FAILED)
+  /**
+   * getter method
+   * @return the failed operations
+   */
+  public List<FailedOperation> getFailed() {
+    return failed;
+  }
+
 }
