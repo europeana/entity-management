@@ -45,13 +45,14 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
     String entityId = entityRecord.getEntityId();
     // used to update the wikidata proxyId in case the zoho sameAs values have been changed
     String newWikidataProxyId = null;
+    EntityProxy wikidataProxyToBeRemoved = null;
     for (EntityProxy externalProxy : entityRecord.getExternalProxies()) {
       // in case of wikidata proxy, update the proxyId with the new data from the zoho sameAs values
       if (WikidataUtils.isWikidataOrganization(
               externalProxy.getProxyId(), entityRecord.getEntity().getType())
           && !externalProxy.getProxyId().equals(newWikidataProxyId)) {
         if (newWikidataProxyId == null) {
-          entityRecord.removeProxy(externalProxy);
+          wikidataProxyToBeRemoved = externalProxy;
           continue;
         }
         externalProxy.setProxyId(newWikidataProxyId);
@@ -102,6 +103,10 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
       externalProxy.getProxyIn().setModified(new Date());
     }
 
+    if(wikidataProxyToBeRemoved != null) {
+      entityRecord.removeProxy(wikidataProxyToBeRemoved);
+    }
+    
     return entityRecord;
   }
 
