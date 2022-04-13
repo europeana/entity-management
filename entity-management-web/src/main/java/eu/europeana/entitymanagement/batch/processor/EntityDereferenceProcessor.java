@@ -103,10 +103,10 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
       externalProxy.getProxyIn().setModified(new Date());
     }
 
-    if(wikidataProxyToBeRemoved != null) {
-      entityRecord.removeProxy(wikidataProxyToBeRemoved);
+    if (wikidataProxyToBeRemoved != null) {
+      entityRecord.getExternalProxies().remove(wikidataProxyToBeRemoved);
     }
-    
+
     return entityRecord;
   }
 
