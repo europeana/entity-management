@@ -74,6 +74,10 @@ public class EntityRecord {
     this.proxies.add(proxy);
   }
 
+  public void removeProxy(EntityProxy proxy) {
+    this.proxies.remove(proxy);
+  }
+
   public void setDbId(ObjectId dbId_param) {
     this.dbId = dbId_param;
   }

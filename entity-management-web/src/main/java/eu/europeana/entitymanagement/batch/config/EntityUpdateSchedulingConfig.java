@@ -19,7 +19,6 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
@@ -34,8 +33,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
       value = "classpath:entitymanagement.user.properties",
       ignoreResourceNotFound = true)
 })
-//EA-2992
-//@ConditionalOnProperty(
+// EA-2992
+// @ConditionalOnProperty(
 //    prefix = "batch.scheduling",
 //    value = "enabled",
 //    havingValue = "true",

@@ -1,19 +1,5 @@
 package eu.europeana.entitymanagement.web.service;
 
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.stream.Collectors;
-import javax.validation.constraints.NotNull;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import com.zoho.crm.api.record.DeletedRecord;
 import com.zoho.crm.api.record.Record;
 import dev.morphia.query.experimental.filters.Filter;
@@ -42,6 +28,20 @@ import eu.europeana.entitymanagement.web.model.ZohoSyncReportFields;
 import eu.europeana.entitymanagement.zoho.organization.ZohoAccessConfiguration;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.stream.Collectors;
+import javax.validation.constraints.NotNull;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service(AppConfig.BEAN_ZOHO_SYNC_SERVICE)
 public class ZohoSyncService {
@@ -65,10 +65,14 @@ public class ZohoSyncService {
   private static final Logger logger = LogManager.getLogger(ZohoSyncService.class);
 
   @Autowired
-  public ZohoSyncService(EntityRecordService entityRecordService,
-      EntityUpdateService entityUpdateService, EntityRecordRepository entityRecordRepository,
-      EntityManagementConfiguration emConfiguration, DataSources datasources,
-      ZohoAccessConfiguration zohoAccessConfiguration, SolrService solrService) {
+  public ZohoSyncService(
+      EntityRecordService entityRecordService,
+      EntityUpdateService entityUpdateService,
+      EntityRecordRepository entityRecordRepository,
+      EntityManagementConfiguration emConfiguration,
+      DataSources datasources,
+      ZohoAccessConfiguration zohoAccessConfiguration,
+      SolrService solrService) {
     this.entityRecordService = entityRecordService;
     this.entityUpdateService = entityUpdateService;
     this.entityRecordRepository = entityRecordRepository;
@@ -99,8 +103,8 @@ public class ZohoSyncService {
     return zohoSyncReport;
   }
 
-  void synchronizeZohoOrganizations(@NotNull OffsetDateTime modifiedSince,
-      ZohoSyncReport zohoSyncReport) {
+  void synchronizeZohoOrganizations(
+      @NotNull OffsetDateTime modifiedSince, ZohoSyncReport zohoSyncReport) {
     List<Record> orgList;
     BatchOperations operations;
 
@@ -114,14 +118,18 @@ public class ZohoSyncService {
       // OffsetDateTime offsetDateTime = modifiedSince.toInstant()
       // .atOffset(ZoneOffset.UTC);
       try {
-        orgList = zohoAccessConfiguration.getZohoAccessClient().getZcrmRecordOrganizations(page,
-            pageSize, modifiedSince);
+        orgList =
+            zohoAccessConfiguration
+                .getZohoAccessClient()
+                .getZcrmRecordOrganizations(page, pageSize, modifiedSince);
 
         logExecutionProgress(orgList, page, pageSize);
       } catch (ZohoException e) {
         // break if Zoho access failures occurs
         // sets also execution status
-        zohoSyncReport.addFailedOperation(null, ZohoSyncReportFields.ZOHO_ACCESS_ERROR,
+        zohoSyncReport.addFailedOperation(
+            null,
+            ZohoSyncReportFields.ZOHO_ACCESS_ERROR,
             "Zoho synchronization exception occured when handling organizations modified in Zoho, the execution was interupted without updating all organizations",
             e);
         // stop execution if the organizations cannot be read from zoho
@@ -151,8 +159,8 @@ public class ZohoSyncService {
    * @throws ZohoException
    * @throws OrganizationImportException
    */
-  void synchronizeDeletedZohoOrganizations(OffsetDateTime modifiedSince,
-      ZohoSyncReport zohoSyncReport) {
+  void synchronizeDeletedZohoOrganizations(
+      OffsetDateTime modifiedSince, ZohoSyncReport zohoSyncReport) {
 
     // do not delete organizations for individual entity importer
     // in case of full import the database should be manually cleaned. No need to delete
@@ -167,9 +175,11 @@ public class ZohoSyncService {
     while (hasNext) {
       try {
         // list of (europeana) organizations ids
-        deletedRecordsInZoho = zohoAccessConfiguration.getZohoAccessClient()
-            .getZohoDeletedRecordOrganizations(modifiedSince, startPage, pageSize);
-        
+        deletedRecordsInZoho =
+            zohoAccessConfiguration
+                .getZohoAccessClient()
+                .getZohoDeletedRecordOrganizations(modifiedSince, startPage, pageSize);
+
         currentPageSize = deletedRecordsInZoho.size();
         // check exists in EM (Note: zoho doesn't support filtering by lastModified for deleted
         // entities)
@@ -186,9 +196,12 @@ public class ZohoSyncService {
         logger.error(
             "Zoho synchronization exception occured when handling organizations deleted in Zoho",
             e);
-        String message = buildErrorMessage("Unexpected error occured when deleting organizations with ids: ", entitiesDeletedInZoho);
-        zohoSyncReport.addFailedOperation(null, ZohoSyncReportFields.ENTITY_DELETION_ERROR, message,
-            e);
+        String message =
+            buildErrorMessage(
+                "Unexpected error occured when deleting organizations with ids: ",
+                entitiesDeletedInZoho);
+        zohoSyncReport.addFailedOperation(
+            null, ZohoSyncReportFields.ENTITY_DELETION_ERROR, message, e);
       }
 
       if (isLastPage(currentPageSize, pageSize)) {
@@ -199,7 +212,6 @@ public class ZohoSyncService {
         startPage++;
       }
     }
-
   }
 
   String buildErrorMessage(String message, List<String> ids) {
@@ -231,26 +243,29 @@ public class ZohoSyncService {
     performPermanentDeleteOperations(operations.getPermanentDeleteOperations(), zohoSyncReport);
   }
 
-  void performPermanentDeleteOperations(SortedSet<Operation> permanentDeleteOperations,
-      ZohoSyncReport zohoSyncReport) {
+  void performPermanentDeleteOperations(
+      SortedSet<Operation> permanentDeleteOperations, ZohoSyncReport zohoSyncReport) {
     if (permanentDeleteOperations == null || permanentDeleteOperations.isEmpty()) {
       return;
     }
 
-    List<String> entitiesToDelete = permanentDeleteOperations.stream()
-        .map(permDelete -> permDelete.getOrganizationId()).collect(Collectors.toList());
+    List<String> entitiesToDelete =
+        permanentDeleteOperations.stream()
+            .map(permDelete -> permDelete.getOrganizationId())
+            .collect(Collectors.toList());
     try {
       runPermanentDelete(entitiesToDelete, zohoSyncReport);
     } catch (RuntimeException e) {
-      String message = "Cannot perfomr permanet delete operations for organizations with ids:"
-          + entitiesToDelete.toArray();
-      zohoSyncReport.addFailedOperation(null, ZohoSyncReportFields.ENTITY_DELETION_ERROR, message,
-          e);
+      String message =
+          "Cannot perfomr permanet delete operations for organizations with ids:"
+              + entitiesToDelete.toArray();
+      zohoSyncReport.addFailedOperation(
+          null, ZohoSyncReportFields.ENTITY_DELETION_ERROR, message, e);
     }
   }
 
-  void performDeprecationOperations(SortedSet<Operation> deprecateOperations,
-      ZohoSyncReport zohoSyncReport) {
+  void performDeprecationOperations(
+      SortedSet<Operation> deprecateOperations, ZohoSyncReport zohoSyncReport) {
     if (deprecateOperations == null || deprecateOperations.isEmpty()) {
       return;
     }
@@ -259,8 +274,8 @@ public class ZohoSyncService {
       zohoOrganization =
           ZohoOrganizationConverter.convertToOrganizationEntity(operation.getZohoRecord());
       // update sameAs
-      entityRecordService.addSameReferenceLinks(operation.getEntityRecord().getEntity(),
-          zohoOrganization.getSameReferenceLinks());
+      entityRecordService.addSameReferenceLinks(
+          operation.getEntityRecord().getEntity(), zohoOrganization.getSameReferenceLinks());
 
       // deprecate
       performDeprecation(zohoSyncReport, operation);
@@ -273,34 +288,36 @@ public class ZohoSyncService {
       entityRecordService.disableEntityRecord(operation.getEntityRecord());
       zohoSyncReport.increaseDeprecated(1);
     } catch (SolrServiceException e) {
-      zohoSyncReport.addFailedOperation(operation.getOrganizationId(),
-          ZohoSyncReportFields.SOLR_DELETION_ERROR, e);
+      zohoSyncReport.addFailedOperation(
+          operation.getOrganizationId(), ZohoSyncReportFields.SOLR_DELETION_ERROR, e);
     } catch (RuntimeException e) {
-      zohoSyncReport.addFailedOperation(operation.getOrganizationId(),
-          ZohoSyncReportFields.ENTITY_DEPRECATION_ERROR, e);
+      zohoSyncReport.addFailedOperation(
+          operation.getOrganizationId(), ZohoSyncReportFields.ENTITY_DEPRECATION_ERROR, e);
     }
-
   }
 
-  void performUpdateOperations(SortedSet<Operation> updateOperations,
-      ZohoSyncReport zohoSyncReport) {
+  void performUpdateOperations(
+      SortedSet<Operation> updateOperations, ZohoSyncReport zohoSyncReport) {
     if (updateOperations == null || updateOperations.isEmpty()) {
       return;
     }
-    List<String> organizationIds = updateOperations.stream()
-        .map(operation -> operation.getOrganizationId()).collect(Collectors.toList());
+    List<String> organizationIds =
+        updateOperations.stream()
+            .map(operation -> operation.getOrganizationId())
+            .collect(Collectors.toList());
     try {
       entityUpdateService.scheduleTasks(organizationIds, ScheduledUpdateType.FULL_UPDATE);
       zohoSyncReport.increaseUpdated(updateOperations.size());
     } catch (RuntimeException e) {
-      String message = "Cannot schedule updae operations for organizations with ids:"
-          + organizationIds.toArray();
+      String message =
+          "Cannot schedule updae operations for organizations with ids:"
+              + organizationIds.toArray();
       zohoSyncReport.addFailedOperation(null, ZohoSyncReportFields.CREATION_ERROR, message, e);
     }
   }
 
-  private void performCreateOperation(SortedSet<Operation> createOperations,
-      ZohoSyncReport zohoSyncReport) {
+  private void performCreateOperation(
+      SortedSet<Operation> createOperations, ZohoSyncReport zohoSyncReport) {
 
     if (createOperations == null || createOperations.isEmpty()) {
       return;
@@ -312,14 +329,15 @@ public class ZohoSyncService {
       entityUpdateService.scheduleTasks(entitiesToUpdate, ScheduledUpdateType.FULL_UPDATE);
       zohoSyncReport.increaseCreated(entitiesToUpdate.size());
     } catch (RuntimeException e) {
-      String message = "Cannot schedule updae operations for organizations with ids:"
-          + entitiesToUpdate.toArray();
+      String message =
+          "Cannot schedule updae operations for organizations with ids:"
+              + entitiesToUpdate.toArray();
       zohoSyncReport.addFailedOperation(null, ZohoSyncReportFields.CREATION_ERROR, message, e);
     }
   }
 
-  List<String> performEntityRegistration(SortedSet<Operation> createOperations,
-      ZohoSyncReport zohoSyncReport) {
+  List<String> performEntityRegistration(
+      SortedSet<Operation> createOperations, ZohoSyncReport zohoSyncReport) {
     List<String> entitiesToUpdate = new ArrayList<String>(createOperations.size());
 
     // register new entitities
@@ -329,8 +347,8 @@ public class ZohoSyncService {
     return entitiesToUpdate;
   }
 
-  void performEntityRegistration(Operation operation, ZohoSyncReport zohoSyncReport,
-      List<String> entitiesToUpdate) {
+  void performEntityRegistration(
+      Operation operation, ZohoSyncReport zohoSyncReport, List<String> entitiesToUpdate) {
     Organization zohoOrganization =
         ZohoOrganizationConverter.convertToOrganizationEntity(operation.getZohoRecord());
     List<String> allCorefs = new ArrayList<>();
@@ -344,28 +362,37 @@ public class ZohoSyncService {
           entityRecordService.findMatchingCoreference(allCorefs);
       if (existingEntity.isPresent()) {
         // skipp processing
-        zohoSyncReport.addFailedOperation(zohoOrganization.getAbout(), "Dupplicate entity error",
-            "Dupplicate of :" + existingEntity.get().getEntityId(), null);
+        zohoSyncReport.addFailedOperation(
+            zohoOrganization.getAbout(),
+            "Dupplicate entity error",
+            "Dupplicate of :" + existingEntity.get().getEntityId(),
+            null);
       } else {
         // create shell
         Organization europeanaProxyEntity = new Organization();
         // set zoho URL
         europeanaProxyEntity.setAbout(zohoOrganization.getAbout());
 
-        EntityRecord savedEntityRecord = entityRecordService
-            .createEntityFromRequest(europeanaProxyEntity, zohoOrganization, getZohoDataSource());
+        EntityRecord savedEntityRecord =
+            entityRecordService.createEntityFromRequest(
+                europeanaProxyEntity, zohoOrganization, getZohoDataSource());
         entitiesToUpdate.add(savedEntityRecord.getEntityId());
         if (logger.isDebugEnabled()) {
-          logger.debug("Created Entity record for externalId={}; entityId={}",
-              zohoOrganization.getAbout(), savedEntityRecord.getEntityId());
+          logger.debug(
+              "Created Entity record for externalId={}; entityId={}",
+              zohoOrganization.getAbout(),
+              savedEntityRecord.getEntityId());
         }
       }
     } catch (EntityCreationException e) {
-      zohoSyncReport.addFailedOperation(zohoOrganization.getAbout(),
-          ZohoSyncReportFields.CREATION_ERROR, "Entity registration failed.",  e);
+      zohoSyncReport.addFailedOperation(
+          zohoOrganization.getAbout(),
+          ZohoSyncReportFields.CREATION_ERROR,
+          "Entity registration failed.",
+          e);
     } catch (RuntimeException e) {
-      zohoSyncReport.addFailedOperation(zohoOrganization.getAbout(),
-          ZohoSyncReportFields.CREATION_ERROR, e);
+      zohoSyncReport.addFailedOperation(
+          zohoOrganization.getAbout(), ZohoSyncReportFields.CREATION_ERROR, e);
     }
   }
 
@@ -374,8 +401,7 @@ public class ZohoSyncService {
    * addressing deleted and unwanted (defined by owner criteria) organizations. We separate to
    * update from to delete types
    *
-   * <p>
-   * If full import -> only update/create else Update operation -> 1) search criteria is empty,
+   * <p>If full import -> only update/create else Update operation -> 1) search criteria is empty,
    * check if the owner is present in the zoho record 2) search criteria present, then zoho record
    * owner should match with the search filter ZOHO_OWNER_CRITERIA Delete the record if none of the
    * above matches.
@@ -398,6 +424,7 @@ public class ZohoSyncService {
       if (entityRecordOptional.isPresent()) {
         entityRecord = entityRecordOptional.get();
       }
+
       addOperation(operations, zohoId, zohoOrg, entityRecord);
     }
     return operations;
@@ -405,12 +432,12 @@ public class ZohoSyncService {
 
   List<EntityRecord> findEntityRecordsById(Set<String> modifiedInZoho) {
     Filter entityIdsFilter = Filters.in(WebEntityFields.ENTITY_ID, modifiedInZoho);
-    return entityRecordRepository.findWithFilters(0, modifiedInZoho.size(),
-        new Filter[] {entityIdsFilter});
+    return entityRecordRepository.findWithFilters(
+        0, modifiedInZoho.size(), new Filter[] {entityIdsFilter});
   }
 
-  private void addOperation(BatchOperations operations, String zohoId, Record zohoOrg,
-      EntityRecord entityRecord) {
+  private void addOperation(
+      BatchOperations operations, String zohoId, Record zohoOrg, EntityRecord entityRecord) {
 
     String entityId = EntityRecordUtils.buildEntityIdUri(EntityTypes.Organization, zohoId);
 
@@ -472,8 +499,11 @@ public class ZohoSyncService {
     Set<String> modifiedInZoho = new HashSet<String>();
     // get the id list from Zoho deleted Record
     if (!orgList.isEmpty()) {
-      orgList.forEach(updatedRecord -> modifiedInZoho.add(EntityRecordUtils
-          .buildEntityIdUri(EntityTypes.Organization, updatedRecord.getId().toString())));
+      orgList.forEach(
+          updatedRecord ->
+              modifiedInZoho.add(
+                  EntityRecordUtils.buildEntityIdUri(
+                      EntityTypes.Organization, updatedRecord.getId().toString())));
     }
     return modifiedInZoho;
   }
@@ -483,14 +513,17 @@ public class ZohoSyncService {
     List<String> deletedEntityIds = new ArrayList<String>();
     // get the id list from Zoho deleted Record
     if (!deletedInZoho.isEmpty()) {
-      deletedInZoho.forEach(deletedRecord -> deletedEntityIds.add(EntityRecordUtils
-          .buildEntityIdUri(EntityTypes.Organization, deletedRecord.getId().toString())));
+      deletedInZoho.forEach(
+          deletedRecord ->
+              deletedEntityIds.add(
+                  EntityRecordUtils.buildEntityIdUri(
+                      EntityTypes.Organization, deletedRecord.getId().toString())));
     }
     return deletedEntityIds;
   }
 
-  private Optional<EntityRecord> findRecordInList(String zohoId,
-      List<EntityRecord> existingRecords) {
+  private Optional<EntityRecord> findRecordInList(
+      String zohoId, List<EntityRecord> existingRecords) {
     if (existingRecords == null || existingRecords.isEmpty()) {
       return Optional.ofNullable(null);
     }
@@ -498,8 +531,8 @@ public class ZohoSyncService {
     return existingRecords.stream().filter(er -> er.getEntityId().endsWith(identifier)).findFirst();
   }
 
-  private void runPermanentDelete(List<String> entitiesDeletedInZoho,
-      ZohoSyncReport zohoSyncReport) {
+  private void runPermanentDelete(
+      List<String> entitiesDeletedInZoho, ZohoSyncReport zohoSyncReport) {
     long deleted = entityRecordService.deleteBulk(entitiesDeletedInZoho);
     zohoSyncReport.increaseDeleted(deleted);
   }

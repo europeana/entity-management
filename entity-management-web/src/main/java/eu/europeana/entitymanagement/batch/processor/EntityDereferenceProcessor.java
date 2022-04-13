@@ -9,6 +9,8 @@ import eu.europeana.entitymanagement.dereference.Dereferencer;
 import eu.europeana.entitymanagement.exception.DatasourceNotKnownException;
 import eu.europeana.entitymanagement.exception.EntityMismatchException;
 import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
+import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
+import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 import java.util.Date;
 import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
@@ -41,7 +43,20 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
   @Override
   public EntityRecord process(@NonNull EntityRecord entityRecord) throws Exception {
     String entityId = entityRecord.getEntityId();
+    // used to update the wikidata proxyId in case the zoho sameAs values have been changed
+    String newWikidataProxyId = null;
     for (EntityProxy externalProxy : entityRecord.getExternalProxies()) {
+      // in case of wikidata proxy, update the proxyId with the new data from the zoho sameAs values
+      if (WikidataUtils.isWikidataOrganization(
+              externalProxy.getProxyId(), entityRecord.getEntity().getType())
+          && !externalProxy.getProxyId().equals(newWikidataProxyId)) {
+        if (newWikidataProxyId == null) {
+          entityRecord.removeProxy(externalProxy);
+          continue;
+        }
+        externalProxy.setProxyId(newWikidataProxyId);
+      }
+
       String proxyId = externalProxy.getProxyId();
       // do not update external proxy for static data sources
       Optional<DataSource> dataSource = datasources.getDatasource(proxyId);
@@ -60,6 +75,18 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
       Entity proxyResponse = proxyResponseOptional.get();
 
       Entity entity = entityRecord.getEntity();
+
+      /*
+       * in case of the zoho proxy, save the new wikidata proxy id from the zoho sameAs values
+       * (this is used to update the wikidata proxy)
+       */
+      Optional<String> newWikidataIdFromZoho;
+      if (ZohoUtils.isZohoOrganization(proxyId, entity.getType())
+          && (newWikidataIdFromZoho =
+                  WikidataUtils.getWikidataId(proxyResponse.getSameReferenceLinks()))
+              .isPresent()) {
+        newWikidataProxyId = newWikidataIdFromZoho.get();
+      }
 
       String proxyResponseType = proxyResponse.getType();
       String entityType = entity.getType();

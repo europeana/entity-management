@@ -562,6 +562,18 @@ public class EntityRecordService {
      */
     Aggregation aggregation = entityRecord.getEntity().getIsAggregatedBy();
     aggregation.setModified(new Date());
+    // update the aggregates, since some proxy data can be changed
+    List<String> newAggregates = new ArrayList<String>();
+    if (aggregation.getAggregates() != null) {
+      newAggregates.add(aggregation.getAggregates().get(0));
+    }
+    if (entityRecord.getExternalProxies() != null) {
+      for (int i = 0; i < entityRecord.getExternalProxies().size(); i++) {
+        newAggregates.add(getDatasourceAggregationId(entityRecord.getEntityId(), i + 1));
+      }
+    }
+    aggregation.setAggregates(newAggregates);
+
     consolidatedEntity.setIsAggregatedBy(aggregation);
     entityRecord.setEntity(consolidatedEntity);
   }

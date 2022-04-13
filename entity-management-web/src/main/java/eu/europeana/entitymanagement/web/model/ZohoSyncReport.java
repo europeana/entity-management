@@ -1,27 +1,18 @@
 package eu.europeana.entitymanagement.web.model;
 
 import static eu.europeana.entitymanagement.web.model.ZohoSyncReportFields.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import eu.europeana.api.commons.definitions.utils.DateUtils;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
-/**
- * class used for serialization of zoho sync report
- */
-@JsonPropertyOrder({
-  LAST_SYNC_DATE,
-  EXECUTION_STATUS,
-  NEW,
-  UPDATED,
-  DEPRECATED,
-  DELETED,
-  FAILED
-})
+/** class used for serialization of zoho sync report */
+@JsonPropertyOrder({LAST_SYNC_DATE, EXECUTION_STATUS, NEW, UPDATED, DEPRECATED, DELETED, FAILED})
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class ZohoSyncReport {
 
@@ -35,7 +26,6 @@ public class ZohoSyncReport {
   long deleted = 0l;
   private List<FailedOperation> failed;
 
-  
   public ZohoSyncReport(Date lastSyncDate) {
     this.lastSyncDate = lastSyncDate;
   }
@@ -99,7 +89,7 @@ public class ZohoSyncReport {
 
   @JsonProperty(EXECUTION_STATUS)
   public String getExecutionStatus() {
-    if(getFailed() == null || getFailed().isEmpty()) {
+    if (getFailed() == null || getFailed().isEmpty()) {
       return STATUS_COMPLETED;
     }
     return STATUS_INCOMPLETE;
@@ -120,6 +110,7 @@ public class ZohoSyncReport {
   @JsonProperty(LAST_SYNC_DATE)
   /**
    * getter method
+   *
    * @return the date and time when the synchronization was run
    */
   public Date getLastSyncDate() {
@@ -127,7 +118,7 @@ public class ZohoSyncReport {
   }
 
   private void addFailedOperation(FailedOperation operation) {
-    if(failed == null) {
+    if (failed == null) {
       failed = new ArrayList<>();
     }
     failed.add(operation);
@@ -135,6 +126,7 @@ public class ZohoSyncReport {
 
   /**
    * Utility method for registering a FailedOperation
+   *
    * @param id - zoho organization id
    * @param error - the label of the error
    * @param th - the exception indicating the source of the processing error
@@ -142,31 +134,31 @@ public class ZohoSyncReport {
   public void addFailedOperation(String id, String error, Throwable th) {
     addFailedOperation(id, error, th.getMessage(), th);
   }
-  
+
   /**
    * Utility method for registering a FailedOperation
+   *
    * @param id - zoho organization id
    * @param error - the label of the error
    * @param message - the message indicating the failed operations
    * @param th - the exception indicating the source of the processing error
    */
   public void addFailedOperation(String id, String error, String message, Throwable th) {
-    String trace = (th == null) ? null : ExceptionUtils.getStackTrace(th); 
-    if(error == null && th != null) {
+    String trace = (th == null) ? null : ExceptionUtils.getStackTrace(th);
+    if (error == null && th != null) {
       error = th.getClass().getSimpleName();
     }
-    FailedOperation failedOperation = new FailedOperation(id, error, message, trace); 
+    FailedOperation failedOperation = new FailedOperation(id, error, message, trace);
     addFailedOperation(failedOperation);
   }
-  
-  
+
   @JsonProperty(FAILED)
   /**
    * getter method
+   *
    * @return the failed operations
    */
   public List<FailedOperation> getFailed() {
     return failed;
   }
-
 }
