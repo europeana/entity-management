@@ -554,7 +554,8 @@ public class EntityRecordService {
     return combineEntities(primary, secondary, fieldsToCombine, true);
   }
 
-  public void updateConsolidatedVersion(EntityRecord entityRecord, Entity consolidatedEntity) {
+  public void updateConsolidatedVersionAggregatesAndDeprecation(
+      EntityRecord entityRecord, Entity consolidatedEntity) {
 
     /*
      * isAggregatedBy isn't set on Europeana Proxy, so it won't be copied to the
@@ -573,8 +574,12 @@ public class EntityRecordService {
       }
     }
     aggregation.setAggregates(newAggregates);
-
     consolidatedEntity.setIsAggregatedBy(aggregation);
+
+    if (entityRecord.isDisabled()) {
+      entityRecord.setDisabled(null);
+    }
+
     entityRecord.setEntity(consolidatedEntity);
   }
 
