@@ -606,7 +606,7 @@ public class EntityRecordService {
     Aggregation aggregation = entityRecord.getEntity().getIsAggregatedBy();
     aggregation.setModified(new Date());
     // update the aggregates, since some proxy data can be changed
-    List<String> newAggregates = new ArrayList<String>();
+    List<String> newAggregates = new ArrayList<>();
     if (aggregation.getAggregates() != null) {
       newAggregates.add(aggregation.getAggregates().get(0));
     }
