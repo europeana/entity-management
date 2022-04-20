@@ -297,28 +297,45 @@ public class EntityRecordService {
         && (wikidataId = WikidataUtils.getWikidataId(datasourceResponse.getSameReferenceLinks()))
             .isPresent()) {
 
-      // entity metadata will be populated during update task
-      Entity wikidataProxyEntity =
-          EntityObjectFactory.createProxyEntityObject(datasourceResponse.getType());
-
-      Optional<DataSource> wikidataDatasource = getDataSource(wikidataId.get());
-      // exception is thrown in factory method if wikidataDatasource is empty
-      setExternalProxy(
-          wikidataProxyEntity,
-          wikidataId.get(),
-          entityId,
-          wikidataDatasource.get(),
-          entityRecord,
-          timestamp,
-          2);
-
-      // add wikidata uri to entity sameAs
-      entity.getSameReferenceLinks().add(wikidataId.get());
-      // add to entityIsAggregatedBy
-      entity.getIsAggregatedBy().getAggregates().add(getDatasourceAggregationId(entityId, 2));
+      String wikidataProxyId = wikidataId.get();
+      
+      appendWikidataProxy(entityRecord, wikidataProxyId, datasourceResponse.getType(), timestamp);
     }
 
     return entityRecordRepository.save(entityRecord);
+  }
+
+  /**
+   * Creates a wikidata proxy and appends it to the proxy list
+   * @param entityRecord the entity record to be updated
+   * @param wikidataProxyId the wikidata entity id
+   * @param datasourceResponse the entity dereferenced from wikidata
+   * @param timestamp the timestamp set as created and modified dates
+   * @throws EntityCreationException if the creation is not successfull
+   */
+  public EntityProxy appendWikidataProxy(EntityRecord entityRecord, String wikidataProxyId,
+      String entityType, Date timestamp) throws EntityCreationException {
+    // entity metadata will be populated during update task
+    Entity wikidataProxyEntity =
+        EntityObjectFactory.createProxyEntityObject(entityType);
+    
+    Optional<DataSource> wikidataDatasource = getDataSource(wikidataProxyId);
+    // exception is thrown in factory method if wikidataDatasource is empty
+    int proxyNr = entityRecord.getProxies().size();
+    EntityProxy wikidataProxy = setExternalProxy(
+        wikidataProxyEntity,
+        wikidataProxyId,
+        entityRecord.getEntityId(),
+        wikidataDatasource.get(),
+        entityRecord,
+        timestamp,
+        proxyNr);
+
+    // add wikidata uri to entity sameAs
+    entityRecord.getEntity().addSameReferenceLink(wikidataProxyId);
+    // add to entityIsAggregatedBy
+    entityRecord.getEntity().getIsAggregatedBy().getAggregates().add(getDatasourceAggregationId(entityRecord.getEntityId(), proxyNr));
+    return wikidataProxy;
   }
 
   String generateEntityId(Entity datasourceResponse, boolean isZohoOrg) {
@@ -576,9 +593,9 @@ public class EntityRecordService {
     aggregation.setAggregates(newAggregates);
     consolidatedEntity.setIsAggregatedBy(aggregation);
 
-    if (entityRecord.isDisabled()) {
-      entityRecord.setDisabled(null);
-    }
+//    if (entityRecord.isDisabled()) {
+//      entityRecord.setDisabled(null);
+//    }
 
     entityRecord.setEntity(consolidatedEntity);
   }
@@ -1034,7 +1051,7 @@ public class EntityRecordService {
     entityRecord.addProxy(europeanaProxy);
   }
 
-  private void setExternalProxy(
+  private EntityProxy setExternalProxy(
       Entity metisResponse,
       String proxyId,
       String entityId,
@@ -1056,6 +1073,7 @@ public class EntityRecordService {
     datasourceProxy.setEntity(metisResponse);
 
     entityRecord.addProxy(datasourceProxy);
+    return datasourceProxy;
   }
 
   /**

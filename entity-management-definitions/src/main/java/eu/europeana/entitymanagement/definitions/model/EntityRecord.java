@@ -17,6 +17,7 @@ import dev.morphia.annotations.IndexOptions;
 import dev.morphia.annotations.Indexed;
 import dev.morphia.annotations.Indexes;
 import eu.europeana.entitymanagement.utils.EntityRecordWatcher;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -113,6 +114,13 @@ public class EntityRecord {
         .orElse(null);
   }
 
+  public EntityProxy getWikidataProxy() {
+    return proxies.stream()
+        .filter(s -> s.getProxyId().contains(WebEntityFields.WIKIDATA_HOST))
+        .findFirst()
+        .orElse(null);
+  }
+  
   public List<EntityProxy> getExternalProxies() {
     return proxies.stream()
         .filter(s -> !s.getProxyId().startsWith(BASE_DATA_EUROPEANA_URI))
