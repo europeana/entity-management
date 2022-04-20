@@ -109,7 +109,6 @@ public class EMController extends BaseRest {
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
   public ResponseEntity<String> disableEntity(
       @RequestHeader(value = "If-Match", required = false) String ifMatchHeader,
-      @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
       @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
       @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
       @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = false)
@@ -152,7 +151,6 @@ public class EMController extends BaseRest {
       method = RequestMethod.POST,
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
   public ResponseEntity<String> enableEntity(
-      @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
       @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = false)
           String profile,
       @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
