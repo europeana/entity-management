@@ -37,3 +37,6 @@ SDKLogs.log*
 # Zoho Token files
 token_store.txt
 zoho_import.properties
+
+#log files
+**/*.log

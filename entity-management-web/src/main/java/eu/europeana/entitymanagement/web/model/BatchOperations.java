@@ -8,12 +8,17 @@ import java.util.TreeSet;
 public class BatchOperations {
 
   SortedSet<Operation> createOperations;
+  SortedSet<Operation> enableOperations;
   SortedSet<Operation> updateOperations;
   SortedSet<Operation> deleteOperations;
   SortedSet<Operation> permanentDeleteOperations;
 
   public SortedSet<Operation> getCreateOperations() {
     return createOperations;
+  }
+  
+  public SortedSet<Operation> getEnableOperations() {
+    return enableOperations;
   }
 
   public SortedSet<Operation> getUpdateOperations() {
@@ -37,6 +42,13 @@ public class BatchOperations {
         createOperations.add(operation);
         break;
 
+      case Operations.ENABLE:
+        if (enableOperations == null) {
+          enableOperations = new TreeSet<Operation>();
+        }
+        enableOperations.add(operation);
+        break;
+  
       case Operations.UPDATE:
         if (updateOperations == null) {
           updateOperations = new TreeSet<Operation>();

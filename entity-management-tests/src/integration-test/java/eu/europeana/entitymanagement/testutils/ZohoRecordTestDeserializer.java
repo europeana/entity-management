@@ -16,6 +16,10 @@ import java.util.List;
 public class ZohoRecordTestDeserializer extends StdDeserializer<Record> {
 
   /**
+   * 
+   */
+  private static final long serialVersionUID = 7519475270154623735L;
+  /**
    * Contains list of fields to read from JSON file.
    *
    * <p>Fields with numeric suffixes (sameAs, lang code) and ID field are handled separately

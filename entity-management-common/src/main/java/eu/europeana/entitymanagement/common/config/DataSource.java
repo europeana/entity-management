@@ -10,8 +10,7 @@ public class DataSource {
   public static final String EUROPEANA_ID = "europeana";
   public static final String ZOHO_ID = "zoho-crm";
   public static final String ZOHO_HOST = "crm.zoho.com";
-  public static final String WIKIDATA_HOST = "www.wikidata.org";
-
+  
   @JacksonXmlProperty(isAttribute = true)
   private String url;
 
