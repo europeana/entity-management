@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.web.service;
 
+import static eu.europeana.entitymanagement.solr.SolrUtils.createSolrEntity;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getDatasourceAggregationId;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEuropeanaAggregationId;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEuropeanaProxyId;
@@ -33,6 +34,8 @@ import eu.europeana.entitymanagement.exception.HttpBadRequestException;
 import eu.europeana.entitymanagement.exception.HttpUnprocessableException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
+import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
+import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.utils.EntityUtils;
@@ -69,7 +72,9 @@ public class EntityRecordService {
   final EntityManagementConfiguration emConfiguration;
 
   private final DataSources datasources;
-
+  
+  private final SolrService solrService;
+  
   private static final Logger logger = LogManager.getLogger(EntityRecordService.class);
 
   private static final String ENTITY_ID_REMOVED_MSG = "Entity '%s' has been removed";
@@ -81,10 +86,11 @@ public class EntityRecordService {
   public EntityRecordService(
       EntityRecordRepository entityRecordRepository,
       EntityManagementConfiguration emConfiguration,
-      DataSources datasources) {
+      DataSources datasources, SolrService solrService) {
     this.entityRecordRepository = entityRecordRepository;
     this.emConfiguration = emConfiguration;
     this.datasources = datasources;
+    this.solrService = solrService;
   }
 
   public boolean existsByEntityId(String entityId) {
@@ -160,7 +166,12 @@ public class EntityRecordService {
     logger.info("Deprecated {} entities: entityIds={}", updateResult.getModifiedCount(), entityIds);
   }
 
-  public void disableEntityRecord(EntityRecord er) {
+  public void disableEntityRecord(EntityRecord er) throws EntityUpdateException {
+    try {
+      solrService.deleteById(List.of(er.getEntityId()));
+    } catch (SolrServiceException e) {
+      throw new EntityUpdateException("Cannot delete solr record with id: " + er.getEntityId(), e);
+    }
     er.setDisabled(new Date());
     saveEntityRecord(er);
   }
@@ -169,11 +180,19 @@ public class EntityRecordService {
    * Re-Enable an already existing entity record.
    *
    * @param entityRecord entity record to update
+   * @throws EntityUpdateException 
    */
-  public void enableEntityRecord(EntityRecord entityRecord) {
+  public void enableEntityRecord(EntityRecord entityRecord) throws EntityUpdateException {
     // disabled records have a date value (indicating when they were disabled)
     entityRecord.setDisabled(null);
     saveEntityRecord(entityRecord);
+    
+    // entity needs to be added back to the solr index
+    try {
+      solrService.storeEntity(createSolrEntity(entityRecord));
+    } catch (SolrServiceException e) {
+      throw new EntityUpdateException("Cannot create solr record for entity with id: " + entityRecord.getEntityId(), e);
+    }
   }
 
   /**
@@ -571,9 +590,15 @@ public class EntityRecordService {
     return combineEntities(primary, secondary, fieldsToCombine, true);
   }
 
-  public void updateConsolidatedVersionAggregatesAndDeprecation(
+  public void updateConsolidatedVersion(
       EntityRecord entityRecord, Entity consolidatedEntity) {
 
+    entityRecord.setEntity(consolidatedEntity);
+    Aggregation aggregation = updateAggregation(entityRecord);
+    consolidatedEntity.setIsAggregatedBy(aggregation);
+  }
+
+  Aggregation updateAggregation(EntityRecord entityRecord) {
     /*
      * isAggregatedBy isn't set on Europeana Proxy, so it won't be copied to the
      * consolidatedEntity We add it separately here
@@ -591,13 +616,7 @@ public class EntityRecordService {
       }
     }
     aggregation.setAggregates(newAggregates);
-    consolidatedEntity.setIsAggregatedBy(aggregation);
-
-//    if (entityRecord.isDisabled()) {
-//      entityRecord.setDisabled(null);
-//    }
-
-    entityRecord.setEntity(consolidatedEntity);
+    return aggregation;
   }
 
   /**

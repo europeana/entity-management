@@ -12,7 +12,7 @@ import java.util.List;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 /** class used for serialization of zoho sync report */
-@JsonPropertyOrder({LAST_SYNC_DATE, EXECUTION_STATUS, NEW, UPDATED, DEPRECATED, DELETED, FAILED})
+@JsonPropertyOrder({LAST_SYNC_DATE, EXECUTION_STATUS, NEW, ENABLED, UPDATED, DEPRECATED, DELETED, FAILED})
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class ZohoSyncReport {
 
@@ -21,6 +21,7 @@ public class ZohoSyncReport {
 
   final Date lastSyncDate;
   long created = 0l;
+  long enabled = 0l;
   long updated = 0l;
   long deprecated = 0l;
   long deleted = 0l;
@@ -48,6 +49,19 @@ public class ZohoSyncReport {
     this.created += created;
   }
 
+  @JsonProperty(ENABLED)
+  public long getEnabled() {
+    return enabled;
+  }
+
+  public void setEnabled(long enabled) {
+    this.enabled = enabled;
+  }
+
+  public void increaseEnabled(long enabled) {
+    this.enabled += enabled;
+  }
+  
   @JsonProperty(UPDATED)
   public long getUpdated() {
     return updated;

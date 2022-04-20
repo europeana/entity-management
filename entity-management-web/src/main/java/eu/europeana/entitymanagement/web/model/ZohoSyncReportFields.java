@@ -4,6 +4,7 @@ public class ZohoSyncReportFields {
 
   public static final String LAST_SYNC_DATE = "lastSyncDate";
   public static final String NEW = "new";
+  public static final String ENABLED = "enabled";
   public static final String UPDATED = "updated";
   public static final String DEPRECATED = "deprecated";
   public static final String DELETED = "deleted";
@@ -15,6 +16,7 @@ public class ZohoSyncReportFields {
   public static final String TRACE = "trace";
 
   public static final String CREATION_ERROR = "Entity creation error";
+  public static final String ENABLE_ERROR = "Entity enable error";
   public static final String SOLR_DELETION_ERROR = "Solr deletion error";
   public static final String ENTITY_DELETION_ERROR = "Entity deletion error";
   public static final String ENTITY_DEPRECATION_ERROR = "Entity deprecation error";

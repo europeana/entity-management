@@ -134,7 +134,6 @@ public class EMController extends BaseRest {
 
     if (isSynchronous) {
       // delete from Solr before Mongo, so Solr errors won't leave DB in an inconsistent state
-      solrService.deleteById(List.of(entityId));
       entityRecordService.disableEntityRecord(entityRecord);
     } else {
       entityUpdateService.scheduleTasks(
@@ -180,9 +179,7 @@ public class EMController extends BaseRest {
     }
     logger.info("Re-enabling entityId={}", entityRecord.getEntityId());
     entityRecordService.enableEntityRecord(entityRecord);
-    // entity needs to be added back to the solr index
-    solrService.storeEntity(createSolrEntity(entityRecord));
-
+    
     return createResponse(
         request,
         entityProfile,
