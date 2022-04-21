@@ -114,13 +114,22 @@ public class EntityRecord {
         .orElse(null);
   }
 
+  public EntityProxy getZohoProxy() {
+    return getProxyByHost(WebEntityFields.ZOHO_CRM_HOST);
+  }
   public EntityProxy getWikidataProxy() {
+    return getProxyByHost(WebEntityFields.WIKIDATA_HOST);
+  }
+
+  EntityProxy getProxyByHost(String host_name) {
     return proxies.stream()
-        .filter(s -> s.getProxyId().contains(WebEntityFields.WIKIDATA_HOST))
+        .filter(s -> {
+          return s.getProxyId().contains(host_name);
+        })
         .findFirst()
         .orElse(null);
   }
-
+  
   public List<EntityProxy> getExternalProxies() {
     return proxies.stream()
         .filter(s -> !s.getProxyId().startsWith(BASE_DATA_EUROPEANA_URI))

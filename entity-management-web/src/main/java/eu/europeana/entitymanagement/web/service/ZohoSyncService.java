@@ -12,6 +12,7 @@ import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
+import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
@@ -270,12 +271,15 @@ public class ZohoSyncService {
       return;
     }
     Organization zohoOrganization;
+    EntityRecord entityRecord;
     for (Operation operation : deprecateOperations) {
       zohoOrganization =
           ZohoOrganizationConverter.convertToOrganizationEntity(operation.getZohoRecord());
-      // update sameAs
+      entityRecord = operation.getEntityRecord();
+      
+      // update sameAs from zohoOrganization to the consolidated version
       entityRecordService.addSameReferenceLinks(
-          operation.getEntityRecord().getEntity(), zohoOrganization.getSameReferenceLinks());
+          entityRecord.getEntity(), zohoOrganization.getSameReferenceLinks());
 
       // deprecate
       performDeprecation(zohoSyncReport, operation);
@@ -475,18 +479,14 @@ public class ZohoSyncService {
       }
     } else {
       // entity record not null, update or deletion
-      if(!hasDpsOwner) {
-        //lost ownership, permanent delete
-        emOperation = Operations.PERMANENT_DELETE;
-      }else if (skipExisting(entityRecord, markedForDeletion)) {
+      if(!hasDpsOwner || markedForDeletion) {
+        //lost ownership, or marked for deletion - > disable
+        emOperation = Operations.DELETE;
+      } else if (skipExisting(entityRecord, markedForDeletion)) {
         // skipped
         logger.debug(
             "Organization was marked for deletion, but it is already disabled. Skipped update for Zoho id: {}",
             zohoId);
-      }else if(markedForDeletion){ 
-        // entity marked for deletion
-        // deprecate organization
-        emOperation = Operations.DELETE;
       } else {
         if (needsToBeEnabled(entityRecord, hasDpsOwner, markedForDeletion)){
           // check if need to enable
