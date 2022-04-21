@@ -112,7 +112,7 @@ public class EntityManagementConfiguration {
   @Value("${entitymanagement.entityIdResponseMaxSize: 100}")
   private int entityIdResponseMaxSize;
 
-  @Value("${zoho.sync.filter.owner:}")
+  @Value("${zoho.sync.filter.owner:DPS Team}")
   private String zohoSyncOwnerFilter;
 
   @Value("${zoho.sync.batch.size: 100}")
