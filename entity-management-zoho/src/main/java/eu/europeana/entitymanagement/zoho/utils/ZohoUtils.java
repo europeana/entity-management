@@ -1,5 +1,9 @@
 package eu.europeana.entitymanagement.zoho.utils;
 
+import com.zoho.crm.api.util.Choice;
+import eu.europeana.entitymanagement.common.config.DataSource;
+import eu.europeana.entitymanagement.definitions.model.WebResource;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,10 +20,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
-import com.zoho.crm.api.util.Choice;
-import eu.europeana.entitymanagement.common.config.DataSource;
-import eu.europeana.entitymanagement.definitions.model.WebResource;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 public final class ZohoUtils {
 
@@ -52,7 +52,6 @@ public final class ZohoUtils {
    * @param object the object to be checked
    * @return the List of strings representation of the object or empty list
    */
-  @SuppressWarnings("unchecked")
   public static List<String> stringListSupplier(Object object) {
     if (!JSONObject.NULL.equals(object)
         && object instanceof List<?>
@@ -158,7 +157,6 @@ public final class ZohoUtils {
    * @param addMap
    * @return
    */
-  @SuppressWarnings({"rawtypes", "unchecked"})
   public static Map<String, List<String>> mergeMapsWithLists(
       Map<String, List<String>> baseMap, Map<String, List<String>> addMap) {
     if (baseMap == null && addMap == null) {
@@ -191,7 +189,6 @@ public final class ZohoUtils {
    * @param notMergedMap
    * @return
    */
-  @SuppressWarnings({"rawtypes", "unchecked"})
   public static Map<String, List<String>> mergeMapsWithSingletonLists(
       Map<String, List<String>> baseMap,
       Map<String, List<String>> addMap,
@@ -301,5 +298,4 @@ public final class ZohoUtils {
     return EntityTypes.Organization.getEntityType().equals(entityType)
         && id.contains(DataSource.ZOHO_HOST);
   }
-
 }

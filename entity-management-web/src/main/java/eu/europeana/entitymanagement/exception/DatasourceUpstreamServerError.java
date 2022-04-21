@@ -4,7 +4,6 @@ import eu.europeana.api.commons.error.EuropeanaApiException;
 import org.springframework.http.HttpStatus;
 
 /** Exception thrown during dereferencing when the response from the upstream server is invalid */
-@SuppressWarnings("serial")
 public class DatasourceUpstreamServerError extends EuropeanaApiException {
 
   public DatasourceUpstreamServerError(String msg) {

@@ -1,10 +1,10 @@
 package eu.europeana.entitymanagement.zoho.utils;
 
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 
 public class WikidataUtils {
 
@@ -16,8 +16,7 @@ public class WikidataUtils {
    * @return true if given entity is a wikidata organization, false otherwise
    */
   public static boolean isWikidataOrganization(String id, String entityType) {
-    return EntityTypes.Organization.getEntityType().equals(entityType)
-        && isWikidataEntity(id);
+    return EntityTypes.Organization.getEntityType().equals(entityType) && isWikidataEntity(id);
   }
 
   /**
@@ -42,12 +41,12 @@ public class WikidataUtils {
     }
     return Optional.empty();
   }
-  
+
   public static List<String> getAllWikidataIds(List<String> uriList) {
-    if(uriList == null || uriList.isEmpty()) {
+    if (uriList == null || uriList.isEmpty()) {
       return null;
     }
-    
+
     return uriList.stream().filter(s -> isWikidataEntity(s)).collect(Collectors.toList());
   }
 }

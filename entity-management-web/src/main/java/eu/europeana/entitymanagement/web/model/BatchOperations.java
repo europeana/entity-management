@@ -16,7 +16,7 @@ public class BatchOperations {
   public SortedSet<Operation> getCreateOperations() {
     return createOperations;
   }
-  
+
   public SortedSet<Operation> getEnableOperations() {
     return enableOperations;
   }
@@ -48,7 +48,7 @@ public class BatchOperations {
         }
         enableOperations.add(operation);
         break;
-  
+
       case Operations.UPDATE:
         if (updateOperations == null) {
           updateOperations = new TreeSet<Operation>();

@@ -91,8 +91,7 @@ public class EntityConsolidationProcessor implements ItemProcessor<EntityRecord,
     emEntityFieldCleaner.cleanAndNormalize(consolidatedEntity);
     entityRecordService.performReferentialIntegrity(consolidatedEntity);
     validateCompleteValidationConstraints(consolidatedEntity);
-    entityRecordService.updateConsolidatedVersion(
-        entityRecord, consolidatedEntity);
+    entityRecordService.updateConsolidatedVersion(entityRecord, consolidatedEntity);
 
     return entityRecord;
   }

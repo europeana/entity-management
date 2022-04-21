@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
  * Exception thrown during de-referenciation, if datasource returns an empty response, or 404
  * response. Considered to be caused by a bad user request.
  */
-@SuppressWarnings("serial")
 public class DatasourceNotKnownException extends EuropeanaApiException {
   public DatasourceNotKnownException(String message) {
     super(message);

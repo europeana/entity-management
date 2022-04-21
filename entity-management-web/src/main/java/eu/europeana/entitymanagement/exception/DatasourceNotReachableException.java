@@ -4,7 +4,6 @@ import eu.europeana.api.commons.error.EuropeanaApiException;
 import org.springframework.http.HttpStatus;
 
 /** Exception thrown during dereferencing when external datasource is down */
-@SuppressWarnings("serial")
 public class DatasourceNotReachableException extends EuropeanaApiException {
 
   public DatasourceNotReachableException(String msg) {

@@ -4,7 +4,6 @@ import eu.europeana.api.commons.error.EuropeanaApiException;
 import org.springframework.http.HttpStatus;
 
 /** Exception thrown when trying to combine metadata of different entity types */
-@SuppressWarnings("serial")
 public class EntityMismatchException extends EuropeanaApiException {
 
   public EntityMismatchException(String message) {

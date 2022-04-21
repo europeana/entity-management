@@ -9,8 +9,10 @@ import org.springframework.http.HttpStatus;
  * <p>{@link DatasourceNotKnownException} should be used if the response is valid but empty
  * (equivalent to HTTP 404 status code)
  */
-@SuppressWarnings("serial")
 public class DatasourceDereferenceException extends EuropeanaApiException {
+
+  private static final long serialVersionUID = 4333519344219370680L;
+
   public DatasourceDereferenceException(String msg) {
     super(msg);
   }
