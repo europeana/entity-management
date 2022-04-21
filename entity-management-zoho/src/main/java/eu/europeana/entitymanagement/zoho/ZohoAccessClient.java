@@ -249,11 +249,11 @@ public class ZohoAccessClient {
    */
   public static List<Record> getZohoRecords(APIResponse<ResponseHandler> response)
       throws ZohoException {
-    int FIRST_ERROR_CODE = 400;
+    
     if(response == null) {
       return Collections.emptyList();
     }
-    
+    final int FIRST_ERROR_CODE = 400;
     if (response.getStatusCode() >= FIRST_ERROR_CODE) {
       // handle error responses
       if(LOGGER.isDebugEnabled()) {

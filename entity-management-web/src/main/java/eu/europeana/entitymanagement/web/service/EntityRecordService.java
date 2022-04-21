@@ -185,7 +185,7 @@ public class EntityRecordService {
    * Re-Enable an already existing entity record.
    *
    * @param entityRecord entity record to update
-   * @throws EntityUpdateException
+   * @throws EntityUpdateException in case of solr access errors
    */
   public void enableEntityRecord(EntityRecord entityRecord) throws EntityUpdateException {
     // disabled records have a date value (indicating when they were disabled)
@@ -1046,7 +1046,6 @@ public class EntityRecordService {
     // aggregates is mutable in case we need to append to it later
     List<String> aggregates = new ArrayList<>();
     aggregates.add(getEuropeanaAggregationId(entityId));
-    //    aggregates.add(getDatasourceAggregationId(entityId, 1));
     if (entityRecord.getExternalProxies() != null) {
       for (int i = 0; i < entityRecord.getExternalProxies().size(); i++) {
         aggregates.add(getDatasourceAggregationId(entityRecord.getEntityId(), i + 1));
