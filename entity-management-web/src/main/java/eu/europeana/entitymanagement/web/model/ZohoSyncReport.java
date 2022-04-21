@@ -125,9 +125,10 @@ public class ZohoSyncReport {
   @Override
   public String toString() {
     return String.format(
-        "lastSyncDate: %s,%n created: %d,%n updated: %d,%n deprecated: %d,%n deleted: %d,%n executionStatus: %s",
+        "lastSyncDate: %s,%n created: %d,%n enabled: %d, %n updated: %d,%n deprecated: %d,%n deleted: %d,%n executionStatus: %s",
         DateUtils.convertDateToStr(getLastSyncDate()),
         getCreated(),
+        getEnabled(),
         getUpdated(),
         getDeprecated(),
         getDeleted(),

@@ -486,7 +486,7 @@ public class ZohoSyncService {
     }
 
     // check if need to enable
-    if (!markedForDeletion && entityRecord != null && entityRecord.isDisabled()) {
+    if (entityRecord != null && entityRecord.isDisabled() && hasDpsOwner && !markedForDeletion ) {
       Operation operation = new Operation(entityId, Operations.ENABLE, null, entityRecord);
       operations.addOperation(operation);
     }
