@@ -353,7 +353,8 @@ public class EntityRecordService {
     // add wikidata uri to entity sameAs
     entityRecord.getEntity().addSameReferenceLink(wikidataProxyId);
     // add to entityIsAggregatedBy
-    entityRecord.getEntity().getIsAggregatedBy().getAggregates().add(getDatasourceAggregationId(entityRecord.getEntityId(), proxyNr));
+    String datasourceAggregationId = getDatasourceAggregationId(entityRecord.getEntityId(), proxyNr);
+    entityRecord.getEntity().getIsAggregatedBy().getAggregates().add(datasourceAggregationId);
     return wikidataProxy;
   }
 
@@ -817,7 +818,7 @@ public class EntityRecordService {
          * if the map value is a list, merge the lists of the primary and the secondary
          * object without duplicates
          */
-        mergePrimrySecndryListWoDuplicates(
+        mergePrimarySecondaryListWitoutDuplicates(
             fieldValuePrimaryObject, key, elemSecondary, fieldName, prefLabelsForAltLabels);
       }
     }
@@ -835,7 +836,8 @@ public class EntityRecordService {
    * @param fieldName
    * @param prefLabelsForAltLabels
    */
-  private void mergePrimrySecndryListWoDuplicates(
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  private void mergePrimarySecondaryListWitoutDuplicates(
       Map<Object, Object> fieldValuePrimaryObject,
       Object key,
       Map.Entry elemSecondary,
@@ -918,6 +920,7 @@ public class EntityRecordService {
       boolean altLabelPrimaryValueChanged) {
     for (Map.Entry<Object, Object> prefLabel : prefLabelsForAltLabels.entrySet()) {
       String keyPrefLabel = (String) prefLabel.getKey();
+      @SuppressWarnings("unchecked")
       List<Object> altLabelPrimaryObjectList =
           (List<Object>) altLabelPrimaryObject.get(keyPrefLabel);
       List<Object> altLabelPrimaryValue = initialiseAltLabelList(altLabelPrimaryObjectList);

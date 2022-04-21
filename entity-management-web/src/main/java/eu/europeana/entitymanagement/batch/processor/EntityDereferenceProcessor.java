@@ -16,7 +16,7 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.dereference.Dereferencer;
-import eu.europeana.entitymanagement.exception.DatasourceNotKnownException;
+import eu.europeana.entitymanagement.exception.DatasourceDereferenceException;
 import eu.europeana.entitymanagement.exception.EntityMismatchException;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
@@ -78,8 +78,7 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
       //nothing to do, no wikidata reference
     } else if(wikidataProxy != null && wikidataEntityIds.contains(wikidataProxy.getProxyId())) {
       //nothing to do, the wikidata proxy is correct
-    } else {
-      //!wikidataEntityIds.isEmpty()
+    } else if(!wikidataEntityIds.isEmpty()){
       String wikidataId = wikidataEntityIds.first();
       
       if(wikidataProxy == null) {
@@ -130,8 +129,8 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
         dereferenceServiceLocator.getDereferencer(proxyId, entityType);
     Optional<Entity> proxyResponseOptional = dereferencer.dereferenceEntityById(proxyId);
     if (proxyResponseOptional.isEmpty()) {
-      throw new DatasourceNotKnownException(
-          "Unsuccessful dereferenciation for externalId=" + proxyId + "; entityId=" + entityId);
+      throw new DatasourceDereferenceException(
+          "Unsuccessful dereferenciation (empty response) for externalId=" + proxyId + "; entityId=" + entityId);
     }
 
     Entity proxyResponse = proxyResponseOptional.get();

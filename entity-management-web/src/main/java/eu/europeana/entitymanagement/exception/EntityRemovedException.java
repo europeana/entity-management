@@ -3,6 +3,7 @@ package eu.europeana.entitymanagement.exception;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import org.springframework.http.HttpStatus;
 
+@SuppressWarnings("serial")
 public class EntityRemovedException extends EuropeanaApiException {
 
   public EntityRemovedException(String message) {

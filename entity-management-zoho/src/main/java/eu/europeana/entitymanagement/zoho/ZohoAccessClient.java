@@ -1,7 +1,17 @@
 package eu.europeana.entitymanagement.zoho;
 
-import static eu.europeana.entitymanagement.zoho.utils.ZohoUtils.getZohoRecords;
-
+import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.SystemUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import com.zoho.api.authenticator.OAuthToken;
 import com.zoho.api.authenticator.OAuthToken.TokenType;
 import com.zoho.api.authenticator.Token;
@@ -24,23 +34,16 @@ import com.zoho.crm.api.record.RecordOperations.GetRecordsHeader;
 import com.zoho.crm.api.record.RecordOperations.GetRecordsParam;
 import com.zoho.crm.api.record.RecordOperations.SearchRecordsParam;
 import com.zoho.crm.api.record.ResponseHandler;
+import com.zoho.crm.api.record.ResponseWrapper;
 import com.zoho.crm.api.util.APIResponse;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
-import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.SystemUtils;
 
 public class ZohoAccessClient {
 
+  private static final Logger logger = LogManager.getLogger(ZohoAccessClient.class);
+  
   /**
    * Constructor with all parameters.
    *
@@ -236,5 +239,24 @@ public class ZohoAccessClient {
    */
   private static boolean isNullOrEmpty(final Map<?, ?> m) {
     return m == null || m.isEmpty();
+  }
+  
+  public static List<Record> getZohoRecords(APIResponse<ResponseHandler> response) throws ZohoException {
+    if(response.getStatusCode() >= 400) {
+      //handle error responses
+      logger.debug("Zoho Error. Response Status: {}, response Headers:{}", response.getStatusCode(), response.getHeaders());
+      
+      throw new ZohoException("Zoho access error. Response code: " + response.getStatusCode());
+    }
+    
+    if (response != null && response.isExpected()) {
+      // Get the object from response
+      ResponseHandler responseHandler = response.getObject();
+      if (responseHandler instanceof ResponseWrapper) {
+        ResponseWrapper responseWrapper = (ResponseWrapper) responseHandler;
+        return responseWrapper.getData();
+      }
+    }
+    return Collections.emptyList();
   }
 }

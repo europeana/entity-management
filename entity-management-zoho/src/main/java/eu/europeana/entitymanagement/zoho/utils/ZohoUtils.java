@@ -1,13 +1,5 @@
 package eu.europeana.entitymanagement.zoho.utils;
 
-import com.zoho.crm.api.record.Record;
-import com.zoho.crm.api.record.ResponseHandler;
-import com.zoho.crm.api.record.ResponseWrapper;
-import com.zoho.crm.api.util.APIResponse;
-import com.zoho.crm.api.util.Choice;
-import eu.europeana.entitymanagement.common.config.DataSource;
-import eu.europeana.entitymanagement.definitions.model.WebResource;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,6 +16,10 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
+import com.zoho.crm.api.util.Choice;
+import eu.europeana.entitymanagement.common.config.DataSource;
+import eu.europeana.entitymanagement.definitions.model.WebResource;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 public final class ZohoUtils {
 
@@ -56,6 +52,7 @@ public final class ZohoUtils {
    * @param object the object to be checked
    * @return the List of strings representation of the object or empty list
    */
+  @SuppressWarnings("unchecked")
   public static List<String> stringListSupplier(Object object) {
     if (!JSONObject.NULL.equals(object)
         && object instanceof List<?>
@@ -161,6 +158,7 @@ public final class ZohoUtils {
    * @param addMap
    * @return
    */
+  @SuppressWarnings({"rawtypes", "unchecked"})
   public static Map<String, List<String>> mergeMapsWithLists(
       Map<String, List<String>> baseMap, Map<String, List<String>> addMap) {
     if (baseMap == null && addMap == null) {
@@ -193,11 +191,12 @@ public final class ZohoUtils {
    * @param notMergedMap
    * @return
    */
+  @SuppressWarnings({"rawtypes", "unchecked"})
   public static Map<String, List<String>> mergeMapsWithSingletonLists(
       Map<String, List<String>> baseMap,
       Map<String, List<String>> addMap,
       Map<String, List<String>> notMergedMap) {
-    Map<String, List<String>> result = new HashMap(baseMap);
+    Map<String, List<String>> result = new HashMap<>(baseMap);
     Iterator var5 = addMap.entrySet().iterator();
 
     while (var5.hasNext()) {
@@ -233,14 +232,14 @@ public final class ZohoUtils {
    * @return
    */
   public static List<String> mergeStringLists(List<String> baseList, List<String> addList) {
-    Set<String> result = new HashSet();
+    Set<String> result = new HashSet<>();
     if (baseList != null) {
       result.addAll(baseList);
     }
     if (addList != null) {
       result.addAll(addList);
     }
-    return result.isEmpty() ? null : new ArrayList(result);
+    return result.isEmpty() ? null : new ArrayList<>(result);
   }
 
   /**
@@ -253,7 +252,7 @@ public final class ZohoUtils {
   public static Map<String, List<String>> createMapWithLists(
       List<String> keys, List<String> values) {
     if (keys != null && !keys.isEmpty()) {
-      Map<String, List<String>> resMap = new HashMap(keys.size());
+      Map<String, List<String>> resMap = new HashMap<>(keys.size());
       for (int i = 0; i < keys.size(); ++i) {
         resMap.put(toIsoLanguage(keys.get(i)), createList(values.get(i)));
       }
@@ -303,15 +302,4 @@ public final class ZohoUtils {
         && id.contains(DataSource.ZOHO_HOST);
   }
 
-  public static List<Record> getZohoRecords(APIResponse<ResponseHandler> response) {
-    if (response != null && response.isExpected()) {
-      // Get the object from response
-      ResponseHandler responseHandler = response.getObject();
-      if (responseHandler instanceof ResponseWrapper) {
-        ResponseWrapper responseWrapper = (ResponseWrapper) responseHandler;
-        return responseWrapper.getData();
-      }
-    }
-    return Collections.emptyList();
-  }
 }
