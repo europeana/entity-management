@@ -10,6 +10,9 @@ import org.springframework.http.HttpStatus;
  * (equivalent to HTTP 404 status code)
  */
 public class DatasourceDereferenceException extends EuropeanaApiException {
+
+  private static final long serialVersionUID = 4333519344219370680L;
+
   public DatasourceDereferenceException(String msg) {
     super(msg);
   }

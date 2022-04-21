@@ -72,9 +72,9 @@ public class EntityRecordService {
   final EntityManagementConfiguration emConfiguration;
 
   private final DataSources datasources;
-  
+
   private final SolrService solrService;
-  
+
   private static final Logger logger = LogManager.getLogger(EntityRecordService.class);
 
   private static final String ENTITY_ID_REMOVED_MSG = "Entity '%s' has been removed";
@@ -86,7 +86,8 @@ public class EntityRecordService {
   public EntityRecordService(
       EntityRecordRepository entityRecordRepository,
       EntityManagementConfiguration emConfiguration,
-      DataSources datasources, SolrService solrService) {
+      DataSources datasources,
+      SolrService solrService) {
     this.entityRecordRepository = entityRecordRepository;
     this.emConfiguration = emConfiguration;
     this.datasources = datasources;
@@ -147,7 +148,6 @@ public class EntityRecordService {
     return entityRecordRepository.save(er);
   }
 
-  @SuppressWarnings("unchecked")
   public List<? extends EntityRecord> saveBulkEntityRecords(List<? extends EntityRecord> records) {
     return entityRecordRepository.saveBulk((List<EntityRecord>) records);
   }
@@ -166,6 +166,11 @@ public class EntityRecordService {
     logger.info("Deprecated {} entities: entityIds={}", updateResult.getModifiedCount(), entityIds);
   }
 
+  /**
+   * Mark entity record as disabled and remove from solr
+   * @param er the entity record
+   * @throws EntityUpdateException incase of solr access errors
+   */
   public void disableEntityRecord(EntityRecord er) throws EntityUpdateException {
     try {
       solrService.deleteById(List.of(er.getEntityId()));
@@ -180,18 +185,19 @@ public class EntityRecordService {
    * Re-Enable an already existing entity record.
    *
    * @param entityRecord entity record to update
-   * @throws EntityUpdateException 
+   * @throws EntityUpdateException in case of solr access errors
    */
   public void enableEntityRecord(EntityRecord entityRecord) throws EntityUpdateException {
     // disabled records have a date value (indicating when they were disabled)
     entityRecord.setDisabled(null);
     saveEntityRecord(entityRecord);
-    
+
     // entity needs to be added back to the solr index
     try {
       solrService.storeEntity(createSolrEntity(entityRecord));
     } catch (SolrServiceException e) {
-      throw new EntityUpdateException("Cannot create solr record for entity with id: " + entityRecord.getEntityId(), e);
+      throw new EntityUpdateException(
+          "Cannot create solr record for entity with id: " + entityRecord.getEntityId(), e);
     }
   }
 
@@ -263,7 +269,7 @@ public class EntityRecordService {
     setExternalProxy(
         metisEntity, externalProxyId, entityId, externalDatasource, entityRecord, timestamp, 1);
 
-    setEntityAggregation(entityRecord, entityId, timestamp);
+    upsertEntityAggregation(entityRecord, entityId, timestamp);
     return entityRecordRepository.save(entityRecord);
   }
 
@@ -309,7 +315,9 @@ public class EntityRecordService {
     setExternalProxy(
         datasourceResponse, externalProxyId, entityId, dataSource, entityRecord, timestamp, 1);
 
-    setEntityAggregation(entityRecord, entityId, timestamp);
+    // create aggregation object
+    upsertEntityAggregation(entityRecord, entityId, timestamp);
+
     // for Zoho organizations, create second proxy for Wikidata metadata
     Optional<String> wikidataId;
     if (isZohoOrg
@@ -317,7 +325,6 @@ public class EntityRecordService {
             .isPresent()) {
 
       String wikidataProxyId = wikidataId.get();
-      
       appendWikidataProxy(entityRecord, wikidataProxyId, datasourceResponse.getType(), timestamp);
     }
 
@@ -325,35 +332,41 @@ public class EntityRecordService {
   }
 
   /**
-   * Creates a wikidata proxy and appends it to the proxy list
+   * Creates a wikidata proxy and appends it to the proxy list, also updates the aggregates list for
+   * the consolidated version
+   *
    * @param entityRecord the entity record to be updated
    * @param wikidataProxyId the wikidata entity id
-   * @param datasourceResponse the entity dereferenced from wikidata
+   * @param entityType the entity type
    * @param timestamp the timestamp set as created and modified dates
    * @throws EntityCreationException if the creation is not successfull
+   * @return the new created Entity Proxy object
    */
-  public EntityProxy appendWikidataProxy(EntityRecord entityRecord, String wikidataProxyId,
-      String entityType, Date timestamp) throws EntityCreationException {
+  public EntityProxy appendWikidataProxy(
+      EntityRecord entityRecord, String wikidataProxyId, String entityType, Date timestamp)
+      throws EntityCreationException {
     // entity metadata will be populated during update task
-    Entity wikidataProxyEntity =
-        EntityObjectFactory.createProxyEntityObject(entityType);
-    
+    Entity wikidataProxyEntity = EntityObjectFactory.createProxyEntityObject(entityType);
+
     Optional<DataSource> wikidataDatasource = getDataSource(wikidataProxyId);
     // exception is thrown in factory method if wikidataDatasource is empty
     int proxyNr = entityRecord.getProxies().size();
-    EntityProxy wikidataProxy = setExternalProxy(
-        wikidataProxyEntity,
-        wikidataProxyId,
-        entityRecord.getEntityId(),
-        wikidataDatasource.get(),
-        entityRecord,
-        timestamp,
-        proxyNr);
+    EntityProxy wikidataProxy =
+        setExternalProxy(
+            wikidataProxyEntity,
+            wikidataProxyId,
+            entityRecord.getEntityId(),
+            wikidataDatasource.get(),
+            entityRecord,
+            timestamp,
+            proxyNr);
 
     // add wikidata uri to entity sameAs
     entityRecord.getEntity().addSameReferenceLink(wikidataProxyId);
     // add to entityIsAggregatedBy
-    entityRecord.getEntity().getIsAggregatedBy().getAggregates().add(getDatasourceAggregationId(entityRecord.getEntityId(), proxyNr));
+    Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
+    updateEntityAggregatesList(isAggregatedBy, entityRecord, entityRecord.getEntityId());
+
     return wikidataProxy;
   }
 
@@ -411,7 +424,7 @@ public class EntityRecordService {
    *
    * @param entityType
    * @param entityId
-   * @return
+   * @return the generated EntityId
    */
   private String generateEntityId(String entityType, String entityId) {
     if (entityId != null) {
@@ -590,33 +603,10 @@ public class EntityRecordService {
     return combineEntities(primary, secondary, fieldsToCombine, true);
   }
 
-  public void updateConsolidatedVersion(
-      EntityRecord entityRecord, Entity consolidatedEntity) {
+  public void updateConsolidatedVersion(EntityRecord entityRecord, Entity consolidatedEntity) {
 
     entityRecord.setEntity(consolidatedEntity);
-    Aggregation aggregation = updateAggregation(entityRecord);
-    consolidatedEntity.setIsAggregatedBy(aggregation);
-  }
-
-  Aggregation updateAggregation(EntityRecord entityRecord) {
-    /*
-     * isAggregatedBy isn't set on Europeana Proxy, so it won't be copied to the
-     * consolidatedEntity We add it separately here
-     */
-    Aggregation aggregation = entityRecord.getEntity().getIsAggregatedBy();
-    aggregation.setModified(new Date());
-    // update the aggregates, since some proxy data can be changed
-    List<String> newAggregates = new ArrayList<>();
-    if (aggregation.getAggregates() != null) {
-      newAggregates.add(aggregation.getAggregates().get(0));
-    }
-    if (entityRecord.getExternalProxies() != null) {
-      for (int i = 0; i < entityRecord.getExternalProxies().size(); i++) {
-        newAggregates.add(getDatasourceAggregationId(entityRecord.getEntityId(), i + 1));
-      }
-    }
-    aggregation.setAggregates(newAggregates);
-    return aggregation;
+    upsertEntityAggregation(entityRecord, consolidatedEntity.getEntityId(), new Date());
   }
 
   /**
@@ -650,7 +640,6 @@ public class EntityRecordService {
    *     collection (eg. maps, lists and arrays) within the primary . If accumulate is false, the
    *     "primary" content overwrites the "secondary"
    */
-  @SuppressWarnings("unchecked")
   private Entity combineEntities(
       Entity primary, Entity secondary, List<Field> fieldsToCombine, boolean accumulate)
       throws EuropeanaApiException {
@@ -784,7 +773,6 @@ public class EntityRecordService {
         || Integer.class.isAssignableFrom(fieldType);
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes"})
   void combineEntities(
       Entity consolidatedEntity,
       Entity primary,
@@ -817,7 +805,7 @@ public class EntityRecordService {
          * if the map value is a list, merge the lists of the primary and the secondary
          * object without duplicates
          */
-        mergePrimrySecndryListWoDuplicates(
+        mergePrimarySecondaryListWitoutDuplicates(
             fieldValuePrimaryObject, key, elemSecondary, fieldName, prefLabelsForAltLabels);
       }
     }
@@ -835,7 +823,7 @@ public class EntityRecordService {
    * @param fieldName
    * @param prefLabelsForAltLabels
    */
-  private void mergePrimrySecndryListWoDuplicates(
+  private void mergePrimarySecondaryListWitoutDuplicates(
       Map<Object, Object> fieldValuePrimaryObject,
       Object key,
       Map.Entry elemSecondary,
@@ -881,7 +869,6 @@ public class EntityRecordService {
     return new HashMap<>();
   }
 
-  @SuppressWarnings("unchecked")
   void mergeSkippedPrefLabels(
       Entity consilidatedEntity,
       Map<Object, Object> prefLabelsForAltLabels,
@@ -1034,19 +1021,37 @@ public class EntityRecordService {
     return this.entityRecordRepository.findWithFilters(start, count, queryFilters);
   }
 
-  private void setEntityAggregation(EntityRecord entityRecord, String entityId, Date timestamp) {
+  private void upsertEntityAggregation(EntityRecord entityRecord, String entityId, Date timestamp) {
+    Aggregation aggregation = entityRecord.getEntity().getIsAggregatedBy();
+    if (aggregation == null) {
+      aggregation = createNewAggregation(entityId, timestamp);
+      entityRecord.getEntity().setIsAggregatedBy(aggregation);
+    } else {
+      aggregation.setModified(timestamp);
+    }
+
+    updateEntityAggregatesList(aggregation, entityRecord, entityId);
+  }
+
+  private Aggregation createNewAggregation(String entityId, Date timestamp) {
     Aggregation isAggregatedBy = new Aggregation();
     isAggregatedBy.setId(getIsAggregatedById(entityId));
     isAggregatedBy.setCreated(timestamp);
     isAggregatedBy.setModified(timestamp);
+    return isAggregatedBy;
+  }
 
+  private void updateEntityAggregatesList(
+      Aggregation aggregation, EntityRecord entityRecord, String entityId) {
     // aggregates is mutable in case we need to append to it later
     List<String> aggregates = new ArrayList<>();
     aggregates.add(getEuropeanaAggregationId(entityId));
-    aggregates.add(getDatasourceAggregationId(entityId, 1));
-    isAggregatedBy.setAggregates(aggregates);
-
-    entityRecord.getEntity().setIsAggregatedBy(isAggregatedBy);
+    if (entityRecord.getExternalProxies() != null) {
+      for (int i = 0; i < entityRecord.getExternalProxies().size(); i++) {
+        aggregates.add(getDatasourceAggregationId(entityRecord.getEntityId(), i + 1));
+      }
+    }
+    aggregation.setAggregates(aggregates);
   }
 
   private void setEuropeanaMetadata(

@@ -7,16 +7,16 @@ import java.util.TreeSet;
 
 public class BatchOperations {
 
-  SortedSet<Operation> createOperations;
-  SortedSet<Operation> enableOperations;
-  SortedSet<Operation> updateOperations;
-  SortedSet<Operation> deleteOperations;
-  SortedSet<Operation> permanentDeleteOperations;
+  private SortedSet<Operation> createOperations;
+  private SortedSet<Operation> enableOperations;
+  private SortedSet<Operation> updateOperations;
+  private SortedSet<Operation> deleteOperations;
+  private SortedSet<Operation> permanentDeleteOperations;
 
   public SortedSet<Operation> getCreateOperations() {
     return createOperations;
   }
-  
+
   public SortedSet<Operation> getEnableOperations() {
     return enableOperations;
   }
@@ -37,35 +37,35 @@ public class BatchOperations {
     switch (operation.getAction()) {
       case Operations.CREATE:
         if (createOperations == null) {
-          createOperations = new TreeSet<Operation>();
+          createOperations = new TreeSet<>();
         }
         createOperations.add(operation);
         break;
 
       case Operations.ENABLE:
         if (enableOperations == null) {
-          enableOperations = new TreeSet<Operation>();
+          enableOperations = new TreeSet<>();
         }
         enableOperations.add(operation);
         break;
-  
+
       case Operations.UPDATE:
         if (updateOperations == null) {
-          updateOperations = new TreeSet<Operation>();
+          updateOperations = new TreeSet<>();
         }
         updateOperations.add(operation);
         break;
 
       case Operations.DELETE:
         if (deleteOperations == null) {
-          deleteOperations = new TreeSet<Operation>();
+          deleteOperations = new TreeSet<>();
         }
         deleteOperations.add(operation);
         break;
 
       case Operations.PERMANENT_DELETE:
         if (permanentDeleteOperations == null) {
-          permanentDeleteOperations = new TreeSet<Operation>();
+          permanentDeleteOperations = new TreeSet<>();
         }
         permanentDeleteOperations.add(operation);
         break;

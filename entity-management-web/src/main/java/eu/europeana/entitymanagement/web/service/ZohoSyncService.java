@@ -1,19 +1,5 @@
 package eu.europeana.entitymanagement.web.service;
 
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.stream.Collectors;
-import javax.validation.constraints.NotNull;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import com.zoho.crm.api.record.DeletedRecord;
 import com.zoho.crm.api.record.Record;
 import dev.morphia.query.experimental.filters.Filter;
@@ -42,6 +28,20 @@ import eu.europeana.entitymanagement.web.model.ZohoSyncReportFields;
 import eu.europeana.entitymanagement.zoho.organization.ZohoAccessConfiguration;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.stream.Collectors;
+import javax.validation.constraints.NotNull;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service(AppConfig.BEAN_ZOHO_SYNC_SERVICE)
 public class ZohoSyncService {
@@ -334,7 +334,7 @@ public class ZohoSyncService {
       zohoSyncReport.addFailedOperation(null, ZohoSyncReportFields.CREATION_ERROR, message, e);
     }
   }
-  
+
   List<String> performEntityRegistration(
       SortedSet<Operation> createOperations, ZohoSyncReport zohoSyncReport) {
     List<String> entitiesToUpdate = new ArrayList<String>(createOperations.size());
@@ -395,7 +395,6 @@ public class ZohoSyncService {
     }
   }
 
-  
   private void performEnableOperations(
       SortedSet<Operation> enableOperations, ZohoSyncReport zohoSyncReport) {
 
@@ -407,13 +406,13 @@ public class ZohoSyncService {
       try {
         entityRecordService.enableEntityRecord(operation.getEntityRecord());
         zohoSyncReport.increaseEnabled(1);
-      }catch (RuntimeException | EntityUpdateException e) {
+      } catch (RuntimeException | EntityUpdateException e) {
         zohoSyncReport.addFailedOperation(
             operation.getEntityRecord().getEntityId(), ZohoSyncReportFields.ENABLE_ERROR, e);
       }
     }
   }
-  
+
   /**
    * This method performs synchronization of organizations between Zoho and Entity API database
    * addressing deleted and unwanted (defined by owner criteria) organizations. We separate to
@@ -486,12 +485,12 @@ public class ZohoSyncService {
       }
     }
 
-    //check if need to enable
+    // check if need to enable
     if (!markedForDeletion && entityRecord != null && entityRecord.isDisabled()) {
       Operation operation = new Operation(entityId, Operations.ENABLE, null, entityRecord);
       operations.addOperation(operation);
     }
-    
+
     if (emOperation != null) {
       // only if there is an operation to perform in EM
       Operation operation = new Operation(entityId, emOperation, zohoOrg, entityRecord);

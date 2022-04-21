@@ -1,7 +1,5 @@
 package eu.europeana.entitymanagement.zoho;
 
-import static eu.europeana.entitymanagement.zoho.utils.ZohoUtils.getZohoRecords;
-
 import com.zoho.api.authenticator.OAuthToken;
 import com.zoho.api.authenticator.OAuthToken.TokenType;
 import com.zoho.api.authenticator.Token;
@@ -24,6 +22,7 @@ import com.zoho.crm.api.record.RecordOperations.GetRecordsHeader;
 import com.zoho.crm.api.record.RecordOperations.GetRecordsParam;
 import com.zoho.crm.api.record.RecordOperations.SearchRecordsParam;
 import com.zoho.crm.api.record.ResponseHandler;
+import com.zoho.crm.api.record.ResponseWrapper;
 import com.zoho.crm.api.util.APIResponse;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
@@ -38,8 +37,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.SystemUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ZohoAccessClient {
+
+  private static final Logger LOGGER = LogManager.getLogger(ZohoAccessClient.class);
 
   /**
    * Constructor with all parameters.
@@ -236,5 +239,40 @@ public class ZohoAccessClient {
    */
   private static boolean isNullOrEmpty(final Map<?, ?> m) {
     return m == null || m.isEmpty();
+  }
+
+  /**
+   * Extract records from results
+   * @param response the zoho response
+   * @return the list of records available in results
+   * @throws ZohoException if zoho response indicates error codes
+   */
+  public static List<Record> getZohoRecords(APIResponse<ResponseHandler> response)
+      throws ZohoException {
+    
+    if(response == null) {
+      return Collections.emptyList();
+    }
+    final int FIRST_ERROR_CODE = 400;
+    if (response.getStatusCode() >= FIRST_ERROR_CODE) {
+      // handle error responses
+      if(LOGGER.isDebugEnabled()) {
+        LOGGER.debug(
+            "Zoho Error. Response Status: {}, response Headers:{}",
+            response.getStatusCode(),
+            response.getHeaders());
+      }
+      throw new ZohoException("Zoho access error. Response code: " + response.getStatusCode());
+    }
+
+    if (response.isExpected()) {
+      // Get the object from response
+      ResponseHandler responseHandler = response.getObject();
+      if (responseHandler instanceof ResponseWrapper) {
+        ResponseWrapper responseWrapper = (ResponseWrapper) responseHandler;
+        return responseWrapper.getData();
+      }
+    }
+    return Collections.emptyList();
   }
 }

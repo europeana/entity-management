@@ -120,7 +120,7 @@ public class EntityRecord {
         .findFirst()
         .orElse(null);
   }
-  
+
   public List<EntityProxy> getExternalProxies() {
     return proxies.stream()
         .filter(s -> !s.getProxyId().startsWith(BASE_DATA_EUROPEANA_URI))

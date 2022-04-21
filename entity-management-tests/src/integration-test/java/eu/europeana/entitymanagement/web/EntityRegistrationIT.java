@@ -90,7 +90,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         .andExpect(
             jsonPath(
                 "$.sameAs",
-                Matchers.containsInRelativeOrder(
+                Matchers.hasItems(
                     IntegrationTestUtils.AGENT_BIRCH_URI,
                     IntegrationTestUtils.AGENT_BIRCH_UPDATED_URI)))
         .andExpect(jsonPath("$.proxies[1].id", is(IntegrationTestUtils.AGENT_BIRCH_UPDATED_URI)));
