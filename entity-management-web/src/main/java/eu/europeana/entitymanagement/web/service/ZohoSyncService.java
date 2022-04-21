@@ -463,7 +463,7 @@ public class ZohoSyncService {
     String emOperation = null;
 
     if (entityRecord == null) {
-      if (needsToBeRemoved(hasDpsOwner, markedForDeletion)) {
+      if (skipNonExisting(hasDpsOwner, markedForDeletion)) {
         // skipped
         logger.debug(
             "Organization has changed in zoho, but it is marked for deletion or doesn't have DPS as Owner. Skipped update for Zoho id: {}",
@@ -475,19 +475,26 @@ public class ZohoSyncService {
       }
     } else {
       // entity record not null, update or deletion
-      if (needsToBeRemoved(hasDpsOwner, markedForDeletion)) {
-        // entity marked for deletion, or lost DPS ownerShip
+      if(!hasDpsOwner) {
+        //lost ownership, permanent delete
+        emOperation = Operations.PERMANENT_DELETE;
+      }else if (skipExisting(entityRecord, markedForDeletion)) {
+        // skipped
+        logger.debug(
+            "Organization was marked for deletion, but it is already disabled. Skipped update for Zoho id: {}",
+            zohoId);
+      }else if(markedForDeletion){ 
+        // entity marked for deletion
         // deprecate organization
         emOperation = Operations.DELETE;
-      } else if (needsToBeEnabled(entityRecord, hasDpsOwner, markedForDeletion) ) {
-        // check if need to enable
-        Operation operation = new Operation(entityId, Operations.ENABLE, null, entityRecord);
-        //add enable operation
-        operations.addOperation(operation);
-        //perform update for enabled operations
-        emOperation = Operations.UPDATE;
-        //
-      }else {
+      } else {
+        if (needsToBeEnabled(entityRecord, hasDpsOwner, markedForDeletion)){
+          // check if need to enable
+          Operation operation = new Operation(entityId, Operations.ENABLE, null, entityRecord);
+          //add enable operation
+          operations.addOperation(operation);
+          //perform update for enabled operations
+        }       
         // Zoho entry has changed
         emOperation = Operations.UPDATE;
       }
@@ -508,10 +515,14 @@ public class ZohoSyncService {
     }
   }
 
-  boolean needsToBeRemoved(boolean hasDpsOwner, boolean markedForDeletion) {
+  boolean skipNonExisting(boolean hasDpsOwner, boolean markedForDeletion) {
     return markedForDeletion || !hasDpsOwner;
   }
 
+  boolean skipExisting(EntityRecord entityRecord,boolean markedForDeletion) {
+    return markedForDeletion && entityRecord.isDisabled();
+  }
+  
   boolean needsToBeEnabled(EntityRecord entityRecord, boolean hasDpsOwner,
       boolean markedForDeletion) {
     return entityRecord != null && entityRecord.isDisabled() && hasDpsOwner && !markedForDeletion;
