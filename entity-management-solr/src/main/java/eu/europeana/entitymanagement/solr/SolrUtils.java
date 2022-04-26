@@ -104,7 +104,7 @@ public class SolrUtils {
       return (Class<U>) SolrOrganization.class;
     } else if (solrType.equals(EntityTypes.Place.getEntityType())) {
       return (Class<U>) SolrPlace.class;
-    } else if (solrType.equals(EntityTypes.TimeSpan.getEntityType())) {
+    } else if (solrType.equalsIgnoreCase(EntityTypes.TimeSpan.getEntityType())) {
       return (Class<U>) SolrTimeSpan.class;
     }
 
