@@ -69,6 +69,7 @@ public class ZohoSyncReport {
 
   /**
    * increase the enabled counter
+   *
    * @param enabled value used for increasing counter
    */
   public void increaseEnabled(long enabled) {

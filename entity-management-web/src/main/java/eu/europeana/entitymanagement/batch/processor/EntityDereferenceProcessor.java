@@ -107,7 +107,7 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
           // message
           String message =
               "For Entity Record with id:{}, wikidata proxy was not replaced as the proxy id: {} was found in coreferences.";
-          logger.debug(message, entityRecord.getEntityId(), wikidataId); 
+          logger.debug(message, entityRecord.getEntityId(), wikidataId);
         } else if (logger.isDebugEnabled()) {
           updateWikidataProxies(entityRecord, wikidataId, wikidataProxy, wikidataEntityIds);
         }

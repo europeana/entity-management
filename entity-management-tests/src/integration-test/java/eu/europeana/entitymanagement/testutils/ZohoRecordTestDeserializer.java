@@ -15,9 +15,7 @@ import java.util.List;
 /** Helper class to deserialize JSON into Zoho {@link Record} to make testing easier */
 public class ZohoRecordTestDeserializer extends StdDeserializer<Record> {
 
-  /**
-   * 
-   */
+  /** */
   private static final long serialVersionUID = 7519475270154623735L;
   /**
    * Contains list of fields to read from JSON file.
