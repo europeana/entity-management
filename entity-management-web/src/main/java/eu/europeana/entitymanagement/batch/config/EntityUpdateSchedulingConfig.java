@@ -21,24 +21,13 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.annotation.PropertySources;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Configuration
-@PropertySources({
-  @PropertySource("classpath:entitymanagement.properties"),
-  @PropertySource(
-      value = "classpath:entitymanagement.user.properties",
-      ignoreResourceNotFound = true)
-})
-// EA-2992
-// @ConditionalOnProperty(
-//    prefix = "batch.scheduling",
-//    value = "enabled",
-//    havingValue = "true",
-//    matchIfMissing = true)
+@PropertySource("classpath:entitymanagement.properties")
+@PropertySource(value = "classpath:entitymanagement.user.properties", ignoreResourceNotFound = true)
 @EnableScheduling
 public class EntityUpdateSchedulingConfig implements InitializingBean {
 
@@ -65,6 +54,9 @@ public class EntityUpdateSchedulingConfig implements InitializingBean {
   @Value("${batch.scheduling.intervalSeconds}")
   private long interval;
 
+  @Value("${batch.scheduling.enabled}")
+  private boolean syncEnabled;
+
   public EntityUpdateSchedulingConfig(
       @Qualifier(ENTITY_UPDATE_JOB_LAUNCHER) JobLauncher entityUpdateJobLauncher,
       @Qualifier(ENTITY_REMOVALS_JOB_LAUNCHER) JobLauncher entityDeletionsJobLauncher,
@@ -80,18 +72,29 @@ public class EntityUpdateSchedulingConfig implements InitializingBean {
 
   @Override
   public void afterPropertiesSet() {
-    logger.info(
-        "Batch scheduling initialized – metricsUpdateInitialDelay: {}; fullUpdateInitialDelay: {}; "
-            + "deletionInitialDelay: {}; deprecationInitialDelay: {}"
-            + "interval: {}",
-        toMinutesAndSeconds(metricsUpdateInitialDelay),
-        toMinutesAndSeconds(fullUpdateInitialDelay),
-        toMinutesAndSeconds(deletionInitialDelay),
-        toMinutesAndSeconds(deprecationInitialDelay),
-        toMinutesAndSeconds(interval));
+    if (syncEnabled) {
+      // invoke methods outside logging call
+      String metricsInitialDelayString = toMinutesAndSeconds(metricsUpdateInitialDelay);
+      String fullUpdateInitialDelayString = toMinutesAndSeconds(fullUpdateInitialDelay);
+      String deletionInitialDelayString = toMinutesAndSeconds(deletionInitialDelay);
+      String deprecationInitialDelayString = toMinutesAndSeconds(deprecationInitialDelay);
+      String intervalString = toMinutesAndSeconds(interval);
 
-    schedulePeriodicUpdates();
-    schedulePeriodicDeletions();
+      logger.info(
+          "Batch scheduling initialized – metricsUpdateInitialDelay: {}; fullUpdateInitialDelay: {}; "
+              + "deletionInitialDelay: {}; deprecationInitialDelay: {}"
+              + "interval: {}",
+          metricsInitialDelayString,
+          fullUpdateInitialDelayString,
+          deletionInitialDelayString,
+          deprecationInitialDelayString,
+          intervalString);
+
+      schedulePeriodicUpdates();
+      schedulePeriodicDeletions();
+    } else {
+      logger.warn("Batch scheduling disabled. Entities will not be automatically updated.");
+    }
   }
 
   private void schedulePeriodicDeletions() {
