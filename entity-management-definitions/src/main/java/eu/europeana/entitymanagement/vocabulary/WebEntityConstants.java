@@ -55,6 +55,8 @@ public interface WebEntityConstants extends WebEntityFields {
   /** Model attribute names */
   public static final String AT_CONTEXT = "@context";
 
+  public static final String RESULT_PAGE = "ResultPage";
+
   public static final String AT_LANGUAGE = "@language";
 
   //	public static final String ID = "id";

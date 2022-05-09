@@ -48,9 +48,9 @@ public class JsonLdSerializer {
   }
 
   /**
-   * Serialise the entities using the external profile and list them as a JSON array
+   * Serialise the EntityRetrievalResponse
    *
-   * @param entityRecords entity Records to be serialised
+   * @param entityRecords entityRecords to be serialised
    * @return serialised response
    * @throws IOException IOException
    */

@@ -85,7 +85,7 @@ public abstract class BaseRest extends BaseRestController {
   }
 
   /**
-   * Serialise the entities using the external profile and list them as a JSON array
+   * Serialises the Entity Records
    *
    * @param entityRecords
    * @return
@@ -100,6 +100,7 @@ public abstract class BaseRest extends BaseRestController {
     }
     return responseBody;
   }
+
   /**
    * This method selects serialization method according to provided format.
    *
