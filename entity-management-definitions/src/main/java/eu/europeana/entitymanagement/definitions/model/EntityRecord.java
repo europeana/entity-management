@@ -135,9 +135,18 @@ public class EntityRecord {
   public List<EntityProxy> getExternalProxies() {
     return proxies.stream()
         .filter(s -> !s.getProxyId().startsWith(BASE_DATA_EUROPEANA_URI))
-        .collect(Collectors.toList());
+        .collect(Collectors.toList());    
   }
 
+  public List<String> getExternalProxyIds() {
+    return proxies.stream()
+        .filter(s -> !s.getProxyId().startsWith(BASE_DATA_EUROPEANA_URI))
+        .map(EntityProxy::getProxyId)
+        .collect(Collectors.toList());
+    
+  }
+
+  
   @Override
   public String toString() {
     return String.format("EntityRecord.entityTd: %s", getEntityId());

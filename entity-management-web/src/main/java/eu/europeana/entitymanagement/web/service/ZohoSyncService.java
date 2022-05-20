@@ -361,7 +361,7 @@ public class ZohoSyncService {
     try {
 
       Optional<EntityRecord> existingEntity =
-          entityRecordService.findMatchingCoreference(allCorefs);
+          entityRecordService.findEntityDupplicationByCoreference(allCorefs, null);
       if (existingEntity.isPresent()) {
         // skipp processing
         zohoSyncReport.addFailedOperation(

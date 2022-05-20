@@ -138,10 +138,11 @@ public class EntityRecordService {
    * version)
    *
    * @param uris co-reference uris
+   * @param entityId indicating the the record for the given entityId should not be retrieved as matchingCoreference 
    * @return Optional containing matching record, or empty optional if none found.
    */
-  public Optional<EntityRecord> findMatchingCoreference(List<String> uris) {
-    return entityRecordRepository.findMatchingEntitiesByCoreference(uris);
+  public Optional<EntityRecord> findEntityDupplicationByCoreference(List<String> uris, String entityId) {
+    return entityRecordRepository.findEntityDupplicationByCoreference(uris, entityId);
   }
 
   public EntityRecord saveEntityRecord(EntityRecord er) {
@@ -578,7 +579,7 @@ public class EntityRecordService {
       updatedReferences.add(value);
     } else {
       // value is external URI, replace it with internal reference if they are accessible
-      Optional<EntityRecord> record = findMatchingCoreference(Collections.singletonList(value));
+      Optional<EntityRecord> record = findEntityDupplicationByCoreference(Collections.singletonList(value), null);
       record.ifPresent(entityRecord -> updatedReferences.add(entityRecord.getEntityId()));
     }
   }

@@ -1,3 +1,6 @@
+#CHECK DISABLED
+db.getCollection('EntityRecord').find({"disabled":true})
+
 #DELETE DISABLED
 db.getCollection('EntityRecord').deleteMany({"disabled":true})
 #if these records are still needed the disabled field could be set to a date 

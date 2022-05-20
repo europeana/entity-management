@@ -76,11 +76,11 @@ public abstract class BaseRest extends BaseRestController {
     super();
   }
 
-  public EMAuthorizationService getAuthorizationService() {
+  protected EMAuthorizationService getAuthorizationService() {
     return emAuthorizationService;
   }
 
-  public String getApiVersion() {
+  protected String getApiVersion() {
     return emBuildInfo.getVersion();
   }
 
@@ -288,7 +288,7 @@ public abstract class BaseRest extends BaseRestController {
    * Generates a unique hex string based on the input params TODO: move logic to {@link
    * eu.europeana.api.commons.web.controller.BaseRestController#generateETag(Date, String, String)}
    */
-  public String computeEtag(long timestamp, String format, String version) {
+  protected String computeEtag(long timestamp, String format, String version) {
     return DigestUtils.md5Hex(String.format("%s:%s:%s", timestamp, format, version));
   }
 

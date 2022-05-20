@@ -1,6 +1,6 @@
 {
   "type": "Concept",
-  "sameAs": [
+  "exactMatch": [
     "http://www.wikidata.org/entity/Q152095"
   ]
 }

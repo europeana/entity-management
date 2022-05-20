@@ -1,4 +1,4 @@
-#DELETE DISABLED
+#DELETE ORGANIZATIONS
 db.getCollection('EntityRecord').deleteMany({"entity.type":"Organization"})
 #if these annotations are still needed the disabled field could be set to a date 
 
