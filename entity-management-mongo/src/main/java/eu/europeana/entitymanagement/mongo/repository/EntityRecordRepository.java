@@ -178,27 +178,7 @@ public class EntityRecordRepository {
    * Gets EntityRecord containing the given uris in its sameAs or exactMatch fields.
    *
    * @param uris uris to query
-   * @return Optional containing result, or empty Optional if no match
-   */
-  @Deprecated
-  public Optional<EntityRecord> findMatchingEntitiesByCoreference(List<String> uris) {
-
-    return findEntityDupplicationByCoreference(uris, null);
-//    EntityRecord value =
-//        datastore
-//            .find(EntityRecord.class)
-//            .disableValidation()
-//            .filter(or(in(ENTITY_SAME_AS, uris), in(ENTITY_EXACT_MATCH, uris)))
-//            .first();
-//
-//    return Optional.ofNullable(value);
-  }
-
-  /**
-   * Gets EntityRecord containing the given uris in its sameAs or exactMatch fields.
-   *
-   * @param uris uris to query
-   * @param entityId 
+   * @param entityId indicated the record for which a dupplicate is searched. Use null to return any 
    * @return Optional containing result, or empty Optional if no match
    */
   public Optional<EntityRecord> findEntityDupplicationByCoreference(List<String> uris, String entityId) {
