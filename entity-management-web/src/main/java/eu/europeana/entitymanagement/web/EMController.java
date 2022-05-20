@@ -478,14 +478,21 @@ public class EMController extends BaseRest {
 
     validateBodyEntity(europeanaProxyEntity);
     
+    String creationRequestId = europeanaProxyEntity.getEntityId();
+    
+    if(StringUtils.hasText(creationRequestId)) {
+      logger.info("Registering new entity: externalId={}", creationRequestId);  
+    } else {
+      //external id is mandatory in request body
+      throw new HttpBadRequestException("Mandatory field missing in the request body: id");
+    }
+      
     //isAgregatedBy mut not be set by the user, if provided the value is discarded 
     if(europeanaProxyEntity.getIsAggregatedBy() != null) {
       europeanaProxyEntity.setIsAggregatedBy(null);
     }
 
-    String creationRequestId = europeanaProxyEntity.getEntityId();
-    logger.info("Registering new entity: externalId={}", creationRequestId);
-
+    
     // check if id is already being used, if so return a 301
     Optional<EntityRecord> existingEntity =
         entityRecordService.findEntityDupplicationByCoreference(Collections.singletonList(creationRequestId), null);

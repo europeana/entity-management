@@ -19,6 +19,7 @@ import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -439,5 +440,20 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                 .content(loadFile(IntegrationTestUtils.CONCEPT_REGISTER_BATHTUB_JSON_INVALID))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isBadRequest());
+  }
+  
+  @Test
+  void registrationWithStaticDataSourceShouldReturn422() throws Exception {
+    ResultActions result =
+        mockMvc.perform(
+            MockMvcRequestBuilders.post(
+                    IntegrationTestUtils.BASE_SERVICE_URL)
+                .content(loadFile(IntegrationTestUtils.STATIC_ENTITY_NOT_MINTED_FILE))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .queryParam("profile", "debug"));
+    result
+        .andExpect(status().isUnprocessableEntity())
+        .andExpect(jsonPath("$.trace").isNotEmpty());
   }
 }

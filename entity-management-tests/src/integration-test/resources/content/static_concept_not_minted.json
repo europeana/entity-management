@@ -1,0 +1,25 @@
+{
+  "type": "Concept",
+  "id" : "http://bib.arts.kuleuven.be/photoVocabulary/-photoVocabulary-11008",
+  "prefLabel": {
+    "bg": "Негативен отпечатък",
+    "da": "Negative udskrifter",
+    "de": "Negativ-Abzüge",
+    "en": "Negative prints",
+    "es": "Impresiones negativas",
+    "fr": "Épreuve négative",
+    "it": "Stampe negative",
+    "lt": "Negatyvo atspaudai",
+    "nl": "Negatiefdruk",
+    "pl": "Odbitki negatywowe",
+    "sl": "Tlač z negatívu"
+  },
+  "altLabel": {
+    "de": [
+      "Negativ prints"
+    ]
+  },
+  "broader": [
+    "http://data.europeana.eu/concept/base/1720"
+  ]
+}
