@@ -30,7 +30,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 class EntityAdminControllerIT extends BaseWebControllerTest {
 
   public static final String STATIC_ENTITY_EXTERNAL_ID =
-      "http://bib.arts.kuleuven.be/photoVocabulary/-photoVocabulary-11007";
+      "http://bib.arts.kuleuven.be/photoVocabulary/-photoVocabulary-11008";
   public static final String STATIC_ENTITY_IDENTIFIER = "1689";
   public static final String STATIC_ENTITY_FILE = "/content/static_concept_1689.json";
 
@@ -150,10 +150,14 @@ class EntityAdminControllerIT extends BaseWebControllerTest {
   }
 
   @Test
+  /**
+   * @deprecated the entity migration functionality is deprecated the test case will loose purpose 
+   * @throws Exception
+   */
+  @Deprecated
   void migrationAndUpdateWithStaticDataSourceShouldBeSuccessful() throws Exception {
     String entityId = "http://data.europeana.eu/concept/" + STATIC_ENTITY_IDENTIFIER;
     migrateEntity("Concept", entityId, STATIC_ENTITY_EXTERNAL_ID);
-
     ResultActions result =
         mockMvc.perform(
             MockMvcRequestBuilders.put(
