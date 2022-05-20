@@ -168,6 +168,7 @@ public class EntityRecordService {
 
   /**
    * Mark entity record as disabled and remove from solr
+   *
    * @param er the entity record
    * @throws EntityUpdateException incase of solr access errors
    */

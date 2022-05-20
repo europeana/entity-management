@@ -12,7 +12,6 @@ import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
-import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
@@ -276,7 +275,7 @@ public class ZohoSyncService {
       zohoOrganization =
           ZohoOrganizationConverter.convertToOrganizationEntity(operation.getZohoRecord());
       entityRecord = operation.getEntityRecord();
-      
+
       // update sameAs from zohoOrganization to the consolidated version
       entityRecordService.addSameReferenceLinks(
           entityRecord.getEntity(), zohoOrganization.getSameReferenceLinks());
@@ -472,15 +471,15 @@ public class ZohoSyncService {
         logger.debug(
             "Organization has changed in zoho, but it is marked for deletion or doesn't have DPS as Owner. Skipped update for Zoho id: {}",
             zohoId);
-      }else {
+      } else {
         // entity not in entity management database,
         // create operation if ownership is correct
         emOperation = Operations.CREATE;
       }
     } else {
       // entity record not null, update or deletion
-      if(!hasDpsOwner || markedForDeletion) {
-        //lost ownership, or marked for deletion - > disable
+      if (!hasDpsOwner || markedForDeletion) {
+        // lost ownership, or marked for deletion - > disable
         emOperation = Operations.DELETE;
       } else if (skipExisting(entityRecord, markedForDeletion)) {
         // skipped
@@ -488,13 +487,13 @@ public class ZohoSyncService {
             "Organization was marked for deletion, but it is already disabled. Skipped update for Zoho id: {}",
             zohoId);
       } else {
-        if (needsToBeEnabled(entityRecord, hasDpsOwner, markedForDeletion)){
+        if (needsToBeEnabled(entityRecord, hasDpsOwner, markedForDeletion)) {
           // check if need to enable
           Operation operation = new Operation(entityId, Operations.ENABLE, null, entityRecord);
-          //add enable operation
+          // add enable operation
           operations.addOperation(operation);
-          //perform update for enabled operations
-        }       
+          // perform update for enabled operations
+        }
         // Zoho entry has changed
         emOperation = Operations.UPDATE;
       }
@@ -519,12 +518,12 @@ public class ZohoSyncService {
     return markedForDeletion || !hasDpsOwner;
   }
 
-  boolean skipExisting(EntityRecord entityRecord,boolean markedForDeletion) {
+  boolean skipExisting(EntityRecord entityRecord, boolean markedForDeletion) {
     return markedForDeletion && entityRecord.isDisabled();
   }
-  
-  boolean needsToBeEnabled(EntityRecord entityRecord, boolean hasDpsOwner,
-      boolean markedForDeletion) {
+
+  boolean needsToBeEnabled(
+      EntityRecord entityRecord, boolean hasDpsOwner, boolean markedForDeletion) {
     return entityRecord != null && entityRecord.isDisabled() && hasDpsOwner && !markedForDeletion;
   }
 

@@ -1,11 +1,11 @@
 package eu.europeana.entitymanagement.zoho.utils;
 
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 
 public class WikidataUtils {
 
@@ -45,6 +45,7 @@ public class WikidataUtils {
 
   /**
    * extract wikidata uris
+   *
    * @param uriList list of references
    * @return list of wikidata uris found in the input
    */

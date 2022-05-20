@@ -243,20 +243,21 @@ public class ZohoAccessClient {
 
   /**
    * Extract records from results
+   *
    * @param response the zoho response
    * @return the list of records available in results
    * @throws ZohoException if zoho response indicates error codes
    */
   public static List<Record> getZohoRecords(APIResponse<ResponseHandler> response)
       throws ZohoException {
-    
-    if(response == null) {
+
+    if (response == null) {
       return Collections.emptyList();
     }
     final int FIRST_ERROR_CODE = 400;
     if (response.getStatusCode() >= FIRST_ERROR_CODE) {
       // handle error responses
-      if(LOGGER.isDebugEnabled()) {
+      if (LOGGER.isDebugEnabled()) {
         LOGGER.debug(
             "Zoho Error. Response Status: {}, response Headers:{}",
             response.getStatusCode(),
