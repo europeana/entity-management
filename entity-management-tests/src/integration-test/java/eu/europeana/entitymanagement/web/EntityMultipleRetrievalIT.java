@@ -1,12 +1,15 @@
 package eu.europeana.entitymanagement.web;
 
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_CONTEXT;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
 import java.util.List;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -14,12 +17,10 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class EntityMultipleRetrievalIT extends BaseWebControllerTest {
-
-  private static final String requestPath = "retrieve";
+class EntityMultipleRetrievalIT extends BaseWebControllerTest {
 
   @Test
-  public void multipleEntitiesRetrievedSuccessfully() throws Exception {
+  void multipleEntitiesRetrievedSuccessfully() throws Exception {
     // create 1st entity
     String europeanaMetadata = loadFile(IntegrationTestUtils.CONCEPT_REGISTER_BATHTUB_JSON);
     String metisResponse = loadFile(IntegrationTestUtils.CONCEPT_BATHTUB_XML);
@@ -36,19 +37,21 @@ public class EntityMultipleRetrievalIT extends BaseWebControllerTest {
 
     mockMvc
         .perform(
-            MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath)
-                .accept(MediaType.APPLICATION_JSON)
-                .content(String.valueOf(List.of(entityId1, entityId2))))
+            post(IntegrationTestUtils.BASE_SERVICE_URL + "/retrieve")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(List.of(entityId1, entityId2))))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.entities", hasSize(2)));
+        .andExpect(jsonPath("$.@context", is(ENTITY_CONTEXT)))
+        .andExpect(jsonPath("$.total", is(2)))
+        .andExpect(jsonPath("$.items", hasSize(2)));
   }
 
   @Test
-  public void multipleEntitiesRetrievedNotFound() throws Exception {
+  void multipleEntitiesRetrievedNotFound() throws Exception {
     mockMvc
         .perform(
-            MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath)
-                .accept(MediaType.APPLICATION_JSON)
+            MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL + "/retrieve")
+                .contentType(MediaType.APPLICATION_JSON)
                 // db is cleared between test runs, so these shouldn't exist
                 .content(
                     "[ \"http://data.europeana.eu/concept/1\" , \"http://data.europeana.eu/concept/2\"]"))
@@ -56,7 +59,7 @@ public class EntityMultipleRetrievalIT extends BaseWebControllerTest {
   }
 
   @Test
-  public void shouldReturnEntitiesWhenSomeInvalidEntitiesInRequest() throws Exception {
+  void shouldReturnEntitiesWhenSomeInvalidEntitiesInRequest() throws Exception {
     // create 1st entity
     String europeanaMetadata = loadFile(IntegrationTestUtils.CONCEPT_REGISTER_BATHTUB_JSON);
     String metisResponse = loadFile(IntegrationTestUtils.CONCEPT_BATHTUB_XML);
@@ -65,14 +68,15 @@ public class EntityMultipleRetrievalIT extends BaseWebControllerTest {
             .getEntityId();
 
     // one invalid and valid entityId each
-    List<String> requestBody = List.of("http://data.europeana.eu/concept/0", entityId1);
+    String requestBody =
+        objectMapper.writeValueAsString(List.of("http://data.europeana.eu/concept/0", entityId1));
 
     mockMvc
         .perform(
-            MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath)
-                .accept(MediaType.APPLICATION_JSON)
+            post(IntegrationTestUtils.BASE_SERVICE_URL + "/retrieve")
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(String.valueOf(requestBody)))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.entities", hasSize(1)));
+        .andExpect(jsonPath("$.items", hasSize(1)));
   }
 }
