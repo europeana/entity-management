@@ -11,6 +11,7 @@ import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRunt
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -72,7 +73,12 @@ public class SerializationUtils {
               entities.add(entityNode);
             });
 
-    ObjectNode result = mapper.createObjectNode().set("entities", entities);
+    ObjectNode result = mapper.createObjectNode();
+    result.set(WebEntityFields.CONTEXT, mapper.valueToTree(WebEntityFields.ENTITY_CONTEXT));
+    result.set(WebEntityFields.TYPE, mapper.valueToTree(WebEntityConstants.RESULT_PAGE));
+    result.set(WebEntityFields.TOTAL, mapper.valueToTree(entityRecords.size()));
+    result.set(WebEntityConstants.ITEMS, entities);
+
     mapper.writeValue(buffer, result);
     return buffer.toString();
   }
