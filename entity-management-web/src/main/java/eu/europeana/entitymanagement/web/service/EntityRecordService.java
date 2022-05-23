@@ -305,7 +305,7 @@ public class EntityRecordService {
      * sameAs will be replaced during consolidation; however we set this here to prevent duplicate
      * registrations if consolidation fails
      */
-    List<String> sameAs = buildSameAsReferenceLinks(externalProxyId, datasourceResponse);
+    List<String> sameAs = buildSameAsReferenceLinks(externalProxyId, datasourceResponse, europeanaProxyEntity); 
     entity.setSameReferenceLinks(sameAs);
     entityRecord.setEntity(entity);
 
@@ -385,7 +385,7 @@ public class EntityRecordService {
     return entityId;
   }
 
-  List<String> buildSameAsReferenceLinks(String externalProxyId, Entity datasourceResponse) {
+  List<String> buildSameAsReferenceLinks(String externalProxyId, Entity datasourceResponse, Entity europeanaProxyEntity) {
     // entity id might be different than proxyId in case of redirections
     SortedSet<String> sameAsUrls = new TreeSet<String>();
     sameAsUrls.add(datasourceResponse.getEntityId());
@@ -393,6 +393,11 @@ public class EntityRecordService {
     if (datasourceResponse.getSameReferenceLinks() != null) {
       sameAsUrls.addAll(datasourceResponse.getSameReferenceLinks());
     }
+    //add the sameAs from europeanaProxy
+    if(europeanaProxyEntity.getSameReferenceLinks() != null) {
+      sameAsUrls.addAll(europeanaProxyEntity.getSameReferenceLinks());   
+    }
+    
     List<String> sameAs = new ArrayList<String>(sameAsUrls);
     return sameAs;
   }

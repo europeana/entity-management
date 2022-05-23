@@ -487,12 +487,11 @@ public class EMController extends BaseRest {
       throw new HttpBadRequestException("Mandatory field missing in the request body: id");
     }
       
-    //isAgregatedBy mut not be set by the user, if provided the value is discarded 
+    //isAgregatedBy must not be set by the user, if provided the value is discarded 
     if(europeanaProxyEntity.getIsAggregatedBy() != null) {
       europeanaProxyEntity.setIsAggregatedBy(null);
     }
 
-    
     // check if id is already being used, if so return a 301
     Optional<EntityRecord> existingEntity =
         entityRecordService.findEntityDupplicationByCoreference(Collections.singletonList(creationRequestId), null);
