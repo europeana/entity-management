@@ -493,8 +493,16 @@ public class EMController extends BaseRest {
     }
 
     // check if id is already being used, if so return a 301
+    List<String> corefs;
+    if(europeanaProxyEntity.getSameReferenceLinks() != null) {
+      corefs = new ArrayList<>(europeanaProxyEntity.getSameReferenceLinks());
+      corefs.add(creationRequestId);
+    } else {
+      corefs = Collections.singletonList(creationRequestId);
+    }
+    
     Optional<EntityRecord> existingEntity =
-        entityRecordService.findEntityDupplicationByCoreference(Collections.singletonList(creationRequestId), null);
+        entityRecordService.findEntityDupplicationByCoreference(corefs, null);
     ResponseEntity<String> response = checkExistingEntity(existingEntity, creationRequestId);
 
     if (response != null) {
