@@ -494,11 +494,11 @@ public class EMController extends BaseRest {
 
     // check if id is already being used, if so return a 301
     List<String> corefs;
-    if(europeanaProxyEntity.getSameReferenceLinks() != null) {
+    if(europeanaProxyEntity.getSameReferenceLinks() == null) {
+      corefs = Collections.singletonList(creationRequestId);
+    } else {
       corefs = new ArrayList<>(europeanaProxyEntity.getSameReferenceLinks());
       corefs.add(creationRequestId);
-    } else {
-      corefs = Collections.singletonList(creationRequestId);
     }
     
     Optional<EntityRecord> existingEntity =
