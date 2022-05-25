@@ -34,7 +34,9 @@ public abstract class SolrEntity<T extends Entity> {
   private Map<String, List<String>> altLabel;
 
   //  @Field(EntitySolrFields.HIDDEN_LABEL)
-  private List<String> hiddenLabel;
+//  private List<String> hiddenLabel;
+  @Field(EntitySolrFields.HIDDEN_LABEL_ALL)
+  private Map<String, List<String>> hiddenLabel;
 
   @Field(EntitySolrFields.IDENTIFIER)
   private List<String> identifier;
@@ -78,9 +80,8 @@ public abstract class SolrEntity<T extends Entity> {
     setNote(entity.getNote());
     setPrefLabelStringMap(entity.getPrefLabel());
     setAltLabel(entity.getAltLabel());
-
-    //    if (entity.getHiddenLabel() != null)
-    //      this.hiddenLabel = new ArrayList<>(entity.getHiddenLabel());
+    setHiddenLabelMap(entity.getHiddenLabel());
+    
     setIsShownBy(entity.getIsShownBy());
     if (entity.getIdentifier() != null) this.identifier = new ArrayList<>(entity.getIdentifier());
     if (entity.getIsRelatedTo() != null)
@@ -116,6 +117,14 @@ public abstract class SolrEntity<T extends Entity> {
           new HashMap<>(
               SolrUtils.normalizeStringListMapByAddingPrefix(
                   EntitySolrFields.ALT_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, altLabel));
+    }
+  }
+  
+  public void setHiddenLabelMap(List<String> hiddenLabel) {
+    if(hiddenLabel != null && !hiddenLabel.isEmpty()) {
+      this.hiddenLabel = new HashMap<String, List<String>>(); 
+      //convert array to language map
+      this.hiddenLabel.put(EntitySolrFields.HIDDEN_LABEL_NO_LANG, new ArrayList<>(hiddenLabel));
     }
   }
 
@@ -163,7 +172,7 @@ public abstract class SolrEntity<T extends Entity> {
     return altLabel;
   }
 
-  public List<String> getHiddenLabel() {
+  public Map<String, List<String>> getHiddenLabel() {
     return hiddenLabel;
   }
 
@@ -233,7 +242,4 @@ public abstract class SolrEntity<T extends Entity> {
 
   protected abstract void setSameReferenceLinks(ArrayList<String> uris);
 
-  public void setHiddenLabel(List<String> hiddenLabel) {
-    this.hiddenLabel = hiddenLabel;
-  }
 }
