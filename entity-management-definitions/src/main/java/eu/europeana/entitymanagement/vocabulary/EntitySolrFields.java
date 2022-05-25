@@ -18,6 +18,7 @@ public interface EntitySolrFields {
   public static final String ALT_LABEL = "skos_altLabel";
   public static final String ALT_LABEL_ALL = ALT_LABEL + DYNAMIC_FIELD_SEPARATOR + "*";
   public static final String HIDDEN_LABEL = "skos_hiddenLabel";
+  public static final String HIDDEN_LABEL_NO_LANG = HIDDEN_LABEL + DYNAMIC_FIELD_SEPARATOR;
   public static final String HIDDEN_LABEL_ALL = HIDDEN_LABEL + DYNAMIC_FIELD_SEPARATOR + "*";
   public static final String SAME_AS = "owl_sameAs";
   public static final String IDENTIFIER = "dc_identifier";
