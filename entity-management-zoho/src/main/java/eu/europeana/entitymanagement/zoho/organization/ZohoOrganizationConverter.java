@@ -128,7 +128,9 @@ public class ZohoOrganizationConverter {
 
       //hidden labels text area
       String[] hiddenLabelsTextArea = getTextAreaFieldValues(zohoRecord, ZohoConstants.HIDDEN_LABEL_FIELD);
-      Collections.addAll(hiddenLabels, hiddenLabelsTextArea);
+      if(hiddenLabelsTextArea != null) {
+        Collections.addAll(hiddenLabels, hiddenLabelsTextArea);
+      }
       
       org.setHiddenLabel(hiddenLabels);
     }
