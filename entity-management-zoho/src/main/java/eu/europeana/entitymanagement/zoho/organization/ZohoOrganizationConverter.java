@@ -11,6 +11,7 @@ import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -108,11 +109,12 @@ public class ZohoOrganizationConverter {
       org.setLanguage(edmISOLanguage);
     }
 
+    //hidden labels 1-4
     String hiddenLabel1 = getStringFieldValue(zohoRecord, ZohoConstants.HIDDEN_LABEL1_FIELD);
     String hiddenLabel2 = getStringFieldValue(zohoRecord, ZohoConstants.HIDDEN_LABEL2_FIELD);
     String hiddenLabel3 = getStringFieldValue(zohoRecord, ZohoConstants.HIDDEN_LABEL3_FIELD);
     String hiddenLabel4 = getStringFieldValue(zohoRecord, ZohoConstants.HIDDEN_LABEL4_FIELD);
-
+    
     if (hiddenLabel1 != null
         || hiddenLabel2 != null
         || hiddenLabel3 != null
@@ -124,6 +126,10 @@ public class ZohoOrganizationConverter {
       addValueToList(hiddenLabel3, hiddenLabels);
       addValueToList(hiddenLabel4, hiddenLabels);
 
+      //hidden labels text area
+      String[] hiddenLabelsTextArea = getTextAreaFieldValues(zohoRecord, ZohoConstants.HIDDEN_LABEL_FIELD);
+      Collections.addAll(hiddenLabels, hiddenLabelsTextArea);
+      
       org.setHiddenLabel(hiddenLabels);
     }
 
@@ -204,6 +210,15 @@ public class ZohoOrganizationConverter {
     return ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(zohoFieldName));
   }
 
+  static String[] getTextAreaFieldValues(Record zohoRecord, String zohoFieldName) {
+    String textArea = ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(zohoFieldName));
+    if(StringUtils.isBlank(textArea)) {
+      return null;
+    }
+    
+    return StringUtils.split(textArea, "\n");
+  }
+  
   static String getIsoLanguage(Record zohoRecord, String zohoLangFieldName) {
     return toIsoLanguage(getStringFieldValue(zohoRecord, zohoLangFieldName));
   }
