@@ -127,10 +127,7 @@ public class ZohoOrganizationConverter {
       addValueToList(hiddenLabel4, hiddenLabels);
 
       //hidden labels text area
-      String[] hiddenLabelsTextArea = getTextAreaFieldValues(zohoRecord, ZohoConstants.HIDDEN_LABEL_FIELD);
-      if(hiddenLabelsTextArea != null) {
-        Collections.addAll(hiddenLabels, hiddenLabelsTextArea);
-      }
+      hiddenLabels.addAll(getTextAreaFieldValues(zohoRecord, ZohoConstants.HIDDEN_LABEL_FIELD));
       
       org.setHiddenLabel(hiddenLabels);
     }
@@ -212,13 +209,13 @@ public class ZohoOrganizationConverter {
     return ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(zohoFieldName));
   }
 
-  static String[] getTextAreaFieldValues(Record zohoRecord, String zohoFieldName) {
+  static List<String> getTextAreaFieldValues(Record zohoRecord, String zohoFieldName) {
     String textArea = ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(zohoFieldName));
     if(StringUtils.isBlank(textArea)) {
-      return null;
+      return Collections.emptyList();
     }
     
-    return StringUtils.split(textArea, "\n");
+    return List.of(StringUtils.split(textArea, "\n"));
   }
   
   static String getIsoLanguage(Record zohoRecord, String zohoLangFieldName) {
