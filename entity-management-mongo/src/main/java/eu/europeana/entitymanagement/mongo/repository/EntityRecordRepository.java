@@ -4,6 +4,7 @@ import static dev.morphia.query.Sort.ascending;
 import static dev.morphia.query.experimental.filters.Filters.eq;
 import static dev.morphia.query.experimental.filters.Filters.in;
 import static dev.morphia.query.experimental.filters.Filters.or;
+import static dev.morphia.query.experimental.filters.Filters.ne;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.DISABLED;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_EXACT_MATCH;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_ID;
@@ -15,6 +16,7 @@ import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_UPDAT
 import com.mongodb.client.result.UpdateResult;
 import dev.morphia.Datastore;
 import dev.morphia.query.FindOptions;
+import dev.morphia.query.Query;
 import dev.morphia.query.experimental.filters.Filter;
 import dev.morphia.query.experimental.updates.UpdateOperators;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
@@ -29,6 +31,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
 /** Repository for retrieving the EntityRecord objects. */
@@ -175,20 +178,26 @@ public class EntityRecordRepository {
    * Gets EntityRecord containing the given uris in its sameAs or exactMatch fields.
    *
    * @param uris uris to query
+   * @param entityId indicated the record for which a dupplicate is searched. Use null to return any 
    * @return Optional containing result, or empty Optional if no match
    */
-  public Optional<EntityRecord> findMatchingEntitiesByCoreference(List<String> uris) {
+  public Optional<EntityRecord> findEntityDupplicationByCoreference(List<String> uris, String entityId) {
 
-    EntityRecord value =
-        datastore
-            .find(EntityRecord.class)
-            .disableValidation()
-            .filter(or(in(ENTITY_SAME_AS, uris), in(ENTITY_EXACT_MATCH, uris)))
-            .first();
-
+    Query<EntityRecord> query = datastore
+        .find(EntityRecord.class)
+        .disableValidation()
+        .filter(or(in(ENTITY_SAME_AS, uris), in(ENTITY_EXACT_MATCH, uris)));
+    
+    if(StringUtils.isNotBlank(entityId)) {
+      query.filter(ne(ENTITY_ID, entityId));
+    }
+    
+    EntityRecord value = query.first();
     return Optional.ofNullable(value);
   }
 
+  
+  
   public List<EntityRecord> saveBulk(List<EntityRecord> entityRecords) {
     return datastore.save(entityRecords);
   }

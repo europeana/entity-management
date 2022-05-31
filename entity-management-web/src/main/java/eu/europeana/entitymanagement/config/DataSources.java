@@ -57,7 +57,7 @@ public class DataSources {
           String.format("id %s does not match a configured datasource", creationRequestId));
     }
 
-    // return 406 error if datasource is static
+    // return 422 error if datasource is static
     if (!allowStatic && dataSource.get().isStatic()) {
       throw new HttpUnprocessableException(
           String.format(
