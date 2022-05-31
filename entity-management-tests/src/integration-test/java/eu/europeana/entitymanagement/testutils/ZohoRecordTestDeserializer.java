@@ -46,6 +46,7 @@ public class ZohoRecordTestDeserializer extends StdDeserializer<Record> {
           HIDDEN_LABEL2_FIELD,
           HIDDEN_LABEL3_FIELD,
           HIDDEN_LABEL4_FIELD,
+          HIDDEN_LABEL_FIELD,
           INDUSTRY_FIELD);
 
   public ZohoRecordTestDeserializer() {

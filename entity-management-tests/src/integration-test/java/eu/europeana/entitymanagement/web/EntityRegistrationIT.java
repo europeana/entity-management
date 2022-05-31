@@ -369,7 +369,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.hasAddress.hasGeo").isNotEmpty())
         .andExpect(jsonPath("$.language", everyItem(matchesRegex("[a-z]+"))))
-        .andExpect(jsonPath("$.hiddenLabel", hasSize(1)))
+        .andExpect(jsonPath("$.hiddenLabel", hasSize(3)))
         .andExpect(jsonPath("$.organizationDomain[*]", hasSize(1)));
   }
 

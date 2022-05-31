@@ -51,6 +51,8 @@ public final class ZohoConstants {
   public static final String HIDDEN_LABEL2_FIELD = "Hidden_2";
   public static final String HIDDEN_LABEL3_FIELD = "Hidden_3";
   public static final String HIDDEN_LABEL4_FIELD = "Hidden_4";
+  public static final String HIDDEN_LABEL_FIELD = "Hidden";
+  
   public static final String INDUSTRY_FIELD = "Industry_2";
 
   // Operations
