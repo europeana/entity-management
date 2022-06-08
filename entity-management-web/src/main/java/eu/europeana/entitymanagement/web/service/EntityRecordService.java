@@ -138,10 +138,12 @@ public class EntityRecordService {
    * version)
    *
    * @param uris co-reference uris
-   * @param entityId indicating the the record for the given entityId should not be retrieved as matchingCoreference 
+   * @param entityId indicating the the record for the given entityId should not be retrieved as
+   *     matchingCoreference
    * @return Optional containing matching record, or empty optional if none found.
    */
-  public Optional<EntityRecord> findEntityDupplicationByCoreference(List<String> uris, String entityId) {
+  public Optional<EntityRecord> findEntityDupplicationByCoreference(
+      List<String> uris, String entityId) {
     return entityRecordRepository.findEntityDupplicationByCoreference(uris, entityId);
   }
 
@@ -305,7 +307,8 @@ public class EntityRecordService {
      * sameAs will be replaced during consolidation; however we set this here to prevent duplicate
      * registrations if consolidation fails
      */
-    List<String> sameAs = buildSameAsReferenceLinks(externalProxyId, datasourceResponse, europeanaProxyEntity); 
+    List<String> sameAs =
+        buildSameAsReferenceLinks(externalProxyId, datasourceResponse, europeanaProxyEntity);
     entity.setSameReferenceLinks(sameAs);
     entityRecord.setEntity(entity);
 
@@ -385,7 +388,8 @@ public class EntityRecordService {
     return entityId;
   }
 
-  List<String> buildSameAsReferenceLinks(String externalProxyId, Entity datasourceResponse, Entity europeanaProxyEntity) {
+  List<String> buildSameAsReferenceLinks(
+      String externalProxyId, Entity datasourceResponse, Entity europeanaProxyEntity) {
     // entity id might be different than proxyId in case of redirections
     SortedSet<String> sameAsUrls = new TreeSet<String>();
     sameAsUrls.add(datasourceResponse.getEntityId());
@@ -393,11 +397,11 @@ public class EntityRecordService {
     if (datasourceResponse.getSameReferenceLinks() != null) {
       sameAsUrls.addAll(datasourceResponse.getSameReferenceLinks());
     }
-    //add the sameAs from europeanaProxy
-    if(europeanaProxyEntity.getSameReferenceLinks() != null) {
-      sameAsUrls.addAll(europeanaProxyEntity.getSameReferenceLinks());   
+    // add the sameAs from europeanaProxy
+    if (europeanaProxyEntity.getSameReferenceLinks() != null) {
+      sameAsUrls.addAll(europeanaProxyEntity.getSameReferenceLinks());
     }
-    
+
     List<String> sameAs = new ArrayList<String>(sameAsUrls);
     return sameAs;
   }
@@ -584,7 +588,8 @@ public class EntityRecordService {
       updatedReferences.add(value);
     } else {
       // value is external URI, replace it with internal reference if they are accessible
-      Optional<EntityRecord> record = findEntityDupplicationByCoreference(Collections.singletonList(value), null);
+      Optional<EntityRecord> record =
+          findEntityDupplicationByCoreference(Collections.singletonList(value), null);
       record.ifPresent(entityRecord -> updatedReferences.add(entityRecord.getEntityId()));
     }
   }

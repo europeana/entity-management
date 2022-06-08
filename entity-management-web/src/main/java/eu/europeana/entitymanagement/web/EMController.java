@@ -229,7 +229,7 @@ public class EMController extends BaseRest {
     }
 
     verifyCoreferencesForUpdate(updateRequestEntity, entityRecord);
-    
+
     Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
     long timestamp = isAggregatedBy != null ? isAggregatedBy.getModified().getTime() : 0L;
 
@@ -244,29 +244,34 @@ public class EMController extends BaseRest {
     return launchTaskAndRetrieveEntity(request, type, identifier, entityRecord, profile);
   }
 
-  private void verifyCoreferencesForUpdate(Entity updateRequestEntity, EntityRecord entityRecord) throws HttpBadRequestException {
-    //Check if all the URIs present in the “sameAs” (of provided entity) dot not clash with another Entity and if all Proxies are reflected on the “sameAs”, if not respond with HTTP 400;
+  private void verifyCoreferencesForUpdate(Entity updateRequestEntity, EntityRecord entityRecord)
+      throws HttpBadRequestException {
+    // Check if all the URIs present in the “sameAs” (of provided entity) dot not clash with another
+    // Entity and if all Proxies are reflected on the “sameAs”, if not respond with HTTP 400;
     // check provided coreferences, consider static data sources
-    if(updateRequestEntity.getSameReferenceLinks() == null || updateRequestEntity.getSameReferenceLinks().isEmpty()) {
+    if (updateRequestEntity.getSameReferenceLinks() == null
+        || updateRequestEntity.getSameReferenceLinks().isEmpty()) {
       throw new HttpBadRequestException(
-          "The mandatory coreferences (sameAs or exactMatch field) are missing in the request body");      
+          "The mandatory coreferences (sameAs or exactMatch field) are missing in the request body");
     }
-    
+
     Optional<EntityRecord> existingEntity =
-        entityRecordService.findEntityDupplicationByCoreference(updateRequestEntity.getSameReferenceLinks(), entityRecord.getEntityId());
-    if(existingEntity.isPresent()) {
+        entityRecordService.findEntityDupplicationByCoreference(
+            updateRequestEntity.getSameReferenceLinks(), entityRecord.getEntityId());
+    if (existingEntity.isPresent()) {
       throw new HttpBadRequestException(
-          "The entity coreferences (sameAs or exactMatch field) contains an entry indicating the provided input as being a dupplicate of : " 
+          "The entity coreferences (sameAs or exactMatch field) contains an entry indicating the provided input as being a dupplicate of : "
               + existingEntity.get().getEntityId());
     }
-  
-//  //check if existing proxy ids are present in the same as
+
+    //  //check if existing proxy ids are present in the same as
     List<String> proxyIds = entityRecord.getExternalProxyIds();
-    //check the proxies which are not available in the sameAs
+    // check the proxies which are not available in the sameAs
     proxyIds.removeAll(updateRequestEntity.getSameReferenceLinks());
-    if(!proxyIds.isEmpty()) {
+    if (!proxyIds.isEmpty()) {
       throw new HttpBadRequestException(
-          "The coreferences (sameAs or exactMatch field) of the request body does not contain the following proxies of the existing record:" + proxyIds);
+          "The coreferences (sameAs or exactMatch field) of the request body does not contain the following proxies of the existing record:"
+              + proxyIds);
     }
   }
 
@@ -477,30 +482,30 @@ public class EMController extends BaseRest {
     }
 
     validateBodyEntity(europeanaProxyEntity);
-    
+
     String creationRequestId = europeanaProxyEntity.getEntityId();
-    
-    if(StringUtils.hasText(creationRequestId)) {
-      logger.info("Registering new entity: externalId={}", creationRequestId);  
+
+    if (StringUtils.hasText(creationRequestId)) {
+      logger.info("Registering new entity: externalId={}", creationRequestId);
     } else {
-      //external id is mandatory in request body
+      // external id is mandatory in request body
       throw new HttpBadRequestException("Mandatory field missing in the request body: id");
     }
-      
-    //isAgregatedBy must not be set by the user, if provided the value is discarded 
-    if(europeanaProxyEntity.getIsAggregatedBy() != null) {
+
+    // isAgregatedBy must not be set by the user, if provided the value is discarded
+    if (europeanaProxyEntity.getIsAggregatedBy() != null) {
       europeanaProxyEntity.setIsAggregatedBy(null);
     }
 
     // check if id is already being used, if so return a 301
     List<String> corefs;
-    if(europeanaProxyEntity.getSameReferenceLinks() == null) {
+    if (europeanaProxyEntity.getSameReferenceLinks() == null) {
       corefs = Collections.singletonList(creationRequestId);
     } else {
       corefs = new ArrayList<>(europeanaProxyEntity.getSameReferenceLinks());
       corefs.add(creationRequestId);
     }
-    
+
     Optional<EntityRecord> existingEntity =
         entityRecordService.findEntityDupplicationByCoreference(corefs, null);
     ResponseEntity<String> response = checkExistingEntity(existingEntity, creationRequestId);
@@ -525,7 +530,8 @@ public class EMController extends BaseRest {
 
     if (datasourceResponse != null && datasourceResponse.getSameReferenceLinks() != null) {
       existingEntity =
-          entityRecordService.findEntityDupplicationByCoreference(datasourceResponse.getSameReferenceLinks(), null);
+          entityRecordService.findEntityDupplicationByCoreference(
+              datasourceResponse.getSameReferenceLinks(), null);
       response = checkExistingEntity(existingEntity, creationRequestId);
       if (response != null) {
         return response;

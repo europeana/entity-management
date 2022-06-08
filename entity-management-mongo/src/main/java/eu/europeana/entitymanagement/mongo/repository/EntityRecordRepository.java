@@ -3,8 +3,8 @@ package eu.europeana.entitymanagement.mongo.repository;
 import static dev.morphia.query.Sort.ascending;
 import static dev.morphia.query.experimental.filters.Filters.eq;
 import static dev.morphia.query.experimental.filters.Filters.in;
-import static dev.morphia.query.experimental.filters.Filters.or;
 import static dev.morphia.query.experimental.filters.Filters.ne;
+import static dev.morphia.query.experimental.filters.Filters.or;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.DISABLED;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_EXACT_MATCH;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_ID;
@@ -178,26 +178,26 @@ public class EntityRecordRepository {
    * Gets EntityRecord containing the given uris in its sameAs or exactMatch fields.
    *
    * @param uris uris to query
-   * @param entityId indicated the record for which a dupplicate is searched. Use null to return any 
+   * @param entityId indicated the record for which a dupplicate is searched. Use null to return any
    * @return Optional containing result, or empty Optional if no match
    */
-  public Optional<EntityRecord> findEntityDupplicationByCoreference(List<String> uris, String entityId) {
+  public Optional<EntityRecord> findEntityDupplicationByCoreference(
+      List<String> uris, String entityId) {
 
-    Query<EntityRecord> query = datastore
-        .find(EntityRecord.class)
-        .disableValidation()
-        .filter(or(in(ENTITY_SAME_AS, uris), in(ENTITY_EXACT_MATCH, uris)));
-    
-    if(StringUtils.isNotBlank(entityId)) {
+    Query<EntityRecord> query =
+        datastore
+            .find(EntityRecord.class)
+            .disableValidation()
+            .filter(or(in(ENTITY_SAME_AS, uris), in(ENTITY_EXACT_MATCH, uris)));
+
+    if (StringUtils.isNotBlank(entityId)) {
       query.filter(ne(ENTITY_ID, entityId));
     }
-    
+
     EntityRecord value = query.first();
     return Optional.ofNullable(value);
   }
 
-  
-  
   public List<EntityRecord> saveBulk(List<EntityRecord> entityRecords) {
     return datastore.save(entityRecords);
   }

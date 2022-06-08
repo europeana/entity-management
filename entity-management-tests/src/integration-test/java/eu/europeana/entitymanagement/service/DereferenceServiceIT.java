@@ -66,7 +66,7 @@ class DereferenceServiceIT extends AbstractIntegrationTest {
     assertEquals(8, entity.getNote().size());
   }
 
-//  @Test
+  //  @Test
   public void zohoOrganizationDereferenceTest() throws Exception {
     String organizationId = IntegrationTestUtils.ORGANIZATION_BNF_URI_ZOHO;
     Dereferencer dereferencer =

@@ -146,12 +146,13 @@ class EntityAdminControllerIT extends BaseWebControllerTest {
 
   @Test
   /**
-   * @deprecated the entity migration functionality is deprecated the test case will loose purpose 
+   * @deprecated the entity migration functionality is deprecated the test case will loose purpose
    * @throws Exception
    */
   @Deprecated
   void migrationAndUpdateWithStaticDataSourceShouldBeSuccessful() throws Exception {
-    String entityId = "http://data.europeana.eu/concept/" + IntegrationTestUtils.STATIC_ENTITY_IDENTIFIER;
+    String entityId =
+        "http://data.europeana.eu/concept/" + IntegrationTestUtils.STATIC_ENTITY_IDENTIFIER;
     migrateEntity("Concept", entityId, IntegrationTestUtils.STATIC_ENTITY_EXTERNAL_ID);
     ResultActions result =
         mockMvc.perform(
@@ -172,7 +173,8 @@ class EntityAdminControllerIT extends BaseWebControllerTest {
 
   @Test
   void updateForStaticDataSourceShouldBeSuccessful() throws Exception {
-    String entityId = "http://data.europeana.eu/concept/" + IntegrationTestUtils.STATIC_ENTITY_IDENTIFIER;
+    String entityId =
+        "http://data.europeana.eu/concept/" + IntegrationTestUtils.STATIC_ENTITY_IDENTIFIER;
     migrateEntity("Concept", entityId, IntegrationTestUtils.STATIC_ENTITY_EXTERNAL_ID);
 
     // check that record is present

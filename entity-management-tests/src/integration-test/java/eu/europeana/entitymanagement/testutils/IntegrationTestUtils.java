@@ -203,13 +203,15 @@ public class IntegrationTestUtils {
   public static final String ORGANIZATION_BNF_WIKIDATA_RESPONSE_XML =
       "/wikidata-deref/organization_wikidata_bnf_response.xml";
 
-  /** static data source **/
+  /** static data source * */
   public static final String STATIC_ENTITY_EXTERNAL_ID =
       "http://bib.arts.kuleuven.be/photoVocabulary/-photoVocabulary-11008";
+
   public static final String STATIC_ENTITY_IDENTIFIER = "1689";
   public static final String STATIC_ENTITY_FILE = "/content/static_concept_1689.json";
-  public static final String STATIC_ENTITY_NOT_MINTED_FILE = "/content/static_concept_not_minted.json"; 
-  
+  public static final String STATIC_ENTITY_NOT_MINTED_FILE =
+      "/content/static_concept_not_minted.json";
+
   /** Creates an ObjectMapper specifically for handling Mock zoho responses */
   private static final ObjectMapper zohoResponseObjectMapper =
       new ObjectMapper()

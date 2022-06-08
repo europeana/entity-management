@@ -109,12 +109,12 @@ public class ZohoOrganizationConverter {
       org.setLanguage(edmISOLanguage);
     }
 
-    //hidden labels 1-4
+    // hidden labels 1-4
     String hiddenLabel1 = getStringFieldValue(zohoRecord, ZohoConstants.HIDDEN_LABEL1_FIELD);
     String hiddenLabel2 = getStringFieldValue(zohoRecord, ZohoConstants.HIDDEN_LABEL2_FIELD);
     String hiddenLabel3 = getStringFieldValue(zohoRecord, ZohoConstants.HIDDEN_LABEL3_FIELD);
     String hiddenLabel4 = getStringFieldValue(zohoRecord, ZohoConstants.HIDDEN_LABEL4_FIELD);
-    
+
     if (hiddenLabel1 != null
         || hiddenLabel2 != null
         || hiddenLabel3 != null
@@ -126,9 +126,9 @@ public class ZohoOrganizationConverter {
       addValueToList(hiddenLabel3, hiddenLabels);
       addValueToList(hiddenLabel4, hiddenLabels);
 
-      //hidden labels text area
+      // hidden labels text area
       hiddenLabels.addAll(getTextAreaFieldValues(zohoRecord, ZohoConstants.HIDDEN_LABEL_FIELD));
-      
+
       org.setHiddenLabel(hiddenLabels);
     }
 
@@ -211,13 +211,13 @@ public class ZohoOrganizationConverter {
 
   static List<String> getTextAreaFieldValues(Record zohoRecord, String zohoFieldName) {
     String textArea = ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(zohoFieldName));
-    if(StringUtils.isBlank(textArea)) {
+    if (StringUtils.isBlank(textArea)) {
       return Collections.emptyList();
     }
-    
+
     return List.of(StringUtils.split(textArea, "\n"));
   }
-  
+
   static String getIsoLanguage(Record zohoRecord, String zohoLangFieldName) {
     return toIsoLanguage(getStringFieldValue(zohoRecord, zohoLangFieldName));
   }

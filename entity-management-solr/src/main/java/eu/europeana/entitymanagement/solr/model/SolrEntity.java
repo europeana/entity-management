@@ -34,7 +34,7 @@ public abstract class SolrEntity<T extends Entity> {
   private Map<String, List<String>> altLabel;
 
   //  @Field(EntitySolrFields.HIDDEN_LABEL)
-//  private List<String> hiddenLabel;
+  //  private List<String> hiddenLabel;
   @Field(EntitySolrFields.HIDDEN_LABEL_ALL)
   private Map<String, List<String>> hiddenLabel;
 
@@ -81,7 +81,7 @@ public abstract class SolrEntity<T extends Entity> {
     setPrefLabelStringMap(entity.getPrefLabel());
     setAltLabel(entity.getAltLabel());
     setHiddenLabelMap(entity.getHiddenLabel());
-    
+
     setIsShownBy(entity.getIsShownBy());
     if (entity.getIdentifier() != null) this.identifier = new ArrayList<>(entity.getIdentifier());
     if (entity.getIsRelatedTo() != null)
@@ -119,11 +119,11 @@ public abstract class SolrEntity<T extends Entity> {
                   EntitySolrFields.ALT_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, altLabel));
     }
   }
-  
+
   public void setHiddenLabelMap(List<String> hiddenLabel) {
-    if(hiddenLabel != null && !hiddenLabel.isEmpty()) {
-      this.hiddenLabel = new HashMap<String, List<String>>(); 
-      //convert array to language map
+    if (hiddenLabel != null && !hiddenLabel.isEmpty()) {
+      this.hiddenLabel = new HashMap<String, List<String>>();
+      // convert array to language map
       this.hiddenLabel.put(EntitySolrFields.HIDDEN_LABEL_NO_LANG, new ArrayList<>(hiddenLabel));
     }
   }
@@ -241,5 +241,4 @@ public abstract class SolrEntity<T extends Entity> {
   }
 
   protected abstract void setSameReferenceLinks(ArrayList<String> uris);
-
 }
