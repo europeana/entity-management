@@ -626,12 +626,28 @@ public class EMController extends BaseRest {
     if (entityRecords.isEmpty()) {
       throw new EntityNotFoundException(entityIds.toString());
     }
+    // order the entities as requested
+    List<EntityRecord> orderedEntityRecords = new ArrayList<>();
+    entityIds.stream()
+        .forEach(
+            id -> {
+              EntityRecord record =
+                  entityRecords.stream()
+                      .filter(entityRecord -> id.equals(entityRecord.getEntityId()))
+                      .findAny()
+                      .orElse(null);
+
+              if (record != null) {
+                orderedEntityRecords.add(record);
+              }
+            });
+
     // create response headers
     String contentType = HttpHeaders.CONTENT_TYPE_JSONLD_UTF8;
     org.springframework.http.HttpHeaders headers = createAllowHeader(request);
     headers.add(HttpHeaders.CONTENT_TYPE, contentType);
 
-    String body = serialize(entityRecords);
+    String body = serialize(orderedEntityRecords);
     return ResponseEntity.status(HttpStatus.OK).headers(headers).body(body);
   }
 
