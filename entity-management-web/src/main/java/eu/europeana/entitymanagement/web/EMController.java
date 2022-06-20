@@ -44,8 +44,10 @@ import io.swagger.annotations.ApiOperation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
@@ -626,28 +628,29 @@ public class EMController extends BaseRest {
     if (entityRecords.isEmpty()) {
       throw new EntityNotFoundException(entityIds.toString());
     }
-    // order the entities as requested
-    List<EntityRecord> orderedEntityRecords = new ArrayList<>();
-    entityIds.stream()
-        .forEach(
-            id -> {
-              EntityRecord record =
-                  entityRecords.stream()
-                      .filter(entityRecord -> id.equals(entityRecord.getEntityId()))
-                      .findAny()
-                      .orElse(null);
 
-              if (record != null) {
-                orderedEntityRecords.add(record);
-              }
-            });
+    // LinkedHashMap iterates keys() and values() in order of insertion. Using a map
+    // improves sort performance significantly
+    Map<String, EntityRecord> sortedEntityRecordMap = new LinkedHashMap<>(entityIds.size());
+    for (String id : entityIds) {
+      sortedEntityRecordMap.put(id, null);
+    }
+
+    for (EntityRecord entityRecord : entityRecords) {
+      sortedEntityRecordMap.replace(entityRecord.getEntityId(), entityRecord);
+    }
 
     // create response headers
     String contentType = HttpHeaders.CONTENT_TYPE_JSONLD_UTF8;
     org.springframework.http.HttpHeaders headers = createAllowHeader(request);
     headers.add(HttpHeaders.CONTENT_TYPE, contentType);
 
-    String body = serialize(orderedEntityRecords);
+    // remove null values in response
+    List<EntityRecord> responseBody =
+        sortedEntityRecordMap.values().stream()
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+    String body = serialize(responseBody);
     return ResponseEntity.status(HttpStatus.OK).headers(headers).body(body);
   }
 

@@ -1,6 +1,5 @@
 package eu.europeana.entitymanagement.web;
 
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_CONTEXT;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -35,15 +34,39 @@ class EntityMultipleRetrievalIT extends BaseWebControllerTest {
         createEntity(europeanaMetadata, metisResponse, IntegrationTestUtils.AGENT_DA_VINCI_URI)
             .getEntityId();
 
+    // add 3rd entity
+    europeanaMetadata = loadFile(IntegrationTestUtils.AGENT_REGISTER_STALIN_JSON);
+    metisResponse = loadFile(IntegrationTestUtils.AGENT_STALIN_XML);
+    String entityId3 =
+        createEntity(europeanaMetadata, metisResponse, IntegrationTestUtils.AGENT_STALIN_URI)
+            .getEntityId();
+
     mockMvc
         .perform(
             post(IntegrationTestUtils.BASE_SERVICE_URL + "/retrieve")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(List.of(entityId1, entityId2))))
+                .content(objectMapper.writeValueAsString(List.of(entityId1, entityId2, entityId3))))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.@context", is(ENTITY_CONTEXT)))
-        .andExpect(jsonPath("$.total", is(2)))
-        .andExpect(jsonPath("$.items", hasSize(2)));
+        // entities in response should match entityId ordering
+        .andExpect(jsonPath("$.items.*.id", is(List.of(entityId1, entityId2, entityId3))));
+
+    mockMvc
+        .perform(
+            post(IntegrationTestUtils.BASE_SERVICE_URL + "/retrieve")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    objectMapper.writeValueAsString(
+                        // change ordering of entityIds and retry request. Also include id that
+                        // doesn't
+                        // exist
+                        List.of(
+                            entityId3,
+                            entityId1,
+                            "http://data.europeana.eu/agent/200",
+                            entityId2))))
+        .andExpect(status().isOk())
+        // ordering should match request entityIds, minus id that doesn't exist
+        .andExpect(jsonPath("$.items.*.id", is(List.of(entityId3, entityId1, entityId2))));
   }
 
   @Test
