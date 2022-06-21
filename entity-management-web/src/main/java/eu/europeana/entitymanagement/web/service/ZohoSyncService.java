@@ -90,7 +90,8 @@ public class ZohoSyncService {
     return zohoDatasource.get();
   }
 
-  public ZohoSyncReport synchronizeZohoOrganizations(@NotNull OffsetDateTime modifiedSince) {
+  public ZohoSyncReport synchronizeZohoOrganizations(@NotNull OffsetDateTime modifiedSince)
+      throws EntityUpdateException {
     ZohoSyncReport zohoSyncReport = new ZohoSyncReport(new Date());
     // synchronize updated
     synchronizeZohoOrganizations(modifiedSince, zohoSyncReport);
@@ -153,11 +154,12 @@ public class ZohoSyncService {
    * Retrieve deleted in Zoho organizations and removed from the Enrichment database
    *
    * @return the number of deleted from Enrichment database organizations
+   * @throws EntityUpdateException
    * @throws ZohoException
    * @throws OrganizationImportException
    */
   void synchronizeDeletedZohoOrganizations(
-      OffsetDateTime modifiedSince, ZohoSyncReport zohoSyncReport) {
+      OffsetDateTime modifiedSince, ZohoSyncReport zohoSyncReport) throws EntityUpdateException {
 
     // do not delete organizations for individual entity importer
     // in case of full import the database should be manually cleaned. No need to delete
@@ -255,7 +257,7 @@ public class ZohoSyncService {
             .collect(Collectors.toList());
     try {
       runPermanentDelete(entitiesToDelete, zohoSyncReport);
-    } catch (RuntimeException e) {
+    } catch (RuntimeException | EntityUpdateException e) {
       String message =
           "Cannot perfomr permanet delete operations for organizations with ids:"
               + entitiesToDelete.toArray();
@@ -575,9 +577,10 @@ public class ZohoSyncService {
     return existingRecords.stream().filter(er -> er.getEntityId().endsWith(identifier)).findFirst();
   }
 
-  private void runPermanentDelete(
-      List<String> entitiesDeletedInZoho, ZohoSyncReport zohoSyncReport) {
+  private void runPermanentDelete(List<String> entitiesDeletedInZoho, ZohoSyncReport zohoSyncReport)
+      throws EntityUpdateException {
     long deleted = entityRecordService.deleteBulk(entitiesDeletedInZoho);
+    entityRecordService.deleteFromSolr(entitiesDeletedInZoho);
     zohoSyncReport.increaseDeleted(deleted);
   }
 

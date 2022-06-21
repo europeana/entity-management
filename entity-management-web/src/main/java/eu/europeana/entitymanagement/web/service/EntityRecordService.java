@@ -185,6 +185,15 @@ public class EntityRecordService {
     saveEntityRecord(er);
   }
 
+  public void deleteFromSolr(List<String> entityIds) throws EntityUpdateException {
+    try {
+      solrService.deleteById(entityIds);
+    } catch (SolrServiceException e) {
+      throw new EntityUpdateException(
+          "Cannot delete solr records with ids: " + String.join(",", entityIds), e);
+    }
+  }
+
   /**
    * Re-Enable an already existing entity record.
    *
