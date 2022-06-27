@@ -226,12 +226,13 @@ public class SolrService implements InitializingBean {
    * Deletes the document whose id matches the specified entityId value
    *
    * @param entityIds entity id list
+   * @param forceCommit 
    * @throws SolrServiceException on error
    */
-  public void deleteById(List<String> entityIds) throws SolrServiceException {
+  public void deleteById(List<String> entityIds, boolean forceCommit) throws SolrServiceException {
     try {
       UpdateResponse updateResponse = solrClient.deleteById(entityIds);
-      if (isExplicitCommitsEnabled) {
+      if (forceCommit || isExplicitCommitsEnabled) {
         solrClient.commit();
       }
       log.info(

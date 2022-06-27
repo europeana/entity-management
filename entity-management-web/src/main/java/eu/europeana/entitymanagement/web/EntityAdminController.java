@@ -102,8 +102,6 @@ public class EntityAdminController extends BaseRest {
     LOG.info("Permanently deleting entityId={}, isSynchronous={}", entityUri, isSynchronous);
 
     if (isSynchronous) {
-      // delete from Solr before Mongo, so Solr errors won't leave DB in an inconsistent state
-      solrService.deleteById(List.of(entityUri));
       entityRecordService.delete(entityUri);
     } else {
       entityUpdateService.scheduleTasks(

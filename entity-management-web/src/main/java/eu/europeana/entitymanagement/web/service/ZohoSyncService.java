@@ -17,6 +17,7 @@ import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
+import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
@@ -191,7 +192,7 @@ public class ZohoSyncService {
             "Zoho synchronization exception occured when handling organizations deleted in Zoho",
             e);
         zohoSyncReport.addFailedOperation(null, ZohoSyncReportFields.ZOHO_ACCESS_ERROR, e);
-      } catch (RuntimeException e) {
+      } catch (SolrServiceException | RuntimeException e) {
         logger.error(
             "Zoho synchronization exception occured when handling organizations deleted in Zoho",
             e);
@@ -257,9 +258,9 @@ public class ZohoSyncService {
             .collect(Collectors.toList());
     try {
       runPermanentDelete(entitiesToDelete, zohoSyncReport);
-    } catch (RuntimeException | EntityUpdateException e) {
+    } catch (SolrServiceException | EntityUpdateException | RuntimeException e) {
       String message =
-          "Cannot perfomr permanet delete operations for organizations with ids:"
+          "Cannot perform permanent delete operations for organizations with ids:"
               + entitiesToDelete.toArray();
       zohoSyncReport.addFailedOperation(
           null, ZohoSyncReportFields.ENTITY_DELETION_ERROR, message, e);
@@ -578,9 +579,8 @@ public class ZohoSyncService {
   }
 
   private void runPermanentDelete(List<String> entitiesDeletedInZoho, ZohoSyncReport zohoSyncReport)
-      throws EntityUpdateException {
-    long deleted = entityRecordService.deleteBulk(entitiesDeletedInZoho);
-    entityRecordService.deleteFromSolr(entitiesDeletedInZoho);
+      throws EntityUpdateException, SolrServiceException {
+    long deleted = entityRecordService.deleteBulk(entitiesDeletedInZoho, true);
     zohoSyncReport.increaseDeleted(deleted);
   }
 
