@@ -179,7 +179,7 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
   }
 
   protected void deprecateEntity(EntityRecord entityRecord) throws EntityUpdateException {
-    entityRecordService.disableEntityRecord(entityRecord);
+    entityRecordService.disableEntityRecord(entityRecord, true);
   }
 
   protected Optional<EntityRecord> retrieveEntity(String entityId) {

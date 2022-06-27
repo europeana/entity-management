@@ -296,7 +296,7 @@ public class ZohoSyncService {
 
   void performDeprecation(ZohoSyncReport zohoSyncReport, Operation operation) {
     try {
-      entityRecordService.disableEntityRecord(operation.getEntityRecord());
+      entityRecordService.disableEntityRecord(operation.getEntityRecord(), false);
       zohoSyncReport.increaseDeprecated(1);
     } catch (EntityUpdateException e) {
       zohoSyncReport.addFailedOperation(
