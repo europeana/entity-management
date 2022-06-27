@@ -238,7 +238,7 @@ public class EntityRecordService {
    *
    * @param entityId entity record to delete
    * @return the number of deleted objects
-   * @throws SolrServiceException 
+   * @throws SolrServiceException if the deletion from solr is not executed successfully
    */
   public long delete(String entityId) throws SolrServiceException {
     // delete from Solr before Mongo, so Solr errors won't leave DB in an inconsistent state

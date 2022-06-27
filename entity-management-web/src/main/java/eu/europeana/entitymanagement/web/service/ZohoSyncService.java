@@ -91,6 +91,12 @@ public class ZohoSyncService {
     return zohoDatasource.get();
   }
 
+  /**
+   * main method to run the zoho synchronization
+   * @param modifiedSince the start date from which the Zoho modifications must be synchronized  
+   * @return the report on performed opperations
+   * @throws EntityUpdateException
+   */
   public ZohoSyncReport synchronizeZohoOrganizations(@NotNull OffsetDateTime modifiedSince)
       throws EntityUpdateException {
     ZohoSyncReport zohoSyncReport = new ZohoSyncReport(new Date());
@@ -258,7 +264,7 @@ public class ZohoSyncService {
             .collect(Collectors.toList());
     try {
       runPermanentDelete(entitiesToDelete, zohoSyncReport);
-    } catch (SolrServiceException | EntityUpdateException | RuntimeException e) {
+    } catch (SolrServiceException | RuntimeException e) {
       String message =
           "Cannot perform permanent delete operations for organizations with ids:"
               + entitiesToDelete.toArray();
@@ -579,7 +585,7 @@ public class ZohoSyncService {
   }
 
   private void runPermanentDelete(List<String> entitiesDeletedInZoho, ZohoSyncReport zohoSyncReport)
-      throws EntityUpdateException, SolrServiceException {
+      throws SolrServiceException {
     long deleted = entityRecordService.deleteBulk(entitiesDeletedInZoho, true);
     zohoSyncReport.increaseDeleted(deleted);
   }
@@ -589,6 +595,10 @@ public class ZohoSyncService {
     return currentPageSize < maxItemsPerPage;
   }
 
+  /**
+   * 
+   * @return the Zoho DataSource object  
+   */
   public DataSource getZohoDataSource() {
     return zohoDataSource;
   }
