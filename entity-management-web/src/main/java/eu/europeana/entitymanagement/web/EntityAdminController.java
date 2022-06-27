@@ -1,33 +1,5 @@
 package eu.europeana.entitymanagement.web;
 
-import eu.europeana.api.commons.definitions.exception.DateParsingException;
-import eu.europeana.api.commons.definitions.utils.DateUtils;
-import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.api.commons.error.EuropeanaApiException;
-import eu.europeana.api.commons.web.exception.HttpException;
-import eu.europeana.api.commons.web.http.HttpHeaders;
-import eu.europeana.api.commons.web.model.vocabulary.Operations;
-import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType;
-import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
-import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.exception.EntityNotFoundException;
-import eu.europeana.entitymanagement.exception.HttpBadRequestException;
-import eu.europeana.entitymanagement.solr.service.SolrService;
-import eu.europeana.entitymanagement.utils.EntityRecordUtils;
-import eu.europeana.entitymanagement.vocabulary.EntityProfile;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.vocabulary.FormatTypes;
-import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
-import eu.europeana.entitymanagement.web.auth.EMOperations;
-import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
-import eu.europeana.entitymanagement.web.service.EntityRecordService;
-import eu.europeana.entitymanagement.web.service.ZohoSyncService;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -49,6 +21,33 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import eu.europeana.api.commons.definitions.exception.DateParsingException;
+import eu.europeana.api.commons.definitions.utils.DateUtils;
+import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons.error.EuropeanaApiException;
+import eu.europeana.api.commons.web.exception.HttpException;
+import eu.europeana.api.commons.web.http.HttpHeaders;
+import eu.europeana.api.commons.web.model.vocabulary.Operations;
+import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
+import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.exception.EntityNotFoundException;
+import eu.europeana.entitymanagement.exception.HttpBadRequestException;
+import eu.europeana.entitymanagement.utils.EntityRecordUtils;
+import eu.europeana.entitymanagement.vocabulary.EntityProfile;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.FormatTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
+import eu.europeana.entitymanagement.web.auth.EMOperations;
+import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
+import eu.europeana.entitymanagement.web.service.EntityRecordService;
+import eu.europeana.entitymanagement.web.service.ZohoSyncService;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 @RestController
 @Validated
@@ -59,7 +58,6 @@ public class EntityAdminController extends BaseRest {
 
   private final EntityRecordService entityRecordService;
   private final ZohoSyncService zohoSyncService;
-  private final SolrService solrService;
   private final EntityUpdateService entityUpdateService;
   private final EntityManagementConfiguration emConfig;
 
@@ -68,12 +66,10 @@ public class EntityAdminController extends BaseRest {
       EntityRecordService entityRecordService,
       EntityUpdateService entityUpdateService,
       ZohoSyncService zohoSyncService,
-      SolrService solrService,
       EntityManagementConfiguration emConfig) {
     this.entityRecordService = entityRecordService;
     this.entityUpdateService = entityUpdateService;
     this.zohoSyncService = zohoSyncService;
-    this.solrService = solrService;
     this.emConfig = emConfig;
   }
 
@@ -102,8 +98,6 @@ public class EntityAdminController extends BaseRest {
     LOG.info("Permanently deleting entityId={}, isSynchronous={}", entityUri, isSynchronous);
 
     if (isSynchronous) {
-      // delete from Solr before Mongo, so Solr errors won't leave DB in an inconsistent state
-      solrService.deleteById(List.of(entityUri));
       entityRecordService.delete(entityUri);
     } else {
       entityUpdateService.scheduleTasks(

@@ -20,6 +20,6 @@ public class EntitySolrRemovalWriter implements ItemWriter<EntityRecord> {
   @Override
   public void write(@NonNull List<? extends EntityRecord> entityRecords) throws Exception {
     String[] entityIds = BatchUtils.getEntityIds(entityRecords);
-    solrService.deleteById(List.of(entityIds));
+    solrService.deleteById(List.of(entityIds), true);
   }
 }

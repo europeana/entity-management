@@ -155,7 +155,18 @@ public class EntityRecordService {
     return entityRecordRepository.saveBulk((List<EntityRecord>) records);
   }
 
-  public long deleteBulk(List<String> entityIds) {
+  /**
+   * This method deletes entities permanently from database and from solr index if the deleteFromSolr flag is set to true
+   * @param entityIds the ids of the entities to be deleted
+   * @param deleteFromSolr flag indicating if the 
+   * @return the number of entities deleted into the database
+   * @throws SolrServiceException if an error occurs when deleteing from solr
+   */
+  public long deleteBulk(List<String> entityIds, boolean deleteFromSolr) throws SolrServiceException {
+    if(deleteFromSolr) {
+      solrService.deleteById(entityIds, true);
+    }
+    
     long deleteCount = entityRecordRepository.deleteBulk(entityIds);
     if (deleteCount > 0) {
       logger.info("Deleted {} entityRecords from database: entityIds={}", deleteCount, entityIds);
@@ -163,6 +174,12 @@ public class EntityRecordService {
     return deleteCount;
   }
 
+  /**
+   * This method sets the deleted field in the database, it does not remove from solr. This method needs to be used only within the batch item writer
+   * @deprecated this method does not remove from solr. When using this method, it must be ensured that the delete from solr is also invoked   
+   * @param entityRecords
+   */
+  @Deprecated
   public void disableBulk(List<? extends EntityRecord> entityRecords) {
     String[] entityIds = BatchUtils.getEntityIds(entityRecords);
     UpdateResult updateResult = entityRecordRepository.disableBulk(List.of(entityIds));
@@ -177,13 +194,14 @@ public class EntityRecordService {
    */
   public void disableEntityRecord(EntityRecord er) throws EntityUpdateException {
     try {
-      solrService.deleteById(List.of(er.getEntityId()));
+      solrService.deleteById(List.of(er.getEntityId()), false);
     } catch (SolrServiceException e) {
       throw new EntityUpdateException("Cannot delete solr record with id: " + er.getEntityId(), e);
     }
     er.setDisabled(new Date());
     saveEntityRecord(er);
   }
+
 
   /**
    * Re-Enable an already existing entity record.
@@ -220,8 +238,12 @@ public class EntityRecordService {
    *
    * @param entityId entity record to delete
    * @return the number of deleted objects
+   * @throws SolrServiceException if the deletion from solr is not executed successfully
    */
-  public long delete(String entityId) {
+  public long delete(String entityId) throws SolrServiceException {
+    // delete from Solr before Mongo, so Solr errors won't leave DB in an inconsistent state
+    solrService.deleteById(List.of(entityId), true);
+    
     return entityRecordRepository.deleteForGood(entityId);
   }
 

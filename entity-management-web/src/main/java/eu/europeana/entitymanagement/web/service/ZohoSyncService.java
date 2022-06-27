@@ -17,6 +17,7 @@ import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
+import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
@@ -90,7 +91,14 @@ public class ZohoSyncService {
     return zohoDatasource.get();
   }
 
-  public ZohoSyncReport synchronizeZohoOrganizations(@NotNull OffsetDateTime modifiedSince) {
+  /**
+   * main method to run the zoho synchronization
+   * @param modifiedSince the start date from which the Zoho modifications must be synchronized  
+   * @return the report on performed opperations
+   * @throws EntityUpdateException
+   */
+  public ZohoSyncReport synchronizeZohoOrganizations(@NotNull OffsetDateTime modifiedSince)
+      throws EntityUpdateException {
     ZohoSyncReport zohoSyncReport = new ZohoSyncReport(new Date());
     // synchronize updated
     synchronizeZohoOrganizations(modifiedSince, zohoSyncReport);
@@ -153,11 +161,12 @@ public class ZohoSyncService {
    * Retrieve deleted in Zoho organizations and removed from the Enrichment database
    *
    * @return the number of deleted from Enrichment database organizations
+   * @throws EntityUpdateException
    * @throws ZohoException
    * @throws OrganizationImportException
    */
   void synchronizeDeletedZohoOrganizations(
-      OffsetDateTime modifiedSince, ZohoSyncReport zohoSyncReport) {
+      OffsetDateTime modifiedSince, ZohoSyncReport zohoSyncReport) throws EntityUpdateException {
 
     // do not delete organizations for individual entity importer
     // in case of full import the database should be manually cleaned. No need to delete
@@ -189,7 +198,7 @@ public class ZohoSyncService {
             "Zoho synchronization exception occured when handling organizations deleted in Zoho",
             e);
         zohoSyncReport.addFailedOperation(null, ZohoSyncReportFields.ZOHO_ACCESS_ERROR, e);
-      } catch (RuntimeException e) {
+      } catch (SolrServiceException | RuntimeException e) {
         logger.error(
             "Zoho synchronization exception occured when handling organizations deleted in Zoho",
             e);
@@ -255,9 +264,9 @@ public class ZohoSyncService {
             .collect(Collectors.toList());
     try {
       runPermanentDelete(entitiesToDelete, zohoSyncReport);
-    } catch (RuntimeException e) {
+    } catch (SolrServiceException | RuntimeException e) {
       String message =
-          "Cannot perfomr permanet delete operations for organizations with ids:"
+          "Cannot perform permanent delete operations for organizations with ids:"
               + entitiesToDelete.toArray();
       zohoSyncReport.addFailedOperation(
           null, ZohoSyncReportFields.ENTITY_DELETION_ERROR, message, e);
@@ -575,9 +584,9 @@ public class ZohoSyncService {
     return existingRecords.stream().filter(er -> er.getEntityId().endsWith(identifier)).findFirst();
   }
 
-  private void runPermanentDelete(
-      List<String> entitiesDeletedInZoho, ZohoSyncReport zohoSyncReport) {
-    long deleted = entityRecordService.deleteBulk(entitiesDeletedInZoho);
+  private void runPermanentDelete(List<String> entitiesDeletedInZoho, ZohoSyncReport zohoSyncReport)
+      throws SolrServiceException {
+    long deleted = entityRecordService.deleteBulk(entitiesDeletedInZoho, true);
     zohoSyncReport.increaseDeleted(deleted);
   }
 
@@ -586,6 +595,10 @@ public class ZohoSyncService {
     return currentPageSize < maxItemsPerPage;
   }
 
+  /**
+   * 
+   * @return the Zoho DataSource object  
+   */
   public DataSource getZohoDataSource() {
     return zohoDataSource;
   }
