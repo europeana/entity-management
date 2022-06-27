@@ -142,7 +142,7 @@ public class EMController extends BaseRest {
 
     if (isSynchronous) {
       // delete from Solr before Mongo, so Solr errors won't leave DB in an inconsistent state
-      entityRecordService.disableEntityRecord(entityRecord);
+      entityRecordService.disableEntityRecord(entityRecord, true);
     } else {
       entityUpdateService.scheduleTasks(
           Collections.singletonList(entityId), ScheduledRemovalType.DEPRECATION);

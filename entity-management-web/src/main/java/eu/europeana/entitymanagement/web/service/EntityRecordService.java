@@ -190,11 +190,12 @@ public class EntityRecordService {
    * Mark entity record as disabled and remove from solr
    *
    * @param er the entity record
+   * @param forceSolrCommit indicating if a solr commit should be explicitly (synchronuously) executed 
    * @throws EntityUpdateException incase of solr access errors
    */
-  public void disableEntityRecord(EntityRecord er) throws EntityUpdateException {
+  public void disableEntityRecord(EntityRecord er, boolean forceSolrCommit) throws EntityUpdateException {
     try {
-      solrService.deleteById(List.of(er.getEntityId()), false);
+      solrService.deleteById(List.of(er.getEntityId()), forceSolrCommit);
     } catch (SolrServiceException e) {
       throw new EntityUpdateException("Cannot delete solr record with id: " + er.getEntityId(), e);
     }
