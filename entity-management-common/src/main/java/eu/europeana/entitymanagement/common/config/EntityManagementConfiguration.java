@@ -49,6 +49,15 @@ public class EntityManagementConfiguration {
   @Value("${entitymanagement.solr.indexing.url}")
   private String indexingSolrUrl;
 
+  @Value("${entitymanagement.solr.indexing.zookeeper.url}")
+  private String indexingSolrZookeeperUrl;
+
+  @Value("${entitymanagement.solr.indexing.timeout}")
+  private int indexingSolrTimeoutMillis;
+
+  @Value("${entitymanagement.solr.indexing.collection}")
+  private String indexingSolrCollection;
+
   @Value("${entitymanagement.solr.indexing.explicitCommits: false}")
   private boolean explicitCommitsEnabled;
 
@@ -252,5 +261,17 @@ public class EntityManagementConfiguration {
 
   public int getZohoSyncBatchSize() {
     return zohoSyncBatchSize;
+  }
+
+  public String getIndexingSolrZookeeperUrl() {
+    return indexingSolrZookeeperUrl;
+  }
+
+  public int getIndexingSolrTimeoutMillis() {
+    return indexingSolrTimeoutMillis;
+  }
+
+  public String getIndexingSolrCollection() {
+    return indexingSolrCollection;
   }
 }
