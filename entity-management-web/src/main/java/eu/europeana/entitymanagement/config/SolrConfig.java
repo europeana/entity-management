@@ -36,7 +36,8 @@ public class SolrConfig {
   public SolrClient indexingSolrClient() {
     logger.info(
         "Configuring indexing solr client at the url: {}", emConfiguration.getIndexingSolrUrl());
-    if (StringUtils.isNotBlank(emConfiguration.getIndexingSolrZookeeperUrl())) {
+    if (emConfiguration.getIndexingSolrZookeeperUrl()!=null 
+        && StringUtils.isNotBlank(emConfiguration.getIndexingSolrZookeeperUrl())) {
       return initSolrCloudClient();
     } else {
       return initSolrClient();

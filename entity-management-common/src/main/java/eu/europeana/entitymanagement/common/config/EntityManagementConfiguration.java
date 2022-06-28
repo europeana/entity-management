@@ -49,13 +49,13 @@ public class EntityManagementConfiguration {
   @Value("${entitymanagement.solr.indexing.url}")
   private String indexingSolrUrl;
 
-  @Value("${entitymanagement.solr.indexing.zookeeper.url}")
+  @Value("${entitymanagement.solr.indexing.zookeeper.url:null}")
   private String indexingSolrZookeeperUrl;
 
-  @Value("${entitymanagement.solr.indexing.timeout}")
+  @Value("${entitymanagement.solr.indexing.timeout:60000}")
   private int indexingSolrTimeoutMillis;
 
-  @Value("${entitymanagement.solr.indexing.collection}")
+  @Value("${entitymanagement.solr.indexing.collection:null}")
   private String indexingSolrCollection;
 
   @Value("${entitymanagement.solr.indexing.explicitCommits: false}")
