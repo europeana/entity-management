@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement.batch.processor;
 
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.common.config.DataSource;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
@@ -34,22 +35,26 @@ public class EntityConsolidationProcessor implements ItemProcessor<EntityRecord,
 
   private final EntityFieldsCleaner emEntityFieldCleaner;
   private final DataSources datasources;
+  private final EntityManagementConfiguration emConfiguration;
 
   public EntityConsolidationProcessor(
       EntityRecordService entityRecordService,
       ValidatorFactory emValidatorFactory,
       EntityFieldsCleaner emEntityFieldCleaner,
-      DataSources datasources) {
+      DataSources datasources,
+      EntityManagementConfiguration emConfiguration) {
     this.entityRecordService = entityRecordService;
     this.emValidatorFactory = emValidatorFactory;
     this.emEntityFieldCleaner = emEntityFieldCleaner;
     this.datasources = datasources;
+    this.emConfiguration = emConfiguration;
   }
 
   @Override
   public EntityRecord process(@NonNull EntityRecord entityRecord) throws EuropeanaApiException {
 
-    List<EntityProxy> externalProxies = entityRecord.getExternalProxies();
+    List<EntityProxy> externalProxies =
+        entityRecord.getExternalProxies(emConfiguration.getBaseDataEuropeanaUri());
 
     Entity externalProxyEntity = externalProxies.get(0).getEntity();
     String proxyId = externalProxies.get(0).getProxyId();
@@ -73,7 +78,8 @@ public class EntityConsolidationProcessor implements ItemProcessor<EntityRecord,
       }
     }
 
-    Entity europeanaProxyEntity = entityRecord.getEuropeanaProxy().getEntity();
+    Entity europeanaProxyEntity =
+        entityRecord.getEuropeanaProxy(emConfiguration.getBaseDataEuropeanaUri()).getEntity();
 
     Entity consolidatedEntity = null;
     if (isStaticDataSource) {
@@ -88,7 +94,8 @@ public class EntityConsolidationProcessor implements ItemProcessor<EntityRecord,
         consolidatedEntity,
         externalProxies.stream().map(EntityProxy::getProxyId).collect(Collectors.toList()));
 
-    emEntityFieldCleaner.cleanAndNormalize(consolidatedEntity);
+    emEntityFieldCleaner.cleanAndNormalize(
+        consolidatedEntity, emConfiguration.getBaseDataEuropeanaUri());
     entityRecordService.performReferentialIntegrity(consolidatedEntity);
     validateCompleteValidationConstraints(consolidatedEntity);
     entityRecordService.updateConsolidatedVersion(entityRecord, consolidatedEntity);

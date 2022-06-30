@@ -92,7 +92,8 @@ public class EntityAdminController extends BaseRest {
     if (emConfig.isAuthEnabled()) {
       verifyWriteAccess(Operations.DELETE, request);
     }
-    String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
+    String entityUri =
+        EntityRecordUtils.buildEntityIdUri(type, identifier, emConfig.getBaseDataEuropeanaUri());
     if (!entityRecordService.existsByEntityId(entityUri)) {
       throw new EntityNotFoundException(entityUri);
     }

@@ -1,7 +1,8 @@
 package eu.europeana.entitymanagement.normalization;
 
-import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.*;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BASE_DATA_EUROPEANA_URI;
+import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_DATE;
+import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_TEXT;
+import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_TEXT_OR_URI;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BEGIN;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DATE_OF_BIRTH;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DATE_OF_DEATH;
@@ -71,7 +72,7 @@ public class EntityFieldsCleaner {
   }
 
   @SuppressWarnings("unchecked")
-  public void cleanAndNormalize(Entity entity) {
+  public void cleanAndNormalize(Entity entity, String baseDataEuropeanaUri) {
     List<Field> entityFields = EntityUtils.getAllFields(entity.getClass());
 
     try {
@@ -112,7 +113,8 @@ public class EntityFieldsCleaner {
           Map normalized = normalizeMapField(field, (Map) fieldValue);
           entity.setFieldValue(field, normalized);
         } else if (WebResource.class.isAssignableFrom(fieldType)) {
-          entity.setFieldValue(field, normalizeWebResource((WebResource) fieldValue));
+          entity.setFieldValue(
+              field, normalizeWebResource((WebResource) fieldValue, baseDataEuropeanaUri));
         }
       }
     } catch (IllegalArgumentException
@@ -126,13 +128,14 @@ public class EntityFieldsCleaner {
     }
   }
 
-  private WebResource normalizeWebResource(WebResource existingFieldValue) {
+  private WebResource normalizeWebResource(
+      WebResource existingFieldValue, String baseDataEuropeanaUri) {
     WebResource webResource = new WebResource(existingFieldValue);
 
     // generate missing thumbnail for Europeana resources
     if (StringUtils.isEmpty(webResource.getThumbnail())
         && StringUtils.isNotBlank(webResource.getSource())
-        && webResource.getSource().startsWith(BASE_DATA_EUROPEANA_URI)) {
+        && webResource.getSource().startsWith(baseDataEuropeanaUri)) {
       webResource.setThumbnail(
           thumbnailBaseUrl + URLEncoder.encode(webResource.getId(), StandardCharsets.UTF_8));
     }

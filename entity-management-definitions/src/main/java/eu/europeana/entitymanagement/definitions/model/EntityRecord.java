@@ -2,7 +2,6 @@ package eu.europeana.entitymanagement.definitions.model;
 
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_EXACT_MATCH;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_SAME_AS;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BASE_DATA_EUROPEANA_URI;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
@@ -107,9 +106,9 @@ public class EntityRecord {
     return this.modified;
   }
 
-  public EntityProxy getEuropeanaProxy() {
+  public EntityProxy getEuropeanaProxy(String baseDataEuropeanaUri) {
     return proxies.stream()
-        .filter(s -> s.getProxyId().startsWith(BASE_DATA_EUROPEANA_URI))
+        .filter(s -> s.getProxyId().startsWith(baseDataEuropeanaUri))
         .findFirst()
         .orElse(null);
   }
@@ -132,15 +131,15 @@ public class EntityRecord {
         .orElse(null);
   }
 
-  public List<EntityProxy> getExternalProxies() {
+  public List<EntityProxy> getExternalProxies(String baseDataEuropeanaUri) {
     return proxies.stream()
-        .filter(s -> !s.getProxyId().startsWith(BASE_DATA_EUROPEANA_URI))
+        .filter(s -> !s.getProxyId().startsWith(baseDataEuropeanaUri))
         .collect(Collectors.toList());
   }
 
-  public List<String> getExternalProxyIds() {
+  public List<String> getExternalProxyIds(String baseDataEuropeanaUri) {
     return proxies.stream()
-        .filter(s -> !s.getProxyId().startsWith(BASE_DATA_EUROPEANA_URI))
+        .filter(s -> !s.getProxyId().startsWith(baseDataEuropeanaUri))
         .map(EntityProxy::getProxyId)
         .collect(Collectors.toList());
   }

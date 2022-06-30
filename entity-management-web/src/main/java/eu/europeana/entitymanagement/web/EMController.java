@@ -267,7 +267,7 @@ public class EMController extends BaseRest {
     }
 
     //  //check if existing proxy ids are present in the same as
-    List<String> proxyIds = entityRecord.getExternalProxyIds();
+    List<String> proxyIds = entityRecord.getExternalProxyIds(emConfig.getBaseDataEuropeanaUri());
     // check the proxies which are not available in the sameAs
     proxyIds.removeAll(updateRequestEntity.getSameReferenceLinks());
     if (!proxyIds.isEmpty()) {
@@ -296,7 +296,9 @@ public class EMController extends BaseRest {
     }
     EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
     // update from external data source is not available for static data sources
-    datasources.verifyDataSource(entityRecord.getExternalProxies().get(0).getProxyId(), false);
+    datasources.verifyDataSource(
+        entityRecord.getExternalProxies(emConfig.getBaseDataEuropeanaUri()).get(0).getProxyId(),
+        false);
     return launchTaskAndRetrieveEntity(request, type, identifier, entityRecord, profile);
   }
 
@@ -740,7 +742,7 @@ public class EMController extends BaseRest {
                   .path("/entity/{id}")
                   .buildAndExpand(
                       EntityRecordUtils.extractIdentifierFromEntityId(
-                          existingEntity.get().getEntityId()))
+                          existingEntity.get().getEntityId(), emConfig.getBaseDataEuropeanaUri()))
                   .toUri())
           .build();
     }

@@ -242,7 +242,8 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
     String expectedId =
         EntityRecordUtils.buildEntityIdUri(
             "organization",
-            EntityRecordUtils.getIdFromUrl(IntegrationTestUtils.ORGANIZATION_GFM_URI_ZOHO));
+            EntityRecordUtils.getIdFromUrl(IntegrationTestUtils.ORGANIZATION_GFM_URI_ZOHO),
+            emConfiguration.getBaseDataEuropeanaUri());
 
     ResultActions response =
         mockMvc.perform(
@@ -282,7 +283,8 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         EntityRecordUtils.buildEntityIdUri(
             "organization",
             EntityRecordUtils.getIdFromUrl(
-                IntegrationTestUtils.ORGANIZATION_BERGER_MUSEUM_URI_ZOHO));
+                IntegrationTestUtils.ORGANIZATION_BERGER_MUSEUM_URI_ZOHO),
+            emConfiguration.getBaseDataEuropeanaUri());
 
     ResultActions response =
         mockMvc.perform(
@@ -325,7 +327,8 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
     String expectedId =
         EntityRecordUtils.buildEntityIdUri(
             "organization",
-            EntityRecordUtils.getIdFromUrl(IntegrationTestUtils.ORGANIZATION_PCCE_URI_ZOHO));
+            EntityRecordUtils.getIdFromUrl(IntegrationTestUtils.ORGANIZATION_PCCE_URI_ZOHO),
+            emConfiguration.getBaseDataEuropeanaUri());
 
     ResultActions response =
         mockMvc.perform(
@@ -357,7 +360,8 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
   void registerZohoOrganizationBnfWithNewFieldsShouldBeSuccessful() throws Exception {
     EntityRecordUtils.buildEntityIdUri(
         "organization",
-        EntityRecordUtils.getIdFromUrl(IntegrationTestUtils.ORGANIZATION_BNF_URI_ZOHO));
+        EntityRecordUtils.getIdFromUrl(IntegrationTestUtils.ORGANIZATION_BNF_URI_ZOHO),
+        emConfiguration.getBaseDataEuropeanaUri());
 
     ResultActions response =
         mockMvc.perform(
@@ -381,7 +385,10 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         createEntity(europeanaMetadata, metisResponse, IntegrationTestUtils.CONCEPT_BATHTUB_URI)
             .getEntityId();
     String redirectUrl =
-        String.format("/entity/%s", EntityRecordUtils.extractIdentifierFromEntityId(entityId));
+        String.format(
+            "/entity/%s",
+            EntityRecordUtils.extractIdentifierFromEntityId(
+                entityId, emConfiguration.getBaseDataEuropeanaUri()));
 
     mockMvc
         .perform(

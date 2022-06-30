@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.DataSource;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -74,6 +75,8 @@ public abstract class AbstractIntegrationTest {
   private static MockWebServer mockWikidata;
 
   @Autowired protected EntityRecordService entityRecordService;
+
+  @Autowired protected EntityManagementConfiguration emConfiguration;
 
   @BeforeAll
   public static void setupAll() throws IOException {

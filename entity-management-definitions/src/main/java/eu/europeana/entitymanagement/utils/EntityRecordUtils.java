@@ -1,7 +1,6 @@
 package eu.europeana.entitymanagement.utils;
 
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import org.apache.commons.lang3.StringUtils;
 
 public class EntityRecordUtils {
@@ -10,22 +9,24 @@ public class EntityRecordUtils {
     // private constructor to prevent instantiation
   }
 
-  public static String buildEntityIdUri(EntityTypes type, String identifier) {
-    return buildEntityIdUri(type.getEntityType(), identifier);
+  public static String buildEntityIdUri(
+      EntityTypes type, String identifier, String baseDataEuropeanaUri) {
+    return buildEntityIdUri(type.getEntityType(), identifier, baseDataEuropeanaUri);
   }
 
-  public static String buildEntityIdUri(String type, String identifier) {
+  public static String buildEntityIdUri(
+      String type, String identifier, String baseDataEuropeanaUri) {
     StringBuilder stringBuilder = new StringBuilder();
 
-    stringBuilder.append(WebEntityFields.BASE_DATA_EUROPEANA_URI);
+    stringBuilder.append(baseDataEuropeanaUri);
     if (StringUtils.isNotEmpty(type)) stringBuilder.append(type.toLowerCase()).append("/");
     if (StringUtils.isNotEmpty(identifier)) stringBuilder.append(identifier);
 
     return stringBuilder.toString();
   }
 
-  public static String extractIdentifierFromEntityId(String entityId) {
-    return entityId.replace(WebEntityFields.BASE_DATA_EUROPEANA_URI, "");
+  public static String extractIdentifierFromEntityId(String entityId, String baseDataEuropeanaUri) {
+    return entityId.replace(baseDataEuropeanaUri, "");
   }
 
   public static String getEuropeanaAggregationId(String entityId) {

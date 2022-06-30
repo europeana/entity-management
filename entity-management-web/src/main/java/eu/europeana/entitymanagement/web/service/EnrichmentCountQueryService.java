@@ -2,7 +2,6 @@ package eu.europeana.entitymanagement.web.service;
 
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPath;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPathWithBase;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BASE_DATA_EUROPEANA_URI;
 
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.exception.ScoringComputationException;
@@ -36,8 +35,10 @@ public class EnrichmentCountQueryService {
   private final WebClient webClient;
   private final String searchApiUriPrefix;
   private final String contentTier;
+  private final EntityManagementConfiguration emConfig;
 
   public EnrichmentCountQueryService(EntityManagementConfiguration configuration) {
+    emConfig = configuration;
     searchApiUriPrefix = configuration.getSearchApiUrlPrefix();
     contentTier = contentTierPrefix + configuration.getEnrichmentsQueryContentTier();
 
@@ -114,10 +115,10 @@ public class EnrichmentCountQueryService {
     // EA-2944 suport both URIs with and without /base/ in the path
     StringBuilder entityIdsBuilder = new StringBuilder("(\"");
     entityIdsBuilder
-        .append(BASE_DATA_EUROPEANA_URI)
+        .append(emConfig.getBaseDataEuropeanaUri())
         .append(getEntityRequestPathWithBase(entityId))
         .append("\" OR \"")
-        .append(BASE_DATA_EUROPEANA_URI)
+        .append(emConfig.getBaseDataEuropeanaUri())
         .append(getEntityRequestPath(entityId))
         .append("\")");
 

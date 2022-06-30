@@ -33,6 +33,8 @@ public class EntityFieldsCleanerTest {
 
   @Autowired private JAXBContext jaxbContext;
 
+  @Autowired private EntityManagementConfiguration emConfiguration;
+
   @Test
   public void shouldCleanEntityFields() throws Exception {
     XmlBaseEntityImpl<?> xmlAgent =
@@ -45,7 +47,7 @@ public class EntityFieldsCleanerTest {
     ConsolidatedAgent agent = new ConsolidatedAgent((Agent) xmlAgent.toEntityModel());
     EntityFieldsCleaner fieldCleaner =
         new EntityFieldsCleaner(emLanguageCodes, "http://thumbnail.url");
-    fieldCleaner.cleanAndNormalize(agent);
+    fieldCleaner.cleanAndNormalize(agent, emConfiguration.getBaseDataEuropeanaUri());
     assertEquals(26, agent.getPrefLabel().size());
     assertEquals(14, agent.getAltLabel().size());
 

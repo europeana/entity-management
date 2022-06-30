@@ -151,15 +151,30 @@ class EntityUpdateIT extends BaseWebControllerTest {
     Assertions.assertTrue(entityRecordUpdated.isPresent());
     Assertions.assertEquals(
         nodeReference.path("depiction").path("id").asText(),
-        entityRecordUpdated.get().getEuropeanaProxy().getEntity().getDepiction().getId());
+        entityRecordUpdated
+            .get()
+            .getEuropeanaProxy(emConfiguration.getBaseDataEuropeanaUri())
+            .getEntity()
+            .getDepiction()
+            .getId());
     Assertions.assertEquals(
         nodeReference.path("note").path("en").path(0).asText(),
-        entityRecordUpdated.get().getEuropeanaProxy().getEntity().getNote().get("en").get(0));
+        entityRecordUpdated
+            .get()
+            .getEuropeanaProxy(emConfiguration.getBaseDataEuropeanaUri())
+            .getEntity()
+            .getNote()
+            .get("en")
+            .get(0));
     // acquire the reader for the right type
     ObjectReader reader = mapper.readerFor(new TypeReference<Map<String, String>>() {});
     Map<String, String> prefLabelToCheck = reader.readValue(nodeReference.path("prefLabel"));
     Map<String, String> prefLabelUpdated =
-        entityRecordUpdated.get().getEuropeanaProxy().getEntity().getPrefLabel();
+        entityRecordUpdated
+            .get()
+            .getEuropeanaProxy(emConfiguration.getBaseDataEuropeanaUri())
+            .getEntity()
+            .getPrefLabel();
     for (Map.Entry<String, String> prefLabelEntry : prefLabelToCheck.entrySet()) {
       Assertions.assertTrue(prefLabelUpdated.containsKey(prefLabelEntry.getKey()));
       Assertions.assertTrue(prefLabelUpdated.containsValue(prefLabelEntry.getValue()));
@@ -171,7 +186,8 @@ class EntityUpdateIT extends BaseWebControllerTest {
     EntityRecord savedRecord = createConcept();
 
     // assert content of Europeana proxy
-    Entity europeanaProxyEntity = savedRecord.getEuropeanaProxy().getEntity();
+    Entity europeanaProxyEntity =
+        savedRecord.getEuropeanaProxy(emConfiguration.getBaseDataEuropeanaUri()).getEntity();
 
     // values match labels in json file
     Assertions.assertNotNull(europeanaProxyEntity.getPrefLabel().get("en"));
@@ -191,7 +207,11 @@ class EntityUpdateIT extends BaseWebControllerTest {
     // check that update removed fields from Europeana proxy in original request
     Optional<EntityRecord> updatedRecord = retrieveEntity(savedRecord.getEntityId());
     Assertions.assertTrue(updatedRecord.isPresent());
-    europeanaProxyEntity = updatedRecord.get().getEuropeanaProxy().getEntity();
+    europeanaProxyEntity =
+        updatedRecord
+            .get()
+            .getEuropeanaProxy(emConfiguration.getBaseDataEuropeanaUri())
+            .getEntity();
 
     Assertions.assertNull(europeanaProxyEntity.getPrefLabel());
     Assertions.assertNull(europeanaProxyEntity.getAltLabel());

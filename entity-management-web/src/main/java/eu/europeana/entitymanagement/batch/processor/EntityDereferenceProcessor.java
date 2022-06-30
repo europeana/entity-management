@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.batch.processor;
 
 import eu.europeana.entitymanagement.common.config.DataSource;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
@@ -36,15 +37,18 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
   private final DereferenceServiceLocator dereferenceServiceLocator;
   private final DataSources datasources;
   private final EntityRecordService entityRecordService;
+  private final EntityManagementConfiguration emConfiguration;
 
   @Autowired
   public EntityDereferenceProcessor(
       DereferenceServiceLocator dereferenceServiceLocator,
       DataSources datasources,
-      EntityRecordService entityRecordService) {
+      EntityRecordService entityRecordService,
+      EntityManagementConfiguration emConfiguration) {
     this.dereferenceServiceLocator = dereferenceServiceLocator;
     this.datasources = datasources;
     this.entityRecordService = entityRecordService;
+    this.emConfiguration = emConfiguration;
   }
 
   @Override
@@ -52,9 +56,12 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
 
     // might be multiple wikidata IDs in case of redirections
     TreeSet<String> wikidataEntityIds = new TreeSet<>();
-    collectWikidataEntityIds(entityRecord.getEuropeanaProxy().getEntity(), wikidataEntityIds);
+    collectWikidataEntityIds(
+        entityRecord.getEuropeanaProxy(emConfiguration.getBaseDataEuropeanaUri()).getEntity(),
+        wikidataEntityIds);
 
-    for (EntityProxy externalProxy : entityRecord.getExternalProxies()) {
+    for (EntityProxy externalProxy :
+        entityRecord.getExternalProxies(emConfiguration.getBaseDataEuropeanaUri())) {
       Optional<DataSource> dataSource = datasources.getDatasource(externalProxy.getProxyId());
       if (dataSource.isPresent() && dataSource.get().isStatic()) {
         // do not update external proxy for static data sources

@@ -118,6 +118,9 @@ public class EntityManagementConfiguration {
   @Value("${zoho.sync.batch.size: 100}")
   private int zohoSyncBatchSize;
 
+  @Value("${entitymanagement.base.data.europeana.uri}")
+  private String baseDataEuropeanaUri;
+
   public EntityManagementConfiguration() {
     LOG.info("Initializing EntityManagementConfiguration bean as: configuration");
   }
@@ -252,5 +255,9 @@ public class EntityManagementConfiguration {
 
   public int getZohoSyncBatchSize() {
     return zohoSyncBatchSize;
+  }
+
+  public String getBaseDataEuropeanaUri() {
+    return baseDataEuropeanaUri;
   }
 }

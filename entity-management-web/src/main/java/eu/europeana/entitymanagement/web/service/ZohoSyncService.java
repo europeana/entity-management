@@ -459,7 +459,9 @@ public class ZohoSyncService {
   private void addOperation(
       BatchOperations operations, String zohoId, Record zohoOrg, EntityRecord entityRecord) {
 
-    String entityId = EntityRecordUtils.buildEntityIdUri(EntityTypes.Organization, zohoId);
+    String entityId =
+        EntityRecordUtils.buildEntityIdUri(
+            EntityTypes.Organization, zohoId, emConfiguration.getBaseDataEuropeanaUri());
 
     boolean hasDpsOwner = hasRequiredOwnership(zohoOrg);
     boolean markedForDeletion = ZohoOrganizationConverter.isMarkedForDeletion(zohoOrg);
@@ -547,7 +549,9 @@ public class ZohoSyncService {
           updatedRecord ->
               modifiedInZoho.add(
                   EntityRecordUtils.buildEntityIdUri(
-                      EntityTypes.Organization, updatedRecord.getId().toString())));
+                      EntityTypes.Organization,
+                      updatedRecord.getId().toString(),
+                      emConfiguration.getBaseDataEuropeanaUri())));
     }
     return modifiedInZoho;
   }
@@ -561,7 +565,9 @@ public class ZohoSyncService {
           deletedRecord ->
               deletedEntityIds.add(
                   EntityRecordUtils.buildEntityIdUri(
-                      EntityTypes.Organization, deletedRecord.getId().toString())));
+                      EntityTypes.Organization,
+                      deletedRecord.getId().toString(),
+                      emConfiguration.getBaseDataEuropeanaUri())));
     }
     return deletedEntityIds;
   }

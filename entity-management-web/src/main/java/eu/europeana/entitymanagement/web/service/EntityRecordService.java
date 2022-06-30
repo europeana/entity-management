@@ -41,7 +41,6 @@ import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.utils.UriValidator;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 import java.lang.reflect.Field;
@@ -115,7 +114,9 @@ public class EntityRecordService {
 
   public EntityRecord retrieveEntityRecord(String type, String identifier, boolean retrieveDisabled)
       throws EuropeanaApiException {
-    String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
+    String entityUri =
+        EntityRecordUtils.buildEntityIdUri(
+            type, identifier, emConfiguration.getBaseDataEuropeanaUri());
     Optional<EntityRecord> entityRecordOptional = this.retrieveByEntityId(entityUri);
     if (entityRecordOptional.isEmpty()) {
       throw new EntityNotFoundException(entityUri);
@@ -381,7 +382,9 @@ public class EntityRecordService {
     if (isZohoOrg) {
       // zoho id is mandatory and unique identifier for zoho Organizations
       String zohoId = EntityRecordUtils.getIdFromUrl(datasourceResponse.getEntityId());
-      entityId = EntityRecordUtils.buildEntityIdUri(datasourceResponse.getType(), zohoId);
+      entityId =
+          EntityRecordUtils.buildEntityIdUri(
+              datasourceResponse.getType(), zohoId, emConfiguration.getBaseDataEuropeanaUri());
     } else {
       entityId = generateEntityId(datasourceResponse.getType(), null);
     }
@@ -439,10 +442,12 @@ public class EntityRecordService {
    */
   private String generateEntityId(String entityType, String entityId) {
     if (entityId != null) {
-      return EntityRecordUtils.buildEntityIdUri(entityType, entityId);
+      return EntityRecordUtils.buildEntityIdUri(
+          entityType, entityId, emConfiguration.getBaseDataEuropeanaUri());
     } else {
       long dbId = entityRecordRepository.generateAutoIncrement(entityType);
-      return EntityRecordUtils.buildEntityIdUri(entityType, String.valueOf(dbId));
+      return EntityRecordUtils.buildEntityIdUri(
+          entityType, String.valueOf(dbId), emConfiguration.getBaseDataEuropeanaUri());
     }
   }
 
@@ -583,7 +588,7 @@ public class EntityRecordService {
   }
 
   private void addValueOrInternalReference(List<String> updatedReferences, String value) {
-    if (value.startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI) || !UriValidator.isUri(value)) {
+    if (value.startsWith(emConfiguration.getBaseDataEuropeanaUri()) || !UriValidator.isUri(value)) {
       // value is internal reference or string literal
       updatedReferences.add(value);
     } else {
@@ -630,7 +635,8 @@ public class EntityRecordService {
    * @param entityRecord entity record
    */
   public void replaceEuropeanaProxy(final Entity updateRequestEntity, EntityRecord entityRecord) {
-    EntityProxy europeanaProxy = entityRecord.getEuropeanaProxy();
+    EntityProxy europeanaProxy =
+        entityRecord.getEuropeanaProxy(emConfiguration.getBaseDataEuropeanaUri());
 
     String entityId = europeanaProxy.getEntity().getEntityId();
 
@@ -1058,8 +1064,10 @@ public class EntityRecordService {
     // aggregates is mutable in case we need to append to it later
     List<String> aggregates = new ArrayList<>();
     aggregates.add(getEuropeanaAggregationId(entityId));
-    if (entityRecord.getExternalProxies() != null) {
-      for (int i = 0; i < entityRecord.getExternalProxies().size(); i++) {
+    if (entityRecord.getExternalProxies(emConfiguration.getBaseDataEuropeanaUri()) != null) {
+      for (int i = 0;
+          i < entityRecord.getExternalProxies(emConfiguration.getBaseDataEuropeanaUri()).size();
+          i++) {
         aggregates.add(getDatasourceAggregationId(entityRecord.getEntityId(), i + 1));
       }
     }
@@ -1123,7 +1131,8 @@ public class EntityRecordService {
       throws EuropeanaApiException {
 
     DataSource dataSource = datasources.verifyDataSource(newProxyId, true);
-    List<EntityProxy> externalProxies = entityRecord.getExternalProxies();
+    List<EntityProxy> externalProxies =
+        entityRecord.getExternalProxies(emConfiguration.getBaseDataEuropeanaUri());
 
     if (externalProxies.size() > 1) {
       // Changing provenance isn't supported if entity has multiple external proxies (eg. for Zoho
