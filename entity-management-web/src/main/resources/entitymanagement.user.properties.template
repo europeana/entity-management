@@ -18,7 +18,8 @@ batch.step.chunkSize=100
 batch.computeMetrics=false
 
 # Whether user requests should be authenticated. Requires Keycloak public key and ApiKey URL if "true"
-auth.enabled=false
+auth.read.enabled=false
+auth.write.enabled=false
 
 # Resource name embedded in JWT token
 authorization.api.name=entities

@@ -10,7 +10,6 @@ import eu.europeana.entitymanagement.definitions.web.EntityIdResponse;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.service.EnrichmentService;
-import eu.europeana.entitymanagement.utils.UriValidator;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import io.swagger.annotations.ApiOperation;
 import java.util.ArrayList;
@@ -25,7 +24,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Validated
@@ -60,7 +63,7 @@ public class EnrichmentController extends BaseRest {
       HttpServletRequest request)
       throws ApplicationAuthenticationException {
 
-    if (!UriValidator.isLocalhost(request.getRequestURL().toString())) {
+    if (emConfig.isAuthWriteEnabled()) {
       verifyWriteAccess(Operations.CREATE, request);
     }
     return publishToEnrichment(entityList);

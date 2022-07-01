@@ -33,7 +33,6 @@ import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.solr.model.SolrEntity;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
-import eu.europeana.entitymanagement.utils.UriValidator;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
@@ -125,7 +124,7 @@ public class EMController extends BaseRest {
           String profile,
       HttpServletRequest request)
       throws HttpException, EuropeanaApiException {
-    if (!UriValidator.isLocalhost(request.getRequestURL().toString())) {
+    if (emConfig.isAuthWriteEnabled()) {
       verifyWriteAccess(Operations.DELETE, request);
     }
     EntityRecord entityRecord =
@@ -169,7 +168,7 @@ public class EMController extends BaseRest {
       throws HttpException, EuropeanaApiException {
 
     List<EntityProfile> entityProfile = getEntityProfile(profile);
-    if (!UriValidator.isLocalhost(request.getRequestURL().toString())) {
+    if (emConfig.isAuthWriteEnabled()) {
       verifyWriteAccess(Operations.UPDATE, request);
     }
     EntityRecord entityRecord =
@@ -216,7 +215,7 @@ public class EMController extends BaseRest {
       @RequestBody Entity updateRequestEntity,
       HttpServletRequest request)
       throws Exception {
-    if (!UriValidator.isLocalhost(request.getRequestURL().toString())) {
+    if (emConfig.isAuthWriteEnabled()) {
       verifyWriteAccess(Operations.UPDATE, request);
     }
 
@@ -292,7 +291,7 @@ public class EMController extends BaseRest {
           String profile,
       HttpServletRequest request)
       throws Exception {
-    if (!UriValidator.isLocalhost(request.getRequestURL().toString())) {
+    if (emConfig.isAuthWriteEnabled()) {
       verifyWriteAccess(Operations.UPDATE, request);
     }
     EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
@@ -313,7 +312,7 @@ public class EMController extends BaseRest {
       @RequestParam(value = QUERY_PARAM_QUERY, required = false) String query,
       HttpServletRequest request)
       throws Exception {
-    if (!UriValidator.isLocalhost(request.getRequestURL().toString())) {
+    if (emConfig.isAuthWriteEnabled()) {
       verifyWriteAccess(Operations.UPDATE, request);
     }
 
@@ -341,7 +340,7 @@ public class EMController extends BaseRest {
       @RequestParam(value = QUERY_PARAM_QUERY, required = false) String query,
       HttpServletRequest request)
       throws Exception {
-    if (!UriValidator.isLocalhost(request.getRequestURL().toString())) {
+    if (emConfig.isAuthWriteEnabled()) {
       verifyWriteAccess(Operations.UPDATE, request);
     }
 
@@ -381,7 +380,7 @@ public class EMController extends BaseRest {
       throws EuropeanaApiException, HttpException {
 
     List<EntityProfile> entityProfile = getEntityProfile(profile);
-    if (emConfig.isAuthEnabled()) {
+    if (emConfig.isAuthReadEnabled()) {
       verifyReadAccess(request);
     }
     return createResponse(
@@ -423,7 +422,7 @@ public class EMController extends BaseRest {
       HttpServletRequest request)
       throws EuropeanaApiException, HttpException {
     List<EntityProfile> entityProfile = getEntityProfile(profile);
-    if (emConfig.isAuthEnabled()) {
+    if (emConfig.isAuthReadEnabled()) {
       verifyReadAccess(request);
     }
 
@@ -457,7 +456,7 @@ public class EMController extends BaseRest {
       throws EuropeanaApiException, HttpException {
 
     List<EntityProfile> entityProfile = getEntityProfile(profile);
-    if (emConfig.isAuthEnabled()) {
+    if (emConfig.isAuthReadEnabled()) {
       verifyReadAccess(request);
     }
     return createResponse(
@@ -480,7 +479,7 @@ public class EMController extends BaseRest {
   public ResponseEntity<String> registerEntity(
       @RequestBody Entity europeanaProxyEntity, HttpServletRequest request) throws Exception {
 
-    if (!UriValidator.isLocalhost(request.getRequestURL().toString())) {
+    if (emConfig.isAuthWriteEnabled()) {
       verifyWriteAccess(Operations.CREATE, request);
     }
 
@@ -594,7 +593,7 @@ public class EMController extends BaseRest {
       @RequestParam(value = WebEntityConstants.PATH_PARAM_URL) String url,
       HttpServletRequest request)
       throws Exception {
-    if (!UriValidator.isLocalhost(request.getRequestURL().toString())) {
+    if (emConfig.isAuthWriteEnabled()) {
       verifyWriteAccess(Operations.UPDATE, request);
     }
     EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
@@ -617,7 +616,7 @@ public class EMController extends BaseRest {
       @RequestBody List<String> urls,
       HttpServletRequest request)
       throws Exception {
-    if (emConfig.isAuthEnabled()) {
+    if (emConfig.isAuthReadEnabled()) {
       verifyReadAccess(request);
     }
     return createResponseMultipleEntities(urls, request);

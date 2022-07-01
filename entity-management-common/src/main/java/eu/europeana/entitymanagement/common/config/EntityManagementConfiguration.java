@@ -100,8 +100,11 @@ public class EntityManagementConfiguration {
   @Value("${batch.maxFailedTaskRetries: 3}")
   private int maxFailedTaskRetries;
 
-  @Value("${auth.enabled: true}")
-  private boolean authEnabled;
+  @Value("${auth.read.enabled: true}")
+  private boolean authReadEnabled;
+
+  @Value("${auth.write.enabled: true}")
+  private boolean authWriteEnabled;
 
   @Value("${metis.proxy.enabled: false}")
   private boolean useMetisProxy;
@@ -178,8 +181,12 @@ public class EntityManagementConfiguration {
     return batchComputeMetrics;
   }
 
-  public boolean isAuthEnabled() {
-    return authEnabled;
+  public boolean isAuthReadEnabled() {
+    return authReadEnabled;
+  }
+
+  public boolean isAuthWriteEnabled() {
+    return authWriteEnabled;
   }
 
   public int getBatchUpdatesThrottleLimit() {
