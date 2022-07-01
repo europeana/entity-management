@@ -36,4 +36,8 @@ public class UriValidator {
   public static boolean isUri(String uri) {
     return URI_PATTERN.test(uri);
   }
+
+  public static boolean isLocalhost(String uri) {
+    return uri.startsWith("http://localhost");
+  }
 }

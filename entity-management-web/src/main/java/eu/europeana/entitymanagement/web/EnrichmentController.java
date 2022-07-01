@@ -10,6 +10,7 @@ import eu.europeana.entitymanagement.definitions.web.EntityIdResponse;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.service.EnrichmentService;
+import eu.europeana.entitymanagement.utils.UriValidator;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import io.swagger.annotations.ApiOperation;
 import java.util.ArrayList;
@@ -59,7 +60,7 @@ public class EnrichmentController extends BaseRest {
       HttpServletRequest request)
       throws ApplicationAuthenticationException {
 
-    if (emConfig.isAuthEnabled()) {
+    if (!UriValidator.isLocalhost(request.getRequestURL().toString())) {
       verifyWriteAccess(Operations.CREATE, request);
     }
     return publishToEnrichment(entityList);

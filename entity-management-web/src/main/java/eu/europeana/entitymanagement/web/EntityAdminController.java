@@ -18,6 +18,7 @@ import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
+import eu.europeana.entitymanagement.utils.UriValidator;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
@@ -89,7 +90,7 @@ public class EntityAdminController extends BaseRest {
           String profile,
       HttpServletRequest request)
       throws HttpException, EuropeanaApiException {
-    if (emConfig.isAuthEnabled()) {
+    if (!UriValidator.isLocalhost(request.getRequestURL().toString())) {
       verifyWriteAccess(Operations.DELETE, request);
     }
     String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
@@ -137,7 +138,7 @@ public class EntityAdminController extends BaseRest {
       @RequestBody Entity europeanaProxyEntity,
       HttpServletRequest request)
       throws HttpException, EuropeanaApiException {
-    if (emConfig.isAuthEnabled()) {
+    if (!UriValidator.isLocalhost(request.getRequestURL().toString())) {
       verifyWriteAccess(Operations.CREATE, request);
     }
 
@@ -227,7 +228,7 @@ public class EntityAdminController extends BaseRest {
       HttpServletRequest request)
       throws HttpException, EuropeanaApiException {
 
-    if (emConfig.isAuthEnabled()) {
+    if (!UriValidator.isLocalhost(request.getRequestURL().toString())) {
       verifyWriteAccess(EMOperations.OPERATION_ZOHO_SYNC, request);
     }
 
