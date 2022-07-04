@@ -80,7 +80,6 @@ public class EMController extends BaseRest {
   private final DereferenceServiceLocator dereferenceServiceLocator;
   private final DataSources datasources;
   private final EntityUpdateService entityUpdateService;
-  private final EntityManagementConfiguration emConfig;
 
   private static final String EXTERNAL_ID_REMOVED_MSG =
       "Entity id '%s' already exists as '%s', which has been removed";
@@ -105,7 +104,6 @@ public class EMController extends BaseRest {
     this.dereferenceServiceLocator = dereferenceServiceLocator;
     this.datasources = datasources;
     this.entityUpdateService = entityUpdateService;
-    this.emConfig = emConfig;
   }
 
   @ApiOperation(
@@ -377,9 +375,9 @@ public class EMController extends BaseRest {
       throws EuropeanaApiException, HttpException {
 
     List<EntityProfile> entityProfile = getEntityProfile(profile);
-    if (emConfig.isAuthReadEnabled()) {
-      verifyReadAccess(request);
-    }
+
+    verifyReadAccess(request);
+
     return createResponse(
         request,
         entityProfile,
@@ -419,9 +417,8 @@ public class EMController extends BaseRest {
       HttpServletRequest request)
       throws EuropeanaApiException, HttpException {
     List<EntityProfile> entityProfile = getEntityProfile(profile);
-    if (emConfig.isAuthReadEnabled()) {
-      verifyReadAccess(request);
-    }
+
+    verifyReadAccess(request);
 
     // always return application/rdf+xml Content-Type
     return createResponse(
@@ -453,9 +450,9 @@ public class EMController extends BaseRest {
       throws EuropeanaApiException, HttpException {
 
     List<EntityProfile> entityProfile = getEntityProfile(profile);
-    if (emConfig.isAuthReadEnabled()) {
-      verifyReadAccess(request);
-    }
+
+    verifyReadAccess(request);
+
     return createResponse(
         request,
         entityProfile,
@@ -611,9 +608,9 @@ public class EMController extends BaseRest {
       @RequestBody List<String> urls,
       HttpServletRequest request)
       throws Exception {
-    if (emConfig.isAuthReadEnabled()) {
-      verifyReadAccess(request);
-    }
+
+    verifyReadAccess(request);
+
     return createResponseMultipleEntities(urls, request);
   }
 

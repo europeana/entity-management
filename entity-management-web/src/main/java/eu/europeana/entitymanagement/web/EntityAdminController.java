@@ -59,7 +59,6 @@ public class EntityAdminController extends BaseRest {
   private final EntityRecordService entityRecordService;
   private final ZohoSyncService zohoSyncService;
   private final EntityUpdateService entityUpdateService;
-  private final EntityManagementConfiguration emConfig;
 
   @Autowired
   public EntityAdminController(
@@ -70,7 +69,6 @@ public class EntityAdminController extends BaseRest {
     this.entityRecordService = entityRecordService;
     this.entityUpdateService = entityUpdateService;
     this.zohoSyncService = zohoSyncService;
-    this.emConfig = emConfig;
   }
 
   @ApiOperation(value = "Permanent Deletion of Entity", nickname = "deleteEntity")
@@ -182,9 +180,7 @@ public class EntityAdminController extends BaseRest {
       HttpServletRequest request)
       throws HttpException, EuropeanaApiException {
 
-    if (emConfig.isAuthReadEnabled()) {
-      verifyReadAccess(request);
-    }
+    verifyReadAccess(request);
 
     if (pageSize > 1000) {
       pageSize = 1000;

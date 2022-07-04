@@ -4,7 +4,6 @@ import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.web.EntityIdResponse;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
@@ -40,8 +39,6 @@ public class EnrichmentController extends BaseRest {
   @Autowired private EnrichmentService entityEnrichmentService;
 
   @Autowired private EntityRecordService entityRecordService;
-
-  @Autowired private EntityManagementConfiguration emConfig;
 
   /**
    * Method to publish to Enrichment
