@@ -80,7 +80,6 @@ public class EMController extends BaseRest {
   private final DereferenceServiceLocator dereferenceServiceLocator;
   private final DataSources datasources;
   private final EntityUpdateService entityUpdateService;
-  private final EntityManagementConfiguration emConfig;
 
   private static final String EXTERNAL_ID_REMOVED_MSG =
       "Entity id '%s' already exists as '%s', which has been removed";
@@ -105,7 +104,6 @@ public class EMController extends BaseRest {
     this.dereferenceServiceLocator = dereferenceServiceLocator;
     this.datasources = datasources;
     this.entityUpdateService = entityUpdateService;
-    this.emConfig = emConfig;
   }
 
   @ApiOperation(
@@ -124,9 +122,9 @@ public class EMController extends BaseRest {
           String profile,
       HttpServletRequest request)
       throws HttpException, EuropeanaApiException {
-    if (emConfig.isAuthEnabled()) {
-      verifyWriteAccess(Operations.DELETE, request);
-    }
+
+    verifyWriteAccess(Operations.DELETE, request);
+
     EntityRecord entityRecord =
         entityRecordService.retrieveEntityRecord(type, identifier.toLowerCase(), false);
 
@@ -168,9 +166,9 @@ public class EMController extends BaseRest {
       throws HttpException, EuropeanaApiException {
 
     List<EntityProfile> entityProfile = getEntityProfile(profile);
-    if (emConfig.isAuthEnabled()) {
-      verifyWriteAccess(Operations.UPDATE, request);
-    }
+
+    verifyWriteAccess(Operations.UPDATE, request);
+
     EntityRecord entityRecord =
         entityRecordService.retrieveEntityRecord(type, identifier.toLowerCase(), true);
     if (!entityRecord.isDisabled()) {
@@ -215,9 +213,8 @@ public class EMController extends BaseRest {
       @RequestBody Entity updateRequestEntity,
       HttpServletRequest request)
       throws Exception {
-    if (emConfig.isAuthEnabled()) {
-      verifyWriteAccess(Operations.UPDATE, request);
-    }
+
+    verifyWriteAccess(Operations.UPDATE, request);
 
     validateBodyEntity(updateRequestEntity);
 
@@ -291,9 +288,9 @@ public class EMController extends BaseRest {
           String profile,
       HttpServletRequest request)
       throws Exception {
-    if (emConfig.isAuthEnabled()) {
-      verifyWriteAccess(Operations.UPDATE, request);
-    }
+
+    verifyWriteAccess(Operations.UPDATE, request);
+
     EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
     // update from external data source is not available for static data sources
     datasources.verifyDataSource(entityRecord.getExternalProxies().get(0).getProxyId(), false);
@@ -312,9 +309,8 @@ public class EMController extends BaseRest {
       @RequestParam(value = QUERY_PARAM_QUERY, required = false) String query,
       HttpServletRequest request)
       throws Exception {
-    if (emConfig.isAuthEnabled()) {
-      verifyWriteAccess(Operations.UPDATE, request);
-    }
+
+    verifyWriteAccess(Operations.UPDATE, request);
 
     // query param takes precedence over request body
     if (StringUtils.hasLength(query)) {
@@ -340,9 +336,8 @@ public class EMController extends BaseRest {
       @RequestParam(value = QUERY_PARAM_QUERY, required = false) String query,
       HttpServletRequest request)
       throws Exception {
-    if (emConfig.isAuthEnabled()) {
-      verifyWriteAccess(Operations.UPDATE, request);
-    }
+
+    verifyWriteAccess(Operations.UPDATE, request);
 
     // query param takes precedence over request body
     if (StringUtils.hasLength(query)) {
@@ -380,9 +375,9 @@ public class EMController extends BaseRest {
       throws EuropeanaApiException, HttpException {
 
     List<EntityProfile> entityProfile = getEntityProfile(profile);
-    if (emConfig.isAuthEnabled()) {
-      verifyReadAccess(request);
-    }
+
+    verifyReadAccess(request);
+
     return createResponse(
         request,
         entityProfile,
@@ -422,9 +417,8 @@ public class EMController extends BaseRest {
       HttpServletRequest request)
       throws EuropeanaApiException, HttpException {
     List<EntityProfile> entityProfile = getEntityProfile(profile);
-    if (emConfig.isAuthEnabled()) {
-      verifyReadAccess(request);
-    }
+
+    verifyReadAccess(request);
 
     // always return application/rdf+xml Content-Type
     return createResponse(
@@ -456,9 +450,9 @@ public class EMController extends BaseRest {
       throws EuropeanaApiException, HttpException {
 
     List<EntityProfile> entityProfile = getEntityProfile(profile);
-    if (emConfig.isAuthEnabled()) {
-      verifyReadAccess(request);
-    }
+
+    verifyReadAccess(request);
+
     return createResponse(
         request,
         entityProfile,
@@ -479,9 +473,7 @@ public class EMController extends BaseRest {
   public ResponseEntity<String> registerEntity(
       @RequestBody Entity europeanaProxyEntity, HttpServletRequest request) throws Exception {
 
-    if (emConfig.isAuthEnabled()) {
-      verifyWriteAccess(Operations.CREATE, request);
-    }
+    verifyWriteAccess(Operations.CREATE, request);
 
     validateBodyEntity(europeanaProxyEntity);
 
@@ -593,9 +585,9 @@ public class EMController extends BaseRest {
       @RequestParam(value = WebEntityConstants.PATH_PARAM_URL) String url,
       HttpServletRequest request)
       throws Exception {
-    if (emConfig.isAuthEnabled()) {
-      verifyWriteAccess(Operations.UPDATE, request);
-    }
+
+    verifyWriteAccess(Operations.UPDATE, request);
+
     EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
 
     if (!entityRecord.getEntity().getSameReferenceLinks().contains(url)) {
@@ -616,9 +608,9 @@ public class EMController extends BaseRest {
       @RequestBody List<String> urls,
       HttpServletRequest request)
       throws Exception {
-    if (emConfig.isAuthEnabled()) {
-      verifyReadAccess(request);
-    }
+
+    verifyReadAccess(request);
+
     return createResponseMultipleEntities(urls, request);
   }
 

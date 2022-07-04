@@ -110,7 +110,8 @@ public abstract class AbstractIntegrationTest {
     registry.add("batch.computeMetrics", () -> "false");
     // Do not run scheduled entity updates in tests
     registry.add("batch.scheduling.enabled", () -> "false");
-    registry.add("auth.enabled", () -> "false");
+    registry.add("auth.read.enabled", () -> "false");
+    registry.add("auth.write.enabled", () -> "false");
     registry.add("entitymanagement.solr.indexing.url", SOLR_CONTAINER::getConnectionUrl);
     // enable explicit commits while indexing to Solr in tests
     registry.add("entitymanagement.solr.indexing.explicitCommits", () -> true);
