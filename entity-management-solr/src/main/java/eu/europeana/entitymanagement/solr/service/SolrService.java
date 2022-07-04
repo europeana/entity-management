@@ -226,7 +226,7 @@ public class SolrService implements InitializingBean {
    * Deletes the document whose id matches the specified entityId value
    *
    * @param entityIds entity id list
-   * @param forceCommit flag use to force synchronuous solr commit 
+   * @param forceCommit flag use to force synchronuous solr commit
    * @throws SolrServiceException on error
    */
   public void deleteById(List<String> entityIds, boolean forceCommit) throws SolrServiceException {
