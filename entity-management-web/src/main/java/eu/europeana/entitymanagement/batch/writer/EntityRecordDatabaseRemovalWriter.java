@@ -21,6 +21,6 @@ public class EntityRecordDatabaseRemovalWriter implements ItemWriter<EntityRecor
   @Override
   public void write(@NonNull List<? extends EntityRecord> entityRecords) throws Exception {
     List<String> ids = List.of(BatchUtils.getEntityIds(entityRecords));
-    entityRecordService.deleteBulk(ids);
+    entityRecordService.deleteBulk(ids, false);
   }
 }

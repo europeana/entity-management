@@ -16,7 +16,6 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
-import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
@@ -59,7 +58,6 @@ public class EntityAdminController extends BaseRest {
 
   private final EntityRecordService entityRecordService;
   private final ZohoSyncService zohoSyncService;
-  private final SolrService solrService;
   private final EntityUpdateService entityUpdateService;
   private final EntityManagementConfiguration emConfig;
 
@@ -68,12 +66,10 @@ public class EntityAdminController extends BaseRest {
       EntityRecordService entityRecordService,
       EntityUpdateService entityUpdateService,
       ZohoSyncService zohoSyncService,
-      SolrService solrService,
       EntityManagementConfiguration emConfig) {
     this.entityRecordService = entityRecordService;
     this.entityUpdateService = entityUpdateService;
     this.zohoSyncService = zohoSyncService;
-    this.solrService = solrService;
     this.emConfig = emConfig;
   }
 
@@ -89,9 +85,9 @@ public class EntityAdminController extends BaseRest {
           String profile,
       HttpServletRequest request)
       throws HttpException, EuropeanaApiException {
-    if (emConfig.isAuthWriteEnabled()) {
-      verifyWriteAccess(Operations.DELETE, request);
-    }
+
+    verifyWriteAccess(Operations.DELETE, request);
+
     String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
     if (!entityRecordService.existsByEntityId(entityUri)) {
       throw new EntityNotFoundException(entityUri);
@@ -102,8 +98,6 @@ public class EntityAdminController extends BaseRest {
     LOG.info("Permanently deleting entityId={}, isSynchronous={}", entityUri, isSynchronous);
 
     if (isSynchronous) {
-      // delete from Solr before Mongo, so Solr errors won't leave DB in an inconsistent state
-      solrService.deleteById(List.of(entityUri));
       entityRecordService.delete(entityUri);
     } else {
       entityUpdateService.scheduleTasks(
@@ -137,9 +131,8 @@ public class EntityAdminController extends BaseRest {
       @RequestBody Entity europeanaProxyEntity,
       HttpServletRequest request)
       throws HttpException, EuropeanaApiException {
-    if (emConfig.isAuthWriteEnabled()) {
-      verifyWriteAccess(Operations.CREATE, request);
-    }
+
+    verifyWriteAccess(Operations.CREATE, request);
 
     validateBodyEntity(europeanaProxyEntity);
 
@@ -227,9 +220,7 @@ public class EntityAdminController extends BaseRest {
       HttpServletRequest request)
       throws HttpException, EuropeanaApiException {
 
-    if (emConfig.isAuthWriteEnabled()) {
-      verifyWriteAccess(EMOperations.OPERATION_ZOHO_SYNC, request);
-    }
+    verifyWriteAccess(EMOperations.OPERATION_ZOHO_SYNC, request);
 
     OffsetDateTime modifiedSince = validateSince(since);
     ZohoSyncReport zohoSyncReport = zohoSyncService.synchronizeZohoOrganizations(modifiedSince);

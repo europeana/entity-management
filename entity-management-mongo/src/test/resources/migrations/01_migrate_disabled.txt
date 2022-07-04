@@ -1,5 +1,6 @@
 #CHECK DISABLED
 db.getCollection('EntityRecord').find({"disabled":true})
+db.getCollection('EntityRecord').find({"disabled":{$exists:true)})
 
 #DELETE DISABLED
 db.getCollection('EntityRecord').deleteMany({"disabled":true})

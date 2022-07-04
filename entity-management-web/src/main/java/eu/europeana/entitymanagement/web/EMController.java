@@ -124,9 +124,9 @@ public class EMController extends BaseRest {
           String profile,
       HttpServletRequest request)
       throws HttpException, EuropeanaApiException {
-    if (emConfig.isAuthWriteEnabled()) {
-      verifyWriteAccess(Operations.DELETE, request);
-    }
+
+    verifyWriteAccess(Operations.DELETE, request);
+
     EntityRecord entityRecord =
         entityRecordService.retrieveEntityRecord(type, identifier.toLowerCase(), false);
 
@@ -142,7 +142,7 @@ public class EMController extends BaseRest {
 
     if (isSynchronous) {
       // delete from Solr before Mongo, so Solr errors won't leave DB in an inconsistent state
-      entityRecordService.disableEntityRecord(entityRecord);
+      entityRecordService.disableEntityRecord(entityRecord, true);
     } else {
       entityUpdateService.scheduleTasks(
           Collections.singletonList(entityId), ScheduledRemovalType.DEPRECATION);
@@ -168,9 +168,9 @@ public class EMController extends BaseRest {
       throws HttpException, EuropeanaApiException {
 
     List<EntityProfile> entityProfile = getEntityProfile(profile);
-    if (emConfig.isAuthWriteEnabled()) {
-      verifyWriteAccess(Operations.UPDATE, request);
-    }
+
+    verifyWriteAccess(Operations.UPDATE, request);
+
     EntityRecord entityRecord =
         entityRecordService.retrieveEntityRecord(type, identifier.toLowerCase(), true);
     if (!entityRecord.isDisabled()) {
@@ -215,9 +215,8 @@ public class EMController extends BaseRest {
       @RequestBody Entity updateRequestEntity,
       HttpServletRequest request)
       throws Exception {
-    if (emConfig.isAuthWriteEnabled()) {
-      verifyWriteAccess(Operations.UPDATE, request);
-    }
+
+    verifyWriteAccess(Operations.UPDATE, request);
 
     validateBodyEntity(updateRequestEntity);
 
@@ -291,9 +290,9 @@ public class EMController extends BaseRest {
           String profile,
       HttpServletRequest request)
       throws Exception {
-    if (emConfig.isAuthWriteEnabled()) {
-      verifyWriteAccess(Operations.UPDATE, request);
-    }
+
+    verifyWriteAccess(Operations.UPDATE, request);
+
     EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
     // update from external data source is not available for static data sources
     datasources.verifyDataSource(entityRecord.getExternalProxies().get(0).getProxyId(), false);
@@ -312,9 +311,8 @@ public class EMController extends BaseRest {
       @RequestParam(value = QUERY_PARAM_QUERY, required = false) String query,
       HttpServletRequest request)
       throws Exception {
-    if (emConfig.isAuthWriteEnabled()) {
-      verifyWriteAccess(Operations.UPDATE, request);
-    }
+
+    verifyWriteAccess(Operations.UPDATE, request);
 
     // query param takes precedence over request body
     if (StringUtils.hasLength(query)) {
@@ -340,9 +338,8 @@ public class EMController extends BaseRest {
       @RequestParam(value = QUERY_PARAM_QUERY, required = false) String query,
       HttpServletRequest request)
       throws Exception {
-    if (emConfig.isAuthWriteEnabled()) {
-      verifyWriteAccess(Operations.UPDATE, request);
-    }
+
+    verifyWriteAccess(Operations.UPDATE, request);
 
     // query param takes precedence over request body
     if (StringUtils.hasLength(query)) {
@@ -479,9 +476,7 @@ public class EMController extends BaseRest {
   public ResponseEntity<String> registerEntity(
       @RequestBody Entity europeanaProxyEntity, HttpServletRequest request) throws Exception {
 
-    if (emConfig.isAuthWriteEnabled()) {
-      verifyWriteAccess(Operations.CREATE, request);
-    }
+    verifyWriteAccess(Operations.CREATE, request);
 
     validateBodyEntity(europeanaProxyEntity);
 
@@ -593,9 +588,9 @@ public class EMController extends BaseRest {
       @RequestParam(value = WebEntityConstants.PATH_PARAM_URL) String url,
       HttpServletRequest request)
       throws Exception {
-    if (emConfig.isAuthWriteEnabled()) {
-      verifyWriteAccess(Operations.UPDATE, request);
-    }
+
+    verifyWriteAccess(Operations.UPDATE, request);
+
     EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
 
     if (!entityRecord.getEntity().getSameReferenceLinks().contains(url)) {

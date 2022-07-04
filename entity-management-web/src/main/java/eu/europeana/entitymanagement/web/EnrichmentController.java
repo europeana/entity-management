@@ -63,9 +63,8 @@ public class EnrichmentController extends BaseRest {
       HttpServletRequest request)
       throws ApplicationAuthenticationException {
 
-    if (emConfig.isAuthWriteEnabled()) {
-      verifyWriteAccess(Operations.CREATE, request);
-    }
+    verifyWriteAccess(Operations.CREATE, request);
+
     return publishToEnrichment(entityList);
   }
 
