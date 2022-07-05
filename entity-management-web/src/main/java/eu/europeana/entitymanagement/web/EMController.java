@@ -522,16 +522,6 @@ public class EMController extends BaseRest {
 
     Entity datasourceResponse = dereferenceEntity(creationRequestId, creationRequestType);
 
-    if (datasourceResponse != null && datasourceResponse.getSameReferenceLinks() != null) {
-      existingEntity =
-          entityRecordService.findEntityDupplicationByCoreference(
-              datasourceResponse.getSameReferenceLinks(), null);
-      response = checkExistingEntity(existingEntity, creationRequestId);
-      if (response != null) {
-        return response;
-      }
-    }
-
     EntityRecord savedEntityRecord =
         entityRecordService.createEntityFromRequest(
             europeanaProxyEntity, datasourceResponse, dataSource);
