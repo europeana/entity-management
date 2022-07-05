@@ -59,7 +59,6 @@ public class EntityAdminController extends BaseRest {
   private final EntityRecordService entityRecordService;
   private final ZohoSyncService zohoSyncService;
   private final EntityUpdateService entityUpdateService;
-  private final EntityManagementConfiguration emConfig;
 
   @Autowired
   public EntityAdminController(
@@ -70,7 +69,6 @@ public class EntityAdminController extends BaseRest {
     this.entityRecordService = entityRecordService;
     this.entityUpdateService = entityUpdateService;
     this.zohoSyncService = zohoSyncService;
-    this.emConfig = emConfig;
   }
 
   @ApiOperation(value = "Permanent Deletion of Entity", nickname = "deleteEntity")
@@ -85,9 +83,9 @@ public class EntityAdminController extends BaseRest {
           String profile,
       HttpServletRequest request)
       throws HttpException, EuropeanaApiException {
-    if (emConfig.isAuthEnabled()) {
-      verifyWriteAccess(Operations.DELETE, request);
-    }
+
+    verifyWriteAccess(Operations.DELETE, request);
+
     String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
     if (!entityRecordService.existsByEntityId(entityUri)) {
       throw new EntityNotFoundException(entityUri);
@@ -131,9 +129,8 @@ public class EntityAdminController extends BaseRest {
       @RequestBody Entity europeanaProxyEntity,
       HttpServletRequest request)
       throws HttpException, EuropeanaApiException {
-    if (emConfig.isAuthEnabled()) {
-      verifyWriteAccess(Operations.CREATE, request);
-    }
+
+    verifyWriteAccess(Operations.CREATE, request);
 
     validateBodyEntity(europeanaProxyEntity);
 
@@ -183,9 +180,7 @@ public class EntityAdminController extends BaseRest {
       HttpServletRequest request)
       throws HttpException, EuropeanaApiException {
 
-    if (emConfig.isAuthEnabled()) {
-      verifyReadAccess(request);
-    }
+    verifyReadAccess(request);
 
     if (pageSize > 1000) {
       pageSize = 1000;
@@ -221,9 +216,7 @@ public class EntityAdminController extends BaseRest {
       HttpServletRequest request)
       throws HttpException, EuropeanaApiException {
 
-    if (emConfig.isAuthEnabled()) {
-      verifyWriteAccess(EMOperations.OPERATION_ZOHO_SYNC, request);
-    }
+    verifyWriteAccess(EMOperations.OPERATION_ZOHO_SYNC, request);
 
     OffsetDateTime modifiedSince = validateSince(since);
     ZohoSyncReport zohoSyncReport = zohoSyncService.synchronizeZohoOrganizations(modifiedSince);

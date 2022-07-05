@@ -42,7 +42,7 @@ public class AppConfig extends AppConfigConstants {
 
   @PostConstruct
   public void init() {
-    if (emConfiguration.isAuthEnabled()) {
+    if (emConfiguration.isAuthReadEnabled() || emConfiguration.isAuthWriteEnabled()) {
       String jwtTokenSignatureKey = emConfiguration.getApiKeyPublicKey();
       if (jwtTokenSignatureKey == null || jwtTokenSignatureKey.isBlank()) {
         throw new IllegalStateException("The jwt token signature key cannot be null or empty.");

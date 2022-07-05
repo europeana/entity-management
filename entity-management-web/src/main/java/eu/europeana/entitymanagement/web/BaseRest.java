@@ -2,8 +2,10 @@ package eu.europeana.entitymanagement.web;
 
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.api.commons.web.controller.BaseRestController;
+import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.entitymanagement.batch.service.FailedTaskService;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
@@ -48,6 +50,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.util.StringUtils;
 
 public abstract class BaseRest extends BaseRestController {
@@ -69,6 +72,8 @@ public abstract class BaseRest extends BaseRestController {
   @Autowired protected ValidatorFactory emValidatorFactory;
 
   @Autowired protected EntityFieldsCleaner emEntityFieldCleaner;
+
+  @Autowired protected EntityManagementConfiguration emConfig;
 
   protected Logger logger = LogManager.getLogger(getClass());
 
@@ -366,5 +371,23 @@ public abstract class BaseRest extends BaseRestController {
           violations.stream().map(ConstraintViolation::getMessage).collect(Collectors.joining(" "));
       throw new HttpBadRequestException(requestEntityViolations);
     }
+  }
+
+  @Override
+  public Authentication verifyWriteAccess(String operation, HttpServletRequest request)
+      throws ApplicationAuthenticationException {
+    if (emConfig.isAuthWriteEnabled()) {
+      return super.verifyWriteAccess(operation, request);
+    }
+    return null;
+  }
+
+  @Override
+  public Authentication verifyReadAccess(HttpServletRequest request)
+      throws ApplicationAuthenticationException {
+    if (emConfig.isAuthReadEnabled()) {
+      return super.verifyReadAccess(request);
+    }
+    return null;
   }
 }

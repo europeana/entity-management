@@ -4,7 +4,6 @@ import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.web.EntityIdResponse;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
@@ -24,7 +23,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Validated
@@ -36,8 +39,6 @@ public class EnrichmentController extends BaseRest {
   @Autowired private EnrichmentService entityEnrichmentService;
 
   @Autowired private EntityRecordService entityRecordService;
-
-  @Autowired private EntityManagementConfiguration emConfig;
 
   /**
    * Method to publish to Enrichment
@@ -59,9 +60,8 @@ public class EnrichmentController extends BaseRest {
       HttpServletRequest request)
       throws ApplicationAuthenticationException {
 
-    if (emConfig.isAuthEnabled()) {
-      verifyWriteAccess(Operations.CREATE, request);
-    }
+    verifyWriteAccess(Operations.CREATE, request);
+
     return publishToEnrichment(entityList);
   }
 
