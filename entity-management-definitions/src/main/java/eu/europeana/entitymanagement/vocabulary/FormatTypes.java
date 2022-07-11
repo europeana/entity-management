@@ -14,6 +14,7 @@ import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedFormatTyp
  */
 public enum FormatTypes {
   jsonld("jsonld"), // default format
+  json("json"),
   schema("schema.jsonld"), // a schema.org format
   xml("xml");
 

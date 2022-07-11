@@ -235,7 +235,9 @@ public abstract class BaseRest extends BaseRestController {
     // see: https://stackoverflow.com/a/8080548/14530159
     String requestUri = request.getRequestURI();
     boolean hasPathExtension =
-        requestUri.endsWith("." + FormatTypes.jsonld) || requestUri.endsWith("." + FormatTypes.xml);
+        requestUri.endsWith("." + FormatTypes.jsonld)
+            || requestUri.endsWith("." + FormatTypes.json)
+            || requestUri.endsWith("." + FormatTypes.xml);
 
     // HttpHeaders.ALLOW
     org.springframework.http.HttpHeaders headers = createAllowHeader(request);

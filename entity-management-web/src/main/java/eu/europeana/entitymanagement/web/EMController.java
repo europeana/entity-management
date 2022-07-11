@@ -358,7 +358,9 @@ public class EMController extends BaseRest {
   @GetMapping(
       value = {
         "/{type}/base/{identifier}.jsonld",
+        "/{type}/base/{identifier}.json",
         "/{type}/{identifier}.jsonld",
+        "/{type}/{identifier}.json",
         "/{type}/base/{identifier}",
         "/{type}/{identifier}"
       },
@@ -436,7 +438,12 @@ public class EMController extends BaseRest {
       nickname = "getEntitySchemaJsonLd",
       response = java.lang.Void.class)
   @GetMapping(
-      value = {"/{type}/base/{identifier}.schema.jsonld", "/{type}/{identifier}.schema.jsonld"},
+      value = {
+        "/{type}/base/{identifier}.schema.jsonld",
+        "/{type}/base/{identifier}.schema.json",
+        "/{type}/{identifier}.schema.jsonld",
+        "/{type}/{identifier}.schema.json"
+      },
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
   public ResponseEntity<String> getEntitySchemaJsonLd(
       @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
