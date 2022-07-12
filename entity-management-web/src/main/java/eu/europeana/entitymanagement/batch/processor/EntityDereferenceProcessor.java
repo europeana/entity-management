@@ -14,6 +14,7 @@ import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeSet;
 import org.apache.logging.log4j.LogManager;
@@ -187,6 +188,12 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
     externalProxy.setEntity(proxyResponse);
     handleDatasourceRedirections(externalProxy, proxyResponse);
     externalProxy.getProxyIn().setModified(new Date());
+    // update rights
+    Optional<DataSource> dataSource = datasources.getDatasource(externalProxy.getProxyId());
+    if (dataSource.isPresent()
+        && !Objects.equals(dataSource.get().getRights(), externalProxy.getProxyIn().getRights())) {
+      externalProxy.getProxyIn().setRights(dataSource.get().getRights());
+    }
     return proxyResponse;
   }
 

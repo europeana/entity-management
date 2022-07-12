@@ -93,7 +93,8 @@ public class ZohoSyncService {
 
   /**
    * main method to run the zoho synchronization
-   * @param modifiedSince the start date from which the Zoho modifications must be synchronized  
+   *
+   * @param modifiedSince the start date from which the Zoho modifications must be synchronized
    * @return the report on performed opperations
    * @throws EntityUpdateException
    */
@@ -595,10 +596,7 @@ public class ZohoSyncService {
     return currentPageSize < maxItemsPerPage;
   }
 
-  /**
-   * 
-   * @return the Zoho DataSource object  
-   */
+  /** @return the Zoho DataSource object */
   public DataSource getZohoDataSource() {
     return zohoDataSource;
   }
