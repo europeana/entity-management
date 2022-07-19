@@ -24,8 +24,8 @@ public class EMCollectionUtils {
     }
   }
 
-  public static String getFirstElement(@NotNull List<String> values) {
-    if (!values.isEmpty()) {
+  public static String getFirstElement(List<String> values) {
+    if (values != null && !values.isEmpty()) {
       return values.stream().findFirst().get();
     }
     return null;
