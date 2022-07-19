@@ -1,16 +1,16 @@
 package eu.europeana.entitymanagement.batch.writer;
 
-import eu.europeana.entitymanagement.batch.utils.BatchUtils;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import java.util.List;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
+import eu.europeana.entitymanagement.batch.utils.BatchUtils;
+import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
+import eu.europeana.entitymanagement.web.service.EntityRecordService;
 
 /** ItemWriter for deleting EntityRecords from Mongo */
 @Component
-public class EntityRecordDatabaseRemovalWriter implements ItemWriter<EntityRecord> {
+public class EntityRecordDatabaseRemovalWriter implements ItemWriter<BatchEntityRecord> {
 
   private final EntityRecordService entityRecordService;
 
@@ -19,8 +19,8 @@ public class EntityRecordDatabaseRemovalWriter implements ItemWriter<EntityRecor
   }
 
   @Override
-  public void write(@NonNull List<? extends EntityRecord> entityRecords) throws Exception {
-    List<String> ids = List.of(BatchUtils.getEntityIds(entityRecords));
+  public void write(@NonNull List<? extends BatchEntityRecord> entityRecords) throws Exception {
+    List<String> ids = List.of(BatchUtils.getEntityIds((List<BatchEntityRecord>)BatchUtils.filterRecordsForWritters(this.getClass(), entityRecords)));
     entityRecordService.deleteBulk(ids, false);
   }
 }

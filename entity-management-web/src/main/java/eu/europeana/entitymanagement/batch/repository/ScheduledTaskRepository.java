@@ -4,10 +4,26 @@ import static dev.morphia.query.Sort.ascending;
 import static dev.morphia.query.experimental.filters.Filters.eq;
 import static dev.morphia.query.experimental.filters.Filters.gte;
 import static dev.morphia.query.experimental.filters.Filters.in;
-import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.*;
+import static dev.morphia.query.experimental.filters.Filters.or;
+import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.CREATED;
+import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.DOC_SET;
+import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.DOC_SET_ON_INSERT;
+import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.ENTITY_ID;
+import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.HAS_BEEN_PROCESSED;
+import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.MODIFIED;
+import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.MORPHIA_DISCRIMINATOR;
+import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.SCHEDULED_TASK_CLASSNAME;
+import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.UPDATE_TYPE;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_DELETE_OPTS;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.UPSERT_OPTS;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.bson.Document;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Repository;
 import com.mongodb.bulk.BulkWriteResult;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.UpdateOneModel;
@@ -20,19 +36,12 @@ import dev.morphia.query.FindOptions;
 import dev.morphia.query.experimental.filters.Filter;
 import dev.morphia.query.internal.MorphiaCursor;
 import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.bson.Document;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Repository;
 
 @Repository
 public class ScheduledTaskRepository implements InitializingBean {
@@ -51,21 +60,20 @@ public class ScheduledTaskRepository implements InitializingBean {
   }
 
   /**
-   * Marks the given tasks as "processed". Update only occurs if current updateType for a task
-   * matches the specified updateType.
-   *
-   * @param updateType batch update type
+   * Marks the given tasks as "processed". Update only occurs if a task
+   * matches the specified query filter document.
+   * 
    * @param tasks list of scheduled tasks
    * @return BulkWriteResult of db query
    */
-  public BulkWriteResult markAsProcessed(ScheduledTaskType updateType, List<ScheduledTask> tasks) {
+  public BulkWriteResult markAsProcessed(List<ScheduledTask> tasks) {
     List<WriteModel<ScheduledTask>> updates = new ArrayList<>();
     for (ScheduledTask task : tasks) {
       updates.add(
           new UpdateOneModel<>(
               // query filters on updateType
               new Document(ENTITY_ID, task.getEntityId())
-                  .append(UPDATE_TYPE, updateType.getValue()),
+                  .append(UPDATE_TYPE, task.getUpdateType().getValue()),
               new Document(
                   DOC_SET,
                   new Document(HAS_BEEN_PROCESSED, task.hasBeenProcessed())
@@ -125,13 +133,21 @@ public class ScheduledTaskRepository implements InitializingBean {
   /**
    * Deletes {@link ScheduledTask} entries in the db that have been processed
    *
-   * @param updateType updateType to filter on
+   * @param updateType update types to filter on
    * @return number of deleted entries
    */
-  public long removeProcessedTasks(ScheduledTaskType updateType) {
+  public long removeProcessedTasks(List<? extends ScheduledTaskType> updateType) {
+
+    Filter[] orFilters = updateType.stream()
+      .map(u -> eq(UPDATE_TYPE, u.getValue()))
+      .toArray(Filter[]::new);
+    Filter[] mainFilters = new Filter[2];
+    mainFilters[0] = eq(HAS_BEEN_PROCESSED, true);
+    mainFilters[1] = or(orFilters);
+
     return datastore
         .find(ScheduledTask.class)
-        .filter(eq(HAS_BEEN_PROCESSED, true), eq(UPDATE_TYPE, updateType.getValue()))
+        .filter(mainFilters)
         .delete(MULTI_DELETE_OPTS)
         .getDeletedCount();
   }
@@ -147,7 +163,7 @@ public class ScheduledTaskRepository implements InitializingBean {
    * @param filters Query filters
    * @return List with results
    */
-  public List<? extends EntityRecord> getEntityRecordsForTasks(
+  public List<BatchEntityRecord> getEntityRecordsForTasks(
       int start, int count, Filter[] filters) {
     List<ScheduledTask> scheduledTasks =
         datastore
@@ -155,9 +171,9 @@ public class ScheduledTaskRepository implements InitializingBean {
             .filter(filters)
             .iterator(
                 new FindOptions()
-                    // we only care about the EntityID
+                    // we only care about the EntityID and update type
                     .projection()
-                    .include(ENTITY_ID)
+                    .include(ENTITY_ID, UPDATE_TYPE)
                     .skip(start)
                     // matches the index sort order defined in ScheduledTask
                     .sort(ascending(CREATED))
@@ -167,11 +183,22 @@ public class ScheduledTaskRepository implements InitializingBean {
     List<String> matchingIds =
         scheduledTasks.stream().map(ScheduledTask::getEntityId).collect(Collectors.toList());
 
-    return datastore
+    List<EntityRecord> entityRecords = datastore
         .find(EntityRecord.class)
         .filter(in(ENTITY_ID, matchingIds))
         .iterator()
         .toList();
+    
+    List<BatchEntityRecord> batchEntityRecords = entityRecords.stream()
+        .map(p -> new BatchEntityRecord(
+            p,
+            scheduledTasks.stream()
+              .filter(q -> q.getEntityId().equals(p.getEntityId()))
+              .collect(Collectors.toList()).get(0).getUpdateType()
+            ))
+        .collect(Collectors.toList());
+    
+    return batchEntityRecords;
   }
 
   public ScheduledTask getTask(String entityId) {
@@ -191,11 +218,18 @@ public class ScheduledTaskRepository implements InitializingBean {
    * value. Note: this method returns a cursor, which callers are responsible for closing
    */
   public MorphiaCursor<ScheduledTask> getTasksWithFailures(
-      int maxFailedTaskRetries, ScheduledTaskType updateType) {
+      int maxFailedTaskRetries, List<? extends ScheduledTaskType> updateType) {
+
+    Filter[] orFilters = updateType.stream()
+      .map(u -> eq(UPDATE_TYPE, u.getValue()))
+      .toArray(Filter[]::new);
+    Filter[] mainFilters = new Filter[2];
+    mainFilters[0] = eq(HAS_BEEN_PROCESSED, false);
+    mainFilters[1] = or(orFilters);
 
     return datastore
         .aggregate(ScheduledTask.class)
-        .match(eq(HAS_BEEN_PROCESSED, false), eq(UPDATE_TYPE, updateType.getValue()))
+        .match(mainFilters)
         // both collections use the same entityId field name
         .lookup(
             Lookup.from(FailedTask.class)

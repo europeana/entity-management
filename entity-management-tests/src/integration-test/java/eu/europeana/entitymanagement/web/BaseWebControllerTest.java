@@ -67,12 +67,6 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
     emSolrService.deleteAllDocuments();
   }
 
-  protected static String loadFile(String resourcePath) throws IOException {
-    InputStream is = BaseWebControllerTest.class.getResourceAsStream(resourcePath);
-    assert is != null;
-    return IOUtils.toString(is, StandardCharsets.UTF_8).replace("\n", "");
-  }
-
   /** Checks common response headers. Allow header checked within each test method. */
   protected void checkCommonResponseHeaders(ResultActions results, boolean hasPathExtension)
       throws Exception {
@@ -180,10 +174,6 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
 
   protected void deprecateEntity(EntityRecord entityRecord) throws EntityUpdateException {
     entityRecordService.disableEntityRecord(entityRecord, true);
-  }
-
-  protected Optional<EntityRecord> retrieveEntity(String entityId) {
-    return entityRecordService.retrieveByEntityId(entityId);
   }
 
   protected void assertedTaskScheduled(String entityId, ScheduledTaskType taskType) {

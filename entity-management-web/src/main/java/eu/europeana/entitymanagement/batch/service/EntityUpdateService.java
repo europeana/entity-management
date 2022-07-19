@@ -1,15 +1,12 @@
 package eu.europeana.entitymanagement.batch.service;
 
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.SYNC_WEB_REQUEST_JOB_LAUNCHER;
-
-import eu.europeana.entitymanagement.batch.config.EntityUpdateJobConfig;
-import eu.europeana.entitymanagement.batch.utils.BatchUtils;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.launch.JobLauncher;
@@ -17,6 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import eu.europeana.entitymanagement.batch.config.EntityUpdateJobConfig;
+import eu.europeana.entitymanagement.batch.utils.BatchUtils;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 
 @Service
 public class EntityUpdateService {
@@ -48,7 +49,7 @@ public class EntityUpdateService {
     syncWebRequestLauncher.run(
         entityUpdateJobConfig.updateSingleEntity(),
         BatchUtils.createJobParameters(
-            entityId, Date.from(Instant.now()), ScheduledUpdateType.FULL_UPDATE, true));
+            entityId, Date.from(Instant.now()), List.of(ScheduledUpdateType.FULL_UPDATE), true));
   }
 
   /**
@@ -66,6 +67,10 @@ public class EntityUpdateService {
         Arrays.toString(entityIds.toArray()),
         entityIds.size(),
         updateType);
-    scheduledTaskService.scheduleTasksForEntities(entityIds, updateType);
+    Map<String, ScheduledTaskType> mapEntityIdScheduledTaskType = new HashMap<String, ScheduledTaskType>();
+    for(String id : entityIds) {
+      mapEntityIdScheduledTaskType.put(id, updateType);
+    }
+    scheduledTaskService.scheduleTasksForEntities(mapEntityIdScheduledTaskType);
   }
 }
