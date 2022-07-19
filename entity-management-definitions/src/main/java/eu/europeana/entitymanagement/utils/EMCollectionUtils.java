@@ -23,4 +23,12 @@ public class EMCollectionUtils {
       dest.addAll(addition.subList(0, Math.min(maxSize - dest.size(), addition.size())));
     }
   }
+
+  public static String getFirstElement(@NotNull List<String> values) {
+    if (!values.isEmpty()) {
+      return values.stream().findFirst().get();
+    }
+    return null;
+  }
+
 }
