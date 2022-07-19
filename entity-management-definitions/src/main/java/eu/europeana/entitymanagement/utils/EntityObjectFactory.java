@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.utils;
 
-import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Concept;
 import eu.europeana.entitymanagement.definitions.model.ConsolidatedAgent;
@@ -58,7 +58,7 @@ public class EntityObjectFactory {
   @SuppressWarnings("unchecked")
   private static <T extends Entity> T instantiateEntityObject(
       Map<EntityTypes, Class<? extends Entity>> entityMap, EntityTypes entityType)
-      throws EntityCreationException {
+      throws EntityModelCreationException {
 
     try {
       Class<T> entityClass = (Class<T>) entityMap.get(entityType);
@@ -66,25 +66,26 @@ public class EntityObjectFactory {
       return entityClass.getDeclaredConstructor().newInstance();
 
     } catch (Exception e) {
-      throw new EntityCreationException("Error creating instance for " + entityType.toString(), e);
+      throw new EntityModelCreationException(
+          "Error creating instance for " + entityType.toString(), e);
     }
   }
 
   public static <T extends Entity> T createProxyEntityObject(String entityType)
-      throws EntityCreationException {
+      throws EntityModelCreationException {
 
     return instantiateEntityObject(proxyEntityTypesClassMap, EntityTypes.valueOf(entityType));
   }
 
   public static <T extends Entity> T createConsolidatedEntityObject(String entityType)
-      throws EntityCreationException {
+      throws EntityModelCreationException {
 
     return instantiateEntityObject(
         consolidatedEntityTypesClassMap, EntityTypes.valueOf(entityType));
   }
 
   public static <T extends Entity> T createConsolidatedEntityObject(Entity entity)
-      throws EntityCreationException {
+      throws EntityModelCreationException {
     try {
       @SuppressWarnings("unchecked")
       Class<T> consolidatedEntityClass =
@@ -117,7 +118,7 @@ public class EntityObjectFactory {
                   entity.getType(), entity.getEntityId()));
       }
     } catch (Exception e) {
-      throw new EntityCreationException(
+      throw new EntityModelCreationException(
           "Error when creating consolidated copy from enitity " + entity.getEntityId(), e);
     }
   }

@@ -11,7 +11,7 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PLACE_OF_
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PLACE_OF_DEATH;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.springframework.util.CollectionUtils;
+import org.apache.commons.collections.CollectionUtils;
 
 /**
  * Necessary for serializing agent instances contained within the consolidated entity.
@@ -30,46 +30,46 @@ public class ConsolidatedAgent extends Agent {
 
   @JsonProperty(BEGIN)
   private String beginString() {
-    return CollectionUtils.firstElement(getBegin());
+    return (String) CollectionUtils.get(getBegin(), 0);
   }
 
   @JsonProperty(END)
   private String endString() {
-    return CollectionUtils.firstElement(getEnd());
+    return (String) CollectionUtils.get(getEnd(), 0);
   }
 
   @JsonProperty(DATE_OF_BIRTH)
   private String dateOfBirthString() {
-    return CollectionUtils.firstElement(getDateOfBirth());
+    return (String) CollectionUtils.get(getDateOfBirth(), 0);
   }
 
   @JsonProperty(DATE_OF_ESTABLISHMENT)
   private String dateOfEstablishmentString() {
-    return CollectionUtils.firstElement(getDateOfEstablishment());
+    return (String) CollectionUtils.get(getDateOfEstablishment(), 0);
   }
 
   @JsonProperty(PLACE_OF_DEATH)
   private String placeOfDeathString() {
-    return CollectionUtils.firstElement(getPlaceOfDeath());
+    return (String) CollectionUtils.get(getPlaceOfDeath(), 0);
   }
 
   @JsonProperty(DATE_OF_DEATH)
   private String dateOfDeathString() {
-    return CollectionUtils.firstElement(getDateOfDeath());
+    return (String) CollectionUtils.get(getDateOfDeath(), 0);
   }
 
   @JsonProperty(PLACE_OF_BIRTH)
   private String placeOfBirthString() {
-    return CollectionUtils.firstElement(getPlaceOfBirth());
+    return (String) CollectionUtils.get(getPlaceOfBirth(), 0);
   }
 
   @JsonProperty(GENDER)
   private String genderString() {
-    return CollectionUtils.firstElement(getGender());
+    return (String) CollectionUtils.get(getGender(), 0);
   }
 
   @JsonProperty(DATE_OF_TERMINATION)
   private String dateOfTerminationString() {
-    return CollectionUtils.firstElement(getDateOfTermination());
+    return (String) CollectionUtils.get(getDateOfTermination(), 0);
   }
 }

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import dev.morphia.annotations.Embedded;
-import org.springframework.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 @Embedded
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
@@ -120,11 +120,11 @@ public class Address {
 
   /** Checks that this Address metadata properties set. 'about' field not included in this check. */
   public boolean hasMetadataProperties() {
-    return StringUtils.hasLength(streetAddress)
-        || StringUtils.hasLength(postalCode)
-        || StringUtils.hasLength(postBox)
-        || StringUtils.hasLength(locality)
-        || StringUtils.hasLength(countryName)
-        || StringUtils.hasLength(hasGeo);
+    return StringUtils.isNotEmpty(streetAddress)
+        || StringUtils.isNotEmpty(postalCode)
+        || StringUtils.isNotEmpty(postBox)
+        || StringUtils.isNotEmpty(locality)
+        || StringUtils.isNotEmpty(countryName)
+        || StringUtils.isNotEmpty(hasGeo);
   }
 }

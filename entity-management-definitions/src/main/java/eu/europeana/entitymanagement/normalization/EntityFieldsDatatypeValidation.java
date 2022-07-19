@@ -4,7 +4,7 @@ import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_T
 import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_EMAIL;
 import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_URI;
 
-import eu.europeana.entitymanagement.common.config.LanguageCodes;
+import eu.europeana.entitymanagement.definitions.LanguageCodes;
 import eu.europeana.entitymanagement.definitions.model.Address;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.validation.ConstraintValidatorContext;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
-import org.springframework.util.StringUtils;
 
 public class EntityFieldsDatatypeValidation {
 
@@ -127,7 +127,7 @@ public class EntityFieldsDatatypeValidation {
     }
 
     // thumbnail can be empty
-    if (StringUtils.hasLength(webResource.getThumbnail())
+    if (StringUtils.isNotEmpty(webResource.getThumbnail())
         && !validateUri(
             context,
             fieldName,
@@ -417,7 +417,7 @@ public class EntityFieldsDatatypeValidation {
                 + fieldName
                 + "' contains the language code: "
                 + key
-                + " that does not belong to the Europena languge codes.");
+                + " that does not belong to the Europeana language codes.");
         if (isValid) isValid = false;
       }
     }

@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import org.springframework.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 @XmlRootElement(namespace = NAMESPACE_EDM, name = XmlConstants.XML_EDM_WEB_RESOURCE)
 @XmlType(propOrder = {XmlConstants.ABOUT, XmlConstants.XML_DC_SOURCE, XmlConstants.XML_THUMBNAIL})
@@ -51,6 +51,6 @@ public class XmlWebResourceImpl {
   }
 
   public boolean isEmpty() {
-    return !StringUtils.hasLength(about) && (source == null) && (thumbnail == null);
+    return !StringUtils.isNotEmpty(about) && (source == null) && (thumbnail == null);
   }
 }

@@ -19,7 +19,7 @@
   <dependencies>
   	<dependency>
 		<groupId>eu.europeana.api</groupId>
-		<artifactId>entity-management-definitions</artifactId>
+		<artifactId>entity-management-common</artifactId>
 		<version>1.2.0-SNAPSHOT</version>
 	</dependency>
 	
@@ -29,10 +29,10 @@
 	  	<version>${solrj.version}</version>
 	</dependency>
 	
-		<dependency>
-			<groupId>eu.europeana.api.commons</groupId>
-			<artifactId>commons-error</artifactId>
-			<version>${api.commons.version}</version>
-		</dependency>
+	<dependency>
+		<groupId>eu.europeana.api.commons</groupId>
+		<artifactId>commons-error</artifactId>
+		<version>${api.commons.version}</version>
+	</dependency>
   </dependencies>
 </project>

@@ -7,9 +7,9 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.util.CollectionUtils;
 
 public class EntityComparator implements Comparator<Entity>, Serializable {
 
@@ -149,10 +149,10 @@ public class EntityComparator implements Comparator<Entity>, Serializable {
 
   @SuppressWarnings("unchecked")
   private int compareMaps(Map<Object, Object> m1, Map<Object, Object> m2) {
-    if (CollectionUtils.isEmpty(m1) && CollectionUtils.isEmpty(m2)) {
+    if (m1.isEmpty() && m2.isEmpty()) {
       // if both null or empty
       return 0;
-    } else if (CollectionUtils.isEmpty(m1) || CollectionUtils.isEmpty(m2)) {
+    } else if (m1.isEmpty() || m2.isEmpty()) {
       // if only one map is null or empty
       return 1;
     }

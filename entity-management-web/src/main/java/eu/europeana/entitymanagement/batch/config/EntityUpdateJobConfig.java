@@ -1,9 +1,9 @@
 package eu.europeana.entitymanagement.batch.config;
 
 import static eu.europeana.entitymanagement.batch.utils.BatchUtils.*;
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.REMOVALS_STEP_EXECUTOR;
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.UPDATES_STEP_EXECUTOR;
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.WEB_REQUEST_JOB_EXECUTOR;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.REMOVALS_STEP_EXECUTOR;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.UPDATES_STEP_EXECUTOR;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.WEB_REQUEST_JOB_EXECUTOR;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_ID;
 import static eu.europeana.entitymanagement.definitions.batch.ScheduledTaskUtils.scheduledTaskTypeValueOf;
 

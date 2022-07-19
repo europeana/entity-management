@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.batch.config;
 
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.PERIODIC_REMOVALS_SCHEDULER;
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.PERIODIC_UPDATES_SCHEDULER;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.PERIODIC_REMOVALS_SCHEDULER;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.PERIODIC_UPDATES_SCHEDULER;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

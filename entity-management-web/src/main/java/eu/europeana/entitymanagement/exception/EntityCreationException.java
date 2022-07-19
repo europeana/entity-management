@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.definitions.exceptions;
+package eu.europeana.entitymanagement.exception;
 
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import org.springframework.http.HttpStatus;

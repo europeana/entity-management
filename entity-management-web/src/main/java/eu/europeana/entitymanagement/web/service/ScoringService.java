@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.web.service;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;

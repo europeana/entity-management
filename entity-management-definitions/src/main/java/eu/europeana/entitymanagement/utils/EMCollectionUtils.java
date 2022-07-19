@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.utils;
 
 import java.util.List;
-import org.springframework.lang.NonNull;
+import javax.validation.constraints.NotNull;
 
 public class EMCollectionUtils {
 
@@ -18,7 +18,7 @@ public class EMCollectionUtils {
    * @param maxSize max size of destination list
    * @param <E>
    */
-  public static <E> void addToList(@NonNull List<E> dest, @NonNull List<E> addition, int maxSize) {
+  public static <E> void addToList(@NotNull List<E> dest, @NotNull List<E> addition, int maxSize) {
     if (dest.size() < maxSize) {
       dest.addAll(addition.subList(0, Math.min(maxSize - dest.size(), addition.size())));
     }
