@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.utils;
 
 import java.util.List;
+import java.util.Optional;
 import javax.validation.constraints.NotNull;
 
 public class EMCollectionUtils {
@@ -24,11 +25,17 @@ public class EMCollectionUtils {
     }
   }
 
+  /**
+   * Returns the first element from the list
+   *
+   * @param values list of values
+   * @return first element of the list
+   */
   public static String getFirstElement(List<String> values) {
     if (values != null && !values.isEmpty()) {
-      return values.stream().findFirst().get();
+      Optional<String> value = values.stream().findFirst();
+      return value.isPresent() ? value.get() : null;
     }
     return null;
   }
-
 }

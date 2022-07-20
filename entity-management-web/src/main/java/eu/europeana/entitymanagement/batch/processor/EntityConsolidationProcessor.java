@@ -3,6 +3,7 @@ package eu.europeana.entitymanagement.batch.processor;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.config.DataSources;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -47,7 +48,8 @@ public class EntityConsolidationProcessor implements ItemProcessor<EntityRecord,
   }
 
   @Override
-  public EntityRecord process(@NonNull EntityRecord entityRecord) throws EuropeanaApiException {
+  public EntityRecord process(@NonNull EntityRecord entityRecord)
+      throws EuropeanaApiException, EntityModelCreationException {
 
     List<EntityProxy> externalProxies = entityRecord.getExternalProxies();
 

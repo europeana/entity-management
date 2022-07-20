@@ -119,7 +119,7 @@ public class EntityObjectFactory {
       }
     } catch (Exception e) {
       throw new EntityModelCreationException(
-          "Error when creating consolidated copy from enitity " + entity.getEntityId(), e);
+          "Error when creating consolidated copy from entity " + entity.getEntityId(), e);
     }
   }
 

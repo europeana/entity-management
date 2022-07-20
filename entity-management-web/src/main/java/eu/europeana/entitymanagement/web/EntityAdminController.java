@@ -10,6 +10,7 @@ import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -137,25 +138,26 @@ public class EntityAdminController extends BaseRest {
     try {
       // get the entity type based on path param
       type = EntityTypes.getByEntityType(type).getEntityType();
+      EntityRecord savedEntityRecord =
+          entityRecordService.createEntityFromMigrationRequest(
+              europeanaProxyEntity, type, identifier);
+      LOG.info(
+          "Created Entity record for {}; entityId={}",
+          europeanaProxyEntity.getEntityId(),
+          savedEntityRecord.getEntityId());
+      return generateResponseEntity(
+          request,
+          List.of(EntityProfile.internal),
+          FormatTypes.jsonld,
+          null,
+          null,
+          savedEntityRecord,
+          HttpStatus.ACCEPTED);
     } catch (UnsupportedEntityTypeException e) {
       throw new EntityCreationException("Entity type invalid or not supported: " + type, e);
+    } catch (EntityModelCreationException e) {
+      throw new EntityCreationException("Error while creating entity object for " + type, e);
     }
-
-    EntityRecord savedEntityRecord =
-        entityRecordService.createEntityFromMigrationRequest(
-            europeanaProxyEntity, type, identifier);
-    LOG.info(
-        "Created Entity record for {}; entityId={}",
-        europeanaProxyEntity.getEntityId(),
-        savedEntityRecord.getEntityId());
-    return generateResponseEntity(
-        request,
-        List.of(EntityProfile.internal),
-        FormatTypes.jsonld,
-        null,
-        null,
-        savedEntityRecord,
-        HttpStatus.ACCEPTED);
   }
 
   @ApiOperation(
