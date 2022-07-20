@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.batch.processor;
 
 import java.util.Date;
+import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.item.ItemProcessor;
@@ -9,6 +10,8 @@ import org.springframework.stereotype.Component;
 import eu.europeana.entitymanagement.batch.utils.BatchUtils;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
@@ -21,6 +24,9 @@ import eu.europeana.entitymanagement.web.service.ScoringService;
 /** Updates Metrics for EntityRecords */
 @Component
 public class EntityMetricsProcessor implements ItemProcessor<BatchEntityRecord, BatchEntityRecord> {
+
+  private static final List<ScheduledTaskType> supportedScheduledTasks = 
+      List.of(ScheduledUpdateType.FULL_UPDATE, ScheduledUpdateType.METRICS_UPDATE);
 
   private final ScoringService scoringService;
   private final EntityManagementConfiguration entityManagementConfiguration;
@@ -35,7 +41,7 @@ public class EntityMetricsProcessor implements ItemProcessor<BatchEntityRecord, 
 
   @Override
   public BatchEntityRecord process(@NonNull BatchEntityRecord entityRecord) throws Exception {
-    if(BatchUtils.processorsScheduledTaskTypes.get(this.getClass()).contains(entityRecord.getScheduledTaskType())) {
+    if(supportedScheduledTasks.contains(entityRecord.getScheduledTaskType())) {
       Date now = new Date();
       if (entityRecord.getEntityRecord().getEntity().getIsAggregatedBy() == null) {
         Aggregation aggregation = new Aggregation();

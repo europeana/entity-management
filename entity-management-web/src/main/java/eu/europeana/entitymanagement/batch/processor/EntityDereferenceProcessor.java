@@ -10,10 +10,11 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
-import eu.europeana.entitymanagement.batch.utils.BatchUtils;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -31,6 +32,8 @@ import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
  */
 @Component
 public class EntityDereferenceProcessor implements ItemProcessor<BatchEntityRecord, BatchEntityRecord> {
+
+  private static final List<ScheduledTaskType> supportedScheduledTasks = List.of(ScheduledUpdateType.FULL_UPDATE);
 
   private static final String MISMATCH_EXCEPTION_STRING =
       "DataSource type %s does not match entity type %s for entityId=%s, proxyId=%s";
@@ -52,7 +55,7 @@ public class EntityDereferenceProcessor implements ItemProcessor<BatchEntityReco
   @Override
   public BatchEntityRecord process(@NonNull BatchEntityRecord entityRecord) throws Exception {
 
-    if(BatchUtils.processorsScheduledTaskTypes.get(this.getClass()).contains(entityRecord.getScheduledTaskType())) {
+    if(supportedScheduledTasks.contains(entityRecord.getScheduledTaskType())) {
       // might be multiple wikidata IDs in case of redirections
       TreeSet<String> wikidataEntityIds = new TreeSet<>();
       collectWikidataEntityIds(entityRecord.getEntityRecord().getEuropeanaProxy().getEntity(), wikidataEntityIds);

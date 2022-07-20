@@ -137,17 +137,16 @@ public class ScheduledTaskRepository implements InitializingBean {
    * @return number of deleted entries
    */
   public long removeProcessedTasks(List<? extends ScheduledTaskType> updateType) {
-
-    Filter[] orFilters = updateType.stream()
-      .map(u -> eq(UPDATE_TYPE, u.getValue()))
-      .toArray(Filter[]::new);
-    Filter[] mainFilters = new Filter[2];
-    mainFilters[0] = eq(HAS_BEEN_PROCESSED, true);
-    mainFilters[1] = or(orFilters);
-
     return datastore
         .find(ScheduledTask.class)
-        .filter(mainFilters)
+        .filter(
+            eq(HAS_BEEN_PROCESSED, true),
+            or(
+                updateType.stream()
+                .map(u -> eq(UPDATE_TYPE, u.getValue()))
+                .toArray(Filter[]::new)
+              )
+        )
         .delete(MULTI_DELETE_OPTS)
         .getDeletedCount();
   }
@@ -189,7 +188,7 @@ public class ScheduledTaskRepository implements InitializingBean {
         .iterator()
         .toList();
     
-    List<BatchEntityRecord> batchEntityRecords = entityRecords.stream()
+    return entityRecords.stream()
         .map(p -> new BatchEntityRecord(
             p,
             scheduledTasks.stream()
@@ -197,8 +196,6 @@ public class ScheduledTaskRepository implements InitializingBean {
               .collect(Collectors.toList()).get(0).getUpdateType()
             ))
         .collect(Collectors.toList());
-    
-    return batchEntityRecords;
   }
 
   public ScheduledTask getTask(String entityId) {
@@ -219,17 +216,16 @@ public class ScheduledTaskRepository implements InitializingBean {
    */
   public MorphiaCursor<ScheduledTask> getTasksWithFailures(
       int maxFailedTaskRetries, List<? extends ScheduledTaskType> updateType) {
-
-    Filter[] orFilters = updateType.stream()
-      .map(u -> eq(UPDATE_TYPE, u.getValue()))
-      .toArray(Filter[]::new);
-    Filter[] mainFilters = new Filter[2];
-    mainFilters[0] = eq(HAS_BEEN_PROCESSED, false);
-    mainFilters[1] = or(orFilters);
-
     return datastore
         .aggregate(ScheduledTask.class)
-        .match(mainFilters)
+        .match(
+            eq(HAS_BEEN_PROCESSED, false),
+            or(
+                updateType.stream()
+                .map(u -> eq(UPDATE_TYPE, u.getValue()))
+                .toArray(Filter[]::new)
+            )
+        )
         // both collections use the same entityId field name
         .lookup(
             Lookup.from(FailedTask.class)

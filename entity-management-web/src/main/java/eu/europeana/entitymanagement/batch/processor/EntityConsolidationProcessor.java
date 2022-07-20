@@ -10,10 +10,11 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import eu.europeana.api.commons.error.EuropeanaApiException;
-import eu.europeana.entitymanagement.batch.utils.BatchUtils;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.exception.ingestion.EntityValidationException;
@@ -30,6 +31,8 @@ import eu.europeana.entitymanagement.web.service.EntityRecordService;
 @Component
 public class EntityConsolidationProcessor implements ItemProcessor<BatchEntityRecord, BatchEntityRecord> {
 
+  private static final List<ScheduledTaskType> supportedScheduledTasks = List.of(ScheduledUpdateType.FULL_UPDATE);
+  
   private final EntityRecordService entityRecordService;
   private final ValidatorFactory emValidatorFactory;
 
@@ -50,7 +53,7 @@ public class EntityConsolidationProcessor implements ItemProcessor<BatchEntityRe
   @Override
   public BatchEntityRecord process(@NonNull BatchEntityRecord entityRecord) throws EuropeanaApiException {
 
-    if(BatchUtils.processorsScheduledTaskTypes.get(this.getClass()).contains(entityRecord.getScheduledTaskType())) {
+    if(supportedScheduledTasks.contains(entityRecord.getScheduledTaskType())) {
 
       List<EntityProxy> externalProxies = entityRecord.getEntityRecord().getExternalProxies();
   

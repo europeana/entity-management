@@ -67,7 +67,7 @@ public class EntityUpdateService {
         Arrays.toString(entityIds.toArray()),
         entityIds.size(),
         updateType);
-    Map<String, ScheduledTaskType> mapEntityIdScheduledTaskType = new HashMap<String, ScheduledTaskType>();
+    Map<String, ScheduledTaskType> mapEntityIdScheduledTaskType = new HashMap<String, ScheduledTaskType>(entityIds.size());
     for(String id : entityIds) {
       mapEntityIdScheduledTaskType.put(id, updateType);
     }
