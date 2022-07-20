@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement.batch.utils;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
@@ -51,7 +52,7 @@ public class BatchUtils {
     return batchEntityRecords.stream().map(p -> p.getEntityRecord().getEntityId()).toArray(String[]::new);
   }
   
-  public static List<? extends BatchEntityRecord> filterRecordsForWritters(List<ScheduledTaskType> supportedScheduledTasks, List<? extends BatchEntityRecord> records) {
+  public static List<? extends BatchEntityRecord> filterRecordsForWritters(Set<ScheduledTaskType> supportedScheduledTasks, List<? extends BatchEntityRecord> records) {
     return records.stream()
         .filter(p -> supportedScheduledTasks.contains(p.getScheduledTaskType()))
         .collect(Collectors.toList());

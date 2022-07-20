@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.batch.writer;
 
 import java.util.List;
+import java.util.Set;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
@@ -14,8 +15,8 @@ import eu.europeana.entitymanagement.solr.service.SolrService;
 @Component
 public class EntitySolrRemovalWriter implements ItemWriter<BatchEntityRecord> {
 
-  private static final List<ScheduledTaskType> supportedScheduledTasks = 
-      List.of(ScheduledRemovalType.DEPRECATION, ScheduledRemovalType.PERMANENT_DELETION);
+  private static final Set<ScheduledTaskType> supportedScheduledTasks = 
+      Set.of(ScheduledRemovalType.DEPRECATION, ScheduledRemovalType.PERMANENT_DELETION);
 
   private final SolrService solrService;
 

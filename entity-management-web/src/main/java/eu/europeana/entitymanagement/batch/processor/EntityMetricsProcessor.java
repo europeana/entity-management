@@ -1,13 +1,12 @@
 package eu.europeana.entitymanagement.batch.processor;
 
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
-import eu.europeana.entitymanagement.batch.utils.BatchUtils;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
@@ -25,8 +24,8 @@ import eu.europeana.entitymanagement.web.service.ScoringService;
 @Component
 public class EntityMetricsProcessor implements ItemProcessor<BatchEntityRecord, BatchEntityRecord> {
 
-  private static final List<ScheduledTaskType> supportedScheduledTasks = 
-      List.of(ScheduledUpdateType.FULL_UPDATE, ScheduledUpdateType.METRICS_UPDATE);
+  private static final Set<ScheduledTaskType> supportedScheduledTasks = 
+      Set.of(ScheduledUpdateType.FULL_UPDATE, ScheduledUpdateType.METRICS_UPDATE);
 
   private final ScoringService scoringService;
   private final EntityManagementConfiguration entityManagementConfiguration;

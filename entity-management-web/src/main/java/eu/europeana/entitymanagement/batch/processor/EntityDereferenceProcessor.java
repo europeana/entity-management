@@ -3,6 +3,7 @@ package eu.europeana.entitymanagement.batch.processor;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeSet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,7 +34,7 @@ import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
 @Component
 public class EntityDereferenceProcessor implements ItemProcessor<BatchEntityRecord, BatchEntityRecord> {
 
-  private static final List<ScheduledTaskType> supportedScheduledTasks = List.of(ScheduledUpdateType.FULL_UPDATE);
+  private static final Set<ScheduledTaskType> supportedScheduledTasks = Set.of(ScheduledUpdateType.FULL_UPDATE);
 
   private static final String MISMATCH_EXCEPTION_STRING =
       "DataSource type %s does not match entity type %s for entityId=%s, proxyId=%s";

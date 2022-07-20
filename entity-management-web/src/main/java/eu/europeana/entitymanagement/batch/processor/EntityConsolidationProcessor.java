@@ -31,7 +31,7 @@ import eu.europeana.entitymanagement.web.service.EntityRecordService;
 @Component
 public class EntityConsolidationProcessor implements ItemProcessor<BatchEntityRecord, BatchEntityRecord> {
 
-  private static final List<ScheduledTaskType> supportedScheduledTasks = List.of(ScheduledUpdateType.FULL_UPDATE);
+  private static final Set<ScheduledTaskType> supportedScheduledTasks = Set.of(ScheduledUpdateType.FULL_UPDATE);
   
   private final EntityRecordService entityRecordService;
   private final ValidatorFactory emValidatorFactory;
