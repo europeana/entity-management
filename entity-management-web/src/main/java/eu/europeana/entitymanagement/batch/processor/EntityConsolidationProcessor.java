@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.validation.ConstraintViolation;
 import javax.validation.ValidatorFactory;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.lang.NonNull;
@@ -100,7 +101,10 @@ public class EntityConsolidationProcessor implements ItemProcessor<EntityRecord,
     entityRecordService.performReferentialIntegrity(consolidatedEntity);
     //if isShownBy or depiction are null, create the isShownBy using the Search and Record api 
     if(consolidatedEntity.getIsShownBy()==null && consolidatedEntity.getDepiction()==null) {
-      consolidatedEntity.setIsShownBy(generateIsShownBy(consolidatedEntity.getEntityId()));
+      WebResource isShownBy = generateIsShownBy(consolidatedEntity.getEntityId());
+      if(isShownBy!=null) {
+        consolidatedEntity.setIsShownBy(isShownBy);
+      }
     }
     validateCompleteValidationConstraints(consolidatedEntity);
     entityRecordService.updateConsolidatedVersion(entityRecord, consolidatedEntity);
@@ -152,19 +156,28 @@ public class EntityConsolidationProcessor implements ItemProcessor<EntityRecord,
     String itemId = null;
     String edmPreview = null;
     if(responseJson.has("items")) {
-      JSONObject item = (JSONObject) responseJson.getJSONArray("items").get(0);
-      if(item.has("edmIsShownBy")) {
-        edmIsShownBy = item.getJSONArray("edmIsShownBy").getString(0);
-      }
-      if(item.has("id")) {
-        itemId = item.getString("id");
-      }
-      if(item.has("edmPreview")) {
-        edmPreview = item.getJSONArray("edmPreview").getString(0);
+      JSONArray itemsList = responseJson.getJSONArray("items");
+      if(itemsList.length()>0) {
+        JSONObject item = (JSONObject) itemsList.get(0);
+        if(item.has("edmIsShownBy")) {
+          JSONArray edmIsShownByList = item.getJSONArray("edmIsShownBy");
+          if(edmIsShownByList.length()>0) {
+            edmIsShownBy = edmIsShownByList.getString(0);
+          }
+        }
+        if(item.has("id")) {
+          itemId = item.getString("id");
+        }
+        if(item.has("edmPreview")) {
+          JSONArray edmPreviewList = item.getJSONArray("edmPreview");
+          if(edmPreviewList.length()>0) {
+            edmPreview = edmPreviewList.getString(0);
+          }
+        }
       }
     }
     
-    if(edmIsShownBy!=null || itemId!=null || edmPreview!=null) {
+    if(edmIsShownBy!=null && itemId!=null) {
       return new WebResource(edmIsShownBy, emConfiguration.getItemDataEndpoint() + itemId, edmPreview);
     }
     return null;
