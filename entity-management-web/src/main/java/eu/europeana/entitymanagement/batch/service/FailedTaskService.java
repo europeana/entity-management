@@ -1,5 +1,10 @@
 package eu.europeana.entitymanagement.batch.service;
 
+import com.mongodb.bulk.BulkWriteResult;
+import com.mongodb.client.result.UpdateResult;
+import eu.europeana.entitymanagement.batch.repository.FailedTaskRepository;
+import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -10,11 +15,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.mongodb.bulk.BulkWriteResult;
-import com.mongodb.client.result.UpdateResult;
-import eu.europeana.entitymanagement.batch.repository.FailedTaskRepository;
-import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 
 @Service
 public class FailedTaskService {
@@ -53,7 +53,7 @@ public class FailedTaskService {
 
   /**
    * Creates {@link FailedTask} instances for all entities, and then saves them to the database
-   * 
+   *
    * @param entityIdsToUpdateType
    * @param e
    */
@@ -64,9 +64,10 @@ public class FailedTaskService {
     Instant now = Instant.now();
 
     // create FailedTask instance for each entity id
-    List<FailedTask> failures = entityIdsToUpdateType.entrySet().stream()
-        .map(r -> createUpdateFailure(r.getKey(), r.getValue(), now, message, stackTrace))
-        .collect(Collectors.toList());
+    List<FailedTask> failures =
+        entityIdsToUpdateType.entrySet().stream()
+            .map(r -> createUpdateFailure(r.getKey(), r.getValue(), now, message, stackTrace))
+            .collect(Collectors.toList());
 
     BulkWriteResult writeResult = failureRepository.upsertBulk(failures);
     logger.info(

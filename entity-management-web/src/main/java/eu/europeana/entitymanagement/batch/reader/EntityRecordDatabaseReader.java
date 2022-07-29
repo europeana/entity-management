@@ -1,5 +1,11 @@
 package eu.europeana.entitymanagement.batch.reader;
 
+import dev.morphia.query.experimental.filters.Filter;
+import eu.europeana.entitymanagement.batch.utils.BatchUtils;
+import eu.europeana.entitymanagement.definitions.batch.ScheduledTaskUtils;
+import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -8,12 +14,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.lang.NonNull;
-import dev.morphia.query.experimental.filters.Filter;
-import eu.europeana.entitymanagement.batch.utils.BatchUtils;
-import eu.europeana.entitymanagement.definitions.batch.ScheduledTaskUtils;
-import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.web.service.EntityRecordService;
 
 /** {@link ItemReader} that reads documents from MongoDB via a paging technique. */
 public class EntityRecordDatabaseReader extends BaseDatabaseReader<BatchEntityRecord> {
@@ -21,10 +21,13 @@ public class EntityRecordDatabaseReader extends BaseDatabaseReader<BatchEntityRe
   private static final Logger logger = LogManager.getLogger(EntityRecordDatabaseReader.class);
   private final EntityRecordService entityRecordService;
   private final Filter[] queryFilters;
-  private final String scheduledTaskType; 
+  private final String scheduledTaskType;
 
   public EntityRecordDatabaseReader(
-      String scheduledTaskType, EntityRecordService entityRecordService, int pageSize, Filter... queryFilters) {
+      String scheduledTaskType,
+      EntityRecordService entityRecordService,
+      int pageSize,
+      Filter... queryFilters) {
     super(pageSize);
     this.scheduledTaskType = scheduledTaskType;
     this.entityRecordService = entityRecordService;
@@ -39,11 +42,15 @@ public class EntityRecordDatabaseReader extends BaseDatabaseReader<BatchEntityRe
     int start = page * pageSize;
     List<? extends EntityRecord> result =
         entityRecordService.findEntitiesWithFilter(start, pageSize, queryFilters);
-    
-    List<BatchEntityRecord> batchEntityRecords = result.stream()
-        .map(p -> new BatchEntityRecord(p, ScheduledTaskUtils.scheduledTaskTypeValueOf(scheduledTaskType)))
-        .collect(Collectors.toList());
-    
+
+    List<BatchEntityRecord> batchEntityRecords =
+        result.stream()
+            .map(
+                p ->
+                    new BatchEntityRecord(
+                        p, ScheduledTaskUtils.scheduledTaskTypeValueOf(scheduledTaskType)))
+            .collect(Collectors.toList());
+
     if (logger.isDebugEnabled()) {
       logger.debug(
           "Retrieved {} EntityRecords from database. skip={}, limit={}, entityIds={}",
@@ -52,7 +59,7 @@ public class EntityRecordDatabaseReader extends BaseDatabaseReader<BatchEntityRe
           pageSize,
           Arrays.toString(BatchUtils.getEntityIds(batchEntityRecords)));
     }
-    
+
     return (Iterator<BatchEntityRecord>) batchEntityRecords.iterator();
   }
 

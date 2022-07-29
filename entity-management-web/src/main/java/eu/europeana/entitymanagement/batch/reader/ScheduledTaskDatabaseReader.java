@@ -1,15 +1,15 @@
 package eu.europeana.entitymanagement.batch.reader;
 
+import dev.morphia.query.experimental.filters.Filter;
+import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
+import eu.europeana.entitymanagement.batch.utils.BatchUtils;
+import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.lang.NonNull;
-import dev.morphia.query.experimental.filters.Filter;
-import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
-import eu.europeana.entitymanagement.batch.utils.BatchUtils;
-import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 
 /**
  * Reads scheduled entities from the ScheduledTask collection, then retrieves the matching

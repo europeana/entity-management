@@ -6,25 +6,7 @@ import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEuropeana
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEuropeanaProxyId;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getIsAggregatedById;
 import static java.time.Instant.now;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
+
 import com.mongodb.client.result.UpdateResult;
 import dev.morphia.query.experimental.filters.Filter;
 import eu.europeana.api.commons.error.EuropeanaApiException;
@@ -63,6 +45,25 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service(AppConfig.BEAN_ENTITY_RECORD_SERVICE)
 public class EntityRecordService {
@@ -152,24 +153,26 @@ public class EntityRecordService {
   }
 
   public List<EntityRecord> saveBulkEntityRecords(List<? extends BatchEntityRecord> records) {
-    List<EntityRecord> entityRecords = records.stream()
-        .map(r -> r.getEntityRecord())
-        .collect(Collectors.toList());
+    List<EntityRecord> entityRecords =
+        records.stream().map(r -> r.getEntityRecord()).collect(Collectors.toList());
     return entityRecordRepository.saveBulk(entityRecords);
   }
 
   /**
-   * This method deletes entities permanently from database and from solr index if the deleteFromSolr flag is set to true
+   * This method deletes entities permanently from database and from solr index if the
+   * deleteFromSolr flag is set to true
+   *
    * @param entityIds the ids of the entities to be deleted
-   * @param deleteFromSolr flag indicating if the 
+   * @param deleteFromSolr flag indicating if the
    * @return the number of entities deleted into the database
    * @throws SolrServiceException if an error occurs when deleteing from solr
    */
-  public long deleteBulk(List<String> entityIds, boolean deleteFromSolr) throws SolrServiceException {
-    if(deleteFromSolr) {
+  public long deleteBulk(List<String> entityIds, boolean deleteFromSolr)
+      throws SolrServiceException {
+    if (deleteFromSolr) {
       solrService.deleteById(entityIds, true);
     }
-    
+
     long deleteCount = entityRecordRepository.deleteBulk(entityIds);
     if (deleteCount > 0) {
       logger.info("Deleted {} entityRecords from database: entityIds={}", deleteCount, entityIds);
@@ -178,8 +181,11 @@ public class EntityRecordService {
   }
 
   /**
-   * This method sets the deleted field in the database, it does not remove from solr. This method needs to be used only within the batch item writer
-   * @deprecated this method does not remove from solr. When using this method, it must be ensured that the delete from solr is also invoked   
+   * This method sets the deleted field in the database, it does not remove from solr. This method
+   * needs to be used only within the batch item writer
+   *
+   * @deprecated this method does not remove from solr. When using this method, it must be ensured
+   *     that the delete from solr is also invoked
    * @param entityRecords
    */
   @Deprecated
@@ -193,10 +199,12 @@ public class EntityRecordService {
    * Mark entity record as disabled and remove from solr
    *
    * @param er the entity record
-   * @param forceSolrCommit indicating if a solr commit should be explicitly (synchronuously) executed 
+   * @param forceSolrCommit indicating if a solr commit should be explicitly (synchronuously)
+   *     executed
    * @throws EntityUpdateException incase of solr access errors
    */
-  public void disableEntityRecord(EntityRecord er, boolean forceSolrCommit) throws EntityUpdateException {
+  public void disableEntityRecord(EntityRecord er, boolean forceSolrCommit)
+      throws EntityUpdateException {
     try {
       solrService.deleteById(List.of(er.getEntityId()), forceSolrCommit);
     } catch (SolrServiceException e) {
@@ -205,7 +213,6 @@ public class EntityRecordService {
     er.setDisabled(new Date());
     saveEntityRecord(er);
   }
-
 
   /**
    * Re-Enable an already existing entity record.
@@ -247,7 +254,7 @@ public class EntityRecordService {
   public long delete(String entityId) throws SolrServiceException {
     // delete from Solr before Mongo, so Solr errors won't leave DB in an inconsistent state
     solrService.deleteById(List.of(entityId), true);
-    
+
     return entityRecordRepository.deleteForGood(entityId);
   }
 
@@ -1054,8 +1061,7 @@ public class EntityRecordService {
    * @return
    */
   @Deprecated
-  public List<EntityRecord> findEntitiesWithFilter(
-      int start, int count, Filter[] queryFilters) {
+  public List<EntityRecord> findEntitiesWithFilter(int start, int count, Filter[] queryFilters) {
     return this.entityRecordRepository.findWithFilters(start, count, queryFilters);
   }
 

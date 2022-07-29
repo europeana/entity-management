@@ -16,14 +16,7 @@ import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.S
 import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.UPDATE_TYPE;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_DELETE_OPTS;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.UPSERT_OPTS;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.bson.Document;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Repository;
+
 import com.mongodb.bulk.BulkWriteResult;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.UpdateOneModel;
@@ -42,6 +35,14 @@ import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.bson.Document;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Repository;
 
 @Repository
 public class ScheduledTaskRepository implements InitializingBean {
@@ -60,9 +61,9 @@ public class ScheduledTaskRepository implements InitializingBean {
   }
 
   /**
-   * Marks the given tasks as "processed". Update only occurs if a task
-   * matches the specified query filter document.
-   * 
+   * Marks the given tasks as "processed". Update only occurs if a task matches the specified query
+   * filter document.
+   *
    * @param tasks list of scheduled tasks
    * @return BulkWriteResult of db query
    */
@@ -141,12 +142,7 @@ public class ScheduledTaskRepository implements InitializingBean {
         .find(ScheduledTask.class)
         .filter(
             eq(HAS_BEEN_PROCESSED, true),
-            or(
-                updateType.stream()
-                .map(u -> eq(UPDATE_TYPE, u.getValue()))
-                .toArray(Filter[]::new)
-              )
-        )
+            or(updateType.stream().map(u -> eq(UPDATE_TYPE, u.getValue())).toArray(Filter[]::new)))
         .delete(MULTI_DELETE_OPTS)
         .getDeletedCount();
   }
@@ -162,8 +158,7 @@ public class ScheduledTaskRepository implements InitializingBean {
    * @param filters Query filters
    * @return List with results
    */
-  public List<BatchEntityRecord> getEntityRecordsForTasks(
-      int start, int count, Filter[] filters) {
+  public List<BatchEntityRecord> getEntityRecordsForTasks(int start, int count, Filter[] filters) {
     List<ScheduledTask> scheduledTasks =
         datastore
             .find(ScheduledTask.class)
@@ -182,19 +177,19 @@ public class ScheduledTaskRepository implements InitializingBean {
     List<String> matchingIds =
         scheduledTasks.stream().map(ScheduledTask::getEntityId).collect(Collectors.toList());
 
-    List<EntityRecord> entityRecords = datastore
-        .find(EntityRecord.class)
-        .filter(in(ENTITY_ID, matchingIds))
-        .iterator()
-        .toList();
-    
+    List<EntityRecord> entityRecords =
+        datastore.find(EntityRecord.class).filter(in(ENTITY_ID, matchingIds)).iterator().toList();
+
     return entityRecords.stream()
-        .map(p -> new BatchEntityRecord(
-            p,
-            scheduledTasks.stream()
-              .filter(q -> q.getEntityId().equals(p.getEntityId()))
-              .collect(Collectors.toList()).get(0).getUpdateType()
-            ))
+        .map(
+            p ->
+                new BatchEntityRecord(
+                    p,
+                    scheduledTasks.stream()
+                        .filter(q -> q.getEntityId().equals(p.getEntityId()))
+                        .collect(Collectors.toList())
+                        .get(0)
+                        .getUpdateType()))
         .collect(Collectors.toList());
   }
 
@@ -220,12 +215,7 @@ public class ScheduledTaskRepository implements InitializingBean {
         .aggregate(ScheduledTask.class)
         .match(
             eq(HAS_BEEN_PROCESSED, false),
-            or(
-                updateType.stream()
-                .map(u -> eq(UPDATE_TYPE, u.getValue()))
-                .toArray(Filter[]::new)
-            )
-        )
+            or(updateType.stream().map(u -> eq(UPDATE_TYPE, u.getValue())).toArray(Filter[]::new)))
         // both collections use the same entityId field name
         .lookup(
             Lookup.from(FailedTask.class)

@@ -1,6 +1,10 @@
 package eu.europeana.entitymanagement.batch.listener;
 
 import static eu.europeana.entitymanagement.batch.utils.BatchUtils.getEntityIds;
+
+import eu.europeana.entitymanagement.batch.service.FailedTaskService;
+import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
+import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -8,12 +12,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.listener.ItemListenerSupport;
 import org.springframework.lang.NonNull;
-import eu.europeana.entitymanagement.batch.service.FailedTaskService;
-import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
-import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 
 /** Listens for Read, Processing and Write operations during Entity Update steps. */
-public class ScheduledTaskItemListener extends ItemListenerSupport<BatchEntityRecord, BatchEntityRecord> {
+public class ScheduledTaskItemListener
+    extends ItemListenerSupport<BatchEntityRecord, BatchEntityRecord> {
 
   private static final Logger logger = LogManager.getLogger(ScheduledTaskItemListener.class);
 
@@ -43,10 +45,14 @@ public class ScheduledTaskItemListener extends ItemListenerSupport<BatchEntityRe
 
     // Remove entries from the FailedTask collection if exists
     failedTaskService.removeFailures(Arrays.asList(entityIds));
-    
+
     // ScheduledTasks cleanup not required for synchronous execution
     if (!isSynchronous) {
-      scheduledTaskService.markAsProcessed(entityRecords.stream().collect(Collectors.toMap(p -> p.getEntityRecord().getEntityId(), p -> p.getScheduledTaskType())));
+      scheduledTaskService.markAsProcessed(
+          entityRecords.stream()
+              .collect(
+                  Collectors.toMap(
+                      p -> p.getEntityRecord().getEntityId(), p -> p.getScheduledTaskType())));
     }
   }
 
@@ -69,6 +75,11 @@ public class ScheduledTaskItemListener extends ItemListenerSupport<BatchEntityRe
     String[] entityIds = getEntityIds((List<BatchEntityRecord>) entityRecords);
 
     logger.warn("onWriteError: entityIds={}", entityIds, e);
-    failedTaskService.persistFailureBulk(entityRecords.stream().collect(Collectors.toMap(r -> r.getEntityRecord().getEntityId(), r -> r.getScheduledTaskType())), e);
+    failedTaskService.persistFailureBulk(
+        entityRecords.stream()
+            .collect(
+                Collectors.toMap(
+                    r -> r.getEntityRecord().getEntityId(), r -> r.getScheduledTaskType())),
+        e);
   }
 }

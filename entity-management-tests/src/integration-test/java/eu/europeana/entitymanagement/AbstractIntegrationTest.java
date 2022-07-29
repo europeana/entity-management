@@ -1,11 +1,29 @@
 package eu.europeana.entitymanagement;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
+import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.common.config.DataSource;
+import eu.europeana.entitymanagement.config.DataSources;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
+import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
+import eu.europeana.entitymanagement.testutils.MongoContainer;
+import eu.europeana.entitymanagement.testutils.SolrContainer;
+import eu.europeana.entitymanagement.web.MetisDereferenceUtils;
+import eu.europeana.entitymanagement.web.service.EntityRecordService;
+import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Optional;
 import javax.xml.bind.JAXBContext;
+import okhttp3.mockwebserver.Dispatcher;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,24 +39,6 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.output.ToStringConsumer;
 import org.testcontainers.containers.output.WaitingConsumer;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
-import eu.europeana.entitymanagement.common.config.DataSource;
-import eu.europeana.entitymanagement.config.DataSources;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
-import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
-import eu.europeana.entitymanagement.testutils.MongoContainer;
-import eu.europeana.entitymanagement.testutils.SolrContainer;
-import eu.europeana.entitymanagement.web.MetisDereferenceUtils;
-import eu.europeana.entitymanagement.web.service.EntityRecordService;
-import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
-import okhttp3.mockwebserver.Dispatcher;
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
-import okhttp3.mockwebserver.RecordedRequest;
 
 @ComponentScan(basePackageClasses = EntityManagementBasePackageMapper.class)
 @AutoConfigureMockMvc
@@ -212,14 +212,13 @@ public abstract class AbstractIntegrationTest {
     // return entityRecord version with consolidated entity
     return entityRecordService.retrieveByEntityId(savedRecord.getEntityId()).orElseThrow();
   }
-  
 
   public static String loadFile(String resourcePath) throws IOException {
     InputStream is = AbstractIntegrationTest.class.getResourceAsStream(resourcePath);
     assert is != null;
     return IOUtils.toString(is, StandardCharsets.UTF_8).replace("\n", "");
   }
-  
+
   public Optional<EntityRecord> retrieveEntity(String entityId) {
     return entityRecordService.retrieveByEntityId(entityId);
   }

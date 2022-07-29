@@ -1,14 +1,5 @@
 package eu.europeana.entitymanagement.batch.processor;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.validation.ConstraintViolation;
-import javax.validation.ValidatorFactory;
-import org.springframework.batch.item.ItemProcessor;
-import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Component;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.config.DataSources;
@@ -23,16 +14,27 @@ import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatio
 import eu.europeana.entitymanagement.normalization.EntityFieldsDataSourceProxyValidationGroup;
 import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.validation.ConstraintViolation;
+import javax.validation.ValidatorFactory;
+import org.springframework.batch.item.ItemProcessor;
+import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Component;
 
 /**
  * This {@link ItemProcessor} validates Entity metadata, then creates a consolidated entity by
  * merging the metadata from all data sources .
  */
 @Component
-public class EntityConsolidationProcessor implements ItemProcessor<BatchEntityRecord, BatchEntityRecord> {
+public class EntityConsolidationProcessor
+    implements ItemProcessor<BatchEntityRecord, BatchEntityRecord> {
 
-  private static final Set<ScheduledTaskType> supportedScheduledTasks = Set.of(ScheduledUpdateType.FULL_UPDATE);
-  
+  private static final Set<ScheduledTaskType> supportedScheduledTasks =
+      Set.of(ScheduledUpdateType.FULL_UPDATE);
+
   private final EntityRecordService entityRecordService;
   private final ValidatorFactory emValidatorFactory;
 
@@ -51,22 +53,23 @@ public class EntityConsolidationProcessor implements ItemProcessor<BatchEntityRe
   }
 
   @Override
-  public BatchEntityRecord process(@NonNull BatchEntityRecord entityRecord) throws EuropeanaApiException {
+  public BatchEntityRecord process(@NonNull BatchEntityRecord entityRecord)
+      throws EuropeanaApiException {
 
-    if(supportedScheduledTasks.contains(entityRecord.getScheduledTaskType())) {
+    if (supportedScheduledTasks.contains(entityRecord.getScheduledTaskType())) {
 
       List<EntityProxy> externalProxies = entityRecord.getEntityRecord().getExternalProxies();
-  
+
       Entity externalProxyEntity = externalProxies.get(0).getEntity();
       String proxyId = externalProxies.get(0).getProxyId();
       Optional<DataSource> dataSource = datasources.getDatasource(proxyId);
       boolean isStaticDataSource = dataSource.isPresent() && dataSource.get().isStatic();
-  
+
       // do not validate static data sources
       if (!isStaticDataSource) {
         validateDataSourceProxyConstraints(externalProxyEntity);
       }
-  
+
       // entities from static datasources should not have multiple proxies
       if (externalProxies.size() > 1) {
         // cumulatively merge all external proxies
@@ -78,28 +81,30 @@ public class EntityConsolidationProcessor implements ItemProcessor<BatchEntityRe
               entityRecordService.mergeEntities(externalProxyEntity, secondaryProxyEntity);
         }
       }
-  
+
       Entity europeanaProxyEntity = entityRecord.getEntityRecord().getEuropeanaProxy().getEntity();
-  
+
       Entity consolidatedEntity = null;
       if (isStaticDataSource) {
-        consolidatedEntity = EntityObjectFactory.createConsolidatedEntityObject(europeanaProxyEntity);
+        consolidatedEntity =
+            EntityObjectFactory.createConsolidatedEntityObject(europeanaProxyEntity);
       } else {
         consolidatedEntity =
             entityRecordService.mergeEntities(europeanaProxyEntity, externalProxyEntity);
       }
-  
+
       // add external proxyIds to sameAs / exactMatch
       entityRecordService.addSameReferenceLinks(
           consolidatedEntity,
           externalProxies.stream().map(EntityProxy::getProxyId).collect(Collectors.toList()));
-  
+
       emEntityFieldCleaner.cleanAndNormalize(consolidatedEntity);
       entityRecordService.performReferentialIntegrity(consolidatedEntity);
       validateCompleteValidationConstraints(consolidatedEntity);
-      entityRecordService.updateConsolidatedVersion(entityRecord.getEntityRecord(), consolidatedEntity);
+      entityRecordService.updateConsolidatedVersion(
+          entityRecord.getEntityRecord(), consolidatedEntity);
     }
-    
+
     return entityRecord;
   }
 

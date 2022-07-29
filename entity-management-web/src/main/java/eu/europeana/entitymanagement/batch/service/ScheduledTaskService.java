@@ -1,5 +1,12 @@
 package eu.europeana.entitymanagement.batch.service;
 
+import com.mongodb.bulk.BulkWriteResult;
+import dev.morphia.query.experimental.filters.Filter;
+import dev.morphia.query.internal.MorphiaCursor;
+import eu.europeana.entitymanagement.batch.repository.ScheduledTaskRepository;
+import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -9,13 +16,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.mongodb.bulk.BulkWriteResult;
-import dev.morphia.query.experimental.filters.Filter;
-import dev.morphia.query.internal.MorphiaCursor;
-import eu.europeana.entitymanagement.batch.repository.ScheduledTaskRepository;
-import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 
 @Service
 public class ScheduledTaskService {
@@ -30,9 +30,9 @@ public class ScheduledTaskService {
   }
 
   /**
-   * Creates {@link ScheduledTask} instances for entity ids and their update types, 
-   * and then saves them to the database.
-   * 
+   * Creates {@link ScheduledTask} instances for entity ids and their update types, and then saves
+   * them to the database.
+   *
    * @param entityIdsToUpdateType
    */
   public void scheduleTasksForEntities(Map<String, ScheduledTaskType> entityIdsToUpdateType) {
@@ -48,7 +48,7 @@ public class ScheduledTaskService {
 
   /**
    * Marks entities as processed.
-   * 
+   *
    * @param entityIdsToUpdateType
    */
   public void markAsProcessed(Map<String, ScheduledTaskType> entityIdsToUpdateType) {
@@ -71,8 +71,10 @@ public class ScheduledTaskService {
     long removeCount = repository.removeProcessedTasks(updateType);
     if (removeCount > 0 && logger.isDebugEnabled()) {
       logger.debug(
-          "Removed scheduled tasks from db: count={}, updateType={}", 
-          removeCount, String.join(",", updateType.stream().map(u -> u.getValue()).collect(Collectors.toList())));
+          "Removed scheduled tasks from db: count={}, updateType={}",
+          removeCount,
+          String.join(
+              ",", updateType.stream().map(u -> u.getValue()).collect(Collectors.toList())));
     }
   }
 

@@ -6,16 +6,17 @@ public class BatchEntityRecord {
 
   private EntityRecord entityRecord;
   private ScheduledTaskType scheduledTaskType;
-  
+
   public BatchEntityRecord(EntityRecord entityRecord, ScheduledTaskType scheduledTaskType) {
     this.entityRecord = entityRecord;
     this.scheduledTaskType = scheduledTaskType;
   }
+
   public EntityRecord getEntityRecord() {
     return entityRecord;
   }
+
   public ScheduledTaskType getScheduledTaskType() {
     return scheduledTaskType;
   }
-  
 }

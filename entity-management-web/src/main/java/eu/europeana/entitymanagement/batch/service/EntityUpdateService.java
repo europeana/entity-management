@@ -1,6 +1,11 @@
 package eu.europeana.entitymanagement.batch.service;
 
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.SYNC_WEB_REQUEST_JOB_LAUNCHER;
+
+import eu.europeana.entitymanagement.batch.config.EntityUpdateJobConfig;
+import eu.europeana.entitymanagement.batch.utils.BatchUtils;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
@@ -14,10 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import eu.europeana.entitymanagement.batch.config.EntityUpdateJobConfig;
-import eu.europeana.entitymanagement.batch.utils.BatchUtils;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 
 @Service
 public class EntityUpdateService {
@@ -67,8 +68,9 @@ public class EntityUpdateService {
         Arrays.toString(entityIds.toArray()),
         entityIds.size(),
         updateType);
-    Map<String, ScheduledTaskType> mapEntityIdScheduledTaskType = new HashMap<String, ScheduledTaskType>(entityIds.size());
-    for(String id : entityIds) {
+    Map<String, ScheduledTaskType> mapEntityIdScheduledTaskType =
+        new HashMap<String, ScheduledTaskType>(entityIds.size());
+    for (String id : entityIds) {
       mapEntityIdScheduledTaskType.put(id, updateType);
     }
     scheduledTaskService.scheduleTasksForEntities(mapEntityIdScheduledTaskType);

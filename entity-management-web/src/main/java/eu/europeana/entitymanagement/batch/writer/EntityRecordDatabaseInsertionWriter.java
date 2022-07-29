@@ -1,11 +1,11 @@
 package eu.europeana.entitymanagement.batch.writer;
 
+import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
+import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import java.util.List;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
-import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
-import eu.europeana.entitymanagement.web.service.EntityRecordService;
 
 /** This {@link ItemWriter} saves EntityRecords to the database. */
 @Component
@@ -21,5 +21,4 @@ public class EntityRecordDatabaseInsertionWriter implements ItemWriter<BatchEnti
   public void write(@NonNull List<? extends BatchEntityRecord> list) throws Exception {
     entityRecordService.saveBulkEntityRecords(list);
   }
-
 }

@@ -1,13 +1,14 @@
 package eu.europeana.entitymanagement.batch.writer;
 
 import static eu.europeana.entitymanagement.solr.SolrUtils.createSolrEntity;
+
+import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
+import eu.europeana.entitymanagement.solr.model.SolrEntity;
+import eu.europeana.entitymanagement.solr.service.SolrService;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.stereotype.Component;
-import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
-import eu.europeana.entitymanagement.solr.model.SolrEntity;
-import eu.europeana.entitymanagement.solr.service.SolrService;
 
 /** Saves Entities to Solr */
 @Component

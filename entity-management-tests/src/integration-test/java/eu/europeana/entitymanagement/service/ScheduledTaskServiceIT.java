@@ -5,19 +5,7 @@ import static eu.europeana.entitymanagement.common.config.AppConfigConstants.ENT
 import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.ENTITY_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import java.time.Instant;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+
 import com.mongodb.assertions.Assertions;
 import dev.morphia.query.experimental.filters.Filter;
 import dev.morphia.query.experimental.filters.Filters;
@@ -36,10 +24,22 @@ import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
-import eu.europeana.entitymanagement.solr.model.SolrAgent;
 import eu.europeana.entitymanagement.solr.model.SolrConcept;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
+import java.time.Instant;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -52,18 +52,17 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
 
   /** Used for testing EntityRecord retrieval via ScheduledTask */
   @Autowired private EntityRecordRepository entityRecordRepository;
-  
+
   @Autowired
-  @Qualifier(ENTITY_UPDATE_JOB_LAUNCHER) 
+  @Qualifier(ENTITY_UPDATE_JOB_LAUNCHER)
   JobLauncher entityUpdateJobLauncher;
-  
+
   @Autowired
-  @Qualifier(ENTITY_REMOVALS_JOB_LAUNCHER) 
+  @Qualifier(ENTITY_REMOVALS_JOB_LAUNCHER)
   JobLauncher entityDeletionsJobLauncher;
-  
-  @Autowired
-  EntityUpdateJobConfig updateJobConfig;
-  
+
+  @Autowired EntityUpdateJobConfig updateJobConfig;
+
   @Qualifier(AppConfig.BEAN_EM_SOLR_SERVICE)
   @Autowired
   private SolrService emSolrService;
@@ -85,10 +84,11 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
   @Test
   void shouldCreateTasksForEntities() {
     List<String> entityIds = List.of(ScheduledTaskServiceIT.entityId1, entityId2);
-    
-    Map<String, ScheduledTaskType> map = Map.of(
-        entityId1, testUpdateType, 
-        entityId2, testUpdateType);
+
+    Map<String, ScheduledTaskType> map =
+        Map.of(
+            entityId1, testUpdateType,
+            entityId2, testUpdateType);
     service.scheduleTasksForEntities(map);
 
     List<ScheduledTask> tasks = service.getTasks(entityIds);
@@ -125,9 +125,10 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
   @Test
   void shouldMarkAsProcessed() {
     List<String> entityIds = List.of(entityId1, entityId2);
-    Map<String, ScheduledTaskType> map = Map.of(
-        entityId1, testUpdateType, 
-        entityId2, testUpdateType);
+    Map<String, ScheduledTaskType> map =
+        Map.of(
+            entityId1, testUpdateType,
+            entityId2, testUpdateType);
     service.scheduleTasksForEntities(map);
 
     service.markAsProcessed(map);
@@ -145,9 +146,10 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
 
     // create scheduledTasks for entityId1 and entityId2
     List<String> entityIds = List.of(ScheduledTaskServiceIT.entityId1, entityId2);
-    Map<String, ScheduledTaskType> map = Map.of(
-        entityId1, testUpdateType, 
-        entityId2, testUpdateType);
+    Map<String, ScheduledTaskType> map =
+        Map.of(
+            entityId1, testUpdateType,
+            entityId2, testUpdateType);
 
     service.scheduleTasksForEntities(map);
 
@@ -169,7 +171,7 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
     assertEquals(1, tasks.size());
     assertEquals(entityId2, tasks.get(0).getEntityId());
   }
-  
+
   @Test
   void updateScheduledTasks() throws Exception {
     // create first entity
@@ -185,55 +187,73 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
     String entityId2 =
         createEntity(europeanaMetadata, metisResponse, IntegrationTestUtils.AGENT_STALIN_URI)
             .getEntityId();
-    
+
     // create scheduledTasks for entityId1 and entityId2
-    Map<String, ScheduledTaskType> map = Map.of(
-        entityId1, ScheduledUpdateType.FULL_UPDATE, 
-        entityId2, ScheduledUpdateType.METRICS_UPDATE);
+    Map<String, ScheduledTaskType> map =
+        Map.of(
+            entityId1, ScheduledUpdateType.FULL_UPDATE,
+            entityId2, ScheduledUpdateType.METRICS_UPDATE);
     service.scheduleTasksForEntities(map);
-    
+
     Date dateBeforeRun = new Date();
-    
+
     entityUpdateJobLauncher.run(
-        updateJobConfig.updateScheduledEntities(List.of(ScheduledUpdateType.FULL_UPDATE, ScheduledUpdateType.METRICS_UPDATE)),
+        updateJobConfig.updateScheduledEntities(
+            List.of(ScheduledUpdateType.FULL_UPDATE, ScheduledUpdateType.METRICS_UPDATE)),
         BatchUtils.createJobParameters(
-            null, Date.from(Instant.now()), List.of(ScheduledUpdateType.FULL_UPDATE, ScheduledUpdateType.METRICS_UPDATE), false));
-    
+            null,
+            Date.from(Instant.now()),
+            List.of(ScheduledUpdateType.FULL_UPDATE, ScheduledUpdateType.METRICS_UPDATE),
+            false));
+
     Optional<EntityRecord> entityRecord1Updated = retrieveEntity(entityId1);
     Optional<EntityRecord> entityRecord2Updated = retrieveEntity(entityId2);
-    
+
     /*
      * check the modification date for the external proxies (updated in case of the dereferce processor which is
      * called during the FULL_UPDATE but not during the METRICS_UPDATE.
      */
     Assertions.assertFalse(
-      entityRecord1Updated.get().getExternalProxies().stream()
-        .map(p -> p.getProxyIn().getModified().compareTo(dateBeforeRun)>0)
-        .collect(Collectors.toList()).contains(false)
-    );
+        entityRecord1Updated.get().getExternalProxies().stream()
+            .map(p -> p.getProxyIn().getModified().compareTo(dateBeforeRun) > 0)
+            .collect(Collectors.toList())
+            .contains(false));
     Assertions.assertFalse(
         entityRecord2Updated.get().getExternalProxies().stream()
-          .map(p -> p.getProxyIn().getModified().compareTo(dateBeforeRun)>0)
-          .collect(Collectors.toList()).contains(true)
-      );
-    
+            .map(p -> p.getProxyIn().getModified().compareTo(dateBeforeRun) > 0)
+            .collect(Collectors.toList())
+            .contains(true));
+
     /*
      * check the modified field in the aggregation which is updated during the METRICS_UPDATE
      */
-    Assertions.assertTrue(entityRecord1Updated.get().getEntity().getIsAggregatedBy().getModified()
-        .compareTo(dateBeforeRun)>0);
-    Assertions.assertTrue(entityRecord2Updated.get().getEntity().getIsAggregatedBy().getModified()
-        .compareTo(dateBeforeRun)>0);
+    Assertions.assertTrue(
+        entityRecord1Updated
+                .get()
+                .getEntity()
+                .getIsAggregatedBy()
+                .getModified()
+                .compareTo(dateBeforeRun)
+            > 0);
+    Assertions.assertTrue(
+        entityRecord2Updated
+                .get()
+                .getEntity()
+                .getIsAggregatedBy()
+                .getModified()
+                .compareTo(dateBeforeRun)
+            > 0);
 
     List<String> entityIds = List.of(entityId1, entityId2);
     List<ScheduledTask> tasks = service.getTasks(entityIds);
-    //check that the scheduled tasks has been processed
-    Assertions.assertFalse(tasks.stream().map(p -> p.hasBeenProcessed()).collect(Collectors.toList()).contains(false));
-    
-    //check that no failed tasks are created
-    Assertions.assertTrue(failedTaskRepository.getFailures(entityIds).size()==0);
+    // check that the scheduled tasks has been processed
+    Assertions.assertFalse(
+        tasks.stream().map(p -> p.hasBeenProcessed()).collect(Collectors.toList()).contains(false));
+
+    // check that no failed tasks are created
+    Assertions.assertTrue(failedTaskRepository.getFailures(entityIds).size() == 0);
   }
-  
+
   @Test
   void deprecationAndDeletionScheduledTasks() throws Exception {
     // create first entity
@@ -242,7 +262,7 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
     String entityId1 =
         createEntity(europeanaMetadata, metisResponse, IntegrationTestUtils.CONCEPT_BATHTUB_URI)
             .getEntityId();
-    //check that the solr entity is created
+    // check that the solr entity is created
     SolrConcept solrConcept = emSolrService.searchById(SolrConcept.class, entityId1);
     Assertions.assertNotNull(solrConcept);
 
@@ -252,27 +272,33 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
     String entityId2 =
         createEntity(europeanaMetadata, metisResponse, IntegrationTestUtils.CONCEPT_BATHTUB_URI)
             .getEntityId();
-    //check that the solr entity is created
+    // check that the solr entity is created
     solrConcept = emSolrService.searchById(SolrConcept.class, entityId2);
     Assertions.assertNotNull(solrConcept);
-    
+
     // create scheduledTasks for entityId1 and entityId2
-    Map<String, ScheduledTaskType> map = Map.of(
-        entityId1, ScheduledRemovalType.DEPRECATION, 
-        entityId2, ScheduledRemovalType.PERMANENT_DELETION);
+    Map<String, ScheduledTaskType> map =
+        Map.of(
+            entityId1, ScheduledRemovalType.DEPRECATION,
+            entityId2, ScheduledRemovalType.PERMANENT_DELETION);
     service.scheduleTasksForEntities(map);
-    
+
     entityDeletionsJobLauncher.run(
-        updateJobConfig.removeScheduledEntities(List.of(ScheduledRemovalType.DEPRECATION, ScheduledRemovalType.PERMANENT_DELETION)),
+        updateJobConfig.removeScheduledEntities(
+            List.of(ScheduledRemovalType.DEPRECATION, ScheduledRemovalType.PERMANENT_DELETION)),
         BatchUtils.createJobParameters(
-            null, Date.from(Instant.now()), List.of(ScheduledRemovalType.DEPRECATION, ScheduledRemovalType.PERMANENT_DELETION), false));
-    
+            null,
+            Date.from(Instant.now()),
+            List.of(ScheduledRemovalType.DEPRECATION, ScheduledRemovalType.PERMANENT_DELETION),
+            false));
+
     Optional<EntityRecord> entityRecord1DbUpdated = retrieveEntity(entityId1);
-    Optional<EntityRecord> entityRecord2DbUpdated = retrieveEntity(entityId2);    
+    Optional<EntityRecord> entityRecord2DbUpdated = retrieveEntity(entityId2);
     SolrConcept entity1Solr = emSolrService.searchById(SolrConcept.class, entityId1);
     SolrConcept entity2Solr = emSolrService.searchById(SolrConcept.class, entityId2);
 
-    //check that the first record is disbaled and the second deleted from the db, and both solr records are deleted
+    // check that the first record is disbaled and the second deleted from the db, and both solr
+    // records are deleted
     Assertions.assertTrue(entityRecord1DbUpdated.get().isDisabled());
     Assertions.assertFalse(entityRecord2DbUpdated.isPresent());
     Assertions.assertNull(entity1Solr);
@@ -280,10 +306,11 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
 
     List<String> entityIds = List.of(entityId1, entityId2);
     List<ScheduledTask> tasks = service.getTasks(entityIds);
-    //check that the scheduled tasks has been processed
-    Assertions.assertFalse(tasks.stream().map(p -> p.hasBeenProcessed()).collect(Collectors.toList()).contains(false));
-    
-    //check that no failed tasks are created
-    Assertions.assertTrue(failedTaskRepository.getFailures(entityIds).size()==0);
+    // check that the scheduled tasks has been processed
+    Assertions.assertFalse(
+        tasks.stream().map(p -> p.hasBeenProcessed()).collect(Collectors.toList()).contains(false));
+
+    // check that no failed tasks are created
+    Assertions.assertTrue(failedTaskRepository.getFailures(entityIds).size() == 0);
   }
 }

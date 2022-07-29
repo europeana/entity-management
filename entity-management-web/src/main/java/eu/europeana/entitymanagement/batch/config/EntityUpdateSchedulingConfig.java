@@ -6,6 +6,9 @@ import static eu.europeana.entitymanagement.common.config.AppConfigConstants.PER
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.PERIODIC_UPDATES_SCHEDULER;
 import static eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType.DEPRECATION;
 import static eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType.PERMANENT_DELETION;
+
+import eu.europeana.entitymanagement.batch.utils.BatchUtils;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
@@ -22,8 +25,6 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import eu.europeana.entitymanagement.batch.utils.BatchUtils;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 
 @Configuration
 @PropertySource("classpath:entitymanagement.properties")
@@ -69,7 +70,8 @@ public class EntityUpdateSchedulingConfig implements InitializingBean {
     if (syncEnabled) {
       // invoke methods outside logging call
       String updateInitialDelayString = toMinutesAndSeconds(updateInitialDelay);
-      String deprecationDeletionInitialDelayString = toMinutesAndSeconds(deprecationDeletionInitialDelay);
+      String deprecationDeletionInitialDelayString =
+          toMinutesAndSeconds(deprecationDeletionInitialDelay);
       String intervalString = toMinutesAndSeconds(interval);
 
       logger.info(
@@ -107,15 +109,19 @@ public class EntityUpdateSchedulingConfig implements InitializingBean {
     logger.info("Triggering scheduled full and metrics update for entities");
     try {
       entityUpdateJobLauncher.run(
-          updateJobConfig.updateScheduledEntities(List.of(ScheduledUpdateType.FULL_UPDATE, ScheduledUpdateType.METRICS_UPDATE)),
+          updateJobConfig.updateScheduledEntities(
+              List.of(ScheduledUpdateType.FULL_UPDATE, ScheduledUpdateType.METRICS_UPDATE)),
           BatchUtils.createJobParameters(
-              null, Date.from(Instant.now()), List.of(ScheduledUpdateType.FULL_UPDATE, ScheduledUpdateType.METRICS_UPDATE), false));
+              null,
+              Date.from(Instant.now()),
+              List.of(ScheduledUpdateType.FULL_UPDATE, ScheduledUpdateType.METRICS_UPDATE),
+              false));
     } catch (Exception e) {
       logger.warn("Error running scheduled full and metrics update", e);
     }
   }
 
-  /** Periodically run deprecations and deletions (in one run)*/
+  /** Periodically run deprecations and deletions (in one run) */
   @Async
   void runScheduledDeprecationsAndDeletions() {
     logger.info("Triggering scheduled deprecations and deletions for entities");

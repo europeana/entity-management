@@ -3,6 +3,11 @@ package eu.europeana.entitymanagement.service;
 import static eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType.PERMANENT_DELETION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import eu.europeana.entitymanagement.AbstractIntegrationTest;
+import eu.europeana.entitymanagement.batch.service.FailedTaskService;
+import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -11,10 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import eu.europeana.entitymanagement.AbstractIntegrationTest;
-import eu.europeana.entitymanagement.batch.service.FailedTaskService;
-import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -50,9 +51,10 @@ class FailedTaskServiceIT extends AbstractIntegrationTest {
 
   @Test
   void shouldPersistMultipleFailures() {
-    Map<String, ScheduledTaskType> map = Map.of(
-        entityId1, testUpdateType, 
-        entityId2, testUpdateType);
+    Map<String, ScheduledTaskType> map =
+        Map.of(
+            entityId1, testUpdateType,
+            entityId2, testUpdateType);
 
     service.persistFailureBulk(map, testException);
 
@@ -83,9 +85,10 @@ class FailedTaskServiceIT extends AbstractIntegrationTest {
     service.persistFailure(entityId1, testUpdateType, testException);
 
     // insert two failures - with one matching pre-inserted
-    Map<String, ScheduledTaskType> map = Map.of(
-        entityId1, testUpdateType, 
-        entityId2, testUpdateType);
+    Map<String, ScheduledTaskType> map =
+        Map.of(
+            entityId1, testUpdateType,
+            entityId2, testUpdateType);
     service.persistFailureBulk(map, testException);
 
     // also check that failure count is incremented

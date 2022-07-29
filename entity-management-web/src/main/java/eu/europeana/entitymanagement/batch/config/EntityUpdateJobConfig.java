@@ -11,6 +11,30 @@ import static eu.europeana.entitymanagement.common.config.AppConfigConstants.UPD
 import static eu.europeana.entitymanagement.common.config.AppConfigConstants.WEB_REQUEST_JOB_EXECUTOR;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_ID;
 import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.UPDATE_TYPE;
+
+import dev.morphia.query.experimental.filters.Filter;
+import dev.morphia.query.experimental.filters.Filters;
+import eu.europeana.entitymanagement.batch.listener.EntityUpdateStepListener;
+import eu.europeana.entitymanagement.batch.listener.ScheduledTaskItemListener;
+import eu.europeana.entitymanagement.batch.processor.EntityConsolidationProcessor;
+import eu.europeana.entitymanagement.batch.processor.EntityDereferenceProcessor;
+import eu.europeana.entitymanagement.batch.processor.EntityMetricsProcessor;
+import eu.europeana.entitymanagement.batch.reader.EntityRecordDatabaseReader;
+import eu.europeana.entitymanagement.batch.reader.ScheduledTaskDatabaseReader;
+import eu.europeana.entitymanagement.batch.service.FailedTaskService;
+import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
+import eu.europeana.entitymanagement.batch.writer.EntityRecordDatabaseDeprecationWriter;
+import eu.europeana.entitymanagement.batch.writer.EntityRecordDatabaseInsertionWriter;
+import eu.europeana.entitymanagement.batch.writer.EntityRecordDatabaseRemovalWriter;
+import eu.europeana.entitymanagement.batch.writer.EntitySolrInsertionWriter;
+import eu.europeana.entitymanagement.batch.writer.EntitySolrRemovalWriter;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.definitions.batch.EMBatchConstants;
+import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
+import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -37,29 +61,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
-import dev.morphia.query.experimental.filters.Filter;
-import dev.morphia.query.experimental.filters.Filters;
-import eu.europeana.entitymanagement.batch.listener.EntityUpdateStepListener;
-import eu.europeana.entitymanagement.batch.listener.ScheduledTaskItemListener;
-import eu.europeana.entitymanagement.batch.processor.EntityConsolidationProcessor;
-import eu.europeana.entitymanagement.batch.processor.EntityDereferenceProcessor;
-import eu.europeana.entitymanagement.batch.processor.EntityMetricsProcessor;
-import eu.europeana.entitymanagement.batch.reader.EntityRecordDatabaseReader;
-import eu.europeana.entitymanagement.batch.reader.ScheduledTaskDatabaseReader;
-import eu.europeana.entitymanagement.batch.service.FailedTaskService;
-import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
-import eu.europeana.entitymanagement.batch.writer.EntityRecordDatabaseDeprecationWriter;
-import eu.europeana.entitymanagement.batch.writer.EntityRecordDatabaseInsertionWriter;
-import eu.europeana.entitymanagement.batch.writer.EntityRecordDatabaseRemovalWriter;
-import eu.europeana.entitymanagement.batch.writer.EntitySolrInsertionWriter;
-import eu.europeana.entitymanagement.batch.writer.EntitySolrRemovalWriter;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.definitions.batch.EMBatchConstants;
-import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
-import eu.europeana.entitymanagement.web.service.EntityRecordService;
 
 @Component
 public class EntityUpdateJobConfig {
@@ -108,7 +109,8 @@ public class EntityUpdateJobConfig {
   public EntityUpdateJobConfig(
       JobBuilderFactory jobBuilderFactory,
       StepBuilderFactory stepBuilderFactory,
-      @Qualifier(SINGLE_ENTITY_RECORD_READER) ItemReader<BatchEntityRecord> singleEntityRecordReader,
+      @Qualifier(SINGLE_ENTITY_RECORD_READER)
+          ItemReader<BatchEntityRecord> singleEntityRecordReader,
       @Qualifier(SCHEDULED_TASK_READER) ItemReader<BatchEntityRecord> scheduledTaskReader,
       EntityDereferenceProcessor dereferenceProcessor,
       EntityConsolidationProcessor entityUpdateProcessor,
@@ -164,10 +166,12 @@ public class EntityUpdateJobConfig {
   @StepScope
   private EntityRecordDatabaseReader singleEntityRecordReader(
       @Value("#{jobParameters[entityId]}") String entityIdString,
-      @Value("#{jobParameters[updateType]}") String updateType
-      ) {
+      @Value("#{jobParameters[updateType]}") String updateType) {
     return new EntityRecordDatabaseReader(
-        updateType, entityRecordService, configuredBatchChunkSize, Filters.eq(ENTITY_ID, entityIdString));
+        updateType,
+        entityRecordService,
+        configuredBatchChunkSize,
+        Filters.eq(ENTITY_ID, entityIdString));
   }
 
   @Bean(name = SCHEDULED_TASK_READER)
@@ -175,11 +179,12 @@ public class EntityUpdateJobConfig {
   private SynchronizedItemStreamReader<BatchEntityRecord> allEntityFailureReader(
       @Value("#{jobParameters[currentStartTime]}") Date currentStartTime,
       @Value("#{jobParameters[updateType]}") String updateType) {
-    
-    Filter[] orFilters = Arrays.asList(updateType.split(",")).stream()
-      .map(u -> eq(UPDATE_TYPE, u))
-      .toArray(Filter[]::new);
-    
+
+    Filter[] orFilters =
+        Arrays.asList(updateType.split(",")).stream()
+            .map(u -> eq(UPDATE_TYPE, u))
+            .toArray(Filter[]::new);
+
     ScheduledTaskDatabaseReader reader =
         new ScheduledTaskDatabaseReader(
             scheduledTaskService,
@@ -201,9 +206,7 @@ public class EntityUpdateJobConfig {
       // see JobParameter enum for string values
       @Value("#{jobParameters[isSynchronous]}") String isSynchronousString) {
     return new ScheduledTaskItemListener(
-        failedTaskService,
-        scheduledTaskService,
-        Boolean.parseBoolean(isSynchronousString));
+        failedTaskService, scheduledTaskService, Boolean.parseBoolean(isSynchronousString));
   }
 
   /** Creates a StepExecutionListener that's called before / after the step runs */
@@ -238,7 +241,8 @@ public class EntityUpdateJobConfig {
 
   private ItemWriter<BatchEntityRecord> compositeEntityDeprecationDeletionWriter() {
     CompositeItemWriter<BatchEntityRecord> compositeWriter = new CompositeItemWriter<>();
-    compositeWriter.setDelegates(Arrays.asList(dbDeprecationWriter, dbRemovalWriter, solrRemovalWriter));
+    compositeWriter.setDelegates(
+        Arrays.asList(dbDeprecationWriter, dbRemovalWriter, solrRemovalWriter));
     return compositeWriter;
   }
 
@@ -246,7 +250,7 @@ public class EntityUpdateJobConfig {
    * Step for updating entities. Uses a different reader and processor, based on the value of
    * isSynchronous.
    *
-   * @param updateType types of update 
+   * @param updateType types of update
    * @param isSynchronous indicates whether this update is executed synchronously or async
    * @return step
    */
@@ -268,7 +272,9 @@ public class EntityUpdateJobConfig {
     step.processor(compositeUpdateProcessor());
 
     return step.writer(compositeEntityInsertionWriter())
-        .listener((ItemProcessListener<? super BatchEntityRecord, ? super BatchEntityRecord>) itemListener)
+        .listener(
+            (ItemProcessListener<? super BatchEntityRecord, ? super BatchEntityRecord>)
+                itemListener)
         .faultTolerant()
         .skipPolicy(noopSkipPolicy)
         .taskExecutor(executor)
@@ -292,7 +298,8 @@ public class EntityUpdateJobConfig {
     step.writer(compositeEntityDeprecationDeletionWriter());
 
     return step.listener(
-            (ItemProcessListener<? super BatchEntityRecord, ? super BatchEntityRecord>) itemListener)
+            (ItemProcessListener<? super BatchEntityRecord, ? super BatchEntityRecord>)
+                itemListener)
         .faultTolerant()
         .skipPolicy(noopSkipPolicy)
         .taskExecutor(executor)
