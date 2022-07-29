@@ -6,6 +6,7 @@ import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.exception.ingestion.EntityValidationException;
@@ -54,7 +55,7 @@ public class EntityConsolidationProcessor
 
   @Override
   public BatchEntityRecord process(@NonNull BatchEntityRecord entityRecord)
-      throws EuropeanaApiException {
+      throws EuropeanaApiException, EntityModelCreationException {
 
     if (supportedScheduledTasks.contains(entityRecord.getScheduledTaskType())) {
 

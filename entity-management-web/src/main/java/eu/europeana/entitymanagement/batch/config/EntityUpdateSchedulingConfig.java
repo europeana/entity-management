@@ -1,9 +1,9 @@
 package eu.europeana.entitymanagement.batch.config;
 
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.ENTITY_REMOVALS_JOB_LAUNCHER;
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.ENTITY_UPDATE_JOB_LAUNCHER;
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.PERIODIC_REMOVALS_SCHEDULER;
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.PERIODIC_UPDATES_SCHEDULER;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.ENTITY_REMOVALS_JOB_LAUNCHER;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.ENTITY_UPDATE_JOB_LAUNCHER;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.PERIODIC_REMOVALS_SCHEDULER;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.PERIODIC_UPDATES_SCHEDULER;
 import static eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType.DEPRECATION;
 import static eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType.PERMANENT_DELETION;
 

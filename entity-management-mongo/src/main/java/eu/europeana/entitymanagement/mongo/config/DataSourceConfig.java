@@ -10,7 +10,7 @@ import dev.morphia.Datastore;
 import dev.morphia.Morphia;
 import dev.morphia.mapping.MapperOptions;
 import eu.europeana.batch.entity.JobExecutionEntity;
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.batch.codec.ScheduledTaskTypeCodec;
 import eu.europeana.entitymanagement.definitions.batch.codec.ScheduledTaskTypeCodecProvider;
 import java.util.concurrent.TimeUnit;

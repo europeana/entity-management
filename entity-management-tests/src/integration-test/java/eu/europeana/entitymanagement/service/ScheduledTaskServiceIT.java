@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.service;
 
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.ENTITY_REMOVALS_JOB_LAUNCHER;
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.ENTITY_UPDATE_JOB_LAUNCHER;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.ENTITY_REMOVALS_JOB_LAUNCHER;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.ENTITY_UPDATE_JOB_LAUNCHER;
 import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.ENTITY_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;

@@ -7,7 +7,7 @@ import eu.europeana.entitymanagement.utils.EntityUtils;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import org.springframework.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 /**
@@ -85,7 +85,7 @@ public class XmlWebResourceWrapper {
     webResource.setId(xmlWebResourceWrapper.getWebResource().getAbout());
 
     LabelledResource source = xmlWebResourceWrapper.getWebResource().getSource();
-    if (source != null && StringUtils.hasLength(source.getResource())) {
+    if (source != null && StringUtils.isNotEmpty(source.getResource())) {
       webResource.setSource(source.getResource());
     } else {
       webResource.setSource(EntityUtils.createWikimediaResourceString(webResource.getId()));

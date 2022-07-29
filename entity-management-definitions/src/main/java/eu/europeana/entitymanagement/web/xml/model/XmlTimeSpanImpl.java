@@ -19,7 +19,7 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IS_PA
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_SAME_AS;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_TIMESPAN;
 
-import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.model.TimeSpan;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.List;
@@ -87,7 +87,7 @@ public class XmlTimeSpanImpl extends XmlBaseEntityImpl<TimeSpan> {
   }
 
   @Override
-  public TimeSpan toEntityModel() throws EntityCreationException {
+  public TimeSpan toEntityModel() throws EntityModelCreationException {
     super.toEntityModel();
     entity.setBeginString(begin);
     entity.setEndString(end);

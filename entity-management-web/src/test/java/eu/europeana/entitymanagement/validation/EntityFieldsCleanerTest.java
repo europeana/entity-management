@@ -4,9 +4,9 @@ import static eu.europeana.entitymanagement.testutils.UnitTestUtils.loadFile;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.common.config.LanguageCodes;
 import eu.europeana.entitymanagement.config.SerializationConfig;
 import eu.europeana.entitymanagement.config.ValidatorConfig;
+import eu.europeana.entitymanagement.definitions.LanguageCodes;
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.ConsolidatedAgent;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;

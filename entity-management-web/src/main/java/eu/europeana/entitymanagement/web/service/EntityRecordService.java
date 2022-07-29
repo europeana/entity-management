@@ -16,7 +16,7 @@ import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
-import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.model.Address;
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
@@ -29,6 +29,7 @@ import eu.europeana.entitymanagement.definitions.model.TimeSpan;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
 import eu.europeana.entitymanagement.exception.EntityAlreadyExistsException;
+import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
@@ -272,8 +273,8 @@ public class EntityRecordService {
    */
   public EntityRecord createEntityFromMigrationRequest(
       Entity europeanaProxyEntity, String type, String identifier)
-      throws EntityCreationException, EntityAlreadyExistsException, HttpBadRequestException,
-          HttpUnprocessableException {
+      throws EntityAlreadyExistsException, HttpBadRequestException, HttpUnprocessableException,
+          EntityModelCreationException {
 
     String externalProxyId = europeanaProxyEntity.getEntityId();
 
@@ -327,7 +328,12 @@ public class EntityRecordService {
     String externalProxyId = europeanaProxyEntity.getEntityId();
 
     Date timestamp = new Date();
-    Entity entity = EntityObjectFactory.createConsolidatedEntityObject(europeanaProxyEntity);
+    Entity entity;
+    try {
+      entity = EntityObjectFactory.createConsolidatedEntityObject(europeanaProxyEntity);
+    } catch (EntityModelCreationException e) {
+      throw new EntityCreationException(e.getMessage(), e);
+    }
 
     boolean isZohoOrg = ZohoUtils.isZohoOrganization(externalProxyId, datasourceResponse.getType());
     String entityId = generateEntityId(datasourceResponse, isZohoOrg);
@@ -383,29 +389,33 @@ public class EntityRecordService {
   public EntityProxy appendWikidataProxy(
       EntityRecord entityRecord, String wikidataProxyId, String entityType, Date timestamp)
       throws EntityCreationException {
-    // entity metadata will be populated during update task
-    Entity wikidataProxyEntity = EntityObjectFactory.createProxyEntityObject(entityType);
+    try {
+      // entity metadata will be populated during update task
+      Entity wikidataProxyEntity = EntityObjectFactory.createProxyEntityObject(entityType);
 
-    Optional<DataSource> wikidataDatasource = getDataSource(wikidataProxyId);
-    // exception is thrown in factory method if wikidataDatasource is empty
-    int proxyNr = entityRecord.getProxies().size();
-    EntityProxy wikidataProxy =
-        setExternalProxy(
-            wikidataProxyEntity,
-            wikidataProxyId,
-            entityRecord.getEntityId(),
-            wikidataDatasource.get(),
-            entityRecord,
-            timestamp,
-            proxyNr);
+      Optional<DataSource> wikidataDatasource = getDataSource(wikidataProxyId);
+      // exception is thrown in factory method if wikidataDatasource is empty
+      int proxyNr = entityRecord.getProxies().size();
+      EntityProxy wikidataProxy =
+          setExternalProxy(
+              wikidataProxyEntity,
+              wikidataProxyId,
+              entityRecord.getEntityId(),
+              wikidataDatasource.get(),
+              entityRecord,
+              timestamp,
+              proxyNr);
 
-    // add wikidata uri to entity sameAs
-    entityRecord.getEntity().addSameReferenceLink(wikidataProxyId);
-    // add to entityIsAggregatedBy
-    Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
-    updateEntityAggregatesList(isAggregatedBy, entityRecord, entityRecord.getEntityId());
+      // add wikidata uri to entity sameAs
+      entityRecord.getEntity().addSameReferenceLink(wikidataProxyId);
+      // add to entityIsAggregatedBy
+      Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
+      updateEntityAggregatesList(isAggregatedBy, entityRecord, entityRecord.getEntityId());
 
-    return wikidataProxy;
+      return wikidataProxy;
+    } catch (EntityModelCreationException e) {
+      throw new EntityCreationException(e.getMessage(), e);
+    }
   }
 
   String generateEntityId(Entity datasourceResponse, boolean isZohoOrg) {
@@ -633,7 +643,8 @@ public class EntityRecordService {
    *
    * @throws EntityCreationException
    */
-  public Entity mergeEntities(Entity primary, Entity secondary) throws EuropeanaApiException {
+  public Entity mergeEntities(Entity primary, Entity secondary)
+      throws EuropeanaApiException, EntityModelCreationException {
 
     // TODO: consider refactoring of this implemeentation by creating a new class
     // EntityReconciliator
@@ -687,7 +698,7 @@ public class EntityRecordService {
    */
   private Entity combineEntities(
       Entity primary, Entity secondary, List<Field> fieldsToCombine, boolean accumulate)
-      throws EuropeanaApiException {
+      throws EuropeanaApiException, EntityModelCreationException {
     Entity consolidatedEntity =
         EntityObjectFactory.createConsolidatedEntityObject(primary.getType());
 
@@ -1152,7 +1163,7 @@ public class EntityRecordService {
    * @throws EuropeanaApiException on exception
    */
   public void changeExternalProxy(EntityRecord entityRecord, String newProxyId)
-      throws EuropeanaApiException {
+      throws EuropeanaApiException, EntityModelCreationException {
 
     DataSource dataSource = datasources.verifyDataSource(newProxyId, true);
     List<EntityProxy> externalProxies = entityRecord.getExternalProxies();

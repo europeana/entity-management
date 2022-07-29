@@ -10,10 +10,11 @@ import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType;
-import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
@@ -59,7 +60,6 @@ public class EntityAdminController extends BaseRest {
   private final EntityRecordService entityRecordService;
   private final ZohoSyncService zohoSyncService;
   private final EntityUpdateService entityUpdateService;
-  private final EntityManagementConfiguration emConfig;
 
   @Autowired
   public EntityAdminController(
@@ -70,7 +70,6 @@ public class EntityAdminController extends BaseRest {
     this.entityRecordService = entityRecordService;
     this.entityUpdateService = entityUpdateService;
     this.zohoSyncService = zohoSyncService;
-    this.emConfig = emConfig;
   }
 
   @ApiOperation(value = "Permanent Deletion of Entity", nickname = "deleteEntity")
@@ -85,9 +84,9 @@ public class EntityAdminController extends BaseRest {
           String profile,
       HttpServletRequest request)
       throws HttpException, EuropeanaApiException {
-    if (emConfig.isAuthEnabled()) {
-      verifyWriteAccess(Operations.DELETE, request);
-    }
+
+    verifyWriteAccess(Operations.DELETE, request);
+
     String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
     if (!entityRecordService.existsByEntityId(entityUri)) {
       throw new EntityNotFoundException(entityUri);
@@ -131,34 +130,34 @@ public class EntityAdminController extends BaseRest {
       @RequestBody Entity europeanaProxyEntity,
       HttpServletRequest request)
       throws HttpException, EuropeanaApiException {
-    if (emConfig.isAuthEnabled()) {
-      verifyWriteAccess(Operations.CREATE, request);
-    }
+
+    verifyWriteAccess(Operations.CREATE, request);
 
     validateBodyEntity(europeanaProxyEntity);
 
     try {
       // get the entity type based on path param
       type = EntityTypes.getByEntityType(type).getEntityType();
+      EntityRecord savedEntityRecord =
+          entityRecordService.createEntityFromMigrationRequest(
+              europeanaProxyEntity, type, identifier);
+      LOG.info(
+          "Created Entity record for {}; entityId={}",
+          europeanaProxyEntity.getEntityId(),
+          savedEntityRecord.getEntityId());
+      return generateResponseEntity(
+          request,
+          List.of(EntityProfile.internal),
+          FormatTypes.jsonld,
+          null,
+          null,
+          savedEntityRecord,
+          HttpStatus.ACCEPTED);
     } catch (UnsupportedEntityTypeException e) {
       throw new EntityCreationException("Entity type invalid or not supported: " + type, e);
+    } catch (EntityModelCreationException e) {
+      throw new EntityCreationException("Error while creating entity object for " + type, e);
     }
-
-    EntityRecord savedEntityRecord =
-        entityRecordService.createEntityFromMigrationRequest(
-            europeanaProxyEntity, type, identifier);
-    LOG.info(
-        "Created Entity record for {}; entityId={}",
-        europeanaProxyEntity.getEntityId(),
-        savedEntityRecord.getEntityId());
-    return generateResponseEntity(
-        request,
-        List.of(EntityProfile.internal),
-        FormatTypes.jsonld,
-        null,
-        null,
-        savedEntityRecord,
-        HttpStatus.ACCEPTED);
   }
 
   @ApiOperation(
@@ -183,9 +182,7 @@ public class EntityAdminController extends BaseRest {
       HttpServletRequest request)
       throws HttpException, EuropeanaApiException {
 
-    if (emConfig.isAuthEnabled()) {
-      verifyReadAccess(request);
-    }
+    verifyReadAccess(request);
 
     if (pageSize > 1000) {
       pageSize = 1000;
@@ -221,9 +218,7 @@ public class EntityAdminController extends BaseRest {
       HttpServletRequest request)
       throws HttpException, EuropeanaApiException {
 
-    if (emConfig.isAuthEnabled()) {
-      verifyWriteAccess(EMOperations.OPERATION_ZOHO_SYNC, request);
-    }
+    verifyWriteAccess(EMOperations.OPERATION_ZOHO_SYNC, request);
 
     OffsetDateTime modifiedSince = validateSince(since);
     ZohoSyncReport zohoSyncReport = zohoSyncService.synchronizeZohoOrganizations(modifiedSince);

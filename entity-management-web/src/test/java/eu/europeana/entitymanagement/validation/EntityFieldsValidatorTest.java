@@ -1,14 +1,14 @@
 package eu.europeana.entitymanagement.validation;
 
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_EM_VALIDATOR_FACTORY;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_EM_VALIDATOR_FACTORY;
 import static eu.europeana.entitymanagement.testutils.UnitTestUtils.AGENT_VALIDATE_FIELDS_EMPTY_PREFLABEL_JSON;
 import static eu.europeana.entitymanagement.testutils.UnitTestUtils.AGENT_VALIDATE_FIELDS_JSON;
 import static eu.europeana.entitymanagement.testutils.UnitTestUtils.ORGANIZATION_VALIDATE_FIELDS_JSON;
 import static eu.europeana.entitymanagement.testutils.UnitTestUtils.loadFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.config.SerializationConfig;
 import eu.europeana.entitymanagement.config.ValidatorConfig;
 import eu.europeana.entitymanagement.definitions.model.Agent;
