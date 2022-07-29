@@ -10,7 +10,7 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DATE_OF_T
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.END;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.GENDER;
 
-import eu.europeana.entitymanagement.common.config.LanguageCodes;
+import eu.europeana.entitymanagement.definitions.LanguageCodes;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
 import eu.europeana.entitymanagement.definitions.model.ConsolidatedAgent;
 import eu.europeana.entitymanagement.definitions.model.Entity;

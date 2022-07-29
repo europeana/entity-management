@@ -24,7 +24,7 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_WGS84
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_WGS84_POS_LAT;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_WGS84_POS_LONG;
 
-import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.List;
@@ -97,7 +97,7 @@ public class XmlPlaceImpl extends XmlBaseEntityImpl<Place> {
   }
 
   @Override
-  public Place toEntityModel() throws EntityCreationException {
+  public Place toEntityModel() throws EntityModelCreationException {
     super.toEntityModel();
 
     entity.setLatitude(getLatitude());

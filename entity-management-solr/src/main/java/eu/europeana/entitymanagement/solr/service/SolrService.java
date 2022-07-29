@@ -1,16 +1,16 @@
 package eu.europeana.entitymanagement.solr.service;
 
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_INDEXING_SOLR_CLIENT;
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_JSON_MAPPER;
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_SOLR_ENTITY_SUGGESTER_FILTER;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_INDEXING_SOLR_CLIENT;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_JSON_MAPPER;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_SOLR_ENTITY_SUGGESTER_FILTER;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Concept;
 import eu.europeana.entitymanagement.definitions.model.Entity;

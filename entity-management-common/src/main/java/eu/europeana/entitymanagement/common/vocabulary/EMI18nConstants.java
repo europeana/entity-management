@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.common.config;
+package eu.europeana.entitymanagement.common.vocabulary;
 
 public abstract class EMI18nConstants
     implements eu.europeana.api.commons.definitions.config.i18n.I18nConstants {

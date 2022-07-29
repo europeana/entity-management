@@ -23,10 +23,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.util.CollectionUtils;
 
 public final class SchemaOrgUtils {
 
@@ -250,7 +250,7 @@ public final class SchemaOrgUtils {
       // gender
       addStringProperty(
           agentObject,
-          CollectionUtils.firstElement(agent.getGender()),
+          String.valueOf(CollectionUtils.get(agent.getGender(), 0)),
           SchemaOrgConstants.PROPERTY_GENDER);
 
       // jobTitle
@@ -279,7 +279,7 @@ public final class SchemaOrgUtils {
       if (agent.getDateOfEstablishment() != null) {
         addStringProperty(
             agentObject,
-            CollectionUtils.firstElement(agent.getDateOfEstablishment()),
+            String.valueOf(CollectionUtils.get(agent.getDateOfEstablishment(), 0)),
             SchemaOrgConstants.PROPERTY_FOUNDING_DATE);
       }
 
@@ -287,7 +287,7 @@ public final class SchemaOrgUtils {
       if (agent.getDateOfTermination() != null) {
         addStringProperty(
             agentObject,
-            CollectionUtils.firstElement(agent.getDateOfTermination()),
+            String.valueOf(CollectionUtils.get(agent.getDateOfTermination(), 0)),
             SchemaOrgConstants.PROPERTY_DISSOLUTION_DATE);
       }
     }

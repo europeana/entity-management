@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.wikidata;
 
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.dereference.Dereferencer;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
@@ -100,7 +100,7 @@ public class WikidataDereferenceService implements Dereferencer, InitializingBea
 
   @Override
   public Optional<Entity> dereferenceEntityById(String wikidataUri)
-      throws WikidataAccessException, EntityCreationException {
+      throws WikidataAccessException, EntityModelCreationException {
     StringBuilder wikidataXml = null;
     WikidataOrganization wikidataOrganization = null;
     try {

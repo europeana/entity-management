@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.common.config;
+package eu.europeana.entitymanagement.utils;
 
 import java.util.List;
 import java.util.Map;
