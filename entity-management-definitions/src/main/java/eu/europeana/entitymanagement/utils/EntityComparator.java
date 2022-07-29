@@ -8,6 +8,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -149,10 +150,10 @@ public class EntityComparator implements Comparator<Entity>, Serializable {
 
   @SuppressWarnings("unchecked")
   private int compareMaps(Map<Object, Object> m1, Map<Object, Object> m2) {
-    if (m1.isEmpty() && m2.isEmpty()) {
+    if (MapUtils.isEmpty(m1) && MapUtils.isEmpty(m2)) {
       // if both null or empty
       return 0;
-    } else if (m1.isEmpty() || m2.isEmpty()) {
+    } else if (MapUtils.isEmpty(m1) || MapUtils.isEmpty(m2)) {
       // if only one map is null or empty
       return 1;
     }
