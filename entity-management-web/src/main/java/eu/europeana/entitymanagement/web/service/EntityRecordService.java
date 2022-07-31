@@ -10,12 +10,10 @@ import static java.time.Instant.now;
 import com.mongodb.client.result.UpdateResult;
 import dev.morphia.query.experimental.filters.Filter;
 import eu.europeana.api.commons.error.EuropeanaApiException;
-import eu.europeana.entitymanagement.batch.utils.BatchUtils;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.config.DataSources;
-import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.model.Address;
 import eu.europeana.entitymanagement.definitions.model.Agent;
@@ -153,10 +151,8 @@ public class EntityRecordService {
     return entityRecordRepository.save(er);
   }
 
-  public List<EntityRecord> saveBulkEntityRecords(List<? extends BatchEntityRecord> records) {
-    List<EntityRecord> entityRecords =
-        records.stream().map(r -> r.getEntityRecord()).collect(Collectors.toList());
-    return entityRecordRepository.saveBulk(entityRecords);
+  public List<EntityRecord> saveBulkEntityRecords(List<EntityRecord> records) {
+    return entityRecordRepository.saveBulk(records);
   }
 
   /**
@@ -170,8 +166,9 @@ public class EntityRecordService {
    */
   public long deleteBulk(List<String> entityIds, boolean deleteFromSolr)
       throws SolrServiceException {
-    if (deleteFromSolr) {
+    if (deleteFromSolr && !entityIds.isEmpty()) {
       solrService.deleteById(entityIds, true);
+      logger.info("Deleted {} entityRecords from Solr: entityIds={}", entityIds.size(), entityIds);
     }
 
     long deleteCount = entityRecordRepository.deleteBulk(entityIds);
@@ -185,14 +182,10 @@ public class EntityRecordService {
    * This method sets the deleted field in the database, it does not remove from solr. This method
    * needs to be used only within the batch item writer
    *
-   * @deprecated this method does not remove from solr. When using this method, it must be ensured
-   *     that the delete from solr is also invoked
-   * @param entityRecords
+   * @param entityIds list of records to disable
    */
-  @Deprecated
-  public void disableBulk(List<BatchEntityRecord> entityRecords) {
-    String[] entityIds = BatchUtils.getEntityIds(entityRecords);
-    UpdateResult updateResult = entityRecordRepository.disableBulk(List.of(entityIds));
+  public void disableBulk(List<String> entityIds) {
+    UpdateResult updateResult = entityRecordRepository.disableBulk(entityIds);
     logger.info("Deprecated {} entities: entityIds={}", updateResult.getModifiedCount(), entityIds);
   }
 
@@ -1064,14 +1057,13 @@ public class EntityRecordService {
   }
 
   /**
-   * @deprecated the service should add the deprecated filter, eventually by adding a boolean
-   *     parameter
+   * Fetches records matching the provided filter(s)
+   *
    * @param start
    * @param count
    * @param queryFilters
    * @return
    */
-  @Deprecated
   public List<EntityRecord> findEntitiesWithFilter(int start, int count, Filter[] queryFilters) {
     return this.entityRecordRepository.findWithFilters(start, count, queryFilters);
   }

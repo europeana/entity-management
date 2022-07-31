@@ -26,11 +26,10 @@ public class EntityRecordDatabaseRemovalWriter implements ItemWriter<BatchEntity
 
   @Override
   public void write(@NonNull List<? extends BatchEntityRecord> entityRecords) throws Exception {
-    List<String> ids =
-        List.of(
-            BatchUtils.getEntityIds(
-                (List<BatchEntityRecord>)
-                    BatchUtils.filterRecordsForWritters(supportedScheduledTasks, entityRecords)));
-    entityRecordService.deleteBulk(ids, false);
+    List<String> ids = BatchUtils.filterRecordsForWriters(supportedScheduledTasks, entityRecords);
+
+    if (!ids.isEmpty()) {
+      entityRecordService.deleteBulk(ids, false);
+    }
   }
 }

@@ -26,8 +26,10 @@ public class EntityRecordDatabaseDeprecationWriter implements ItemWriter<BatchEn
 
   @Override
   public void write(@NonNull List<? extends BatchEntityRecord> entityRecords) throws Exception {
-    entityRecordService.disableBulk(
-        (List<BatchEntityRecord>)
-            BatchUtils.filterRecordsForWritters(supportedScheduledTasks, entityRecords));
+    List<String> ids = BatchUtils.filterRecordsForWriters(supportedScheduledTasks, entityRecords);
+
+    if (!ids.isEmpty()) {
+      entityRecordService.disableBulk(ids);
+    }
   }
 }

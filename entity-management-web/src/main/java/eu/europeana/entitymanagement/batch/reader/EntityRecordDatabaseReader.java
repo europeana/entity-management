@@ -4,6 +4,7 @@ import dev.morphia.query.experimental.filters.Filter;
 import eu.europeana.entitymanagement.batch.utils.BatchUtils;
 import eu.europeana.entitymanagement.definitions.batch.ScheduledTaskUtils;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import java.util.Arrays;
@@ -21,7 +22,7 @@ public class EntityRecordDatabaseReader extends BaseDatabaseReader<BatchEntityRe
   private static final Logger logger = LogManager.getLogger(EntityRecordDatabaseReader.class);
   private final EntityRecordService entityRecordService;
   private final Filter[] queryFilters;
-  private final String scheduledTaskType;
+  private final ScheduledTaskType scheduledTaskType;
 
   public EntityRecordDatabaseReader(
       String scheduledTaskType,
@@ -29,7 +30,7 @@ public class EntityRecordDatabaseReader extends BaseDatabaseReader<BatchEntityRe
       int pageSize,
       Filter... queryFilters) {
     super(pageSize);
-    this.scheduledTaskType = scheduledTaskType;
+    this.scheduledTaskType = ScheduledTaskUtils.scheduledTaskTypeValueOf(scheduledTaskType);
     this.entityRecordService = entityRecordService;
     this.queryFilters = queryFilters;
   }
@@ -45,10 +46,7 @@ public class EntityRecordDatabaseReader extends BaseDatabaseReader<BatchEntityRe
 
     List<BatchEntityRecord> batchEntityRecords =
         result.stream()
-            .map(
-                p ->
-                    new BatchEntityRecord(
-                        p, ScheduledTaskUtils.scheduledTaskTypeValueOf(scheduledTaskType)))
+            .map(p -> new BatchEntityRecord(p, scheduledTaskType))
             .collect(Collectors.toList());
 
     if (logger.isDebugEnabled()) {
@@ -60,7 +58,7 @@ public class EntityRecordDatabaseReader extends BaseDatabaseReader<BatchEntityRe
           Arrays.toString(BatchUtils.getEntityIds(batchEntityRecords)));
     }
 
-    return (Iterator<BatchEntityRecord>) batchEntityRecords.iterator();
+    return batchEntityRecords.iterator();
   }
 
   @Override

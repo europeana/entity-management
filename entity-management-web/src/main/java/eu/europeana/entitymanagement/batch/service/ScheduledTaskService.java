@@ -73,8 +73,7 @@ public class ScheduledTaskService {
       logger.debug(
           "Removed scheduled tasks from db: count={}, updateType={}",
           removeCount,
-          String.join(
-              ",", updateType.stream().map(u -> u.getValue()).collect(Collectors.toList())));
+          updateType.stream().map(ScheduledTaskType::getValue).collect(Collectors.joining(",")));
     }
   }
 

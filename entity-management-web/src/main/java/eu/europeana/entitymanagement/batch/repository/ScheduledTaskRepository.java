@@ -37,6 +37,7 @@ import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.bson.Document;
 import org.springframework.beans.factory.InitializingBean;
@@ -174,22 +175,20 @@ public class ScheduledTaskRepository implements InitializingBean {
                     .limit(count))
             .toList();
 
-    List<String> matchingIds =
-        scheduledTasks.stream().map(ScheduledTask::getEntityId).collect(Collectors.toList());
+    // Use EntityId - ScheduledTaskType map for quick lookup
+    Map<String, ScheduledTaskType> taskTypeMap =
+        scheduledTasks.stream()
+            .collect(Collectors.toMap(ScheduledTask::getEntityId, ScheduledTask::getUpdateType));
 
     List<EntityRecord> entityRecords =
-        datastore.find(EntityRecord.class).filter(in(ENTITY_ID, matchingIds)).iterator().toList();
+        datastore
+            .find(EntityRecord.class)
+            .filter(in(ENTITY_ID, taskTypeMap.keySet()))
+            .iterator()
+            .toList();
 
     return entityRecords.stream()
-        .map(
-            p ->
-                new BatchEntityRecord(
-                    p,
-                    scheduledTasks.stream()
-                        .filter(q -> q.getEntityId().equals(p.getEntityId()))
-                        .collect(Collectors.toList())
-                        .get(0)
-                        .getUpdateType()))
+        .map(r -> new BatchEntityRecord(r, taskTypeMap.get(r.getEntityId())))
         .collect(Collectors.toList());
   }
 

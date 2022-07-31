@@ -26,10 +26,11 @@ public class EntitySolrRemovalWriter implements ItemWriter<BatchEntityRecord> {
 
   @Override
   public void write(@NonNull List<? extends BatchEntityRecord> entityRecords) throws Exception {
-    String[] entityIds =
-        BatchUtils.getEntityIds(
-            (List<BatchEntityRecord>)
-                BatchUtils.filterRecordsForWritters(supportedScheduledTasks, entityRecords));
-    solrService.deleteById(List.of(entityIds), true);
+    List<String> entityIds =
+        BatchUtils.filterRecordsForWriters(supportedScheduledTasks, entityRecords);
+
+    if (!entityIds.isEmpty()) {
+      solrService.deleteById(entityIds, true);
+    }
   }
 }

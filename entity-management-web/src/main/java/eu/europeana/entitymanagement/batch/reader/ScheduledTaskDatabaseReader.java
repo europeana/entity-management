@@ -44,7 +44,7 @@ public class ScheduledTaskDatabaseReader extends BaseDatabaseReader<BatchEntityR
           pageSize,
           Arrays.toString(BatchUtils.getEntityIds(entityRecords)));
     }
-    return (Iterator<BatchEntityRecord>) entityRecords.iterator();
+    return entityRecords.iterator();
   }
 
   @Override

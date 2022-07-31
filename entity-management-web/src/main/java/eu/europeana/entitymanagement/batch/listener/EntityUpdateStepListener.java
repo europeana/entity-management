@@ -41,9 +41,11 @@ public class EntityUpdateStepListener implements StepExecutionListener {
   public void beforeStep(@NonNull StepExecution stepExecution) {
     // for now, we don't need any cleanup for synchronous steps
     if (!isSynchronous) {
-      logger.debug(
-          "Cleaning up processed tasks before step execution. updateType={}",
-          updateType.stream().map(u -> u.getValue()).collect(Collectors.joining(",")));
+      if (logger.isDebugEnabled()) {
+        logger.debug(
+            "Cleaning up processed tasks before step execution. updateType={}",
+            updateType.stream().map(ScheduledTaskType::getValue).collect(Collectors.joining(",")));
+      }
       // remove processed tasks here, in case application restarted before step finished execution
       scheduledTaskService.removeProcessedTasks(updateType);
     }

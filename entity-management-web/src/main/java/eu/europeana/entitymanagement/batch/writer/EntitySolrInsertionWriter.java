@@ -26,6 +26,8 @@ public class EntitySolrInsertionWriter implements ItemWriter<BatchEntityRecord> 
             .map(entityRecord -> createSolrEntity(entityRecord.getEntityRecord()))
             .collect(Collectors.toList());
 
-    solrService.storeMultipleEntities(solrEntities);
+    if (!solrEntities.isEmpty()) {
+      solrService.storeMultipleEntities(solrEntities);
+    }
   }
 }

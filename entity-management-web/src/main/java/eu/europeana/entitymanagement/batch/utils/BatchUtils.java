@@ -39,7 +39,9 @@ public class BatchUtils {
             .addDate(JobParameter.CURRENT_START_TIME.key(), runTime)
             .addString(
                 JobParameter.UPDATE_TYPE.key(),
-                updateType.stream().map(p -> p.getValue()).collect(Collectors.joining(",")))
+                updateType.stream()
+                    .map(ScheduledTaskType::getValue)
+                    .collect(Collectors.joining(",")))
             // boolean parameters not supported
             .addString(JobParameter.IS_SYNCHRONOUS.key(), String.valueOf(isSynchronous));
 
@@ -56,10 +58,11 @@ public class BatchUtils {
         .toArray(String[]::new);
   }
 
-  public static List<? extends BatchEntityRecord> filterRecordsForWritters(
+  public static List<String> filterRecordsForWriters(
       Set<ScheduledTaskType> supportedScheduledTasks, List<? extends BatchEntityRecord> records) {
     return records.stream()
         .filter(p -> supportedScheduledTasks.contains(p.getScheduledTaskType()))
+        .map(r -> r.getEntityRecord().getEntityId())
         .collect(Collectors.toList());
   }
 }
