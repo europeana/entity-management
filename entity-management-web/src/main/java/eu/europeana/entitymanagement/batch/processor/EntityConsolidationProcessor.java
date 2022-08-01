@@ -3,10 +3,11 @@ package eu.europeana.entitymanagement.batch.processor;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.config.DataSources;
+import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.ingestion.EntityValidationException;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidationGroup;
@@ -20,7 +21,6 @@ import java.util.stream.Collectors;
 import javax.validation.ConstraintViolation;
 import javax.validation.ValidatorFactory;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 /**
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
  * merging the metadata from all data sources .
  */
 @Component
-public class EntityConsolidationProcessor implements ItemProcessor<EntityRecord, EntityRecord> {
+public class EntityConsolidationProcessor extends BaseEntityProcessor {
 
   private final EntityRecordService entityRecordService;
   private final ValidatorFactory emValidatorFactory;
@@ -41,17 +41,17 @@ public class EntityConsolidationProcessor implements ItemProcessor<EntityRecord,
       ValidatorFactory emValidatorFactory,
       EntityFieldsCleaner emEntityFieldCleaner,
       DataSources datasources) {
+    super(ScheduledUpdateType.FULL_UPDATE);
     this.entityRecordService = entityRecordService;
     this.emValidatorFactory = emValidatorFactory;
     this.emEntityFieldCleaner = emEntityFieldCleaner;
     this.datasources = datasources;
   }
 
-  @Override
-  public EntityRecord process(@NonNull EntityRecord entityRecord)
+  public BatchEntityRecord doProcessing(BatchEntityRecord entityRecord)
       throws EuropeanaApiException, EntityModelCreationException {
 
-    List<EntityProxy> externalProxies = entityRecord.getExternalProxies();
+    List<EntityProxy> externalProxies = entityRecord.getEntityRecord().getExternalProxies();
 
     Entity externalProxyEntity = externalProxies.get(0).getEntity();
     String proxyId = externalProxies.get(0).getProxyId();
@@ -75,7 +75,7 @@ public class EntityConsolidationProcessor implements ItemProcessor<EntityRecord,
       }
     }
 
-    Entity europeanaProxyEntity = entityRecord.getEuropeanaProxy().getEntity();
+    Entity europeanaProxyEntity = entityRecord.getEntityRecord().getEuropeanaProxy().getEntity();
 
     Entity consolidatedEntity = null;
     if (isStaticDataSource) {
@@ -93,7 +93,8 @@ public class EntityConsolidationProcessor implements ItemProcessor<EntityRecord,
     emEntityFieldCleaner.cleanAndNormalize(consolidatedEntity);
     entityRecordService.performReferentialIntegrity(consolidatedEntity);
     validateCompleteValidationConstraints(consolidatedEntity);
-    entityRecordService.updateConsolidatedVersion(entityRecord, consolidatedEntity);
+    entityRecordService.updateConsolidatedVersion(
+        entityRecord.getEntityRecord(), consolidatedEntity);
 
     return entityRecord;
   }
