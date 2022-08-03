@@ -1,6 +1,5 @@
 package eu.europeana.entitymanagement.batch.config;
 
-import static dev.morphia.query.experimental.filters.Filters.eq;
 import static eu.europeana.entitymanagement.batch.utils.BatchUtils.JOB_REMOVE_SCHEDULED_ENTITIES;
 import static eu.europeana.entitymanagement.batch.utils.BatchUtils.JOB_UPDATE_SCHEDULED_ENTITIES;
 import static eu.europeana.entitymanagement.batch.utils.BatchUtils.JOB_UPDATE_SINGLE_ENTITY;
@@ -12,7 +11,6 @@ import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_ID;
 import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.UPDATE_TYPE;
 
-import dev.morphia.query.experimental.filters.Filter;
 import dev.morphia.query.experimental.filters.Filters;
 import eu.europeana.entitymanagement.batch.listener.EntityUpdateStepListener;
 import eu.europeana.entitymanagement.batch.listener.ScheduledTaskItemListener;
@@ -38,6 +36,8 @@ import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.springframework.batch.core.ItemProcessListener;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -176,21 +176,19 @@ public class EntityUpdateJobConfig {
 
   @Bean(name = SCHEDULED_TASK_READER)
   @StepScope
-  private SynchronizedItemStreamReader<BatchEntityRecord> allEntityFailureReader(
+  private SynchronizedItemStreamReader<BatchEntityRecord> scheduledTaskReader(
       @Value("#{jobParameters[currentStartTime]}") Date currentStartTime,
       @Value("#{jobParameters[updateType]}") String updateType) {
 
-    Filter[] orFilters =
-        Arrays.asList(updateType.split(",")).stream()
-            .map(u -> eq(UPDATE_TYPE, u))
-            .toArray(Filter[]::new);
+    List<String> updateTypeList =
+        Stream.of(updateType.split(",")).map(String::trim).collect(Collectors.toList());
 
     ScheduledTaskDatabaseReader reader =
         new ScheduledTaskDatabaseReader(
             scheduledTaskService,
             configuredBatchChunkSize,
             Filters.lte(EMBatchConstants.CREATED, currentStartTime),
-            Filters.or(orFilters));
+            Filters.in(UPDATE_TYPE, updateTypeList));
 
     return threadSafeReader(reader);
   }

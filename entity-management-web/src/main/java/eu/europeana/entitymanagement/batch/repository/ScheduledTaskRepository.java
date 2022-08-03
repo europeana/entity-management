@@ -171,7 +171,8 @@ public class ScheduledTaskRepository implements InitializingBean {
                     .include(ENTITY_ID, UPDATE_TYPE)
                     .skip(start)
                     // matches the index sort order defined in ScheduledTask
-                    .sort(ascending(CREATED))
+                    // sort with _id in case of multiple matching created values
+                    .sort(ascending(CREATED), ascending("_id"))
                     .limit(count))
             .toList();
 
