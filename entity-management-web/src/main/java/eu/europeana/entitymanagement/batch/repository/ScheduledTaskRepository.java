@@ -172,7 +172,7 @@ public class ScheduledTaskRepository implements InitializingBean {
                     .skip(start)
                     // matches the index sort order defined in ScheduledTask
                     // sort with _id in case of multiple matching created values
-                    .sort(ascending(CREATED), ascending("_id"))
+                    .sort(ascending(CREATED), ascending(ENTITY_ID))
                     .limit(count))
             .toList();
 
@@ -215,7 +215,9 @@ public class ScheduledTaskRepository implements InitializingBean {
         .aggregate(ScheduledTask.class)
         .match(
             eq(HAS_BEEN_PROCESSED, false),
-            or(updateType.stream().map(u -> eq(UPDATE_TYPE, u.getValue())).toArray(Filter[]::new)))
+            in(
+                UPDATE_TYPE,
+                updateType.stream().map(ScheduledTaskType::getValue).collect(Collectors.toList())))
         // both collections use the same entityId field name
         .lookup(
             Lookup.from(FailedTask.class)
