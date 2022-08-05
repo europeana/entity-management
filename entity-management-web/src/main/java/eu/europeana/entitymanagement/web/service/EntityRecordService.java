@@ -292,11 +292,12 @@ public class EntityRecordService {
     entityRecord.setEntity(entity);
 
     europeanaProxyEntity.setEntityId(entityId);
-    setEuropeanaMetadata(europeanaProxyEntity, entityId, entityRecord, timestamp);
 
     // create metis Entity
     Entity metisEntity = EntityObjectFactory.createProxyEntityObject(type);
 
+    // set proxies
+    setEuropeanaMetadata(europeanaProxyEntity, entityId, entityRecord, metisEntity, timestamp);
     setExternalProxy(
         metisEntity, externalProxyId, entityId, externalDatasource, entityRecord, timestamp, 1);
 
@@ -327,7 +328,6 @@ public class EntityRecordService {
     } catch (EntityModelCreationException e) {
       throw new EntityCreationException(e.getMessage(), e);
     }
-
     boolean isZohoOrg = ZohoUtils.isZohoOrganization(externalProxyId, datasourceResponse.getType());
     String entityId = generateEntityId(datasourceResponse, isZohoOrg);
 
@@ -346,7 +346,8 @@ public class EntityRecordService {
 
     // copy the newly generated europeana id
     europeanaProxyEntity.setEntityId(entityId);
-    setEuropeanaMetadata(europeanaProxyEntity, entityId, entityRecord, timestamp);
+    setEuropeanaMetadata(
+        europeanaProxyEntity, entityId, entityRecord, datasourceResponse, timestamp);
 
     // create default external proxy
     setExternalProxy(
@@ -1102,7 +1103,11 @@ public class EntityRecordService {
   }
 
   private void setEuropeanaMetadata(
-      Entity europeanaProxyMetadata, String entityId, EntityRecord entityRecord, Date timestamp) {
+      Entity europeanaProxyMetadata,
+      String entityId,
+      EntityRecord entityRecord,
+      Entity datasourceResponse,
+      Date timestamp) {
     Aggregation europeanaAggr = new Aggregation();
     Optional<DataSource> europeanaDataSource = datasources.getEuropeanaDatasource();
     europeanaAggr.setId(getEuropeanaAggregationId(entityId));
@@ -1116,9 +1121,12 @@ public class EntityRecordService {
     europeanaProxy.setProxyId(getEuropeanaProxyId(entityId));
     europeanaProxy.setProxyFor(entityId);
     europeanaProxy.setProxyIn(europeanaAggr);
-
     europeanaProxy.setEntity(europeanaProxyMetadata);
 
+    // set datasource sameAs (if present) in Europeana Proxy
+    if (datasourceResponse != null && datasourceResponse.getSameReferenceLinks() != null) {
+      europeanaProxy.getEntity().setSameReferenceLinks(datasourceResponse.getSameReferenceLinks());
+    }
     entityRecord.addProxy(europeanaProxy);
   }
 

@@ -8,7 +8,6 @@ import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
@@ -65,8 +64,7 @@ public class EntityAdminController extends BaseRest {
   public EntityAdminController(
       EntityRecordService entityRecordService,
       EntityUpdateService entityUpdateService,
-      ZohoSyncService zohoSyncService,
-      EntityManagementConfiguration emConfig) {
+      ZohoSyncService zohoSyncService) {
     this.entityRecordService = entityRecordService;
     this.entityUpdateService = entityUpdateService;
     this.zohoSyncService = zohoSyncService;
@@ -122,7 +120,7 @@ public class EntityAdminController extends BaseRest {
       response = java.lang.Void.class)
   @PostMapping(
       value = "/{type}/{identifier}/management",
-      produces = MediaType.APPLICATION_JSON_VALUE)
+      produces = {MediaType.APPLICATION_JSON_VALUE, HttpHeaders.CONTENT_TYPE_JSONLD})
   public ResponseEntity<String> migrateExistingEntity(
       @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
       @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
