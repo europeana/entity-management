@@ -15,7 +15,7 @@ import com.mongodb.client.result.UpdateResult;
 import dev.morphia.Datastore;
 import dev.morphia.query.FindOptions;
 import dev.morphia.query.experimental.updates.UpdateOperators;
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
 import java.util.ArrayList;
 import java.util.List;

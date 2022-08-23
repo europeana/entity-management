@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.common.config;
+package eu.europeana.entitymanagement.common.vocabulary;
 
 public class AppConfigConstants {
 

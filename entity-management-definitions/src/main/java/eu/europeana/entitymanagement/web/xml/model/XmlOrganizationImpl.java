@@ -27,7 +27,7 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ORGAN
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PHONE;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_SAME_AS;
 
-import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.ArrayList;
@@ -37,7 +37,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import org.springframework.util.CollectionUtils;
+import org.apache.commons.collections.CollectionUtils;
 
 @XmlRootElement(namespace = NAMESPACE_EDM, name = XML_ORGANIZATION)
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -145,7 +145,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
   }
 
   @Override
-  public Organization toEntityModel() throws EntityCreationException {
+  public Organization toEntityModel() throws EntityModelCreationException {
     super.toEntityModel();
     entity.setAcronym(RdfXmlUtils.toLanguageMapList(getAcronym()));
     entity.setDescription(RdfXmlUtils.toLanguageMap(getDescription()));

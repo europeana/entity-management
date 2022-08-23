@@ -1,6 +1,6 @@
 package eu.europeana.entitymanagement.config;
 
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.*;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.*;
 
 import eu.europeana.batch.config.MongoBatchConfigurer;
 import org.springframework.batch.core.launch.JobLauncher;

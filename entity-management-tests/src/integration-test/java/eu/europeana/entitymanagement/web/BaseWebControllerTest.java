@@ -23,11 +23,7 @@ import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.testutils.TestConfig;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,12 +61,6 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
     this.scheduledTaskService.dropCollection();
 
     emSolrService.deleteAllDocuments();
-  }
-
-  protected static String loadFile(String resourcePath) throws IOException {
-    InputStream is = BaseWebControllerTest.class.getResourceAsStream(resourcePath);
-    assert is != null;
-    return IOUtils.toString(is, StandardCharsets.UTF_8).replace("\n", "");
   }
 
   /** Checks common response headers. Allow header checked within each test method. */
@@ -180,10 +170,6 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
 
   protected void deprecateEntity(EntityRecord entityRecord) throws EntityUpdateException {
     entityRecordService.disableEntityRecord(entityRecord, true);
-  }
-
-  protected Optional<EntityRecord> retrieveEntity(String entityId) {
-    return entityRecordService.retrieveByEntityId(entityId);
   }
 
   protected void assertedTaskScheduled(String entityId, ScheduledTaskType taskType) {

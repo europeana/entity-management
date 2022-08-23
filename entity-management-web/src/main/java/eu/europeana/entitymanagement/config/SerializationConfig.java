@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 import eu.europeana.corelib.edm.utils.JsonLdSerializer;
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.mixins.ConsolidatedAgentMixin;
 import eu.europeana.entitymanagement.definitions.model.ConsolidatedAgent;
 import eu.europeana.entitymanagement.web.xml.model.RdfBaseWrapper;

@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.config;
 
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import java.util.Arrays;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;

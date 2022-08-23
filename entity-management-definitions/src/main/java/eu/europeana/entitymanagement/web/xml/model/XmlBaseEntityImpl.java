@@ -9,7 +9,7 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_SKOS;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.PREF_LABEL;
 
-import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
@@ -72,7 +72,7 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
     this.depiction = XmlWebResourceWrapper.fromWebResource(entity.getDepiction());
   }
 
-  public T toEntityModel() throws EntityCreationException {
+  public T toEntityModel() throws EntityModelCreationException {
     if (entity == null) {
       entity = EntityObjectFactory.createProxyEntityObject(getTypeEnum().getEntityType());
     }

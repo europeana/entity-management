@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
-import eu.europeana.entitymanagement.common.config.LanguageCodes;
+import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
+import eu.europeana.entitymanagement.definitions.LanguageCodes;
 import java.io.IOException;
 import java.io.InputStream;
 import org.junit.jupiter.api.Test;

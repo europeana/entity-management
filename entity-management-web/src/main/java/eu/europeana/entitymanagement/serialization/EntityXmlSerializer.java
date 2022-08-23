@@ -1,6 +1,6 @@
 package eu.europeana.entitymanagement.serialization;
 
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.web.xml.model.RdfBaseWrapper;
