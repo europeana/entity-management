@@ -10,12 +10,11 @@ import static java.time.Instant.now;
 import com.mongodb.client.result.UpdateResult;
 import dev.morphia.query.experimental.filters.Filter;
 import eu.europeana.api.commons.error.EuropeanaApiException;
-import eu.europeana.entitymanagement.batch.utils.BatchUtils;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.config.DataSources;
-import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.model.Address;
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
@@ -28,6 +27,7 @@ import eu.europeana.entitymanagement.definitions.model.TimeSpan;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
 import eu.europeana.entitymanagement.exception.EntityAlreadyExistsException;
+import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
@@ -151,8 +151,8 @@ public class EntityRecordService {
     return entityRecordRepository.save(er);
   }
 
-  public List<? extends EntityRecord> saveBulkEntityRecords(List<? extends EntityRecord> records) {
-    return entityRecordRepository.saveBulk((List<EntityRecord>) records);
+  public List<EntityRecord> saveBulkEntityRecords(List<EntityRecord> records) {
+    return entityRecordRepository.saveBulk(records);
   }
 
   /**
@@ -166,8 +166,9 @@ public class EntityRecordService {
    */
   public long deleteBulk(List<String> entityIds, boolean deleteFromSolr)
       throws SolrServiceException {
-    if (deleteFromSolr) {
+    if (deleteFromSolr && !entityIds.isEmpty()) {
       solrService.deleteById(entityIds, true);
+      logger.info("Deleted {} entityRecords from Solr: entityIds={}", entityIds.size(), entityIds);
     }
 
     long deleteCount = entityRecordRepository.deleteBulk(entityIds);
@@ -181,14 +182,10 @@ public class EntityRecordService {
    * This method sets the deleted field in the database, it does not remove from solr. This method
    * needs to be used only within the batch item writer
    *
-   * @deprecated this method does not remove from solr. When using this method, it must be ensured
-   *     that the delete from solr is also invoked
-   * @param entityRecords
+   * @param entityIds list of records to disable
    */
-  @Deprecated
-  public void disableBulk(List<? extends EntityRecord> entityRecords) {
-    String[] entityIds = BatchUtils.getEntityIds(entityRecords);
-    UpdateResult updateResult = entityRecordRepository.disableBulk(List.of(entityIds));
+  public void disableBulk(List<String> entityIds) {
+    UpdateResult updateResult = entityRecordRepository.disableBulk(entityIds);
     logger.info("Deprecated {} entities: entityIds={}", updateResult.getModifiedCount(), entityIds);
   }
 
@@ -269,8 +266,8 @@ public class EntityRecordService {
    */
   public EntityRecord createEntityFromMigrationRequest(
       Entity europeanaProxyEntity, String type, String identifier)
-      throws EntityCreationException, EntityAlreadyExistsException, HttpBadRequestException,
-          HttpUnprocessableException {
+      throws EntityAlreadyExistsException, HttpBadRequestException, HttpUnprocessableException,
+          EntityModelCreationException {
 
     String externalProxyId = europeanaProxyEntity.getEntityId();
 
@@ -324,7 +321,12 @@ public class EntityRecordService {
     String externalProxyId = europeanaProxyEntity.getEntityId();
 
     Date timestamp = new Date();
-    Entity entity = EntityObjectFactory.createConsolidatedEntityObject(europeanaProxyEntity);
+    Entity entity;
+    try {
+      entity = EntityObjectFactory.createConsolidatedEntityObject(europeanaProxyEntity);
+    } catch (EntityModelCreationException e) {
+      throw new EntityCreationException(e.getMessage(), e);
+    }
 
     boolean isZohoOrg = ZohoUtils.isZohoOrganization(externalProxyId, datasourceResponse.getType());
     String entityId = generateEntityId(datasourceResponse, isZohoOrg);
@@ -380,29 +382,33 @@ public class EntityRecordService {
   public EntityProxy appendWikidataProxy(
       EntityRecord entityRecord, String wikidataProxyId, String entityType, Date timestamp)
       throws EntityCreationException {
-    // entity metadata will be populated during update task
-    Entity wikidataProxyEntity = EntityObjectFactory.createProxyEntityObject(entityType);
+    try {
+      // entity metadata will be populated during update task
+      Entity wikidataProxyEntity = EntityObjectFactory.createProxyEntityObject(entityType);
 
-    Optional<DataSource> wikidataDatasource = getDataSource(wikidataProxyId);
-    // exception is thrown in factory method if wikidataDatasource is empty
-    int proxyNr = entityRecord.getProxies().size();
-    EntityProxy wikidataProxy =
-        setExternalProxy(
-            wikidataProxyEntity,
-            wikidataProxyId,
-            entityRecord.getEntityId(),
-            wikidataDatasource.get(),
-            entityRecord,
-            timestamp,
-            proxyNr);
+      Optional<DataSource> wikidataDatasource = getDataSource(wikidataProxyId);
+      // exception is thrown in factory method if wikidataDatasource is empty
+      int proxyNr = entityRecord.getProxies().size();
+      EntityProxy wikidataProxy =
+          setExternalProxy(
+              wikidataProxyEntity,
+              wikidataProxyId,
+              entityRecord.getEntityId(),
+              wikidataDatasource.get(),
+              entityRecord,
+              timestamp,
+              proxyNr);
 
-    // add wikidata uri to entity sameAs
-    entityRecord.getEntity().addSameReferenceLink(wikidataProxyId);
-    // add to entityIsAggregatedBy
-    Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
-    updateEntityAggregatesList(isAggregatedBy, entityRecord, entityRecord.getEntityId());
+      // add wikidata uri to entity sameAs
+      entityRecord.getEntity().addSameReferenceLink(wikidataProxyId);
+      // add to entityIsAggregatedBy
+      Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
+      updateEntityAggregatesList(isAggregatedBy, entityRecord, entityRecord.getEntityId());
 
-    return wikidataProxy;
+      return wikidataProxy;
+    } catch (EntityModelCreationException e) {
+      throw new EntityCreationException(e.getMessage(), e);
+    }
   }
 
   String generateEntityId(Entity datasourceResponse, boolean isZohoOrg) {
@@ -630,7 +636,8 @@ public class EntityRecordService {
    *
    * @throws EntityCreationException
    */
-  public Entity mergeEntities(Entity primary, Entity secondary) throws EuropeanaApiException {
+  public Entity mergeEntities(Entity primary, Entity secondary)
+      throws EuropeanaApiException, EntityModelCreationException {
 
     // TODO: consider refactoring of this implemeentation by creating a new class
     // EntityReconciliator
@@ -684,7 +691,7 @@ public class EntityRecordService {
    */
   private Entity combineEntities(
       Entity primary, Entity secondary, List<Field> fieldsToCombine, boolean accumulate)
-      throws EuropeanaApiException {
+      throws EuropeanaApiException, EntityModelCreationException {
     Entity consolidatedEntity =
         EntityObjectFactory.createConsolidatedEntityObject(primary.getType());
 
@@ -1050,16 +1057,14 @@ public class EntityRecordService {
   }
 
   /**
-   * @deprecated the service should add the deprecated filter, eventually by adding a boolean
-   *     parameter
+   * Fetches records matching the provided filter(s)
+   *
    * @param start
    * @param count
    * @param queryFilters
    * @return
    */
-  @Deprecated
-  public List<? extends EntityRecord> findEntitiesWithFilter(
-      int start, int count, Filter[] queryFilters) {
+  public List<EntityRecord> findEntitiesWithFilter(int start, int count, Filter[] queryFilters) {
     return this.entityRecordRepository.findWithFilters(start, count, queryFilters);
   }
 
@@ -1150,7 +1155,7 @@ public class EntityRecordService {
    * @throws EuropeanaApiException on exception
    */
   public void changeExternalProxy(EntityRecord entityRecord, String newProxyId)
-      throws EuropeanaApiException {
+      throws EuropeanaApiException, EntityModelCreationException {
 
     DataSource dataSource = datasources.verifyDataSource(newProxyId, true);
     List<EntityProxy> externalProxies = entityRecord.getExternalProxies();
