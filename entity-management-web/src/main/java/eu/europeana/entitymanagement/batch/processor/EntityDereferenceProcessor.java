@@ -193,14 +193,19 @@ public class EntityDereferenceProcessor extends BaseEntityProcessor {
     // always replace external proxy with proxy response
     externalProxy.setEntity(proxyResponse);
     handleDatasourceRedirections(externalProxy, proxyResponse);
-    externalProxy.getProxyIn().setModified(new Date());
     // update rights
     Optional<DataSource> dataSource = datasources.getDatasource(externalProxy.getProxyId());
     if (dataSource.isPresent()
-        && !Objects.equals(dataSource.get().getRights(), externalProxy.getProxyIn().getRights())) {
+        && hasChangedRights(externalProxy, dataSource.get())) {
       externalProxy.getProxyIn().setRights(dataSource.get().getRights());
     }
+    //reset modified field
+    externalProxy.getProxyIn().setModified(new Date());
     return proxyResponse;
+  }
+
+  boolean hasChangedRights(EntityProxy externalProxy, DataSource dataSource) {
+    return !dataSource.getRights().equals(externalProxy.getProxyIn().getRights());
   }
 
   private void handleDatasourceRedirections(EntityProxy externalProxy, Entity proxyResponse) {
