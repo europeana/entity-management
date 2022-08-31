@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import org.springframework.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 @XmlRootElement(namespace = NAMESPACE_VCARD, name = XmlConstants.XML_ADDRESS)
 // This throws an error because of fieldname - xml property mismatch.
@@ -48,7 +48,7 @@ public class XmlAddressImpl {
   }
 
   public XmlAddressImpl(Address address) {
-    if (StringUtils.hasLength(address.getAbout())) {
+    if (StringUtils.isNotEmpty(address.getAbout())) {
       this.about = address.getAbout();
     }
     this.streetAddress = address.getVcardStreetAddress();
@@ -58,7 +58,7 @@ public class XmlAddressImpl {
     this.postBox = address.getVcardPostOfficeBox();
     this.locality = address.getVcardLocality();
 
-    if (StringUtils.hasLength(address.getVcardHasGeo())) {
+    if (StringUtils.isNotEmpty(address.getVcardHasGeo())) {
       this.hasGeo = new LabelledResource(EntityUtils.toGeoUri(address.getVcardHasGeo()));
     }
   }
@@ -108,11 +108,11 @@ public class XmlAddressImpl {
 
   /** Checks that this Address metadata properties set. 'about' field not included in this check. */
   public boolean hasMetadataProperties() {
-    return StringUtils.hasLength(streetAddress)
-        || StringUtils.hasLength(postalCode)
-        || StringUtils.hasLength(postBox)
-        || StringUtils.hasLength(locality)
-        || StringUtils.hasLength(countryName)
+    return StringUtils.isNotEmpty(streetAddress)
+        || StringUtils.isNotEmpty(postalCode)
+        || StringUtils.isNotEmpty(postBox)
+        || StringUtils.isNotEmpty(locality)
+        || StringUtils.isNotEmpty(countryName)
         || hasGeo != null;
   }
 }

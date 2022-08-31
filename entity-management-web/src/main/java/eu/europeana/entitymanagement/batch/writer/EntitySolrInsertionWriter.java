@@ -2,7 +2,7 @@ package eu.europeana.entitymanagement.batch.writer;
 
 import static eu.europeana.entitymanagement.solr.SolrUtils.createSolrEntity;
 
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.solr.model.SolrEntity;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import java.util.List;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 /** Saves Entities to Solr */
 @Component
-public class EntitySolrInsertionWriter implements ItemWriter<EntityRecord> {
+public class EntitySolrInsertionWriter implements ItemWriter<BatchEntityRecord> {
   private final SolrService solrService;
 
   public EntitySolrInsertionWriter(SolrService solrService) {
@@ -20,12 +20,14 @@ public class EntitySolrInsertionWriter implements ItemWriter<EntityRecord> {
   }
 
   @Override
-  public void write(List<? extends EntityRecord> entityRecords) throws Exception {
+  public void write(List<? extends BatchEntityRecord> entityRecords) throws Exception {
     List<SolrEntity<?>> solrEntities =
         entityRecords.stream()
-            .map(entityRecord -> createSolrEntity(entityRecord))
+            .map(entityRecord -> createSolrEntity(entityRecord.getEntityRecord()))
             .collect(Collectors.toList());
 
-    solrService.storeMultipleEntities(solrEntities);
+    if (!solrEntities.isEmpty()) {
+      solrService.storeMultipleEntities(solrEntities);
+    }
   }
 }

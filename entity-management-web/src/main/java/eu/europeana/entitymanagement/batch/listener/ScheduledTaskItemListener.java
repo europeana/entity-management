@@ -4,42 +4,40 @@ import static eu.europeana.entitymanagement.batch.utils.BatchUtils.getEntityIds;
 
 import eu.europeana.entitymanagement.batch.service.FailedTaskService;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.listener.ItemListenerSupport;
 import org.springframework.lang.NonNull;
 
 /** Listens for Read, Processing and Write operations during Entity Update steps. */
-public class ScheduledTaskItemListener extends ItemListenerSupport<EntityRecord, EntityRecord> {
+public class ScheduledTaskItemListener
+    extends ItemListenerSupport<BatchEntityRecord, BatchEntityRecord> {
 
   private static final Logger logger = LogManager.getLogger(ScheduledTaskItemListener.class);
 
   private final FailedTaskService failedTaskService;
   private final ScheduledTaskService scheduledTaskService;
-  private final ScheduledTaskType updateType;
   private final boolean isSynchronous;
 
   public ScheduledTaskItemListener(
       FailedTaskService failedTaskService,
       ScheduledTaskService scheduledTaskService,
-      ScheduledTaskType updateType,
       boolean isSynchronous) {
     this.failedTaskService = failedTaskService;
     this.scheduledTaskService = scheduledTaskService;
-    this.updateType = updateType;
     this.isSynchronous = isSynchronous;
   }
 
   @Override
-  public void afterWrite(@NonNull List<? extends EntityRecord> entityRecords) {
+  public void afterWrite(@NonNull List<? extends BatchEntityRecord> entityRecords) {
     if (entityRecords.isEmpty()) {
       return;
     }
-    String[] entityIds = getEntityIds(entityRecords);
+    String[] entityIds = getEntityIds((List<BatchEntityRecord>) entityRecords);
     if (logger.isDebugEnabled()) {
       logger.debug(
           "afterWrite: entityIds={}, count={};", Arrays.toString(entityIds), entityIds.length);
@@ -50,7 +48,11 @@ public class ScheduledTaskItemListener extends ItemListenerSupport<EntityRecord,
 
     // ScheduledTasks cleanup not required for synchronous execution
     if (!isSynchronous) {
-      scheduledTaskService.markAsProcessed(Arrays.asList(entityIds), updateType);
+      scheduledTaskService.markAsProcessed(
+          entityRecords.stream()
+              .collect(
+                  Collectors.toMap(
+                      p -> p.getEntityRecord().getEntityId(), p -> p.getScheduledTaskType())));
     }
   }
 
@@ -61,18 +63,23 @@ public class ScheduledTaskItemListener extends ItemListenerSupport<EntityRecord,
   }
 
   @Override
-  public void onProcessError(@NonNull EntityRecord entityRecord, @NonNull Exception e) {
-    String entityId = entityRecord.getEntityId();
+  public void onProcessError(@NonNull BatchEntityRecord entityRecord, @NonNull Exception e) {
+    String entityId = entityRecord.getEntityRecord().getEntityId();
     logger.warn("onProcessError: entityId={}", entityId, e);
-    failedTaskService.persistFailure(entityId, updateType, e);
+    failedTaskService.persistFailure(entityId, entityRecord.getScheduledTaskType(), e);
   }
 
   @Override
   public void onWriteError(
-      @NonNull Exception e, @NonNull List<? extends EntityRecord> entityRecords) {
-    String[] entityIds = getEntityIds(entityRecords);
+      @NonNull Exception e, @NonNull List<? extends BatchEntityRecord> entityRecords) {
+    String[] entityIds = getEntityIds((List<BatchEntityRecord>) entityRecords);
 
     logger.warn("onWriteError: entityIds={}", entityIds, e);
-    failedTaskService.persistFailureBulk(List.of(entityIds), updateType, e);
+    failedTaskService.persistFailureBulk(
+        entityRecords.stream()
+            .collect(
+                Collectors.toMap(
+                    r -> r.getEntityRecord().getEntityId(), r -> r.getScheduledTaskType())),
+        e);
   }
 }

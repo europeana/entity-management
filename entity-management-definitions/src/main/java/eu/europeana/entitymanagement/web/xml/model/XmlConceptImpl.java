@@ -21,7 +21,7 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.RELATED;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.RELATED_MATCH;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_CONCEPT;
 
-import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.model.Concept;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.ArrayList;
@@ -111,7 +111,7 @@ public class XmlConceptImpl extends XmlBaseEntityImpl<Concept> {
   }
 
   @Override
-  public Concept toEntityModel() throws EntityCreationException {
+  public Concept toEntityModel() throws EntityModelCreationException {
     super.toEntityModel();
 
     entity.setRelated(RdfXmlUtils.toStringList(getRelated()));

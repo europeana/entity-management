@@ -36,7 +36,7 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PLACE
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PROFESSION_OR_OCCUPATION;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_SAME_AS;
 
-import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.ArrayList;
@@ -195,7 +195,7 @@ public class XmlAgentImpl extends XmlBaseEntityImpl<Agent> {
   }
 
   @Override
-  public Agent toEntityModel() throws EntityCreationException {
+  public Agent toEntityModel() throws EntityModelCreationException {
     super.toEntityModel();
     entity.setNote(RdfXmlUtils.toLanguageMapList(note));
     entity.setIdentifier(identifier);

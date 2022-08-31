@@ -1,6 +1,6 @@
 package eu.europeana.entitymanagement.web.service;
 
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.METIS_DEREF_PATH;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.METIS_DEREF_PATH;
 import static eu.europeana.entitymanagement.web.MetisDereferenceUtils.parseMetisResponse;
 
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;

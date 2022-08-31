@@ -19,7 +19,7 @@ import dev.morphia.query.FindOptions;
 import dev.morphia.query.Query;
 import dev.morphia.query.experimental.filters.Filter;
 import dev.morphia.query.experimental.updates.UpdateOperators;
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
+import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.EntityRecordFields;
 import eu.europeana.entitymanagement.definitions.model.EntityIdGenerator;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;

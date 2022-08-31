@@ -1,16 +1,16 @@
 package eu.europeana.entitymanagement.solr.service;
 
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_INDEXING_SOLR_CLIENT;
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_JSON_MAPPER;
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_SOLR_ENTITY_SUGGESTER_FILTER;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_INDEXING_SOLR_CLIENT;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_JSON_MAPPER;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_SOLR_ENTITY_SUGGESTER_FILTER;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Concept;
 import eu.europeana.entitymanagement.definitions.model.Entity;
@@ -226,7 +226,7 @@ public class SolrService implements InitializingBean {
    * Deletes the document whose id matches the specified entityId value
    *
    * @param entityIds entity id list
-   * @param forceCommit flag use to force synchronuous solr commit 
+   * @param forceCommit flag use to force synchronuous solr commit
    * @throws SolrServiceException on error
    */
   public void deleteById(List<String> entityIds, boolean forceCommit) throws SolrServiceException {

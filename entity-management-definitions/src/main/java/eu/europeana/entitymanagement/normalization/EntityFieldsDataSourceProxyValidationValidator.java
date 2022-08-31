@@ -3,9 +3,7 @@ package eu.europeana.entitymanagement.normalization;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-import org.springframework.stereotype.Component;
 
-@Component
 public class EntityFieldsDataSourceProxyValidationValidator
     implements ConstraintValidator<EntityFieldsDataSourceProxyValidationInterface, Entity> {
 

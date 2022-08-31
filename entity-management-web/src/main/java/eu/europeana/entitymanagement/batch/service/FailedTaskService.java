@@ -7,6 +7,7 @@ import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -53,19 +54,19 @@ public class FailedTaskService {
   /**
    * Creates {@link FailedTask} instances for all entities, and then saves them to the database
    *
-   * @param entityIds list of entity records to be saved
-   * @param e exception
+   * @param entityIdsToUpdateType
+   * @param e
    */
   public void persistFailureBulk(
-      List<String> entityIds, ScheduledTaskType updateType, Exception e) {
+      Map<String, ScheduledTaskType> entityIdsToUpdateType, Exception e) {
     String message = e.getMessage();
     String stackTrace = ExceptionUtils.getStackTrace(e);
     Instant now = Instant.now();
 
-    // create FailedTask instance for each entityRecord
+    // create FailedTask instance for each entity id
     List<FailedTask> failures =
-        entityIds.stream()
-            .map(entityId -> createUpdateFailure(entityId, updateType, now, message, stackTrace))
+        entityIdsToUpdateType.entrySet().stream()
+            .map(r -> createUpdateFailure(r.getKey(), r.getValue(), now, message, stackTrace))
             .collect(Collectors.toList());
 
     BulkWriteResult writeResult = failureRepository.upsertBulk(failures);

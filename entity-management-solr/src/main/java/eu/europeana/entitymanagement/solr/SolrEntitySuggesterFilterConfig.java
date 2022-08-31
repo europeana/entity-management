@@ -1,6 +1,6 @@
 package eu.europeana.entitymanagement.solr;
 
-import static eu.europeana.entitymanagement.common.config.AppConfigConstants.BEAN_SOLR_ENTITY_SUGGESTER_FILTER;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_SOLR_ENTITY_SUGGESTER_FILTER;
 import static eu.europeana.entitymanagement.solr.SolrUtils.*;
 
 import com.fasterxml.jackson.databind.ser.FilterProvider;

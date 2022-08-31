@@ -4,7 +4,6 @@ import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Field;
 import dev.morphia.annotations.Id;
 import dev.morphia.annotations.Index;
-import dev.morphia.annotations.Indexed;
 import dev.morphia.annotations.Indexes;
 import eu.europeana.entitymanagement.definitions.batch.EMBatchConstants;
 import java.time.Instant;
@@ -13,17 +12,14 @@ import org.bson.types.ObjectId;
 @Entity("ScheduledTasks")
 @Indexes({
   @Index(
-      fields = {
-        @Field(value = EMBatchConstants.CREATED),
-        @Field(EMBatchConstants.UPDATE_TYPE),
-        @Field(EMBatchConstants.HAS_BEEN_PROCESSED)
-      }),
+      fields = {@Field(EMBatchConstants.UPDATE_TYPE), @Field(EMBatchConstants.HAS_BEEN_PROCESSED)}),
+  @Index(fields = {@Field(EMBatchConstants.CREATED), @Field(EMBatchConstants.ENTITY_ID)}),
 })
 public class ScheduledTask {
 
   @Id private ObjectId dbId;
 
-  @Indexed private String entityId;
+  private String entityId;
 
   /**
    * created not explicitly set. During upserts, we use the value for modified if record doesn't

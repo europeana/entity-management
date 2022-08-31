@@ -4,9 +4,9 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import dev.morphia.Datastore;
 import eu.europeana.api.commons.oauth2.service.impl.EuropeanaClientDetailsService;
 import eu.europeana.batch.config.MongoBatchConfigurer;
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,7 +42,7 @@ public class AppConfig extends AppConfigConstants {
 
   @PostConstruct
   public void init() {
-    if (emConfiguration.isAuthEnabled()) {
+    if (emConfiguration.isAuthReadEnabled() || emConfiguration.isAuthWriteEnabled()) {
       String jwtTokenSignatureKey = emConfiguration.getApiKeyPublicKey();
       if (jwtTokenSignatureKey == null || jwtTokenSignatureKey.isBlank()) {
         throw new IllegalStateException("The jwt token signature key cannot be null or empty.");

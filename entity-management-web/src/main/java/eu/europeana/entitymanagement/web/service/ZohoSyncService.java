@@ -11,9 +11,9 @@ import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
-import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
@@ -93,7 +93,8 @@ public class ZohoSyncService {
 
   /**
    * main method to run the zoho synchronization
-   * @param modifiedSince the start date from which the Zoho modifications must be synchronized  
+   *
+   * @param modifiedSince the start date from which the Zoho modifications must be synchronized
    * @return the report on performed opperations
    * @throws EntityUpdateException
    */
@@ -595,10 +596,7 @@ public class ZohoSyncService {
     return currentPageSize < maxItemsPerPage;
   }
 
-  /**
-   * 
-   * @return the Zoho DataSource object  
-   */
+  /** @return the Zoho DataSource object */
   public DataSource getZohoDataSource() {
     return zohoDataSource;
   }

@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.config;
 
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import java.util.Arrays;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
@@ -44,7 +44,7 @@ public class SolrConfig {
   private SolrClient initSolrClient() {
     logger.info(
         "Configuring indexing solr client at the url: {}", emConfiguration.getIndexingSolrUrl());
-    
+
     if (emConfiguration.getIndexingSolrUrl().contains(",")) {
       LBHttpSolrClient.Builder builder = new LBHttpSolrClient.Builder();
       return builder
@@ -62,8 +62,10 @@ public class SolrConfig {
 
   private SolrClient initSolrCloudClient() {
     logger.info(
-        "Configuring indexing solr client with the zookeperurls: {} and collection: {}", emConfiguration.getIndexingSolrUrl(), emConfiguration.getIndexingSolrCollection());
-    
+        "Configuring indexing solr client with the zookeperurls: {} and collection: {}",
+        emConfiguration.getIndexingSolrUrl(),
+        emConfiguration.getIndexingSolrCollection());
+
     String[] solrZookeeperUrls = emConfiguration.getIndexingSolrZookeeperUrl().trim().split(",");
 
     CloudSolrClient client =

@@ -61,7 +61,7 @@ public class EntityManagementConfiguration {
   @Value("${entitymanagement.solr.indexing.explicitCommits: false}")
   private boolean explicitCommitsEnabled;
 
-  @Value("${entitymanagement.solr.indexing.query.maxPageSize: 300}")
+  @Value("${entitymanagement.solr.indexing.query.maxPageSize: 500}")
   private int solrQueryMaxPageSize;
 
   @Value("${entitymanagement.solr.searchapi.hits.query}")
@@ -109,8 +109,11 @@ public class EntityManagementConfiguration {
   @Value("${batch.maxFailedTaskRetries: 3}")
   private int maxFailedTaskRetries;
 
-  @Value("${auth.enabled: true}")
-  private boolean authEnabled;
+  @Value("${auth.read.enabled: true}")
+  private boolean authReadEnabled;
+
+  @Value("${auth.write.enabled: true}")
+  private boolean authWriteEnabled;
 
   @Value("${metis.proxy.enabled: false}")
   private boolean useMetisProxy;
@@ -126,9 +129,6 @@ public class EntityManagementConfiguration {
 
   @Value("${zoho.sync.batch.size: 100}")
   private int zohoSyncBatchSize;
-  
-  @Value("${searchAndRecord.url:}")
-  private String searchAndRecordUrl;
   
   @Value("${europeana.item.data.endpoint}")
   private String itemDataEndpoint;
@@ -193,8 +193,12 @@ public class EntityManagementConfiguration {
     return batchComputeMetrics;
   }
 
-  public boolean isAuthEnabled() {
-    return authEnabled;
+  public boolean isAuthReadEnabled() {
+    return authReadEnabled;
+  }
+
+  public boolean isAuthWriteEnabled() {
+    return authWriteEnabled;
   }
 
   public int getBatchUpdatesThrottleLimit() {
@@ -279,10 +283,6 @@ public class EntityManagementConfiguration {
 
   public String getIndexingSolrCollection() {
     return indexingSolrCollection;
-  }
-
-  public String getSearchAndRecordUrl() {
-    return searchAndRecordUrl;
   }
 
   public String getItemDataEndpoint() {

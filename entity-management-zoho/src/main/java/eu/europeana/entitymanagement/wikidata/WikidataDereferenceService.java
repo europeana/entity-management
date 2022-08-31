@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.Optional;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -16,6 +15,12 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import org.apache.commons.io.output.StringBuilderWriter;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
@@ -23,8 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.common.config.HttpClient;
-import eu.europeana.entitymanagement.definitions.exceptions.EntityCreationException;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.dereference.Dereferencer;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
@@ -96,7 +100,7 @@ public class WikidataDereferenceService implements Dereferencer, InitializingBea
 
   @Override
   public Optional<Entity> dereferenceEntityById(String wikidataUri)
-      throws WikidataAccessException, EntityCreationException {
+      throws WikidataAccessException, EntityModelCreationException {
     StringBuilder wikidataXml = null;
     WikidataOrganization wikidataOrganization = null;
     try {
@@ -141,16 +145,28 @@ public class WikidataDereferenceService implements Dereferencer, InitializingBea
    * @throws WikidataAccessException
    */
   private String getEntityFromURL(String urlToRead) throws WikidataAccessException {
+
     // wikidataBaseUrl is only set in integration tests (where a mock Wikidata service is used)
     if (StringUtils.hasLength(wikidataBaseUrl)) {
       urlToRead = wikidataBaseUrl + "/entity/" + EntityRecordUtils.getIdFromUrl(urlToRead);
     }
-    
-    try {
-      return HttpClient.httpGetClient(urlToRead, Map.of("Accept", "application/xml"), null);
-    } catch (Exception e) {
+
+    try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+      HttpGet request = new HttpGet(urlToRead);
+      request.addHeader("Accept", "application/xml");
+      try (CloseableHttpResponse response = httpClient.execute(request)) {
+        if (response.getStatusLine().getStatusCode() != 200) {
+          return null;
+        }
+        HttpEntity entity = response.getEntity();
+        if (entity != null) {
+          return EntityUtils.toString(entity);
+        }
+      }
+    } catch (IOException e) {
       throw new WikidataAccessException("Error executing the request for uri " + urlToRead, e);
-    }  
+    }
+    return null;
   }
 
   private WikidataOrganization parse(String xml) throws JAXBException {

@@ -2,8 +2,8 @@ package eu.europeana.entitymanagement;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
-import eu.europeana.entitymanagement.common.config.AppConfigConstants;
 import eu.europeana.entitymanagement.common.config.DataSource;
+import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -15,12 +15,16 @@ import eu.europeana.entitymanagement.web.MetisDereferenceUtils;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.Optional;
 import javax.xml.bind.JAXBContext;
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -110,7 +114,8 @@ public abstract class AbstractIntegrationTest {
     registry.add("batch.computeMetrics", () -> "false");
     // Do not run scheduled entity updates in tests
     registry.add("batch.scheduling.enabled", () -> "false");
-    registry.add("auth.enabled", () -> "false");
+    registry.add("auth.read.enabled", () -> "false");
+    registry.add("auth.write.enabled", () -> "false");
     registry.add("entitymanagement.solr.indexing.url", SOLR_CONTAINER::getConnectionUrl);
     // enable explicit commits while indexing to Solr in tests
     registry.add("entitymanagement.solr.indexing.explicitCommits", () -> true);
@@ -207,5 +212,15 @@ public abstract class AbstractIntegrationTest {
 
     // return entityRecord version with consolidated entity
     return entityRecordService.retrieveByEntityId(savedRecord.getEntityId()).orElseThrow();
+  }
+
+  public static String loadFile(String resourcePath) throws IOException {
+    InputStream is = AbstractIntegrationTest.class.getResourceAsStream(resourcePath);
+    assert is != null;
+    return IOUtils.toString(is, StandardCharsets.UTF_8).replace("\n", "");
+  }
+
+  public Optional<EntityRecord> retrieveEntity(String entityId) {
+    return entityRecordService.retrieveByEntityId(entityId);
   }
 }

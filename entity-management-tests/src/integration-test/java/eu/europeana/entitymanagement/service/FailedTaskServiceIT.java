@@ -9,6 +9,7 @@ import eu.europeana.entitymanagement.batch.service.FailedTaskService;
 import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,7 +51,12 @@ class FailedTaskServiceIT extends AbstractIntegrationTest {
 
   @Test
   void shouldPersistMultipleFailures() {
-    service.persistFailureBulk(List.of(entityId1, entityId2), testUpdateType, testException);
+    Map<String, ScheduledTaskType> map =
+        Map.of(
+            entityId1, testUpdateType,
+            entityId2, testUpdateType);
+
+    service.persistFailureBulk(map, testException);
 
     // check that entries were inserted
     List<FailedTask> savedRecords = service.getFailures(List.of(entityId1, entityId2));
@@ -79,7 +85,11 @@ class FailedTaskServiceIT extends AbstractIntegrationTest {
     service.persistFailure(entityId1, testUpdateType, testException);
 
     // insert two failures - with one matching pre-inserted
-    service.persistFailureBulk(List.of(entityId1, entityId2), testUpdateType, testException);
+    Map<String, ScheduledTaskType> map =
+        Map.of(
+            entityId1, testUpdateType,
+            entityId2, testUpdateType);
+    service.persistFailureBulk(map, testException);
 
     // also check that failure count is incremented
     Optional<FailedTask> saved = service.getFailure(entityId1);

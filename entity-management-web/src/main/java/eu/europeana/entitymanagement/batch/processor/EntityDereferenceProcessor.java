@@ -2,6 +2,8 @@ package eu.europeana.entitymanagement.batch.processor;
 
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.config.DataSources;
+import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -14,6 +16,7 @@ import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeSet;
 import org.apache.logging.log4j.LogManager;
@@ -28,7 +31,7 @@ import org.springframework.stereotype.Component;
  * overwrites the local metadata if datasource response is different.
  */
 @Component
-public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, EntityRecord> {
+public class EntityDereferenceProcessor extends BaseEntityProcessor {
 
   private static final String MISMATCH_EXCEPTION_STRING =
       "DataSource type %s does not match entity type %s for entityId=%s, proxyId=%s";
@@ -42,41 +45,45 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
       DereferenceServiceLocator dereferenceServiceLocator,
       DataSources datasources,
       EntityRecordService entityRecordService) {
+    super(ScheduledUpdateType.FULL_UPDATE);
     this.dereferenceServiceLocator = dereferenceServiceLocator;
     this.datasources = datasources;
     this.entityRecordService = entityRecordService;
   }
 
   @Override
-  public EntityRecord process(@NonNull EntityRecord entityRecord) throws Exception {
+  public BatchEntityRecord doProcessing(@NonNull BatchEntityRecord entityRecord) throws Exception {
 
     // might be multiple wikidata IDs in case of redirections
     TreeSet<String> wikidataEntityIds = new TreeSet<>();
-    collectWikidataEntityIds(entityRecord.getEuropeanaProxy().getEntity(), wikidataEntityIds);
+    collectWikidataEntityIds(
+        entityRecord.getEntityRecord().getEuropeanaProxy().getEntity(), wikidataEntityIds);
 
-    for (EntityProxy externalProxy : entityRecord.getExternalProxies()) {
+    for (EntityProxy externalProxy : entityRecord.getEntityRecord().getExternalProxies()) {
       Optional<DataSource> dataSource = datasources.getDatasource(externalProxy.getProxyId());
       if (dataSource.isPresent() && dataSource.get().isStatic()) {
         // do not update external proxy for static data sources
         continue;
       }
 
-      Entity externalEntity = dereferenceAndUpdateProxy(externalProxy, entityRecord);
+      Entity externalEntity =
+          dereferenceAndUpdateProxy(externalProxy, entityRecord.getEntityRecord());
       // also for wikidata proxy we can collect redirection links
       collectWikidataEntityIds(externalEntity, wikidataEntityIds);
     }
 
-    if (EntityTypes.Organization.getEntityType().equals(entityRecord.getEntity().getType())) {
+    if (EntityTypes.Organization.getEntityType()
+        .equals(entityRecord.getEntityRecord().getEntity().getType())) {
       // cross-check wikidata proxy, if reference is lost of changed update the proxy list
       // accordingly
-      handleWikidataReferenceChange(wikidataEntityIds, entityRecord);
+      handleWikidataReferenceChange(wikidataEntityIds, entityRecord.getEntityRecord());
     }
 
     return entityRecord;
   }
 
-  void handleWikidataReferenceChange(TreeSet<String> wikidataEntityIds, EntityRecord entityRecord)
-      throws Exception {
+  private void handleWikidataReferenceChange(
+      TreeSet<String> wikidataEntityIds, EntityRecord entityRecord) throws Exception {
     EntityProxy wikidataProxy = entityRecord.getWikidataProxy();
     if (wikidataProxy == null && wikidataEntityIds.isEmpty()) {
       // nothing to do, no wikidata reference
@@ -115,7 +122,7 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
     }
   }
 
-  void updateWikidataProxies(
+  private void updateWikidataProxies(
       EntityRecord entityRecord,
       String wikidataId,
       EntityProxy wikidataProxy,
@@ -186,11 +193,15 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
     // always replace external proxy with proxy response
     externalProxy.setEntity(proxyResponse);
     handleDatasourceRedirections(externalProxy, proxyResponse);
+    //ensure rights are up to date for all external proxies
+    updateRights(externalProxy);
+    
+    //reset modified field
     externalProxy.getProxyIn().setModified(new Date());
     return proxyResponse;
   }
 
-  void handleDatasourceRedirections(EntityProxy externalProxy, Entity proxyResponse) {
+  private void handleDatasourceRedirections(EntityProxy externalProxy, Entity proxyResponse) {
     // in case of redirections also update proxy id
     if (!externalProxy.getProxyId().equals(proxyResponse.getEntityId())) {
       // add old id to sameAs references
@@ -205,5 +216,18 @@ public class EntityDereferenceProcessor implements ItemProcessor<EntityRecord, E
       }
       externalProxy.setProxyId(proxyResponse.getEntityId());
     }
+  }
+
+  protected void updateRights(EntityProxy externalProxy) {
+    // update rights
+    Optional<DataSource> dataSource = datasources.getDatasource(externalProxy.getProxyId());
+    if (dataSource.isPresent()
+        && hasChangedRights(externalProxy, dataSource.get())) {
+      externalProxy.getProxyIn().setRights(dataSource.get().getRights());
+    }
+  }
+  
+  boolean hasChangedRights(EntityProxy externalProxy, DataSource dataSource) {
+    return !dataSource.getRights().equals(externalProxy.getProxyIn().getRights());
   }
 }

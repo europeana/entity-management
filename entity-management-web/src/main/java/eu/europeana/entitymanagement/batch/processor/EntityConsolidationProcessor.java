@@ -1,8 +1,6 @@
 package eu.europeana.entitymanagement.batch.processor;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -11,16 +9,18 @@ import javax.validation.ValidatorFactory;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.lang.NonNull;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.common.config.HttpClient;
 import eu.europeana.entitymanagement.config.DataSources;
+import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.exception.ingestion.EntityValidationException;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
@@ -34,13 +34,14 @@ import eu.europeana.entitymanagement.web.service.EntityRecordService;
  * merging the metadata from all data sources .
  */
 @Component
-public class EntityConsolidationProcessor implements ItemProcessor<EntityRecord, EntityRecord> {
+public class EntityConsolidationProcessor extends BaseEntityProcessor {
 
   private final EntityRecordService entityRecordService;
   private final ValidatorFactory emValidatorFactory;
   private final EntityFieldsCleaner emEntityFieldCleaner;
   private final DataSources datasources;
   final EntityManagementConfiguration emConfiguration;
+  private final WebClient webClient;
 
   public EntityConsolidationProcessor(
       EntityRecordService entityRecordService,
@@ -48,20 +49,24 @@ public class EntityConsolidationProcessor implements ItemProcessor<EntityRecord,
       EntityFieldsCleaner emEntityFieldCleaner,
       DataSources datasources,
       EntityManagementConfiguration emConfiguration) {
+    super(ScheduledUpdateType.FULL_UPDATE);
     this.entityRecordService = entityRecordService;
     this.emValidatorFactory = emValidatorFactory;
     this.emEntityFieldCleaner = emEntityFieldCleaner;
     this.datasources = datasources;
     this.emConfiguration = emConfiguration;
+    webClient = WebClient.builder().build();
   }
 
-  @Override
-  public EntityRecord process(@NonNull EntityRecord entityRecord) throws EuropeanaApiException {
+  public BatchEntityRecord doProcessing(BatchEntityRecord entityRecord)
+      throws EuropeanaApiException, EntityModelCreationException {
 
-    List<EntityProxy> externalProxies = entityRecord.getExternalProxies();
+    List<EntityProxy> externalProxies = entityRecord.getEntityRecord().getExternalProxies();
 
-    Entity externalProxyEntity = externalProxies.get(0).getEntity();
-    String proxyId = externalProxies.get(0).getProxyId();
+    EntityProxy primaryExternalProxy = externalProxies.get(0);
+    Entity externalProxyEntity = primaryExternalProxy.getEntity();
+    
+    String proxyId = primaryExternalProxy.getProxyId();
     Optional<DataSource> dataSource = datasources.getDatasource(proxyId);
     boolean isStaticDataSource = dataSource.isPresent() && dataSource.get().isStatic();
 
@@ -72,9 +77,13 @@ public class EntityConsolidationProcessor implements ItemProcessor<EntityRecord,
 
     // entities from static datasources should not have multiple proxies
     if (externalProxies.size() > 1) {
+      
       // cumulatively merge all external proxies
+      EntityProxy secondaryExternalProxy;
+      Entity secondaryProxyEntity;
       for (int i = 1; i < externalProxies.size(); i++) {
-        Entity secondaryProxyEntity = externalProxies.get(i).getEntity();
+        secondaryExternalProxy = externalProxies.get(i);
+        secondaryProxyEntity = secondaryExternalProxy.getEntity();
         // validate each proxy's metadata before merging
         validateDataSourceProxyConstraints(secondaryProxyEntity);
         externalProxyEntity =
@@ -82,7 +91,7 @@ public class EntityConsolidationProcessor implements ItemProcessor<EntityRecord,
       }
     }
 
-    Entity europeanaProxyEntity = entityRecord.getEuropeanaProxy().getEntity();
+    Entity europeanaProxyEntity = entityRecord.getEntityRecord().getEuropeanaProxy().getEntity();
 
     Entity consolidatedEntity = null;
     if (isStaticDataSource) {
@@ -107,7 +116,8 @@ public class EntityConsolidationProcessor implements ItemProcessor<EntityRecord,
       }
     }
     validateCompleteValidationConstraints(consolidatedEntity);
-    entityRecordService.updateConsolidatedVersion(entityRecord, consolidatedEntity);
+    entityRecordService.updateConsolidatedVersion(
+        entityRecord.getEntityRecord(), consolidatedEntity);
 
     return entityRecord;
   }
@@ -136,19 +146,28 @@ public class EntityConsolidationProcessor implements ItemProcessor<EntityRecord,
   }
   
   private WebResource generateIsShownBy (String entityUri) throws EuropeanaApiException {
-    Map<String, String> params = new HashMap<String, String>();
-    params.put("rows", "1");
-    params.put("wskey", "apidemo");
-    params.put("query", "\"" + entityUri + "\"");
-    params.put("sort", "contentTier+desc,metadataTier+desc");
-    params.put("profile", "minimal");
+    String params = "query=\"" + entityUri + "\"" +  " AND provider_aggregation_edm_isShownBy:*" + 
+                    "&sort=contentTier+desc,metadataTier+desc" +
+                    "&profile=minimal" + 
+                    "&wskey=apidemo" + 
+                    "&rows=1" +
+                    "&pageSize=0";
+    String uri = emConfiguration.getSearchApiUrlPrefix() + params;
 
     String response = null;
     try {
-      response = HttpClient.httpGetClient(emConfiguration.getSearchAndRecordUrl(), null, params);
+      response =
+          webClient
+              .get()
+              .uri(uri)
+              .accept(MediaType.APPLICATION_JSON)
+              .retrieve()
+              .bodyToMono(String.class)
+              .block();
     } catch (Exception e) {
       throw new EuropeanaApiException("Unable to get the valid response from the Search and Record API.", e);
     }
+
     if(response==null) return null;
     
     JSONObject responseJson = new JSONObject(response);
@@ -175,11 +194,12 @@ public class EntityConsolidationProcessor implements ItemProcessor<EntityRecord,
           }
         }
       }
+      else {
+        return null;
+      }
     }
-    
-    if(edmIsShownBy!=null && itemId!=null) {
-      return new WebResource(edmIsShownBy, emConfiguration.getItemDataEndpoint() + itemId, edmPreview);
-    }
-    return null;
+
+    return new WebResource(edmIsShownBy, emConfiguration.getItemDataEndpoint() + itemId, edmPreview);
+
   }
 }
