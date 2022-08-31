@@ -153,7 +153,7 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
                     "&rows=1" +
                     "&pageSize=0";
     String uri = emConfiguration.getSearchApiUrlPrefix() + params;
-
+    
     String response = null;
     try {
       response =
@@ -167,7 +167,6 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
     } catch (Exception e) {
       throw new EuropeanaApiException("Unable to get the valid response from the Search and Record API.", e);
     }
-
     if(response==null) return null;
     
     JSONObject responseJson = new JSONObject(response);
