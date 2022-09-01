@@ -173,7 +173,7 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
   }
 
   @Test
-  void updateScheduledTasks() throws Exception {
+  void updateScheduledTasksExecution() throws Exception {
     // create first entity
     String europeanaMetadata = loadFile(IntegrationTestUtils.AGENT_REGISTER_DAVINCI_JSON);
     String metisResponse = loadFile(IntegrationTestUtils.AGENT_DA_VINCI_XML);
@@ -255,7 +255,7 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
   }
 
   @Test
-  void deprecationAndDeletionScheduledTasks() throws Exception {
+  void deprecationAndDeletionScheduledTasksExecution() throws Exception {
     // create first entity
     String europeanaMetadata = loadFile(IntegrationTestUtils.CONCEPT_REGISTER_BATHTUB_JSON);
     String metisResponse = loadFile(IntegrationTestUtils.CONCEPT_BATHTUB_XML);

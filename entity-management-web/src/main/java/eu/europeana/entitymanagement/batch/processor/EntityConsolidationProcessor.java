@@ -53,8 +53,10 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
 
     List<EntityProxy> externalProxies = entityRecord.getEntityRecord().getExternalProxies();
 
-    Entity externalProxyEntity = externalProxies.get(0).getEntity();
-    String proxyId = externalProxies.get(0).getProxyId();
+    EntityProxy primaryExternalProxy = externalProxies.get(0);
+    Entity externalProxyEntity = primaryExternalProxy.getEntity();
+    
+    String proxyId = primaryExternalProxy.getProxyId();
     Optional<DataSource> dataSource = datasources.getDatasource(proxyId);
     boolean isStaticDataSource = dataSource.isPresent() && dataSource.get().isStatic();
 
@@ -65,9 +67,13 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
 
     // entities from static datasources should not have multiple proxies
     if (externalProxies.size() > 1) {
+      
       // cumulatively merge all external proxies
+      EntityProxy secondaryExternalProxy;
+      Entity secondaryProxyEntity;
       for (int i = 1; i < externalProxies.size(); i++) {
-        Entity secondaryProxyEntity = externalProxies.get(i).getEntity();
+        secondaryExternalProxy = externalProxies.get(i);
+        secondaryProxyEntity = secondaryExternalProxy.getEntity();
         // validate each proxy's metadata before merging
         validateDataSourceProxyConstraints(secondaryProxyEntity);
         externalProxyEntity =

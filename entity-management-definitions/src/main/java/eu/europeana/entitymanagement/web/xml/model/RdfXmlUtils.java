@@ -50,7 +50,7 @@ public class RdfXmlUtils {
     }
     List<LabelledResource> res = new ArrayList<>();
     for (String language : values.keySet()) {
-      res.add(new LabelledResource(StringEscapeUtils.escapeXml11(values.get(language)), language));
+      res.add(new LabelledResource(language, StringEscapeUtils.escapeXml11(values.get(language))));
     }
     return res;
   }

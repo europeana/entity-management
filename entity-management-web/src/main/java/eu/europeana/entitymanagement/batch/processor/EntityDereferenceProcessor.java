@@ -16,6 +16,7 @@ import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeSet;
 import org.apache.logging.log4j.LogManager;
