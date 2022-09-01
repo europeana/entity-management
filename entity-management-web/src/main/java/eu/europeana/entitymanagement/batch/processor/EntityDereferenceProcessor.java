@@ -193,6 +193,10 @@ public class EntityDereferenceProcessor extends BaseEntityProcessor {
     // always replace external proxy with proxy response
     externalProxy.setEntity(proxyResponse);
     handleDatasourceRedirections(externalProxy, proxyResponse);
+    //ensure rights are up to date for all external proxies
+    updateRights(externalProxy);
+    
+    //reset modified field
     externalProxy.getProxyIn().setModified(timestamp);
     return proxyResponse;
   }
@@ -212,5 +216,18 @@ public class EntityDereferenceProcessor extends BaseEntityProcessor {
       }
       externalProxy.setProxyId(proxyResponse.getEntityId());
     }
+  }
+
+  protected void updateRights(EntityProxy externalProxy) {
+    // update rights
+    Optional<DataSource> dataSource = datasources.getDatasource(externalProxy.getProxyId());
+    if (dataSource.isPresent()
+        && hasChangedRights(externalProxy, dataSource.get())) {
+      externalProxy.getProxyIn().setRights(dataSource.get().getRights());
+    }
+  }
+  
+  boolean hasChangedRights(EntityProxy externalProxy, DataSource dataSource) {
+    return !dataSource.getRights().equals(externalProxy.getProxyIn().getRights());
   }
 }
