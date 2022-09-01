@@ -53,6 +53,7 @@ public class EntityDereferenceProcessor extends BaseEntityProcessor {
   @Override
   public BatchEntityRecord doProcessing(@NonNull BatchEntityRecord entityRecord) throws Exception {
 
+    Date timestamp = new Date();
     // might be multiple wikidata IDs in case of redirections
     TreeSet<String> wikidataEntityIds = new TreeSet<>();
     collectWikidataEntityIds(
@@ -66,7 +67,7 @@ public class EntityDereferenceProcessor extends BaseEntityProcessor {
       }
 
       Entity externalEntity =
-          dereferenceAndUpdateProxy(externalProxy, entityRecord.getEntityRecord());
+          dereferenceAndUpdateProxy(externalProxy, entityRecord.getEntityRecord(), timestamp);
       // also for wikidata proxy we can collect redirection links
       collectWikidataEntityIds(externalEntity, wikidataEntityIds);
     }
@@ -75,14 +76,14 @@ public class EntityDereferenceProcessor extends BaseEntityProcessor {
         .equals(entityRecord.getEntityRecord().getEntity().getType())) {
       // cross-check wikidata proxy, if reference is lost of changed update the proxy list
       // accordingly
-      handleWikidataReferenceChange(wikidataEntityIds, entityRecord.getEntityRecord());
+      handleWikidataReferenceChange(wikidataEntityIds, entityRecord.getEntityRecord(), timestamp);
     }
 
     return entityRecord;
   }
 
   private void handleWikidataReferenceChange(
-      TreeSet<String> wikidataEntityIds, EntityRecord entityRecord) throws Exception {
+      TreeSet<String> wikidataEntityIds, EntityRecord entityRecord, @NonNull Date timestamp) throws Exception {
     EntityProxy wikidataProxy = entityRecord.getWikidataProxy();
     if (wikidataProxy == null && wikidataEntityIds.isEmpty()) {
       // nothing to do, no wikidata reference
@@ -93,7 +94,7 @@ public class EntityDereferenceProcessor extends BaseEntityProcessor {
 
       if (wikidataProxy == null) {
         // create the wikidata proxy and dereference, only if a wikidata reference is found
-        EntityProxy newProxy = addWikidataProxyAndDeref(wikidataId, entityRecord);
+        EntityProxy newProxy = addWikidataProxyAndDeref(wikidataId, entityRecord, timestamp);
         if (logger.isInfoEnabled()) {
           logger.info(
               "For Entity Record with id:{}, wikidata proxy with id: {}  was created",
@@ -115,7 +116,7 @@ public class EntityDereferenceProcessor extends BaseEntityProcessor {
               "For Entity Record with id:{}, wikidata proxy was not replaced as the proxy id: {} was found in coreferences.";
           logger.debug(message, entityRecord.getEntityId(), wikidataId);
         } else if (logger.isDebugEnabled()) {
-          updateWikidataProxies(entityRecord, wikidataId, wikidataProxy, wikidataEntityIds);
+          updateWikidataProxies(entityRecord, wikidataId, wikidataProxy, wikidataEntityIds, timestamp);
         }
       }
     }
@@ -125,7 +126,7 @@ public class EntityDereferenceProcessor extends BaseEntityProcessor {
       EntityRecord entityRecord,
       String wikidataId,
       EntityProxy wikidataProxy,
-      TreeSet<String> wikidataEntityIds)
+      TreeSet<String> wikidataEntityIds, @NonNull Date timestamp)
       throws Exception {
     // remove wikidata proxy, if nor the proxy id or redirection id is found in coreferences
     entityRecord.getProxies().remove(wikidataProxy);
@@ -139,7 +140,7 @@ public class EntityDereferenceProcessor extends BaseEntityProcessor {
     // create new proxy if wikidata id is available
     if (!wikidataEntityIds.isEmpty()) {
       // create the wikidata proxy and dereference, only if a wikidata reference is found
-      EntityProxy newProxy = addWikidataProxyAndDeref(wikidataId, entityRecord);
+      EntityProxy newProxy = addWikidataProxyAndDeref(wikidataId, entityRecord, timestamp);
       if (logger.isInfoEnabled()) {
         logger.info(
             "For Entity Record with id:{}, wikidata proxy was replaced, new proxy id: {}",
@@ -149,12 +150,12 @@ public class EntityDereferenceProcessor extends BaseEntityProcessor {
     }
   }
 
-  private EntityProxy addWikidataProxyAndDeref(String wikidataId, EntityRecord entityRecord)
+  private EntityProxy addWikidataProxyAndDeref(String wikidataId, EntityRecord entityRecord, @NonNull Date timestamp)
       throws Exception {
     EntityProxy wikidataProxy =
         entityRecordService.appendWikidataProxy(
-            entityRecord, wikidataId, entityRecord.getEntity().getType(), new Date());
-    dereferenceAndUpdateProxy(wikidataProxy, entityRecord);
+            entityRecord, wikidataId, entityRecord.getEntity().getType(), timestamp);
+    dereferenceAndUpdateProxy(wikidataProxy, entityRecord, timestamp);
     return wikidataProxy;
   }
 
@@ -166,7 +167,7 @@ public class EntityDereferenceProcessor extends BaseEntityProcessor {
   }
 
   private Entity dereferenceAndUpdateProxy(
-      @NonNull EntityProxy externalProxy, @NonNull EntityRecord entityRecord) throws Exception {
+      @NonNull EntityProxy externalProxy, @NonNull EntityRecord entityRecord, @NonNull Date timestamp) throws Exception {
     String entityId = entityRecord.getEntityId();
     String proxyId = externalProxy.getProxyId();
     String entityType = entityRecord.getEntity().getType();
@@ -192,7 +193,7 @@ public class EntityDereferenceProcessor extends BaseEntityProcessor {
     // always replace external proxy with proxy response
     externalProxy.setEntity(proxyResponse);
     handleDatasourceRedirections(externalProxy, proxyResponse);
-    externalProxy.getProxyIn().setModified(new Date());
+    externalProxy.getProxyIn().setModified(timestamp);
     return proxyResponse;
   }
 

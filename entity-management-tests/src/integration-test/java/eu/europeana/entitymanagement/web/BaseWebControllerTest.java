@@ -18,11 +18,13 @@ import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.testutils.TestConfig;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -151,14 +153,15 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
     return entityRecordService.retrieveByEntityId(savedRecord.getEntityId()).orElseThrow();
   }
 
-  protected EntityRecord createOrganization(String europeanaProxyEntityStr, Record zohoOrganization)
+  protected EntityRecord createOrganization(String europeanaProxyEntityStr, Record zohoRecord)
       throws Exception {
     Entity europeanaProxyEntity = objectMapper.readValue(europeanaProxyEntityStr, Entity.class);
     DataSource dataSource = datasources.verifyDataSource(europeanaProxyEntity.getEntityId(), false);
+    Organization zohoOrganization = ZohoOrganizationConverter.convertToOrganizationEntity(zohoRecord);
     EntityRecord savedRecord =
         entityRecordService.createEntityFromRequest(
             europeanaProxyEntity,
-            ZohoOrganizationConverter.convertToOrganizationEntity(zohoOrganization),
+            zohoOrganization,
             dataSource);
 
     // trigger update to generate consolidated entity
