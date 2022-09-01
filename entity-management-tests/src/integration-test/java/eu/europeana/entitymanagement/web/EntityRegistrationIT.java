@@ -229,7 +229,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         .andExpect(
             jsonPath(
                 "$.sameAs",
-                Matchers.containsInRelativeOrder(
+                Matchers.hasItems(
                     IntegrationTestUtils.ORGANIZATION_NATURALIS_URI_WIKIDATA_URI,
                     IntegrationTestUtils.ORGANIZATION_NATURALIS_URI_ZOHO)))
         // should have Europeana, Zoho and Wikidata proxies
@@ -266,7 +266,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         .andExpect(
             jsonPath(
                 "$.sameAs",
-                Matchers.containsInRelativeOrder(
+                Matchers.hasItems(
                     IntegrationTestUtils.ORGANIZATION_GFM_OLD_URI_WIKIDATA_URI,
                     IntegrationTestUtils.ORGANIZATION_GFM_URI_ZOHO,
                     IntegrationTestUtils.ORGANIZATION_GFM_URI_WIKIDATA_URI)))
@@ -355,7 +355,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
 
   @Test
   void registerZohoOrganizationBnfWithNewFieldsShouldBeSuccessful() throws Exception {
-    EntityRecordUtils.buildEntityIdUri(
+    String entityId = EntityRecordUtils.buildEntityIdUri(
         "organization",
         EntityRecordUtils.getIdFromUrl(IntegrationTestUtils.ORGANIZATION_BNF_URI_ZOHO));
 
@@ -369,7 +369,9 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         .andExpect(jsonPath("$.hasAddress.hasGeo").isNotEmpty())
         .andExpect(jsonPath("$.language", everyItem(matchesRegex("[a-z]+"))))
         .andExpect(jsonPath("$.hiddenLabel", hasSize(3)))
-        .andExpect(jsonPath("$.organizationDomain[*]", hasSize(1)));
+        .andExpect(jsonPath("$.organizationDomain[*]", hasSize(1)))
+        .andExpect(jsonPath("$.id", is(entityId)));
+    
   }
 
   @Test
