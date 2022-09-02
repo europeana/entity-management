@@ -155,7 +155,7 @@ public class ZohoSyncService {
       }
     }
 
-    logger.info("Zoho update operations completed successfully:\n {}", zohoSyncReport);
+    logger.debug("Zoho update operations completed successfully:\n {}", zohoSyncReport);
   }
 
   /**
@@ -233,7 +233,7 @@ public class ZohoSyncService {
   void logExecutionProgress(List<Record> orgList, int page, final int pageSize) {
     int start = (page - 1) * pageSize;
     int end = start + orgList.size();
-    logger.info("Processing organizations set: {} - {}", start, end);
+    logger.debug("Processing organizations set: {} - {}", start, end);
   }
 
   private void performOperations(BatchOperations operations, ZohoSyncReport zohoSyncReport) {
@@ -515,8 +515,8 @@ public class ZohoSyncService {
       operations.addOperation(operation);
     } else {
       // skip
-      if (logger.isInfoEnabled()) {
-        logger.info(
+      if (logger.isDebugEnabled()) {
+        logger.debug(
             "Organization has changed in zoho, but there is no operation to perform on entity database, "
                 + "probably becasue the zoho organization doesn't have the required role or it was marked for deletion. Zoho id: {}",
             zohoId);

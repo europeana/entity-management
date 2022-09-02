@@ -82,7 +82,7 @@ public class MetisDereferenceService implements InitializingBean, Dereferencer {
 
   String fetchMetisResponse(String externalId) throws Exception {
     Instant start = Instant.now();
-    logger.info("De-referencing externalId={} from Metis", externalId);
+    logger.debug("De-referencing externalId={} from Metis", externalId);
 
     String metisResponseBody;
     try {
@@ -139,11 +139,9 @@ public class MetisDereferenceService implements InitializingBean, Dereferencer {
 
       throw new Exception(t);
     }
-
-    long duration = Duration.between(start, Instant.now()).toMillis();
-    logger.info("Received Metis response for externalId={}. Duration={}ms", externalId, duration);
     if (logger.isDebugEnabled()) {
-      logger.debug("Metis response for externalId={}: {}", externalId, metisResponseBody);
+      long duration = Duration.between(start, Instant.now()).toMillis();
+      logger.debug("Metis response for externalId={} fetched in {}ms: {}", externalId, duration, metisResponseBody);
     }
     return metisResponseBody;
   }
@@ -170,7 +168,7 @@ public class MetisDereferenceService implements InitializingBean, Dereferencer {
           .defaultHeader(HttpHeaders.HOST, defaultHostHeader)
           // ensure that baseUrl has a trailing slash
           .baseUrl(proxyUrl);
-      logger.info(
+      logger.debug(
           "Using proxy for Metis dereferencing. defaultHostHeader={}; proxy={}",
           defaultHostHeader,
           proxyUrl);
