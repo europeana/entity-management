@@ -166,12 +166,12 @@ public class EntityRecordService {
       throws SolrServiceException {
     if (deleteFromSolr && !entityIds.isEmpty()) {
       solrService.deleteById(entityIds, true);
-      logger.info("Deleted {} entityRecords from Solr: entityIds={}", entityIds.size(), entityIds);
+      logger.debug("Deleted {} entityRecords from Solr: entityIds={}", entityIds.size(), entityIds);
     }
 
     long deleteCount = entityRecordRepository.deleteBulk(entityIds);
     if (deleteCount > 0) {
-      logger.info("Deleted {} entityRecords from database: entityIds={}", deleteCount, entityIds);
+      logger.debug("Deleted {} entityRecords from database: entityIds={}", deleteCount, entityIds);
     }
     return deleteCount;
   }
@@ -184,7 +184,7 @@ public class EntityRecordService {
    */
   public void disableBulk(List<String> entityIds) {
     UpdateResult updateResult = entityRecordRepository.disableBulk(entityIds);
-    logger.info("Deprecated {} entities: entityIds={}", updateResult.getModifiedCount(), entityIds);
+    logger.debug("Deprecated {} entities: entityIds={}", updateResult.getModifiedCount(), entityIds);
   }
 
   /**

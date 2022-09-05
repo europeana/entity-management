@@ -96,8 +96,8 @@ public class EntityDereferenceProcessor extends BaseEntityProcessor {
       if (wikidataProxy == null) {
         // create the wikidata proxy and dereference, only if a wikidata reference is found
         EntityProxy newProxy = addWikidataProxyAndDeref(wikidataId, entityRecord, timestamp);
-        if (logger.isInfoEnabled()) {
-          logger.info(
+        if (logger.isDebugEnabled()) {
+          logger.debug(
               "For Entity Record with id:{}, wikidata proxy with id: {}  was created",
               entityRecord.getEntityId(),
               newProxy.getProxyId());
@@ -131,8 +131,8 @@ public class EntityDereferenceProcessor extends BaseEntityProcessor {
       throws Exception {
     // remove wikidata proxy, if nor the proxy id or redirection id is found in coreferences
     entityRecord.getProxies().remove(wikidataProxy);
-    if (logger.isInfoEnabled()) {
-      logger.info(
+    if (logger.isDebugEnabled()) {
+      logger.debug(
           "For Entity Record with id:{}, wikidata proxy with id: {}  was removed",
           entityRecord.getEntityId(),
           wikidataId);
@@ -142,8 +142,8 @@ public class EntityDereferenceProcessor extends BaseEntityProcessor {
     if (!wikidataEntityIds.isEmpty()) {
       // create the wikidata proxy and dereference, only if a wikidata reference is found
       EntityProxy newProxy = addWikidataProxyAndDeref(wikidataId, entityRecord, timestamp);
-      if (logger.isInfoEnabled()) {
-        logger.info(
+      if (logger.isDebugEnabled()) {
+        logger.debug(
             "For Entity Record with id:{}, wikidata proxy was replaced, new proxy id: {}",
             entityRecord.getEntityId(),
             newProxy.getProxyId());
@@ -209,8 +209,8 @@ public class EntityDereferenceProcessor extends BaseEntityProcessor {
       proxyResponse.addSameReferenceLink(externalProxy.getProxyId());
 
       // update proxy ID with the id of the main entity
-      if (logger.isInfoEnabled()) {
-        logger.info(
+      if (logger.isDebugEnabled()) {
+        logger.debug(
             "Updating proxy id with the actual value from the external entity {} -> {}",
             externalProxy.getProxyId(),
             proxyResponse.getEntityId());

@@ -39,7 +39,7 @@ public class ScheduledTaskService {
     List<ScheduledTask> tasks = createScheduledTasks(entityIdsToUpdateType, false);
 
     BulkWriteResult writeResult = repository.upsertBulk(tasks);
-    logger.info(
+    logger.debug(
         "Persisted scheduled tasks to db: matched={}, modified={}, inserted={}",
         writeResult.getMatchedCount(),
         writeResult.getModifiedCount(),
@@ -55,7 +55,7 @@ public class ScheduledTaskService {
     List<ScheduledTask> tasks = createScheduledTasks(entityIdsToUpdateType, true);
 
     BulkWriteResult writeResult = repository.markAsProcessed(tasks);
-    logger.info(
+    logger.debug(
         "Marked scheduled tasks as processed: matched={}, modified={}, inserted={}",
         writeResult.getMatchedCount(),
         writeResult.getModifiedCount(),
