@@ -31,7 +31,7 @@ public class EnrichmentCountQueryService {
 
   private static final Logger logger = LogManager.getLogger(EnrichmentCountQueryService.class);
   private static final String ERROR_MSG = "Error retrieving enrichmentCount for entityId=";
-  private static final String contentTierPrefix = "AND contentTier:";
+  private static final String contentTierPrefix = " AND contentTier:";
 
   private final WebClient webClient;
   private final EntityManagementConfiguration configuration;
@@ -92,7 +92,7 @@ public class EnrichmentCountQueryService {
         String.format(
             "%s:%s ", ENRICHMENT_QUERY_FIELD_MAP.get(type), getEntityIdForQuery(entityId, type));
 
-    url.append(searchQuery);
+    url.append("&query=" + searchQuery);
     if (!EntityTypes.Organization.getEntityType().equals(type)) {
             url.append(contentTierPrefix);
       url.append(configuration.getEnrichmentsQueryContentTier());

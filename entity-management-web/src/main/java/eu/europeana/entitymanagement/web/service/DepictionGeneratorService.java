@@ -45,17 +45,17 @@ public class DepictionGeneratorService {
       return null;
     }
 
-
     JSONArray itemsList = responseJson.getJSONArray("items");
-    if (itemsList.length() > 0) {
-      JSONObject item = (JSONObject) itemsList.get(0);
-
-      edmIsShownBy = getIsShownBy(item);
-      if (item.has("id")) {
-        itemId = item.getString("id");
-      }
-      edmPreview = getEdmPreview(item);
+    if (itemsList.length() <= 0) {
+      return null;
     }
+    
+    JSONObject item = (JSONObject) itemsList.get(0);
+    edmIsShownBy = getIsShownBy(item);
+    if (item.has("id")) {
+      itemId = item.getString("id");
+    }
+    edmPreview = getEdmPreview(item);
 
     return new WebResource(edmIsShownBy, configuration.getItemDataEndpoint() + itemId, edmPreview);
   }
@@ -85,7 +85,7 @@ public class DepictionGeneratorService {
 
   String buildSearchRequestUrl(String entityUri) {
     StringBuilder url = new StringBuilder(configuration.getSearchApiUrlPrefix());
-    url.append("query=\"").append(entityUri).append("\" AND provider_aggregation_edm_isShownBy:*")
+    url.append("&query=\"").append(entityUri).append("\" AND provider_aggregation_edm_isShownBy:*")
         .append("&sort=contentTier+desc,metadataTier+desc").append("&profile=minimal")
         // only first result is needed
         .append("&rows=1");

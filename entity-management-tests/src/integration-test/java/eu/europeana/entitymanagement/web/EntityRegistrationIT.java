@@ -196,6 +196,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         .andExpect(jsonPath("$.type", is(EntityTypes.TimeSpan.name())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
+        .andExpect(jsonPath("$.depiction").isNotEmpty())
         // should have Europeana and Datasource proxies
         .andExpect(jsonPath("$.proxies", hasSize(2)));
   }
