@@ -83,43 +83,76 @@ public class EntityDereferenceProcessor extends BaseEntityProcessor {
     return entityRecord;
   }
 
+  /**
+   * The wikidata ids may change in Zoho. Therefore the changes needs to be identified and the proxies need to be updated accordingly 
+   * 
+   * @param wikidataEntityIds
+   * @param entityRecord
+   * @param timestamp
+   * @throws Exception
+   */
   private void handleWikidataReferenceChange(
-      TreeSet<String> wikidataEntityIds, EntityRecord entityRecord, @NonNull Date timestamp) throws Exception {
+      @NonNull TreeSet<String> wikidataEntityIds, EntityRecord entityRecord, @NonNull Date timestamp) throws Exception {
     EntityProxy wikidataProxy = entityRecord.getWikidataProxy();
-    if (wikidataProxy == null && wikidataEntityIds.isEmpty()) {
-      // nothing to do, no wikidata reference
-    } else if (wikidataProxy != null && wikidataEntityIds.contains(wikidataProxy.getProxyId())) {
-      // nothing to do, the wikidata proxy is correct
-    } else if (!wikidataEntityIds.isEmpty()) {
-      String wikidataId = wikidataEntityIds.first();
+    boolean noWikidataProxy = (wikidataProxy == null && wikidataEntityIds.isEmpty());
+    boolean noChangeForProxy = wikidataProxy != null && wikidataEntityIds.contains(wikidataProxy.getProxyId());
+    boolean noWikidataId = wikidataEntityIds.isEmpty();
+    if (noWikidataProxy || noChangeForProxy) {
+      // nothing to do, no wikidata reference or the wikidata proxy is correct
+      return;
+    } 
+    
+    if (noWikidataId && wikidataProxy!= null) {
+      //remove wikidata proxy
+      entityRecord.getProxies().remove(wikidataProxy);
+      return;
+    } 
+    
+    //wikidataEntityIdswikidataEntityIds cannot be empty at this stage
+    String wikidataId = wikidataEntityIds.first();
+    if (wikidataProxy == null) {
+          // create the wikidata proxy and dereference, only if a wikidata reference is found
+          EntityProxy newProxy = addWikidataProxyAndDeref(wikidataId, entityRecord, timestamp);
+          logNewProxyCreated(entityRecord, newProxy);
 
-      if (wikidataProxy == null) {
-        // create the wikidata proxy and dereference, only if a wikidata reference is found
-        EntityProxy newProxy = addWikidataProxyAndDeref(wikidataId, entityRecord, timestamp);
-        if (logger.isDebugEnabled()) {
-          logger.debug(
-              "For Entity Record with id:{}, wikidata proxy with id: {}  was created",
-              entityRecord.getEntityId(),
-              newProxy.getProxyId());
-        }
+    } else if (!wikidataEntityIds.contains(wikidataProxy.getProxyId())) {
+          handleNewWikidataId(entityRecord, wikidataEntityIds, wikidataId, wikidataProxy,
+              timestamp);
+     }
+  }
 
-      } else if (!wikidataEntityIds.contains(wikidataProxy.getProxyId())) {
-        // wikidataProxy != null
-        Optional<String> redirectedWikidataId =
-            WikidataUtils.getWikidataId(wikidataProxy.getEntity().getSameReferenceLinks());
-        boolean hasRedirectionCoref =
-            redirectedWikidataId.isPresent()
-                && wikidataEntityIds.contains(redirectedWikidataId.get());
-        if (hasRedirectionCoref) {
-          // possible wikidata redirections, the proxy is found in coreferences, only show debug
-          // message
-          String message =
-              "For Entity Record with id:{}, wikidata proxy was not replaced as the proxy id: {} was found in coreferences.";
-          logger.debug(message, entityRecord.getEntityId(), wikidataId);
-        } else if (logger.isDebugEnabled()) {
-          updateWikidataProxies(entityRecord, wikidataId, wikidataProxy, wikidataEntityIds, timestamp);
-        }
-      }
+  private void handleNewWikidataId(EntityRecord entityRecord, TreeSet<String> wikidataEntityIds,
+      String wikidataId, EntityProxy wikidataProxy, Date timestamp) throws Exception {
+    // wikidataProxy != null
+    Optional<String> redirectedWikidataId =
+        WikidataUtils.getWikidataId(wikidataProxy.getEntity().getSameReferenceLinks());
+    boolean hasRedirectionCoref =
+        redirectedWikidataId.isPresent()
+            && wikidataEntityIds.contains(redirectedWikidataId.get());
+    if (hasRedirectionCoref) {
+      // possible wikidata redirections, the proxy is found in coreferences, only show debug
+      // message
+      logProxyWithRedirectionExists(entityRecord, wikidataId);   
+    } else  {
+      //proxy not found in coreferences, update the proxy with the new wikidata ID
+      updateWikidataProxies(entityRecord, wikidataId, wikidataProxy, wikidataEntityIds, timestamp);
+    }
+  }
+
+  void logNewProxyCreated(EntityRecord entityRecord, EntityProxy newProxy) {
+    if (logger.isDebugEnabled()) {
+      logger.debug(
+          "For Entity Record with id:{}, wikidata proxy with id: {}  was created",
+          entityRecord.getEntityId(),
+          newProxy.getProxyId());
+    }
+  }
+
+  void logProxyWithRedirectionExists(EntityRecord entityRecord, String wikidataId) {
+    if (logger.isDebugEnabled()) {
+      String message =
+          "For Entity Record with id:{}, wikidata proxy was not replaced as the proxy id: {} was found in coreferences.";
+      logger.debug(message, entityRecord.getEntityId(), wikidataId);  
     }
   }
 
