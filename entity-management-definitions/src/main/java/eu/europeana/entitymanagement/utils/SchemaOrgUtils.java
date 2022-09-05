@@ -691,7 +691,7 @@ public final class SchemaOrgUtils {
       resource = referenceClass.newInstance();
     } catch (InstantiationException | IllegalAccessException e) {
       resource = new Thing();
-      LOG.info(
+      LOG.debug(
           "Cannot instantiate object of class {} . Instance of Thing is used instead!",
           referenceClass.getCanonicalName());
     }

@@ -136,7 +136,7 @@ public class EMController extends BaseRest {
 
     boolean isSynchronous = containsSyncProfile(profile);
     String entityId = entityRecord.getEntityId();
-    logger.info("Deprecating entityId={}, isSynchronous={}", entityId, isSynchronous);
+    logger.debug("Deprecating entityId={}, isSynchronous={}", entityId, isSynchronous);
 
     if (isSynchronous) {
       // delete from Solr before Mongo, so Solr errors won't leave DB in an inconsistent state
@@ -182,7 +182,7 @@ public class EMController extends BaseRest {
           FormatTypes.jsonld,
           HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
     }
-    logger.info("Re-enabling entityId={}", entityRecord.getEntityId());
+    logger.debug("Re-enabling entityId={}", entityRecord.getEntityId());
     entityRecordService.enableEntityRecord(entityRecord);
 
     return createResponse(
@@ -487,7 +487,7 @@ public class EMController extends BaseRest {
     String creationRequestId = europeanaProxyEntity.getEntityId();
 
     if (StringUtils.hasText(creationRequestId)) {
-      logger.info("Registering new entity: externalId={}", creationRequestId);
+      logger.debug("Registering new entity: externalId={}", creationRequestId);
     } else {
       // external id is mandatory in request body
       throw new HttpBadRequestException("Mandatory field missing in the request body: id");
@@ -532,7 +532,7 @@ public class EMController extends BaseRest {
     EntityRecord savedEntityRecord =
         entityRecordService.createEntityFromRequest(
             europeanaProxyEntity, datasourceResponse, dataSource);
-    logger.info(
+    logger.debug(
         "Created Entity record for externalId={}; entityId={}",
         creationRequestId,
         savedEntityRecord.getEntityId());
@@ -829,7 +829,6 @@ public class EMController extends BaseRest {
   }
 
   private void launchUpdateTask(String entityId) throws Exception {
-    logger.info("Launching synchronous update for entityId={}", entityId);
     entityUpdateService.runSynchronousUpdate(entityId);
   }
 

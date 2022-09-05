@@ -46,7 +46,7 @@ public class EntityUpdateService {
    * @throws Exception on exception
    */
   public void runSynchronousUpdate(String entityId) throws Exception {
-    logger.info("Triggering synchronous update for entityId={}", entityId);
+    logger.debug("Triggering synchronous update for entityId={}", entityId);
     syncWebRequestLauncher.run(
         entityUpdateJobConfig.updateSingleEntity(),
         BatchUtils.createJobParameters(

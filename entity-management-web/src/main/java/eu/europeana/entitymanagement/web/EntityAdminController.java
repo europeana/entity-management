@@ -92,7 +92,7 @@ public class EntityAdminController extends BaseRest {
 
     boolean isSynchronous = containsSyncProfile(profile);
 
-    LOG.info("Permanently deleting entityId={}, isSynchronous={}", entityUri, isSynchronous);
+    LOG.debug("Permanently deleting entityId={}, isSynchronous={}", entityUri, isSynchronous);
 
     if (isSynchronous) {
       entityRecordService.delete(entityUri);
@@ -139,7 +139,7 @@ public class EntityAdminController extends BaseRest {
       EntityRecord savedEntityRecord =
           entityRecordService.createEntityFromMigrationRequest(
               europeanaProxyEntity, type, identifier);
-      LOG.info(
+      LOG.debug(
           "Created Entity record for {}; entityId={}",
           europeanaProxyEntity.getEntityId(),
           savedEntityRecord.getEntityId());
