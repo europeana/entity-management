@@ -31,16 +31,13 @@ public class EnrichmentCountQueryService {
 
   private static final Logger logger = LogManager.getLogger(EnrichmentCountQueryService.class);
   private static final String ERROR_MSG = "Error retrieving enrichmentCount for entityId=";
-  private static final String contentTierPrefix = "AND contentTier:";
+  private static final String contentTierPrefix = " AND contentTier:";
 
   private final WebClient webClient;
-  private final String searchApiUriPrefix;
-  private final String contentTier;
-
+  private final EntityManagementConfiguration configuration;
+  
   public EnrichmentCountQueryService(EntityManagementConfiguration configuration) {
-    searchApiUriPrefix = configuration.getSearchApiUrlPrefix();
-    contentTier = contentTierPrefix + configuration.getEnrichmentsQueryContentTier();
-
+    this.configuration = configuration;
     webClient = WebClient.builder().build();
   }
 
@@ -52,15 +49,7 @@ public class EnrichmentCountQueryService {
    * @param type entity type
    */
   public int getEnrichmentCount(String entityId, String type) {
-    String searchQuery =
-        String.format(
-            "%s:%s ", ENRICHMENT_QUERY_FIELD_MAP.get(type), getEntityIdForQuery(entityId, type));
-
-    if (!EntityTypes.Organization.getEntityType().equals(type)) {
-      searchQuery = searchQuery + contentTier;
-    }
-
-    String uri = searchApiUriPrefix + searchQuery;
+    String uri = buildSearchRequestUrl(entityId, type);
 
     if (logger.isDebugEnabled()) {
       logger.debug("Getting enrichment count for entityId={}; queryUri={}", entityId, uri);
@@ -95,6 +84,24 @@ public class EnrichmentCountQueryService {
     }
 
     return response.getTotalResults();
+  }
+
+  String buildSearchRequestUrl(String entityId, String type) {
+    StringBuilder url = new StringBuilder(configuration.getSearchApiUrlPrefix());
+    String searchQuery =
+        String.format(
+            "%s:%s ", ENRICHMENT_QUERY_FIELD_MAP.get(type), getEntityIdForQuery(entityId, type));
+
+    url.append("&query=" + searchQuery);
+    if (!EntityTypes.Organization.getEntityType().equals(type)) {
+            url.append(contentTierPrefix);
+      url.append(configuration.getEnrichmentsQueryContentTier());
+      
+    }
+    url.append("&profile=minimal");
+    //no rows needed, only the count
+    url.append("&rows=0");
+    return url.toString();
   }
 
   /**
