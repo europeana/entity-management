@@ -37,7 +37,6 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
   private final ValidatorFactory emValidatorFactory;
   private final EntityFieldsCleaner emEntityFieldCleaner;
   private final DataSources datasources;
-  private final EntityManagementConfiguration emConfiguration;
   private final DepictionGeneratorService depictionGeneratorService;
   
   public EntityConsolidationProcessor(
@@ -52,7 +51,6 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
     this.emValidatorFactory = emValidatorFactory;
     this.emEntityFieldCleaner = emEntityFieldCleaner;
     this.datasources = datasources;
-    this.emConfiguration = emConfiguration;
     this.depictionGeneratorService = depictionGeneratorService;
   }
 
