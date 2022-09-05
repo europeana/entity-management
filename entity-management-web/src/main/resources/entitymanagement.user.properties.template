@@ -31,4 +31,4 @@ europeana.apikey.serviceurl=
 europeana.apikey.jwttoken.signaturekey=
 
 #url for the search api
-europeana.searchapi.urlPrefix=https://record-api-reindex.eanadev.org/record/v2/search.json?wskey=api2demo&rows=0&query=
+europeana.searchapi.urlPrefix=https://search-api-dr.eanadev.org/record/v2/search.json?wskey=api2demo&query=
