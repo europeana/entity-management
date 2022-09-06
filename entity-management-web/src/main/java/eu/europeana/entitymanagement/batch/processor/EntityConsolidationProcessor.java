@@ -23,6 +23,7 @@ import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidationGroup;
 import eu.europeana.entitymanagement.normalization.EntityFieldsDataSourceProxyValidationGroup;
 import eu.europeana.entitymanagement.utils.EntityObjectFactory;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.service.DepictionGeneratorService;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 
@@ -104,8 +105,9 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
 
     emEntityFieldCleaner.cleanAndNormalize(consolidatedEntity);
     entityRecordService.performReferentialIntegrity(consolidatedEntity);
-    //if isShownBy or depiction are null, create the isShownBy using the Search and Record api 
-    if(consolidatedEntity.getIsShownBy()==null && consolidatedEntity.getDepiction()==null) {
+    
+    if(hasToGenerateDepiction(consolidatedEntity)) {
+      //if isShownBy or depiction are null, create the isShownBy using the Search and Record api 
       WebResource isShownBy = depictionGeneratorService.generateIsShownBy(consolidatedEntity.getEntityId());
       if(isShownBy!=null) {
         consolidatedEntity.setIsShownBy(isShownBy);
@@ -116,6 +118,16 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
         entityRecord.getEntityRecord(), consolidatedEntity);
 
     return entityRecord;
+  }
+
+  /**
+   * Indicates if a depiction (isShownBy needs to be generated for the given entity)
+   * @param consolidatedEntity
+   * @return
+   */
+  boolean hasToGenerateDepiction(Entity consolidatedEntity) {
+    boolean isOrganization = EntityTypes.Organization.getEntityType().equals(consolidatedEntity.getType());
+    return  !isOrganization && consolidatedEntity.getIsShownBy()==null && consolidatedEntity.getDepiction()==null;
   }
 
   private void validateCompleteValidationConstraints(Entity entity)
