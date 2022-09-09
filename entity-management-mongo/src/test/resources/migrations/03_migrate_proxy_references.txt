@@ -1,0 +1,253 @@
+## organizations are different, must add zoho proxy id and wikidata if exists 
+## concepts are different use exact match
+
+
+//db.getCollection('EntityRecord').find({"entity.type":{$in : ["Place", "Agent", "TimeSpan", "Organization"]}}){
+//db.getCollection('EntityRecord').find({"entityId":"http://data.europeana.eu/place/41488"}).forEach( function(record, index){
+//db.getCollection('EntityRecord').find({"entityId":"http://data.europeana.eu/place/80422"}).forEach( function(record, index){
+//db.getCollection('EntityRecord').find({"entity.type":"Place"}).forEach( function(record, index){
+//db.getCollection('EntityRecord').find({"entityId":"http://data.europeana.eu/agent/146741"}).forEach( function(record, index){
+//db.getCollection('EntityRecord').find({"entityId":"http://data.europeana.eu/agent/62248"}).forEach( function(record, index){
+//db.getCollection('EntityRecord').find({"entity.type": "Agent"}).forEach( function(record, index){
+//db.getCollection('EntityRecord').find({"entityId":"http://data.europeana.eu/timespan/2"}).forEach( function(record, index) {
+//db.getCollection('EntityRecord').find({"entity.type":"TimeSpan"}).forEach( function(record, index){
+//db.getCollection('EntityRecord').find({"entity.type":"Place", "proxies.0.entity.sameAs":{$exists:false}}).forEach( function(record, index){
+db.getCollection('EntityRecord').find({"entity.type": "Agent", "proxies.0.entity.sameAs":{$exists:false}}).forEach( function(record){
+	var europeanaProxy = record.proxies[0];
+	var europeanaEntity = record.proxies[0].entity;
+	var externalProxIndex = 1;
+	var externalProxy = record.proxies[externalProxIndex];
+	var externalProxyId = externalProxy.proxyId;
+	var externalEntityId = externalProxy.entity.entityId;
+	var mustUpdate = true;
+	updatedRecords = 0;
+	
+	if(externalProxyId !== externalEntityId){
+		//something is not correct
+		//print("inconsistent external proxy id: " +  externalProxyId + " != " + externalEntityId);
+		mustUpdate = false;
+	}
+	
+	if(typeof europeanaEntity.sameAs == "undefined" ){
+		//no same as Available, add the value of the external proxy
+		//append same as 
+		//print("europeana proxy has empty sameAs, added externalProxyId: " +  externalProxyId);
+		record.proxies[0].entity.sameAs =  [];
+        record.proxies[0].entity.sameAs[0] = externalProxyId;
+	} else {
+		var hasExternalIdInSameAs = false;
+		var hasWikidataReference = false;
+		for(var i = 0; i < europeanaEntity.sameAs.length; i++){
+			if(externalProxyId == europeanaEntity.sameAs[i]){
+				hasExternalIdInSameAs = true;
+			}
+			
+			if(europeanaEntity.sameAs[i].startsWith("http://www.wikidata.org/")){
+				hasWikidataReference = true;
+			}
+		}
+		
+		if(hasExternalIdInSameAs){
+			//do nothing
+			mustUpdate = false;
+			//print("europeana proxy allready has the reference for externalProxyId: " +  externalProxyId);
+		} else if(hasWikidataReference){
+			//do nothing
+			mustUpdate = false;
+			//print("europeana proxy allready has another wikidata reference probably because of redirection: " +  externalProxyId);
+		} else {
+			
+			//print("append reference for externalProxyId: " +  externalProxyId);
+			var index = europeanaEntity.sameAs.length;
+			record.proxies[0].entity.sameAs[index] = externalProxyId;
+		}
+	}
+	//save updated record
+	if(mustUpdate){	
+		//print("saving record: " +  record.entityId);
+		db.getCollection('EntityRecord').save(record);
+	}
+			    		    
+})
+
+
+db.getCollection('EntityRecord').find({"entity.type":"Place", "proxies.0.entity.sameAs":{$exists:true}}).count()
+db.getCollection('EntityRecord').find({"entity.type":"Place", "proxies.0.entity.sameAs":{$exists:false}}).count()
+############## ORGANIZATIONS ##############
+//db.getCollection('EntityRecord').find({"entityId":"http://data.europeana.eu/organization/1482250000002112001"}).forEach( function(record) {
+//db.getCollection('EntityRecord').find({"entityId":"http://data.europeana.eu/organization/1482250000004503618"}).forEach( function(record) {
+//db.getCollection('EntityRecord').find({"entityId":"http://data.europeana.eu/organization/1482250000000338645"}).forEach( function(record) {
+db.getCollection('EntityRecord').find({"entity.type": "Organization"}).forEach( function(record) {
+	var europeanaProxy = record.proxies[0];
+	var europeanaEntity = record.proxies[0].entity;
+	
+	var zohoProxyIndex = 1;
+	var zohoProxyProxy = record.proxies[1];
+	var zohoProxyId = zohoProxyProxy.proxyId;
+	
+	const emptyValue = "empty"
+	var externalProxyIndex = 2;
+	var externalProxy = emptyValue;
+	var externalProxyId = emptyValue;
+	var externalEntityId = emptyValue;
+	var updatedRecords = 0;
+	
+	if(record.proxies.length == 3){
+		externalProxy = record.proxies[externalProxyIndex];
+		externalProxyId = externalProxy.proxyId;
+		externalEntityId = externalProxy.entity.entityId;
+	}
+	
+	//the most of the entries require update
+	var mustUpdate = true;
+	
+	if(emptyValue != externalProxy && externalProxyId !== externalEntityId){
+		//quick check wikidata proxy ID
+		//something is not correct, do not change the data, to identify entries for this cases later
+		print("inconsistent external proxy id: " +  externalProxyId + " != " + externalEntityId);
+		mustUpdate = false;
+	}
+	
+	if(typeof europeanaEntity.sameAs == "undefined" ){
+		//no same as Available, add the value of the external proxy
+		//append same as 
+		var mustUpdate = true;
+		record.proxies[0].entity.sameAs =  [];
+        print("europeana proxy has empty sameAs, added zohoProxyId: " +  externalProxyId);
+		record.proxies[0].entity.sameAs[0] = zohoProxyId;
+        if(emptyValue != externalProxy){
+        	print("europeana proxy has empty sameAs, added externalProxyId: " +  externalProxyId);
+			record.proxies[0].entity.sameAs[1] = externalProxyId;
+		}
+	} else {
+		var hasExternalIdInSameAs = false;
+		var hasZohoReferenceInSameAs = false;
+		var hasWikidataReference = false;
+		
+	    for(var i = 0; i < europeanaEntity.sameAs.length; i++){
+			if(zohoProxyId == europeanaEntity.sameAs[i]){
+				hasZohoReferenceInSameAs = true;
+			}
+			
+			if(externalProxyId == europeanaEntity.sameAs[i]){
+				hasExternalIdInSameAs = true;
+			}
+			
+			if(europeanaEntity.sameAs[i].startsWith("http://www.wikidata.org/")){
+				hasWikidataReference = true;
+			}
+			
+		}
+		
+		if(hasZohoReferenceInSameAs){
+			//no update for zoho reference required, only update wikidata if needed
+			mustUpdate = false;
+			if( emptyValue != externalProxy  && !hasWikidataReference){
+				//add wikidata reference 
+				mustUpdate = true;
+				var index = europeanaEntity.sameAs.length;
+				record.proxies[0].entity.sameAs[index] = externalProxyId;
+				print("append reference for externalProxyId: " +  externalProxyId);
+			} else {
+				print("record is up to date - external proxyId: " +  externalProxyId);
+            }	
+		} else {
+			//update with zoho reference required
+			mustUpdate = true;
+			var index = europeanaEntity.sameAs.length;
+			print("append reference for zoho ID: " +  zohoProxyId);
+			record.proxies[0].entity.sameAs[index] = zohoProxyId;
+			if( emptyValue != externalProxy && !hasWikidataReference){
+				//need to add wikidata reference 
+				mustUpdate = true;
+				index++;
+				print("append reference for externalProxyId: " +  externalProxyId); 
+				record.proxies[0].entity.sameAs[index] = externalProxyId;
+			}
+		} 	
+	}
+	//save updated record
+	if(mustUpdate){
+		print("saving record: " +  record.entityId);	
+		db.getCollection('EntityRecord').save(record);
+		updatedRecords++;
+	}
+	
+	print("Updated records: " + updatedRecords);		    
+})
+
+######### CONCEPTS
+//db.getCollection('EntityRecord').find({"entityId":"http://data.europeana.eu/concept/6"}).forEach( function(record) {
+//db.getCollection('EntityRecord').find({"entityId":"http://data.europeana.eu/concept/1689"}).forEach( function(record) { 
+db.getCollection('EntityRecord').find({"entity.type": "Concept"}).forEach( function(record){
+
+	var europeanaProxy = record.proxies[0];
+	var europeanaEntity = record.proxies[0].entity;
+	var externalProxIndex = 1;
+	var externalProxy = record.proxies[externalProxIndex];
+	var externalProxyId = externalProxy.proxyId;
+	var externalEntityId = externalProxy.entity.entityId;
+	var mustUpdate = true;
+	
+	if(externalProxyId !== externalEntityId){
+		if(typeof externalEntityId == "undefined"){
+			//the case of static datasources (doesn't have id in the proxy entity)
+			externalEntityId = externalProxyId;
+		}else{
+			//something is not correct
+			print("inconsistent external proxy id: " +  externalProxyId + " != " + externalEntityId);
+			mustUpdate = false;
+		}
+	}
+	
+	if(typeof europeanaEntity.exactMatch == "undefined" ){
+		//no same as Available, add the value of the external proxy
+		//append same as 
+		print("europeana proxy has empty exactMatch, added externalProxyId: " +  externalProxyId);
+		record.proxies[0].entity.exactMatch =  [];
+        record.proxies[0].entity.exactMatch[0] = externalProxyId;
+	} else {
+		var hasExternalIdInexactMatch = false;
+		for(var i = 0; i < europeanaEntity.exactMatch.length; i++){
+			if(externalProxyId == europeanaEntity.exactMatch[i]){
+				hasExternalIdInexactMatch = true;
+			}
+		}
+		
+		if(hasExternalIdInexactMatch){
+			//do nothing
+			mustUpdate = false;
+			print("europeana proxy allready has the reference for externalProxyId: " +  externalProxyId);
+		} else {
+			
+			print("append reference for externalProxyId: " +  externalProxyId);
+			var index = europeanaEntity.exactMatch.length;
+			record.proxies[0].entity.exactMatch[index] = externalProxyId;
+		}
+	}
+	//save updated record
+	if(mustUpdate){
+		print("saving record: " +  record.entityId);	
+		db.getCollection('EntityRecord').save(record);
+	}		    
+})
+
+//TODO: crosscheck the length of europeanaProxy.sameAs/exact match and record.proxies
+db.getCollection('EntityRecord').find({"entity.type":"Concept", "proxies.0.entity.exactMatch":{$exists:false}}).count()
+db.getCollection('EntityRecord').find({"entity.type":"Concept", "proxies.0.entity.exactMatch":{$exists:true}}).count()
+
+db.getCollection('EntityRecord').find({"entity.type":{$in : ["Place", "Agent", "TimeSpan", "Organization"]}}).count()
+
+
+db.getCollection('EntityRecord').find({"entity.type":{$in : ["Place", "Agent", "TimeSpan", "Organization"]}, "proxies.0.entity.sameAs":{$exists:false}}).count()
+db.getCollection('EntityRecord').find({"entity.type":{$in : ["Place", "Agent", "TimeSpan", "Organization"]}, "proxies.0.entity.sameAs":{$exists:true}}).count()
+
+
+//TODO: crosscheck the length of europeanaProxy.sameAs/exact match and record.proxies
+db.getCollection('EntityRecord').find({"entity.type":"Place", "proxies.0.entity.sameAs":{$exists:false}}).count()
+db.getCollection('EntityRecord').find({"entity.type":"Place", "proxies.0.entity.sameAs":{$exists:true}}).count()
+
+
+// avoid static data sources
+//db.getCollection('EntityRecord').find({"entity.type":{$in : ["Place", "Agent", "Timespan", "Organization"]}}).forEach( function(record) {
+//db.getCollection('EntityRecord').find({"entity.type":{$in : ["Timespan"]}}).forEach( function(record) {
