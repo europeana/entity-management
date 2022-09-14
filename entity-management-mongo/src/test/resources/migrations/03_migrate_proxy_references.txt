@@ -12,7 +12,8 @@
 //db.getCollection('EntityRecord').find({"entityId":"http://data.europeana.eu/timespan/2"}).forEach( function(record, index) {
 //db.getCollection('EntityRecord').find({"entity.type":"TimeSpan"}).forEach( function(record, index){
 //db.getCollection('EntityRecord').find({"entity.type":"Place", "proxies.0.entity.sameAs":{$exists:false}}).forEach( function(record, index){
-db.getCollection('EntityRecord').find({"entity.type": "Agent", "proxies.0.entity.sameAs":{$exists:false}}).forEach( function(record){
+//db.getCollection('EntityRecord').find({"entity.type": "Agent", "proxies.0.entity.sameAs":{$exists:false}}).forEach( function(record){
+db.getCollection('EntityRecord').find({"entity.type":"Place"}).forEach( function(record, index){
 	var europeanaProxy = record.proxies[0];
 	var europeanaEntity = record.proxies[0].entity;
 	var externalProxIndex = 1;
@@ -113,10 +114,10 @@ db.getCollection('EntityRecord').find({"entity.type": "Organization"}).forEach( 
 		//append same as 
 		var mustUpdate = true;
 		record.proxies[0].entity.sameAs =  [];
-        print("europeana proxy has empty sameAs, added zohoProxyId: " +  externalProxyId);
+        //print("europeana proxy has empty sameAs, added zohoProxyId: " +  externalProxyId);
 		record.proxies[0].entity.sameAs[0] = zohoProxyId;
         if(emptyValue != externalProxy){
-        	print("europeana proxy has empty sameAs, added externalProxyId: " +  externalProxyId);
+        	//print("europeana proxy has empty sameAs, added externalProxyId: " +  externalProxyId);
 			record.proxies[0].entity.sameAs[1] = externalProxyId;
 		}
 	} else {
@@ -147,9 +148,9 @@ db.getCollection('EntityRecord').find({"entity.type": "Organization"}).forEach( 
 				mustUpdate = true;
 				var index = europeanaEntity.sameAs.length;
 				record.proxies[0].entity.sameAs[index] = externalProxyId;
-				print("append reference for externalProxyId: " +  externalProxyId);
+				//print("append reference for externalProxyId: " +  externalProxyId);
 			} else {
-				print("record is up to date - external proxyId: " +  externalProxyId);
+				//print("record is up to date - external proxyId: " +  externalProxyId);
             }	
 		} else {
 			//update with zoho reference required
@@ -161,19 +162,19 @@ db.getCollection('EntityRecord').find({"entity.type": "Organization"}).forEach( 
 				//need to add wikidata reference 
 				mustUpdate = true;
 				index++;
-				print("append reference for externalProxyId: " +  externalProxyId); 
+				//print("append reference for externalProxyId: " +  externalProxyId); 
 				record.proxies[0].entity.sameAs[index] = externalProxyId;
 			}
 		} 	
 	}
 	//save updated record
 	if(mustUpdate){
-		print("saving record: " +  record.entityId);	
+		//print("saving record: " +  record.entityId);	
 		db.getCollection('EntityRecord').save(record);
 		updatedRecords++;
 	}
 	
-	print("Updated records: " + updatedRecords);		    
+	//print("Updated records: " + updatedRecords);		    
 })
 
 ######### CONCEPTS
