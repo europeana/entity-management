@@ -1,13 +1,5 @@
 package eu.europeana.entitymanagement.batch.processor;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.validation.ConstraintViolation;
-import javax.validation.ValidatorFactory;
-import org.springframework.batch.item.ItemProcessor;
-import org.springframework.stereotype.Component;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
@@ -26,6 +18,14 @@ import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.service.DepictionGeneratorService;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.validation.ConstraintViolation;
+import javax.validation.ValidatorFactory;
+import org.springframework.batch.item.ItemProcessor;
+import org.springframework.stereotype.Component;
 
 /**
  * This {@link ItemProcessor} validates Entity metadata, then creates a consolidated entity by
@@ -39,7 +39,7 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
   private final EntityFieldsCleaner emEntityFieldCleaner;
   private final DataSources datasources;
   private final DepictionGeneratorService depictionGeneratorService;
-  
+
   public EntityConsolidationProcessor(
       EntityRecordService entityRecordService,
       ValidatorFactory emValidatorFactory,
@@ -62,7 +62,7 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
 
     EntityProxy primaryExternalProxy = externalProxies.get(0);
     Entity externalProxyEntity = primaryExternalProxy.getEntity();
-    
+
     String proxyId = primaryExternalProxy.getProxyId();
     Optional<DataSource> dataSource = datasources.getDatasource(proxyId);
     boolean isStaticDataSource = dataSource.isPresent() && dataSource.get().isStatic();
@@ -74,7 +74,7 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
 
     // entities from static datasources should not have multiple proxies
     if (externalProxies.size() > 1) {
-      
+
       // cumulatively merge all external proxies
       EntityProxy secondaryExternalProxy;
       Entity secondaryProxyEntity;
@@ -105,11 +105,12 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
 
     emEntityFieldCleaner.cleanAndNormalize(consolidatedEntity);
     entityRecordService.performReferentialIntegrity(consolidatedEntity);
-    
-    if(hasToGenerateDepiction(consolidatedEntity)) {
-      //if isShownBy or depiction are null, create the isShownBy using the Search and Record api 
-      WebResource isShownBy = depictionGeneratorService.generateIsShownBy(consolidatedEntity.getEntityId());
-      if(isShownBy!=null) {
+
+    if (hasToGenerateDepiction(consolidatedEntity)) {
+      // if isShownBy or depiction are null, create the isShownBy using the Search and Record api
+      WebResource isShownBy =
+          depictionGeneratorService.generateIsShownBy(consolidatedEntity.getEntityId());
+      if (isShownBy != null) {
         consolidatedEntity.setIsShownBy(isShownBy);
       }
     }
@@ -122,12 +123,16 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
 
   /**
    * Indicates if a depiction (isShownBy needs to be generated for the given entity)
+   *
    * @param consolidatedEntity
    * @return
    */
   boolean hasToGenerateDepiction(Entity consolidatedEntity) {
-    boolean isOrganization = EntityTypes.Organization.getEntityType().equals(consolidatedEntity.getType());
-    return  !isOrganization && consolidatedEntity.getIsShownBy()==null && consolidatedEntity.getDepiction()==null;
+    boolean isOrganization =
+        EntityTypes.Organization.getEntityType().equals(consolidatedEntity.getType());
+    return !isOrganization
+        && consolidatedEntity.getIsShownBy() == null
+        && consolidatedEntity.getDepiction() == null;
   }
 
   private void validateCompleteValidationConstraints(Entity entity)

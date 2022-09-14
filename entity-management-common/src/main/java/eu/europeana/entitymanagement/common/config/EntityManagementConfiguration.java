@@ -129,7 +129,7 @@ public class EntityManagementConfiguration {
 
   @Value("${zoho.sync.batch.size: 100}")
   private int zohoSyncBatchSize;
-  
+
   @Value("${europeana.item.data.endpoint}")
   private String itemDataEndpoint;
 
