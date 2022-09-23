@@ -46,16 +46,16 @@ public class EntityManagementConfiguration {
   @Value("${europeana.searchapi.enrichments.contentTier}")
   private String enrichmentsQueryContentTier;
 
-  @Value("${entitymanagement.solr.indexing.url}")
+  @Value("${entitymanagement.solr.indexing.url:#{null}}")
   private String indexingSolrUrl;
 
-  @Value("${entitymanagement.solr.indexing.zookeeper.url:}")
+  @Value("${entitymanagement.solr.indexing.zookeeper.url:#{null}}")
   private String indexingSolrZookeeperUrl;
 
   @Value("${entitymanagement.solr.indexing.timeout:60000}")
   private int indexingSolrTimeoutMillis;
 
-  @Value("${entitymanagement.solr.indexing.collection:null}")
+  @Value("${entitymanagement.solr.indexing.collection:#{null}}")
   private String indexingSolrCollection;
 
   @Value("${entitymanagement.solr.indexing.explicitCommits: false}")
