@@ -1,43 +1,30 @@
-package eu.europeana.entitymanagement.web.service.impl;
+package eu.europeana.entitymanagement.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.config.AppConfig;
-import eu.europeana.entitymanagement.config.SerializationConfig;
-import eu.europeana.entitymanagement.config.SolrConfig;
-import eu.europeana.entitymanagement.config.ValidatorConfig;
-import eu.europeana.entitymanagement.definitions.model.Agent;
-import eu.europeana.entitymanagement.definitions.model.Place;
-import eu.europeana.entitymanagement.definitions.model.TimeSpan;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.web.model.scoring.EntityMetrics;
-import eu.europeana.entitymanagement.web.model.scoring.MaxEntityMetrics;
-import eu.europeana.entitymanagement.web.service.EnrichmentCountQueryService;
-import eu.europeana.entitymanagement.web.service.ScoringService;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.Resource;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import eu.europeana.entitymanagement.AbstractIntegrationTest;
+import eu.europeana.entitymanagement.config.AppConfig;
+import eu.europeana.entitymanagement.definitions.model.Agent;
+import eu.europeana.entitymanagement.definitions.model.Place;
+import eu.europeana.entitymanagement.definitions.model.TimeSpan;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.web.model.scoring.EntityMetrics;
+import eu.europeana.entitymanagement.web.model.scoring.MaxEntityMetrics;
+import eu.europeana.entitymanagement.web.service.ScoringService;
 
-/** Integration test for testing the ScoringService */
-// TODO: create a "proper" integration test with this
-@SpringBootTest(
-    classes = {
-      ValidatorConfig.class,
-      SerializationConfig.class,
-      EntityManagementConfiguration.class,
-      ScoringService.class,
-      SolrConfig.class,
-      EnrichmentCountQueryService.class
-    })
-public class ScoringServiceTest {
-
+@SpringBootTest
+@AutoConfigureMockMvc
+class ScoringServiceIT extends AbstractIntegrationTest {
+  
   @Resource(name = AppConfig.BEAN_EM_SCORING_SERVICE)
   ScoringService scoringService;
 
@@ -66,12 +53,12 @@ public class ScoringServiceTest {
 
     assertEquals(entityId, metrics.getEntityId());
     assertEquals("Agent", metrics.getEntityType());
-    //	actual value = 304.6025939567319
+    //  actual value = 304.6025939567319
     assertTrue(metrics.getPageRank() == 304);
     // value may increase in time, currently 807
     assertTrue(metrics.getEnrichmentCount() >= 807);
     // value may increase in time, for provided labelts it is currently 2555
-    //	assertTrue(metrics.getHitCount() > 1000);
+    //  assertTrue(metrics.getHitCount() > 1000);
 
     assertTrue(metrics.getScore() > 970000);
   }
@@ -147,7 +134,7 @@ public class ScoringServiceTest {
 
   @Test
   public void testGetMaxOverallMetrics() throws Exception {
-    //	MaxEntityMetrics maxValues = scoringService.getMaxEntityMetrics();
+    //  MaxEntityMetrics maxValues = scoringService.getMaxEntityMetrics();
     EntityMetrics maxValues = scoringService.getMaxOverallMetrics();
     assertNotNull(maxValues);
     assertEquals(24772, maxValues.getPageRank());
