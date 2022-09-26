@@ -24,7 +24,6 @@ import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.testutils.TestConfig;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
-import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -157,12 +156,11 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
       throws Exception {
     Entity europeanaProxyEntity = objectMapper.readValue(europeanaProxyEntityStr, Entity.class);
     DataSource dataSource = datasources.verifyDataSource(europeanaProxyEntity.getEntityId(), false);
-    Organization zohoOrganization = ZohoOrganizationConverter.convertToOrganizationEntity(zohoRecord);
+    Organization zohoOrganization =
+        ZohoOrganizationConverter.convertToOrganizationEntity(zohoRecord);
     EntityRecord savedRecord =
         entityRecordService.createEntityFromRequest(
-            europeanaProxyEntity,
-            zohoOrganization,
-            dataSource);
+            europeanaProxyEntity, zohoOrganization, dataSource);
 
     // trigger update to generate consolidated entity
     entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId());

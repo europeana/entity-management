@@ -141,7 +141,11 @@ public class MetisDereferenceService implements InitializingBean, Dereferencer {
     }
     if (logger.isDebugEnabled()) {
       long duration = Duration.between(start, Instant.now()).toMillis();
-      logger.debug("Metis response for externalId={} fetched in {}ms: {}", externalId, duration, metisResponseBody);
+      logger.debug(
+          "Metis response for externalId={} fetched in {}ms: {}",
+          externalId,
+          duration,
+          metisResponseBody);
     }
     return metisResponseBody;
   }

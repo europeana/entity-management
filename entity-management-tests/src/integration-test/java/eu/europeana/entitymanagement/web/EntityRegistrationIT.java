@@ -360,9 +360,10 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
 
   @Test
   void registerZohoOrganizationBnfWithNewFieldsShouldBeSuccessful() throws Exception {
-    String entityId = EntityRecordUtils.buildEntityIdUri(
-        "organization",
-        EntityRecordUtils.getIdFromUrl(IntegrationTestUtils.ORGANIZATION_BNF_URI_ZOHO));
+    String entityId =
+        EntityRecordUtils.buildEntityIdUri(
+            "organization",
+            EntityRecordUtils.getIdFromUrl(IntegrationTestUtils.ORGANIZATION_BNF_URI_ZOHO));
 
     ResultActions response =
         mockMvc.perform(
@@ -375,7 +376,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         .andExpect(jsonPath("$.language", everyItem(matchesRegex("[a-z]+"))))
         .andExpect(jsonPath("$.hiddenLabel", hasSize(3)))
         .andExpect(jsonPath("$.organizationDomain[*]", hasSize(1)))
-        .andExpect(jsonPath("$.id", is(entityId)));    
+        .andExpect(jsonPath("$.id", is(entityId)));
   }
 
   @Test

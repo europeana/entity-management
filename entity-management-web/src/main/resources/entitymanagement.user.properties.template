@@ -3,6 +3,13 @@ mongo.connectionUrl = mongodb://<host>:<port>
 mongo.em.database = <entity-management-db>
 mongo.batch.database = <spring-batch-db>
 
+#solr connectivity 
+#solr url for the indexing entities (superseeded by entitymanagement.solr.indexing.zookeeper.url if present)
+#entitymanagement.solr.indexing.url=
+
+#zookeeper url for the indexing entities
+entitymanagement.solr.indexing.zookeeper.url=
+
 # Schedules periodic update of entities
 #if missing it will be interpreted as true
 #set property to false to disable scheduling

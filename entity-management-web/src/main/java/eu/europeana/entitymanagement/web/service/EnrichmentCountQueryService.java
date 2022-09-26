@@ -34,7 +34,7 @@ public class EnrichmentCountQueryService {
 
   private final WebClient webClient;
   private final EntityManagementConfiguration configuration;
-  
+
   public EnrichmentCountQueryService(EntityManagementConfiguration configuration) {
     this.configuration = configuration;
     webClient = WebClient.builder().build();
@@ -98,12 +98,11 @@ public class EnrichmentCountQueryService {
 
     url.append("&query=" + searchQuery);
     if (!EntityTypes.Organization.getEntityType().equals(type)) {
-            url.append(contentTierPrefix);
+      url.append(contentTierPrefix);
       url.append(configuration.getEnrichmentsQueryContentTier());
-      
     }
     url.append("&profile=minimal");
-    //no rows needed, only the count
+    // no rows needed, only the count
     url.append("&rows=0");
     return url.toString();
   }

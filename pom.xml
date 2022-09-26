@@ -29,12 +29,18 @@
 			<name>europeana-snapshots</name>
 			<url>https://artifactory.eanadev.org/artifactory/libs-snapshot</url>
 		</repository>
+		<!-- repo for plugins, required to resolve git-commit-id -->
+		<repository>
+			<id>plugins-release</id>
+			<name>artifactory plugins-release</name>
+			<url>https://artifactory.eanadev.org/artifactory/plugins-release</url>
+		</repository>
 	</repositories>
 
 
     <groupId>eu.europeana.api</groupId>
     <artifactId>entity-management</artifactId>
-    <version>1.2.0-SNAPSHOT</version>
+    <version>1.2.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Entity Management</name>
