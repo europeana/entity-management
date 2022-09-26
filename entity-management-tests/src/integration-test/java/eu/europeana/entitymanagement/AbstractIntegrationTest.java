@@ -76,7 +76,7 @@ public abstract class AbstractIntegrationTest {
   /** MockWebServer needs to be static, so we can inject its port into the Spring context. */
   private static MockWebServer mockMetis;
   private static MockWebServer mockWikidata;
-  private static MockWebServer mockSearchAndRecordIsShownBy;
+  private static MockWebServer mockSearchAndRecord;
   
   @Autowired protected EntityRecordService entityRecordService;
 
@@ -90,10 +90,9 @@ public abstract class AbstractIntegrationTest {
     mockWikidata.setDispatcher(setupWikidataDispatcher());
     mockWikidata.start();
     
-    mockSearchAndRecordIsShownBy = new MockWebServer();
-    mockSearchAndRecordIsShownBy.setDispatcher(setupSearchAndRecordIsShownByDispatcher());
-    mockSearchAndRecordIsShownBy.start();
-
+    mockSearchAndRecord = new MockWebServer();
+    mockSearchAndRecord.setDispatcher(setupSearchAndRecordDispatcher());
+    mockSearchAndRecord.start();
   }
 
   @AfterAll
@@ -119,7 +118,7 @@ public abstract class AbstractIntegrationTest {
         () -> String.format("http://%s:%s", mockWikidata.getHostName(), mockWikidata.getPort()));
     registry.add(
         "europeana.searchapi.urlPrefix",
-        () -> String.format("http://%s:%s?wskey=api2demo", mockSearchAndRecordIsShownBy.getHostName(), mockSearchAndRecordIsShownBy.getPort()));
+        () -> String.format("http://%s:%s?wskey=api2demo", mockSearchAndRecord.getHostName(), mockSearchAndRecord.getPort()));
     
     registry.add("batch.computeMetrics", () -> "false");
     // Do not run scheduled entity updates in tests
@@ -161,7 +160,12 @@ public abstract class AbstractIntegrationTest {
     };
   }
   
-  private static Dispatcher setupSearchAndRecordIsShownByDispatcher() {
+  /*
+   * Currently this method is used for both the enrichment count and the isShownBy generation
+   * services, since the same search and record base url property is used for both 
+   * (europeana.searchapi.urlPrefix).
+   */
+  private static Dispatcher setupSearchAndRecordDispatcher() {
     return new Dispatcher() {
       @NotNull
       @Override
@@ -173,7 +177,7 @@ public abstract class AbstractIntegrationTest {
            * The reason is the same generation of the isShownBy field for all entity types. If that changes in
            * the future, the mock needs to be updated.
            */
-          String responseBody = queryParam.contains(EntityTypes.TimeSpan.getEntityType().toLowerCase()) ? 
+          String responseBody = queryParam.contains(EntityTypes.TimeSpan.getEntityType().toLowerCase()) ?
             IntegrationTestUtils.loadFile( IntegrationTestUtils.TIMESPAN_1_CENTURY_SEARCH_AND_RECORD_JSON) :
             IntegrationTestUtils.loadFile( IntegrationTestUtils.SEARCH_AND_RECORD_EMPTY_JSON);
           return new MockResponse().setResponseCode(200).setBody(responseBody);
@@ -183,7 +187,7 @@ public abstract class AbstractIntegrationTest {
       }
     };
   }
-
+  
   private static Dispatcher setupWikidataDispatcher() {
     return new Dispatcher() {
 

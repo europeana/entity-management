@@ -3,19 +3,18 @@ package eu.europeana.entitymanagement.web.service;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPath;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPathWithBase;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BASE_DATA_EUROPEANA_URI;
-
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.exception.ScoringComputationException;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.web.model.EnrichmentCountResponse;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.exception.ScoringComputationException;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @Service
 public class EnrichmentCountQueryService {
@@ -55,7 +54,7 @@ public class EnrichmentCountQueryService {
       logger.debug("Getting enrichment count for entityId={}; queryUri={}", entityId, uri);
     }
 
-    EnrichmentCountResponse response;
+    String response = null;
     Instant start = Instant.now();
 
     try {
@@ -65,7 +64,7 @@ public class EnrichmentCountQueryService {
               .uri(uri)
               .accept(MediaType.APPLICATION_JSON)
               .retrieve()
-              .bodyToMono(EnrichmentCountResponse.class)
+              .bodyToMono(String.class)
               .block();
     } catch (Exception e) {
       throw new ScoringComputationException(ERROR_MSG + entityId, e);
@@ -83,7 +82,12 @@ public class EnrichmentCountQueryService {
       throw new ScoringComputationException(ERROR_MSG + entityId);
     }
 
-    return response.getTotalResults();
+    int result=0;
+    JSONObject responseJson = new JSONObject(response);
+    if(responseJson.has("totalResults")) {
+      result = responseJson.getInt("totalResults");
+    }
+    return result;
   }
 
   String buildSearchRequestUrl(String entityId, String type) {
