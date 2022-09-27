@@ -11,6 +11,7 @@ import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
 import eu.europeana.entitymanagement.testutils.MongoContainer;
 import eu.europeana.entitymanagement.testutils.SolrContainer;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.MetisDereferenceUtils;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
@@ -74,9 +75,9 @@ public abstract class AbstractIntegrationTest {
 
   /** MockWebServer needs to be static, so we can inject its port into the Spring context. */
   private static MockWebServer mockMetis;
-
   private static MockWebServer mockWikidata;
-
+  private static MockWebServer mockSearchAndRecord;
+  
   @Autowired protected EntityRecordService entityRecordService;
 
   @BeforeAll
@@ -84,10 +85,14 @@ public abstract class AbstractIntegrationTest {
     mockMetis = new MockWebServer();
     mockMetis.setDispatcher(setupMetisDispatcher());
     mockMetis.start();
-
+    
     mockWikidata = new MockWebServer();
     mockWikidata.setDispatcher(setupWikidataDispatcher());
     mockWikidata.start();
+    
+    mockSearchAndRecord = new MockWebServer();
+    mockSearchAndRecord.setDispatcher(setupSearchAndRecordDispatcher());
+    mockSearchAndRecord.start();
   }
 
   @AfterAll
@@ -111,6 +116,10 @@ public abstract class AbstractIntegrationTest {
     registry.add(
         "wikidata.baseUrl",
         () -> String.format("http://%s:%s", mockWikidata.getHostName(), mockWikidata.getPort()));
+    registry.add(
+        "europeana.searchapi.urlPrefix",
+        () -> String.format("http://%s:%s?wskey=api2demo", mockSearchAndRecord.getHostName(), mockSearchAndRecord.getPort()));
+    
     registry.add("batch.computeMetrics", () -> "false");
     // Do not run scheduled entity updates in tests
     registry.add("batch.scheduling.enabled", () -> "false");
@@ -150,7 +159,35 @@ public abstract class AbstractIntegrationTest {
       }
     };
   }
-
+  
+  /*
+   * Currently this method is used for both the enrichment count and the isShownBy generation
+   * services, since the same search and record base url property is used for both 
+   * (europeana.searchapi.urlPrefix).
+   */
+  private static Dispatcher setupSearchAndRecordDispatcher() {
+    return new Dispatcher() {
+      @NotNull
+      @Override
+      public MockResponse dispatch(@NotNull RecordedRequest request) {
+        String queryParam = Objects.requireNonNull(request.getRequestUrl()).queryParameter("query");
+        try {
+          /*
+           * The full response is only returned for the TimeSpan type, and for the others the empty response.
+           * The reason is the same generation of the isShownBy field for all entity types. If that changes in
+           * the future, the mock needs to be updated.
+           */
+          String responseBody = queryParam.contains(EntityTypes.TimeSpan.getEntityType().toLowerCase()) ?
+            IntegrationTestUtils.loadFile( IntegrationTestUtils.TIMESPAN_1_CENTURY_SEARCH_AND_RECORD_JSON) :
+            IntegrationTestUtils.loadFile( IntegrationTestUtils.SEARCH_AND_RECORD_EMPTY_JSON);
+          return new MockResponse().setResponseCode(200).setBody(responseBody);
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+      }
+    };
+  }
+  
   private static Dispatcher setupWikidataDispatcher() {
     return new Dispatcher() {
 

@@ -1,0 +1,43 @@
+{
+	"apikey": "api2demo",
+	"success": true,
+	"requestNumber": 999,
+	"itemsCount": 1,
+	"totalResults": 175,
+	"items": [
+		{
+			"dataProvider": [
+				"Museum of Oriental Art"
+			],
+			"dcTitleLangAware": {
+				"def": [
+					"Modello di granaio"
+				]
+			},
+			"edmIsShownAt": [
+				"http://www.culturaitalia.it/opencms/viewItem.jsp?language=en&case=&id=oai%3Amaotorino.it_MAO%3A1482"
+			],
+			"edmIsShownBy": [
+				"http://93.62.170.226/foto/mao/2524_Cc102.jpg"
+			],
+			"edmPreview": [
+				"https://api.europeana.eu/thumbnail/v2/url.json?uri=http%3A%2F%2F93.62.170.226%2Ffoto%2Fmao%2F2524_Cc102.jpg&type=IMAGE"
+			],
+			"europeanaCompleteness": 5,
+			"guid": "https://www.europeana.eu/item/286/MAO1482?utm_source=api&utm_medium=api&utm_campaign=api2demo",
+			"id": "/286/MAO1482",
+			"link": "https://api.europeana.eu/record/286/MAO1482.json?wskey=api2demo",
+			"provider": [
+				"CulturaItalia"
+			],
+			"rights": [
+				"http://creativecommons.org/licenses/by/4.0/"
+			],
+			"score": 10.249214,
+			"title": [
+				"Modello di granaio"
+			],
+			"type": "IMAGE"
+		}
+	]
+}

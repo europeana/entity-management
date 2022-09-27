@@ -186,21 +186,23 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
 
   @Test
   void registerTimespanShouldBeSuccessful() throws Exception {
-    mockMvc
+    ResultActions response = mockMvc
         .perform(
             MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL)
                 .content(loadFile(IntegrationTestUtils.TIMESPAN_REGISTER_1ST_CENTURY_JSON))
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .contentType(MediaType.APPLICATION_JSON_VALUE));
+    
+    response
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.id", any(String.class)))
         .andExpect(jsonPath("$.type", is(EntityTypes.TimeSpan.name())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
+        // should have Europeana and Datasource proxies
+        .andExpect(jsonPath("$.proxies", hasSize(2)))
         .andExpect(jsonPath("$.isShownBy.id").isNotEmpty())
         .andExpect(jsonPath("$.isShownBy.source").isNotEmpty())
-        .andExpect(jsonPath("$.isShownBy.type").isNotEmpty())
-        // should have Europeana and Datasource proxies
-        .andExpect(jsonPath("$.proxies", hasSize(2)));
+        .andExpect(jsonPath("$.isShownBy.type").isNotEmpty());
   }
 
   @Test
