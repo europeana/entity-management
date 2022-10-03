@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.common.config;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -21,6 +22,8 @@ import org.springframework.context.annotation.PropertySources;
 public class EntityManagementConfiguration implements InitializingBean {
 
   private static final Logger LOG = LogManager.getLogger(EntityManagementConfiguration.class);
+  /** Matches spring.profiles.active property in test/resource application.properties file */
+  public static final String ACTIVE_TEST_PROFILE = "test";
 
   @Value("${datasources.config}")
   private String datasourcesXMLConfig;
@@ -132,7 +135,10 @@ public class EntityManagementConfiguration implements InitializingBean {
 
   @Value("${europeana.item.data.endpoint}")
   private String itemDataEndpoint;
-
+  
+  @Value("${spring.profiles.active:}")
+  private String activeProfileString;
+  
   public EntityManagementConfiguration() {
     LOG.info("Initializing EntityManagementConfiguration bean as: configuration");
   }
@@ -291,8 +297,16 @@ public class EntityManagementConfiguration implements InitializingBean {
 
   @Override
   public void afterPropertiesSet() throws Exception {
-    verifyRequiredProperties();
+    if (testProfileNotActive(activeProfileString)) {
+      verifyRequiredProperties();
+    }
+    
   }
+
+  public static boolean testProfileNotActive(String activeProfileString) {
+    return Arrays.stream(activeProfileString.split(",")).noneMatch(ACTIVE_TEST_PROFILE::equals);
+  }
+
 
   /**
    * verify properties
