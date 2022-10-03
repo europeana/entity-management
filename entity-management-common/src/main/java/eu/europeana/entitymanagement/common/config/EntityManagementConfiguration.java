@@ -1,7 +1,11 @@
 package eu.europeana.entitymanagement.common.config;
 
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -12,13 +16,9 @@ import org.springframework.context.annotation.PropertySources;
  * override from entitymanagement.user.properties file
  */
 @Configuration
-@PropertySources({
-  @PropertySource("classpath:entitymanagement.properties"),
-  @PropertySource(
-      value = "classpath:entitymanagement.user.properties",
-      ignoreResourceNotFound = true)
-})
-public class EntityManagementConfiguration {
+@PropertySources({@PropertySource("classpath:entitymanagement.properties"), @PropertySource(
+    value = "classpath:entitymanagement.user.properties", ignoreResourceNotFound = true)})
+public class EntityManagementConfiguration implements InitializingBean {
 
   private static final Logger LOG = LogManager.getLogger(EntityManagementConfiguration.class);
 
@@ -46,16 +46,16 @@ public class EntityManagementConfiguration {
   @Value("${europeana.searchapi.enrichments.contentTier}")
   private String enrichmentsQueryContentTier;
 
-  @Value("${entitymanagement.solr.indexing.url:#{null}}")
+  @Value("${entitymanagement.solr.indexing.url:}")
   private String indexingSolrUrl;
 
-  @Value("${entitymanagement.solr.indexing.zookeeper.url:#{null}}")
+  @Value("${entitymanagement.solr.indexing.zookeeper.url:}")
   private String indexingSolrZookeeperUrl;
 
   @Value("${entitymanagement.solr.indexing.timeout:60000}")
   private int indexingSolrTimeoutMillis;
 
-  @Value("${entitymanagement.solr.indexing.collection:#{null}}")
+  @Value("${entitymanagement.solr.indexing.collection}")
   private String indexingSolrCollection;
 
   @Value("${entitymanagement.solr.indexing.explicitCommits: false}")
@@ -287,5 +287,39 @@ public class EntityManagementConfiguration {
 
   public String getItemDataEndpoint() {
     return itemDataEndpoint;
+  }
+
+  @Override
+  public void afterPropertiesSet() throws Exception {
+    verifyRequiredProperties();
+  }
+
+  /**
+   * verify properties
+   */
+  private void verifyRequiredProperties() {
+    List<String> missingProps = new ArrayList<>();
+
+    // search api prefix is mandatory
+    if (StringUtils.isBlank(getSearchApiUrlPrefix())) {
+      missingProps.add("europeana.searchapi.urlPrefix");
+    }
+
+    // one of zookeeperUrl or solr indexing url are
+    if (StringUtils.isBlank(getIndexingSolrZookeeperUrl())
+        && StringUtils.isBlank(getIndexingSolrUrl())) {
+      missingProps
+          .add("entitymanagement.solr.indexing.url/entitymanagement.solr.indexing.zookeeper.url");
+    }
+    
+    //collection name is mandatory when using zookeeper url
+    if (StringUtils.isNotBlank(getIndexingSolrZookeeperUrl()) && StringUtils.isBlank(getIndexingSolrCollection())){
+      missingProps.add("entitymanagement.solr.indexing.collection");
+    }
+
+    if (!missingProps.isEmpty()) {
+      throw new IllegalStateException(String.format(
+          "The following config properties are not set: %s", String.join("\n", missingProps)));
+    }
   }
 }
