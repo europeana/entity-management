@@ -28,8 +28,8 @@ class ScoringServiceIT extends AbstractIntegrationTest {
   @Resource(name = AppConfig.BEAN_EM_SCORING_SERVICE)
   ScoringService scoringService;
 
-  @Test
-  @Disabled("Excluded from automated runs as this requires Search API")
+  //@Test
+  @Disabled("Excluded from automated, the response mocking is implemented only for timespan")
   public void testComputeMetrics() throws Exception {
 
     Agent agent = new Agent();
@@ -56,15 +56,14 @@ class ScoringServiceIT extends AbstractIntegrationTest {
     //  actual value = 304.6025939567319
     assertTrue(metrics.getPageRank() == 304);
     // value may increase in time, currently 807
-    assertTrue(metrics.getEnrichmentCount() >= 807);
-    // value may increase in time, for provided labelts it is currently 2555
+    assertTrue(metrics.getEnrichmentCount() >= 0);
+    // value may increase in time, for provided labels it is currently 2555
     //  assertTrue(metrics.getHitCount() > 1000);
 
-    assertTrue(metrics.getScore() > 970000);
+//    assertTrue(metrics.getScore() > 970000);
   }
 
   @Test
-  @Disabled("Excluded from automated runs as this requires Search API")
   public void testComputeMetricsForTimeSpan() throws Exception {
 
     TimeSpan entity = new TimeSpan();
@@ -84,13 +83,13 @@ class ScoringServiceIT extends AbstractIntegrationTest {
     //  actual value = 575.xxx
     assertTrue(metrics.getPageRank() == 575);
     // value may increase in time, currently 598943
-    assertTrue(metrics.getEnrichmentCount() >= 598943);
-    // value may increase in time, currently 2301560
-    assertTrue(metrics.getScore() > 2301500);
+    assertTrue(metrics.getEnrichmentCount() == 175);
+    // value may increase in time, currently 1638965
+    assertTrue(metrics.getScore() >= 1638965);
   }
 
-  @Test
-  @Disabled("Excluded from automated runs as this requires Search API")
+//  @Test
+//  @Disabled("Excluded from automated, the response mocking is implemented only for timespan")
   public void testComputeMetricsForPlaces() throws Exception {
 
     Place agent = new Place();
@@ -113,12 +112,11 @@ class ScoringServiceIT extends AbstractIntegrationTest {
     //      actual value = 304.6025939567319
     assertTrue(metrics.getPageRank() == 0);
     // value may increase in time, currently
-    // before last reindexing was 750, let's see if the reindexing is complete
-    assertTrue(metrics.getEnrichmentCount() >= 52000);
+    assertTrue(metrics.getEnrichmentCount() == 0);
     // value may increase in time, for provided labelts it is currently 2555
     //        assertTrue(metrics.getHitCount() > 2000000);
 
-    assertTrue(metrics.getScore() > 1085);
+//    assertTrue(metrics.getScore() > 1085);
   }
 
   @Test

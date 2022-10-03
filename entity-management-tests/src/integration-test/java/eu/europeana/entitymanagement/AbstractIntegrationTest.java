@@ -177,6 +177,7 @@ public abstract class AbstractIntegrationTest {
            * The reason is the same generation of the isShownBy field for all entity types. If that changes in
            * the future, the mock needs to be updated.
            */
+          //NOTE: the response returned is the one used for isShownBy
           String responseBody = queryParam.contains(EntityTypes.TimeSpan.getEntityType().toLowerCase()) ?
             IntegrationTestUtils.loadFile( IntegrationTestUtils.TIMESPAN_1_CENTURY_SEARCH_AND_RECORD_JSON) :
             IntegrationTestUtils.loadFile( IntegrationTestUtils.SEARCH_AND_RECORD_EMPTY_JSON);
