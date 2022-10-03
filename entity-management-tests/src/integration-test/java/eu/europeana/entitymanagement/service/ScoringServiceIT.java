@@ -64,6 +64,7 @@ class ScoringServiceIT extends AbstractIntegrationTest {
   }
 
   @Test
+  @Disabled("Does not work on server because of blocked connection to PR solr")
   public void testComputeMetricsForTimeSpan() throws Exception {
 
     TimeSpan entity = new TimeSpan();
@@ -89,7 +90,7 @@ class ScoringServiceIT extends AbstractIntegrationTest {
   }
 
 //  @Test
-//  @Disabled("Excluded from automated, the response mocking is implemented only for timespan")
+  @Disabled("Excluded from automated, the response mocking is implemented only for timespan")
   public void testComputeMetricsForPlaces() throws Exception {
 
     Place agent = new Place();
