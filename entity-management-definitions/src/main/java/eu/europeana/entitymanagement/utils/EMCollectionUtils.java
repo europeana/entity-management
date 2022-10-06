@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.utils;
 
-import java.util.List;
-import java.util.Optional;
+import eu.europeana.corelib.utils.ComparatorUtils;
+import java.util.*;
 import javax.validation.constraints.NotNull;
 
 public class EMCollectionUtils {
@@ -37,5 +37,30 @@ public class EMCollectionUtils {
       return value.isPresent() ? value.get() : null;
     }
     return null;
+  }
+
+  /**
+   * Checks if the element of Secondary List is present in the primary list of objects Takes into
+   * account punctuation, spaces and case
+   *
+   * @param listPrimaryObject
+   * @param elemSecondaryList
+   * @return
+   */
+  public static boolean ifValueAlreadyExistsInList(
+      List<Object> listPrimaryObject, Object elemSecondaryList) {
+    // if the list contains the element return.
+    if (listPrimaryObject.contains(elemSecondaryList)) {
+      return true;
+    }
+    // check further, for any space or cases etc.
+    for (Object primaryValue : listPrimaryObject) {
+      if (ComparatorUtils.sameValueWithoutSpace(
+          ComparatorUtils.stripPunctuation(primaryValue.toString()),
+          ComparatorUtils.stripPunctuation(elemSecondaryList.toString()))) {
+        return true;
+      }
+    }
+    return false;
   }
 }

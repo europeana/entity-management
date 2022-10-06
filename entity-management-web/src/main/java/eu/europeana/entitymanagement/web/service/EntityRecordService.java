@@ -36,26 +36,13 @@ import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
-import eu.europeana.entitymanagement.utils.EntityObjectFactory;
-import eu.europeana.entitymanagement.utils.EntityRecordUtils;
-import eu.europeana.entitymanagement.utils.EntityUtils;
-import eu.europeana.entitymanagement.utils.UriValidator;
+import eu.europeana.entitymanagement.utils.*;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
@@ -735,7 +722,6 @@ public class EntityRecordService {
       Map<Object, Object> prefLabelsForAltLabels = new HashMap<>();
 
       for (Field field : fieldsToCombine) {
-
         Class<?> fieldType = field.getType();
         String fieldName = field.getName();
 
@@ -916,7 +902,8 @@ public class EntityRecordService {
           new ArrayList<>((List<Object>) fieldValuePrimaryObject.get(key));
       boolean listPrimaryObjectChanged = false;
       for (Object elemSecondaryList : listSecondaryObject) {
-        if (!listPrimaryObject.contains(elemSecondaryList)) {
+        // check if value already exists in the primary list.
+        if (!EMCollectionUtils.ifValueAlreadyExistsInList(listPrimaryObject, elemSecondaryList)) {
           listPrimaryObject.add(elemSecondaryList);
           if (listPrimaryObjectChanged == false) {
             listPrimaryObjectChanged = true;
@@ -1043,7 +1030,9 @@ public class EntityRecordService {
     if (fieldValuePrimaryObject != null && fieldValueSecondaryObject != null) {
       if (accumulate) {
         for (Object secondaryObjectListObject : fieldValueSecondaryObject) {
-          if (!fieldValuePrimaryObject.contains(secondaryObjectListObject)) {
+          // check if the secondary value already exists in primary List
+          if (!EMCollectionUtils.ifValueAlreadyExistsInList(
+              fieldValuePrimaryObject, secondaryObjectListObject)) {
             fieldValuePrimaryObject.add(secondaryObjectListObject);
           }
         }
@@ -1075,11 +1064,13 @@ public class EntityRecordService {
       // return a clone of the primary if we're not appending
       return primaryArray.clone();
     }
-
     // merge arrays
     Set<Object> mergedAndOrdered = new TreeSet<>(Arrays.asList(primaryArray));
-    mergedAndOrdered.addAll(Arrays.asList(secondaryArray));
-
+    for (Object second : secondaryArray) {
+      if (!EMCollectionUtils.ifValueAlreadyExistsInList(Arrays.asList(primaryArray), second)) {
+        mergedAndOrdered.add(second);
+      }
+    }
     return mergedAndOrdered.toArray(Arrays.copyOf(primaryArray, 0));
   }
 
