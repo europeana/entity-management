@@ -122,7 +122,7 @@ public class EntityRecordService {
     }
 
     EntityRecord entityRecord = entityRecordOptional.get();
-    if (!retrieveDisabled && entityRecord.isDisabled()) {
+    if (retrieveDisabled && entityRecord.isDisabled()) {
       throw new EntityRemovedException(String.format(ENTITY_ID_REMOVED_MSG, entityUri));
     }
     return entityRecord;

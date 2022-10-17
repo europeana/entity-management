@@ -351,6 +351,60 @@ public class EMController extends BaseRest {
     return scheduleBatchUpdates(request, entityIds, ScheduledUpdateType.METRICS_UPDATE);
   }
 
+  /**
+   * Synchronize Organizations from Zoho
+   *
+   * @param type type of entity
+   * @param identifier entity id
+   * @param action used with either “enable” or “disable” to mark an entity to be used or not for
+   *     enrichment using labels.
+   * @param request
+   * @return
+   * @throws HttpException
+   */
+  @ApiOperation(
+      value = "Enabled or disabled the entity for enrichment",
+      nickname = "enableDisableForEnrich",
+      response = java.lang.Void.class)
+  @PostMapping(
+      value = "/{type}/{identifier}/management/enrich",
+      produces = {MediaType.APPLICATION_JSON_VALUE, HttpHeaders.CONTENT_TYPE_JSONLD})
+  public ResponseEntity<String> enableDisableForEnrich(
+      @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
+      @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
+      @RequestParam(value = "action") String action,
+      HttpServletRequest request)
+      throws Exception {
+
+    verifyWriteAccess(Operations.UPDATE, request);
+
+    // validate action value
+    if (!org.apache.commons.lang3.StringUtils.equalsAnyIgnoreCase(
+        action, WebEntityConstants.ACTION_ENABLE, WebEntityConstants.ACTION_DISABLE)) {
+      throw new HttpBadRequestException(
+          "Invalid value for param action. Supported values are "
+              + WebEntityConstants.ACTION_ENABLE
+              + " or "
+              + WebEntityConstants.ACTION_DISABLE
+              + ".");
+    }
+
+    EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, true);
+    // Set the “enrich” field on the Aggregation of the Consolidated Version to the value indicated
+    // in the “action” parameter;
+    entityRecord.getEntity().getIsAggregatedBy().setEnrich(action);
+    entityRecordService.update(entityRecord);
+
+    return generateResponseEntity(
+        request,
+        getEntityProfile(null),
+        FormatTypes.jsonld,
+        null,
+        HttpHeaders.CONTENT_TYPE_JSONLD_UTF8,
+        entityRecord,
+        HttpStatus.ACCEPTED);
+  }
+
   @ApiOperation(
       value = "Retrieve a known entity",
       nickname = "getEntityJsonLd",
