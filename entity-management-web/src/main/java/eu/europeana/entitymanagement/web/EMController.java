@@ -389,7 +389,7 @@ public class EMController extends BaseRest {
               + ".");
     }
 
-    EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, true);
+    EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
     // Set the “enrich” field on the Aggregation of the Consolidated Version to the value indicated
     // in the “action” parameter;
     entityRecord.getEntity().getIsAggregatedBy().setEnrich(action);
