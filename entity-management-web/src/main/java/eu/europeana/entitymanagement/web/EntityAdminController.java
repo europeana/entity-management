@@ -19,7 +19,6 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
-import eu.europeana.entitymanagement.web.service.ZohoSyncService;
 import io.swagger.annotations.ApiOperation;
 import java.util.Collections;
 import java.util.List;
@@ -48,17 +47,13 @@ public class EntityAdminController extends BaseRest {
   private static final Logger LOG = LogManager.getLogger(EntityAdminController.class);
 
   private final EntityRecordService entityRecordService;
-  private final ZohoSyncService zohoSyncService;
   private final EntityUpdateService entityUpdateService;
 
   @Autowired
   public EntityAdminController(
-      EntityRecordService entityRecordService,
-      EntityUpdateService entityUpdateService,
-      ZohoSyncService zohoSyncService) {
+      EntityRecordService entityRecordService, EntityUpdateService entityUpdateService) {
     this.entityRecordService = entityRecordService;
     this.entityUpdateService = entityUpdateService;
-    this.zohoSyncService = zohoSyncService;
   }
 
   @ApiOperation(value = "Permanent Deletion of Entity", nickname = "deleteEntity")
