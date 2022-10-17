@@ -5,6 +5,8 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.QUERY_
 import static java.util.stream.Collectors.groupingBy;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 
+import eu.europeana.api.commons.definitions.exception.DateParsingException;
+import eu.europeana.api.commons.definitions.utils.DateUtils;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.api.commons.web.exception.HttpException;
@@ -38,9 +40,16 @@ import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
+import eu.europeana.entitymanagement.web.auth.EMOperations;
+import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
 import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
+import eu.europeana.entitymanagement.web.service.ZohoSyncService;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -80,6 +89,7 @@ public class EMController extends BaseRest {
   private final DereferenceServiceLocator dereferenceServiceLocator;
   private final DataSources datasources;
   private final EntityUpdateService entityUpdateService;
+  private final ZohoSyncService zohoSyncService;
 
   private static final String EXTERNAL_ID_REMOVED_MSG =
       "Entity id '%s' already exists as '%s', which has been removed";
@@ -98,12 +108,58 @@ public class EMController extends BaseRest {
       DereferenceServiceLocator dereferenceServiceLocator,
       DataSources datasources,
       EntityUpdateService entityUpdateService,
-      EntityManagementConfiguration emConfig) {
+      EntityManagementConfiguration emConfig,
+      ZohoSyncService zohoSyncService) {
     this.entityRecordService = entityRecordService;
     this.solrService = solrService;
     this.dereferenceServiceLocator = dereferenceServiceLocator;
     this.datasources = datasources;
     this.entityUpdateService = entityUpdateService;
+    this.zohoSyncService = zohoSyncService;
+  }
+
+  /**
+   * Synchronize Organizations from Zoho
+   *
+   * @param request
+   * @return
+   * @throws HttpException
+   */
+  @ApiOperation(
+      value = "Synchronize Organizations from Zoho",
+      nickname = "zohoSync",
+      response = java.lang.Void.class)
+  @PostMapping(value = "/management/zohosync", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<String> zohoSync(
+      @ApiParam(
+              name = WebEntityConstants.SINCE,
+              required = true,
+              format = "ISO DateTime",
+              example = "1970-01-01T00:00:00Z")
+          @RequestParam
+          String since,
+      HttpServletRequest request)
+      throws HttpException, EuropeanaApiException {
+
+    verifyWriteAccess(EMOperations.OPERATION_ZOHO_SYNC, request);
+
+    OffsetDateTime modifiedSince = validateSince(since);
+    ZohoSyncReport zohoSyncReport = zohoSyncService.synchronizeZohoOrganizations(modifiedSince);
+
+    return generateZohoSyncResponse(request, zohoSyncReport);
+  }
+
+  private OffsetDateTime validateSince(String since) throws HttpBadRequestException {
+    if (since == null) {
+      return Instant.EPOCH.atOffset(ZoneOffset.UTC);
+    }
+
+    try {
+      return DateUtils.parseToOffsetDateTime(since);
+    } catch (DateParsingException e) {
+      throw new HttpBadRequestException(
+          "Request param 'since' is not an ISO DateTime: " + since, e);
+    }
   }
 
   @ApiOperation(
