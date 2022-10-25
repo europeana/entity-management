@@ -730,7 +730,6 @@ public class EntityRecordService {
           consolidatedEntity.setFieldValue(field, mergedArray);
 
         } else if (List.class.isAssignableFrom(fieldType)) {
-
           List<Object> fieldValuePrimaryObjectList = (List<Object>) primary.getFieldValue(field);
           List<Object> fieldValueSecondaryObjectList =
               (List<Object>) secondary.getFieldValue(field);
@@ -1030,8 +1029,12 @@ public class EntityRecordService {
     if (fieldValuePrimaryObject != null && fieldValueSecondaryObject != null) {
       if (accumulate) {
         for (Object secondaryObjectListObject : fieldValueSecondaryObject) {
+          if (field.getName().equals(WebEntityFields.HIDDEN_LABEL)) {
+            // Leave hidden labels (usually present for organizations) un-touched.
+            fieldValuePrimaryObject.add(secondaryObjectListObject);
+          }
           // check if the secondary value already exists in primary List
-          if (!EMCollectionUtils.ifValueAlreadyExistsInList(
+          else if (!EMCollectionUtils.ifValueAlreadyExistsInList(
               fieldValuePrimaryObject, secondaryObjectListObject)) {
             fieldValuePrimaryObject.add(secondaryObjectListObject);
           }

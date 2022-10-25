@@ -58,7 +58,7 @@
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <!-- Exclude POJOs code duplication analysis -->
         <sonar.cpd.exclusions>**/model/**/*</sonar.cpd.exclusions>
-        <api.commons.version>0.3.14</api.commons.version>
+        <api.commons.version>0.3.17-SNAPSHOT</api.commons.version>
         <springbatch.mongo.version>1.0.3</springbatch.mongo.version>
         <corelib.version>2.15.4</corelib.version>
         <jackson.version>2.11.4</jackson.version>

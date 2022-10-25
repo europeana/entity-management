@@ -1,6 +1,6 @@
 package eu.europeana.entitymanagement.utils;
 
-import eu.europeana.corelib.utils.ComparatorUtils;
+import eu.europeana.api.commons.definitions.utils.ComparatorUtils;
 import java.util.*;
 import javax.validation.constraints.NotNull;
 
