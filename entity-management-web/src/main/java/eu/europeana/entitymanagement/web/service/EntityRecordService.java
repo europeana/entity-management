@@ -45,6 +45,8 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1029,7 +1031,7 @@ public class EntityRecordService {
     if (fieldValuePrimaryObject != null && fieldValueSecondaryObject != null) {
       if (accumulate) {
         for (Object secondaryObjectListObject : fieldValueSecondaryObject) {
-          if (field.getName().equals(WebEntityFields.HIDDEN_LABEL)) {
+          if (StringUtils.equals(field.getName(), WebEntityFields.HIDDEN_LABEL)) {
             // Leave hidden labels (usually present for organizations) un-touched.
             fieldValuePrimaryObject.add(secondaryObjectListObject);
           }
