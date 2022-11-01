@@ -45,7 +45,6 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -1031,9 +1030,15 @@ public class EntityRecordService {
     if (fieldValuePrimaryObject != null && fieldValueSecondaryObject != null) {
       if (accumulate) {
         for (Object secondaryObjectListObject : fieldValueSecondaryObject) {
+          // if field is hidden label (usually present for organizations)
+          // then check for an exact match for URI values. leave the string values un-touched
           if (StringUtils.equals(field.getName(), WebEntityFields.HIDDEN_LABEL)) {
-            // Leave hidden labels (usually present for organizations) un-touched.
-            fieldValuePrimaryObject.add(secondaryObjectListObject);
+            System.out.println("hidden label " + fieldValuePrimaryObject);
+            if (!EMCollectionUtils.ifUriAlreadyExists(
+                fieldValuePrimaryObject, secondaryObjectListObject)) {
+              System.out.println("hidden label value added" + secondaryObjectListObject);
+              fieldValuePrimaryObject.add(secondaryObjectListObject);
+            }
           }
           // check if the secondary value already exists in primary List
           else if (!EMCollectionUtils.ifValueAlreadyExistsInList(

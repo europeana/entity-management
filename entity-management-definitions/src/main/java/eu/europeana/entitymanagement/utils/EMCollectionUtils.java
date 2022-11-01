@@ -49,18 +49,33 @@ public class EMCollectionUtils {
    */
   public static boolean ifValueAlreadyExistsInList(
       List<Object> listPrimaryObject, Object elemSecondaryList) {
-    // if the list contains the element return.
+    // First do a exact match for URI and strings
     if (listPrimaryObject.contains(elemSecondaryList)) {
       return true;
     }
-    // check further, for any space or cases etc.
-    for (Object primaryValue : listPrimaryObject) {
-      if (ComparatorUtils.sameValueWithoutSpace(
-          ComparatorUtils.stripPunctuation(primaryValue.toString()),
-          ComparatorUtils.stripPunctuation(elemSecondaryList.toString()))) {
-        return true;
+    // For strings values only, do further checks for any space or cases etc.
+    if (!UriValidator.isUri(elemSecondaryList.toString())) {
+      for (Object primaryValue : listPrimaryObject) {
+        if (ComparatorUtils.sameValueWithoutSpace(
+            ComparatorUtils.stripPunctuation(primaryValue.toString()),
+            ComparatorUtils.stripPunctuation(elemSecondaryList.toString()))) {
+          return true;
+        }
       }
     }
     return false;
+  }
+
+  /**
+   * Checks if the value is a uri and matches exactly with any value present in primary/other list
+   *
+   * @param listPrimaryObject
+   * @param elemSecondaryList
+   * @return
+   */
+  public static boolean ifUriAlreadyExists(
+      List<Object> listPrimaryObject, Object elemSecondaryList) {
+    return UriValidator.isUri(elemSecondaryList.toString())
+        && listPrimaryObject.contains(elemSecondaryList);
   }
 }
