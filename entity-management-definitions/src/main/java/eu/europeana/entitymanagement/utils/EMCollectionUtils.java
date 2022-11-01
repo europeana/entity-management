@@ -71,7 +71,7 @@ public class EMCollectionUtils {
    *
    * @param listPrimaryObject
    * @param elemSecondaryList
-   * @return
+   * @return true - if the value is uri and present in the list
    */
   public static boolean ifUriAlreadyExists(
       List<Object> listPrimaryObject, Object elemSecondaryList) {

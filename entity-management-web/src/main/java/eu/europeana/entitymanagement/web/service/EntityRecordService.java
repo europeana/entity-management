@@ -1030,21 +1030,7 @@ public class EntityRecordService {
     if (fieldValuePrimaryObject != null && fieldValueSecondaryObject != null) {
       if (accumulate) {
         for (Object secondaryObjectListObject : fieldValueSecondaryObject) {
-          // if field is hidden label (usually present for organizations)
-          // then check for an exact match for URI values. leave the string values un-touched
-          if (StringUtils.equals(field.getName(), WebEntityFields.HIDDEN_LABEL)) {
-            System.out.println("hidden label " + fieldValuePrimaryObject);
-            if (!EMCollectionUtils.ifUriAlreadyExists(
-                fieldValuePrimaryObject, secondaryObjectListObject)) {
-              System.out.println("hidden label value added" + secondaryObjectListObject);
-              fieldValuePrimaryObject.add(secondaryObjectListObject);
-            }
-          }
-          // check if the secondary value already exists in primary List
-          else if (!EMCollectionUtils.ifValueAlreadyExistsInList(
-              fieldValuePrimaryObject, secondaryObjectListObject)) {
-            fieldValuePrimaryObject.add(secondaryObjectListObject);
-          }
+          addToPrimaryList(field, fieldValuePrimaryObject, secondaryObjectListObject);
         }
         consolidatedEntity.setFieldValue(field, fieldValuePrimaryObject);
       } else {
@@ -1057,6 +1043,27 @@ public class EntityRecordService {
     } else if (fieldValuePrimaryObject != null && fieldValueSecondaryObject == null) {
       consolidatedEntity.setFieldValue(field, fieldValuePrimaryObject);
       return;
+    }
+  }
+
+  /**
+   * Add the secondary value in the primary list (if not already present)
+   * @param field
+   * @param fieldValuePrimaryObject
+   * @param secondaryObjectListObject
+   */
+  private void addToPrimaryList(Field field, List<Object> fieldValuePrimaryObject,Object secondaryObjectListObject) {
+    // if field is hidden label (usually present for organizations)
+    // then check for an exact match for URI values. leave the string values un-touched
+    if (StringUtils.equals(field.getName(), WebEntityFields.HIDDEN_LABEL)) {
+      if (!EMCollectionUtils.ifUriAlreadyExists(fieldValuePrimaryObject, secondaryObjectListObject)) {
+        fieldValuePrimaryObject.add(secondaryObjectListObject);
+      }
+    }
+    // check if the secondary value already exists in primary List
+    else if (!EMCollectionUtils.ifValueAlreadyExistsInList(
+            fieldValuePrimaryObject, secondaryObjectListObject)) {
+      fieldValuePrimaryObject.add(secondaryObjectListObject);
     }
   }
 
