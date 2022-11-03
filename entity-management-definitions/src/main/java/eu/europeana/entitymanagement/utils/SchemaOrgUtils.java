@@ -410,6 +410,13 @@ public final class SchemaOrgUtils {
     // sameAs
     addTextProperties(
         timespanObject, time.getSameReferenceLinks(), SchemaOrgConstants.PROPERTY_SAME_AS);
+
+    // image
+    if (time.getDepiction() != null) {
+      timespanObject.setImage(time.getDepiction().getThumbnail());
+    } else if (time.getIsShownBy() != null) {
+      timespanObject.setImage(time.getIsShownBy().getThumbnail());
+    }
   }
 
   /**
