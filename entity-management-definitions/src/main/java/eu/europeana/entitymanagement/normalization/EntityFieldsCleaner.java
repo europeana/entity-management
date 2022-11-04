@@ -315,7 +315,7 @@ public class EntityFieldsCleaner {
         return StringUtils.capitalize(fieldValue.trim());
       }
       // for keyword field type leave it as it is
-      if (EntityFieldsTypes.getFieldType(fieldName).equals(FIELD_TYPE_KEYWORD)) {
+      if (StringUtils.equals(EntityFieldsTypes.getFieldType(fieldName), FIELD_TYPE_KEYWORD)) {
         return fieldValue.trim();
       }
     }
