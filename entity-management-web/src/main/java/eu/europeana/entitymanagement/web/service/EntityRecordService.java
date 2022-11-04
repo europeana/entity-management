@@ -46,6 +46,8 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1248,12 +1250,12 @@ public class EntityRecordService {
   public static boolean doSloppyMatch(String fieldName) {
     String type = EntityFieldsTypes.getFieldType(fieldName);
     // for text do a sloppy match
-    if (type.equals(EntityFieldsTypes.FIELD_TYPE_TEXT)) {
+    if (StringUtils.equals(type, EntityFieldsTypes.FIELD_TYPE_TEXT)) {
       return true;
     }
     // for uri or keywords do an exact match
-    else if (type.equals(EntityFieldsTypes.FIELD_TYPE_URI)
-        || type.equals(EntityFieldsTypes.FIELD_TYPE_KEYWORD)) {
+    else if (StringUtils.equals(type, EntityFieldsTypes.FIELD_TYPE_URI)
+        || StringUtils.equals(type, EntityFieldsTypes.FIELD_TYPE_KEYWORD)) {
       return false;
     }
     // for all other cases
