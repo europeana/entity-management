@@ -96,7 +96,11 @@ public final class SchemaOrgUtils {
     addEntityPageUrl(concept, conceptObject, SchemaOrgConstants.ENTITY_PAGE_URL_CONCEPT_TYPE);
 
     // image
-    if (concept.getDepiction() != null) conceptObject.setImage(concept.getDepiction().getId());
+    if (concept.getDepiction() != null) {
+      conceptObject.setImage(concept.getDepiction().getThumbnail());
+    } else if (concept.getIsShownBy() != null) {
+      conceptObject.setImage(concept.getIsShownBy().getThumbnail());
+    }
   }
 
   private static void addEntityPageUrl(
@@ -168,7 +172,11 @@ public final class SchemaOrgUtils {
     // SchemaOrgConstants.ENTITY_PAGE_URL_PLACE_TYPE);
 
     // image
-    if (edmPlace.getDepiction() != null) placeObject.setImage(edmPlace.getDepiction().getId());
+    if (edmPlace.getDepiction() != null) {
+      placeObject.setImage(edmPlace.getDepiction().getThumbnail());
+    } else if (edmPlace.getIsShownBy() != null) {
+      placeObject.setImage(edmPlace.getIsShownBy().getThumbnail());
+    }
   }
 
   /**
@@ -247,10 +255,12 @@ public final class SchemaOrgUtils {
       }
 
       // gender
-      addStringProperty(
-          agentObject,
-          String.valueOf(CollectionUtils.get(agent.getGender(), 0)),
-          SchemaOrgConstants.PROPERTY_GENDER);
+      if (agent.getGender() != null) {
+        addStringProperty(
+            agentObject,
+            String.valueOf(CollectionUtils.get(agent.getGender(), 0)),
+            SchemaOrgConstants.PROPERTY_GENDER);
+      }
 
       // jobTitle
       addStringProperties(
@@ -299,7 +309,11 @@ public final class SchemaOrgUtils {
     addEntityPageUrl(agent, agentObject, SchemaOrgConstants.ENTITY_PAGE_URL_AGENT_TYPE);
 
     // image
-    if (agent.getDepiction() != null) agentObject.setImage(agent.getDepiction().getId());
+    if (agent.getDepiction() != null) {
+      agentObject.setImage(agent.getDepiction().getThumbnail());
+    } else if (agent.getIsShownBy() != null) {
+      agentObject.setImage(agent.getIsShownBy().getThumbnail());
+    }
   }
 
   /**
@@ -360,8 +374,11 @@ public final class SchemaOrgUtils {
         organization, entityObject, SchemaOrgConstants.ENTITY_PAGE_URL_ORGANIZATION_TYPE);
 
     // image
-    if (organization.getDepiction() != null)
-      entityObject.setImage(organization.getDepiction().getId());
+    if (organization.getDepiction() != null) {
+      entityObject.setImage(organization.getDepiction().getThumbnail());
+    } else if (organization.getIsShownBy() != null) {
+      entityObject.setImage(organization.getIsShownBy().getThumbnail());
+    }
   }
 
   /**
@@ -392,6 +409,13 @@ public final class SchemaOrgUtils {
     // sameAs
     addTextProperties(
         timespanObject, time.getSameReferenceLinks(), SchemaOrgConstants.PROPERTY_SAME_AS);
+
+    // image
+    if (time.getDepiction() != null) {
+      timespanObject.setImage(time.getDepiction().getThumbnail());
+    } else if (time.getIsShownBy() != null) {
+      timespanObject.setImage(time.getIsShownBy().getThumbnail());
+    }
   }
 
   /**
