@@ -10,7 +10,6 @@ import eu.europeana.corelib.edm.model.schemaorg.Reference;
 import eu.europeana.corelib.edm.model.schemaorg.SchemaOrgConstants;
 import eu.europeana.corelib.edm.model.schemaorg.Text;
 import eu.europeana.corelib.edm.model.schemaorg.Thing;
-import eu.europeana.corelib.utils.EuropeanaUriUtils;
 import eu.europeana.entitymanagement.definitions.model.Address;
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Concept;
@@ -542,7 +541,7 @@ public final class SchemaOrgUtils {
     }
 
     for (String value : entry) {
-      if (EuropeanaUriUtils.isUri(value)) {
+      if (UriValidator.isUri(value)) {
         // while creating reference for about, contributor, creator, publisher reference
         // class
         // should be null.
@@ -604,7 +603,7 @@ public final class SchemaOrgUtils {
       Class<? extends Thing> referenceClass,
       List<String> linkedContextualEntities) {
     if (notNullNorEmpty(value)) {
-      if (EuropeanaUriUtils.isUri(value)) {
+      if (UriValidator.isUri(value)) {
         addLinkedContextualEntities(value, linkedContextualEntities);
         addReference(object, value, propertyName, referenceClass);
       } else {

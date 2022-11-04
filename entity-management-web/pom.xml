@@ -123,12 +123,6 @@
 
 		<dependency>
 			<groupId>eu.europeana.api</groupId>
-			<artifactId>entity-management-enrichment</artifactId>
-			<version>1.2.1-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
-			<groupId>eu.europeana.api</groupId>
 			<artifactId>entity-management-solr</artifactId>
 			<version>1.2.1-SNAPSHOT</version>
 		</dependency>

@@ -57,11 +57,6 @@
 
         <dependency>
             <groupId>eu.europeana.corelib</groupId>
-            <artifactId>corelib-utils</artifactId>
-            <version>${corelib.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>eu.europeana.corelib</groupId>
             <artifactId>corelib-schemaorg</artifactId>
             <version>${corelib.version}</version>
             <exclusions>
