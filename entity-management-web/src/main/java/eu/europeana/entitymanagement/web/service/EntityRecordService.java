@@ -37,6 +37,7 @@ import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.utils.*;
+import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
@@ -45,7 +46,6 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -903,7 +903,8 @@ public class EntityRecordService {
       boolean listPrimaryObjectChanged = false;
       for (Object elemSecondaryList : listSecondaryObject) {
         // check if value already exists in the primary list.
-        if (!EMCollectionUtils.ifValueAlreadyExistsInList(listPrimaryObject, elemSecondaryList)) {
+        if (!EMCollectionUtils.ifValueAlreadyExistsInList(
+            listPrimaryObject, elemSecondaryList, doSloppyMatch(fieldName))) {
           listPrimaryObject.add(elemSecondaryList);
           if (listPrimaryObjectChanged == false) {
             listPrimaryObjectChanged = true;
@@ -994,7 +995,8 @@ public class EntityRecordService {
       List<Object> altLabelPrimaryValue, Map.Entry<Object, Object> prefLabel) {
     return altLabelPrimaryValue.isEmpty()
         || (!altLabelPrimaryValue.isEmpty()
-            && !altLabelPrimaryValue.contains(prefLabel.getValue()));
+            && !EMCollectionUtils.ifValueAlreadyExistsInList(
+                altLabelPrimaryValue, prefLabel.getValue(), true));
   }
 
   private Map<Object, Object> initialiseAltLabelMap(Map<Object, Object> altLabelConsolidatedMap) {
@@ -1048,21 +1050,16 @@ public class EntityRecordService {
 
   /**
    * Add the secondary value in the primary list (if not already present)
+   *
    * @param field
    * @param fieldValuePrimaryObject
    * @param secondaryObjectListObject
    */
-  private void addToPrimaryList(Field field, List<Object> fieldValuePrimaryObject,Object secondaryObjectListObject) {
-    // if field is hidden label (usually present for organizations)
-    // then check for an exact match for URI values. leave the string values un-touched
-    if (StringUtils.equals(field.getName(), WebEntityFields.HIDDEN_LABEL)) {
-      if (!EMCollectionUtils.ifUriAlreadyExists(fieldValuePrimaryObject, secondaryObjectListObject)) {
-        fieldValuePrimaryObject.add(secondaryObjectListObject);
-      }
-    }
+  private void addToPrimaryList(
+      Field field, List<Object> fieldValuePrimaryObject, Object secondaryObjectListObject) {
     // check if the secondary value already exists in primary List
-    else if (!EMCollectionUtils.ifValueAlreadyExistsInList(
-            fieldValuePrimaryObject, secondaryObjectListObject)) {
+    if (!EMCollectionUtils.ifValueAlreadyExistsInList(
+        fieldValuePrimaryObject, secondaryObjectListObject, doSloppyMatch(field.getName()))) {
       fieldValuePrimaryObject.add(secondaryObjectListObject);
     }
   }
@@ -1084,7 +1081,8 @@ public class EntityRecordService {
     // merge arrays
     Set<Object> mergedAndOrdered = new TreeSet<>(Arrays.asList(primaryArray));
     for (Object second : secondaryArray) {
-      if (!EMCollectionUtils.ifValueAlreadyExistsInList(Arrays.asList(primaryArray), second)) {
+      if (!EMCollectionUtils.ifValueAlreadyExistsInList(
+          Arrays.asList(primaryArray), second, doSloppyMatch(field.getName()))) {
         mergedAndOrdered.add(second);
       }
     }
@@ -1245,5 +1243,20 @@ public class EntityRecordService {
         Stream.concat(entitySameReferenceLinks.stream(), uris.stream())
             .distinct()
             .collect(Collectors.toList()));
+  }
+
+  public static boolean doSloppyMatch(String fieldName) {
+    String type = EntityFieldsTypes.getFieldType(fieldName);
+    // for text do a sloppy match
+    if (type.equals(EntityFieldsTypes.FIELD_TYPE_TEXT)) {
+      return true;
+    }
+    // for uri or keywords do an exact match
+    else if (type.equals(EntityFieldsTypes.FIELD_TYPE_URI)
+        || type.equals(EntityFieldsTypes.FIELD_TYPE_KEYWORD)) {
+      return false;
+    }
+    // for all other cases
+    return false;
   }
 }

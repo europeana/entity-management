@@ -45,16 +45,20 @@ public class EMCollectionUtils {
    *
    * @param listPrimaryObject
    * @param elemSecondaryList
+   * @param doSloppyMatch does a loose comparison neglecting lower/upper case, spaces or
+   *     punctuations.
    * @return
    */
   public static boolean ifValueAlreadyExistsInList(
-      List<Object> listPrimaryObject, Object elemSecondaryList) {
-    // First do a exact match for URI and strings
+      List<Object> listPrimaryObject, Object elemSecondaryList, boolean doSloppyMatch) {
+    // check for exact match if present. If a value is present exactly there is no need to do any
+    // further checks
     if (listPrimaryObject.contains(elemSecondaryList)) {
       return true;
     }
-    // For strings values only, do further checks for any space or cases etc.
-    if (!UriValidator.isUri(elemSecondaryList.toString())) {
+
+    // if doSloppyMatch is true, do further checks for any space or cases etc.
+    if (doSloppyMatch) {
       for (Object primaryValue : listPrimaryObject) {
         if (ComparatorUtils.sameValueWithoutSpace(
             ComparatorUtils.stripPunctuation(primaryValue.toString()),
@@ -64,18 +68,5 @@ public class EMCollectionUtils {
       }
     }
     return false;
-  }
-
-  /**
-   * Checks if the value is a uri and matches exactly with any value present in primary/other list
-   *
-   * @param listPrimaryObject
-   * @param elemSecondaryList
-   * @return true - if the value is uri and present in the list
-   */
-  public static boolean ifUriAlreadyExists(
-      List<Object> listPrimaryObject, Object elemSecondaryList) {
-    return UriValidator.isUri(elemSecondaryList.toString())
-        && listPrimaryObject.contains(elemSecondaryList);
   }
 }
