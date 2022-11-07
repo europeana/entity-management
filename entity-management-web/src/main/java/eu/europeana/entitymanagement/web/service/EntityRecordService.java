@@ -47,7 +47,6 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -1251,14 +1250,15 @@ public class EntityRecordService {
   public EntityRecord setEnrichForEnableDisable(EntityRecord entityRecord, String action) {
     // Set the “enrich” field on the Aggregation of the Consolidated Version
     // according to the value indicated in action parameter
-    if (action.equals(WebEntityConstants.ACTION_ENABLE)) {
-      entityRecord.getEntity().getIsAggregatedBy().setEnrich(true);
+    if (StringUtils.equals(action, WebEntityConstants.ACTION_ENABLE)) {
+      entityRecord.getEntity().getIsAggregatedBy().setEnrich(Boolean.TRUE);
     }
-    if (action.equals(WebEntityConstants.ACTION_DISABLE)) {
-      entityRecord.getEntity().getIsAggregatedBy().setEnrich(false);
+    if (StringUtils.equals(action, WebEntityConstants.ACTION_DISABLE)) {
+      entityRecord.getEntity().getIsAggregatedBy().setEnrich(Boolean.FALSE);
     }
     return entityRecord;
   }
+
   public static boolean doSloppyMatch(String fieldName) {
     String type = EntityFieldsTypes.getFieldType(fieldName);
     // for text do a sloppy match
