@@ -37,6 +37,7 @@ public interface WebEntityFields {
   public static final String AGGREGATION = "Aggregation";
   public static final String IS_AGGREGATED_BY = "isAggregatedBy";
   public static final String AGGREGATES = "aggregates";
+  public static final String ENRICH = "enrich";
 
   // additional fields for aggregations
   public static final String PAGE_RANK = "pageRank";

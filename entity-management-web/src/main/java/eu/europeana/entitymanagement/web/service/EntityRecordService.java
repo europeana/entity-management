@@ -39,6 +39,7 @@ import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.utils.*;
 import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
@@ -46,7 +47,6 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -1245,6 +1245,18 @@ public class EntityRecordService {
         Stream.concat(entitySameReferenceLinks.stream(), uris.stream())
             .distinct()
             .collect(Collectors.toList()));
+  }
+
+  public EntityRecord setEnrichForEnableDisable(EntityRecord entityRecord, String action) {
+    // Set the “enrich” field on the Aggregation of the Consolidated Version
+    // according to the value indicated in action parameter
+    if (StringUtils.equals(action, WebEntityConstants.ACTION_ENABLE)) {
+      entityRecord.getEntity().getIsAggregatedBy().setEnrich(Boolean.TRUE);
+    }
+    if (StringUtils.equals(action, WebEntityConstants.ACTION_DISABLE)) {
+      entityRecord.getEntity().getIsAggregatedBy().setEnrich(Boolean.FALSE);
+    }
+    return entityRecord;
   }
 
   public static boolean doSloppyMatch(String fieldName) {

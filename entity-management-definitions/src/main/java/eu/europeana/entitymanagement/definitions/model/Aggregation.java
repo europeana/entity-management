@@ -15,7 +15,17 @@ import java.util.List;
 @Embedded
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonPropertyOrder({ID, TYPE, CREATED, MODIFIED, PAGE_RANK, RECORD_COUNT, SCORE, AGGREGATES})
+@JsonPropertyOrder({
+  ID,
+  TYPE,
+  CREATED,
+  MODIFIED,
+  PAGE_RANK,
+  RECORD_COUNT,
+  SCORE,
+  AGGREGATES,
+  ENRICH
+})
 public class Aggregation {
 
   private String id;
@@ -24,6 +34,7 @@ public class Aggregation {
   private String source;
   private Date created;
   private Date modified;
+  private Boolean enrich;
 
   private Integer score;
 
@@ -45,6 +56,7 @@ public class Aggregation {
     this.recordCount = copy.getRecordCount();
     this.pageRank = copy.getPageRank();
     if (copy.getAggregates() != null) this.aggregates = new ArrayList<>(copy.getAggregates());
+    if (copy.getEnrich() != null) this.enrich = copy.getEnrich();
   }
 
   @JsonGetter(ID)
@@ -90,6 +102,31 @@ public class Aggregation {
   @JsonSetter(CREATED)
   public void setCreated(Date created) {
     this.created = created;
+  }
+
+  @Override
+  public String toString() {
+    return "Aggregation{"
+        + "id='"
+        + id
+        + '\''
+        + ", type='"
+        + type
+        + '\''
+        + ", rights='"
+        + rights
+        + '\''
+        + ", source='"
+        + source
+        + '\''
+        + ", created="
+        + created
+        + ", modified="
+        + modified
+        + ", enrich='"
+        + enrich
+        + '\''
+        + '}';
   }
 
   @JsonGetter(MODIFIED)
@@ -140,5 +177,15 @@ public class Aggregation {
   @JsonSetter(AGGREGATES)
   public void setAggregates(List<String> aggregates) {
     this.aggregates = aggregates;
+  }
+
+  @JsonGetter(ENRICH)
+  public Boolean getEnrich() {
+    return enrich;
+  }
+
+  @JsonSetter(ENRICH)
+  public void setEnrich(Boolean enrich) {
+    this.enrich = enrich;
   }
 }
