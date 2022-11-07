@@ -1,11 +1,12 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
-import eu.europeana.corelib.utils.EuropeanaUriUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import eu.europeana.entitymanagement.utils.UriValidator;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 public class RdfXmlUtils {
@@ -36,7 +37,7 @@ public class RdfXmlUtils {
     for (String language : values.keySet()) {
       List<String> entryValues = values.get(language);
       for (String entryValue : entryValues) {
-        if (EuropeanaUriUtils.isUri(entryValue)) res.add(new LabelledResource(entryValue));
+        if (UriValidator.isUri(entryValue)) res.add(new LabelledResource(entryValue));
         else res.add(new LabelledResource(language, StringEscapeUtils.escapeXml11(entryValue)));
       }
     }

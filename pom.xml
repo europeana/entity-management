@@ -6,7 +6,6 @@
         <module>entity-management-common</module>
         <module>entity-management-web</module>
         <module>entity-management-mongo</module>
-        <module>entity-management-enrichment</module>
     <module>entity-management-solr</module>
      <module>entity-management-zoho</module>
       <module>entity-management-tests</module>
@@ -58,7 +57,7 @@
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <!-- Exclude POJOs code duplication analysis -->
         <sonar.cpd.exclusions>**/model/**/*</sonar.cpd.exclusions>
-        <api.commons.version>0.3.14</api.commons.version>
+        <api.commons.version>0.3.17-SNAPSHOT</api.commons.version>
         <springbatch.mongo.version>1.0.3</springbatch.mongo.version>
         <corelib.version>2.15.4</corelib.version>
         <jackson.version>2.11.4</jackson.version>
@@ -67,7 +66,6 @@
         <morphia.version>2.1.4</morphia.version>
         <mock-webserver.version>4.9.0</mock-webserver.version>
         <testcontainers.version>1.16.0</testcontainers.version>
-        <metis.version>4.1</metis.version>
         <solrj.version>7.7.2</solrj.version>
         <apache.commons.validator.version>1.7</apache.commons.validator.version>
 		    <zoho-sdk.version>3.0.1</zoho-sdk.version>

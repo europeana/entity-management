@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.utils;
 
-import java.util.List;
-import java.util.Optional;
+import eu.europeana.api.commons.definitions.utils.ComparatorUtils;
+import java.util.*;
 import javax.validation.constraints.NotNull;
 
 public class EMCollectionUtils {
@@ -37,5 +37,36 @@ public class EMCollectionUtils {
       return value.isPresent() ? value.get() : null;
     }
     return null;
+  }
+
+  /**
+   * Checks if the element of Secondary List is present in the primary list of objects Takes into
+   * account punctuation, spaces and case
+   *
+   * @param listPrimaryObject
+   * @param elemSecondaryList
+   * @param doSloppyMatch does a loose comparison neglecting lower/upper case, spaces or
+   *     punctuations.
+   * @return
+   */
+  public static boolean ifValueAlreadyExistsInList(
+      List<Object> listPrimaryObject, Object elemSecondaryList, boolean doSloppyMatch) {
+    // check for exact match if present. If a value is present exactly there is no need to do any
+    // further checks
+    if (listPrimaryObject.contains(elemSecondaryList)) {
+      return true;
+    }
+
+    // if doSloppyMatch is true, do further checks for any space or cases etc.
+    if (doSloppyMatch) {
+      for (Object primaryValue : listPrimaryObject) {
+        if (ComparatorUtils.sameValueWithoutSpace(
+            ComparatorUtils.stripPunctuation(primaryValue.toString()),
+            ComparatorUtils.stripPunctuation(elemSecondaryList.toString()))) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }
