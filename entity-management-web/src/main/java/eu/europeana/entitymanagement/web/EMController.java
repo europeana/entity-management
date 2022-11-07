@@ -363,7 +363,7 @@ public class EMController extends BaseRest {
    * @throws HttpException
    */
   @ApiOperation(
-      value = "Enabled or disabled the entity for enrichment",
+      value = "Enable or disable the use of the entity for enrichment",
       nickname = "enableDisableForEnrich",
       response = java.lang.Void.class)
   @PostMapping(
