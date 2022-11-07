@@ -41,6 +41,7 @@ import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.utils.UriValidator;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
@@ -1237,5 +1238,17 @@ public class EntityRecordService {
         Stream.concat(entitySameReferenceLinks.stream(), uris.stream())
             .distinct()
             .collect(Collectors.toList()));
+  }
+
+  public EntityRecord setEnrichForEnableDisable(EntityRecord entityRecord, String action) {
+    // Set the “enrich” field on the Aggregation of the Consolidated Version
+    // according to the value indicated in action parameter
+    if (action.equals(WebEntityConstants.ACTION_ENABLE)) {
+      entityRecord.getEntity().getIsAggregatedBy().setEnrich(true);
+    }
+    if (action.equals(WebEntityConstants.ACTION_DISABLE)) {
+      entityRecord.getEntity().getIsAggregatedBy().setEnrich(false);
+    }
+    return entityRecord;
   }
 }

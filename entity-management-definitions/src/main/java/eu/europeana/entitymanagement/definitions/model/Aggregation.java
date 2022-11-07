@@ -34,7 +34,7 @@ public class Aggregation {
   private String source;
   private Date created;
   private Date modified;
-  private String enrich;
+  private Boolean enrich;
 
   private Integer score;
 
@@ -180,12 +180,12 @@ public class Aggregation {
   }
 
   @JsonGetter(ENRICH)
-  public String getEnrich() {
+  public Boolean getEnrich() {
     return enrich;
   }
 
   @JsonSetter(ENRICH)
-  public void setEnrich(String enrich) {
+  public void setEnrich(Boolean enrich) {
     this.enrich = enrich;
   }
 }

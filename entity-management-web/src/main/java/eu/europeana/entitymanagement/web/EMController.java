@@ -51,12 +51,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -313,7 +313,7 @@ public class EMController extends BaseRest {
     verifyWriteAccess(Operations.UPDATE, request);
 
     // query param takes precedence over request body
-    if (StringUtils.hasLength(query)) {
+    if (StringUtils.isNotEmpty(query)) {
       return scheduleUpdatesWithSearch(request, query, ScheduledUpdateType.FULL_UPDATE);
     }
 
@@ -340,7 +340,7 @@ public class EMController extends BaseRest {
     verifyWriteAccess(Operations.UPDATE, request);
 
     // query param takes precedence over request body
-    if (StringUtils.hasLength(query)) {
+    if (StringUtils.isNotEmpty(query)) {
       return scheduleUpdatesWithSearch(request, query, ScheduledUpdateType.METRICS_UPDATE);
     }
 
@@ -373,13 +373,33 @@ public class EMController extends BaseRest {
       @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
       @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
       @RequestParam(value = "action") String action,
+      @RequestParam(
+              value = WebEntityConstants.QUERY_PARAM_PROFILE,
+              required = false,
+              defaultValue = "internal")
+          String profile,
       HttpServletRequest request)
       throws Exception {
 
     verifyWriteAccess(Operations.UPDATE, request);
+    validateAction(action);
 
-    // validate action value
-    if (!org.apache.commons.lang3.StringUtils.equalsAnyIgnoreCase(
+    EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
+    entityRecordService.setEnrichForEnableDisable(entityRecord, action);
+    entityRecordService.update(entityRecord);
+
+    return generateResponseEntity(
+        request,
+        getEntityProfile(profile),
+        FormatTypes.jsonld,
+        null,
+        HttpHeaders.CONTENT_TYPE_JSONLD_UTF8,
+        entityRecord,
+        HttpStatus.ACCEPTED);
+  }
+
+  private void validateAction(String action) throws HttpBadRequestException {
+    if (!StringUtils.equalsAnyIgnoreCase(
         action, WebEntityConstants.ACTION_ENABLE, WebEntityConstants.ACTION_DISABLE)) {
       throw new HttpBadRequestException(
           "Invalid value for param action. Supported values are "
@@ -388,21 +408,6 @@ public class EMController extends BaseRest {
               + WebEntityConstants.ACTION_DISABLE
               + ".");
     }
-
-    EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
-    // Set the “enrich” field on the Aggregation of the Consolidated Version to the value indicated
-    // in the “action” parameter;
-    entityRecord.getEntity().getIsAggregatedBy().setEnrich(action);
-    entityRecordService.update(entityRecord);
-
-    return generateResponseEntity(
-        request,
-        getEntityProfile(null),
-        FormatTypes.jsonld,
-        null,
-        HttpHeaders.CONTENT_TYPE_JSONLD_UTF8,
-        entityRecord,
-        HttpStatus.ACCEPTED);
   }
 
   @ApiOperation(
@@ -540,7 +545,7 @@ public class EMController extends BaseRest {
 
     String creationRequestId = europeanaProxyEntity.getEntityId();
 
-    if (StringUtils.hasText(creationRequestId)) {
+    if (StringUtils.isNotEmpty(creationRequestId)) {
       logger.debug("Registering new entity: externalId={}", creationRequestId);
     } else {
       // external id is mandatory in request body
@@ -723,7 +728,7 @@ public class EMController extends BaseRest {
   private List<EntityProfile> getEntityProfile(String profileParamString)
       throws HttpBadRequestException {
 
-    if (!StringUtils.hasLength(profileParamString)) {
+    if (!StringUtils.isNotEmpty(profileParamString)) {
       return List.of(DEFAULT_REQUEST_PROFILE);
     }
 
