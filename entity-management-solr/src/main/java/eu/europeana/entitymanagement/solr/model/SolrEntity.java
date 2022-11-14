@@ -37,6 +37,13 @@ public abstract class SolrEntity<T extends Entity> {
   //  private List<String> hiddenLabel;
   @Field(EntitySolrFields.HIDDEN_LABEL_ALL)
   private Map<String, List<String>> hiddenLabel;
+  
+  @Field(EntitySolrFields.LABEL_ENRICH_GENERAL)
+  private List<String> labelEnrichGeneral;
+  
+  @Field(EntitySolrFields.LABEL_ENRICH_ALL)
+  private Map<String, List<String>> labelEnrich;
+  
 
   @Field(EntitySolrFields.IDENTIFIER)
   private List<String> identifier;
@@ -241,4 +248,25 @@ public abstract class SolrEntity<T extends Entity> {
   }
 
   protected abstract void setSameReferenceLinks(ArrayList<String> uris);
+
+  public List<String> getLabelEnrichGeneral() {
+    return labelEnrichGeneral;
+  }
+
+  public void setLabelEnrichGeneral(List<String> labelEnrichGeneral) {
+    this.labelEnrichGeneral = labelEnrichGeneral;
+  }
+
+  public Map<String, List<String>> getLabelEnrich() {
+    return labelEnrich;
+  }
+
+  public void setLabelEnrich(Map<String, List<String>> labelEnrich) {
+    if (MapUtils.isNotEmpty(labelEnrich)) {
+      this.labelEnrich =
+          new HashMap<>(
+              SolrUtils.normalizeStringListMapByAddingPrefix(
+                  EntitySolrFields.LABEL_ENRICH_GENERAL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, labelEnrich));
+    }               
+  }
 }

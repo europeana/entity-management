@@ -384,10 +384,8 @@ public class EMController extends BaseRest {
     verifyWriteAccess(Operations.UPDATE, request);
     validateAction(action);
 
-    EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
-    entityRecordService.setEnrichForEnableDisable(entityRecord, action);
-    entityRecordService.update(entityRecord);
-
+    EntityRecord entityRecord = entityRecordService.updateUsedForEnrichment(type, identifier, action);
+    entityRecord = launchMetricsUpdateTask(entityRecord);
     return generateResponseEntity(
         request,
         getEntityProfile(profile),
@@ -395,18 +393,18 @@ public class EMController extends BaseRest {
         null,
         HttpHeaders.CONTENT_TYPE_JSONLD_UTF8,
         entityRecord,
-        HttpStatus.ACCEPTED);
+        HttpStatus.OK);    
   }
 
   private void validateAction(String action) throws HttpBadRequestException {
     if (!StringUtils.equalsAnyIgnoreCase(
         action, WebEntityConstants.ACTION_ENABLE, WebEntityConstants.ACTION_DISABLE)) {
       throw new HttpBadRequestException(
-          "Invalid value for param action. Supported values are "
+          "Invalid value for param action: "+ action +". Supported values are ["
               + WebEntityConstants.ACTION_ENABLE
-              + " or "
+              + ", "
               + WebEntityConstants.ACTION_DISABLE
-              + ".");
+              + "]");
     }
   }
 
@@ -749,6 +747,16 @@ public class EMController extends BaseRest {
     return requestProfiles.stream().map(EntityProfile::valueOf).collect(Collectors.toList());
   }
 
+  private EntityRecord launchMetricsUpdateTask(
+      EntityRecord entityRecord)
+      throws Exception {
+    // launch synchronous metrics update, then retrieve entity from DB afterwards
+    entityUpdateService.runSynchronousMetricsUpdate(entityRecord.getEntityId());
+    entityRecord = entityRecordService.retrieveByEntityId(entityRecord.getEntityId()).get();
+    return entityRecord;
+
+  }
+  
   private ResponseEntity<String> launchTaskAndRetrieveEntity(
       HttpServletRequest request,
       String type,

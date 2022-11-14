@@ -52,6 +52,21 @@ public class EntityUpdateService {
         BatchUtils.createJobParameters(
             entityId, Date.from(Instant.now()), List.of(ScheduledUpdateType.FULL_UPDATE), true));
   }
+  
+  /**
+   * Runs the re-indexing of the entity synchronously for the given entityId
+   * 
+   *
+   * @param entityId entityId
+   * @throws Exception on exception
+   */
+  public void runSynchronousMetricsUpdate(String entityId) throws Exception {
+    logger.debug("Triggering synchronous metrics update for entityId={}", entityId);
+    syncWebRequestLauncher.run(
+        entityUpdateJobConfig.updateSingleEntity(),
+        BatchUtils.createJobParameters(
+            entityId, Date.from(Instant.now()), List.of(ScheduledUpdateType.METRICS_UPDATE), true));
+  }
 
   /**
    * Schedules entities with the given entityIds for an update.

@@ -1,5 +1,13 @@
 package eu.europeana.entitymanagement.solr;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.apache.commons.collections.MapUtils;
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Concept;
@@ -16,12 +24,6 @@ import eu.europeana.entitymanagement.solr.model.SolrPlace;
 import eu.europeana.entitymanagement.solr.model.SolrTimeSpan;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import org.apache.commons.collections.MapUtils;
 
 /**
  * This class implements supporting methods for Solr*Impl classes e.g. normalization of the content
@@ -137,8 +139,134 @@ public class SolrUtils {
     }
 
     setMetricsAndFilters(solrEntity, record);
+    setLabelEnrich(solrEntity, record);
 
     return solrEntity;
+  }
+
+  private static void setLabelEnrich(SolrEntity<? extends Entity> solrEntity, EntityRecord record) {
+    if(isEnrichmentDisabled(record)) {
+      return;
+    }
+    
+    solrEntity.setLabelEnrichGeneral(collectLabelEnrichGeneral(record));
+    solrEntity.setLabelEnrich(collectLabelEnrich(record));
+  }
+  
+  
+  private static List<String> collectLabelEnrichGeneral(EntityRecord record) {
+    //collect values from prefLabel, altLabel, hiddenLabel, acronym
+    Entity entity = record.getEntity();
+    if(entity == null) {
+      return null;
+    }
+    
+    List<String> values = new ArrayList<>();
+    
+    //prefLabel
+    values.addAll(entity.getPrefLabel().values());
+    
+    //altLabel
+    Map<String, List<String>> altLabels = entity.getAltLabel();
+    if(altLabels != null) {
+      for (Map.Entry<String, List<String>> entry : altLabels.entrySet()) {
+        values.addAll(entry.getValue());
+      }
+    }
+    
+    //hiddenLabel, only available for organizations
+    if(entity.getHiddenLabel() != null) {
+      values.addAll(entity.getHiddenLabel());
+    }
+    
+    //acronym
+    if(entity instanceof Organization) {
+      Map<String, List<String>> acronyms = ((Organization) entity).getAcronym();
+      if(acronyms != null) {
+        for (Map.Entry<String, List<String>> entry : acronyms.entrySet()) {
+          values.addAll(entry.getValue());
+        }
+      }
+    }
+    
+    return values;
+  }
+  
+  private static Map<String, List<String>> collectLabelEnrich(EntityRecord record) {
+    //collect values from prefLabel, altLabel, hiddenLabel acronym
+    Entity entity = record.getEntity();
+    if(entity == null) {
+      return null;
+    }
+    
+    Map<String, List<String>> values = new HashMap<String, List<String>>();
+    
+    //prefLabel
+    for (Map.Entry<String, String> entry : entity.getPrefLabel().entrySet()) {
+      addLabel(values, entry.getKey(), entry.getValue());
+    }
+    
+    //altLabel
+    Map<String, List<String>> altLabels = entity.getAltLabel();
+    if(altLabels != null) {
+      for (Map.Entry<String, List<String>> entry : altLabels.entrySet()) {
+        addLabels(values, entry.getKey(), entry.getValue());
+      }
+    }
+    
+    //acronym
+    if(entity instanceof Organization) {
+      Map<String, List<String>> acronyms = ((Organization) entity).getAcronym();
+      if(acronyms != null) {
+        for (Map.Entry<String, List<String>> entry : acronyms.entrySet()) {
+          addLabels(values, entry.getKey(), entry.getValue());
+        }
+      }
+    }
+    
+    //hiddenLabel, only available for organizations
+    if(entity.getHiddenLabel() != null) {
+      //add hidden labels to all languages 
+      for(Map.Entry<String, List<String>> entry : values.entrySet()) {
+        entry.getValue().addAll(entity.getHiddenLabel());
+      }
+    }
+    
+    return values;
+  }
+
+  private static void addLabel(Map<String, List<String>> labelMap, String language, String label) {
+    if(!labelMap.containsKey(language)) {
+      List<String> values = new ArrayList<>();
+      values.add(label);
+      labelMap.put(language, values);
+    } else {
+      labelMap.get(language).add(label);
+    }
+  }
+  
+  private static void addLabels(Map<String, List<String>> labelMap, String language, List<String> labels) {
+    if(!labelMap.containsKey(language)) {
+      List<String> values = new ArrayList<>(labels);
+      labelMap.put(language, values);
+    } else {
+      labelMap.get(language).addAll(labels);
+    }
+  }
+
+
+  private static boolean isEnrichmentDisabled(EntityRecord record) {
+    if(record.getEntity() == null || record.getEntity().getIsAggregatedBy() == null) {
+      //entity is not consolidated, should not be index at this stage
+      return true;
+    }
+    
+    //check if flag is set to false
+    if(Boolean.FALSE.equals(record.getEntity().getIsAggregatedBy().getEnrich())) {
+      return true;
+    }
+     
+    return false;
   }
 
   private static void setMetricsAndFilters(

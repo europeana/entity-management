@@ -186,6 +186,7 @@ ed by import scripts -->
 		<dynamicField name="label_enrich.*" type="untokenized"
 			indexed="true" stored="false" multiValued="true"/>
 		
+		<!-- 
 		<copyField source="skos_prefLabel.*" dest="label_enrich" />
 		<copyField source="skos_prefLabel.*" dest="label_enrich.*" />
 		<copyField source="skos_altLabel.*" dest="label_enrich" />
@@ -193,7 +194,9 @@ ed by import scripts -->
 		<copyField source="edm_acronym.*" dest="label_enrich.*" />
 		<copyField source="edm_acronym.*" dest="label_enrich" />
 		<copyField source="skos_hiddenLabel." dest="label_enrich" />
+		 -->
 		<!--  hidden labels are language agnostic and must be matched in any language -->
+		<!-- 
 		<copyField source="skos_hiddenLabel." dest="label_enrich.en" />
 		<copyField source="skos_hiddenLabel." dest="label_enrich.nl" />
 		<copyField source="skos_hiddenLabel." dest="label_enrich.fr" />
@@ -222,6 +225,7 @@ ed by import scripts -->
 		<copyField source="skos_hiddenLabel." dest="label_enrich.ca" />
 		<copyField source="skos_hiddenLabel." dest="label_enrich.ru" />
 		<copyField source="skos_hiddenLabel." dest="label_enrich.eu" />
+		 -->
 		
 		<!-- these fields all consist of URI identifiers -->
 		<!-- TODO: alias -->

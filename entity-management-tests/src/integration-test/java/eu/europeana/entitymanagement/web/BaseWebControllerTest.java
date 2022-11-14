@@ -21,6 +21,7 @@ import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
+import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
 import eu.europeana.entitymanagement.testutils.TestConfig;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
@@ -49,7 +50,7 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
 
   @Qualifier(AppConfig.BEAN_EM_SOLR_SERVICE)
   @Autowired
-  private SolrService emSolrService;
+  protected SolrService emSolrService;
 
   @Autowired private WebApplicationContext webApplicationContext;
 
@@ -152,6 +153,21 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
     return entityRecordService.retrieveByEntityId(savedRecord.getEntityId()).orElseThrow();
   }
 
+  protected EntityRecord createConcept() throws Exception {
+    String europeanaMetadata = loadFile(IntegrationTestUtils.CONCEPT_REGISTER_BATHTUB_JSON);
+    String metisResponse = loadFile(IntegrationTestUtils.CONCEPT_BATHTUB_XML);
+
+    return createEntity(europeanaMetadata, metisResponse, IntegrationTestUtils.CONCEPT_BATHTUB_URI);
+  }
+
+  protected EntityRecord createTimeSpan() throws Exception {
+    String europeanaMetadata = loadFile(IntegrationTestUtils.TIMESPAN_REGISTER_1ST_CENTURY_JSON);
+    String metisResponse = loadFile(IntegrationTestUtils.TIMESPAN_1ST_CENTURY_XML);
+
+    return createEntity(
+        europeanaMetadata, metisResponse, IntegrationTestUtils.TIMESPAN_1ST_CENTURY_URI);
+  }
+  
   protected EntityRecord createOrganization(String europeanaProxyEntityStr, Record zohoRecord)
       throws Exception {
     Entity europeanaProxyEntity = objectMapper.readValue(europeanaProxyEntityStr, Entity.class);
