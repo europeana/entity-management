@@ -193,6 +193,12 @@ public class SolrService implements InitializingBean {
     return binder.getBean(classType, doc);
   }
   
+  /**
+   * Search by provided solr query
+   * @param query the solr query to be used for retrieval
+   * @return a list of found entities or null if none found
+   * @throws SolrServiceException
+   */
   public List<SolrEntity<Entity>> searchByQuery(
       SolrQuery query) throws SolrServiceException {
 
@@ -216,15 +222,18 @@ public class SolrService implements InitializingBean {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   List<SolrEntity<Entity>> getEntityList(QueryResponse rsp) throws SolrServiceException {
-    DocumentObjectBinder binder = new DocumentObjectBinder();
     SolrDocumentList docList = rsp.getResults();
     
-    if (docList == null || docList.size() == 0) return null;
+    if (docList == null || docList.isEmpty()) {
+      return null;
+    }
 
     try{
     List<SolrEntity<Entity>> res = new ArrayList<>(docList.size());
     String type; 
     Class classType;
+    DocumentObjectBinder binder = new DocumentObjectBinder();
+    
     for (SolrDocument solrDocument : docList) {
       type = (String) solrDocument.get(EntitySolrFields.TYPE);
       classType = SolrUtils.getSolrEntityClass(type);

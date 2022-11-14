@@ -385,7 +385,7 @@ public class EMController extends BaseRest {
     validateAction(action);
 
     EntityRecord entityRecord = entityRecordService.updateUsedForEnrichment(type, identifier, action);
-    entityRecord = launchMetricsUpdateTask(entityRecord);
+    entityRecord = launchMetricsUpdateTask(entityRecord, true);
     return generateResponseEntity(
         request,
         getEntityProfile(profile),
@@ -393,7 +393,7 @@ public class EMController extends BaseRest {
         null,
         HttpHeaders.CONTENT_TYPE_JSONLD_UTF8,
         entityRecord,
-        HttpStatus.OK);    
+        HttpStatus.ACCEPTED);    
   }
 
   private void validateAction(String action) throws HttpBadRequestException {
@@ -748,13 +748,11 @@ public class EMController extends BaseRest {
   }
 
   private EntityRecord launchMetricsUpdateTask(
-      EntityRecord entityRecord)
+      EntityRecord entityRecord, boolean includeDisabled)
       throws Exception {
     // launch synchronous metrics update, then retrieve entity from DB afterwards
     entityUpdateService.runSynchronousMetricsUpdate(entityRecord.getEntityId());
-    entityRecord = entityRecordService.retrieveByEntityId(entityRecord.getEntityId()).get();
-    return entityRecord;
-
+    return entityRecordService.retrieveEntityRecord(entityRecord.getEntityId(), includeDisabled);
   }
   
   private ResponseEntity<String> launchTaskAndRetrieveEntity(

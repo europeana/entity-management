@@ -22,7 +22,7 @@ import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class EntityEnableDisableForEnrichment extends BaseWebControllerTest {
+class EntityEnableDisableForEnrichmentIT extends BaseWebControllerTest {
 
   // private final ObjectMapper mapper = new ObjectMapper();
 

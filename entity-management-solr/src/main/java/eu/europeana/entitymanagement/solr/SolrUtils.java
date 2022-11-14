@@ -156,12 +156,12 @@ public class SolrUtils {
   
   private static List<String> collectLabelEnrichGeneral(EntityRecord record) {
     //collect values from prefLabel, altLabel, hiddenLabel, acronym
+    List<String> values = new ArrayList<>();
     Entity entity = record.getEntity();
     if(entity == null) {
-      return null;
+      return values;
     }
     
-    List<String> values = new ArrayList<>();
     
     //prefLabel
     values.addAll(entity.getPrefLabel().values());
@@ -195,11 +195,10 @@ public class SolrUtils {
   private static Map<String, List<String>> collectLabelEnrich(EntityRecord record) {
     //collect values from prefLabel, altLabel, hiddenLabel acronym
     Entity entity = record.getEntity();
+    Map<String, List<String>> values = new HashMap<>();
     if(entity == null) {
-      return null;
+      return values;
     }
-    
-    Map<String, List<String>> values = new HashMap<String, List<String>>();
     
     //prefLabel
     for (Map.Entry<String, String> entry : entity.getPrefLabel().entrySet()) {
@@ -236,21 +235,21 @@ public class SolrUtils {
   }
 
   private static void addLabel(Map<String, List<String>> labelMap, String language, String label) {
-    if(!labelMap.containsKey(language)) {
+    if(labelMap.containsKey(language)) {
+      labelMap.get(language).add(label);
+    } else {
       List<String> values = new ArrayList<>();
       values.add(label);
       labelMap.put(language, values);
-    } else {
-      labelMap.get(language).add(label);
     }
   }
   
   private static void addLabels(Map<String, List<String>> labelMap, String language, List<String> labels) {
-    if(!labelMap.containsKey(language)) {
+    if(labelMap.containsKey(language)) {
+      labelMap.get(language).addAll(labels);
+    } else {
       List<String> values = new ArrayList<>(labels);
       labelMap.put(language, values);
-    } else {
-      labelMap.get(language).addAll(labels);
     }
   }
 

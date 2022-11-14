@@ -106,6 +106,11 @@ public class EntityRecordService {
   public EntityRecord retrieveEntityRecord(String type, String identifier, boolean retrieveDisabled)
       throws EuropeanaApiException {
     String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
+    return retrieveEntityRecord(entityUri, retrieveDisabled);
+  }
+
+  public EntityRecord retrieveEntityRecord(String entityUri, boolean retrieveDisabled)
+      throws EntityNotFoundException, EntityRemovedException {
     Optional<EntityRecord> entityRecordOptional = this.retrieveByEntityId(entityUri);
     if (entityRecordOptional.isEmpty()) {
       throw new EntityNotFoundException(entityUri);
