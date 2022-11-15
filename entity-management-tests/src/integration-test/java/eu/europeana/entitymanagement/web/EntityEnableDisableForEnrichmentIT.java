@@ -51,7 +51,7 @@ class EntityEnableDisableForEnrichmentIT extends BaseWebControllerTest {
             .param("action", "disable"));
     
     result
-        .andExpect(status().isAccepted())
+        .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(entityRecord.getEntityId())))
         .andExpect(jsonPath("$.isAggregatedBy.enrich", is(false)));
     
@@ -90,7 +90,7 @@ class EntityEnableDisableForEnrichmentIT extends BaseWebControllerTest {
             .param("action", "enable"));
     
     result
-        .andExpect(status().isAccepted())
+        .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(entityRecord.getEntityId())))
         .andExpect(jsonPath("$.isAggregatedBy.enrich", is(true)));
     

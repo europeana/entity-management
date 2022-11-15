@@ -393,7 +393,7 @@ public class EMController extends BaseRest {
         null,
         HttpHeaders.CONTENT_TYPE_JSONLD_UTF8,
         entityRecord,
-        HttpStatus.ACCEPTED);    
+        HttpStatus.OK);    
   }
 
   private void validateAction(String action) throws HttpBadRequestException {
