@@ -149,15 +149,6 @@
 			stored="true" multiValued="false" />
 
 		<!-- entity fields -->
-
-		<!-- deprecated - to be removed toghether with the old suggester EA-2922 -->
-		<!-- suggester field popu
-ed by import scripts -->
-		<!--
-		<field name="skos_prefLabel" type="proper_name_sortable" indexed="true"
-			stored="true" multiValued="false"/>
-		-->
-
 		<dynamicField name="skos_prefLabel.*" type="untokenized"
 			indexed="true" stored="true" multiValued="false"/>
 		<dynamicField name="skos_altLabel.*" type="string"
