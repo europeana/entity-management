@@ -106,6 +106,11 @@ public class EntityRecordService {
   public EntityRecord retrieveEntityRecord(String type, String identifier, boolean retrieveDisabled)
       throws EuropeanaApiException {
     String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
+    return retrieveEntityRecord(entityUri, retrieveDisabled);
+  }
+
+  public EntityRecord retrieveEntityRecord(String entityUri, boolean retrieveDisabled)
+      throws EntityNotFoundException, EntityRemovedException {
     Optional<EntityRecord> entityRecordOptional = this.retrieveByEntityId(entityUri);
     if (entityRecordOptional.isEmpty()) {
       throw new EntityNotFoundException(entityUri);
@@ -1247,7 +1252,10 @@ public class EntityRecordService {
             .collect(Collectors.toList()));
   }
 
-  public EntityRecord setEnrichForEnableDisable(EntityRecord entityRecord, String action) {
+  public EntityRecord updateUsedForEnrichment(String type, String identifier, String action) throws EuropeanaApiException {
+    
+    EntityRecord entityRecord = retrieveEntityRecord(type, identifier, false);
+    
     // Set the “enrich” field on the Aggregation of the Consolidated Version
     // according to the value indicated in action parameter
     if (StringUtils.equals(action, WebEntityConstants.ACTION_ENABLE)) {
@@ -1256,7 +1264,8 @@ public class EntityRecordService {
     if (StringUtils.equals(action, WebEntityConstants.ACTION_DISABLE)) {
       entityRecord.getEntity().getIsAggregatedBy().setEnrich(Boolean.FALSE);
     }
-    return entityRecord;
+    
+    return update(entityRecord);    
   }
 
   public static boolean doSloppyMatch(String fieldName) {

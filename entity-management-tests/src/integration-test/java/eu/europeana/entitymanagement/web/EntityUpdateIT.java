@@ -253,19 +253,4 @@ class EntityUpdateIT extends BaseWebControllerTest {
         .andExpect(jsonPath("$.successful", hasSize(1)))
         .andExpect(jsonPath("$.successful", contains(timeSpan.getEntityId())));
   }
-
-  private EntityRecord createConcept() throws Exception {
-    String europeanaMetadata = loadFile(IntegrationTestUtils.CONCEPT_REGISTER_BATHTUB_JSON);
-    String metisResponse = loadFile(IntegrationTestUtils.CONCEPT_BATHTUB_XML);
-
-    return createEntity(europeanaMetadata, metisResponse, IntegrationTestUtils.CONCEPT_BATHTUB_URI);
-  }
-
-  private EntityRecord createTimeSpan() throws Exception {
-    String europeanaMetadata = loadFile(IntegrationTestUtils.TIMESPAN_REGISTER_1ST_CENTURY_JSON);
-    String metisResponse = loadFile(IntegrationTestUtils.TIMESPAN_1ST_CENTURY_XML);
-
-    return createEntity(
-        europeanaMetadata, metisResponse, IntegrationTestUtils.TIMESPAN_1ST_CENTURY_URI);
-  }
 }
