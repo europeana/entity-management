@@ -17,8 +17,12 @@ import org.springframework.context.annotation.PropertySources;
  * override from entitymanagement.user.properties file
  */
 @Configuration
-@PropertySources({@PropertySource("classpath:entitymanagement.properties"), @PropertySource(
-    value = "classpath:entitymanagement.user.properties", ignoreResourceNotFound = true)})
+@PropertySources({
+  @PropertySource("classpath:entitymanagement.properties"),
+  @PropertySource(
+      value = "classpath:entitymanagement.user.properties",
+      ignoreResourceNotFound = true)
+})
 public class EntityManagementConfiguration implements InitializingBean {
 
   private static final Logger LOG = LogManager.getLogger(EntityManagementConfiguration.class);
@@ -135,10 +139,10 @@ public class EntityManagementConfiguration implements InitializingBean {
 
   @Value("${europeana.item.data.endpoint}")
   private String itemDataEndpoint;
-  
+
   @Value("${spring.profiles.active:}")
   private String activeProfileString;
-  
+
   public EntityManagementConfiguration() {
     LOG.info("Initializing EntityManagementConfiguration bean as: configuration");
   }
@@ -300,17 +304,13 @@ public class EntityManagementConfiguration implements InitializingBean {
     if (testProfileNotActive(activeProfileString)) {
       verifyRequiredProperties();
     }
-    
   }
 
   public static boolean testProfileNotActive(String activeProfileString) {
     return Arrays.stream(activeProfileString.split(",")).noneMatch(ACTIVE_TEST_PROFILE::equals);
   }
 
-
-  /**
-   * verify properties
-   */
+  /** verify properties */
   private void verifyRequiredProperties() {
     List<String> missingProps = new ArrayList<>();
 
@@ -322,18 +322,20 @@ public class EntityManagementConfiguration implements InitializingBean {
     // one of zookeeperUrl or solr indexing url are
     if (StringUtils.isBlank(getIndexingSolrZookeeperUrl())
         && StringUtils.isBlank(getIndexingSolrUrl())) {
-      missingProps
-          .add("entitymanagement.solr.indexing.url/entitymanagement.solr.indexing.zookeeper.url");
+      missingProps.add(
+          "entitymanagement.solr.indexing.url/entitymanagement.solr.indexing.zookeeper.url");
     }
-    
-    //collection name is mandatory when using zookeeper url
-    if (StringUtils.isNotBlank(getIndexingSolrZookeeperUrl()) && StringUtils.isBlank(getIndexingSolrCollection())){
+
+    // collection name is mandatory when using zookeeper url
+    if (StringUtils.isNotBlank(getIndexingSolrZookeeperUrl())
+        && StringUtils.isBlank(getIndexingSolrCollection())) {
       missingProps.add("entitymanagement.solr.indexing.collection");
     }
 
     if (!missingProps.isEmpty()) {
-      throw new IllegalStateException(String.format(
-          "The following config properties are not set: %s", String.join("\n", missingProps)));
+      throw new IllegalStateException(
+          String.format(
+              "The following config properties are not set: %s", String.join("\n", missingProps)));
     }
   }
 }

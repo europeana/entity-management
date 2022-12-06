@@ -1252,10 +1252,11 @@ public class EntityRecordService {
             .collect(Collectors.toList()));
   }
 
-  public EntityRecord updateUsedForEnrichment(String type, String identifier, String action) throws EuropeanaApiException {
-    
+  public EntityRecord updateUsedForEnrichment(String type, String identifier, String action)
+      throws EuropeanaApiException {
+
     EntityRecord entityRecord = retrieveEntityRecord(type, identifier, false);
-    
+
     // Set the “enrich” field on the Aggregation of the Consolidated Version
     // according to the value indicated in action parameter
     if (StringUtils.equals(action, WebEntityConstants.ACTION_ENABLE)) {
@@ -1264,8 +1265,8 @@ public class EntityRecordService {
     if (StringUtils.equals(action, WebEntityConstants.ACTION_DISABLE)) {
       entityRecord.getEntity().getIsAggregatedBy().setEnrich(Boolean.FALSE);
     }
-    
-    return update(entityRecord);    
+
+    return update(entityRecord);
   }
 
   public static boolean doSloppyMatch(String fieldName) {

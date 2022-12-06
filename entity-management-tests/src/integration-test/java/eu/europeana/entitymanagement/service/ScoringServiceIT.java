@@ -3,14 +3,7 @@ package eu.europeana.entitymanagement.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.annotation.Resource;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+
 import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.model.Agent;
@@ -20,15 +13,23 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.model.scoring.EntityMetrics;
 import eu.europeana.entitymanagement.web.model.scoring.MaxEntityMetrics;
 import eu.europeana.entitymanagement.web.service.ScoringService;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Resource;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 class ScoringServiceIT extends AbstractIntegrationTest {
-  
+
   @Resource(name = AppConfig.BEAN_EM_SCORING_SERVICE)
   ScoringService scoringService;
 
-  //@Test
+  // @Test
   @Disabled("Excluded from automated, the response mocking is implemented only for timespan")
   public void testComputeMetrics() throws Exception {
 
@@ -60,7 +61,7 @@ class ScoringServiceIT extends AbstractIntegrationTest {
     // value may increase in time, for provided labels it is currently 2555
     //  assertTrue(metrics.getHitCount() > 1000);
 
-//    assertTrue(metrics.getScore() > 970000);
+    //    assertTrue(metrics.getScore() > 970000);
   }
 
   @Test
@@ -89,7 +90,7 @@ class ScoringServiceIT extends AbstractIntegrationTest {
     assertTrue(metrics.getScore() >= 1638965);
   }
 
-//  @Test
+  //  @Test
   @Disabled("Excluded from automated, the response mocking is implemented only for timespan")
   public void testComputeMetricsForPlaces() throws Exception {
 
@@ -117,7 +118,7 @@ class ScoringServiceIT extends AbstractIntegrationTest {
     // value may increase in time, for provided labelts it is currently 2555
     //        assertTrue(metrics.getHitCount() > 2000000);
 
-//    assertTrue(metrics.getScore() > 1085);
+    //    assertTrue(metrics.getScore() > 1085);
   }
 
   @Test

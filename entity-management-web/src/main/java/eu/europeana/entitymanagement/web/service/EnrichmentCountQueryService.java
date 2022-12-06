@@ -3,6 +3,10 @@ package eu.europeana.entitymanagement.web.service;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPath;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPathWithBase;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BASE_DATA_EUROPEANA_URI;
+
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.exception.ScoringComputationException;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
@@ -12,9 +16,6 @@ import org.json.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.exception.ScoringComputationException;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @Service
 public class EnrichmentCountQueryService {
@@ -82,9 +83,9 @@ public class EnrichmentCountQueryService {
       throw new ScoringComputationException(ERROR_MSG + entityId);
     }
 
-    int result=0;
+    int result = 0;
     JSONObject responseJson = new JSONObject(response);
-    if(responseJson.has("totalResults")) {
+    if (responseJson.has("totalResults")) {
       result = responseJson.getInt("totalResults");
     }
     return result;

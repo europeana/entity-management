@@ -384,7 +384,8 @@ public class EMController extends BaseRest {
     verifyWriteAccess(Operations.UPDATE, request);
     validateAction(action);
 
-    EntityRecord entityRecord = entityRecordService.updateUsedForEnrichment(type, identifier, action);
+    EntityRecord entityRecord =
+        entityRecordService.updateUsedForEnrichment(type, identifier, action);
     entityRecord = launchMetricsUpdateTask(entityRecord, true);
     return generateResponseEntity(
         request,
@@ -393,14 +394,16 @@ public class EMController extends BaseRest {
         null,
         HttpHeaders.CONTENT_TYPE_JSONLD_UTF8,
         entityRecord,
-        HttpStatus.OK);    
+        HttpStatus.OK);
   }
 
   private void validateAction(String action) throws HttpBadRequestException {
     if (!StringUtils.equalsAnyIgnoreCase(
         action, WebEntityConstants.ACTION_ENABLE, WebEntityConstants.ACTION_DISABLE)) {
       throw new HttpBadRequestException(
-          "Invalid value for param action: "+ action +". Supported values are ["
+          "Invalid value for param action: "
+              + action
+              + ". Supported values are ["
               + WebEntityConstants.ACTION_ENABLE
               + ", "
               + WebEntityConstants.ACTION_DISABLE
@@ -747,14 +750,13 @@ public class EMController extends BaseRest {
     return requestProfiles.stream().map(EntityProfile::valueOf).collect(Collectors.toList());
   }
 
-  private EntityRecord launchMetricsUpdateTask(
-      EntityRecord entityRecord, boolean includeDisabled)
+  private EntityRecord launchMetricsUpdateTask(EntityRecord entityRecord, boolean includeDisabled)
       throws Exception {
     // launch synchronous metrics update, then retrieve entity from DB afterwards
     entityUpdateService.runSynchronousMetricsUpdate(entityRecord.getEntityId());
     return entityRecordService.retrieveEntityRecord(entityRecord.getEntityId(), includeDisabled);
   }
-  
+
   private ResponseEntity<String> launchTaskAndRetrieveEntity(
       HttpServletRequest request,
       String type,

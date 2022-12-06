@@ -52,10 +52,9 @@ public class EntityUpdateService {
         BatchUtils.createJobParameters(
             entityId, Date.from(Instant.now()), List.of(ScheduledUpdateType.FULL_UPDATE), true));
   }
-  
+
   /**
    * Runs the re-indexing of the entity synchronously for the given entityId
-   * 
    *
    * @param entityId entityId
    * @throws Exception on exception

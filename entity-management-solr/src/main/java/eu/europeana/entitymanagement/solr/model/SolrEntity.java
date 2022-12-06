@@ -37,13 +37,12 @@ public abstract class SolrEntity<T extends Entity> {
   //  private List<String> hiddenLabel;
   @Field(EntitySolrFields.HIDDEN_LABEL_ALL)
   private Map<String, List<String>> hiddenLabel;
-  
+
   @Field(EntitySolrFields.LABEL_ENRICH_GENERAL)
   private List<String> labelEnrichGeneral;
-  
+
   @Field(EntitySolrFields.LABEL_ENRICH_ALL)
   private Map<String, List<String>> labelEnrich;
-  
 
   @Field(EntitySolrFields.IDENTIFIER)
   private List<String> identifier;
@@ -266,7 +265,8 @@ public abstract class SolrEntity<T extends Entity> {
       this.labelEnrich =
           new HashMap<>(
               SolrUtils.normalizeStringListMapByAddingPrefix(
-                  EntitySolrFields.LABEL_ENRICH_GENERAL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, labelEnrich));
-    }               
+                  EntitySolrFields.LABEL_ENRICH_GENERAL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
+                  labelEnrich));
+    }
   }
 }

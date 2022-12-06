@@ -100,9 +100,11 @@ public class IntegrationTestUtils {
   public static final String PLACE_HAGENBACH_XML = "/metis-deref/place_hagenbach_redirect.xml";
   public static final String TIMESPAN_1ST_CENTURY_XML = "/metis-deref/timespan_1st_century.xml";
 
-  public static final String TIMESPAN_1_CENTURY_SEARCH_AND_RECORD_JSON = "/search_and_record-deref/timespan_1_century_search_and_record.json";
-  public static final String SEARCH_AND_RECORD_EMPTY_JSON = "/search_and_record-deref/search_and_record_empty.json";
-  
+  public static final String TIMESPAN_1_CENTURY_SEARCH_AND_RECORD_JSON =
+      "/search_and_record-deref/timespan_1_century_search_and_record.json";
+  public static final String SEARCH_AND_RECORD_EMPTY_JSON =
+      "/search_and_record-deref/search_and_record_empty.json";
+
   public static final String AGENT1_REFERENTIAL_INTEGRITY_JSON =
       "/content/agent1-referential-integrity.json";
   public static final String AGENT2_REFERENTIAL_INTEGRITY_JSON =

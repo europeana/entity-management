@@ -186,12 +186,12 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
 
   @Test
   void registerTimespanShouldBeSuccessful() throws Exception {
-    ResultActions response = mockMvc
-        .perform(
+    ResultActions response =
+        mockMvc.perform(
             MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL)
                 .content(loadFile(IntegrationTestUtils.TIMESPAN_REGISTER_1ST_CENTURY_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
-    
+
     response
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.id", any(String.class)))

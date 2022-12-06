@@ -21,7 +21,8 @@ public interface EntitySolrFields {
   public static final String HIDDEN_LABEL_NO_LANG = HIDDEN_LABEL + DYNAMIC_FIELD_SEPARATOR;
   public static final String HIDDEN_LABEL_ALL = HIDDEN_LABEL + DYNAMIC_FIELD_SEPARATOR + "*";
   public static final String LABEL_ENRICH_GENERAL = "label_enrich";
-  public static final String LABEL_ENRICH_ALL = LABEL_ENRICH_GENERAL + DYNAMIC_FIELD_SEPARATOR + "*";
+  public static final String LABEL_ENRICH_ALL =
+      LABEL_ENRICH_GENERAL + DYNAMIC_FIELD_SEPARATOR + "*";
   public static final String SAME_AS = "owl_sameAs";
   public static final String IDENTIFIER = "dc_identifier";
   public static final String IS_RELATED_TO = "edm_isRelatedTo";

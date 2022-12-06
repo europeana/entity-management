@@ -167,7 +167,7 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
     return createEntity(
         europeanaMetadata, metisResponse, IntegrationTestUtils.TIMESPAN_1ST_CENTURY_URI);
   }
-  
+
   protected EntityRecord createOrganization(String europeanaProxyEntityStr, Record zohoRecord)
       throws Exception {
     Entity europeanaProxyEntity = objectMapper.readValue(europeanaProxyEntityStr, Entity.class);
