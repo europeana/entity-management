@@ -4,7 +4,35 @@ import static eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.QUERY_PARAM_QUERY;
 import static java.util.stream.Collectors.groupingBy;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.api.commons.web.exception.HttpException;
@@ -38,37 +66,10 @@ import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import io.swagger.annotations.ApiOperation;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @Validated
@@ -172,27 +173,15 @@ public class EMController extends BaseRest {
     EntityRecord entityRecord =
         entityRecordService.retrieveEntityRecord(type, identifier.toLowerCase(), true);
     if (!entityRecord.isDisabled()) {
-
-      return createResponse(
-          request,
-          entityProfile,
-          type,
-          null,
-          identifier,
-          FormatTypes.jsonld,
-          HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
+      return generateResponseEntity(
+          request, entityProfile, FormatTypes.jsonld, null, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, entityRecord, HttpStatus.OK);
     }
     logger.debug("Re-enabling entityId={}", entityRecord.getEntityId());
     entityRecordService.enableEntityRecord(entityRecord);
 
-    return createResponse(
-        request,
-        entityProfile,
-        type,
-        null,
-        identifier,
-        FormatTypes.jsonld,
-        HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
+    entityRecord = entityRecordService.retrieveEntityRecord(type, identifier.toLowerCase(), false);
+    return generateResponseEntity(
+        request, entityProfile, FormatTypes.jsonld, null, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, entityRecord, HttpStatus.OK);
   }
 
   @ApiOperation(
@@ -436,18 +425,9 @@ public class EMController extends BaseRest {
       HttpServletRequest request)
       throws EuropeanaApiException, HttpException {
 
-    List<EntityProfile> entityProfile = getEntityProfile(profile);
-
     verifyReadAccess(request);
-
-    return createResponse(
-        request,
-        entityProfile,
-        type,
-        languages,
-        identifier,
-        FormatTypes.jsonld,
-        HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
+    
+    return createResponseRetrieve (type, identifier, profile, request,  FormatTypes.jsonld, languages, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);    
   }
 
   @ApiOperation(
@@ -478,19 +458,10 @@ public class EMController extends BaseRest {
       @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
       HttpServletRequest request)
       throws EuropeanaApiException, HttpException {
-    List<EntityProfile> entityProfile = getEntityProfile(profile);
 
     verifyReadAccess(request);
-
-    // always return application/rdf+xml Content-Type
-    return createResponse(
-        request,
-        entityProfile,
-        type,
-        languages,
-        identifier,
-        FormatTypes.xml,
-        HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML);
+    
+    return createResponseRetrieve (type, identifier, profile, request,  FormatTypes.xml, languages, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML);    
   }
 
   @ApiOperation(
@@ -516,18 +487,10 @@ public class EMController extends BaseRest {
       HttpServletRequest request)
       throws EuropeanaApiException, HttpException {
 
-    List<EntityProfile> entityProfile = getEntityProfile(profile);
-
     verifyReadAccess(request);
-
-    return createResponse(
-        request,
-        entityProfile,
-        type,
-        languages,
-        identifier,
-        FormatTypes.schema,
-        HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
+    
+    return createResponseRetrieve (type, identifier, profile, request,  FormatTypes.schema, languages, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
+    
   }
 
   @ApiOperation(
@@ -671,6 +634,17 @@ public class EMController extends BaseRest {
     return createResponseMultipleEntities(urls, request);
   }
 
+  private ResponseEntity<String> createResponseRetrieve (String type, String identifier, String profile, HttpServletRequest request,  FormatTypes outFormat, String languages, String contentType) throws EuropeanaApiException {
+    EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier.toLowerCase(), true);
+    if (entityRecord.isDisabled()) {
+      return redirectDeprecated(entityRecord, type, identifier.toLowerCase());
+    }
+
+    List<EntityProfile> entityProfile = getEntityProfile(profile);
+    // if request doesn't specify a valid EntityProfile, use external by default
+    return generateResponseEntity(request, entityProfile, outFormat, languages, contentType, entityRecord, HttpStatus.OK);
+    
+  }
   private ResponseEntity<String> createResponseMultipleEntities(
       List<String> entityIds, HttpServletRequest request) throws EuropeanaApiException {
     List<EntityRecord> entityRecords = entityRecordService.retrieveMultipleByEntityIds(entityIds);
@@ -701,23 +675,6 @@ public class EMController extends BaseRest {
             .collect(Collectors.toList());
     String body = serialize(responseBody);
     return ResponseEntity.status(HttpStatus.OK).headers(headers).body(body);
-  }
-
-  private ResponseEntity<String> createResponse(
-      HttpServletRequest request,
-      List<EntityProfile> entityProfile,
-      String type,
-      String languages,
-      String identifier,
-      FormatTypes outFormat,
-      String contentType)
-      throws EuropeanaApiException {
-    // validate profile
-
-    EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
-    // if request doesn't specify a valid EntityProfile, use external by default
-    return generateResponseEntity(
-        request, entityProfile, outFormat, languages, contentType, entityRecord, HttpStatus.OK);
   }
 
   /**
@@ -802,6 +759,22 @@ public class EMController extends BaseRest {
     }
     return null;
   }
+  
+  private ResponseEntity<String> redirectDeprecated(EntityRecord deprecatedEntity, String type, String identifier) throws EntityRemovedException {
+    //check if there is an entity in the sameAs ref links starting with "http://data.europeana.eu/" and so, redirect to it 
+    List<String> sameAsRefLinks = deprecatedEntity.getEntity().getSameReferenceLinks();
+    if (sameAsRefLinks!=null) {
+      Optional<String> sameAsLink = sameAsRefLinks.stream().filter(el -> el.contains(WebEntityFields.BASE_DATA_EUROPEANA_URI)).findFirst();      
+      if (sameAsLink.isPresent()) {
+        // return 301 redirect
+        return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
+            .location(URI.create(sameAsLink.get()))
+            .build();
+      }
+    }
+    String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
+    throw new EntityRemovedException(String.format(EntityRecordUtils.ENTITY_ID_REMOVED_MSG, entityUri));  
+  }  
 
   private ResponseEntity<EntityIdResponse> scheduleBatchUpdates(
       HttpServletRequest request, List<String> entityIds, ScheduledTaskType updateType) {
