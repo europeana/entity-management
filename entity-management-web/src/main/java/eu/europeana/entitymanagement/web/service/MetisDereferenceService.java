@@ -2,17 +2,6 @@ package eu.europeana.entitymanagement.web.service;
 
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.METIS_DEREF_PATH;
 import static eu.europeana.entitymanagement.web.MetisDereferenceUtils.parseMetisResponse;
-
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.config.AppConfig;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.dereference.Dereferencer;
-import eu.europeana.entitymanagement.exception.DatasourceNotReachableException;
-import eu.europeana.entitymanagement.exception.DatasourceUpstreamServerError;
-import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
-import eu.europeana.entitymanagement.exception.HttpBadRequestException;
-import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
-import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
@@ -29,10 +18,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.config.AppConfig;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.dereference.Dereferencer;
+import eu.europeana.entitymanagement.exception.DatasourceNotReachableException;
+import eu.europeana.entitymanagement.exception.DatasourceUpstreamServerError;
+import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
+import eu.europeana.entitymanagement.exception.HttpBadRequestException;
+import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
+import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 import reactor.core.Exceptions;
+import reactor.netty.http.client.HttpClient;
 
 /** Handles de-referencing entities from Metis. */
 @Service(AppConfig.BEAN_METIS_DEREF_SERVICE)
@@ -163,25 +164,34 @@ public class MetisDereferenceService implements InitializingBean, Dereferencer {
   }
 
   private void configureMetisWebClient() throws MalformedURLException {
+    
     WebClient.Builder webClientBuilder = WebClient.builder();
+    //enable follow redirects
+    HttpClient httpClient= HttpClient.create().followRedirect(true);
+    webClientBuilder.clientConnector(new ReactorClientHttpConnector(httpClient));
+    
     if (config.useMetisProxy()) {
-      String defaultHostHeader = new URL(config.getMetisBaseUrl()).getHost();
-      String proxyUrl = ensureNoTrailingSlash(config.getMetisProxyUrl());
-
-      webClientBuilder
-          .defaultHeader(HttpHeaders.HOST, defaultHostHeader)
-          // ensure that baseUrl has a trailing slash
-          .baseUrl(proxyUrl);
-      logger.debug(
-          "Using proxy for Metis dereferencing. defaultHostHeader={}; proxy={}",
-          defaultHostHeader,
-          proxyUrl);
+      setMetisProxy(webClientBuilder);
     } else {
       webClientBuilder.baseUrl(ensureNoTrailingSlash(config.getMetisBaseUrl()));
     }
 
     logger.info("Metis baseUrl={}", config.getMetisBaseUrl());
     this.metisWebClient = webClientBuilder.build();
+  }
+
+  void setMetisProxy(WebClient.Builder webClientBuilder) throws MalformedURLException {
+    String defaultHostHeader = new URL(config.getMetisBaseUrl()).getHost();
+    String proxyUrl = ensureNoTrailingSlash(config.getMetisProxyUrl());
+
+    webClientBuilder
+        .defaultHeader(HttpHeaders.HOST, defaultHostHeader)
+        // ensure that baseUrl has a trailing slash
+        .baseUrl(proxyUrl);
+    logger.debug(
+        "Using proxy for Metis dereferencing. defaultHostHeader={}; proxy={}",
+        defaultHostHeader,
+        proxyUrl);
   }
 
   private String ensureNoTrailingSlash(String url) {

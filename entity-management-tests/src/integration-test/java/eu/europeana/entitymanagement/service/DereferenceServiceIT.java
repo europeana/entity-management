@@ -35,7 +35,7 @@ class DereferenceServiceIT extends AbstractIntegrationTest {
 
   @Autowired private DereferenceServiceLocator dereferenceServiceLocator;
 
-  // @Test
+//  @Test
   public void dereferenceConceptById() throws Exception {
 
     // bathtube
@@ -52,7 +52,7 @@ class DereferenceServiceIT extends AbstractIntegrationTest {
 
     // check prefLabels
     assertNotNull(entity.getPrefLabel());
-    assertEquals(23, entity.getPrefLabel().size());
+    assertEquals(21, entity.getPrefLabel().size());
     assertEquals("bathtub", entity.getPrefLabel().get("en"));
 
     // check altLabels
