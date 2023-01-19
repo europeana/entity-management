@@ -124,6 +124,7 @@ class EntityUpdateIT extends BaseWebControllerTest {
     TimeSpan timespan = (TimeSpan) (entityRecordUpdated.get().getEntity());
     Assertions.assertNotNull(timespan.getPrefLabel());
     Assertions.assertFalse(timespan.getPrefLabel().isEmpty());
+    Assertions.assertTrue(timespan.getPrefLabel().containsKey("en"));
     Assertions.assertNotNull(timespan.getAltLabel());
     Assertions.assertNotNull(timespan.getBeginString());
     Assertions.assertNotNull(timespan.getEndString());

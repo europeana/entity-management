@@ -10,6 +10,9 @@ mongo.batch.database = <spring-batch-db>
 #zookeeper url for the indexing entities
 entitymanagement.solr.indexing.zookeeper.url=
 
+#Base URL for dereferencing service
+#metis.baseUrl=
+
 # Schedules periodic update of entities
 #if missing it will be interpreted as true
 #set property to false to disable scheduling
