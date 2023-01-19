@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
 
 import com.zoho.crm.api.record.Record;
@@ -308,12 +309,13 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
     .andExpect(status().isNoContent());
 
     //retrieve
-    mockMvc
+    ResultActions result = mockMvc
         .perform(
             get(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath + ".jsonld")
                 .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isMovedPermanently());
+                .accept(MediaType.APPLICATION_JSON));
+    result.andExpect(status().isMovedPermanently());
+    result.andExpect(header().string("Location", "http://data.europeana.eu/agent/5"));
   }
   
   @Test
