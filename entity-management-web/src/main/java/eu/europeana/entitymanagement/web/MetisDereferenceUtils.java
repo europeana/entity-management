@@ -28,7 +28,8 @@ public class MetisDereferenceUtils {
           (EnrichmentResultList) unmarshaller.unmarshal(new StringReader(metisResponseBody));
     } catch (JAXBException | RuntimeException e) {
       throw new DatasourceDereferenceException(
-          String.format("Error while deserializing metis dereference response %s: ", metisResponseBody),
+          String.format(
+              "Error while deserializing metis dereference response %s: ", metisResponseBody),
           e);
     }
 
