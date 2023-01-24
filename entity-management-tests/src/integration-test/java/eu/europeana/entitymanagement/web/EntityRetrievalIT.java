@@ -10,9 +10,9 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
 
 import com.zoho.crm.api.record.Record;
@@ -300,24 +300,24 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
 
     String requestPath = getEntityRequestPath(entityId);
 
-    //sync deprecation
+    // sync deprecation
     mockMvc
-    .perform(
-        delete(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath)
-            .param(QUERY_PARAM_PROFILE, PARAM_PROFILE_SYNC)
-            .accept(MediaType.APPLICATION_JSON))
-    .andExpect(status().isNoContent());
-
-    //retrieve
-    ResultActions result = mockMvc
         .perform(
+            delete(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath)
+                .param(QUERY_PARAM_PROFILE, PARAM_PROFILE_SYNC)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent());
+
+    // retrieve
+    ResultActions result =
+        mockMvc.perform(
             get(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath + ".jsonld")
                 .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
                 .accept(MediaType.APPLICATION_JSON));
     result.andExpect(status().isMovedPermanently());
     result.andExpect(header().string("Location", "http://data.europeana.eu/agent/5"));
   }
-  
+
   @Test
   public void retrieveAgentXmlExternalShouldBeSuccessful() throws Exception {
     String europeanaMetadata = loadFile(IntegrationTestUtils.AGENT_REGISTER_DAVINCI_JSON);

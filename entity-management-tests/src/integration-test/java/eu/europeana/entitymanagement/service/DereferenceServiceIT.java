@@ -35,7 +35,7 @@ class DereferenceServiceIT extends AbstractIntegrationTest {
 
   @Autowired private DereferenceServiceLocator dereferenceServiceLocator;
 
-//  @Test
+  //  @Test
   public void dereferenceConceptById() throws Exception {
 
     // bathtube
