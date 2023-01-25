@@ -7,6 +7,7 @@ import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityMismatchException;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
@@ -38,22 +39,29 @@ public class EntityVerificationLogger extends BaseEntityProcessor {
    * @throws EntityMismatchException if prefLabel counts do not match
    */
   private void checkPrefLabels(EntityRecord entityRecord) throws EntityMismatchException {
-    int consolidatedPrefLabels = entityRecord.getEntity().getPrefLabel().size();
+    Set<String> consolidatedPrefLabels = entityRecord.getEntity().getPrefLabel().keySet();
 
-    long proxyPrefLabels =
+    Set<String> proxyPrefLabels =
         entityRecord.getProxies().stream()
             .map(p -> p.getEntity().getPrefLabel())
             .filter(Objects::nonNull)
             .flatMap(prefLabels -> prefLabels.keySet().stream())
             .filter(supportedLanguageCodes::contains)
-            .distinct()
-            .count();
+            .collect(Collectors.toSet());
 
-    if (consolidatedPrefLabels != proxyPrefLabels) {
+    if (consolidatedPrefLabels.size() != proxyPrefLabels.size()) {
+      String missingLabels =
+          proxyPrefLabels.stream()
+              .filter(e -> !consolidatedPrefLabels.contains(e))
+              .collect(Collectors.joining(",", "[", "]"));
+
       throw new EntityMismatchException(
           String.format(
-              "Consolidated entity for %s has %d prefLabels; expected %d",
-              entityRecord.getEntityId(), consolidatedPrefLabels, proxyPrefLabels));
+              "Consolidated entity for %s has %d prefLabels; expected %d. Missing labels for %s",
+              entityRecord.getEntityId(),
+              consolidatedPrefLabels.size(),
+              proxyPrefLabels.size(),
+              missingLabels));
     }
   }
 }

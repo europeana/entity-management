@@ -17,6 +17,7 @@ import eu.europeana.entitymanagement.batch.listener.ScheduledTaskItemListener;
 import eu.europeana.entitymanagement.batch.processor.EntityConsolidationProcessor;
 import eu.europeana.entitymanagement.batch.processor.EntityDereferenceProcessor;
 import eu.europeana.entitymanagement.batch.processor.EntityMetricsProcessor;
+import eu.europeana.entitymanagement.batch.processor.EntityVerificationLogger;
 import eu.europeana.entitymanagement.batch.reader.EntityRecordDatabaseReader;
 import eu.europeana.entitymanagement.batch.reader.ScheduledTaskDatabaseReader;
 import eu.europeana.entitymanagement.batch.service.FailedTaskService;
@@ -76,6 +77,8 @@ public class EntityUpdateJobConfig {
   private final ItemReader<BatchEntityRecord> scheduledTaskReader;
   private final EntityDereferenceProcessor dereferenceProcessor;
   private final EntityConsolidationProcessor entityUpdateProcessor;
+  private final EntityVerificationLogger entityVerificationLogger;
+
   private final EntityMetricsProcessor entityMetricsProcessor;
   private final EntityRecordDatabaseInsertionWriter dbInsertionWriter;
   private final EntitySolrInsertionWriter solrInsertionWriter;
@@ -114,6 +117,7 @@ public class EntityUpdateJobConfig {
       @Qualifier(SCHEDULED_TASK_READER) ItemReader<BatchEntityRecord> scheduledTaskReader,
       EntityDereferenceProcessor dereferenceProcessor,
       EntityConsolidationProcessor entityUpdateProcessor,
+      EntityVerificationLogger entityVerificationLogger,
       EntityMetricsProcessor entityMetricsProcessor,
       EntityRecordDatabaseInsertionWriter dbInsertionWriter,
       EntitySolrInsertionWriter solrInsertionWriter,
@@ -134,6 +138,7 @@ public class EntityUpdateJobConfig {
     this.scheduledTaskReader = scheduledTaskReader;
     this.dereferenceProcessor = dereferenceProcessor;
     this.entityUpdateProcessor = entityUpdateProcessor;
+    this.entityVerificationLogger = entityVerificationLogger;
     this.entityMetricsProcessor = entityMetricsProcessor;
     this.dbInsertionWriter = dbInsertionWriter;
     this.solrInsertionWriter = solrInsertionWriter;
@@ -226,7 +231,11 @@ public class EntityUpdateJobConfig {
     CompositeItemProcessor<BatchEntityRecord, BatchEntityRecord> compositeItemProcessor =
         new CompositeItemProcessor<>();
     compositeItemProcessor.setDelegates(
-        Arrays.asList(dereferenceProcessor, entityUpdateProcessor, entityMetricsProcessor));
+        Arrays.asList(
+            dereferenceProcessor,
+            entityUpdateProcessor,
+            entityMetricsProcessor,
+            entityVerificationLogger));
     return compositeItemProcessor;
   }
 
