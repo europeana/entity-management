@@ -3,6 +3,7 @@ package eu.europeana.entitymanagement.definitions;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -16,7 +17,7 @@ public class LanguageCodes {
   @JacksonXmlProperty(localName = "language")
   private List<Language> languages;
 
-  Set<String> supportedLangCodes;
+  private Set<String> supportedLangCodes;
 
   private Map<String, String> altLangMap = new HashMap<String, String>();
 
@@ -57,7 +58,7 @@ public class LanguageCodes {
         supportedLangCodes.add(language.getCode());
       }
     }
-    return supportedLangCodes;
+    return Collections.unmodifiableSet(supportedLangCodes);
   }
 
   public String getByAlternativeCode(String altLang) {

@@ -1,10 +1,12 @@
 package eu.europeana.entitymanagement.batch.processor;
 
+import eu.europeana.entitymanagement.definitions.LanguageCodes;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityMismatchException;
 import java.util.Objects;
+import java.util.Set;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
@@ -15,8 +17,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class EntityVerificationLogger extends BaseEntityProcessor {
 
-  public EntityVerificationLogger() {
+  private final Set<String> supportedLanguageCodes;
+
+  public EntityVerificationLogger(LanguageCodes languageCodes) {
     super(ScheduledUpdateType.FULL_UPDATE, ScheduledUpdateType.METRICS_UPDATE);
+    this.supportedLanguageCodes = languageCodes.getSupportedLangCodes();
   }
 
   @Override
@@ -27,7 +32,7 @@ public class EntityVerificationLogger extends BaseEntityProcessor {
 
   /**
    * Checks if the number of prefLabels in the consolidated entity matches unique prefLabels in all
-   * proxies
+   * proxies. Only prefLabels for supported languages are taken into account.
    *
    * @param entityRecord record being processed
    * @throws EntityMismatchException if prefLabel counts do not match
@@ -40,6 +45,7 @@ public class EntityVerificationLogger extends BaseEntityProcessor {
             .map(p -> p.getEntity().getPrefLabel())
             .filter(Objects::nonNull)
             .flatMap(prefLabels -> prefLabels.keySet().stream())
+            .filter(supportedLanguageCodes::contains)
             .distinct()
             .count();
 
