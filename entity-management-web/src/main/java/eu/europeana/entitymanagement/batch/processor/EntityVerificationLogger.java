@@ -3,9 +3,8 @@ package eu.europeana.entitymanagement.batch.processor;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.exception.EntityMismatchException;
 import java.util.Objects;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
@@ -15,8 +14,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class EntityVerificationLogger extends BaseEntityProcessor {
-
-  private static final Logger logger = LogManager.getLogger(EntityVerificationLogger.class);
 
   public EntityVerificationLogger() {
     super(ScheduledUpdateType.FULL_UPDATE, ScheduledUpdateType.METRICS_UPDATE);
@@ -28,11 +25,16 @@ public class EntityVerificationLogger extends BaseEntityProcessor {
     return entityRecord;
   }
 
-  private void checkPrefLabels(EntityRecord entityRecord) {
+  /**
+   * Checks if the number of prefLabels in the consolidated entity matches unique prefLabels in all
+   * proxies
+   *
+   * @param entityRecord record being processed
+   * @throws EntityMismatchException if prefLabel counts do not match
+   */
+  private void checkPrefLabels(EntityRecord entityRecord) throws EntityMismatchException {
     int consolidatedPrefLabels = entityRecord.getEntity().getPrefLabel().size();
 
-    // mismatch occurs if the number of prefLabels in the consolidated entity is
-    // less than all unique prefLabels in proxies
     long proxyPrefLabels =
         entityRecord.getProxies().stream()
             .map(p -> p.getEntity().getPrefLabel())
@@ -41,12 +43,11 @@ public class EntityVerificationLogger extends BaseEntityProcessor {
             .distinct()
             .count();
 
-    if (consolidatedPrefLabels < proxyPrefLabels) {
-      logger.warn(
-          "Consolidated entity for {} has {} prefLabels; expected {}",
-          entityRecord.getEntityId(),
-          consolidatedPrefLabels,
-          proxyPrefLabels);
+    if (consolidatedPrefLabels != proxyPrefLabels) {
+      throw new EntityMismatchException(
+          String.format(
+              "Consolidated entity for %s has %d prefLabels; expected %d",
+              entityRecord.getEntityId(), consolidatedPrefLabels, proxyPrefLabels));
     }
   }
 }
