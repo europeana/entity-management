@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: entity-management-api-deployment
+spec:
+  # selector.matchLabels is provided via Kustomize
+  template:
+    spec:
+      containers:
+        - name: entity-management-api
+          image: europeana/entity-management-api
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              port: 8080
+              path: /
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              port: 8080
+              path: /
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          volumeMounts:
+            - name: secret1
+              mountPath: "/usr/local/tomcat/webapps/ROOT/WEB-INF/classes/entitymanagement.user.properties"
+              readOnly: true
+              subPath: entitymanagement.user.properties
+            - name: secret2
+              mountPath: "/usr/local/tomcat/webapps/ROOT/WEB-INF/classes/zoho_import.properties"
+              readOnly: true
+              subPath: zoho_import.properties
+      volumes:
+        - name: secret1
+          secret:
+            secretName: entity-management-api-secret1
+        - name: secret2
+          secret:
+            secretName: entity-management-api-secret2

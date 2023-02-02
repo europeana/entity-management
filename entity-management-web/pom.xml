@@ -9,7 +9,7 @@
 
 	<artifactId>entity-management-web</artifactId>
 	<description>The Web Module of the Entity Management API</description>
-	<packaging>jar</packaging>
+	<packaging>war</packaging>
 
 	<properties>
 		<sonar.coverage.jacoco.xmlReportPaths>${basedir}/../${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>

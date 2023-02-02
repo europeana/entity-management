@@ -1,0 +1,9 @@
+# Send only unzipped war directory to Docker
+**
+!/entity-management-web/target/entity-management-web
+
+# Any type of properties file should not be uploaded to Docker hub
+
+*.user.properties
+*.properties
+**/zoho_import.properties
