@@ -14,13 +14,13 @@ spec:
           livenessProbe:
             httpGet:
               port: 8080
-              path: /
+              path: /v2/api-docs
             initialDelaySeconds: 30
             periodSeconds: 30
           readinessProbe:
             httpGet:
               port: 8080
-              path: /
+              path: /swagger-ui
             initialDelaySeconds: 30
             periodSeconds: 30
           volumeMounts:

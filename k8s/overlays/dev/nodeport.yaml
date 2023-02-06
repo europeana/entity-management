@@ -6,5 +6,5 @@ spec:
   type: NodePort
   ports:
     - port: 8080
-      nodePort: 31000
+      nodePort: 30000
   # selector provided via kustomize
