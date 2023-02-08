@@ -1,7 +1,6 @@
-# Send only unzipped war directory to Docker
+# Ensure no sensitive files are included in jar
 **
-!/entity-management-web/target/entity-management-web
-
+!/entity-management-web/target/entity-management-web-executable.jar
 # Any type of properties file should not be uploaded to Docker hub
 
 *.user.properties

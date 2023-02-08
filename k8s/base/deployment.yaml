@@ -14,28 +14,37 @@ spec:
           livenessProbe:
             httpGet:
               port: 8080
-              path: /v2/api-docs
+              path: /actuator/info
+              httpHeaders:
+                - name: Accept
+                  value: application/json
             initialDelaySeconds: 30
             periodSeconds: 30
           readinessProbe:
             httpGet:
               port: 8080
-              path: /swagger-ui
+              path: /actuator/info
+              httpHeaders:
+                - name: Accept
+                  value: application/json
             initialDelaySeconds: 30
             periodSeconds: 30
           volumeMounts:
-            - name: secret1
-              mountPath: "/usr/local/tomcat/webapps/ROOT/WEB-INF/classes/entitymanagement.user.properties"
+            - name: app-properties
+              mountPath: "/opt/app/classpath/entitymanagement.user.properties"
               readOnly: true
               subPath: entitymanagement.user.properties
-            - name: secret2
-              mountPath: "/usr/local/tomcat/webapps/ROOT/WEB-INF/classes/zoho_import.properties"
+            - name: zoho-import-config
+              mountPath: "/opt/app/classpath/zoho_import.properties"
               readOnly: true
               subPath: zoho_import.properties
+          env:
+            - name: SPRING_CONFIG_ADDITIONAL_LOCATION
+              value: "file:/opt/app/classpath/entitymanagement.user.properties,file:/opt/app/classpath/zoho_import.properties"
       volumes:
-        - name: secret1
+        - name: app-properties
           secret:
-            secretName: entity-management-api-secret1
-        - name: secret2
+            secretName: entity-management-api-properties
+        - name: zoho-import-config
           secret:
-            secretName: entity-management-api-secret2
+            secretName: zoho-import-properties
