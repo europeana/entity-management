@@ -2,6 +2,8 @@
 mongo.connectionUrl = mongodb://<host>:<port>
 mongo.em.database = <entity-management-db>
 mongo.batch.database = <spring-batch-db>
+mongo.truststore = <path-to-truststore-or-empty>
+mongo.truststore.pwd =
 
 #solr connectivity 
 #solr url for the indexing entities (superseeded by entitymanagement.solr.indexing.zookeeper.url if present)
