@@ -1,4 +1,4 @@
-FROM amazoncorretto:11-alpine-jdk
+FROM eclipse-temurin:11-jre-alpine
 LABEL Author="Europeana Foundation <development@europeana.eu>"
 
 ENV ELASTIC_APM_VERSION 1.34.1
