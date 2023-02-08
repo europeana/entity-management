@@ -2,7 +2,7 @@
 mongo.connectionUrl = mongodb://<host>:<port>
 mongo.em.database = <entity-management-db>
 mongo.batch.database = <spring-batch-db>
-mongo.truststore = <path-to-truststore-or-empty>
+mongo.truststore = <truststore-file-or-empty>
 mongo.truststore.pwd =
 
 #solr connectivity 

@@ -13,12 +13,10 @@ import eu.europeana.batch.entity.JobExecutionEntity;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.batch.codec.ScheduledTaskTypeCodec;
 import eu.europeana.entitymanagement.definitions.batch.codec.ScheduledTaskTypeCodecProvider;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLContext;
@@ -34,6 +32,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.util.ResourceUtils;
 
 @Configuration
 @PropertySource(
@@ -83,17 +82,19 @@ public class DataSourceConfig {
       // build SSL context that uses separate truststore (needs to be copied and specified via
       // mongo.truststore property)
       if (!truststorePath.isBlank()) {
+        File tsFile =
+            ResourceUtils.getFile("classpath:" + truststorePath); // throws error if not available
+
         KeyStore ks = KeyStore.getInstance("JKS");
-        ks.load(new FileInputStream(truststorePath), truststorePwd.toCharArray());
-        LogManager.getLogger(DataSourceConfig.class)
-            .info("Read truststore file {}", truststorePath);
+        ks.load(new FileInputStream(tsFile), truststorePwd.toCharArray());
+        logger.info("Read truststore file {}", truststorePath);
 
         TrustManagerFactory trustFactory =
             TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
         trustFactory.init(ks);
 
         SSLContext sslContext = SSLContext.getInstance("TLSv1.3");
-        sslContext.init(null, trustFactory.getTrustManagers(), null);
+        sslContext.init(null, trustFactory.getTrustManagers(), new SecureRandom());
         return MongoClients.create(
             MongoClientSettings.builder()
                 .applyConnectionString(connectionString)
