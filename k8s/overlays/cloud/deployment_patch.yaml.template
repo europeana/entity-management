@@ -27,3 +27,7 @@ spec:
             limits:
               memory: "${MEMORY_LIMIT}M"
               cpu: "${CPU_LIMIT}m"
+      volumes:
+        - name: ibm-certficate
+          secret:
+            secretName: ibm-secret

@@ -52,6 +52,3 @@ spec:
         - name: zoho-import-config
           secret:
             secretName: zoho-import-properties
-        - name: ibm-certficate
-          secret:
-            secretName: ibm-secret
