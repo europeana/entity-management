@@ -12,3 +12,6 @@ secretGenerator:
   - name: zoho-import-properties
     files:
       - zoho_import.properties
+  - name: ibm-secret
+    files:
+      - ibm-databases-truststore.jks

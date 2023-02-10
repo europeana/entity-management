@@ -38,9 +38,13 @@ spec:
               mountPath: "/opt/app/config/zoho_import.properties"
               readOnly: true
               subPath: zoho_import.properties
+            - name: ibm-certficate
+              mountPath: "/opt/app/config/ibm-databases-truststore.jks"
+              readOnly: true
+              subPath: ibm-databases-truststore.jks
           env:
             - name: SPRING_CONFIG_ADDITIONAL_LOCATION
-              value: "file:/opt/app/config/entitymanagement.user.properties,file:/opt/app/config/zoho_import.properties"
+              value: "file:/opt/app/config/entitymanagement.user.properties,file:/opt/app/config/zoho_import.properties,file:/opt/app/config/ibm-databases-truststore.jks"
       volumes:
         - name: app-properties
           secret:
@@ -48,3 +52,6 @@ spec:
         - name: zoho-import-config
           secret:
             secretName: zoho-import-properties
+        - name: ibm-certficate
+          secret:
+            secretName: ibm-secret
