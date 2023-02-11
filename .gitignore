@@ -28,6 +28,7 @@ build/
 .vscode/
 
 **/*.user.properties
+**/*.jks
 
 .DS_Store
 
