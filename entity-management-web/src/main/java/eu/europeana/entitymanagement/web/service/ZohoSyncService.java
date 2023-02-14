@@ -6,16 +6,16 @@ import dev.morphia.query.experimental.filters.Filter;
 import dev.morphia.query.experimental.filters.Filters;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
+import eu.europeana.entitymanagement.common.config.AppConfig;
 import eu.europeana.entitymanagement.common.config.DataSource;
+import eu.europeana.entitymanagement.common.config.DataSources;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.config.AppConfig;
-import eu.europeana.entitymanagement.config.DataSources;
+import eu.europeana.entitymanagement.common.exception.EntityCreationException;
+import eu.europeana.entitymanagement.common.exception.FunctionalRuntimeException;
+import eu.europeana.entitymanagement.common.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Organization;
-import eu.europeana.entitymanagement.exception.EntityCreationException;
-import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
-import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
@@ -164,7 +164,6 @@ public class ZohoSyncService {
    * @return the number of deleted from Enrichment database organizations
    * @throws EntityUpdateException
    * @throws ZohoException
-   * @throws OrganizationImportException
    */
   void synchronizeDeletedZohoOrganizations(
       OffsetDateTime modifiedSince, ZohoSyncReport zohoSyncReport) throws EntityUpdateException {

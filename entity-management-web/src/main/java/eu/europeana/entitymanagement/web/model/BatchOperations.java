@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.web.model;
 
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
-import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
+import eu.europeana.entitymanagement.common.exception.FunctionalRuntimeException;
 import java.util.SortedSet;
 import java.util.TreeSet;
 

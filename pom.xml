@@ -9,6 +9,7 @@
     <module>entity-management-solr</module>
      <module>entity-management-zoho</module>
       <module>entity-management-tests</module>
+        <module>entity-management-batch</module>
     </modules>
 
     <parent>

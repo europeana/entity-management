@@ -4,7 +4,7 @@ import static eu.europeana.entitymanagement.testutils.UnitTestUtils.loadFile;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import eu.europeana.entitymanagement.web.MetisDereferenceUtils;
+import eu.europeana.entitymanagement.common.utils.MetisDereferenceUtils;
 import eu.europeana.entitymanagement.web.xml.model.*;
 import eu.europeana.entitymanagement.web.xml.model.metis.EnrichmentResultList;
 import javax.xml.bind.JAXBContext;
