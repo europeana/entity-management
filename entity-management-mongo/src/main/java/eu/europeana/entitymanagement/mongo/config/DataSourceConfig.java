@@ -17,6 +17,8 @@ import eu.europeana.entitymanagement.definitions.batch.codec.ScheduledTaskTypeCo
 
 import java.io.*;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.concurrent.TimeUnit;
@@ -132,8 +134,7 @@ public class DataSourceConfig {
   private InputStream loadTrustStore() throws IOException {
     //lazy initialization
     if (StringUtils.startsWith(truststorePath, "/")) {
-      File trustoreFile = new File(FilenameUtils.getName(truststorePath));
-      return java.nio.file.Files.newInputStream(trustoreFile.toPath());
+      return java.nio.file.Files.newInputStream(Path.of(truststorePath));
     } else {
       logger.debug("Loading trust store from classpath: {}", truststorePath);
       String trustStoreLocation = "/" + truststorePath;
