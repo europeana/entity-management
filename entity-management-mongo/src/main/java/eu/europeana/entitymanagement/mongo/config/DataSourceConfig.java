@@ -14,18 +14,14 @@ import eu.europeana.batch.entity.JobExecutionEntity;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.batch.codec.ScheduledTaskTypeCodec;
 import eu.europeana.entitymanagement.definitions.batch.codec.ScheduledTaskTypeCodecProvider;
-
 import java.io.*;
 import java.net.URL;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
-
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -128,11 +124,12 @@ public class DataSourceConfig {
 
   /**
    * Loads the trust store
+   *
    * @return
    * @throws FileNotFoundException
    */
   private InputStream loadTrustStore() throws IOException {
-    //lazy initialization
+    // lazy initialization
     if (StringUtils.startsWith(truststorePath, "/")) {
       return java.nio.file.Files.newInputStream(Path.of(truststorePath));
     } else {
@@ -142,7 +139,7 @@ public class DataSourceConfig {
       if (trustStoreUri == null) {
         logger.info("truststore not at location: {}", trustStoreLocation);
         throw new MongoClientException(
-                "cannot find trustore file in classpath: " + trustStoreLocation);
+            "cannot find trustore file in classpath: " + trustStoreLocation);
       }
       return getClass().getResourceAsStream(trustStoreLocation);
     }
