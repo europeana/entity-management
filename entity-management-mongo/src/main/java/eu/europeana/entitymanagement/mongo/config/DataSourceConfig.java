@@ -22,6 +22,9 @@ import java.security.cert.CertificateException;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
+
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bson.codecs.configuration.CodecProvider;
@@ -33,7 +36,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.util.ResourceUtils;
 
 @Configuration
 @PropertySource(
@@ -87,7 +89,6 @@ public class DataSourceConfig {
 
         KeyStore ks = KeyStore.getInstance("JKS");
         ks.load(stream, truststorePwd.toCharArray());
-       //ks.load(new FileInputStream(tsFile), truststorePwd.toCharArray());
         logger.info("Read truststore file {}", truststorePath);
 
         TrustManagerFactory trustFactory =
@@ -128,11 +129,11 @@ public class DataSourceConfig {
    * @return
    * @throws FileNotFoundException
    */
-  private InputStream loadTrustStore() throws FileNotFoundException {
-    // lazy initialization
-    if (truststorePath.startsWith("/")) {
-      File trustoreFile = new File(truststorePath);
-      return new FileInputStream(trustoreFile);
+  private InputStream loadTrustStore() throws IOException {
+    //lazy initialization
+    if (StringUtils.startsWith(truststorePath, "/")) {
+      File trustoreFile = new File(FilenameUtils.getName(truststorePath));
+      return java.nio.file.Files.newInputStream(trustoreFile.toPath());
     } else {
       logger.debug("Loading trust store from classpath: {}", truststorePath);
       String trustStoreLocation = "/" + truststorePath;
