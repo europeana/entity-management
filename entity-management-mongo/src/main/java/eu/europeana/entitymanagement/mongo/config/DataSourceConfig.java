@@ -83,14 +83,11 @@ public class DataSourceConfig {
       // build SSL context that uses separate truststore (needs to be copied and specified via
       // mongo.truststore property)
       if (!truststorePath.isBlank()) {
-
-        File tsFile =
-                ResourceUtils.getFile("classpath:" + truststorePath); // throws error if not available
-//        InputStream stream = loadTrustStore();
+        InputStream stream = loadTrustStore();
 
         KeyStore ks = KeyStore.getInstance("JKS");
-        //ks.load(stream, truststorePwd.toCharArray());
-       ks.load(new FileInputStream(tsFile), truststorePwd.toCharArray());
+        ks.load(stream, truststorePwd.toCharArray());
+       //ks.load(new FileInputStream(tsFile), truststorePwd.toCharArray());
         logger.info("Read truststore file {}", truststorePath);
 
         TrustManagerFactory trustFactory =
