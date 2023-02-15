@@ -4,5 +4,5 @@
 # Any type of properties file should not be uploaded to Docker hub
 **/*.jks
 **/*.user.properties
-*.properties
+**/*.properties
 **/zoho_import.properties
