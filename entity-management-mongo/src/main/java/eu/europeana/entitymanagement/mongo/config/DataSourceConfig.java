@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement.mongo.config;
 
 import com.mongodb.Block;
 import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientException;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -13,14 +14,15 @@ import eu.europeana.batch.entity.JobExecutionEntity;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.batch.codec.ScheduledTaskTypeCodec;
 import eu.europeana.entitymanagement.definitions.batch.codec.ScheduledTaskTypeCodecProvider;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
+import java.net.URL;
+import java.nio.file.Path;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bson.codecs.configuration.CodecProvider;
@@ -32,7 +34,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.util.ResourceUtils;
 
 @Configuration
 @PropertySource(
@@ -82,11 +83,10 @@ public class DataSourceConfig {
       // build SSL context that uses separate truststore (needs to be copied and specified via
       // mongo.truststore property)
       if (!truststorePath.isBlank()) {
-        File tsFile =
-            ResourceUtils.getFile("classpath:" + truststorePath); // throws error if not available
+        InputStream stream = loadTrustStore();
 
         KeyStore ks = KeyStore.getInstance("JKS");
-        ks.load(new FileInputStream(tsFile), truststorePwd.toCharArray());
+        ks.load(stream, truststorePwd.toCharArray());
         logger.info("Read truststore file {}", truststorePath);
 
         TrustManagerFactory trustFactory =
@@ -114,13 +114,35 @@ public class DataSourceConfig {
     } catch (KeyManagementException e) {
       throw new RuntimeException("Error initializing SSL context", e);
     }
-
     return MongoClients.create(
         MongoClientSettings.builder()
             .applyConnectionString(connectionString)
             .applyToConnectionPoolSettings(connectionPoolSettingsBlockBuilder)
             .codecRegistry(codecRegistry)
             .build());
+  }
+
+  /**
+   * Loads the trust store
+   *
+   * @return
+   * @throws FileNotFoundException
+   */
+  private InputStream loadTrustStore() throws IOException {
+    // lazy initialization
+    if (StringUtils.startsWith(truststorePath, "/")) {
+      return java.nio.file.Files.newInputStream(Path.of(truststorePath));
+    } else {
+      logger.debug("Loading trust store from classpath: {}", truststorePath);
+      String trustStoreLocation = "/" + truststorePath;
+      URL trustStoreUri = getClass().getResource(trustStoreLocation);
+      if (trustStoreUri == null) {
+        logger.info("truststore not at location: {}", trustStoreLocation);
+        throw new MongoClientException(
+            "cannot find trustore file in classpath: " + trustStoreLocation);
+      }
+      return getClass().getResourceAsStream(trustStoreLocation);
+    }
   }
 
   @Primary

@@ -1,0 +1,8 @@
+# Ensure no sensitive files are included in jar
+**
+!/entity-management-web/target/entity-management-web-executable.jar
+# Any type of properties file should not be uploaded to Docker hub
+**/*.jks
+**/*.user.properties
+**/*.properties
+**/zoho_import.properties

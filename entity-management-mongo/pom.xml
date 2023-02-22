@@ -53,7 +53,5 @@
 			<version>${springbatch.mongo.version}</version>
 			<scope>compile</scope>
 		</dependency>
-
-
 	</dependencies>
 </project>
