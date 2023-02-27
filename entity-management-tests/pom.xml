@@ -3,7 +3,7 @@
   <parent>
     <artifactId>entity-management</artifactId>
     <groupId>eu.europeana.api</groupId>
-    <version>1.4.0-SNAPSHOT</version>
+    <version>1.4</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -17,36 +17,36 @@
     <dependency>
       <groupId>eu.europeana.api</groupId>
       <artifactId>entity-management-web</artifactId>
-      <version>1.4.0-SNAPSHOT</version>
+      <version>1.4</version>
     </dependency>
     <dependency>
       <groupId>eu.europeana.api</groupId>
       <artifactId>entity-management-definitions</artifactId>
-      <version>1.4.0-SNAPSHOT</version>
+      <version>1.4</version>
     </dependency>
 
     <dependency>
       <groupId>eu.europeana.api</groupId>
       <artifactId>entity-management-common</artifactId>
-      <version>1.4.0-SNAPSHOT</version>
+      <version>1.4</version>
     </dependency>
 
     <dependency>
       <groupId>eu.europeana.api</groupId>
       <artifactId>entity-management-mongo</artifactId>
-      <version>1.4.0-SNAPSHOT</version>
+      <version>1.4</version>
     </dependency>
 
     <dependency>
       <groupId>eu.europeana.api</groupId>
       <artifactId>entity-management-solr</artifactId>
-      <version>1.4.0-SNAPSHOT</version>
+      <version>1.4</version>
     </dependency>
 
     <dependency>
       <groupId>eu.europeana.api</groupId>
       <artifactId>entity-management-zoho</artifactId>
-      <version>1.4.0-SNAPSHOT</version>
+      <version>1.4</version>
     </dependency>
 
     <dependency>
