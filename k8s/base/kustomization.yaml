@@ -1,0 +1,14 @@
+resources:
+  - deployment.yaml
+
+commonLabels:
+  app: entity-management-api
+
+# expects files to be in the same directory
+secretGenerator:
+  - name: entity-management-api-properties
+    files:
+      - entitymanagement.user.properties
+  - name: zoho-import-properties
+    files:
+      - zoho_import.properties

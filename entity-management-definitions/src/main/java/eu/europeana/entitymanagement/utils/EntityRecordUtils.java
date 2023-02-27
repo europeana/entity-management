@@ -6,6 +6,8 @@ import org.apache.commons.lang3.StringUtils;
 
 public class EntityRecordUtils {
 
+  public static final String ENTITY_ID_REMOVED_MSG = "Entity '%s' has been removed";
+
   private EntityRecordUtils() {
     // private constructor to prevent instantiation
   }

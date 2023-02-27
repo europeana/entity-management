@@ -1,12 +1,16 @@
 package eu.europeana.entitymanagement.web;
 
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPath;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.PARAM_PROFILE_SYNC;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.QUERY_PARAM_PROFILE;
 import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
@@ -283,6 +287,35 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(entityId)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())));
+  }
+
+  @Test
+  public void retrieveAgentDeprecatedShouldBeRedirected() throws Exception {
+    String europeanaMetadata = loadFile(IntegrationTestUtils.AGENT_REGISTER_RAPHAEL_JSON);
+    String metisResponse = loadFile(IntegrationTestUtils.AGENT_RAPHAEL_XML);
+
+    String entityId =
+        createEntity(europeanaMetadata, metisResponse, IntegrationTestUtils.AGENT_RAPHAEL_URI)
+            .getEntityId();
+
+    String requestPath = getEntityRequestPath(entityId);
+
+    // sync deprecation
+    mockMvc
+        .perform(
+            delete(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath)
+                .param(QUERY_PARAM_PROFILE, PARAM_PROFILE_SYNC)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent());
+
+    // retrieve
+    ResultActions result =
+        mockMvc.perform(
+            get(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath + ".jsonld")
+                .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                .accept(MediaType.APPLICATION_JSON));
+    result.andExpect(status().isMovedPermanently());
+    result.andExpect(header().string("Location", "http://data.europeana.eu/agent/5"));
   }
 
   @Test

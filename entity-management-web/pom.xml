@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>entity-management</artifactId>
 		<groupId>eu.europeana.api</groupId>
-		<version>1.3</version>
+		<version>1.4.0-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
@@ -100,19 +100,19 @@
 		<dependency>
 			<groupId>eu.europeana.api</groupId>
 			<artifactId>entity-management-definitions</artifactId>
-			<version>1.3</version>
+			<version>1.4.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>eu.europeana.api</groupId>
 			<artifactId>entity-management-common</artifactId>
-			<version>1.3</version>
+			<version>1.4.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>eu.europeana.api</groupId>
 			<artifactId>entity-management-mongo</artifactId>
-			<version>1.3</version>
+			<version>1.4.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
@@ -124,13 +124,13 @@
 		<dependency>
 			<groupId>eu.europeana.api</groupId>
 			<artifactId>entity-management-solr</artifactId>
-			<version>1.3</version>
+			<version>1.4.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>eu.europeana.api</groupId>
 			<artifactId>entity-management-zoho</artifactId>
-			<version>1.3</version>
+			<version>1.4.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
@@ -193,6 +193,28 @@
 
 	</dependencies>
 	<build>
+		<resources>
+		    <resource>
+		        <directory>src/main/resources</directory>
+		        <filtering>true</filtering>
+		        <includes>
+		            <include>*.properties</include>
+		            <include>*/*.info</include>
+		            <include>*.xml</include>
+		        </includes>
+		        <excludes>
+		            <exclude>**/*.jks</exclude>
+		        </excludes>
+		    </resource>
+		    <resource>
+		        <directory>src/main/resources</directory>
+		        <filtering>false</filtering>
+		        <includes>
+		            <include>**/*.jks</include>
+		            <include>public/**</include>
+		        </includes>
+		    </resource>
+		</resources>
 		<!-- set fixed name for easy deployment -->
 		<finalName>${project.artifactId}</finalName>
 

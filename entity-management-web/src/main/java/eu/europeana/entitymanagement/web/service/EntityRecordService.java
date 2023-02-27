@@ -36,7 +36,11 @@ import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
-import eu.europeana.entitymanagement.utils.*;
+import eu.europeana.entitymanagement.utils.EMCollectionUtils;
+import eu.europeana.entitymanagement.utils.EntityObjectFactory;
+import eu.europeana.entitymanagement.utils.EntityRecordUtils;
+import eu.europeana.entitymanagement.utils.EntityUtils;
+import eu.europeana.entitymanagement.utils.UriValidator;
 import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
@@ -44,7 +48,17 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang.StringUtils;
@@ -66,8 +80,6 @@ public class EntityRecordService {
   private final SolrService solrService;
 
   private static final Logger logger = LogManager.getLogger(EntityRecordService.class);
-
-  private static final String ENTITY_ID_REMOVED_MSG = "Entity '%s' has been removed";
 
   // Fields to be ignored during consolidation ("type" is final, so it cannot be updated)
   private static final List<String> ignoredMergeFields = List.of("type");
@@ -118,7 +130,8 @@ public class EntityRecordService {
 
     EntityRecord entityRecord = entityRecordOptional.get();
     if (!retrieveDisabled && entityRecord.isDisabled()) {
-      throw new EntityRemovedException(String.format(ENTITY_ID_REMOVED_MSG, entityUri));
+      throw new EntityRemovedException(
+          String.format(EntityRecordUtils.ENTITY_ID_REMOVED_MSG, entityUri));
     }
     return entityRecord;
   }

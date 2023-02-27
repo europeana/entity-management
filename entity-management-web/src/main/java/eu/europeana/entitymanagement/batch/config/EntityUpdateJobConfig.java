@@ -80,6 +80,8 @@ public class EntityUpdateJobConfig {
   private final EntityVerificationLogger entityVerificationLogger;
 
   private final EntityMetricsProcessor entityMetricsProcessor;
+
+  private final EntityVerificationLogger verificationLogger;
   private final EntityRecordDatabaseInsertionWriter dbInsertionWriter;
   private final EntitySolrInsertionWriter solrInsertionWriter;
 
@@ -119,6 +121,7 @@ public class EntityUpdateJobConfig {
       EntityConsolidationProcessor entityUpdateProcessor,
       EntityVerificationLogger entityVerificationLogger,
       EntityMetricsProcessor entityMetricsProcessor,
+      EntityVerificationLogger verificationLogger,
       EntityRecordDatabaseInsertionWriter dbInsertionWriter,
       EntitySolrInsertionWriter solrInsertionWriter,
       EntitySolrRemovalWriter solrRemovalWriter,
@@ -140,6 +143,7 @@ public class EntityUpdateJobConfig {
     this.entityUpdateProcessor = entityUpdateProcessor;
     this.entityVerificationLogger = entityVerificationLogger;
     this.entityMetricsProcessor = entityMetricsProcessor;
+    this.verificationLogger = verificationLogger;
     this.dbInsertionWriter = dbInsertionWriter;
     this.solrInsertionWriter = solrInsertionWriter;
     this.solrRemovalWriter = solrRemovalWriter;

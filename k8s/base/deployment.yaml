@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: entity-management-api-deployment
+spec:
+  # selector.matchLabels is provided via Kustomize
+  template:
+    spec:
+      containers:
+        - name: entity-management-api
+          image: europeana/entity-management-api
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              port: 8080
+              path: /actuator/info
+              httpHeaders:
+                - name: Accept
+                  value: application/json
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              port: 8080
+              path: /actuator/info
+              httpHeaders:
+                - name: Accept
+                  value: application/json
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          volumeMounts:
+            - name: app-properties
+              mountPath: "/opt/app/config/entitymanagement.user.properties"
+              readOnly: true
+              subPath: entitymanagement.user.properties
+            - name: zoho-import-config
+              mountPath: "/opt/app/config/zoho_import.properties"
+              readOnly: true
+              subPath: zoho_import.properties
+          env:
+            - name: SPRING_CONFIG_ADDITIONAL_LOCATION
+              value: "file:/opt/app/config/entitymanagement.user.properties,file:/opt/app/config/zoho_import.properties"
+      volumes:
+        - name: app-properties
+          secret:
+            secretName: entity-management-api-properties
+        - name: zoho-import-config
+          secret:
+            secretName: zoho-import-properties

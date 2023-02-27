@@ -1,0 +1,16 @@
+resources:
+  - ../../base
+  - service.yaml
+  - ingress.yaml
+  - hpa.yaml
+
+patchesStrategicMerge:
+  - deployment_patch.yaml
+
+commonLabels:
+  app: entity-management-api
+
+secretGenerator:
+  - name: ibm-secret
+    files:
+      - ibm-databases-truststore.jks

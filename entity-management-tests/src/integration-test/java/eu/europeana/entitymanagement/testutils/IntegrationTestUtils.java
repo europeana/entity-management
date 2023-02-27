@@ -53,6 +53,7 @@ public class IntegrationTestUtils {
   public static final String CONCEPT_REGISTER_BATHTUB_JSON_INVALID =
       "/content/concept_register_bathtub_invalid.json";
   public static final String AGENT_REGISTER_DAVINCI_JSON = "/content/agent_register_davinci.json";
+  public static final String AGENT_REGISTER_RAPHAEL_JSON = "/content/agent_register_raphael.json";
   public static final String AGENT_REGISTER_BIRCH_REDIRECTION_JSON =
       "/content/agent_register_birch_redirection.json";
   public static final String AGENT_REGISTER_STALIN_JSON = "/content/agent_register_stalin.json";
@@ -89,6 +90,7 @@ public class IntegrationTestUtils {
   public static final String CONCEPT_ERROR_CHECK_1_XML = "/metis-deref/concept-error-check-1.xml";
 
   public static final String AGENT_DA_VINCI_XML = "/metis-deref/agent_da_vinci.xml";
+  public static final String AGENT_RAPHAEL_XML = "/metis-deref/agent_raphael.xml";
   public static final String AGENT_BIRCH_XML = "/metis-deref/agent_birch.xml";
   public static final String AGENT_STALIN_XML = "/metis-deref/agent_stalin.xml";
   public static final String AGENT_SCHEGK_XML = "/metis-deref/agent_schegk.xml";
@@ -137,6 +139,7 @@ public class IntegrationTestUtils {
       "/content/place-referential-integrity.json";
 
   public static final String AGENT_DA_VINCI_URI = "http://www.wikidata.org/entity/Q762";
+  public static final String AGENT_RAPHAEL_URI = "http://www.wikidata.org/entity/Q5597";
   public static final String AGENT_BIRCH_URI = "http://www.wikidata.org/entity/Q5485322";
   public static final String AGENT_BIRCH_UPDATED_URI = "http://www.wikidata.org/entity/Q14819199";
 
