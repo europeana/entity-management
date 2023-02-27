@@ -77,6 +77,8 @@ public class EntityUpdateJobConfig {
   private final ItemReader<BatchEntityRecord> scheduledTaskReader;
   private final EntityDereferenceProcessor dereferenceProcessor;
   private final EntityConsolidationProcessor entityUpdateProcessor;
+  private final EntityVerificationLogger entityVerificationLogger;
+
   private final EntityMetricsProcessor entityMetricsProcessor;
 
   private final EntityVerificationLogger verificationLogger;
@@ -117,6 +119,7 @@ public class EntityUpdateJobConfig {
       @Qualifier(SCHEDULED_TASK_READER) ItemReader<BatchEntityRecord> scheduledTaskReader,
       EntityDereferenceProcessor dereferenceProcessor,
       EntityConsolidationProcessor entityUpdateProcessor,
+      EntityVerificationLogger entityVerificationLogger,
       EntityMetricsProcessor entityMetricsProcessor,
       EntityVerificationLogger verificationLogger,
       EntityRecordDatabaseInsertionWriter dbInsertionWriter,
@@ -138,6 +141,7 @@ public class EntityUpdateJobConfig {
     this.scheduledTaskReader = scheduledTaskReader;
     this.dereferenceProcessor = dereferenceProcessor;
     this.entityUpdateProcessor = entityUpdateProcessor;
+    this.entityVerificationLogger = entityVerificationLogger;
     this.entityMetricsProcessor = entityMetricsProcessor;
     this.verificationLogger = verificationLogger;
     this.dbInsertionWriter = dbInsertionWriter;
@@ -235,7 +239,7 @@ public class EntityUpdateJobConfig {
             dereferenceProcessor,
             entityUpdateProcessor,
             entityMetricsProcessor,
-            verificationLogger));
+            entityVerificationLogger));
     return compositeItemProcessor;
   }
 

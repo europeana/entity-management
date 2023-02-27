@@ -7,6 +7,8 @@ import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityMismatchException;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
@@ -38,6 +40,7 @@ public class EntityVerificationLogger extends BaseEntityProcessor {
    * @throws EntityMismatchException if prefLabel counts do not match
    */
   private void checkPrefLabels(EntityRecord entityRecord) throws EntityMismatchException {
+
     int consolidatedPrefLabels = entityRecord.getEntity().getPrefLabel().size();
 
     long proxyPrefLabels =
