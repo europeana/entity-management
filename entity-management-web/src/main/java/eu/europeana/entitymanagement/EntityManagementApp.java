@@ -1,14 +1,21 @@
 package eu.europeana.entitymanagement;
 
+import static eu.europeana.entitymanagement.batch.model.JobType.SCHEDULE_UPDATES;
+
+import eu.europeana.entitymanagement.batch.config.EntityUpdateSchedulingConfig;
 import eu.europeana.entitymanagement.common.config.SocksProxyConfig;
 import eu.europeana.entitymanagement.config.SocksProxyActivator;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * Main application. Allows deploying as a war and logs instance data when deployed in Cloud Foundry
@@ -22,27 +29,52 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
       // DataSources are manually configured (for EM and batch DBs)
       DataSourceAutoConfiguration.class
     })
-@EnableBatchProcessing
-public class EntityManagementApp {
+public class EntityManagementApp implements CommandLineRunner {
+
+  private static final Logger LOG = LogManager.getLogger(EntityManagementApp.class);
+  private static String jobType = "";
+
+  @Autowired private EntityUpdateSchedulingConfig schedulingConfig;
 
   /**
    * Main entry point of this application
    *
+   * <p>if the command line Argument - 'schedule_update' is passed then call EM Batch processing is
+   * invoked.
+   *
    * @param args command-line arguments
    */
   public static void main(String[] args) {
-    // When deploying to Cloud Foundry, this will log the instance index number, IP and GUID
-    LogManager.getLogger(EntityManagementApp.class)
-        .info(
-            "CF_INSTANCE_INDEX  = {}, CF_INSTANCE_GUID = {}, CF_INSTANCE_IP  = {}",
-            System.getenv("CF_INSTANCE_INDEX"),
-            System.getenv("CF_INSTANCE_GUID"),
-            System.getenv("CF_INSTANCE_IP"));
+    jobType = args.length > 0 ? args[0] : "";
 
     // Activate socks proxy (if your application requires it)
     SocksProxyActivator.activate(
         new SocksProxyConfig("entitymanagement.properties", "entitymanagement.user.properties"));
+    ConfigurableApplicationContext context = SpringApplication.run(EntityManagementApp.class, args);
 
-    SpringApplication.run(EntityManagementApp.class, args);
+    if (StringUtils.isNotEmpty(jobType)) {
+      System.exit(SpringApplication.exit(context));
+    }
+  }
+
+  @Override
+  public void run(String... args) throws Exception {
+    if (StringUtils.isNotEmpty(jobType)) {
+      validateArguments();
+      LOG.info("Started the Entity Management Batch Application with arguments - {}", jobType);
+      schedulingConfig.runScheduledUpdate();
+      schedulingConfig.runScheduledDeprecationsAndDeletions();
+    }
+  }
+
+  /** validates the arguments passed */
+  private static void validateArguments() {
+    if (StringUtils.isNotEmpty(jobType) && !SCHEDULE_UPDATES.value().equalsIgnoreCase(jobType)) {
+      LOG.error(
+          "Unsupported argument '{}'. Supported arguments is '{}'",
+          jobType,
+          SCHEDULE_UPDATES.value());
+      System.exit(1);
+    }
   }
 }

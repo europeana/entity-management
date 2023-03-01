@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: entity-management-batch-job
+spec:
+  schedule: "H 15 30 * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 60
+      template:
+        spec:
+          containers:
+            - name: entity-management-batch
+              image: europeana/entity-management-batch
+              imagePullPolicy: Always
+              command:
+                - java
+                - -jar
+                - /opt/app/entity-management-web.jar
+                - schedule_update
+              env:
+                - name: SPRING_CONFIG_ADDITIONAL_LOCATION
+                  value: "file:/opt/app/config/entitymanagement.user.properties"
+                - name: SPRING_MAIN_WEBAPPLICATIONTYPE
+                  value: "NONE"
+              volumeMounts:
+                - name: app-properties
+                  mountPath: "/opt/app/config/entitymanagement.user.properties"
+                  readOnly: true
+                  subPath: entitymanagement.user.properties
+          restartPolicy: Never
+          volumes:
+            - name: app-properties
+              configMap:
+                name: entity-management-api-properties

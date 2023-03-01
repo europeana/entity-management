@@ -1,0 +1,52 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: entity-management-batch-job
+spec:
+  schedule: "${BATCH_CRON_SCHEDULE}"
+  suspend: ${SUSPEND_BATCH}
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 60
+      template:
+        spec:
+          containers:
+            - name: entity-management-batch
+              image: europeana/entity-management-batch
+              imagePullPolicy: Always
+              command:
+                - java
+                - -jar
+                - /opt/app/entity-management-web.jar
+                - schedule_update
+              env:
+                - name: SPRING_CONFIG_ADDITIONAL_LOCATION
+                  value: "file:/opt/app/config/entitymanagement.user.properties"
+                - name: SPRING_MAIN_WEBAPPLICATIONTYPE
+                  value: "NONE"
+                - name: JAVA_OPTS
+                  value: "-javaagent:\"/usr/local/elastic-apm-agent.jar\"
+                          -Delastic.apm.application_packages=${ELASTIC_APP_PACKAGES}
+                          -Delastic.apm.server_urls=${ELASTIC_APM_SERVERS}
+                          -Delastic.apm.service_name=${BATCH_APP_NAME}
+                          -Delastic.apm.enabled=${COLLECT_LOGS}
+                          -Delastic.apm.environment=${K8S_NAMESPACE}
+                          -XX:+UseParallelGC -XX:MaxRAMPercentage=75"
+              resources:
+                requests:
+                  memory: "${BATCH_MEMORY}M"
+                  cpu: "${BATCH_CPU}m"
+                limits:
+                  memory: "${BATCH_MEMORY}M"
+                  cpu: "${BATCH_CPU}m"
+              volumeMounts:
+                - name: app-properties
+                  mountPath: "/opt/app/config/entitymanagement.user.properties"
+                  readOnly: true
+                  subPath: entitymanagement.user.properties
+          restartPolicy: Never
+          volumes:
+            - name: app-properties
+              configMap:
+                name: entity-management-api-properties

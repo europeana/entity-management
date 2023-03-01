@@ -43,6 +43,7 @@ import org.springframework.batch.core.ItemProcessListener;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecutionListener;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -64,6 +65,7 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 
 @Component
+@EnableBatchProcessing
 public class EntityUpdateJobConfig {
 
   private static final String SINGLE_ENTITY_RECORD_READER = "singleEntityRecordReader";

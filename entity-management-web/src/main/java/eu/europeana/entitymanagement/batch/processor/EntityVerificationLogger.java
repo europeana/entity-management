@@ -7,8 +7,6 @@ import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityMismatchException;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 

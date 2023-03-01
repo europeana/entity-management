@@ -17,7 +17,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -30,7 +29,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @PropertySource("classpath:entitymanagement.properties")
 @PropertySource(value = "classpath:entitymanagement.user.properties", ignoreResourceNotFound = true)
 @EnableScheduling
-public class EntityUpdateSchedulingConfig implements InitializingBean {
+public class EntityUpdateSchedulingConfig {
 
   private static final Logger logger = LogManager.getLogger(EntityUpdateSchedulingConfig.class);
   private final JobLauncher entityUpdateJobLauncher;
@@ -65,30 +64,6 @@ public class EntityUpdateSchedulingConfig implements InitializingBean {
     this.removalsScheduler = removalsScheduler;
   }
 
-  @Override
-  public void afterPropertiesSet() {
-    if (syncEnabled) {
-      // invoke methods outside logging call
-      String updateInitialDelayString = toMinutesAndSeconds(updateInitialDelay);
-      String deprecationDeletionInitialDelayString =
-          toMinutesAndSeconds(deprecationDeletionInitialDelay);
-      String intervalString = toMinutesAndSeconds(interval);
-
-      logger.info(
-          "Batch scheduling initialized – updateInitialDelay: {}; "
-              + "deprecationDeletionInitialDelay: {}"
-              + "interval: {}",
-          updateInitialDelayString,
-          deprecationDeletionInitialDelayString,
-          intervalString);
-
-      schedulePeriodicUpdates();
-      schedulePeriodicDeprecationsAndDeletions();
-    } else {
-      logger.warn("Batch scheduling disabled. Entities will not be automatically updated.");
-    }
-  }
-
   private void schedulePeriodicDeprecationsAndDeletions() {
     removalsScheduler.scheduleWithFixedDelay(
         this::runScheduledDeprecationsAndDeletions,
@@ -105,7 +80,7 @@ public class EntityUpdateSchedulingConfig implements InitializingBean {
 
   /** Periodically run full entity and metric updates (in one run). */
   @Async
-  void runScheduledUpdate() {
+  public void runScheduledUpdate() {
     logger.info("Triggering scheduled full and metrics update for entities");
     try {
       entityUpdateJobLauncher.run(
@@ -123,7 +98,7 @@ public class EntityUpdateSchedulingConfig implements InitializingBean {
 
   /** Periodically run deprecations and deletions (in one run) */
   @Async
-  void runScheduledDeprecationsAndDeletions() {
+  public void runScheduledDeprecationsAndDeletions() {
     logger.info("Triggering scheduled deprecations and deletions for entities");
     try {
       entityDeletionsJobLauncher.run(
