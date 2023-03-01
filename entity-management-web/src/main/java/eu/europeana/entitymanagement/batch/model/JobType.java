@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.batch.model;
 
 public enum JobType {
-  SCHEDULE_UPDATES("schedule_update");
+  SCHEDULE_UPDATE("schedule_update");
 
   final String value;
 

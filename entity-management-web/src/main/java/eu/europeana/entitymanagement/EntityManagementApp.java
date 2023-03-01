@@ -1,6 +1,6 @@
 package eu.europeana.entitymanagement;
 
-import static eu.europeana.entitymanagement.batch.model.JobType.SCHEDULE_UPDATES;
+import static eu.europeana.entitymanagement.batch.model.JobType.SCHEDULE_UPDATE;
 
 import eu.europeana.entitymanagement.batch.config.EntityUpdateSchedulingConfig;
 import eu.europeana.entitymanagement.common.config.SocksProxyConfig;
@@ -69,11 +69,11 @@ public class EntityManagementApp implements CommandLineRunner {
 
   /** validates the arguments passed */
   private static void validateArguments() {
-    if (StringUtils.isNotEmpty(jobType) && !SCHEDULE_UPDATES.value().equalsIgnoreCase(jobType)) {
+    if (StringUtils.isNotEmpty(jobType) && !SCHEDULE_UPDATE.value().equalsIgnoreCase(jobType)) {
       LOG.error(
           "Unsupported argument '{}'. Supported arguments is '{}'",
           jobType,
-          SCHEDULE_UPDATES.value());
+          SCHEDULE_UPDATE.value());
       System.exit(1);
     }
   }

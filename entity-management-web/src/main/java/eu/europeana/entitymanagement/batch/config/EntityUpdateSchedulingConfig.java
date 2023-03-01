@@ -2,26 +2,20 @@ package eu.europeana.entitymanagement.batch.config;
 
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.ENTITY_REMOVALS_JOB_LAUNCHER;
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.ENTITY_UPDATE_JOB_LAUNCHER;
-import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.PERIODIC_REMOVALS_SCHEDULER;
-import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.PERIODIC_UPDATES_SCHEDULER;
 import static eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType.DEPRECATION;
 import static eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType.PERMANENT_DELETION;
 
 import eu.europeana.entitymanagement.batch.utils.BatchUtils;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -36,46 +30,13 @@ public class EntityUpdateSchedulingConfig {
   private final JobLauncher entityDeletionsJobLauncher;
   private final EntityUpdateJobConfig updateJobConfig;
 
-  private final TaskScheduler updatesScheduler;
-  private final TaskScheduler removalsScheduler;
-
-  @Value("${batch.scheduling.update.initialDelaySeconds}")
-  private long updateInitialDelay;
-
-  @Value("${batch.scheduling.deprecation-deletion.initialDelaySeconds}")
-  private long deprecationDeletionInitialDelay;
-
-  @Value("${batch.scheduling.intervalSeconds}")
-  private long interval;
-
-  @Value("${batch.scheduling.enabled}")
-  private boolean syncEnabled;
-
   public EntityUpdateSchedulingConfig(
       @Qualifier(ENTITY_UPDATE_JOB_LAUNCHER) JobLauncher entityUpdateJobLauncher,
       @Qualifier(ENTITY_REMOVALS_JOB_LAUNCHER) JobLauncher entityDeletionsJobLauncher,
-      EntityUpdateJobConfig batchUpdateConfig,
-      @Qualifier(PERIODIC_UPDATES_SCHEDULER) TaskScheduler updatesScheduler,
-      @Qualifier(PERIODIC_REMOVALS_SCHEDULER) TaskScheduler removalsScheduler) {
+      EntityUpdateJobConfig batchUpdateConfig) {
     this.entityUpdateJobLauncher = entityUpdateJobLauncher;
     this.entityDeletionsJobLauncher = entityDeletionsJobLauncher;
     this.updateJobConfig = batchUpdateConfig;
-    this.updatesScheduler = updatesScheduler;
-    this.removalsScheduler = removalsScheduler;
-  }
-
-  private void schedulePeriodicDeprecationsAndDeletions() {
-    removalsScheduler.scheduleWithFixedDelay(
-        this::runScheduledDeprecationsAndDeletions,
-        Instant.now().plusSeconds(deprecationDeletionInitialDelay),
-        Duration.ofSeconds(interval));
-  }
-
-  private void schedulePeriodicUpdates() {
-    updatesScheduler.scheduleWithFixedDelay(
-        this::runScheduledUpdate,
-        Instant.now().plusSeconds(updateInitialDelay),
-        Duration.ofSeconds(interval));
   }
 
   /** Periodically run full entity and metric updates (in one run). */
@@ -108,13 +69,5 @@ public class EntityUpdateSchedulingConfig {
     } catch (Exception e) {
       logger.warn("Error running scheduled deprecations and deletions", e);
     }
-  }
-
-  /** Converts Seconds to "x min, y sec" */
-  private String toMinutesAndSeconds(long seconds) {
-    return String.format(
-        "%d min, %d sec",
-        TimeUnit.SECONDS.toMinutes(seconds),
-        seconds - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(seconds)));
   }
 }
