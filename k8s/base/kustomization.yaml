@@ -1,6 +1,5 @@
 resources:
   - deployment.yaml
-  - cronjob.yaml
 
 commonLabels:
   app: entity-management-api

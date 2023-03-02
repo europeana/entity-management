@@ -18,7 +18,7 @@ spec:
               command:
                 - java
                 - -jar
-                - /opt/app/entity-management-web.jar
+                - /opt/app/entity-management-api.jar
                 - schedule_update
               env:
                 - name: SPRING_CONFIG_ADDITIONAL_LOCATION
@@ -41,12 +41,12 @@ spec:
                   memory: "${BATCH_MEMORY}M"
                   cpu: "${BATCH_CPU}m"
               volumeMounts:
-                - name: app-properties
+                - name: batch-properties
                   mountPath: "/opt/app/config/entitymanagement.user.properties"
                   readOnly: true
                   subPath: entitymanagement.user.properties
           restartPolicy: Never
           volumes:
-            - name: app-properties
+            - name: batch-properties
               configMap:
-                name: entity-management-api-properties
+                name: entity-management-batch-config
