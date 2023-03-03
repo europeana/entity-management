@@ -45,8 +45,15 @@ spec:
                   mountPath: "/opt/app/config/entitymanagement.user.properties"
                   readOnly: true
                   subPath: entitymanagement.user.properties
+                - name: ibm-batch-certficate
+                  mountPath: "/opt/app/config/ibm-databases-truststore.jks"
+                  readOnly: true
+                  subPath: ibm-databases-truststore.jks
           restartPolicy: Never
           volumes:
             - name: batch-properties
               configMap:
                 name: entity-management-batch-config
+            - name: ibm-batch-certficate
+              configMap:
+                name: ibm-secret-config-map
