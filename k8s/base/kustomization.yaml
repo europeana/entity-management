@@ -12,3 +12,8 @@ secretGenerator:
   - name: zoho-import-properties
     files:
       - zoho_import.properties
+
+configMapGenerator:
+  - name: entity-management-batch-config
+    files:
+      - entitymanagement.user.properties

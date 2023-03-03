@@ -15,8 +15,3 @@ secretGenerator:
   - name: ibm-secret
     files:
       - ibm-databases-truststore.jks
-
-configMapGenerator:
-  - name: entity-management-batch-config
-    files:
-      - entitymanagement.user.properties
