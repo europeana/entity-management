@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.method.HandlerMethod;
@@ -18,6 +19,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 
 /** This service is used to populate the Allow header in API responses. */
 @Service
+@ConditionalOnWebApplication
 public class RequestPathMethodService implements InitializingBean {
 
   /**

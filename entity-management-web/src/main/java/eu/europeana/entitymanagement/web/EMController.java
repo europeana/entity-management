@@ -55,6 +55,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -75,6 +76,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RestController
 @Validated
 @RequestMapping("/entity")
+@ConditionalOnWebApplication
 public class EMController extends BaseRest {
 
   private final EntityRecordService entityRecordService;
