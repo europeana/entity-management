@@ -11,10 +11,12 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 
 /**
@@ -50,21 +52,32 @@ public class EntityManagementApp implements CommandLineRunner {
     // Activate socks proxy (if your application requires it)
     SocksProxyActivator.activate(
         new SocksProxyConfig("entitymanagement.properties", "entitymanagement.user.properties"));
-    ConfigurableApplicationContext context = SpringApplication.run(EntityManagementApp.class, args);
 
     if (StringUtils.isNotEmpty(jobType)) {
+      validateArguments();
+      // disable web server since we're only running an update task
+      ConfigurableApplicationContext context =
+          new SpringApplicationBuilder(EntityManagementApp.class)
+              .web(WebApplicationType.NONE)
+              .run(args);
+
       System.exit(SpringApplication.exit(context));
+    } else {
+      LOG.info("No args provided to application. Starting web server");
+      SpringApplication.run(EntityManagementApp.class, args);
+      return;
     }
   }
 
   @Override
   public void run(String... args) throws Exception {
     if (StringUtils.isNotEmpty(jobType)) {
-      validateArguments();
       LOG.info("Started the Entity Management Batch Application with arguments - {}", jobType);
       schedulingConfig.runScheduledUpdate();
       schedulingConfig.runScheduledDeprecationsAndDeletions();
     }
+    // if no arguments then web server should be started
+    return;
   }
 
   /** validates the arguments passed */

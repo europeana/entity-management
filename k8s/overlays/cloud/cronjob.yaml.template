@@ -23,8 +23,6 @@ spec:
               env:
                 - name: SPRING_CONFIG_ADDITIONAL_LOCATION
                   value: "file:/opt/app/config/entitymanagement.user.properties"
-                - name: SPRING_MAIN_WEBAPPLICATIONTYPE
-                  value: "NONE"
                 - name: JAVA_OPTS
                   value: "-javaagent:\"/usr/local/elastic-apm-agent.jar\"
                           -Delastic.apm.application_packages=${ELASTIC_APP_PACKAGES}
