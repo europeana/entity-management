@@ -12,19 +12,6 @@ import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTIT
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_SAME_AS;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MAJORITY_WRITE_MODIFY_OPTS;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_UPDATE_OPTS;
-
-import com.mongodb.client.result.UpdateResult;
-import dev.morphia.Datastore;
-import dev.morphia.query.FindOptions;
-import dev.morphia.query.Query;
-import dev.morphia.query.experimental.filters.Filter;
-import dev.morphia.query.experimental.updates.UpdateOperators;
-import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
-import eu.europeana.entitymanagement.definitions.EntityRecordFields;
-import eu.europeana.entitymanagement.definitions.model.EntityIdGenerator;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
-import eu.europeana.entitymanagement.mongo.utils.MorphiaUtils;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -33,6 +20,21 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
+import com.mongodb.client.result.UpdateResult;
+import dev.morphia.Datastore;
+import dev.morphia.query.FindOptions;
+import dev.morphia.query.Query;
+import dev.morphia.query.experimental.filters.Filter;
+import dev.morphia.query.experimental.updates.UpdateOperators;
+import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
+import eu.europeana.entitymanagement.definitions.EntityRecordFields;
+import eu.europeana.entitymanagement.definitions.model.ConceptScheme;
+import eu.europeana.entitymanagement.definitions.model.EntityIdGenerator;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
+import eu.europeana.entitymanagement.mongo.utils.MorphiaUtils;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 
 /** Repository for retrieving the EntityRecord objects. */
 @Repository(AppConfigConstants.BEAN_ENTITY_RECORD_REPO)
@@ -137,14 +139,14 @@ public class EntityRecordRepository {
   public EntityRecord save(EntityRecord entityRecord) {
     return datastore.save(entityRecord);
   }
-
+  
   /**
    * Generates an autoincrement value for entities, based on the Entity type
    *
    * @param internalType internal type for Entity
    * @return autoincrement value
    */
-  public long generateAutoIncrement(String internalType) {
+  public long generateAutoIncrement(EntityTypes internalType) {
     /*
      * Get the given key from the auto increment entity and try to increment it.
      * Synchronization occurs on the DB-level, so we don't need to synchronize this code block.
@@ -162,7 +164,7 @@ public class EntityRecordRepository {
      * production as the db is pre-populated with entities
      */
     if (autoIncrement == null) {
-      autoIncrement = new EntityIdGenerator(internalType, 1L);
+      autoIncrement = new EntityIdGenerator(internalType.toString(), 1L);
       datastore.save(autoIncrement);
     }
     return autoIncrement.getValue();
@@ -172,6 +174,7 @@ public class EntityRecordRepository {
   public void dropCollection() {
     datastore.getMapper().getCollection(EntityRecord.class).drop();
     datastore.getMapper().getCollection(EntityIdGenerator.class).drop();
+    datastore.getMapper().getCollection(ConceptScheme.class).drop();
   }
 
   /**
@@ -234,4 +237,21 @@ public class EntityRecordRepository {
         .update(UpdateOperators.set(DISABLED, disablingDate))
         .execute(MULTI_UPDATE_OPTS);
   }
+  
+  public ConceptScheme findConceptScheme(String id) {
+    return datastore.find(ConceptScheme.class).filter(eq(WebEntityFields.ID, id)).first();
+  }
+
+  public long deleteConceptSchemeForGood(String id) {
+    return datastore
+        .find(ConceptScheme.class)
+        .filter(eq(WebEntityFields.ID, id))
+        .delete()
+        .getDeletedCount();
+  }
+
+  public ConceptScheme saveConceptScheme(ConceptScheme scheme) {
+    return datastore.save(scheme);
+  }
+  
 }

@@ -1,0 +1,10 @@
+{
+  "@context": "http://www.europeana.eu/schemas/context/entity.jsonld",
+  "type": "ConceptScheme",
+  "prefLabel": {
+     "en": "Photography Genre"
+  },
+  "definition": {
+     "en": "Genres of Photography"
+  }
+}

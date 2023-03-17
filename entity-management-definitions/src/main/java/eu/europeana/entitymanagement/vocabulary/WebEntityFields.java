@@ -114,6 +114,7 @@ public interface WebEntityFields {
   public static final String IS_DEFINED_BY = "isDefinedBy";
   public static final String DEFINITION = "definition";
   public static final String TOTAL = "total";
+  public static final String SUBJECT = "subject";
 
   // Authentication
   public static final String USER_ADMIN = "admin";

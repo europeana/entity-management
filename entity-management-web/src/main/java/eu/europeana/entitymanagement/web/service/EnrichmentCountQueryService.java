@@ -23,11 +23,11 @@ public class EnrichmentCountQueryService {
   /** Query fields for entity types */
   private static final Map<String, String> ENRICHMENT_QUERY_FIELD_MAP =
       Map.of(
-          EntityTypes.Agent.getEntityType(), "edm_agent",
-          EntityTypes.Concept.getEntityType(), "skos_concept",
-          EntityTypes.Place.getEntityType(), "edm_place",
-          EntityTypes.TimeSpan.getEntityType(), "edm_timespan",
-          EntityTypes.Organization.getEntityType(), "foaf_organization");
+          EntityTypes.Agent.toString(), "edm_agent",
+          EntityTypes.Concept.toString(), "skos_concept",
+          EntityTypes.Place.toString(), "edm_place",
+          EntityTypes.TimeSpan.toString(), "edm_timespan",
+          EntityTypes.Organization.toString(), "foaf_organization");
 
   private static final Logger logger = LogManager.getLogger(EnrichmentCountQueryService.class);
   private static final String ERROR_MSG = "Error retrieving enrichmentCount for entityId=";
@@ -98,7 +98,7 @@ public class EnrichmentCountQueryService {
             "%s:%s ", ENRICHMENT_QUERY_FIELD_MAP.get(type), getEntityIdForQuery(entityId, type));
 
     url.append("&query=" + searchQuery);
-    if (!EntityTypes.Organization.getEntityType().equals(type)) {
+    if (!EntityTypes.Organization.toString().equals(type)) {
       url.append(contentTierPrefix);
       url.append(configuration.getEnrichmentsQueryContentTier());
     }
@@ -117,8 +117,8 @@ public class EnrichmentCountQueryService {
    */
   private String getEntityIdForQuery(String entityId, String type) {
     // not applicable for organizations and timespans
-    if (EntityTypes.TimeSpan.getEntityType().equals(type)
-        || EntityTypes.Organization.getEntityType().equals(type)) {
+    if (EntityTypes.TimeSpan.toString().equals(type)
+        || EntityTypes.Organization.toString().equals(type)) {
       return "\"" + entityId + "\"";
     }
 

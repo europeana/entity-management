@@ -1,8 +1,8 @@
 package eu.europeana.entitymanagement.utils;
 
+import org.apache.commons.lang3.StringUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
-import org.apache.commons.lang3.StringUtils;
 
 public class EntityRecordUtils {
 
@@ -16,13 +16,11 @@ public class EntityRecordUtils {
     return buildEntityIdUri(type.getEntityType(), identifier);
   }
 
-  public static String buildEntityIdUri(String type, String identifier) {
+  private static String buildEntityIdUri(String type, String identifier) {
     StringBuilder stringBuilder = new StringBuilder();
-
     stringBuilder.append(WebEntityFields.BASE_DATA_EUROPEANA_URI);
     if (StringUtils.isNotEmpty(type)) stringBuilder.append(type.toLowerCase()).append("/");
     if (StringUtils.isNotEmpty(identifier)) stringBuilder.append(identifier);
-
     return stringBuilder.toString();
   }
 

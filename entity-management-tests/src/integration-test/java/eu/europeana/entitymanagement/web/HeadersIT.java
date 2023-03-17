@@ -11,10 +11,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
-import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,6 +18,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
+import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 
 /** Standalone test for checking behaviour of headers */
 @SpringBootTest
@@ -41,6 +40,21 @@ public class HeadersIT extends BaseWebControllerTest {
   }
 
   @Test
+  void registrationConceptSchemeCorsShouldReturnCorrectHeaders() throws Exception {
+    ResultActions results =
+        mockMvc.perform(
+            MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SCHEME_URL)
+                .content(loadFile(IntegrationTestUtils.CONCEPT_SCHEME_PHOTO_GENRE_JSON))
+                // CORS requests include the Origin header
+                .header("Origin", "http://test-origin.eu")
+                .contentType(MediaType.APPLICATION_JSON_VALUE));
+
+    checkAllowHeaderForPOST(results);
+    checkCommonResponseHeaders(results, false);
+    checkCorsHeaders(results, false);
+  }
+
+  @Test
   void registrationCorsShouldReturnCorrectHeaders() throws Exception {
     ResultActions results =
         mockMvc.perform(
@@ -54,7 +68,7 @@ public class HeadersIT extends BaseWebControllerTest {
     checkCommonResponseHeaders(results, false);
     checkCorsHeaders(results, false);
   }
-
+  
   @Test
   void retrievalWithJsonldExtensionShouldReturnCorrectHeaders() throws Exception {
     String requestPath = createEntity();

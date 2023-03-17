@@ -97,15 +97,15 @@ public class SolrUtils {
   @SuppressWarnings("unchecked")
   public static <T extends Entity, U extends SolrEntity<T>> Class<U> getSolrEntityClass(
       String solrType) {
-    if (solrType.equals(EntityTypes.Agent.getEntityType())) {
+    if (solrType.equals(EntityTypes.Agent.toString())) {
       return (Class<U>) SolrAgent.class;
-    } else if (solrType.equals(EntityTypes.Concept.getEntityType())) {
+    } else if (solrType.equals(EntityTypes.Concept.toString())) {
       return (Class<U>) SolrConcept.class;
-    } else if (solrType.equals(EntityTypes.Organization.getEntityType())) {
+    } else if (solrType.equals(EntityTypes.Organization.toString())) {
       return (Class<U>) SolrOrganization.class;
-    } else if (solrType.equals(EntityTypes.Place.getEntityType())) {
+    } else if (solrType.equals(EntityTypes.Place.toString())) {
       return (Class<U>) SolrPlace.class;
-    } else if (solrType.equalsIgnoreCase(EntityTypes.TimeSpan.getEntityType())) {
+    } else if (solrType.equalsIgnoreCase(EntityTypes.TimeSpan.toString())) {
       return (Class<U>) SolrTimeSpan.class;
     }
 

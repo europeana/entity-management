@@ -4,44 +4,6 @@ import static eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.QUERY_PARAM_QUERY;
 import static java.util.stream.Collectors.groupingBy;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-
-import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.api.commons.error.EuropeanaApiException;
-import eu.europeana.api.commons.web.exception.HttpException;
-import eu.europeana.api.commons.web.http.HttpHeaders;
-import eu.europeana.api.commons.web.model.vocabulary.Operations;
-import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
-import eu.europeana.entitymanagement.common.config.DataSource;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.config.DataSources;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
-import eu.europeana.entitymanagement.definitions.model.Aggregation;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
-import eu.europeana.entitymanagement.definitions.web.EntityIdResponse;
-import eu.europeana.entitymanagement.dereference.Dereferencer;
-import eu.europeana.entitymanagement.exception.DatasourceNotKnownException;
-import eu.europeana.entitymanagement.exception.EntityMismatchException;
-import eu.europeana.entitymanagement.exception.EntityNotFoundException;
-import eu.europeana.entitymanagement.exception.EntityRemovedException;
-import eu.europeana.entitymanagement.exception.HttpBadRequestException;
-import eu.europeana.entitymanagement.solr.SolrSearchCursorIterator;
-import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
-import eu.europeana.entitymanagement.solr.model.SolrEntity;
-import eu.europeana.entitymanagement.solr.service.SolrService;
-import eu.europeana.entitymanagement.utils.EntityRecordUtils;
-import eu.europeana.entitymanagement.vocabulary.EntityProfile;
-import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.vocabulary.FormatTypes;
-import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
-import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
-import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
-import eu.europeana.entitymanagement.web.service.EntityRecordService;
-import io.swagger.annotations.ApiOperation;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -71,10 +33,49 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
+import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons.error.EuropeanaApiException;
+import eu.europeana.api.commons.web.exception.HttpException;
+import eu.europeana.api.commons.web.http.HttpHeaders;
+import eu.europeana.api.commons.web.model.vocabulary.Operations;
+import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
+import eu.europeana.entitymanagement.common.config.DataSource;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.config.DataSources;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
+import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
+import eu.europeana.entitymanagement.definitions.model.Aggregation;
+import eu.europeana.entitymanagement.definitions.model.ConceptScheme;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
+import eu.europeana.entitymanagement.definitions.web.EntityIdResponse;
+import eu.europeana.entitymanagement.dereference.Dereferencer;
+import eu.europeana.entitymanagement.exception.DatasourceNotKnownException;
+import eu.europeana.entitymanagement.exception.EntityMismatchException;
+import eu.europeana.entitymanagement.exception.EntityNotFoundException;
+import eu.europeana.entitymanagement.exception.EntityRemovedException;
+import eu.europeana.entitymanagement.exception.HttpBadRequestException;
+import eu.europeana.entitymanagement.solr.SolrSearchCursorIterator;
+import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
+import eu.europeana.entitymanagement.solr.model.SolrEntity;
+import eu.europeana.entitymanagement.solr.service.SolrService;
+import eu.europeana.entitymanagement.utils.EntityRecordUtils;
+import eu.europeana.entitymanagement.vocabulary.EntityProfile;
+import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.FormatTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
+import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
+import eu.europeana.entitymanagement.web.service.EntityRecordService;
+import io.swagger.annotations.ApiOperation;
 
 @RestController
 @Validated
-@RequestMapping("/entity")
+//@RequestMapping("/entity")
 public class EMController extends BaseRest {
 
   private final EntityRecordService entityRecordService;
@@ -113,7 +114,7 @@ public class EMController extends BaseRest {
       nickname = "disableEntity",
       response = java.lang.Void.class)
   @RequestMapping(
-      value = {"/{type}/{identifier}"},
+      value = {"/entity/{type}/{identifier}"},
       method = RequestMethod.DELETE,
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
   public ResponseEntity<String> disableEntity(
@@ -127,8 +128,12 @@ public class EMController extends BaseRest {
 
     verifyWriteAccess(Operations.DELETE, request);
 
-    EntityRecord entityRecord =
-        entityRecordService.retrieveEntityRecord(type, identifier.toLowerCase(), false);
+    EntityRecord entityRecord=null;
+    try {
+      entityRecord = entityRecordService.retrieveEntityRecord(EntityTypes.getByName(type), identifier.toLowerCase(), false);
+    } catch (UnsupportedEntityTypeException e) {
+      throw new EntityNotFoundException("/"+type+"/"+identifier);
+    }
 
     Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
     long timestamp = isAggregatedBy != null ? isAggregatedBy.getModified().getTime() : 0L;
@@ -156,7 +161,7 @@ public class EMController extends BaseRest {
       nickname = "enableEntity",
       response = java.lang.Void.class)
   @RequestMapping(
-      value = {"/{type}/{identifier}"},
+      value = {"/entity/{type}/{identifier}"},
       method = RequestMethod.POST,
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
   public ResponseEntity<String> enableEntity(
@@ -171,10 +176,17 @@ public class EMController extends BaseRest {
 
     verifyWriteAccess(Operations.UPDATE, request);
 
-    EntityRecord entityRecord =
-        entityRecordService.retrieveEntityRecord(type, identifier.toLowerCase(), true);
+    EntityTypes enType=null;
+    try {
+      enType=EntityTypes.getByName(type);
+    } catch (UnsupportedEntityTypeException e1) {
+      throw new EntityNotFoundException("/"+type+"/"+identifier);
+    }
+    
+    EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier.toLowerCase(), true);
+    
     if (!entityRecord.isDisabled()) {
-      return generateResponseEntity(
+      return generateResponseEntityForEntityRecord(
           request,
           entityProfile,
           FormatTypes.jsonld,
@@ -186,8 +198,9 @@ public class EMController extends BaseRest {
     logger.debug("Re-enabling entityId={}", entityRecord.getEntityId());
     entityRecordService.enableEntityRecord(entityRecord);
 
-    entityRecord = entityRecordService.retrieveEntityRecord(type, identifier.toLowerCase(), false);
-    return generateResponseEntity(
+    entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier.toLowerCase(), false);
+    
+    return generateResponseEntityForEntityRecord(
         request,
         entityProfile,
         FormatTypes.jsonld,
@@ -202,7 +215,7 @@ public class EMController extends BaseRest {
       nickname = "updateEntity",
       response = java.lang.Void.class)
   @RequestMapping(
-      value = {"/{type}/{identifier}"},
+      value = {"/entity/{type}/{identifier}"},
       method = RequestMethod.PUT,
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
   public ResponseEntity<String> updateEntity(
@@ -218,9 +231,15 @@ public class EMController extends BaseRest {
 
     verifyWriteAccess(Operations.UPDATE, request);
 
-    validateBodyEntity(updateRequestEntity);
+    validateBodyEntity(updateRequestEntity, false);
 
-    EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
+    EntityTypes enType=null;
+    try {
+      enType = EntityTypes.getByName(type);
+    } catch (UnsupportedEntityTypeException e) {
+      throw new EntityNotFoundException("/"+type+"/"+identifier);
+    }
+    EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier, false);
 
     // check that  type from update request matches existing entity's
     if (!entityRecord.getEntity().getType().equals(updateRequestEntity.getType())) {
@@ -242,7 +261,11 @@ public class EMController extends BaseRest {
     entityRecordService.update(entityRecord);
 
     // update the consolidated version in mongo and solr
-    return launchTaskAndRetrieveEntity(request, type, identifier, entityRecord, profile);
+    try {
+      return launchTaskAndRetrieveEntity(request, EntityTypes.getByName(type), identifier, entityRecord, profile);
+    } catch (UnsupportedEntityTypeException e) {
+      throw new EntityNotFoundException("/"+type+"/"+identifier);
+    }
   }
 
   private void verifyCoreferencesForUpdate(Entity updateRequestEntity, EntityRecord entityRecord)
@@ -281,7 +304,7 @@ public class EMController extends BaseRest {
       nickname = "updateEntityFromDatasource",
       response = java.lang.Void.class)
   @PostMapping(
-      value = "/{type}/{identifier}/management/update",
+      value = "/entity/{type}/{identifier}/management/update",
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
   public ResponseEntity<String> triggerSingleEntityFullUpdate(
       @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
@@ -293,10 +316,17 @@ public class EMController extends BaseRest {
 
     verifyWriteAccess(Operations.UPDATE, request);
 
-    EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
+    EntityTypes enType=null;
+    try {
+      enType = EntityTypes.getByName(type);
+    } catch (UnsupportedEntityTypeException e) {
+      throw new EntityNotFoundException("/"+type+"/"+identifier);
+    }  
+    
+    EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier, false);
     // update from external data source is not available for static data sources
     datasources.verifyDataSource(entityRecord.getExternalProxies().get(0).getProxyId(), false);
-    return launchTaskAndRetrieveEntity(request, type, identifier, entityRecord, profile);
+    return launchTaskAndRetrieveEntity(request, enType, identifier, entityRecord, profile);
   }
 
   @ApiOperation(
@@ -304,7 +334,7 @@ public class EMController extends BaseRest {
       nickname = "updateMultipleEntityFromDatasource",
       response = java.lang.Void.class)
   @PostMapping(
-      value = "/management/update",
+      value = "/entity/management/update",
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
   public ResponseEntity<EntityIdResponse> triggerFullUpdateMultipleEntities(
       @RequestBody(required = false) List<String> entityIds,
@@ -331,7 +361,7 @@ public class EMController extends BaseRest {
       nickname = "updateMetricsForEntities",
       response = java.lang.Void.class)
   @PostMapping(
-      value = "/management/metrics",
+      value = "/entity/management/metrics",
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
   public ResponseEntity<EntityIdResponse> triggerMetricsUpdateMultipleEntities(
       @RequestBody(required = false) List<String> entityIds,
@@ -369,7 +399,7 @@ public class EMController extends BaseRest {
       nickname = "enableDisableForEnrich",
       response = java.lang.Void.class)
   @PostMapping(
-      value = "/{type}/{identifier}/management/enrich",
+      value = "/entity/{type}/{identifier}/management/enrich",
       produces = {MediaType.APPLICATION_JSON_VALUE, HttpHeaders.CONTENT_TYPE_JSONLD})
   public ResponseEntity<String> enableDisableForEnrich(
       @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
@@ -387,9 +417,9 @@ public class EMController extends BaseRest {
     validateAction(action);
 
     EntityRecord entityRecord =
-        entityRecordService.updateUsedForEnrichment(type, identifier, action);
+        entityRecordService.updateUsedForEnrichment(EntityTypes.getByName(type), identifier, action);
     entityRecord = launchMetricsUpdateTask(entityRecord, true);
-    return generateResponseEntity(
+    return generateResponseEntityForEntityRecord(
         request,
         getEntityProfile(profile),
         FormatTypes.jsonld,
@@ -419,12 +449,12 @@ public class EMController extends BaseRest {
       response = java.lang.Void.class)
   @GetMapping(
       value = {
-        "/{type}/base/{identifier}.jsonld",
-        "/{type}/base/{identifier}.json",
-        "/{type}/{identifier}.jsonld",
-        "/{type}/{identifier}.json",
-        "/{type}/base/{identifier}",
-        "/{type}/{identifier}"
+        "/entity/{type}/base/{identifier}.jsonld",
+        "/entity/{type}/base/{identifier}.json",
+        "/entity/{type}/{identifier}.jsonld",
+        "/entity/{type}/{identifier}.json",
+        "/entity/{type}/base/{identifier}",
+        "/entity/{type}/{identifier}"
       },
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
   public ResponseEntity<String> getJsonLdEntity(
@@ -440,14 +470,18 @@ public class EMController extends BaseRest {
 
     verifyReadAccess(request);
 
-    return createResponseRetrieve(
-        type,
-        identifier,
-        profile,
-        request,
-        FormatTypes.jsonld,
-        languages,
-        HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
+    try {
+      return createResponseRetrieve(
+          EntityTypes.getByName(type),
+          identifier,
+          profile,
+          request,
+          FormatTypes.jsonld,
+          languages,
+          HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
+    } catch (UnsupportedEntityTypeException e) {
+      throw new EntityNotFoundException("/"+type+"/"+identifier);
+    }
   }
 
   @ApiOperation(
@@ -456,10 +490,10 @@ public class EMController extends BaseRest {
       response = java.lang.Void.class)
   @RequestMapping(
       value = {
-        "/{type}/base/{identifier}.xml",
-        "/{type}/{identifier}.xml",
-        "/{type}/{identifier}",
-        "/{type}/{identifier}"
+        "/entity/{type}/base/{identifier}.xml",
+        "/entity/{type}/{identifier}.xml",
+        "/entity/{type}/{identifier}",
+        "/entity/{type}/{identifier}"
       },
       method = RequestMethod.GET,
       produces = {
@@ -481,14 +515,18 @@ public class EMController extends BaseRest {
 
     verifyReadAccess(request);
 
-    return createResponseRetrieve(
-        type,
-        identifier,
-        profile,
-        request,
-        FormatTypes.xml,
-        languages,
-        HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML);
+    try {
+      return createResponseRetrieve(
+          EntityTypes.getByName(type),
+          identifier,
+          profile,
+          request,
+          FormatTypes.xml,
+          languages,
+          HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML);
+    } catch (UnsupportedEntityTypeException e) {
+      throw new EntityNotFoundException("/"+type+"/"+identifier);
+    }
   }
 
   @ApiOperation(
@@ -497,10 +535,10 @@ public class EMController extends BaseRest {
       response = java.lang.Void.class)
   @GetMapping(
       value = {
-        "/{type}/base/{identifier}.schema.jsonld",
-        "/{type}/base/{identifier}.schema.json",
-        "/{type}/{identifier}.schema.jsonld",
-        "/{type}/{identifier}.schema.json"
+        "/entity/{type}/base/{identifier}.schema.jsonld",
+        "/entity/{type}/base/{identifier}.schema.json",
+        "/entity/{type}/{identifier}.schema.jsonld",
+        "/entity/{type}/{identifier}.schema.json"
       },
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
   public ResponseEntity<String> getEntitySchemaJsonLd(
@@ -516,14 +554,18 @@ public class EMController extends BaseRest {
 
     verifyReadAccess(request);
 
-    return createResponseRetrieve(
-        type,
-        identifier,
-        profile,
-        request,
-        FormatTypes.schema,
-        languages,
-        HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
+    try {
+      return createResponseRetrieve(
+          EntityTypes.getByName(type),
+          identifier,
+          profile,
+          request,
+          FormatTypes.schema,
+          languages,
+          HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
+    } catch (UnsupportedEntityTypeException e) {
+      throw new EntityNotFoundException("/"+type+"/"+identifier);
+    }
   }
 
   @ApiOperation(
@@ -531,14 +573,14 @@ public class EMController extends BaseRest {
       nickname = "registerEntity",
       response = java.lang.Void.class)
   @PostMapping(
-      value = "/",
+      value = "/entity/",
       produces = {MediaType.APPLICATION_JSON_VALUE, HttpHeaders.CONTENT_TYPE_JSONLD})
   public ResponseEntity<String> registerEntity(
       @RequestBody Entity europeanaProxyEntity, HttpServletRequest request) throws Exception {
 
     verifyWriteAccess(Operations.CREATE, request);
 
-    validateBodyEntity(europeanaProxyEntity);
+    validateBodyEntity(europeanaProxyEntity, false);
 
     String creationRequestId = europeanaProxyEntity.getEntityId();
 
@@ -575,7 +617,7 @@ public class EMController extends BaseRest {
 
     // in case of Organization it must be the zoho Organization
     String creationRequestType = europeanaProxyEntity.getType();
-    if (EntityTypes.Organization.getEntityType().equals(creationRequestType)
+    if (EntityTypes.Organization.toString().equals(creationRequestType)
         && !creationRequestId.contains(DataSource.ZOHO_HOST)) {
       throw new HttpBadRequestException(
           String.format(
@@ -595,7 +637,7 @@ public class EMController extends BaseRest {
 
     return launchTaskAndRetrieveEntity(
         request,
-        savedEntityRecord.getEntity().getType(),
+        EntityTypes.getByName(savedEntityRecord.getEntity().getType()),
         getDatabaseIdentifier(savedEntityRecord.getEntityId()),
         savedEntityRecord,
         EntityProfile.internal.toString());
@@ -628,7 +670,7 @@ public class EMController extends BaseRest {
 
   @ApiOperation(value = "Change provenance for an Entity", nickname = "changeProvenance")
   @PutMapping(
-      value = "/{type}/{identifier}/management/source",
+      value = "/entity/{type}/{identifier}/management/source",
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
   public ResponseEntity<String> changeProvenance(
       @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
@@ -641,7 +683,8 @@ public class EMController extends BaseRest {
 
     verifyWriteAccess(Operations.UPDATE, request);
 
-    EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
+    EntityTypes enType = EntityTypes.getByName(type);
+    EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier, false);
 
     if (!entityRecord.getEntity().getSameReferenceLinks().contains(url)) {
       throw new HttpBadRequestException(String.format(SAME_AS_NOT_EXISTS_MSG, url));
@@ -649,12 +692,12 @@ public class EMController extends BaseRest {
 
     entityRecordService.changeExternalProxy(entityRecord, url);
     entityRecordService.update(entityRecord);
-    return launchTaskAndRetrieveEntity(request, type, identifier, entityRecord, profile);
+    return launchTaskAndRetrieveEntity(request, enType, identifier, entityRecord, profile);
   }
 
   @ApiOperation(value = "Retrieve multiple entities", nickname = "retrieveEntities")
   @PostMapping(
-      value = "/retrieve",
+      value = "/entity/retrieve",
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
   public ResponseEntity<String> retrieveEntities(
       @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
@@ -666,9 +709,35 @@ public class EMController extends BaseRest {
 
     return createResponseMultipleEntities(urls, request);
   }
+  
+  @ApiOperation(
+      value = "Create an entity grouping/scheme", 
+      nickname = "createScheme",
+      response = java.lang.Void.class
+  )
+  @PostMapping(
+      value = "/scheme/",
+      produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
+  public ResponseEntity<String> createScheme(
+      @RequestParam(value = CommonApiConstants.QUERY_PARAM_PROFILE, required = false, defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profile,
+      @RequestBody ConceptScheme conceptScheme,
+      HttpServletRequest request)
+      throws Exception {
+
+    verifyWriteAccess(Operations.CREATE, request);
+    
+    ConceptScheme createdScheme = entityRecordService.createConceptScheme(conceptScheme);
+
+    validateBodyEntity(createdScheme, true);
+    
+    entityRecordService.saveConceptScheme(createdScheme);
+    
+    return generateResponseEntityForConceptScheme(request, profile, createdScheme, HttpStatus.CREATED);
+    
+  }
 
   private ResponseEntity<String> createResponseRetrieve(
-      String type,
+      EntityTypes type,
       String identifier,
       String profile,
       HttpServletRequest request,
@@ -684,7 +753,7 @@ public class EMController extends BaseRest {
 
     List<EntityProfile> entityProfile = getEntityProfile(profile);
     // if request doesn't specify a valid EntityProfile, use external by default
-    return generateResponseEntity(
+    return generateResponseEntityForEntityRecord(
         request, entityProfile, outFormat, languages, contentType, entityRecord, HttpStatus.OK);
   }
 
@@ -759,7 +828,7 @@ public class EMController extends BaseRest {
 
   private ResponseEntity<String> launchTaskAndRetrieveEntity(
       HttpServletRequest request,
-      String type,
+      EntityTypes type,
       String identifier,
       EntityRecord entityRecord,
       String profile)
@@ -768,7 +837,7 @@ public class EMController extends BaseRest {
     launchUpdateTask(entityRecord.getEntityId());
     entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
 
-    return generateResponseEntity(
+    return generateResponseEntityForEntityRecord(
         request,
         getEntityProfile(profile),
         FormatTypes.jsonld,
@@ -804,7 +873,7 @@ public class EMController extends BaseRest {
   }
 
   private ResponseEntity<String> redirectDeprecated(
-      EntityRecord deprecatedEntity, String type, String identifier) throws EntityRemovedException {
+      EntityRecord deprecatedEntity, EntityTypes type, String identifier) throws EntityRemovedException {
     // check if there is an entity in the sameAs ref links starting with "http://data.europeana.eu/"
     // and so, redirect to it
     List<String> sameAsRefLinks = deprecatedEntity.getEntity().getSameReferenceLinks();

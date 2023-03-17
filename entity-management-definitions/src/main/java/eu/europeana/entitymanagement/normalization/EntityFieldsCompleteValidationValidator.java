@@ -1,11 +1,11 @@
 package eu.europeana.entitymanagement.normalization;
 
-import eu.europeana.entitymanagement.definitions.model.Entity;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
+import eu.europeana.entitymanagement.vocabulary.ValidationEntity;
 
 public class EntityFieldsCompleteValidationValidator
-    implements ConstraintValidator<EntityFieldsCompleteValidationInterface, Entity> {
+    implements ConstraintValidator<EntityFieldsCompleteValidationInterface, ValidationEntity> {
 
   private final EntityFieldsDatatypeValidation emEntityFieldDatatypeValidation;
 
@@ -19,7 +19,7 @@ public class EntityFieldsCompleteValidationValidator
   }
 
   @Override
-  public boolean isValid(Entity entity, ConstraintValidatorContext context) {
+  public boolean isValid(ValidationEntity entity, ConstraintValidatorContext context) {
     context.disableDefaultConstraintViolation();
     return emEntityFieldDatatypeValidation.validateEntity(entity, context, true, true);
   }

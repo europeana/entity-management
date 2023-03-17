@@ -3,30 +3,6 @@ package eu.europeana.entitymanagement.solr.service;
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_INDEXING_SOLR_CLIENT;
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_JSON_MAPPER;
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_SOLR_ENTITY_SUGGESTER_FILTER;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.ser.FilterProvider;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
-import eu.europeana.entitymanagement.definitions.model.Agent;
-import eu.europeana.entitymanagement.definitions.model.Concept;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.Organization;
-import eu.europeana.entitymanagement.definitions.model.Place;
-import eu.europeana.entitymanagement.definitions.model.TimeSpan;
-import eu.europeana.entitymanagement.solr.SolrEntitySuggesterMixins;
-import eu.europeana.entitymanagement.solr.SolrEntitySuggesterMixins.ConceptSuggesterMixin;
-import eu.europeana.entitymanagement.solr.SolrEntitySuggesterMixins.PlaceSuggesterMixin;
-import eu.europeana.entitymanagement.solr.SolrEntitySuggesterMixins.TimeSpanSuggesterMixin;
-import eu.europeana.entitymanagement.solr.SolrSearchCursorIterator;
-import eu.europeana.entitymanagement.solr.SolrUtils;
-import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
-import eu.europeana.entitymanagement.solr.model.SolrEntity;
-import eu.europeana.entitymanagement.solr.model.SolrOrganization;
-import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,6 +24,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
+import eu.europeana.entitymanagement.definitions.model.Agent;
+import eu.europeana.entitymanagement.definitions.model.Concept;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.definitions.model.Place;
+import eu.europeana.entitymanagement.definitions.model.TimeSpan;
+import eu.europeana.entitymanagement.solr.SolrEntitySuggesterMixins;
+import eu.europeana.entitymanagement.solr.SolrEntitySuggesterMixins.ConceptSuggesterMixin;
+import eu.europeana.entitymanagement.solr.SolrEntitySuggesterMixins.PlaceSuggesterMixin;
+import eu.europeana.entitymanagement.solr.SolrEntitySuggesterMixins.TimeSpanSuggesterMixin;
+import eu.europeana.entitymanagement.solr.SolrSearchCursorIterator;
+import eu.europeana.entitymanagement.solr.SolrUtils;
+import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
+import eu.europeana.entitymanagement.solr.model.SolrConceptScheme;
+import eu.europeana.entitymanagement.solr.model.SolrEntity;
+import eu.europeana.entitymanagement.solr.model.SolrOrganization;
+import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 
 @Service(AppConfigConstants.BEAN_EM_SOLR_SERVICE)
 public class SolrService implements InitializingBean {
@@ -116,6 +116,25 @@ public class SolrService implements InitializingBean {
     }
   }
 
+  public void storeConceptScheme(SolrConceptScheme solrConceptScheme) throws SolrServiceException {
+    try {
+      UpdateResponse rsp = solrClient.addBean(solrConceptScheme);
+      if (isExplicitCommitsEnabled) {
+        solrClient.commit();
+        log.debug("Performed explicit commit for entityId={}", solrConceptScheme.getEntityId());
+      }
+
+      log.debug(
+          "Indexed entity to Solr in {}ms: entityId={}",
+          rsp.getElapsedTime(),
+          solrConceptScheme.getEntityId());
+    } catch (SolrServerException | IOException | RuntimeException ex) {
+      throw new SolrServiceException(
+          String.format("Error during Solr indexing for entityId=%s", solrConceptScheme.getEntityId()),
+          ex);
+    }
+  }
+  
   /**
    * Indexes multiple entities to Solr. Replaces any existing entities with the same entity
    * identifier.

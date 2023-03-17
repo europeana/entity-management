@@ -129,7 +129,7 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
    */
   boolean hasToGenerateDepiction(Entity consolidatedEntity) {
     boolean isOrganization =
-        EntityTypes.Organization.getEntityType().equals(consolidatedEntity.getType());
+        EntityTypes.Organization.toString().equals(consolidatedEntity.getType());
     return !isOrganization
         && consolidatedEntity.getIsShownBy() == null
         && consolidatedEntity.getDepiction() == null;

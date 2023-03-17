@@ -60,7 +60,7 @@ import java.util.Map;
 })
 public class Organization extends Entity {
 
-  private String type = EntityTypes.Organization.getEntityType();
+  private String type = EntityTypes.Organization.toString();
   private Map<String, String> description;
   private Map<String, List<String>> acronym;
   private WebResource logo;

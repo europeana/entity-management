@@ -13,7 +13,13 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_RELATE
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_SHOWN_BY;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NOTE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
-
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -28,14 +34,8 @@ import eu.europeana.entitymanagement.normalization.EntityFieldsDataSourceProxyVa
 import eu.europeana.entitymanagement.normalization.EntityFieldsDataSourceProxyValidationInterface;
 import eu.europeana.entitymanagement.normalization.EntityFieldsEuropeanaProxyValidationGroup;
 import eu.europeana.entitymanagement.normalization.EntityFieldsEuropeanaProxyValidationInterface;
+import eu.europeana.entitymanagement.vocabulary.ValidationEntity;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @dev.morphia.annotations.Embedded
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
     groups = {EntityFieldsEuropeanaProxyValidationGroup.class})
 @EntityFieldsDataSourceProxyValidationInterface(
     groups = {EntityFieldsDataSourceProxyValidationGroup.class})
-public abstract class Entity {
+public abstract class Entity implements ValidationEntity {
 
   protected String entityId;
   // ID of entityRecord in database

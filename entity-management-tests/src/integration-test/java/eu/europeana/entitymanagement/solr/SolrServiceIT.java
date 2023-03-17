@@ -82,7 +82,7 @@ public class SolrServiceIT extends AbstractIntegrationTest {
     assertThat(payload, Matchers.containsString("\"type\""));
 
     // for organizations verify country
-    if (EntityTypes.Organization.getEntityType().equals(entity.getType())) {
+    if (EntityTypes.Organization.toString().equals(entity.getType())) {
       assertThat(payload, Matchers.containsString("\"country\""));
       assertThat(payload, Matchers.containsString("\"organizationDomain\""));
     }

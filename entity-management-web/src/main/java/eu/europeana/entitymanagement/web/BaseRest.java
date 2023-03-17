@@ -1,35 +1,7 @@
 package eu.europeana.entitymanagement.web;
 
-import eu.europeana.api.commons.error.EuropeanaApiException;
-import eu.europeana.api.commons.web.controller.BaseRestController;
-import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
-import eu.europeana.api.commons.web.http.HttpHeaders;
-import eu.europeana.entitymanagement.batch.service.FailedTaskService;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
-import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
-import eu.europeana.entitymanagement.definitions.model.Aggregation;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.exception.EtagMismatchException;
-import eu.europeana.entitymanagement.exception.HttpBadRequestException;
-import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
-import eu.europeana.entitymanagement.normalization.EntityFieldsEuropeanaProxyValidationGroup;
-import eu.europeana.entitymanagement.schemaorg.model.SchemaOrgEntity;
-import eu.europeana.entitymanagement.serialization.EntityXmlSerializer;
-import eu.europeana.entitymanagement.serialization.JsonLdSerializer;
-import eu.europeana.entitymanagement.utils.EntityObjectFactory;
-import eu.europeana.entitymanagement.utils.EntityRecordUtils;
-import eu.europeana.entitymanagement.utils.EntityUtils;
-import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
-import eu.europeana.entitymanagement.vocabulary.EntityProfile;
-import eu.europeana.entitymanagement.vocabulary.FormatTypes;
-import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
-import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
-import eu.europeana.entitymanagement.web.service.EMAuthorizationService;
-import eu.europeana.entitymanagement.web.service.RequestPathMethodService;
-import eu.europeana.entitymanagement.web.xml.model.RdfBaseWrapper;
-import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
+import static eu.europeana.api.commons.web.http.HttpHeaders.LINK;
+import static eu.europeana.api.commons.web.http.HttpHeaders.PREFER;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -52,6 +24,42 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.StringUtils;
+import eu.europeana.api.commons.error.EuropeanaApiException;
+import eu.europeana.api.commons.web.controller.BaseRestController;
+import eu.europeana.api.commons.web.definitions.WebFields;
+import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
+import eu.europeana.api.commons.web.http.HttpHeaders;
+import eu.europeana.entitymanagement.batch.service.FailedTaskService;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
+import eu.europeana.entitymanagement.definitions.exceptions.EMProfileValidationException;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
+import eu.europeana.entitymanagement.definitions.model.Aggregation;
+import eu.europeana.entitymanagement.definitions.model.ConceptScheme;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.exception.EtagMismatchException;
+import eu.europeana.entitymanagement.exception.HttpBadRequestException;
+import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
+import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidationGroup;
+import eu.europeana.entitymanagement.normalization.EntityFieldsEuropeanaProxyValidationGroup;
+import eu.europeana.entitymanagement.schemaorg.model.SchemaOrgEntity;
+import eu.europeana.entitymanagement.serialization.EntityXmlSerializer;
+import eu.europeana.entitymanagement.serialization.JsonLdSerializer;
+import eu.europeana.entitymanagement.utils.EntityObjectFactory;
+import eu.europeana.entitymanagement.utils.EntityRecordUtils;
+import eu.europeana.entitymanagement.utils.EntityUtils;
+import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
+import eu.europeana.entitymanagement.vocabulary.EntityProfile;
+import eu.europeana.entitymanagement.vocabulary.FormatTypes;
+import eu.europeana.entitymanagement.vocabulary.LdProfiles;
+import eu.europeana.entitymanagement.vocabulary.ValidationEntity;
+import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
+import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
+import eu.europeana.entitymanagement.web.service.EMAuthorizationService;
+import eu.europeana.entitymanagement.web.service.RequestPathMethodService;
+import eu.europeana.entitymanagement.web.xml.model.RdfBaseWrapper;
+import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 
 public abstract class BaseRest extends BaseRestController {
 
@@ -203,6 +211,66 @@ public abstract class BaseRest extends BaseRestController {
     }
   }
 
+  // TODO: this method exists also in the set-api, consider moving to api-commons
+  public LdProfiles getProfile(String paramProfile, HttpServletRequest request) throws EMProfileValidationException {
+      LdProfiles profile = null;
+      profile = getHeaderProfile(request);
+      if (profile == null) {
+          // get profile from param
+          profile = getProfileFromParam(paramProfile);
+      }
+      return profile;
+  }
+
+  //TODO: this method exists also in the set-api, consider moving to api-commons
+  private LdProfiles getProfileFromParam(String paramProfile) throws EMProfileValidationException {
+    return LdProfiles.getByName(paramProfile);  
+  }
+
+  //TODO: this method exists also in the set-api, consider moving to api-commons
+  public LdProfiles getHeaderProfile(HttpServletRequest request) throws EMProfileValidationException {
+
+      LdProfiles profile = null;
+      String preferHeader = request.getHeader(PREFER);
+      if (preferHeader != null) {
+          // identify profile by prefer header
+          // retrieve profile if provided within the "If-Match" HTTP
+          String ldPreferHeaderStr = null;
+          String include = "include";
+          if (! org.apache.commons.lang3.StringUtils.isBlank(preferHeader)) {
+              // log header for debuging
+              logger.debug("'Prefer' header value: {} ", preferHeader);
+
+              Map<String, String> preferHeaderMap = parsePreferHeader(preferHeader);
+              ldPreferHeaderStr = preferHeaderMap.get(include).replace("\"", "");
+              profile = LdProfiles.getByHeaderValue(ldPreferHeaderStr.trim());
+          }
+          logger.debug("Profile identified by prefer header: {} ", profile);
+
+      }
+      return profile;
+  }
+
+  //TODO: this method exists also in the set-api, consider moving to api-commons  
+  public Map<String, String> parsePreferHeader(String preferHeader) {
+    // TODO: consider moving to api-commons
+    String[] headerParts = null;
+    String[] contentParts = null;
+    int keyPos = 0;
+    int valuePos = 1;
+
+    Map<String, String> resMap = new HashMap<>(3);
+
+    headerParts = preferHeader.split(";");
+    for (String headerPart : headerParts) {
+        contentParts = headerPart.split("=");
+        if(contentParts.length == 2) {
+            resMap.put(contentParts[keyPos], contentParts[valuePos]);
+        }
+    }
+    return resMap;
+  }
+
   /**
    * Generates serialised EntityRecord Response entity along with Http status and headers
    *
@@ -215,7 +283,7 @@ public abstract class BaseRest extends BaseRestController {
    * @return
    * @throws EuropeanaApiException
    */
-  protected ResponseEntity<String> generateResponseEntity(
+  protected ResponseEntity<String> generateResponseEntityForEntityRecord(
       HttpServletRequest request,
       List<EntityProfile> profiles,
       FormatTypes outFormat,
@@ -269,6 +337,70 @@ public abstract class BaseRest extends BaseRestController {
     return ResponseEntity.status(status).headers(headers).eTag(etag).body(body);
   }
 
+  protected ResponseEntity<String> generateResponseEntityForConceptScheme(
+      HttpServletRequest request,
+      String profileStr,
+      ConceptScheme scheme,
+      HttpStatus status)
+      throws EuropeanaApiException {
+    
+    LdProfiles profile=null;
+    try {
+      profile = getProfile(profileStr, request);
+    } catch (EMProfileValidationException e) {
+      throw new EuropeanaApiException("Error getting the profile parameter.", e);
+    }
+
+    String requestUri = request.getRequestURI();
+    boolean hasPathExtension = requestUri.endsWith("." + FormatTypes.jsonld) 
+        || requestUri.endsWith("." + FormatTypes.json)
+        || requestUri.endsWith("." + FormatTypes.xml);
+
+    long timestamp = scheme.getModified().getTime();
+    String etag = computeEtag(timestamp, WebFields.FORMAT_JSONLD, getApiVersion());
+    
+    // create headers
+    org.springframework.http.HttpHeaders headers = createAllowHeader(request);
+    //TODO: check if this header is needed since in the methods it is not used (for now commented out)
+//    headers.add(LINK, EMHttpHeaders.VALUE_BASIC_CONTAINER);
+    headers.add(LINK, HttpHeaders.VALUE_LDP_RESOURCE);
+    headers.add(HttpHeaders.CONTENT_TYPE, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
+    if (!hasPathExtension) {
+      headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
+    }
+    headers.add(EMHttpHeaders.PREFERENCE_APPLIED, profile.getPreferHeaderValue());
+    headers.add(EMHttpHeaders.CACHE_CONTROL, EMHttpHeaders.VALUE_NO_CAHCHE_STORE_REVALIDATE);
+    headers.add(EMHttpHeaders.ETAG, etag);
+
+    // Access-Control-Expose-Headers only set for CORS requests
+    if (StringUtils.hasLength(request.getHeader(org.springframework.http.HttpHeaders.ORIGIN))) {
+      // HttpHeaders.ALLOW is added above, avoid duplication
+//      headers.add(
+//          org.springframework.http.HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
+      headers.add(
+          org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.LINK);
+      if (!hasPathExtension) {
+        headers.add(
+            org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.VARY);
+      }
+      headers.add(
+          org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.ETAG);
+//      headers.add(
+//          org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, EMHttpHeaders.PREFERENCE_APPLIED);
+//      headers.add(
+//          org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, EMHttpHeaders.CACHE_CONTROL);
+    }
+
+    try {
+      String body = jsonLdSerializer.serializeObject(scheme);
+      return ResponseEntity.status(status).headers(headers).eTag(etag).body(body);
+    } catch (IOException e) {
+      throw new EuropeanaApiException("Error serializing concept scheme.", e);
+    }
+  }
+  
+  
+
   protected org.springframework.http.HttpHeaders createAllowHeader(HttpServletRequest request) {
     org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
     String allowHeaderValue;
@@ -284,6 +416,7 @@ public abstract class BaseRest extends BaseRestController {
       allowHeaderValue = methodsForRequestPattern.get();
     }
 
+    logger.info("Srdjo debug: the value of the allow header for url: " + request.getRequestURL().toString() +  "is: " + allowHeaderValue);
     headers.add(HttpHeaders.ALLOW, allowHeaderValue);
     return headers;
   }
@@ -363,11 +496,12 @@ public abstract class BaseRest extends BaseRestController {
         && Arrays.asList(profile.split(",")).contains(WebEntityConstants.PARAM_PROFILE_SYNC);
   }
 
-  protected void validateBodyEntity(Entity entity) throws HttpBadRequestException {
-    Set<ConstraintViolation<Entity>> violations =
+  protected void validateBodyEntity(ValidationEntity entity, boolean completely) throws HttpBadRequestException {
+    Class<?> validatorGroup = completely ? EntityFieldsCompleteValidationGroup.class : EntityFieldsEuropeanaProxyValidationGroup.class;
+    Set<ConstraintViolation<ValidationEntity>> violations =
         emValidatorFactory
             .getValidator()
-            .validate(entity, EntityFieldsEuropeanaProxyValidationGroup.class);
+            .validate(entity, validatorGroup);
     if (!violations.isEmpty()) {
       String requestEntityViolations =
           violations.stream().map(ConstraintViolation::getMessage).collect(Collectors.joining(" "));

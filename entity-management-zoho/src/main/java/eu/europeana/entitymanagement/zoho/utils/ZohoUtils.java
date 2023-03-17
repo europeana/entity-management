@@ -295,7 +295,7 @@ public final class ZohoUtils {
    * @return
    */
   public static boolean isZohoOrganization(String id, String entityType) {
-    return EntityTypes.Organization.getEntityType().equals(entityType)
+    return EntityTypes.Organization.toString().equals(entityType)
         && id.contains(DataSource.ZOHO_HOST);
   }
 }

@@ -183,7 +183,7 @@ public abstract class AbstractIntegrationTest {
            */
           // NOTE: the response returned is the one used for isShownBy
           String responseBody =
-              queryParam.contains(EntityTypes.TimeSpan.getEntityType().toLowerCase())
+              queryParam.contains(EntityTypes.TimeSpan.toString().toLowerCase())
                   ? IntegrationTestUtils.loadFile(
                       IntegrationTestUtils.TIMESPAN_1_CENTURY_SEARCH_AND_RECORD_JSON)
                   : IntegrationTestUtils.loadFile(

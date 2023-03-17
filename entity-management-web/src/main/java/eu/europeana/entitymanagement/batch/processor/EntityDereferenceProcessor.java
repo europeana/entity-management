@@ -72,7 +72,7 @@ public class EntityDereferenceProcessor extends BaseEntityProcessor {
       collectWikidataEntityIds(externalEntity, wikidataEntityIds);
     }
 
-    if (EntityTypes.Organization.getEntityType()
+    if (EntityTypes.Organization.toString()
         .equals(entityRecord.getEntityRecord().getEntity().getType())) {
       // cross-check wikidata proxy, if reference is lost of changed update the proxy list
       // accordingly

@@ -5,6 +5,7 @@ import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTyp
 public enum EntityTypes implements EntityKeyword {
   Organization("Organization", "http://www.europeana.eu/schemas/edm/Organization"),
   Concept("Concept", "https://www.w3.org/2009/08/skos-reference/skos.html#Concept"),
+  ConceptScheme("Scheme", "https://www.w3.org/2009/08/skos-reference/skos.html#ConceptScheme"),
   Agent("Agent", "http://www.europeana.eu/schemas/edm/Agent"),
   Place("Place", "http://www.europeana.eu/schemas/edm/Place"),
   TimeSpan("TimeSpan", "http://www.europeana.eu/schemas/edm/TimeSpan");
@@ -56,11 +57,11 @@ public enum EntityTypes implements EntityKeyword {
     return false;
   }
 
-  public static EntityTypes getByEntityType(String entityType)
+  public static EntityTypes getByName(String entityType)
       throws UnsupportedEntityTypeException {
 
     for (EntityTypes entityTypeEnum : EntityTypes.values()) {
-      if (entityTypeEnum.getEntityType().equalsIgnoreCase(entityType)) return entityTypeEnum;
+      if (entityTypeEnum.toString().equalsIgnoreCase(entityType)) return entityTypeEnum;
     }
     throw new UnsupportedEntityTypeException(entityType);
   }

@@ -6,47 +6,6 @@ import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEuropeana
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEuropeanaProxyId;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getIsAggregatedById;
 import static java.time.Instant.now;
-
-import com.mongodb.client.result.UpdateResult;
-import dev.morphia.query.experimental.filters.Filter;
-import eu.europeana.api.commons.error.EuropeanaApiException;
-import eu.europeana.entitymanagement.common.config.DataSource;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.config.AppConfig;
-import eu.europeana.entitymanagement.config.DataSources;
-import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
-import eu.europeana.entitymanagement.definitions.model.Address;
-import eu.europeana.entitymanagement.definitions.model.Agent;
-import eu.europeana.entitymanagement.definitions.model.Aggregation;
-import eu.europeana.entitymanagement.definitions.model.Concept;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.EntityProxy;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.Place;
-import eu.europeana.entitymanagement.definitions.model.TimeSpan;
-import eu.europeana.entitymanagement.definitions.model.WebResource;
-import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
-import eu.europeana.entitymanagement.exception.EntityAlreadyExistsException;
-import eu.europeana.entitymanagement.exception.EntityCreationException;
-import eu.europeana.entitymanagement.exception.EntityNotFoundException;
-import eu.europeana.entitymanagement.exception.EntityRemovedException;
-import eu.europeana.entitymanagement.exception.HttpBadRequestException;
-import eu.europeana.entitymanagement.exception.HttpUnprocessableException;
-import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
-import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
-import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
-import eu.europeana.entitymanagement.solr.service.SolrService;
-import eu.europeana.entitymanagement.utils.EMCollectionUtils;
-import eu.europeana.entitymanagement.utils.EntityObjectFactory;
-import eu.europeana.entitymanagement.utils.EntityRecordUtils;
-import eu.europeana.entitymanagement.utils.EntityUtils;
-import eu.europeana.entitymanagement.utils.UriValidator;
-import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
-import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
-import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
-import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,6 +26,49 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import com.mongodb.client.result.UpdateResult;
+import dev.morphia.query.experimental.filters.Filter;
+import eu.europeana.api.commons.error.EuropeanaApiException;
+import eu.europeana.entitymanagement.common.config.DataSource;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.config.AppConfig;
+import eu.europeana.entitymanagement.config.DataSources;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
+import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
+import eu.europeana.entitymanagement.definitions.model.Address;
+import eu.europeana.entitymanagement.definitions.model.Agent;
+import eu.europeana.entitymanagement.definitions.model.Aggregation;
+import eu.europeana.entitymanagement.definitions.model.Concept;
+import eu.europeana.entitymanagement.definitions.model.ConceptScheme;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.EntityProxy;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.model.Place;
+import eu.europeana.entitymanagement.definitions.model.TimeSpan;
+import eu.europeana.entitymanagement.definitions.model.WebResource;
+import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
+import eu.europeana.entitymanagement.exception.EntityAlreadyExistsException;
+import eu.europeana.entitymanagement.exception.EntityCreationException;
+import eu.europeana.entitymanagement.exception.EntityNotFoundException;
+import eu.europeana.entitymanagement.exception.EntityRemovedException;
+import eu.europeana.entitymanagement.exception.HttpBadRequestException;
+import eu.europeana.entitymanagement.exception.HttpUnprocessableException;
+import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
+import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
+import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
+import eu.europeana.entitymanagement.solr.model.SolrConceptScheme;
+import eu.europeana.entitymanagement.solr.service.SolrService;
+import eu.europeana.entitymanagement.utils.EMCollectionUtils;
+import eu.europeana.entitymanagement.utils.EntityObjectFactory;
+import eu.europeana.entitymanagement.utils.EntityRecordUtils;
+import eu.europeana.entitymanagement.utils.EntityUtils;
+import eu.europeana.entitymanagement.utils.UriValidator;
+import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
+import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
+import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 
 @Service(AppConfig.BEAN_ENTITY_RECORD_SERVICE)
 public class EntityRecordService {
@@ -104,6 +106,10 @@ public class EntityRecordService {
     return Optional.ofNullable(entityRecordRepository.findByEntityId(entityId));
   }
 
+  public Optional<ConceptScheme> retrieveConceptSchemeById(String id) {
+    return Optional.ofNullable(entityRecordRepository.findConceptScheme(id));
+  }
+
   /**
    * Retives Multiple Entities at a time. NOTE : If the entity does not exist or is deprecated, do
    * not include it in the response hence, excludeDisabled is set to true.
@@ -115,7 +121,7 @@ public class EntityRecordService {
     return entityRecordRepository.findByEntityIds(entityIds, true, true);
   }
 
-  public EntityRecord retrieveEntityRecord(String type, String identifier, boolean retrieveDisabled)
+  public EntityRecord retrieveEntityRecord(EntityTypes type, String identifier, boolean retrieveDisabled)
       throws EuropeanaApiException {
     String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
     return retrieveEntityRecord(entityUri, retrieveDisabled);
@@ -158,6 +164,27 @@ public class EntityRecordService {
   public EntityRecord saveEntityRecord(EntityRecord er) {
     return entityRecordRepository.save(er);
   }
+
+  public ConceptScheme createConceptScheme(ConceptScheme scheme) throws UnsupportedEntityTypeException  {
+    String id = generateEntityId(EntityTypes.getByName(scheme.getType()), null);
+    scheme.setEntityId(id);
+    Date now = new Date();
+    scheme.setCreated(now);
+    scheme.setModified(now);
+    return scheme;
+  }
+  
+  public ConceptScheme saveConceptScheme(ConceptScheme scheme) throws SolrServiceException {
+    ConceptScheme dbScheme=entityRecordRepository.saveConceptScheme(scheme);
+    try {
+      solrService.storeConceptScheme(new SolrConceptScheme(scheme));
+    } catch (SolrServiceException e) {
+      throw new SolrServiceException(
+          String.format("Error during Solr indexing for id=%s", scheme.getEntityId()), e);
+    }
+    return dbScheme;
+  }
+  
 
   public List<EntityRecord> saveBulkEntityRecords(List<EntityRecord> records) {
     return entityRecordRepository.saveBulk(records);
@@ -260,6 +287,12 @@ public class EntityRecordService {
 
     return entityRecordRepository.deleteForGood(entityId);
   }
+  
+  public long deleteConceptScheme(String id) throws SolrServiceException {
+    // delete from Solr before Mongo, so Solr errors won't leave DB in an inconsistent state
+    solrService.deleteById(List.of(id), true);
+    return entityRecordRepository.deleteConceptSchemeForGood(id);
+  }  
 
   /**
    * Creates an {@link EntityRecord} from an {@link Entity}, which is then persisted. Note : This
@@ -272,11 +305,12 @@ public class EntityRecordService {
    * @throws EntityCreationException if an error occurs
    * @throws HttpUnprocessableException
    * @throws HttpBadRequestException
+   * @throws UnsupportedEntityTypeException 
    */
   public EntityRecord createEntityFromMigrationRequest(
       Entity europeanaProxyEntity, String type, String identifier)
       throws EntityAlreadyExistsException, HttpBadRequestException, HttpUnprocessableException,
-          EntityModelCreationException {
+          EntityModelCreationException, UnsupportedEntityTypeException {
 
     String externalProxyId = europeanaProxyEntity.getEntityId();
 
@@ -286,7 +320,7 @@ public class EntityRecordService {
     Date timestamp = new Date();
 
     Entity entity = EntityObjectFactory.createConsolidatedEntityObject(type);
-    String entityId = generateEntityId(entity.getType(), identifier);
+    String entityId = generateEntityId(EntityTypes.getByName(entity.getType()), identifier);
     // check if entity already exists
     // this is avoid MongoDb exception for duplicate key
     checkIfEntityAlreadyExists(entityId);
@@ -329,10 +363,11 @@ public class EntityRecordService {
    * @param dataSource the data source identified for the given entity id
    * @return Saved Entity record
    * @throws EntityCreationException if an error occurs
+   * @throws UnsupportedEntityTypeException 
    */
   public EntityRecord createEntityFromRequest(
       Entity europeanaProxyEntity, Entity datasourceResponse, DataSource dataSource)
-      throws EntityCreationException {
+      throws EntityCreationException, UnsupportedEntityTypeException {
 
     // Fail quick if no datasource is configured
     String externalEntityId = europeanaProxyEntity.getEntityId();
@@ -450,15 +485,16 @@ public class EntityRecordService {
     }
   }
 
-  String generateEntityId(Entity datasourceResponse, boolean isZohoOrg) {
+  String generateEntityId(Entity datasourceResponse, boolean isZohoOrg) throws UnsupportedEntityTypeException {
     // only in case of Zoho Organization use the provided id from de-referencing
     String entityId = null;
+    EntityTypes type=EntityTypes.getByName(datasourceResponse.getType());
     if (isZohoOrg) {
       // zoho id is mandatory and unique identifier for zoho Organizations
       String zohoId = EntityRecordUtils.getIdFromUrl(datasourceResponse.getEntityId());
-      entityId = EntityRecordUtils.buildEntityIdUri(datasourceResponse.getType(), zohoId);
+      entityId = EntityRecordUtils.buildEntityIdUri(type, zohoId);
     } else {
-      entityId = generateEntityId(datasourceResponse.getType(), null);
+      entityId = generateEntityId(type, null);
     }
     return entityId;
   }
@@ -512,7 +548,7 @@ public class EntityRecordService {
    * @param entityId
    * @return the generated EntityId
    */
-  private String generateEntityId(String entityType, String entityId) {
+  private String generateEntityId(EntityTypes entityType, String entityId) {
     if (entityId != null) {
       return EntityRecordUtils.buildEntityIdUri(entityType, entityId);
     } else {
@@ -1265,7 +1301,7 @@ public class EntityRecordService {
             .collect(Collectors.toList()));
   }
 
-  public EntityRecord updateUsedForEnrichment(String type, String identifier, String action)
+  public EntityRecord updateUsedForEnrichment(EntityTypes type, String identifier, String action)
       throws EuropeanaApiException {
 
     EntityRecord entityRecord = retrieveEntityRecord(type, identifier, false);

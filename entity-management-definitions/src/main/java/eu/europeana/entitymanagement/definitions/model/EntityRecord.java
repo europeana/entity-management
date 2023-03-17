@@ -4,7 +4,11 @@ import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTIT
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_SAME_AS;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BASE_DATA_EUROPEANA_URI;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
-
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.bson.types.ObjectId;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -18,15 +22,12 @@ import dev.morphia.annotations.Indexed;
 import dev.morphia.annotations.Indexes;
 import eu.europeana.entitymanagement.utils.EntityRecordWatcher;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.bson.types.ObjectId;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @dev.morphia.annotations.Entity("EntityRecord")
-@Indexes({@Index(fields = {@Field(ENTITY_EXACT_MATCH)}), @Index(fields = {@Field(ENTITY_SAME_AS)})})
+@Indexes({
+  @Index(fields = {@Field(ENTITY_EXACT_MATCH)}), @Index(fields = {@Field(ENTITY_SAME_AS)})
+})
 @EntityListeners(EntityRecordWatcher.class)
 public class EntityRecord {
 
