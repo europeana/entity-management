@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement;
 
+import static eu.europeana.entitymanagement.batch.model.JobType.SCHEDULE_DELETION;
 import static eu.europeana.entitymanagement.batch.model.JobType.SCHEDULE_UPDATE;
 
 import eu.europeana.entitymanagement.batch.config.EntityUpdateSchedulingConfig;
@@ -72,9 +73,14 @@ public class EntityManagementApp implements CommandLineRunner {
   @Override
   public void run(String... args) throws Exception {
     if (StringUtils.isNotEmpty(jobType)) {
-      LOG.info("Started the Entity Management Batch Application with arguments - {}", jobType);
-      schedulingConfig.runScheduledUpdate();
-      schedulingConfig.runScheduledDeprecationsAndDeletions();
+      if (StringUtils.equalsIgnoreCase(jobType, SCHEDULE_UPDATE.value())) {
+        LOG.info("Started the Entity Management Batch Application for scheduled entity update");
+        schedulingConfig.runScheduledUpdate();
+      }
+      if (StringUtils.equalsIgnoreCase(jobType, SCHEDULE_DELETION.value())) {
+        LOG.info("Started the Entity Management Batch Application for scheduled entity deletion");
+        schedulingConfig.runScheduledDeprecationsAndDeletions();
+      }
     }
     // if no arguments then web server should be started
     return;
@@ -82,11 +88,14 @@ public class EntityManagementApp implements CommandLineRunner {
 
   /** validates the arguments passed */
   private static void validateArguments() {
-    if (StringUtils.isNotEmpty(jobType) && !SCHEDULE_UPDATE.value().equalsIgnoreCase(jobType)) {
+    if (StringUtils.isNotEmpty(jobType)
+        && !(SCHEDULE_UPDATE.value().equalsIgnoreCase(jobType)
+            || SCHEDULE_DELETION.value().equalsIgnoreCase(jobType))) {
       LOG.error(
-          "Unsupported argument '{}'. Supported arguments is '{}'",
+          "Unsupported argument '{}'. Supported arguments are '{}' or '{}'",
           jobType,
-          SCHEDULE_UPDATE.value());
+          SCHEDULE_UPDATE.value(),
+          SCHEDULE_DELETION.value());
       System.exit(1);
     }
   }
