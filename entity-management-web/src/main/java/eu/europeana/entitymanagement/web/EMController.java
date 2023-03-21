@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
 import eu.europeana.api.commons.error.EuropeanaApiException;
+import eu.europeana.api.commons.web.definitions.WebFields;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
@@ -155,6 +156,39 @@ public class EMController extends BaseRest {
 
     return noContentResponse(request);
   }
+  
+  @ApiOperation(
+      value = "Disable a concept scheme",
+      nickname = "disableConceptScheme",
+      response = java.lang.Void.class)
+  @RequestMapping(
+      value = {"/scheme/{identifier}"},
+      method = RequestMethod.DELETE,
+      produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
+  public ResponseEntity<String> disableConceptScheme(
+      @RequestHeader(value = "If-Match", required = false) String ifMatchHeader,
+      @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
+      HttpServletRequest request)
+      throws HttpException, EuropeanaApiException {
+
+    verifyWriteAccess(Operations.DELETE, request);
+
+    ConceptScheme scheme = entityRecordService.retrieveConceptScheme(identifier, true);
+
+    long timestamp = scheme.getModified().getTime();
+    String etag = computeEtag(timestamp, WebFields.FORMAT_JSONLD, getApiVersion());
+    checkIfMatchHeaderWithQuotes(etag, request);
+
+    if(! scheme.isDisabled()) {
+      entityRecordService.disableConceptScheme(scheme, true);
+    }
+    else {
+      entityRecordService.deleteConceptScheme(identifier);
+    }
+
+    return noContentResponse(request);
+  }
+
 
   @ApiOperation(
       value = "Re-enable an entity",
@@ -736,6 +770,30 @@ public class EMController extends BaseRest {
     
   }
 
+  @ApiOperation(
+      value = "Retrieve an entity grouping/scheme",
+      nickname = "getConceptSchemeJsonLd",
+      response = java.lang.Void.class)
+  @GetMapping(
+      value = {
+        "/scheme/{identifier}.jsonld",
+        "/scheme/{identifier}"
+      },
+      produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
+  public ResponseEntity<String> getConceptSchemeJsonLd(
+      @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
+      @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = false, defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profile,
+      @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
+      HttpServletRequest request)
+      throws EuropeanaApiException, HttpException {
+
+    verifyReadAccess(request);
+    
+    ConceptScheme scheme = entityRecordService.retrieveConceptScheme(identifier, false);
+    return generateResponseEntityForConceptScheme(request, profile, scheme, HttpStatus.OK);
+
+  }
+  
   private ResponseEntity<String> createResponseRetrieve(
       EntityTypes type,
       String identifier,

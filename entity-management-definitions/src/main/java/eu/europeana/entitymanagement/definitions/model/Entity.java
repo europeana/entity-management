@@ -7,6 +7,7 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_PART;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HIDDEN_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IDENTIFIER;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IN_SCHEME;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_AGGREGATED_BY;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_PART_OF;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_RELATED_TO;
@@ -65,6 +66,7 @@ public abstract class Entity implements ValidationEntity {
 
   protected List<String> identifier;
   protected List<String> isRelatedTo;
+  protected List<String> inScheme;
 
   // hierarchical structure available only for a part of entities. Add set/get
   // methods to the appropriate interfaces
@@ -94,6 +96,16 @@ public abstract class Entity implements ValidationEntity {
     if (copy.getIsShownBy() != null) this.isShownBy = new WebResource(copy.getIsShownBy());
 
     this.payload = copy.getPayload();
+  }
+
+  @JsonGetter(IN_SCHEME)
+  public List<String> getInScheme() {
+    return inScheme;
+  }
+
+  @JsonSetter(IN_SCHEME)
+  public void setInScheme(List<String> inScheme) {
+    this.inScheme = inScheme;
   }
 
   @JsonGetter(WebEntityFields.PREF_LABEL)

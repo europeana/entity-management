@@ -212,6 +212,34 @@ public class SolrService implements InitializingBean {
     SolrDocument doc = docList.get(0);
     return binder.getBean(classType, doc);
   }
+  
+  public SolrConceptScheme searchConceptScheme(String entityId) throws SolrServiceException {
+    QueryResponse rsp;
+    SolrQuery query = new SolrQuery();
+    query.set("q", EntitySolrFields.ID + ":\"" + entityId + "\"");
+    try {
+      rsp = solrClient.query(query);
+      if (log.isDebugEnabled()) {
+        log.debug(
+            "Performed Solr search query in {}ms:  type={}, query={}",
+            rsp.getElapsedTime(),
+            SolrConceptScheme.class.getSimpleName(),
+            query);
+      }
+    } catch (IOException | SolrServerException ex) {
+      throw new SolrServiceException(
+          String.format("Error while searching Solr for entityId=%s", entityId), ex);
+    }
+
+    DocumentObjectBinder binder = new DocumentObjectBinder();
+    SolrDocumentList docList = rsp.getResults();
+
+    if (docList == null || docList.size() == 0) return null;
+
+    SolrDocument doc = docList.get(0);
+    return binder.getBean(SolrConceptScheme.class, doc);
+  }
+
 
   /**
    * Search by provided solr query

@@ -34,7 +34,6 @@ import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
 import eu.europeana.entitymanagement.mongo.utils.MorphiaUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 
 /** Repository for retrieving the EntityRecord objects. */
 @Repository(AppConfigConstants.BEAN_ENTITY_RECORD_REPO)
@@ -239,13 +238,13 @@ public class EntityRecordRepository {
   }
   
   public ConceptScheme findConceptScheme(String id) {
-    return datastore.find(ConceptScheme.class).filter(eq(WebEntityFields.ID, id)).first();
+    return datastore.find(ConceptScheme.class).filter(eq(ENTITY_ID, id)).first();
   }
 
   public long deleteConceptSchemeForGood(String id) {
     return datastore
         .find(ConceptScheme.class)
-        .filter(eq(WebEntityFields.ID, id))
+        .filter(eq(ENTITY_ID, id))
         .delete()
         .getDeletedCount();
   }

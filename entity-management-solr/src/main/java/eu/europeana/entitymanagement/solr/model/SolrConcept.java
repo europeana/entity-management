@@ -1,15 +1,15 @@
 package eu.europeana.entitymanagement.solr.model;
 
-import eu.europeana.entitymanagement.definitions.model.Concept;
-import eu.europeana.entitymanagement.solr.SolrUtils;
-import eu.europeana.entitymanagement.vocabulary.ConceptSolrFields;
-import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.solr.client.solrj.beans.Field;
+import eu.europeana.entitymanagement.definitions.model.Concept;
+import eu.europeana.entitymanagement.solr.SolrUtils;
+import eu.europeana.entitymanagement.vocabulary.ConceptSolrFields;
+import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 
 public class SolrConcept extends SolrEntity<Concept> {
 
@@ -40,9 +40,6 @@ public class SolrConcept extends SolrEntity<Concept> {
   @Field(ConceptSolrFields.CLOSE_MATCH)
   private List<String> closeMatch;
 
-  @Field(ConceptSolrFields.IN_SCHEME)
-  private List<String> inScheme;
-
   @Field(ConceptSolrFields.NOTATION_ALL)
   Map<String, List<String>> notation;
 
@@ -63,7 +60,6 @@ public class SolrConcept extends SolrEntity<Concept> {
     if (concept.getRelatedMatch() != null)
       this.relatedMatch = new ArrayList<>(concept.getRelatedMatch());
     if (concept.getCloseMatch() != null) this.closeMatch = new ArrayList<>(concept.getCloseMatch());
-    if (concept.getInScheme() != null) this.inScheme = new ArrayList<>(concept.getInScheme());
     setNotation(concept.getNotation());
     if (concept.getSameReferenceLinks() != null) {
       this.exactMatch = new ArrayList<>(concept.getSameReferenceLinks());
@@ -113,10 +109,6 @@ public class SolrConcept extends SolrEntity<Concept> {
 
   public List<String> getCloseMatch() {
     return closeMatch;
-  }
-
-  public List<String> getInScheme() {
-    return inScheme;
   }
 
   public Map<String, List<String>> getNotation() {

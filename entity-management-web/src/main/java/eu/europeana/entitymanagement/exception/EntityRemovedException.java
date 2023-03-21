@@ -5,6 +5,8 @@ import org.springframework.http.HttpStatus;
 
 public class EntityRemovedException extends EuropeanaApiException {
 
+  private static final long serialVersionUID = -6898015316847953613L;
+
   public EntityRemovedException(String message) {
     super(message);
   }

@@ -1,15 +1,15 @@
 package eu.europeana.entitymanagement.solr.model;
 
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.WebResource;
-import eu.europeana.entitymanagement.solr.SolrUtils;
-import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.solr.client.solrj.beans.Field;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.WebResource;
+import eu.europeana.entitymanagement.solr.SolrUtils;
+import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 
 public abstract class SolrEntity<T extends Entity> {
 
@@ -76,6 +76,9 @@ public abstract class SolrEntity<T extends Entity> {
 
   @Field(EntitySolrFields.DERIVED_SCORE)
   private Float derivedScore;
+  
+  @Field(EntitySolrFields.IN_SCHEME)
+  private List<String> inScheme;
 
   public SolrEntity(T entity) {
     this.type = entity.getType();
@@ -95,7 +98,9 @@ public abstract class SolrEntity<T extends Entity> {
     if (entity.getHasPart() != null) this.hasPart = new ArrayList<>(entity.getHasPart());
     if (entity.getIsPartOfArray() != null)
       this.isPartOf = new ArrayList<>(entity.getIsPartOfArray());
-
+    if (entity.getInScheme() != null) 
+      this.inScheme = new ArrayList<>(entity.getInScheme());
+    
     this.entity = entity;
   }
 
@@ -246,6 +251,14 @@ public abstract class SolrEntity<T extends Entity> {
     this.derivedScore = derivedScore;
   }
 
+  public List<String> getInScheme() {
+    return inScheme;
+  }
+  
+  public void setInScheme(List<String> inScheme) {
+    this.inScheme = inScheme;
+  }
+  
   protected abstract void setSameReferenceLinks(ArrayList<String> uris);
 
   public List<String> getLabelEnrichGeneral() {

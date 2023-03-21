@@ -106,10 +106,6 @@ public class EntityRecordService {
     return Optional.ofNullable(entityRecordRepository.findByEntityId(entityId));
   }
 
-  public Optional<ConceptScheme> retrieveConceptSchemeById(String id) {
-    return Optional.ofNullable(entityRecordRepository.findConceptScheme(id));
-  }
-
   /**
    * Retives Multiple Entities at a time. NOTE : If the entity does not exist or is deprecated, do
    * not include it in the response hence, excludeDisabled is set to true.
@@ -129,12 +125,12 @@ public class EntityRecordService {
 
   public EntityRecord retrieveEntityRecord(String entityUri, boolean retrieveDisabled)
       throws EntityNotFoundException, EntityRemovedException {
-    Optional<EntityRecord> entityRecordOptional = this.retrieveByEntityId(entityUri);
-    if (entityRecordOptional.isEmpty()) {
+    Optional<EntityRecord> entityRecordOpt = this.retrieveByEntityId(entityUri);
+    if (entityRecordOpt.isEmpty()) {
       throw new EntityNotFoundException(entityUri);
     }
 
-    EntityRecord entityRecord = entityRecordOptional.get();
+    EntityRecord entityRecord = entityRecordOpt.get();
     if (!retrieveDisabled && entityRecord.isDisabled()) {
       throw new EntityRemovedException(
           String.format(EntityRecordUtils.ENTITY_ID_REMOVED_MSG, entityUri));
@@ -185,7 +181,22 @@ public class EntityRecordService {
     return dbScheme;
   }
   
+  public ConceptScheme retrieveConceptScheme(String identifier, boolean retrieveDisabled)
+      throws EuropeanaApiException {
+    String schemeUri = EntityRecordUtils.buildEntityIdUri(EntityTypes.ConceptScheme, identifier);
+    ConceptScheme dbScheme = entityRecordRepository.findConceptScheme(schemeUri);
+    
+    if (dbScheme==null) {
+      throw new EntityNotFoundException(schemeUri);
+    }
 
+    if (!retrieveDisabled && dbScheme.isDisabled()) {
+      throw new EntityRemovedException(
+          String.format(EntityRecordUtils.ENTITY_ID_REMOVED_MSG, schemeUri));
+    }
+    return dbScheme;
+  }
+  
   public List<EntityRecord> saveBulkEntityRecords(List<EntityRecord> records) {
     return entityRecordRepository.saveBulk(records);
   }
@@ -241,7 +252,39 @@ public class EntityRecordService {
       throw new EntityUpdateException("Cannot delete solr record with id: " + er.getEntityId(), e);
     }
     er.setDisabled(new Date());
-    saveEntityRecord(er);
+    entityRecordRepository.save(er);
+  }
+    
+  public void disableConceptScheme(ConceptScheme scheme, boolean forceSolrCommit)
+      throws EntityUpdateException {
+    updateConceptSchemeEntities(scheme);
+    try {
+      solrService.deleteById(List.of(scheme.getEntityId()), forceSolrCommit);
+    } catch (SolrServiceException e) {
+      throw new EntityUpdateException("Cannot delete solr record with id: " + scheme.getEntityId(), e);
+    }
+    scheme.setDisabled(new Date());
+    entityRecordRepository.saveConceptScheme(scheme);
+  }
+  
+  //update the inScheme field of the entities that refer to this scheme
+  private void updateConceptSchemeEntities(ConceptScheme scheme) throws EntityUpdateException {
+    if(scheme.getItems()==null) {
+      return;
+    }
+    for(String entityUrl : scheme.getItems()) {
+      Optional<EntityRecord> erOpt = retrieveByEntityId(entityUrl);
+      if(erOpt.isEmpty()) {
+        continue;
+      }
+      
+      EntityRecord er = erOpt.get();
+      List<String> inScheme = er.getEntity().getInScheme();
+      if(inScheme!=null) {
+        inScheme.remove(scheme.getEntityId());
+      }
+      entityRecordRepository.save(er);            
+    }      
   }
 
   /**
@@ -533,8 +576,8 @@ public class EntityRecordService {
    * @throws EntityAlreadyExistsException
    */
   private void checkIfEntityAlreadyExists(String entityId) throws EntityAlreadyExistsException {
-    Optional<EntityRecord> entityRecordOptional = retrieveByEntityId(entityId);
-    if (entityRecordOptional.isPresent()) {
+    Optional<EntityRecord> entityRecordOpt = retrieveByEntityId(entityId);
+    if (entityRecordOpt.isPresent()) {
       throw new EntityAlreadyExistsException(entityId);
     }
   }

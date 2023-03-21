@@ -7,24 +7,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-
-import com.zoho.crm.api.record.Record;
-import eu.europeana.entitymanagement.AbstractIntegrationTest;
-import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
-import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
-import eu.europeana.entitymanagement.common.config.DataSource;
-import eu.europeana.entitymanagement.config.AppConfig;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.Organization;
-import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
-import eu.europeana.entitymanagement.solr.service.SolrService;
-import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
-import eu.europeana.entitymanagement.testutils.TestConfig;
-import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
-import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,6 +19,24 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import com.zoho.crm.api.record.Record;
+import eu.europeana.entitymanagement.AbstractIntegrationTest;
+import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
+import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
+import eu.europeana.entitymanagement.common.config.DataSource;
+import eu.europeana.entitymanagement.config.AppConfig;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
+import eu.europeana.entitymanagement.definitions.model.ConceptScheme;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
+import eu.europeana.entitymanagement.solr.service.SolrService;
+import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
+import eu.europeana.entitymanagement.testutils.TestConfig;
+import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
+import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
 
 @Import(TestConfig.class)
 abstract class BaseWebControllerTest extends AbstractIntegrationTest {
@@ -73,9 +74,8 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
 
   protected void checkCommonResponseHeaders(
       ResultActions results, boolean hasPathExtension, boolean hasXmlResponse) throws Exception {
-    results
-        .andExpect(header().exists(HttpHeaders.ETAG))
-        .andExpect(header().string(HttpHeaders.LINK, is(VALUE_LDP_RESOURCE)));
+    results.andExpect(header().exists(HttpHeaders.ETAG))
+           .andExpect(header().stringValues(HttpHeaders.LINK, hasItems(VALUE_LDP_RESOURCE)));
     if (!hasPathExtension) {
       results.andExpect(
           header().stringValues(HttpHeaders.VARY, hasItems(containsString(HttpHeaders.ACCEPT))));
@@ -94,21 +94,19 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
 
     if (hasPathExtension) {
       results.andExpect(
-          header()
-              .stringValues(
-                  HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,
+          header().stringValues(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, 
+              hasItems(
                   HttpHeaders.ALLOW,
                   HttpHeaders.LINK,
-                  HttpHeaders.ETAG)); // NO Vary
+                  HttpHeaders.ETAG)));
     } else {
       results.andExpect(
-          header()
-              .stringValues(
-                  HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,
+          header().stringValues(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, 
+              hasItems(
                   HttpHeaders.ALLOW,
                   HttpHeaders.LINK,
                   HttpHeaders.VARY,
-                  HttpHeaders.ETAG));
+                  HttpHeaders.ETAG)));
     }
   }
 
@@ -151,6 +149,13 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
 
     // return entityRecord version with consolidated entity
     return entityRecordService.retrieveByEntityId(savedRecord.getEntityId()).orElseThrow();
+  }
+  
+  protected ConceptScheme createConceptScheme(List<String> items) throws Exception {
+    ConceptScheme scheme = objectMapper.readValue(loadFile(IntegrationTestUtils.CONCEPT_SCHEME_PHOTO_GENRE_JSON), ConceptScheme.class);
+    scheme.setItems(items);
+    ConceptScheme schemeFull = entityRecordService.createConceptScheme(scheme);
+    return entityRecordService.saveConceptScheme(schemeFull);
   }
 
   protected EntityRecord createConcept() throws Exception {

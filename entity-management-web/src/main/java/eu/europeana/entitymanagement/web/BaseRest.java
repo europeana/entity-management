@@ -362,7 +362,7 @@ public abstract class BaseRest extends BaseRestController {
     // create headers
     org.springframework.http.HttpHeaders headers = createAllowHeader(request);
     //TODO: check if this header is needed since in the methods it is not used (for now commented out)
-//    headers.add(LINK, EMHttpHeaders.VALUE_BASIC_CONTAINER);
+    headers.add(LINK, EMHttpHeaders.VALUE_BASIC_CONTAINER);
     headers.add(LINK, HttpHeaders.VALUE_LDP_RESOURCE);
     headers.add(HttpHeaders.CONTENT_TYPE, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
     if (!hasPathExtension) {
@@ -375,8 +375,8 @@ public abstract class BaseRest extends BaseRestController {
     // Access-Control-Expose-Headers only set for CORS requests
     if (StringUtils.hasLength(request.getHeader(org.springframework.http.HttpHeaders.ORIGIN))) {
       // HttpHeaders.ALLOW is added above, avoid duplication
-//      headers.add(
-//          org.springframework.http.HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
+      headers.add(
+          org.springframework.http.HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
       headers.add(
           org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.LINK);
       if (!hasPathExtension) {
@@ -385,13 +385,16 @@ public abstract class BaseRest extends BaseRestController {
       }
       headers.add(
           org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.ETAG);
-//      headers.add(
-//          org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, EMHttpHeaders.PREFERENCE_APPLIED);
-//      headers.add(
-//          org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, EMHttpHeaders.CACHE_CONTROL);
+      headers.add(
+          org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, EMHttpHeaders.PREFERENCE_APPLIED);
+      headers.add(
+          org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, EMHttpHeaders.CACHE_CONTROL);
     }
 
     try {
+      if(profile == LdProfiles.MINIMAL) {
+        scheme.setItems(null);
+      }
       String body = jsonLdSerializer.serializeObject(scheme);
       return ResponseEntity.status(status).headers(headers).eTag(etag).body(body);
     } catch (IOException e) {

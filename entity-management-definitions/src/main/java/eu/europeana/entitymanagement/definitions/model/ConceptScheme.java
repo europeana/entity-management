@@ -6,12 +6,15 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CREATED;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DEFINITION;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_DEFINED_BY;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ITEMS;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.MODIFIED;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SUBJECT;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TOTAL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
 import java.lang.reflect.Field;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import org.bson.types.ObjectId;
 import com.fasterxml.jackson.annotation.JsonGetter;
@@ -39,6 +42,8 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
   DEFINITION,
   SUBJECT,
   IS_DEFINED_BY,
+  TOTAL,
+  ITEMS,
   CREATED,
   MODIFIED
 })
@@ -53,15 +58,26 @@ public class ConceptScheme implements ValidationEntity{
   @Indexed(options = @IndexOptions(unique = true))
   private String entityId;
   
+  @JsonIgnore private Date disabled;
   private Map<String, String> prefLabel;
   private Map<String, String> definition;
   private String isDefinedBy;
   private String subject;
   private Date created;
   private Date modified;
+  private int total;
+  private List<String> items;
 
   public ConceptScheme() {
   }
+  
+  public boolean isDisabled() {
+    return disabled != null;
+  }
+
+  public void setDisabled(Date disabledParam) {
+    this.disabled = disabledParam;
+  }  
 
   @JsonGetter(CONTEXT)
   public String getContext() {
@@ -142,6 +158,27 @@ public class ConceptScheme implements ValidationEntity{
   public void setModified(Date modified) {
     this.modified = modified;
   }
+  
+  @JsonGetter(TOTAL)
+  public int getTotal() {
+    return total;
+  }
+
+  @JsonSetter(TOTAL)
+  public void setTotal(int total) {
+    this.total = total;
+  }
+
+  @JsonGetter(ITEMS)
+  public List<String> getItems() {
+    return items;
+  }
+
+  @JsonSetter(ITEMS)
+  public void setItems(List<String> items) {
+    this.items = items;
+  }
+  
 
   public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
     // TODO:in case of the performance overhead cause by using the reflecion code, change this

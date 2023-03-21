@@ -115,7 +115,8 @@ public interface WebEntityFields {
   public static final String DEFINITION = "definition";
   public static final String TOTAL = "total";
   public static final String SUBJECT = "subject";
-
+  public static final String ITEMS = "items";
+  
   // Authentication
   public static final String USER_ADMIN = "admin";
 
