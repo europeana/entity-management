@@ -3,6 +3,7 @@ resources:
   - service.yaml
   - ingress.yaml
   - hpa.yaml
+  - cronjob.yaml
 
 patchesStrategicMerge:
   - deployment_patch.yaml
@@ -12,5 +13,13 @@ commonLabels:
 
 secretGenerator:
   - name: ibm-secret
+    files:
+      - ibm-databases-truststore.jks
+
+configMapGenerator:
+  - name: entity-management-batch-config
+    files:
+      - entitymanagement.user.properties
+  - name: ibm-secret-config-map
     files:
       - ibm-databases-truststore.jks
