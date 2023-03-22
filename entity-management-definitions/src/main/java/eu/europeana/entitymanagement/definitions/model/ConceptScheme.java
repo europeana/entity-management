@@ -47,7 +47,7 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
   CREATED,
   MODIFIED
 })
-@dev.morphia.annotations.Entity
+@dev.morphia.annotations.Entity("ConceptScheme")
 @EntityFieldsCompleteValidationInterface(groups = {EntityFieldsCompleteValidationGroup.class})
 public class ConceptScheme implements ValidationEntity{
   

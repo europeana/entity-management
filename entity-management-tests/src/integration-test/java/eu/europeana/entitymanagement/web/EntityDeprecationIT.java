@@ -125,7 +125,16 @@ public class EntityDeprecationIT extends BaseWebControllerTest {
      * 6. confirm the concept inScheme field does not contain the disabled scheme id
      */
     Optional<EntityRecord> dbRecordOptional = retrieveEntity(entityRecord.getEntityId());
-    Assertions.assertNull(dbRecordOptional.get().getEntity().getInScheme());    
+    Assertions.assertNull(dbRecordOptional.get().getEntity().getInScheme());  
+    /*
+     * 7. after repeated delete, the concept scheme should be permanently deleted
+     */
+    mockMvc
+    .perform(
+        delete(IntegrationTestUtils.BASE_SCHEME_URL + "/" + scheme.getEntityId().substring(scheme.getEntityId().lastIndexOf('/') + 1))
+            .accept(MediaType.APPLICATION_JSON))
+    .andExpect(status().isNoContent());
+    Assertions.assertNull(entityRecordRepository.findConceptScheme(scheme.getEntityId()));
   }
   
 

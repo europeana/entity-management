@@ -264,6 +264,10 @@
 			stored="true" multiValued="true" />
 		<field name="skos_inScheme" type="string" indexed="true"
 			stored="true" multiValued="true" />
+		<field name="as_items" type="string" indexed="true"
+			stored="true" multiValued="true" />
+		<field name="total" type="int" indexed="true"
+			stored="true" multiValued="false" />
 
 		<!-- TODO: alias -->
 		<field name="dc_identifier" type="string" indexed="false"

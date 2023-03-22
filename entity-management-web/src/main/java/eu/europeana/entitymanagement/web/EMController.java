@@ -183,7 +183,7 @@ public class EMController extends BaseRest {
       entityRecordService.disableConceptScheme(scheme, true);
     }
     else {
-      entityRecordService.deleteConceptScheme(identifier);
+      entityRecordService.deleteConceptSchemeFromMongo(identifier);
     }
 
     return noContentResponse(request);

@@ -331,10 +331,9 @@ public class EntityRecordService {
     return entityRecordRepository.deleteForGood(entityId);
   }
   
-  public long deleteConceptScheme(String id) throws SolrServiceException {
-    // delete from Solr before Mongo, so Solr errors won't leave DB in an inconsistent state
-    solrService.deleteById(List.of(id), true);
-    return entityRecordRepository.deleteConceptSchemeForGood(id);
+  public long deleteConceptSchemeFromMongo(String id) throws SolrServiceException {
+    String schemeUri = EntityRecordUtils.buildEntityIdUri(EntityTypes.ConceptScheme, id);
+    return entityRecordRepository.deleteConceptSchemeForGood(schemeUri);
   }  
 
   /**

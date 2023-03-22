@@ -1,6 +1,9 @@
 package eu.europeana.entitymanagement.solr.model;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.solr.client.solrj.beans.Field;
@@ -22,6 +25,18 @@ public class SolrConceptScheme {
 
   @Field(ConceptSchemeSolrFields.DEFINITION_ALL)
   private Map<String, String> definition;
+  
+  @Field(EntitySolrFields.TOTAL)
+  private int total;
+  
+  @Field(EntitySolrFields.ITEMS)
+  private List<String> items;
+
+  @Field(EntitySolrFields.CREATED)
+  private Date created;
+  
+  @Field(EntitySolrFields.MODIFIED)
+  private Date modified;
 
   public SolrConceptScheme() {
     super();
@@ -30,6 +45,11 @@ public class SolrConceptScheme {
   public SolrConceptScheme(ConceptScheme conceptScheme) {
     this.type = conceptScheme.getType();
     this.entityId = conceptScheme.getEntityId();
+    if (conceptScheme.getItems() != null)
+      this.items = new ArrayList<>(conceptScheme.getItems());
+    this.total = conceptScheme.getTotal();
+    this.created = conceptScheme.getCreated();
+    this.modified = conceptScheme.getModified();
     setDefinitionStringMap(conceptScheme.getDefinition());
     setPrefLabelStringMap(conceptScheme.getPrefLabel());
   }
