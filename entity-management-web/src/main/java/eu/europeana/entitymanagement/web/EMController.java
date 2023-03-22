@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -76,7 +77,7 @@ import io.swagger.annotations.ApiOperation;
 
 @RestController
 @Validated
-//@RequestMapping("/entity")
+@ConditionalOnWebApplication
 public class EMController extends BaseRest {
 
   private final EntityRecordService entityRecordService;
@@ -133,7 +134,7 @@ public class EMController extends BaseRest {
     try {
       entityRecord = entityRecordService.retrieveEntityRecord(EntityTypes.getByName(type), identifier.toLowerCase(), false);
     } catch (UnsupportedEntityTypeException e) {
-      throw new EntityNotFoundException("/"+type+"/"+identifier);
+      throw new EntityNotFoundException("/"+type+"/"+identifier, e);
     }
 
     Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
@@ -214,7 +215,7 @@ public class EMController extends BaseRest {
     try {
       enType=EntityTypes.getByName(type);
     } catch (UnsupportedEntityTypeException e1) {
-      throw new EntityNotFoundException("/"+type+"/"+identifier);
+      throw new EntityNotFoundException("/"+type+"/"+identifier, e1);
     }
     
     EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier.toLowerCase(), true);
@@ -271,7 +272,7 @@ public class EMController extends BaseRest {
     try {
       enType = EntityTypes.getByName(type);
     } catch (UnsupportedEntityTypeException e) {
-      throw new EntityNotFoundException("/"+type+"/"+identifier);
+      throw new EntityNotFoundException("/"+type+"/"+identifier, e);
     }
     EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier, false);
 
@@ -298,7 +299,7 @@ public class EMController extends BaseRest {
     try {
       return launchTaskAndRetrieveEntity(request, EntityTypes.getByName(type), identifier, entityRecord, profile);
     } catch (UnsupportedEntityTypeException e) {
-      throw new EntityNotFoundException("/"+type+"/"+identifier);
+      throw new EntityNotFoundException("/"+type+"/"+identifier, e);
     }
   }
 
@@ -354,7 +355,7 @@ public class EMController extends BaseRest {
     try {
       enType = EntityTypes.getByName(type);
     } catch (UnsupportedEntityTypeException e) {
-      throw new EntityNotFoundException("/"+type+"/"+identifier);
+      throw new EntityNotFoundException("/"+type+"/"+identifier, e);
     }  
     
     EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier, false);
@@ -514,7 +515,7 @@ public class EMController extends BaseRest {
           languages,
           HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
     } catch (UnsupportedEntityTypeException e) {
-      throw new EntityNotFoundException("/"+type+"/"+identifier);
+      throw new EntityNotFoundException("/"+type+"/"+identifier, e);
     }
   }
 
@@ -559,7 +560,7 @@ public class EMController extends BaseRest {
           languages,
           HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML);
     } catch (UnsupportedEntityTypeException e) {
-      throw new EntityNotFoundException("/"+type+"/"+identifier);
+      throw new EntityNotFoundException("/"+type+"/"+identifier, e);
     }
   }
 
@@ -598,7 +599,7 @@ public class EMController extends BaseRest {
           languages,
           HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
     } catch (UnsupportedEntityTypeException e) {
-      throw new EntityNotFoundException("/"+type+"/"+identifier);
+      throw new EntityNotFoundException("/"+type+"/"+identifier, e);
     }
   }
 
@@ -760,13 +761,13 @@ public class EMController extends BaseRest {
 
     verifyWriteAccess(Operations.CREATE, request);
     
-    ConceptScheme createdScheme = entityRecordService.createConceptScheme(conceptScheme);
+    entityRecordService.completeConceptScheme(conceptScheme);
 
-    validateBodyEntity(createdScheme, true);
+    validateBodyEntity(conceptScheme, true);
     
-    entityRecordService.saveConceptScheme(createdScheme);
+    entityRecordService.saveConceptScheme(conceptScheme);
     
-    return generateResponseEntityForConceptScheme(request, profile, createdScheme, HttpStatus.CREATED);
+    return generateResponseEntityForConceptScheme(request, profile, conceptScheme, HttpStatus.CREATED);
     
   }
 

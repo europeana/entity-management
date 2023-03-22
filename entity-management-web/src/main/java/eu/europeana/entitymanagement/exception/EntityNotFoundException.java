@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.exception;
 
-import eu.europeana.api.commons.error.EuropeanaApiException;
 import org.springframework.http.HttpStatus;
+import eu.europeana.api.commons.error.EuropeanaApiException;
 
 /** Exception thrown when a requested entity isn't found */
 public class EntityNotFoundException extends EuropeanaApiException {
@@ -10,6 +10,10 @@ public class EntityNotFoundException extends EuropeanaApiException {
 
   public EntityNotFoundException(String entityUri) {
     super("No entity found with for specified uri(s): '" + entityUri + "'");
+  }
+
+  public EntityNotFoundException(String entityUri, Throwable t) {
+    super("No entity found with for specified uri(s): '" + entityUri + "'", t);
   }
 
   @Override

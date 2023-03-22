@@ -161,13 +161,12 @@ public class EntityRecordService {
     return entityRecordRepository.save(er);
   }
 
-  public ConceptScheme createConceptScheme(ConceptScheme scheme) throws UnsupportedEntityTypeException  {
+  public void completeConceptScheme(ConceptScheme scheme) throws UnsupportedEntityTypeException  {
     String id = generateEntityId(EntityTypes.getByName(scheme.getType()), null);
     scheme.setEntityId(id);
     Date now = new Date();
     scheme.setCreated(now);
     scheme.setModified(now);
-    return scheme;
   }
   
   public ConceptScheme saveConceptScheme(ConceptScheme scheme) throws SolrServiceException {
@@ -268,7 +267,7 @@ public class EntityRecordService {
   }
   
   //update the inScheme field of the entities that refer to this scheme
-  private void updateConceptSchemeEntities(ConceptScheme scheme) throws EntityUpdateException {
+  private void updateConceptSchemeEntities(ConceptScheme scheme) {
     if(scheme.getItems()==null) {
       return;
     }

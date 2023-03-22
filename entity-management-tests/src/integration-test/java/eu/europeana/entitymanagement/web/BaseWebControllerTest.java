@@ -154,8 +154,8 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
   protected ConceptScheme createConceptScheme(List<String> items) throws Exception {
     ConceptScheme scheme = objectMapper.readValue(loadFile(IntegrationTestUtils.CONCEPT_SCHEME_PHOTO_GENRE_JSON), ConceptScheme.class);
     scheme.setItems(items);
-    ConceptScheme schemeFull = entityRecordService.createConceptScheme(scheme);
-    return entityRecordService.saveConceptScheme(schemeFull);
+    entityRecordService.completeConceptScheme(scheme);
+    return entityRecordService.saveConceptScheme(scheme);
   }
 
   protected EntityRecord createConcept() throws Exception {

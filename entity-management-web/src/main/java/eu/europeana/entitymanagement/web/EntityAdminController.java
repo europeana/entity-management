@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -52,6 +53,7 @@ import io.swagger.annotations.ApiParam;
 @RestController
 @Validated
 @RequestMapping("/entity")
+@ConditionalOnWebApplication
 public class EntityAdminController extends BaseRest {
 
   private static final Logger LOG = LogManager.getLogger(EntityAdminController.class);
@@ -89,7 +91,7 @@ public class EntityAdminController extends BaseRest {
     try {
       entityUri = EntityRecordUtils.buildEntityIdUri(EntityTypes.getByName(type), identifier);
     } catch (UnsupportedEntityTypeException e) {
-      throw new EntityNotFoundException("/"+type+"/"+identifier);
+      throw new EntityNotFoundException("/"+type+"/"+identifier, e);
     }
     
     if (!entityRecordService.existsByEntityId(entityUri)) {

@@ -5,6 +5,7 @@ import eu.europeana.api.commons.error.EuropeanaGlobalExceptionHandler;
 import eu.europeana.api.commons.web.exception.HttpException;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindingResult;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
+@ConditionalOnWebApplication
 public class EMExceptionHandler extends EuropeanaGlobalExceptionHandler {
   // exception handling inherited from parent
 
