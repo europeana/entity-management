@@ -53,7 +53,7 @@ import java.util.List;
 })
 public class Place extends Entity {
 
-  private String type = EntityTypes.Place.name();
+  private String type = EntityTypes.Place.getEntityType();
   private List<String> isNextInSequence;
   private Float latitude;
   private Float longitude;

@@ -264,10 +264,6 @@
 			stored="true" multiValued="true" />
 		<field name="skos_inScheme" type="string" indexed="true"
 			stored="true" multiValued="true" />
-		<field name="as_items" type="string" indexed="true"
-			stored="true" multiValued="true" />
-		<field name="total" type="int" indexed="true"
-			stored="true" multiValued="false" />
 
 		<!-- TODO: alias -->
 		<field name="dc_identifier" type="string" indexed="false"
@@ -546,6 +542,7 @@
 			indexed="false" stored="true" />
 
 		<!-- ConceptScheme fields -->
+		<field name="skos_subject" type="string" indexed="true" stored="true" multiValued="false" />
 		<dynamicField name="skos_definition.*" type="string"
 			indexed="false" stored="true" multiValued="false" />
 		

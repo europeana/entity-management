@@ -241,14 +241,6 @@ public class EntityRecordRepository {
     return datastore.find(ConceptScheme.class).filter(eq(ENTITY_ID, id)).first();
   }
 
-  public long deleteConceptSchemeForGood(String id) {
-    return datastore
-        .find(ConceptScheme.class)
-        .filter(eq(ENTITY_ID, id))
-        .delete()
-        .getDeletedCount();
-  }
-
   public ConceptScheme saveConceptScheme(ConceptScheme scheme) {
     return datastore.save(scheme);
   }

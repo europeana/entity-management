@@ -62,7 +62,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.id", any(String.class)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Agent.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         // JSON includes isShownBy and depiction
         .andExpect(jsonPath("$.isShownBy").isNotEmpty())
@@ -83,7 +83,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
     response
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.id", any(String.class)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Agent.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
         // should have Europeana and Datasource proxies
@@ -106,7 +106,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.id", any(String.class)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Agent.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         // fields to be serialized as string
         .andExpect(jsonPath("$.dateOfBirth", any(String.class)))
@@ -128,7 +128,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
     response
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.id", any(String.class)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Agent.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         // fields to be serialized as string
         .andExpect(jsonPath("$.dateOfBirth", any(String.class)))
@@ -152,7 +152,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.id", any(String.class)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Place.name())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Place.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
         // should have Europeana and Datasource proxies
@@ -170,7 +170,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
     response
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.id", any(String.class)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Place.name())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Place.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
         // should have Europeana and Datasource proxies
@@ -196,7 +196,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
     response
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.id", any(String.class)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.TimeSpan.name())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.TimeSpan.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
         // should have Europeana and Datasource proxies
@@ -214,8 +214,8 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                 .content(loadFile(IntegrationTestUtils.CONCEPT_SCHEME_PHOTO_GENRE_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.id", containsString(WebEntityFields.BASE_DATA_EUROPEANA_URI + EntityTypes.ConceptScheme.getEntityType().toLowerCase())))
-        .andExpect(jsonPath("$.type", is(EntityTypes.ConceptScheme.name())))
+        .andExpect(jsonPath("$.id", containsString(WebEntityFields.BASE_DATA_EUROPEANA_URI + EntityTypes.ConceptScheme.getStringForUrl())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.ConceptScheme.getEntityType())))
         .andExpect(jsonPath("$.prefLabel").isNotEmpty());
   }
   
@@ -234,7 +234,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
     response
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.id", is(expectedId)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         // isAggregatedBy should contain 3 aggregates (for Europeana, zoho and wikidata proxies)
         .andExpect(
@@ -271,7 +271,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
     response
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.id", is(expectedId)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         // isAggregatedBy should contain 3 aggregates (for Europeana, zoho and wikidata proxies)
         .andExpect(
@@ -312,7 +312,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
     response
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.id", is(expectedId)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         // isAggregatedBy should contain 3 aggregates (for Europeana, zoho and wikidata proxies)
         .andExpect(
@@ -354,7 +354,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
     response
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.id", is(expectedId)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         // isAggregatedBy should contain 2 aggregates (for Europeana and zoho proxies). No wikidata
         // sameAs for this org

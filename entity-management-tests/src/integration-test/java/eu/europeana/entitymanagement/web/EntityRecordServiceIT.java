@@ -73,7 +73,7 @@ public class EntityRecordServiceIT extends AbstractIntegrationTest {
 
     // aggregation is reused from consolidated version
     //    Concept notConsolidated =
-    //        EntityObjectFactory.createProxyEntityObject(EntityTypes.Concept.toString());
+    //        EntityObjectFactory.createProxyEntityObject(EntityTypes.Concept.getEntityType());
     //    assertNotNull(notConsolidated);
     //	    notConsolidated.setIsAggregatedBy(new Aggregation());
     //	    entityRecord.setEntity(notConsolidated);

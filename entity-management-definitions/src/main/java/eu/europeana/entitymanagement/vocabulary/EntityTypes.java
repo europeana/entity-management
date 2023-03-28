@@ -3,22 +3,28 @@ package eu.europeana.entitymanagement.vocabulary;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 
 public enum EntityTypes implements EntityKeyword {
-  Organization("Organization", "http://www.europeana.eu/schemas/edm/Organization"),
-  Concept("Concept", "https://www.w3.org/2009/08/skos-reference/skos.html#Concept"),
-  ConceptScheme("Scheme", "https://www.w3.org/2009/08/skos-reference/skos.html#ConceptScheme"),
-  Agent("Agent", "http://www.europeana.eu/schemas/edm/Agent"),
-  Place("Place", "http://www.europeana.eu/schemas/edm/Place"),
-  TimeSpan("TimeSpan", "http://www.europeana.eu/schemas/edm/TimeSpan");
+  Organization("Organization", "organization","http://www.europeana.eu/schemas/edm/Organization"),
+  Concept("Concept", "concept", "https://www.w3.org/2009/08/skos-reference/skos.html#Concept"),
+  ConceptScheme("ConceptScheme", "scheme", "https://www.w3.org/2009/08/skos-reference/skos.html#ConceptScheme"),
+  Agent("Agent", "agent", "http://www.europeana.eu/schemas/edm/Agent"),
+  Place("Place", "place", "http://www.europeana.eu/schemas/edm/Place"),
+  TimeSpan("TimeSpan", "timespan", "http://www.europeana.eu/schemas/edm/TimeSpan");
 
   private String entityType;
+  private String stringForUrl;
   private String httpUri;
 
   public String getEntityType() {
     return entityType;
   }
+  
+  public String getStringForUrl() {
+    return stringForUrl;
+  }
 
-  EntityTypes(String entityType, String uri) {
+  EntityTypes(String entityType, String stringForUrl, String uri) {
     this.entityType = entityType;
+    this.stringForUrl = stringForUrl;
     this.httpUri = uri;
   }
 
@@ -57,11 +63,11 @@ public enum EntityTypes implements EntityKeyword {
     return false;
   }
 
-  public static EntityTypes getByName(String entityType)
+  public static EntityTypes getByEntityType(String entityType)
       throws UnsupportedEntityTypeException {
 
     for (EntityTypes entityTypeEnum : EntityTypes.values()) {
-      if (entityTypeEnum.toString().equalsIgnoreCase(entityType)) return entityTypeEnum;
+      if (entityTypeEnum.getEntityType().equalsIgnoreCase(entityType)) return entityTypeEnum;
     }
     throw new UnsupportedEntityTypeException(entityType);
   }

@@ -127,14 +127,13 @@ public class EntityDeprecationIT extends BaseWebControllerTest {
     Optional<EntityRecord> dbRecordOptional = retrieveEntity(entityRecord.getEntityId());
     Assertions.assertNull(dbRecordOptional.get().getEntity().getInScheme());  
     /*
-     * 7. after repeated delete, the concept scheme should be permanently deleted
+     * 7. after repeated delete, 410 error code should be returned
      */
     mockMvc
     .perform(
         delete(IntegrationTestUtils.BASE_SCHEME_URL + "/" + scheme.getEntityId().substring(scheme.getEntityId().lastIndexOf('/') + 1))
             .accept(MediaType.APPLICATION_JSON))
-    .andExpect(status().isNoContent());
-    Assertions.assertNull(entityRecordRepository.findConceptScheme(scheme.getEntityId()));
+    .andExpect(status().isGone());
   }
   
 

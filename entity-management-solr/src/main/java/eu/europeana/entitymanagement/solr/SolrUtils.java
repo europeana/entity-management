@@ -1,5 +1,12 @@
 package eu.europeana.entitymanagement.solr;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import org.apache.commons.collections.MapUtils;
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Concept;
@@ -16,13 +23,6 @@ import eu.europeana.entitymanagement.solr.model.SolrPlace;
 import eu.europeana.entitymanagement.solr.model.SolrTimeSpan;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import org.apache.commons.collections.MapUtils;
 
 /**
  * This class implements supporting methods for Solr*Impl classes e.g. normalization of the content
@@ -97,15 +97,15 @@ public class SolrUtils {
   @SuppressWarnings("unchecked")
   public static <T extends Entity, U extends SolrEntity<T>> Class<U> getSolrEntityClass(
       String solrType) {
-    if (solrType.equals(EntityTypes.Agent.toString())) {
+    if (solrType.equals(EntityTypes.Agent.getEntityType())) {
       return (Class<U>) SolrAgent.class;
-    } else if (solrType.equals(EntityTypes.Concept.toString())) {
+    } else if (solrType.equals(EntityTypes.Concept.getEntityType())) {
       return (Class<U>) SolrConcept.class;
-    } else if (solrType.equals(EntityTypes.Organization.toString())) {
+    } else if (solrType.equals(EntityTypes.Organization.getEntityType())) {
       return (Class<U>) SolrOrganization.class;
-    } else if (solrType.equals(EntityTypes.Place.toString())) {
+    } else if (solrType.equals(EntityTypes.Place.getEntityType())) {
       return (Class<U>) SolrPlace.class;
-    } else if (solrType.equalsIgnoreCase(EntityTypes.TimeSpan.toString())) {
+    } else if (solrType.equalsIgnoreCase(EntityTypes.TimeSpan.getEntityType())) {
       return (Class<U>) SolrTimeSpan.class;
     }
 

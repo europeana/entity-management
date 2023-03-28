@@ -132,7 +132,7 @@ public class EMController extends BaseRest {
 
     EntityRecord entityRecord=null;
     try {
-      entityRecord = entityRecordService.retrieveEntityRecord(EntityTypes.getByName(type), identifier.toLowerCase(), false);
+      entityRecord = entityRecordService.retrieveEntityRecord(EntityTypes.getByEntityType(type), identifier.toLowerCase(), false);
     } catch (UnsupportedEntityTypeException e) {
       throw new EntityNotFoundException("/"+type+"/"+identifier, e);
     }
@@ -174,19 +174,14 @@ public class EMController extends BaseRest {
 
     verifyWriteAccess(Operations.DELETE, request);
 
-    ConceptScheme scheme = entityRecordService.retrieveConceptScheme(identifier, true);
+    ConceptScheme scheme = entityRecordService.retrieveConceptScheme(identifier, false);
 
     long timestamp = scheme.getModified().getTime();
     String etag = computeEtag(timestamp, WebFields.FORMAT_JSONLD, getApiVersion());
     checkIfMatchHeaderWithQuotes(etag, request);
 
-    if(! scheme.isDisabled()) {
-      entityRecordService.disableConceptScheme(scheme, true);
-    }
-    else {
-      entityRecordService.deleteConceptSchemeFromMongo(identifier);
-    }
-
+    entityRecordService.disableConceptScheme(scheme, true);
+ 
     return noContentResponse(request);
   }
 
@@ -213,7 +208,7 @@ public class EMController extends BaseRest {
 
     EntityTypes enType=null;
     try {
-      enType=EntityTypes.getByName(type);
+      enType=EntityTypes.getByEntityType(type);
     } catch (UnsupportedEntityTypeException e1) {
       throw new EntityNotFoundException("/"+type+"/"+identifier, e1);
     }
@@ -270,7 +265,7 @@ public class EMController extends BaseRest {
 
     EntityTypes enType=null;
     try {
-      enType = EntityTypes.getByName(type);
+      enType = EntityTypes.getByEntityType(type);
     } catch (UnsupportedEntityTypeException e) {
       throw new EntityNotFoundException("/"+type+"/"+identifier, e);
     }
@@ -297,7 +292,7 @@ public class EMController extends BaseRest {
 
     // update the consolidated version in mongo and solr
     try {
-      return launchTaskAndRetrieveEntity(request, EntityTypes.getByName(type), identifier, entityRecord, profile);
+      return launchTaskAndRetrieveEntity(request, EntityTypes.getByEntityType(type), identifier, entityRecord, profile);
     } catch (UnsupportedEntityTypeException e) {
       throw new EntityNotFoundException("/"+type+"/"+identifier, e);
     }
@@ -353,7 +348,7 @@ public class EMController extends BaseRest {
 
     EntityTypes enType=null;
     try {
-      enType = EntityTypes.getByName(type);
+      enType = EntityTypes.getByEntityType(type);
     } catch (UnsupportedEntityTypeException e) {
       throw new EntityNotFoundException("/"+type+"/"+identifier, e);
     }  
@@ -452,7 +447,7 @@ public class EMController extends BaseRest {
     validateAction(action);
 
     EntityRecord entityRecord =
-        entityRecordService.updateUsedForEnrichment(EntityTypes.getByName(type), identifier, action);
+        entityRecordService.updateUsedForEnrichment(EntityTypes.getByEntityType(type), identifier, action);
     entityRecord = launchMetricsUpdateTask(entityRecord, true);
     return generateResponseEntityForEntityRecord(
         request,
@@ -507,7 +502,7 @@ public class EMController extends BaseRest {
 
     try {
       return createResponseRetrieve(
-          EntityTypes.getByName(type),
+          EntityTypes.getByEntityType(type),
           identifier,
           profile,
           request,
@@ -552,7 +547,7 @@ public class EMController extends BaseRest {
 
     try {
       return createResponseRetrieve(
-          EntityTypes.getByName(type),
+          EntityTypes.getByEntityType(type),
           identifier,
           profile,
           request,
@@ -591,7 +586,7 @@ public class EMController extends BaseRest {
 
     try {
       return createResponseRetrieve(
-          EntityTypes.getByName(type),
+          EntityTypes.getByEntityType(type),
           identifier,
           profile,
           request,
@@ -652,7 +647,7 @@ public class EMController extends BaseRest {
 
     // in case of Organization it must be the zoho Organization
     String creationRequestType = europeanaProxyEntity.getType();
-    if (EntityTypes.Organization.toString().equals(creationRequestType)
+    if (EntityTypes.Organization.getEntityType().equals(creationRequestType)
         && !creationRequestId.contains(DataSource.ZOHO_HOST)) {
       throw new HttpBadRequestException(
           String.format(
@@ -672,7 +667,7 @@ public class EMController extends BaseRest {
 
     return launchTaskAndRetrieveEntity(
         request,
-        EntityTypes.getByName(savedEntityRecord.getEntity().getType()),
+        EntityTypes.getByEntityType(savedEntityRecord.getEntity().getType()),
         getDatabaseIdentifier(savedEntityRecord.getEntityId()),
         savedEntityRecord,
         EntityProfile.internal.toString());
@@ -718,7 +713,7 @@ public class EMController extends BaseRest {
 
     verifyWriteAccess(Operations.UPDATE, request);
 
-    EntityTypes enType = EntityTypes.getByName(type);
+    EntityTypes enType = EntityTypes.getByEntityType(type);
     EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier, false);
 
     if (!entityRecord.getEntity().getSameReferenceLinks().contains(url)) {

@@ -75,7 +75,7 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
   protected void checkCommonResponseHeaders(
       ResultActions results, boolean hasPathExtension, boolean hasXmlResponse) throws Exception {
     results.andExpect(header().exists(HttpHeaders.ETAG))
-           .andExpect(header().stringValues(HttpHeaders.LINK, hasItems(VALUE_LDP_RESOURCE)));
+           .andExpect(header().string(HttpHeaders.LINK, is(VALUE_LDP_RESOURCE)));
     if (!hasPathExtension) {
       results.andExpect(
           header().stringValues(HttpHeaders.VARY, hasItems(containsString(HttpHeaders.ACCEPT))));
@@ -94,19 +94,17 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
 
     if (hasPathExtension) {
       results.andExpect(
-          header().stringValues(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, 
-              hasItems(
+          header().stringValues(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,
                   HttpHeaders.ALLOW,
                   HttpHeaders.LINK,
-                  HttpHeaders.ETAG)));
+                  HttpHeaders.ETAG));
     } else {
       results.andExpect(
-          header().stringValues(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, 
-              hasItems(
+          header().stringValues(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,
                   HttpHeaders.ALLOW,
                   HttpHeaders.LINK,
                   HttpHeaders.VARY,
-                  HttpHeaders.ETAG)));
+                  HttpHeaders.ETAG));
     }
   }
 

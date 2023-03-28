@@ -162,8 +162,11 @@ public class EntityRecordService {
   }
 
   public void completeConceptScheme(ConceptScheme scheme) throws UnsupportedEntityTypeException  {
-    String id = generateEntityId(EntityTypes.getByName(scheme.getType()), null);
+    String id = generateEntityId(EntityTypes.getByEntityType(scheme.getType()), null);
     scheme.setEntityId(id);
+    if(scheme.getItems()!=null) {
+      scheme.setTotal(scheme.getItems().size());
+    }
     Date now = new Date();
     scheme.setCreated(now);
     scheme.setModified(now);
@@ -329,11 +332,6 @@ public class EntityRecordService {
 
     return entityRecordRepository.deleteForGood(entityId);
   }
-  
-  public long deleteConceptSchemeFromMongo(String id) throws SolrServiceException {
-    String schemeUri = EntityRecordUtils.buildEntityIdUri(EntityTypes.ConceptScheme, id);
-    return entityRecordRepository.deleteConceptSchemeForGood(schemeUri);
-  }  
 
   /**
    * Creates an {@link EntityRecord} from an {@link Entity}, which is then persisted. Note : This
@@ -361,7 +359,7 @@ public class EntityRecordService {
     Date timestamp = new Date();
 
     Entity entity = EntityObjectFactory.createConsolidatedEntityObject(type);
-    String entityId = generateEntityId(EntityTypes.getByName(entity.getType()), identifier);
+    String entityId = generateEntityId(EntityTypes.getByEntityType(entity.getType()), identifier);
     // check if entity already exists
     // this is avoid MongoDb exception for duplicate key
     checkIfEntityAlreadyExists(entityId);
@@ -529,7 +527,7 @@ public class EntityRecordService {
   String generateEntityId(Entity datasourceResponse, boolean isZohoOrg) throws UnsupportedEntityTypeException {
     // only in case of Zoho Organization use the provided id from de-referencing
     String entityId = null;
-    EntityTypes type=EntityTypes.getByName(datasourceResponse.getType());
+    EntityTypes type=EntityTypes.getByEntityType(datasourceResponse.getType());
     if (isZohoOrg) {
       // zoho id is mandatory and unique identifier for zoho Organizations
       String zohoId = EntityRecordUtils.getIdFromUrl(datasourceResponse.getEntityId());

@@ -266,7 +266,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(entityId)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Concept.name())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Concept.getEntityType())))
         .andExpect(jsonPath("$.prefLabel[*]", hasSize(2)))
         .andExpect(jsonPath("$.altLabel[*]", hasSize(2)));
   }
@@ -288,7 +288,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(entityId)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())));
+        .andExpect(jsonPath("$.type", is(EntityTypes.Agent.getEntityType())));
   }
 
   @Test
@@ -480,7 +480,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(entityId)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
         .andExpect(jsonPath("$.sameAs").isNotEmpty());
   }
 
@@ -505,7 +505,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
     result
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(entityId)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
         .andExpect(jsonPath("$.logo.id", is(BNF_LOGO)))
         .andExpect(jsonPath("$.sameAs").isNotEmpty());
   }
@@ -590,7 +590,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(entityId)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Place.name())));
+        .andExpect(jsonPath("$.type", is(EntityTypes.Place.getEntityType())));
   }
 
   @Test
@@ -633,7 +633,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(entityId)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.TimeSpan.name())));
+        .andExpect(jsonPath("$.type", is(EntityTypes.TimeSpan.getEntityType())));
   }
 
   @Test
@@ -677,7 +677,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(entityId)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Concept.name())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Concept.getEntityType())))
         .andExpect(jsonPath("$.proxies", hasSize(2)));
   }
 
@@ -695,7 +695,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
 
     results
         .andExpect(jsonPath("$.id", any(String.class)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Agent.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
         // should have Europeana and Datasource proxies
@@ -724,7 +724,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(scheme.getEntityId())))
-        .andExpect(jsonPath("$.type", is(EntityTypes.ConceptScheme.name())));
+        .andExpect(jsonPath("$.type", is(EntityTypes.ConceptScheme.getEntityType())));
     
     //check solr obj also exists
     SolrConceptScheme solrConceptScheme = solrService.searchConceptScheme(scheme.getEntityId());

@@ -20,7 +20,6 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
-import eu.europeana.entitymanagement.vocabulary.LdProfiles;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 
 /** Standalone test for checking behaviour of headers */
@@ -51,18 +50,15 @@ public class HeadersIT extends BaseWebControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
     
     checkAllowHeaderForPOST(results);
-    checkCommonResponseHeaders(results, false);
-    checkCorsHeaders(results, false);
+    checkCommonResponseHeaders(results, true);
 
     //checking additional headers
-    results.andExpect(header().stringValues(HttpHeaders.LINK, hasItems(EMHttpHeaders.VALUE_BASIC_CONTAINER)));
-    results.andExpect(header().stringValues(EMHttpHeaders.PREFERENCE_APPLIED, hasItems(LdProfiles.MINIMAL.getPreferHeaderValue())));
     results.andExpect(header().stringValues(EMHttpHeaders.CACHE_CONTROL, hasItems(EMHttpHeaders.VALUE_NO_CAHCHE_STORE_REVALIDATE)));
     results.andExpect(header().stringValues(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, hasItems(
-                EMHttpHeaders.PREFERENCE_APPLIED,
-                EMHttpHeaders.CACHE_CONTROL)));
-    results.andExpect(header().stringValues(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, hasItems(
-                "true")));
+        HttpHeaders.ALLOW,
+        HttpHeaders.LINK,
+        HttpHeaders.ETAG,
+        EMHttpHeaders.CACHE_CONTROL)));
   }
 
   @Test

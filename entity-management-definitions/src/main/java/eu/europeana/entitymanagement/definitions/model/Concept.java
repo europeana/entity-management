@@ -56,7 +56,7 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 })
 public class Concept extends Entity {
 
-  private String type = EntityTypes.Concept.name();
+  private String type = EntityTypes.Concept.getEntityType();
   private List<String> broader;
   private List<String> narrower;
   private List<String> related;

@@ -111,7 +111,6 @@ public interface WebEntityFields {
   public static final String ADDRESS_TYPE = "Address";
 
   // ConceptScheme fields
-  public static final String IS_DEFINED_BY = "isDefinedBy";
   public static final String DEFINITION = "definition";
   public static final String TOTAL = "total";
   public static final String SUBJECT = "subject";

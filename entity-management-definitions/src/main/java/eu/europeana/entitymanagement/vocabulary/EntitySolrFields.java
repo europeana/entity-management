@@ -52,7 +52,5 @@ public interface EntitySolrFields {
   // fields for Timespans and Agents
   public static final String BEGIN = "edm_begin";
   public static final String END = "edm_end";
-  //fields for ConceptScheme
-  public static final String ITEMS = "as_items";
-  public static final String TOTAL = "total";
+
 }

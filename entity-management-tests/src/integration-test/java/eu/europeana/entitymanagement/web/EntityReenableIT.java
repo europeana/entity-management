@@ -43,7 +43,7 @@ public class EntityReenableIT extends BaseWebControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(entityRecord.getEntityId())))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Concept.name())));
+        .andExpect(jsonPath("$.type", is(EntityTypes.Concept.getEntityType())));
 
     // confirm that Solr document now exists
     SolrConcept solrConcept = solrService.searchById(SolrConcept.class, entityRecord.getEntityId());

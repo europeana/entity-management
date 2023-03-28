@@ -19,7 +19,7 @@ import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.utils.UriValidator;
 import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
-import eu.europeana.entitymanagement.vocabulary.ValidationEntity;
+import eu.europeana.entitymanagement.vocabulary.ValidationObject;
 
 public class EntityFieldsDatatypeValidation {
 
@@ -496,7 +496,7 @@ public class EntityFieldsDatatypeValidation {
   }
 
   public boolean validateEntity(
-      ValidationEntity entity,
+      ValidationObject entity,
       ConstraintValidatorContext context,
       boolean validateMandatoryFields,
       boolean validateMetadataFields) {

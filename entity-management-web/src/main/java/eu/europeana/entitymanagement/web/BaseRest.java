@@ -53,7 +53,7 @@ import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.LdProfiles;
-import eu.europeana.entitymanagement.vocabulary.ValidationEntity;
+import eu.europeana.entitymanagement.vocabulary.ValidationObject;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
 import eu.europeana.entitymanagement.web.service.EMAuthorizationService;
@@ -352,23 +352,13 @@ public abstract class BaseRest extends BaseRestController {
     }
 
     String requestUri = request.getRequestURI();
-    boolean hasPathExtension = requestUri.endsWith("." + FormatTypes.jsonld) 
-        || requestUri.endsWith("." + FormatTypes.json)
-        || requestUri.endsWith("." + FormatTypes.xml);
-
     long timestamp = scheme.getModified().getTime();
     String etag = computeEtag(timestamp, WebFields.FORMAT_JSONLD, getApiVersion());
     
     // create headers
     org.springframework.http.HttpHeaders headers = createAllowHeader(request);
-    //TODO: check if this header is needed since in the methods it is not used (for now commented out)
-    headers.add(LINK, EMHttpHeaders.VALUE_BASIC_CONTAINER);
     headers.add(LINK, HttpHeaders.VALUE_LDP_RESOURCE);
     headers.add(HttpHeaders.CONTENT_TYPE, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
-    if (!hasPathExtension) {
-      headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
-    }
-    headers.add(EMHttpHeaders.PREFERENCE_APPLIED, profile.getPreferHeaderValue());
     headers.add(EMHttpHeaders.CACHE_CONTROL, EMHttpHeaders.VALUE_NO_CAHCHE_STORE_REVALIDATE);
     headers.add(EMHttpHeaders.ETAG, etag);
 
@@ -376,17 +366,9 @@ public abstract class BaseRest extends BaseRestController {
     if (StringUtils.hasLength(request.getHeader(org.springframework.http.HttpHeaders.ORIGIN))) {
       // HttpHeaders.ALLOW is added above, avoid duplication
       headers.add(
-          org.springframework.http.HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
-      headers.add(
           org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.LINK);
-      if (!hasPathExtension) {
-        headers.add(
-            org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.VARY);
-      }
       headers.add(
           org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.ETAG);
-      headers.add(
-          org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, EMHttpHeaders.PREFERENCE_APPLIED);
       headers.add(
           org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, EMHttpHeaders.CACHE_CONTROL);
     }
@@ -419,7 +401,6 @@ public abstract class BaseRest extends BaseRestController {
       allowHeaderValue = methodsForRequestPattern.get();
     }
 
-    logger.info("Srdjo debug: the value of the allow header for url: " + request.getRequestURL().toString() +  "is: " + allowHeaderValue);
     headers.add(HttpHeaders.ALLOW, allowHeaderValue);
     return headers;
   }
@@ -499,9 +480,9 @@ public abstract class BaseRest extends BaseRestController {
         && Arrays.asList(profile.split(",")).contains(WebEntityConstants.PARAM_PROFILE_SYNC);
   }
 
-  protected void validateBodyEntity(ValidationEntity entity, boolean completely) throws HttpBadRequestException {
+  protected void validateBodyEntity(ValidationObject entity, boolean completely) throws HttpBadRequestException {
     Class<?> validatorGroup = completely ? EntityFieldsCompleteValidationGroup.class : EntityFieldsEuropeanaProxyValidationGroup.class;
-    Set<ConstraintViolation<ValidationEntity>> violations =
+    Set<ConstraintViolation<ValidationObject>> violations =
         emValidatorFactory
             .getValidator()
             .validate(entity, validatorGroup);

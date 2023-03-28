@@ -13,7 +13,7 @@ public class EntityRecordUtils {
   }
 
   public static String buildEntityIdUri(EntityTypes type, String identifier) {
-    return buildEntityIdUri(type.getEntityType(), identifier);
+    return buildEntityIdUri(type.getStringForUrl(), identifier);
   }
 
   private static String buildEntityIdUri(String type, String identifier) {

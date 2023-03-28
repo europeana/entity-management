@@ -59,7 +59,7 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 })
 public class Organization extends Entity {
 
-  private String type = EntityTypes.Organization.name();
+  private String type = EntityTypes.Organization.getEntityType();
   private Map<String, String> description;
   private Map<String, List<String>> acronym;
   private WebResource logo;

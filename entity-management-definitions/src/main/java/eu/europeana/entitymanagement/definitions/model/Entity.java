@@ -35,7 +35,7 @@ import eu.europeana.entitymanagement.normalization.EntityFieldsDataSourceProxyVa
 import eu.europeana.entitymanagement.normalization.EntityFieldsDataSourceProxyValidationInterface;
 import eu.europeana.entitymanagement.normalization.EntityFieldsEuropeanaProxyValidationGroup;
 import eu.europeana.entitymanagement.normalization.EntityFieldsEuropeanaProxyValidationInterface;
-import eu.europeana.entitymanagement.vocabulary.ValidationEntity;
+import eu.europeana.entitymanagement.vocabulary.ValidationObject;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 
 @dev.morphia.annotations.Embedded
@@ -54,7 +54,7 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
     groups = {EntityFieldsEuropeanaProxyValidationGroup.class})
 @EntityFieldsDataSourceProxyValidationInterface(
     groups = {EntityFieldsDataSourceProxyValidationGroup.class})
-public abstract class Entity implements ValidationEntity {
+public abstract class Entity implements ValidationObject {
 
   protected String entityId;
   // ID of entityRecord in database

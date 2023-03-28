@@ -5,7 +5,6 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CREATED;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DEFINITION;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_DEFINED_BY;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ITEMS;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.MODIFIED;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
@@ -29,7 +28,7 @@ import dev.morphia.annotations.Indexed;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidationGroup;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidationInterface;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.vocabulary.ValidationEntity;
+import eu.europeana.entitymanagement.vocabulary.ValidationObject;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -41,7 +40,6 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
   PREF_LABEL,
   DEFINITION,
   SUBJECT,
-  IS_DEFINED_BY,
   TOTAL,
   ITEMS,
   CREATED,
@@ -49,11 +47,11 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 })
 @dev.morphia.annotations.Entity("ConceptScheme")
 @EntityFieldsCompleteValidationInterface(groups = {EntityFieldsCompleteValidationGroup.class})
-public class ConceptScheme implements ValidationEntity{
+public class ConceptScheme implements ValidationObject{
   
   @Id @JsonIgnore private ObjectId dbId;
   
-  private String type = EntityTypes.ConceptScheme.name();
+  private String type = EntityTypes.ConceptScheme.getEntityType();
   
   @Indexed(options = @IndexOptions(unique = true))
   private String entityId;
@@ -61,7 +59,6 @@ public class ConceptScheme implements ValidationEntity{
   @JsonIgnore private Date disabled;
   private Map<String, String> prefLabel;
   private Map<String, String> definition;
-  private String isDefinedBy;
   private String subject;
   private Date created;
   private Date modified;
@@ -117,16 +114,6 @@ public class ConceptScheme implements ValidationEntity{
   @JsonGetter(TYPE)
   public String getType() {
     return type;
-  }
-
-  @JsonGetter(IS_DEFINED_BY)
-  public String getIsDefinedBy() {
-    return isDefinedBy;
-  }
-
-  @JsonSetter(IS_DEFINED_BY)
-  public void setIsDefinedBy(String isDefinedBy) {
-    this.isDefinedBy = isDefinedBy;
   }
 
   @JsonGetter(SUBJECT)

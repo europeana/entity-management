@@ -2,16 +2,15 @@ package eu.europeana.entitymanagement.scoring;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import eu.europeana.entitymanagement.config.SerializationConfig;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.model.scoring.EntityMetrics;
 import eu.europeana.entitymanagement.web.model.scoring.MaxEntityMetrics;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 /** JUnit test for testing the EMControllerTest class */
 @SpringBootTest(classes = SerializationConfig.class)
@@ -24,21 +23,21 @@ public class ScoringComputationTest {
   public void testSerializeMaxMetricsValues() throws Exception {
     MaxEntityMetrics maxMetrics = new MaxEntityMetrics();
 
-    maxMetrics.addMetrics(createMetricsObject(EntityTypes.Agent.name(), 1204, 31734, 2297502));
-    maxMetrics.addMetrics(createMetricsObject(EntityTypes.Place.name(), 24772, 3065416, 24576199));
-    maxMetrics.addMetrics(createMetricsObject(EntityTypes.Concept.name(), 4055, 1448506, 8106790));
-    maxMetrics.addMetrics(createMetricsObject(EntityTypes.Organization.name(), 244, 1, 8977503));
-    maxMetrics.addMetrics(createMetricsObject(EntityTypes.TimeSpan.name(), 3912, 1, 8977503));
+    maxMetrics.addMetrics(createMetricsObject(EntityTypes.Agent.getEntityType(), 1204, 31734, 2297502));
+    maxMetrics.addMetrics(createMetricsObject(EntityTypes.Place.getEntityType(), 24772, 3065416, 24576199));
+    maxMetrics.addMetrics(createMetricsObject(EntityTypes.Concept.getEntityType(), 4055, 1448506, 8106790));
+    maxMetrics.addMetrics(createMetricsObject(EntityTypes.Organization.getEntityType(), 244, 1, 8977503));
+    maxMetrics.addMetrics(createMetricsObject(EntityTypes.TimeSpan.getEntityType(), 3912, 1, 8977503));
 
     String maxMetricsXml = objectMapper.writeValueAsString(maxMetrics);
     System.out.println(maxMetricsXml);
 
     assertNotNull(maxMetricsXml);
-    assertTrue(maxMetricsXml.contains(EntityTypes.Agent.name()));
-    assertTrue(maxMetricsXml.contains(EntityTypes.Place.name()));
-    assertTrue(maxMetricsXml.contains(EntityTypes.Concept.name()));
-    assertTrue(maxMetricsXml.contains(EntityTypes.Organization.name()));
-    assertTrue(maxMetricsXml.contains(EntityTypes.TimeSpan.name()));
+    assertTrue(maxMetricsXml.contains(EntityTypes.Agent.getEntityType()));
+    assertTrue(maxMetricsXml.contains(EntityTypes.Place.getEntityType()));
+    assertTrue(maxMetricsXml.contains(EntityTypes.Concept.getEntityType()));
+    assertTrue(maxMetricsXml.contains(EntityTypes.Organization.getEntityType()));
+    assertTrue(maxMetricsXml.contains(EntityTypes.TimeSpan.getEntityType()));
   }
 
   @Test

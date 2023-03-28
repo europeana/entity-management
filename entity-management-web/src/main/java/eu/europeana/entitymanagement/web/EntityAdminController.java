@@ -89,7 +89,7 @@ public class EntityAdminController extends BaseRest {
 
     String entityUri=null;
     try {
-      entityUri = EntityRecordUtils.buildEntityIdUri(EntityTypes.getByName(type), identifier);
+      entityUri = EntityRecordUtils.buildEntityIdUri(EntityTypes.getByEntityType(type), identifier);
     } catch (UnsupportedEntityTypeException e) {
       throw new EntityNotFoundException("/"+type+"/"+identifier, e);
     }
@@ -143,7 +143,7 @@ public class EntityAdminController extends BaseRest {
 
     try {
       // get the entity type based on path param
-      type = EntityTypes.getByName(type).toString();
+      type = EntityTypes.getByEntityType(type).toString();
       EntityRecord savedEntityRecord =
           entityRecordService.createEntityFromMigrationRequest(
               europeanaProxyEntity, type, identifier);
