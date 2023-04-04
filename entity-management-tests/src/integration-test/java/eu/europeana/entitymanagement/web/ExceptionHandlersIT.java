@@ -19,6 +19,8 @@ import org.springframework.http.*;
  * TestRestTemplate is needed. Please note also the configuration properties in the test resources application.properties:
  * spring.mvc.throw-exception-if-no-handler-found=true
  * spring.resources.add-mappings=false
+ * Links: https://stackoverflow.com/questions/61455449/unit-test-mockhttpservletrequest-not-returning-content-type,
+ * https://github.com/spring-projects/spring-boot/issues/7321
  * @author StevaneticS
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
