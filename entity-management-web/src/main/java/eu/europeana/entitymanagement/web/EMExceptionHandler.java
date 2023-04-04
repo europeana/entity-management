@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement.web;
 
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import eu.europeana.api.commons.error.EuropeanaGlobalExceptionHandler;
 import eu.europeana.api.commons.web.exception.HttpException;
 
 @ControllerAdvice
+@ConditionalOnWebApplication
 public class EMExceptionHandler extends EuropeanaGlobalExceptionHandler {
   // exception handling inherited from parent
 

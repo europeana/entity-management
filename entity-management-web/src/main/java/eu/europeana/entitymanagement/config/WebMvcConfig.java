@@ -14,9 +14,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 /** Setup CORS for all requests and setup default Content-type */
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
-
-  @Value("${spring.resources.static-locations}")
-  String resourceLocations;
   
   MediaType jsonLdMediaType =
       MediaType.valueOf(eu.europeana.api.commons.web.http.HttpHeaders.CONTENT_TYPE_JSONLD);
@@ -78,6 +75,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
   
   @Override
   public void addResourceHandlers(ResourceHandlerRegistry registry) {
-    registry.addResourceHandler("/public/**").addResourceLocations(resourceLocations);
+    registry.addResourceHandler("/public/**").addResourceLocations("classpath:/public/");
   }  
 }

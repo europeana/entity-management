@@ -7,12 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.solr.model.SolrEntity;
-import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
-import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import java.util.List;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.junit.jupiter.api.Test;
@@ -20,6 +14,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.solr.model.SolrEntity;
+import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
+import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -125,7 +124,7 @@ class EntityEnableDisableForEnrichmentIT extends BaseWebControllerTest {
     assertNotNull(res);
     assertEquals(1, res.size());
   }
-
+  
   SolrQuery buildSolrQueryWithIdAndFieldExists(EntityRecord entityRecord, String field) {
     StringBuilder queryBuilder =
         new StringBuilder("id:\"")

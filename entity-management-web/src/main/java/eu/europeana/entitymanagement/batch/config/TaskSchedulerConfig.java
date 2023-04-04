@@ -11,7 +11,10 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 /**
  * Configures TaskSchedulers for triggering periodic ScheduledTask handling. Multiple schedulers are
  * used, so long-running updates do not block the execution of deletions / deprecations
+ *
+ * @deprecated - this will not be used anymore since Kubernetes migration for batch application
  */
+@Deprecated(since = "1-03-2023")
 @Configuration
 public class TaskSchedulerConfig {
 
