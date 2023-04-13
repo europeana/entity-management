@@ -3,6 +3,14 @@ package eu.europeana.entitymanagement.normalization;
 import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_DATE;
 import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_EMAIL;
 import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_URI;
+
+import eu.europeana.entitymanagement.definitions.LanguageCodes;
+import eu.europeana.entitymanagement.definitions.model.Address;
+import eu.europeana.entitymanagement.definitions.model.WebResource;
+import eu.europeana.entitymanagement.utils.EntityUtils;
+import eu.europeana.entitymanagement.utils.UriValidator;
+import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
+import eu.europeana.entitymanagement.vocabulary.ValidationObject;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -13,13 +21,6 @@ import java.util.Set;
 import javax.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
-import eu.europeana.entitymanagement.definitions.LanguageCodes;
-import eu.europeana.entitymanagement.definitions.model.Address;
-import eu.europeana.entitymanagement.definitions.model.WebResource;
-import eu.europeana.entitymanagement.utils.EntityUtils;
-import eu.europeana.entitymanagement.utils.UriValidator;
-import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
-import eu.europeana.entitymanagement.vocabulary.ValidationObject;
 
 public class EntityFieldsDatatypeValidation {
 

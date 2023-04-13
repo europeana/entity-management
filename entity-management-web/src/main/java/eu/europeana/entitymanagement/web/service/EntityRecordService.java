@@ -56,7 +56,6 @@ import eu.europeana.entitymanagement.exception.HttpUnprocessableException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
-import eu.europeana.entitymanagement.solr.model.SolrConceptScheme;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.utils.EMCollectionUtils;
 import eu.europeana.entitymanagement.utils.EntityObjectFactory;
@@ -117,8 +116,8 @@ public class EntityRecordService {
     return entityRecordRepository.findByEntityIds(entityIds, true, true);
   }
 
-  public EntityRecord retrieveEntityRecord(EntityTypes type, String identifier, boolean retrieveDisabled)
-      throws EuropeanaApiException {
+  public EntityRecord retrieveEntityRecord(
+      EntityTypes type, String identifier, boolean retrieveDisabled) throws EuropeanaApiException {
     String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
     return retrieveEntityRecord(entityUri, retrieveDisabled);
   }
@@ -161,44 +160,6 @@ public class EntityRecordService {
     return entityRecordRepository.save(er);
   }
 
-  public void completeConceptScheme(ConceptScheme scheme) throws UnsupportedEntityTypeException  {
-    String id = generateEntityId(EntityTypes.getByEntityType(scheme.getType()), null);
-    scheme.setEntityId(id);
-    if(scheme.getItems()!=null) {
-      scheme.setTotal(scheme.getItems().size());
-    }
-    Date now = new Date();
-    scheme.setCreated(now);
-    scheme.setModified(now);
-  }
-  
-  public ConceptScheme saveConceptScheme(ConceptScheme scheme) throws SolrServiceException {
-    ConceptScheme dbScheme=entityRecordRepository.saveConceptScheme(scheme);
-    try {
-      solrService.storeConceptScheme(new SolrConceptScheme(scheme));
-    } catch (SolrServiceException e) {
-      throw new SolrServiceException(
-          String.format("Error during Solr indexing for id=%s", scheme.getEntityId()), e);
-    }
-    return dbScheme;
-  }
-  
-  public ConceptScheme retrieveConceptScheme(String identifier, boolean retrieveDisabled)
-      throws EuropeanaApiException {
-    String schemeUri = EntityRecordUtils.buildEntityIdUri(EntityTypes.ConceptScheme, identifier);
-    ConceptScheme dbScheme = entityRecordRepository.findConceptScheme(schemeUri);
-    
-    if (dbScheme==null) {
-      throw new EntityNotFoundException(schemeUri);
-    }
-
-    if (!retrieveDisabled && dbScheme.isDisabled()) {
-      throw new EntityRemovedException(
-          String.format(EntityRecordUtils.ENTITY_ID_REMOVED_MSG, schemeUri));
-    }
-    return dbScheme;
-  }
-  
   public List<EntityRecord> saveBulkEntityRecords(List<EntityRecord> records) {
     return entityRecordRepository.saveBulk(records);
   }
@@ -256,37 +217,31 @@ public class EntityRecordService {
     er.setDisabled(new Date());
     entityRecordRepository.save(er);
   }
-    
-  public void disableConceptScheme(ConceptScheme scheme, boolean forceSolrCommit)
-      throws EntityUpdateException {
-    updateConceptSchemeEntities(scheme);
-    try {
-      solrService.deleteById(List.of(scheme.getEntityId()), forceSolrCommit);
-    } catch (SolrServiceException e) {
-      throw new EntityUpdateException("Cannot delete solr record with id: " + scheme.getEntityId(), e);
-    }
-    scheme.setDisabled(new Date());
-    entityRecordRepository.saveConceptScheme(scheme);
-  }
-  
-  //update the inScheme field of the entities that refer to this scheme
-  private void updateConceptSchemeEntities(ConceptScheme scheme) {
-    if(scheme.getItems()==null) {
+
+
+  // update the inScheme field of the entities that refer to this scheme
+  @Deprecated
+  /**
+   * @deprecated "need to call the update methods to keep data consistent"
+   * @param scheme
+   */
+  private void updateEntitiesInScheme(ConceptScheme scheme) {
+    if (scheme.getItems() == null) {
       return;
     }
-    for(String entityUrl : scheme.getItems()) {
+    for (String entityUrl : scheme.getItems()) {
       Optional<EntityRecord> erOpt = retrieveByEntityId(entityUrl);
-      if(erOpt.isEmpty()) {
+      if (erOpt.isEmpty()) {
         continue;
       }
-      
+
       EntityRecord er = erOpt.get();
       List<String> inScheme = er.getEntity().getInScheme();
-      if(inScheme!=null) {
-        inScheme.remove(scheme.getEntityId());
+      if (inScheme != null) {
+        inScheme.remove(scheme.getConceptSchemeId());
       }
-      entityRecordRepository.save(er);            
-    }      
+      entityRecordRepository.save(er);
+    }
   }
 
   /**
@@ -344,7 +299,7 @@ public class EntityRecordService {
    * @throws EntityCreationException if an error occurs
    * @throws HttpUnprocessableException
    * @throws HttpBadRequestException
-   * @throws UnsupportedEntityTypeException 
+   * @throws UnsupportedEntityTypeException
    */
   public EntityRecord createEntityFromMigrationRequest(
       Entity europeanaProxyEntity, String type, String identifier)
@@ -402,7 +357,7 @@ public class EntityRecordService {
    * @param dataSource the data source identified for the given entity id
    * @return Saved Entity record
    * @throws EntityCreationException if an error occurs
-   * @throws UnsupportedEntityTypeException 
+   * @throws UnsupportedEntityTypeException
    */
   public EntityRecord createEntityFromRequest(
       Entity europeanaProxyEntity, Entity datasourceResponse, DataSource dataSource)
@@ -524,10 +479,11 @@ public class EntityRecordService {
     }
   }
 
-  String generateEntityId(Entity datasourceResponse, boolean isZohoOrg) throws UnsupportedEntityTypeException {
+  String generateEntityId(Entity datasourceResponse, boolean isZohoOrg)
+      throws UnsupportedEntityTypeException {
     // only in case of Zoho Organization use the provided id from de-referencing
     String entityId = null;
-    EntityTypes type=EntityTypes.getByEntityType(datasourceResponse.getType());
+    EntityTypes type = EntityTypes.getByEntityType(datasourceResponse.getType());
     if (isZohoOrg) {
       // zoho id is mandatory and unique identifier for zoho Organizations
       String zohoId = EntityRecordUtils.getIdFromUrl(datasourceResponse.getEntityId());
@@ -591,7 +547,7 @@ public class EntityRecordService {
     if (entityId != null) {
       return EntityRecordUtils.buildEntityIdUri(entityType, entityId);
     } else {
-      long dbId = entityRecordRepository.generateAutoIncrement(entityType);
+      long dbId = entityRecordRepository.generateAutoIncrement(entityType.getEntityType());
       return EntityRecordUtils.buildEntityIdUri(entityType, String.valueOf(dbId));
     }
   }
@@ -690,7 +646,7 @@ public class EntityRecordService {
   }
 
   /** @deprecated */
-  @Deprecated(since = "", forRemoval = false)
+  @Deprecated(since = "to remove deprecation when first used", forRemoval = false)
   private Map<String, List<String>> replaceWithInternalReferences(
       Map<String, List<String>> originalReferences) {
     if (originalReferences == null) {
@@ -803,6 +759,7 @@ public class EntityRecordService {
    *     collection (eg. maps, lists and arrays) within the primary . If accumulate is false, the
    *     "primary" content overwrites the "secondary"
    */
+  @SuppressWarnings("unchecked")
   private Entity combineEntities(
       Entity primary, Entity secondary, List<Field> fieldsToCombine, boolean accumulate)
       throws EuropeanaApiException, EntityModelCreationException {
@@ -934,6 +891,7 @@ public class EntityRecordService {
         || Integer.class.isAssignableFrom(fieldType);
   }
 
+  @SuppressWarnings({"unchecked", "rawtypes"})
   void combineEntities(
       Entity consolidatedEntity,
       Entity primary,
@@ -984,6 +942,7 @@ public class EntityRecordService {
    * @param fieldName
    * @param prefLabelsForAltLabels
    */
+  @SuppressWarnings({"rawtypes", "unchecked"})
   private void mergePrimarySecondaryListWitoutDuplicates(
       Map<Object, Object> fieldValuePrimaryObject,
       Object key,
@@ -1032,6 +991,7 @@ public class EntityRecordService {
     return new HashMap<>();
   }
 
+  @SuppressWarnings("unchecked")
   void mergeSkippedPrefLabels(
       Entity consilidatedEntity,
       Map<Object, Object> prefLabelsForAltLabels,
@@ -1062,6 +1022,7 @@ public class EntityRecordService {
     }
   }
 
+  @SuppressWarnings("unchecked")
   private boolean addValuesToAltLabel(
       Map<Object, Object> prefLabelsForAltLabels,
       Map<Object, Object> altLabelPrimaryObject,

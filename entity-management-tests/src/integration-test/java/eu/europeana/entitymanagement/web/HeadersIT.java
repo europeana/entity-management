@@ -11,6 +11,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
+import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,9 +22,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
-import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 
 /** Standalone test for checking behaviour of headers */
 @SpringBootTest
@@ -48,17 +49,25 @@ public class HeadersIT extends BaseWebControllerTest {
                 // CORS requests include the Origin header
                 .header("Origin", "http://test-origin.eu")
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
-    
+
     checkAllowHeaderForPOST(results);
     checkCommonResponseHeaders(results, true);
 
-    //checking additional headers
-    results.andExpect(header().stringValues(EMHttpHeaders.CACHE_CONTROL, hasItems(EMHttpHeaders.VALUE_NO_CAHCHE_STORE_REVALIDATE)));
-    results.andExpect(header().stringValues(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, hasItems(
-        HttpHeaders.ALLOW,
-        HttpHeaders.LINK,
-        HttpHeaders.ETAG,
-        EMHttpHeaders.CACHE_CONTROL)));
+    // checking additional headers
+    results.andExpect(
+        header()
+            .stringValues(
+                EMHttpHeaders.CACHE_CONTROL,
+                hasItems(EMHttpHeaders.VALUE_NO_CAHCHE_STORE_REVALIDATE)));
+    results.andExpect(
+        header()
+            .stringValues(
+                HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,
+                hasItems(
+                    HttpHeaders.ALLOW,
+                    HttpHeaders.LINK,
+                    HttpHeaders.ETAG,
+                    EMHttpHeaders.CACHE_CONTROL)));
   }
 
   @Test
@@ -75,7 +84,7 @@ public class HeadersIT extends BaseWebControllerTest {
     checkCommonResponseHeaders(results, false);
     checkCorsHeaders(results, false);
   }
-  
+
   @Test
   void retrievalWithJsonldExtensionShouldReturnCorrectHeaders() throws Exception {
     String requestPath = createEntity();

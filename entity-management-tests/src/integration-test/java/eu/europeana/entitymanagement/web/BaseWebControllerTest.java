@@ -7,7 +7,6 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,10 +23,10 @@ import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.common.config.DataSource;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
-import eu.europeana.entitymanagement.definitions.model.ConceptScheme;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Organization;
@@ -52,6 +51,8 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
   @Qualifier(AppConfig.BEAN_EM_SOLR_SERVICE)
   @Autowired
   protected SolrService emSolrService;
+  
+  @Autowired protected EntityManagementConfiguration emConfig;
 
   @Autowired private WebApplicationContext webApplicationContext;
 
@@ -62,7 +63,7 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
     // ensure a clean db between test runs
     this.entityRecordService.dropRepository();
     this.scheduledTaskService.dropCollection();
-
+    this.emConceptSchemeService.dropRepository();
     emSolrService.deleteAllDocuments();
   }
 
@@ -74,8 +75,9 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
 
   protected void checkCommonResponseHeaders(
       ResultActions results, boolean hasPathExtension, boolean hasXmlResponse) throws Exception {
-    results.andExpect(header().exists(HttpHeaders.ETAG))
-           .andExpect(header().string(HttpHeaders.LINK, is(VALUE_LDP_RESOURCE)));
+    results
+        .andExpect(header().exists(HttpHeaders.ETAG))
+        .andExpect(header().string(HttpHeaders.LINK, is(VALUE_LDP_RESOURCE)));
     if (!hasPathExtension) {
       results.andExpect(
           header().stringValues(HttpHeaders.VARY, hasItems(containsString(HttpHeaders.ACCEPT))));
@@ -94,13 +96,17 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
 
     if (hasPathExtension) {
       results.andExpect(
-          header().stringValues(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,
+          header()
+              .stringValues(
+                  HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,
                   HttpHeaders.ALLOW,
                   HttpHeaders.LINK,
                   HttpHeaders.ETAG));
     } else {
       results.andExpect(
-          header().stringValues(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,
+          header()
+              .stringValues(
+                  HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,
                   HttpHeaders.ALLOW,
                   HttpHeaders.LINK,
                   HttpHeaders.VARY,
@@ -147,13 +153,6 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
 
     // return entityRecord version with consolidated entity
     return entityRecordService.retrieveByEntityId(savedRecord.getEntityId()).orElseThrow();
-  }
-  
-  protected ConceptScheme createConceptScheme(List<String> items) throws Exception {
-    ConceptScheme scheme = objectMapper.readValue(loadFile(IntegrationTestUtils.CONCEPT_SCHEME_PHOTO_GENRE_JSON), ConceptScheme.class);
-    scheme.setItems(items);
-    entityRecordService.completeConceptScheme(scheme);
-    return entityRecordService.saveConceptScheme(scheme);
   }
 
   protected EntityRecord createConcept() throws Exception {

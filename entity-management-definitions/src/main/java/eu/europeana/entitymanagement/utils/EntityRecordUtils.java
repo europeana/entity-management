@@ -1,19 +1,19 @@
 package eu.europeana.entitymanagement.utils;
 
-import org.apache.commons.lang3.StringUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
+import org.apache.commons.lang3.StringUtils;
 
 public class EntityRecordUtils {
 
-  public static final String ENTITY_ID_REMOVED_MSG = "Entity '%s' has been removed";
+  public static final String ENTITY_ID_REMOVED_MSG = "Entity '%d' has been removed";
 
   private EntityRecordUtils() {
     // private constructor to prevent instantiation
   }
 
   public static String buildEntityIdUri(EntityTypes type, String identifier) {
-    return buildEntityIdUri(type.getStringForUrl(), identifier);
+    return buildEntityIdUri(type.getUrlPath(), identifier);
   }
 
   private static String buildEntityIdUri(String type, String identifier) {

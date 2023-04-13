@@ -14,17 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
-import java.util.Map;
-import java.util.Optional;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
 import com.zoho.crm.api.record.Record;
 import eu.europeana.entitymanagement.batch.service.FailedTaskService;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
@@ -37,6 +27,17 @@ import eu.europeana.entitymanagement.vocabulary.FailedTaskJsonFields;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.web.xml.model.XmlConstants;
+import java.util.Map;
+import java.util.Optional;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -714,23 +715,8 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
         .andExpect(jsonPath("$.proxies[1].proxyIn.score").doesNotExist());
   }
 
-  @Test
-  public void retrieveConceptSchemeShouldBeSuccessful() throws Exception {
-    ConceptScheme scheme = createConceptScheme(null);
-    mockMvc
-        .perform(
-            get(IntegrationTestUtils.BASE_SCHEME_URL + scheme.getEntityId().substring(scheme.getEntityId().lastIndexOf('/') + 1) + ".jsonld")
-            .param(WebEntityConstants.QUERY_PARAM_WSKEY, "apidemo")    
-            .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id", is(scheme.getEntityId())))
-        .andExpect(jsonPath("$.type", is(EntityTypes.ConceptScheme.getEntityType())));
-    
-    //check solr obj also exists
-    SolrConceptScheme solrConceptScheme = solrService.searchConceptScheme(scheme.getEntityId());
-    Assertions.assertNotNull(solrConceptScheme);
-  }
   
+
   // TODO: add tests for XML retrieval
 
   @Test
@@ -741,17 +727,4 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
   }
-
-  @Test
-  void retrieveDeprecatedConceptScheme() throws Exception {
-    ConceptScheme scheme = createConceptScheme(null);
-    entityRecordService.disableConceptScheme(scheme, true);
-    
-    mockMvc
-        .perform(
-            get(IntegrationTestUtils.BASE_SCHEME_URL + scheme.getEntityId().substring(scheme.getEntityId().lastIndexOf('/') + 1) + ".jsonld")
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isGone());
-  }
-
 }

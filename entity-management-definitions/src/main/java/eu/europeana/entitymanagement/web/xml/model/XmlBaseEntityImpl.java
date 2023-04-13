@@ -74,7 +74,7 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
 
   public T toEntityModel() throws EntityModelCreationException {
     if (entity == null) {
-      entity = EntityObjectFactory.createProxyEntityObject(getTypeEnum().toString());
+      entity = EntityObjectFactory.createProxyEntityObject(getTypeEnum().getEntityType());
     }
     entity.setEntityId(getAbout());
     entity.setPrefLabel(RdfXmlUtils.toLanguageMap(getPrefLabel()));

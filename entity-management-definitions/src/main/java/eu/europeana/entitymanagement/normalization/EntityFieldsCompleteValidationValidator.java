@@ -1,8 +1,8 @@
 package eu.europeana.entitymanagement.normalization;
 
+import eu.europeana.entitymanagement.vocabulary.ValidationObject;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-import eu.europeana.entitymanagement.vocabulary.ValidationObject;
 
 public class EntityFieldsCompleteValidationValidator
     implements ConstraintValidator<EntityFieldsCompleteValidationInterface, ValidationObject> {

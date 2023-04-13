@@ -25,13 +25,14 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import dev.morphia.annotations.Id;
 import dev.morphia.annotations.IndexOptions;
 import dev.morphia.annotations.Indexed;
+import dev.morphia.annotations.Transient;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidationGroup;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidationInterface;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.ValidationObject;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonIgnoreProperties(ignoreUnknown = false)
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
   CONTEXT,
@@ -47,48 +48,57 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 })
 @dev.morphia.annotations.Entity("ConceptScheme")
 @EntityFieldsCompleteValidationInterface(groups = {EntityFieldsCompleteValidationGroup.class})
-public class ConceptScheme implements ValidationObject{
-  
+public class ConceptScheme implements ValidationObject {
+
   @Id @JsonIgnore private ObjectId dbId;
-  
+
   private String type = EntityTypes.ConceptScheme.getEntityType();
-  
+
+  @JsonIgnore
   @Indexed(options = @IndexOptions(unique = true))
-  private String entityId;
-  
-  @JsonIgnore private Date disabled;
+  private Long identifier;
+  @Transient
+  private String conceptSchemeId;
+
   private Map<String, String> prefLabel;
   private Map<String, String> definition;
   private String subject;
   private Date created;
   private Date modified;
+  @JsonIgnore private Date disabled;
   private int total;
   private List<String> items;
 
-  public ConceptScheme() {
-  }
-  
+  public ConceptScheme() {}
+
   public boolean isDisabled() {
     return disabled != null;
   }
 
   public void setDisabled(Date disabledParam) {
     this.disabled = disabledParam;
-  }  
+  }
 
   @JsonGetter(CONTEXT)
   public String getContext() {
     return ENTITY_CONTEXT;
   }
-  
-  @JsonGetter(ID)
-  public String getEntityId() {
-    return entityId;
+
+  public Long getIdentifier() {
+    return identifier;
   }
 
-  @JsonSetter(ID)
-  public void setEntityId(String entityId) {
-    this.entityId = entityId;
+  public void setIdentifier(Long identifier) {
+    this.identifier = identifier;
+  }
+
+  @JsonGetter(ID)
+  public String getConceptSchemeId() {
+    return conceptSchemeId;
+  }
+
+  public void setConceptSchemeId(String conceptSchemeId) {
+    this.conceptSchemeId = conceptSchemeId;
   }
   
   @JsonGetter(WebEntityFields.PREF_LABEL)
@@ -145,7 +155,7 @@ public class ConceptScheme implements ValidationObject{
   public void setModified(Date modified) {
     this.modified = modified;
   }
-  
+
   @JsonGetter(TOTAL)
   public int getTotal() {
     return total;
@@ -165,18 +175,13 @@ public class ConceptScheme implements ValidationObject{
   public void setItems(List<String> items) {
     this.items = items;
   }
-  
 
   public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
-    // TODO:in case of the performance overhead cause by using the reflecion code, change this
-    // method to call the getters for each field individually
     return field.get(this);
   }
 
   public void setFieldValue(Field field, Object value)
       throws IllegalArgumentException, IllegalAccessException {
-    // TODO:in case of the performance overhead cause by using the reflecion code, change this
-    // method to call the setter for each field individually
     field.set(this, value);
   }
   

@@ -137,9 +137,14 @@ public class EntityManagementConfiguration implements InitializingBean {
   @Value("${zoho.sync.batch.size: 100}")
   private int zohoSyncBatchSize;
 
-  @Value("${europeana.item.data.endpoint}")
+  @Value("${europeana.item.data.endpoint:'http://data.europeana.eu/item'}")
   private String itemDataEndpoint;
-
+  
+  
+  @Value("${europeana.scheme.data.endpoint:'http://data.europeana.eu/scheme'}")
+  private String schemeDataEndpoint;
+  
+  
   @Value("${spring.profiles.active:}")
   private String activeProfileString;
 
@@ -337,5 +342,13 @@ public class EntityManagementConfiguration implements InitializingBean {
           String.format(
               "The following config properties are not set: %s", String.join("\n", missingProps)));
     }
+  }
+
+  public String getSchemeDataEndpoint() {
+    return schemeDataEndpoint;
+  }
+
+  public void setSchemeDataEndpoint(String schemeDataEndpoint) {
+    this.schemeDataEndpoint = schemeDataEndpoint;
   }
 }

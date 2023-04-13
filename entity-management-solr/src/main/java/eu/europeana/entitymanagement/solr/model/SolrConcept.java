@@ -1,15 +1,15 @@
 package eu.europeana.entitymanagement.solr.model;
 
+import eu.europeana.entitymanagement.definitions.model.Concept;
+import eu.europeana.entitymanagement.solr.SolrUtils;
+import eu.europeana.entitymanagement.vocabulary.ConceptSolrFields;
+import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.solr.client.solrj.beans.Field;
-import eu.europeana.entitymanagement.definitions.model.Concept;
-import eu.europeana.entitymanagement.solr.SolrUtils;
-import eu.europeana.entitymanagement.vocabulary.ConceptSolrFields;
-import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 
 public class SolrConcept extends SolrEntity<Concept> {
 

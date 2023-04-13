@@ -13,6 +13,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.solr.model.SolrOrganization;
+import eu.europeana.entitymanagement.solr.service.SolrService;
+import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
+import eu.europeana.entitymanagement.utils.EntityRecordUtils;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,13 +30,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.solr.model.SolrOrganization;
-import eu.europeana.entitymanagement.solr.service.SolrService;
-import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
-import eu.europeana.entitymanagement.utils.EntityRecordUtils;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -206,19 +207,6 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         .andExpect(jsonPath("$.isShownBy.type").isNotEmpty());
   }
 
-  @Test
-  void registerConceptSchemeShouldBeSuccessful() throws Exception {
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SCHEME_URL)
-                .content(loadFile(IntegrationTestUtils.CONCEPT_SCHEME_PHOTO_GENRE_JSON))
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-        .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.id", containsString(WebEntityFields.BASE_DATA_EUROPEANA_URI + EntityTypes.ConceptScheme.getStringForUrl())))
-        .andExpect(jsonPath("$.type", is(EntityTypes.ConceptScheme.getEntityType())))
-        .andExpect(jsonPath("$.prefLabel").isNotEmpty());
-  }
-  
   @Test
   public void registerZohoOrganizationShouldBeSuccessful() throws Exception {
 

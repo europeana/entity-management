@@ -3,27 +3,7 @@ package eu.europeana.entitymanagement.solr.service;
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_INDEXING_SOLR_CLIENT;
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_JSON_MAPPER;
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_SOLR_ENTITY_SUGGESTER_FILTER;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.beans.BindingException;
-import org.apache.solr.client.solrj.beans.DocumentObjectBinder;
-import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.client.solrj.response.UpdateResponse;
-import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,6 +28,27 @@ import eu.europeana.entitymanagement.solr.model.SolrConceptScheme;
 import eu.europeana.entitymanagement.solr.model.SolrEntity;
 import eu.europeana.entitymanagement.solr.model.SolrOrganization;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.beans.BindingException;
+import org.apache.solr.client.solrj.beans.DocumentObjectBinder;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.response.UpdateResponse;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service(AppConfigConstants.BEAN_EM_SOLR_SERVICE)
 public class SolrService implements InitializingBean {
@@ -130,11 +131,12 @@ public class SolrService implements InitializingBean {
           solrConceptScheme.getEntityId());
     } catch (SolrServerException | IOException | RuntimeException ex) {
       throw new SolrServiceException(
-          String.format("Error during Solr indexing for entityId=%s", solrConceptScheme.getEntityId()),
+          String.format(
+              "Error during Solr indexing for entityId=%s", solrConceptScheme.getEntityId()),
           ex);
     }
   }
-  
+
   /**
    * Indexes multiple entities to Solr. Replaces any existing entities with the same entity
    * identifier.
@@ -212,11 +214,11 @@ public class SolrService implements InitializingBean {
     SolrDocument doc = docList.get(0);
     return binder.getBean(classType, doc);
   }
-  
-  public SolrConceptScheme searchConceptScheme(String entityId) throws SolrServiceException {
+
+  public SolrConceptScheme searchConceptSchemeById(String conceptSchemeId) throws SolrServiceException {
     QueryResponse rsp;
     SolrQuery query = new SolrQuery();
-    query.set("q", EntitySolrFields.ID + ":\"" + entityId + "\"");
+    query.set("q", EntitySolrFields.ID + ":\"" + conceptSchemeId + "\"");
     try {
       rsp = solrClient.query(query);
       if (log.isDebugEnabled()) {
@@ -228,7 +230,7 @@ public class SolrService implements InitializingBean {
       }
     } catch (IOException | SolrServerException ex) {
       throw new SolrServiceException(
-          String.format("Error while searching Solr for entityId=%s", entityId), ex);
+          String.format("Error while searching Solr for entityId=%s", conceptSchemeId), ex);
     }
 
     DocumentObjectBinder binder = new DocumentObjectBinder();
@@ -239,7 +241,6 @@ public class SolrService implements InitializingBean {
     SolrDocument doc = docList.get(0);
     return binder.getBean(SolrConceptScheme.class, doc);
   }
-
 
   /**
    * Search by provided solr query

@@ -10,41 +10,33 @@ import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTIT
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_ID;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_MODIFIED;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_SAME_AS;
-import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MAJORITY_WRITE_MODIFY_OPTS;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_UPDATE_OPTS;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 import com.mongodb.client.result.UpdateResult;
-import dev.morphia.Datastore;
 import dev.morphia.query.FindOptions;
 import dev.morphia.query.Query;
 import dev.morphia.query.experimental.filters.Filter;
 import dev.morphia.query.experimental.updates.UpdateOperators;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.EntityRecordFields;
-import eu.europeana.entitymanagement.definitions.model.ConceptScheme;
 import eu.europeana.entitymanagement.definitions.model.EntityIdGenerator;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
 import eu.europeana.entitymanagement.mongo.utils.MorphiaUtils;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 /** Repository for retrieving the EntityRecord objects. */
 @Repository(AppConfigConstants.BEAN_ENTITY_RECORD_REPO)
-public class EntityRecordRepository {
-
-  @Resource(name = AppConfigConstants.BEAN_EM_DATA_STORE)
-  private Datastore datastore;
+public class EntityRecordRepository extends AbstractRepository {
 
   /** @return the total number of resources in the database */
   public long count() {
-    return datastore.find(EntityRecord.class).count();
+    return getDataStore().find(EntityRecord.class).count();
   }
 
   /**
@@ -55,7 +47,7 @@ public class EntityRecordRepository {
    * @return true if yes, otherwise false
    */
   public boolean existsByEntityId(String entityId) {
-    return datastore
+    return getDataStore()
             .find(EntityRecord.class)
             .filter(eq(EntityRecordFields.ENTITY_ID, entityId))
             .count()
@@ -69,7 +61,7 @@ public class EntityRecordRepository {
    * @return EntityRecord
    */
   public EntityRecord findByEntityId(String entityId) {
-    return datastore.find(EntityRecord.class).filter(eq(ENTITY_ID, entityId)).first();
+    return getDataStore().find(EntityRecord.class).filter(eq(ENTITY_ID, entityId)).first();
   }
 
   /**
@@ -97,7 +89,7 @@ public class EntityRecordRepository {
     if (!fetchFullRecord) {
       findOptions.projection().include(ENTITY_ID).projection().include(DISABLED);
     }
-    return datastore
+    return getDataStore()
         .find(EntityRecord.class)
         .filter(filters.toArray(Filter[]::new))
         .iterator(findOptions)
@@ -121,7 +113,7 @@ public class EntityRecordRepository {
    * @return the number of deleted objects
    */
   public long deleteForGood(String entityId) {
-    return datastore
+    return getDataStore()
         .find(EntityRecord.class)
         .filter(eq(ENTITY_ID, entityId))
         .delete()
@@ -136,44 +128,13 @@ public class EntityRecordRepository {
    * @return saved entity
    */
   public EntityRecord save(EntityRecord entityRecord) {
-    return datastore.save(entityRecord);
-  }
-  
-  /**
-   * Generates an autoincrement value for entities, based on the Entity type
-   *
-   * @param internalType internal type for Entity
-   * @return autoincrement value
-   */
-  public long generateAutoIncrement(EntityTypes internalType) {
-    /*
-     * Get the given key from the auto increment entity and try to increment it.
-     * Synchronization occurs on the DB-level, so we don't need to synchronize this code block.
-     */
-
-    EntityIdGenerator autoIncrement =
-        datastore
-            .find(EntityIdGenerator.class)
-            .filter(eq("_id", internalType))
-            .modify(UpdateOperators.inc("value"))
-            .execute(MAJORITY_WRITE_MODIFY_OPTS);
-
-    /*
-     * If none is found, we need to create one for the given key. This shouldn't happen in
-     * production as the db is pre-populated with entities
-     */
-    if (autoIncrement == null) {
-      autoIncrement = new EntityIdGenerator(internalType.toString(), 1L);
-      datastore.save(autoIncrement);
-    }
-    return autoIncrement.getValue();
+    return getDataStore().save(entityRecord);
   }
 
   /** Drops the EntityRecord and Entity ID generator collections. */
   public void dropCollection() {
-    datastore.getMapper().getCollection(EntityRecord.class).drop();
-    datastore.getMapper().getCollection(EntityIdGenerator.class).drop();
-    datastore.getMapper().getCollection(ConceptScheme.class).drop();
+    getDataStore().getMapper().getCollection(EntityRecord.class).drop();
+    getDataStore().getMapper().getCollection(EntityIdGenerator.class).drop();
   }
 
   /**
@@ -187,7 +148,7 @@ public class EntityRecordRepository {
       List<String> uris, String entityId) {
 
     Query<EntityRecord> query =
-        datastore
+        getDataStore()
             .find(EntityRecord.class)
             .disableValidation()
             .filter(or(in(ENTITY_SAME_AS, uris), in(ENTITY_EXACT_MATCH, uris)));
@@ -201,7 +162,7 @@ public class EntityRecordRepository {
   }
 
   public List<EntityRecord> saveBulk(List<EntityRecord> entityRecords) {
-    return datastore.save(entityRecords);
+    return getDataStore().save(entityRecords);
   }
 
   /**
@@ -213,7 +174,7 @@ public class EntityRecordRepository {
    * @return List with results
    */
   public List<EntityRecord> findWithFilters(int start, int count, Filter[] filters) {
-    return datastore
+    return getDataStore()
         .find(EntityRecord.class)
         .filter(filters)
         .iterator(new FindOptions().skip(start).sort(ascending(ENTITY_MODIFIED)).limit(count))
@@ -221,7 +182,7 @@ public class EntityRecordRepository {
   }
 
   public long deleteBulk(List<String> entityIds) {
-    return datastore
+    return getDataStore()
         .find(EntityRecord.class)
         .filter(in(ENTITY_ID, entityIds))
         .delete(MorphiaUtils.MULTI_DELETE_OPTS)
@@ -230,19 +191,11 @@ public class EntityRecordRepository {
 
   public UpdateResult disableBulk(List<String> entityIds) {
     Date disablingDate = new Date();
-    return datastore
+    return getDataStore()
         .find(EntityRecord.class)
         .filter(in(ENTITY_ID, entityIds))
         .update(UpdateOperators.set(DISABLED, disablingDate))
         .execute(MULTI_UPDATE_OPTS);
   }
-  
-  public ConceptScheme findConceptScheme(String id) {
-    return datastore.find(ConceptScheme.class).filter(eq(ENTITY_ID, id)).first();
-  }
 
-  public ConceptScheme saveConceptScheme(ConceptScheme scheme) {
-    return datastore.save(scheme);
-  }
-  
 }

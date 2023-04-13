@@ -1,14 +1,14 @@
 package eu.europeana.entitymanagement.solr.model;
 
+import eu.europeana.entitymanagement.definitions.model.ConceptScheme;
+import eu.europeana.entitymanagement.solr.SolrUtils;
+import eu.europeana.entitymanagement.vocabulary.ConceptSchemeSolrFields;
+import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.solr.client.solrj.beans.Field;
-import eu.europeana.entitymanagement.definitions.model.ConceptScheme;
-import eu.europeana.entitymanagement.solr.SolrUtils;
-import eu.europeana.entitymanagement.vocabulary.ConceptSchemeSolrFields;
-import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 
 public class SolrConceptScheme {
 
@@ -23,13 +23,13 @@ public class SolrConceptScheme {
 
   @Field(ConceptSchemeSolrFields.DEFINITION_ALL)
   private Map<String, String> definition;
-  
+
   @Field(ConceptSchemeSolrFields.SUBJECT)
   private String subject;
 
   @Field(EntitySolrFields.CREATED)
   private Date created;
-  
+
   @Field(EntitySolrFields.MODIFIED)
   private Date modified;
 
@@ -39,7 +39,7 @@ public class SolrConceptScheme {
 
   public SolrConceptScheme(ConceptScheme conceptScheme) {
     this.type = conceptScheme.getType();
-    this.entityId = conceptScheme.getEntityId();
+    this.entityId = conceptScheme.getConceptSchemeId();
     this.subject = conceptScheme.getSubject();
     this.created = conceptScheme.getCreated();
     this.modified = conceptScheme.getModified();
@@ -49,11 +49,11 @@ public class SolrConceptScheme {
 
   private void setDefinitionStringMap(Map<String, String> definition) {
     if (MapUtils.isNotEmpty(definition)) {
-      this.definition = new HashMap<>(
-          SolrUtils.normalizeStringMapByAddingPrefix(
-              ConceptSchemeSolrFields.DEFINITION + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, definition
-          )
-      );
+      this.definition =
+          new HashMap<>(
+              SolrUtils.normalizeStringMapByAddingPrefix(
+                  ConceptSchemeSolrFields.DEFINITION + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
+                  definition));
     }
   }
 
@@ -62,13 +62,12 @@ public class SolrConceptScheme {
       this.prefLabel =
           new HashMap<>(
               SolrUtils.normalizeStringMapByAddingPrefix(
-                  EntitySolrFields.PREF_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
+                  EntitySolrFields.PREF_LABEL_FIELD_NAME + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
                   prefLabel));
     }
   }
-  
+
   public String getEntityId() {
     return entityId;
   }
-
 }

@@ -1,15 +1,5 @@
 package eu.europeana.entitymanagement.batch.processor;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.TreeSet;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.batch.item.ItemProcessor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Component;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
@@ -24,6 +14,16 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.TreeSet;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.batch.item.ItemProcessor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Component;
 
 /**
  * This {@link ItemProcessor} retrieves Entity metadata from all proxy datasources, and then
@@ -72,7 +72,8 @@ public class EntityDereferenceProcessor extends BaseEntityProcessor {
       collectWikidataEntityIds(externalEntity, wikidataEntityIds);
     }
 
-    if (EntityTypes.Organization.getEntityType().equals(entityRecord.getEntityRecord().getEntity().getType())) {
+    if (EntityTypes.Organization.getEntityType()
+        .equals(entityRecord.getEntityRecord().getEntity().getType())) {
       // cross-check wikidata proxy, if reference is lost of changed update the proxy list
       // accordingly
       handleWikidataReferenceChange(wikidataEntityIds, entityRecord.getEntityRecord(), timestamp);
