@@ -29,8 +29,6 @@ public class ConceptSchemeService {
   final EntityManagementConfiguration emConfiguration;
 
 
-//  private static final Logger logger = LogManager.getLogger(ConceptSchemeService.class);
-
   @Autowired
   public ConceptSchemeService(
       ConceptSchemeRepository emConceptSchemeRepo,
@@ -39,15 +37,6 @@ public class ConceptSchemeService {
     this.emConceptSchemeRepo = emConceptSchemeRepo;
     this.emConfiguration = emConfiguration;
     this.solrService = solrService;
-  }
-
-//  public boolean existsByEntityId(String entityId) {
-//    return emConceptSchemeRepo.existsByEntityId(entityId);
-//  }
-
-  public Optional<EntityRecord> retrieveByConceptSchemeId(String entityId) {
-//    return Optional.ofNullable(entityRecordRepo.findByEntityId(entityId));
-    return null;
   }
 
 

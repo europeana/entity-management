@@ -54,7 +54,6 @@ public class ConceptScheme implements ValidationObject {
 
   private String type = EntityTypes.ConceptScheme.getEntityType();
 
-  @JsonIgnore
   @Indexed(options = @IndexOptions(unique = true))
   private Long identifier;
   @Transient
@@ -84,10 +83,12 @@ public class ConceptScheme implements ValidationObject {
     return ENTITY_CONTEXT;
   }
 
+  @JsonIgnore
   public Long getIdentifier() {
     return identifier;
   }
 
+  @JsonIgnore
   public void setIdentifier(Long identifier) {
     this.identifier = identifier;
   }

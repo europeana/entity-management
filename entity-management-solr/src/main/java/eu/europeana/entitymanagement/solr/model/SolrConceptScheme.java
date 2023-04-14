@@ -70,4 +70,28 @@ public class SolrConceptScheme {
   public String getEntityId() {
     return entityId;
   }
+
+  public String getType() {
+    return type;
+  }
+
+  public Map<String, String> getPrefLabel() {
+    return prefLabel;
+  }
+
+  public Map<String, String> getDefinition() {
+    return definition;
+  }
+
+  public String getSubject() {
+    return subject;
+  }
+
+  public Date getCreated() {
+    return created;
+  }
+
+  public Date getModified() {
+    return modified;
+  }
 }

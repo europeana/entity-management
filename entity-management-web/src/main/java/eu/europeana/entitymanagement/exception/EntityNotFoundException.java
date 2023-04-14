@@ -12,7 +12,7 @@ public class EntityNotFoundException extends EuropeanaApiException {
     super("No entity found with for specified uri(s): '" + entityUri + "'");
   }
 
-  public EntityNotFoundException(String message, String identifier) {
+  public EntityNotFoundException(String message, String identifier, Throwable t) {
     super(message + identifier);
   }
   

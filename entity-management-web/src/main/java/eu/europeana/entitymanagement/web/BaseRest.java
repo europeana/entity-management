@@ -404,6 +404,7 @@ public abstract class BaseRest extends BaseRestController {
   /** Gets the database identifier from an EntityId string */
   protected String getDatabaseIdentifier(String entityId) {
     // entity id is "http://data.europeana.eu/{type}/{identifier}"
-    return entityId.substring(entityId.lastIndexOf("/") + 1);
+    int nextPos = 1;
+    return entityId.substring(entityId.lastIndexOf("/") + nextPos);
   }
 }

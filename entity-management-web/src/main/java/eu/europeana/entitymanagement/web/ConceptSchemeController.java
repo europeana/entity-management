@@ -85,7 +85,7 @@ public class ConceptSchemeController extends BaseRest {
     try {
       return Long.parseLong(identifier);
     }catch (NumberFormatException e) {
-      throw new EntityNotFoundException("No concept scheme found for the given identifier: ", identifier);
+      throw new EntityNotFoundException("No concept scheme found for the given identifier: ", identifier, e);
     }
   }
 

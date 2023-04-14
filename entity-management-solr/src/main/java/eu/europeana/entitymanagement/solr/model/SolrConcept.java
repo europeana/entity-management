@@ -44,7 +44,7 @@ public class SolrConcept extends SolrEntity<Concept> {
   Map<String, List<String>> notation;
 
   public SolrConcept() {
-    super();
+    // nor arg constructor
   }
 
   public SolrConcept(Concept concept) {
