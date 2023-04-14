@@ -50,7 +50,7 @@ import java.util.Map;
 })
 public class Agent extends Entity {
 
-  private String type = EntityTypes.Agent.name();
+  private String type = EntityTypes.Agent.getEntityType();
   private List<String> date; // format "YYYY"
 
   @JsonDeserialize(converter = StringOrListConverter.class)

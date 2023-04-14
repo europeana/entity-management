@@ -3,6 +3,7 @@ package eu.europeana.entitymanagement.web;
 import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -19,6 +20,7 @@ import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +63,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.id", any(String.class)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Agent.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         // JSON includes isShownBy and depiction
         .andExpect(jsonPath("$.isShownBy").isNotEmpty())
@@ -82,7 +84,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
     response
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.id", any(String.class)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Agent.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
         // should have Europeana and Datasource proxies
@@ -105,7 +107,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.id", any(String.class)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Agent.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         // fields to be serialized as string
         .andExpect(jsonPath("$.dateOfBirth", any(String.class)))
@@ -127,7 +129,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
     response
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.id", any(String.class)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Agent.name())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Agent.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         // fields to be serialized as string
         .andExpect(jsonPath("$.dateOfBirth", any(String.class)))
@@ -151,7 +153,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.id", any(String.class)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Place.name())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Place.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
         // should have Europeana and Datasource proxies
@@ -169,7 +171,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
     response
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.id", any(String.class)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Place.name())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Place.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
         // should have Europeana and Datasource proxies
@@ -195,7 +197,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
     response
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.id", any(String.class)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.TimeSpan.name())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.TimeSpan.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
         // should have Europeana and Datasource proxies
@@ -220,7 +222,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
     response
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.id", is(expectedId)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         // isAggregatedBy should contain 3 aggregates (for Europeana, zoho and wikidata proxies)
         .andExpect(
@@ -246,7 +248,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
 
     String expectedId =
         EntityRecordUtils.buildEntityIdUri(
-            "organization",
+            EntityTypes.Organization,
             EntityRecordUtils.getIdFromUrl(IntegrationTestUtils.ORGANIZATION_GFM_URI_ZOHO));
 
     ResultActions response =
@@ -257,7 +259,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
     response
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.id", is(expectedId)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         // isAggregatedBy should contain 3 aggregates (for Europeana, zoho and wikidata proxies)
         .andExpect(
@@ -285,7 +287,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
 
     String expectedId =
         EntityRecordUtils.buildEntityIdUri(
-            "organization",
+            EntityTypes.Organization,
             EntityRecordUtils.getIdFromUrl(
                 IntegrationTestUtils.ORGANIZATION_BERGER_MUSEUM_URI_ZOHO));
 
@@ -298,7 +300,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
     response
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.id", is(expectedId)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         // isAggregatedBy should contain 3 aggregates (for Europeana, zoho and wikidata proxies)
         .andExpect(
@@ -329,7 +331,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
   void registerZohoOrganizationWithoutWikidataSameAsShouldBeSuccessful() throws Exception {
     String expectedId =
         EntityRecordUtils.buildEntityIdUri(
-            "organization",
+            EntityTypes.Organization,
             EntityRecordUtils.getIdFromUrl(IntegrationTestUtils.ORGANIZATION_PCCE_URI_ZOHO));
 
     ResultActions response =
@@ -340,7 +342,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
     response
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.id", is(expectedId)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Organization.name())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         // isAggregatedBy should contain 2 aggregates (for Europeana and zoho proxies). No wikidata
         // sameAs for this org
@@ -362,7 +364,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
   void registerZohoOrganizationBnfWithNewFieldsShouldBeSuccessful() throws Exception {
     String entityId =
         EntityRecordUtils.buildEntityIdUri(
-            "organization",
+            EntityTypes.Organization,
             EntityRecordUtils.getIdFromUrl(IntegrationTestUtils.ORGANIZATION_BNF_URI_ZOHO));
 
     ResultActions response =

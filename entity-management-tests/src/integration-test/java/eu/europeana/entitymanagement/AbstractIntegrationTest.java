@@ -13,6 +13,7 @@ import eu.europeana.entitymanagement.testutils.MongoContainer;
 import eu.europeana.entitymanagement.testutils.SolrContainer;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.MetisDereferenceUtils;
+import eu.europeana.entitymanagement.web.service.ConceptSchemeService;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import java.io.IOException;
@@ -58,6 +59,7 @@ public abstract class AbstractIntegrationTest {
   @Autowired protected EntityUpdateService entityUpdateService;
   @Autowired protected DataSources datasources;
   @Autowired protected EntityRecordRepository entityRecordRepository;
+  @Autowired protected ConceptSchemeService emConceptSchemeService;
 
   static {
     MONGO_CONTAINER =

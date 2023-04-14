@@ -133,7 +133,7 @@ class EntityAdminControllerIT extends BaseWebControllerTest {
 
     results
         .andExpect(jsonPath("$.id", is(entityId)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Concept.name())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Concept.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
         // should have Europeana and Datasource proxies
@@ -166,7 +166,7 @@ class EntityAdminControllerIT extends BaseWebControllerTest {
     result
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.id", is(entityId)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Concept.name())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Concept.getEntityType())))
         .andExpect(jsonPath("$.prefLabel[*]", hasSize(11))) // 4 labels removed through cleaning
         .andExpect(jsonPath("$.altLabel[*]", hasSize(1)));
   }

@@ -143,7 +143,7 @@ class EntityUpdateIT extends BaseWebControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.id", is(entityRecord.getEntityId())))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Concept.name())));
+        .andExpect(jsonPath("$.type", is(EntityTypes.Concept.getEntityType())));
 
     final ObjectNode nodeReference =
         mapper.readValue(

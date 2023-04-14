@@ -6,7 +6,26 @@ import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEuropeana
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEuropeanaProxyId;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getIsAggregatedById;
 import static java.time.Instant.now;
-
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import com.mongodb.client.result.UpdateResult;
 import dev.morphia.query.experimental.filters.Filter;
 import eu.europeana.api.commons.error.EuropeanaApiException;
@@ -15,10 +34,12 @@ import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
+import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.model.Address;
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Concept;
+import eu.europeana.entitymanagement.definitions.model.ConceptScheme;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -47,26 +68,6 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import org.apache.commons.lang.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 @Service(AppConfig.BEAN_ENTITY_RECORD_SERVICE)
 public class EntityRecordService {
@@ -115,20 +116,20 @@ public class EntityRecordService {
     return entityRecordRepository.findByEntityIds(entityIds, true, true);
   }
 
-  public EntityRecord retrieveEntityRecord(String type, String identifier, boolean retrieveDisabled)
-      throws EuropeanaApiException {
+  public EntityRecord retrieveEntityRecord(
+      EntityTypes type, String identifier, boolean retrieveDisabled) throws EuropeanaApiException {
     String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
     return retrieveEntityRecord(entityUri, retrieveDisabled);
   }
 
   public EntityRecord retrieveEntityRecord(String entityUri, boolean retrieveDisabled)
       throws EntityNotFoundException, EntityRemovedException {
-    Optional<EntityRecord> entityRecordOptional = this.retrieveByEntityId(entityUri);
-    if (entityRecordOptional.isEmpty()) {
+    Optional<EntityRecord> entityRecordOpt = this.retrieveByEntityId(entityUri);
+    if (entityRecordOpt.isEmpty()) {
       throw new EntityNotFoundException(entityUri);
     }
 
-    EntityRecord entityRecord = entityRecordOptional.get();
+    EntityRecord entityRecord = entityRecordOpt.get();
     if (!retrieveDisabled && entityRecord.isDisabled()) {
       throw new EntityRemovedException(
           String.format(EntityRecordUtils.ENTITY_ID_REMOVED_MSG, entityUri));
@@ -214,7 +215,33 @@ public class EntityRecordService {
       throw new EntityUpdateException("Cannot delete solr record with id: " + er.getEntityId(), e);
     }
     er.setDisabled(new Date());
-    saveEntityRecord(er);
+    entityRecordRepository.save(er);
+  }
+
+
+  // update the inScheme field of the entities that refer to this scheme
+  @Deprecated
+  /**
+   * @deprecated "need to call the update methods to keep data consistent"
+   * @param scheme
+   */
+  private void updateEntitiesInScheme(ConceptScheme scheme) {
+    if (scheme.getItems() == null) {
+      return;
+    }
+    for (String entityUrl : scheme.getItems()) {
+      Optional<EntityRecord> erOpt = retrieveByEntityId(entityUrl);
+      if (erOpt.isEmpty()) {
+        continue;
+      }
+
+      EntityRecord er = erOpt.get();
+      List<String> inScheme = er.getEntity().getInScheme();
+      if (inScheme != null) {
+        inScheme.remove(scheme.getConceptSchemeId());
+      }
+      entityRecordRepository.save(er);
+    }
   }
 
   /**
@@ -272,11 +299,12 @@ public class EntityRecordService {
    * @throws EntityCreationException if an error occurs
    * @throws HttpUnprocessableException
    * @throws HttpBadRequestException
+   * @throws UnsupportedEntityTypeException
    */
   public EntityRecord createEntityFromMigrationRequest(
       Entity europeanaProxyEntity, String type, String identifier)
       throws EntityAlreadyExistsException, HttpBadRequestException, HttpUnprocessableException,
-          EntityModelCreationException {
+          EntityModelCreationException, UnsupportedEntityTypeException {
 
     String externalProxyId = europeanaProxyEntity.getEntityId();
 
@@ -286,7 +314,7 @@ public class EntityRecordService {
     Date timestamp = new Date();
 
     Entity entity = EntityObjectFactory.createConsolidatedEntityObject(type);
-    String entityId = generateEntityId(entity.getType(), identifier);
+    String entityId = generateEntityId(EntityTypes.getByEntityType(entity.getType()), identifier);
     // check if entity already exists
     // this is avoid MongoDb exception for duplicate key
     checkIfEntityAlreadyExists(entityId);
@@ -329,10 +357,11 @@ public class EntityRecordService {
    * @param dataSource the data source identified for the given entity id
    * @return Saved Entity record
    * @throws EntityCreationException if an error occurs
+   * @throws UnsupportedEntityTypeException
    */
   public EntityRecord createEntityFromRequest(
       Entity europeanaProxyEntity, Entity datasourceResponse, DataSource dataSource)
-      throws EntityCreationException {
+      throws EntityCreationException, UnsupportedEntityTypeException {
 
     // Fail quick if no datasource is configured
     String externalEntityId = europeanaProxyEntity.getEntityId();
@@ -450,15 +479,17 @@ public class EntityRecordService {
     }
   }
 
-  String generateEntityId(Entity datasourceResponse, boolean isZohoOrg) {
+  String generateEntityId(Entity datasourceResponse, boolean isZohoOrg)
+      throws UnsupportedEntityTypeException {
     // only in case of Zoho Organization use the provided id from de-referencing
     String entityId = null;
+    EntityTypes type = EntityTypes.getByEntityType(datasourceResponse.getType());
     if (isZohoOrg) {
       // zoho id is mandatory and unique identifier for zoho Organizations
       String zohoId = EntityRecordUtils.getIdFromUrl(datasourceResponse.getEntityId());
-      entityId = EntityRecordUtils.buildEntityIdUri(datasourceResponse.getType(), zohoId);
+      entityId = EntityRecordUtils.buildEntityIdUri(type, zohoId);
     } else {
-      entityId = generateEntityId(datasourceResponse.getType(), null);
+      entityId = generateEntityId(type, null);
     }
     return entityId;
   }
@@ -497,8 +528,8 @@ public class EntityRecordService {
    * @throws EntityAlreadyExistsException
    */
   private void checkIfEntityAlreadyExists(String entityId) throws EntityAlreadyExistsException {
-    Optional<EntityRecord> entityRecordOptional = retrieveByEntityId(entityId);
-    if (entityRecordOptional.isPresent()) {
+    Optional<EntityRecord> entityRecordOpt = retrieveByEntityId(entityId);
+    if (entityRecordOpt.isPresent()) {
       throw new EntityAlreadyExistsException(entityId);
     }
   }
@@ -512,11 +543,11 @@ public class EntityRecordService {
    * @param entityId
    * @return the generated EntityId
    */
-  private String generateEntityId(String entityType, String entityId) {
+  private String generateEntityId(EntityTypes entityType, String entityId) {
     if (entityId != null) {
       return EntityRecordUtils.buildEntityIdUri(entityType, entityId);
     } else {
-      long dbId = entityRecordRepository.generateAutoIncrement(entityType);
+      long dbId = entityRecordRepository.generateAutoIncrement(entityType.getEntityType());
       return EntityRecordUtils.buildEntityIdUri(entityType, String.valueOf(dbId));
     }
   }
@@ -615,7 +646,7 @@ public class EntityRecordService {
   }
 
   /** @deprecated */
-  @Deprecated(since = "", forRemoval = false)
+  @Deprecated(since = "to remove deprecation when first used", forRemoval = false)
   private Map<String, List<String>> replaceWithInternalReferences(
       Map<String, List<String>> originalReferences) {
     if (originalReferences == null) {
@@ -728,6 +759,7 @@ public class EntityRecordService {
    *     collection (eg. maps, lists and arrays) within the primary . If accumulate is false, the
    *     "primary" content overwrites the "secondary"
    */
+  @SuppressWarnings("unchecked")
   private Entity combineEntities(
       Entity primary, Entity secondary, List<Field> fieldsToCombine, boolean accumulate)
       throws EuropeanaApiException, EntityModelCreationException {
@@ -859,6 +891,7 @@ public class EntityRecordService {
         || Integer.class.isAssignableFrom(fieldType);
   }
 
+  @SuppressWarnings({"unchecked", "rawtypes"})
   void combineEntities(
       Entity consolidatedEntity,
       Entity primary,
@@ -909,6 +942,7 @@ public class EntityRecordService {
    * @param fieldName
    * @param prefLabelsForAltLabels
    */
+  @SuppressWarnings({"rawtypes", "unchecked"})
   private void mergePrimarySecondaryListWitoutDuplicates(
       Map<Object, Object> fieldValuePrimaryObject,
       Object key,
@@ -957,6 +991,7 @@ public class EntityRecordService {
     return new HashMap<>();
   }
 
+  @SuppressWarnings("unchecked")
   void mergeSkippedPrefLabels(
       Entity consilidatedEntity,
       Map<Object, Object> prefLabelsForAltLabels,
@@ -987,6 +1022,7 @@ public class EntityRecordService {
     }
   }
 
+  @SuppressWarnings("unchecked")
   private boolean addValuesToAltLabel(
       Map<Object, Object> prefLabelsForAltLabels,
       Map<Object, Object> altLabelPrimaryObject,
@@ -1265,7 +1301,7 @@ public class EntityRecordService {
             .collect(Collectors.toList()));
   }
 
-  public EntityRecord updateUsedForEnrichment(String type, String identifier, String action)
+  public EntityRecord updateUsedForEnrichment(EntityTypes type, String identifier, String action)
       throws EuropeanaApiException {
 
     EntityRecord entityRecord = retrieveEntityRecord(type, identifier, false);

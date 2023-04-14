@@ -16,6 +16,15 @@ public class EntityUtils {
     return null;
   }
 
+  public static String buildConceptSchemeId(String baseUrl, Long identifier) {
+    StringBuilder builder = new StringBuilder();
+    builder.append(baseUrl);
+    if(baseUrl !=null && !baseUrl.endsWith("/")){
+      builder.append('/');
+    }
+    return builder.append(identifier).toString();
+  }
+  
   public static String toGeoUri(String latLon) {
     if (latLon == null) {
       return null;

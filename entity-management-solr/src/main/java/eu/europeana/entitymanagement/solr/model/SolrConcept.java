@@ -40,14 +40,11 @@ public class SolrConcept extends SolrEntity<Concept> {
   @Field(ConceptSolrFields.CLOSE_MATCH)
   private List<String> closeMatch;
 
-  @Field(ConceptSolrFields.IN_SCHEME)
-  private List<String> inScheme;
-
   @Field(ConceptSolrFields.NOTATION_ALL)
   Map<String, List<String>> notation;
 
   public SolrConcept() {
-    super();
+    // nor arg constructor
   }
 
   public SolrConcept(Concept concept) {
@@ -63,7 +60,6 @@ public class SolrConcept extends SolrEntity<Concept> {
     if (concept.getRelatedMatch() != null)
       this.relatedMatch = new ArrayList<>(concept.getRelatedMatch());
     if (concept.getCloseMatch() != null) this.closeMatch = new ArrayList<>(concept.getCloseMatch());
-    if (concept.getInScheme() != null) this.inScheme = new ArrayList<>(concept.getInScheme());
     setNotation(concept.getNotation());
     if (concept.getSameReferenceLinks() != null) {
       this.exactMatch = new ArrayList<>(concept.getSameReferenceLinks());
@@ -113,10 +109,6 @@ public class SolrConcept extends SolrEntity<Concept> {
 
   public List<String> getCloseMatch() {
     return closeMatch;
-  }
-
-  public List<String> getInScheme() {
-    return inScheme;
   }
 
   public Map<String, List<String>> getNotation() {

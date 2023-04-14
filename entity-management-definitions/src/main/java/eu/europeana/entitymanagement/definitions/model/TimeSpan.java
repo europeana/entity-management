@@ -49,7 +49,7 @@ import java.util.List;
 })
 public class TimeSpan extends Entity {
 
-  private String type = EntityTypes.TimeSpan.name();
+  private String type = EntityTypes.TimeSpan.getEntityType();
   private List<String> isNextInSequence;
   private String begin;
   private String end;

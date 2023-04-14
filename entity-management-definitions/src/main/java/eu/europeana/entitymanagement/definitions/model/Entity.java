@@ -7,6 +7,7 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_PART;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HIDDEN_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IDENTIFIER;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IN_SCHEME;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_AGGREGATED_BY;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_PART_OF;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_RELATED_TO;
@@ -28,6 +29,7 @@ import eu.europeana.entitymanagement.normalization.EntityFieldsDataSourceProxyVa
 import eu.europeana.entitymanagement.normalization.EntityFieldsDataSourceProxyValidationInterface;
 import eu.europeana.entitymanagement.normalization.EntityFieldsEuropeanaProxyValidationGroup;
 import eu.europeana.entitymanagement.normalization.EntityFieldsEuropeanaProxyValidationInterface;
+import eu.europeana.entitymanagement.vocabulary.ValidationObject;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -53,7 +55,7 @@ import java.util.stream.Collectors;
     groups = {EntityFieldsEuropeanaProxyValidationGroup.class})
 @EntityFieldsDataSourceProxyValidationInterface(
     groups = {EntityFieldsDataSourceProxyValidationGroup.class})
-public abstract class Entity {
+public abstract class Entity implements ValidationObject {
 
   protected String entityId;
   // ID of entityRecord in database
@@ -65,6 +67,7 @@ public abstract class Entity {
 
   protected List<String> identifier;
   protected List<String> isRelatedTo;
+  protected List<String> inScheme;
 
   // hierarchical structure available only for a part of entities. Add set/get
   // methods to the appropriate interfaces
@@ -94,6 +97,16 @@ public abstract class Entity {
     if (copy.getIsShownBy() != null) this.isShownBy = new WebResource(copy.getIsShownBy());
 
     this.payload = copy.getPayload();
+  }
+
+  @JsonGetter(IN_SCHEME)
+  public List<String> getInScheme() {
+    return inScheme;
+  }
+
+  @JsonSetter(IN_SCHEME)
+  public void setInScheme(List<String> inScheme) {
+    this.inScheme = inScheme;
   }
 
   @JsonGetter(WebEntityFields.PREF_LABEL)
@@ -219,13 +232,11 @@ public abstract class Entity {
   }
 
   public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
-    // method to call the getters for each field individually
     return field.get(this);
   }
 
   public void setFieldValue(Field field, Object value)
       throws IllegalArgumentException, IllegalAccessException {
-    // method to call the setter for each field individually
     field.set(this, value);
   }
 
