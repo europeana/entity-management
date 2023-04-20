@@ -2,6 +2,8 @@ package eu.europeana.entitymanagement.web;
 
 import static eu.europeana.api.commons.web.http.HttpHeaders.LINK;
 import java.io.IOException;
+import java.util.Date;
+import java.util.HashMap;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -13,6 +15,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +31,7 @@ import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.model.ConceptScheme;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
+import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.web.service.ConceptSchemeService;
 import io.swagger.annotations.ApiOperation;
@@ -140,6 +144,38 @@ public class ConceptSchemeController extends BaseRest {
     
     ConceptScheme scheme = emConceptSchemeService.retrieveConceptScheme(numericIdentifier, false);
     return generateResponseEntityForConceptScheme(request, scheme, HttpStatus.OK);
+  }
+  
+  @ApiOperation(
+      value = "Update concept scheme",
+      nickname = "updateConceptScheme",
+      response = java.lang.Void.class)
+  @PutMapping(
+      value = {"/scheme/{identifier}"},
+      produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
+  public ResponseEntity<String> updateConceptScheme(
+      @RequestHeader(value = "If-Match", required = false) String ifMatchHeader,
+      @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = false, defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profile,
+      @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) Long identifier,
+      @RequestBody ConceptScheme newConceptScheme,
+      HttpServletRequest request)
+      throws Exception {
+
+    verifyWriteAccess(Operations.UPDATE, request);
+
+    ConceptScheme existingScheme = emConceptSchemeService.retrieveConceptScheme(identifier, false);
+
+    long timestamp = existingScheme.getModified()!=null ? existingScheme.getModified().getTime() : 0L;
+    String etag = computeEtag(timestamp, FormatTypes.jsonld.name(), getApiVersion());
+    checkIfMatchHeaderWithQuotes(etag, request);
+
+    existingScheme.setDefinition(new HashMap<>(newConceptScheme.getDefinition()));
+    existingScheme.setPrefLabel(new HashMap<>(newConceptScheme.getPrefLabel()));
+    existingScheme.setModified(new Date());
+//  validateBodyEntity(existingScheme, true);
+    
+    emConceptSchemeService.storeConceptScheme(existingScheme);
+    return generateResponseEntityForConceptScheme(request, existingScheme, HttpStatus.OK);
   }
   
   protected ResponseEntity<String> generateResponseEntityForConceptScheme(

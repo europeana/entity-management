@@ -55,18 +55,22 @@ public class ConceptSchemeService {
     
     setMandatoryFields(scheme);
 
-    ConceptScheme dbScheme = emConceptSchemeRepo.saveConceptScheme(scheme);
-    setConceptSchemeId(dbScheme);
+    setConceptSchemeId(scheme);
     
+    return storeConceptScheme(scheme);
+  }
+
+  public ConceptScheme storeConceptScheme(ConceptScheme scheme) throws SolrServiceException {
+    emConceptSchemeRepo.saveConceptScheme(scheme);
     try {
       solrService.storeConceptScheme(new SolrConceptScheme(scheme));
     } catch (SolrServiceException e) {
       throw new SolrServiceException(
           String.format("Error during Solr indexing for id=%s", scheme.getConceptSchemeId()), e);
     }
-    return dbScheme;
+    return scheme;
   }
-
+  
   public ConceptScheme retrieveConceptScheme(long identifier)
       throws EuropeanaApiException {
         
@@ -91,10 +95,10 @@ public class ConceptSchemeService {
     return dbScheme;
   }
 
-  void setConceptSchemeId(ConceptScheme dbScheme) {
+  void setConceptSchemeId(ConceptScheme scheme) {
     //set the schemeId for serialization
-    dbScheme.setConceptSchemeId(
-        EntityUtils.buildConceptSchemeId(emConfiguration.getSchemeDataEndpoint(), dbScheme.getIdentifier()));
+    scheme.setConceptSchemeId(
+        EntityUtils.buildConceptSchemeId(emConfiguration.getSchemeDataEndpoint(), scheme.getIdentifier()));
   }
 
 
