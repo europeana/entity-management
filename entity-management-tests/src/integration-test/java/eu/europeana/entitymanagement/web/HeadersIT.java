@@ -41,6 +41,36 @@ public class HeadersIT extends BaseWebControllerTest {
   }
 
   @Test
+  void registrationConceptSchemeCorsShouldReturnCorrectHeaders() throws Exception {
+    ResultActions results =
+        mockMvc.perform(
+            MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SCHEME_URL)
+                .content(loadFile(IntegrationTestUtils.CONCEPT_SCHEME_PHOTO_GENRE_JSON))
+                // CORS requests include the Origin header
+                .header("Origin", "http://test-origin.eu")
+                .contentType(MediaType.APPLICATION_JSON_VALUE));
+
+    checkAllowHeaderForPOST(results);
+    checkCommonResponseHeaders(results, true);
+
+    // checking additional headers
+    results.andExpect(
+        header()
+            .stringValues(
+                EMHttpHeaders.CACHE_CONTROL,
+                hasItems(EMHttpHeaders.VALUE_NO_CAHCHE_STORE_REVALIDATE)));
+    results.andExpect(
+        header()
+            .stringValues(
+                HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,
+                hasItems(
+                    HttpHeaders.ALLOW,
+                    HttpHeaders.LINK,
+                    HttpHeaders.ETAG,
+                    EMHttpHeaders.CACHE_CONTROL)));
+  }
+
+  @Test
   void registrationCorsShouldReturnCorrectHeaders() throws Exception {
     ResultActions results =
         mockMvc.perform(

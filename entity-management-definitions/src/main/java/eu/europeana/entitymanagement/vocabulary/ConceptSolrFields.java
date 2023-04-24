@@ -13,5 +13,4 @@ public interface ConceptSolrFields extends EntitySolrFields {
   public static final String COREF = "coref";
   public static final String NOTATION = "skos_notation";
   public static final String NOTATION_ALL = NOTATION + DYNAMIC_FIELD_SEPARATOR + "*";
-  public static final String IN_SCHEME = "inScheme";
 }

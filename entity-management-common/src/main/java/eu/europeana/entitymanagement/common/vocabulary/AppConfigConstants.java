@@ -13,7 +13,9 @@ public class AppConfigConstants {
   public static final String BEAN_EM_SCORING_SERVICE = "emScoringService";
   public static final String BEAN_CLIENT_DETAILS_SERVICE = "clientDetailsService";
   public static final String BEAN_ENTITY_RECORD_REPO = "emEntityRecordRepo";
+  public static final String BEAN_CONCEPT_SCHEME_REPO = "emConceptSchemeRepo";
   public static final String BEAN_ENTITY_RECORD_SERVICE = "emEntityRecordService";
+  public static final String BEAN_CONCEPT_SCHEME_SERVICE = "emConceptSchemeService";
   public static final String BEAN_ZOHO_SYNC_SERVICE = "emZohoSyncService";
 
   public static final String BEAN_EM_DATA_STORE = "emDataStore";

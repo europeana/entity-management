@@ -3,21 +3,31 @@ package eu.europeana.entitymanagement.vocabulary;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 
 public enum EntityTypes implements EntityKeyword {
-  Organization("Organization", "http://www.europeana.eu/schemas/edm/Organization"),
-  Concept("Concept", "https://www.w3.org/2009/08/skos-reference/skos.html#Concept"),
-  Agent("Agent", "http://www.europeana.eu/schemas/edm/Agent"),
-  Place("Place", "http://www.europeana.eu/schemas/edm/Place"),
-  TimeSpan("TimeSpan", "http://www.europeana.eu/schemas/edm/TimeSpan");
+  Organization("Organization", "organization", "http://www.europeana.eu/schemas/edm/Organization"),
+  Concept("Concept", "concept", "https://www.w3.org/2009/08/skos-reference/skos.html#Concept"),
+  ConceptScheme(
+      "ConceptScheme",
+      "scheme",
+      "https://www.w3.org/2009/08/skos-reference/skos.html#ConceptScheme"),
+  Agent("Agent", "agent", "http://www.europeana.eu/schemas/edm/Agent"),
+  Place("Place", "place", "http://www.europeana.eu/schemas/edm/Place"),
+  TimeSpan("TimeSpan", "timespan", "http://www.europeana.eu/schemas/edm/TimeSpan");
 
   private String entityType;
+  private String urlPath;
   private String httpUri;
 
   public String getEntityType() {
     return entityType;
   }
 
-  EntityTypes(String entityType, String uri) {
+  public String getUrlPath() {
+    return urlPath;
+  }
+
+  EntityTypes(String entityType, String stringForUrl, String uri) {
     this.entityType = entityType;
+    this.urlPath = stringForUrl;
     this.httpUri = uri;
   }
 
@@ -68,7 +78,7 @@ public enum EntityTypes implements EntityKeyword {
   public static EntityTypes getByEntityId(String entityId) throws UnsupportedEntityTypeException {
 
     for (EntityTypes field : EntityTypes.values()) {
-      if (entityId.contains(String.format("/%s/", field.getEntityType().toLowerCase()))) {
+      if (entityId.contains(String.format("/%s/", field.getUrlPath()))) {
         return field;
       }
     }

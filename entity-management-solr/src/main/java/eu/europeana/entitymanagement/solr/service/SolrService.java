@@ -24,6 +24,7 @@ import eu.europeana.entitymanagement.solr.SolrEntitySuggesterMixins.TimeSpanSugg
 import eu.europeana.entitymanagement.solr.SolrSearchCursorIterator;
 import eu.europeana.entitymanagement.solr.SolrUtils;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
+import eu.europeana.entitymanagement.solr.model.SolrConceptScheme;
 import eu.europeana.entitymanagement.solr.model.SolrEntity;
 import eu.europeana.entitymanagement.solr.model.SolrOrganization;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
@@ -116,6 +117,26 @@ public class SolrService implements InitializingBean {
     }
   }
 
+  public void storeConceptScheme(SolrConceptScheme solrConceptScheme) throws SolrServiceException {
+    try {
+      UpdateResponse rsp = solrClient.addBean(solrConceptScheme);
+      if (isExplicitCommitsEnabled) {
+        solrClient.commit();
+        log.debug("Performed explicit commit for entityId={}", solrConceptScheme.getEntityId());
+      }
+
+      log.debug(
+          "Indexed entity to Solr in {}ms: entityId={}",
+          rsp.getElapsedTime(),
+          solrConceptScheme.getEntityId());
+    } catch (SolrServerException | IOException | RuntimeException ex) {
+      throw new SolrServiceException(
+          String.format(
+              "Error during Solr indexing for entityId=%s", solrConceptScheme.getEntityId()),
+          ex);
+    }
+  }
+
   /**
    * Indexes multiple entities to Solr. Replaces any existing entities with the same entity
    * identifier.
@@ -192,6 +213,33 @@ public class SolrService implements InitializingBean {
 
     SolrDocument doc = docList.get(0);
     return binder.getBean(classType, doc);
+  }
+
+  public SolrConceptScheme searchConceptSchemeById(String conceptSchemeId) throws SolrServiceException {
+    QueryResponse rsp;
+    SolrQuery query = new SolrQuery();
+    query.set("q", EntitySolrFields.ID + ":\"" + conceptSchemeId + "\"");
+    try {
+      rsp = solrClient.query(query);
+      if (log.isDebugEnabled()) {
+        log.debug(
+            "Performed Solr search query in {}ms:  type={}, query={}",
+            rsp.getElapsedTime(),
+            SolrConceptScheme.class.getSimpleName(),
+            query);
+      }
+    } catch (IOException | SolrServerException ex) {
+      throw new SolrServiceException(
+          String.format("Error while searching Solr for entityId=%s", conceptSchemeId), ex);
+    }
+
+    DocumentObjectBinder binder = new DocumentObjectBinder();
+    SolrDocumentList docList = rsp.getResults();
+
+    if (docList == null || docList.size() == 0) return null;
+
+    SolrDocument doc = docList.get(0);
+    return binder.getBean(SolrConceptScheme.class, doc);
   }
 
   /**

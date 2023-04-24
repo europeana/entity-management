@@ -1,35 +1,5 @@
 package eu.europeana.entitymanagement.web;
 
-import eu.europeana.api.commons.error.EuropeanaApiException;
-import eu.europeana.api.commons.web.controller.BaseRestController;
-import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
-import eu.europeana.api.commons.web.http.HttpHeaders;
-import eu.europeana.entitymanagement.batch.service.FailedTaskService;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
-import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
-import eu.europeana.entitymanagement.definitions.model.Aggregation;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.exception.EtagMismatchException;
-import eu.europeana.entitymanagement.exception.HttpBadRequestException;
-import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
-import eu.europeana.entitymanagement.normalization.EntityFieldsEuropeanaProxyValidationGroup;
-import eu.europeana.entitymanagement.schemaorg.model.SchemaOrgEntity;
-import eu.europeana.entitymanagement.serialization.EntityXmlSerializer;
-import eu.europeana.entitymanagement.serialization.JsonLdSerializer;
-import eu.europeana.entitymanagement.utils.EntityObjectFactory;
-import eu.europeana.entitymanagement.utils.EntityRecordUtils;
-import eu.europeana.entitymanagement.utils.EntityUtils;
-import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
-import eu.europeana.entitymanagement.vocabulary.EntityProfile;
-import eu.europeana.entitymanagement.vocabulary.FormatTypes;
-import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
-import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
-import eu.europeana.entitymanagement.web.service.EMAuthorizationService;
-import eu.europeana.entitymanagement.web.service.RequestPathMethodService;
-import eu.europeana.entitymanagement.web.xml.model.RdfBaseWrapper;
-import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -52,6 +22,38 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.StringUtils;
+import eu.europeana.api.commons.error.EuropeanaApiException;
+import eu.europeana.api.commons.web.controller.BaseRestController;
+import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
+import eu.europeana.api.commons.web.http.HttpHeaders;
+import eu.europeana.entitymanagement.batch.service.FailedTaskService;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
+import eu.europeana.entitymanagement.definitions.model.Aggregation;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.exception.EtagMismatchException;
+import eu.europeana.entitymanagement.exception.HttpBadRequestException;
+import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
+import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidationGroup;
+import eu.europeana.entitymanagement.normalization.EntityFieldsEuropeanaProxyValidationGroup;
+import eu.europeana.entitymanagement.schemaorg.model.SchemaOrgEntity;
+import eu.europeana.entitymanagement.serialization.EntityXmlSerializer;
+import eu.europeana.entitymanagement.serialization.JsonLdSerializer;
+import eu.europeana.entitymanagement.utils.EntityObjectFactory;
+import eu.europeana.entitymanagement.utils.EntityRecordUtils;
+import eu.europeana.entitymanagement.utils.EntityUtils;
+import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
+import eu.europeana.entitymanagement.vocabulary.EntityProfile;
+import eu.europeana.entitymanagement.vocabulary.FormatTypes;
+import eu.europeana.entitymanagement.vocabulary.ValidationObject;
+import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
+import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
+import eu.europeana.entitymanagement.web.service.EMAuthorizationService;
+import eu.europeana.entitymanagement.web.service.RequestPathMethodService;
+import eu.europeana.entitymanagement.web.xml.model.RdfBaseWrapper;
+import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 
 public abstract class BaseRest extends BaseRestController {
 
@@ -61,7 +63,7 @@ public abstract class BaseRest extends BaseRestController {
 
   @Autowired private EntityXmlSerializer entityXmlSerializer;
 
-  @Autowired private JsonLdSerializer jsonLdSerializer;
+  @Autowired protected JsonLdSerializer jsonLdSerializer;
 
   @Autowired private eu.europeana.corelib.edm.utils.JsonLdSerializer corelibJsonLdSerializer;
 
@@ -203,6 +205,7 @@ public abstract class BaseRest extends BaseRestController {
     }
   }
 
+ 
   /**
    * Generates serialised EntityRecord Response entity along with Http status and headers
    *
@@ -215,7 +218,7 @@ public abstract class BaseRest extends BaseRestController {
    * @return
    * @throws EuropeanaApiException
    */
-  protected ResponseEntity<String> generateResponseEntity(
+  protected ResponseEntity<String> generateResponseEntityForEntityRecord(
       HttpServletRequest request,
       List<EntityProfile> profiles,
       FormatTypes outFormat,
@@ -268,6 +271,8 @@ public abstract class BaseRest extends BaseRestController {
     String body = serialize(entityRecord, outFormat, profiles);
     return ResponseEntity.status(status).headers(headers).eTag(etag).body(body);
   }
+
+  
 
   protected org.springframework.http.HttpHeaders createAllowHeader(HttpServletRequest request) {
     org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
@@ -363,11 +368,14 @@ public abstract class BaseRest extends BaseRestController {
         && Arrays.asList(profile.split(",")).contains(WebEntityConstants.PARAM_PROFILE_SYNC);
   }
 
-  protected void validateBodyEntity(Entity entity) throws HttpBadRequestException {
-    Set<ConstraintViolation<Entity>> violations =
-        emValidatorFactory
-            .getValidator()
-            .validate(entity, EntityFieldsEuropeanaProxyValidationGroup.class);
+  protected void validateBodyEntity(ValidationObject entity, boolean completely)
+      throws HttpBadRequestException {
+    Class<?> validatorGroup =
+        completely
+            ? EntityFieldsCompleteValidationGroup.class
+            : EntityFieldsEuropeanaProxyValidationGroup.class;
+    Set<ConstraintViolation<ValidationObject>> violations =
+        emValidatorFactory.getValidator().validate(entity, validatorGroup);
     if (!violations.isEmpty()) {
       String requestEntityViolations =
           violations.stream().map(ConstraintViolation::getMessage).collect(Collectors.joining(" "));
@@ -391,5 +399,12 @@ public abstract class BaseRest extends BaseRestController {
       return super.verifyReadAccess(request);
     }
     return null;
+  }
+  
+  /** Gets the database identifier from an EntityId string */
+  protected String getDatabaseIdentifier(String entityId) {
+    // entity id is "http://data.europeana.eu/{type}/{identifier}"
+    int nextPos = 1;
+    return entityId.substring(entityId.lastIndexOf("/") + nextPos);
   }
 }

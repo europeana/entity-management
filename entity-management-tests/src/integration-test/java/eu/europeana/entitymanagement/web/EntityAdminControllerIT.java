@@ -10,12 +10,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.solr.model.SolrConcept;
-import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
-import eu.europeana.entitymanagement.utils.EntityRecordUtils;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -24,6 +18,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.solr.model.SolrConcept;
+import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
+import eu.europeana.entitymanagement.utils.EntityRecordUtils;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -133,7 +132,7 @@ class EntityAdminControllerIT extends BaseWebControllerTest {
 
     results
         .andExpect(jsonPath("$.id", is(entityId)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Concept.name())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Concept.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
         // should have Europeana and Datasource proxies
@@ -166,7 +165,7 @@ class EntityAdminControllerIT extends BaseWebControllerTest {
     result
         .andExpect(status().isAccepted())
         .andExpect(jsonPath("$.id", is(entityId)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Concept.name())))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Concept.getEntityType())))
         .andExpect(jsonPath("$.prefLabel[*]", hasSize(11))) // 4 labels removed through cleaning
         .andExpect(jsonPath("$.altLabel[*]", hasSize(1)));
   }
@@ -241,7 +240,7 @@ class EntityAdminControllerIT extends BaseWebControllerTest {
                 .content(requestBody))
         .andExpect(status().isBadRequest());
   }
-
+  
   private void migrateEntity(String entityType, String entityId, String externalId)
       throws Exception {
     String requestBody = "{\"type\" : \"" + entityType + "\", \"id\" : \"" + externalId + "\"}";

@@ -5,6 +5,8 @@ import org.springframework.http.HttpStatus;
 
 public class ParamValidationException extends EuropeanaApiException {
 
+  private static final long serialVersionUID = 1011058391855359828L;
+
   public ParamValidationException(String msg) {
     super(msg);
   }

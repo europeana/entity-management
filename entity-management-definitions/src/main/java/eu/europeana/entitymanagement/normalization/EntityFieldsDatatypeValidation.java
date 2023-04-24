@@ -6,11 +6,11 @@ import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_T
 
 import eu.europeana.entitymanagement.definitions.LanguageCodes;
 import eu.europeana.entitymanagement.definitions.model.Address;
-import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.utils.UriValidator;
 import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
+import eu.europeana.entitymanagement.vocabulary.ValidationObject;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -497,7 +497,7 @@ public class EntityFieldsDatatypeValidation {
   }
 
   public boolean validateEntity(
-      Entity entity,
+      ValidationObject entity,
       ConstraintValidatorContext context,
       boolean validateMandatoryFields,
       boolean validateMetadataFields) {

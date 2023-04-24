@@ -1,6 +1,25 @@
 package eu.europeana.entitymanagement.definitions.model;
 
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ALT_LABEL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BROADER;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BROAD_MATCH;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CLOSE_MATCH;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DEPICTION;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.EXACT_MATCH;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HIDDEN_LABEL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IN_SCHEME;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_AGGREGATED_BY;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_SHOWN_BY;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NARROWER;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NARROW_MATCH;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NOTATION;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NOTE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.RELATED;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.RELATED_MATCH;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -38,7 +57,7 @@ import java.util.Map;
 })
 public class Concept extends Entity {
 
-  private String type = EntityTypes.Concept.name();
+  private String type = EntityTypes.Concept.getEntityType();
   private List<String> broader;
   private List<String> narrower;
   private List<String> related;
@@ -48,7 +67,6 @@ public class Concept extends Entity {
   private List<String> coref;
   private List<String> relatedMatch;
   private List<String> closeMatch;
-  private List<String> inScheme;
   private Map<String, List<String>> notation;
 
   public Concept() {
@@ -146,16 +164,6 @@ public class Concept extends Entity {
   @JsonSetter(CLOSE_MATCH)
   public void setCloseMatch(List<String> closeMatch) {
     this.closeMatch = closeMatch;
-  }
-
-  @JsonGetter(IN_SCHEME)
-  public List<String> getInScheme() {
-    return inScheme;
-  }
-
-  @JsonSetter(IN_SCHEME)
-  public void setInScheme(List<String> inScheme) {
-    this.inScheme = inScheme;
   }
 
   @JsonGetter(NOTATION)

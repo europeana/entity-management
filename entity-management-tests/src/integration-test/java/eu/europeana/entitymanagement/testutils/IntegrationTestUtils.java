@@ -16,6 +16,7 @@ public class IntegrationTestUtils {
 
   private static final String WIKIDATA_BASE_URI = "http://www.wikidata.org";
   public static final String BASE_SERVICE_URL = "/entity/";
+  public static final String BASE_SCHEME_URL = "/scheme/";
   public static final String BASE_ADMIN_URL = "/management";
   public static final String BASE_FAILED_UPDATES = "management/failed";
 
@@ -83,6 +84,8 @@ public class IntegrationTestUtils {
 
   public static final String CONCEPT_BATHTUB_INVALID_ISSHOWNBY_UPDATE_JSON =
       "/content/concept_update_bathtub_invalid_isshownby.json";
+  public static final String CONCEPT_SCHEME_PHOTO_GENRE_JSON =
+      "/content/concept_scheme_photo_genre.json";
 
   public static final String CONCEPT_MACHINE_XML = "/metis-deref/concept_machine.xml";
   public static final String CONCEPT_BATHTUB_XML = "/metis-deref/concept-metis-bathtub.xml";

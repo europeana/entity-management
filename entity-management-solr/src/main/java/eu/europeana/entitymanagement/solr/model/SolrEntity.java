@@ -77,6 +77,9 @@ public abstract class SolrEntity<T extends Entity> {
   @Field(EntitySolrFields.DERIVED_SCORE)
   private Float derivedScore;
 
+  @Field(EntitySolrFields.IN_SCHEME)
+  private List<String> inScheme;
+
   public SolrEntity(T entity) {
     this.type = entity.getType();
     this.entityId = entity.getEntityId();
@@ -95,6 +98,7 @@ public abstract class SolrEntity<T extends Entity> {
     if (entity.getHasPart() != null) this.hasPart = new ArrayList<>(entity.getHasPart());
     if (entity.getIsPartOfArray() != null)
       this.isPartOf = new ArrayList<>(entity.getIsPartOfArray());
+    if (entity.getInScheme() != null) this.inScheme = new ArrayList<>(entity.getInScheme());
 
     this.entity = entity;
   }
@@ -112,7 +116,7 @@ public abstract class SolrEntity<T extends Entity> {
       this.prefLabel =
           new HashMap<>(
               SolrUtils.normalizeStringMapByAddingPrefix(
-                  EntitySolrFields.PREF_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
+                  EntitySolrFields.PREF_LABEL_FIELD_NAME + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
                   prefLabel));
     }
   }
@@ -244,6 +248,14 @@ public abstract class SolrEntity<T extends Entity> {
 
   public void setDerivedScore(Float derivedScore) {
     this.derivedScore = derivedScore;
+  }
+
+  public List<String> getInScheme() {
+    return inScheme;
+  }
+
+  public void setInScheme(List<String> inScheme) {
+    this.inScheme = inScheme;
   }
 
   protected abstract void setSameReferenceLinks(ArrayList<String> uris);

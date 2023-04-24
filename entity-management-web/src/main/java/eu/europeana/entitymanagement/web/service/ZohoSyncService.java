@@ -11,6 +11,7 @@ import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
+import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
@@ -396,7 +397,7 @@ public class ZohoSyncService {
               savedEntityRecord.getEntityId());
         }
       }
-    } catch (EntityCreationException e) {
+    } catch (EntityCreationException | UnsupportedEntityTypeException e) {
       zohoSyncReport.addFailedOperation(
           zohoOrganization.getAbout(),
           ZohoSyncReportFields.CREATION_ERROR,

@@ -13,16 +13,14 @@ public class EntityRecordUtils {
   }
 
   public static String buildEntityIdUri(EntityTypes type, String identifier) {
-    return buildEntityIdUri(type.getEntityType(), identifier);
+    return buildEntityIdUri(type.getUrlPath(), identifier);
   }
 
-  public static String buildEntityIdUri(String type, String identifier) {
+  private static String buildEntityIdUri(String type, String identifier) {
     StringBuilder stringBuilder = new StringBuilder();
-
     stringBuilder.append(WebEntityFields.BASE_DATA_EUROPEANA_URI);
     if (StringUtils.isNotEmpty(type)) stringBuilder.append(type.toLowerCase()).append("/");
     if (StringUtils.isNotEmpty(identifier)) stringBuilder.append(identifier);
-
     return stringBuilder.toString();
   }
 

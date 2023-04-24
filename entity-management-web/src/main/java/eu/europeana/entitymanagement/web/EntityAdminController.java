@@ -87,7 +87,13 @@ public class EntityAdminController extends BaseRest {
 
     verifyWriteAccess(Operations.DELETE, request);
 
-    String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
+    String entityUri = null;
+    try {
+      entityUri = EntityRecordUtils.buildEntityIdUri(EntityTypes.getByEntityType(type), identifier);
+    } catch (UnsupportedEntityTypeException e) {
+      throw new EntityNotFoundException("/" + type + "/" + identifier, e);
+    }
+
     if (!entityRecordService.existsByEntityId(entityUri)) {
       throw new EntityNotFoundException(entityUri);
     }
@@ -133,11 +139,11 @@ public class EntityAdminController extends BaseRest {
 
     verifyWriteAccess(Operations.CREATE, request);
 
-    validateBodyEntity(europeanaProxyEntity);
+    validateBodyEntity(europeanaProxyEntity, false);
 
     try {
       // get the entity type based on path param
-      type = EntityTypes.getByEntityType(type).getEntityType();
+      type = EntityTypes.getByEntityType(type).toString();
       EntityRecord savedEntityRecord =
           entityRecordService.createEntityFromMigrationRequest(
               europeanaProxyEntity, type, identifier);
@@ -145,7 +151,7 @@ public class EntityAdminController extends BaseRest {
           "Created Entity record for {}; entityId={}",
           europeanaProxyEntity.getEntityId(),
           savedEntityRecord.getEntityId());
-      return generateResponseEntity(
+      return generateResponseEntityForEntityRecord(
           request,
           List.of(EntityProfile.internal),
           FormatTypes.jsonld,

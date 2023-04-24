@@ -10,11 +10,9 @@ public interface EntitySolrFields {
   public static final String NOTE = "skos_note";
   public static final String NOTE_ALL = NOTE + DYNAMIC_FIELD_SEPARATOR + "*";
 
-  @Deprecated
-  /** @deprecated should be removed when old suggester is removed * */
-  public static final String PREF_LABEL = "skos_prefLabel";
+  public static final String PREF_LABEL_FIELD_NAME = "skos_prefLabel";
 
-  public static final String PREF_LABEL_ALL = PREF_LABEL + DYNAMIC_FIELD_SEPARATOR + "*";
+  public static final String PREF_LABEL_ALL = PREF_LABEL_FIELD_NAME + DYNAMIC_FIELD_SEPARATOR + "*";
   public static final String ALT_LABEL = "skos_altLabel";
   public static final String ALT_LABEL_ALL = ALT_LABEL + DYNAMIC_FIELD_SEPARATOR + "*";
   public static final String HIDDEN_LABEL = "skos_hiddenLabel";
