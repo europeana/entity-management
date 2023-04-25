@@ -1,0 +1,24 @@
+
+resources:
+#  - ../../base
+  - cronjob.yaml
+
+#patchesStrategicMerge:
+#  - deployment_patch.yaml
+
+commonLabels:
+  app: entity-management-cronjob
+#  app: entity-management-api
+
+secretGenerator:
+  - name: ibm-secret
+    files:
+      - ibm-databases-truststore.jks
+
+#configMapGenerator:
+#  - name: entity-management-batch-config
+#    files:
+#      - entitymanagement.user.properties
+#  - name: ibm-secret-config-map
+#    files:
+#      - ibm-databases-truststore.jks

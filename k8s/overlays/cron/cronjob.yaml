@@ -1,0 +1,56 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: entity-management-cronjob-deployment
+spec:
+  schedule: "@daily"
+  suspend: false
+  concurrencyPolicy: Forbid
+  jobTemplate:
+#    metadata:
+#      annotations:
+#        fluentd/include: '${COLLECT_LOGS}'
+#        fluentd/multiline: 'true'    
+    spec:
+      ttlSecondsAfterFinished: 120
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: entity-management-cronjob
+              image: europeana/entity-management-api:latest
+              imagePullPolicy: Always
+              command:
+                - java
+                - -jar
+                - /opt/app/entity-management-api.jar
+                - schedule_deletion
+                - schedule_update
+              env:
+                - name: SPRING_CONFIG_ADDITIONAL_LOCATION
+                  value: "file:/opt/app/config/entitymanagement.user.properties"
+                #- name: JAVA_OPTS
+                #  value: "-javaagent:\"/usr/local/elastic-apm-agent.jar\"
+                #          -Delastic.apm.application_packages=${ELASTIC_APP_PACKAGES}
+                #          -Delastic.apm.server_urls=${ELASTIC_APM_SERVERS}
+                #          -Delastic.apm.service_name=${BATCH_APP_NAME}
+                #          -Delastic.apm.enabled=${COLLECT_LOGS}
+                #          -Delastic.apm.environment=${K8S_NAMESPACE}
+                #          -XX:+UseParallelGC -XX:MaxRAMPercentage=75"
+              resources:
+                requests:
+                  memory: "200M"
+                  cpu: "200m"
+                limits:
+                  memory: "400M"
+                  cpu: "400m"
+              volumeMounts:
+                - name: ibm-certficate
+                  mountPath: "/opt/app/config/ibm-databases-truststore.jks"
+                  readOnly: true
+                  subPath: ibm-databases-truststore.jks
+          volumes:
+            - name: ibm-certficate
+              secret:
+                secretName: ibm-secret
+                
