@@ -11,9 +11,16 @@ commonLabels:
 #  app: entity-management-api
 
 secretGenerator:
+  - name: entity-management-api-properties
+    files:
+      - entitymanagement.user.properties
+  - name: zoho-import-properties
+    files:
+      - zoho_import.properties
   - name: ibm-secret
     files:
       - ibm-databases-truststore.jks
+
 
 #configMapGenerator:
 #  - name: entity-management-batch-config

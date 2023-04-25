@@ -3,7 +3,8 @@ kind: CronJob
 metadata:
   name: entity-management-cronjob-deployment
 spec:
-  schedule: "@daily"
+#  schedule: "@daily"
+  schedule: "40 * * * *"
   suspend: false
   concurrencyPolicy: Forbid
   jobTemplate:
@@ -18,6 +19,7 @@ spec:
           restartPolicy: Never
           containers:
             - name: entity-management-cronjob
+#              image: docker.io/europeana/entity-management-api
               image: europeana/entity-management-api:latest
               imagePullPolicy: Always
               command:
@@ -49,8 +51,23 @@ spec:
                   mountPath: "/opt/app/config/ibm-databases-truststore.jks"
                   readOnly: true
                   subPath: ibm-databases-truststore.jks
+                - name: app-properties
+                  mountPath: "/opt/app/config/entitymanagement.user.properties"
+                  readOnly: true
+                  subPath: entitymanagement.user.properties
+                - name: zoho-import-config
+                  mountPath: "/opt/app/config/zoho_import.properties"
+                  readOnly: true
+                  subPath: zoho_import.properties
           volumes:
             - name: ibm-certficate
               secret:
                 secretName: ibm-secret
+                volumes:
+            - name: app-properties
+              secret:
+                secretName: entity-management-api-properties
+            - name: zoho-import-config
+              secret:
+                secretName: zoho-import-properties
                 
