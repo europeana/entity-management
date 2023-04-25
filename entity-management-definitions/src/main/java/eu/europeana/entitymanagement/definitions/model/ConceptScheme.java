@@ -11,11 +11,7 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABE
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SUBJECT;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TOTAL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
-import java.lang.reflect.Field;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import org.bson.types.ObjectId;
+
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -31,6 +27,11 @@ import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatio
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.ValidationObject;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
+import java.lang.reflect.Field;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import org.bson.types.ObjectId;
 
 @JsonIgnoreProperties(ignoreUnknown = false)
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
@@ -56,8 +57,8 @@ public class ConceptScheme implements ValidationObject {
 
   @Indexed(options = @IndexOptions(unique = true))
   private Long identifier;
-  @Transient
-  private String conceptSchemeId;
+
+  @Transient private String conceptSchemeId;
 
   private Map<String, String> prefLabel;
   private Map<String, String> definition;
@@ -101,7 +102,7 @@ public class ConceptScheme implements ValidationObject {
   public void setConceptSchemeId(String conceptSchemeId) {
     this.conceptSchemeId = conceptSchemeId;
   }
-  
+
   @JsonGetter(WebEntityFields.PREF_LABEL)
   public Map<String, String> getPrefLabel() {
     return prefLabel;
@@ -185,5 +186,4 @@ public class ConceptScheme implements ValidationObject {
       throws IllegalArgumentException, IllegalAccessException {
     field.set(this, value);
   }
-  
 }

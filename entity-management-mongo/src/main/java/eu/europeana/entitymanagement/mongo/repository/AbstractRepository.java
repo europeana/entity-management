@@ -2,15 +2,17 @@ package eu.europeana.entitymanagement.mongo.repository;
 
 import static dev.morphia.query.experimental.filters.Filters.eq;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MAJORITY_WRITE_MODIFY_OPTS;
-import javax.annotation.Resource;
+
 import dev.morphia.Datastore;
 import dev.morphia.query.experimental.updates.UpdateOperators;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.EntityIdGenerator;
+import javax.annotation.Resource;
 
 public abstract class AbstractRepository {
 
-  @Resource(name = AppConfigConstants.BEAN_EM_DATA_STORE) Datastore datastore;
+  @Resource(name = AppConfigConstants.BEAN_EM_DATA_STORE)
+  Datastore datastore;
 
   /**
    * Generates an autoincrement value for entities, based on the Entity type
@@ -23,14 +25,14 @@ public abstract class AbstractRepository {
      * Get the given key from the auto increment entity and try to increment it.
      * Synchronization occurs on the DB-level, so we don't need to synchronize this code block.
      */
-  
+
     EntityIdGenerator autoIncrement =
         getDataStore()
             .find(EntityIdGenerator.class)
             .filter(eq("_id", type))
             .modify(UpdateOperators.inc("value"))
             .execute(MAJORITY_WRITE_MODIFY_OPTS);
-  
+
     /*
      * If none is found, we need to create one for the given key. This shouldn't happen in
      * production as the db is pre-populated with entities

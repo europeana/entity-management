@@ -1,6 +1,19 @@
 package eu.europeana.entitymanagement.web;
 
 import static eu.europeana.api.commons.web.http.HttpHeaders.LINK;
+
+import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons.error.EuropeanaApiException;
+import eu.europeana.api.commons.web.definitions.WebFields;
+import eu.europeana.api.commons.web.exception.HttpException;
+import eu.europeana.api.commons.web.http.HttpHeaders;
+import eu.europeana.api.commons.web.model.vocabulary.Operations;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.definitions.model.ConceptScheme;
+import eu.europeana.entitymanagement.exception.EntityNotFoundException;
+import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
+import eu.europeana.entitymanagement.web.service.ConceptSchemeService;
+import io.swagger.annotations.ApiOperation;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,35 +32,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.api.commons.error.EuropeanaApiException;
-import eu.europeana.api.commons.web.definitions.WebFields;
-import eu.europeana.api.commons.web.exception.HttpException;
-import eu.europeana.api.commons.web.http.HttpHeaders;
-import eu.europeana.api.commons.web.model.vocabulary.Operations;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.definitions.model.ConceptScheme;
-import eu.europeana.entitymanagement.exception.EntityNotFoundException;
-import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
-import eu.europeana.entitymanagement.web.service.ConceptSchemeService;
-import io.swagger.annotations.ApiOperation;
 
 @RestController
 @Validated
 @ConditionalOnWebApplication
 public class ConceptSchemeController extends BaseRest {
 
-  //private final SolrService solrService;
+  // private final SolrService solrService;
   private final ConceptSchemeService emConceptSchemeService;
-  
+
   public static final String INVALID_UPDATE_REQUEST_MSG =
       "Request must either specify a 'query' param or contain entity identifiers in body";
 
-
   @Autowired
   public ConceptSchemeController(
-      ConceptSchemeService emConceptSchemeService,
-      EntityManagementConfiguration emConfig) {
+      ConceptSchemeService emConceptSchemeService, EntityManagementConfiguration emConfig) {
     this.emConceptSchemeService = emConceptSchemeService;
     this.emConfig = emConfig;
   }
@@ -69,7 +68,7 @@ public class ConceptSchemeController extends BaseRest {
     verifyWriteAccess(Operations.DELETE, request);
 
     long numericIdentifier = parseNumericIdentifier(identifier);
-    
+
     ConceptScheme scheme = emConceptSchemeService.retrieveConceptScheme(numericIdentifier);
 
     long timestamp = scheme.getModified().getTime();
@@ -84,8 +83,9 @@ public class ConceptSchemeController extends BaseRest {
   long parseNumericIdentifier(String identifier) throws EntityNotFoundException {
     try {
       return Long.parseLong(identifier);
-    }catch (NumberFormatException e) {
-      throw new EntityNotFoundException("No concept scheme found for the given identifier: ", identifier, e);
+    } catch (NumberFormatException e) {
+      throw new EntityNotFoundException(
+          "No concept scheme found for the given identifier: ", identifier, e);
     }
   }
 
@@ -108,12 +108,11 @@ public class ConceptSchemeController extends BaseRest {
 
     verifyWriteAccess(Operations.CREATE, request);
 
-//    validateBodyEntity(conceptScheme, true);
+    //    validateBodyEntity(conceptScheme, true);
 
     emConceptSchemeService.createConceptScheme(conceptScheme);
 
-    return generateResponseEntityForConceptScheme(
-        request, conceptScheme, HttpStatus.CREATED);
+    return generateResponseEntityForConceptScheme(request, conceptScheme, HttpStatus.CREATED, "create");
   }
 
   @ApiOperation(
@@ -121,7 +120,7 @@ public class ConceptSchemeController extends BaseRest {
       nickname = "getConceptSchemeJsonLd",
       response = java.lang.Void.class)
   @GetMapping(
-      value = {"/scheme/{identifier}.jsonld", "/scheme/{identifier}"},
+      value = {"/scheme/{identifier}.json", "/scheme/{identifier}.jsonld", "/scheme/{identifier}"},
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
   public ResponseEntity<String> getConceptSchemeJsonLd(
       @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
@@ -137,13 +136,13 @@ public class ConceptSchemeController extends BaseRest {
     verifyReadAccess(request);
 
     long numericIdentifier = parseNumericIdentifier(identifier);
-    
+
     ConceptScheme scheme = emConceptSchemeService.retrieveConceptScheme(numericIdentifier, false);
-    return generateResponseEntityForConceptScheme(request, scheme, HttpStatus.OK);
+    return generateResponseEntityForConceptScheme(request, scheme, HttpStatus.OK, "retrieve");
   }
-  
+
   protected ResponseEntity<String> generateResponseEntityForConceptScheme(
-      HttpServletRequest request, ConceptScheme scheme, HttpStatus status)
+      HttpServletRequest request, ConceptScheme scheme, HttpStatus status, String method)
       throws EuropeanaApiException {
 
     long timestamp = scheme.getModified().getTime();
@@ -153,7 +152,6 @@ public class ConceptSchemeController extends BaseRest {
     org.springframework.http.HttpHeaders headers = createAllowHeader(request);
     headers.add(LINK, HttpHeaders.VALUE_LDP_RESOURCE);
     headers.add(HttpHeaders.CONTENT_TYPE, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
-    headers.add(EMHttpHeaders.CACHE_CONTROL, EMHttpHeaders.VALUE_NO_CAHCHE_STORE_REVALIDATE);
     headers.add(EMHttpHeaders.ETAG, etag);
 
     // Access-Control-Expose-Headers only set for CORS requests
@@ -163,9 +161,13 @@ public class ConceptSchemeController extends BaseRest {
           org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.LINK);
       headers.add(
           org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.ETAG);
-      headers.add(
-          org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,
-          EMHttpHeaders.CACHE_CONTROL);
+      if(method.equals("create")) {
+        headers.add(EMHttpHeaders.CACHE_CONTROL, EMHttpHeaders.VALUE_NO_CAHCHE_STORE_REVALIDATE);
+        headers.add(org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, EMHttpHeaders.CACHE_CONTROL);
+      }
+      if(method.equals("retrieve")) {
+        headers.add(org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.VARY);
+      }
     }
 
     try {

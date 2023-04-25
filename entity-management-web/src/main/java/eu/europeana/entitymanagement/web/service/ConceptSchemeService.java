@@ -1,9 +1,5 @@
 package eu.europeana.entitymanagement.web.service;
 
-import java.util.Date;
-import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.AppConfig;
@@ -18,6 +14,10 @@ import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import java.util.Date;
+import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service(AppConfig.BEAN_CONCEPT_SCHEME_SERVICE)
 public class ConceptSchemeService {
@@ -25,7 +25,6 @@ public class ConceptSchemeService {
   private final ConceptSchemeRepository emConceptSchemeRepo;
   private final SolrService solrService;
   final EntityManagementConfiguration emConfiguration;
-
 
   @Autowired
   public ConceptSchemeService(
@@ -37,9 +36,8 @@ public class ConceptSchemeService {
     this.solrService = solrService;
   }
 
+  public void setMandatoryFields(ConceptScheme scheme) {
 
-  public void setMandatoryFields(ConceptScheme scheme){
-    
     if (scheme.getItems() != null) {
       scheme.setTotal(scheme.getItems().size());
     }
@@ -49,15 +47,15 @@ public class ConceptSchemeService {
   }
 
   public ConceptScheme createConceptScheme(ConceptScheme scheme) throws SolrServiceException {
-    
+
     Long id = generateConceptSchemeIdentifier();
     scheme.setIdentifier(id);
-    
+
     setMandatoryFields(scheme);
 
     ConceptScheme dbScheme = emConceptSchemeRepo.saveConceptScheme(scheme);
     setConceptSchemeId(dbScheme);
-    
+
     try {
       solrService.storeConceptScheme(new SolrConceptScheme(scheme));
     } catch (SolrServiceException e) {
@@ -67,13 +65,11 @@ public class ConceptSchemeService {
     return dbScheme;
   }
 
-  public ConceptScheme retrieveConceptScheme(long identifier)
-      throws EuropeanaApiException {
-        
+  public ConceptScheme retrieveConceptScheme(long identifier) throws EuropeanaApiException {
+
     return retrieveConceptScheme(identifier, false);
   }
-  
-  
+
   public ConceptScheme retrieveConceptScheme(long identifier, boolean retrieveDisabled)
       throws EuropeanaApiException {
     ConceptScheme dbScheme = emConceptSchemeRepo.findConceptScheme(identifier);
@@ -86,21 +82,21 @@ public class ConceptSchemeService {
       throw new EntityRemovedException(
           String.format(EntityRecordUtils.ENTITY_ID_REMOVED_MSG, identifier));
     }
-    
+
     setConceptSchemeId(dbScheme);
     return dbScheme;
   }
 
   void setConceptSchemeId(ConceptScheme dbScheme) {
-    //set the schemeId for serialization
+    // set the schemeId for serialization
     dbScheme.setConceptSchemeId(
-        EntityUtils.buildConceptSchemeId(emConfiguration.getSchemeDataEndpoint(), dbScheme.getIdentifier()));
+        EntityUtils.buildConceptSchemeId(
+            emConfiguration.getSchemeDataEndpoint(), dbScheme.getIdentifier()));
   }
-
 
   public void disableConceptScheme(ConceptScheme scheme, boolean forceSolrCommit)
       throws EntityUpdateException {
-    //not specified yet
+    // not specified yet
     //    updateConceptSchemeEntities(scheme);
     try {
       solrService.deleteById(List.of(scheme.getConceptSchemeId()), forceSolrCommit);
@@ -122,11 +118,10 @@ public class ConceptSchemeService {
    * @return the generated EntityId
    */
   private Long generateConceptSchemeIdentifier() {
-      return emConceptSchemeRepo.generateAutoIncrement(EntityTypes.ConceptScheme.getEntityType());
+    return emConceptSchemeRepo.generateAutoIncrement(EntityTypes.ConceptScheme.getEntityType());
   }
 
   public void dropRepository() {
     this.emConceptSchemeRepo.dropCollection();
   }
-
 }

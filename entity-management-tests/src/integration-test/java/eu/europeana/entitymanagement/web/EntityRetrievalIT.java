@@ -18,9 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.zoho.crm.api.record.Record;
 import eu.europeana.entitymanagement.batch.service.FailedTaskService;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
-import eu.europeana.entitymanagement.definitions.model.ConceptScheme;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.solr.model.SolrConceptScheme;
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.FailedTaskJsonFields;
@@ -30,7 +28,6 @@ import eu.europeana.entitymanagement.web.xml.model.XmlConstants;
 import java.util.Map;
 import java.util.Optional;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -714,8 +711,6 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
         .andExpect(jsonPath("$.proxies[1].proxyIn.recordCount").doesNotExist())
         .andExpect(jsonPath("$.proxies[1].proxyIn.score").doesNotExist());
   }
-
-  
 
   // TODO: add tests for XML retrieval
 

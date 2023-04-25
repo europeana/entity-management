@@ -10,6 +10,4 @@ public class ConceptSchemeFields {
   public static final String IDENTIFIER = "identifier";
   public static final String MODIFIED = "modified";
   public static final String DISABLED = "disabled";
-
-  
 }
