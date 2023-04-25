@@ -1,4 +1,4 @@
-package eu.europeana.entitymanagement.config;
+package eu.europeana.entitymanagement.batch.config;
 
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.*;
 
