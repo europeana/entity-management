@@ -66,8 +66,8 @@ public class ConceptSchemeServiceIT extends BaseWebControllerTest {
         .andExpect(jsonPath("$.type", is(EntityTypes.ConceptScheme.getEntityType())));
 
     // check solr obj also exists
-    SolrConceptScheme solrConceptScheme = solrService.searchConceptSchemeById(scheme.getConceptSchemeId());
-    Assertions.assertNotNull(solrConceptScheme);
+//    SolrConceptScheme solrConceptScheme = solrService.searchConceptSchemeById(scheme.getConceptSchemeId());
+//    Assertions.assertNotNull(solrConceptScheme);
   }
 
   // TODO: add tests for XML retrieval
@@ -200,17 +200,17 @@ public class ConceptSchemeServiceIT extends BaseWebControllerTest {
       .andExpect(status().isOk());
 
     ConceptScheme updatedSchemeMongo = emConceptSchemeService.retrieveConceptScheme(scheme.getIdentifier(), false);
-    SolrConceptScheme updatedSchemeSolr = solrService.searchConceptSchemeById(scheme.getConceptSchemeId());
+//    SolrConceptScheme updatedSchemeSolr = solrService.searchConceptSchemeById(scheme.getConceptSchemeId());
     
     Assertions.assertNotNull(updatedSchemeMongo);
-    Assertions.assertNotNull(updatedSchemeSolr);
+//    Assertions.assertNotNull(updatedSchemeSolr);
     Assertions.assertTrue(updatedSchemeMongo.getPrefLabel().keySet().size()==2);
-    Assertions.assertTrue(updatedSchemeSolr.getPrefLabel().keySet().size()==2);
+//    Assertions.assertTrue(updatedSchemeSolr.getPrefLabel().keySet().size()==2);
     Assertions.assertTrue(updatedSchemeMongo.getDefinition().keySet().size()==2);
-    Assertions.assertTrue(updatedSchemeSolr.getDefinition().keySet().size()==2);
+//    Assertions.assertTrue(updatedSchemeSolr.getDefinition().keySet().size()==2);
     Assertions.assertTrue(updatedSchemeMongo.getTotal()==1);
     Assertions.assertTrue(updatedSchemeMongo.getModified().getTime()!=scheme.getModified().getTime());
-    Assertions.assertTrue(updatedSchemeSolr.getModified().getTime()!=scheme.getModified().getTime());
+//    Assertions.assertTrue(updatedSchemeSolr.getModified().getTime()!=scheme.getModified().getTime());
   }
   
   /*

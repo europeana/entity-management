@@ -76,8 +76,7 @@ public class ConceptSchemeController extends BaseRest {
     
     ConceptScheme scheme = emConceptSchemeService.retrieveConceptScheme(numericIdentifier);
 
-    long timestamp = scheme.getModified().getTime();
-    String etag = computeEtag(timestamp, WebFields.FORMAT_JSONLD, getApiVersion());
+    String etag = generateETag(scheme.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
     checkIfMatchHeaderWithQuotes(etag, request);
 
     emConceptSchemeService.disableConceptScheme(scheme, true);
@@ -156,17 +155,18 @@ public class ConceptSchemeController extends BaseRest {
   public ResponseEntity<String> updateConceptScheme(
       @RequestHeader(value = "If-Match", required = false) String ifMatchHeader,
       @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = false, defaultValue = CommonApiConstants.PROFILE_MINIMAL) String profile,
-      @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) Long identifier,
+      @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
       @RequestBody ConceptScheme newConceptScheme,
       HttpServletRequest request)
       throws Exception {
 
     verifyWriteAccess(Operations.UPDATE, request);
 
-    ConceptScheme existingScheme = emConceptSchemeService.retrieveConceptScheme(identifier, false);
+    long numericIdentifier = parseNumericIdentifier(identifier);
+    
+    ConceptScheme existingScheme = emConceptSchemeService.retrieveConceptScheme(numericIdentifier, false);
 
-    long timestamp = existingScheme.getModified()!=null ? existingScheme.getModified().getTime() : 0L;
-    String etag = computeEtag(timestamp, FormatTypes.jsonld.name(), getApiVersion());
+    String etag = generateETag(existingScheme.getModified(), FormatTypes.jsonld.name(), getApiVersion());
     checkIfMatchHeaderWithQuotes(etag, request);
 
     existingScheme.setDefinition(new HashMap<>(newConceptScheme.getDefinition()));
@@ -182,8 +182,7 @@ public class ConceptSchemeController extends BaseRest {
       HttpServletRequest request, ConceptScheme scheme, HttpStatus status)
       throws EuropeanaApiException {
 
-    long timestamp = scheme.getModified().getTime();
-    String etag = computeEtag(timestamp, WebFields.FORMAT_JSONLD, getApiVersion());
+    String etag = generateETag(scheme.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
 
     // create headers
     org.springframework.http.HttpHeaders headers = createAllowHeader(request);

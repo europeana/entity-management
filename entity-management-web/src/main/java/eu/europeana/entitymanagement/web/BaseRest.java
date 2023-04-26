@@ -230,9 +230,7 @@ public abstract class BaseRest extends BaseRestController {
 
     Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
 
-    long timestamp = isAggregatedBy != null ? isAggregatedBy.getModified().getTime() : 0L;
-
-    String etag = computeEtag(timestamp, outFormat.name(), getApiVersion());
+    String etag = generateETag(isAggregatedBy.getModified(), outFormat.name(), getApiVersion());
 
     // use request.getRequestURI() as Spring returns null for request.getPathInfo()
     // see: https://stackoverflow.com/a/8080548/14530159
@@ -295,14 +293,6 @@ public abstract class BaseRest extends BaseRestController {
 
   protected ResponseEntity<String> noContentResponse(HttpServletRequest request) {
     return ResponseEntity.noContent().headers(createAllowHeader(request)).build();
-  }
-
-  /**
-   * Generates a unique hex string based on the input params TODO: move logic to {@link
-   * eu.europeana.api.commons.web.controller.BaseRestController#generateETag(Date, String, String)}
-   */
-  protected String computeEtag(long timestamp, String format, String version) {
-    return DigestUtils.md5Hex(String.format("%s:%s:%s", timestamp, format, version));
   }
 
   @SuppressWarnings("unchecked")

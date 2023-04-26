@@ -138,9 +138,8 @@ public class EMController extends BaseRest {
     }
 
     Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
-    long timestamp = isAggregatedBy != null ? isAggregatedBy.getModified().getTime() : 0L;
 
-    String etag = computeEtag(timestamp, FormatTypes.jsonld.name(), getApiVersion());
+    String etag = generateETag(isAggregatedBy.getModified(), FormatTypes.jsonld.name(), getApiVersion());
     checkIfMatchHeaderWithQuotes(etag, request);
 
     boolean isSynchronous = containsSyncProfile(profile);
@@ -255,9 +254,7 @@ public class EMController extends BaseRest {
     verifyCoreferencesForUpdate(updateRequestEntity, entityRecord);
 
     Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
-    long timestamp = isAggregatedBy != null ? isAggregatedBy.getModified().getTime() : 0L;
-
-    String etag = computeEtag(timestamp, FormatTypes.jsonld.name(), getApiVersion());
+    String etag = generateETag(isAggregatedBy.getModified(), FormatTypes.jsonld.name(), getApiVersion());
 
     checkIfMatchHeaderWithQuotes(etag, request);
 
