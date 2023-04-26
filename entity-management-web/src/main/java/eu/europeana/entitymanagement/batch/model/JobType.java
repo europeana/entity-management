@@ -16,10 +16,10 @@ public enum JobType {
   
   public static boolean isValidJobType(String type) { 
     for (JobType jobType : JobType.values()) {
-      if(jobType.value().equalsIgnoreCase(type)) {
+      if(jobType.value().equals(type)) {
         return true;
       }
     }
     return false;
-  }
+  }  
 }

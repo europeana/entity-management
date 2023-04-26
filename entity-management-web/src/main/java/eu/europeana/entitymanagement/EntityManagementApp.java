@@ -2,12 +2,7 @@ package eu.europeana.entitymanagement;
 
 import static eu.europeana.entitymanagement.batch.model.JobType.SCHEDULE_DELETION;
 import static eu.europeana.entitymanagement.batch.model.JobType.SCHEDULE_UPDATE;
-
-import eu.europeana.entitymanagement.batch.config.EntityUpdateSchedulingConfig;
-import eu.europeana.entitymanagement.batch.model.JobType;
-import eu.europeana.entitymanagement.common.config.SocksProxyConfig;
-import eu.europeana.entitymanagement.config.SocksProxyActivator;
-import org.apache.commons.lang3.StringUtils;
+import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +15,10 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
+import eu.europeana.entitymanagement.batch.config.EntityUpdateSchedulingConfig;
+import eu.europeana.entitymanagement.batch.model.JobType;
+import eu.europeana.entitymanagement.common.config.SocksProxyConfig;
+import eu.europeana.entitymanagement.config.SocksProxyActivator;
 
 /**
  * Main application. Allows deploying as a war and logs instance data when deployed in Cloud Foundry
@@ -61,6 +60,7 @@ public class EntityManagementApp implements CommandLineRunner {
               .web(WebApplicationType.NONE)
               .run(args);
 
+      LOG.info("Batch update execution complete for {}. Stopping application. ", args.toString());
       System.exit(SpringApplication.exit(context));
     } else {
       LOG.info("No args provided to application. Starting web server");
@@ -76,7 +76,16 @@ public class EntityManagementApp implements CommandLineRunner {
   @Override
   public void run(String... args) throws Exception {
     if (hasCmdLineParams(args)) {
+      Set<String> tasks = Set.of(args);
+      if(tasks.contains(JobType.SCHEDULE_DELETION.value())) {
+        LOG.debug("Executing scheduled deletions");
         schedulingConfig.runScheduledDeprecationsAndDeletions();
+      }
+      
+      if(tasks.contains(JobType.SCHEDULE_UPDATE.value())) {
+        LOG.debug("Executing scheduled updates");
+        schedulingConfig.runScheduledDeprecationsAndDeletions();
+      }
         schedulingConfig.runScheduledUpdate();
     }
     // if no arguments then web server should be started
