@@ -20,7 +20,7 @@ spec:
           containers:
             - name: entity-management-cronjob
 #              image: docker.io/europeana/entity-management-api
-              image: europeana/entity-management-api:latest
+              image: europeana/entity-management-api:develop
               imagePullPolicy: Always
               command:
                 - java
