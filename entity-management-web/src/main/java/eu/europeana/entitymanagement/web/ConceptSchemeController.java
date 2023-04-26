@@ -1,19 +1,6 @@
 package eu.europeana.entitymanagement.web;
 
 import static eu.europeana.api.commons.web.http.HttpHeaders.LINK;
-
-import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.api.commons.error.EuropeanaApiException;
-import eu.europeana.api.commons.web.definitions.WebFields;
-import eu.europeana.api.commons.web.exception.HttpException;
-import eu.europeana.api.commons.web.http.HttpHeaders;
-import eu.europeana.api.commons.web.model.vocabulary.Operations;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.definitions.model.ConceptScheme;
-import eu.europeana.entitymanagement.exception.EntityNotFoundException;
-import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
-import eu.europeana.entitymanagement.web.service.ConceptSchemeService;
-import io.swagger.annotations.ApiOperation;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +19,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons.error.EuropeanaApiException;
+import eu.europeana.api.commons.web.definitions.WebFields;
+import eu.europeana.api.commons.web.exception.HttpException;
+import eu.europeana.api.commons.web.http.HttpHeaders;
+import eu.europeana.api.commons.web.model.vocabulary.Operations;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.definitions.model.ConceptScheme;
+import eu.europeana.entitymanagement.exception.EntityNotFoundException;
+import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
+import eu.europeana.entitymanagement.web.service.ConceptSchemeService;
+import io.swagger.annotations.ApiOperation;
 
 @RestController
 @Validated
@@ -112,7 +111,7 @@ public class ConceptSchemeController extends BaseRest {
 
     emConceptSchemeService.createConceptScheme(conceptScheme);
 
-    return generateResponseEntityForConceptScheme(request, conceptScheme, HttpStatus.CREATED, "create");
+    return generateResponseEntityForConceptScheme(request, conceptScheme, HttpStatus.CREATED);
   }
 
   @ApiOperation(
@@ -138,11 +137,11 @@ public class ConceptSchemeController extends BaseRest {
     long numericIdentifier = parseNumericIdentifier(identifier);
 
     ConceptScheme scheme = emConceptSchemeService.retrieveConceptScheme(numericIdentifier, false);
-    return generateResponseEntityForConceptScheme(request, scheme, HttpStatus.OK, "retrieve");
+    return generateResponseEntityForConceptScheme(request, scheme, HttpStatus.OK);
   }
 
   protected ResponseEntity<String> generateResponseEntityForConceptScheme(
-      HttpServletRequest request, ConceptScheme scheme, HttpStatus status, String method)
+      HttpServletRequest request, ConceptScheme scheme, HttpStatus status)
       throws EuropeanaApiException {
 
     long timestamp = scheme.getModified().getTime();
@@ -161,11 +160,11 @@ public class ConceptSchemeController extends BaseRest {
           org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.LINK);
       headers.add(
           org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.ETAG);
-      if(method.equals("create")) {
+      if(request.getMethod().equals(RequestMethod.POST.toString())) {
         headers.add(EMHttpHeaders.CACHE_CONTROL, EMHttpHeaders.VALUE_NO_CAHCHE_STORE_REVALIDATE);
         headers.add(org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, EMHttpHeaders.CACHE_CONTROL);
       }
-      if(method.equals("retrieve")) {
+      if(request.getMethod().equals(RequestMethod.GET.toString())) {
         headers.add(org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.VARY);
       }
     }
