@@ -13,4 +13,13 @@ public enum JobType {
   public String value() {
     return value;
   }
+  
+  public static boolean isValidJobType(String type) { 
+    for (JobType jobType : JobType.values()) {
+      if(jobType.value().equalsIgnoreCase(type)) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
