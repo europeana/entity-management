@@ -2,17 +2,19 @@ package eu.europeana.entitymanagement.config;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /** Setup CORS for all requests and setup default Content-type */
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
-
+  
   MediaType jsonLdMediaType =
       MediaType.valueOf(eu.europeana.api.commons.web.http.HttpHeaders.CONTENT_TYPE_JSONLD);
   Map<String, MediaType> mediaTypesMaping = new HashMap<String, MediaType>();
@@ -70,4 +72,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     return mediaTypesMaping;
   }
+  
+  @Override
+  public void addResourceHandlers(ResourceHandlerRegistry registry) {
+    registry.addResourceHandler("/public/**").addResourceLocations("classpath:/public/");
+  }  
 }

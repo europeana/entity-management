@@ -1,10 +1,5 @@
 package eu.europeana.entitymanagement.web;
 
-import eu.europeana.api.commons.config.i18n.I18nService;
-import eu.europeana.api.commons.error.EuropeanaApiErrorResponse;
-import eu.europeana.api.commons.web.exception.EuropeanaGlobalExceptionHandler;
-import eu.europeana.api.commons.web.exception.HttpException;
-import eu.europeana.entitymanagement.web.service.RequestPathMethodService;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -15,6 +10,12 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpMediaTypeException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import eu.europeana.api.commons.config.i18n.I18nService;
+import eu.europeana.api.commons.error.EuropeanaApiErrorResponse;
+import eu.europeana.api.commons.web.exception.EuropeanaGlobalExceptionHandler;
+import eu.europeana.api.commons.web.exception.HttpException;
+import eu.europeana.entitymanagement.web.service.RequestPathMethodService;
 
 @ControllerAdvice
 @ConditionalOnWebApplication
@@ -86,4 +87,21 @@ public class EMExceptionHandler extends EuropeanaGlobalExceptionHandler {
         .headers(createHttpHeaders(httpRequest))
         .body(response);
   }
+
+  @ExceptionHandler(NoHandlerFoundException.class)
+  public ResponseEntity<EuropeanaApiErrorResponse> handleNoHandlerFoundException(
+      NoHandlerFoundException e, HttpServletRequest httpRequest) {
+
+    EuropeanaApiErrorResponse response =
+        new EuropeanaApiErrorResponse.Builder(httpRequest, e, stackTraceEnabled())
+            .setStatus(HttpStatus.NOT_FOUND.value())
+            .setError(HttpStatus.NOT_FOUND.getReasonPhrase())
+            .setMessage(e.getMessage())
+            .build();
+
+    return ResponseEntity.status(HttpStatus.NOT_FOUND.value())
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(response);
+  }
+  
 }

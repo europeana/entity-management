@@ -14,8 +14,7 @@ import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.web.auth.Roles;
 
 @Component(AppConfigConstants.BEAN_AUTHORIZATION_SERVICE)
-public class EMAuthorizationService extends BaseAuthorizationService
-    implements eu.europeana.api.commons.service.authorization.AuthorizationService {
+public class EMAuthorizationService extends BaseAuthorizationService {
 
   protected final Logger logger = LogManager.getLogger(getClass());
 

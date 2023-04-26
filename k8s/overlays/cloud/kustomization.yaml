@@ -3,7 +3,7 @@ resources:
   - service.yaml
   - ingress.yaml
   - hpa.yaml
-  - cronjob.yaml
+#  - cronjob.yaml
 
 patchesStrategicMerge:
   - deployment_patch.yaml
