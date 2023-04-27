@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement;
 
 import static eu.europeana.entitymanagement.batch.model.JobType.SCHEDULE_DELETION;
 import static eu.europeana.entitymanagement.batch.model.JobType.SCHEDULE_UPDATE;
+import java.util.Arrays;
 import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -52,7 +53,7 @@ public class EntityManagementApp implements CommandLineRunner {
         new SocksProxyConfig("entitymanagement.properties", "entitymanagement.user.properties"));
     //jobType = args.length > 0 ? args[0] : "";
     if (hasCmdLineParams(args)) {
-      LOG.info("Starting batch updates execution with args: {}", args.toString());
+      LOG.info("Starting batch updates execution with args: {}", Arrays.toString(args));
       validateArguments(args);
       // disable web server since we're only running an update task
       ConfigurableApplicationContext context =
@@ -60,7 +61,7 @@ public class EntityManagementApp implements CommandLineRunner {
               .web(WebApplicationType.NONE)
               .run(args);
 
-      LOG.info("Batch update execution complete for {}. Stopping application. ", args.toString());
+      LOG.info("Batch update execution complete for {}. Stopping application. ", Arrays.toString(args));
       System.exit(SpringApplication.exit(context));
     } else {
       LOG.info("No args provided to application. Starting web server");
