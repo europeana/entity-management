@@ -1,12 +1,9 @@
-package eu.europeana.entitymanagement.batch.config;
+package eu.europeana.entitymanagement.batch.service;
 
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.ENTITY_REMOVALS_JOB_LAUNCHER;
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.ENTITY_UPDATE_JOB_LAUNCHER;
 import static eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType.DEPRECATION;
 import static eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType.PERMANENT_DELETION;
-
-import eu.europeana.entitymanagement.batch.utils.BatchUtils;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
@@ -14,23 +11,29 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import eu.europeana.entitymanagement.batch.config.EntityUpdateJobConfig;
+import eu.europeana.entitymanagement.batch.utils.BatchUtils;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 
-@Configuration
+//@Configuration
 @PropertySource("classpath:entitymanagement.properties")
 @PropertySource(value = "classpath:entitymanagement.user.properties", ignoreResourceNotFound = true)
-@EnableScheduling
-public class EntityUpdateSchedulingConfig {
+//@EnableScheduling
+/**
+ * This class is used to trigger asynchronuous execution of scheduled jobs 
+ * @author GordeaS
+ *
+ */
+public class BatchEntityUpdateExecutor {
 
-  private static final Logger logger = LogManager.getLogger(EntityUpdateSchedulingConfig.class);
+  private static final Logger logger = LogManager.getLogger(BatchEntityUpdateExecutor.class);
   private final JobLauncher entityUpdateJobLauncher;
   private final JobLauncher entityDeletionsJobLauncher;
   private final EntityUpdateJobConfig updateJobConfig;
 
-  public EntityUpdateSchedulingConfig(
+  public BatchEntityUpdateExecutor(
       @Qualifier(ENTITY_UPDATE_JOB_LAUNCHER) JobLauncher entityUpdateJobLauncher,
       @Qualifier(ENTITY_REMOVALS_JOB_LAUNCHER) JobLauncher entityDeletionsJobLauncher,
       EntityUpdateJobConfig batchUpdateConfig) {

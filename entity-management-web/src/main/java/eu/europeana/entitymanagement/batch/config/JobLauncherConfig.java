@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.batch.config;
 
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.*;
-
+import javax.annotation.Resource;
 import eu.europeana.batch.config.MongoBatchConfigurer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
@@ -10,16 +10,24 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.task.TaskExecutor;
+import dev.morphia.Datastore;
 
 @Configuration
+/**
+ * This class is used to configure the 
+ * @author GordeaS
+ *
+ */
 public class JobLauncherConfig {
 
   private final MongoBatchConfigurer mongoBatchConfigurer;
   private final TaskExecutor synchronousWebRequestExecutor;
   private final TaskExecutor deletionsTaskExecutor;
+  @Resource(name = SCHEDULED_UPDATE_TASK_EXECUTOR)
+  private TaskExecutor defaultTaskExecutor;
 
   public JobLauncherConfig(
-      MongoBatchConfigurer mongoBatchConfigurer,
+      @Qualifier(BEAN_BATCH_MONGO_CONFIGURER) MongoBatchConfigurer mongoBatchConfigurer,
       @Qualifier(WEB_REQUEST_JOB_EXECUTOR) TaskExecutor webRequestJobExecutor,
       @Qualifier(SCHEDULED_REMOVAL_TASK_EXECUTOR) TaskExecutor deletionsTaskExecutor) {
     this.mongoBatchConfigurer = mongoBatchConfigurer;
@@ -50,4 +58,18 @@ public class JobLauncherConfig {
     jobLauncher.afterPropertiesSet();
     return jobLauncher;
   }
+  
+  /**
+   * Configures Spring Batch to use Mongo
+   *
+   * @param datastore Morphia datastore for Spring Batch
+   * @return BatchConfigurer instance
+   */
+  @Bean(name = BEAN_BATCH_MONGO_CONFIGURER)
+  public MongoBatchConfigurer mongoBatchConfigurer(
+      @Qualifier(BEAN_BATCH_DATA_STORE) Datastore datastore) {
+    //TODO verify if sync or async task execution should be performed by MongoBatchConfigurer 
+    return new MongoBatchConfigurer(datastore, defaultTaskExecutor);
+  }
+
 }

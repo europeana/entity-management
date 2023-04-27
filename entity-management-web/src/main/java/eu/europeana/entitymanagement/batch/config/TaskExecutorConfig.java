@@ -30,7 +30,8 @@ public class TaskExecutorConfig {
     return new SyncTaskExecutor();
   }
 
-  /** Returns a TaskExecutor to be used for scheduled deletions / deprecation of entities. */
+  /** Returns a TaskExecutor to be used for scheduled deletions / deprecation of entities. This is a singleThreadExecutor,
+   * so deletions cannot run simultaneously*/
   @Bean(SCHEDULED_REMOVAL_TASK_EXECUTOR)
   public TaskExecutor scheduledDeletionsExecutor() {
     return new SyncTaskExecutor();

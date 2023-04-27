@@ -15,8 +15,8 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
-import eu.europeana.entitymanagement.batch.config.EntityUpdateSchedulingConfig;
 import eu.europeana.entitymanagement.batch.model.JobType;
+import eu.europeana.entitymanagement.batch.service.BatchEntityUpdateExecutor;
 import eu.europeana.entitymanagement.common.config.SocksProxyConfig;
 import eu.europeana.entitymanagement.config.SocksProxyActivator;
 
@@ -35,7 +35,7 @@ import eu.europeana.entitymanagement.config.SocksProxyActivator;
 public class EntityManagementApp implements CommandLineRunner {
 
   private static final Logger LOG = LogManager.getLogger(EntityManagementApp.class);
-  @Autowired private EntityUpdateSchedulingConfig schedulingConfig;
+  @Autowired private BatchEntityUpdateExecutor batchUpdateExecutor;
 
   /**
    * Main entry point of this application
@@ -79,14 +79,14 @@ public class EntityManagementApp implements CommandLineRunner {
       Set<String> tasks = Set.of(args);
       if(tasks.contains(JobType.SCHEDULE_DELETION.value())) {
         LOG.debug("Executing scheduled deletions");
-        schedulingConfig.runScheduledDeprecationsAndDeletions();
+        batchUpdateExecutor.runScheduledDeprecationsAndDeletions();
       }
       
       if(tasks.contains(JobType.SCHEDULE_UPDATE.value())) {
         LOG.debug("Executing scheduled updates");
-        schedulingConfig.runScheduledDeprecationsAndDeletions();
+        batchUpdateExecutor.runScheduledDeprecationsAndDeletions();
       }
-        schedulingConfig.runScheduledUpdate();
+        batchUpdateExecutor.runScheduledUpdate();
     }
     // if no arguments then web server should be started
     return;
