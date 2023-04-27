@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import java.util.ArrayList;
@@ -65,8 +66,8 @@ public class ConceptSchemeServiceIT extends BaseWebControllerTest {
         .andExpect(jsonPath("$.type", is(EntityTypes.ConceptScheme.getEntityType())));
 
     // check solr obj also exists
-    SolrConceptScheme solrConceptScheme = solrService.searchConceptSchemeById(scheme.getConceptSchemeId());
-    Assertions.assertNotNull(solrConceptScheme);
+//    SolrConceptScheme solrConceptScheme = solrService.searchConceptSchemeById(scheme.getConceptSchemeId());
+//    Assertions.assertNotNull(solrConceptScheme);
   }
 
   // TODO: add tests for XML retrieval
@@ -131,7 +132,6 @@ public class ConceptSchemeServiceIT extends BaseWebControllerTest {
         .perform(
             delete(
                     IntegrationTestUtils.BASE_SCHEME_URL
-                        + "/"
                         + scheme.getIdentifier())
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
@@ -157,12 +157,64 @@ public class ConceptSchemeServiceIT extends BaseWebControllerTest {
         .perform(
             delete(
                     IntegrationTestUtils.BASE_SCHEME_URL
-                        + "/"
                         + scheme.getConceptSchemeId().substring(scheme.getConceptSchemeId().lastIndexOf('/') + 1))
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isGone());
   }
 
+  @Test
+  void updatingNonExistingConceptSchemeShouldReturn404() throws Exception {
+    mockMvc
+        .perform(
+            put(IntegrationTestUtils.BASE_SCHEME_URL + "1")
+            .content(loadFile(IntegrationTestUtils.CONCEPT_SCHEME_UPDATE_PHOTO_GENRE_JSON))
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void updatingDeprecatedConceptSchemeReturn410() throws Exception {
+    ConceptScheme scheme = createConceptScheme(null);
+    emConceptSchemeService.disableConceptScheme(scheme, true);
+
+    mockMvc
+      .perform(
+          put(IntegrationTestUtils.BASE_SCHEME_URL + scheme.getIdentifier())
+          .content(loadFile(IntegrationTestUtils.CONCEPT_SCHEME_UPDATE_PHOTO_GENRE_JSON))
+          .contentType(MediaType.APPLICATION_JSON_VALUE))
+      .andExpect(status().isGone());
+  }
+
+
+  @Test
+  void updateConceptSchemeShouldBeSuccessful() throws Exception {
+    List<String> items = new ArrayList<>();
+    items.add(WebEntityFields.BASE_DATA_EUROPEANA_URI + "concept/1");
+    ConceptScheme scheme = createConceptScheme(items);
+
+    mockMvc
+      .perform(
+          put(IntegrationTestUtils.BASE_SCHEME_URL + scheme.getIdentifier())
+          .content(loadFile(IntegrationTestUtils.CONCEPT_SCHEME_UPDATE_PHOTO_GENRE_JSON))
+          .contentType(MediaType.APPLICATION_JSON_VALUE))
+      .andExpect(status().isOk());
+
+    ConceptScheme updatedSchemeMongo = emConceptSchemeService.retrieveConceptScheme(scheme.getIdentifier(), false);
+//    SolrConceptScheme updatedSchemeSolr = solrService.searchConceptSchemeById(scheme.getConceptSchemeId());
+    
+    Assertions.assertNotNull(updatedSchemeMongo);
+//    Assertions.assertNotNull(updatedSchemeSolr);
+    Assertions.assertTrue(updatedSchemeMongo.getPrefLabel().keySet().size()==2);
+//    Assertions.assertTrue(updatedSchemeSolr.getPrefLabel().keySet().size()==2);
+    Assertions.assertTrue(updatedSchemeMongo.getDefinition().keySet().size()==2);
+//    Assertions.assertTrue(updatedSchemeSolr.getDefinition().keySet().size()==2);
+    Assertions.assertTrue(updatedSchemeMongo.getTotal()==1);
+    Assertions.assertTrue(updatedSchemeMongo.getModified().getTime()!=scheme.getModified().getTime());
+//    Assertions.assertTrue(updatedSchemeSolr.getModified().getTime()!=scheme.getModified().getTime());
+  }
   
+  /*
+   * TODO: create a test for the validation of the scheme fields, when the validation gets enabled (currently that code is commented out)
+   */
 
 }

@@ -2,6 +2,8 @@ package eu.europeana.entitymanagement.web.service;
 
 import java.util.Date;
 import java.util.List;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import eu.europeana.api.commons.error.EuropeanaApiException;
@@ -13,7 +15,6 @@ import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.mongo.repository.ConceptSchemeRepository;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
-import eu.europeana.entitymanagement.solr.model.SolrConceptScheme;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.utils.EntityUtils;
@@ -26,6 +27,7 @@ public class ConceptSchemeService {
   private final SolrService solrService;
   final EntityManagementConfiguration emConfiguration;
 
+  private static final Logger logger = LogManager.getLogger(ConceptSchemeService.class);
 
   @Autowired
   public ConceptSchemeService(
@@ -48,25 +50,29 @@ public class ConceptSchemeService {
     scheme.setModified(now);
   }
 
-  public ConceptScheme createConceptScheme(ConceptScheme scheme) throws SolrServiceException {
+  public ConceptScheme createConceptScheme(ConceptScheme scheme) {
     
     Long id = generateConceptSchemeIdentifier();
     scheme.setIdentifier(id);
     
     setMandatoryFields(scheme);
 
-    ConceptScheme dbScheme = emConceptSchemeRepo.saveConceptScheme(scheme);
-    setConceptSchemeId(dbScheme);
+    setConceptSchemeId(scheme);
     
-    try {
-      solrService.storeConceptScheme(new SolrConceptScheme(scheme));
-    } catch (SolrServiceException e) {
-      throw new SolrServiceException(
-          String.format("Error during Solr indexing for id=%s", scheme.getConceptSchemeId()), e);
-    }
-    return dbScheme;
+    return storeConceptScheme(scheme);
   }
 
+  public ConceptScheme storeConceptScheme(ConceptScheme scheme) {
+    emConceptSchemeRepo.saveConceptScheme(scheme);
+    //disabling indexing in this version
+//    try {
+//      solrService.storeConceptScheme(new SolrConceptScheme(scheme));
+//    } catch (SolrServiceException e) {
+//      logger.warn("Exception during Solr indexing of the concept scheme with the id: {}", scheme.getConceptSchemeId());
+//    }
+    return scheme;
+  }
+  
   public ConceptScheme retrieveConceptScheme(long identifier)
       throws EuropeanaApiException {
         
@@ -91,10 +97,10 @@ public class ConceptSchemeService {
     return dbScheme;
   }
 
-  void setConceptSchemeId(ConceptScheme dbScheme) {
+  void setConceptSchemeId(ConceptScheme scheme) {
     //set the schemeId for serialization
-    dbScheme.setConceptSchemeId(
-        EntityUtils.buildConceptSchemeId(emConfiguration.getSchemeDataEndpoint(), dbScheme.getIdentifier()));
+    scheme.setConceptSchemeId(
+        EntityUtils.buildConceptSchemeId(emConfiguration.getSchemeDataEndpoint(), scheme.getIdentifier()));
   }
 
 
@@ -102,12 +108,14 @@ public class ConceptSchemeService {
       throws EntityUpdateException {
     //not specified yet
     //    updateConceptSchemeEntities(scheme);
-    try {
-      solrService.deleteById(List.of(scheme.getConceptSchemeId()), forceSolrCommit);
-    } catch (SolrServiceException e) {
-      throw new EntityUpdateException(
-          "Cannot delete solr record with id: " + scheme.getConceptSchemeId(), e);
-    }
+
+    //disable solr indexing in this version
+//    try {
+//      solrService.deleteById(List.of(scheme.getConceptSchemeId()), forceSolrCommit);
+//    } catch (SolrServiceException e) {
+//      throw new EntityUpdateException(
+//          "Cannot delete solr record with id: " + scheme.getConceptSchemeId(), e);
+//    }
     scheme.setDisabled(new Date());
     emConceptSchemeRepo.saveConceptScheme(scheme);
   }
