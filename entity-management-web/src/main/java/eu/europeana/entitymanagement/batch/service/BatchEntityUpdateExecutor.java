@@ -10,9 +10,11 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
 import eu.europeana.entitymanagement.batch.config.EntityUpdateJobConfig;
 import eu.europeana.entitymanagement.batch.utils.BatchUtils;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
@@ -21,6 +23,7 @@ import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType
 @PropertySource("classpath:entitymanagement.properties")
 @PropertySource(value = "classpath:entitymanagement.user.properties", ignoreResourceNotFound = true)
 //@EnableScheduling
+@Component
 /**
  * This class is used to trigger asynchronuous execution of scheduled jobs 
  * @author GordeaS
@@ -33,6 +36,7 @@ public class BatchEntityUpdateExecutor {
   private final JobLauncher entityDeletionsJobLauncher;
   private final EntityUpdateJobConfig updateJobConfig;
 
+  @Autowired
   public BatchEntityUpdateExecutor(
       @Qualifier(ENTITY_UPDATE_JOB_LAUNCHER) JobLauncher entityUpdateJobLauncher,
       @Qualifier(ENTITY_REMOVALS_JOB_LAUNCHER) JobLauncher entityDeletionsJobLauncher,

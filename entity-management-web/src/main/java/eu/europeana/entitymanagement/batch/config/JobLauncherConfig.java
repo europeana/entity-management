@@ -14,33 +14,42 @@ import dev.morphia.Datastore;
 
 @Configuration
 /**
- * This class is used to configure the 
+ * This class is used to configure the JobLaunchers for single (e.g. web) requests and batch requests (e.g. k8s cron jobs)
  * @author GordeaS
  *
  */
 public class JobLauncherConfig {
 
-  private final MongoBatchConfigurer mongoBatchConfigurer;
+//  private final MongoBatchConfigurer mongoBatchConfigurer;
   private final TaskExecutor synchronousWebRequestExecutor;
   private final TaskExecutor deletionsTaskExecutor;
   @Resource(name = SCHEDULED_UPDATE_TASK_EXECUTOR)
   private TaskExecutor defaultTaskExecutor;
+  @Resource(name = BEAN_BATCH_MONGO_CONFIGURER)
+  private MongoBatchConfigurer mongoBatchConfigurer;
 
   public JobLauncherConfig(
-      @Qualifier(BEAN_BATCH_MONGO_CONFIGURER) MongoBatchConfigurer mongoBatchConfigurer,
       @Qualifier(WEB_REQUEST_JOB_EXECUTOR) TaskExecutor webRequestJobExecutor,
       @Qualifier(SCHEDULED_REMOVAL_TASK_EXECUTOR) TaskExecutor deletionsTaskExecutor) {
-    this.mongoBatchConfigurer = mongoBatchConfigurer;
     this.synchronousWebRequestExecutor = webRequestJobExecutor;
     this.deletionsTaskExecutor = deletionsTaskExecutor;
   }
 
-  @Bean(name = ENTITY_UPDATE_JOB_LAUNCHER)
-  @Primary
   public JobLauncher defaultJobLauncher() throws Exception {
     return mongoBatchConfigurer.getJobLauncher();
   }
 
+  /**
+   * indirection method 
+   * @return
+   * @throws Exception
+   */
+  @Bean(name = ENTITY_UPDATE_JOB_LAUNCHER)
+  @Primary
+  public JobLauncher entityUpdateJobLauncher() throws Exception {
+   return defaultJobLauncher();
+  }
+  
   @Bean(ENTITY_REMOVALS_JOB_LAUNCHER)
   public JobLauncher entityDeletionJobLauncher() throws Exception {
     SimpleJobLauncher jobLauncher = new SimpleJobLauncher();
@@ -71,5 +80,4 @@ public class JobLauncherConfig {
     //TODO verify if sync or async task execution should be performed by MongoBatchConfigurer 
     return new MongoBatchConfigurer(datastore, defaultTaskExecutor);
   }
-
 }
