@@ -1,7 +1,8 @@
 package eu.europeana.entitymanagement.batch.model;
 
 public enum JobType {
-  SCHEDULE_UPDATE("schedule_update");
+  SCHEDULE_UPDATE("schedule_update"),
+  SCHEDULE_DELETION("schedule_deletion");
 
   final String value;
 
@@ -12,4 +13,18 @@ public enum JobType {
   public String value() {
     return value;
   }
+  
+  /**
+   * Verifies if the provided type is valid
+   * @param type job type as string
+   * @return true if valid type
+   */
+  public static boolean isValidJobType(String type) { 
+    for (JobType jobType : JobType.values()) {
+      if(jobType.value().equals(type)) {
+        return true;
+      }
+    }
+    return false;
+  }  
 }

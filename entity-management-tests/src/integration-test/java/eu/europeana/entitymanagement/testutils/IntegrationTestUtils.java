@@ -86,6 +86,8 @@ public class IntegrationTestUtils {
       "/content/concept_update_bathtub_invalid_isshownby.json";
   public static final String CONCEPT_SCHEME_PHOTO_GENRE_JSON =
       "/content/concept_scheme_photo_genre.json";
+  public static final String CONCEPT_SCHEME_UPDATE_PHOTO_GENRE_JSON =
+      "/content/concept_scheme_update_photo_genre.json";
 
   public static final String CONCEPT_MACHINE_XML = "/metis-deref/concept_machine.xml";
   public static final String CONCEPT_BATHTUB_XML = "/metis-deref/concept-metis-bathtub.xml";
