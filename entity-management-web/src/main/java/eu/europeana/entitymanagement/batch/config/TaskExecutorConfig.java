@@ -26,6 +26,7 @@ public class TaskExecutorConfig {
   /**
    * Returns a TaskExecutor to be used for scheduled entity updates. This is a singleThreadExecutor,
    * so updates cannot run simultaneously.
+   * @return new SyncTaskExecutor
    */
   @Bean(SCHEDULED_UPDATE_TASK_EXECUTOR)
   public TaskExecutor scheduledUpdateExecutor() {
@@ -36,7 +37,9 @@ public class TaskExecutorConfig {
   }
 
   /** Returns a TaskExecutor to be used for scheduled deletions / deprecation of entities. This is a singleThreadExecutor,
-   * so deletions cannot run simultaneously*/
+   * so deletions cannot run simultaneously
+   * @return new SyncTaskExecutor
+   */
   @Bean(SCHEDULED_REMOVAL_TASK_EXECUTOR)
   public TaskExecutor scheduledDeletionsExecutor() {
     return new SyncTaskExecutor();
@@ -45,6 +48,7 @@ public class TaskExecutorConfig {
   /**
    * Executor used for Steps when running Scheduled Updates. The configures the concurrency settings
    * for Full and Metrics updates.
+   * @return new ThreadedPoolTaskExecutor
    */
   @Bean(UPDATES_STEP_EXECUTOR)
   public TaskExecutor updatesStepExecutor() {
@@ -59,6 +63,7 @@ public class TaskExecutorConfig {
   /**
    * Executor used for Steps when running Scheduled Removals. The configures the concurrency
    * settings for Deprecations and Permanent Deletions
+   * @return new ThreadedPoolTaskExecutor
    */
   @Bean(REMOVALS_STEP_EXECUTOR)
   public TaskExecutor removalsStepExecutor() {
@@ -70,7 +75,9 @@ public class TaskExecutorConfig {
     return taskExecutor;
   }
 
-  /** Creates a TaskExecutor to be used for entity updates directly triggered from web requests. */
+  /** Creates a TaskExecutor to be used for entity updates directly triggered from web requests. 
+   * @return new SyncTaskExecutor
+   */
   @Bean(WEB_REQUEST_JOB_EXECUTOR)
   public TaskExecutor synchronousExecutor() {
     return new SyncTaskExecutor();

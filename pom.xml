@@ -297,9 +297,7 @@
 											<artifactId>git-code-format-maven-plugin</artifactId>
 											<versionRange>${git-code-format.version}</versionRange>
 											<goals>
-												<!--
 												<goal>install-hooks</goal>
-												-->
 												<goal>format-code</goal>
 												<goal>validate-code-format</goal>
 											</goals>

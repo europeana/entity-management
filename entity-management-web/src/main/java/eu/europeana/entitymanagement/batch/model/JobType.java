@@ -14,6 +14,11 @@ public enum JobType {
     return value;
   }
   
+  /**
+   * Verifies if the provided type is valid
+   * @param type job type as string
+   * @return true if valid type
+   */
   public static boolean isValidJobType(String type) { 
     for (JobType jobType : JobType.values()) {
       if(jobType.value().equals(type)) {

@@ -35,14 +35,19 @@ public class JobLauncherConfig {
     this.deletionsTaskExecutor = deletionsTaskExecutor;
   }
 
+  /**
+   * returns the default job launcher, by default the launcher from the MongoBatchConfigurer is returned
+   * @return the default JobLauncher
+   * @throws see  mongoBatchConfigurer.getJobLauncher  
+   */
   public JobLauncher defaultJobLauncher() throws Exception {
     return mongoBatchConfigurer.getJobLauncher();
   }
 
   /**
    * indirection method 
-   * @return
-   * @throws Exception
+   * @return the JobLauncher to be used for entityUpdates
+   * @throws Exception see mongoBatchConfigurer.getJobLauncher
    */
   @Bean(name = ENTITY_UPDATE_JOB_LAUNCHER)
   @Primary
@@ -50,6 +55,12 @@ public class JobLauncherConfig {
    return defaultJobLauncher();
   }
   
+  
+  /**
+   * returns the job launcher for performing entity  deletions 
+   * @return JobLauncher for deletions
+   * @throws Exception see mongoBatchConfigurer.getJobRepository
+   */
   @Bean(ENTITY_REMOVALS_JOB_LAUNCHER)
   public JobLauncher entityDeletionJobLauncher() throws Exception {
     SimpleJobLauncher jobLauncher = new SimpleJobLauncher();
@@ -59,6 +70,11 @@ public class JobLauncherConfig {
     return jobLauncher;
   }
 
+  /**
+   * Instantiates the JobLauncher for synhronuous execution from web requests
+   * @return JobLauncher with synchronuous task executor 
+   * @throws Exception
+   */
   @Bean(name = SYNC_WEB_REQUEST_JOB_LAUNCHER)
   public JobLauncher synchronousJobLauncher() throws Exception {
     SimpleJobLauncher jobLauncher = new SimpleJobLauncher();
