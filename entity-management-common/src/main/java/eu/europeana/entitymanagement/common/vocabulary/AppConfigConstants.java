@@ -20,6 +20,9 @@ public class AppConfigConstants {
 
   public static final String BEAN_EM_DATA_STORE = "emDataStore";
   public static final String BEAN_BATCH_DATA_STORE = "batchDataStore";
+  public static final String BEAN_BATCH_MONGO_CONFIGURER = "batchMongoConfigurer";
+  public static final String BEAN_BATCH_ENTITY_UPDATE_EXECUTOR = "batchEntityUpdateExecutor";
+  
   public static final String BEAN_METIS_DEREF_SERVICE = "metisDerefService";
   public static final String BEAN_EM_BUILD_INFO = "emBuildInfo";
   public static final String BEAN_AUTHORIZATION_SERVICE = "authorizationService";

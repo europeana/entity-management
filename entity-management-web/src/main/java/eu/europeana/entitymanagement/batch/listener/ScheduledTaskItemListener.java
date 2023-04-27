@@ -37,6 +37,7 @@ public class ScheduledTaskItemListener
     if (entityRecords.isEmpty()) {
       return;
     }
+    @SuppressWarnings("unchecked")
     String[] entityIds = getEntityIds((List<BatchEntityRecord>) entityRecords);
     if (logger.isDebugEnabled()) {
       logger.debug(
@@ -72,6 +73,7 @@ public class ScheduledTaskItemListener
   @Override
   public void onWriteError(
       @NonNull Exception e, @NonNull List<? extends BatchEntityRecord> entityRecords) {
+    @SuppressWarnings("unchecked")
     String[] entityIds = getEntityIds((List<BatchEntityRecord>) entityRecords);
 
     logger.warn("onWriteError: entityIds={}", entityIds, e);

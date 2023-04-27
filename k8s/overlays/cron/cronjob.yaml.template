@@ -1,0 +1,71 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: entity-management-cronjob-deployment
+spec:
+  schedule: "${BATCH_CRON_SCHEDULE}"
+  suspend: ${SUSPEND_BATCH}
+  concurrencyPolicy: Forbid
+  jobTemplate:
+#    metadata:
+#      annotations:
+#        fluentd/include: '${COLLECT_LOGS}'
+#        fluentd/multiline: 'true'    
+    spec:
+      ttlSecondsAfterFinished: 120
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: entity-management-cronjob
+              image: europeana/entity-management-api:${DOCKER_IMAGE_TAG}
+              imagePullPolicy: Always
+              command:
+                - java
+                - -jar
+                - /opt/app/entity-management-api.jar
+                - schedule_deletion
+                - schedule_update
+              env:
+                - name: SPRING_CONFIG_ADDITIONAL_LOCATION
+                  value: "file:/opt/app/config/entitymanagement.user.properties"
+                - name: JAVA_OPTS
+                  value: "-javaagent:\"/usr/local/elastic-apm-agent.jar\"
+                          -Delastic.apm.application_packages=${ELASTIC_APP_PACKAGES}
+                          -Delastic.apm.server_urls=${ELASTIC_APM_SERVERS}
+                          -Delastic.apm.service_name=${CRON_APP_NAME}
+                          -Delastic.apm.enabled=${COLLECT_APM}
+                          -Delastic.apm.environment=${K8S_NAMESPACE}
+                          -XX:+UseParallelGC -XX:MaxRAMPercentage=75"
+              resources:
+                requests:
+                  memory: "${MEMORY}"
+                  cpu: "${CPU}m"
+                limits:
+                  memory: "${MEMORY_LIMIT}M"
+                  cpu: "${CPU_LIMIT}m"
+              volumeMounts:
+                - name: ibm-certficate
+                  mountPath: "/opt/app/config/ibm-databases-truststore.jks"
+                  readOnly: true
+                  subPath: ibm-databases-truststore.jks
+                - name: app-properties
+                  mountPath: "/opt/app/config/entitymanagement.user.properties"
+                  readOnly: true
+                  subPath: entitymanagement.user.properties
+                - name: zoho-import-config
+                  mountPath: "/opt/app/config/zoho_import.properties"
+                  readOnly: true
+                  subPath: zoho_import.properties
+          volumes:
+            - name: ibm-certficate
+              secret:
+                secretName: ibm-secret
+                volumes:
+            - name: app-properties
+              secret:
+                secretName: entity-management-api-properties
+            - name: zoho-import-config
+              secret:
+                secretName: zoho-import-properties
+                

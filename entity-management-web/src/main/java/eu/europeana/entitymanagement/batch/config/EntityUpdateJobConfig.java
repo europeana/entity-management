@@ -66,6 +66,13 @@ import org.springframework.stereotype.Component;
 
 @Component
 @EnableBatchProcessing
+/**
+ * This class instantiates  beens required for performing the actual processing of the Entity Manaement Update tasks (see specs)
+ * It support synchronuous execution for web requests and asynchronuous for scheduled jobs (see also {@link TaskExecutorConfig} and {@link JobLauncherConfig}
+ * see also {@link TaskExecutorConfig}
+ * @author GordeaS
+ *
+ */
 public class EntityUpdateJobConfig {
 
   private static final String SINGLE_ENTITY_RECORD_READER = "singleEntityRecordReader";

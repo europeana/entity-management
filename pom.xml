@@ -245,10 +245,17 @@
               <groupId>com.cosium.code</groupId>
               <artifactId>git-code-format-maven-plugin</artifactId>
               <version>${git-code-format.version}</version>
+              <configuration>
+                <skip>true</skip>
+                <googleJavaFormatOptions>
+                    <aosp>true</aosp>
+                </googleJavaFormatOptions>
+              </configuration>
               <executions>
                 <!-- Install git pre-commit hook -->
                 <execution>
                   <id>install-formatter-hook</id>
+                  <phase>verify</phase>
                   <goals>
                     <goal>install-hooks</goal>
                   </goals>
