@@ -33,7 +33,7 @@ spec:
                   value: "-javaagent:\"/usr/local/elastic-apm-agent.jar\"
                           -Delastic.apm.application_packages=${ELASTIC_APP_PACKAGES}
                           -Delastic.apm.server_urls=${ELASTIC_APM_SERVERS}
-                          -Delastic.apm.service_name=${BATCH_APP_NAME}
+                          -Delastic.apm.service_name=${CRON_APP_NAME}
                           -Delastic.apm.enabled=${COLLECT_LOGS}
                           -Delastic.apm.environment=${K8S_NAMESPACE}
                           -XX:+UseParallelGC -XX:MaxRAMPercentage=75"
