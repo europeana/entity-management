@@ -495,7 +495,6 @@ public class EMController extends BaseRest {
       value = {
         "/entity/{type}/base/{identifier}.xml",
         "/entity/{type}/{identifier}.xml",
-        "/entity/{type}/{identifier}",
         "/entity/{type}/{identifier}"
       },
       method = RequestMethod.GET,
@@ -505,7 +504,6 @@ public class EMController extends BaseRest {
         HttpHeaders.CONTENT_TYPE_RDF_XML
       })
   public ResponseEntity<String> getXmlEntity(
-      @RequestHeader(value = HttpHeaders.ACCEPT) String acceptHeader,
       @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
       @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = false)
           String profile,
