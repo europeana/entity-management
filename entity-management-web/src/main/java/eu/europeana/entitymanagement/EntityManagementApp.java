@@ -62,11 +62,23 @@ public class EntityManagementApp implements CommandLineRunner {
               .run(args);
 
       LOG.info("Batch update execution complete for {}. Stopping application. ", Arrays.toString(args));
+      waitForAPM();
       System.exit(SpringApplication.exit(context));
     } else {
       LOG.info("No args provided to application. Starting web server");
       SpringApplication.run(EntityManagementApp.class, args);
       return;
+    }
+  }
+
+  static void waitForAPM() {
+    //quickfix - allow APM to transfer logs
+    //
+    long sleepTimeSeconds = 300;
+    try {
+      Thread.sleep(sleepTimeSeconds * 1000);
+    } catch (InterruptedException e) {
+      LOG.info("Sleep time interrupted.", e);
     }
   }
 
