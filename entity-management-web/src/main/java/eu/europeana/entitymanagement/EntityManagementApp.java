@@ -16,7 +16,6 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.ImportResource;
 import eu.europeana.entitymanagement.batch.model.JobType;
 import eu.europeana.entitymanagement.batch.service.BatchEntityUpdateExecutor;
 import eu.europeana.entitymanagement.common.config.SocksProxyConfig;
@@ -34,7 +33,6 @@ import eu.europeana.entitymanagement.config.SocksProxyActivator;
       // DataSources are manually configured (for EM and batch DBs)
       DataSourceAutoConfiguration.class
     })
-@ImportResource("classpath:em-web-context.xml") // used only for the error messages bean config
 public class EntityManagementApp implements CommandLineRunner {
 
   private static final Logger LOG = LogManager.getLogger(EntityManagementApp.class);

@@ -12,6 +12,9 @@ public class AppConfigConstants {
       "emEntityFieldDatatypeValidation";
   public static final String BEAN_EM_SCORING_SERVICE = "emScoringService";
   public static final String BEAN_CLIENT_DETAILS_SERVICE = "clientDetailsService";
+  public static final String BEAN_I18N_SERVICE = "i18nService";
+  public static final String BEAN_MESSAGE_SOURCE = "messageSource";
+  
   public static final String BEAN_ENTITY_RECORD_REPO = "emEntityRecordRepo";
   public static final String BEAN_CONCEPT_SCHEME_REPO = "emConceptSchemeRepo";
   public static final String BEAN_ENTITY_RECORD_SERVICE = "emEntityRecordService";
