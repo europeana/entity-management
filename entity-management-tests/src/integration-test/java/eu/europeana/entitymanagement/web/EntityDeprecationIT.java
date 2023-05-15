@@ -7,16 +7,10 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.QUERY_
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import eu.europeana.entitymanagement.definitions.model.ConceptScheme;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.solr.model.SolrConcept;
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
-import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

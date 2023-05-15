@@ -1,27 +1,35 @@
 package eu.europeana.entitymanagement.web;
 
-import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import eu.europeana.api.commons.config.i18n.I18nService;
 import eu.europeana.api.commons.error.EuropeanaApiErrorResponse;
-import eu.europeana.api.commons.error.EuropeanaGlobalExceptionHandler;
+import eu.europeana.api.commons.web.exception.EuropeanaGlobalExceptionHandler;
 import eu.europeana.api.commons.web.exception.HttpException;
+import eu.europeana.entitymanagement.web.service.RequestPathMethodService;
 
 @ControllerAdvice
 @ConditionalOnWebApplication
 public class EMExceptionHandler extends EuropeanaGlobalExceptionHandler {
   // exception handling inherited from parent
+
+  private I18nService i18nService;
+
+  @Autowired
+  public EMExceptionHandler(
+      RequestPathMethodService requestPathMethodService, I18nService i18nService) {
+    this.requestPathMethodService = requestPathMethodService;
+    this.i18nService = i18nService;
+  }
 
   /**
    * Default handler for EuropeanaApiException types
@@ -37,13 +45,13 @@ public class EMExceptionHandler extends EuropeanaGlobalExceptionHandler {
         new EuropeanaApiErrorResponse.Builder(httpRequest, e, stackTraceEnabled())
             .setStatus(e.getStatus().value())
             .setError(e.getStatus().getReasonPhrase())
-            .setMessage(e.getMessage())
+            .setMessage(i18nService.getMessage(e.getI18nKey(), e.getI18nParams()))
             // code only included in JSON if a value is set in exception
             .setCode(e.getI18nKey())
             .build();
 
     return ResponseEntity.status(e.getStatus())
-        .contentType(MediaType.APPLICATION_JSON)
+        .headers(createHttpHeaders(httpRequest))
         .body(response);
   }
 
@@ -58,30 +66,7 @@ public class EMExceptionHandler extends EuropeanaGlobalExceptionHandler {
             .build();
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST.value())
-        .contentType(MediaType.APPLICATION_JSON)
-        .body(response);
-  }
-
-  /** Exception thrown by Spring when RequestBody validation fails. */
-  @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<EuropeanaApiErrorResponse> handleMethodArgNotValidException(
-      MethodArgumentNotValidException e, HttpServletRequest httpRequest) {
-    BindingResult result = e.getBindingResult();
-    String error = "";
-    List<FieldError> fieldErrors = result.getFieldErrors();
-    if (!fieldErrors.isEmpty()) {
-      // just return the first error
-      error = fieldErrors.get(0).getField() + " " + fieldErrors.get(0).getDefaultMessage();
-    }
-    EuropeanaApiErrorResponse response =
-        new EuropeanaApiErrorResponse.Builder(httpRequest, e, stackTraceEnabled())
-            .setStatus(HttpStatus.BAD_REQUEST.value())
-            .setMessage("Invalid request body")
-            .setError(error)
-            .build();
-
-    return ResponseEntity.status(response.getStatus())
-        .contentType(MediaType.APPLICATION_JSON)
+        .headers(createHttpHeaders(httpRequest))
         .body(response);
   }
 
@@ -99,7 +84,7 @@ public class EMExceptionHandler extends EuropeanaGlobalExceptionHandler {
             .build();
 
     return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE.value())
-        .contentType(MediaType.APPLICATION_JSON)
+        .headers(createHttpHeaders(httpRequest))
         .body(response);
   }
 

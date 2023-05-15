@@ -215,7 +215,8 @@ public class SolrService implements InitializingBean {
     return binder.getBean(classType, doc);
   }
 
-  public SolrConceptScheme searchConceptSchemeById(String conceptSchemeId) throws SolrServiceException {
+  public SolrConceptScheme searchConceptSchemeById(String conceptSchemeId)
+      throws SolrServiceException {
     QueryResponse rsp;
     SolrQuery query = new SolrQuery();
     query.set("q", EntitySolrFields.ID + ":\"" + conceptSchemeId + "\"");

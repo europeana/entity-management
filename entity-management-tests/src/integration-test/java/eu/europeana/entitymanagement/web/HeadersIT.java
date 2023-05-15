@@ -5,6 +5,7 @@ import static eu.europeana.api.commons.web.http.HttpHeaders.VALUE_LDP_RESOURCE;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPath;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -68,6 +69,28 @@ public class HeadersIT extends BaseWebControllerTest {
                     HttpHeaders.LINK,
                     HttpHeaders.ETAG,
                     EMHttpHeaders.CACHE_CONTROL)));
+    
+    //testing the retrieve headers
+    results = mockMvc.perform(
+        get(IntegrationTestUtils.BASE_SCHEME_URL + "1" + ".json")
+        .header("Origin", "http://test-origin.eu")
+        .accept(MediaType.APPLICATION_JSON));
+
+    results.andExpect(
+        header()
+            .stringValues(
+                EMHttpHeaders.CACHE_CONTROL,
+                emptyIterable()));
+    results.andExpect(
+        header()
+            .stringValues(
+                HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,
+                hasItems(
+                    HttpHeaders.ALLOW,
+                    HttpHeaders.LINK,
+                    HttpHeaders.ETAG,
+                    HttpHeaders.VARY)));
+
   }
 
   @Test

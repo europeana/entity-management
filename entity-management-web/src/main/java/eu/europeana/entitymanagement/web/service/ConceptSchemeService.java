@@ -19,6 +19,10 @@ import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import java.util.Date;
+import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service(AppConfig.BEAN_CONCEPT_SCHEME_SERVICE)
 public class ConceptSchemeService {
@@ -39,9 +43,8 @@ public class ConceptSchemeService {
     this.solrService = solrService;
   }
 
+  public void setMandatoryFields(ConceptScheme scheme) {
 
-  public void setMandatoryFields(ConceptScheme scheme){
-    
     if (scheme.getItems() != null) {
       scheme.setTotal(scheme.getItems().size());
     }
@@ -50,16 +53,24 @@ public class ConceptSchemeService {
     scheme.setModified(now);
   }
 
+
   public ConceptScheme createConceptScheme(ConceptScheme scheme) {
     
     Long id = generateConceptSchemeIdentifier();
     scheme.setIdentifier(id);
-    
+
     setMandatoryFields(scheme);
 
-    setConceptSchemeId(scheme);
-    
-    return storeConceptScheme(scheme);
+    ConceptScheme dbScheme = emConceptSchemeRepo.saveConceptScheme(scheme);
+    setConceptSchemeId(dbScheme);
+
+//    try {
+//      solrService.storeConceptScheme(new SolrConceptScheme(scheme));
+//    } catch (SolrServiceException e) {
+//     throw new SolrServiceException(
+//         String.format("Error during Solr indexing for id=%s", scheme.getConceptSchemeId()), e);
+//    }
+    return dbScheme;
   }
 
   public ConceptScheme storeConceptScheme(ConceptScheme scheme) {
@@ -78,8 +89,7 @@ public class ConceptSchemeService {
         
     return retrieveConceptScheme(identifier, false);
   }
-  
-  
+
   public ConceptScheme retrieveConceptScheme(long identifier, boolean retrieveDisabled)
       throws EuropeanaApiException {
     ConceptScheme dbScheme = emConceptSchemeRepo.findConceptScheme(identifier);
@@ -92,7 +102,7 @@ public class ConceptSchemeService {
       throw new EntityRemovedException(
           String.format(EntityRecordUtils.ENTITY_ID_REMOVED_MSG, identifier));
     }
-    
+
     setConceptSchemeId(dbScheme);
     return dbScheme;
   }
@@ -103,10 +113,9 @@ public class ConceptSchemeService {
         EntityUtils.buildConceptSchemeId(emConfiguration.getSchemeDataEndpoint(), scheme.getIdentifier()));
   }
 
-
   public void disableConceptScheme(ConceptScheme scheme, boolean forceSolrCommit)
       throws EntityUpdateException {
-    //not specified yet
+    // not specified yet
     //    updateConceptSchemeEntities(scheme);
 
     //disable solr indexing in this version
@@ -130,11 +139,10 @@ public class ConceptSchemeService {
    * @return the generated EntityId
    */
   private Long generateConceptSchemeIdentifier() {
-      return emConceptSchemeRepo.generateAutoIncrement(EntityTypes.ConceptScheme.getEntityType());
+    return emConceptSchemeRepo.generateAutoIncrement(EntityTypes.ConceptScheme.getEntityType());
   }
 
   public void dropRepository() {
     this.emConceptSchemeRepo.dropCollection();
   }
-
 }

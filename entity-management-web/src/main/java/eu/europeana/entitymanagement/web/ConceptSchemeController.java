@@ -10,7 +10,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,17 +40,15 @@ import io.swagger.annotations.ApiOperation;
 @ConditionalOnWebApplication
 public class ConceptSchemeController extends BaseRest {
 
-  //private final SolrService solrService;
+  // private final SolrService solrService;
   private final ConceptSchemeService emConceptSchemeService;
-  
+
   public static final String INVALID_UPDATE_REQUEST_MSG =
       "Request must either specify a 'query' param or contain entity identifiers in body";
 
-
   @Autowired
   public ConceptSchemeController(
-      ConceptSchemeService emConceptSchemeService,
-      EntityManagementConfiguration emConfig) {
+      ConceptSchemeService emConceptSchemeService, EntityManagementConfiguration emConfig) {
     this.emConceptSchemeService = emConceptSchemeService;
     this.emConfig = emConfig;
   }
@@ -73,7 +70,7 @@ public class ConceptSchemeController extends BaseRest {
     verifyWriteAccess(Operations.DELETE, request);
 
     long numericIdentifier = parseNumericIdentifier(identifier);
-    
+
     ConceptScheme scheme = emConceptSchemeService.retrieveConceptScheme(numericIdentifier);
 
     String etag = generateETag(scheme.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
@@ -87,8 +84,9 @@ public class ConceptSchemeController extends BaseRest {
   long parseNumericIdentifier(String identifier) throws EntityNotFoundException {
     try {
       return Long.parseLong(identifier);
-    }catch (NumberFormatException e) {
-      throw new EntityNotFoundException("No concept scheme found for the given identifier: ", identifier, e);
+    } catch (NumberFormatException e) {
+      throw new EntityNotFoundException(
+          "No concept scheme found for the given identifier: ", identifier, e);
     }
   }
 
@@ -111,12 +109,11 @@ public class ConceptSchemeController extends BaseRest {
 
     verifyWriteAccess(Operations.CREATE, request);
 
-//    validateBodyEntity(conceptScheme, true);
+    //    validateBodyEntity(conceptScheme, true);
 
     emConceptSchemeService.createConceptScheme(conceptScheme);
 
-    return generateResponseEntityForConceptScheme(
-        request, conceptScheme, HttpStatus.CREATED);
+    return generateResponse(request, conceptScheme, HttpStatus.CREATED);
   }
 
   @ApiOperation(
@@ -124,7 +121,7 @@ public class ConceptSchemeController extends BaseRest {
       nickname = "getConceptSchemeJsonLd",
       response = java.lang.Void.class)
   @GetMapping(
-      value = {"/scheme/{identifier}.jsonld", "/scheme/{identifier}"},
+      value = {"/scheme/{identifier}.json", "/scheme/{identifier}.jsonld", "/scheme/{identifier}"},
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
   public ResponseEntity<String> getConceptSchemeJsonLd(
       @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
@@ -140,9 +137,9 @@ public class ConceptSchemeController extends BaseRest {
     verifyReadAccess(request);
 
     long numericIdentifier = parseNumericIdentifier(identifier);
-    
+
     ConceptScheme scheme = emConceptSchemeService.retrieveConceptScheme(numericIdentifier, false);
-    return generateResponseEntityForConceptScheme(request, scheme, HttpStatus.OK);
+    return generateResponse(request, scheme, HttpStatus.OK);
   }
   
   @ApiOperation(
@@ -175,39 +172,41 @@ public class ConceptSchemeController extends BaseRest {
 //  validateBodyEntity(existingScheme, true);
     
     emConceptSchemeService.storeConceptScheme(existingScheme);
-    return generateResponseEntityForConceptScheme(request, existingScheme, HttpStatus.OK);
+    return generateResponse(request, existingScheme, HttpStatus.OK);
   }
   
-  protected ResponseEntity<String> generateResponseEntityForConceptScheme(
+  protected ResponseEntity<String> generateResponse(
       HttpServletRequest request, ConceptScheme scheme, HttpStatus status)
       throws EuropeanaApiException {
 
+    org.springframework.http.HttpHeaders headers = generateHeaders(scheme, request);
+
+    try {
+      String body = jsonLdSerializer.serializeObject(scheme);
+      return ResponseEntity.status(status).headers(headers).body(body);
+    } catch (IOException e) {
+      throw new EuropeanaApiException("Error serializing concept scheme.", e);
+    }
+  }
+
+  /**
+   * generates response headers
+   * @param scheme - object to be serialized
+   * @param request - the http request 
+   * @return response headers
+   */
+  org.springframework.http.HttpHeaders generateHeaders(ConceptScheme scheme,
+      HttpServletRequest request) {
     String etag = generateETag(scheme.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
 
     // create headers
     org.springframework.http.HttpHeaders headers = createAllowHeader(request);
     headers.add(LINK, HttpHeaders.VALUE_LDP_RESOURCE);
-    headers.add(HttpHeaders.CONTENT_TYPE, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
-    headers.add(EMHttpHeaders.CACHE_CONTROL, EMHttpHeaders.VALUE_NO_CAHCHE_STORE_REVALIDATE);
     headers.add(EMHttpHeaders.ETAG, etag);
 
-    // Access-Control-Expose-Headers only set for CORS requests
-    if (StringUtils.hasLength(request.getHeader(org.springframework.http.HttpHeaders.ORIGIN))) {
-      // HttpHeaders.ALLOW is added above, avoid duplication
-      headers.add(
-          org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.LINK);
-      headers.add(
-          org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.ETAG);
-      headers.add(
-          org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,
-          EMHttpHeaders.CACHE_CONTROL);
+    if(RequestMethod.POST.toString().equals(request.getMethod())) {
+      headers.add(EMHttpHeaders.CACHE_CONTROL, EMHttpHeaders.VALUE_NO_CAHCHE_STORE_REVALIDATE);
     }
-
-    try {
-      String body = jsonLdSerializer.serializeObject(scheme);
-      return ResponseEntity.status(status).headers(headers).eTag(etag).body(body);
-    } catch (IOException e) {
-      throw new EuropeanaApiException("Error serializing concept scheme.", e);
-    }
+    return headers;
   }
 }

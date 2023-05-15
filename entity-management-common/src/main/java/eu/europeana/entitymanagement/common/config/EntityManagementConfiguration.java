@@ -139,12 +139,10 @@ public class EntityManagementConfiguration implements InitializingBean {
 
   @Value("${europeana.item.data.endpoint:'http://data.europeana.eu/item'}")
   private String itemDataEndpoint;
-  
-  
+
   @Value("${europeana.scheme.data.endpoint:'http://data.europeana.eu/scheme'}")
   private String schemeDataEndpoint;
-  
-  
+
   @Value("${spring.profiles.active:}")
   private String activeProfileString;
 

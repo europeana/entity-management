@@ -7,6 +7,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import eu.europeana.entitymanagement.definitions.model.ConceptScheme;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.solr.model.SolrConcept;
+import eu.europeana.entitymanagement.solr.model.SolrConceptScheme;
+import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONArray;
@@ -18,18 +26,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import eu.europeana.entitymanagement.definitions.model.ConceptScheme;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.solr.model.SolrConcept;
-import eu.europeana.entitymanagement.solr.model.SolrConceptScheme;
-import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 public class ConceptSchemeServiceIT extends BaseWebControllerTest {
-
 
   protected ConceptScheme createConceptScheme(List<String> items) throws Exception {
     ConceptScheme scheme =
@@ -38,28 +38,28 @@ public class ConceptSchemeServiceIT extends BaseWebControllerTest {
     scheme.setItems(items);
     return emConceptSchemeService.createConceptScheme(scheme);
   }
-  
+
   @Test
   void registerConceptSchemeShouldBeSuccessful() throws Exception {
     ResultActions response =
-        mockMvc.perform(MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SCHEME_URL)
-            .content(loadFile(IntegrationTestUtils.CONCEPT_SCHEME_PHOTO_GENRE_JSON))
-            .contentType(MediaType.APPLICATION_JSON_VALUE));
-    response.andExpect(status().isCreated())
+        mockMvc.perform(
+            MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SCHEME_URL)
+                .content(loadFile(IntegrationTestUtils.CONCEPT_SCHEME_PHOTO_GENRE_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE));
+    response
+        .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id", containsString(emConfig.getSchemeDataEndpoint())))
         .andExpect(jsonPath("$.type", is(EntityTypes.ConceptScheme.getEntityType())))
         .andExpect(jsonPath("$.prefLabel").isNotEmpty());
   }
-  
+
   @Test
   public void retrieveConceptSchemeShouldBeSuccessful() throws Exception {
     ConceptScheme scheme = createConceptScheme(null);
     mockMvc
         .perform(
-            get(IntegrationTestUtils.BASE_SCHEME_URL
-                    + scheme.getIdentifier()
-                    + ".jsonld")
-//                .param(WebEntityConstants.QUERY_PARAM_WSKEY, "testapikey")
+            get(IntegrationTestUtils.BASE_SCHEME_URL + scheme.getIdentifier() + ".jsonld")
+                //                .param(WebEntityConstants.QUERY_PARAM_WSKEY, "testapikey")
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(scheme.getConceptSchemeId())))
@@ -88,12 +88,11 @@ public class ConceptSchemeServiceIT extends BaseWebControllerTest {
 
     mockMvc
         .perform(
-            get(IntegrationTestUtils.BASE_SCHEME_URL
-                    + scheme.getIdentifier())
+            get(IntegrationTestUtils.BASE_SCHEME_URL + scheme.getIdentifier())
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isGone());
   }
-  
+
   @Test
   void deprecationConceptSchemeShouldBeSuccessful() throws Exception {
     /*
@@ -120,7 +119,8 @@ public class ConceptSchemeServiceIT extends BaseWebControllerTest {
     /*
      * 3. confirm concept contains the inScheme field
      */
-    Assertions.assertTrue(entityRecord.getEntity().getInScheme().contains(scheme.getConceptSchemeId()));
+    Assertions.assertTrue(
+        entityRecord.getEntity().getInScheme().contains(scheme.getConceptSchemeId()));
     // confirm also that Solr document contains the inScheme field
     SolrConcept solrConcept = solrService.searchById(SolrConcept.class, entityRecord.getEntityId());
     Assertions.assertTrue(solrConcept.getInScheme().contains(scheme.getConceptSchemeId()));
@@ -130,9 +130,7 @@ public class ConceptSchemeServiceIT extends BaseWebControllerTest {
      */
     mockMvc
         .perform(
-            delete(
-                    IntegrationTestUtils.BASE_SCHEME_URL
-                        + scheme.getIdentifier())
+            delete(IntegrationTestUtils.BASE_SCHEME_URL + "/" + scheme.getIdentifier())
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
