@@ -81,17 +81,17 @@ public class EntityManagementApp implements CommandLineRunner {
     if (hasCmdLineParams(args)) {
       Set<String> tasks = Set.of(args);
       if(tasks.contains(JobType.SCHEDULE_DELETION.value())) {
-        LOG.debug("Executing scheduled deletions");
+        LOG.info("Executing scheduled deletions");
         batchUpdateExecutor.runScheduledDeprecationsAndDeletions();
       }
       
       if(tasks.contains(JobType.ZOHO_SYNC.value())) {
-        LOG.debug("Executing zoho sync");
+        LOG.info("Executing zoho sync");
         zohoSyncService.synchronizeModifiedZohoOrganizations();
       }
       
       if(tasks.contains(JobType.SCHEDULE_UPDATE.value())) {
-        LOG.debug("Executing scheduled updates");
+        LOG.info("Executing scheduled updates");
         batchUpdateExecutor.runScheduledDeprecationsAndDeletions();
       }
         batchUpdateExecutor.runScheduledUpdate();
