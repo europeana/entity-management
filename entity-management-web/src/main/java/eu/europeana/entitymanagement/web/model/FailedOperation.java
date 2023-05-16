@@ -5,10 +5,12 @@ import static eu.europeana.entitymanagement.web.model.ZohoSyncReportFields.*;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import dev.morphia.annotations.Embedded;
 
 /** Class used for serialization of zoho sync errors */
 @JsonPropertyOrder({ID, ERROR, MESSAGE, TRACE})
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
+@Embedded
 public class FailedOperation {
 
   private String zohoId;
@@ -29,6 +31,13 @@ public class FailedOperation {
     this.error = error;
     this.message = message;
     this.trace = trace;
+  }
+  
+  /**
+   * Default constructor used by Morphia
+   */
+  public FailedOperation() {
+  
   }
 
   /**

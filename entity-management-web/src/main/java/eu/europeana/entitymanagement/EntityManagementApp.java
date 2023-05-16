@@ -20,6 +20,7 @@ import eu.europeana.entitymanagement.batch.model.JobType;
 import eu.europeana.entitymanagement.batch.service.BatchEntityUpdateExecutor;
 import eu.europeana.entitymanagement.common.config.SocksProxyConfig;
 import eu.europeana.entitymanagement.config.SocksProxyActivator;
+import eu.europeana.entitymanagement.web.service.ZohoSyncService;
 
 /**
  * Main application. Allows deploying as a war and logs instance data when deployed in Cloud Foundry
@@ -37,6 +38,7 @@ public class EntityManagementApp implements CommandLineRunner {
 
   private static final Logger LOG = LogManager.getLogger(EntityManagementApp.class);
   @Autowired private BatchEntityUpdateExecutor batchUpdateExecutor;
+  @Autowired private ZohoSyncService zohoSyncService;
 
   /**
    * Main entry point of this application
@@ -62,23 +64,11 @@ public class EntityManagementApp implements CommandLineRunner {
               .run(args);
 
       LOG.info("Batch update execution complete for {}. Stopping application. ", Arrays.toString(args));
-      waitForAPM();
       System.exit(SpringApplication.exit(context));
     } else {
       LOG.info("No args provided to application. Starting web server");
       SpringApplication.run(EntityManagementApp.class, args);
       return;
-    }
-  }
-
-  static void waitForAPM() {
-    //quickfix - allow APM to transfer logs
-    //
-    long sleepTimeSeconds = 300;
-    try {
-      Thread.sleep(sleepTimeSeconds * 1000);
-    } catch (InterruptedException e) {
-      LOG.info("Sleep time interrupted.", e);
     }
   }
 
@@ -93,6 +83,11 @@ public class EntityManagementApp implements CommandLineRunner {
       if(tasks.contains(JobType.SCHEDULE_DELETION.value())) {
         LOG.debug("Executing scheduled deletions");
         batchUpdateExecutor.runScheduledDeprecationsAndDeletions();
+      }
+      
+      if(tasks.contains(JobType.ZOHO_SYNC.value())) {
+        LOG.debug("Executing zoho sync");
+        zohoSyncService.synchronizeModifiedZohoOrganizations();
       }
       
       if(tasks.contains(JobType.SCHEDULE_UPDATE.value())) {
