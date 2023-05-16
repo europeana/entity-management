@@ -104,9 +104,9 @@ public class EntityManagementApp implements CommandLineRunner {
   private static void validateArguments(String[] args) {
     for (String arg : args) {
       if(!JobType.isValidJobType(arg)) {
-        LOG.error("Unsupported argument '{}'. Supported arguments are '{}' or '{}'",
-            arg, SCHEDULE_DELETION.value(),
-            SCHEDULE_UPDATE.value());
+        String allowdJobTypes = JobType.values().toString();
+        LOG.error("Unsupported argument '{}'. Supported arguments are '{}'",
+            arg, allowdJobTypes);
         System.exit(1);  
       }
     }

@@ -28,4 +28,9 @@ public enum JobType {
     }
     return false;
   }  
+  
+  @Override
+  public String toString() {
+    return value();
+  }
 }
