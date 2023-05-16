@@ -29,7 +29,7 @@ spec:
                 - ${BATCH_UPDATE}
               env:
                 - name: SPRING_CONFIG_ADDITIONAL_LOCATION
-                  value: "file:/opt/app/config/entitymanagement.user.properties"
+                  value: "file:/opt/app/config/entitymanagement.user.properties,file:/opt/app/config/zoho_import.properties"
                 - name: JAVA_OPTS
                   value: "-XX:+UseParallelGC -XX:MaxRAMPercentage=75"
               resources:
