@@ -1,7 +1,5 @@
 package eu.europeana.entitymanagement;
 
-import static eu.europeana.entitymanagement.batch.model.JobType.SCHEDULE_DELETION;
-import static eu.europeana.entitymanagement.batch.model.JobType.SCHEDULE_UPDATE;
 import java.util.Arrays;
 import java.util.Set;
 import org.apache.logging.log4j.LogManager;
@@ -92,9 +90,9 @@ public class EntityManagementApp implements CommandLineRunner {
       
       if(tasks.contains(JobType.SCHEDULE_UPDATE.value())) {
         LOG.info("Executing scheduled updates");
-        batchUpdateExecutor.runScheduledDeprecationsAndDeletions();
-      }
         batchUpdateExecutor.runScheduledUpdate();
+      }
+        
     }
     // if no arguments then web server should be started
     return;
