@@ -1,9 +1,26 @@
 package eu.europeana.entitymanagement.web.service;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.stream.Collectors;
+import javax.validation.constraints.NotNull;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import com.zoho.crm.api.record.DeletedRecord;
 import com.zoho.crm.api.record.Record;
 import dev.morphia.query.experimental.filters.Filter;
 import dev.morphia.query.experimental.filters.Filters;
+import eu.europeana.api.commons.definitions.utils.DateUtils;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.common.config.DataSource;
@@ -18,6 +35,7 @@ import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
+import eu.europeana.entitymanagement.mongo.repository.ZohoSyncRepository;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
@@ -30,20 +48,6 @@ import eu.europeana.entitymanagement.web.model.ZohoSyncReportFields;
 import eu.europeana.entitymanagement.zoho.organization.ZohoAccessConfiguration;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.stream.Collectors;
-import javax.validation.constraints.NotNull;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 @Service(AppConfig.BEAN_ZOHO_SYNC_SERVICE)
 public class ZohoSyncService {
@@ -61,6 +65,8 @@ public class ZohoSyncService {
   private final DataSource zohoDataSource;
 
   private final ZohoAccessConfiguration zohoAccessConfiguration;
+  
+  private final ZohoSyncRepository zohoSyncRepo;
 
   private static final Logger logger = LogManager.getLogger(ZohoSyncService.class);
 
@@ -72,7 +78,8 @@ public class ZohoSyncService {
       EntityManagementConfiguration emConfiguration,
       DataSources datasources,
       ZohoAccessConfiguration zohoAccessConfiguration,
-      SolrService solrService) {
+      SolrService solrService,
+      ZohoSyncRepository zohoSyncRepo) {
     this.entityRecordService = entityRecordService;
     this.entityUpdateService = entityUpdateService;
     this.entityRecordRepository = entityRecordRepository;
@@ -80,6 +87,7 @@ public class ZohoSyncService {
     this.datasources = datasources;
     this.zohoAccessConfiguration = zohoAccessConfiguration;
     this.zohoDataSource = initZohoDataSource();
+    this.zohoSyncRepo = zohoSyncRepo;
   }
 
   private DataSource initZohoDataSource() {
@@ -93,10 +101,30 @@ public class ZohoSyncService {
   }
 
   /**
+   * method to run the zoho synchronization for organizations updated since last successfully scheduled synchronization (updates are run asynchronously)  
+   *
+   * @return the report on performed operations
+   * @throws EntityUpdateException
+   */
+  public ZohoSyncReport synchronizeModifiedZohoOrganizations()
+      throws EntityUpdateException {
+    
+    ZohoSyncReport previousSync = zohoSyncRepo.findLastZohoSyncReport(); 
+    OffsetDateTime modifiedSince;
+    if(previousSync != null && previousSync.getStartDate() != null) {
+      modifiedSince = DateUtils.toOffsetDateTime(previousSync.getStartDate());
+    } else {
+      modifiedSince = OffsetDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC); 
+    }
+    
+    return synchronizeZohoOrganizations(modifiedSince);
+  }
+  
+  /**
    * main method to run the zoho synchronization
    *
    * @param modifiedSince the start date from which the Zoho modifications must be synchronized
-   * @return the report on performed opperations
+   * @return the report on performed operations
    * @throws EntityUpdateException
    */
   public ZohoSyncReport synchronizeZohoOrganizations(@NotNull OffsetDateTime modifiedSince)
@@ -107,7 +135,8 @@ public class ZohoSyncService {
 
     // synchronize deleted
     synchronizeDeletedZohoOrganizations(modifiedSince, zohoSyncReport);
-    return zohoSyncReport;
+    
+    return zohoSyncRepo.save(zohoSyncReport);
   }
 
   void synchronizeZohoOrganizations(

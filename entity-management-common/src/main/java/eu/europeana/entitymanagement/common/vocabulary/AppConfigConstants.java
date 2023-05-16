@@ -17,6 +17,7 @@ public class AppConfigConstants {
   
   public static final String BEAN_ENTITY_RECORD_REPO = "emEntityRecordRepo";
   public static final String BEAN_CONCEPT_SCHEME_REPO = "emConceptSchemeRepo";
+  public static final String BEAN_ZOHO_SYNC_REPO = "emZohoSyncRepo";
   public static final String BEAN_ENTITY_RECORD_SERVICE = "emEntityRecordService";
   public static final String BEAN_CONCEPT_SCHEME_SERVICE = "emConceptSchemeService";
   public static final String BEAN_ZOHO_SYNC_SERVICE = "emZohoSyncService";

@@ -2,6 +2,11 @@ package eu.europeana.entitymanagement.web.model;
 
 public class ZohoSyncReportFields {
 
+  //mongo field names
+  public static final String START_DATE = "startDate";
+  
+  
+  //web field names
   public static final String LAST_SYNC_DATE = "lastSyncDate";
   public static final String NEW = "new";
   public static final String ENABLED = "enabled";
@@ -21,4 +26,8 @@ public class ZohoSyncReportFields {
   public static final String ENTITY_DELETION_ERROR = "Entity deletion error";
   public static final String ENTITY_DEPRECATION_ERROR = "Entity deprecation error";
   public static final String ZOHO_ACCESS_ERROR = "Zoho access error";
+  
+  public static final String STATUS_COMPLETED = "completed";
+  public static final String STATUS_INCOMPLETE = "incomplete";
+
 }
