@@ -1,15 +1,19 @@
 package eu.europeana.entitymanagement.web.model;
 
 import static eu.europeana.entitymanagement.web.model.ZohoSyncReportFields.*;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import dev.morphia.annotations.Id;
+import dev.morphia.annotations.IndexOptions;
+import dev.morphia.annotations.Indexed;
 import eu.europeana.api.commons.definitions.utils.DateUtils;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.bson.types.ObjectId;
 
 /** class used for serialization of zoho sync report */
 @JsonPropertyOrder({
@@ -23,48 +27,48 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
   FAILED
 })
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
+@dev.morphia.annotations.Entity("ZohoSyncReport")
 public class ZohoSyncReport {
 
-  public static final String STATUS_COMPLETED = "completed";
-  public static final String STATUS_INCOMPLETE = "incomplete";
+  @Id @JsonIgnore private ObjectId dbId;
 
-  final Date lastSyncDate;
-  long created;
-  long enabled;
-  long updated;
-  long deprecated;
-  long deleted;
+  @Indexed(options = @IndexOptions(unique = true))
+  Date startDate;
+  long createdItems;
+  long enabledItems;
+  long updatedItems;
+  long deprecatedItems;
+  long deletedItems;
   private List<FailedOperation> failed;
 
-  public ZohoSyncReport(Date lastSyncDate) {
-    this.lastSyncDate = lastSyncDate;
+  public ZohoSyncReport(Date startDate) {
+    this.startDate = startDate;
   }
 
-  @SuppressWarnings("unused")
-  private ZohoSyncReport() {
-    this(new Date(0));
+  public ZohoSyncReport() {
+    //implicit constructor used by for morphia
   }
 
   @JsonProperty(NEW)
-  public long getCreated() {
-    return created;
+  public long getCreatedItems() {
+    return createdItems;
   }
 
-  public void setCreated(long created) {
-    this.created = created;
+  public void setCreatedItems(long created) {
+    this.createdItems = created;
   }
 
   public void increaseCreated(long created) {
-    this.created += created;
+    this.createdItems += created;
   }
 
   @JsonProperty(ENABLED)
-  public long getEnabled() {
-    return enabled;
+  public long getEnabledItems() {
+    return enabledItems;
   }
 
-  public void setEnabled(long enabled) {
-    this.enabled = enabled;
+  public void setEnabledItems(long enabled) {
+    this.enabledItems = enabled;
   }
 
   /**
@@ -73,46 +77,46 @@ public class ZohoSyncReport {
    * @param enabled value used for increasing counter
    */
   public void increaseEnabled(long enabled) {
-    this.enabled += enabled;
+    this.enabledItems += enabled;
   }
 
   @JsonProperty(UPDATED)
-  public long getUpdated() {
-    return updated;
+  public long getUpdatedItems() {
+    return updatedItems;
   }
 
-  public void setUpdated(long updated) {
-    this.updated = updated;
+  public void setUpdatedItems(long updated) {
+    this.updatedItems = updated;
   }
 
   public void increaseUpdated(long updated) {
-    this.updated += updated;
+    this.updatedItems += updated;
   }
 
   @JsonProperty(DEPRECATED)
-  public long getDeprecated() {
-    return deprecated;
+  public long getDeprecatedItems() {
+    return deprecatedItems;
   }
 
-  public void setDeprecated(long deprecated) {
-    this.deprecated = deprecated;
+  public void setDeprecatedItems(long deprecated) {
+    this.deprecatedItems = deprecated;
   }
 
   public void increaseDeprecated(long deprecated) {
-    this.deprecated += deprecated;
+    this.deprecatedItems += deprecated;
   }
 
   @JsonProperty(DELETED)
-  public long getDeleted() {
-    return deleted;
+  public long getDeletedItems() {
+    return deletedItems;
   }
 
-  public void setDeleted(long deleted) {
-    this.deleted = deleted;
+  public void setDeletedItems(long deleted) {
+    this.deletedItems = deleted;
   }
 
   public void increaseDeleted(long deleted) {
-    this.deleted += deleted;
+    this.deletedItems += deleted;
   }
 
   @JsonProperty(EXECUTION_STATUS)
@@ -127,23 +131,23 @@ public class ZohoSyncReport {
   public String toString() {
     return String.format(
         "lastSyncDate: %s,%n created: %d,%n enabled: %d, %n updated: %d,%n deprecated: %d,%n deleted: %d,%n executionStatus: %s",
-        DateUtils.convertDateToStr(getLastSyncDate()),
-        getCreated(),
-        getEnabled(),
-        getUpdated(),
-        getDeprecated(),
-        getDeleted(),
+        DateUtils.convertDateToStr(getStartDate()),
+        getCreatedItems(),
+        getEnabledItems(),
+        getUpdatedItems(),
+        getDeprecatedItems(),
+        getDeletedItems(),
         getExecutionStatus());
   }
 
-  @JsonProperty(LAST_SYNC_DATE)
   /**
    * getter method
    *
    * @return the date and time when the synchronization was run
    */
-  public Date getLastSyncDate() {
-    return lastSyncDate;
+  @JsonProperty(LAST_SYNC_DATE)
+  public Date getStartDate() {
+    return startDate;
   }
 
   private void addFailedOperation(FailedOperation operation) {
@@ -189,5 +193,21 @@ public class ZohoSyncReport {
    */
   public List<FailedOperation> getFailed() {
     return failed;
+  }
+
+  public ObjectId getDbId() {
+    return dbId;
+  }
+
+  public void setDbId(ObjectId dbId) {
+    this.dbId = dbId;
+  }
+
+  public void setStartDate(Date startDate) {
+    this.startDate = startDate;
+  }
+
+  public void setFailed(List<FailedOperation> failed) {
+    this.failed = failed;
   }
 }
