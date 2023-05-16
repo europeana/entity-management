@@ -203,6 +203,7 @@ public class ConceptSchemeController extends BaseRest {
     org.springframework.http.HttpHeaders headers = createAllowHeader(request);
     headers.add(LINK, HttpHeaders.VALUE_LDP_RESOURCE);
     headers.add(EMHttpHeaders.ETAG, etag);
+    headers.add(HttpHeaders.CONTENT_TYPE, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
 
     if(RequestMethod.POST.toString().equals(request.getMethod())) {
       headers.add(EMHttpHeaders.CACHE_CONTROL, EMHttpHeaders.VALUE_NO_CAHCHE_STORE_REVALIDATE);
