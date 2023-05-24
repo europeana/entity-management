@@ -74,7 +74,7 @@ public class ConceptSchemeController extends BaseRest {
     ConceptScheme scheme = emConceptSchemeService.retrieveConceptScheme(numericIdentifier);
 
     String etag = generateETag(scheme.getModified(), WebFields.FORMAT_JSONLD, getApiVersion());
-    checkIfMatchHeaderWithQuotes(etag, request);
+    checkIfMatchHeader(etag, request);
 
     emConceptSchemeService.disableConceptScheme(scheme, true);
 
@@ -164,7 +164,7 @@ public class ConceptSchemeController extends BaseRest {
     ConceptScheme existingScheme = emConceptSchemeService.retrieveConceptScheme(numericIdentifier, false);
 
     String etag = generateETag(existingScheme.getModified(), FormatTypes.jsonld.name(), getApiVersion());
-    checkIfMatchHeaderWithQuotes(etag, request);
+    checkIfMatchHeader(etag, request);
 
     existingScheme.setDefinition(new HashMap<>(newConceptScheme.getDefinition()));
     existingScheme.setPrefLabel(new HashMap<>(newConceptScheme.getPrefLabel()));

@@ -141,7 +141,7 @@ public class EMController extends BaseRest {
     Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
 
     String etag = generateETag(isAggregatedBy.getModified(), FormatTypes.jsonld.name(), getApiVersion());
-    checkIfMatchHeaderWithQuotes(etag, request);
+    checkIfMatchHeader(etag, request);
 
     boolean isSynchronous = containsSyncProfile(profile);
     String entityId = entityRecord.getEntityId();
@@ -257,7 +257,7 @@ public class EMController extends BaseRest {
     Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
     String etag = generateETag(isAggregatedBy.getModified(), FormatTypes.jsonld.name(), getApiVersion());
 
-    checkIfMatchHeaderWithQuotes(etag, request);
+    checkIfMatchHeader(etag, request);
 
     entityRecordService.replaceEuropeanaProxy(updateRequestEntity, entityRecord);
     entityRecordService.update(entityRecord);
