@@ -4,7 +4,7 @@
   <parent>
     <artifactId>entity-management</artifactId>
     <groupId>eu.europeana.api</groupId>
-		<version>1.4.2-SNAPSHOT</version>
+		<version>1.5</version>
   </parent>
 
   <artifactId>entity-management-solr</artifactId>
@@ -20,7 +20,7 @@
   	<dependency>
 		<groupId>eu.europeana.api</groupId>
 		<artifactId>entity-management-common</artifactId>
-		<version>1.4.2-SNAPSHOT</version>
+		<version>1.5</version>
 	</dependency>
 	
 	 <dependency>
