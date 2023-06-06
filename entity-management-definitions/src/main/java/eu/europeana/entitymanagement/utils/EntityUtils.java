@@ -1,10 +1,14 @@
 package eu.europeana.entitymanagement.utils;
 
-import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
+import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 
 public class EntityUtils {
 
@@ -48,6 +52,58 @@ public class EntityUtils {
       return null;
     }
     return geoUri.replaceFirst(WebEntityConstants.PROTOCOL_GEO, "");
+  }
+
+  public static boolean compareLists(List<String> l1, List<String> l2) {
+    if (CollectionUtils.isEmpty(l1) && CollectionUtils.isEmpty(l2)) {
+      return true;
+    } else if (CollectionUtils.isEmpty(l1) || CollectionUtils.isEmpty(l2)) {
+      return false;
+    }
+    if (l1.size() != l2.size()) {
+      return false;
+    }
+    return l1.containsAll(l2);
+  }
+  
+  public static boolean compareStringStringMaps(Map<String, String> m1, Map<String, String> m2) {
+    if (MapUtils.isEmpty(m1) && MapUtils.isEmpty(m2)) {
+      return true;
+    } else if (MapUtils.isEmpty(m1) || MapUtils.isEmpty(m2)) {
+      return false;
+    }
+
+    if(m1.size() != m2.size()) {
+      return false;
+    }
+
+    for (Map.Entry<String, String> m1Entry : m1.entrySet()) {
+      if(! Objects.equals(m1Entry.getValue(), m2.get(m1Entry.getKey()))) {
+        return false;
+      }
+    }
+    
+    return true;
+  }
+
+  public static boolean compareStringListStringMaps(Map<String, List<String>> m1, Map<String, List<String>> m2) {
+    if (MapUtils.isEmpty(m1) && MapUtils.isEmpty(m2)) {
+      return true;
+    } else if (MapUtils.isEmpty(m1) || MapUtils.isEmpty(m2)) {
+      return false;
+    }
+
+    if(m1.size() != m2.size()) {
+      return false;
+    }
+
+    for (Map.Entry<String, List<String>> m1Entry : m1.entrySet()) {
+      if(! compareLists(m1Entry.getValue(), m2.get(m1Entry.getKey()))) {
+        return false;
+      }
+    }
+    
+    return true;
   }
 
   /*

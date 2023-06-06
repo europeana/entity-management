@@ -14,7 +14,14 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_RELATE
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_SHOWN_BY;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NOTE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
-
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -29,15 +36,9 @@ import eu.europeana.entitymanagement.normalization.EntityFieldsDataSourceProxyVa
 import eu.europeana.entitymanagement.normalization.EntityFieldsDataSourceProxyValidationInterface;
 import eu.europeana.entitymanagement.normalization.EntityFieldsEuropeanaProxyValidationGroup;
 import eu.europeana.entitymanagement.normalization.EntityFieldsEuropeanaProxyValidationInterface;
+import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.ValidationObject;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @dev.morphia.annotations.Embedded
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -90,6 +91,7 @@ public abstract class Entity implements ValidationObject {
     if (copy.getHiddenLabel() != null) this.hiddenLabel = new ArrayList<>(copy.getHiddenLabel());
     if (copy.getIdentifier() != null) this.identifier = new ArrayList<>(copy.getIdentifier());
     if (copy.getIsRelatedTo() != null) this.isRelatedTo = new ArrayList<>(copy.getIsRelatedTo());
+    if (copy.getInScheme() != null) this.inScheme = new ArrayList<>(copy.getInScheme());
     if (copy.getHasPart() != null) this.hasPart = new ArrayList<>(copy.getHasPart());
     if (copy.getIsPartOfArray() != null) this.isPartOf = new ArrayList<>(copy.getIsPartOfArray());
     if (copy.getIsAggregatedBy() != null)
@@ -299,4 +301,49 @@ public abstract class Entity implements ValidationObject {
       getSameReferenceLinks().add(uri);
     }
   }
+  
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    Entity that = (Entity) o;
+
+    if (! Objects.equals(entityId, that.getEntityId())) return false;
+    if (! EntityUtils.compareStringListStringMaps(note, that.getNote())) return false;
+    if (! EntityUtils.compareStringStringMaps(prefLabel, that.getPrefLabel())) return false;
+    if (! EntityUtils.compareStringListStringMaps(altLabel, that.getAltLabel())) return false;
+    if (! EntityUtils.compareLists(hiddenLabel, that.getHiddenLabel())) return false;
+    if (! EntityUtils.compareLists(identifier, that.getIdentifier())) return false;
+    if (! EntityUtils.compareLists(isRelatedTo, that.getIsRelatedTo())) return false;
+    if (! EntityUtils.compareLists(inScheme, that.getInScheme())) return false;
+    if (! EntityUtils.compareLists(hasPart, that.getHasPart())) return false;
+    if (! EntityUtils.compareLists(isPartOf, that.getIsPartOfArray())) return false;
+    if (! Objects.equals(isAggregatedBy, that.getIsAggregatedBy())) return false;
+    if (! Objects.equals(isShownBy, that.getIsShownBy())) return false;
+    if (! Objects.equals(depiction, that.getDepiction())) return false;
+    return Objects.equals(payload, that.getPayload());
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((entityId == null) ? 0 : entityId.hashCode());
+    result = prime * result + ((note == null) ? 0 : note.hashCode());
+    result = prime * result + ((prefLabel == null) ? 0 : prefLabel.hashCode());
+    result = prime * result + ((altLabel == null) ? 0 : altLabel.hashCode());
+    result = prime * result + ((hiddenLabel == null) ? 0 : hiddenLabel.hashCode());
+    result = prime * result + ((identifier == null) ? 0 : identifier.hashCode());
+    result = prime * result + ((isRelatedTo == null) ? 0 : isRelatedTo.hashCode());
+    result = prime * result + ((inScheme == null) ? 0 : inScheme.hashCode());
+    result = prime * result + ((hasPart == null) ? 0 : hasPart.hashCode());
+    result = prime * result + ((isPartOf == null) ? 0 : isPartOf.hashCode());
+    result = prime * result + ((isAggregatedBy == null) ? 0 : isAggregatedBy.hashCode());
+    result = prime * result + ((isShownBy == null) ? 0 : isShownBy.hashCode());
+    result = prime * result + ((depiction == null) ? 0 : depiction.hashCode());
+    result = prime * result + ((payload == null) ? 0 : payload.hashCode());
+    return result;
+  }
+  
 }

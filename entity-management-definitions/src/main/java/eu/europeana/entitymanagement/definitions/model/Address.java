@@ -1,13 +1,22 @@
 package eu.europeana.entitymanagement.definitions.model;
 
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
-
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.COUNTRY_NAME;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_GEO;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.LOCALITY;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.POSTAL_CODE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.POST_OFFICE_BOX;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.REGION;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.STREET_ADDRESS;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
+import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import dev.morphia.annotations.Embedded;
-import org.apache.commons.lang3.StringUtils;
 
 @Embedded
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
@@ -127,4 +136,35 @@ public class Address {
         || StringUtils.isNotEmpty(countryName)
         || StringUtils.isNotEmpty(hasGeo);
   }
+  
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    Address that = (Address) o;
+    
+    if (!Objects.equals(about, that.getAbout())) return false;
+    if (!Objects.equals(streetAddress, that.getVcardStreetAddress())) return false;
+    if (!Objects.equals(postalCode, that.getVcardPostalCode())) return false;
+    if (!Objects.equals(postBox, that.getVcardPostOfficeBox())) return false;
+    if (!Objects.equals(locality, that.getVcardLocality())) return false;
+    if (!Objects.equals(countryName, that.getVcardCountryName())) return false;
+    return Objects.equals(hasGeo, that.getVcardHasGeo());
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((about == null) ? 0 : about.hashCode());
+    result = prime * result + ((streetAddress == null) ? 0 : streetAddress.hashCode());
+    result = prime * result + ((postalCode == null) ? 0 : postalCode.hashCode());
+    result = prime * result + ((postBox == null) ? 0 : postBox.hashCode());
+    result = prime * result + ((locality == null) ? 0 : locality.hashCode());
+    result = prime * result + ((countryName == null) ? 0 : countryName.hashCode());
+    result = prime * result + ((hasGeo == null) ? 0 : hasGeo.hashCode());
+    return result;
+  }
+  
 }

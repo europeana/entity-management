@@ -16,17 +16,18 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NOTE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
-
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
@@ -129,4 +130,31 @@ public class TimeSpan extends Entity {
   public List<String> getSameReferenceLinks() {
     return this.sameAs;
   }
+  
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    TimeSpan that = (TimeSpan) o;
+
+    if (! super.equals(that)) return false;
+    if (! EntityUtils.compareLists(isNextInSequence, that.getIsNextInSequence())) return false;
+    if (! Objects.equals(begin, that.getBeginString())) return false;
+    if (! Objects.equals(end, that.getEndString())) return false;
+    return EntityUtils.compareLists(sameAs, that.getSameReferenceLinks());
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+//    int result = 1;
+    int result = super.hashCode();
+    result = prime * result + ((isNextInSequence == null) ? 0 : isNextInSequence.hashCode());
+    result = prime * result + ((begin == null) ? 0 : begin.hashCode());
+    result = prime * result + ((end == null) ? 0 : end.hashCode());
+    result = prime * result + ((sameAs == null) ? 0 : sameAs.hashCode());
+    return result;
+  }
+
 }

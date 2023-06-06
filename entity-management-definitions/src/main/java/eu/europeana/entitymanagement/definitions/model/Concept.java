@@ -20,17 +20,17 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABE
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.RELATED;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.RELATED_MATCH;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
-
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonSetter;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import eu.europeana.entitymanagement.utils.EntityUtils;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
@@ -83,7 +83,6 @@ public class Concept extends Entity {
     if (copy.getCoref() != null) this.coref = new ArrayList<>(copy.getCoref());
     if (copy.getRelatedMatch() != null) this.relatedMatch = new ArrayList<>(copy.getRelatedMatch());
     if (copy.getCloseMatch() != null) this.closeMatch = new ArrayList<>(copy.getCloseMatch());
-    if (copy.getInScheme() != null) this.inScheme = new ArrayList<>(copy.getInScheme());
     if (copy.getNotation() != null) this.notation = new HashMap<>(copy.getNotation());
     if (copy.exactMatch != null) this.exactMatch = (new ArrayList<>(copy.exactMatch));
   }
@@ -204,4 +203,43 @@ public class Concept extends Entity {
   public List<String> getSameReferenceLinks() {
     return this.exactMatch;
   }
+  
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    Concept that = (Concept) o;
+
+    if (! super.equals(that)) return false;
+    if (! EntityUtils.compareLists(broader, that.getBroader())) return false;
+    if (! EntityUtils.compareLists(narrower, that.getNarrower())) return false;
+    if (! EntityUtils.compareLists(related, that.getRelated())) return false;
+    if (! EntityUtils.compareLists(broadMatch, that.getBroadMatch())) return false;
+    if (! EntityUtils.compareLists(narrowMatch, that.getNarrowMatch())) return false;
+    if (! EntityUtils.compareLists(exactMatch, that.getSameReferenceLinks())) return false;
+    if (! EntityUtils.compareLists(coref, that.getCoref())) return false;
+    if (! EntityUtils.compareLists(relatedMatch, that.getRelatedMatch())) return false;
+    if (! EntityUtils.compareLists(closeMatch, that.getCloseMatch())) return false;
+    return EntityUtils.compareStringListStringMaps(notation, that.getNotation());
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+//    int result = 1;
+    int result = super.hashCode();
+    result = prime * result + ((broader == null) ? 0 : broader.hashCode());
+    result = prime * result + ((narrower == null) ? 0 : narrower.hashCode());
+    result = prime * result + ((related == null) ? 0 : related.hashCode());
+    result = prime * result + ((broadMatch == null) ? 0 : broadMatch.hashCode());
+    result = prime * result + ((narrowMatch == null) ? 0 : narrowMatch.hashCode());
+    result = prime * result + ((exactMatch == null) ? 0 : exactMatch.hashCode());
+    result = prime * result + ((coref == null) ? 0 : coref.hashCode());
+    result = prime * result + ((relatedMatch == null) ? 0 : relatedMatch.hashCode());
+    result = prime * result + ((closeMatch == null) ? 0 : closeMatch.hashCode());
+    result = prime * result + ((notation == null) ? 0 : notation.hashCode());
+    return result;
+  }
+
 }
