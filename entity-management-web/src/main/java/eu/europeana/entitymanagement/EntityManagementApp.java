@@ -16,8 +16,6 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 import eu.europeana.entitymanagement.batch.model.JobType;
 import eu.europeana.entitymanagement.batch.service.BatchEntityUpdateExecutor;
-import eu.europeana.entitymanagement.common.config.SocksProxyConfig;
-import eu.europeana.entitymanagement.config.SocksProxyActivator;
 import eu.europeana.entitymanagement.web.service.ZohoSyncService;
 
 /**
@@ -47,10 +45,6 @@ public class EntityManagementApp implements CommandLineRunner {
    * @param args command-line arguments
    */
   public static void main(String[] args) {
-    
-    // Activate socks proxy (if your application requires it)
-    SocksProxyActivator.activate(
-        new SocksProxyConfig("entitymanagement.properties", "entitymanagement.user.properties"));
     //jobType = args.length > 0 ? args[0] : "";
     if (hasCmdLineParams(args)) {
       LOG.info("Starting batch updates execution with args: {}", Arrays.toString(args));
