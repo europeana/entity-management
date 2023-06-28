@@ -110,25 +110,18 @@ public class ZohoOrganizationConverter {
     }
 
     // hidden labels 1-4
+    List<String> hiddenLabels = new ArrayList<String>();
     String hiddenLabel1 = getStringFieldValue(zohoRecord, ZohoConstants.HIDDEN_LABEL1_FIELD);
+    addValueToList(hiddenLabel1, hiddenLabels);
     String hiddenLabel2 = getStringFieldValue(zohoRecord, ZohoConstants.HIDDEN_LABEL2_FIELD);
+    addValueToList(hiddenLabel2, hiddenLabels);
     String hiddenLabel3 = getStringFieldValue(zohoRecord, ZohoConstants.HIDDEN_LABEL3_FIELD);
+    addValueToList(hiddenLabel3, hiddenLabels);
     String hiddenLabel4 = getStringFieldValue(zohoRecord, ZohoConstants.HIDDEN_LABEL4_FIELD);
-
-    if (hiddenLabel1 != null
-        || hiddenLabel2 != null
-        || hiddenLabel3 != null
-        || hiddenLabel4 != null) {
-
-      List<String> hiddenLabels = new ArrayList<String>();
-      addValueToList(hiddenLabel1, hiddenLabels);
-      addValueToList(hiddenLabel2, hiddenLabels);
-      addValueToList(hiddenLabel3, hiddenLabels);
-      addValueToList(hiddenLabel4, hiddenLabels);
-
-      // hidden labels text area
-      hiddenLabels.addAll(getTextAreaFieldValues(zohoRecord, ZohoConstants.HIDDEN_LABEL_FIELD));
-
+    addValueToList(hiddenLabel4, hiddenLabels);
+    // hidden labels text area
+    hiddenLabels.addAll(getTextAreaFieldValues(zohoRecord, ZohoConstants.HIDDEN_LABEL_FIELD));
+    if (hiddenLabels.size()>0) {
       org.setHiddenLabel(hiddenLabels);
     }
 
