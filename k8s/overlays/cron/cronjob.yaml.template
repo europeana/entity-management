@@ -56,7 +56,6 @@ spec:
             - name: ibm-certficate
               secret:
                 secretName: ibm-secret
-                volumes:
             - name: app-properties
               secret:
                 secretName: entity-management-api-properties
