@@ -4,7 +4,7 @@
     <parent>
         <artifactId>entity-management</artifactId>
         <groupId>eu.europeana.api</groupId>
-        <version>1.6.1-SNAPSHOT</version>
+        <version>1.6.1</version>
     </parent>
 
     <artifactId>entity-management-zoho</artifactId>
@@ -48,7 +48,7 @@
         <dependency>
             <groupId>eu.europeana.api</groupId>
             <artifactId>entity-management-common</artifactId>
-            <version>1.6.1-SNAPSHOT</version>
+            <version>1.6.1</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
