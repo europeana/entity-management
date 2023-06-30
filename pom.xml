@@ -39,7 +39,7 @@
 
     <groupId>eu.europeana.api</groupId>
     <artifactId>entity-management</artifactId>
-    <version>1.6.1</version>
+    <version>1.6.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Entity Management</name>
