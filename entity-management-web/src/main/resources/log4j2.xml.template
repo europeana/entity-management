@@ -25,7 +25,7 @@
         <Logger name="org.apache.http.client.protocol.ResponseProcessCookies" level="ERROR"/>
         
         <!--  set level to WARN for suppressing exhaustive logging of connection pull -->
-        <Logger name="com.mongodb.diagnostics" level="WARN">
+        <Logger name="com.mongodb.diagnostics" level="WARN"/>
 
         <!-- To suppress Mongo opened/closed connection messages -->	
         <Logger name="org.mongodb.driver.connection" level="WARN"/> 
