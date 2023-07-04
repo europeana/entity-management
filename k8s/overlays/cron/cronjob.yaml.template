@@ -7,13 +7,13 @@ spec:
   suspend: ${SUSPEND_BATCH}
   concurrencyPolicy: Forbid
   jobTemplate:
-    metadata:
-      annotations:
-        fluentd/include: '${COLLECT_LOGS}'
-        fluentd/multiline: 'true'    
     spec:
       ttlSecondsAfterFinished: ${TTL_AFTER_FINISH}
       template:
+        metadata:
+          annotations:
+            fluentd/include: '${COLLECT_LOGS}'
+            fluentd/multiline: 'true'
         spec:
           restartPolicy: Never
           containers:
