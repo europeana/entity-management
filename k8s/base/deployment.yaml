@@ -41,7 +41,7 @@ spec:
           env:
             - name: SPRING_CONFIG_ADDITIONAL_LOCATION
               value: "file:/opt/app/config/entitymanagement.user.properties,file:/opt/app/config/zoho_import.properties"
-          args: -Dlogging.config=/opt/app/config/log4j2.xml
+          args: ["-Dlogging.config=/opt/app/config/log4j2.xml"]
       volumes:
         - name: app-properties
           secret:
