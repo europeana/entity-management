@@ -32,6 +32,8 @@ spec:
                   value: "file:/opt/app/config/entitymanagement.user.properties,file:/opt/app/config/zoho_import.properties"
                 - name: JAVA_OPTS
                   value: "-XX:+UseParallelGC -XX:MaxRAMPercentage=75"
+                - name: JAVA_TOOL_OPTIONS
+                  value: "-Dlogging.config=/opt/app/config/log4j2.xml"  
               resources:
                 requests:
                   memory: "${MEMORY}"
@@ -40,7 +42,7 @@ spec:
                   memory: "${MEMORY_LIMIT}M"
                   cpu: "${CPU_LIMIT}m"
               volumeMounts:
-                - name: ibm-certficate
+                - name: ibm-certificate
                   mountPath: "/opt/app/config/ibm-databases-truststore.jks"
                   readOnly: true
                   subPath: ibm-databases-truststore.jks
@@ -52,8 +54,12 @@ spec:
                   mountPath: "/opt/app/config/zoho_import.properties"
                   readOnly: true
                   subPath: zoho_import.properties
+                - name: log4j-config
+                  mountPath: "/opt/app/config/log4j2.xml"
+                  readOnly: true
+                  subPath: log4j2.xml  
           volumes:
-            - name: ibm-certficate
+            - name: ibm-certificate
               secret:
                 secretName: ibm-secret
             - name: app-properties
@@ -62,4 +68,7 @@ spec:
             - name: zoho-import-config
               secret:
                 secretName: zoho-import-properties
+            - name: log4j-config
+              configMap:
+                name: log4j2-properties    
                 
