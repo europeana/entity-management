@@ -21,6 +21,11 @@ secretGenerator:
     files:
       - ibm-databases-truststore.jks
 
+#configMapGenerator:
+#  - name: log4j2-properties
+#    files:
+#      - log4j2.xml
+
 
 #configMapGenerator:
 #  - name: entity-management-batch-config

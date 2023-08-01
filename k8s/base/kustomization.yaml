@@ -13,11 +13,8 @@ secretGenerator:
   - name: zoho-import-properties
     files:
       - zoho_import.properties
+
+configMapGenerator:
   - name: log4j2-properties
     files:
       - log4j2.xml
-
-#configMapGenerator:
-#  - name: entity-management-batch-config
-#    files:
-#      - entitymanagement.user.properties
