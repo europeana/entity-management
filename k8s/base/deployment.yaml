@@ -55,8 +55,3 @@ spec:
         - name: log4j-config
           configMap:
             name: log4j2-properties
-#          items:
-#          - key: database.yml
-#            path: database.yml
-#          secret:
-#            secretName: log4j2-properties

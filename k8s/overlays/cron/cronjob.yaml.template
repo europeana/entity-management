@@ -42,7 +42,7 @@ spec:
                   memory: "${MEMORY_LIMIT}M"
                   cpu: "${CPU_LIMIT}m"
               volumeMounts:
-                - name: ibm-certficate
+                - name: ibm-certificate
                   mountPath: "/opt/app/config/ibm-databases-truststore.jks"
                   readOnly: true
                   subPath: ibm-databases-truststore.jks
@@ -59,7 +59,7 @@ spec:
                   readOnly: true
                   subPath: log4j2.xml  
           volumes:
-            - name: ibm-certficate
+            - name: ibm-certificate
               secret:
                 secretName: ibm-secret
             - name: app-properties
@@ -69,6 +69,6 @@ spec:
               secret:
                 secretName: zoho-import-properties
             - name: log4j-config
-              secret:
-                secretName: log4j2-properties    
+              configMap:
+                name: log4j2-properties    
                 
