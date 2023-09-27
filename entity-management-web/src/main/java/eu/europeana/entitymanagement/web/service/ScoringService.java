@@ -157,7 +157,7 @@ public class ScoringService {
       return null;
     }
 
-    query.setQuery("page_url:\"" + wikidataQId + "\"");
+    query.setQuery("identifier:\"" + wikidataQId + "\"");
 
     try {
       Instant start = Instant.now();
