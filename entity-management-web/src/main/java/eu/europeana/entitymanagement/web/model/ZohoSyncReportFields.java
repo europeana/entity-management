@@ -21,11 +21,14 @@ public class ZohoSyncReportFields {
   public static final String TRACE = "trace";
 
   public static final String CREATION_ERROR = "Entity creation error";
+  public static final String UPDATE_ERROR = "Entity scheduled update error";
   public static final String ENABLE_ERROR = "Entity enable error";
   public static final String SOLR_DELETION_ERROR = "Solr deletion error";
   public static final String ENTITY_DELETION_ERROR = "Entity deletion error";
   public static final String ENTITY_DEPRECATION_ERROR = "Entity deprecation error";
+  public static final String ENTITY_SYNCHRONOUS_UPDATE_ERROR = "Entity synchronous update error";
   public static final String ZOHO_ACCESS_ERROR = "Zoho access error";
+  public static final String ZOHO_UPDATE_ERROR = "Zoho update error";
   
   public static final String STATUS_COMPLETED = "completed";
   public static final String STATUS_INCOMPLETE = "incomplete";

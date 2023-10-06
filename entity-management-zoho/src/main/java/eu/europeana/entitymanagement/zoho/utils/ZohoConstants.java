@@ -54,6 +54,7 @@ public final class ZohoConstants {
   public static final String HIDDEN_LABEL_FIELD = "Hidden";
 
   public static final String INDUSTRY_FIELD = "Industry_2";
+  public static final String EUROPEANA_ID_FIELD = "Europeana_ID";
 
   // Operations
   public static final String EQUALS_OPERATION = "equals";

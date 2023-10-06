@@ -198,7 +198,7 @@ public class ZohoOrganizationConverter {
     }
   }
 
-  static String getStringFieldValue(Record zohoRecord, String zohoFieldName) {
+  public static String getStringFieldValue(Record zohoRecord, String zohoFieldName) {
     return ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(zohoFieldName));
   }
 
@@ -273,4 +273,5 @@ public class ZohoOrganizationConverter {
       return ((Boolean) scheduledDeletion).booleanValue();
     }
   }
+  
 }

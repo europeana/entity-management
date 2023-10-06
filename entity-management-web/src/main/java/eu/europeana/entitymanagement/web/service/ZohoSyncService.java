@@ -47,7 +47,9 @@ import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReportFields;
 import eu.europeana.entitymanagement.zoho.organization.ZohoAccessConfiguration;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
+import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
+import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 
 @Service(AppConfig.BEAN_ZOHO_SYNC_SERVICE)
 public class ZohoSyncService {
@@ -116,6 +118,16 @@ public class ZohoSyncService {
     } else {
       modifiedSince = OffsetDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC); 
     }
+    
+    //hardcoded date, just for manual testing
+//    SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss", Locale.ENGLISH);
+//    String dateInString = "06-Oct-2023 15:54:00"; 
+//    try {
+//      Date date = formatter.parse(dateInString);
+//      modifiedSince = DateUtils.toOffsetDateTime(date);
+//    } catch (ParseException e) {
+//      e.printStackTrace();
+//    }
     
     return synchronizeZohoOrganizations(modifiedSince);
   }
@@ -275,12 +287,15 @@ public class ZohoSyncService {
     SortedSet<Operation> enableOperations = operations.getEnableOperations();
     performEnableOperations(enableOperations, zohoSyncReport);
 
-    // schedule updates
-    performUpdateOperations(operations.getUpdateOperations(), zohoSyncReport);
+    //deprecation
     performDeprecationOperations(operations.getDeleteOperations(), zohoSyncReport);
 
     // per deletion
     performPermanentDeleteOperations(operations.getPermanentDeleteOperations(), zohoSyncReport);
+    
+    // scheduled updates at the end, otherwise the other operations may overwrite the record in the db with the old captured in the operation
+    performUpdateOperations(operations.getUpdateOperations(), zohoSyncReport);
+
   }
 
   void performPermanentDeleteOperations(
@@ -309,19 +324,36 @@ public class ZohoSyncService {
     if (deprecateOperations == null || deprecateOperations.isEmpty()) {
       return;
     }
-    Organization zohoOrganization;
-    EntityRecord entityRecord;
     for (Operation operation : deprecateOperations) {
-      zohoOrganization =
-          ZohoOrganizationConverter.convertToOrganizationEntity(operation.getZohoRecord());
-      entityRecord = operation.getEntityRecord();
-
+            
+      //this part will now be executed through the below update of the entity (not needed any more)
       // update sameAs from zohoOrganization to the consolidated version
-      entityRecordService.addSameReferenceLinks(
-          entityRecord.getEntity(), zohoOrganization.getSameReferenceLinks());
+//      entityRecordService.addSameReferenceLinks(
+//          entityRecord.getEntity(), zohoOrganization.getSameReferenceLinks());
 
-      // deprecate
-      performDeprecation(zohoSyncReport, operation);
+      // deprecate if not already deprecated
+      if(! operation.getEntityRecord().isDisabled()) {
+        performDeprecation(zohoSyncReport, operation);
+      }
+      else {
+        logger.debug(
+            "Organization was marked for deletion, but it is already disabled. Skipping disable for id: {}",
+            operation.getOrganizationId());
+      }
+      
+      /*
+       * CAUTION: this update is a scheduled update, which will modify the record from the db,
+       * and therefore must be execute after the previous deprecation step which operates on the
+       * record which is already taken from the db. If this does not hold, the deprecation would overwrite
+       * the modified record from update with the old record which is incorrect.
+       */
+      //through this update, the sameAs field from zoho should also end up in the sameAs field of the entity
+      try {
+        entityUpdateService.runSynchronousUpdate(operation.getEntityRecord().getEntityId());
+      } catch (Exception e) {
+        zohoSyncReport.addFailedOperation(
+            operation.getOrganizationId(), ZohoSyncReportFields.ENTITY_SYNCHRONOUS_UPDATE_ERROR, e);
+      }
     }
   }
 
@@ -352,7 +384,7 @@ public class ZohoSyncService {
       zohoSyncReport.increaseUpdated(updateOperations.size());
     } catch (RuntimeException e) {
       String message =
-          "Cannot schedule updae operations for organizations with ids:"
+          "Cannot schedule update operations for organizations with ids:"
               + organizationIds.toArray();
       zohoSyncReport.addFailedOperation(null, ZohoSyncReportFields.CREATION_ERROR, message, e);
     }
@@ -366,15 +398,29 @@ public class ZohoSyncService {
     }
 
     List<String> entitiesToUpdate = performEntityRegistration(createOperations, zohoSyncReport);
+    
+    //update the Europeana_ID field in zoho
+    int counter=0;
+    for(Operation op : createOperations) {
+      String zohoUrl = ZohoUtils.buildZohoOrganizationId(op.getZohoRecord().getId());
+      try {
+        zohoAccessConfiguration.getZohoAccessClient().updateZohoRecordOrganizationStringField(zohoUrl, ZohoConstants.EUROPEANA_ID_FIELD, entitiesToUpdate.get(counter));
+      } catch (ZohoException e) {
+        String message = "Updating a field:" + ZohoConstants.EUROPEANA_ID_FIELD + " in Zoho throwed an exception.";
+        zohoSyncReport.addFailedOperation(entitiesToUpdate.get(counter), ZohoSyncReportFields.ZOHO_UPDATE_ERROR, message, e);
+      }
+      counter++;
+    }
+    
     // schedule updates
     try {
       entityUpdateService.scheduleTasks(entitiesToUpdate, ScheduledUpdateType.FULL_UPDATE);
       zohoSyncReport.increaseCreated(entitiesToUpdate.size());
     } catch (RuntimeException e) {
       String message =
-          "Cannot schedule updae operations for organizations with ids:"
+          "Cannot schedule update operations for organizations with ids:"
               + entitiesToUpdate.toArray();
-      zohoSyncReport.addFailedOperation(null, ZohoSyncReportFields.CREATION_ERROR, message, e);
+      zohoSyncReport.addFailedOperation(null, ZohoSyncReportFields.UPDATE_ERROR, message, e);
     }
   }
 
@@ -503,6 +549,8 @@ public class ZohoSyncService {
 
     boolean hasDpsOwner = hasRequiredOwnership(zohoOrg);
     boolean markedForDeletion = ZohoOrganizationConverter.isMarkedForDeletion(zohoOrg);
+    String Europeana_ID = ZohoOrganizationConverter.getStringFieldValue(zohoOrg, ZohoConstants.EUROPEANA_ID_FIELD);
+    
     String emOperation = null;
 
     if (entityRecord == null) {
@@ -516,18 +564,14 @@ public class ZohoSyncService {
         // create operation if ownership is correct
         emOperation = Operations.CREATE;
       }
-    } else {
+    //even though there must be a Europeana_ID here, we check it to avoid strange zoho entries
+    } else if(Europeana_ID != null) {
       // entity record not null, update or deletion
       if (!hasDpsOwner || markedForDeletion) {
         // lost ownership, or marked for deletion - > disable
         emOperation = Operations.DELETE;
-      } else if (skipExisting(entityRecord, markedForDeletion)) {
-        // skipped
-        logger.debug(
-            "Organization was marked for deletion, but it is already disabled. Skipped update for Zoho id: {}",
-            zohoId);
       } else {
-        if (needsToBeEnabled(entityRecord, hasDpsOwner, markedForDeletion)) {
+        if (entityRecord.isDisabled()) {
           // check if need to enable
           Operation operation = new Operation(entityId, Operations.ENABLE, null, entityRecord);
           // add enable operation
@@ -558,14 +602,14 @@ public class ZohoSyncService {
     return markedForDeletion || !hasDpsOwner;
   }
 
-  boolean skipExisting(EntityRecord entityRecord, boolean markedForDeletion) {
-    return markedForDeletion && entityRecord.isDisabled();
-  }
+//  boolean skipExisting(EntityRecord entityRecord, boolean markedForDeletion) {
+//    return markedForDeletion && entityRecord.isDisabled();
+//  }
 
-  boolean needsToBeEnabled(
-      EntityRecord entityRecord, boolean hasDpsOwner, boolean markedForDeletion) {
-    return entityRecord != null && entityRecord.isDisabled() && hasDpsOwner && !markedForDeletion;
-  }
+//  boolean needsToBeEnabled(
+//      EntityRecord entityRecord, boolean hasDpsOwner, boolean markedForDeletion) {
+//    return entityRecord != null && entityRecord.isDisabled() && hasDpsOwner && !markedForDeletion;
+//  }
 
   /**
    * This method validates that organization ownership match to the filter criteria.

@@ -1,11 +1,12 @@
 package eu.europeana.entitymanagement.zoho.organization;
 
-import com.zoho.crm.api.record.Record;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.dereference.Dereferencer;
 import java.util.Optional;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+import com.zoho.crm.api.record.Record;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.dereference.Dereferencer;
+import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 
 @Service
 public class ZohoDereferenceService implements Dereferencer {
@@ -25,5 +26,9 @@ public class ZohoDereferenceService implements Dereferencer {
     //    System.out.println(resp.toJson(zohoOrganization.get().getKeyValues()));
     //
     return zohoOrganization.map(ZohoOrganizationConverter::convertToOrganizationEntity);
+  }
+  
+  public void updateEntityStringField(String zohoUrl, String fieldAPIName, String fieldValue) throws ZohoException {
+    zohoAccessConfiguration.getZohoAccessClient().updateZohoRecordOrganizationStringField(zohoUrl, fieldAPIName, fieldValue);
   }
 }
