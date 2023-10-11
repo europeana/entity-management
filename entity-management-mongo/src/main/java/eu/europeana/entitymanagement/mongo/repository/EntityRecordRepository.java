@@ -24,6 +24,7 @@ import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
 import eu.europeana.entitymanagement.mongo.utils.MorphiaUtils;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -161,6 +162,18 @@ public class EntityRecordRepository extends AbstractRepository {
     EntityRecord value = query.first();
     return Optional.ofNullable(value);
   }
+  
+  public Optional<EntityRecord> findEntityDupplicationBySameAs(String entityId) {
+    List<String> listIds = Collections.singletonList(entityId);
+    Query<EntityRecord> query =
+        getDataStore()
+            .find(EntityRecord.class)
+            .disableValidation()
+            .filter(in(ENTITY_SAME_AS, listIds));
+    query.filter(eq(DISABLED, null));
+    EntityRecord value = query.first();
+    return Optional.ofNullable(value);
+  }  
 
   public List<EntityRecord> saveBulk(List<EntityRecord> entityRecords) {
     return getDataStore().save(entityRecords);
