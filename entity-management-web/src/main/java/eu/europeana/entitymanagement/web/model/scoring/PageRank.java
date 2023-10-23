@@ -4,6 +4,9 @@ import org.apache.solr.client.solrj.beans.Field;
 
 public class PageRank {
 
+  @Field("identifier")
+  String identifier;
+
   @Field("page_url")
   String pageUrl;
 
@@ -11,6 +14,14 @@ public class PageRank {
   Double pageRank;
 
   public PageRank() {}
+  
+  public String getIdentifier() {
+    return identifier;
+  }
+
+  public void setIdentifier(String identifier) {
+    this.identifier = identifier;
+  }  
 
   public String getPageUrl() {
     return pageUrl;
