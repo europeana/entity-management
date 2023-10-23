@@ -40,8 +40,7 @@ public class ScoringService {
   private static final int RANGE_EXTENSION_FACTOR = 100;
 
   public static final String WIKIDATA_PREFFIX = "http://www.wikidata.org/entity/";
-  public static final String WIKIDATA_DBPEDIA_PREFIX = "http://wikidata.dbpedia.org/resource/";
-
+  
   public ScoringService(
       EnrichmentCountQueryService enrichmentCountQueryService,
       @Qualifier(AppConfigConstants.BEAN_PR_SOLR_CLIENT) SolrClient prSolrClient) {
