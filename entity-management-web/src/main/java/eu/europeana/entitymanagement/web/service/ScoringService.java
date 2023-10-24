@@ -40,8 +40,7 @@ public class ScoringService {
   private static final int RANGE_EXTENSION_FACTOR = 100;
 
   public static final String WIKIDATA_PREFFIX = "http://www.wikidata.org/entity/";
-  public static final String WIKIDATA_DBPEDIA_PREFIX = "http://wikidata.dbpedia.org/resource/";
-
+  
   public ScoringService(
       EnrichmentCountQueryService enrichmentCountQueryService,
       @Qualifier(AppConfigConstants.BEAN_PR_SOLR_CLIENT) SolrClient prSolrClient) {
@@ -151,13 +150,13 @@ public class ScoringService {
   private PageRank getPageRank(Entity entity) {
     SolrQuery query = new SolrQuery();
     String wikidataUrl = getWikidataUrl(entity);
-    String wikidataQId = "Q" + StringUtils.substringAfterLast(wikidataUrl, "Q");
+    String wikidataQId = StringUtils.substringAfterLast(wikidataUrl, "/");
 
     if (wikidataUrl == null) {
       return null;
     }
 
-    query.setQuery("identifier:\"" + wikidataQId + "\"");
+    query.setQuery("identifier:" + wikidataQId);
 
     try {
       Instant start = Instant.now();
