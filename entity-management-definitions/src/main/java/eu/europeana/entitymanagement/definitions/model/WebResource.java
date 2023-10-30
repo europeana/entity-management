@@ -3,7 +3,7 @@ package eu.europeana.entitymanagement.definitions.model;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SOURCE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.THUMBNAIL;
-
+import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -11,7 +11,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import dev.morphia.annotations.Embedded;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
-import java.util.Objects;
 
 @Embedded
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
@@ -82,11 +81,12 @@ public class WebResource {
 
     WebResource that = (WebResource) o;
 
-    if (!Objects.equals(source, that.source)) return false;
-    if (!id.equals(that.id)) return false;
-    return Objects.equals(thumbnail, that.thumbnail);
+    if (!Objects.equals(source, that.getSource())) return false;
+    if (!Objects.equals(id, that.getId())) return false;
+    return Objects.equals(thumbnail, that.getThumbnail());
   }
 
+  @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;

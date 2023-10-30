@@ -1,0 +1,18 @@
+{
+  "@context": "http://www.europeana.eu/schemas/context/entity.jsonld",
+  "id": "http://data.europeana.eu/organization/1482250000000370517",
+  "type": "Organization",
+  "isAggregatedBy": {
+    "id": "id",
+	"type": "type",
+	"rights": "rights",
+	"source": "source",
+	"created": 1661518473905,
+	"modified": 2661518473905,
+	"enrich": "true",
+	"score": "2",
+	"recordCount": "3",
+	"pageRank": "0.6",
+	"aggregates": ["agg2", "agg1"]
+  }
+}

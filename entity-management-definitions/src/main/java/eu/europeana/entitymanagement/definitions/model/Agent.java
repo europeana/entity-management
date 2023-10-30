@@ -1,19 +1,48 @@
 package eu.europeana.entitymanagement.definitions.model;
 
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
-
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ALT_LABEL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BEGIN;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BIOGRAPHICAL_INFORMATION;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DATE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DATE_OF_BIRTH;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DATE_OF_DEATH;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DATE_OF_ESTABLISHMENT;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DATE_OF_TERMINATION;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DEPICTION;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.END;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.GENDER;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_MET;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_PART;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HIDDEN_LABEL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IDENTIFIER;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_AGGREGATED_BY;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_PART_OF;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_RELATED_TO;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_SHOWN_BY;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NAME;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NOTE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PLACE_OF_BIRTH;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PLACE_OF_DEATH;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PROFESSION_OR_OCCUPATION;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.WAS_PRESENT_AT;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import eu.europeana.entitymanagement.serialization.StringOrListConverter;
+import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
@@ -293,4 +322,55 @@ public class Agent extends Entity {
   public List<String> getSameReferenceLinks() {
     return this.sameAs;
   }
+  
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    Agent that = (Agent) o;
+
+    if (! super.equals(that)) return false;
+    if (! EntityUtils.compareLists(date, that.getDate())) return false;
+    if (! EntityUtils.compareLists(begin, that.getBegin())) return false;
+    if (! EntityUtils.compareLists(end, that.getEnd())) return false;
+    if (! EntityUtils.compareLists(dateOfBirth, that.getDateOfBirth())) return false;
+    if (! EntityUtils.compareLists(dateOfDeath, that.getDateOfDeath())) return false;
+    if (! EntityUtils.compareLists(wasPresentAt, that.getWasPresentAt())) return false;
+    if (! EntityUtils.compareLists(hasMet, that.getHasMet())) return false;
+    if (! EntityUtils.compareStringStringMaps(name, that.getName())) return false;
+    if (! EntityUtils.compareStringListStringMaps(biographicalInformation, that.getBiographicalInformation())) return false;
+    if (! EntityUtils.compareLists(professionOrOccupation, that.getProfessionOrOccupation())) return false;
+    if (! EntityUtils.compareLists(placeOfBirth, that.getPlaceOfBirth())) return false;
+    if (! EntityUtils.compareLists(placeOfDeath, that.getPlaceOfDeath())) return false;
+    if (! EntityUtils.compareLists(dateOfEstablishment, that.getDateOfEstablishment())) return false;
+    if (! EntityUtils.compareLists(dateOfTermination, that.getDateOfTermination())) return false;
+    if (! EntityUtils.compareLists(gender, that.getGender())) return false;
+    return EntityUtils.compareLists(sameAs, that.getSameReferenceLinks());
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+//    int result = 1;
+    int result = super.hashCode();
+    result = prime * result + ((date == null) ? 0 : date.hashCode());
+    result = prime * result + ((begin == null) ? 0 : begin.hashCode());
+    result = prime * result + ((end == null) ? 0 : end.hashCode());
+    result = prime * result + ((dateOfBirth == null) ? 0 : dateOfBirth.hashCode());
+    result = prime * result + ((dateOfDeath == null) ? 0 : dateOfDeath.hashCode());
+    result = prime * result + ((wasPresentAt == null) ? 0 : wasPresentAt.hashCode());
+    result = prime * result + ((hasMet == null) ? 0 : hasMet.hashCode());
+    result = prime * result + ((name == null) ? 0 : name.hashCode());
+    result = prime * result + ((biographicalInformation == null) ? 0 : biographicalInformation.hashCode());
+    result = prime * result + ((professionOrOccupation == null) ? 0 : professionOrOccupation.hashCode());
+    result = prime * result + ((placeOfBirth == null) ? 0 : placeOfBirth.hashCode());
+    result = prime * result + ((placeOfDeath == null) ? 0 : placeOfDeath.hashCode());
+    result = prime * result + ((dateOfEstablishment == null) ? 0 : dateOfEstablishment.hashCode());
+    result = prime * result + ((dateOfTermination == null) ? 0 : dateOfTermination.hashCode());
+    result = prime * result + ((gender == null) ? 0 : gender.hashCode());
+    result = prime * result + ((sameAs == null) ? 0 : sameAs.hashCode());
+    return result;
+  }
+  
 }

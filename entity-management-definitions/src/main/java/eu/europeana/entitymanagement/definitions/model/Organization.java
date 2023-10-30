@@ -21,17 +21,18 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ORGANIZAT
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
-
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonSetter;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import eu.europeana.entitymanagement.utils.EntityUtils;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 /** This class defines base organization type of an entity. */
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
@@ -246,4 +247,49 @@ public class Organization extends Entity {
   public void setLanguage(List<String> edmLanguage) {
     this.language = edmLanguage;
   }
+  
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    Organization that = (Organization) o;
+
+    if (! super.equals(that)) return false;
+    if (! EntityUtils.compareStringStringMaps(description, that.getDescription())) return false;
+    if (! EntityUtils.compareStringListStringMaps(acronym, that.getAcronym())) return false;
+    if (! Objects.equals(logo, that.getLogo())) return false;
+    if (! Objects.equals(homepage, that.getHomepage())) return false;
+    if (! EntityUtils.compareLists(phone, that.getPhone())) return false;
+    if (! EntityUtils.compareLists(mbox, that.getMbox())) return false;
+    if (! EntityUtils.compareStringListStringMaps(europeanaRole, that.getEuropeanaRole())) return false;
+    if (! EntityUtils.compareStringListStringMaps(organizationDomain, that.getOrganizationDomain())) return false;
+    if (! EntityUtils.compareStringStringMaps(geographicLevel, that.getGeographicLevel())) return false;
+    if (! Objects.equals(country, that.getCountry())) return false;
+    if (! Objects.equals(hasAddress, that.getAddress())) return false;
+    if (! EntityUtils.compareLists(sameAs, that.getSameReferenceLinks())) return false;
+    return Objects.equals(language, that.getLanguage());
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+//    int result = 1;
+    int result = super.hashCode();
+    result = prime * result + ((description == null) ? 0 : description.hashCode());
+    result = prime * result + ((acronym == null) ? 0 : acronym.hashCode());
+    result = prime * result + ((logo == null) ? 0 : logo.hashCode());
+    result = prime * result + ((homepage == null) ? 0 : homepage.hashCode());
+    result = prime * result + ((phone == null) ? 0 : phone.hashCode());
+    result = prime * result + ((mbox == null) ? 0 : mbox.hashCode());
+    result = prime * result + ((europeanaRole == null) ? 0 : europeanaRole.hashCode());
+    result = prime * result + ((organizationDomain == null) ? 0 : organizationDomain.hashCode());
+    result = prime * result + ((geographicLevel == null) ? 0 : geographicLevel.hashCode());
+    result = prime * result + ((country == null) ? 0 : country.hashCode());
+    result = prime * result + ((hasAddress == null) ? 0 : hasAddress.hashCode());
+    result = prime * result + ((sameAs == null) ? 0 : sameAs.hashCode());
+    result = prime * result + ((language == null) ? 0 : language.hashCode());
+    return result;
+  }
+  
 }

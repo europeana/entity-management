@@ -1,16 +1,28 @@
 package eu.europeana.entitymanagement.definitions.model;
 
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
-
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.AGGREGATES;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.AGGREGATION;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CREATED;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENRICH;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.MODIFIED;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PAGE_RANK;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.RECORD_COUNT;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.RIGHTS;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SCORE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SOURCE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import dev.morphia.annotations.Embedded;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import eu.europeana.entitymanagement.utils.EntityUtils;
 
 @Embedded
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
@@ -188,4 +200,41 @@ public class Aggregation {
   public void setEnrich(Boolean enrich) {
     this.enrich = enrich;
   }
+  
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    Aggregation that = (Aggregation) o;
+
+    if (!Objects.equals(id, that.getId())) return false;
+    if (!Objects.equals(rights, that.getRights())) return false;
+    if (!Objects.equals(source, that.getSource())) return false;
+    if (!Objects.equals(created, that.getCreated())) return false;
+    if (!Objects.equals(modified, that.getModified())) return false;
+    if (!Objects.equals(enrich, that.getEnrich())) return false;
+    if (!Objects.equals(score, that.getScore())) return false;
+    if (!Objects.equals(recordCount, that.getRecordCount())) return false;
+    if (!Objects.equals(pageRank, that.getPageRank())) return false;
+    return EntityUtils.compareLists(aggregates, that.getAggregates());
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((id == null) ? 0 : id.hashCode());
+    result = prime * result + ((rights == null) ? 0 : rights.hashCode());
+    result = prime * result + ((source == null) ? 0 : source.hashCode());
+    result = prime * result + ((created == null) ? 0 : created.hashCode());
+    result = prime * result + ((modified == null) ? 0 : modified.hashCode());
+    result = prime * result + ((enrich == null) ? 0 : enrich.hashCode());
+    result = prime * result + ((score == null) ? 0 : score.hashCode());
+    result = prime * result + ((recordCount == null) ? 0 : recordCount.hashCode());
+    result = prime * result + ((pageRank == null) ? 0 : pageRank.hashCode());
+    result = prime * result + ((aggregates == null) ? 0 : aggregates.hashCode());
+    return result;
+  }
+  
 }
