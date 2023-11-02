@@ -322,6 +322,33 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
   }
 
   @Test
+  public void retrieveAgentNotFoundShouldBeRedirected() throws Exception {
+    String europeanaMetadataBirch = loadFile(IntegrationTestUtils.AGENT_REGISTER_BIRCH_REDIRECTION_JSON);
+    String metisResponseBirch = loadFile(IntegrationTestUtils.AGENT_BIRCH_XML);
+    String entityIdBirch =
+        createEntity(europeanaMetadataBirch, metisResponseBirch, IntegrationTestUtils.AGENT_BIRCH_URI)
+            .getEntityId();
+    
+    String europeanaMetadataRaphael = loadFile(IntegrationTestUtils.AGENT_REGISTER_RAPHAEL_JSON);
+    String metisResponseRaphael = loadFile(IntegrationTestUtils.AGENT_RAPHAEL_XML);
+    String entityIdRaphael =
+        createEntity(europeanaMetadataRaphael, metisResponseRaphael, IntegrationTestUtils.AGENT_RAPHAEL_URI)
+            .getEntityId();
+    
+    deleteEntity(entityIdRaphael);
+
+    String requestPathRaphael = getEntityRequestPath(entityIdRaphael);
+    // retrieve
+    ResultActions result =
+        mockMvc.perform(
+            get(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPathRaphael + ".jsonld")
+                .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                .accept(MediaType.APPLICATION_JSON));
+    result.andExpect(status().isMovedPermanently());
+    result.andExpect(header().string("Location", entityIdBirch));
+  }
+
+  @Test
   public void retrieveAgentXmlExternalShouldBeSuccessful() throws Exception {
     String europeanaMetadata = loadFile(IntegrationTestUtils.AGENT_REGISTER_DAVINCI_JSON);
     String metisResponse = loadFile(IntegrationTestUtils.AGENT_DA_VINCI_XML);

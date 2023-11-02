@@ -11,7 +11,13 @@ import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTIT
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_MODIFIED;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_SAME_AS;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_UPDATE_OPTS;
-
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Repository;
 import com.mongodb.client.result.UpdateResult;
 import dev.morphia.query.FindOptions;
 import dev.morphia.query.Query;
@@ -23,14 +29,6 @@ import eu.europeana.entitymanagement.definitions.model.EntityIdGenerator;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
 import eu.europeana.entitymanagement.mongo.utils.MorphiaUtils;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Repository;
 
 /** Repository for retrieving the EntityRecord objects. */
 @Repository(AppConfigConstants.BEAN_ENTITY_RECORD_REPO)
@@ -163,16 +161,14 @@ public class EntityRecordRepository extends AbstractRepository {
     return Optional.ofNullable(value);
   }
   
-  public Optional<EntityRecord> findEntityDupplicationBySameAs(String entityId) {
-    List<String> listIds = Collections.singletonList(entityId);
-    Query<EntityRecord> query =
-        getDataStore()
-            .find(EntityRecord.class)
-            .disableValidation()
-            .filter(in(ENTITY_SAME_AS, listIds));
-    query.filter(eq(DISABLED, null));
-    EntityRecord value = query.first();
-    return Optional.ofNullable(value);
+  public List<EntityRecord> findAllEntitiesDupplicationByCoreference(List<String> uris) {
+    return getDataStore()
+      .find(EntityRecord.class)
+      .disableValidation()
+      .filter(or(in(ENTITY_SAME_AS, uris), in(ENTITY_EXACT_MATCH, uris)))
+      .filter(eq(DISABLED, null))
+      .iterator()
+      .toList();
   }  
 
   public List<EntityRecord> saveBulk(List<EntityRecord> entityRecords) {

@@ -58,6 +58,7 @@ import eu.europeana.entitymanagement.exception.EntityMismatchException;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
+import eu.europeana.entitymanagement.exception.MultipleChoicesException;
 import eu.europeana.entitymanagement.solr.SolrSearchCursorIterator;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.solr.model.SolrEntity;
@@ -68,6 +69,7 @@ import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import io.swagger.annotations.ApiOperation;
@@ -89,6 +91,8 @@ public class EMController extends BaseRest {
       "Url '%s' does not exist in entity owl:sameAs or skos:exactMatch";
   public static final String INVALID_UPDATE_REQUEST_MSG =
       "Request must either specify a 'query' param or contain entity identifiers in body";
+  private static final String MULTIPLE_CHOICES_FOR_REDIRECTION_MSG =
+      "There are multiple choices for redirecting the entity id: '%s'. They include: '%s'.";
 
   // profile used if none included in request
   public static final EntityProfile DEFAULT_REQUEST_PROFILE = EntityProfile.external;
@@ -719,8 +723,31 @@ public class EMController extends BaseRest {
       String languages,
       String contentType)
       throws EuropeanaApiException {
-    EntityRecord entityRecord =
-        entityRecordService.retrieveEntityRecord(type, identifier.toLowerCase(), true);
+    
+    EntityRecord entityRecord = null;
+    try {
+      entityRecord = 
+          entityRecordService.retrieveEntityRecord(type, identifier.toLowerCase(), true);
+    }
+    catch (EntityNotFoundException ex) {
+      //search in the coreferences of all enabled entities
+      String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
+      List<EntityRecord> corefEntities = entityRecordService.findAllEntitiesDupplicationByCoreference(Collections.singletonList(entityUri));
+      if(corefEntities.size()>1) {
+        String allCorefUris = corefEntities.stream().map(el -> el.getEntityId()).collect(Collectors.joining(","));
+        throw new MultipleChoicesException(String.format(MULTIPLE_CHOICES_FOR_REDIRECTION_MSG, entityUri, allCorefUris));
+      }
+      else if(corefEntities.size()==1) {
+        //return 301 redirect
+        return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
+            .location(URI.create(corefEntities.get(0).getEntityId()))
+            .build();
+      }
+      else {
+        throw new EntityNotFoundException(entityUri);
+      }
+    }
+    
     if (entityRecord.isDisabled()) {
       return redirectDeprecated(entityRecord, type, identifier.toLowerCase());
     }
@@ -733,7 +760,7 @@ public class EMController extends BaseRest {
 
   private ResponseEntity<String> createResponseMultipleEntities(
       List<String> entityIds, HttpServletRequest request) throws EuropeanaApiException {
-    List<EntityRecord> entityRecords = entityRecordService.retrieveMultipleByEntityIds(entityIds);
+    List<EntityRecord> entityRecords = entityRecordService.retrieveMultipleByEntityIds(entityIds, true, true);
     if (entityRecords.isEmpty()) {
       throw new EntityNotFoundException(entityIds.toString());
     }
@@ -848,18 +875,26 @@ public class EMController extends BaseRest {
 
   private ResponseEntity<String> redirectDeprecated(
       EntityRecord deprecatedEntity, EntityTypes type, String identifier)
-      throws EntityRemovedException {
-    //check if there is any enabled entity in the db, containing the entityId of this entity
-    //in the sameAs ref links and redirect to it
-    Optional<EntityRecord> entityRedirect = entityRecordService.findEntityDupplicationBySameAs(deprecatedEntity.getEntityId());
-    if (entityRedirect.isPresent()) {
+      throws EntityRemovedException, MultipleChoicesException {
+    //search by the entity id, using the corefs of the disabled entity
+    List<String> allCorefEuropeanaIds = deprecatedEntity.getEntity().getSameReferenceLinks().stream()
+        .filter(el -> el.startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI))
+        .collect(Collectors.toList());
+    List<EntityRecord> entitiesRedirect = entityRecordService.retrieveMultipleByEntityIds(allCorefEuropeanaIds, true, false);
+    if(entitiesRedirect.size()>1) {
+      String allRedirectUris = entitiesRedirect.stream().map(el -> el.getEntityId()).collect(Collectors.joining(","));
+      throw new MultipleChoicesException(String.format(MULTIPLE_CHOICES_FOR_REDIRECTION_MSG, deprecatedEntity.getEntityId(), allRedirectUris));
+    }    
+    else if (entitiesRedirect.size()==1) {
       // return 301 redirect
       return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
-          .location(URI.create(entityRedirect.get().getEntityId()))
+          .location(URI.create(entitiesRedirect.get(0).getEntityId()))
           .build();
     }
-    throw new EntityRemovedException(
-        String.format(EntityRecordUtils.ENTITY_ID_REMOVED_MSG, deprecatedEntity.getEntityId()));
+    else {
+      throw new EntityRemovedException(
+          String.format(EntityRecordUtils.ENTITY_ID_REMOVED_MSG, deprecatedEntity.getEntityId()));
+    }
   }
 
   private ResponseEntity<EntityIdResponse> scheduleBatchUpdates(

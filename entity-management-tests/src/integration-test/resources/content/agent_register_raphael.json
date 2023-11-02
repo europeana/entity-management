@@ -1,7 +1,4 @@
 {
   "type": "Agent",
-  "id": "http://www.wikidata.org/entity/Q5597",
-  "sameAs": [
-  	"http://data.europeana.eu/agent/1"
-  ]
+  "id": "http://www.wikidata.org/entity/Q5597"
 }

@@ -105,15 +105,8 @@ public class EntityRecordService {
     return Optional.ofNullable(entityRecordRepository.findByEntityId(entityId));
   }
 
-  /**
-   * Retives Multiple Entities at a time. NOTE : If the entity does not exist or is deprecated, do
-   * not include it in the response hence, excludeDisabled is set to true.
-   *
-   * @param entityIds
-   * @return
-   */
-  public List<EntityRecord> retrieveMultipleByEntityIds(List<String> entityIds) {
-    return entityRecordRepository.findByEntityIds(entityIds, true, true);
+  public List<EntityRecord> retrieveMultipleByEntityIds(List<String> entityIds, boolean excludeDisabled, boolean fetchFullRecord) {
+    return entityRecordRepository.findByEntityIds(entityIds, excludeDisabled, fetchFullRecord);
   }
 
   public EntityRecord retrieveEntityRecord(
@@ -156,8 +149,8 @@ public class EntityRecordService {
     return entityRecordRepository.findEntityDupplicationByCoreference(uris, entityId);
   }
   
-  public Optional<EntityRecord> findEntityDupplicationBySameAs(String entityId) {
-    return entityRecordRepository.findEntityDupplicationBySameAs(entityId);
+  public List<EntityRecord> findAllEntitiesDupplicationByCoreference(List<String> uris) {
+    return entityRecordRepository.findAllEntitiesDupplicationByCoreference(uris);
   }  
 
   public EntityRecord saveEntityRecord(EntityRecord er) {
