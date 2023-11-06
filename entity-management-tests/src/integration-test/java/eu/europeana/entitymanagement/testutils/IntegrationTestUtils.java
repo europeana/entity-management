@@ -2,7 +2,6 @@ package eu.europeana.entitymanagement.testutils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -250,22 +249,20 @@ public class IntegrationTestUtils {
           ORGANIZATION_BERGER_MUSEUM_ZOHO_RESPONSE);
   
   /** Maps Metis dereferenciation URIs to mocked XML responses */
-  public static final Map<String, String> METIS_RESPONSE_MAP = new HashMap<>(){
-      private static final long serialVersionUID = 9061784872644178552L;
-      {
-        put(AGENT_DA_VINCI_URI, AGENT_DA_VINCI_XML); 
-        put(AGENT_STALIN_URI, AGENT_STALIN_XML); 
-        put(PLACE_PARIS_URI, PLACE_PARIS_XML);
-        put(PLACE_HAGENBACH_URI, PLACE_HAGENBACH_XML);
-        put(TIMESPAN_1ST_CENTURY_URI, TIMESPAN_1ST_CENTURY_XML);
-        put(CONCEPT_BATHTUB_URI, CONCEPT_BATHTUB_XML);
-        put(AGENT_JAN_VERMEER_VIAF_URI, AGENT_JAN_VERMEER_XML_VIAF);
-        put(AGENT_JAN_VERMEER_WIKIDATA_URI, AGENT_JAN_VERMEER_XML_WIKIDATA);
-        put(AGENT_SCHEGK_URI, AGENT_SCHEGK_XML);
-        put(AGENT_BIRCH_URI, AGENT_BIRCH_XML);
-        put(AGENT_RAPHAEL_URI, AGENT_RAPHAEL_XML);
-      }
-  }; 
+  public static final Map<String, String> METIS_RESPONSE_MAP = 
+      Map.ofEntries(
+        Map.entry(AGENT_DA_VINCI_URI, AGENT_DA_VINCI_XML), 
+        Map.entry(AGENT_STALIN_URI, AGENT_STALIN_XML), 
+        Map.entry(PLACE_PARIS_URI, PLACE_PARIS_XML),
+        Map.entry(PLACE_HAGENBACH_URI, PLACE_HAGENBACH_XML),
+        Map.entry(TIMESPAN_1ST_CENTURY_URI, TIMESPAN_1ST_CENTURY_XML),
+        Map.entry(CONCEPT_BATHTUB_URI, CONCEPT_BATHTUB_XML),
+        Map.entry(AGENT_JAN_VERMEER_VIAF_URI, AGENT_JAN_VERMEER_XML_VIAF),
+        Map.entry(AGENT_JAN_VERMEER_WIKIDATA_URI, AGENT_JAN_VERMEER_XML_WIKIDATA),
+        Map.entry(AGENT_SCHEGK_URI, AGENT_SCHEGK_XML),
+        Map.entry(AGENT_BIRCH_URI, AGENT_BIRCH_XML),
+        Map.entry(AGENT_RAPHAEL_URI, AGENT_RAPHAEL_XML)
+      ); 
 
   public static String loadFile(String resourcePath) throws IOException {
     return IOUtils.toString(
