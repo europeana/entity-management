@@ -1,12 +1,13 @@
 package eu.europeana.entitymanagement.utils;
 
+import org.apache.commons.lang3.StringUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
-import org.apache.commons.lang3.StringUtils;
 
 public class EntityRecordUtils {
 
   public static final String ENTITY_ID_REMOVED_MSG = "Entity '%s' has been removed";
+  public static final String MULTIPLE_CHOICES_FOR_REDIRECTION_MSG = "There are multiple choices for redirecting the entity id: '%s'. They include: '%s'.";
 
   private EntityRecordUtils() {
     // private constructor to prevent instantiation
@@ -20,7 +21,7 @@ public class EntityRecordUtils {
     StringBuilder stringBuilder = new StringBuilder();
     stringBuilder.append(WebEntityFields.BASE_DATA_EUROPEANA_URI);
     if (StringUtils.isNotEmpty(type)) stringBuilder.append(type.toLowerCase()).append("/");
-    if (StringUtils.isNotEmpty(identifier)) stringBuilder.append(identifier);
+    if (StringUtils.isNotEmpty(identifier)) stringBuilder.append(identifier.toLowerCase());
     return stringBuilder.toString();
   }
 

@@ -53,6 +53,7 @@ import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
 import eu.europeana.entitymanagement.exception.HttpUnprocessableException;
+import eu.europeana.entitymanagement.exception.MultipleChoicesException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
@@ -128,6 +129,42 @@ public class EntityRecordService {
           String.format(EntityRecordUtils.ENTITY_ID_REMOVED_MSG, entityUri));
     }
     return entityRecord;
+  }
+  
+  public String redirectNotFound(EntityTypes type, String identifier, EntityNotFoundException exToRethrow) throws MultipleChoicesException, EntityNotFoundException {
+    //search in the coreferences of all enabled entities
+    String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
+    List<EntityRecord> corefEntities = findAllEntitiesDupplicationByCoreference(Collections.singletonList(entityUri));
+    if(corefEntities.size()>1) {
+      String allCorefUris = corefEntities.stream().map(el -> el.getEntityId()).collect(Collectors.joining(","));
+      throw new MultipleChoicesException(String.format(EntityRecordUtils.MULTIPLE_CHOICES_FOR_REDIRECTION_MSG, entityUri, allCorefUris));
+    }
+    else if(corefEntities.size()==1) {
+      return corefEntities.get(0).getEntityId();
+    }
+    else {
+      throw exToRethrow;
+    }   
+  }
+
+  public String redirectDeprecated(EntityRecord deprecatedEntity)
+      throws EntityRemovedException, MultipleChoicesException {
+    //search by the entity id, using the corefs of the disabled entity
+    List<String> allCorefEuropeanaIds = deprecatedEntity.getEntity().getSameReferenceLinks().stream()
+        .filter(el -> el.startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI))
+        .collect(Collectors.toList());
+    List<EntityRecord> entitiesRedirect = retrieveMultipleByEntityIds(allCorefEuropeanaIds, true, false);
+    if(entitiesRedirect.size()>1) {
+      String allRedirectUris = entitiesRedirect.stream().map(el -> el.getEntityId()).collect(Collectors.joining(","));
+      throw new MultipleChoicesException(String.format(EntityRecordUtils.MULTIPLE_CHOICES_FOR_REDIRECTION_MSG, deprecatedEntity.getEntityId(), allRedirectUris));
+    }    
+    else if (entitiesRedirect.size()==1) {
+      return entitiesRedirect.get(0).getEntityId();
+    }
+    else {
+      throw new EntityRemovedException(
+          String.format(EntityRecordUtils.ENTITY_ID_REMOVED_MSG, deprecatedEntity.getEntityId()));
+    }
   }
 
   public List<EntityIdDisabledStatus> retrieveMultipleByEntityId(
