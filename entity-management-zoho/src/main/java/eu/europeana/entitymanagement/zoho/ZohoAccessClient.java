@@ -94,6 +94,12 @@ public class ZohoAccessClient {
     }
   }
 
+  /**
+   * Retrieve Zoho Organization by its zoho URL
+   * @param zohoUrl the zoho url for the Organization
+   * @return the retrieved zoho records
+   * @throws ZohoException wrapping the original SDK exception
+   */
   public Optional<Record> getZohoRecordOrganizationById(String zohoUrl) throws ZohoException {
     String zohoId = EntityRecordUtils.getIdFromUrl(zohoUrl);
     try {
@@ -115,28 +121,41 @@ public class ZohoAccessClient {
     }
   }
   
-  public void updateZohoRecordOrganizationStringField(String zohoUrl, String fieldAPIName, String fieldValue) throws ZohoException {
+  /**
+   * Method for updating one field in zoho
+   * @param zohoUrl the URL of the organization in Zoho
+   * @param fieldName the name of the field to update
+   * @param fieldValue the new value 
+   * @throws ZohoException wrapping the original SDK exception
+   */
+  public void updateZohoRecordOrganizationStringField(String zohoUrl, String fieldName, String fieldValue) throws ZohoException {
     String zohoId = EntityRecordUtils.getIdFromUrl(zohoUrl);
     try {
       RecordOperations recordOperations = new RecordOperations();
-      BodyWrapper request = new BodyWrapper();
-      List<Record> records = new ArrayList<Record> ();
-      Record record1 = new Record();
-      record1.addKeyValue(fieldAPIName, fieldValue);
-      records.add(record1);
-      request.setData(records);
-      List <String> trigger = new ArrayList<String> ();
-      trigger.add("approval");
-      trigger.add("workflow");
-      trigger.add("blueprint");
-      request.setTrigger(trigger);
+      BodyWrapper request = buildUpdateRequest(fieldName, fieldValue);
       
       //Call updateRecord method that takes recordId, ModuleAPIName and BodyWrapper instance as parameter.
       APIResponse<ActionHandler> response = recordOperations.updateRecord(Long.valueOf(zohoId), ZohoConstants.ACCOUNTS_MODULE_NAME, request);
+      //check if the update was successful
       validateZohoUpdateResponse(response);
     } catch (SDKException e) {
       throw new ZohoException("Zoho update the organization field threw an exception.", e);
     }
+  }
+
+  BodyWrapper buildUpdateRequest(String fieldName, String fieldValue) {
+    BodyWrapper request = new BodyWrapper();
+    List<Record> records = new ArrayList<Record> ();
+    Record record1 = new Record();
+    record1.addKeyValue(fieldName, fieldValue);
+    records.add(record1);
+    request.setData(records);
+    List <String> trigger = new ArrayList<String> ();
+    trigger.add("approval");
+    trigger.add("workflow");
+    trigger.add("blueprint");
+    request.setTrigger(trigger);
+    return request;
   }
 
   /**
@@ -172,9 +191,8 @@ public class ZohoAccessClient {
                 else if(actionResponse instanceof APIException)
                 {
                   //Get the received APIException instance
-                  APIException exception = (APIException) actionResponse;                        
-                  throw new ZohoException("Exeption during updating a field in Zoho. Status: " + exception.getStatus().getValue() +
-                      ", code: " + exception.getCode().getValue() + ", message: " + exception.getMessage().getValue());
+                  String message = extractErrorMessage((APIException)actionResponse);
+                  throw new ZohoException(message);
                 }
             }
         }
@@ -183,16 +201,22 @@ public class ZohoAccessClient {
         {
             //Get the received APIException instance
             APIException exception = (APIException) actionHandler;                
-            throw new ZohoException("Exeption during updating a field in Zoho. Status: " + exception.getStatus().getValue() +
-                ", code: " + exception.getCode().getValue() + ", message: " + exception.getMessage().getValue());
+            String message = extractErrorMessage(exception);
+            throw new ZohoException(message);
         }
       }
       else
       {//If response is not as expected            
-        throw new ZohoException("Unexpected response during updating a field in Zoho.");
+        throw new ZohoException("Unexpected response during updating a field in Zoho." + response.getStatusCode());
       }
     }
     
+  }
+
+  String extractErrorMessage(APIException errorResponse) {
+    String message = "Exeption during updating a field in Zoho. Status: " + errorResponse.getStatus().getValue() +
+        ", code: " + errorResponse.getCode().getValue() + ", message: " + errorResponse.getMessage().getValue();
+    return message;
   }
 
   /**

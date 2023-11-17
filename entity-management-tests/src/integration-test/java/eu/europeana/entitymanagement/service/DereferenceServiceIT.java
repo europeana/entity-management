@@ -34,7 +34,7 @@ import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 class DereferenceServiceIT extends AbstractIntegrationTest {
 
   @Autowired private DereferenceServiceLocator dereferenceServiceLocator;
-
+  
   //  @Test
   public void dereferenceConceptById() throws Exception {
 
@@ -99,8 +99,7 @@ class DereferenceServiceIT extends AbstractIntegrationTest {
     ZohoDereferenceService dereferencer =
         (ZohoDereferenceService) dereferenceServiceLocator.getDereferencer(organizationId, "Organization");
     
-    dereferencer.updateEntityStringField(organizationId, ZohoConstants.EUROPEANA_ID_FIELD, Europeana_ID);
-
+    dereferencer.updateEuropeanaId(organizationId, Europeana_ID);
   }
 
   //  @Test
@@ -146,7 +145,7 @@ class DereferenceServiceIT extends AbstractIntegrationTest {
     //    choice = new Choice<String>("EN");
     //    record.addKeyValue(ZohoConstants.LANG_ALTERNATIVE_FIELD + "_4", choice);
 
-    Organization org = ZohoOrganizationConverter.convertToOrganizationEntity(record);
+    Organization org = ZohoOrganizationConverter.convertToOrganizationEntity(record, zohoAccessConfiguration.getZohoBaseUrl());
 
     Assertions.assertEquals(2, org.getPrefLabel().size());
     Assertions.assertEquals(1, org.getAltLabel().size());

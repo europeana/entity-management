@@ -16,6 +16,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 import eu.europeana.entitymanagement.batch.model.JobType;
 import eu.europeana.entitymanagement.batch.service.BatchEntityUpdateExecutor;
+import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
 import eu.europeana.entitymanagement.web.service.ZohoSyncService;
 
 /**
@@ -79,7 +80,8 @@ public class EntityManagementApp implements CommandLineRunner {
       
       if(tasks.contains(JobType.ZOHO_SYNC.value())) {
         LOG.info("Executing zoho sync");
-        zohoSyncService.synchronizeModifiedZohoOrganizations();
+        ZohoSyncReport zohoSyncReport = zohoSyncService.synchronizeModifiedZohoOrganizations();
+        LOG.info("Synchronization Report: {}", zohoSyncReport.toString());
       }
       
       if(tasks.contains(JobType.SCHEDULE_UPDATE.value())) {

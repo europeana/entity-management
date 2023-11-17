@@ -13,6 +13,7 @@ public class ZohoSyncReportFields {
   public static final String UPDATED = "updated";
   public static final String DEPRECATED = "deprecated";
   public static final String DELETED = "deleted";
+  public static final String SUBMITTED_ZOHO_EUROPEANA_ID = "submittedZohoEuropeanaID";
   public static final String EXECUTION_STATUS = "executionStatus";
   public static final String FAILED = "failed";
   public static final String ID = "id";

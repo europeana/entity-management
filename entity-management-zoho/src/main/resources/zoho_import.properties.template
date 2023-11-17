@@ -3,3 +3,4 @@ zoho.client.id=
 zoho.client.secret=
 zoho.refresh.token=
 zoho.redirect.url=
+zoho.baseUrl=

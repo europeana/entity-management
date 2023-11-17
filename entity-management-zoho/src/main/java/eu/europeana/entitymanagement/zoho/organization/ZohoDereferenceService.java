@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import com.zoho.crm.api.record.Record;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.dereference.Dereferencer;
+import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 
 @Service
@@ -25,10 +26,14 @@ public class ZohoDereferenceService implements Dereferencer {
     //    Gson resp = new Gson();
     //    System.out.println(resp.toJson(zohoOrganization.get().getKeyValues()));
     //
-    return zohoOrganization.map(ZohoOrganizationConverter::convertToOrganizationEntity);
+    if(zohoOrganization.isPresent()) {
+      return Optional.of(ZohoOrganizationConverter.convertToOrganizationEntity(zohoOrganization.get(), zohoAccessConfiguration.getZohoBaseUrl())); 
+    } else {
+      return Optional.empty();
+    }
   }
   
-  public void updateEntityStringField(String zohoUrl, String fieldAPIName, String fieldValue) throws ZohoException {
-    zohoAccessConfiguration.getZohoAccessClient().updateZohoRecordOrganizationStringField(zohoUrl, fieldAPIName, fieldValue);
+  public void updateEuropeanaId(String zohoOrganizationUrl, String organizationEuropeanaID) throws ZohoException {
+    zohoAccessConfiguration.getZohoAccessClient().updateZohoRecordOrganizationStringField(zohoOrganizationUrl, ZohoConstants.EUROPEANA_ID_FIELD, organizationEuropeanaID);
   }
 }

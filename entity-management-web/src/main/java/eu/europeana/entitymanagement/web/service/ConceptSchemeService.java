@@ -1,7 +1,6 @@
 package eu.europeana.entitymanagement.web.service;
 
 import java.util.Date;
-import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,15 +13,10 @@ import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.mongo.repository.ConceptSchemeRepository;
-import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import java.util.Date;
-import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 @Service(AppConfig.BEAN_CONCEPT_SCHEME_SERVICE)
 public class ConceptSchemeService {
@@ -143,6 +137,7 @@ public class ConceptSchemeService {
   }
 
   public void dropRepository() {
+    logger.warn("The concept scheme collection was deleted!");
     this.emConceptSchemeRepo.dropCollection();
   }
 }

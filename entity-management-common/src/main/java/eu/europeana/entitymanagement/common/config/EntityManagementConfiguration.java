@@ -137,6 +137,9 @@ public class EntityManagementConfiguration implements InitializingBean {
   @Value("${zoho.sync.batch.size: 100}")
   private int zohoSyncBatchSize;
 
+  @Value("${zoho.generate.organization.europeanaid=: false}")
+  private boolean generateOrganizationEuropeanaId;
+  
   @Value("${europeana.item.data.endpoint:'http://data.europeana.eu/item'}")
   private String itemDataEndpoint;
 
@@ -304,12 +307,12 @@ public class EntityManagementConfiguration implements InitializingBean {
 
   @Override
   public void afterPropertiesSet() throws Exception {
-    if (testProfileNotActive(activeProfileString)) {
+    if (isNotTestProfile(activeProfileString)) {
       verifyRequiredProperties();
     }
   }
 
-  public static boolean testProfileNotActive(String activeProfileString) {
+  public static boolean isNotTestProfile(String activeProfileString) {
     return Arrays.stream(activeProfileString.split(",")).noneMatch(ACTIVE_TEST_PROFILE::equals);
   }
 
@@ -349,4 +352,9 @@ public class EntityManagementConfiguration implements InitializingBean {
   public void setSchemeDataEndpoint(String schemeDataEndpoint) {
     this.schemeDataEndpoint = schemeDataEndpoint;
   }
+
+  public boolean isGenerateOrganizationEuropeanaId() {
+    return generateOrganizationEuropeanaId;
+  }
+
 }
