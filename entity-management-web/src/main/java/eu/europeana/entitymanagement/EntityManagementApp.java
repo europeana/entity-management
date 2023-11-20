@@ -16,6 +16,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 import eu.europeana.entitymanagement.batch.model.JobType;
 import eu.europeana.entitymanagement.batch.service.BatchEntityUpdateExecutor;
+import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
 import eu.europeana.entitymanagement.web.service.ZohoSyncService;
 
 /**
@@ -73,18 +74,22 @@ public class EntityManagementApp implements CommandLineRunner {
     if (hasCmdLineParams(args)) {
       Set<String> tasks = Set.of(args);
       if(tasks.contains(JobType.SCHEDULE_DELETION.value())) {
+        //run also the deletions called through the API directly
         LOG.info("Executing scheduled deletions");
         batchUpdateExecutor.runScheduledDeprecationsAndDeletions();
+        //TODO: should read the number of scheduled deletions and deprecations from the database and write it to the logs
       }
       
       if(tasks.contains(JobType.ZOHO_SYNC.value())) {
         LOG.info("Executing zoho sync");
-        zohoSyncService.synchronizeModifiedZohoOrganizations();
+        ZohoSyncReport zohoSyncReport = zohoSyncService.synchronizeModifiedZohoOrganizations();
+        LOG.info("Synchronization Report: {}", zohoSyncReport.toString());
       }
       
       if(tasks.contains(JobType.SCHEDULE_UPDATE.value())) {
         LOG.info("Executing scheduled updates");
         batchUpdateExecutor.runScheduledUpdate();
+        //TODO: should read the number of scheduled deletions and deprecations from the database and write it to the logs
       }
         
     }

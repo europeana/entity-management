@@ -39,6 +39,7 @@ public class ZohoSyncReport {
   long updatedItems;
   long deprecatedItems;
   long deletedItems;
+  long submittedZohoEuropeanaId;
   private List<FailedOperation> failed;
 
   public ZohoSyncReport(Date startDate) {
@@ -118,6 +119,19 @@ public class ZohoSyncReport {
   public void increaseDeleted(long deleted) {
     this.deletedItems += deleted;
   }
+  
+  @JsonProperty(SUBMITTED_ZOHO_EUROPEANA_ID)
+  public long getSubmittedZohoEuropeanaId() {
+    return submittedZohoEuropeanaId;
+  }
+
+  public void setSubmittedZohoEuropeanaId(long submittedZohoEuropeanaId) {
+    this.submittedZohoEuropeanaId = submittedZohoEuropeanaId;
+  }
+  
+  public void increaseSubmittedZohoEuropeanaId() {
+    this.submittedZohoEuropeanaId++;
+  }
 
   @JsonProperty(EXECUTION_STATUS)
   public String getExecutionStatus() {
@@ -130,12 +144,13 @@ public class ZohoSyncReport {
   @Override
   public String toString() {
     return String.format(
-        "lastSyncDate: %s,%n created: %d,%n enabled: %d, %n updated: %d,%n deprecated: %d,%n deleted: %d,%n executionStatus: %s",
+        "lastSyncDate: %s,%n created: %d,%n enabled: %d, %n updated: %d,%n deprecated: %d,%n deleted: %d,%n updated EuropeanaID in Zoho: %d,%n executionStatus: %s",
         DateUtils.convertDateToStr(getStartDate()),
         getCreatedItems(),
         getEnabledItems(),
         getUpdatedItems(),
         getDeprecatedItems(),
+        getDeletedItems(),
         getDeletedItems(),
         getExecutionStatus());
   }

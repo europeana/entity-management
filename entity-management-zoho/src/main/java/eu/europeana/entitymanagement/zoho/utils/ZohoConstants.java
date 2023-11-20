@@ -44,8 +44,6 @@ public final class ZohoConstants {
   public static final String LATITUDE_FIELD = "Latitude";
   public static final String LONGITUDE_FIELD = "Longitude";
   public static final String LAST_ACTIVITY_TIME_FIELD = "Last_Activity_Time";
-  public static final String URL_ORGANIZATION_PREFFIX =
-      "https://crm.zoho.com/crm/org51823723/tab/Accounts/";
   public static final String ADDRESS_ABOUT = "#address";
   public static final String HIDDEN_LABEL1_FIELD = "Hidden_1";
   public static final String HIDDEN_LABEL2_FIELD = "Hidden_2";
@@ -54,6 +52,7 @@ public final class ZohoConstants {
   public static final String HIDDEN_LABEL_FIELD = "Hidden";
 
   public static final String INDUSTRY_FIELD = "Industry_2";
+  public static final String EUROPEANA_ID_FIELD = "Europeana_ID";
 
   // Operations
   public static final String EQUALS_OPERATION = "equals";

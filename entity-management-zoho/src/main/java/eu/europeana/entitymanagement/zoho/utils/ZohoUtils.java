@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.validation.constraints.NotEmpty;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
@@ -41,8 +42,12 @@ public final class ZohoUtils {
     return null;
   }
 
-  public static String buildZohoOrganizationId(Long zohoId) {
-    return ZohoConstants.URL_ORGANIZATION_PREFFIX + zohoId;
+  public static String buildZohoOrganizationId(@NotEmpty String zohoBaseUrl, Long zohoId) {
+    StringBuilder builder = new StringBuilder(zohoBaseUrl);
+    if(!zohoBaseUrl.endsWith("/")) {
+      builder.append('/');
+    }
+    return builder.append(zohoId).toString();
   }
 
   /**
@@ -52,6 +57,7 @@ public final class ZohoUtils {
    * @param object the object to be checked
    * @return the List of strings representation of the object or empty list
    */
+  @SuppressWarnings("unchecked")
   public static List<String> stringListSupplier(Object object) {
     if (!JSONObject.NULL.equals(object)
         && object instanceof List<?>
@@ -157,6 +163,7 @@ public final class ZohoUtils {
    * @param addMap
    * @return
    */
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public static Map<String, List<String>> mergeMapsWithLists(
       Map<String, List<String>> baseMap, Map<String, List<String>> addMap) {
     if (baseMap == null && addMap == null) {
@@ -189,6 +196,7 @@ public final class ZohoUtils {
    * @param notMergedMap
    * @return
    */
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public static Map<String, List<String>> mergeMapsWithSingletonLists(
       Map<String, List<String>> baseMap,
       Map<String, List<String>> addMap,

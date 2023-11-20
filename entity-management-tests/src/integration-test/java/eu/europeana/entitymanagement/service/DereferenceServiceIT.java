@@ -4,7 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
+import java.util.Optional;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import com.zoho.crm.api.record.Record;
 import com.zoho.crm.api.util.Choice;
 import eu.europeana.entitymanagement.AbstractIntegrationTest;
@@ -15,15 +20,10 @@ import eu.europeana.entitymanagement.dereference.Dereferencer;
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
 import eu.europeana.entitymanagement.testutils.TestConfig;
 import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
+import eu.europeana.entitymanagement.zoho.organization.ZohoDereferenceService;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
-import java.util.Optional;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 
 /** JUnit test for testing the DereferenceService class */
 // enable test config to use zoho mocking
@@ -34,7 +34,7 @@ import org.springframework.context.annotation.Import;
 class DereferenceServiceIT extends AbstractIntegrationTest {
 
   @Autowired private DereferenceServiceLocator dereferenceServiceLocator;
-
+  
   //  @Test
   public void dereferenceConceptById() throws Exception {
 
@@ -66,9 +66,9 @@ class DereferenceServiceIT extends AbstractIntegrationTest {
     assertEquals(8, entity.getNote().size());
   }
 
-  //  @Test
+  // @Test
   public void zohoOrganizationDereferenceTest() throws Exception {
-    String organizationId = IntegrationTestUtils.ORGANIZATION_BNF_URI_ZOHO;
+    String organizationId = IntegrationTestUtils.ORGANIZATION_BNF_URI_ZOHO;    
     Dereferencer dereferencer =
         dereferenceServiceLocator.getDereferencer(organizationId, "Organization");
     Optional<Entity> orgOptional = dereferencer.dereferenceEntityById(organizationId);
@@ -90,6 +90,16 @@ class DereferenceServiceIT extends AbstractIntegrationTest {
     Assertions.assertTrue(org.getHiddenLabel().contains("Bibliothèque nationale"));
     Assertions.assertTrue(org.getHiddenLabel().contains("Bibliothèque nationale Francaise"));
     Assertions.assertTrue(org.getHiddenLabel().contains("French National Library"));
+  }
+
+  // @Test
+  public void zohoUpdateOrganizationStringFieldTest() throws Exception {
+    String organizationId = "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000060440051";
+    String Europeana_ID = "http://data.europeana.eu/organization/1482250000060440051";
+    ZohoDereferenceService dereferencer =
+        (ZohoDereferenceService) dereferenceServiceLocator.getDereferencer(organizationId, "Organization");
+    
+    dereferencer.updateEuropeanaId(organizationId, Europeana_ID);
   }
 
   //  @Test
@@ -135,7 +145,7 @@ class DereferenceServiceIT extends AbstractIntegrationTest {
     //    choice = new Choice<String>("EN");
     //    record.addKeyValue(ZohoConstants.LANG_ALTERNATIVE_FIELD + "_4", choice);
 
-    Organization org = ZohoOrganizationConverter.convertToOrganizationEntity(record);
+    Organization org = ZohoOrganizationConverter.convertToOrganizationEntity(record, zohoAccessConfiguration.getZohoBaseUrl());
 
     Assertions.assertEquals(2, org.getPrefLabel().size());
     Assertions.assertEquals(1, org.getAltLabel().size());

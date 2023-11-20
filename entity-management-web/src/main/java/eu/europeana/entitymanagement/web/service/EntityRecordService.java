@@ -6,7 +6,26 @@ import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEuropeana
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEuropeanaProxyId;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getIsAggregatedById;
 import static java.time.Instant.now;
-
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import com.mongodb.client.result.UpdateResult;
 import dev.morphia.query.experimental.filters.Filter;
 import eu.europeana.api.commons.error.EuropeanaApiException;
@@ -49,26 +68,6 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import org.apache.commons.lang.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 @Service(AppConfig.BEAN_ENTITY_RECORD_SERVICE)
 public class EntityRecordService {
@@ -373,9 +372,8 @@ public class EntityRecordService {
     } catch (EntityModelCreationException e) {
       throw new EntityCreationException(e.getMessage(), e);
     }
-    boolean isZohoOrg =
-        ZohoUtils.isZohoOrganization(externalEntityId, datasourceResponse.getType());
-    String entityId = generateEntityId(datasourceResponse, isZohoOrg);
+    boolean isZohoOrg = ZohoUtils.isZohoOrganization(externalEntityId, datasourceResponse.getType());
+    String entityId = generateEntityId(datasourceResponse);
 
     EntityRecord entityRecord = new EntityRecord();
     entityRecord.setEntityId(entityId);
@@ -479,18 +477,20 @@ public class EntityRecordService {
     }
   }
 
-  String generateEntityId(Entity datasourceResponse, boolean isZohoOrg)
+  String generateEntityId(Entity datasourceResponse)
       throws UnsupportedEntityTypeException {
     // only in case of Zoho Organization use the provided id from de-referencing
     String entityId = null;
     EntityTypes type = EntityTypes.getByEntityType(datasourceResponse.getType());
-    if (isZohoOrg) {
-      // zoho id is mandatory and unique identifier for zoho Organizations
-      String zohoId = EntityRecordUtils.getIdFromUrl(datasourceResponse.getEntityId());
-      entityId = EntityRecordUtils.buildEntityIdUri(type, zohoId);
-    } else {
-      entityId = generateEntityId(type, null);
-    }
+    //now we generate the sequenced entityIds also for the organizations
+//    if (isZohoOrg) {
+//      // zoho id is mandatory and unique identifier for zoho Organizations
+//      String zohoId = EntityRecordUtils.getIdFromUrl(datasourceResponse.getEntityId());
+//      entityId = EntityRecordUtils.buildEntityIdUri(type, zohoId);
+//    } else {
+//      entityId = generateEntityId(type, null);
+//    }
+    entityId = generateEntityId(type, null);
     return entityId;
   }
 

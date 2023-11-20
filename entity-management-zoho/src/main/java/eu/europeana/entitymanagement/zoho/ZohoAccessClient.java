@@ -1,5 +1,18 @@
 package eu.europeana.entitymanagement.zoho;
 
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.SystemUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import com.zoho.api.authenticator.OAuthToken;
 import com.zoho.api.authenticator.OAuthToken.TokenType;
 import com.zoho.api.authenticator.Token;
@@ -12,6 +25,11 @@ import com.zoho.crm.api.UserSignature;
 import com.zoho.crm.api.dc.DataCenter.Environment;
 import com.zoho.crm.api.dc.USDataCenter;
 import com.zoho.crm.api.exception.SDKException;
+import com.zoho.crm.api.record.APIException;
+import com.zoho.crm.api.record.ActionHandler;
+import com.zoho.crm.api.record.ActionResponse;
+import com.zoho.crm.api.record.ActionWrapper;
+import com.zoho.crm.api.record.BodyWrapper;
 import com.zoho.crm.api.record.DeletedRecord;
 import com.zoho.crm.api.record.DeletedRecordsHandler;
 import com.zoho.crm.api.record.DeletedRecordsWrapper;
@@ -23,22 +41,11 @@ import com.zoho.crm.api.record.RecordOperations.GetRecordsParam;
 import com.zoho.crm.api.record.RecordOperations.SearchRecordsParam;
 import com.zoho.crm.api.record.ResponseHandler;
 import com.zoho.crm.api.record.ResponseWrapper;
+import com.zoho.crm.api.record.SuccessResponse;
 import com.zoho.crm.api.util.APIResponse;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
-import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.SystemUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class ZohoAccessClient {
 
@@ -87,6 +94,12 @@ public class ZohoAccessClient {
     }
   }
 
+  /**
+   * Retrieve Zoho Organization by its zoho URL
+   * @param zohoUrl the zoho url for the Organization
+   * @return the retrieved zoho records
+   * @throws ZohoException wrapping the original SDK exception
+   */
   public Optional<Record> getZohoRecordOrganizationById(String zohoUrl) throws ZohoException {
     String zohoId = EntityRecordUtils.getIdFromUrl(zohoUrl);
     try {
@@ -106,6 +119,104 @@ public class ZohoAccessClient {
     } catch (SDKException e) {
       throw new ZohoException("Zoho search organization by organization id threw an exception", e);
     }
+  }
+  
+  /**
+   * Method for updating one field in zoho
+   * @param zohoUrl the URL of the organization in Zoho
+   * @param fieldName the name of the field to update
+   * @param fieldValue the new value 
+   * @throws ZohoException wrapping the original SDK exception
+   */
+  public void updateZohoRecordOrganizationStringField(String zohoUrl, String fieldName, String fieldValue) throws ZohoException {
+    String zohoId = EntityRecordUtils.getIdFromUrl(zohoUrl);
+    try {
+      RecordOperations recordOperations = new RecordOperations();
+      BodyWrapper request = buildUpdateRequest(fieldName, fieldValue);
+      
+      //Call updateRecord method that takes recordId, ModuleAPIName and BodyWrapper instance as parameter.
+      APIResponse<ActionHandler> response = recordOperations.updateRecord(Long.valueOf(zohoId), ZohoConstants.ACCOUNTS_MODULE_NAME, request);
+      //check if the update was successful
+      validateZohoUpdateResponse(response);
+    } catch (SDKException e) {
+      throw new ZohoException("Zoho update the organization field threw an exception.", e);
+    }
+  }
+
+  BodyWrapper buildUpdateRequest(String fieldName, String fieldValue) {
+    BodyWrapper request = new BodyWrapper();
+    List<Record> records = new ArrayList<Record> ();
+    Record record1 = new Record();
+    record1.addKeyValue(fieldName, fieldValue);
+    records.add(record1);
+    request.setData(records);
+    List <String> trigger = new ArrayList<String> ();
+    trigger.add("approval");
+    trigger.add("workflow");
+    trigger.add("blueprint");
+    request.setTrigger(trigger);
+    return request;
+  }
+
+  /**
+   * Source: https://www.zoho.com/crm/developer/docs/java-sdk/v2/record-samples.html
+   * @throws ZohoException 
+   */
+  private void validateZohoUpdateResponse(APIResponse<ActionHandler> response) throws ZohoException {
+    if(response != null)
+    {
+      //Get the status code from response (response.getStatusCode())
+      //Check if expected response is received
+      if(response.isExpected())
+      {
+        //Get object from response
+        ActionHandler actionHandler = response.getObject(); 
+        if(actionHandler instanceof ActionWrapper)
+        {
+            //Get the received ResponseWrapper instance
+            ActionWrapper actionWrapper = (ActionWrapper) actionHandler;  
+            //Get the list of obtained ActionResponse instances
+            List<ActionResponse> actionResponses = actionWrapper.getData();
+            for(ActionResponse actionResponse : actionResponses)
+            {
+                //Check if the request is successful
+                if(actionResponse instanceof SuccessResponse)
+                {
+                  //Get the received SuccessResponse instance
+                  // SuccessResponse successResponse = (SuccessResponse)actionResponse;
+                  // status, code, and message can be taken with: successResponse.getStatus().getValue(), successResponse.getCode().getValue(), and successResponse.getMessage().getValue()
+                  continue;
+                }
+                //Check if the request returned an exception
+                else if(actionResponse instanceof APIException)
+                {
+                  //Get the received APIException instance
+                  String message = extractErrorMessage((APIException)actionResponse);
+                  throw new ZohoException(message);
+                }
+            }
+        }
+        //Check if the request returned an exception
+        else if(actionHandler instanceof APIException)
+        {
+            //Get the received APIException instance
+            APIException exception = (APIException) actionHandler;                
+            String message = extractErrorMessage(exception);
+            throw new ZohoException(message);
+        }
+      }
+      else
+      {//If response is not as expected            
+        throw new ZohoException("Unexpected response during updating a field in Zoho." + response.getStatusCode());
+      }
+    }
+    
+  }
+
+  String extractErrorMessage(APIException errorResponse) {
+    String message = "Exeption during updating a field in Zoho. Status: " + errorResponse.getStatus().getValue() +
+        ", code: " + errorResponse.getCode().getValue() + ", message: " + errorResponse.getMessage().getValue();
+    return message;
   }
 
   /**
