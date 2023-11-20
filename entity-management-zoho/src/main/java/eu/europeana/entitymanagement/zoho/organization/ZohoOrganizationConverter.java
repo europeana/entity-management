@@ -202,7 +202,7 @@ public class ZohoOrganizationConverter {
     return ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(zohoFieldName));
   }
 
-  public static String getEuropeansIdFieldValue(Record zohoRecord) {
+  public static String getEuropeanaIdFieldValue(Record zohoRecord) {
     return getStringFieldValue(zohoRecord, ZohoConstants.EUROPEANA_ID_FIELD);
   }
   

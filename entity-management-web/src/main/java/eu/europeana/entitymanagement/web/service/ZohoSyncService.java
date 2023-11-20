@@ -71,6 +71,7 @@ public class ZohoSyncService extends BaseZohoAccess {
     }
 
     // for development debugging purposes use modifiedSince = generateFixDate();
+    modifiedSince = generateFixDate();
 
     return synchronizeZohoOrganizations(modifiedSince);
   }
@@ -87,11 +88,9 @@ public class ZohoSyncService extends BaseZohoAccess {
     ZohoSyncReport zohoSyncReport = new ZohoSyncReport(new Date());
     // synchronize updated
     synchronizeZohoOrganizations(modifiedSince, zohoSyncReport);
-
-    // synchronize deleted
-    //to clarify if permanent deletion or deprecation only
-//    synchronizeDeletedZohoOrganizations(modifiedSince, zohoSyncReport);
-
+    //synchronize deleted in zoho
+    synchronizeDeletedZohoOrganizations(modifiedSince, zohoSyncReport);
+    
     return zohoSyncRepo.save(zohoSyncReport);
   }
 
@@ -137,11 +136,11 @@ public class ZohoSyncService extends BaseZohoAccess {
       }
     }
 
-    logger.debug("Zoho update operations completed successfully:\n {}", zohoSyncReport);
+    logger.info("Zoho update operations completed successfully:\n {}", zohoSyncReport);
   }
 
   /**
-   * Retrieve deleted in Zoho organizations and removed from the Enrichment database
+   * Retrieve deleted in Zoho organizations and remove them from the Enrichment database
    *
    * @return the number of deleted from Enrichment database organizations
    * @throws EntityUpdateException
@@ -257,9 +256,9 @@ public class ZohoSyncService extends BaseZohoAccess {
   private void addOperation(BatchOperations operations, Long zohoId, Record zohoOrg,
       EntityRecord entityRecord) {
 
-    String zohoBasedEntityId =
-        EntityRecordUtils.buildEntityIdUri(EntityTypes.Organization, zohoId.toString());
-    String zohoRecordEuropeanaID = ZohoOrganizationConverter.getEuropeansIdFieldValue(zohoOrg);
+//    String zohoBasedEntityId =
+//        EntityRecordUtils.buildEntityIdUri(EntityTypes.Organization, zohoId.toString());
+    String zohoRecordEuropeanaID = ZohoOrganizationConverter.getEuropeanaIdFieldValue(zohoOrg);
 
     boolean hasDpsOwner = hasRequiredOwnership(zohoOrg);
     boolean markedForDeletion = ZohoOrganizationConverter.isMarkedForDeletion(zohoOrg);
@@ -269,7 +268,8 @@ public class ZohoSyncService extends BaseZohoAccess {
 
     if (emOperation != null) {
       // only if there is an operation to perform in EM
-      Operation operation = new Operation(zohoBasedEntityId, emOperation, zohoOrg, entityRecord);
+      //zohoRecordEuropeanaID might be null at this stage
+      Operation operation = new Operation(zohoRecordEuropeanaID, emOperation, zohoOrg, entityRecord);
       operations.addOperation(operation);
     } else {
       // skip

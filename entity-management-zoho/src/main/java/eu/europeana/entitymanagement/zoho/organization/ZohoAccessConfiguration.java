@@ -27,7 +27,7 @@ public class ZohoAccessConfiguration {
   @Value("${zoho.redirect.url:#{null}}")
   private String zohoRedirectUrl;
   
-  @Value("${zoho.baseUrl=: #{null}}")
+  @Value("${zoho.base.url:#{null}}")
   private String zohoBaseUrl;
 
   private volatile ZohoAccessClient zohoAccessClient;

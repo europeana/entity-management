@@ -41,3 +41,6 @@ zoho_import.properties
 
 #log files
 **/*.log
+
+##local backups of text files 
+**/*.bk

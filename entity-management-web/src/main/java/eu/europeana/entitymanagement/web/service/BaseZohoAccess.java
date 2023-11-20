@@ -265,7 +265,7 @@ public class BaseZohoAccess {
        * here we need to check if the Europeana_ID field in zoho exists, and if not (can be due to zoho update failed last time),
        * we need to update it again
        */
-      String Europeana_ID = ZohoOrganizationConverter.getEuropeansIdFieldValue(operation.getZohoRecord());
+      String Europeana_ID = ZohoOrganizationConverter.getEuropeanaIdFieldValue(operation.getZohoRecord());
       if(StringUtils.isBlank(Europeana_ID)) {
         updateEuropeanaIDFieldInZoho(operation.getZohoRecord().getId(), operation.getEntityRecord().getEntityId(), zohoSyncReport);
       }
@@ -315,23 +315,10 @@ public class BaseZohoAccess {
        * here we need to check if the Europeana_ID field in zoho exists, and if not (can be due to zoho update failed last time),
        * we need to update it again
        */
-      String Europeana_ID = ZohoOrganizationConverter.getEuropeansIdFieldValue(operation.getZohoRecord());
+      String Europeana_ID = ZohoOrganizationConverter.getEuropeanaIdFieldValue(operation.getZohoRecord());
       if(StringUtils.isBlank(Europeana_ID)) {
         updateEuropeanaIDFieldInZoho(operation.getZohoRecord().getId(), operation.getEntityRecord().getEntityId(), zohoSyncReport);
       }
-      
-      //first enable the records in the db if disabled (synchronous)
-      //SG: EA-3584 
-//      if(operation.getEntityRecord().isDisabled()) {
-//        try {
-//          entityRecordService.enableEntityRecord(operation.getEntityRecord());
-//          zohoSyncReport.increaseEnabled(1);
-//        } catch (RuntimeException | EntityUpdateException e) {
-//          zohoSyncReport.addFailedOperation(
-//              operation.getEntityRecord().getEntityId(), ZohoSyncReportFields.ENABLE_ERROR, e);
-//        }
-//      }
-      
     }
     
     //update the records (async through the scheduled tasks)   
@@ -402,20 +389,21 @@ public class BaseZohoAccess {
     return entitiesToUpdate;
   }
 
+  /**
+   * registers the new organization and sets the generated organizationID in the operation
+   * @param operation the create operation object
+   * @param zohoSyncReport the report collecting executed operations
+   * @param entitiesToUpdate the ids of the newly created organizations
+   */
   private void performEntityRegistration(Operation operation, ZohoSyncReport zohoSyncReport, List<String> entitiesToUpdate) {
     Organization zohoOrganization =
         ZohoOrganizationConverter.convertToOrganizationEntity(operation.getZohoRecord(), zohoAccessConfiguration.getZohoBaseUrl());
-    List<String> allCorefs = new ArrayList<>();
-    allCorefs.add(operation.getOrganizationId());
-    allCorefs.add(zohoOrganization.getAbout());
-    allCorefs.addAll(zohoOrganization.getSameReferenceLinks());
     
     entitiesToUpdate.add(null);
   
     try {
-  
       Optional<EntityRecord> existingEntity =
-          entityRecordService.findEntityDupplicationByCoreference(allCorefs, null);
+          findDupplicateOrganization(operation, zohoOrganization);
       if (existingEntity.isPresent()) {
         // skipp processing
         zohoSyncReport.addFailedOperation(
@@ -433,6 +421,8 @@ public class BaseZohoAccess {
             entityRecordService.createEntityFromRequest(
                 europeanaProxyEntity, zohoOrganization, getZohoDataSource());
         entitiesToUpdate.set(entitiesToUpdate.size()-1, savedEntityRecord.getEntityId());
+        //set newly generated organization ID into the operation, it is available only at this stage
+        operation.setOrganizationId(savedEntityRecord.getEntityId());
         zohoSyncReport.increaseCreated(1);
         
         if (logger.isDebugEnabled()) {
@@ -452,6 +442,20 @@ public class BaseZohoAccess {
       zohoSyncReport.addFailedOperation(
           zohoOrganization.getAbout(), ZohoSyncReportFields.CREATION_ERROR, e);
     }
+  }
+
+  Optional<EntityRecord> findDupplicateOrganization(Operation operation,
+      Organization zohoOrganization) {
+    List<String> allCorefs = new ArrayList<>();
+    allCorefs.add(operation.getOrganizationId());
+    allCorefs.add(zohoOrganization.getAbout());
+    String Europeana_ID = ZohoOrganizationConverter.getEuropeanaIdFieldValue(operation.getZohoRecord());
+    allCorefs.add(Europeana_ID);
+    allCorefs.addAll(zohoOrganization.getSameReferenceLinks());
+    
+    Optional<EntityRecord> existingEntity =
+        entityRecordService.findEntityDupplicationByCoreference(allCorefs, null);
+    return existingEntity;
   }
 
   /**

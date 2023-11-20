@@ -20,7 +20,7 @@ import org.springframework.context.annotation.PropertySources;
 @PropertySources({
   @PropertySource("classpath:entitymanagement.properties"),
   @PropertySource(
-      value = "classpath:entitymanagement.user.properties",
+      value = "entitymanagement.user.properties",
       ignoreResourceNotFound = true)
 })
 public class EntityManagementConfiguration implements InitializingBean {
@@ -137,7 +137,7 @@ public class EntityManagementConfiguration implements InitializingBean {
   @Value("${zoho.sync.batch.size: 100}")
   private int zohoSyncBatchSize;
 
-  @Value("${zoho.generate.organization.europeanaid=: false}")
+  @Value("${zoho.generate.organization.europeanaid: false}")
   private boolean generateOrganizationEuropeanaId;
   
   @Value("${europeana.item.data.endpoint:'http://data.europeana.eu/item'}")

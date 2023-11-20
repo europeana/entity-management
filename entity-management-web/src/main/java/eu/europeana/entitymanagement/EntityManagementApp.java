@@ -74,8 +74,10 @@ public class EntityManagementApp implements CommandLineRunner {
     if (hasCmdLineParams(args)) {
       Set<String> tasks = Set.of(args);
       if(tasks.contains(JobType.SCHEDULE_DELETION.value())) {
+        //run also the deletions called through the API directly
         LOG.info("Executing scheduled deletions");
         batchUpdateExecutor.runScheduledDeprecationsAndDeletions();
+        //TODO: should read the number of scheduled deletions and deprecations from the database and write it to the logs
       }
       
       if(tasks.contains(JobType.ZOHO_SYNC.value())) {
@@ -87,6 +89,7 @@ public class EntityManagementApp implements CommandLineRunner {
       if(tasks.contains(JobType.SCHEDULE_UPDATE.value())) {
         LOG.info("Executing scheduled updates");
         batchUpdateExecutor.runScheduledUpdate();
+        //TODO: should read the number of scheduled deletions and deprecations from the database and write it to the logs
       }
         
     }
