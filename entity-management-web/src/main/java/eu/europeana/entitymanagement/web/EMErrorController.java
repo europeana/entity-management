@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement.web;
 
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.web.servlet.error.AbstractErrorController;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 
 @RestController
+@ConditionalOnWebApplication
 public class EMErrorController extends AbstractErrorController {
 
     public EMErrorController(ErrorAttributes errorAttributes) {
