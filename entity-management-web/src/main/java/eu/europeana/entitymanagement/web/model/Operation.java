@@ -79,7 +79,26 @@ public class Operation implements Comparable<Operation> {
   public int compareTo(Operation o) {
     // used to order operations in cronological order
     int ret = getModified().compareTo(o.getModified());
-    if (ret == 0) ret = getOrganizationId().compareTo(o.getOrganizationId());
+    
+    //should be of same type
+    if(ret == 0) {
+      ret = getAction().compareTo(o.getAction());
+    }
+    
+    // create operations don't have an operation id
+    if (ret == 0 && getOrganizationId() != null) {
+      ret = getOrganizationId().compareTo(o.getOrganizationId());
+    }
+    
+    //permanent delete operations don't have a zoho record
+    if(ret == 0 && getZohoRecord() != null) {
+      if(o.getZohoRecord() == null) {
+        return 1;
+      } else {
+        getZohoRecord().getId().compareTo(o.getZohoRecord().getId());
+      } 
+    }
+      
     return ret;
   }
 
