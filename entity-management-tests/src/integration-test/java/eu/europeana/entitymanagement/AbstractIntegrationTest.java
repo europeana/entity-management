@@ -143,6 +143,8 @@ public abstract class AbstractIntegrationTest {
     
     //overwrite default zoho properties
     registry.add("zoho.baseUrl", () -> "https://crm.zoho.com/crm/org51823723/tab/Accounts/");
+    //tests must not register organizations as this is updating the zoho
+    //generate Europeana ID can be set to true when using the mock service, see TextConfig class 
     registry.add("zoho.generate.organization.europeanaid", () -> true);
     
     // could be used to fix eclipse issues
