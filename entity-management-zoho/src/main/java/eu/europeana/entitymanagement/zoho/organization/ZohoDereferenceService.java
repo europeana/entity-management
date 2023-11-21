@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.zoho.organization;
 
 import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import com.zoho.crm.api.record.Record;
@@ -12,6 +13,7 @@ public class ZohoDereferenceService implements Dereferencer {
 
   private final ZohoAccessConfiguration zohoAccessConfiguration;
 
+  @Autowired
   public ZohoDereferenceService(ZohoAccessConfiguration zohoAccessConfiguration) {
     this.zohoAccessConfiguration = zohoAccessConfiguration;
   }
