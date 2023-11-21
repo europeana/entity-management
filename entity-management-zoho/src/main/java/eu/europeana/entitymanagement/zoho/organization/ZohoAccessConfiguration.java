@@ -53,4 +53,8 @@ public class ZohoAccessConfiguration {
   public String getZohoBaseUrl() {
     return zohoBaseUrl;
   }
+
+  public void setZohoBaseUrl(String zohoBaseUrl) {
+    this.zohoBaseUrl = zohoBaseUrl;
+  }
 }

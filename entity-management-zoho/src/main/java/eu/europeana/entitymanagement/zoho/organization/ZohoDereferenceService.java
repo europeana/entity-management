@@ -1,19 +1,19 @@
 package eu.europeana.entitymanagement.zoho.organization;
 
 import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import com.zoho.crm.api.record.Record;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.dereference.Dereferencer;
-import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
-import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 
 @Service
 public class ZohoDereferenceService implements Dereferencer {
 
   private final ZohoAccessConfiguration zohoAccessConfiguration;
 
+  @Autowired
   public ZohoDereferenceService(ZohoAccessConfiguration zohoAccessConfiguration) {
     this.zohoAccessConfiguration = zohoAccessConfiguration;
   }
@@ -31,9 +31,5 @@ public class ZohoDereferenceService implements Dereferencer {
     } else {
       return Optional.empty();
     }
-  }
-  
-  public void updateEuropeanaId(String zohoOrganizationUrl, String organizationEuropeanaID) throws ZohoException {
-    zohoAccessConfiguration.getZohoAccessClient().updateZohoRecordOrganizationStringField(zohoOrganizationUrl, ZohoConstants.EUROPEANA_ID_FIELD, organizationEuropeanaID);
-  }
+  }  
 }

@@ -20,7 +20,6 @@ import eu.europeana.entitymanagement.dereference.Dereferencer;
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
 import eu.europeana.entitymanagement.testutils.TestConfig;
 import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
-import eu.europeana.entitymanagement.zoho.organization.ZohoDereferenceService;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
@@ -90,16 +89,6 @@ class DereferenceServiceIT extends AbstractIntegrationTest {
     Assertions.assertTrue(org.getHiddenLabel().contains("Bibliothèque nationale"));
     Assertions.assertTrue(org.getHiddenLabel().contains("Bibliothèque nationale Francaise"));
     Assertions.assertTrue(org.getHiddenLabel().contains("French National Library"));
-  }
-
-  // @Test
-  public void zohoUpdateOrganizationStringFieldTest() throws Exception {
-    String organizationId = "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000060440051";
-    String Europeana_ID = "http://data.europeana.eu/organization/1482250000060440051";
-    ZohoDereferenceService dereferencer =
-        (ZohoDereferenceService) dereferenceServiceLocator.getDereferencer(organizationId, "Organization");
-    
-    dereferencer.updateEuropeanaId(organizationId, Europeana_ID);
   }
 
   //  @Test

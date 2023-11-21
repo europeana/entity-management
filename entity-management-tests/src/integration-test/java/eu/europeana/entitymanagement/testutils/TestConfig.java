@@ -14,6 +14,8 @@ import org.springframework.context.annotation.Primary;
 @TestConfiguration
 public class TestConfig {
 
+  
+  public static final String MOCK_ZOHO_BASE_URL = "https://crm.zoho.com/crm/org51823723/tab/Accounts/";
   /**
    * Since requests to Zoho are done via its SDK, and require authentication first, we mock out the
    * entire flow with Mockito.
@@ -24,6 +26,7 @@ public class TestConfig {
     ZohoAccessConfiguration zohoAccessConfiguration = Mockito.mock(ZohoAccessConfiguration.class);
     ZohoAccessClient zohoClient = Mockito.mock(ZohoAccessClient.class);
     Mockito.when(zohoAccessConfiguration.getZohoAccessClient()).thenReturn(zohoClient);
+    Mockito.when(zohoAccessConfiguration.getZohoBaseUrl()). thenReturn(MOCK_ZOHO_BASE_URL);
 
     // find matching JSON file based on zohoId argument, then create a Record object for it
     Mockito.doAnswer(
