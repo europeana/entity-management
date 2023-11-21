@@ -12,6 +12,7 @@ import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
 import eu.europeana.entitymanagement.testutils.MongoContainer;
 import eu.europeana.entitymanagement.testutils.SolrContainer;
+import eu.europeana.entitymanagement.testutils.TestConfig;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.MetisDereferenceUtils;
 import eu.europeana.entitymanagement.web.service.ConceptSchemeService;
@@ -142,7 +143,9 @@ public abstract class AbstractIntegrationTest {
     registry.add("metis.proxy.enabled", () -> false);
     
     //overwrite default zoho properties
-    registry.add("zoho.baseUrl", () -> "https://crm.zoho.com/crm/org51823723/tab/Accounts/");
+    registry.add("zoho.base.url", () -> TestConfig.MOCK_ZOHO_BASE_URL);
+    //tests must not register organizations as this is updating the zoho
+    //generate Europeana ID can be set to true when using the mock service, see TextConfig class 
     registry.add("zoho.generate.organization.europeanaid", () -> true);
     
     // could be used to fix eclipse issues

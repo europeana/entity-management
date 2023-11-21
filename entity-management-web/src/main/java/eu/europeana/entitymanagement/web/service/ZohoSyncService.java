@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import javax.validation.constraints.NotNull;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.zoho.crm.api.record.DeletedRecord;
@@ -26,14 +27,11 @@ import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.mongo.repository.ZohoSyncRepository;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
-import eu.europeana.entitymanagement.utils.EntityRecordUtils;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.model.BatchOperations;
 import eu.europeana.entitymanagement.web.model.Operation;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReportFields;
 import eu.europeana.entitymanagement.zoho.organization.ZohoAccessConfiguration;
-import eu.europeana.entitymanagement.zoho.organization.ZohoDereferenceService;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 
@@ -45,12 +43,11 @@ public class ZohoSyncService extends BaseZohoAccess {
       EntityUpdateService entityUpdateService, EntityRecordRepository entityRecordRepository,
       EntityManagementConfiguration emConfiguration, DataSources datasources,
       ZohoAccessConfiguration zohoAccessConfiguration, 
-      ZohoDereferenceService zohoDereferenceService,
       SolrService solrService,
       ZohoSyncRepository zohoSyncRepo) {
 
     super(entityRecordService, entityUpdateService, entityRecordRepository, emConfiguration,
-        datasources, zohoAccessConfiguration, zohoDereferenceService, solrService, zohoSyncRepo);
+        datasources, zohoAccessConfiguration, solrService, zohoSyncRepo);
   }
 
   /**
@@ -297,7 +294,7 @@ public class ZohoSyncService extends BaseZohoAccess {
         //NOTE: the perform deletion needs to be updated to schedule updates
       } 
       
-      if (zohoRecordEuropeanaID != null) {
+      if (StringUtils.isBlank(zohoRecordEuropeanaID)) {
         if(entityRecord.isDisabled() && !isForDisabling(hasDpsOwner, markedForDeletion)) {
           //isForDisabling check is redundant here, but condition kept for easier maintenance
           //enable and update
@@ -354,10 +351,6 @@ public class ZohoSyncService extends BaseZohoAccess {
   boolean skipNonExisting(boolean hasDpsOwner, boolean markedForDeletion) {
     return markedForDeletion || !hasDpsOwner;
   }
-
-  // boolean skipExisting(EntityRecord entityRecord, boolean markedForDeletion) {
-  // return markedForDeletion && entityRecord.isDisabled();
-  // }
 
   boolean needsToBeEnabled(EntityRecord entityRecord, boolean hasDpsOwner,
       boolean markedForDeletion) {
