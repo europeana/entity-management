@@ -73,17 +73,19 @@ public class EntityManagementApp implements CommandLineRunner {
   public void run(String... args) throws Exception {
     if (hasCmdLineParams(args)) {
       Set<String> tasks = Set.of(args);
+      
+      //first zoho sync as it runs synchronuous operations
+      if(tasks.contains(JobType.ZOHO_SYNC.value())) {
+        LOG.info("Executing zoho sync");
+        ZohoSyncReport zohoSyncReport = zohoSyncService.synchronizeModifiedZohoOrganizations();
+        LOG.info("Synchronization Report: {}", zohoSyncReport.toString());
+      }
+      
       if(tasks.contains(JobType.SCHEDULE_DELETION.value())) {
         //run also the deletions called through the API directly
         LOG.info("Executing scheduled deletions");
         batchUpdateExecutor.runScheduledDeprecationsAndDeletions();
         //TODO: should read the number of scheduled deletions and deprecations from the database and write it to the logs
-      }
-      
-      if(tasks.contains(JobType.ZOHO_SYNC.value())) {
-        LOG.info("Executing zoho sync");
-        ZohoSyncReport zohoSyncReport = zohoSyncService.synchronizeModifiedZohoOrganizations();
-        LOG.info("Synchronization Report: {}", zohoSyncReport.toString());
       }
       
       if(tasks.contains(JobType.SCHEDULE_UPDATE.value())) {
