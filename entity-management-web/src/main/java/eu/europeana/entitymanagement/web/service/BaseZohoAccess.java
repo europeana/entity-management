@@ -377,14 +377,28 @@ public class BaseZohoAccess {
   Optional<EntityRecord> findDupplicateOrganization(Operation operation,
       Organization zohoOrganization) {
     List<String> allCorefs = new ArrayList<>();
-    allCorefs.add(operation.getOrganizationId());
+    if(operation.getOrganizationId() != null) {
+      allCorefs.add(operation.getOrganizationId());
+    }
     allCorefs.add(zohoOrganization.getAbout());
     String Europeana_ID = ZohoOrganizationConverter.getEuropeanaIdFieldValue(operation.getZohoRecord());
-    allCorefs.add(Europeana_ID);
-    allCorefs.addAll(zohoOrganization.getSameReferenceLinks());
+    if(Europeana_ID != null) {
+      allCorefs.add(Europeana_ID);
+    }
+    if(zohoOrganization.getSameReferenceLinks() != null && !zohoOrganization.getSameReferenceLinks().isEmpty()) {
+      allCorefs.addAll(zohoOrganization.getSameReferenceLinks());
+    }
     
+    if(logger.isDebugEnabled()) {
+      logger.debug("Searching existing organizations by corefs: {}", allCorefs);
+    }
+      
     Optional<EntityRecord> existingEntity =
         entityRecordService.findEntityDupplicationByCoreference(allCorefs, null);
+    
+    if(logger.isDebugEnabled() && existingEntity.isPresent()) {
+      logger.debug("Found existing dupplicated organization with id: {} ", existingEntity.get().getEntityId());
+    }
     return existingEntity;
   }
 

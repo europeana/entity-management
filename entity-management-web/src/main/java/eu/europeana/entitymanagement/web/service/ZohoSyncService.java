@@ -82,11 +82,18 @@ public class ZohoSyncService extends BaseZohoAccess {
    */
   public ZohoSyncReport synchronizeZohoOrganizations(@NotNull OffsetDateTime modifiedSince)
       throws EntityUpdateException {
+    
+    if(logger.isInfoEnabled()) {
+      logger.info("Synchronizing organizations updated after date: {}", modifiedSince);
+    }
+   
     ZohoSyncReport zohoSyncReport = new ZohoSyncReport(new Date());
     // synchronize updated
     synchronizeZohoOrganizations(modifiedSince, zohoSyncReport);
     //synchronize deleted in zoho
     synchronizeDeletedZohoOrganizations(modifiedSince, zohoSyncReport);
+    
+    logger.info("Zoho update operations completed successfully:\n {}", zohoSyncReport);
     
     return zohoSyncRepo.save(zohoSyncReport);
   }
@@ -132,8 +139,6 @@ public class ZohoSyncService extends BaseZohoAccess {
         page++;
       }
     }
-
-    logger.info("Zoho update operations completed successfully:\n {}", zohoSyncReport);
   }
 
   /**
