@@ -133,6 +133,9 @@ public class ZohoSyncService extends BaseZohoAccess {
       performOperations(operations, zohoSyncReport);
 
       if (isLastPage(orgList.size(), pageSize)) {
+        if(logger.isDebugEnabled()) {
+          logger.debug("Processing of deleted records is complete on page on page {}, pageSize {}, items on last page {}", page, pageSize, orgList.size());
+        }
         hasNext = false;
       } else {
         // go to next page
@@ -193,6 +196,9 @@ public class ZohoSyncService extends BaseZohoAccess {
 
       if (isLastPage(currentPageSize, pageSize)) {
         // last page: if no more organizations exist in Zoho
+        if(logger.isDebugEnabled()) {
+          logger.debug("Processing of deleted records is complete on page on page {}, pageSize {}, items on last page {}", startPage, pageSize, currentPageSize);
+        }
         hasNext = false;
       } else {
         // go to next page
@@ -204,6 +210,7 @@ public class ZohoSyncService extends BaseZohoAccess {
   boolean isLastPage(int currentPageSize, int maxItemsPerPage) {
     // END LOOP: if no more organizations exist in Zoho
     return currentPageSize < maxItemsPerPage;
+//    return currentPageSize == 0;
   }
 
 

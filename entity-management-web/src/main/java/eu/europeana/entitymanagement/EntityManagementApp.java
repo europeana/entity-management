@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Set;
 import org.apache.logging.log4j.LogManager;
@@ -56,7 +57,20 @@ public class EntityManagementApp implements CommandLineRunner {
               .web(WebApplicationType.NONE)
               .run(args);
 
-      LOG.info("Batch update execution complete for {}. Stopping application. ", Arrays.toString(args));
+      LOG.info("Batch scheduling execution complete for {} ", Arrays.toString(args));
+      //3hours
+      int minutes = 180;
+      LOG.info("Wait for completion of asynchonuous processing: {}m", minutes);
+      try {
+        Thread.sleep(Duration.ofMinutes(minutes).toMillis());
+      } catch (InterruptedException e) {
+        LOG.error("Cannot complete execution!", e);
+        SpringApplication.exit(context);
+        System.exit(-2);
+      }
+      
+      //TODO: erorneous execution should be indicated with negative codes
+      LOG.info("Stoping application after scheduling batch processing and waiting {}m for processing schedule updates!", minutes);
       System.exit(SpringApplication.exit(context));
     } else {
       LOG.info("No args provided to application. Starting web server");
