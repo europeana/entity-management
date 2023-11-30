@@ -144,7 +144,7 @@ public class ScoringService {
   }
 
   private Integer getEnrichmentCount(Entity entity) {
-    return enrichmentCountQueryService.getEnrichmentCount(entity.getEntityId(), entity.getType());
+    return enrichmentCountQueryService.getEnrichmentCount(entity);
   }
 
   private PageRank getPageRank(Entity entity) {
