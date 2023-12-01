@@ -79,7 +79,6 @@ class DereferenceServiceIT extends AbstractIntegrationTest {
     assertNull(org.getAltLabel());
     assertEquals(1, org.getAcronym().size());
     assertEquals(1, org.getEuropeanaRole().size());
-    assertEquals(1, org.getGeographicLevel().size());
     assertEquals(1, org.getAcronym().size());
     assertEquals("FR", org.getCountry());
     Assertions.assertNotNull(org.getHomepage());

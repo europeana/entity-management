@@ -90,9 +90,7 @@ public interface WebEntityFields {
   public static final String DESCRIPTION = "description";
   public static final String ACRONYM = "acronym";
   public static final String COUNTRY = "country";
-  public static final String ORGANIZATION_DOMAIN = "organizationDomain";
   public static final String EUROPEANA_ROLE = "europeanaRole";
-  public static final String GEOGRAPHIC_LEVEL = "geographicLevel";
   public static final String FOAF_LOGO = "logo";
   public static final String FOAF_HOMEPAGE = "homepage";
   public static final String FOAF_PHONE = "phone";

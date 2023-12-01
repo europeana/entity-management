@@ -11,27 +11,24 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_HOME
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_LOGO;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_MBOX;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_PHONE;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.GEOGRAPHIC_LEVEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_ADDRESS;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HIDDEN_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IDENTIFIER;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.LANGUAGE;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ORGANIZATION_DOMAIN;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
-
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonSetter;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 /** This class defines base organization type of an entity. */
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
@@ -47,8 +44,6 @@ import java.util.Map;
   DESCRIPTION,
   FOAF_LOGO,
   EUROPEANA_ROLE,
-  ORGANIZATION_DOMAIN,
-  GEOGRAPHIC_LEVEL,
   COUNTRY,
   LANGUAGE,
   FOAF_HOMEPAGE,
@@ -68,8 +63,6 @@ public class Organization extends Entity {
   private List<String> phone;
   private List<String> mbox;
   private Map<String, List<String>> europeanaRole;
-  private Map<String, List<String>> organizationDomain;
-  private Map<String, String> geographicLevel;
   private String country;
   private Address hasAddress;
   private List<String> sameAs;
@@ -89,10 +82,6 @@ public class Organization extends Entity {
     if (copy.getMbox() != null) this.mbox = new ArrayList<>(copy.getMbox());
     if (copy.getEuropeanaRole() != null)
       this.europeanaRole = new HashMap<>(copy.getEuropeanaRole());
-    if (copy.getOrganizationDomain() != null)
-      this.organizationDomain = new HashMap<>(copy.getOrganizationDomain());
-    if (copy.getGeographicLevel() != null)
-      this.geographicLevel = new HashMap<>(copy.getGeographicLevel());
     this.country = copy.getCountry();
     if (copy.getAddress() != null) this.hasAddress = new Address(copy.getAddress());
     if (copy.sameAs != null) this.sameAs = (new ArrayList<>(copy.sameAs));
@@ -167,26 +156,6 @@ public class Organization extends Entity {
   @JsonSetter(HAS_ADDRESS)
   public void setAddress(Address hasAddress) {
     this.hasAddress = hasAddress;
-  }
-
-  @JsonGetter(GEOGRAPHIC_LEVEL)
-  public Map<String, String> getGeographicLevel() {
-    return geographicLevel;
-  }
-
-  @JsonSetter(GEOGRAPHIC_LEVEL)
-  public void setGeographicLevel(Map<String, String> geographicLevel) {
-    this.geographicLevel = geographicLevel;
-  }
-
-  @JsonGetter(ORGANIZATION_DOMAIN)
-  public Map<String, List<String>> getOrganizationDomain() {
-    return organizationDomain;
-  }
-
-  @JsonSetter(ORGANIZATION_DOMAIN)
-  public void setOrganizationDomain(Map<String, List<String>> organizationDomain) {
-    this.organizationDomain = organizationDomain;
   }
 
   @JsonGetter(FOAF_HOMEPAGE)

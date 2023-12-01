@@ -15,7 +15,6 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ACRON
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_COUNTRY;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_DESCRIPTION;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_EUROPEANA_ROLE;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_GEOGRAPHIC_LEVEL;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_HAS_ADDRESS;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_HOMEPAGE;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IDENTIFIER;
@@ -23,13 +22,8 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_LANGU
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_LOGO;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_MBOX;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ORGANIZATION;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ORGANIZATION_DOMAIN;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PHONE;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_SAME_AS;
-
-import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
-import eu.europeana.entitymanagement.definitions.model.Organization;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -38,6 +32,9 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import org.apache.commons.collections.CollectionUtils;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
+import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @XmlRootElement(namespace = NAMESPACE_EDM, name = XML_ORGANIZATION)
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -53,8 +50,6 @@ import org.apache.commons.collections.CollectionUtils;
       XML_DESCRIPTION,
       XML_LOGO,
       XML_EUROPEANA_ROLE,
-      XML_ORGANIZATION_DOMAIN,
-      XML_GEOGRAPHIC_LEVEL,
       XML_COUNTRY,
       XML_LANGUAGE,
       XML_HOMEPAGE,
@@ -81,12 +76,6 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
 
   @XmlElement(namespace = NAMESPACE_EDM, name = XML_EUROPEANA_ROLE)
   private List<LabelledResource> europeanaRole = new ArrayList<>();
-
-  @XmlElement(namespace = NAMESPACE_EDM, name = XML_ORGANIZATION_DOMAIN)
-  private List<LabelledResource> organizationDomain = new ArrayList<>();
-
-  @XmlElement(namespace = NAMESPACE_EDM, name = XML_GEOGRAPHIC_LEVEL)
-  private List<LabelledResource> geographicLevel = new ArrayList<>();
 
   @XmlElement(namespace = NAMESPACE_EDM, name = XML_COUNTRY)
   private String country;
@@ -119,10 +108,6 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     }
     this.europeanaRole =
         RdfXmlUtils.convertToXmlMultilingualString(organization.getEuropeanaRole());
-    this.organizationDomain =
-        RdfXmlUtils.convertToXmlMultilingualString(organization.getOrganizationDomain());
-    this.geographicLevel =
-        RdfXmlUtils.convertMapToXmlMultilingualString(organization.getGeographicLevel());
     this.country = organization.getCountry();
     if (organization.getHomepage() != null) {
       this.homepage = new LabelledResource(organization.getHomepage());
@@ -151,8 +136,6 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     entity.setDescription(RdfXmlUtils.toLanguageMap(getDescription()));
     entity.setLogo(XmlWebResourceWrapper.toWebResource(getLogo()));
     entity.setEuropeanaRole(RdfXmlUtils.toLanguageMapList(getEuropeanaRole()));
-    entity.setOrganizationDomain(RdfXmlUtils.toLanguageMapList(getOrganizationDomain()));
-    entity.setGeographicLevel(RdfXmlUtils.toLanguageMap(getGeographicLevel()));
     entity.setCountry(getCountry());
     if (getHomepage() != null) {
       entity.setHomepage(getHomepage().getResource());
@@ -187,14 +170,6 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
 
   public List<LabelledResource> getEuropeanaRole() {
     return europeanaRole;
-  }
-
-  public List<LabelledResource> getOrganizationDomain() {
-    return organizationDomain;
-  }
-
-  public List<LabelledResource> getGeographicLevel() {
-    return geographicLevel;
   }
 
   public String getCountry() {

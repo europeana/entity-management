@@ -1,7 +1,14 @@
 package eu.europeana.entitymanagement.zoho.organization;
 
 import static eu.europeana.entitymanagement.zoho.utils.ZohoUtils.toIsoLanguage;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import com.zoho.crm.api.record.Record;
 import com.zoho.crm.api.users.User;
 import eu.europeana.entitymanagement.definitions.model.Address;
@@ -10,15 +17,6 @@ import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
 
 public class ZohoOrganizationConverter {
 
@@ -58,17 +56,6 @@ public class ZohoOrganizationConverter {
           ZohoUtils.createLanguageMapOfStringList(
               Locale.ENGLISH.getLanguage(), organizationRoleStringList));
     }
-    org.setOrganizationDomain(
-        ZohoUtils.createMapWithLists(
-            Locale.ENGLISH.getLanguage(),
-            ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.DOMAIN_FIELD))));
-
-    List<String> geographicLevel =
-        ZohoUtils.stringListSupplier(zohoRecord.getKeyValue(ZohoConstants.GEOGRAPHIC_LEVEL_FIELD));
-    if (!geographicLevel.isEmpty()) {
-      org.setGeographicLevel(
-          ZohoUtils.createMap(Locale.ENGLISH.getLanguage(), geographicLevel.get(0)));
-    }
 
     String organizationCountry =
         toEdmCountry(getStringFieldValue(zohoRecord, ZohoConstants.ORGANIZATION_COUNTRY_FIELD));
@@ -84,16 +71,6 @@ public class ZohoOrganizationConverter {
         ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.COUNTRY_FIELD)));
     address.setVcardPostalCode(
         ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.ZIP_CODE_FIELD)));
-    address.setVcardPostOfficeBox(
-        ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.PO_BOX_FIELD)));
-
-    String lat =
-        ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.LATITUDE_FIELD));
-    String lon =
-        ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.LONGITUDE_FIELD));
-    if (lat != null && lon != null) {
-      address.setVcardHasGeo(EntityUtils.toGeoUri(lat, lon));
-    }
 
     // only set address if it contains metadata properties.
     if (address.hasMetadataProperties()) {
@@ -123,14 +100,6 @@ public class ZohoOrganizationConverter {
     hiddenLabels.addAll(getTextAreaFieldValues(zohoRecord, ZohoConstants.HIDDEN_LABEL_FIELD));
     if (hiddenLabels.size()>0) {
       org.setHiddenLabel(hiddenLabels);
-    }
-
-    List<String> industry =
-        ZohoUtils.stringListSupplier(zohoRecord.getKeyValue(ZohoConstants.INDUSTRY_FIELD));
-    if (!industry.isEmpty()) {
-      Map<String, List<String>> orgDomain = new HashMap<String, List<String>>();
-      orgDomain.put("en", industry);
-      org.setOrganizationDomain(orgDomain);
     }
 
     return org;

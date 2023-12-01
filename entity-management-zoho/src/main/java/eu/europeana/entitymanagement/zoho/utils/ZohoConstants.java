@@ -30,10 +30,8 @@ public final class ZohoConstants {
   public static final String ACRONYM_FIELD = "Acronym";
   public static final String LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD = "Logo_link_to_WikimediaCommons";
   public static final String WEBSITE_FIELD = "Website";
-  public static final String DOMAIN_FIELD = "Domain2";
   public static final String SECTOR_FIELD = "Sector";
   public static final String SCOPE_FIELD = "Scope";
-  public static final String GEOGRAPHIC_LEVEL_FIELD = "Geographic_Level";
   public static final String ORGANIZATION_COUNTRY_FIELD = "Country1";
   public static final String SAME_AS_FIELD = "SameAs";
   public static final String STREET_FIELD = "Street";

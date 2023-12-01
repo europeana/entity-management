@@ -101,10 +101,6 @@ public enum EntityFieldsTypes {
   logo(EntityFieldsTypes.FIELD_TYPE_WEB_RESOURCE, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
   europeanaRole(
       EntityFieldsTypes.FIELD_TYPE_KEYWORD, true, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
-  organizationDomain(
-      EntityFieldsTypes.FIELD_TYPE_KEYWORD, true, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
-  geographicLevel(
-      EntityFieldsTypes.FIELD_TYPE_KEYWORD, true, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
   country(EntityFieldsTypes.FIELD_TYPE_TEXT, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
   homepage(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
   phone(

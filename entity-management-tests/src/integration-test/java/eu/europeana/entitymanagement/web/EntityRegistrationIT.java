@@ -6,7 +6,6 @@ import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.matchesRegex;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -280,8 +279,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
 
     // check if indexing is successfull by searching the organization in solr
     SolrOrganization org = emSolrService.searchById(SolrOrganization.class, WebEntityFields.BASE_DATA_EUROPEANA_URI + "organization/1");
-    assertNotNull(org.getHasGeo());
-    assertFalse(org.getHasGeo().startsWith("geo:"));
+    assertNotNull(org.getHasAddress());
   }
 
   @Test
@@ -328,10 +326,9 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
     response
         .andExpect(status().isAccepted())
-        .andExpect(jsonPath("$.hasAddress.hasGeo").isNotEmpty())
+        .andExpect(jsonPath("$.hasAddress.postalCode").isNotEmpty())
         .andExpect(jsonPath("$.language", everyItem(matchesRegex("[a-z]+"))))
         .andExpect(jsonPath("$.hiddenLabel", hasSize(3)))
-        .andExpect(jsonPath("$.organizationDomain[*]", hasSize(1)))
         .andExpect(jsonPath("$.id", any(String.class)));
   }
 
