@@ -50,6 +50,12 @@
             <artifactId>entity-management-common</artifactId>
             <version>1.6.3-SNAPSHOT</version>
         </dependency>
+   		<dependency>
+			<groupId>eu.europeana.api</groupId>
+			<artifactId>entity-management-mongo</artifactId>
+			<version>1.6.3-SNAPSHOT</version>
+		</dependency>
+
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>

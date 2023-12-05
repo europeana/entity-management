@@ -63,7 +63,7 @@ public class Organization extends Entity {
   private List<String> phone;
   private List<String> mbox;
   private Map<String, List<String>> europeanaRole;
-  private String country;
+  private Country country;
   private Address hasAddress;
   private List<String> sameAs;
   private List<String> language;
@@ -82,7 +82,7 @@ public class Organization extends Entity {
     if (copy.getMbox() != null) this.mbox = new ArrayList<>(copy.getMbox());
     if (copy.getEuropeanaRole() != null)
       this.europeanaRole = new HashMap<>(copy.getEuropeanaRole());
-    this.country = copy.getCountry();
+    if (copy.getCountry() != null) this.country = new Country(copy.getCountry());
     if (copy.getAddress() != null) this.hasAddress = new Address(copy.getAddress());
     if (copy.sameAs != null) this.sameAs = (new ArrayList<>(copy.sameAs));
     if (copy.language != null) this.language = (new ArrayList<>(copy.language));
@@ -139,12 +139,12 @@ public class Organization extends Entity {
   }
 
   @JsonGetter(COUNTRY)
-  public String getCountry() {
+  public Country getCountry() {
     return country;
   }
 
   @JsonSetter(COUNTRY)
-  public void setCountry(String country) {
+  public void setCountry(Country country) {
     this.country = country;
   }
 

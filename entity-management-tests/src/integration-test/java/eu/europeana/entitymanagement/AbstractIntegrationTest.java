@@ -18,7 +18,8 @@ import eu.europeana.entitymanagement.web.MetisDereferenceUtils;
 import eu.europeana.entitymanagement.web.service.ConceptSchemeService;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
-import eu.europeana.entitymanagement.zoho.organization.ZohoAccessConfiguration;
+import eu.europeana.entitymanagement.zoho.organization.ZohoConfiguration;
+import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -64,7 +65,8 @@ public abstract class AbstractIntegrationTest {
   @Autowired protected EntityRecordRepository entityRecordRepository;
   @Autowired protected ConceptSchemeService emConceptSchemeService;
   @Autowired protected EntityManagementConfiguration emConfig;
-  @Autowired protected ZohoAccessConfiguration zohoAccessConfiguration;
+  @Autowired protected ZohoConfiguration zohoConfiguration;
+  @Autowired protected ZohoOrganizationConverter zohoOrgConverter;
   
   static {
     MONGO_CONTAINER =

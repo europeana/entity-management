@@ -34,7 +34,6 @@ import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
 import eu.europeana.entitymanagement.testutils.TestConfig;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
-import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
 
 @Import(TestConfig.class)
 abstract class BaseWebControllerTest extends AbstractIntegrationTest {
@@ -172,7 +171,7 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
     Entity europeanaProxyEntity = objectMapper.readValue(europeanaProxyEntityStr, Entity.class);
     DataSource dataSource = datasources.verifyDataSource(europeanaProxyEntity.getEntityId(), false);
     Organization zohoOrganization =
-        ZohoOrganizationConverter.convertToOrganizationEntity(zohoRecord, zohoAccessConfiguration.getZohoBaseUrl());
+        zohoOrgConverter.convertToOrganizationEntity(zohoRecord);
     EntityRecord savedRecord =
         entityRecordService.createEntityFromRequest(
             europeanaProxyEntity, zohoOrganization, dataSource);

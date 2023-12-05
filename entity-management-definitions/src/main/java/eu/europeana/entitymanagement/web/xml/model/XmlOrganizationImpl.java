@@ -25,7 +25,9 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ORGAN
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PHONE;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_SAME_AS;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -33,6 +35,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import org.apache.commons.collections.CollectionUtils;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
+import eu.europeana.entitymanagement.definitions.model.Country;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
@@ -79,7 +82,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
 
   @XmlElement(namespace = NAMESPACE_EDM, name = XML_COUNTRY)
   private String country;
-
+  
   @XmlElement(namespace = NAMESPACE_FOAF, name = XML_HOMEPAGE)
   private LabelledResource homepage;
 
@@ -108,7 +111,11 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     }
     this.europeanaRole =
         RdfXmlUtils.convertToXmlMultilingualString(organization.getEuropeanaRole());
-    this.country = organization.getCountry();
+    
+    if(organization.getCountry()!=null && organization.getCountry().getPrefLabel()!=null) {
+      this.country = organization.getCountry().getPrefLabel().get("en");
+    }    
+    
     if (organization.getHomepage() != null) {
       this.homepage = new LabelledResource(organization.getHomepage());
     }
@@ -136,7 +143,15 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     entity.setDescription(RdfXmlUtils.toLanguageMap(getDescription()));
     entity.setLogo(XmlWebResourceWrapper.toWebResource(getLogo()));
     entity.setEuropeanaRole(RdfXmlUtils.toLanguageMapList(getEuropeanaRole()));
-    entity.setCountry(getCountry());
+    
+    if(country!=null) {
+      Country orgCountry = new Country();
+      Map<String,String> countryPrefLabel = new HashMap<>();
+      countryPrefLabel.put("en", country);
+      orgCountry.setPrefLabel(countryPrefLabel);
+      entity.setCountry(orgCountry);
+    }
+  
     if (getHomepage() != null) {
       entity.setHomepage(getHomepage().getResource());
     }

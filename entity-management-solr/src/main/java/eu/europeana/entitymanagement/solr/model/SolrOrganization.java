@@ -39,8 +39,11 @@ public class SolrOrganization extends SolrEntity<Organization> {
   @Field(OrganizationSolrFields.EUROPEANA_ROLE_ALL)
   private Map<String, List<String>> europeanaRole;
 
-  @Field(OrganizationSolrFields.COUNTRY)
-  private String country;
+  @Field(OrganizationSolrFields.COUNTRY_ID)
+  private String countryId;
+
+  @Field(OrganizationSolrFields.COUNTRY_PREF_LABEL_ALL)
+  private Map<String, String> countryPrefLabel;
 
   @Field(OrganizationSolrFields.VCARD_HAS_ADDRESS)
   private String hasAddress;
@@ -82,7 +85,9 @@ public class SolrOrganization extends SolrEntity<Organization> {
     this.phone = organization.getPhone();
     if (organization.getMbox() != null) this.mbox = new ArrayList<>(organization.getMbox());
     setEuropeanaRole(organization.getEuropeanaRole());
-    this.country = organization.getCountry();
+    this.countryId = organization.getCountry().getId();
+    setCountryPrefLabel(organization.getCountry().getPrefLabel());
+    
     if (organization.getSameReferenceLinks() != null) {
       this.sameAs = new ArrayList<>(organization.getSameReferenceLinks());
     }
@@ -127,6 +132,16 @@ public class SolrOrganization extends SolrEntity<Organization> {
                   europeanaRole));
     }
   }
+  
+  private void setCountryPrefLabel(Map<String, String> prefLabel) {
+    if (MapUtils.isNotEmpty(prefLabel)) {
+      this.countryPrefLabel =
+          new HashMap<>(
+              SolrUtils.normalizeStringMapByAddingPrefix(
+                  OrganizationSolrFields.COUNTRY_PREF_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
+                  prefLabel));
+    }
+  }
 
   public Map<String, String> getDescription() {
     return description;
@@ -154,10 +169,6 @@ public class SolrOrganization extends SolrEntity<Organization> {
 
   public Map<String, List<String>> getEuropeanaRole() {
     return europeanaRole;
-  }
-
-  public String getCountry() {
-    return country;
   }
 
   public String getHasAddress() {
@@ -195,5 +206,13 @@ public class SolrOrganization extends SolrEntity<Organization> {
   @Override
   protected void setSameReferenceLinks(ArrayList<String> uris) {
     this.sameAs = uris;
+  }
+
+  public String getCountryId() {
+    return countryId;
+  }
+
+  public Map<String, String> getCountryPrefLabel() {
+    return countryPrefLabel;
   }
 }

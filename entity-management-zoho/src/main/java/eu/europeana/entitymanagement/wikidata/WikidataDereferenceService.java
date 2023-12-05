@@ -170,7 +170,12 @@ public class WikidataDereferenceService implements Dereferencer, InitializingBea
   }
 
   private WikidataOrganization parse(String xml) throws JAXBException {
+    //this commented out code caused exception, i.e. Caused by: org.xml.sax.SAXParseException: Premature end of file.
+//    InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
+//    return (WikidataOrganization) unmarshaller.get().unmarshal(stream);    
+    
     InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
-    return (WikidataOrganization) unmarshaller.get().unmarshal(stream);
+    return (WikidataOrganization) unmarshaller.get().unmarshal( new StreamSource( stream ) );
+
   }
 }

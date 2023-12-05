@@ -509,8 +509,11 @@
 		<dynamicField name="edm_acronym.*" type="string"
 			indexed="false" stored="true" multiValued="true" />
 		<!-- ISO ALPHA-2 codes -->
-		<field name="country" type="string" indexed="true" stored="true"
+		<field name="countryId" type="string" indexed="true" stored="true"
 			multiValued="false" />
+		<dynamicField name="countryPrefLabel.*" type="string"
+			indexed="true" stored="true" multiValued="false" />
+			
 		<!-- TODO: alias -->
 		<!-- <field name="edm_country" type="string" indexed="true" stored="true" 
 			multiValued="false"/> <copyField source="country" dest="edm_country"/> -->

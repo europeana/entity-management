@@ -20,7 +20,6 @@ import eu.europeana.entitymanagement.dereference.Dereferencer;
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
 import eu.europeana.entitymanagement.testutils.TestConfig;
 import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
-import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 
@@ -30,7 +29,7 @@ import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 // enable tests only on local machine
 // @Disabled
 @SpringBootTest
-class DereferenceServiceIT extends AbstractIntegrationTest {
+public class DereferenceServiceIT extends AbstractIntegrationTest {
 
   @Autowired private DereferenceServiceLocator dereferenceServiceLocator;
   
@@ -90,7 +89,7 @@ class DereferenceServiceIT extends AbstractIntegrationTest {
     Assertions.assertTrue(org.getHiddenLabel().contains("French National Library"));
   }
 
-  //  @Test
+//  @Test
   public void zohoOrganizationDereferenceGFMTest() throws Exception {
     String organizationId = IntegrationTestUtils.ORGANIZATION_GFM_URI_ZOHO;
     Dereferencer dereferencer =
@@ -98,7 +97,6 @@ class DereferenceServiceIT extends AbstractIntegrationTest {
     Optional<Entity> orgOptional = dereferencer.dereferenceEntityById(organizationId);
 
     Assertions.assertTrue(orgOptional.isPresent());
-
     Organization org = (Organization) orgOptional.get();
     assertEquals(2, org.getPrefLabel().size());
     assertNotNull(org.getSameReferenceLinks());
@@ -133,7 +131,7 @@ class DereferenceServiceIT extends AbstractIntegrationTest {
     //    choice = new Choice<String>("EN");
     //    record.addKeyValue(ZohoConstants.LANG_ALTERNATIVE_FIELD + "_4", choice);
 
-    Organization org = ZohoOrganizationConverter.convertToOrganizationEntity(record, zohoAccessConfiguration.getZohoBaseUrl());
+    Organization org = zohoOrgConverter.convertToOrganizationEntity(record);
 
     Assertions.assertEquals(2, org.getPrefLabel().size());
     Assertions.assertEquals(1, org.getAltLabel().size());

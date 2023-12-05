@@ -1,35 +1,73 @@
 package eu.europeana.entitymanagement.zoho.organization;
 
 import static eu.europeana.entitymanagement.zoho.utils.ZohoUtils.toIsoLanguage;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import com.zoho.crm.api.record.Record;
 import com.zoho.crm.api.users.User;
 import eu.europeana.entitymanagement.definitions.model.Address;
+import eu.europeana.entitymanagement.definitions.model.Country;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
+import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 
+@Component
 public class ZohoOrganizationConverter {
+  
+  private final EntityRecordRepository entityRecordRepository;
+  private final ZohoConfiguration zohoConfiguration;
+  private Map<String, String> countryMapping;
+
+  static final Logger logger = LogManager.getLogger(ZohoOrganizationConverter.class);
 
   private static final String POSITION_SEPARATOR = "_";
   
-  private ZohoOrganizationConverter() {
-    // private constructor to prevent instantiation
+  @Autowired
+  public ZohoOrganizationConverter(EntityRecordRepository entityRecordRepository, ZohoConfiguration zohoConfiguration) throws IOException {
+    this.entityRecordRepository=entityRecordRepository;
+    this.zohoConfiguration=zohoConfiguration;
+    //reading the country mapping file
+    countryMapping = new HashMap<>();
+    String countryMappingFile = this.zohoConfiguration.getZohoCountryMappingFile();
+    try (InputStream inputStream = getClass().getResourceAsStream(countryMappingFile)) {
+      assert inputStream != null;
+      try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+        String contents = reader.lines().collect(Collectors.joining(System.lineSeparator()));
+        if(! StringUtils.isBlank(contents)) {
+          JSONObject contentsJson = new JSONObject(contents);
+          contentsJson.keys().forEachRemaining(key -> {
+            countryMapping.put(key, contentsJson.getString(key));
+          });
+        }
+      }
+    }
+
   }
 
-  public static Organization convertToOrganizationEntity(Record zohoRecord, String zohoBaseUrl) {
+  public Organization convertToOrganizationEntity(Record zohoRecord) {
     Organization org = new Organization();
     Long zohoId = zohoRecord.getId();
-    org.setAbout(ZohoUtils.buildZohoOrganizationId(zohoBaseUrl, zohoRecord.getId()));
+    org.setAbout(ZohoUtils.buildZohoOrganizationId(zohoConfiguration.getZohoBaseUrl(), zohoRecord.getId()));
     org.setIdentifier(List.of(Long.toString(zohoId)));
 
     // extract language maps
@@ -57,20 +95,35 @@ public class ZohoOrganizationConverter {
               Locale.ENGLISH.getLanguage(), organizationRoleStringList));
     }
 
-    String organizationCountry =
-        toEdmCountry(getStringFieldValue(zohoRecord, ZohoConstants.ORGANIZATION_COUNTRY_FIELD));
-    org.setCountry(organizationCountry);
-    org.setSameReferenceLinks(getAllSameAs(zohoRecord));
-
     Address address = new Address();
     address.setVcardStreetAddress(
         ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.STREET_FIELD)));
     address.setVcardLocality(
         ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.CITY_FIELD)));
-    address.setVcardCountryName(
-        ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.COUNTRY_FIELD)));
+    String vcardCountryName = ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.COUNTRY_FIELD));
+    address.setVcardCountryName(vcardCountryName);
     address.setVcardPostalCode(
         ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.ZIP_CODE_FIELD)));
+
+    //set country
+    String orgCountryUri = countryMapping.get(vcardCountryName);
+    if(StringUtils.isBlank(orgCountryUri)) {
+      logger.info("The mapping for the zoho country: {}, to the uri does not exist.", vcardCountryName);
+    }
+    else {
+      Country orgCountry = new Country();
+      orgCountry.setId(orgCountryUri);
+      EntityRecord orgEntityRecord = entityRecordRepository.findByEntityId(orgCountryUri);
+      if(orgEntityRecord==null) {
+        logger.info("The entity record to be dereferenced for the zoho country with the id: {}, does not exist in the db.", orgCountryUri);
+      }
+      else {
+        orgCountry.setPrefLabel(orgEntityRecord.getEntity().getPrefLabel());
+      }
+      org.setCountry(orgCountry);  
+    }
+
+    org.setSameReferenceLinks(getAllSameAs(zohoRecord));
 
     // only set address if it contains metadata properties.
     if (address.hasMetadataProperties()) {
@@ -105,7 +158,7 @@ public class ZohoOrganizationConverter {
     return org;
   }
 
-  private static WebResource buildWebResource(Record zohoRecord, String logoFieldName) {
+  private WebResource buildWebResource(Record zohoRecord, String logoFieldName) {
     String id = getStringFieldValue(zohoRecord, logoFieldName);
     if (id == null) {
       return null;
@@ -116,14 +169,14 @@ public class ZohoOrganizationConverter {
     return resource;
   }
 
-  private static Map<String, String> getPrefLabel(Map<String, List<String>> allLabels) {
+  private Map<String, String> getPrefLabel(Map<String, List<String>> allLabels) {
     Map<String, String> prefLabel = new LinkedHashMap<>(allLabels.size());
     // first label for each language goes to prefLabel map
     allLabels.forEach((key, value) -> prefLabel.put(key, value.get(0)));
     return prefLabel;
   }
 
-  private static Map<String, List<String>> getAltLabel(Map<String, List<String>> allLabels) {
+  private Map<String, List<String>> getAltLabel(Map<String, List<String>> allLabels) {
     Map<String, List<String>> altLabel = new LinkedHashMap<>();
     for (Map.Entry<String, List<String>> entry : allLabels.entrySet()) {
       int size = entry.getValue().size();
@@ -135,7 +188,7 @@ public class ZohoOrganizationConverter {
     return altLabel;
   }
 
-  private static Map<String, List<String>> getAllRecordLabels(Record zohoRecord) {
+  private Map<String, List<String>> getAllRecordLabels(Record zohoRecord) {
     Map<String, List<String>> allLabels = new LinkedHashMap<>();
 
     // read account name first
@@ -155,7 +208,7 @@ public class ZohoOrganizationConverter {
     return allLabels;
   }
 
-  static void addLabel(
+  void addLabel(
       Record zohoRecord,
       Map<String, List<String>> allLabels,
       String langFieldName,
@@ -167,15 +220,15 @@ public class ZohoOrganizationConverter {
     }
   }
 
-  public static String getStringFieldValue(Record zohoRecord, String zohoFieldName) {
+  public String getStringFieldValue(Record zohoRecord, String zohoFieldName) {
     return ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(zohoFieldName));
   }
 
-  public static String getEuropeanaIdFieldValue(Record zohoRecord) {
+  public String getEuropeanaIdFieldValue(Record zohoRecord) {
     return getStringFieldValue(zohoRecord, ZohoConstants.EUROPEANA_ID_FIELD);
   }
   
-  static List<String> getTextAreaFieldValues(Record zohoRecord, String zohoFieldName) {
+  List<String> getTextAreaFieldValues(Record zohoRecord, String zohoFieldName) {
     String textArea = ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(zohoFieldName));
     if (StringUtils.isBlank(textArea)) {
       return Collections.emptyList();
@@ -184,22 +237,22 @@ public class ZohoOrganizationConverter {
     return List.of(StringUtils.split(textArea, "\n"));
   }
 
-  static String getIsoLanguage(Record zohoRecord, String zohoLangFieldName) {
+  String getIsoLanguage(Record zohoRecord, String zohoLangFieldName) {
     return toIsoLanguage(getStringFieldValue(zohoRecord, zohoLangFieldName));
   }
 
-  static void addValueToList(String value, List<String> list) {
+  void addValueToList(String value, List<String> list) {
     if (value != null) {
       list.add(value);
     }
   }
 
-  static void addLabel(Map<String, List<String>> allLabels, String isoLanguage, String label) {
+  void addLabel(Map<String, List<String>> allLabels, String isoLanguage, String label) {
     allLabels.computeIfAbsent(isoLanguage, k -> new ArrayList<>());
     allLabels.get(isoLanguage).add(label);
   }
 
-  private static List<String> getAllSameAs(Record zohoRecord) {
+  private List<String> getAllSameAs(Record zohoRecord) {
     List<String> sameAsList = new ArrayList<>();
     for (int i = 1; i <= ZohoConstants.SAME_AS_CODE_LENGTH; i++) {
       String sameAs = getStringFieldValue(zohoRecord, ZohoConstants.SAME_AS_FIELD + "_" + i);
@@ -210,22 +263,22 @@ public class ZohoOrganizationConverter {
     return sameAsList;
   }
 
-  private static String toEdmCountry(String organizationCountry) {
-    if (StringUtils.isBlank(organizationCountry)) {
-      return null;
-    } else {
-      String isoCode = null;
-      int commaSeparatorPos = organizationCountry.indexOf(44);
-      int bracketSeparatorPos = organizationCountry.indexOf(40);
-      if (commaSeparatorPos > 0) {
-        isoCode = organizationCountry.substring(commaSeparatorPos + 1).trim();
-      } else if (bracketSeparatorPos > 0) {
-        isoCode = organizationCountry.substring(0, bracketSeparatorPos).trim();
-      }
-
-      return isoCode;
-    }
-  }
+//  private static String toEdmCountry(String organizationCountry) {
+//    if (StringUtils.isBlank(organizationCountry)) {
+//      return null;
+//    } else {
+//      String isoCode = null;
+//      int commaSeparatorPos = organizationCountry.indexOf(44);
+//      int bracketSeparatorPos = organizationCountry.indexOf(40);
+//      if (commaSeparatorPos > 0) {
+//        isoCode = organizationCountry.substring(commaSeparatorPos + 1).trim();
+//      } else if (bracketSeparatorPos > 0) {
+//        isoCode = organizationCountry.substring(0, bracketSeparatorPos).trim();
+//      }
+//
+//      return isoCode;
+//    }
+//  }
 
   /**
    * The method is to process the ZOHO_OWNER_FIELD name value
@@ -233,11 +286,11 @@ public class ZohoOrganizationConverter {
    * @param recordOrganization
    * @return
    */
-  public static String getOwnerName(Record recordOrganization) {
+  public String getOwnerName(Record recordOrganization) {
     return ((User) recordOrganization.getKeyValue(ZohoConstants.ZOHO_OWNER_FIELD)).getName();
   }
 
-  public static boolean isMarkedForDeletion(Record recordOrganization) {
+  public boolean isMarkedForDeletion(Record recordOrganization) {
     Object scheduledDeletion =
         recordOrganization.getKeyValue(ZohoConstants.ZOHO_SCHEDULED_DELETION);
     if (scheduledDeletion == null) {

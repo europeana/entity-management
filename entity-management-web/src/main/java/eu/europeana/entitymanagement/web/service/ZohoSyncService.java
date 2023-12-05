@@ -31,7 +31,7 @@ import eu.europeana.entitymanagement.web.model.BatchOperations;
 import eu.europeana.entitymanagement.web.model.Operation;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReportFields;
-import eu.europeana.entitymanagement.zoho.organization.ZohoAccessConfiguration;
+import eu.europeana.entitymanagement.zoho.organization.ZohoConfiguration;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 
@@ -42,12 +42,13 @@ public class ZohoSyncService extends BaseZohoAccess {
   public ZohoSyncService(EntityRecordService entityRecordService,
       EntityUpdateService entityUpdateService, EntityRecordRepository entityRecordRepository,
       EntityManagementConfiguration emConfiguration, DataSources datasources,
-      ZohoAccessConfiguration zohoAccessConfiguration, 
+      ZohoConfiguration zohoConfiguration,
+      ZohoOrganizationConverter zohoOrgConverter,
       SolrService solrService,
       ZohoSyncRepository zohoSyncRepo) {
 
     super(entityRecordService, entityUpdateService, entityRecordRepository, emConfiguration,
-        datasources, zohoAccessConfiguration, solrService, zohoSyncRepo);
+        datasources, zohoConfiguration, zohoOrgConverter, solrService, zohoSyncRepo);
   }
 
   /**
@@ -113,7 +114,7 @@ public class ZohoSyncService extends BaseZohoAccess {
       // OffsetDateTime offsetDateTime = modifiedSince.toInstant()
       // .atOffset(ZoneOffset.UTC);
       try {
-        orgList = zohoAccessConfiguration.getZohoAccessClient().getZcrmRecordOrganizations(page,
+        orgList = zohoConfiguration.getZohoAccessClient().getZcrmRecordOrganizations(page,
             pageSize, modifiedSince);
 
         logExecutionProgress(orgList, page, pageSize);
@@ -168,7 +169,7 @@ public class ZohoSyncService extends BaseZohoAccess {
     while (hasNext) {
       try {
         // list of (europeana) organizations ids
-        deletedRecordsInZoho = zohoAccessConfiguration.getZohoAccessClient()
+        deletedRecordsInZoho = zohoConfiguration.getZohoAccessClient()
             .getZohoDeletedRecordOrganizations(modifiedSince, startPage, pageSize);
 
         currentPageSize = deletedRecordsInZoho.size();
@@ -267,10 +268,10 @@ public class ZohoSyncService extends BaseZohoAccess {
 
 //    String zohoBasedEntityId =
 //        EntityRecordUtils.buildEntityIdUri(EntityTypes.Organization, zohoId.toString());
-    String zohoRecordEuropeanaID = ZohoOrganizationConverter.getEuropeanaIdFieldValue(zohoOrg);
+    String zohoRecordEuropeanaID = zohoOrgConverter.getEuropeanaIdFieldValue(zohoOrg);
 
     boolean hasDpsOwner = hasRequiredOwnership(zohoOrg);
-    boolean markedForDeletion = ZohoOrganizationConverter.isMarkedForDeletion(zohoOrg);
+    boolean markedForDeletion = zohoOrgConverter.isMarkedForDeletion(zohoOrg);
 
     String emOperation = identifyOperationType(zohoId, zohoRecordEuropeanaID, entityRecord,
         hasDpsOwner, markedForDeletion);

@@ -40,6 +40,7 @@ import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Concept;
 import eu.europeana.entitymanagement.definitions.model.ConceptScheme;
+import eu.europeana.entitymanagement.definitions.model.Country;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -66,7 +67,7 @@ import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
-import eu.europeana.entitymanagement.zoho.organization.ZohoAccessConfiguration;
+import eu.europeana.entitymanagement.zoho.organization.ZohoConfiguration;
 import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
@@ -83,7 +84,7 @@ public class EntityRecordService {
 
   private final SolrService solrService;
   
-  private final ZohoAccessConfiguration zohoAccessConfiguration; 
+  private final ZohoConfiguration zohoConfiguration; 
   
   private static final Logger logger = LogManager.getLogger(EntityRecordService.class);
 
@@ -93,12 +94,12 @@ public class EntityRecordService {
   @Autowired
   public EntityRecordService(EntityRecordRepository entityRecordRepository,
       EntityManagementConfiguration emConfiguration,
-      ZohoAccessConfiguration zohoAccessConfiguration,
+      ZohoConfiguration zohoConfiguration,
       DataSources datasources,
       SolrService solrService) {
     this.entityRecordRepository = entityRecordRepository;
     this.emConfiguration = emConfiguration;
-    this.zohoAccessConfiguration = zohoAccessConfiguration; 
+    this.zohoConfiguration = zohoConfiguration; 
     this.datasources = datasources;
     this.solrService = solrService;
   }
@@ -822,6 +823,8 @@ public class EntityRecordService {
           mergeWebResources(primary, secondary, field, consolidatedEntity);
         } else if (Address.class.isAssignableFrom(fieldType)) {
           mergeAddress(primary, secondary, field, consolidatedEntity);
+        } else if (Country.class.isAssignableFrom(fieldType)) {
+          mergeCountry(primary, secondary, field, consolidatedEntity);
         }
       }
 
@@ -852,6 +855,17 @@ public class EntityRecordService {
       consolidatedEntity.setFieldValue(field, new WebResource(secondaryWebResource));
     } else if (primaryWebResource != null) {
       consolidatedEntity.setFieldValue(field, new WebResource(primaryWebResource));
+    }
+  }
+
+  private void mergeCountry(Entity primary, Entity secondary, Field field,
+      Entity consolidatedEntity) throws IllegalAccessException {
+    Country primaryCountry = (Country) primary.getFieldValue(field);
+    Country secondaryCountry = (Country) secondary.getFieldValue(field);
+    if (primaryCountry == null && secondaryCountry != null) {
+      consolidatedEntity.setFieldValue(field, new Country(secondaryCountry));
+    } else if (primaryCountry != null) {
+      consolidatedEntity.setFieldValue(field, new Country(primaryCountry));
     }
   }
 
@@ -1283,7 +1297,7 @@ public class EntityRecordService {
 
   void updateEuropeanaIDFieldInZoho(String zohoOrganizationUrl,  String europeanaId) throws EntityCreationException {
     try {
-        zohoAccessConfiguration.getZohoAccessClient().updateZohoRecordOrganizationStringField(zohoOrganizationUrl, ZohoConstants.EUROPEANA_ID_FIELD, europeanaId);
+        zohoConfiguration.getZohoAccessClient().updateZohoRecordOrganizationStringField(zohoOrganizationUrl, ZohoConstants.EUROPEANA_ID_FIELD, europeanaId);
     } catch (ZohoException e) {
       String message =
           "Updating EuropeanaID field in Zoho faild for Organization: "
