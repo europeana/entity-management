@@ -1,6 +1,5 @@
 package eu.europeana.entitymanagement.zoho.organization;
 
-import java.io.IOException;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
@@ -16,7 +15,7 @@ public class ZohoDereferenceService implements Dereferencer {
   private final ZohoConfiguration zohoConfiguration;
 
   @Autowired
-  public ZohoDereferenceService(ZohoConfiguration zohoConfiguration, ZohoOrganizationConverter zohoOrgConverter) throws IOException {
+  public ZohoDereferenceService(ZohoConfiguration zohoConfiguration, ZohoOrganizationConverter zohoOrgConverter) {
     this.zohoConfiguration = zohoConfiguration;
     this.zohoOrgConverter=zohoOrgConverter;
   }

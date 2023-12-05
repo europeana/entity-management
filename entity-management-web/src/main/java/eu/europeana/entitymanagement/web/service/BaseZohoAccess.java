@@ -62,7 +62,7 @@ public class BaseZohoAccess {
 
   final ZohoSyncRepository zohoSyncRepo;
 
-  static final Logger logger = LogManager.getLogger(ZohoSyncService.class);
+  static final Logger logger = LogManager.getLogger(BaseZohoAccess.class);
   
   public BaseZohoAccess(
       EntityRecordService entityRecordService,
@@ -95,17 +95,12 @@ public class BaseZohoAccess {
     return zohoDatasource.get();
   }
 
-  OffsetDateTime generateFixDate() {
+  OffsetDateTime generateFixDate() throws ParseException {
     //hardcoded date, just for manual testing
     SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss", Locale.ENGLISH);
     String dateInString = "23-Oct-2023 14:38:00"; 
-    try {
-      Date date = formatter.parse(dateInString);
-      return DateUtils.toOffsetDateTime(date);
-    } catch (ParseException e) {
-      e.printStackTrace();
-    }
-    return null;
+    Date date = formatter.parse(dateInString);
+    return DateUtils.toOffsetDateTime(date);
   }
 
   protected String buildErrorMessage(String message, List<String> ids) {

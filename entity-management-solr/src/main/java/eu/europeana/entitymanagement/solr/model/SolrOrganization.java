@@ -85,8 +85,11 @@ public class SolrOrganization extends SolrEntity<Organization> {
     this.phone = organization.getPhone();
     if (organization.getMbox() != null) this.mbox = new ArrayList<>(organization.getMbox());
     setEuropeanaRole(organization.getEuropeanaRole());
-    this.countryId = organization.getCountry().getId();
-    setCountryPrefLabel(organization.getCountry().getPrefLabel());
+    
+    if(organization.getCountry()!=null) {
+      this.countryId = organization.getCountry().getId();
+      this.setCountryPrefLabel(organization.getCountry().getPrefLabel());
+    }
     
     if (organization.getSameReferenceLinks() != null) {
       this.sameAs = new ArrayList<>(organization.getSameReferenceLinks());

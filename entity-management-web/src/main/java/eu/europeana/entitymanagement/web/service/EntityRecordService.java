@@ -496,8 +496,7 @@ public class EntityRecordService {
     // } else {
     // entityId = generateEntityId(type, null);
     // }
-    entityId = generateEntityId(type, null);
-    return entityId;
+    return generateEntityId(type, null);
   }
 
   List<String> buildSameAsReferenceLinks(String externalProxyId, Entity datasourceResponse,
@@ -1302,7 +1301,7 @@ public class EntityRecordService {
       String message =
           "Updating EuropeanaID field in Zoho faild for Organization: "
               + zohoOrganizationUrl;
-      throw new EntityCreationException(message);
+      throw new EntityCreationException(message, e);
     }
   }
 }
