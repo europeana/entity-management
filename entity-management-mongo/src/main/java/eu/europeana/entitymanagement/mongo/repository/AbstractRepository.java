@@ -44,6 +44,24 @@ public abstract class AbstractRepository {
     return autoIncrement.getValue();
   }
 
+  /**
+   * Generates an autoincrement value for entities, based on the Entity type
+   *
+   * @param internalType internal type for Entity
+   * @return autoincrement value
+   */
+  public long getLastGeneratedIdentifier(String type) {
+    /*
+     * Get the given key from the auto increment entity and try to increment it.
+     * Synchronization occurs on the DB-level, so we don't need to synchronize this code block.
+     */
+
+    EntityIdGenerator sequenceValue =
+        getDataStore().find(EntityIdGenerator.class).first();
+
+    return sequenceValue != null ? sequenceValue.getValue() : 0;
+  }
+  
   protected Datastore getDataStore() {
     return datastore;
   }

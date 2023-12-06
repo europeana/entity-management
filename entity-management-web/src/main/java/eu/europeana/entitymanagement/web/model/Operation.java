@@ -8,15 +8,15 @@ public class Operation implements Comparable<Operation> {
 
   private String action;
   //  private String zohoId;
-  private String organizationId;
+  private String zohoEuropeanaId;
 
   private Record zohoRecord;
   private Date modified;
   EntityRecord entityRecord;
 
   public Operation(
-      String organizationId, String action, Record zohoRecord, EntityRecord entityRecord) {
-    this.organizationId = organizationId;
+      String zohoEuropeanaId, String action, Record zohoRecord, EntityRecord entityRecord) {
+    this.zohoEuropeanaId = zohoEuropeanaId;
     this.action = action;
     this.zohoRecord = zohoRecord;
     if (zohoRecord != null) {
@@ -35,25 +35,25 @@ public class Operation implements Comparable<Operation> {
     this.action = action;
   }
 
-  public String getOrganizationId() {
-    return organizationId;
+  public String getZohoEuropeanaId() {
+    return zohoEuropeanaId;
   }
 
-  public void setOrganizationId(String organizationId) {
-    this.organizationId = organizationId;
+  public void setZohoEuropeanaId(String zohoEuropeanaId) {
+    this.zohoEuropeanaId = zohoEuropeanaId;
   }
 
   @Override
   public int hashCode() {
-    if (getOrganizationId() == null) {
+    if (getZohoEuropeanaId() == null) {
       return -1;
     }
-    return getOrganizationId().hashCode();
+    return getZohoEuropeanaId().hashCode();
   }
 
   @Override
   public String toString() {
-    return String.format("organizationId: %s, action: %s", getOrganizationId(), getAction());
+    return String.format("organizationId: %s, action: %s", getZohoEuropeanaId(), getAction());
   }
 
   @Override
@@ -71,7 +71,7 @@ public class Operation implements Comparable<Operation> {
     }
 
     Operation op2 = (Operation) obj;
-    return getOrganizationId().equals(op2.getOrganizationId())
+    return getZohoEuropeanaId().equals(op2.getZohoEuropeanaId())
         && getAction().equals(op2.getAction());
   }
 
@@ -86,8 +86,8 @@ public class Operation implements Comparable<Operation> {
     }
     
     // create operations don't have an operation id
-    if (ret == 0 && getOrganizationId() != null) {
-      ret = getOrganizationId().compareTo(o.getOrganizationId());
+    if (ret == 0 && getZohoEuropeanaId() != null) {
+      ret = getZohoEuropeanaId().compareTo(o.getZohoEuropeanaId());
     }
     
     //permanent delete operations don't have a zoho record

@@ -143,7 +143,7 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
     DataSource dataSource = datasources.verifyDataSource(externalId, false);
     EntityRecord savedRecord =
         entityRecordService.createEntityFromRequest(
-            europeanaProxyEntity, xmlBaseEntity.toEntityModel(), dataSource);
+            europeanaProxyEntity, xmlBaseEntity.toEntityModel(), dataSource, null);
 
     // trigger update to generate consolidated entity
     entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId());
@@ -175,7 +175,7 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
         ZohoOrganizationConverter.convertToOrganizationEntity(zohoRecord, zohoAccessConfiguration.getZohoBaseUrl());
     EntityRecord savedRecord =
         entityRecordService.createEntityFromRequest(
-            europeanaProxyEntity, zohoOrganization, dataSource);
+            europeanaProxyEntity, zohoOrganization, dataSource, null);
 
     // trigger update to generate consolidated entity
     entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId());

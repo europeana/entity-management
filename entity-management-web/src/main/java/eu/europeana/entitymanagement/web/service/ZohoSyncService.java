@@ -42,8 +42,7 @@ public class ZohoSyncService extends BaseZohoAccess {
   public ZohoSyncService(EntityRecordService entityRecordService,
       EntityUpdateService entityUpdateService, EntityRecordRepository entityRecordRepository,
       EntityManagementConfiguration emConfiguration, DataSources datasources,
-      ZohoAccessConfiguration zohoAccessConfiguration, 
-      SolrService solrService,
+      ZohoAccessConfiguration zohoAccessConfiguration, SolrService solrService,
       ZohoSyncRepository zohoSyncRepo) {
 
     super(entityRecordService, entityUpdateService, entityRecordRepository, emConfiguration,
@@ -68,7 +67,7 @@ public class ZohoSyncService extends BaseZohoAccess {
     }
 
     // for development debugging purposes use modifiedSince = generateFixDate();
-//    modifiedSince = generateFixDate();
+    // modifiedSince = generateFixDate();
 
     return synchronizeZohoOrganizations(modifiedSince);
   }
@@ -82,19 +81,19 @@ public class ZohoSyncService extends BaseZohoAccess {
    */
   public ZohoSyncReport synchronizeZohoOrganizations(@NotNull OffsetDateTime modifiedSince)
       throws EntityUpdateException {
-    
-    if(logger.isInfoEnabled()) {
+
+    if (logger.isInfoEnabled()) {
       logger.info("Synchronizing organizations updated after date: {}", modifiedSince);
     }
-   
+
     ZohoSyncReport zohoSyncReport = new ZohoSyncReport(new Date());
     // synchronize updated
     synchronizeZohoOrganizations(modifiedSince, zohoSyncReport);
-    //synchronize deleted in zoho
+    // synchronize deleted in zoho
     synchronizeDeletedZohoOrganizations(modifiedSince, zohoSyncReport);
-    
+
     logger.info("Zoho update operations completed successfully:\n {}", zohoSyncReport);
-    
+
     return zohoSyncRepo.save(zohoSyncReport);
   }
 
@@ -133,8 +132,10 @@ public class ZohoSyncService extends BaseZohoAccess {
       performOperations(operations, zohoSyncReport);
 
       if (isLastPage(orgList.size(), pageSize)) {
-        if(logger.isDebugEnabled()) {
-          logger.debug("Processing of deleted records is complete on page on page {}, pageSize {}, items on last page {}", page, pageSize, orgList.size());
+        if (logger.isDebugEnabled()) {
+          logger.debug(
+              "Processing of deleted records is complete on page on page {}, pageSize {}, items on last page {}",
+              page, pageSize, orgList.size());
         }
         hasNext = false;
       } else {
@@ -196,8 +197,10 @@ public class ZohoSyncService extends BaseZohoAccess {
 
       if (isLastPage(currentPageSize, pageSize)) {
         // last page: if no more organizations exist in Zoho
-        if(logger.isDebugEnabled()) {
-          logger.debug("Processing of deleted records is complete on page on page {}, pageSize {}, items on last page {}", startPage, pageSize, currentPageSize);
+        if (logger.isDebugEnabled()) {
+          logger.debug(
+              "Processing of deleted records is complete on page on page {}, pageSize {}, items on last page {}",
+              startPage, pageSize, currentPageSize);
         }
         hasNext = false;
       } else {
@@ -210,7 +213,7 @@ public class ZohoSyncService extends BaseZohoAccess {
   boolean isLastPage(int currentPageSize, int maxItemsPerPage) {
     // END LOOP: if no more organizations exist in Zoho
     return currentPageSize < maxItemsPerPage;
-//    return currentPageSize == 0;
+    // return currentPageSize == 0;
   }
 
 
@@ -265,8 +268,8 @@ public class ZohoSyncService extends BaseZohoAccess {
   private void addOperation(BatchOperations operations, Long zohoId, Record zohoOrg,
       EntityRecord entityRecord) {
 
-//    String zohoBasedEntityId =
-//        EntityRecordUtils.buildEntityIdUri(EntityTypes.Organization, zohoId.toString());
+    // String zohoBasedEntityId =
+    // EntityRecordUtils.buildEntityIdUri(EntityTypes.Organization, zohoId.toString());
     String zohoRecordEuropeanaID = ZohoOrganizationConverter.getEuropeanaIdFieldValue(zohoOrg);
 
     boolean hasDpsOwner = hasRequiredOwnership(zohoOrg);
@@ -277,8 +280,9 @@ public class ZohoSyncService extends BaseZohoAccess {
 
     if (emOperation != null) {
       // only if there is an operation to perform in EM
-      //zohoRecordEuropeanaID might be null at this stage
-      Operation operation = new Operation(zohoRecordEuropeanaID, emOperation, zohoOrg, entityRecord);
+      // zohoRecordEuropeanaID might be null at this stage
+      Operation operation =
+          new Operation(zohoRecordEuropeanaID, emOperation, zohoOrg, entityRecord);
       operations.addOperation(operation);
     } else {
       // skip
@@ -294,64 +298,61 @@ public class ZohoSyncService extends BaseZohoAccess {
 
   String identifyOperationType(Long zohoId, String zohoRecordEuropeanaID, EntityRecord entityRecord,
       boolean hasDpsOwner, boolean markedForDeletion) {
-    
+
     if (entityRecord == null) {
-      return shouldCreate(zohoId, zohoRecordEuropeanaID, hasDpsOwner, markedForDeletion);
+      return shouldCreate(zohoId, zohoRecordEuropeanaID, hasDpsOwner, markedForDeletion)
+          ? Operations.CREATE
+          : null;
+    } else if (shouldDisable(hasDpsOwner, markedForDeletion)) {
+      // if needsToBeDisabled
+      return Operations.DELETE;
+      // NOTE: the perform deletion needs to be updated to schedule updates
+    } else if (shouldEnable(entityRecord, hasDpsOwner, markedForDeletion)) {
+      // enable and update
+      // if needsToBeDidabled
+      return Operations.ENABLE;
     } else {
-      // entity record not null, update or deletion or enable?
-      // if needsToBeEnabled?
-      if (isForDisabling(hasDpsOwner, markedForDeletion)) {
-        // lost ownership, or marked for deletion - > disable
-        return Operations.DELETE;
-        //NOTE: the perform deletion needs to be updated to schedule updates
-      } 
-      
       if (StringUtils.isBlank(zohoRecordEuropeanaID)) {
-        if(entityRecord.isDisabled() && !isForDisabling(hasDpsOwner, markedForDeletion)) {
-          //isForDisabling check is redundant here, but condition kept for easier maintenance
-          //enable and update
-          return Operations.ENABLE;    
-        }
-        // Zoho entry has changed need to update
-        return Operations.UPDATE;
-      } else {
-        //entity record exists but the EuropeanaID is null in zoho
-        if(emConfiguration.isGenerateOrganizationEuropeanaId()) {
-          logger.warn(
+        logger.warn(
             "Zoho Organization doesn't have a Europeana ID, it should be set in Zoho before running the update workflow {}",
             zohoId);
-        }
-        return Operations.UPDATE; 
       }
+      return Operations.UPDATE;
     }
   }
 
-  String shouldCreate(Long zohoId, String zohoRecordEuropeanaID, boolean hasDpsOwner,
+  boolean shouldEnable(EntityRecord entityRecord, boolean hasDpsOwner, boolean markedForDeletion) {
+    return entityRecord.isDisabled() && !shouldDisable(hasDpsOwner, markedForDeletion);
+  }
+
+  boolean shouldCreate(Long zohoId, String zohoRecordEuropeanaID, boolean hasDpsOwner,
       boolean markedForDeletion) {
-    if (skipNoZohoEuropeanaId(zohoRecordEuropeanaID,
-      emConfiguration.isGenerateOrganizationEuropeanaId())) {
-      logger.debug(
-          "Organization has changed in zoho, but the job instance is not allowed to generate entity ids for Organizations. Skipped entity registration for Zoho id: {}",
-          zohoId);
-      // skipped if Europeana ID Generation is not allowed
-      return null;
-    } 
-      
+
     if (skipNonExisting(hasDpsOwner, markedForDeletion)) {
       logger.debug(
           "Organization has changed in zoho, but it is marked for deletion or doesn't have DPS as Owner. Skipped update for Zoho id: {}",
           zohoId);
-      // skipped 
-      return null;
-    } 
-    
+      // skipped
+      return false;
+    }
+
+    if (skipNoZohoEuropeanaId(zohoRecordEuropeanaID,
+        emConfiguration.isGenerateOrganizationEuropeanaId())) {
+      logger.debug(
+          "Organization has changed in zoho, but the job instance is not allowed to generate entity ids for Organizations. Skipped entity registration for Zoho id: {}",
+          zohoId);
+      // skipped if Europeana ID Generation is not allowed
+      return false;
+    }
+
     // entity not in entity management database,
     // create operation if ownership is correct and (EuropeanaID is available or organization id
     // generation is enabled)
-    return Operations.CREATE;
+    return true;
   }
 
-  boolean isForDisabling(boolean hasDpsOwner, boolean markedForDeletion) {
+  boolean shouldDisable(boolean hasDpsOwner, boolean markedForDeletion) {
+    // lost ownership, or marked for deletion - > disable
     return !hasDpsOwner || markedForDeletion;
   }
 
