@@ -88,7 +88,7 @@ public class EntityRecordService {
   private static final Logger logger = LogManager.getLogger(EntityRecordService.class);
 
   // Fields to be ignored during consolidation ("type" is final, so it cannot be updated)
-  private static final List<String> ignoredMergeFields = List.of("type");
+  private static final Set<String> ignoredMergeFields = Set.of("type");
 
   @Autowired
   public EntityRecordService(EntityRecordRepository entityRecordRepository,
@@ -762,7 +762,7 @@ public class EntityRecordService {
      * corresponds to the entity in the external proxy.
      */
     List<Field> fieldsToCombine = EntityUtils.getAllFields(primary.getClass()).stream()
-        .filter(f -> !ignoredMergeFields.contains(f.getName())).collect(Collectors.toList());
+        .filter(f -> !ignoredMergeFields.contains(f.getName())).toList();
     return combineEntities(primary, secondary, fieldsToCombine, true);
   }
 
@@ -1330,7 +1330,7 @@ public class EntityRecordService {
     } catch (ZohoException e) {
       String message =
           "Updating EuropeanaID field in Zoho faild for Organization: " + zohoOrganizationUrl;
-      throw new EntityCreationException(message);
+      throw new EntityCreationException(message, e);
     }
   }
 }

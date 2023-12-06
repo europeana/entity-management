@@ -44,6 +44,8 @@ import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 
 public class BaseZohoAccess {
 
+  static final Logger logger = LogManager.getLogger(BaseZohoAccess.class);
+  
   final EntityRecordService entityRecordService;
 
   final EntityRecordRepository entityRecordRepository;
@@ -60,7 +62,6 @@ public class BaseZohoAccess {
 
   final ZohoSyncRepository zohoSyncRepo;
 
-  static final Logger logger = LogManager.getLogger(ZohoSyncService.class);
   
   public BaseZohoAccess(
       EntityRecordService entityRecordService,
@@ -99,7 +100,7 @@ public class BaseZohoAccess {
       Date date = formatter.parse(dateInString);
       return DateUtils.toOffsetDateTime(date);
     } catch (ParseException e) {
-      e.printStackTrace();
+      logger.warn("Invalid date format!", e);
     }
     return null;
   }
