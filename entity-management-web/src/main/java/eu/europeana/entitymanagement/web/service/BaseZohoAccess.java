@@ -350,8 +350,6 @@ public class BaseZohoAccess {
                 europeanaProxyEntity, zohoOrganization, getZohoDataSource(), operation.getZohoEuropeanaId());
         
         
-        entitiesToUpdate.set(entitiesToUpdate.size()-1, savedEntityRecord.getEntityId());
-        
         //update organization ID into the operation, generated ids are available only at this stage
         operation.setZohoEuropeanaId(savedEntityRecord.getEntityId());
         entitiesToUpdate.add(savedEntityRecord.getEntityId());
