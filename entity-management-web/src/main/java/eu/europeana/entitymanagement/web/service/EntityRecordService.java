@@ -473,7 +473,7 @@ public class EntityRecordService {
     //only verify if this instance is allowed to generate ids
     if (emConfiguration.isGenerateOrganizationEuropeanaId()) {
       // need to prevent collision of entity ids
-      long predefinedIdentifier = Long.parseLong(StringUtils.substringAfterLast(predefinedEntityId, ""));
+      long predefinedIdentifier = Long.parseLong(StringUtils.substringAfterLast(predefinedEntityId, "/"));
       long lastGeneratedId = entityRecordRepository
           .getLastGeneratedIdentifier(EntityTypes.Organization.getEntityType());
       
