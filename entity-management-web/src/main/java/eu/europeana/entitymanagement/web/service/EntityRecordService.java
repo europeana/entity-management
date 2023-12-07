@@ -786,23 +786,22 @@ public class EntityRecordService {
           Object fieldValuePrimaryObjectPrimitiveOrString = primary.getFieldValue(field);
           Object fieldValueSecondaryObjectPrimitiveOrString = secondary.getFieldValue(field);
 
-          if (fieldValuePrimaryObjectPrimitiveOrString == null
-              && fieldValueSecondaryObjectPrimitiveOrString != null) {
-            consolidatedEntity.setFieldValue(field, fieldValueSecondaryObjectPrimitiveOrString);
-          } else if (fieldValuePrimaryObjectPrimitiveOrString != null) {
+          if (fieldValuePrimaryObjectPrimitiveOrString != null) {
             consolidatedEntity.setFieldValue(field, fieldValuePrimaryObjectPrimitiveOrString);
+          } else if (fieldValueSecondaryObjectPrimitiveOrString != null) {
+            consolidatedEntity.setFieldValue(field, fieldValueSecondaryObjectPrimitiveOrString);
           }
 
         } else if (Date.class.isAssignableFrom(fieldType)) {
           Object fieldValuePrimaryObjectDate = primary.getFieldValue(field);
           Object fieldValueSecondaryObjectDate = secondary.getFieldValue(field);
 
-          if (fieldValuePrimaryObjectDate == null && fieldValueSecondaryObjectDate != null) {
-            consolidatedEntity.setFieldValue(field,
-                new Date(((Date) fieldValueSecondaryObjectDate).getTime()));
-          } else if (fieldValuePrimaryObjectDate != null) {
+          if (fieldValuePrimaryObjectDate != null) {
             consolidatedEntity.setFieldValue(field,
                 new Date(((Date) fieldValuePrimaryObjectDate).getTime()));
+          } else if (fieldValueSecondaryObjectDate != null) {
+            consolidatedEntity.setFieldValue(field,
+                new Date(((Date) fieldValueSecondaryObjectDate).getTime()));
           }
         } else if (fieldType.isArray()) {
           Object[] mergedArray = mergeArrays(primary, secondary, field, accumulate);
@@ -835,11 +834,11 @@ public class EntityRecordService {
       Entity consolidatedEntity) throws IllegalAccessException, IllegalArgumentException, EntityUpdateException {
     Object primaryObj = primary.getFieldValue(field);
     Object secondaryObj = secondary.getFieldValue(field);
-    if (primaryObj == null && secondaryObj != null) {
-      consolidatedEntity.setFieldValue(field, deepCopyOfObject(secondaryObj));
-    } else if (primaryObj != null) {
+    if (primaryObj != null) {
       consolidatedEntity.setFieldValue(field, deepCopyOfObject(primaryObj));
-    }
+    } else if (secondaryObj != null) {
+      consolidatedEntity.setFieldValue(field, deepCopyOfObject(secondaryObj));
+    } 
   }
 
   boolean isStringOrPrimitive(Class<?> fieldType) {
@@ -865,11 +864,7 @@ public class EntityRecordService {
     Map<Object, Object> fieldValuePrimaryObject = deepCopyOfMap(fieldValuePrimaryObjectMap);
     Map<Object, Object> fieldValueSecondaryObject = deepCopyOfMap(fieldValueSecondaryObjectMap);
 
-    if (CollectionUtils.isEmpty(fieldValuePrimaryObject)
-        && !CollectionUtils.isEmpty(fieldValueSecondaryObject)) {
-      fieldValuePrimaryObject.putAll(fieldValueSecondaryObject);
-
-    } else if (!CollectionUtils.isEmpty(fieldValuePrimaryObject)
+    if (!CollectionUtils.isEmpty(fieldValuePrimaryObject)
         && !CollectionUtils.isEmpty(fieldValueSecondaryObject) && accumulate) {
       for (Map.Entry elemSecondary : fieldValueSecondaryObject.entrySet()) {
         Object key = elemSecondary.getKey();
@@ -880,10 +875,12 @@ public class EntityRecordService {
         mergePrimarySecondaryListWitoutDuplicates(fieldValuePrimaryObject, key, elemSecondary,
             fieldName, prefLabelsForAltLabels);
       }
-    }
-    if (!CollectionUtils.isEmpty(fieldValuePrimaryObject)) {
       consolidatedEntity.setFieldValue(field, fieldValuePrimaryObject);
-    }
+    } else if (!CollectionUtils.isEmpty(fieldValuePrimaryObject)) {
+      consolidatedEntity.setFieldValue(field, fieldValuePrimaryObject);
+    } else if (!CollectionUtils.isEmpty(fieldValueSecondaryObject)) {
+      consolidatedEntity.setFieldValue(field, fieldValueSecondaryObject);
+    }    
   }
 
   /**
@@ -994,22 +991,16 @@ public class EntityRecordService {
     List<Object> fieldValuePrimaryObject = deepCopyOfList(fieldValuePrimaryObjectList);
     List<Object> fieldValueSecondaryObject = deepCopyOfList(fieldValueSecondaryObjectList);
 
-    if (!CollectionUtils.isEmpty(fieldValuePrimaryObject) && !CollectionUtils.isEmpty(fieldValueSecondaryObject)) {
-      if (accumulate) {
+    if (!CollectionUtils.isEmpty(fieldValuePrimaryObject) && !CollectionUtils.isEmpty(fieldValueSecondaryObject)
+        && accumulate) {
         for (Object secondaryObjectListObject : fieldValueSecondaryObject) {
           addToPrimaryList(field, fieldValuePrimaryObject, secondaryObjectListObject);
         }
         consolidatedEntity.setFieldValue(field, fieldValuePrimaryObject);
-      } else {
-        consolidatedEntity.setFieldValue(field, fieldValuePrimaryObject);
-      }
-      return;
-    } else if (!CollectionUtils.isEmpty(fieldValueSecondaryObject)) {
-      consolidatedEntity.setFieldValue(field, fieldValueSecondaryObject);
-      return;
     } else if (!CollectionUtils.isEmpty(fieldValuePrimaryObject)) {
       consolidatedEntity.setFieldValue(field, fieldValuePrimaryObject);
-      return;
+    } else if (!CollectionUtils.isEmpty(fieldValueSecondaryObject)) {
+      consolidatedEntity.setFieldValue(field, fieldValueSecondaryObject);
     }
   }
 
