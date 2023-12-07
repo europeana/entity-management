@@ -414,7 +414,7 @@ public class BaseZohoAccess {
     return ownerName.equals(emConfiguration.getZohoSyncOwnerFilter());
   }
 
-  protected Set<String> getZohoUrl(final List<Record> orgList) {
+  protected Set<String> getZohoOrganizationUrls(final List<Record> orgList) {
     Set<String> modifiedInZoho = new HashSet<String>();
     // get the id list from Zoho deleted Record
     if (!orgList.isEmpty()) {

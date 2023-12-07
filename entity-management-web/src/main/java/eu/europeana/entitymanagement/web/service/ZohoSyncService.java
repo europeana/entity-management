@@ -233,16 +233,16 @@ public class ZohoSyncService extends BaseZohoAccess {
   BatchOperations fillOperations(final List<Record> orgList) {
     BatchOperations operations = new BatchOperations();
 
-    Set<String> modifiedZohoUrls = getZohoUrl(orgList);
+    Set<String> modifiedZohoUrls = getZohoOrganizationUrls(orgList);
     // List<EntityRecord> existingRecords = findEntityRecordsBySameAs(modifiedZohoUrls);
-    List<EntityRecord> existingRecords = findEntityRecordsByProxyId(modifiedZohoUrls);
+    List<EntityRecord> existingEntityRecords = findEntityRecordsByProxyId(modifiedZohoUrls);
 
     Long zohoId;
     for (Record zohoOrg : orgList) {
       // if full import then always update no deletion required
       zohoId = zohoOrg.getId();
       // organizationId = EntityRecordUtils.buildEntityIdUri(EntityTypes.Organization, zohoId);
-      Optional<EntityRecord> entityRecordOptional = findRecordInList(zohoId, existingRecords);
+      Optional<EntityRecord> entityRecordOptional = findRecordInList(zohoId, existingEntityRecords);
       EntityRecord entityRecord = null;
       if (entityRecordOptional.isPresent()) {
         entityRecord = entityRecordOptional.get();
@@ -330,7 +330,7 @@ public class ZohoSyncService extends BaseZohoAccess {
 
     if (skipNonExisting(hasDpsOwner, markedForDeletion)) {
       logger.debug(
-          "Organization has changed in zoho, but it is marked for deletion or doesn't have DPS as Owner. Skipped update for Zoho id: {}",
+          "Organization has changed in zoho, but it is marked for deletion or doesn't have DPS as Owner. Skipped creation for Zoho id: {}",
           zohoId);
       // skipped
       return false;
