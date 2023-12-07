@@ -753,8 +753,9 @@ public class EntityRecordService {
   }
 
   /**
-   * Reconciles metadata between two entities.
-   *
+   * Merges metadata between two entities. This method performs a deep copy of the objects, 
+   * for the mutable (custom) filed types.
+   * 
    * @param primary Primary entity. Metadata from this entity takes precedence
    * @param secondary Secondary entity. Metadata from this entity is only used if no matching field
    *        is contained within the primary entity.
@@ -781,18 +782,7 @@ public class EntityRecordService {
         Class<?> fieldType = field.getType();
         String fieldName = field.getName();
 
-        if (fieldType.isArray()) {
-          Object[] mergedArray = mergeArrays(primary, secondary, field, accumulate);
-          consolidatedEntity.setFieldValue(field, mergedArray);
-
-        } else if (List.class.isAssignableFrom(fieldType)) {
-          List<Object> fieldValuePrimaryObjectList = (List<Object>) primary.getFieldValue(field);
-          List<Object> fieldValueSecondaryObjectList =
-              (List<Object>) secondary.getFieldValue(field);
-          mergeList(consolidatedEntity, fieldValuePrimaryObjectList, fieldValueSecondaryObjectList,
-              field, accumulate);
-
-        } else if (isStringOrPrimitive(fieldType)) {
+        if (isStringOrPrimitive(fieldType)) {
           Object fieldValuePrimaryObjectPrimitiveOrString = primary.getFieldValue(field);
           Object fieldValueSecondaryObjectPrimitiveOrString = secondary.getFieldValue(field);
 
@@ -814,16 +804,20 @@ public class EntityRecordService {
             consolidatedEntity.setFieldValue(field,
                 new Date(((Date) fieldValuePrimaryObjectDate).getTime()));
           }
-
+        } else if (fieldType.isArray()) {
+          Object[] mergedArray = mergeArrays(primary, secondary, field, accumulate);
+          consolidatedEntity.setFieldValue(field, mergedArray);
+        } else if (List.class.isAssignableFrom(fieldType)) {
+          List<Object> fieldValuePrimaryObjectList = (List<Object>) primary.getFieldValue(field);
+          List<Object> fieldValueSecondaryObjectList =
+              (List<Object>) secondary.getFieldValue(field);
+          mergeList(consolidatedEntity, fieldValuePrimaryObjectList, fieldValueSecondaryObjectList,
+              field, accumulate);
         } else if (Map.class.isAssignableFrom(fieldType)) {
           combineEntities(consolidatedEntity, primary, secondary, prefLabelsForAltLabels, field,
               fieldName, accumulate);
-        } else if (WebResource.class.isAssignableFrom(fieldType)) {
-          mergeWebResources(primary, secondary, field, consolidatedEntity);
-        } else if (Address.class.isAssignableFrom(fieldType)) {
-          mergeAddress(primary, secondary, field, consolidatedEntity);
-        } else if (Country.class.isAssignableFrom(fieldType)) {
-          mergeCountry(primary, secondary, field, consolidatedEntity);
+        } else {
+          mergeCustomObjects(primary, secondary, field, consolidatedEntity);
         }
       }
 
@@ -837,75 +831,39 @@ public class EntityRecordService {
     return consolidatedEntity;
   }
 
-  /**
-   * Will merge the Web Resources
-   *
-   * @param primary
-   * @param secondary
-   * @param field
-   * @param consolidatedEntity
-   * @throws IllegalAccessException
-   */
-  private void mergeWebResources(Entity primary, Entity secondary, Field field,
-      Entity consolidatedEntity) throws IllegalAccessException {
-    WebResource primaryWebResource = (WebResource) primary.getFieldValue(field);
-    WebResource secondaryWebResource = (WebResource) secondary.getFieldValue(field);
-    if (primaryWebResource == null && secondaryWebResource != null) {
-      consolidatedEntity.setFieldValue(field, new WebResource(secondaryWebResource));
-    } else if (primaryWebResource != null) {
-      consolidatedEntity.setFieldValue(field, new WebResource(primaryWebResource));
-    }
-  }
-
-  private void mergeCountry(Entity primary, Entity secondary, Field field,
-      Entity consolidatedEntity) throws IllegalAccessException {
-    Country primaryCountry = (Country) primary.getFieldValue(field);
-    Country secondaryCountry = (Country) secondary.getFieldValue(field);
-    if (primaryCountry == null && secondaryCountry != null) {
-      consolidatedEntity.setFieldValue(field, new Country(secondaryCountry));
-    } else if (primaryCountry != null) {
-      consolidatedEntity.setFieldValue(field, new Country(primaryCountry));
-    }
-  }
-
-  /**
-   * Will combine the address
-   *
-   * @param primary
-   * @param secondary
-   * @param field
-   * @param consolidatedEntity
-   * @throws IllegalAccessException
-   */
-  private void mergeAddress(Entity primary, Entity secondary, Field field,
-      Entity consolidatedEntity) throws IllegalAccessException {
-    Address primaryAddress = (Address) primary.getFieldValue(field);
-    Address secondaryAddress = (Address) secondary.getFieldValue(field);
-    if (primaryAddress == null && secondaryAddress != null) {
-      consolidatedEntity.setFieldValue(field, new Address(secondaryAddress));
-    } else if (primaryAddress != null) {
-      consolidatedEntity.setFieldValue(field, new Address(primaryAddress));
+  private void mergeCustomObjects(Entity primary, Entity secondary, Field field,
+      Entity consolidatedEntity) throws IllegalAccessException, IllegalArgumentException, EntityUpdateException {
+    Object primaryObj = primary.getFieldValue(field);
+    Object secondaryObj = secondary.getFieldValue(field);
+    if (primaryObj == null && secondaryObj != null) {
+      consolidatedEntity.setFieldValue(field, deepCopyOfObject(secondaryObj));
+    } else if (primaryObj != null) {
+      consolidatedEntity.setFieldValue(field, deepCopyOfObject(primaryObj));
     }
   }
 
   boolean isStringOrPrimitive(Class<?> fieldType) {
-    return String.class.isAssignableFrom(fieldType) || fieldType.isPrimitive()
-        || Float.class.isAssignableFrom(fieldType) || Integer.class.isAssignableFrom(fieldType);
+    return 
+        String.class.isAssignableFrom(fieldType) 
+        || fieldType.isPrimitive()
+        || Float.class.isAssignableFrom(fieldType) || Integer.class.isAssignableFrom(fieldType)
+        || Double.class.isAssignableFrom(fieldType) || Short.class.isAssignableFrom(fieldType)
+        || Byte.class.isAssignableFrom(fieldType) || Boolean.class.isAssignableFrom(fieldType)
+        || Long.class.isAssignableFrom(fieldType);
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   void combineEntities(Entity consolidatedEntity, Entity primary, Entity secondary,
       Map<Object, Object> prefLabelsForAltLabels, Field field, String fieldName, boolean accumulate)
-      throws IllegalAccessException {
+      throws IllegalAccessException, EntityUpdateException {
     // TODO: refactor implemetation
 
     Map<Object, Object> fieldValuePrimaryObjectMap =
         (Map<Object, Object>) primary.getFieldValue(field);
     Map<Object, Object> fieldValueSecondaryObjectMap =
         (Map<Object, Object>) secondary.getFieldValue(field);
-    Map<Object, Object> fieldValuePrimaryObject = initialiseObjectMap(fieldValuePrimaryObjectMap);
-    Map<Object, Object> fieldValueSecondaryObject =
-        initialiseObjectMap(fieldValueSecondaryObjectMap);
+    Map<Object, Object> fieldValuePrimaryObject = deepCopyOfMap(fieldValuePrimaryObjectMap);
+    Map<Object, Object> fieldValueSecondaryObject = deepCopyOfMap(fieldValueSecondaryObjectMap);
 
     if (CollectionUtils.isEmpty(fieldValuePrimaryObject)
         && !CollectionUtils.isEmpty(fieldValueSecondaryObject)) {
@@ -936,16 +894,16 @@ public class EntityRecordService {
    * @param elemSecondary
    * @param fieldName
    * @param prefLabelsForAltLabels
+   * @throws EntityUpdateException 
    */
   @SuppressWarnings({"rawtypes", "unchecked"})
   private void mergePrimarySecondaryListWitoutDuplicates(
       Map<Object, Object> fieldValuePrimaryObject, Object key, Map.Entry elemSecondary,
-      String fieldName, Map<Object, Object> prefLabelsForAltLabels) {
+      String fieldName, Map<Object, Object> prefLabelsForAltLabels) throws EntityUpdateException {
     if (fieldValuePrimaryObject.containsKey(key)
-        && List.class.isAssignableFrom(elemSecondary.getValue().getClass())) {
+        && List.class.isAssignableFrom(elemSecondary.getValue().getClass())) {      
       List<Object> listSecondaryObject = (List<Object>) elemSecondary.getValue();
-      List<Object> listPrimaryObject =
-          new ArrayList<>((List<Object>) fieldValuePrimaryObject.get(key));
+      List<Object> listPrimaryObject = deepCopyOfList((List<Object>) fieldValuePrimaryObject.get(key));
       boolean listPrimaryObjectChanged = false;
       for (Object elemSecondaryList : listSecondaryObject) {
         // check if value already exists in the primary list.
@@ -975,16 +933,9 @@ public class EntityRecordService {
     }
   }
 
-  private Map<Object, Object> initialiseObjectMap(Map<Object, Object> fieldValueObjectMap) {
-    if (fieldValueObjectMap != null) {
-      return new HashMap<>(fieldValueObjectMap);
-    }
-    return new HashMap<>();
-  }
-
   @SuppressWarnings("unchecked")
   void mergeSkippedPrefLabels(Entity consilidatedEntity, Map<Object, Object> prefLabelsForAltLabels,
-      List<Field> allEntityFields) throws IllegalAccessException {
+      List<Field> allEntityFields) throws IllegalAccessException, EntityUpdateException {
     /*
      * adding the preferred labels from the secondary object to the alternative labels of
      * consolidated object
@@ -995,8 +946,7 @@ public class EntityRecordService {
         if (isFieldAltLabel(fieldName)) {
           Map<Object, Object> altLabelConsolidatedMap =
               (Map<Object, Object>) consilidatedEntity.getFieldValue(field);
-          Map<Object, Object> altLabelPrimaryObject =
-              initialiseAltLabelMap(altLabelConsolidatedMap);
+          Map<Object, Object> altLabelPrimaryObject = deepCopyOfMap(altLabelConsolidatedMap);
           boolean altLabelPrimaryValueChanged = false;
           altLabelPrimaryValueChanged = addValuesToAltLabel(prefLabelsForAltLabels,
               altLabelPrimaryObject, altLabelPrimaryValueChanged);
@@ -1011,12 +961,12 @@ public class EntityRecordService {
 
   @SuppressWarnings("unchecked")
   private boolean addValuesToAltLabel(Map<Object, Object> prefLabelsForAltLabels,
-      Map<Object, Object> altLabelPrimaryObject, boolean altLabelPrimaryValueChanged) {
+      Map<Object, Object> altLabelPrimaryObject, boolean altLabelPrimaryValueChanged) throws EntityUpdateException {
     for (Map.Entry<Object, Object> prefLabel : prefLabelsForAltLabels.entrySet()) {
       String keyPrefLabel = (String) prefLabel.getKey();
       List<Object> altLabelPrimaryObjectList =
           (List<Object>) altLabelPrimaryObject.get(keyPrefLabel);
-      List<Object> altLabelPrimaryValue = initialiseAltLabelList(altLabelPrimaryObjectList);
+      List<Object> altLabelPrimaryValue = deepCopyOfList(altLabelPrimaryObjectList);
       if (shouldValuesBeAddedToAltLabel(altLabelPrimaryValue, prefLabel)) {
         altLabelPrimaryValue.add(prefLabel.getValue());
         if (altLabelPrimaryValueChanged == false) {
@@ -1038,33 +988,13 @@ public class EntityRecordService {
         .ifValueAlreadyExistsInList(altLabelPrimaryValue, prefLabel.getValue(), true));
   }
 
-  private Map<Object, Object> initialiseAltLabelMap(Map<Object, Object> altLabelConsolidatedMap) {
-    if (altLabelConsolidatedMap != null) {
-      return new HashMap<>(altLabelConsolidatedMap);
-    }
-    return new HashMap<>();
-  }
-
-  private List<Object> initialiseAltLabelList(List<Object> altLabelPrimaryObjectList) {
-    if (altLabelPrimaryObjectList != null) {
-      return new ArrayList<>(altLabelPrimaryObjectList);
-    }
-    return new ArrayList<>();
-  }
-
   void mergeList(Entity consolidatedEntity, List<Object> fieldValuePrimaryObjectList,
       List<Object> fieldValueSecondaryObjectList, Field field, boolean accumulate)
-      throws IllegalAccessException {
-    List<Object> fieldValuePrimaryObject = null;
-    List<Object> fieldValueSecondaryObject = null;
-    if (fieldValuePrimaryObjectList != null) {
-      fieldValuePrimaryObject = new ArrayList<Object>(fieldValuePrimaryObjectList);
-    }
-    if (fieldValueSecondaryObjectList != null) {
-      fieldValueSecondaryObject = new ArrayList<Object>(fieldValueSecondaryObjectList);
-    }
+      throws IllegalAccessException, EntityUpdateException {
+    List<Object> fieldValuePrimaryObject = deepCopyOfList(fieldValuePrimaryObjectList);
+    List<Object> fieldValueSecondaryObject = deepCopyOfList(fieldValueSecondaryObjectList);
 
-    if (fieldValuePrimaryObject != null && fieldValueSecondaryObject != null) {
+    if (!CollectionUtils.isEmpty(fieldValuePrimaryObject) && !CollectionUtils.isEmpty(fieldValueSecondaryObject)) {
       if (accumulate) {
         for (Object secondaryObjectListObject : fieldValueSecondaryObject) {
           addToPrimaryList(field, fieldValuePrimaryObject, secondaryObjectListObject);
@@ -1074,10 +1004,10 @@ public class EntityRecordService {
         consolidatedEntity.setFieldValue(field, fieldValuePrimaryObject);
       }
       return;
-    } else if (fieldValuePrimaryObject == null && fieldValueSecondaryObject != null) {
+    } else if (!CollectionUtils.isEmpty(fieldValueSecondaryObject)) {
       consolidatedEntity.setFieldValue(field, fieldValueSecondaryObject);
       return;
-    } else if (fieldValuePrimaryObject != null && fieldValueSecondaryObject == null) {
+    } else if (!CollectionUtils.isEmpty(fieldValuePrimaryObject)) {
       consolidatedEntity.setFieldValue(field, fieldValuePrimaryObject);
       return;
     }
@@ -1100,30 +1030,151 @@ public class EntityRecordService {
   }
 
   Object[] mergeArrays(Entity primary, Entity secondary, Field field, boolean append)
-      throws IllegalAccessException {
+      throws IllegalAccessException, EntityUpdateException {
     Object[] primaryArray = (Object[]) primary.getFieldValue(field);
     Object[] secondaryArray = (Object[]) secondary.getFieldValue(field);
+    
+    Object[] deepCopyPrimaryArray = deepCopyOfArray(primaryArray);
+    Object[] deepCopySecondaryArray = deepCopyOfArray(secondaryArray);
 
-    if (primaryArray == null && secondaryArray == null) {
-      return null;
-    } else if (primaryArray == null) {
-      // return a clone of the secondary
-      return secondaryArray.clone();
-    } else if (secondaryArray == null || !append) {
-      // return a clone of the primary if we're not appending
-      return primaryArray.clone();
+    if (deepCopyPrimaryArray.length==0 && deepCopySecondaryArray.length==0) {
+      return deepCopyPrimaryArray;
+    } else if (deepCopyPrimaryArray.length==0) {
+      return deepCopySecondaryArray;
+    } else if (secondaryArray.length==0 || !append) {
+      return deepCopyPrimaryArray;
     }
     // merge arrays
-    Set<Object> mergedAndOrdered = new TreeSet<>(Arrays.asList(primaryArray));
-    for (Object second : secondaryArray) {
-      if (!EMCollectionUtils.ifValueAlreadyExistsInList(Arrays.asList(primaryArray), second,
+    Set<Object> mergedAndOrdered = new TreeSet<>(Arrays.asList(deepCopyPrimaryArray));
+    for (Object second : deepCopySecondaryArray) {
+      if (!EMCollectionUtils.ifValueAlreadyExistsInList(Arrays.asList(deepCopyPrimaryArray), second,
           doSloppyMatch(field.getName()))) {
         mergedAndOrdered.add(second);
       }
     }
-    return mergedAndOrdered.toArray(Arrays.copyOf(primaryArray, 0));
+    return mergedAndOrdered.toArray(Arrays.copyOf(deepCopyPrimaryArray, 0));
+  }
+  
+  private Object deepCopyOfObject(Object obj) throws EntityUpdateException {
+    if(obj==null) {
+      return obj;
+    }
+    
+    if(isStringOrPrimitive(obj.getClass())) {
+      return obj;
+    } else if(obj instanceof WebResource) {
+      return new WebResource((WebResource) obj);
+    } else if (obj instanceof Address) {
+      return new Address((Address) obj);
+    } else if (obj instanceof Country) {
+      return new Country((Country) obj);
+    } else {
+      throw new EntityUpdateException("Metadata consolidation failed due to unknown object type!");
+    }
   }
 
+  private Object[] deepCopyOfArray(Object[] input) throws EntityUpdateException {    
+    if(input==null || input.length==0) {
+      return new Object[0];
+    }
+    
+    Object[] copy;
+    if(isStringOrPrimitive(input[0].getClass())) {
+      copy=input.clone();
+    }
+    else {
+      copy = new Object [input.length];
+      if(input[0] instanceof WebResource) {        
+        for(int i=0;i<input.length;i++) {
+          copy[i]=new WebResource((WebResource) input[i]);
+        }
+      }
+      else if(input[0] instanceof Address) {
+        for(int i=0;i<input.length;i++) {
+          copy[i]=new Address((Address) input[i]);
+        }
+      }
+      else if(input[0] instanceof Country) {
+        for(int i=0;i<input.length;i++) {
+          copy[i]=new Country((Country) input[i]);
+        }
+      }
+      else {
+        throw new EntityUpdateException("Metadata consolidation failed due to unknown object type in array!");
+      }
+    }
+    return copy;
+  }
+  
+  private List<Object> deepCopyOfList(List<Object> input) throws EntityUpdateException {    
+    if(input==null || input.size()==0) {
+      return new ArrayList<>();
+    }
+    
+    List<Object> copy;
+    if(isStringOrPrimitive(input.get(0).getClass())) {
+      copy=new ArrayList<Object>(input);
+    }
+    else {
+      copy = new ArrayList<>(input.size());
+      if(input.get(0) instanceof WebResource) {        
+        for(int i=0;i<input.size();i++) {
+          copy.add(new WebResource((WebResource) input.get(i)));
+        }
+      }
+      else if(input.get(0) instanceof Address) {
+        for(int i=0;i<input.size();i++) {
+          copy.add(new Address((Address) input.get(i)));
+        }
+      }
+      else if(input.get(0) instanceof Country) {
+        for(int i=0;i<input.size();i++) {
+          copy.add(new Country((Country) input.get(i)));
+        }
+      }
+      else {
+        throw new EntityUpdateException("Metadata consolidation failed due to unknown object type in list!");
+      }
+    }
+    return copy;
+  }
+  
+  private Map<Object, Object> deepCopyOfMap(Map<Object, Object> input) throws EntityUpdateException {
+    if(input==null || input.size()==0) {
+      return new HashMap<>();
+    }
+    
+    Map<Object, Object> copy;
+    Object mapFirstKey = input.keySet().stream().findFirst().get();
+    Object mapFirstValue = input.values().stream().findFirst().get();
+    //if both keys and values are of primitive type, no need for deep copy
+    if(isStringOrPrimitive(mapFirstKey.getClass()) && isStringOrPrimitive(mapFirstValue.getClass())) {
+      copy=new HashMap<>(input);
+    }
+    else {
+      copy=new HashMap<>(input.size());
+      for(Map.Entry<Object, Object> entry : input.entrySet()) {
+        Object keyDeepCopy = null;
+        Object valueDeepCopy = null;
+        if(List.class.isAssignableFrom(mapFirstKey.getClass())) {
+          keyDeepCopy = deepCopyOfList((List<Object>) entry.getKey());
+        } else {
+          keyDeepCopy = deepCopyOfObject(entry.getKey());
+        }
+        
+        if(List.class.isAssignableFrom(mapFirstValue.getClass())) {
+          valueDeepCopy = deepCopyOfList((List<Object>) entry.getValue());
+        } else {
+          valueDeepCopy = deepCopyOfObject(entry.getValue());
+        }
+        copy.put(keyDeepCopy, valueDeepCopy);
+      }
+    }
+
+    return copy;
+    
+  }
+    
   public void dropRepository() {
     this.entityRecordRepository.dropCollection();
   }
