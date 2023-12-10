@@ -754,7 +754,7 @@ public class EntityRecordService {
 
   /**
    * Merges metadata between two entities. This method performs a deep copy of the objects, 
-   * for the mutable (custom) filed types.
+   * for the mutable (custom) field types.
    * 
    * @param primary Primary entity. Metadata from this entity takes precedence
    * @param secondary Secondary entity. Metadata from this entity is only used if no matching field
@@ -1060,7 +1060,8 @@ public class EntityRecordService {
     } else if (obj instanceof Country) {
       return new Country((Country) obj);
     } else {
-      throw new EntityUpdateException("Metadata consolidation failed due to unknown object type!");
+      throw new EntityUpdateException("Metadata consolidation failed due to unknown object type! When defining"
+          + "a new custom field type, please also override the equals() method.");
     }
   }
 
@@ -1091,7 +1092,8 @@ public class EntityRecordService {
         }
       }
       else {
-        throw new EntityUpdateException("Metadata consolidation failed due to unknown object type in array!");
+        throw new EntityUpdateException("Metadata consolidation failed due to unknown object type in array! "
+            + "When defining a new custom field type, please also override the equals() method.");
       }
     }
     return copy;
@@ -1124,7 +1126,8 @@ public class EntityRecordService {
         }
       }
       else {
-        throw new EntityUpdateException("Metadata consolidation failed due to unknown object type in list!");
+        throw new EntityUpdateException("Metadata consolidation failed due to unknown object type in list! "
+            + "When defining a new custom field type, please also override the equals() method.");
       }
     }
     return copy;

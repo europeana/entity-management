@@ -16,6 +16,6 @@ public ZohoDereferenceService(ZohoAccessConfiguration zohoAccessConfiguration,
 
 The printed response can then be saved to a file in test/resources. Also make sure to adjust the fields to be either string or list type (no map).
 
-2. Whenever introducing new types for a field for any of the model definition classes, e.g. Organization, make sure to properly hanlde the merging of the entities in the method combineEntities. 
-Please see the java doc on that method. Also override the equals() method for the new field type and add it to the EntityFieldsTypes class.
+2. Whenever introducing new custom types for a field for any of the model definition classes, e.g. Organization, make sure to properly hanlde the merging of the entities in the method combineEntities(). 
+Please also override the equals() method for the new field type and add it to the EntityFieldsTypes class.
 
