@@ -290,8 +290,10 @@ public class ZohoSyncService extends BaseZohoAccess {
         logger.debug(
             "Organization has changed in zoho, but there is no operation to perform on entity database, "
                 + "probably becasue the zoho organization doesn't have the required role, it was marked for deletion, "
-                + "or the generation of Organizations is not allowed for this job instance. Zoho id: {}",
-            zohoId);
+                + "or the generation of Organizations is not allowed for this job instance. Zoho id: {}, "
+                + "hasDpsOwner: {}, markedForDeletion: {}, entityRecord: {}",
+            zohoId, hasDpsOwner, markedForDeletion,
+            entityRecord != null ? entityRecord.getEntityId() : "null");
       }
     }
   }
@@ -330,8 +332,8 @@ public class ZohoSyncService extends BaseZohoAccess {
 
     if (skipNonExisting(hasDpsOwner, markedForDeletion)) {
       logger.debug(
-          "Organization has changed in zoho, but it is marked for deletion or doesn't have DPS as Owner. Skipped creation for Zoho id: {}",
-          zohoId);
+          "Organization has changed in zoho, but it is marked for deletion or doesn't have DPS as Owner. Skipped creation for Zoho id: {}, hasDpsOwner: {}, markedForDeletion: {}",
+          zohoId, hasDpsOwner, markedForDeletion);
       // skipped
       return false;
     }
@@ -348,6 +350,8 @@ public class ZohoSyncService extends BaseZohoAccess {
     // entity not in entity management database,
     // create operation if ownership is correct and (EuropeanaID is available or organization id
     // generation is enabled)
+    logger.debug("New Organization to Create for zoho ID: {}", zohoId);
+
     return true;
   }
 

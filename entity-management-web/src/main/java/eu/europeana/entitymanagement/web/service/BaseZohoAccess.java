@@ -411,7 +411,11 @@ public class BaseZohoAccess {
    */
   protected boolean hasRequiredOwnership(Record zohoRecord) {
     String ownerName = ZohoOrganizationConverter.getOwnerName(zohoRecord);
-    return ownerName.equals(emConfiguration.getZohoSyncOwnerFilter());
+    boolean hasDpsOwner = ownerName.trim().equals(emConfiguration.getZohoSyncOwnerFilter().trim());
+    if(!hasDpsOwner && ownerName.contains("DPS")) {
+      logger.warn("This organization might have typos in the owner name: '{}'", ownerName);
+    }
+    return hasDpsOwner;
   }
 
   protected Set<String> getZohoOrganizationUrls(final List<Record> orgList) {
