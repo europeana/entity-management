@@ -411,7 +411,7 @@ public class BaseZohoAccess {
    */
   protected boolean hasRequiredOwnership(Record zohoRecord) {
     String ownerName = ZohoOrganizationConverter.getOwnerName(zohoRecord);
-    boolean hasDpsOwner = ownerName.trim().equals(emConfiguration.getZohoSyncOwnerFilter().trim());
+    boolean hasDpsOwner = ownerName.equals(emConfiguration.getZohoSyncOwnerFilter());
     if(!hasDpsOwner && ownerName.contains("DPS")) {
       logger.warn("This organization might have typos in the owner name: '{}'", ownerName);
     }

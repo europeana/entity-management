@@ -75,7 +75,7 @@ public class Operation implements Comparable<Operation> {
       return this.getZohoEuropeanaId().equals(op2.getZohoEuropeanaId());
     }
     
-    return this.getZohoRecord().getId() == op2.getZohoRecord().getId()
+    return this.getZohoRecord().getId().equals(op2.getZohoRecord().getId())
         && this.getAction().equals(op2.getAction());
   }
 
