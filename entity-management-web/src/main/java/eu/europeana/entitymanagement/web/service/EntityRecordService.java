@@ -82,23 +82,22 @@ public class EntityRecordService {
   private final DataSources datasources;
 
   private final SolrService solrService;
-  
-  private final ZohoAccessConfiguration zohoAccessConfiguration; 
-  
+
+  private final ZohoAccessConfiguration zohoAccessConfiguration;
+
   private static final Logger logger = LogManager.getLogger(EntityRecordService.class);
 
   // Fields to be ignored during consolidation ("type" is final, so it cannot be updated)
-  private static final List<String> ignoredMergeFields = List.of("type");
+  private static final Set<String> ignoredMergeFields = Set.of("type");
 
   @Autowired
   public EntityRecordService(EntityRecordRepository entityRecordRepository,
       EntityManagementConfiguration emConfiguration,
-      ZohoAccessConfiguration zohoAccessConfiguration,
-      DataSources datasources,
+      ZohoAccessConfiguration zohoAccessConfiguration, DataSources datasources,
       SolrService solrService) {
     this.entityRecordRepository = entityRecordRepository;
     this.emConfiguration = emConfiguration;
-    this.zohoAccessConfiguration = zohoAccessConfiguration; 
+    this.zohoAccessConfiguration = zohoAccessConfiguration;
     this.datasources = datasources;
     this.solrService = solrService;
   }
@@ -345,7 +344,7 @@ public class EntityRecordService {
     setExternalProxy(metisEntity, externalProxyId, entityId, externalDatasource, entityRecord,
         timestamp, 1);
 
-    upsertEntityAggregation(entityRecord, entityId, timestamp);
+    updateEntityAggregation(entityRecord, entityId, timestamp);
     return entityRecordRepository.save(entityRecord);
   }
 
@@ -355,26 +354,54 @@ public class EntityRecordService {
    * @param europeanaProxyEntity Entity for the europeana proxy
    * @param datasourceResponse Entity obtained from de-referencing
    * @param dataSource the data source identified for the given entity id
+   * @param predefinedEntityId previously generated entity ID to be reused for entity registration
+   *        (e.g. see zoho EuropeanaID). Currently only supported for zoho organizations
    * @return Saved Entity record
    * @throws EntityCreationException if an error occurs
    * @throws UnsupportedEntityTypeException
    */
-  public EntityRecord createEntityFromRequest(
-      Entity europeanaProxyEntity, Entity datasourceResponse, DataSource dataSource)
+  public EntityRecord createEntityFromRequest(Entity europeanaProxyEntity,
+      Entity datasourceResponse, DataSource dataSource, String predefinedEntityId)
       throws EntityCreationException, UnsupportedEntityTypeException {
 
     // Fail quick if no datasource is configured
     String externalEntityId = europeanaProxyEntity.getEntityId();
 
-    //prevent registration of organizations if id generation is not enabled
-    boolean isZohoOrg = ZohoUtils.isZohoOrganization(externalEntityId, datasourceResponse.getType());
-    if(isZohoOrg && !emConfiguration.isGenerateOrganizationEuropeanaId()) {
-      throw new EntityCreationException("This instance is not allowed to register new Organizations. Registration of external entity refused: " + externalEntityId);
+    // prevent registration of organizations if id generation is not enabled and now EuropeanaID
+    // available in zoho
+    boolean isZohoOrg = isZohoOrg(externalEntityId, datasourceResponse);
+    if (isZohoOrg && !emConfiguration.isGenerateOrganizationEuropeanaId()
+        && predefinedEntityId == null) {
+      throw new EntityCreationException(
+          "This instance is not allowed to register new Organizations. Registration of external entity refused: "
+              + externalEntityId);
     }
 
-    //genrerate id for the new entity
-    String entityId = generateEntityId(datasourceResponse);
+    // generate id for the new entity
+    String entityId;
+    if (predefinedEntityId != null) {
+      entityId = verifyPredefinedOrganizationEntityId(predefinedEntityId, isZohoOrg);
+    } else {
+      entityId = generateEntityId(datasourceResponse);
+    }
 
+    // build entity record object
+    EntityRecord entityRecord = buildEntityRecordObject(entityId, europeanaProxyEntity,
+        datasourceResponse, dataSource, externalEntityId, isZohoOrg);
+
+    // if new generated organization ID, store it in zoho
+    if (isZohoOrg && predefinedEntityId == null) {
+      // register first the EuropeanaID in Zoho
+      updateEuropeanaIDFieldInZoho(externalEntityId, entityId);
+    }
+
+    // save entity record object into the database
+    return entityRecordRepository.save(entityRecord);
+  }
+
+  EntityRecord buildEntityRecordObject(String entityId, Entity europeanaProxyEntity,
+      Entity datasourceResponse, DataSource dataSource, String externalEntityId, boolean isZohoOrg)
+      throws EntityCreationException {
     Date timestamp = new Date();
     Entity entity;
     try {
@@ -382,7 +409,7 @@ public class EntityRecordService {
     } catch (EntityModelCreationException e) {
       throw new EntityCreationException(e.getMessage(), e);
     }
-    
+
     EntityRecord entityRecord = new EntityRecord();
     entityRecord.setEntityId(entityId);
     entity.setEntityId(entityId);
@@ -400,12 +427,12 @@ public class EntityRecordService {
     // copy the newly generated europeana id
     europeanaProxyEntity.setEntityId(entityId);
     List<String> dereferencedCorefs = buildDereferencedCorefs(datasourceResponse, externalEntityId);
-    setEuropeanaMetadata(
-        europeanaProxyEntity, entityId, dereferencedCorefs, entityRecord, timestamp);
+    setEuropeanaMetadata(europeanaProxyEntity, entityId, dereferencedCorefs, entityRecord,
+        timestamp);
 
     // create external proxy
-    setExternalProxy(
-        datasourceResponse, externalEntityId, entityId, dataSource, entityRecord, timestamp, 1);
+    setExternalProxy(datasourceResponse, externalEntityId, entityId, dataSource, entityRecord,
+        timestamp, 1);
 
     // create second external proxy for Zoho organizations with Wikidata
     Optional<String> wikidataId;
@@ -417,23 +444,48 @@ public class EntityRecordService {
       // note appendWikidataProxy is also calling the upsertEntityAggregation method, which is
       // redundant with the next call,
       // for the simplicity of the code, we can leve the dupplicate call as everything is in memory
-      appendWikidataProxy(
-          entityRecord, wikidataOrganizationId, datasourceResponse.getType(), timestamp);
+      appendWikidataProxy(entityRecord, wikidataOrganizationId, datasourceResponse.getType(),
+          timestamp);
 
       // add the wikidata ID to europeana proxy entity
       europeanaProxyEntity.addSameReferenceLink(wikidataOrganizationId);
     }
 
     // create aggregation object
-    upsertEntityAggregation(entityRecord, entityId, timestamp);
+    updateEntityAggregation(entityRecord, entityId, timestamp);
+    return entityRecord;
+  }
+
+  boolean isZohoOrg(String externalEntityId, Entity datasourceResponse) {
+    return ZohoUtils.isZohoOrganization(externalEntityId, datasourceResponse.getType());
+  }
+
+  private String verifyPredefinedOrganizationEntityId(String predefinedEntityId, boolean isZohoOrg)
+      throws EntityCreationException {
     
-    if(isZohoOrg) {
-      //register first the EuropeanaID in Zoho
-      updateEuropeanaIDFieldInZoho(externalEntityId, entityId);  
+    //verification only allowed for zoho organizations with predefined entity ID
+    if (!isZohoOrg || predefinedEntityId == null) {
+      throw new EntityCreationException(
+          "Predefined entity ids can be used only for registration of Zoho Organizations. Creation with predefined entity id refused: "
+              + predefinedEntityId);
     }
-    
-    //save object into the database
-    return entityRecordRepository.save(entityRecord);
+
+    //only verify if this instance is allowed to generate ids
+    if (emConfiguration.isGenerateOrganizationEuropeanaId()) {
+      // need to prevent collision of entity ids
+      long predefinedIdentifier = Long.parseLong(StringUtils.substringAfterLast(predefinedEntityId, "/"));
+      long lastGeneratedId = entityRecordRepository
+          .getLastGeneratedIdentifier(EntityTypes.Organization.getEntityType());
+      
+      if (lastGeneratedId < predefinedIdentifier || predefinedIdentifier < 1) {
+        // predefined entity ID out of range
+        throw new EntityCreationException(
+            "Predefined entity id is out of range: " + predefinedEntityId
+                + " identifier must be smaller onr equal than: " + lastGeneratedId);
+      }
+    }
+    // this instance is either not generating organizations ids and has to reuse the provided one
+    return predefinedEntityId;
   }
 
   List<String> buildDereferencedCorefs(Entity datasourceResponse, String externalEntityId) {
@@ -475,7 +527,7 @@ public class EntityRecordService {
       // add wikidata uri to entity sameAs
       entityRecord.getEntity().addSameReferenceLink(wikidataProxyId);
       // add to entityIsAggregatedBy, use upsertMethod
-      upsertEntityAggregation(entityRecord, entityType, timestamp);
+      updateEntityAggregation(entityRecord, entityType, timestamp);
 
       return wikidataProxy;
     } catch (EntityModelCreationException e) {
@@ -485,18 +537,7 @@ public class EntityRecordService {
 
   String generateEntityId(Entity datasourceResponse) throws UnsupportedEntityTypeException {
     // only in case of Zoho Organization use the provided id from de-referencing
-    String entityId = null;
-    EntityTypes type = EntityTypes.getByEntityType(datasourceResponse.getType());
-    // now we generate the sequenced entityIds also for the organizations
-    // if (isZohoOrg) {
-    // // zoho id is mandatory and unique identifier for zoho Organizations
-    // String zohoId = EntityRecordUtils.getIdFromUrl(datasourceResponse.getEntityId());
-    // entityId = EntityRecordUtils.buildEntityIdUri(type, zohoId);
-    // } else {
-    // entityId = generateEntityId(type, null);
-    // }
-    entityId = generateEntityId(type, null);
-    return entityId;
+    return generateEntityId(EntityTypes.getByEntityType(datasourceResponse.getType()), null);
   }
 
   List<String> buildSameAsReferenceLinks(String externalProxyId, Entity datasourceResponse,
@@ -650,33 +691,33 @@ public class EntityRecordService {
     entity.setIsNextInSequence(replaceWithInternalReferences(isNextInSequenceField));
   }
 
-  /** @deprecated */
-  @Deprecated(since = "to remove deprecation when first used", forRemoval = false)
-  private Map<String, List<String>> replaceWithInternalReferences(
-      Map<String, List<String>> originalReferences) {
-    if (originalReferences == null) {
-      return null;
-    }
-
-    Map<String, List<String>> updatedReferenceMap = new HashMap<String, List<String>>();
-    for (Map.Entry<String, List<String>> entry : originalReferences.entrySet()) {
-      List<String> updatedReferences = new ArrayList<String>();
-
-      for (String value : entry.getValue()) {
-        addValueOrInternalReference(updatedReferences, value);
-      }
-
-      if (!updatedReferences.isEmpty()) {
-        updatedReferenceMap.put(entry.getKey(), updatedReferences);
-      }
-    }
-
-    if (updatedReferenceMap.isEmpty()) {
-      return null;
-    }
-
-    return updatedReferenceMap;
-  }
+//  /** @deprecated */
+//  @Deprecated(since = "to remove deprecation when first used", forRemoval = false)
+//  private Map<String, List<String>> replaceWithInternalReferences(
+//      Map<String, List<String>> originalReferences) {
+//    if (originalReferences == null) {
+//      return null;
+//    }
+//
+//    Map<String, List<String>> updatedReferenceMap = new HashMap<String, List<String>>();
+//    for (Map.Entry<String, List<String>> entry : originalReferences.entrySet()) {
+//      List<String> updatedReferences = new ArrayList<String>();
+//
+//      for (String value : entry.getValue()) {
+//        addValueOrInternalReference(updatedReferences, value);
+//      }
+//
+//      if (!updatedReferences.isEmpty()) {
+//        updatedReferenceMap.put(entry.getKey(), updatedReferences);
+//      }
+//    }
+//
+//    if (updatedReferenceMap.isEmpty()) {
+//      return null;
+//    }
+//
+//    return updatedReferenceMap;
+//  }
 
   private List<String> replaceWithInternalReferences(List<String> originalReferences) {
     if (originalReferences == null) {
@@ -721,14 +762,14 @@ public class EntityRecordService {
      * corresponds to the entity in the external proxy.
      */
     List<Field> fieldsToCombine = EntityUtils.getAllFields(primary.getClass()).stream()
-        .filter(f -> !ignoredMergeFields.contains(f.getName())).collect(Collectors.toList());
+        .filter(f -> !ignoredMergeFields.contains(f.getName())).toList();
     return combineEntities(primary, secondary, fieldsToCombine, true);
   }
 
   public void updateConsolidatedVersion(EntityRecord entityRecord, Entity consolidatedEntity) {
 
     entityRecord.setEntity(consolidatedEntity);
-    upsertEntityAggregation(entityRecord, consolidatedEntity.getEntityId(), new Date());
+    updateEntityAggregation(entityRecord, consolidatedEntity.getEntityId(), new Date());
   }
 
   /**
@@ -1127,7 +1168,7 @@ public class EntityRecordService {
     return this.entityRecordRepository.findWithFilters(start, count, queryFilters);
   }
 
-  private void upsertEntityAggregation(EntityRecord entityRecord, String entityId, Date timestamp) {
+  private void updateEntityAggregation(EntityRecord entityRecord, String entityId, Date timestamp) {
     Aggregation aggregation = entityRecord.getEntity().getIsAggregatedBy();
     if (aggregation == null) {
       aggregation = createNewAggregation(entityId, timestamp);
@@ -1281,14 +1322,15 @@ public class EntityRecordService {
     return false;
   }
 
-  void updateEuropeanaIDFieldInZoho(String zohoOrganizationUrl,  String europeanaId) throws EntityCreationException {
+  void updateEuropeanaIDFieldInZoho(String zohoOrganizationUrl, String europeanaId)
+      throws EntityCreationException {
     try {
-        zohoAccessConfiguration.getZohoAccessClient().updateZohoRecordOrganizationStringField(zohoOrganizationUrl, ZohoConstants.EUROPEANA_ID_FIELD, europeanaId);
+      zohoAccessConfiguration.getZohoAccessClient().updateZohoRecordOrganizationStringField(
+          zohoOrganizationUrl, ZohoConstants.EUROPEANA_ID_FIELD, europeanaId);
     } catch (ZohoException e) {
       String message =
-          "Updating EuropeanaID field in Zoho faild for Organization: "
-              + zohoOrganizationUrl;
-      throw new EntityCreationException(message);
+          "Updating EuropeanaID field in Zoho faild for Organization: " + zohoOrganizationUrl;
+      throw new EntityCreationException(message, e);
     }
   }
 }

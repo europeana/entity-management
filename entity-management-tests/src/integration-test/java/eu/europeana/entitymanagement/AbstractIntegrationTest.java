@@ -263,7 +263,7 @@ public abstract class AbstractIntegrationTest {
     DataSource dataSource = datasources.verifyDataSource(externalId, false);
     EntityRecord savedRecord =
         entityRecordService.createEntityFromRequest(
-            europeanaProxyEntity, xmlBaseEntity.toEntityModel(), dataSource);
+            europeanaProxyEntity, xmlBaseEntity.toEntityModel(), dataSource, null);
 
     // trigger update to generate consolidated entity
     entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId());
