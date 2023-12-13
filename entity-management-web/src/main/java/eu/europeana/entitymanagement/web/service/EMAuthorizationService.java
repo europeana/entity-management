@@ -13,6 +13,7 @@ import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.web.auth.Roles;
 
+@SuppressWarnings("deprecation")
 @Component(AppConfigConstants.BEAN_AUTHORIZATION_SERVICE)
 public class EMAuthorizationService extends BaseAuthorizationService {
 

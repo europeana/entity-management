@@ -23,7 +23,6 @@ import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.common.config.DataSource;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
@@ -52,8 +51,6 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
   @Qualifier(AppConfig.BEAN_EM_SOLR_SERVICE)
   @Autowired
   protected SolrService emSolrService;
-
-  @Autowired protected EntityManagementConfiguration emConfig;
 
   @Autowired private WebApplicationContext webApplicationContext;
 
@@ -147,7 +144,7 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
     DataSource dataSource = datasources.verifyDataSource(externalId, false);
     EntityRecord savedRecord =
         entityRecordService.createEntityFromRequest(
-            europeanaProxyEntity, xmlBaseEntity.toEntityModel(), dataSource);
+            europeanaProxyEntity, xmlBaseEntity.toEntityModel(), dataSource, null);
 
     // trigger update to generate consolidated entity
     entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId());
@@ -176,10 +173,10 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
     Entity europeanaProxyEntity = objectMapper.readValue(europeanaProxyEntityStr, Entity.class);
     DataSource dataSource = datasources.verifyDataSource(europeanaProxyEntity.getEntityId(), false);
     Organization zohoOrganization =
-        ZohoOrganizationConverter.convertToOrganizationEntity(zohoRecord);
+        ZohoOrganizationConverter.convertToOrganizationEntity(zohoRecord, zohoAccessConfiguration.getZohoBaseUrl());
     EntityRecord savedRecord =
         entityRecordService.createEntityFromRequest(
-            europeanaProxyEntity, zohoOrganization, dataSource);
+            europeanaProxyEntity, zohoOrganization, dataSource, null);
 
     // trigger update to generate consolidated entity
     entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId());

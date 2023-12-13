@@ -44,3 +44,6 @@ europeana.apikey.jwttoken.signaturekey=
 
 #url for the search api
 europeana.searchapi.urlPrefix=https://<api_endpoint>/record/v2/search.json?wskey=<API_KEY>
+
+#enable/disable generation of entity ids for organizations (should be enabled only in productive environment)
+#zoho.generate.organization.europeanaid=false

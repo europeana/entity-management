@@ -1,4 +1,5 @@
-FROM eclipse-temurin:11-jre-alpine
+#FROM eclipse-temurin:17-jre-alpine
+FROM tomcat:9.0.74-jdk17
 LABEL Author="Europeana Foundation <development@europeana.eu>"
 
 ENV ELASTIC_APM_VERSION 1.34.1

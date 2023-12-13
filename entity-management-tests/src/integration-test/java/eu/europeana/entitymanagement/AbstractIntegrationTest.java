@@ -3,6 +3,7 @@ package eu.europeana.entitymanagement;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.common.config.DataSource;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.model.Entity;
@@ -11,11 +12,13 @@ import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
 import eu.europeana.entitymanagement.testutils.MongoContainer;
 import eu.europeana.entitymanagement.testutils.SolrContainer;
+import eu.europeana.entitymanagement.testutils.TestConfig;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.MetisDereferenceUtils;
 import eu.europeana.entitymanagement.web.service.ConceptSchemeService;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
+import eu.europeana.entitymanagement.zoho.organization.ZohoAccessConfiguration;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -60,7 +63,9 @@ public abstract class AbstractIntegrationTest {
   @Autowired protected DataSources datasources;
   @Autowired protected EntityRecordRepository entityRecordRepository;
   @Autowired protected ConceptSchemeService emConceptSchemeService;
-
+  @Autowired protected EntityManagementConfiguration emConfig;
+  @Autowired protected ZohoAccessConfiguration zohoAccessConfiguration;
+  
   static {
     MONGO_CONTAINER =
         new MongoContainer("entity-management", "job-repository", "enrichment")
@@ -136,7 +141,13 @@ public abstract class AbstractIntegrationTest {
     registry.add("entitymanagement.solr.indexing.explicitCommits", () -> true);
     // override setting in .properties file in case this is enabled
     registry.add("metis.proxy.enabled", () -> false);
-
+    
+    //overwrite default zoho properties
+    registry.add("zoho.base.url", () -> TestConfig.MOCK_ZOHO_BASE_URL);
+    //tests must not register organizations as this is updating the zoho
+    //generate Europeana ID can be set to true when using the mock service, see TextConfig class 
+    registry.add("zoho.generate.organization.europeanaid", () -> true);
+    
     // could be used to fix eclipse issues
     registry.add("scmBranch", () -> "dev");
     registry.add("buildNumber", () -> "99");
@@ -252,7 +263,7 @@ public abstract class AbstractIntegrationTest {
     DataSource dataSource = datasources.verifyDataSource(externalId, false);
     EntityRecord savedRecord =
         entityRecordService.createEntityFromRequest(
-            europeanaProxyEntity, xmlBaseEntity.toEntityModel(), dataSource);
+            europeanaProxyEntity, xmlBaseEntity.toEntityModel(), dataSource, null);
 
     // trigger update to generate consolidated entity
     entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId());

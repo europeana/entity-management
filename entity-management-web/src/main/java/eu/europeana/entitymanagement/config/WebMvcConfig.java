@@ -7,6 +7,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -53,6 +54,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
    * Enable content negotiation via path extension (as long as Spring supports it) and set default
    * content type in case we receive a request without an extension or Accept header
    */
+  @SuppressWarnings("deprecation")
   @Override
   public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
     // Enable content negotiation via path extension. Note that this is deprecated with Spring
@@ -93,5 +95,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
   @Override
   public void addResourceHandlers(ResourceHandlerRegistry registry) {
     registry.addResourceHandler("/public/**").addResourceLocations("classpath:/public/");
+  }
+  
+  @Override
+  public void configurePathMatch(PathMatchConfigurer configurer) {
+    configurer.setUseTrailingSlashMatch(false);
   }
 }

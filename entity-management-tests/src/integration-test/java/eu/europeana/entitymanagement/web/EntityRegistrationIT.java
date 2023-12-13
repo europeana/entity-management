@@ -1,7 +1,6 @@
 package eu.europeana.entitymanagement.web;
 
 import static org.hamcrest.Matchers.any;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasSize;
@@ -12,28 +11,24 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.solr.model.SolrOrganization;
-import eu.europeana.entitymanagement.solr.service.SolrService;
-import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
-import eu.europeana.entitymanagement.utils.EntityRecordUtils;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.solr.model.SolrOrganization;
+import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
+import eu.europeana.entitymanagement.utils.EntityRecordUtils;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 public class EntityRegistrationIT extends BaseWebControllerTest {
-
-  @Autowired SolrService solrService;
 
   @Test
   public void registerConceptShouldBeSuccessful() throws Exception {
@@ -207,11 +202,6 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
 
   @Test
   public void registerZohoOrganizationShouldBeSuccessful() throws Exception {
-
-    String expectedId =
-        "http://data.europeana.eu/organization/"
-            + EntityRecordUtils.getIdFromUrl(IntegrationTestUtils.ORGANIZATION_NATURALIS_URI_ZOHO);
-
     ResultActions response =
         mockMvc.perform(
             MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL)
@@ -219,17 +209,11 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
     response
         .andExpect(status().isAccepted())
-        .andExpect(jsonPath("$.id", is(expectedId)))
+        .andExpect(jsonPath("$.id", any(String.class)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         // isAggregatedBy should contain 3 aggregates (for Europeana, zoho and wikidata proxies)
-        .andExpect(
-            jsonPath(
-                "$.isAggregatedBy.aggregates",
-                containsInAnyOrder(
-                    EntityRecordUtils.getEuropeanaAggregationId(expectedId),
-                    EntityRecordUtils.getDatasourceAggregationId(expectedId, 1),
-                    EntityRecordUtils.getDatasourceAggregationId(expectedId, 2))))
+        .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(3)))
         // sameAs contains Wikidata and Zoho uris
         .andExpect(
             jsonPath(
@@ -243,12 +227,6 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
 
   @Test
   public void registerZohoOrganizationGFMShouldBeSuccessful() throws Exception {
-
-    String expectedId =
-        EntityRecordUtils.buildEntityIdUri(
-            EntityTypes.Organization,
-            EntityRecordUtils.getIdFromUrl(IntegrationTestUtils.ORGANIZATION_GFM_URI_ZOHO));
-
     ResultActions response =
         mockMvc.perform(
             MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL)
@@ -256,17 +234,11 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
     response
         .andExpect(status().isAccepted())
-        .andExpect(jsonPath("$.id", is(expectedId)))
+        .andExpect(jsonPath("$.id", any(String.class)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         // isAggregatedBy should contain 3 aggregates (for Europeana, zoho and wikidata proxies)
-        .andExpect(
-            jsonPath(
-                "$.isAggregatedBy.aggregates",
-                containsInAnyOrder(
-                    EntityRecordUtils.getEuropeanaAggregationId(expectedId),
-                    EntityRecordUtils.getDatasourceAggregationId(expectedId, 1),
-                    EntityRecordUtils.getDatasourceAggregationId(expectedId, 2))))
+        .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(3)))
         // sameAs contains Wikidata and Zoho uris
         .andExpect(
             jsonPath(
@@ -282,13 +254,6 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
 
   @Test
   public void registerZohoOrganizationBergerShouldBeSuccessful() throws Exception {
-
-    String expectedId =
-        EntityRecordUtils.buildEntityIdUri(
-            EntityTypes.Organization,
-            EntityRecordUtils.getIdFromUrl(
-                IntegrationTestUtils.ORGANIZATION_BERGER_MUSEUM_URI_ZOHO));
-
     ResultActions response =
         mockMvc.perform(
             MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL)
@@ -297,17 +262,11 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
     response
         .andExpect(status().isAccepted())
-        .andExpect(jsonPath("$.id", is(expectedId)))
+        .andExpect(jsonPath("$.id", any(String.class)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         // isAggregatedBy should contain 3 aggregates (for Europeana, zoho and wikidata proxies)
-        .andExpect(
-            jsonPath(
-                "$.isAggregatedBy.aggregates",
-                containsInAnyOrder(
-                    EntityRecordUtils.getEuropeanaAggregationId(expectedId),
-                    EntityRecordUtils.getDatasourceAggregationId(expectedId, 1),
-                    EntityRecordUtils.getDatasourceAggregationId(expectedId, 2))))
+        .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(3)))
         // sameAs contains Wikidata and Zoho uris
         .andExpect(
             jsonPath(
@@ -320,17 +279,17 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         .andExpect(jsonPath("$.proxies", hasSize(3)));
 
     // check if indexing is successfull by searching the organization in solr
-    SolrOrganization org = solrService.searchById(SolrOrganization.class, expectedId);
+    SolrOrganization org = emSolrService.searchById(SolrOrganization.class, WebEntityFields.BASE_DATA_EUROPEANA_URI + "organization/1");
     assertNotNull(org.getHasGeo());
     assertFalse(org.getHasGeo().startsWith("geo:"));
   }
 
   @Test
   void registerZohoOrganizationWithoutWikidataSameAsShouldBeSuccessful() throws Exception {
-    String expectedId =
-        EntityRecordUtils.buildEntityIdUri(
-            EntityTypes.Organization,
-            EntityRecordUtils.getIdFromUrl(IntegrationTestUtils.ORGANIZATION_PCCE_URI_ZOHO));
+//    String expectedId =
+//        EntityRecordUtils.buildEntityIdUri(
+//            EntityTypes.Organization,
+//            EntityRecordUtils.getIdFromUrl(IntegrationTestUtils.ORGANIZATION_PCCE_URI_ZOHO));
 
     ResultActions response =
         mockMvc.perform(
@@ -339,17 +298,19 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
     response
         .andExpect(status().isAccepted())
-        .andExpect(jsonPath("$.id", is(expectedId)))
+//        .andExpect(jsonPath("$.id", is(expectedId)))
+        .andExpect(jsonPath("$.id", any(String.class)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         // isAggregatedBy should contain 2 aggregates (for Europeana and zoho proxies). No wikidata
         // sameAs for this org
-        .andExpect(
-            jsonPath(
-                "$.isAggregatedBy.aggregates",
-                containsInAnyOrder(
-                    EntityRecordUtils.getEuropeanaAggregationId(expectedId),
-                    EntityRecordUtils.getDatasourceAggregationId(expectedId, 1))))
+//        .andExpect(
+//            jsonPath(
+//                "$.isAggregatedBy.aggregates",
+//                containsInAnyOrder(
+//                    EntityRecordUtils.getEuropeanaAggregationId(expectedId),
+//                    EntityRecordUtils.getDatasourceAggregationId(expectedId, 1))))
+        .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
         // sameAs contains Zoho uri
         .andExpect(
             jsonPath(
@@ -360,11 +321,6 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
 
   @Test
   void registerZohoOrganizationBnfWithNewFieldsShouldBeSuccessful() throws Exception {
-    String entityId =
-        EntityRecordUtils.buildEntityIdUri(
-            EntityTypes.Organization,
-            EntityRecordUtils.getIdFromUrl(IntegrationTestUtils.ORGANIZATION_BNF_URI_ZOHO));
-
     ResultActions response =
         mockMvc.perform(
             MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL)
@@ -376,7 +332,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         .andExpect(jsonPath("$.language", everyItem(matchesRegex("[a-z]+"))))
         .andExpect(jsonPath("$.hiddenLabel", hasSize(3)))
         .andExpect(jsonPath("$.organizationDomain[*]", hasSize(1)))
-        .andExpect(jsonPath("$.id", is(entityId)));
+        .andExpect(jsonPath("$.id", any(String.class)));
   }
 
   @Test

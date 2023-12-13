@@ -626,10 +626,11 @@ public class EMController extends BaseRest {
     }
 
     Entity datasourceResponse = dereferenceEntity(creationRequestId, creationRequestType);
-
+    
+    //TODO: implement support for zoho EuropeanaID 
     EntityRecord savedEntityRecord =
         entityRecordService.createEntityFromRequest(
-            europeanaProxyEntity, datasourceResponse, dataSource);
+            europeanaProxyEntity, datasourceResponse, dataSource, null);
     logger.debug(
         "Created Entity record for externalId={}; entityId={}",
         creationRequestId,

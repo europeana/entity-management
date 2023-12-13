@@ -23,15 +23,15 @@ import org.apache.commons.lang3.StringUtils;
 public class ZohoOrganizationConverter {
 
   private static final String POSITION_SEPARATOR = "_";
-
+  
   private ZohoOrganizationConverter() {
     // private constructor to prevent instantiation
   }
 
-  public static Organization convertToOrganizationEntity(Record zohoRecord) {
+  public static Organization convertToOrganizationEntity(Record zohoRecord, String zohoBaseUrl) {
     Organization org = new Organization();
     Long zohoId = zohoRecord.getId();
-    org.setAbout(ZohoUtils.buildZohoOrganizationId(zohoRecord.getId()));
+    org.setAbout(ZohoUtils.buildZohoOrganizationId(zohoBaseUrl, zohoRecord.getId()));
     org.setIdentifier(List.of(Long.toString(zohoId)));
 
     // extract language maps
@@ -198,10 +198,14 @@ public class ZohoOrganizationConverter {
     }
   }
 
-  static String getStringFieldValue(Record zohoRecord, String zohoFieldName) {
+  public static String getStringFieldValue(Record zohoRecord, String zohoFieldName) {
     return ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(zohoFieldName));
   }
 
+  public static String getEuropeanaIdFieldValue(Record zohoRecord) {
+    return getStringFieldValue(zohoRecord, ZohoConstants.EUROPEANA_ID_FIELD);
+  }
+  
   static List<String> getTextAreaFieldValues(Record zohoRecord, String zohoFieldName) {
     String textArea = ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(zohoFieldName));
     if (StringUtils.isBlank(textArea)) {
@@ -273,4 +277,5 @@ public class ZohoOrganizationConverter {
       return ((Boolean) scheduledDeletion).booleanValue();
     }
   }
+  
 }

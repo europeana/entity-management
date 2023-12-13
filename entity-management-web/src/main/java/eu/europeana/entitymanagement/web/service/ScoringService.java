@@ -1,5 +1,21 @@
 package eu.europeana.entitymanagement.web.service;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
@@ -10,21 +26,6 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.model.scoring.EntityMetrics;
 import eu.europeana.entitymanagement.web.model.scoring.MaxEntityMetrics;
 import eu.europeana.entitymanagement.web.model.scoring.PageRank;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.response.QueryResponse;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
 
 @Service(AppConfigConstants.BEAN_EM_SCORING_SERVICE)
 public class ScoringService {
@@ -39,8 +40,7 @@ public class ScoringService {
   private static final int RANGE_EXTENSION_FACTOR = 100;
 
   public static final String WIKIDATA_PREFFIX = "http://www.wikidata.org/entity/";
-  public static final String WIKIDATA_DBPEDIA_PREFIX = "http://wikidata.dbpedia.org/resource/";
-
+  
   public ScoringService(
       EnrichmentCountQueryService enrichmentCountQueryService,
       @Qualifier(AppConfigConstants.BEAN_PR_SOLR_CLIENT) SolrClient prSolrClient) {
@@ -150,12 +150,13 @@ public class ScoringService {
   private PageRank getPageRank(Entity entity) {
     SolrQuery query = new SolrQuery();
     String wikidataUrl = getWikidataUrl(entity);
+    String wikidataQId = StringUtils.substringAfterLast(wikidataUrl, "/");
 
     if (wikidataUrl == null) {
       return null;
     }
 
-    query.setQuery("page_url:\"" + wikidataUrl + "\"");
+    query.setQuery("identifier:" + wikidataQId);
 
     try {
       Instant start = Instant.now();
@@ -175,7 +176,7 @@ public class ScoringService {
       }
     } catch (Exception e) {
       throw new ScoringComputationException(
-          "Unexpected exception occured when retrieving pagerank: " + wikidataUrl, e);
+          "Unexpected exception occured when retrieving pagerank: " + wikidataQId, e);
     }
   }
 

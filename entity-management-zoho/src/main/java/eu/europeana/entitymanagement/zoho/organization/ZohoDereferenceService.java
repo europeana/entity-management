@@ -1,17 +1,19 @@
 package eu.europeana.entitymanagement.zoho.organization;
 
+import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Service;
 import com.zoho.crm.api.record.Record;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.dereference.Dereferencer;
-import java.util.Optional;
-import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Service;
 
 @Service
 public class ZohoDereferenceService implements Dereferencer {
 
   private final ZohoAccessConfiguration zohoAccessConfiguration;
 
+  @Autowired
   public ZohoDereferenceService(ZohoAccessConfiguration zohoAccessConfiguration) {
     this.zohoAccessConfiguration = zohoAccessConfiguration;
   }
@@ -24,6 +26,10 @@ public class ZohoDereferenceService implements Dereferencer {
     //    Gson resp = new Gson();
     //    System.out.println(resp.toJson(zohoOrganization.get().getKeyValues()));
     //
-    return zohoOrganization.map(ZohoOrganizationConverter::convertToOrganizationEntity);
-  }
+    if(zohoOrganization.isPresent()) {
+      return Optional.of(ZohoOrganizationConverter.convertToOrganizationEntity(zohoOrganization.get(), zohoAccessConfiguration.getZohoBaseUrl())); 
+    } else {
+      return Optional.empty();
+    }
+  }  
 }

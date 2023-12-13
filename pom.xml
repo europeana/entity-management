@@ -46,7 +46,7 @@
     <description>Service for managing entity data from external sources and internal curation</description>
 
     <properties>
-        <java.version>11</java.version>
+        <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <aggregate.report.xml>entity-management-tests/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.xml>
@@ -61,6 +61,7 @@
         <springbatch.mongo.version>1.0.3</springbatch.mongo.version>
         <corelib.version>2.15.4</corelib.version>
         <jackson.version>2.11.4</jackson.version>
+        <em.netty.version>4.1.69.Final</em.netty.version>
         <spring-boot.version>2.5.5</spring-boot.version>
         <swagger.version>3.0.0</swagger.version>
         <morphia.version>2.1.4</morphia.version>
