@@ -111,7 +111,8 @@ public class EntityRecordService {
     return Optional.ofNullable(entityRecordRepository.findByEntityId(entityId));
   }
 
-  public List<EntityRecord> retrieveMultipleByEntityIds(List<String> entityIds, boolean excludeDisabled, boolean fetchFullRecord) {
+  public List<EntityRecord> retrieveMultipleByEntityIds(List<String> entityIds,
+      boolean excludeDisabled, boolean fetchFullRecord) {
     return entityRecordRepository.findByEntityIds(entityIds, excludeDisabled, fetchFullRecord);
   }
 
@@ -135,38 +136,41 @@ public class EntityRecordService {
     }
     return entityRecord;
   }
-  
-  public String redirectNotFound(EntityTypes type, String identifier, EntityNotFoundException exToRethrow) throws MultipleChoicesException, EntityNotFoundException {
-    //search in the coreferences of all enabled entities
+
+  public String redirectNotFound(EntityTypes type, String identifier,
+      EntityNotFoundException exToRethrow)
+      throws MultipleChoicesException, EntityNotFoundException {
+    // search in the coreferences of all enabled entities
     String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
-    List<EntityRecord> corefEntities = findAllEntitiesDupplicationByCoreference(Collections.singletonList(entityUri));
-    if(corefEntities.size()>1) {
-      String allCorefUris = corefEntities.stream().map(el -> el.getEntityId()).collect(Collectors.joining(","));
-      throw new MultipleChoicesException(String.format(EntityRecordUtils.MULTIPLE_CHOICES_FOR_REDIRECTION_MSG, entityUri, allCorefUris));
-    }
-    else if(corefEntities.size()==1) {
+    List<EntityRecord> corefEntities =
+        findEntitiesByCoreference(Collections.singletonList(entityUri), null, true);
+    if (corefEntities.size() > 1) {
+      throw new MultipleChoicesException(String.format(
+          EntityRecordUtils.MULTIPLE_CHOICES_FOR_REDIRECTION_MSG, entityUri,
+          EntityRecordUtils.getEntityIds(corefEntities).toString()));
+    } else if (corefEntities.size() == 1) {
+      // found alternative entity
       return corefEntities.get(0).getEntityId();
-    }
-    else {
+    } else {
       throw exToRethrow;
-    }   
+    }
   }
 
   public String redirectDeprecated(EntityRecord deprecatedEntity)
       throws EntityRemovedException, MultipleChoicesException {
-    //search by the entity id, using the corefs of the disabled entity
-    List<String> allCorefEuropeanaIds = deprecatedEntity.getEntity().getSameReferenceLinks().stream()
-        .filter(el -> el.startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI))
+    // search by the entity id, using the corefs of the disabled entity
+    List<String> allCorefEuropeanaIds = deprecatedEntity.getEntity().getSameReferenceLinks()
+        .stream().filter(el -> el.startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI))
         .collect(Collectors.toList());
-    List<EntityRecord> entitiesRedirect = retrieveMultipleByEntityIds(allCorefEuropeanaIds, true, false);
-    if(entitiesRedirect.size()>1) {
-      String allRedirectUris = entitiesRedirect.stream().map(el -> el.getEntityId()).collect(Collectors.joining(","));
-      throw new MultipleChoicesException(String.format(EntityRecordUtils.MULTIPLE_CHOICES_FOR_REDIRECTION_MSG, deprecatedEntity.getEntityId(), allRedirectUris));
-    }    
-    else if (entitiesRedirect.size()==1) {
+    List<EntityRecord> entitiesRedirect =
+        retrieveMultipleByEntityIds(allCorefEuropeanaIds, true, false);
+    if (entitiesRedirect.size() > 1) {
+      throw new MultipleChoicesException(String.format(
+          EntityRecordUtils.MULTIPLE_CHOICES_FOR_REDIRECTION_MSG, deprecatedEntity.getEntityId(),
+          EntityRecordUtils.getEntityIds(entitiesRedirect).toString()));
+    } else if (entitiesRedirect.size() == 1) {
       return entitiesRedirect.get(0).getEntityId();
-    }
-    else {
+    } else {
       throw new EntityRemovedException(
           String.format(EntityRecordUtils.ENTITY_ID_REMOVED_MSG, deprecatedEntity.getEntityId()));
     }
@@ -178,22 +182,21 @@ public class EntityRecordService {
   }
 
   /**
-   * Gets coreferenced entity with the given id (sameAs or exactMatch value in the Consolidated
-   * version)
+   * Gets that have at list one of the provided URIs present in co-references (sameAs or exactMatch
+   * value in the Consolidated version). The current entity identified by the entityId, if not null
+   * or empty is excluded. Exclude disabled indicates if the disabled entities should be included in
+   * the response or not
    *
    * @param uris co-reference uris
-   * @param entityId indicating the the record for the given entityId should not be retrieved as
+   * @param entityId URI indicating the the record for the given entityId should not be retrieved as
    *        matchingCoreference
-   * @return Optional containing matching record, or empty optional if none found.
+   * @param excludeDisabled indicated if the disabled entities should be filtered out or not
+   * @return List of dupplicated entities or empty.
    */
-  public Optional<EntityRecord> findEntityDupplicationByCoreference(List<String> uris,
-      String entityId) {
-    return entityRecordRepository.findEntityDupplicationByCoreference(uris, entityId);
+  public List<EntityRecord> findEntitiesByCoreference(List<String> uris, String entityId,
+      boolean excludeDisabled) {
+    return entityRecordRepository.findEntitiesByCoreference(uris, entityId, excludeDisabled);
   }
-  
-  public List<EntityRecord> findAllEntitiesDupplicationByCoreference(List<String> uris) {
-    return entityRecordRepository.findAllEntitiesDupplicationByCoreference(uris);
-  }  
 
   public EntityRecord saveEntityRecord(EntityRecord er) {
     return entityRecordRepository.save(er);
@@ -496,21 +499,22 @@ public class EntityRecordService {
 
   private String verifyPredefinedOrganizationEntityId(String predefinedEntityId, boolean isZohoOrg)
       throws EntityCreationException {
-    
-    //verification only allowed for zoho organizations with predefined entity ID
+
+    // verification only allowed for zoho organizations with predefined entity ID
     if (!isZohoOrg || predefinedEntityId == null) {
       throw new EntityCreationException(
           "Predefined entity ids can be used only for registration of Zoho Organizations. Creation with predefined entity id refused: "
               + predefinedEntityId);
     }
 
-    //only verify if this instance is allowed to generate ids
+    // only verify if this instance is allowed to generate ids
     if (emConfiguration.isGenerateOrganizationEuropeanaId()) {
       // need to prevent collision of entity ids
-      long predefinedIdentifier = Long.parseLong(StringUtils.substringAfterLast(predefinedEntityId, "/"));
+      long predefinedIdentifier =
+          Long.parseLong(StringUtils.substringAfterLast(predefinedEntityId, "/"));
       long lastGeneratedId = entityRecordRepository
           .getLastGeneratedIdentifier(EntityTypes.Organization.getEntityType());
-      
+
       if (lastGeneratedId < predefinedIdentifier || predefinedIdentifier < 1) {
         // predefined entity ID out of range
         throw new EntityCreationException(
@@ -725,34 +729,6 @@ public class EntityRecordService {
     entity.setIsNextInSequence(replaceWithInternalReferences(isNextInSequenceField));
   }
 
-//  /** @deprecated */
-//  @Deprecated(since = "to remove deprecation when first used", forRemoval = false)
-//  private Map<String, List<String>> replaceWithInternalReferences(
-//      Map<String, List<String>> originalReferences) {
-//    if (originalReferences == null) {
-//      return null;
-//    }
-//
-//    Map<String, List<String>> updatedReferenceMap = new HashMap<String, List<String>>();
-//    for (Map.Entry<String, List<String>> entry : originalReferences.entrySet()) {
-//      List<String> updatedReferences = new ArrayList<String>();
-//
-//      for (String value : entry.getValue()) {
-//        addValueOrInternalReference(updatedReferences, value);
-//      }
-//
-//      if (!updatedReferences.isEmpty()) {
-//        updatedReferenceMap.put(entry.getKey(), updatedReferences);
-//      }
-//    }
-//
-//    if (updatedReferenceMap.isEmpty()) {
-//      return null;
-//    }
-//
-//    return updatedReferenceMap;
-//  }
-
   private List<String> replaceWithInternalReferences(List<String> originalReferences) {
     if (originalReferences == null) {
       return null;
@@ -774,9 +750,14 @@ public class EntityRecordService {
       updatedReferences.add(value);
     } else {
       // value is external URI, replace it with internal reference if they are accessible
-      Optional<EntityRecord> record =
-          findEntityDupplicationByCoreference(Collections.singletonList(value), null);
-      record.ifPresent(entityRecord -> updatedReferences.add(entityRecord.getEntityId()));
+      // do not use disabled entities as they are not accessible anymore
+      List<EntityRecord> records =
+          findEntitiesByCoreference(Collections.singletonList(value), null, true);
+      if (!records.isEmpty()) {
+        // if the prevention of dupplication worked propertly, that we should find only one active
+        // entry in the database
+        updatedReferences.add(records.get(0).getEntityId());
+      }
     }
   }
 

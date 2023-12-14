@@ -1,6 +1,10 @@
 package eu.europeana.entitymanagement.utils;
 
+import java.util.List;
+import java.util.Locale;
+import javax.validation.constraints.NotNull;
 import org.apache.commons.lang3.StringUtils;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 
@@ -13,18 +17,29 @@ public class EntityRecordUtils {
     // private constructor to prevent instantiation
   }
 
+  /**
+   * Utility method to build Entity Id URLs
+   * @param type of the entity 
+   * @param identifier of the entity
+   * @return EntityId url
+   */
   public static String buildEntityIdUri(EntityTypes type, String identifier) {
     return buildEntityIdUri(type.getUrlPath(), identifier);
   }
 
-  private static String buildEntityIdUri(String type, String identifier) {
+  private static String buildEntityIdUri(@NotNull String type, @NotNull String identifier) {
     StringBuilder stringBuilder = new StringBuilder();
     stringBuilder.append(WebEntityFields.BASE_DATA_EUROPEANA_URI);
-    if (StringUtils.isNotEmpty(type)) stringBuilder.append(type.toLowerCase()).append("/");
-    if (StringUtils.isNotEmpty(identifier)) stringBuilder.append(identifier.toLowerCase());
+    stringBuilder.append(type.toLowerCase(Locale.ENGLISH)).append("/");
+    stringBuilder.append(identifier);
     return stringBuilder.toString();
   }
 
+  /**
+   * Extract identifier part from the EntityId Url
+   * @param entityId as URL
+   * @return identifier
+   */
   public static String extractIdentifierFromEntityId(String entityId) {
     return entityId.replace(WebEntityFields.BASE_DATA_EUROPEANA_URI, "");
   }
@@ -49,12 +64,15 @@ public class EntityRecordUtils {
     if (!url.contains("/")) {
       return url;
     } else {
-      String[] uriParts = url.split("/");
-      return uriParts[uriParts.length - 1];
+      return StringUtils.substringAfterLast(url, "/");
     }
   }
 
-  /** Gets the "{type}/{identifier}" from an EntityId string */
+  /**
+   * Gets the "{type}/{identifier}" from an EntityId string
+   * @param entityId as url
+   * @return the request path "{type}/{identifier}"
+   */
   public static String getEntityRequestPath(String entityId) {
     // entity id is "http://data.europeana.eu/{type}/{identifier}"
     String[] parts = entityId.split("/");
@@ -63,11 +81,27 @@ public class EntityRecordUtils {
     return parts[parts.length - 2] + "/" + parts[parts.length - 1];
   }
 
-  /** Gets the "{type}/base/{identifier}" from an EntityId string */
+  /**
+   * Gets the "{type}/base/{identifier}" from an EntityId string
+   * @param entityId as url
+   * @return the request path "{type}/base/{identifier}"
+   */
   public static String getEntityRequestPathWithBase(String entityId) {
     // entity id is "http://data.europeana.eu/{type}/{identifier}"
     String[] parts = entityId.split("/");
 
     return parts[parts.length - 2] + "/base/" + parts[parts.length - 1];
+  }
+  
+  /**
+   * Utility method to extract the entity ids from the list of entity records
+   * @param entities
+   * @return
+   */
+  public static List<String> getEntityIds(List<EntityRecord> entities) {
+    if(entities== null ||entities.isEmpty()) {
+      return null;
+    }
+    return entities.stream().map(e -> e.getEntityId()).toList();
   }
 }

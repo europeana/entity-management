@@ -330,14 +330,14 @@ public class BaseZohoAccess {
         ZohoOrganizationConverter.convertToOrganizationEntity(operation.getZohoRecord(), zohoAccessConfiguration.getZohoBaseUrl());
     
     try {
-      Optional<EntityRecord> existingEntity =
+      List<EntityRecord> existingEntities =
           findDupplicateOrganization(operation, zohoOrganization);
-      if (existingEntity.isPresent()) {
+      if (!existingEntities.isEmpty()) {
         // skipp processing
         zohoSyncReport.addFailedOperation(
             zohoOrganization.getAbout(),
             "Dupplicate entity error",
-            "Dupplicate of :" + existingEntity.get().getEntityId(),
+            "Dupplicate of :" + EntityRecordUtils.getEntityIds(existingEntities),
             null);
       } else {
         // create shell
@@ -375,7 +375,7 @@ public class BaseZohoAccess {
     }
   }
 
-  Optional<EntityRecord> findDupplicateOrganization(Operation operation,
+  List<EntityRecord> findDupplicateOrganization(Operation operation,
       Organization zohoOrganization) {
     List<String> allCorefs = new ArrayList<>();
     if(operation.getZohoEuropeanaId() != null) {
@@ -394,13 +394,17 @@ public class BaseZohoAccess {
       logger.debug("Searching existing organizations by corefs: {}", allCorefs);
     }
       
-    Optional<EntityRecord> existingEntity =
-        entityRecordService.findEntityDupplicationByCoreference(allCorefs, null);
+    //it is a bit tricky to rely that the disabled in the database are already in sync with the zoho
+    //better let the operation fail and fix the data in zoho manually 
+    //(e.g. remove the sameAs fields in zoho and update the deprecated entity, than the new entity can be registered)
+    boolean excludeDisabled = false;
+    List<EntityRecord> existingEntities =
+        entityRecordService.findEntitiesByCoreference(allCorefs, (String) null, excludeDisabled);
     
-    if(logger.isDebugEnabled() && existingEntity.isPresent()) {
-      logger.debug("Found existing dupplicated organization with id: {} ", existingEntity.get().getEntityId());
+    if(logger.isDebugEnabled() && !existingEntities.isEmpty()) {
+      logger.debug("Found existing dupplicated organization with id: {} ", EntityRecordUtils.getEntityIds(existingEntities) );
     }
-    return existingEntity;
+    return existingEntities;
   }
 
   /**
