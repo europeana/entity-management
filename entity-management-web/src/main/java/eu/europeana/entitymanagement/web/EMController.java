@@ -402,7 +402,7 @@ public class EMController extends BaseRest {
     verifyReadAccess(request);
 
     try {
-      return createResponseRetrieve(EntityTypes.getByEntityType(type), identifier, profile, request,
+      return createResponseForRetrieve(EntityTypes.getByEntityType(type), identifier, profile, request,
           FormatTypes.jsonld, languages, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
     } catch (UnsupportedEntityTypeException e) {
       throw new EntityNotFoundException("/" + type + "/" + identifier, e);
@@ -429,7 +429,7 @@ public class EMController extends BaseRest {
     verifyReadAccess(request);
 
     try {
-      return createResponseRetrieve(EntityTypes.getByEntityType(type), identifier, profile, request,
+      return createResponseForRetrieve(EntityTypes.getByEntityType(type), identifier, profile, request,
           FormatTypes.xml, languages, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML);
     } catch (UnsupportedEntityTypeException e) {
       throw new EntityNotFoundException("/" + type + "/" + identifier, e);
@@ -456,7 +456,7 @@ public class EMController extends BaseRest {
     verifyReadAccess(request);
 
     try {
-      return createResponseRetrieve(EntityTypes.getByEntityType(type), identifier, profile, request,
+      return createResponseForRetrieve(EntityTypes.getByEntityType(type), identifier, profile, request,
           FormatTypes.schema, languages, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
     } catch (UnsupportedEntityTypeException e) {
       throw new EntityNotFoundException("/" + type + "/" + identifier, e);
@@ -501,7 +501,7 @@ public class EMController extends BaseRest {
         entityRecordService.findEntitiesByCoreference(corefs, null, false);
     // verify disabled or redirected
     ResponseEntity<String> response =
-        checkExistingEntityResponse(existingEntities, creationRequestId);
+        checkExistingEntity(existingEntities, creationRequestId);
 
     if (response != null) {
       return response;
@@ -593,22 +593,26 @@ public class EMController extends BaseRest {
     return createResponseMultipleEntities(urls, request);
   }
 
-  private ResponseEntity<String> createResponseRetrieve(EntityTypes type, String identifier,
+  private ResponseEntity<String> createResponseForRetrieve(EntityTypes type, String identifier,
       String profile, HttpServletRequest request, FormatTypes outFormat, String languages,
       String contentType) throws EuropeanaApiException {
 
     EntityRecord entityRecord = null;
+    
     try {
+      //retrieve record
       entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, true);
     } catch (EntityNotFoundException ex) {
-      String redirectUri = entityRecordService.redirectNotFound(type, identifier, ex);
+      //if not found, verify co-references
+      String redirectUri = entityRecordService.getRedirectUriWhenNotFound(type, identifier, ex);
       // return 301 redirect
       return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).location(URI.create(redirectUri))
           .build();
     }
 
     if (entityRecord.isDisabled()) {
-      String redirectUri = entityRecordService.redirectDeprecated(entityRecord);
+      //if disabled verify co-references
+      String redirectUri = entityRecordService.getRedirectUriWhenDeprecated(entityRecord);
       // return 301 redirect
       return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).location(URI.create(redirectUri))
           .build();
@@ -700,7 +704,7 @@ public class EMController extends BaseRest {
         HttpStatus.ACCEPTED);
   }
 
-  private ResponseEntity<String> checkExistingEntityResponse(List<EntityRecord> existingEntities,
+  private ResponseEntity<String> checkExistingEntity(List<EntityRecord> existingEntities,
       String entityCreationId) throws EntityRemovedException, MultipleChoicesException {
 
     if (existingEntities == null || existingEntities.isEmpty()) {
@@ -782,7 +786,7 @@ public class EMController extends BaseRest {
       List<String> entityIds) {
     // Get all existing EntityIds and their disabled status
     List<EntityIdDisabledStatus> statusList =
-        entityRecordService.retrieveMultipleByEntityId(entityIds, false);
+        entityRecordService.retrieveEntityDeprecationStatus(entityIds, false);
 
     // extract only the entityIds for easy comparison
     List<String> existingEntityIds =
