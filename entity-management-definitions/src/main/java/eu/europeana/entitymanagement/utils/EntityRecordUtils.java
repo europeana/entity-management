@@ -31,7 +31,7 @@ public class EntityRecordUtils {
   private static String buildEntityIdUri(@NotNull String type, @NotNull String identifier) {
     StringBuilder stringBuilder = new StringBuilder();
     stringBuilder.append(WebEntityFields.BASE_DATA_EUROPEANA_URI)
-    .append(type.toLowerCase(Locale.ENGLISH)).append("/")
+    .append(type.toLowerCase(Locale.ENGLISH)).append('/')
     .append(identifier);
     return stringBuilder.toString();
   }
