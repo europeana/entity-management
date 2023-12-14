@@ -111,6 +111,13 @@ public class EntityRecordService {
     return Optional.ofNullable(entityRecordRepository.findByEntityId(entityId));
   }
 
+  /**
+   * Retrieve multiple entities
+   * @param entityIds entities to retrieve
+   * @param excludeDisabled if disabled entities should be included
+   * @param fetchFullRecord indicating if full record or only ids
+   * @return
+   */
   public List<EntityRecord> retrieveMultipleByEntityIds(List<String> entityIds,
       boolean excludeDisabled, boolean fetchFullRecord) {
     return entityRecordRepository.findByEntityIds(entityIds, excludeDisabled, fetchFullRecord);

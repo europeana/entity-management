@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.utils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import javax.validation.constraints.NotNull;
@@ -29,9 +30,9 @@ public class EntityRecordUtils {
 
   private static String buildEntityIdUri(@NotNull String type, @NotNull String identifier) {
     StringBuilder stringBuilder = new StringBuilder();
-    stringBuilder.append(WebEntityFields.BASE_DATA_EUROPEANA_URI);
-    stringBuilder.append(type.toLowerCase(Locale.ENGLISH)).append("/");
-    stringBuilder.append(identifier);
+    stringBuilder.append(WebEntityFields.BASE_DATA_EUROPEANA_URI)
+    .append(type.toLowerCase(Locale.ENGLISH)).append("/")
+    .append(identifier);
     return stringBuilder.toString();
   }
 
@@ -60,6 +61,11 @@ public class EntityRecordUtils {
     return entityId + "#proxy_europeana";
   }
 
+  /**
+   * extract the identifier part from the URL
+   * @param url
+   * @return
+   */
   public static String getIdFromUrl(String url) {
     if (!url.contains("/")) {
       return url;
@@ -95,12 +101,13 @@ public class EntityRecordUtils {
   
   /**
    * Utility method to extract the entity ids from the list of entity records
-   * @param entities
-   * @return
+   * @param entities the list of entity records
+   * @return the list of extracted entity ids
    */
+  @SuppressWarnings("unchecked")
   public static List<String> getEntityIds(List<EntityRecord> entities) {
     if(entities== null ||entities.isEmpty()) {
-      return null;
+      return Collections.EMPTY_LIST;
     }
     return entities.stream().map(e -> e.getEntityId()).toList();
   }

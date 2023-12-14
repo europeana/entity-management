@@ -144,6 +144,7 @@ public class EntityRecordRepository extends AbstractRepository {
    * @param excludeDisabled if disabled entities should be returned or not
    * @return the list of entity records found
    */
+  @SuppressWarnings("java:S2301")
   public List<EntityRecord> findEntitiesByCoreference(
       List<String> uris, String entityId, boolean excludeDisabled) {
 

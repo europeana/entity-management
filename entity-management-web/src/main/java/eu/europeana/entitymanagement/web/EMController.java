@@ -23,6 +23,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -94,6 +95,15 @@ public class EMController extends BaseRest {
   // profile used if none included in request
   public static final EntityProfile DEFAULT_REQUEST_PROFILE = EntityProfile.external;
 
+  /**
+   * Constructor to build the controller
+   * @param entityRecordService the service to retrieve entities from database
+   * @param solrService the service for indexing
+   * @param dereferenceServiceLocator service for dereferencing external uros
+   * @param datasources datasources configurations
+   * @param entityUpdateService service for batch updating of entities
+   * @param emConfig application configurations
+   */
   @Autowired
   public EMController(EntityRecordService entityRecordService, SolrService solrService,
       DereferenceServiceLocator dereferenceServiceLocator, DataSources datasources,
@@ -106,8 +116,8 @@ public class EMController extends BaseRest {
   }
 
   @ApiOperation(value = "Disable an entity", nickname = "disableEntity",
-      response = java.lang.Void.class)
-  @RequestMapping(value = {"/entity/{type}/{identifier}"}, method = RequestMethod.DELETE,
+      response = Void.class)
+  @DeleteMapping(value = {"/entity/{type}/{identifier}"}, 
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
   public ResponseEntity<String> disableEntity(
       @RequestHeader(value = "If-Match", required = false) String ifMatchHeader,
@@ -149,8 +159,8 @@ public class EMController extends BaseRest {
   }
 
   @ApiOperation(value = "Re-enable an entity", nickname = "enableEntity",
-      response = java.lang.Void.class)
-  @RequestMapping(value = {"/entity/{type}/{identifier}"}, method = RequestMethod.POST,
+      response = Void.class)
+  @PostMapping(value = {"/entity/{type}/{identifier}"},
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
   public ResponseEntity<String> enableEntity(
       @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE,
@@ -186,8 +196,8 @@ public class EMController extends BaseRest {
   }
 
   @ApiOperation(value = "Update an entity", nickname = "updateEntity",
-      response = java.lang.Void.class)
-  @RequestMapping(value = {"/entity/{type}/{identifier}"}, method = RequestMethod.PUT,
+      response = Void.class)
+  @PutMapping(value = {"/entity/{type}/{identifier}"},
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
   public ResponseEntity<String> updateEntity(
       @RequestHeader(value = "If-Match", required = false) String ifMatchHeader,
@@ -268,7 +278,7 @@ public class EMController extends BaseRest {
   }
 
   @ApiOperation(value = "Update an entity from external data source",
-      nickname = "updateEntityFromDatasource", response = java.lang.Void.class)
+      nickname = "updateEntityFromDatasource", response = Void.class)
   @PostMapping(value = "/entity/{type}/{identifier}/management/update",
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
   public ResponseEntity<String> triggerSingleEntityFullUpdate(
@@ -294,7 +304,7 @@ public class EMController extends BaseRest {
   }
 
   @ApiOperation(value = "Update multiple entities from external data source",
-      nickname = "updateMultipleEntityFromDatasource", response = java.lang.Void.class)
+      nickname = "updateMultipleEntityFromDatasource", response = Void.class)
   @PostMapping(value = "/entity/management/update",
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
   public ResponseEntity<EntityIdResponse> triggerFullUpdateMultipleEntities(
@@ -317,7 +327,7 @@ public class EMController extends BaseRest {
   }
 
   @ApiOperation(value = "Update metrics for given entities", nickname = "updateMetricsForEntities",
-      response = java.lang.Void.class)
+      response = Void.class)
   @PostMapping(value = "/entity/management/metrics",
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
   public ResponseEntity<EntityIdResponse> triggerMetricsUpdateMultipleEntities(
@@ -351,7 +361,7 @@ public class EMController extends BaseRest {
    * @throws HttpException
    */
   @ApiOperation(value = "Enable or disable the use of the entity for enrichment",
-      nickname = "enableDisableForEnrich", response = java.lang.Void.class)
+      nickname = "enableDisableForEnrich", response = Void.class)
   @PostMapping(value = "/entity/{type}/{identifier}/management/enrich",
       produces = {MediaType.APPLICATION_JSON_VALUE, HttpHeaders.CONTENT_TYPE_JSONLD})
   public ResponseEntity<String> enableDisableForEnrich(
@@ -383,7 +393,7 @@ public class EMController extends BaseRest {
   }
 
   @ApiOperation(value = "Retrieve a known entity", nickname = "getEntityJsonLd",
-      response = java.lang.Void.class)
+      response = Void.class)
   @GetMapping(
       value = {"/entity/{type}/base/{identifier}.jsonld", "/entity/{type}/base/{identifier}.json",
           "/entity/{type}/{identifier}.jsonld", "/entity/{type}/{identifier}.json",
@@ -410,7 +420,7 @@ public class EMController extends BaseRest {
   }
 
   @ApiOperation(value = "Retrieve a known entity", nickname = "getEntityXml",
-      response = java.lang.Void.class)
+      response = Void.class)
   @RequestMapping(
       value = {"/entity/{type}/base/{identifier}.xml", "/entity/{type}/{identifier}.xml",
           "/entity/{type}/{identifier}"},
@@ -437,7 +447,7 @@ public class EMController extends BaseRest {
   }
 
   @ApiOperation(value = "Retrieve a known entity", nickname = "getEntitySchemaJsonLd",
-      response = java.lang.Void.class)
+      response = Void.class)
   @GetMapping(
       value = {"/entity/{type}/base/{identifier}.schema.jsonld",
           "/entity/{type}/base/{identifier}.schema.json",
@@ -464,7 +474,7 @@ public class EMController extends BaseRest {
   }
 
   @ApiOperation(value = "Register a new entity", nickname = "registerEntity",
-      response = java.lang.Void.class)
+      response = Void.class)
   @PostMapping(value = "/entity/",
       produces = {MediaType.APPLICATION_JSON_VALUE, HttpHeaders.CONTENT_TYPE_JSONLD})
   public ResponseEntity<String> registerEntity(@RequestBody Entity europeanaProxyEntity,
