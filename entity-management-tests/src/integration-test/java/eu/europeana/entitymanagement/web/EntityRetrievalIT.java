@@ -14,17 +14,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
-
-import com.zoho.crm.api.record.Record;
-import eu.europeana.entitymanagement.batch.service.FailedTaskService;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.vocabulary.FailedTaskJsonFields;
-import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
-import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
-import eu.europeana.entitymanagement.web.xml.model.XmlConstants;
 import java.util.Map;
 import java.util.Optional;
 import org.hamcrest.Matchers;
@@ -35,6 +24,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import com.zoho.crm.api.record.Record;
+import eu.europeana.entitymanagement.batch.service.FailedTaskService;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.FailedTaskJsonFields;
+import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
+import eu.europeana.entitymanagement.web.xml.model.XmlConstants;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -291,19 +290,23 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
 
   @Test
   public void retrieveAgentDeprecatedShouldBeRedirected() throws Exception {
-    String europeanaMetadata = loadFile(IntegrationTestUtils.AGENT_REGISTER_RAPHAEL_JSON);
-    String metisResponse = loadFile(IntegrationTestUtils.AGENT_RAPHAEL_XML);
-
-    String entityId =
-        createEntity(europeanaMetadata, metisResponse, IntegrationTestUtils.AGENT_RAPHAEL_URI)
+    String europeanaMetadataBirch = loadFile(IntegrationTestUtils.AGENT_REGISTER_BIRCH_REDIRECTION_JSON);
+    String metisResponseBirch = loadFile(IntegrationTestUtils.AGENT_BIRCH_XML);
+    String entityIdBirch =
+        createEntity(europeanaMetadataBirch, metisResponseBirch, IntegrationTestUtils.AGENT_BIRCH_URI)
+            .getEntityId();
+    
+    String europeanaMetadataRaphael = loadFile(IntegrationTestUtils.AGENT_REGISTER_RAPHAEL_JSON);
+    String metisResponseRaphael = loadFile(IntegrationTestUtils.AGENT_RAPHAEL_XML);
+    String entityIdRaphael =
+        createEntity(europeanaMetadataRaphael, metisResponseRaphael, IntegrationTestUtils.AGENT_RAPHAEL_URI)
             .getEntityId();
 
-    String requestPath = getEntityRequestPath(entityId);
-
+    String requestPathBirch = getEntityRequestPath(entityIdBirch);
     // sync deprecation
     mockMvc
         .perform(
-            delete(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath)
+            delete(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPathBirch)
                 .param(QUERY_PARAM_PROFILE, PARAM_PROFILE_SYNC)
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
@@ -311,11 +314,38 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
     // retrieve
     ResultActions result =
         mockMvc.perform(
-            get(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath + ".jsonld")
+            get(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPathBirch + ".jsonld")
                 .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
                 .accept(MediaType.APPLICATION_JSON));
     result.andExpect(status().isMovedPermanently());
-    result.andExpect(header().string("Location", "http://data.europeana.eu/agent/5"));
+    result.andExpect(header().string("Location", entityIdRaphael));
+  }
+
+  @Test
+  public void retrieveAgentNotFoundShouldBeRedirected() throws Exception {
+    String europeanaMetadataBirch = loadFile(IntegrationTestUtils.AGENT_REGISTER_BIRCH_REDIRECTION_JSON);
+    String metisResponseBirch = loadFile(IntegrationTestUtils.AGENT_BIRCH_XML);
+    String entityIdBirch =
+        createEntity(europeanaMetadataBirch, metisResponseBirch, IntegrationTestUtils.AGENT_BIRCH_URI)
+            .getEntityId();
+    
+    String europeanaMetadataRaphael = loadFile(IntegrationTestUtils.AGENT_REGISTER_RAPHAEL_JSON);
+    String metisResponseRaphael = loadFile(IntegrationTestUtils.AGENT_RAPHAEL_XML);
+    String entityIdRaphael =
+        createEntity(europeanaMetadataRaphael, metisResponseRaphael, IntegrationTestUtils.AGENT_RAPHAEL_URI)
+            .getEntityId();
+    
+    deleteEntity(entityIdRaphael);
+
+    String requestPathRaphael = getEntityRequestPath(entityIdRaphael);
+    // retrieve
+    ResultActions result =
+        mockMvc.perform(
+            get(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPathRaphael + ".jsonld")
+                .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                .accept(MediaType.APPLICATION_JSON));
+    result.andExpect(status().isMovedPermanently());
+    result.andExpect(header().string("Location", entityIdBirch));
   }
 
   @Test
