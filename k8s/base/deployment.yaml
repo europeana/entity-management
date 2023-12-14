@@ -14,21 +14,21 @@ spec:
           livenessProbe:
             httpGet:
               port: 8080
-              path: /actuator/info
+              path: /actuator/health/liveness
               httpHeaders:
                 - name: Accept
                   value: application/json
             initialDelaySeconds: 120
-            periodSeconds: 30
+            periodSeconds: 20
           readinessProbe:
             httpGet:
               port: 8080
-              path: /actuator/info
+              path: /actuator/health/readiness
               httpHeaders:
                 - name: Accept
                   value: application/json
             initialDelaySeconds: 120
-            periodSeconds: 30
+            periodSeconds: 20
           volumeMounts:
             - name: app-properties
               mountPath: "/opt/app/config/entitymanagement.user.properties"
