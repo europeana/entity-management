@@ -104,10 +104,9 @@ public class EntityRecordUtils {
    * @param entities the list of entity records
    * @return the list of extracted entity ids
    */
-  @SuppressWarnings("unchecked")
   public static List<String> getEntityIds(List<EntityRecord> entities) {
     if(entities== null ||entities.isEmpty()) {
-      return Collections.EMPTY_LIST;
+      return Collections.emptyList();
     }
     return entities.stream().map(e -> e.getEntityId()).toList();
   }
