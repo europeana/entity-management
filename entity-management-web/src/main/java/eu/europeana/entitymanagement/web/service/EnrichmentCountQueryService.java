@@ -3,10 +3,6 @@ package eu.europeana.entitymanagement.web.service;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPath;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPathWithBase;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BASE_DATA_EUROPEANA_URI;
-
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.exception.ScoringComputationException;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
@@ -16,6 +12,11 @@ import org.json.JSONObject;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.exception.ScoringComputationException;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 
 @Service
 public class EnrichmentCountQueryService {
@@ -42,17 +43,18 @@ public class EnrichmentCountQueryService {
   }
 
   /**
-   * Queries the Search API to retrieve enrichment counts for the given entityId. Organizations have
+   * Queries the Search API to retrieve enrichment counts for the given Entity. Organizations have
    * a different query string.
    *
-   * @param entityId entityID string
-   * @param type entity type
+   * @param entity Entity
+   * @return the number of enrichments of Europeana Records using the given entity
+   * @throws ScoringComputationException if the European search API cannot be called successfully 
    */
-  public int getEnrichmentCount(String entityId, String type) {
-    String uri = buildSearchRequestUrl(entityId, type);
+  public int getEnrichmentCount(Entity entity) throws ScoringComputationException {
+    String uri = buildSearchRequestUrl(entity);
 
     if (logger.isDebugEnabled()) {
-      logger.debug("Getting enrichment count for entityId={}; queryUri={}", entityId, uri);
+      logger.debug("Getting enrichment count for entityId={}; queryUri={}", entity.getEntityId(), uri);
     }
 
     String response = null;
@@ -68,19 +70,19 @@ public class EnrichmentCountQueryService {
               .bodyToMono(String.class)
               .block();
     } catch (Exception e) {
-      throw new ScoringComputationException(ERROR_MSG + entityId, e);
+      throw new ScoringComputationException(ERROR_MSG + entity.getEntityId(), e);
     }
 
     if (logger.isDebugEnabled()) {
       logger.debug(
           "Retrieved enrichmentCount for entityId={} in {}ms; response={}",
-          entityId,
+          entity.getEntityId(),
           Duration.between(start, Instant.now()).toMillis(),
           response);
     }
 
     if (response == null) {
-      throw new ScoringComputationException(ERROR_MSG + entityId);
+      throw new ScoringComputationException(ERROR_MSG + entity.getEntityId());
     }
 
     int result = 0;
@@ -91,14 +93,14 @@ public class EnrichmentCountQueryService {
     return result;
   }
 
-  String buildSearchRequestUrl(String entityId, String type) {
+  String buildSearchRequestUrl(Entity entity) {
     StringBuilder url = new StringBuilder(configuration.getSearchApiUrlPrefix());
     String searchQuery =
         String.format(
-            "%s:%s ", ENRICHMENT_QUERY_FIELD_MAP.get(type), getEntityIdForQuery(entityId, type));
+            "%s:%s ", ENRICHMENT_QUERY_FIELD_MAP.get(entity.getType()), getEntityIdsForQuery(entity));
 
     url.append("&query=" + searchQuery);
-    if (!EntityTypes.Organization.getEntityType().equals(type)) {
+    if (!EntityTypes.isOrganization(entity.getType())) {
       url.append(contentTierPrefix);
       url.append(configuration.getEnrichmentsQueryContentTier());
     }
@@ -115,23 +117,46 @@ public class EnrichmentCountQueryService {
    * <p>TODO: This should be changed when entities are re-indexed in Search API with the "correct"
    * ids (EA-2944 suport both URIs with and without /base/ in the path)
    */
-  private String getEntityIdForQuery(String entityId, String type) {
-    // not applicable for organizations and timespans
-    if (EntityTypes.TimeSpan.getEntityType().equals(type)
-        || EntityTypes.Organization.getEntityType().equals(type)) {
-      return "\"" + entityId + "\"";
+  private String getEntityIdsForQuery(Entity entity) {
+    // not applicable for timespans
+    if (EntityTypes.isTimeSpan(entity.getType())) {
+      return "\"" + entity.getEntityId() + "\"";
+    }
+    
+    //for the organizations search also for all data.europeana.eu uris from the sameAs
+    if(EntityTypes.isOrganization(entity.getType())) {
+      return buildSearchedIdsForOrganizations(entity);
     }
 
     // EA-2944 suport both URIs with and without /base/ in the path
     StringBuilder entityIdsBuilder = new StringBuilder("(\"");
     entityIdsBuilder
         .append(BASE_DATA_EUROPEANA_URI)
-        .append(getEntityRequestPathWithBase(entityId))
+        .append(getEntityRequestPathWithBase(entity.getEntityId()))
         .append("\" OR \"")
         .append(BASE_DATA_EUROPEANA_URI)
-        .append(getEntityRequestPath(entityId))
+        .append(getEntityRequestPath(entity.getEntityId()))
         .append("\")");
 
     return entityIdsBuilder.toString();
   }
+
+  String buildSearchedIdsForOrganizations(Entity entity) {
+    StringBuilder orgIdsBuilder = new StringBuilder("(\"");
+    orgIdsBuilder.append(entity.getEntityId());
+    
+    if(entity.getSameReferenceLinks()!=null) {
+      for(String sameAsUri : entity.getSameReferenceLinks()) {
+        if(sameAsUri.startsWith(BASE_DATA_EUROPEANA_URI)) {
+          orgIdsBuilder.append("\" OR \"");
+          orgIdsBuilder.append(sameAsUri);
+        }
+      }
+    }
+    orgIdsBuilder.append("\")");
+    return orgIdsBuilder.toString();
+  }
+
+
+
 }
