@@ -49,14 +49,10 @@ public class ScoringService {
   }
 
   public EntityMetrics computeMetrics(Entity entity)
-      throws FunctionalRuntimeException, UnsupportedEntityTypeException, ScoringComputationException {
+      throws ScoringComputationException {
     EntityMetrics metrics = new EntityMetrics(entity.getEntityId());
-    if (entity.getType() != null) {
-      metrics.setEntityType(entity.getType());
-    } else {
-      metrics.setEntityType(EntityTypes.getByEntityId(entity.getEntityId()).name());
-    }
-
+    metrics.setEntityType(entity.getType());
+    
     PageRank pr = getPageRank(entity);
     if (pr != null && pr.getPageRank() != null) {
       metrics.setPageRank(pr.getPageRank().intValue());

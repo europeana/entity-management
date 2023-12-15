@@ -77,9 +77,9 @@ public enum EntityTypes implements EntityKeyword {
 
   public static EntityTypes getByEntityId(String entityId) throws UnsupportedEntityTypeException {
 
-    for (EntityTypes field : EntityTypes.values()) {
-      if (entityId.contains(String.format("/%s/", field.getUrlPath()))) {
-        return field;
+    for (EntityTypes entityType : EntityTypes.values()) {
+      if (entityId.contains(String.format("/%s/", entityType.getUrlPath()))) {
+        return entityType;
       }
     }
 
@@ -95,10 +95,20 @@ public enum EntityTypes implements EntityKeyword {
     return getEntityType();
   }
   
+  /**
+   * Utility method to verify if the provided type is TimeSpan
+   * @param entityType type as string
+   * @return true if TimeSpan
+   */
   public static boolean isTimeSpan(String entityType) {
     return EntityTypes.TimeSpan.getEntityType().equals(entityType);
   }
   
+  /**
+   * Utility method to verify if the provided type is Organization
+   * @param entityType type as string
+   * @return true if Organization
+   */
   public static boolean isOrganization(String entityType) {
     return EntityTypes.Organization.getEntityType().equals(entityType);
   }

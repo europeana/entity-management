@@ -73,7 +73,7 @@ public class EntityMetricsProcessor extends BaseEntityProcessor {
     EntityMetrics metrics;
     try {
       metrics = scoringService.computeMetrics(entity);
-    } catch (FunctionalRuntimeException | UnsupportedEntityTypeException | ScoringComputationException e) {
+    } catch (ScoringComputationException e) {
       throw new EntityUpdateException(
           "Cannot compute ranking metrics for entityId=" + entity.getEntityId(), e);
     }

@@ -47,7 +47,8 @@ public class EnrichmentCountQueryService {
    * a different query string.
    *
    * @param entity Entity
-   * @throws ScoringComputationException 
+   * @return the number of enrichments of Europeana Records using the given entity
+   * @throws ScoringComputationException if the European search API cannot be called successfully 
    */
   public int getEnrichmentCount(Entity entity) throws ScoringComputationException {
     String uri = buildSearchRequestUrl(entity);
@@ -146,7 +147,7 @@ public class EnrichmentCountQueryService {
     
     if(entity.getSameReferenceLinks()!=null) {
       for(String sameAsUri : entity.getSameReferenceLinks()) {
-        if(sameAsUri.startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI)) {
+        if(sameAsUri.startsWith(BASE_DATA_EUROPEANA_URI)) {
           orgIdsBuilder.append("\" OR \"");
           orgIdsBuilder.append(sameAsUri);
         }
