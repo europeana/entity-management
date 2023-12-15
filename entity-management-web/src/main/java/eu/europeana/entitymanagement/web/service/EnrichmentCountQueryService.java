@@ -47,8 +47,9 @@ public class EnrichmentCountQueryService {
    * a different query string.
    *
    * @param entity Entity
+   * @throws ScoringComputationException 
    */
-  public int getEnrichmentCount(Entity entity) {
+  public int getEnrichmentCount(Entity entity) throws ScoringComputationException {
     String uri = buildSearchRequestUrl(entity);
 
     if (logger.isDebugEnabled()) {
@@ -98,7 +99,7 @@ public class EnrichmentCountQueryService {
             "%s:%s ", ENRICHMENT_QUERY_FIELD_MAP.get(entity.getType()), getEntityIdsForQuery(entity));
 
     url.append("&query=" + searchQuery);
-    if (!EntityTypes.Organization.getEntityType().equals(entity.getType())) {
+    if (!EntityTypes.isOrganization(entity.getType())) {
       url.append(contentTierPrefix);
       url.append(configuration.getEnrichmentsQueryContentTier());
     }
@@ -117,24 +118,13 @@ public class EnrichmentCountQueryService {
    */
   private String getEntityIdsForQuery(Entity entity) {
     // not applicable for timespans
-    if (EntityTypes.TimeSpan.getEntityType().equals(entity.getType())) {
+    if (EntityTypes.isTimeSpan(entity.getType())) {
       return "\"" + entity.getEntityId() + "\"";
     }
     
     //for the organizations search also for all data.europeana.eu uris from the sameAs
-    if(EntityTypes.Organization.getEntityType().equals(entity.getType())) {
-      StringBuilder orgIdsBuilder = new StringBuilder("(\"");
-      orgIdsBuilder.append(entity.getEntityId());
-      if(entity.getSameReferenceLinks()!=null) {
-        for(String sameAsUri : entity.getSameReferenceLinks()) {
-          if(sameAsUri.startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI)) {
-            orgIdsBuilder.append("\" OR \"");
-            orgIdsBuilder.append(sameAsUri);
-          }
-        }
-      }
-      orgIdsBuilder.append("\")");
-      return orgIdsBuilder.toString();
+    if(EntityTypes.isOrganization(entity.getType())) {
+      return buildSearchedIdsForOrganizations(entity);
     }
 
     // EA-2944 suport both URIs with and without /base/ in the path
@@ -149,4 +139,23 @@ public class EnrichmentCountQueryService {
 
     return entityIdsBuilder.toString();
   }
+
+  String buildSearchedIdsForOrganizations(Entity entity) {
+    StringBuilder orgIdsBuilder = new StringBuilder("(\"");
+    orgIdsBuilder.append(entity.getEntityId());
+    
+    if(entity.getSameReferenceLinks()!=null) {
+      for(String sameAsUri : entity.getSameReferenceLinks()) {
+        if(sameAsUri.startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI)) {
+          orgIdsBuilder.append("\" OR \"");
+          orgIdsBuilder.append(sameAsUri);
+        }
+      }
+    }
+    orgIdsBuilder.append("\")");
+    return orgIdsBuilder.toString();
+  }
+
+
+
 }

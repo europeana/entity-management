@@ -8,6 +8,7 @@ import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
+import eu.europeana.entitymanagement.exception.ScoringComputationException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.web.model.scoring.EntityMetrics;
 import eu.europeana.entitymanagement.web.service.ScoringService;
@@ -72,7 +73,7 @@ public class EntityMetricsProcessor extends BaseEntityProcessor {
     EntityMetrics metrics;
     try {
       metrics = scoringService.computeMetrics(entity);
-    } catch (FunctionalRuntimeException | UnsupportedEntityTypeException e) {
+    } catch (FunctionalRuntimeException | UnsupportedEntityTypeException | ScoringComputationException e) {
       throw new EntityUpdateException(
           "Cannot compute ranking metrics for entityId=" + entity.getEntityId(), e);
     }

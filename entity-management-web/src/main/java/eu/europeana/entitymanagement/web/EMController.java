@@ -521,7 +521,7 @@ public class EMController extends BaseRest {
 
     // in case of Organization it must be the zoho Organization
     String creationRequestType = europeanaProxyEntity.getType();
-    if (EntityTypes.Organization.getEntityType().equals(creationRequestType)
+    if (EntityTypes.isOrganization(creationRequestType)
         && !creationRequestId.contains(DataSource.ZOHO_HOST)) {
       throw new HttpBadRequestException(String.format(
           "The Organization entity should come from Zoho and have the corresponding id format containing: %s",

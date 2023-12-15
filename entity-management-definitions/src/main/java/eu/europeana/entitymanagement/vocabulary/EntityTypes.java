@@ -94,4 +94,12 @@ public enum EntityTypes implements EntityKeyword {
   public String getJsonValue() {
     return getEntityType();
   }
+  
+  public static boolean isTimeSpan(String entityType) {
+    return EntityTypes.TimeSpan.getEntityType().equals(entityType);
+  }
+  
+  public static boolean isOrganization(String entityType) {
+    return EntityTypes.Organization.getEntityType().equals(entityType);
+  }
 }
