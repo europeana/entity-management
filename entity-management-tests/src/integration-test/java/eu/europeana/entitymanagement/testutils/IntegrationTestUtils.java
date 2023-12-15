@@ -1,16 +1,16 @@
 package eu.europeana.entitymanagement.testutils;
 
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.zoho.crm.api.record.Record;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import org.apache.commons.io.IOUtils;
+import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.zoho.crm.api.record.Record;
 
 public class IntegrationTestUtils {
 
@@ -247,20 +247,22 @@ public class IntegrationTestUtils {
           ORGANIZATION_PCCE_ZOHO_RESPONSE,
           ORGANIZATION_BERGER_MUSEUM_URI_ZOHO,
           ORGANIZATION_BERGER_MUSEUM_ZOHO_RESPONSE);
-
+  
   /** Maps Metis dereferenciation URIs to mocked XML responses */
-  public static final Map<String, String> METIS_RESPONSE_MAP =
-      Map.of(
-          AGENT_DA_VINCI_URI, AGENT_DA_VINCI_XML,
-          AGENT_STALIN_URI, AGENT_STALIN_XML,
-          PLACE_PARIS_URI, PLACE_PARIS_XML,
-          PLACE_HAGENBACH_URI, PLACE_HAGENBACH_XML,
-          TIMESPAN_1ST_CENTURY_URI, TIMESPAN_1ST_CENTURY_XML,
-          CONCEPT_BATHTUB_URI, CONCEPT_BATHTUB_XML,
-          AGENT_JAN_VERMEER_VIAF_URI, AGENT_JAN_VERMEER_XML_VIAF,
-          AGENT_JAN_VERMEER_WIKIDATA_URI, AGENT_JAN_VERMEER_XML_WIKIDATA,
-          AGENT_SCHEGK_URI, AGENT_SCHEGK_XML,
-          AGENT_BIRCH_URI, AGENT_BIRCH_XML);
+  public static final Map<String, String> METIS_RESPONSE_MAP = 
+      Map.ofEntries(
+        Map.entry(AGENT_DA_VINCI_URI, AGENT_DA_VINCI_XML), 
+        Map.entry(AGENT_STALIN_URI, AGENT_STALIN_XML), 
+        Map.entry(PLACE_PARIS_URI, PLACE_PARIS_XML),
+        Map.entry(PLACE_HAGENBACH_URI, PLACE_HAGENBACH_XML),
+        Map.entry(TIMESPAN_1ST_CENTURY_URI, TIMESPAN_1ST_CENTURY_XML),
+        Map.entry(CONCEPT_BATHTUB_URI, CONCEPT_BATHTUB_XML),
+        Map.entry(AGENT_JAN_VERMEER_VIAF_URI, AGENT_JAN_VERMEER_XML_VIAF),
+        Map.entry(AGENT_JAN_VERMEER_WIKIDATA_URI, AGENT_JAN_VERMEER_XML_WIKIDATA),
+        Map.entry(AGENT_SCHEGK_URI, AGENT_SCHEGK_XML),
+        Map.entry(AGENT_BIRCH_URI, AGENT_BIRCH_XML),
+        Map.entry(AGENT_RAPHAEL_URI, AGENT_RAPHAEL_XML)
+      ); 
 
   public static String loadFile(String resourcePath) throws IOException {
     return IOUtils.toString(

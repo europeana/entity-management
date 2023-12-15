@@ -7,11 +7,11 @@ import java.util.TreeSet;
 
 public class BatchOperations {
 
-  private SortedSet<Operation> createOperations;
-  private SortedSet<Operation> enableOperations;
-  private SortedSet<Operation> updateOperations;
-  private SortedSet<Operation> deleteOperations;
-  private SortedSet<Operation> permanentDeleteOperations;
+  private SortedSet<Operation> createOperations = new TreeSet<>();
+  private SortedSet<Operation> enableOperations  = new TreeSet<>();
+  private SortedSet<Operation> updateOperations = new TreeSet<>();
+  private SortedSet<Operation> deleteOperations  = new TreeSet<>();
+  private SortedSet<Operation> permanentDeleteOperations = new TreeSet<>();
 
   public SortedSet<Operation> getCreateOperations() {
     return createOperations;
@@ -36,37 +36,22 @@ public class BatchOperations {
   public void addOperation(Operation operation) {
     switch (operation.getAction()) {
       case Operations.CREATE:
-        if (createOperations == null) {
-          createOperations = new TreeSet<>();
-        }
         createOperations.add(operation);
         break;
 
       case Operations.ENABLE:
-        if (enableOperations == null) {
-          enableOperations = new TreeSet<>();
-        }
         enableOperations.add(operation);
         break;
 
       case Operations.UPDATE:
-        if (updateOperations == null) {
-          updateOperations = new TreeSet<>();
-        }
         updateOperations.add(operation);
         break;
 
       case Operations.DELETE:
-        if (deleteOperations == null) {
-          deleteOperations = new TreeSet<>();
-        }
         deleteOperations.add(operation);
         break;
 
       case Operations.PERMANENT_DELETE:
-        if (permanentDeleteOperations == null) {
-          permanentDeleteOperations = new TreeSet<>();
-        }
         permanentDeleteOperations.add(operation);
         break;
 
