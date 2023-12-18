@@ -379,11 +379,12 @@ public class ZohoSyncService extends BaseZohoAccess {
   }
 
   boolean skipNonExisting(boolean hasDpsOwner, boolean markedForDeletion) {
-    if(!hasDpsOwner) {
+    if((markedForDeletion && !emConfiguration.isRegisterDeprecated())
+        || !hasDpsOwner) {
+      //skip deprecated if not explicitly enabled in configs
+      //skip if owner is not DPS Team
       return true;
-    } else if(markedForDeletion && !emConfiguration.isRegisterDeprecated()) {
-      return true;
-    }
+    } 
     return  false;
   }
 
