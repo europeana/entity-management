@@ -1,10 +1,9 @@
 package eu.europeana.entitymanagement.web.model;
 
-import com.github.jsonldjava.shaded.com.google.common.hash.HashCode;
+import java.util.Date;
 import com.zoho.crm.api.record.Record;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import java.util.Date;
 
 public class Operation implements Comparable<Operation> {
 

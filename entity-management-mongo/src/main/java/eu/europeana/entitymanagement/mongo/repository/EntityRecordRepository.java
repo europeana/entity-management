@@ -11,7 +11,12 @@ import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTIT
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_MODIFIED;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_SAME_AS;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_UPDATE_OPTS;
-
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Repository;
 import com.mongodb.client.result.UpdateResult;
 import dev.morphia.query.FindOptions;
 import dev.morphia.query.Query;
@@ -23,13 +28,6 @@ import eu.europeana.entitymanagement.definitions.model.EntityIdGenerator;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
 import eu.europeana.entitymanagement.mongo.utils.MorphiaUtils;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Repository;
 
 /** Repository for retrieving the EntityRecord objects. */
 @Repository(AppConfigConstants.BEAN_ENTITY_RECORD_REPO)
@@ -139,14 +137,16 @@ public class EntityRecordRepository extends AbstractRepository {
   }
 
   /**
-   * Gets EntityRecord containing the given uris in its sameAs or exactMatch fields.
+   * Retrieves EntityRecords containing at least one of the provided uris in its sameAs or exactMatch fields.
    *
-   * @param uris uris to query
-   * @param entityId indicated the record for which a dupplicate is searched. Use null to return any
-   * @return Optional containing result, or empty Optional if no match
+   * @param uris uris to query co-references
+   * @param entityId indicated the record for which dupplicates are searched. Use null or empty to return any
+   * @param excludeDisabled if disabled entities should be returned or not
+   * @return the list of entity records found
    */
-  public Optional<EntityRecord> findEntityDupplicationByCoreference(
-      List<String> uris, String entityId) {
+  @SuppressWarnings("java:S2301")
+  public List<EntityRecord> findEntitiesByCoreference(
+      List<String> uris, String entityId, boolean excludeDisabled) {
 
     Query<EntityRecord> query =
         getDataStore()
@@ -157,11 +157,15 @@ public class EntityRecordRepository extends AbstractRepository {
     if (StringUtils.isNotBlank(entityId)) {
       query.filter(ne(ENTITY_ID, entityId));
     }
+    
+    if(excludeDisabled) {
+      query.filter(eq(DISABLED, null));
+    }
 
-    EntityRecord value = query.first();
-    return Optional.ofNullable(value);
+    //query the database
+    return query.iterator().toList();
   }
-
+  
   public List<EntityRecord> saveBulk(List<EntityRecord> entityRecords) {
     return getDataStore().save(entityRecords);
   }

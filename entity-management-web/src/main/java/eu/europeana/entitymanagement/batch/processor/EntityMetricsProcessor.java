@@ -1,20 +1,19 @@
 package eu.europeana.entitymanagement.batch.processor;
 
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
-import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
-import eu.europeana.entitymanagement.definitions.model.Aggregation;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
-import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
-import eu.europeana.entitymanagement.web.model.scoring.EntityMetrics;
-import eu.europeana.entitymanagement.web.service.ScoringService;
 import java.util.Date;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
+import eu.europeana.entitymanagement.definitions.model.Aggregation;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.exception.ScoringComputationException;
+import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
+import eu.europeana.entitymanagement.web.model.scoring.EntityMetrics;
+import eu.europeana.entitymanagement.web.service.ScoringService;
 
 /** Updates Metrics for EntityRecords */
 @Component
@@ -72,7 +71,7 @@ public class EntityMetricsProcessor extends BaseEntityProcessor {
     EntityMetrics metrics;
     try {
       metrics = scoringService.computeMetrics(entity);
-    } catch (FunctionalRuntimeException | UnsupportedEntityTypeException e) {
+    } catch (ScoringComputationException e) {
       throw new EntityUpdateException(
           "Cannot compute ranking metrics for entityId=" + entity.getEntityId(), e);
     }

@@ -18,11 +18,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
-import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.exception.ScoringComputationException;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.model.scoring.EntityMetrics;
 import eu.europeana.entitymanagement.web.model.scoring.MaxEntityMetrics;
 import eu.europeana.entitymanagement.web.model.scoring.PageRank;
@@ -49,14 +47,10 @@ public class ScoringService {
   }
 
   public EntityMetrics computeMetrics(Entity entity)
-      throws FunctionalRuntimeException, UnsupportedEntityTypeException {
+      throws ScoringComputationException {
     EntityMetrics metrics = new EntityMetrics(entity.getEntityId());
-    if (entity.getType() != null) {
-      metrics.setEntityType(entity.getType());
-    } else {
-      metrics.setEntityType(EntityTypes.getByEntityId(entity.getEntityId()).name());
-    }
-
+    metrics.setEntityType(entity.getType());
+    
     PageRank pr = getPageRank(entity);
     if (pr != null && pr.getPageRank() != null) {
       metrics.setPageRank(pr.getPageRank().intValue());
@@ -143,11 +137,11 @@ public class ScoringService {
     return maxOverallMetrics;
   }
 
-  private Integer getEnrichmentCount(Entity entity) {
-    return enrichmentCountQueryService.getEnrichmentCount(entity.getEntityId(), entity.getType());
+  private Integer getEnrichmentCount(Entity entity) throws ScoringComputationException {
+    return enrichmentCountQueryService.getEnrichmentCount(entity);
   }
 
-  private PageRank getPageRank(Entity entity) {
+  private PageRank getPageRank(Entity entity) throws ScoringComputationException {
     SolrQuery query = new SolrQuery();
     String wikidataUrl = getWikidataUrl(entity);
     String wikidataQId = StringUtils.substringAfterLast(wikidataUrl, "/");
