@@ -71,6 +71,11 @@ public final class ZohoConstants {
   public static final String ZOHO_OWNER_FIELD = "Owner";
   public static final String ZOHO_OWNER_CRITERIA = "Owner.name";
 
+  // constants for modified
+  public static final String ZOHO_MODIFIED_BY_FIELD = "Modified_By";
+  public static final String ZOHO_USER_EUROPEANA_APIS = "Europeana APIs";
+  
+  
   // scheduled for deleteion
   public static final String ZOHO_SCHEDULED_DELETION = "Scheduled_for_deletion";
 
