@@ -379,13 +379,10 @@ public class ZohoSyncService extends BaseZohoAccess {
   }
 
   boolean skipNonExisting(boolean hasDpsOwner, boolean markedForDeletion) {
-    if((markedForDeletion && !emConfiguration.isRegisterDeprecated())
-        || !hasDpsOwner) {
-      //skip deprecated if not explicitly enabled in configs
-      //skip if owner is not DPS Team
-      return true;
-    } 
-    return  false;
+    //skip deprecated if not explicitly enabled in configs
+    //skip if owner is not DPS Team
+    return (markedForDeletion && !emConfiguration.isRegisterDeprecated())
+        || !hasDpsOwner;
   }
 
   boolean needsToBeEnabled(EntityRecord entityRecord, boolean hasDpsOwner,
