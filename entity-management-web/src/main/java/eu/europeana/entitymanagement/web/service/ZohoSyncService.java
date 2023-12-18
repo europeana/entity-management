@@ -33,6 +33,7 @@ import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReportFields;
 import eu.europeana.entitymanagement.zoho.organization.ZohoAccessConfiguration;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
+import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 
 @Service(AppConfig.BEAN_ZOHO_SYNC_SERVICE)
@@ -276,7 +277,7 @@ public class ZohoSyncService extends BaseZohoAccess {
     boolean markedForDeletion = ZohoOrganizationConverter.isMarkedForDeletion(zohoOrg);
 
     String emOperation = identifyOperationType(zohoId, zohoRecordEuropeanaID, entityRecord,
-        hasDpsOwner, markedForDeletion);
+        hasDpsOwner, markedForDeletion, zohoOrg);
 
     if (emOperation != null) {
       // only if there is an operation to perform in EM
@@ -299,12 +300,19 @@ public class ZohoSyncService extends BaseZohoAccess {
   }
 
   String identifyOperationType(Long zohoId, String zohoRecordEuropeanaID, EntityRecord entityRecord,
-      boolean hasDpsOwner, boolean markedForDeletion) {
+      boolean hasDpsOwner, boolean markedForDeletion, Record zohoOrg) {
 
     if (entityRecord == null) {
       return shouldCreate(zohoId, zohoRecordEuropeanaID, hasDpsOwner, markedForDeletion)
           ? Operations.CREATE
           : null;
+    } else if(emConfiguration.isGenerateOrganizationEuropeanaId() && isModifiedByApi(zohoOrg)) {
+      if(logger.isInfoEnabled()) {
+      logger.info(
+          "Skip Organization organization, it was last modified by the API by the  {}",
+          zohoId);
+      }
+      return null;
     } else if (shouldDisable(hasDpsOwner, markedForDeletion)) {
       // if needsToBeDisabled
       return Operations.DELETE;
@@ -321,6 +329,11 @@ public class ZohoSyncService extends BaseZohoAccess {
       }
       return Operations.UPDATE;
     }
+  }
+
+  private boolean isModifiedByApi(Record zohoOrg) {
+    String modifiedBy = ZohoOrganizationConverter.getOwnerName(zohoOrg);
+    return ZohoConstants.ZOHO_USER_EUROPEANA_APIS.equals(modifiedBy);
   }
 
   boolean shouldEnable(EntityRecord entityRecord, boolean hasDpsOwner, boolean markedForDeletion) {
