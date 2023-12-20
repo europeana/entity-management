@@ -92,7 +92,7 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
     service.scheduleTasksForEntities(map);
 
     List<ScheduledTask> tasks = service.getTasks(entityIds);
-    assertEquals(2, tasks.size());
+    assertEquals(2, tasks.size()); 
   }
 
   @Test
@@ -195,6 +195,10 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
             entityId2, ScheduledUpdateType.METRICS_UPDATE);
     service.scheduleTasksForEntities(map);
 
+    //check the count method
+    long runningTasks = service.getRunningTasksCount();
+    assertEquals(map.size(), runningTasks);
+    
     Date dateBeforeRun = new Date();
 
     entityUpdateJobLauncher.run(
@@ -250,6 +254,11 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
     Assertions.assertFalse(
         tasks.stream().map(p -> p.hasBeenProcessed()).collect(Collectors.toList()).contains(false));
 
+    //check that not running tasks exist in the database
+    runningTasks = service.getRunningTasksCount();
+    assertEquals(0, runningTasks);
+    
+    
     // check that no failed tasks are created
     Assertions.assertTrue(failedTaskRepository.getFailures(entityIds).size() == 0);
   }
@@ -283,6 +292,10 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
             entityId2, ScheduledRemovalType.PERMANENT_DELETION);
     service.scheduleTasksForEntities(map);
 
+    //check the count method
+    long runningTasks = service.getRunningTasksCount();
+    assertEquals(map.size(), runningTasks);
+    
     entityDeletionsJobLauncher.run(
         updateJobConfig.removeScheduledEntities(
             List.of(ScheduledRemovalType.DEPRECATION, ScheduledRemovalType.PERMANENT_DELETION)),
@@ -310,6 +323,10 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
     Assertions.assertFalse(
         tasks.stream().map(p -> p.hasBeenProcessed()).collect(Collectors.toList()).contains(false));
 
+    //check the count method, should not have unprocessed tasks anymore
+    runningTasks = service.getRunningTasksCount();
+    assertEquals(0, runningTasks);
+    
     // check that no failed tasks are created
     Assertions.assertTrue(failedTaskRepository.getFailures(entityIds).size() == 0);
   }
