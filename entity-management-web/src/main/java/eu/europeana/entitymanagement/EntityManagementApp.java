@@ -17,6 +17,8 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 import eu.europeana.entitymanagement.batch.model.JobType;
 import eu.europeana.entitymanagement.batch.service.BatchEntityUpdateExecutor;
+import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
+import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
 import eu.europeana.entitymanagement.web.service.ZohoSyncService;
 
@@ -57,25 +59,34 @@ public class EntityManagementApp implements CommandLineRunner {
               .web(WebApplicationType.NONE)
               .run(args);
 
-      LOG.info("Batch scheduling execution complete for {} ", Arrays.toString(args));
+      LOG.info("Batch scheduling was completed for {}, waiting for completion of asynchonuous processing ", Arrays.toString(args));
       //3hours
-      int minutes = 180;
-      LOG.info("Wait for completion of asynchonuous processing: {}m", minutes);
-      try {
-        Thread.sleep(Duration.ofMinutes(minutes).toMillis());
-      } catch (InterruptedException e) {
-        LOG.error("Cannot complete execution!", e);
-        SpringApplication.exit(context);
-        System.exit(-2);
+      ScheduledTaskService scheduledTaskService = (ScheduledTaskService)context.getBean(AppConfigConstants.BEAN_BATCH_SCHEDULED_TASK_SERVICE);
+      long runningTasks ;
+      int minutes = 5;
+      while((runningTasks = scheduledTaskService.getRunningTasksCount()) > 0) {
+        LOG.info("Scheduled Tasks to process : {}", runningTasks);
+        wait(context, minutes);
       }
       
-      //TODO: erorneous execution should be indicated with negative codes
-      LOG.info("Stoping application after scheduling batch processing and waiting {}m for processing schedule updates!", minutes);
+      //failed application execution should be indicated with negative codes
+      LOG.info("Stoping application after processing all Schdeduled Tasks!");
       System.exit(SpringApplication.exit(context));
+      
     } else {
       LOG.info("No args provided to application. Starting web server");
       SpringApplication.run(EntityManagementApp.class, args);
       return;
+    }
+  }
+
+  static void wait(ConfigurableApplicationContext context, int minutes) {
+    try {
+      Thread.sleep(Duration.ofMinutes(minutes).toMillis());
+    } catch (InterruptedException e) {
+      LOG.error("Cannot complete execution!", e);
+      SpringApplication.exit(context);
+      System.exit(-2);
     }
   }
 

@@ -197,6 +197,15 @@ public class ScheduledTaskRepository implements InitializingBean {
     return datastore.find(ScheduledTask.class).filter(eq(ENTITY_ID, entityId)).first();
   }
 
+  /**
+   * searches the database for scheduled task for which the processing is not complete
+   * 
+   * @return The number of scheduled task which are not marked as processed
+   */
+  public long getRuningTasksCount() {
+    return datastore.find(ScheduledTask.class).filter(eq(HAS_BEEN_PROCESSED, false)).count();
+  }
+  
   public List<ScheduledTask> getTasks(List<String> entityIds) {
     return datastore.find(ScheduledTask.class).filter(in(ENTITY_ID, entityIds)).iterator().toList();
   }

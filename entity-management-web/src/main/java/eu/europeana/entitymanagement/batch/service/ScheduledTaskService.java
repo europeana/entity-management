@@ -1,12 +1,5 @@
 package eu.europeana.entitymanagement.batch.service;
 
-import com.mongodb.bulk.BulkWriteResult;
-import dev.morphia.query.experimental.filters.Filter;
-import dev.morphia.query.internal.MorphiaCursor;
-import eu.europeana.entitymanagement.batch.repository.ScheduledTaskRepository;
-import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -16,8 +9,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.mongodb.bulk.BulkWriteResult;
+import dev.morphia.query.experimental.filters.Filter;
+import dev.morphia.query.internal.MorphiaCursor;
+import eu.europeana.entitymanagement.batch.repository.ScheduledTaskRepository;
+import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
+import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 
-@Service
+@Service(AppConfigConstants.BEAN_BATCH_SCHEDULED_TASK_SERVICE)
 public class ScheduledTaskService {
 
   private final ScheduledTaskRepository repository;
@@ -100,6 +101,15 @@ public class ScheduledTaskService {
     return repository.getEntityRecordsForTasks(start, count, queryFilters);
   }
 
+  /**
+   * return the 
+   * @return the number of scheduled tasks for which the execution is not complete   
+   */
+  public long getRunningTasksCount() {
+    return repository.getRuningTasksCount();
+  }
+  
+  
   /**
    * Gets the ScheduledTask with the given entityId from the database
    *
