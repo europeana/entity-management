@@ -84,9 +84,7 @@ public class EntityManagementApp implements CommandLineRunner {
       LOG.info("Stoping application after processing all Schdeduled Tasks!");
       System.exit(SpringApplication.exit(context));
 
-    } else
-
-    {
+    } else {
       LOG.info("No args provided to application. Starting web server");
       SpringApplication.run(EntityManagementApp.class, args);
       return;
@@ -99,14 +97,8 @@ public class EntityManagementApp implements CommandLineRunner {
   }
 
   static ConfigurableApplicationContext startStandAlloneApp(String[] args) {
-    ConfigurableApplicationContext context =
-        new SpringApplicationBuilder(EntityManagementApp.class).web(WebApplicationType.NONE)
+    return new SpringApplicationBuilder(EntityManagementApp.class).web(WebApplicationType.NONE)
             .run(args);
-    return context;
-  }
-
-  static void wait(ConfigurableApplicationContext context, int minutes) {
-    
   }
 
   static boolean hasCmdLineParams(String[] args) {
