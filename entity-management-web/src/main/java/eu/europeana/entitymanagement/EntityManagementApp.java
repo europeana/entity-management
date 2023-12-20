@@ -25,100 +25,121 @@ import eu.europeana.entitymanagement.web.service.ZohoSyncService;
 /**
  * Main application. Allows deploying as a war and logs instance data when deployed in Cloud Foundry
  */
-@SpringBootApplication(
-    scanBasePackages = {"eu.europeana.entitymanagement"},
-    exclude = {
-      // Remove these exclusions to re-enable security
-      SecurityAutoConfiguration.class,
-      ManagementWebSecurityAutoConfiguration.class,
-      // DataSources are manually configured (for EM and batch DBs)
-      DataSourceAutoConfiguration.class
-    })
+@SpringBootApplication(scanBasePackages = {"eu.europeana.entitymanagement"}, exclude = {
+    // Remove these exclusions to re-enable security
+    SecurityAutoConfiguration.class, ManagementWebSecurityAutoConfiguration.class,
+    // DataSources are manually configured (for EM and batch DBs)
+    DataSourceAutoConfiguration.class})
 public class EntityManagementApp implements CommandLineRunner {
 
   private static final Logger LOG = LogManager.getLogger(EntityManagementApp.class);
-  @Autowired private BatchEntityUpdateExecutor batchUpdateExecutor;
-  @Autowired private ZohoSyncService zohoSyncService;
+  private static final int WAITING_INTREVAL = 5;
+
+  @Autowired
+  private BatchEntityUpdateExecutor batchUpdateExecutor;
+  @Autowired
+  private ZohoSyncService zohoSyncService;
 
   /**
    * Main entry point of this application
    *
-   * <p>if the command line Argument - 'schedule_update' is passed then call EM Batch processing is
+   * <p>
+   * if the command line Argument - 'schedule_update' is passed then call EM Batch processing is
    * invoked.
    *
    * @param args command-line arguments
    */
   public static void main(String[] args) {
-    //jobType = args.length > 0 ? args[0] : "";
+    // jobType = args.length > 0 ? args[0] : "";
     if (hasCmdLineParams(args)) {
-      LOG.info("Starting batch updates execution with args: {}", Arrays.toString(args));
+      if (LOG.isInfoEnabled()) {
+        LOG.info("Starting batch updates execution with args: {}", Arrays.toString(args));
+      }
       validateArguments(args);
       // disable web server since we're only running an update task
-      ConfigurableApplicationContext context =
-          new SpringApplicationBuilder(EntityManagementApp.class)
-              .web(WebApplicationType.NONE)
-              .run(args);
+      ConfigurableApplicationContext context = startStandAlloneApp(args);
 
-      LOG.info("Batch scheduling was completed for {}, waiting for completion of asynchonuous processing ", Arrays.toString(args));
-      //3hours
-      ScheduledTaskService scheduledTaskService = (ScheduledTaskService)context.getBean(AppConfigConstants.BEAN_BATCH_SCHEDULED_TASK_SERVICE);
-      long runningTasks ;
-      int minutes = 5;
-      while((runningTasks = scheduledTaskService.getRunningTasksCount()) > 0) {
-        LOG.info("Scheduled Tasks to process : {}", runningTasks);
-        wait(context, minutes);
+      if (LOG.isInfoEnabled()) {
+        LOG.info(
+            "Batch scheduling was completed for {}, waiting for completion of asynchonuous processing ",
+            Arrays.toString(args));
       }
-      
-      //failed application execution should be indicated with negative codes
+      ScheduledTaskService scheduledTaskService = getScheduledTasksService(context);
+      long runningTasks;
+      while ((runningTasks = scheduledTaskService.getRunningTasksCount()) > 0) {
+        //wait for execution of schedules tasks
+        if (LOG.isInfoEnabled()) {
+          LOG.info("Scheduled Tasks to process : {}", runningTasks);
+        }
+        try {
+          Thread.sleep(Duration.ofMinutes(WAITING_INTREVAL).toMillis());
+        } catch (InterruptedException e) {
+          LOG.error("Cannot complete execution!", e);
+          SpringApplication.exit(context);
+          System.exit(-2);
+        }
+      }
+
+      // failed application execution should be indicated with negative codes
       LOG.info("Stoping application after processing all Schdeduled Tasks!");
       System.exit(SpringApplication.exit(context));
-      
-    } else {
+
+    } else
+
+    {
       LOG.info("No args provided to application. Starting web server");
       SpringApplication.run(EntityManagementApp.class, args);
       return;
     }
   }
 
+  static ScheduledTaskService getScheduledTasksService(ConfigurableApplicationContext context) {
+    return (ScheduledTaskService) context
+        .getBean(AppConfigConstants.BEAN_BATCH_SCHEDULED_TASK_SERVICE);
+  }
+
+  static ConfigurableApplicationContext startStandAlloneApp(String[] args) {
+    ConfigurableApplicationContext context =
+        new SpringApplicationBuilder(EntityManagementApp.class).web(WebApplicationType.NONE)
+            .run(args);
+    return context;
+  }
+
   static void wait(ConfigurableApplicationContext context, int minutes) {
-    try {
-      Thread.sleep(Duration.ofMinutes(minutes).toMillis());
-    } catch (InterruptedException e) {
-      LOG.error("Cannot complete execution!", e);
-      SpringApplication.exit(context);
-      System.exit(-2);
-    }
+    
   }
 
   static boolean hasCmdLineParams(String[] args) {
-    return args!=null && args.length > 0;
+    return args != null && args.length > 0;
   }
 
   @Override
   public void run(String... args) throws Exception {
     if (hasCmdLineParams(args)) {
       Set<String> tasks = Set.of(args);
-      
-      //first zoho sync as it runs synchronuous operations
-      if(tasks.contains(JobType.ZOHO_SYNC.value())) {
+
+      // first zoho sync as it runs synchronuous operations
+      if (tasks.contains(JobType.ZOHO_SYNC.value())) {
         LOG.info("Executing zoho sync");
         ZohoSyncReport zohoSyncReport = zohoSyncService.synchronizeModifiedZohoOrganizations();
         LOG.info("Synchronization Report: {}", zohoSyncReport.toString());
       }
-      
-      if(tasks.contains(JobType.SCHEDULE_DELETION.value())) {
-        //run also the deletions called through the API directly
+
+      if (tasks.contains(JobType.SCHEDULE_DELETION.value())) {
+        // run also the deletions called through the API directly
         LOG.info("Executing scheduled deletions");
         batchUpdateExecutor.runScheduledDeprecationsAndDeletions();
-        //TODO: should read the number of scheduled deletions and deprecations from the database and write it to the logs
+        // TODO: should read the number of scheduled deletions and deprecations from the database
+        // and write it to the logs
       }
-      
-      if(tasks.contains(JobType.SCHEDULE_UPDATE.value())) {
+
+      if (tasks.contains(JobType.SCHEDULE_UPDATE.value())) {
         LOG.info("Executing scheduled updates");
         batchUpdateExecutor.runScheduledUpdate();
-        //TODO: should read the number of scheduled deletions and deprecations from the database and write it to the logs
+        // TODO: should read the number of scheduled deletions and deprecations from the database
+        // and write it to the logs
       }
-        
+
     }
     // if no arguments then web server should be started
     return;
@@ -127,11 +148,10 @@ public class EntityManagementApp implements CommandLineRunner {
   /** validates the arguments passed */
   private static void validateArguments(String[] args) {
     for (String arg : args) {
-      if(!JobType.isValidJobType(arg)) {
+      if (!JobType.isValidJobType(arg)) {
         String allowdJobTypes = JobType.values().toString();
-        LOG.error("Unsupported argument '{}'. Supported arguments are '{}'",
-            arg, allowdJobTypes);
-        System.exit(1);  
+        LOG.error("Unsupported argument '{}'. Supported arguments are '{}'", arg, allowdJobTypes);
+        System.exit(1);
       }
     }
   }
