@@ -6,13 +6,13 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PROXY;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PROXY_FOR;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PROXY_IN;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
-
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import dev.morphia.annotations.Embedded;
+import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 
 @Embedded
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
@@ -24,6 +24,9 @@ public class EntityProxy {
   String proxyFor;
   Aggregation proxyIn;
   String type;
+  
+  public EntityProxy() {
+  }
 
   @JsonGetter(TYPE)
   public String getType() {

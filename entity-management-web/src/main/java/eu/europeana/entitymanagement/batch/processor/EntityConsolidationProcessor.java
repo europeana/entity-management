@@ -1,5 +1,13 @@
 package eu.europeana.entitymanagement.batch.processor;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.validation.ConstraintViolation;
+import javax.validation.ValidatorFactory;
+import org.springframework.batch.item.ItemProcessor;
+import org.springframework.stereotype.Component;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
@@ -18,14 +26,6 @@ import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.service.DepictionGeneratorService;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.validation.ConstraintViolation;
-import javax.validation.ValidatorFactory;
-import org.springframework.batch.item.ItemProcessor;
-import org.springframework.stereotype.Component;
 
 /**
  * This {@link ItemProcessor} validates Entity metadata, then creates a consolidated entity by
@@ -102,6 +102,8 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
     entityRecordService.addSameReferenceLinks(
         consolidatedEntity,
         externalProxies.stream().map(EntityProxy::getProxyId).collect(Collectors.toList()));
+    
+    entityRecordService.mapMongoReferenceFields(consolidatedEntity);
 
     emEntityFieldCleaner.cleanAndNormalize(consolidatedEntity);
     entityRecordService.performReferentialIntegrity(consolidatedEntity);

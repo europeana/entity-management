@@ -81,10 +81,7 @@
       "GLAM"
     ]
   },
-  "country" : {
-	  "_t" : "Country",
-      "id" : "http://data.europeana.eu/place/4"
-  },
+  "country" : "Netherlands",
   "homepage": "https://www.naturalis.nl/nl/",
   "phone": [
     "+31-71-751-9600"

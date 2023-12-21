@@ -226,14 +226,6 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
 
   @Test
   public void registerZohoOrganizationGFMShouldBeSuccessful() throws Exception {
-    //1. create a place "Sweden" to be used to dereference zoho country for the zoho GFM org
-    mockMvc
-    .perform(
-        MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL)
-            .content(loadFile(IntegrationTestUtils.PLACE_REGISTER_SWEDEN_JSON))
-            .contentType(MediaType.APPLICATION_JSON_VALUE));
-
-    //2. register zoho GFM org
     ResultActions response =
         mockMvc.perform(
             MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL)
@@ -256,8 +248,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                     IntegrationTestUtils.ORGANIZATION_GFM_URI_WIKIDATA_URI)))
         .andExpect(jsonPath("$.prefLabel[*]", hasSize(2)))
         // should have Europeana, Zoho and Wikidata proxies
-        .andExpect(jsonPath("$.proxies", hasSize(3)))
-        .andExpect(jsonPath("$.country.prefLabel").isNotEmpty());
+        .andExpect(jsonPath("$.proxies", hasSize(3)));
   }
 
   @Test

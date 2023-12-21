@@ -29,6 +29,7 @@ import eu.europeana.entitymanagement.vocabulary.XmlFields;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
@@ -146,4 +147,26 @@ public class Place extends Entity {
     // method to call the setter for each field individually
     field.set(this, value);
   }
+  
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    Place that = (Place) o;
+   
+    if (!Objects.equals(latitude, that.getLatitude())) return false;
+    if (!Objects.equals(longitude, that.getLongitude())) return false;
+    return Objects.equals(altitude, that.getAltitude());
+  }
+
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((latitude == null) ? 0 : latitude.hashCode());
+    result = prime * result + ((longitude == null) ? 0 : longitude.hashCode());
+    result = prime * result + ((altitude == null) ? 0 : altitude.hashCode());
+    return result;
+  }
+  
 }

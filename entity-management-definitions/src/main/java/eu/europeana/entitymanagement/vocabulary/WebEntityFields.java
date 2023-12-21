@@ -89,6 +89,8 @@ public interface WebEntityFields {
   // Organization fields
   public static final String DESCRIPTION = "description";
   public static final String ACRONYM = "acronym";
+  public static final String COUNTRY_ID = "countryId";
+  public static final String COUNTRY_PLACE = "countryPlace";
   public static final String COUNTRY = "country";
   public static final String EUROPEANA_ROLE = "europeanaRole";
   public static final String FOAF_LOGO = "logo";
@@ -124,4 +126,9 @@ public interface WebEntityFields {
   public static final String PROXY_FOR = "proxyFor";
   public static final String PROXY_IN = "proxyIn";
   public static final String PROXY = "Proxy";
+  
+  //CountryMapping fields
+  public static final String ZOHO_LABEL="Zoho Label";
+  public static final String ENTITY_URI="Entity URI";
+  public static final String WIKIDATA_URI="Wikidata URI";
 }

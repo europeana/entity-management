@@ -1,5 +1,26 @@
 package eu.europeana.entitymanagement;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+import java.util.Optional;
+import javax.xml.bind.JAXBContext;
+import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.output.ToStringConsumer;
+import org.testcontainers.containers.output.WaitingConsumer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.common.config.DataSource;
@@ -19,32 +40,10 @@ import eu.europeana.entitymanagement.web.service.ConceptSchemeService;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import eu.europeana.entitymanagement.zoho.organization.ZohoConfiguration;
-import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Objects;
-import java.util.Optional;
-import javax.xml.bind.JAXBContext;
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.apache.commons.io.IOUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.output.ToStringConsumer;
-import org.testcontainers.containers.output.WaitingConsumer;
 
 @ComponentScan(basePackageClasses = EntityManagementBasePackageMapper.class)
 @AutoConfigureMockMvc
@@ -66,7 +65,6 @@ public abstract class AbstractIntegrationTest {
   @Autowired protected ConceptSchemeService emConceptSchemeService;
   @Autowired protected EntityManagementConfiguration emConfig;
   @Autowired protected ZohoConfiguration zohoConfiguration;
-  @Autowired protected ZohoOrganizationConverter zohoOrgConverter;
   
   static {
     MONGO_CONTAINER =
@@ -149,6 +147,7 @@ public abstract class AbstractIntegrationTest {
     //tests must not register organizations as this is updating the zoho
     //generate Europeana ID can be set to true when using the mock service, see TextConfig class 
     registry.add("zoho.generate.organization.europeanaid", () -> true);
+    registry.add("zoho.country.mapping.file", () -> "/zoho_country_mapping_test.json");
     
     // could be used to fix eclipse issues
     registry.add("scmBranch", () -> "dev");

@@ -11,13 +11,11 @@ import eu.europeana.entitymanagement.dereference.Dereferencer;
 @Service
 public class ZohoDereferenceService implements Dereferencer {
 
-  private final ZohoOrganizationConverter zohoOrgConverter;
   private final ZohoConfiguration zohoConfiguration;
 
   @Autowired
-  public ZohoDereferenceService(ZohoConfiguration zohoConfiguration, ZohoOrganizationConverter zohoOrgConverter) {
+  public ZohoDereferenceService(ZohoConfiguration zohoConfiguration) {
     this.zohoConfiguration = zohoConfiguration;
-    this.zohoOrgConverter=zohoOrgConverter;
   }
 
   @Override
@@ -29,7 +27,7 @@ public class ZohoDereferenceService implements Dereferencer {
     //    System.out.println(resp.toJson(zohoOrganization.get().getKeyValues()));
     //
     if(zohoOrganization.isPresent()) {
-      return Optional.of(zohoOrgConverter.convertToOrganizationEntity(zohoOrganization.get())); 
+      return Optional.of(ZohoOrganizationConverter.convertToOrganizationEntity(zohoOrganization.get(), zohoConfiguration.getZohoBaseUrl())); 
     } else {
       return Optional.empty();
     }

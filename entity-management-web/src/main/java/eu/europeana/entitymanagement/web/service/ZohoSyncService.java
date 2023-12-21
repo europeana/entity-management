@@ -43,12 +43,11 @@ public class ZohoSyncService extends BaseZohoAccess {
       EntityUpdateService entityUpdateService, EntityRecordRepository entityRecordRepository,
       EntityManagementConfiguration emConfiguration, DataSources datasources,
       ZohoConfiguration zohoConfiguration,
-      ZohoOrganizationConverter zohoOrgConverter,
       SolrService solrService,
       ZohoSyncRepository zohoSyncRepo) {
 
     super(entityRecordService, entityUpdateService, entityRecordRepository, emConfiguration,
-        datasources, zohoConfiguration, zohoOrgConverter, solrService, zohoSyncRepo);
+        datasources, zohoConfiguration, solrService, zohoSyncRepo);
   }
 
   /**
@@ -268,10 +267,10 @@ public class ZohoSyncService extends BaseZohoAccess {
 
 //    String zohoBasedEntityId =
 //        EntityRecordUtils.buildEntityIdUri(EntityTypes.Organization, zohoId.toString());
-    String zohoRecordEuropeanaID = zohoOrgConverter.getEuropeanaIdFieldValue(zohoOrg);
+    String zohoRecordEuropeanaID = ZohoOrganizationConverter.getEuropeanaIdFieldValue(zohoOrg);
 
     boolean hasDpsOwner = hasRequiredOwnership(zohoOrg);
-    boolean markedForDeletion = zohoOrgConverter.isMarkedForDeletion(zohoOrg);
+    boolean markedForDeletion = ZohoOrganizationConverter.isMarkedForDeletion(zohoOrg);
 
     String emOperation = identifyOperationType(zohoId, zohoRecordEuropeanaID, entityRecord,
         hasDpsOwner, markedForDeletion);

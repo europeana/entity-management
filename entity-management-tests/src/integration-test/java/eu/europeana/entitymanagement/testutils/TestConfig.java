@@ -29,7 +29,6 @@ public class TestConfig {
     ZohoAccessClient zohoClient = Mockito.mock(ZohoAccessClient.class);
     Mockito.when(zohoConfiguration.getZohoAccessClient()).thenReturn(zohoClient);
     Mockito.when(zohoConfiguration.getZohoBaseUrl()).thenReturn(MOCK_ZOHO_BASE_URL);
-    Mockito.when(zohoConfiguration.getZohoCountryMappingFile()).thenReturn(MOCK_ZOHO_COUNTRY_MAPPING_FILE);
 
     // find matching JSON file based on zohoId argument, then create a Record object for it
     Mockito.doAnswer(

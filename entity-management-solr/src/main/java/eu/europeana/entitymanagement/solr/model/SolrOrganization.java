@@ -8,6 +8,7 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.solr.client.solrj.beans.Field;
 import eu.europeana.entitymanagement.definitions.model.Address;
 import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.solr.SolrUtils;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
@@ -44,6 +45,12 @@ public class SolrOrganization extends SolrEntity<Organization> {
 
   @Field(OrganizationSolrFields.COUNTRY_PREF_LABEL_ALL)
   private Map<String, String> countryPrefLabel;
+
+  @Field(OrganizationSolrFields.COUNTRY_LAT)
+  private Float countryLatitude;
+
+  @Field(OrganizationSolrFields.COUNTRY_LONG)
+  private Float countryLongitude;
 
   @Field(OrganizationSolrFields.VCARD_HAS_ADDRESS)
   private String hasAddress;
@@ -86,9 +93,11 @@ public class SolrOrganization extends SolrEntity<Organization> {
     if (organization.getMbox() != null) this.mbox = new ArrayList<>(organization.getMbox());
     setEuropeanaRole(organization.getEuropeanaRole());
     
-    if(organization.getCountry()!=null) {
-      this.countryId = organization.getCountry().getId();
-      this.setCountryPrefLabel(organization.getCountry().getPrefLabel());
+    if(organization.getCountryRef()!=null) {
+      this.countryId = organization.getCountryRef().getEntity().getEntityId();
+      this.setCountryPrefLabel(organization.getCountryRef().getEntity().getPrefLabel());
+      this.countryLatitude = ((Place) organization.getCountryRef().getEntity()).getLatitude();
+      this.countryLongitude = ((Place) organization.getCountryRef().getEntity()).getLongitude();
     }
     
     if (organization.getSameReferenceLinks() != null) {
@@ -217,5 +226,13 @@ public class SolrOrganization extends SolrEntity<Organization> {
 
   public Map<String, String> getCountryPrefLabel() {
     return countryPrefLabel;
+  }
+
+  public Float getCountryLatitude() {
+    return countryLatitude;
+  }
+
+  public Float getCountryLongitude() {
+    return countryLongitude;
   }
 }

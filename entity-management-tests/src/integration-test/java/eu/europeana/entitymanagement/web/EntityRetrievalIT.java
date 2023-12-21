@@ -14,17 +14,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
-
-import com.zoho.crm.api.record.Record;
-import eu.europeana.entitymanagement.batch.service.FailedTaskService;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.vocabulary.FailedTaskJsonFields;
-import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
-import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
-import eu.europeana.entitymanagement.web.xml.model.XmlConstants;
 import java.util.Map;
 import java.util.Optional;
 import org.hamcrest.Matchers;
@@ -35,6 +24,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import com.zoho.crm.api.record.Record;
+import eu.europeana.entitymanagement.batch.service.FailedTaskService;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.FailedTaskJsonFields;
+import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
+import eu.europeana.entitymanagement.web.xml.model.XmlConstants;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -461,8 +460,13 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
 
   @Test
   public void retrieveOrganizationJsonExternalShouldBeSuccessful() throws Exception {
-    // id in JSON matches ORGANIZATION_BNF_URI_ZOHO value
-    String europeanaMetadata = loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_GFM_ZOHO_JSON);
+    //1. create a place "Sweden" to be used to dereference zoho country for the zoho GFM org
+    String europeanaMetadata = loadFile(IntegrationTestUtils.PLACE_REGISTER_SWEDEN_JSON);
+    String metisResponse = loadFile(IntegrationTestUtils.PLACE_SWEDEN_XML);
+    createEntity(europeanaMetadata, metisResponse, IntegrationTestUtils.PLACE_SWEDEN_URI);
+
+    //2. register zoho GFM org
+    europeanaMetadata = loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_GFM_ZOHO_JSON);
     Optional<Record> zohoRecord =
         IntegrationTestUtils.getZohoOrganizationRecord(
             IntegrationTestUtils.ORGANIZATION_GFM_URI_ZOHO);
@@ -474,12 +478,14 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
     mockMvc
         .perform(
             get(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath + ".jsonld")
-                .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external, dereference")
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(entityId)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
-        .andExpect(jsonPath("$.sameAs").isNotEmpty());
+        .andExpect(jsonPath("$.sameAs").isNotEmpty())
+        .andExpect(jsonPath("$.countryId").isNotEmpty())
+        .andExpect(jsonPath("$.countryPlace").isNotEmpty());
   }
 
   @Test
@@ -533,7 +539,8 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
         .andExpect(xpath(entityBaseXpath + "/@rdf:about", xmlNamespaces).string(entityId))
         .andExpect(xpath(entityBaseXpath + "/@rdf:about", xmlNamespaces).string(entityId))
         .andExpect(
-            xpath(entityBaseXpath + "/skos:prefLabel", xmlNamespaces).nodeCount(greaterThan(0)));
+            xpath(entityBaseXpath + "/skos:prefLabel", xmlNamespaces).nodeCount(greaterThan(0)))
+        .andExpect(xpath(entityBaseXpath + "/edm:countryPlace", xmlNamespaces).doesNotExist());
   }
 
   @Test

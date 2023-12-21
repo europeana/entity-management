@@ -58,8 +58,6 @@ public class BaseZohoAccess {
   
   final ZohoConfiguration zohoConfiguration;
   
-  protected final ZohoOrganizationConverter zohoOrgConverter;
-
   final ZohoSyncRepository zohoSyncRepo;
 
   static final Logger logger = LogManager.getLogger(BaseZohoAccess.class);
@@ -71,7 +69,6 @@ public class BaseZohoAccess {
       EntityManagementConfiguration emConfiguration,
       DataSources datasources,
       ZohoConfiguration zohoConfiguration,
-      ZohoOrganizationConverter zohoOrgConverter,
       SolrService solrService,
       ZohoSyncRepository zohoSyncRepo) {
     this.entityRecordService = entityRecordService;
@@ -80,7 +77,6 @@ public class BaseZohoAccess {
     this.emConfiguration = emConfiguration;
     this.datasources = datasources;
     this.zohoConfiguration = zohoConfiguration;
-    this.zohoOrgConverter = zohoOrgConverter;
     this.zohoDataSource = initZohoDataSource();
     this.zohoSyncRepo = zohoSyncRepo;
   }
@@ -326,7 +322,7 @@ public class BaseZohoAccess {
    */
   private void performEntityRegistration(Operation operation, ZohoSyncReport zohoSyncReport, List<String> entitiesToUpdate) {
     Organization zohoOrganization =
-        zohoOrgConverter.convertToOrganizationEntity(operation.getZohoRecord());
+        ZohoOrganizationConverter.convertToOrganizationEntity(operation.getZohoRecord(), zohoConfiguration.getZohoBaseUrl());
     
     entitiesToUpdate.add(null);
   
@@ -380,7 +376,7 @@ public class BaseZohoAccess {
       allCorefs.add(operation.getOrganizationId());
     }
     allCorefs.add(zohoOrganization.getAbout());
-    String Europeana_ID = zohoOrgConverter.getEuropeanaIdFieldValue(operation.getZohoRecord());
+    String Europeana_ID = ZohoOrganizationConverter.getEuropeanaIdFieldValue(operation.getZohoRecord());
     if(Europeana_ID != null) {
       allCorefs.add(Europeana_ID);
     }
@@ -408,7 +404,7 @@ public class BaseZohoAccess {
    * @return
    */
   protected boolean hasRequiredOwnership(Record zohoRecord) {
-    String ownerName = zohoOrgConverter.getOwnerName(zohoRecord);
+    String ownerName = ZohoOrganizationConverter.getOwnerName(zohoRecord);
     return ownerName.equals(emConfiguration.getZohoSyncOwnerFilter());
   }
 

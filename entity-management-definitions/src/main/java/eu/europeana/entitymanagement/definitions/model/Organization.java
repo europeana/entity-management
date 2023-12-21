@@ -4,6 +4,8 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ACRONYM;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ALT_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.COUNTRY;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.COUNTRY_ID;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.COUNTRY_PLACE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DEPICTION;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DESCRIPTION;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.EUROPEANA_ROLE;
@@ -25,9 +27,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import dev.morphia.annotations.Reference;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 /** This class defines base organization type of an entity. */
@@ -45,6 +49,8 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
   FOAF_LOGO,
   EUROPEANA_ROLE,
   COUNTRY,
+  COUNTRY_ID,
+  COUNTRY_PLACE,
   LANGUAGE,
   FOAF_HOMEPAGE,
   FOAF_PHONE,
@@ -63,7 +69,13 @@ public class Organization extends Entity {
   private List<String> phone;
   private List<String> mbox;
   private Map<String, List<String>> europeanaRole;
-  private Country country;
+  
+  @Reference(lazy = true)
+  private EntityRecord countryRef;
+  private Place countryPlace;
+  private String country;
+  private String countryId;
+  
   private Address hasAddress;
   private List<String> sameAs;
   private List<String> language;
@@ -82,7 +94,10 @@ public class Organization extends Entity {
     if (copy.getMbox() != null) this.mbox = new ArrayList<>(copy.getMbox());
     if (copy.getEuropeanaRole() != null)
       this.europeanaRole = new HashMap<>(copy.getEuropeanaRole());
-    if (copy.getCountry() != null) this.country = new Country(copy.getCountry());
+    //because the countryRef is a reference to the object we keep it the same
+    this.countryRef=copy.getCountryRef();
+    
+    
     if (copy.getAddress() != null) this.hasAddress = new Address(copy.getAddress());
     if (copy.sameAs != null) this.sameAs = (new ArrayList<>(copy.sameAs));
     if (copy.language != null) this.language = (new ArrayList<>(copy.language));
@@ -136,16 +151,6 @@ public class Organization extends Entity {
   @JsonSetter(FOAF_MBOX)
   public void setMbox(List<String> mbox) {
     this.mbox = mbox;
-  }
-
-  @JsonGetter(COUNTRY)
-  public Country getCountry() {
-    return country;
-  }
-
-  @JsonSetter(COUNTRY)
-  public void setCountry(Country country) {
-    this.country = country;
   }
 
   @JsonGetter(HAS_ADDRESS)
@@ -215,4 +220,51 @@ public class Organization extends Entity {
   public void setLanguage(List<String> edmLanguage) {
     this.language = edmLanguage;
   }
+  
+  @JsonIgnore
+  public EntityRecord getCountryRef() {
+    return countryRef;
+  }
+  
+  public void setCountryRef(EntityRecord countryRef) {
+    this.countryRef=countryRef;
+  }
+
+  @JsonGetter(COUNTRY_PLACE)
+  public Place getCountryPlace() {
+    return countryPlace;
+  }
+
+  @JsonSetter(COUNTRY_PLACE)
+  public void setCountryPlace(Place countryPlace) {
+    this.countryPlace = countryPlace;
+  }
+
+  @JsonGetter(COUNTRY)
+  public String getCountry() {
+    return country;
+  }
+
+  @JsonSetter(COUNTRY)
+  public void setCountry(String country) {
+    this.country = country;
+  }
+
+  @JsonGetter(COUNTRY_ID)
+  public String getCountryId() {
+    return countryId;
+  }
+
+  @JsonSetter(COUNTRY_ID)
+  public void setCountryId(String countryId) {
+    this.countryId = countryId;
+  }
+  
+  @Override
+  public void dereference() {
+    if(this.getCountryRef()!=null) {
+      this.countryPlace=(Place) this.getCountryRef().getEntity();
+    }
+  }
+  
 }

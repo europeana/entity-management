@@ -83,6 +83,8 @@ public final class XmlConstants extends XmlFields {
   public static final String XML_LOGO = "logo";
   public static final String XML_EUROPEANA_ROLE = "europeanaRole";
   public static final String XML_COUNTRY = "country";
+  public static final String XML_COUNTRY_ID = "countryId";
+  public static final String XML_COUNTRY_PLACE = "countryPlace";
   public static final String XML_HOMEPAGE = "homepage";
   public static final String XML_PHONE = "phone";
   public static final String XML_MBOX = "mbox";

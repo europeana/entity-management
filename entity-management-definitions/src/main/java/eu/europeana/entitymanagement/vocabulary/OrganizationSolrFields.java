@@ -19,6 +19,8 @@ public interface OrganizationSolrFields extends EntitySolrFields {
   public static final String COUNTRY_ID = "countryId";
   public static final String COUNTRY_PREF_LABEL_ALL = "countryPrefLabel.*";
   public static final String COUNTRY_PREF_LABEL = "countryPrefLabel";
+  public static final String COUNTRY_LAT = "countryLatitude";
+  public static final String COUNTRY_LONG = "countryLongitude";
   public static final String VCARD_HAS_ADDRESS = "vcard_hasAddress.1";
   public static final String VCARD_STREET_ADDRESS = "vcard_streetAddress.1";
   public static final String VCARD_LOCALITY = "vcard_locality.1";

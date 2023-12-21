@@ -51,7 +51,7 @@ public class AppConfig extends AppConfigConstants {
   @Bean(name = BEAN_EM_DATA_SOURCES)
   public DataSources getDataSources() throws IOException {
     String datasourcesXMLConfigFile = emConfiguration.getDatasourcesXMLConfig();
-
+    
     DataSources dataSources;
     try (InputStream inputStream = getClass().getResourceAsStream(datasourcesXMLConfigFile)) {
       assert inputStream != null;

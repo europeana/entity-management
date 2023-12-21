@@ -101,7 +101,10 @@ public enum EntityFieldsTypes {
   logo(EntityFieldsTypes.FIELD_TYPE_WEB_RESOURCE, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
   europeanaRole(
       EntityFieldsTypes.FIELD_TYPE_KEYWORD, true, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
-  country(EntityFieldsTypes.FIELD_TYPE_COUNTRY, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
+  country(EntityFieldsTypes.FIELD_TYPE_TEXT, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
+  countryId(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
+  countryPlace(EntityFieldsTypes.FIELD_TYPE_PLACE, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
+  countryRef(EntityFieldsTypes.FIELD_TYPE_ENTITY_RECORD, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
   homepage(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
   phone(
       EntityFieldsTypes.FIELD_TYPE_KEYWORD, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
@@ -137,7 +140,8 @@ public enum EntityFieldsTypes {
   public static final String FIELD_TYPE_DATE_OR_URI = "Date or URI";
   public static final String FIELD_TYPE_WEB_RESOURCE = "WebResource";
   public static final String FIELD_TYPE_ADDRESS = "Address";
-  public static final String FIELD_TYPE_COUNTRY = "Country";
+  public static final String FIELD_TYPE_PLACE = "Place";
+  public static final String FIELD_TYPE_ENTITY_RECORD = "EntityRecord";
 
   public static final String FIELD_CARDINALITY_1_1 = "1..1";
   public static final String FIELD_CARDINALITY_0_1 = "0..1";

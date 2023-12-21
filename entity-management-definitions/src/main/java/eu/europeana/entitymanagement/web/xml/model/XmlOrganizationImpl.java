@@ -13,6 +13,8 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.PREF_LABEL;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ACRONYM;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_COUNTRY;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_COUNTRY_ID;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_COUNTRY_PLACE;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_DESCRIPTION;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_EUROPEANA_ROLE;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_HAS_ADDRESS;
@@ -25,9 +27,7 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ORGAN
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PHONE;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_SAME_AS;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -35,7 +35,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import org.apache.commons.collections.CollectionUtils;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
-import eu.europeana.entitymanagement.definitions.model.Country;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
@@ -54,6 +53,8 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
       XML_LOGO,
       XML_EUROPEANA_ROLE,
       XML_COUNTRY,
+      XML_COUNTRY_ID,
+      XML_COUNTRY_PLACE,
       XML_LANGUAGE,
       XML_HOMEPAGE,
       XML_PHONE,
@@ -82,7 +83,13 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
 
   @XmlElement(namespace = NAMESPACE_EDM, name = XML_COUNTRY)
   private String country;
-  
+
+  @XmlElement(namespace = NAMESPACE_EDM, name = XML_COUNTRY_ID)
+  private String countryId;
+
+  @XmlElement(namespace = NAMESPACE_EDM, name = XML_COUNTRY_PLACE)
+  private XmlPlaceImpl countryPlace;
+
   @XmlElement(namespace = NAMESPACE_FOAF, name = XML_HOMEPAGE)
   private LabelledResource homepage;
 
@@ -112,9 +119,11 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     this.europeanaRole =
         RdfXmlUtils.convertToXmlMultilingualString(organization.getEuropeanaRole());
     
-    if(organization.getCountry()!=null && organization.getCountry().getPrefLabel()!=null) {
-      this.country = organization.getCountry().getPrefLabel().get("en");
-    }    
+    this.country = organization.getCountry();
+    this.countryId = organization.getCountryId();
+    if(organization.getCountryPlace()!=null) {
+      this.countryPlace=new XmlPlaceImpl(organization.getCountryPlace());
+    }
     
     if (organization.getHomepage() != null) {
       this.homepage = new LabelledResource(organization.getHomepage());
@@ -144,12 +153,10 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     entity.setLogo(XmlWebResourceWrapper.toWebResource(getLogo()));
     entity.setEuropeanaRole(RdfXmlUtils.toLanguageMapList(getEuropeanaRole()));
     
-    if(country!=null) {
-      Country orgCountry = new Country();
-      Map<String,String> countryPrefLabel = new HashMap<>();
-      countryPrefLabel.put("en", country);
-      orgCountry.setPrefLabel(countryPrefLabel);
-      entity.setCountry(orgCountry);
+    entity.setCountry(getCountry());
+    entity.setCountryId(getCountryId());
+    if(getCountryPlace()!=null) {
+      entity.setCountryPlace(getCountryPlace().toEntityModel());
     }
   
     if (getHomepage() != null) {
@@ -228,5 +235,13 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
 
   public List<String> getLanguage() {
     return language;
+  }
+
+  public String getCountryId() {
+    return countryId;
+  }
+
+  public XmlPlaceImpl getCountryPlace() {
+    return countryPlace;
   }
 }

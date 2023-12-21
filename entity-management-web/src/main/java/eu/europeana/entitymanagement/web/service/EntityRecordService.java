@@ -1,12 +1,18 @@
 package eu.europeana.entitymanagement.web.service;
 
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_JSON_MAPPER;
 import static eu.europeana.entitymanagement.solr.SolrUtils.createSolrEntity;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getDatasourceAggregationId;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEuropeanaAggregationId;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEuropeanaProxyId;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getIsAggregatedById;
 import static java.time.Instant.now;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,8 +30,11 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.result.UpdateResult;
 import dev.morphia.query.experimental.filters.Filter;
 import eu.europeana.api.commons.error.EuropeanaApiException;
@@ -35,18 +44,17 @@ import eu.europeana.entitymanagement.config.AppConfig;
 import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
-import eu.europeana.entitymanagement.definitions.model.Address;
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Concept;
 import eu.europeana.entitymanagement.definitions.model.ConceptScheme;
-import eu.europeana.entitymanagement.definitions.model.Country;
+import eu.europeana.entitymanagement.definitions.model.CountryMapping;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.definitions.model.TimeSpan;
-import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
 import eu.europeana.entitymanagement.exception.EntityAlreadyExistsException;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
@@ -64,6 +72,7 @@ import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.utils.UriValidator;
 import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
+import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
@@ -90,18 +99,35 @@ public class EntityRecordService {
 
   // Fields to be ignored during consolidation ("type" is final, so it cannot be updated)
   private static final List<String> ignoredMergeFields = List.of("type");
+  
+  private List<CountryMapping> countryMapping;
+  private ObjectMapper emJsonMapper;
 
   @Autowired
   public EntityRecordService(EntityRecordRepository entityRecordRepository,
       EntityManagementConfiguration emConfiguration,
       ZohoConfiguration zohoConfiguration,
       DataSources datasources,
-      SolrService solrService) {
+      SolrService solrService,
+      @Qualifier(BEAN_JSON_MAPPER) ObjectMapper emJsonMapper) throws IOException {
     this.entityRecordRepository = entityRecordRepository;
     this.emConfiguration = emConfiguration;
     this.zohoConfiguration = zohoConfiguration; 
     this.datasources = datasources;
     this.solrService = solrService;
+    this.emJsonMapper = emJsonMapper;
+    readCountryMappingFile();
+  }
+  
+  private void readCountryMappingFile() throws IOException {
+    String file=emConfiguration.getZohoCountryMappingFile();
+    try (InputStream inputStream = getClass().getResourceAsStream(file)) {
+      assert inputStream != null;
+      try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+        String contents = reader.lines().collect(Collectors.joining(System.lineSeparator()));
+        countryMapping = emJsonMapper.readValue(contents, new TypeReference<List<CountryMapping>>(){});
+      }
+    }
   }
 
   public boolean existsByEntityId(String entityId) {
@@ -1046,54 +1072,46 @@ public class EntityRecordService {
     return mergedAndOrdered.toArray(Arrays.copyOf(deepCopyPrimaryArray, 0));
   }
   
+  /**
+   * Deep copy of an object.
+   * 
+   * @param obj
+   * @param isReference if the object is a reference to another object (in which case we keep the reference without deep copying)
+   * @return
+   * @throws EntityUpdateException
+   */
   private Object deepCopyOfObject(Object obj) throws EntityUpdateException {
-    if(obj==null) {
+    if(obj==null || isStringOrPrimitive(obj.getClass())) {
       return obj;
     }
     
-    if(isStringOrPrimitive(obj.getClass())) {
-      return obj;
-    } else if(obj instanceof WebResource) {
-      return new WebResource((WebResource) obj);
-    } else if (obj instanceof Address) {
-      return new Address((Address) obj);
-    } else if (obj instanceof Country) {
-      return new Country((Country) obj);
-    } else {
-      throw new EntityUpdateException("Metadata consolidation failed due to unknown object type! When defining"
-          + "a new custom field type, please also override the equals() method.");
+    try {
+      return obj.getClass().getConstructor(obj.getClass()).newInstance(obj);
+    } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+        | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+      throw new EntityUpdateException("Metadata consolidation failed due to illegal creation of the object copy by calling newInstance.", e);
     }
+        
   }
 
   private Object[] deepCopyOfArray(Object[] input) throws EntityUpdateException {    
     if(input==null || input.length==0) {
       return new Object[0];
-    }
-    
+    }    
     Object[] copy;
     if(isStringOrPrimitive(input[0].getClass())) {
       copy=input.clone();
     }
     else {
       copy = new Object [input.length];
-      if(input[0] instanceof WebResource) {        
-        for(int i=0;i<input.length;i++) {
-          copy[i]=new WebResource((WebResource) input[i]);
+      for(int i=0;i<input.length;i++) {
+        try {
+          copy[i]=input[i].getClass().getDeclaredConstructor(input[i].getClass()).newInstance(input[i]);
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+            | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+          throw new EntityUpdateException("Metadata consolidation failed due to illegal creation of the object "
+              + "copy within an array by calling newInstance.", e);
         }
-      }
-      else if(input[0] instanceof Address) {
-        for(int i=0;i<input.length;i++) {
-          copy[i]=new Address((Address) input[i]);
-        }
-      }
-      else if(input[0] instanceof Country) {
-        for(int i=0;i<input.length;i++) {
-          copy[i]=new Country((Country) input[i]);
-        }
-      }
-      else {
-        throw new EntityUpdateException("Metadata consolidation failed due to unknown object type in array! "
-            + "When defining a new custom field type, please also override the equals() method.");
       }
     }
     return copy;
@@ -1110,25 +1128,15 @@ public class EntityRecordService {
     }
     else {
       copy = new ArrayList<>(input.size());
-      if(input.get(0) instanceof WebResource) {        
-        for(int i=0;i<input.size();i++) {
-          copy.add(new WebResource((WebResource) input.get(i)));
+      for(int i=0;i<input.size();i++) {
+        try {
+          copy.add(input.get(i).getClass().getDeclaredConstructor(input.get(i).getClass()).newInstance(input.get(i)));
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+            | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+          throw new EntityUpdateException("Metadata consolidation failed due to illegal creation of the object "
+              + "copy within a list by calling newInstance.", e);
         }
-      }
-      else if(input.get(0) instanceof Address) {
-        for(int i=0;i<input.size();i++) {
-          copy.add(new Address((Address) input.get(i)));
-        }
-      }
-      else if(input.get(0) instanceof Country) {
-        for(int i=0;i<input.size();i++) {
-          copy.add(new Country((Country) input.get(i)));
-        }
-      }
-      else {
-        throw new EntityUpdateException("Metadata consolidation failed due to unknown object type in list! "
-            + "When defining a new custom field type, please also override the equals() method.");
-      }
+      }      
     }
     return copy;
   }
@@ -1347,6 +1355,26 @@ public class EntityRecordService {
           "Updating EuropeanaID field in Zoho faild for Organization: "
               + zohoOrganizationUrl;
       throw new EntityCreationException(message, e);
+    }
+  }
+  
+  public void mapMongoReferenceFields(Entity entity) {
+    if(EntityTypes.Organization.getEntityType().equals(entity.getType())) {
+      Organization org = (Organization) entity;
+      String countryUri = CountryMapping.getEntityUriFromName(countryMapping, org.getCountry());
+      if(StringUtils.isBlank(countryUri)) {
+        logger.info("The mapping for the country: {}, to the europeana uri does not exist.", org.getCountry());
+      }
+      else {
+        org.setCountryId(countryUri);
+        EntityRecord orgCountry = entityRecordRepository.findByEntityId(countryUri);
+        if(orgCountry==null) {
+          logger.info("The entity record with the id: {}, to be assigned for the country reference, does not exist in the db.", countryUri);
+        }
+        else {
+          org.setCountryRef(orgCountry);
+        }
+      }
     }
   }
 }

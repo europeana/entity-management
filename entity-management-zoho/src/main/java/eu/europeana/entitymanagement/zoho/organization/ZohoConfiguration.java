@@ -30,9 +30,6 @@ public class ZohoConfiguration {
   @Value("${zoho.base.url:#{null}}")
   private String zohoBaseUrl;
   
-  @Value("${zoho.country.mapping.file:#{null}}")
-  private String zohoCountryMappingFile;
-
   private volatile ZohoAccessClient zohoAccessClient;
 
   public ZohoAccessClient getZohoAccessClient() throws ZohoException {
@@ -59,10 +56,6 @@ public class ZohoConfiguration {
 
   public void setZohoBaseUrl(String zohoBaseUrl) {
     this.zohoBaseUrl = zohoBaseUrl;
-  }
-  
-  public String getZohoCountryMappingFile() {
-    return zohoCountryMappingFile;
   }
   
 }

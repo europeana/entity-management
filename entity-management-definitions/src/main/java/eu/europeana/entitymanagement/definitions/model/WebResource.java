@@ -94,4 +94,5 @@ public class WebResource {
     result = prime * result + ((source == null) ? 0 : source.hashCode());
     return result;
   }
+
 }

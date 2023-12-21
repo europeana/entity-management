@@ -513,6 +513,10 @@
 			multiValued="false" />
 		<dynamicField name="countryPrefLabel.*" type="string"
 			indexed="true" stored="true" multiValued="false" />
+		<field name="countryLatitude" type="float" indexed="false"
+			stored="true" multiValued="false" />
+		<field name="countryLongitude" type="float" indexed="false"
+			stored="true" multiValued="false" />
 			
 		<!-- TODO: alias -->
 		<!-- <field name="edm_country" type="string" indexed="true" stored="true" 
