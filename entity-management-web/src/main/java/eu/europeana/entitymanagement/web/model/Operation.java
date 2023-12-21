@@ -1,22 +1,23 @@
 package eu.europeana.entitymanagement.web.model;
 
-import com.zoho.crm.api.record.Record;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import java.util.Date;
+import com.zoho.crm.api.record.Record;
+import eu.europeana.api.commons.web.model.vocabulary.Operations;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 
 public class Operation implements Comparable<Operation> {
 
   private String action;
   //  private String zohoId;
-  private String organizationId;
+  private String zohoEuropeanaId;
 
   private Record zohoRecord;
   private Date modified;
   EntityRecord entityRecord;
 
   public Operation(
-      String organizationId, String action, Record zohoRecord, EntityRecord entityRecord) {
-    this.organizationId = organizationId;
+      String zohoEuropeanaId, String action, Record zohoRecord, EntityRecord entityRecord) {
+    this.zohoEuropeanaId = zohoEuropeanaId;
     this.action = action;
     this.zohoRecord = zohoRecord;
     if (zohoRecord != null) {
@@ -35,25 +36,22 @@ public class Operation implements Comparable<Operation> {
     this.action = action;
   }
 
-  public String getOrganizationId() {
-    return organizationId;
+  public String getZohoEuropeanaId() {
+    return zohoEuropeanaId;
   }
 
-  public void setOrganizationId(String organizationId) {
-    this.organizationId = organizationId;
+  public void setZohoEuropeanaId(String zohoEuropeanaId) {
+    this.zohoEuropeanaId = zohoEuropeanaId;
   }
 
   @Override
   public int hashCode() {
-    if (getOrganizationId() == null) {
-      return -1;
-    }
-    return getOrganizationId().hashCode();
+    return getZohoRecord().getId().hashCode();
   }
 
   @Override
   public String toString() {
-    return String.format("organizationId: %s, action: %s", getOrganizationId(), getAction());
+    return String.format("zohoId: %s, action: %s, zohoEuropeanaId: %", getZohoRecord().getId(), getAction(), getZohoEuropeanaId());
   }
 
   @Override
@@ -71,8 +69,13 @@ public class Operation implements Comparable<Operation> {
     }
 
     Operation op2 = (Operation) obj;
-    return getOrganizationId().equals(op2.getOrganizationId())
-        && getAction().equals(op2.getAction());
+    //permanent delete must have zohoOrganizationID
+    if (Operations.PERMANENT_DELETE.equals( this.getAction())) {
+      return this.getZohoEuropeanaId().equals(op2.getZohoEuropeanaId());
+    }
+    
+    return this.getZohoRecord().getId().equals(op2.getZohoRecord().getId())
+        && this.getAction().equals(op2.getAction());
   }
 
   @Override
@@ -85,22 +88,24 @@ public class Operation implements Comparable<Operation> {
       ret = getAction().compareTo(o.getAction());
     }
     
-    // create operations don't have an operation id
-    if (ret == 0 && getOrganizationId() != null) {
-      ret = getOrganizationId().compareTo(o.getOrganizationId());
-    }
-    
     //permanent delete operations don't have a zoho record
     if(ret == 0 && getZohoRecord() != null) {
       if(o.getZohoRecord() == null) {
         return 1;
       } else {
-        getZohoRecord().getId().compareTo(o.getZohoRecord().getId());
+        ret = getZohoRecord().getId().compareTo(o.getZohoRecord().getId());
       } 
     }
-      
+    
+    //Permanent deletes must have zoho organization id 
+    if (Operations.PERMANENT_DELETE.equals( this.getAction())) {
+        ret = this.getZohoEuropeanaId().compareTo(o.getZohoEuropeanaId());
+    }
+    
     return ret;
   }
+  
+  
 
   public Date getModified() {
     return modified;

@@ -44,6 +44,8 @@ import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 
 public class BaseZohoAccess {
 
+  static final Logger logger = LogManager.getLogger(BaseZohoAccess.class);
+  
   final EntityRecordService entityRecordService;
 
   final EntityRecordRepository entityRecordRepository;
@@ -59,8 +61,6 @@ public class BaseZohoAccess {
   final ZohoConfiguration zohoConfiguration;
   
   final ZohoSyncRepository zohoSyncRepo;
-
-  static final Logger logger = LogManager.getLogger(BaseZohoAccess.class);
   
   public BaseZohoAccess(
       EntityRecordService entityRecordService,
@@ -95,8 +95,13 @@ public class BaseZohoAccess {
     //hardcoded date, just for manual testing
     SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss", Locale.ENGLISH);
     String dateInString = "23-Oct-2023 14:38:00"; 
-    Date date = formatter.parse(dateInString);
-    return DateUtils.toOffsetDateTime(date);
+    try {
+      Date date = formatter.parse(dateInString);
+      return DateUtils.toOffsetDateTime(date);
+    } catch (ParseException e) {
+      logger.warn("Invalid date format!", e);
+    }
+    return null;
   }
 
   protected String buildErrorMessage(String message, List<String> ids) {
@@ -117,17 +122,14 @@ public class BaseZohoAccess {
   protected void performOperations(BatchOperations operations, ZohoSyncReport zohoSyncReport) {
     // do not throw exceptions but add them to failed operations of the zohoSyncReport
     // process first the create operations
-    SortedSet<Operation> createOperations = operations.getCreateOperations();
-    performCreateOperations(createOperations, zohoSyncReport);
+    performCreateOperations(operations.getCreateOperations(), zohoSyncReport);
   
     //deprecation
     performDeprecationOperations(operations.getDeleteOperations(), zohoSyncReport);
     
     //enabling
-    performEnablingOperations(operations.getDeleteOperations(), zohoSyncReport);
+    performEnablingOperations(operations.getEnableOperations(), zohoSyncReport);
     
-    // permanent deletion
-//    performPermanentDeleteOperations(operations.getPermanentDeleteOperations(), zohoSyncReport);
     
     // scheduled updates at the end, otherwise the other operations may overwrite the record in the db with the old captured in the operation
     performUpdateOperations(operations.getUpdateOperations(), zohoSyncReport);
@@ -141,7 +143,7 @@ public class BaseZohoAccess {
   
     List<String> entitiesToDelete =
         permanentDeleteOperations.stream()
-            .map(permDelete -> permDelete.getOrganizationId())
+            .map(permDelete -> permDelete.getZohoEuropeanaId())
             .collect(Collectors.toList());
     try {
       runPermanentDelete(entitiesToDelete, zohoSyncReport);
@@ -172,13 +174,14 @@ public class BaseZohoAccess {
         if(operation.getEntityRecord().isDisabled()) {
           logger.info(
               "Organization was marked for deletion, but it is already disabled. Skipping disable for id: {}",
-              operation.getOrganizationId());        
-        }
-        else {
+              operation.getZohoEuropeanaId());        
+        } else {
+          //registers also the failed operations
           performDeprecation(zohoSyncReport, operation);
         }
         
         /*
+         * SG: note, the implementation was changed to sync execution, the following comments might be outdated, but probably still a concern
          * CAUTION: this update is a scheduled update, which will modify the record from the db,
          * and therefore must be execute after the previous deprecation step which operates on the
          * record which is already taken from the db. If this does not hold, the deprecation would overwrite
@@ -186,11 +189,11 @@ public class BaseZohoAccess {
          */
         //through this update, the sameAs field from zoho should also end up in the sameAs field of the entity
         try {
-          //SG: should investigate if we can change to scheduled updates, since the number of deprecations is probalby not high, we can keep synchronuous updated for the time being 
+          //SG: run update synchronously as we don't have many entities disabled and we can report failures 
           entityUpdateService.runSynchronousUpdate(operation.getEntityRecord().getEntityId());
         } catch (Exception e) {
           zohoSyncReport.addFailedOperation(
-              operation.getOrganizationId(), ZohoSyncReportFields.ENTITY_SYNCHRONOUS_UPDATE_ERROR, e);
+              operation.getZohoEuropeanaId(), ZohoSyncReportFields.ENTITY_SYNCHRONOUS_UPDATE_ERROR, e);
         }
       }
     }
@@ -205,10 +208,10 @@ public class BaseZohoAccess {
       zohoSyncReport.increaseDeprecated(1);
     } catch (EntityUpdateException e) {
       zohoSyncReport.addFailedOperation(
-          operation.getOrganizationId(), ZohoSyncReportFields.SOLR_DELETION_ERROR, e);
+          operation.getZohoEuropeanaId(), ZohoSyncReportFields.SOLR_DELETION_ERROR, e);
     } catch (RuntimeException e) {
       zohoSyncReport.addFailedOperation(
-          operation.getOrganizationId(), ZohoSyncReportFields.ENTITY_DEPRECATION_ERROR, e);
+          operation.getZohoEuropeanaId(), ZohoSyncReportFields.ENTITY_DEPRECATION_ERROR, e);
     }
   }
   
@@ -234,7 +237,7 @@ public class BaseZohoAccess {
       } else {
         logger.info(
             "The enable operation was not performed as the entity is already enabled in the database. Skipping enable for id: {}",
-            operation.getOrganizationId()); 
+            operation.getZohoEuropeanaId()); 
       }
     }
     
@@ -282,6 +285,7 @@ public class BaseZohoAccess {
       return;
     }
   
+    //also collects failed operations
     List<String> entitiesToUpdate = performEntityRegistration(createOperations, zohoSyncReport);
     
     // schedule updates
@@ -324,17 +328,15 @@ public class BaseZohoAccess {
     Organization zohoOrganization =
         ZohoOrganizationConverter.convertToOrganizationEntity(operation.getZohoRecord(), zohoConfiguration.getZohoBaseUrl());
     
-    entitiesToUpdate.add(null);
-  
     try {
-      Optional<EntityRecord> existingEntity =
+      List<EntityRecord> existingEntities =
           findDupplicateOrganization(operation, zohoOrganization);
-      if (existingEntity.isPresent()) {
+      if (!existingEntities.isEmpty()) {
         // skipp processing
         zohoSyncReport.addFailedOperation(
             zohoOrganization.getAbout(),
             "Dupplicate entity error",
-            "Dupplicate of :" + existingEntity.get().getEntityId(),
+            "Dupplicate of :" + EntityRecordUtils.getEntityIds(existingEntities),
             null);
       } else {
         // create shell
@@ -344,10 +346,13 @@ public class BaseZohoAccess {
   
         EntityRecord savedEntityRecord =
             entityRecordService.createEntityFromRequest(
-                europeanaProxyEntity, zohoOrganization, getZohoDataSource());
-        entitiesToUpdate.set(entitiesToUpdate.size()-1, savedEntityRecord.getEntityId());
-        //set newly generated organization ID into the operation, it is available only at this stage
-        operation.setOrganizationId(savedEntityRecord.getEntityId());
+                europeanaProxyEntity, zohoOrganization, getZohoDataSource(), operation.getZohoEuropeanaId());
+        
+        
+        //update organization ID into the operation, generated ids are available only at this stage
+        operation.setZohoEuropeanaId(savedEntityRecord.getEntityId());
+        entitiesToUpdate.add(savedEntityRecord.getEntityId());
+        
         zohoSyncReport.increaseCreated(1);
         
         if (logger.isDebugEnabled()) {
@@ -369,11 +374,11 @@ public class BaseZohoAccess {
     }
   }
 
-  Optional<EntityRecord> findDupplicateOrganization(Operation operation,
+  List<EntityRecord> findDupplicateOrganization(Operation operation,
       Organization zohoOrganization) {
     List<String> allCorefs = new ArrayList<>();
-    if(operation.getOrganizationId() != null) {
-      allCorefs.add(operation.getOrganizationId());
+    if(operation.getZohoEuropeanaId() != null) {
+      allCorefs.add(operation.getZohoEuropeanaId());
     }
     allCorefs.add(zohoOrganization.getAbout());
     String Europeana_ID = ZohoOrganizationConverter.getEuropeanaIdFieldValue(operation.getZohoRecord());
@@ -388,13 +393,17 @@ public class BaseZohoAccess {
       logger.debug("Searching existing organizations by corefs: {}", allCorefs);
     }
       
-    Optional<EntityRecord> existingEntity =
-        entityRecordService.findEntityDupplicationByCoreference(allCorefs, null);
+    //it is a bit tricky to rely that the disabled in the database are already in sync with the zoho
+    //better let the operation fail and fix the data in zoho manually 
+    //(e.g. remove the sameAs fields in zoho and update the deprecated entity, than the new entity can be registered)
+    boolean excludeDisabled = false;
+    List<EntityRecord> existingEntities =
+        entityRecordService.findEntitiesByCoreference(allCorefs, (String) null, excludeDisabled);
     
-    if(logger.isDebugEnabled() && existingEntity.isPresent()) {
-      logger.debug("Found existing dupplicated organization with id: {} ", existingEntity.get().getEntityId());
+    if(logger.isDebugEnabled() && !existingEntities.isEmpty()) {
+      logger.debug("Found existing dupplicated organization with id: {} ", EntityRecordUtils.getEntityIds(existingEntities) );
     }
-    return existingEntity;
+    return existingEntities;
   }
 
   /**
@@ -405,10 +414,14 @@ public class BaseZohoAccess {
    */
   protected boolean hasRequiredOwnership(Record zohoRecord) {
     String ownerName = ZohoOrganizationConverter.getOwnerName(zohoRecord);
-    return ownerName.equals(emConfiguration.getZohoSyncOwnerFilter());
+    boolean hasDpsOwner = ownerName.equals(emConfiguration.getZohoSyncOwnerFilter());
+    if(!hasDpsOwner && ownerName.contains("DPS")) {
+      logger.warn("This organization might have typos in the owner name: '{}'", ownerName);
+    }
+    return hasDpsOwner;
   }
 
-  protected Set<String> getZohoUrl(final List<Record> orgList) {
+  protected Set<String> getZohoOrganizationUrls(final List<Record> orgList) {
     Set<String> modifiedInZoho = new HashSet<String>();
     // get the id list from Zoho deleted Record
     if (!orgList.isEmpty()) {

@@ -140,6 +140,9 @@ public class EntityManagementConfiguration implements InitializingBean {
   @Value("${zoho.generate.organization.europeanaid: false}")
   private boolean generateOrganizationEuropeanaId;
   
+  @Value("${zoho.sync.register.deprecated: false}")
+  private boolean registerDeprecated;
+  
   @Value("${europeana.item.data.endpoint:'http://data.europeana.eu/item'}")
   private String itemDataEndpoint;
 
@@ -362,6 +365,10 @@ public class EntityManagementConfiguration implements InitializingBean {
 
   public String getZohoCountryMappingFile() {
     return zohoCountryMappingFile;
+  }
+  
+  public boolean isRegisterDeprecated() {
+    return registerDeprecated;
   }
 
 }

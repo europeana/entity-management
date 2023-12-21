@@ -142,7 +142,7 @@ public class ScheduledTaskRepository implements InitializingBean {
     return datastore
         .find(ScheduledTask.class)
         .filter(
-            eq(HAS_BEEN_PROCESSED, true),
+            eq(HAS_BEEN_PROCESSED, Boolean.TRUE),
             or(updateType.stream().map(u -> eq(UPDATE_TYPE, u.getValue())).toArray(Filter[]::new)))
         .delete(MULTI_DELETE_OPTS)
         .getDeletedCount();
@@ -197,6 +197,15 @@ public class ScheduledTaskRepository implements InitializingBean {
     return datastore.find(ScheduledTask.class).filter(eq(ENTITY_ID, entityId)).first();
   }
 
+  /**
+   * searches the database for scheduled task for which the processing is not complete
+   * 
+   * @return The number of scheduled task which are not marked as processed
+   */
+  public long getRuningTasksCount() {
+    return datastore.find(ScheduledTask.class).filter(eq(HAS_BEEN_PROCESSED, Boolean.FALSE)).count();
+  }
+  
   public List<ScheduledTask> getTasks(List<String> entityIds) {
     return datastore.find(ScheduledTask.class).filter(in(ENTITY_ID, entityIds)).iterator().toList();
   }
@@ -214,7 +223,7 @@ public class ScheduledTaskRepository implements InitializingBean {
     return datastore
         .aggregate(ScheduledTask.class)
         .match(
-            eq(HAS_BEEN_PROCESSED, false),
+            eq(HAS_BEEN_PROCESSED, Boolean.FALSE),
             in(
                 UPDATE_TYPE,
                 updateType.stream().map(ScheduledTaskType::getValue).collect(Collectors.toList())))

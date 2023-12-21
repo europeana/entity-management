@@ -230,11 +230,21 @@ public class ZohoOrganizationConverter {
   /**
    * The method is to process the ZOHO_OWNER_FIELD name value
    *
-   * @param recordOrganization
-   * @return
+   * @param recordOrganization the zoho record
+   * @return the name of the owner
    */
   public static String getOwnerName(Record recordOrganization) {
     return ((User) recordOrganization.getKeyValue(ZohoConstants.ZOHO_OWNER_FIELD)).getName();
+  }
+  
+  /**
+   * The method is to process the ZOHO_MODIFIED_BY_FIELD name value
+   *
+   * @param recordOrganization the zoho record
+   * @return the name of the user that last modified the record
+   */
+  public static String getModifiedByName(Record recordOrganization) {
+    return ((User) recordOrganization.getKeyValue(ZohoConstants.ZOHO_MODIFIED_BY_FIELD)).getName();
   }
 
   public static boolean isMarkedForDeletion(Record recordOrganization) {

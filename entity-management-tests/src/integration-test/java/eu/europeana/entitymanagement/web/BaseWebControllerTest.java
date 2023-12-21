@@ -30,6 +30,7 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
+import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
 import eu.europeana.entitymanagement.testutils.TestConfig;
@@ -143,7 +144,7 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
     DataSource dataSource = datasources.verifyDataSource(externalId, false);
     EntityRecord savedRecord =
         entityRecordService.createEntityFromRequest(
-            europeanaProxyEntity, xmlBaseEntity.toEntityModel(), dataSource);
+            europeanaProxyEntity, xmlBaseEntity.toEntityModel(), dataSource, null);
 
     // trigger update to generate consolidated entity
     entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId());
@@ -175,7 +176,7 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
         ZohoOrganizationConverter.convertToOrganizationEntity(zohoRecord, zohoConfiguration.getZohoBaseUrl());
     EntityRecord savedRecord =
         entityRecordService.createEntityFromRequest(
-            europeanaProxyEntity, zohoOrganization, dataSource);
+            europeanaProxyEntity, zohoOrganization, dataSource, null);
 
     // trigger update to generate consolidated entity
     entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId());
@@ -186,6 +187,10 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
 
   protected void deprecateEntity(EntityRecord entityRecord) throws EntityUpdateException {
     entityRecordService.disableEntityRecord(entityRecord, true);
+  }
+
+  protected void deleteEntity(String entityId) throws SolrServiceException {
+    entityRecordService.delete(entityId);
   }
 
   protected void assertedTaskScheduled(String entityId, ScheduledTaskType taskType) {

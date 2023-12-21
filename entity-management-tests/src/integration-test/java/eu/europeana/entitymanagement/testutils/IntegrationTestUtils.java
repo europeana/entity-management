@@ -250,7 +250,7 @@ public class IntegrationTestUtils {
           ORGANIZATION_PCCE_ZOHO_RESPONSE,
           ORGANIZATION_BERGER_MUSEUM_URI_ZOHO,
           ORGANIZATION_BERGER_MUSEUM_ZOHO_RESPONSE);
-
+  
   /** Maps Metis dereferenciation URIs to mocked XML responses */
   public static final Map<String, String> METIS_RESPONSE_MAP =
       Map.ofEntries(
@@ -264,7 +264,8 @@ public class IntegrationTestUtils {
           Map.entry(AGENT_JAN_VERMEER_VIAF_URI, AGENT_JAN_VERMEER_XML_VIAF),
           Map.entry(AGENT_JAN_VERMEER_WIKIDATA_URI, AGENT_JAN_VERMEER_XML_WIKIDATA),
           Map.entry(AGENT_SCHEGK_URI, AGENT_SCHEGK_XML),
-          Map.entry(AGENT_BIRCH_URI, AGENT_BIRCH_XML));
+          Map.entry(AGENT_BIRCH_URI, AGENT_BIRCH_XML),
+          Map.entry(AGENT_RAPHAEL_URI, AGENT_RAPHAEL_XML));
 
   public static String loadFile(String resourcePath) throws IOException {
     return IOUtils.toString(
