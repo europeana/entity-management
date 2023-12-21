@@ -66,8 +66,9 @@ public class EntityManagementApp implements CommandLineRunner {
       }
       ScheduledTaskService scheduledTaskService = getScheduledTasksService(context);
       long runningTasks;
-      while ((runningTasks = scheduledTaskService.getRunningTasksCount()) > 0) {
+      do {
         //wait for execution of schedules tasks
+        runningTasks = scheduledTaskService.getRunningTasksCount();
         if (LOG.isInfoEnabled()) {
           LOG.info("Scheduled Tasks to process : {}", runningTasks);
         }
@@ -78,7 +79,7 @@ public class EntityManagementApp implements CommandLineRunner {
           SpringApplication.exit(context);
           System.exit(-2);
         }
-      }
+      } while (runningTasks > 0);
 
       // failed application execution should be indicated with negative codes
       LOG.info("Stoping application after processing all Schdeduled Tasks!");
