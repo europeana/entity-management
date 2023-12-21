@@ -129,7 +129,7 @@ public class BaseZohoAccess {
     performDeprecationOperations(operations.getDeleteOperations(), zohoSyncReport);
     
     //enabling
-    performEnablingOperations(operations.getDeleteOperations(), zohoSyncReport);
+    performEnablingOperations(operations.getEnableOperations(), zohoSyncReport);
     
     
     // scheduled updates at the end, otherwise the other operations may overwrite the record in the db with the old captured in the operation
