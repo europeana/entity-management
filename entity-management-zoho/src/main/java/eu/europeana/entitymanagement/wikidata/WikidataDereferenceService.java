@@ -1,12 +1,5 @@
 package eu.europeana.entitymanagement.wikidata;
 
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.dereference.Dereferencer;
-import eu.europeana.entitymanagement.utils.EntityRecordUtils;
-import eu.europeana.entitymanagement.web.xml.model.WikidataOrganization;
-import eu.europeana.entitymanagement.zoho.utils.WikidataAccessException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,6 +27,13 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.dereference.Dereferencer;
+import eu.europeana.entitymanagement.utils.EntityRecordUtils;
+import eu.europeana.entitymanagement.web.xml.model.WikidataOrganization;
+import eu.europeana.entitymanagement.zoho.utils.WikidataAccessException;
 
 @Service
 public class WikidataDereferenceService implements Dereferencer, InitializingBean {
@@ -169,13 +169,8 @@ public class WikidataDereferenceService implements Dereferencer, InitializingBea
     return null;
   }
 
-  private WikidataOrganization parse(String xml) throws JAXBException {
-    //this commented out code caused exception, i.e. Caused by: org.xml.sax.SAXParseException: Premature end of file.
-//    InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
-//    return (WikidataOrganization) unmarshaller.get().unmarshal(stream);    
-    
+  private WikidataOrganization parse(String xml) throws JAXBException { 
     InputStream stream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
     return (WikidataOrganization) unmarshaller.get().unmarshal( new StreamSource( stream ) );
-
   }
 }

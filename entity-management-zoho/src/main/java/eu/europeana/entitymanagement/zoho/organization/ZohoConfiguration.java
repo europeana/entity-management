@@ -30,7 +30,7 @@ public class ZohoConfiguration {
   @Value("${zoho.base.url:#{null}}")
   private String zohoBaseUrl;
   
-  private volatile ZohoAccessClient zohoAccessClient;
+  private ZohoAccessClient zohoAccessClient;
 
   public ZohoAccessClient getZohoAccessClient() throws ZohoException {
     if (zohoAccessClient == null) {

@@ -188,7 +188,7 @@ public class Organization extends Entity {
   }
 
   @Override
-  public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
+  public Object getFieldValue(Field field) throws IllegalAccessException {
     // method to call the getters for each field individually
     return field.get(this);
   }
@@ -206,7 +206,7 @@ public class Organization extends Entity {
 
   @Override
   public void setFieldValue(Field field, Object value)
-      throws IllegalArgumentException, IllegalAccessException {
+      throws IllegalAccessException {
     // method to call the setter for each field individually
     field.set(this, value);
   }
@@ -258,13 +258,6 @@ public class Organization extends Entity {
   @JsonSetter(COUNTRY_ID)
   public void setCountryId(String countryId) {
     this.countryId = countryId;
-  }
-  
-  @Override
-  public void dereference() {
-    if(this.getCountryRef()!=null) {
-      this.countryPlace=(Place) this.getCountryRef().getEntity();
-    }
   }
   
 }

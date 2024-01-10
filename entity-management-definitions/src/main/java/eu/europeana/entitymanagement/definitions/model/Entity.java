@@ -230,12 +230,12 @@ public abstract class Entity implements ValidationObject {
     isShownBy = resource;
   }
 
-  public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
+  public Object getFieldValue(Field field) throws IllegalAccessException {
     return field.get(this);
   }
 
   public void setFieldValue(Field field, Object value)
-      throws IllegalArgumentException, IllegalAccessException {
+      throws IllegalAccessException {
     field.set(this, value);
   }
 
@@ -298,7 +298,5 @@ public abstract class Entity implements ValidationObject {
       getSameReferenceLinks().add(uri);
     }
   }
-  
-  public void dereference() {
-  }
+
 }

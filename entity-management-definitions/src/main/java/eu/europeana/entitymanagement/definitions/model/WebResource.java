@@ -81,17 +81,20 @@ public class WebResource {
 
     WebResource that = (WebResource) o;
 
-    if (!Objects.equals(source, that.getSource())) return false;
-    if (!id.equals(that.getId())) return false;
-    return Objects.equals(thumbnail, that.getThumbnail());
+    if (Objects.equals(source, that.getSource()) &&
+        id.equals(that.getId()) &&
+        Objects.equals(thumbnail, that.getThumbnail())) {
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
   public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((id == null) ? 0 : id.hashCode());
-    result = prime * result + ((thumbnail == null) ? 0 : thumbnail.hashCode());
-    result = prime * result + ((source == null) ? 0 : source.hashCode());
+    int result = (id == null) ? 0 : id.hashCode();
+    result = result + ((thumbnail == null) ? 0 : thumbnail.hashCode());
+    result = result + ((source == null) ? 0 : source.hashCode());
     return result;
   }
 

@@ -11,7 +11,11 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABE
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SUBJECT;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TOTAL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
-
+import java.lang.reflect.Field;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import org.bson.types.ObjectId;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -27,11 +31,6 @@ import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidatio
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.ValidationObject;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
-import java.lang.reflect.Field;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import org.bson.types.ObjectId;
 
 @JsonIgnoreProperties(ignoreUnknown = false)
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
@@ -178,12 +177,12 @@ public class ConceptScheme implements ValidationObject {
     this.items = items;
   }
 
-  public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
+  public Object getFieldValue(Field field) throws IllegalAccessException {
     return field.get(this);
   }
 
   public void setFieldValue(Field field, Object value)
-      throws IllegalArgumentException, IllegalAccessException {
+      throws IllegalAccessException {
     field.set(this, value);
   }
 }

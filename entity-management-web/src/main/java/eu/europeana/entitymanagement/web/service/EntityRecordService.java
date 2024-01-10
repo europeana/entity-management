@@ -73,6 +73,7 @@ import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.utils.UriValidator;
 import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
+import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
@@ -100,6 +101,7 @@ public class EntityRecordService {
   // Fields to be ignored during consolidation ("type" is final, so it cannot be updated)
   private static final Set<String> ignoredMergeFields = Set.of("type");
 
+  private final String countryMappingFile="/zoho_country_mapping_local.json";
   private List<CountryMapping> countryMapping;
   private ObjectMapper emJsonMapper;
 
@@ -120,12 +122,13 @@ public class EntityRecordService {
   }
   
   private void readCountryMappingFile() throws IOException {
-    String file=emConfiguration.getZohoCountryMappingFile();
-    try (InputStream inputStream = getClass().getResourceAsStream(file)) {
+    try (InputStream inputStream = getClass().getResourceAsStream(countryMappingFile)) {
       assert inputStream != null;
       try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
         String contents = reader.lines().collect(Collectors.joining(System.lineSeparator()));
-        countryMapping = emJsonMapper.readValue(contents, new TypeReference<List<CountryMapping>>(){});
+        synchronized(this) {
+          countryMapping = emJsonMapper.readValue(contents, new TypeReference<List<CountryMapping>>(){});
+        }
       }
     }
   }
@@ -150,13 +153,13 @@ public class EntityRecordService {
     return entityRecordRepository.findByEntityIds(entityIds, excludeDisabled, fetchFullRecord);
   }
 
-  public EntityRecord retrieveEntityRecord(EntityTypes type, String identifier,
+  public EntityRecord retrieveEntityRecord(EntityTypes type, String identifier, String profile,
       boolean retrieveDisabled) throws EuropeanaApiException {
     String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
-    return retrieveEntityRecord(entityUri, retrieveDisabled);
+    return retrieveEntityRecord(entityUri, profile, retrieveDisabled);
   }
 
-  public EntityRecord retrieveEntityRecord(String entityUri, boolean retrieveDisabled)
+  public EntityRecord retrieveEntityRecord(String entityUri, String profile, boolean retrieveDisabled)
       throws EntityNotFoundException, EntityRemovedException {
     Optional<EntityRecord> entityRecordOpt = this.retrieveByEntityId(entityUri);
     if (entityRecordOpt.isEmpty()) {
@@ -168,6 +171,17 @@ public class EntityRecordService {
       throw new EntityRemovedException(
           String.format(EntityRecordUtils.ENTITY_ID_REMOVED_MSG, entityUri));
     }
+    
+    //dereference morphia @Reference fields (e.g. the organization country)
+    if(profile!=null && profile.contains(EntityProfile.dereference.toString())) {
+      if(EntityTypes.Organization.getEntityType().equals(entityRecord.getEntity().getType())) {
+        Organization org = (Organization) entityRecord.getEntity(); 
+        if(org.getCountryId()!=null) {
+          org.setCountryPlace((Place) entityRecordRepository.findWithOnlyEntityInRecord(org.getCountryId()).getEntity());
+        }
+      }
+    }
+    
     return entityRecord;
   }
 
@@ -944,7 +958,7 @@ public class EntityRecordService {
   }
 
   private void mergeCustomObjects(Entity primary, Entity secondary, Field field,
-      Entity consolidatedEntity) throws IllegalAccessException, IllegalArgumentException, EntityUpdateException {
+      Entity consolidatedEntity) throws IllegalAccessException, EntityUpdateException  {
     Object primaryObj = primary.getFieldValue(field);
     Object secondaryObj = secondary.getFieldValue(field);
     if (primaryObj != null) {
@@ -1205,7 +1219,7 @@ public class EntityRecordService {
   }
   
   private List<Object> deepCopyOfList(List<Object> input) throws EntityUpdateException {    
-    if(input==null || input.size()==0) {
+    if(input==null || input.isEmpty()) {
       return new ArrayList<>();
     }
     
@@ -1215,9 +1229,9 @@ public class EntityRecordService {
     }
     else {
       copy = new ArrayList<>(input.size());
-      for(int i=0;i<input.size();i++) {
+      for(Object obj : input) {
         try {
-          copy.add(input.get(i).getClass().getDeclaredConstructor(input.get(i).getClass()).newInstance(input.get(i)));
+          copy.add(obj.getClass().getDeclaredConstructor(obj.getClass()).newInstance(obj));
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
             | InvocationTargetException | NoSuchMethodException | SecurityException e) {
           throw new EntityUpdateException("Metadata consolidation failed due to illegal creation of the object "
@@ -1229,13 +1243,13 @@ public class EntityRecordService {
   }
   
   private Map<Object, Object> deepCopyOfMap(Map<Object, Object> input) throws EntityUpdateException {
-    if(input==null || input.size()==0) {
+    if(input==null || input.isEmpty()) {
       return new HashMap<>();
     }
     
     Map<Object, Object> copy;
-    Object mapFirstKey = input.keySet().stream().findFirst().get();
-    Object mapFirstValue = input.values().stream().findFirst().get();
+    Object mapFirstKey = input.entrySet().iterator().next().getKey();
+    Object mapFirstValue = input.entrySet().iterator().next().getValue();
     //if both keys and values are of primitive type, no need for deep copy
     if(isStringOrPrimitive(mapFirstKey.getClass()) && isStringOrPrimitive(mapFirstValue.getClass())) {
       copy=new HashMap<>(input);
@@ -1402,10 +1416,10 @@ public class EntityRecordService {
         .distinct().collect(Collectors.toList()));
   }
 
-  public EntityRecord updateUsedForEnrichment(EntityTypes type, String identifier, String action)
+  public EntityRecord updateUsedForEnrichment(EntityTypes type, String identifier, String profile, String action)
       throws EuropeanaApiException {
 
-    EntityRecord entityRecord = retrieveEntityRecord(type, identifier, false);
+    EntityRecord entityRecord = retrieveEntityRecord(type, identifier, profile, false);
 
     // Set the “enrich” field on the Aggregation of the Consolidated Version
     // according to the value indicated in action parameter
@@ -1462,5 +1476,9 @@ public class EntityRecordService {
         }
       }
     }
+  }
+
+  public synchronized List<CountryMapping> getCountryMapping() {
+    return countryMapping;
   }
 }

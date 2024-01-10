@@ -6,6 +6,7 @@ import static dev.morphia.query.experimental.filters.Filters.in;
 import static dev.morphia.query.experimental.filters.Filters.ne;
 import static dev.morphia.query.experimental.filters.Filters.or;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.DISABLED;
+import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_EXACT_MATCH;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_ID;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_MODIFIED;
@@ -93,6 +94,20 @@ public class EntityRecordRepository extends AbstractRepository {
         .filter(filters.toArray(Filter[]::new))
         .iterator(findOptions)
         .toList();
+  }
+
+  public EntityRecord findWithOnlyEntityInRecord(String entityId) {
+    List<Filter> filters = new ArrayList<>();
+    filters.add(eq(ENTITY_ID, entityId));
+
+    FindOptions findOptions = new FindOptions();
+    findOptions.projection().include(ENTITY);
+
+    return getDataStore()
+      .find(EntityRecord.class)
+      .filter(filters.toArray(Filter[]::new))
+      .first(findOptions);
+      
   }
 
   public List<EntityIdDisabledStatus> getEntityIds(

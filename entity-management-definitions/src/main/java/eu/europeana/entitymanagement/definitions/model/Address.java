@@ -144,26 +144,24 @@ public class Address {
 
     Address that = (Address) o;
     
-    if (!Objects.equals(about, that.getAbout())) return false;
-    if (!Objects.equals(streetAddress, that.getVcardStreetAddress())) return false;
-    if (!Objects.equals(postalCode, that.getVcardPostalCode())) return false;
-    if (!Objects.equals(postBox, that.getVcardPostOfficeBox())) return false;
-    if (!Objects.equals(locality, that.getVcardLocality())) return false;
-    if (!Objects.equals(countryName, that.getVcardCountryName())) return false;
-    return Objects.equals(hasGeo, that.getVcardHasGeo());
+    if (Objects.equals(about, that.getAbout()) &&
+        Objects.equals(streetAddress, that.getVcardStreetAddress()) &&
+        Objects.equals(postalCode, that.getVcardPostalCode()) &&
+        Objects.equals(postBox, that.getVcardPostOfficeBox()) &&
+        Objects.equals(locality, that.getVcardLocality()) &&
+        Objects.equals(countryName, that.getVcardCountryName()) &&
+        Objects.equals(hasGeo, that.getVcardHasGeo())) {
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
   public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((about == null) ? 0 : about.hashCode());
-    result = prime * result + ((streetAddress == null) ? 0 : streetAddress.hashCode());
-    result = prime * result + ((postalCode == null) ? 0 : postalCode.hashCode());
-    result = prime * result + ((postBox == null) ? 0 : postBox.hashCode());
-    result = prime * result + ((locality == null) ? 0 : locality.hashCode());
-    result = prime * result + ((countryName == null) ? 0 : countryName.hashCode());
-    result = prime * result + ((hasGeo == null) ? 0 : hasGeo.hashCode());
-    return result;
+    return ((streetAddress == null) ? 0 : streetAddress.hashCode()) +
+        ((locality == null) ? 0 : locality.hashCode()) +
+        ((hasGeo == null) ? 0 : hasGeo.hashCode());
   }
   
 }

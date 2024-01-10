@@ -210,23 +210,6 @@ public class ZohoOrganizationConverter {
     return sameAsList;
   }
 
-//  private static String toEdmCountry(String organizationCountry) {
-//    if (StringUtils.isBlank(organizationCountry)) {
-//      return null;
-//    } else {
-//      String isoCode = null;
-//      int commaSeparatorPos = organizationCountry.indexOf(44);
-//      int bracketSeparatorPos = organizationCountry.indexOf(40);
-//      if (commaSeparatorPos > 0) {
-//        isoCode = organizationCountry.substring(commaSeparatorPos + 1).trim();
-//      } else if (bracketSeparatorPos > 0) {
-//        isoCode = organizationCountry.substring(0, bracketSeparatorPos).trim();
-//      }
-//
-//      return isoCode;
-//    }
-//  }
-
   /**
    * The method is to process the ZOHO_OWNER_FIELD name value
    *

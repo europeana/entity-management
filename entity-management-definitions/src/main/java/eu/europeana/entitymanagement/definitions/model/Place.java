@@ -18,7 +18,10 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NOTE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
-
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -26,10 +29,6 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
@@ -135,14 +134,14 @@ public class Place extends Entity {
     return type;
   }
 
-  public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
+  public Object getFieldValue(Field field) throws IllegalAccessException {
     // TODO:in case of the performance overhead cause by using the reflecion code, change this
     // method to call the getters for each field individually
     return field.get(this);
   }
 
   public void setFieldValue(Field field, Object value)
-      throws IllegalArgumentException, IllegalAccessException {
+      throws IllegalAccessException {
     // TODO:in case of the performance overhead cause by using the reflecion code, change this
     // method to call the setter for each field individually
     field.set(this, value);
@@ -155,18 +154,20 @@ public class Place extends Entity {
 
     Place that = (Place) o;
    
-    if (!Objects.equals(latitude, that.getLatitude())) return false;
-    if (!Objects.equals(longitude, that.getLongitude())) return false;
-    return Objects.equals(altitude, that.getAltitude());
+    if (Objects.equals(latitude, that.getLatitude()) &&
+        Objects.equals(longitude, that.getLongitude()) &&
+        Objects.equals(altitude, that.getAltitude())) {
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
   public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((latitude == null) ? 0 : latitude.hashCode());
-    result = prime * result + ((longitude == null) ? 0 : longitude.hashCode());
-    result = prime * result + ((altitude == null) ? 0 : altitude.hashCode());
-    return result;
+    return ((latitude == null) ? 0 : latitude.hashCode()) +
+        ((longitude == null) ? 0 : longitude.hashCode()) +
+        ((altitude == null) ? 0 : altitude.hashCode());
   }
   
 }

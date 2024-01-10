@@ -117,11 +117,6 @@ public abstract class BaseRest extends BaseRestController {
   protected String serialize(
       EntityRecord entityRecord, FormatTypes format, List<EntityProfile> profiles)
       throws EuropeanaApiException {
-
-    if(profiles.contains(EntityProfile.dereference)) {
-      entityRecord.getEntity().dereference();
-    }
-    
     String responseBody = null;
     try {
       if (FormatTypes.jsonld.equals(format)) {
