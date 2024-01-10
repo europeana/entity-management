@@ -126,9 +126,7 @@ public class EntityRecordService {
       assert inputStream != null;
       try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
         String contents = reader.lines().collect(Collectors.joining(System.lineSeparator()));
-        synchronized(this) {
-          countryMapping = emJsonMapper.readValue(contents, new TypeReference<List<CountryMapping>>(){});
-        }
+        countryMapping = emJsonMapper.readValue(contents, new TypeReference<List<CountryMapping>>(){});
       }
     }
   }
