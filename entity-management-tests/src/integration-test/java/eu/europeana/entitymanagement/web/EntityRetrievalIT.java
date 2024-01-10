@@ -497,13 +497,14 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
     String europeanaMetadata = loadFile(IntegrationTestUtils.PLACE_REGISTER_SWEDEN_JSON);
     String metisResponse = loadFile(IntegrationTestUtils.PLACE_SWEDEN_XML);
     createEntity(europeanaMetadata, metisResponse, IntegrationTestUtils.PLACE_SWEDEN_URI);
-    //forcefully change the country mapping uri to the right one
-    List<CountryMapping> countryMap= entityRecordService.getCountryMapping();
-    for(CountryMapping cm : countryMap) {
-      if(cm.getZohoLabel().equals("Sweden, SE")) {
-        cm.setEntityUri("http://data.europeana.eu/place/1");
-      }
-    }
+    
+//    //forcefully change the country mapping uri to the right one
+//    List<CountryMapping> countryMap= entityRecordService.getCountryMapping();
+//    for(CountryMapping cm : countryMap) {
+//      if(cm.getZohoLabel().equals("Sweden, SE")) {
+//        cm.setEntityUri("http://data.europeana.eu/place/1");
+//      }
+//    }
 
     //2. register zoho GFM org
     europeanaMetadata = loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_GFM_ZOHO_JSON);

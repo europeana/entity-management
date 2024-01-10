@@ -148,6 +148,8 @@ public abstract class AbstractIntegrationTest {
     //generate Europeana ID can be set to true when using the mock service, see TextConfig class 
     registry.add("zoho.generate.organization.europeanaid", () -> true);
     
+    registry.add("zoho.country.mapping", () -> "/zoho_country_mapping_test.json");
+    
     // could be used to fix eclipse issues
     registry.add("scmBranch", () -> "dev");
     registry.add("buildNumber", () -> "99");

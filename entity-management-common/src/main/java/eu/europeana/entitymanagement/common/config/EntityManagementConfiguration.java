@@ -152,6 +152,9 @@ public class EntityManagementConfiguration implements InitializingBean {
   @Value("${spring.profiles.active:}")
   private String activeProfileString;
 
+  @Value("${zoho.country.mapping:null}")
+  private String zohoCountryMapping;
+
   public EntityManagementConfiguration() {
     LOG.info("Initializing EntityManagementConfiguration bean as: configuration");
   }
@@ -362,6 +365,10 @@ public class EntityManagementConfiguration implements InitializingBean {
   
   public boolean isRegisterDeprecated() {
     return registerDeprecated;
+  }
+
+  public String getZohoCountryMapping() {
+    return zohoCountryMapping;
   }
 
 }

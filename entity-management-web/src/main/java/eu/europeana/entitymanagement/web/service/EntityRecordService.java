@@ -101,7 +101,6 @@ public class EntityRecordService {
   // Fields to be ignored during consolidation ("type" is final, so it cannot be updated)
   private static final Set<String> ignoredMergeFields = Set.of("type");
 
-  private final String countryMappingFile="/zoho_country_mapping_local.json";
   private List<CountryMapping> countryMapping;
   private ObjectMapper emJsonMapper;
 
@@ -122,7 +121,7 @@ public class EntityRecordService {
   }
   
   private void readCountryMappingFile() throws IOException {
-    try (InputStream inputStream = getClass().getResourceAsStream(countryMappingFile)) {
+    try (InputStream inputStream = getClass().getResourceAsStream(emConfiguration.getZohoCountryMapping())) {
       assert inputStream != null;
       try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
         String contents = reader.lines().collect(Collectors.joining(System.lineSeparator()));
@@ -1476,7 +1475,4 @@ public class EntityRecordService {
     }
   }
 
-  public synchronized List<CountryMapping> getCountryMapping() {
-    return countryMapping;
-  }
 }
