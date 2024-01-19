@@ -43,6 +43,7 @@ import eu.europeana.entitymanagement.definitions.model.ConceptScheme;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.definitions.model.TimeSpan;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
@@ -120,7 +121,19 @@ public class EntityRecordService {
    */
   public List<EntityRecord> retrieveMultipleByEntityIds(List<String> entityIds,
       boolean excludeDisabled, boolean fetchFullRecord) {
-    return entityRecordRepository.findByEntityIds(entityIds, excludeDisabled, fetchFullRecord);
+    List<EntityRecord> resp = entityRecordRepository.findByEntityIds(entityIds, excludeDisabled, fetchFullRecord);
+    //for the organizations, populate the aggregatesFrom field
+    if(fetchFullRecord && !resp.isEmpty()) {
+      for(EntityRecord record : resp) {
+        if(EntityTypes.Organization.getEntityType().equals(record.getEntity().getType())) {
+          Organization org = (Organization) record.getEntity();
+          org.setAggregatesFrom(entityRecordRepository.findAggregatesFrom(record.getEntityId()));
+        }
+      }
+    }
+    
+    return resp;
+    
   }
 
   public EntityRecord retrieveEntityRecord(EntityTypes type, String identifier,
@@ -141,6 +154,13 @@ public class EntityRecordService {
       throw new EntityRemovedException(
           String.format(EntityRecordUtils.ENTITY_ID_REMOVED_MSG, entityUri));
     }
+    
+    //for the organizations, populate the aggregatesFrom field
+    if(EntityTypes.Organization.getEntityType().equals(entityRecord.getEntity().getType())) {
+      Organization org = (Organization) entityRecord.getEntity();
+      org.setAggregatesFrom(entityRecordRepository.findAggregatesFrom(entityUri));
+    }
+    
     return entityRecord;
   }
 

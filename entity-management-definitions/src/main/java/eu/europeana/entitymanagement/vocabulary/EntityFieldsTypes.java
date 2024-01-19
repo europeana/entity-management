@@ -24,6 +24,8 @@ public enum EntityFieldsTypes {
   hiddenLabel(
       EntityFieldsTypes.FIELD_TYPE_KEYWORD, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
   sameAs(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
+  aggregatesFrom(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
+  aggregatedVia(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
   language(
       EntityFieldsTypes.FIELD_TYPE_TEXT, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
 

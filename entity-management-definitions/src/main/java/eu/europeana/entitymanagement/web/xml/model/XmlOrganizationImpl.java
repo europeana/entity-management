@@ -12,6 +12,8 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_VCARD;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.PREF_LABEL;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ACRONYM;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_AGGREGATED_VIA;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_AGGREGATES_FROM;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_COUNTRY;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_DESCRIPTION;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_EUROPEANA_ROLE;
@@ -26,10 +28,6 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ORGAN
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ORGANIZATION_DOMAIN;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PHONE;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_SAME_AS;
-
-import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
-import eu.europeana.entitymanagement.definitions.model.Organization;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -38,6 +36,9 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import org.apache.commons.collections.CollectionUtils;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
+import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @XmlRootElement(namespace = NAMESPACE_EDM, name = XML_ORGANIZATION)
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -63,12 +64,20 @@ import org.apache.commons.collections.CollectionUtils;
       XML_HAS_ADDRESS,
       XML_IDENTIFIER,
       XML_SAME_AS,
+      XML_AGGREGATES_FROM,
+      XML_AGGREGATED_VIA,
       IS_AGGREGATED_BY
     })
 public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
 
   @XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.XML_SAME_AS)
   private List<LabelledResource> sameAs = new ArrayList<>();
+
+  @XmlElement(namespace = XmlConstants.NAMESPACE_EDM, name = XmlConstants.XML_AGGREGATES_FROM)
+  private List<LabelledResource> aggregatesFrom = new ArrayList<>();
+
+  @XmlElement(namespace = XmlConstants.NAMESPACE_EDM, name = XmlConstants.XML_AGGREGATED_VIA)
+  private List<LabelledResource> aggregatedVia = new ArrayList<>();
 
   @XmlElement(namespace = NAMESPACE_EDM, name = XML_ACRONYM)
   private List<LabelledResource> acronym = new ArrayList<>();
@@ -112,6 +121,8 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
   public XmlOrganizationImpl(Organization organization) {
     super(organization);
     this.sameAs = RdfXmlUtils.convertToRdfResource(organization.getSameReferenceLinks());
+    this.aggregatesFrom = RdfXmlUtils.convertToRdfResource(organization.getAggregatesFrom());
+    this.aggregatedVia = RdfXmlUtils.convertToRdfResource(organization.getAggregatedVia());
     this.acronym = RdfXmlUtils.convertToXmlMultilingualString(organization.getAcronym());
     this.description = RdfXmlUtils.convertMapToXmlMultilingualString(organization.getDescription());
     if (organization.getLogo() != null) {
@@ -166,6 +177,8 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     }
     entity.setIdentifier(getIdentifier());
     entity.setLanguage(getLanguage());
+    entity.setAggregatesFrom(RdfXmlUtils.toStringList(getAggregatesFrom()));
+    entity.setAggregatedVia(RdfXmlUtils.toStringList(getAggregatedVia()));
     return entity;
   }
 
@@ -239,4 +252,13 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
   public List<String> getLanguage() {
     return language;
   }
+
+  public List<LabelledResource> getAggregatesFrom() {
+    return aggregatesFrom;
+  }
+
+  public List<LabelledResource> getAggregatedVia() {
+    return aggregatedVia;
+  }
+
 }

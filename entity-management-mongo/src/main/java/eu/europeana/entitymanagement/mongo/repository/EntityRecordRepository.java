@@ -10,14 +10,17 @@ import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTIT
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_ID;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_MODIFIED;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_SAME_AS;
+import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_AGGREGATED_VIA;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_UPDATE_OPTS;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 import com.mongodb.client.result.UpdateResult;
+import dev.morphia.aggregation.experimental.stages.Projection;
 import dev.morphia.query.FindOptions;
 import dev.morphia.query.Query;
 import dev.morphia.query.experimental.filters.Filter;
@@ -48,7 +51,7 @@ public class EntityRecordRepository extends AbstractRepository {
   public boolean existsByEntityId(String entityId) {
     return getDataStore()
             .find(EntityRecord.class)
-            .filter(eq(EntityRecordFields.ENTITY_ID, entityId))
+            .filter(eq(ENTITY_ID, entityId))
             .count()
         > 0;
   }
@@ -164,6 +167,17 @@ public class EntityRecordRepository extends AbstractRepository {
 
     //query the database
     return query.iterator().toList();
+  }
+  
+  public List<String> findAggregatesFrom(String entityId) {
+    Query<EntityRecord> query =
+        getDataStore()
+            .find(EntityRecord.class)
+            .disableValidation()
+            .filter(in(ENTITY_AGGREGATED_VIA, Arrays.asList(entityId)));
+    
+    List<EntityRecord> entityRecords = query.iterator(new FindOptions().projection().include(ENTITY_ID)).toList();
+    return entityRecords.stream().map(entityRecord -> entityRecord.getEntityId()).toList();
   }
   
   public List<EntityRecord> saveBulk(List<EntityRecord> entityRecords) {

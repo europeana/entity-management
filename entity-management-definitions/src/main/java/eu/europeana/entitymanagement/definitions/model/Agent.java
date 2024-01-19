@@ -1,7 +1,40 @@
 package eu.europeana.entitymanagement.definitions.model;
 
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
-
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ALT_LABEL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BEGIN;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BIOGRAPHICAL_INFORMATION;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DATE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DATE_OF_BIRTH;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DATE_OF_DEATH;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DATE_OF_ESTABLISHMENT;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DATE_OF_TERMINATION;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DEPICTION;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.END;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.GENDER;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_MET;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_PART;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HIDDEN_LABEL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IDENTIFIER;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_AGGREGATED_BY;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_PART_OF;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_RELATED_TO;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_SHOWN_BY;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NAME;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NOTE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PLACE_OF_BIRTH;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PLACE_OF_DEATH;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PROFESSION_OR_OCCUPATION;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.WAS_PRESENT_AT;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -9,11 +42,6 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import eu.europeana.entitymanagement.serialization.StringOrListConverter;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
@@ -95,7 +123,7 @@ public class Agent extends Entity {
     if (copy.getBegin() != null) this.begin = new ArrayList<>(copy.getBegin());
     if (copy.getEnd() != null) this.end = new ArrayList<>(copy.getEnd());
     if (copy.getDateOfBirth() != null) this.dateOfBirth = new ArrayList<>(copy.getDateOfBirth());
-    if (copy.getDateOfDeath() != null) this.dateOfDeath = new ArrayList<>(copy.dateOfDeath);
+    if (copy.getDateOfDeath() != null) this.dateOfDeath = new ArrayList<>(copy.getDateOfDeath());
     if (copy.getWasPresentAt() != null) this.wasPresentAt = new ArrayList<>(copy.getWasPresentAt());
     if (copy.getHasMet() != null) this.hasMet = new ArrayList<>(copy.getHasMet());
     if (copy.getName() != null) this.name = new HashMap<>(copy.getName());
@@ -108,7 +136,7 @@ public class Agent extends Entity {
     this.dateOfEstablishment = copy.getDateOfEstablishment();
     this.dateOfTermination = copy.getDateOfTermination();
     this.gender = copy.getGender();
-    if (copy.sameAs != null) this.sameAs = (new ArrayList<>(copy.sameAs));
+    if (copy.getSameReferenceLinks() != null) this.sameAs = (new ArrayList<>(copy.getSameReferenceLinks()));
   }
 
   public Agent() {

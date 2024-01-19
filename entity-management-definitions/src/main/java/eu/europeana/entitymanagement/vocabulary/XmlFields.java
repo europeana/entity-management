@@ -71,6 +71,8 @@ public abstract class XmlFields {
   public static final String XML_FOAF_PHONE = "foaf:phone";
   public static final String XML_FOAF_MBOX = "foaf:mbox";
   public static final String XML_VCARD_HAS_ADDRESS = "vcard:hasAddress";
+  public static final String XML_EDM_AGGREGATES_FROM = "edm:aggregatesFrom";
+  public static final String XML_EDM_AGGREGATED_VIA = "edm:aggregatedVia";
 
   public static final String XML_VCARD_ADDRESS = "vcard:Address";
   public static final String XML_VCARD_STREET_ADDRESS = "vcard:street-address";

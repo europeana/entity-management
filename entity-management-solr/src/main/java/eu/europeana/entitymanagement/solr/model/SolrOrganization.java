@@ -1,22 +1,25 @@
 package eu.europeana.entitymanagement.solr.model;
 
-import eu.europeana.entitymanagement.definitions.model.Address;
-import eu.europeana.entitymanagement.definitions.model.Organization;
-import eu.europeana.entitymanagement.solr.SolrUtils;
-import eu.europeana.entitymanagement.utils.EntityUtils;
-import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
-import eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.solr.client.solrj.beans.Field;
+import eu.europeana.entitymanagement.definitions.model.Address;
+import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.solr.SolrUtils;
+import eu.europeana.entitymanagement.utils.EntityUtils;
+import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
+import eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields;
 
 public class SolrOrganization extends SolrEntity<Organization> {
 
   @Field(EntitySolrFields.SAME_AS)
   private List<String> sameAs;
+
+  @Field(EntitySolrFields.AGGREGATED_VIA)
+  private List<String> aggregatedVia;
 
   @Field(OrganizationSolrFields.DC_DESCRIPTION_ALL)
   private Map<String, String> description;
@@ -93,6 +96,9 @@ public class SolrOrganization extends SolrEntity<Organization> {
     this.country = organization.getCountry();
     if (organization.getSameReferenceLinks() != null) {
       this.sameAs = new ArrayList<>(organization.getSameReferenceLinks());
+    }
+    if (organization.getAggregatedVia() != null) {
+      this.aggregatedVia = new ArrayList<>(organization.getAggregatedVia());
     }
     Address organizationAddress = organization.getAddress();
     if (organizationAddress != null) {
@@ -233,5 +239,9 @@ public class SolrOrganization extends SolrEntity<Organization> {
   @Override
   protected void setSameReferenceLinks(ArrayList<String> uris) {
     this.sameAs = uris;
+  }
+
+  public List<String> getAggregatedVia() {
+    return aggregatedVia;
   }
 }

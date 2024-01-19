@@ -1,6 +1,8 @@
 package eu.europeana.entitymanagement.definitions.model;
 
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ACRONYM;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.AGGREGATED_VIA;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.AGGREGATES_FROM;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ALT_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.COUNTRY;
@@ -21,17 +23,17 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ORGANIZAT
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
-
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonSetter;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import dev.morphia.annotations.Transient;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 /** This class defines base organization type of an entity. */
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
@@ -56,7 +58,9 @@ import java.util.Map;
   FOAF_MBOX,
   HAS_ADDRESS,
   IDENTIFIER,
-  SAME_AS
+  SAME_AS,
+  AGGREGATES_FROM,
+  AGGREGATED_VIA
 })
 public class Organization extends Entity {
 
@@ -72,7 +76,9 @@ public class Organization extends Entity {
   private Map<String, String> geographicLevel;
   private String country;
   private Address hasAddress;
-  private List<String> sameAs;
+  private List<String> sameAs; 
+  @Transient private List<String> aggregatesFrom;
+  private List<String> aggregatedVia;
   private List<String> language;
 
   public Organization() {
@@ -95,8 +101,10 @@ public class Organization extends Entity {
       this.geographicLevel = new HashMap<>(copy.getGeographicLevel());
     this.country = copy.getCountry();
     if (copy.getAddress() != null) this.hasAddress = new Address(copy.getAddress());
-    if (copy.sameAs != null) this.sameAs = (new ArrayList<>(copy.sameAs));
-    if (copy.language != null) this.language = (new ArrayList<>(copy.language));
+    if (copy.getSameReferenceLinks() != null) this.sameAs = (new ArrayList<>(copy.getSameReferenceLinks()));
+    if (copy.getLanguage() != null) this.language = (new ArrayList<>(copy.getLanguage()));
+    if (copy.getAggregatesFrom() != null) this.aggregatesFrom = (new ArrayList<>(copy.getAggregatesFrom()));
+    if (copy.getAggregatedVia() != null) this.aggregatedVia = (new ArrayList<>(copy.getAggregatedVia()));
   }
 
   @JsonGetter(DESCRIPTION)
@@ -245,5 +253,25 @@ public class Organization extends Entity {
   @JsonSetter(LANGUAGE)
   public void setLanguage(List<String> edmLanguage) {
     this.language = edmLanguage;
+  }
+
+  @JsonGetter(AGGREGATES_FROM)
+  public List<String> getAggregatesFrom() {
+    return aggregatesFrom;
+  }
+
+  @JsonSetter(AGGREGATES_FROM)
+  public void setAggregatesFrom(List<String> aggregatesFrom) {
+    this.aggregatesFrom = aggregatesFrom;
+  }
+
+  @JsonGetter(AGGREGATED_VIA)
+  public List<String> getAggregatedVia() {
+    return aggregatedVia;
+  }
+
+  @JsonSetter(AGGREGATED_VIA)
+  public void setAggregatedVia(List<String> aggregatedVia) {
+    this.aggregatedVia = aggregatedVia;
   }
 }

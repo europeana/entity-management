@@ -85,7 +85,7 @@ public class Concept extends Entity {
     if (copy.getCloseMatch() != null) this.closeMatch = new ArrayList<>(copy.getCloseMatch());
     if (copy.getInScheme() != null) this.inScheme = new ArrayList<>(copy.getInScheme());
     if (copy.getNotation() != null) this.notation = new HashMap<>(copy.getNotation());
-    if (copy.exactMatch != null) this.exactMatch = (new ArrayList<>(copy.exactMatch));
+    if (copy.getSameReferenceLinks() != null) this.exactMatch = (new ArrayList<>(copy.getSameReferenceLinks()));
   }
 
   @JsonGetter(BROADER)
