@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -49,12 +48,17 @@ public class ZohoOrganizationConverter {
     String logoFieldName = ZohoConstants.LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD;
     org.setLogo(buildWebResource(zohoRecord, logoFieldName));
     org.setHomepage(getStringFieldValue(zohoRecord, ZohoConstants.WEBSITE_FIELD));
-    List<String> organizationRoleStringList =
-        ZohoUtils.stringListSupplier(zohoRecord.getKeyValue(ZohoConstants.ORGANIZATION_ROLE_FIELD));
-    if (!organizationRoleStringList.isEmpty()) {
-      org.setEuropeanaRole(
-          ZohoUtils.createLanguageMapOfStringList(
-              Locale.ENGLISH.getLanguage(), organizationRoleStringList));
+    
+//    List<String> organizationRoleStringList = ZohoUtils.stringListSupplier(zohoRecord.getKeyValue(ZohoConstants.ORGANIZATION_ROLE_FIELD));
+//    if (!organizationRoleStringList.isEmpty()) {
+//      org.setEuropeanaRole(
+//          ZohoUtils.createLanguageMapOfStringList(
+//              Locale.ENGLISH.getLanguage(), organizationRoleStringList));
+//    }
+    List<String> institutionRoleStringList =
+        ZohoUtils.stringListSupplier(zohoRecord.getKeyValue(ZohoConstants.INSTITUTION_ROLE_FIELD));
+    if (!institutionRoleStringList.isEmpty()) {
+      org.setEuropeanaRole(institutionRoleStringList);
     }
 
     Address address = new Address();

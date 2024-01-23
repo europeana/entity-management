@@ -22,6 +22,7 @@ public final class ZohoConstants {
   public static final String ACCOUNT_ROLE_FIELD =
       "Pick_List_3"; // This is the Account/Organization Role field
   public static final String ORGANIZATION_ROLE_FIELD = "Organisation_Role2";
+  public static final String INSTITUTION_ROLE_FIELD = "Institution_Role";
   public static final String OFFICIAL_LANGUAGE_FIELD = "Official_Language";
   public static final String LANG_ORGANIZATION_NAME_FIELD = "Lang_Organisation_Name";
   public static final String LANG_ALTERNATIVE_FIELD = "Lang_Alternative";

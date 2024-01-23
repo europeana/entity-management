@@ -116,8 +116,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     if (organization.getLogo() != null) {
       this.logo = XmlWebResourceWrapper.fromWebResource(organization.getLogo());
     }
-    this.europeanaRole =
-        RdfXmlUtils.convertToXmlMultilingualString(organization.getEuropeanaRole());
+    this.europeanaRole = RdfXmlUtils.convertToRdfResource(organization.getEuropeanaRole());
     
     this.country = organization.getCountry();
     this.countryId = organization.getCountryId();
@@ -151,7 +150,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     entity.setAcronym(RdfXmlUtils.toLanguageMapList(getAcronym()));
     entity.setDescription(RdfXmlUtils.toLanguageMap(getDescription()));
     entity.setLogo(XmlWebResourceWrapper.toWebResource(getLogo()));
-    entity.setEuropeanaRole(RdfXmlUtils.toLanguageMapList(getEuropeanaRole()));
+    entity.setEuropeanaRole(RdfXmlUtils.toStringList(getEuropeanaRole()));
     
     entity.setCountry(getCountry());
     entity.setCountryId(getCountryId());

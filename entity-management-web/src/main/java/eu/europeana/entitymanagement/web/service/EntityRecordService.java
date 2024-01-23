@@ -48,13 +48,13 @@ import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Concept;
 import eu.europeana.entitymanagement.definitions.model.ConceptScheme;
-import eu.europeana.entitymanagement.definitions.model.CountryMapping;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.definitions.model.TimeSpan;
+import eu.europeana.entitymanagement.definitions.model.ZohoMapping;
 import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
 import eu.europeana.entitymanagement.exception.EntityAlreadyExistsException;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
@@ -101,7 +101,8 @@ public class EntityRecordService {
   // Fields to be ignored during consolidation ("type" is final, so it cannot be updated)
   private static final Set<String> ignoredMergeFields = Set.of("type");
 
-  private List<CountryMapping> countryMapping;
+  private List<ZohoMapping> countryMapping;
+  private Map<String, String> roleMapping;
   private ObjectMapper emJsonMapper;
 
   @Autowired
@@ -118,14 +119,29 @@ public class EntityRecordService {
     this.solrService = solrService;
     this.emJsonMapper = emJsonMapper;
     readCountryMappingFile();
+    readRoleMappingFile();
   }
   
+  private void readRoleMappingFile() throws IOException {
+    roleMapping=new HashMap<>();
+    try (InputStream inputStream = getClass().getResourceAsStream(emConfiguration.getZohoRoleMapping())) {
+      assert inputStream != null;
+      try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+        String contents = reader.lines().collect(Collectors.joining(System.lineSeparator()));
+        List<ZohoMapping> zohoRoleMapping = emJsonMapper.readValue(contents, new TypeReference<List<ZohoMapping>>(){});
+        for(ZohoMapping zohoMapping : zohoRoleMapping) {
+          roleMapping.put(zohoMapping.getZohoLabel(), zohoMapping.getEntityUri());
+        }
+      }
+    }
+  }
+
   private void readCountryMappingFile() throws IOException {
     try (InputStream inputStream = getClass().getResourceAsStream(emConfiguration.getZohoCountryMapping())) {
       assert inputStream != null;
       try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
         String contents = reader.lines().collect(Collectors.joining(System.lineSeparator()));
-        countryMapping = emJsonMapper.readValue(contents, new TypeReference<List<CountryMapping>>(){});
+        countryMapping = emJsonMapper.readValue(contents, new TypeReference<List<ZohoMapping>>(){});
       }
     }
   }
@@ -1455,10 +1471,12 @@ public class EntityRecordService {
     }
   }
   
-  public void mapMongoReferenceFields(Entity entity) {
+  public void mapZohoOrgFields(Entity entity) {
     if(EntityTypes.Organization.getEntityType().equals(entity.getType())) {
       Organization org = (Organization) entity;
-      String countryUri = CountryMapping.getEntityUriFromName(countryMapping, org.getCountry());
+      
+      //map the country field 
+      String countryUri = ZohoMapping.getEntityUriFromName(countryMapping, org.getCountry());
       if(StringUtils.isBlank(countryUri)) {
         logger.info("The mapping for the country: {}, to the europeana uri does not exist.", org.getCountry());
       }
@@ -1472,6 +1490,7 @@ public class EntityRecordService {
           org.setCountryRef(orgCountry);
         }
       }
+
     }
   }
 

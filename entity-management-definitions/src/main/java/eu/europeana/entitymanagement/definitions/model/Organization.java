@@ -68,7 +68,7 @@ public class Organization extends Entity {
   private String homepage;
   private List<String> phone;
   private List<String> mbox;
-  private Map<String, List<String>> europeanaRole;
+  private List<String> europeanaRole;
   
   @Reference(lazy = true)
   private EntityRecord countryRef;
@@ -92,8 +92,7 @@ public class Organization extends Entity {
     this.homepage = copy.getHomepage();
     if (copy.getPhone() != null) this.phone = new ArrayList<>(copy.getPhone());
     if (copy.getMbox() != null) this.mbox = new ArrayList<>(copy.getMbox());
-    if (copy.getEuropeanaRole() != null)
-      this.europeanaRole = new HashMap<>(copy.getEuropeanaRole());
+    if (copy.getEuropeanaRole() != null) this.europeanaRole = new ArrayList<>(copy.getEuropeanaRole());
     //because the countryRef is a reference to the object we keep it the same
     this.countryRef=copy.getCountryRef();
     
@@ -124,12 +123,12 @@ public class Organization extends Entity {
   }
 
   @JsonGetter(EUROPEANA_ROLE)
-  public Map<String, List<String>> getEuropeanaRole() {
+  public List<String> getEuropeanaRole() {
     return europeanaRole;
   }
 
   @JsonSetter(EUROPEANA_ROLE)
-  public void setEuropeanaRole(Map<String, List<String>> europeanaRole) {
+  public void setEuropeanaRole(List<String> europeanaRole) {
     this.europeanaRole = europeanaRole;
   }
 

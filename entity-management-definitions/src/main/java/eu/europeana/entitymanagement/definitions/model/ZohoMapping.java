@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
   ENTITY_URI,
   WIKIDATA_URI
 })
-public class CountryMapping {
+public class ZohoMapping {
 
   private String zohoLabel;
   private String entityUri;
@@ -52,8 +52,8 @@ public class CountryMapping {
     this.wikidataUri = wikidataUri;
   }
   
-  public static String getEntityUriFromName(List<CountryMapping> list ,String name) {
-    for(CountryMapping cm : list) {
+  public static String getEntityUriFromName(List<ZohoMapping> list ,String name) {
+    for(ZohoMapping cm : list) {
       List<String> splittedAndTrimmed = Arrays.stream(cm.getZohoLabel().split(",")).map(String::trim).toList();
       if(splittedAndTrimmed.contains(name)) {
         return cm.getEntityUri();

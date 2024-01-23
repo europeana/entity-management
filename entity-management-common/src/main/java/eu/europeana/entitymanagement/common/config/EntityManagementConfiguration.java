@@ -155,6 +155,9 @@ public class EntityManagementConfiguration implements InitializingBean {
   @Value("${zoho.country.mapping:null}")
   private String zohoCountryMapping;
 
+  @Value("${zoho.role.mapping:null}")
+  private String zohoRoleMapping;
+
   public EntityManagementConfiguration() {
     LOG.info("Initializing EntityManagementConfiguration bean as: configuration");
   }
@@ -369,6 +372,10 @@ public class EntityManagementConfiguration implements InitializingBean {
 
   public String getZohoCountryMapping() {
     return zohoCountryMapping;
+  }
+
+  public String getZohoRoleMapping() {
+    return zohoRoleMapping;
   }
 
 }

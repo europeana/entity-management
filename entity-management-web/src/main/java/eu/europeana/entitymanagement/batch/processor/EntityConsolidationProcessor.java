@@ -103,7 +103,7 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
         consolidatedEntity,
         externalProxies.stream().map(EntityProxy::getProxyId).collect(Collectors.toList()));
     
-    entityRecordService.mapMongoReferenceFields(consolidatedEntity);
+    entityRecordService.mapZohoOrgFields(consolidatedEntity);
 
     emEntityFieldCleaner.cleanAndNormalize(consolidatedEntity);
     entityRecordService.performReferentialIntegrity(consolidatedEntity);
