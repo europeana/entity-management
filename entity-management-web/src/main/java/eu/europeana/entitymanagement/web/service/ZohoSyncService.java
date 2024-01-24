@@ -7,9 +7,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import javax.validation.constraints.NotNull;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import com.zoho.crm.api.record.DeletedRecord;
 import com.zoho.crm.api.record.Record;
@@ -81,7 +81,7 @@ public class ZohoSyncService extends BaseZohoAccess {
    * @return the report on performed operations
    * @throws EntityUpdateException
    */
-  public ZohoSyncReport synchronizeZohoOrganizations(@NotNull OffsetDateTime modifiedSince)
+  public ZohoSyncReport synchronizeZohoOrganizations(@NonNull OffsetDateTime modifiedSince)
       throws EntityUpdateException {
 
     if (logger.isInfoEnabled()) {
@@ -99,7 +99,7 @@ public class ZohoSyncService extends BaseZohoAccess {
     return zohoSyncRepo.save(zohoSyncReport);
   }
 
-  void synchronizeZohoOrganizations(@NotNull OffsetDateTime modifiedSince,
+  void synchronizeZohoOrganizations(@NonNull OffsetDateTime modifiedSince,
       ZohoSyncReport zohoSyncReport) {
     List<Record> orgList;
     BatchOperations operations;

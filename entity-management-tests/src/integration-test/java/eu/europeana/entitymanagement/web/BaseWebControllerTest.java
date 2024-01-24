@@ -173,7 +173,10 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
     Entity europeanaProxyEntity = objectMapper.readValue(europeanaProxyEntityStr, Entity.class);
     DataSource dataSource = datasources.verifyDataSource(europeanaProxyEntity.getEntityId(), false);
     Organization zohoOrganization =
-        ZohoOrganizationConverter.convertToOrganizationEntity(zohoRecord, zohoConfiguration.getZohoBaseUrl());
+        ZohoOrganizationConverter.convertToOrganizationEntity(
+            zohoRecord, 
+            zohoConfiguration.getZohoBaseUrl(),
+            emConfig.getCountryMappings());
     EntityRecord savedRecord =
         entityRecordService.createEntityFromRequest(
             europeanaProxyEntity, zohoOrganization, dataSource, null);

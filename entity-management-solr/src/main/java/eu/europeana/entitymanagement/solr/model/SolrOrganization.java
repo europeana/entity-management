@@ -93,11 +93,11 @@ public class SolrOrganization extends SolrEntity<Organization> {
     if (organization.getMbox() != null) this.mbox = new ArrayList<>(organization.getMbox());
     setEuropeanaRole(organization.getEuropeanaRole());
     
-    if(organization.getCountryRef()!=null) {
-      this.countryId = organization.getCountryRef().getEntity().getEntityId();
-      this.setCountryPrefLabel(organization.getCountryRef().getEntity().getPrefLabel());
-      this.countryLatitude = ((Place) organization.getCountryRef().getEntity()).getLatitude();
-      this.countryLongitude = ((Place) organization.getCountryRef().getEntity()).getLongitude();
+    if(organization.getCountry()!=null) {
+      this.countryId = organization.getCountry().getEntityId();
+      this.setCountryPrefLabel(organization.getCountry().getPrefLabel());
+      this.countryLatitude = ((Place) organization.getCountry()).getLatitude();
+      this.countryLongitude = ((Place) organization.getCountry()).getLongitude();
     }
     
     if (organization.getSameReferenceLinks() != null) {

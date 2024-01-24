@@ -18,7 +18,6 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NOTE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -74,6 +73,11 @@ public class Place extends Entity {
     super();
   }
 
+  public Place(String entityId) {
+    super();
+    setEntityId(entityId);
+  }
+  
   @JsonGetter(IS_NEXT_IN_SEQUENCE)
   @JacksonXmlProperty(localName = XmlFields.XML_EDM_IS_NEXT_IN_SEQUENCE)
   public List<String> getIsNextInSequence() {
@@ -133,35 +137,22 @@ public class Place extends Entity {
   public String getType() {
     return type;
   }
-
-  public Object getFieldValue(Field field) throws IllegalAccessException {
-    // TODO:in case of the performance overhead cause by using the reflecion code, change this
-    // method to call the getters for each field individually
-    return field.get(this);
-  }
-
-  public void setFieldValue(Field field, Object value)
-      throws IllegalAccessException {
-    // TODO:in case of the performance overhead cause by using the reflecion code, change this
-    // method to call the setter for each field individually
-    field.set(this, value);
-  }
   
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
     Place that = (Place) o;
    
-    if (Objects.equals(latitude, that.getLatitude()) &&
+    return Objects.equals(latitude, that.getLatitude()) &&
         Objects.equals(longitude, that.getLongitude()) &&
-        Objects.equals(altitude, that.getAltitude())) {
-      return true;
-    }
-    else {
-      return false;
-    }
+        Objects.equals(altitude, that.getAltitude()); 
   }
 
   public int hashCode() {

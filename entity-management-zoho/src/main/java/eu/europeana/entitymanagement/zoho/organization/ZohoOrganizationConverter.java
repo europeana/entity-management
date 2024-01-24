@@ -11,9 +11,11 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.lang.NonNull;
 import com.zoho.crm.api.record.Record;
 import com.zoho.crm.api.users.User;
 import eu.europeana.entitymanagement.definitions.model.Address;
+import eu.europeana.entitymanagement.definitions.model.CountryMapping;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.utils.EntityUtils;
@@ -26,7 +28,7 @@ public class ZohoOrganizationConverter {
 
   private static final String POSITION_SEPARATOR = "_";
   
-  public static Organization convertToOrganizationEntity(Record zohoRecord, String zohoBaseUrl) {
+  public static Organization convertToOrganizationEntity(Record zohoRecord, String zohoBaseUrl,  @NonNull final Map<String, CountryMapping> countryMappings) {
     Organization org = new Organization();
     Long zohoId = zohoRecord.getId();
     org.setAbout(ZohoUtils.buildZohoOrganizationId(zohoBaseUrl, zohoRecord.getId()));
@@ -57,19 +59,30 @@ public class ZohoOrganizationConverter {
               Locale.ENGLISH.getLanguage(), organizationRoleStringList));
     }
 
+    //build address object
     Address address = new Address();
     address.setVcardStreetAddress(
         ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.STREET_FIELD)));
     address.setVcardLocality(
         ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.CITY_FIELD)));
-    String vcardCountryName = ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.COUNTRY_FIELD));
-    address.setVcardCountryName(vcardCountryName);
     address.setVcardPostalCode(
         ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.ZIP_CODE_FIELD)));
 
-    //set country
-    org.setCountry(vcardCountryName);
-
+    String zohoCountryLabel = ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.COUNTRY_FIELD));
+    if(zohoCountryLabel != null) {
+      //update address country
+      address.setVcardCountryName(extractCountryName(zohoCountryLabel));
+      
+      //update organization country id
+      if(countryMappings.containsKey(zohoCountryLabel)) {
+        //get country ID from mappings
+        String entityUri = countryMappings.get(zohoCountryLabel).getEntityUri();
+        org.setCountryId(entityUri);
+      } else if(logger.isInfoEnabled()){
+        logger.info("The mapping for the zoho country label: {}, to the europeana uri does not exist.", org.getCountry());
+      }
+    }
+    
     org.setSameReferenceLinks(getAllSameAs(zohoRecord));
 
     // only set address if it contains metadata properties.
@@ -103,6 +116,11 @@ public class ZohoOrganizationConverter {
     }
 
     return org;
+  }
+
+  private static String extractCountryName(String zohoCountryLabel) {
+    //get only the country name from zohoLabels (e.g France, FR)
+    return StringUtils.substringBeforeLast(zohoCountryLabel, ",");
   }
 
   private static WebResource buildWebResource(Record zohoRecord, String logoFieldName) {

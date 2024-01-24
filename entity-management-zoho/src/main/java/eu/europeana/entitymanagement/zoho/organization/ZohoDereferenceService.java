@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.zoho.organization;
 
 import java.text.SimpleDateFormat;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
@@ -11,6 +12,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zoho.crm.api.record.Record;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.definitions.model.CountryMapping;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.dereference.Dereferencer;
 
@@ -18,10 +21,12 @@ import eu.europeana.entitymanagement.dereference.Dereferencer;
 public class ZohoDereferenceService implements Dereferencer {
 
   private final ZohoConfiguration zohoConfiguration;
+  private final EntityManagementConfiguration emConfig;
 
   @Autowired
-  public ZohoDereferenceService(ZohoConfiguration zohoConfiguration) {
+  public ZohoDereferenceService(ZohoConfiguration zohoConfiguration, EntityManagementConfiguration emConfig) {
     this.zohoConfiguration = zohoConfiguration;
+    this.emConfig = emConfig;
   }
 
   @Override
@@ -33,7 +38,11 @@ public class ZohoDereferenceService implements Dereferencer {
     //    System.out.println(resp.toJson(zohoOrganization.get().getKeyValues()));
 
     if(zohoOrganization.isPresent()) {
-      return Optional.of(ZohoOrganizationConverter.convertToOrganizationEntity(zohoOrganization.get(), zohoConfiguration.getZohoBaseUrl())); 
+      return Optional.of(
+           ZohoOrganizationConverter.convertToOrganizationEntity(
+               zohoOrganization.get(), 
+               zohoConfiguration.getZohoBaseUrl(),
+               emConfig.getCountryMappings())); 
     } else {
       return Optional.empty();
     }

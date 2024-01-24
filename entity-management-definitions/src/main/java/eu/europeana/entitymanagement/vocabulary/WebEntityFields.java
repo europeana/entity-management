@@ -89,8 +89,6 @@ public interface WebEntityFields {
   // Organization fields
   public static final String DESCRIPTION = "description";
   public static final String ACRONYM = "acronym";
-  public static final String COUNTRY_ID = "countryId";
-  public static final String COUNTRY_PLACE = "countryPlace";
   public static final String COUNTRY = "country";
   public static final String EUROPEANA_ROLE = "europeanaRole";
   public static final String FOAF_LOGO = "logo";

@@ -13,8 +13,6 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.PREF_LABEL;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ACRONYM;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_COUNTRY;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_COUNTRY_ID;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_COUNTRY_PLACE;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_DESCRIPTION;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_EUROPEANA_ROLE;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_HAS_ADDRESS;
@@ -53,8 +51,6 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
       XML_LOGO,
       XML_EUROPEANA_ROLE,
       XML_COUNTRY,
-      XML_COUNTRY_ID,
-      XML_COUNTRY_PLACE,
       XML_LANGUAGE,
       XML_HOMEPAGE,
       XML_PHONE,
@@ -82,13 +78,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
   private List<LabelledResource> europeanaRole = new ArrayList<>();
 
   @XmlElement(namespace = NAMESPACE_EDM, name = XML_COUNTRY)
-  private String country;
-
-  @XmlElement(namespace = NAMESPACE_EDM, name = XML_COUNTRY_ID)
-  private String countryId;
-
-  @XmlElement(namespace = NAMESPACE_EDM, name = XML_COUNTRY_PLACE)
-  private XmlPlaceImpl countryPlace;
+  private XmlPlaceImpl country;
 
   @XmlElement(namespace = NAMESPACE_FOAF, name = XML_HOMEPAGE)
   private LabelledResource homepage;
@@ -119,11 +109,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     this.europeanaRole =
         RdfXmlUtils.convertToXmlMultilingualString(organization.getEuropeanaRole());
     
-    this.country = organization.getCountry();
-    this.countryId = organization.getCountryId();
-    if(organization.getCountryPlace()!=null) {
-      this.countryPlace=new XmlPlaceImpl(organization.getCountryPlace());
-    }
+    this.country = new XmlPlaceImpl(organization.getCountry());
     
     if (organization.getHomepage() != null) {
       this.homepage = new LabelledResource(organization.getHomepage());
@@ -153,12 +139,14 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     entity.setLogo(XmlWebResourceWrapper.toWebResource(getLogo()));
     entity.setEuropeanaRole(RdfXmlUtils.toLanguageMapList(getEuropeanaRole()));
     
-    entity.setCountry(getCountry());
-    entity.setCountryId(getCountryId());
-    if(getCountryPlace()!=null) {
-      entity.setCountryPlace(getCountryPlace().toEntityModel());
+    if(getCountry() != null) {
+      //the country is not saved in the database 
+      entity.setCountry(getCountry().toEntityModel());
+      //we need to extract the countryID as well (xml about holds the entityId)
+      entity.setCountryId(getCountry().getAbout());
     }
-  
+    
+    
     if (getHomepage() != null) {
       entity.setHomepage(getHomepage().getResource());
     }
@@ -194,7 +182,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     return europeanaRole;
   }
 
-  public String getCountry() {
+  public XmlPlaceImpl getCountry() {
     return country;
   }
 
@@ -237,11 +225,4 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     return language;
   }
 
-  public String getCountryId() {
-    return countryId;
-  }
-
-  public XmlPlaceImpl getCountryPlace() {
-    return countryPlace;
-  }
 }

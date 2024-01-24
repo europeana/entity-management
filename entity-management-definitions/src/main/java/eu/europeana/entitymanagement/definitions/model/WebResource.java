@@ -76,25 +76,24 @@ public class WebResource {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
     WebResource that = (WebResource) o;
 
-    if (Objects.equals(source, that.getSource()) &&
-        id.equals(that.getId()) &&
-        Objects.equals(thumbnail, that.getThumbnail())) {
-      return true;
-    }
-    else {
-      return false;
-    }
+    return Objects.equals(source, that.getSource()) 
+        && id.equals(that.getId()) 
+        && Objects.equals(thumbnail, that.getThumbnail());
   }
 
   public int hashCode() {
     int result = (id == null) ? 0 : id.hashCode();
-    result = result + ((thumbnail == null) ? 0 : thumbnail.hashCode());
-    result = result + ((source == null) ? 0 : source.hashCode());
+    result += (thumbnail == null) ? 0 : thumbnail.hashCode();
+    result += (source == null) ? 0 : source.hashCode();
     return result;
   }
 

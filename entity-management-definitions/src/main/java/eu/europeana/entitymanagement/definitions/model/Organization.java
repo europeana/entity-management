@@ -4,8 +4,6 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ACRONYM;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ALT_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.COUNTRY;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.COUNTRY_ID;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.COUNTRY_PLACE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DEPICTION;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DESCRIPTION;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.EUROPEANA_ROLE;
@@ -32,6 +30,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import dev.morphia.annotations.Reference;
+import dev.morphia.annotations.Transient;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 /** This class defines base organization type of an entity. */
@@ -49,8 +48,6 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
   FOAF_LOGO,
   EUROPEANA_ROLE,
   COUNTRY,
-  COUNTRY_ID,
-  COUNTRY_PLACE,
   LANGUAGE,
   FOAF_HOMEPAGE,
   FOAF_PHONE,
@@ -72,9 +69,9 @@ public class Organization extends Entity {
   
   @Reference(lazy = true)
   private EntityRecord countryRef;
-  private Place countryPlace;
-  private String country;
   private String countryId;
+  @Transient
+  private Place country;
   
   private Address hasAddress;
   private List<String> sameAs;
@@ -96,7 +93,8 @@ public class Organization extends Entity {
       this.europeanaRole = new HashMap<>(copy.getEuropeanaRole());
     //because the countryRef is a reference to the object we keep it the same
     this.countryRef=copy.getCountryRef();
-    
+    this.countryId = copy.getCountryId();
+    this.country = copy.getCountry();
     
     if (copy.getAddress() != null) this.hasAddress = new Address(copy.getAddress());
     if (copy.sameAs != null) this.sameAs = (new ArrayList<>(copy.sameAs));
@@ -230,32 +228,25 @@ public class Organization extends Entity {
     this.countryRef=countryRef;
   }
 
-  @JsonGetter(COUNTRY_PLACE)
-  public Place getCountryPlace() {
-    return countryPlace;
-  }
-
-  @JsonSetter(COUNTRY_PLACE)
-  public void setCountryPlace(Place countryPlace) {
-    this.countryPlace = countryPlace;
-  }
-
   @JsonGetter(COUNTRY)
-  public String getCountry() {
+  public Place getCountry() {
+    if(country == null && getCountryId() != null) {
+      //set country if not dereferenced during retrieval from database
+      country = new Place(getCountryId());
+    }
     return country;
   }
 
   @JsonSetter(COUNTRY)
-  public void setCountry(String country) {
+  public void setCountry(Place country) {
     this.country = country;
   }
 
-  @JsonGetter(COUNTRY_ID)
+  @JsonIgnore
   public String getCountryId() {
     return countryId;
   }
 
-  @JsonSetter(COUNTRY_ID)
   public void setCountryId(String countryId) {
     this.countryId = countryId;
   }

@@ -131,7 +131,10 @@ public class DereferenceServiceIT extends AbstractIntegrationTest {
     //    choice = new Choice<String>("EN");
     //    record.addKeyValue(ZohoConstants.LANG_ALTERNATIVE_FIELD + "_4", choice);
 
-    Organization org = ZohoOrganizationConverter.convertToOrganizationEntity(record, zohoConfiguration.getZohoBaseUrl());
+    Organization org = ZohoOrganizationConverter.convertToOrganizationEntity(
+        record, 
+        zohoConfiguration.getZohoBaseUrl(),
+        emConfig.getCountryMappings());
 
     Assertions.assertEquals(2, org.getPrefLabel().size());
     Assertions.assertEquals(1, org.getAltLabel().size());

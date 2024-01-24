@@ -98,13 +98,13 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
           entityRecordService.mergeEntities(europeanaProxyEntity, externalProxyEntity);
     }
 
+    entityRecordService.processReferenceFields(consolidatedEntity);
+
     // add external proxyIds to sameAs / exactMatch
     entityRecordService.addSameReferenceLinks(
         consolidatedEntity,
         externalProxies.stream().map(EntityProxy::getProxyId).collect(Collectors.toList()));
     
-    entityRecordService.mapMongoReferenceFields(consolidatedEntity);
-
     emEntityFieldCleaner.cleanAndNormalize(consolidatedEntity);
     entityRecordService.performReferentialIntegrity(consolidatedEntity);
 

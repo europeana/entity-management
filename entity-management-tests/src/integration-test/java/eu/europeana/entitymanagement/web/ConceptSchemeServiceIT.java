@@ -7,14 +7,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import eu.europeana.entitymanagement.definitions.model.ConceptScheme;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.solr.model.SolrConcept;
-import eu.europeana.entitymanagement.solr.model.SolrConceptScheme;
-import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONArray;
@@ -26,6 +18,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import eu.europeana.entitymanagement.definitions.model.ConceptScheme;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.solr.model.SolrConcept;
+import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 
 @SpringBootTest
 @AutoConfigureMockMvc
