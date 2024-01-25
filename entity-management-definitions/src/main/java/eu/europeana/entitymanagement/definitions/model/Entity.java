@@ -231,6 +231,9 @@ public abstract class Entity implements ValidationObject {
   }
 
   public Object getFieldValue(Field field) throws IllegalAccessException {
+    if(!field.canAccess(this)) {
+      field.setAccessible(true);
+    }
     return field.get(this);
   }
 
