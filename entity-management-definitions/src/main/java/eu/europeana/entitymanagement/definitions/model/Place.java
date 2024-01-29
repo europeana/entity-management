@@ -66,7 +66,7 @@ public class Place extends Entity {
     this.latitude = copy.getLatitude();
     this.longitude = copy.getLongitude();
     this.altitude = copy.getAltitude();
-    if (copy.getSameReferenceLinks() != null) this.sameAs = (new ArrayList<>(copy.getSameReferenceLinks()));
+    if (copy.sameAs != null) this.sameAs = (new ArrayList<>(copy.sameAs));
   }
 
   public Place() {

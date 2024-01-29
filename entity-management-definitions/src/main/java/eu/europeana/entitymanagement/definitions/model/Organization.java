@@ -57,10 +57,10 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
   FOAF_PHONE,
   FOAF_MBOX,
   HAS_ADDRESS,
-  IDENTIFIER,
-  SAME_AS,
   AGGREGATES_FROM,
-  AGGREGATED_VIA
+  AGGREGATED_VIA,
+  IDENTIFIER,
+  SAME_AS
 })
 public class Organization extends Entity {
 
@@ -101,7 +101,7 @@ public class Organization extends Entity {
       this.geographicLevel = new HashMap<>(copy.getGeographicLevel());
     this.country = copy.getCountry();
     if (copy.getAddress() != null) this.hasAddress = new Address(copy.getAddress());
-    if (copy.getSameReferenceLinks() != null) this.sameAs = (new ArrayList<>(copy.getSameReferenceLinks()));
+    if (copy.sameAs != null) this.sameAs = (new ArrayList<>(copy.sameAs));
     if (copy.getLanguage() != null) this.language = (new ArrayList<>(copy.getLanguage()));
     if (copy.getAggregatesFrom() != null) this.aggregatesFrom = (new ArrayList<>(copy.getAggregatesFrom()));
     if (copy.getAggregatedVia() != null) this.aggregatedVia = (new ArrayList<>(copy.getAggregatedVia()));

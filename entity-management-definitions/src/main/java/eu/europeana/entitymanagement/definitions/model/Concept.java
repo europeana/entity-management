@@ -20,17 +20,16 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABE
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.RELATED;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.RELATED_MATCH;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
-
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonSetter;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
@@ -85,7 +84,7 @@ public class Concept extends Entity {
     if (copy.getCloseMatch() != null) this.closeMatch = new ArrayList<>(copy.getCloseMatch());
     if (copy.getInScheme() != null) this.inScheme = new ArrayList<>(copy.getInScheme());
     if (copy.getNotation() != null) this.notation = new HashMap<>(copy.getNotation());
-    if (copy.getSameReferenceLinks() != null) this.exactMatch = (new ArrayList<>(copy.getSameReferenceLinks()));
+    if (copy.exactMatch != null) this.exactMatch = (new ArrayList<>(copy.exactMatch));
   }
 
   @JsonGetter(BROADER)

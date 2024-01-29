@@ -6,11 +6,11 @@ import static dev.morphia.query.experimental.filters.Filters.in;
 import static dev.morphia.query.experimental.filters.Filters.ne;
 import static dev.morphia.query.experimental.filters.Filters.or;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.DISABLED;
+import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_AGGREGATED_VIA;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_EXACT_MATCH;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_ID;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_MODIFIED;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_SAME_AS;
-import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_AGGREGATED_VIA;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_UPDATE_OPTS;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,13 +20,11 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 import com.mongodb.client.result.UpdateResult;
-import dev.morphia.aggregation.experimental.stages.Projection;
 import dev.morphia.query.FindOptions;
 import dev.morphia.query.Query;
 import dev.morphia.query.experimental.filters.Filter;
 import dev.morphia.query.experimental.updates.UpdateOperators;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
-import eu.europeana.entitymanagement.definitions.EntityRecordFields;
 import eu.europeana.entitymanagement.definitions.model.EntityIdGenerator;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
@@ -170,13 +168,14 @@ public class EntityRecordRepository extends AbstractRepository {
   }
   
   public List<String> findAggregatesFrom(String entityId) {
-    Query<EntityRecord> query =
+    List<EntityRecord> entityRecords =
         getDataStore()
             .find(EntityRecord.class)
             .disableValidation()
-            .filter(in(ENTITY_AGGREGATED_VIA, Arrays.asList(entityId)));
+            .filter(in(ENTITY_AGGREGATED_VIA, Arrays.asList(entityId)))
+            .iterator(new FindOptions().projection().include(ENTITY_ID))
+            .toList();
     
-    List<EntityRecord> entityRecords = query.iterator(new FindOptions().projection().include(ENTITY_ID)).toList();
     return entityRecords.stream().map(entityRecord -> entityRecord.getEntityId()).toList();
   }
   

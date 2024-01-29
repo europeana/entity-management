@@ -62,11 +62,11 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
       XML_PHONE,
       XML_MBOX,
       XML_HAS_ADDRESS,
+      XML_AGGREGATED_VIA,
+      IS_AGGREGATED_BY,
       XML_IDENTIFIER,
       XML_SAME_AS,
-      XML_AGGREGATES_FROM,
-      XML_AGGREGATED_VIA,
-      IS_AGGREGATED_BY
+      XML_AGGREGATES_FROM
     })
 public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
 

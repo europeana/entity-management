@@ -125,10 +125,7 @@ public class EntityRecordService {
     //for the organizations, populate the aggregatesFrom field
     if(fetchFullRecord && !resp.isEmpty()) {
       for(EntityRecord record : resp) {
-        if(EntityTypes.Organization.getEntityType().equals(record.getEntity().getType())) {
-          Organization org = (Organization) record.getEntity();
-          org.setAggregatesFrom(entityRecordRepository.findAggregatesFrom(record.getEntityId()));
-        }
+        setAggregatesFromForOrganizations(record.getEntity());
       }
     }
     
@@ -156,14 +153,18 @@ public class EntityRecordService {
     }
     
     //for the organizations, populate the aggregatesFrom field
-    if(EntityTypes.Organization.getEntityType().equals(entityRecord.getEntity().getType())) {
-      Organization org = (Organization) entityRecord.getEntity();
-      org.setAggregatesFrom(entityRecordRepository.findAggregatesFrom(entityUri));
-    }
+    setAggregatesFromForOrganizations(entityRecord.getEntity());
     
     return entityRecord;
   }
 
+  private void setAggregatesFromForOrganizations(Entity entity) {
+    if(EntityTypes.Organization.getEntityType().equals(entity.getType())) {
+      Organization org = (Organization) entity;
+      org.setAggregatesFrom(entityRecordRepository.findAggregatesFrom(entity.getEntityId()));
+    }
+  }
+  
   /**
    * Handle the redirection in the case that the requested entity is not found by searching within the corefs 
    * This method allows redirection for old organization ids (which used the zoho identifier before)
