@@ -65,6 +65,7 @@ import eu.europeana.entitymanagement.exception.HttpUnprocessableException;
 import eu.europeana.entitymanagement.exception.MultipleChoicesException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
+import eu.europeana.entitymanagement.mongo.repository.VocabularyRepository;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.utils.EMCollectionUtils;
@@ -87,6 +88,8 @@ import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 public class EntityRecordService {
 
   private final EntityRecordRepository entityRecordRepository;
+  
+  private final VocabularyRepository vocabRepository;
 
   final EntityManagementConfiguration emConfiguration;
 
@@ -102,40 +105,26 @@ public class EntityRecordService {
   private static final Set<String> ignoredMergeFields = Set.of("type");
 
   private List<ZohoMapping> countryMapping;
-  private Map<String, String> roleMapping;
   private ObjectMapper emJsonMapper;
 
   @Autowired
   public EntityRecordService(EntityRecordRepository entityRecordRepository,
+      VocabularyRepository vocabRepository,
       EntityManagementConfiguration emConfiguration,
       ZohoConfiguration zohoConfiguration,
       DataSources datasources,
       SolrService solrService,
       @Qualifier(BEAN_JSON_MAPPER) ObjectMapper emJsonMapper) throws IOException {
     this.entityRecordRepository = entityRecordRepository;
+    this.vocabRepository=vocabRepository;
     this.emConfiguration = emConfiguration;
     this.zohoConfiguration = zohoConfiguration; 
     this.datasources = datasources;
     this.solrService = solrService;
     this.emJsonMapper = emJsonMapper;
     readCountryMappingFile();
-    readRoleMappingFile();
   }
   
-  private void readRoleMappingFile() throws IOException {
-    roleMapping=new HashMap<>();
-    try (InputStream inputStream = getClass().getResourceAsStream(emConfiguration.getZohoRoleMapping())) {
-      assert inputStream != null;
-      try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-        String contents = reader.lines().collect(Collectors.joining(System.lineSeparator()));
-        List<ZohoMapping> zohoRoleMapping = emJsonMapper.readValue(contents, new TypeReference<List<ZohoMapping>>(){});
-        for(ZohoMapping zohoMapping : zohoRoleMapping) {
-          roleMapping.put(zohoMapping.getZohoLabel(), zohoMapping.getEntityUri());
-        }
-      }
-    }
-  }
-
   private void readCountryMappingFile() throws IOException {
     try (InputStream inputStream = getClass().getResourceAsStream(emConfiguration.getZohoCountryMapping())) {
       assert inputStream != null;
@@ -185,12 +174,15 @@ public class EntityRecordService {
           String.format(EntityRecordUtils.ENTITY_ID_REMOVED_MSG, entityUri));
     }
     
-    //dereference morphia @Reference fields (e.g. the organization country)
+    //dereference morphia @Reference fields (e.g. the organization country and europeanaRole)
     if(profile!=null && profile.contains(EntityProfile.dereference.toString())) {
       if(EntityTypes.Organization.getEntityType().equals(entityRecord.getEntity().getType())) {
         Organization org = (Organization) entityRecord.getEntity(); 
         if(org.getCountryId()!=null) {
           org.setCountryPlace((Place) entityRecordRepository.findWithOnlyEntityInRecord(org.getCountryId()).getEntity());
+        }
+        if(org.getEuropeanaRole()!=null && !org.getEuropeanaRole().isEmpty()) {
+          org.setEuropeanaRoleVocabularies(vocabRepository.findByVocabularyUris(org.getEuropeanaRole()));          
         }
       }
     }
@@ -1476,21 +1468,27 @@ public class EntityRecordService {
       Organization org = (Organization) entity;
       
       //map the country field 
-      String countryUri = ZohoMapping.getEntityUriFromName(countryMapping, org.getCountry());
-      if(StringUtils.isBlank(countryUri)) {
-        logger.info("The mapping for the country: {}, to the europeana uri does not exist.", org.getCountry());
-      }
-      else {
-        org.setCountryId(countryUri);
-        EntityRecord orgCountry = entityRecordRepository.findByEntityId(countryUri);
-        if(orgCountry==null) {
-          logger.info("The entity record with the id: {}, to be assigned for the country reference, does not exist in the db.", countryUri);
+      if(org.getAddress()!=null && org.getAddress().getVcardCountryName()!=null) {
+        String countryUri = ZohoMapping.getEntityUriFromName(countryMapping, org.getAddress().getVcardCountryName());
+        if(StringUtils.isBlank(countryUri)) {
+          logger.info("The mapping for the country: {}, to the europeana uri does not exist.", org.getAddress().getVcardCountryName());
         }
         else {
-          org.setCountryRef(orgCountry);
+          org.setCountryId(countryUri);
+          EntityRecord orgCountry = entityRecordRepository.findByEntityId(countryUri);
+          if(orgCountry==null) {
+            logger.info("The entity record with the id: {}, to be assigned for the country reference, does not exist in the db.", countryUri);
+          }
+          else {
+            org.setCountryRef(orgCountry);
+          }
         }
+      }      
+      
+      //map the europeanaRole field
+      if(org.getEuropeanaRole()!=null && !org.getEuropeanaRole().isEmpty()) {
+        org.setEuropeanaRoleRefs(vocabRepository.findByVocabularyUris(org.getEuropeanaRole()));
       }
-
     }
   }
 

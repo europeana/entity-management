@@ -1,13 +1,14 @@
 package eu.europeana.entitymanagement.web;
 
+import java.io.StringReader;
+import java.util.List;
+import java.util.Optional;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.exception.DatasourceDereferenceException;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import eu.europeana.entitymanagement.web.xml.model.metis.EnrichmentResultList;
-import java.io.StringReader;
-import java.util.Optional;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 
 public class MetisDereferenceUtils {
 
@@ -59,4 +60,35 @@ public class MetisDereferenceUtils {
 
     return entityOptional.get();
   }
+  
+  public static List<XmlBaseEntityImpl<?>> parseMetisResponseMany(
+      Unmarshaller unmarshaller, String metisResponseBody) throws EuropeanaApiException {
+    EnrichmentResultList derefResult;
+
+    try {
+      derefResult =
+          (EnrichmentResultList) unmarshaller.unmarshal(new StringReader(metisResponseBody));
+    } catch (JAXBException | RuntimeException e) {
+      throw new DatasourceDereferenceException(
+          String.format(
+              "Error while deserializing metis dereference response %s: ", metisResponseBody),
+          e);
+    }
+
+    if (derefResult == null
+        || derefResult.getEnrichmentBaseResultWrapperList().isEmpty()
+        || derefResult
+            .getEnrichmentBaseResultWrapperList()
+            .get(0)
+            .getEnrichmentBaseList()
+            .isEmpty()) {
+      // Metis returns an empty XML response if de-referencing is unsuccessful,
+      // instead of throwing an error
+      return null;
+    }
+
+    return derefResult.getEnrichmentBaseResultWrapperList().get(0).getEnrichmentBaseList();
+    
+  }
+  
 }

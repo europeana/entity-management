@@ -3,6 +3,7 @@ package eu.europeana.entitymanagement.zoho.organization;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoUtils.toIsoLanguage;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,15 @@ public class ZohoOrganizationConverter {
   static final Logger logger = LogManager.getLogger(ZohoOrganizationConverter.class);
 
   private static final String POSITION_SEPARATOR = "_";
+
+  private static Map<String, String> roleMapping ;
+  static {
+    roleMapping = new HashMap<>();
+    roleMapping.put("Providing Institution", "http://data.europeana.eu/vocabulary/role/ProvidingInstitution"); 
+    roleMapping.put("Aggregator", "http://data.europeana.eu/vocabulary/role/Aggregator"); 
+    roleMapping.put("Accredited Aggregator", "http://data.europeana.eu/vocabulary/role/AccreditedAggregator");
+    roleMapping.put("Potential Providing Institution", "http://data.europeana.eu/vocabulary/role/ProvidingInstitution");
+  }   
   
   public static Organization convertToOrganizationEntity(Record zohoRecord, String zohoBaseUrl) {
     Organization org = new Organization();
@@ -58,7 +68,7 @@ public class ZohoOrganizationConverter {
     List<String> institutionRoleStringList =
         ZohoUtils.stringListSupplier(zohoRecord.getKeyValue(ZohoConstants.INSTITUTION_ROLE_FIELD));
     if (!institutionRoleStringList.isEmpty()) {
-      org.setEuropeanaRole(institutionRoleStringList);
+      org.setEuropeanaRole(institutionRoleStringList.stream().map(e -> roleMapping.get(e)).toList());
     }
 
     Address address = new Address();
@@ -70,9 +80,6 @@ public class ZohoOrganizationConverter {
     address.setVcardCountryName(vcardCountryName);
     address.setVcardPostalCode(
         ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.ZIP_CODE_FIELD)));
-
-    //set country
-    org.setCountry(vcardCountryName);
 
     org.setSameReferenceLinks(getAllSameAs(zohoRecord));
 

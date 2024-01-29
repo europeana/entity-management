@@ -10,6 +10,7 @@ public interface WebEntityFields {
   public static final String BASE_DATA_EUROPEANA_URI = "http://data.europeana.eu/";
   public static final String WIKIDATA_HOST = "www.wikidata.org";
   public static final String ZOHO_CRM_HOST = "crm.zoho.com";
+//  public static final String ZOHO_CRM_HOST = "crm.zoho.eu";
 
   // common fields
   public static final String ID = "id";
@@ -93,6 +94,8 @@ public interface WebEntityFields {
   public static final String COUNTRY_PLACE = "countryPlace";
   public static final String COUNTRY = "country";
   public static final String EUROPEANA_ROLE = "europeanaRole";
+  public static final String EUROPEANA_ROLE_VOCABULARIES = "europeanaRoleVocabularies";
+  public static final String EUROPEANA_ROLE_IDS = "europeanaRoleIds";
   public static final String FOAF_LOGO = "logo";
   public static final String FOAF_HOMEPAGE = "homepage";
   public static final String FOAF_PHONE = "phone";

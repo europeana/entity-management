@@ -118,7 +118,6 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     }
     this.europeanaRole = RdfXmlUtils.convertToRdfResource(organization.getEuropeanaRole());
     
-    this.country = organization.getCountry();
     this.countryId = organization.getCountryId();
     if(organization.getCountryPlace()!=null) {
       this.countryPlace=new XmlPlaceImpl(organization.getCountryPlace());
@@ -135,6 +134,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     }
     if (organization.getAddress() != null) {
       this.hasAddress = new XmlAddresses(List.of(new XmlAddressImpl(organization.getAddress())));
+      this.country = organization.getAddress().getVcardCountryName();
     }
     if (organization.getIdentifier() != null) {
       this.identifier = new ArrayList<String>(organization.getIdentifier());
@@ -152,7 +152,6 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     entity.setLogo(XmlWebResourceWrapper.toWebResource(getLogo()));
     entity.setEuropeanaRole(RdfXmlUtils.toStringList(getEuropeanaRole()));
     
-    entity.setCountry(getCountry());
     entity.setCountryId(getCountryId());
     if(getCountryPlace()!=null) {
       entity.setCountryPlace(getCountryPlace().toEntityModel());

@@ -9,6 +9,8 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.COUNTRY_P
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DEPICTION;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DESCRIPTION;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.EUROPEANA_ROLE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.EUROPEANA_ROLE_IDS;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.EUROPEANA_ROLE_VOCABULARIES;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_HOMEPAGE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_LOGO;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_MBOX;
@@ -32,6 +34,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import dev.morphia.annotations.Reference;
+import dev.morphia.annotations.Transient;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 /** This class defines base organization type of an entity. */
@@ -48,6 +51,8 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
   DESCRIPTION,
   FOAF_LOGO,
   EUROPEANA_ROLE,
+  EUROPEANA_ROLE_IDS,
+  EUROPEANA_ROLE_VOCABULARIES,
   COUNTRY,
   COUNTRY_ID,
   COUNTRY_PLACE,
@@ -68,13 +73,18 @@ public class Organization extends Entity {
   private String homepage;
   private List<String> phone;
   private List<String> mbox;
-  private List<String> europeanaRole;
   
   @Reference(lazy = true)
   private EntityRecord countryRef;
+  @Transient
   private Place countryPlace;
-  private String country;
   private String countryId;
+
+  private List<String> europeanaRole;
+  @Reference(lazy = true)
+  private List<Vocabulary> europeanaRoleRefs;
+  @Transient
+  private List<Vocabulary> europeanaRoleVocabularies;
   
   private Address hasAddress;
   private List<String> sameAs;
@@ -92,11 +102,15 @@ public class Organization extends Entity {
     this.homepage = copy.getHomepage();
     if (copy.getPhone() != null) this.phone = new ArrayList<>(copy.getPhone());
     if (copy.getMbox() != null) this.mbox = new ArrayList<>(copy.getMbox());
-    if (copy.getEuropeanaRole() != null) this.europeanaRole = new ArrayList<>(copy.getEuropeanaRole());
+    if(copy.getEuropeanaRole() != null) this.europeanaRole = new ArrayList<>(copy.getEuropeanaRole());
+    if(copy.getEuropeanaRoleRefs() != null) this.europeanaRoleRefs = new ArrayList<>(copy.getEuropeanaRoleRefs());
+    if(copy.getEuropeanaRoleVocabularies()!=null) this.europeanaRoleVocabularies=new ArrayList<>(copy.getEuropeanaRoleVocabularies());
     //because the countryRef is a reference to the object we keep it the same
     this.countryRef=copy.getCountryRef();
-    
-    
+    if(copy.getCountryPlace()!=null) {
+      this.countryPlace=new Place(copy.getCountryPlace());
+    }
+    this.countryId=copy.getCountryId();
     if (copy.getAddress() != null) this.hasAddress = new Address(copy.getAddress());
     if (copy.sameAs != null) this.sameAs = (new ArrayList<>(copy.sameAs));
     if (copy.language != null) this.language = (new ArrayList<>(copy.language));
@@ -239,16 +253,6 @@ public class Organization extends Entity {
     this.countryPlace = countryPlace;
   }
 
-  @JsonGetter(COUNTRY)
-  public String getCountry() {
-    return country;
-  }
-
-  @JsonSetter(COUNTRY)
-  public void setCountry(String country) {
-    this.country = country;
-  }
-
   @JsonGetter(COUNTRY_ID)
   public String getCountryId() {
     return countryId;
@@ -258,5 +262,24 @@ public class Organization extends Entity {
   public void setCountryId(String countryId) {
     this.countryId = countryId;
   }
-  
+
+  @JsonIgnore
+  public List<Vocabulary> getEuropeanaRoleRefs() {
+    return europeanaRoleRefs;
+  }
+
+  public void setEuropeanaRoleRefs(List<Vocabulary> europeanaRoleRefs) {
+    this.europeanaRoleRefs = europeanaRoleRefs;
+  }
+
+  @JsonGetter(EUROPEANA_ROLE_VOCABULARIES)
+  public List<Vocabulary> getEuropeanaRoleVocabularies() {
+    return europeanaRoleVocabularies;
+  }
+
+  @JsonSetter(EUROPEANA_ROLE_VOCABULARIES)
+  public void setEuropeanaRoleVocabularies(List<Vocabulary> europeanaRoleVocabularies) {
+    this.europeanaRoleVocabularies = europeanaRoleVocabularies;
+  }
+
 }

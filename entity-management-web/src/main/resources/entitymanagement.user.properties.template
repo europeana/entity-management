@@ -49,4 +49,4 @@ europeana.searchapi.urlPrefix=https://<api_endpoint>/record/v2/search.json?wskey
 #zoho.generate.organization.europeanaid=false
 
 zoho.country.mapping=
-zoho.role.mapping=
+
