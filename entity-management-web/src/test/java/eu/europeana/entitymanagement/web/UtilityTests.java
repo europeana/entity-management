@@ -4,6 +4,7 @@ import static eu.europeana.entitymanagement.solr.SolrUtils.createSolrEntity;
 import static eu.europeana.entitymanagement.testutils.UnitTestUtils.loadFile;
 import java.util.List;
 import javax.xml.bind.JAXBContext;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -21,7 +22,7 @@ import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
 
 @SpringBootTest
-//@Disabled("Excluded from automated runs")
+@Disabled("Excluded from automated runs")
 public class UtilityTests {
 
   @Qualifier(AppConfig.BEAN_EM_SOLR_SERVICE)
@@ -53,7 +54,7 @@ public class UtilityTests {
     }    
   }
   
-  @Test
+//  @Test
   public void saveVocabulariesToMongo() throws Exception {
     List<XmlBaseEntityImpl<?>> xmlEntities = MetisDereferenceUtils.parseMetisResponseMany(
         jaxbContext.createUnmarshaller(), loadFile("/metis-deref-unittest/roles.xml"));
