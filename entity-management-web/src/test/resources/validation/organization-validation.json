@@ -70,14 +70,6 @@
     "ru": "музей в Голландии",
     "wrong-for-testing-2": "Природничий музей в місті Лейден, Нідерланди"
   },
-  "europeanaRole": {
-    "en": [
-      "Data Provider"
-    ],
-    "de": [
-      "text"
-    ]
-  },
   "organizationDomain": {
     "en": [
       "GLAM"
