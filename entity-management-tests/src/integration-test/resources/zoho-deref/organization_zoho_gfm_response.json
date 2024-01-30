@@ -4,7 +4,7 @@
   "DEA_Sent": false,
   "Lang_Alternative_1":"SV(Swedish)",
   "Image_service_Opt_in": false,
-  "Country": "Sweden",
+  "Organisation_Country": "Sweden, SE",
   "Geographic_Level": [],
   "Alternative_1":"Gotlands försvarsmuseum",
   "Lang_Organisation_Name": "EN(English)",
@@ -13,8 +13,8 @@
   "Sector": "Cultural Heritage",
   "SameAs_1": "http://www.wikidata.org/entity/Q28933300",
   "SameAs_2": "http://isni.org/isni/000000012159802X",
-  "Organisation_Role2": [
-    "Data Provider"
+  "Organisation_Role": [
+    "Providing Institution"
   ],
   "Latitude": "-1",
   "Longitude": "-1"

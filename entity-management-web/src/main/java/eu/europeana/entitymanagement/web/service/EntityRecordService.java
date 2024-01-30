@@ -104,7 +104,7 @@ public class EntityRecordService {
   // Fields to be ignored during consolidation ("type" is final, so it cannot be updated)
   private static final Set<String> ignoredMergeFields = Set.of("type");
 
-  private List<ZohoMapping> countryMapping;
+  private Map<String, String> countryMapping;
   private ObjectMapper emJsonMapper;
 
   @Autowired
@@ -130,7 +130,8 @@ public class EntityRecordService {
       assert inputStream != null;
       try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
         String contents = reader.lines().collect(Collectors.joining(System.lineSeparator()));
-        countryMapping = emJsonMapper.readValue(contents, new TypeReference<List<ZohoMapping>>(){});
+        List<ZohoMapping> countryMapList = emJsonMapper.readValue(contents, new TypeReference<List<ZohoMapping>>(){});
+        countryMapping=countryMapList.stream().collect(Collectors.toMap(ZohoMapping::getZohoLabel, ZohoMapping::getEntityUri));
       }
     }
   }
@@ -1285,6 +1286,7 @@ public class EntityRecordService {
     
   public void dropRepository() {
     this.entityRecordRepository.dropCollection();
+    this.vocabRepository.dropCollection();
   }
 
   /**
@@ -1469,7 +1471,7 @@ public class EntityRecordService {
       
       //map the country field 
       if(org.getAddress()!=null && org.getAddress().getVcardCountryName()!=null) {
-        String countryUri = ZohoMapping.getEntityUriFromName(countryMapping, org.getAddress().getVcardCountryName());
+        String countryUri = countryMapping.get(org.getAddress().getVcardCountryName());
         if(StringUtils.isBlank(countryUri)) {
           logger.info("The mapping for the country: {}, to the europeana uri does not exist.", org.getAddress().getVcardCountryName());
         }

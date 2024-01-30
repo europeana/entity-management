@@ -10,7 +10,7 @@
   "City": "Brussels",
   "Content_Language": "NL(Dutch)",
   "Image_service_Opt_in": false,
-  "Country": "Belgium",
+  "Organisation_Country": "Belgium, BE",
   "Geographic_Level": [
     "Regional"
   ],
@@ -22,7 +22,7 @@
   "ZIP_code": "1000",
   "Account_Name": "PCCE (Provincial Centre for Cultural Heritage)",
   "Sector": "Cultural Heritage",
-  "Organisation_Role2": [
+  "Organisation_Role": [
     "Data Provider"
   ],
   "Tag": [],

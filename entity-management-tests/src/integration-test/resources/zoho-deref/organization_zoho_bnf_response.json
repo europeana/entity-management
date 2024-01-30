@@ -13,7 +13,7 @@
 	"Alternative_1": "FR(French)",
 	"City": "Paris",
 	"Longitude": "2.3758333",
-	"Country": "France",
+	"Organisation_Country": "France, FR",
 	"Description": "The Bibliothèque nationale de France (BnF; French: [bi.bli.jɔ.tɛk na.sjɔ.nal də fʁɑ̃s]) is the National Library of France, located in Paris. It is the national repository of all that is published in France and also holds extensive historical collections.",
 	"Geographic_Level": [
 		"National"
@@ -34,7 +34,7 @@
 	"Industry_2": [
 		"Library"
 	],
-	"Organisation_Role2": [
+	"Organisation_Role": [
 		"Data Provider",
 		"Provider"
 	],

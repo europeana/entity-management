@@ -10,11 +10,11 @@
   "DEA_Signed": true,
   "Account_Name": "Berger museum",
   "Sector": "Cultural Heritage",
-  "Organisation_Role2": [
+  "Organisation_Role": [
     "Data Provider"
   ],
   "SameAs_1": "http://www.wikidata.org/entity/Q23014463",
-  "Country": "Norway",
+  "Organisation_Country": "Norway, NO",
   "Tag": [],
   "Latitude": "-1",
   "Longitude": "-1"

@@ -21,8 +21,7 @@ public final class ZohoConstants {
   public static final String METIS_USER_FIELD = "Metis_user";
   public static final String ACCOUNT_ROLE_FIELD =
       "Pick_List_3"; // This is the Account/Organization Role field
-  public static final String ORGANIZATION_ROLE_FIELD = "Organisation_Role2";
-  public static final String INSTITUTION_ROLE_FIELD = "Institution_Role";
+  public static final String ORGANIZATION_ROLE_FIELD = "Organisation_Role";
   public static final String OFFICIAL_LANGUAGE_FIELD = "Official_Language";
   public static final String LANG_ORGANIZATION_NAME_FIELD = "Lang_Organisation_Name";
   public static final String LANG_ALTERNATIVE_FIELD = "Lang_Alternative";
@@ -37,7 +36,7 @@ public final class ZohoConstants {
   public static final String SAME_AS_FIELD = "SameAs";
   public static final String STREET_FIELD = "Street";
   public static final String CITY_FIELD = "City";
-  public static final String COUNTRY_FIELD = "Country";
+  public static final String COUNTRY_FIELD = "Organisation_Country";
   public static final String ZIP_CODE_FIELD = "ZIP_code";
   public static final String PO_BOX_FIELD = "PO_box";
   public static final String LATITUDE_FIELD = "Latitude";

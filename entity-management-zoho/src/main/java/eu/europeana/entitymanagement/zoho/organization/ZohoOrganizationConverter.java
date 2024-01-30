@@ -29,10 +29,10 @@ public class ZohoOrganizationConverter {
   private static Map<String, String> roleMapping ;
   static {
     roleMapping = new HashMap<>();
-    roleMapping.put("Providing Institution", "http://data.europeana.eu/vocabulary/role/ProvidingInstitution"); 
-    roleMapping.put("Aggregator", "http://data.europeana.eu/vocabulary/role/Aggregator"); 
-    roleMapping.put("Accredited Aggregator", "http://data.europeana.eu/vocabulary/role/AccreditedAggregator");
-    roleMapping.put("Potential Providing Institution", "http://data.europeana.eu/vocabulary/role/ProvidingInstitution");
+    roleMapping.put("providing institution", "http://data.europeana.eu/vocabulary/role/ProvidingInstitution"); 
+    roleMapping.put("aggregator", "http://data.europeana.eu/vocabulary/role/Aggregator"); 
+    roleMapping.put("accredited aggregator", "http://data.europeana.eu/vocabulary/role/AccreditedAggregator");
+    roleMapping.put("potential providing institution", "http://data.europeana.eu/vocabulary/role/ProvidingInstitution");
   }   
   
   public static Organization convertToOrganizationEntity(Record zohoRecord, String zohoBaseUrl) {
@@ -65,10 +65,18 @@ public class ZohoOrganizationConverter {
 //          ZohoUtils.createLanguageMapOfStringList(
 //              Locale.ENGLISH.getLanguage(), organizationRoleStringList));
 //    }
-    List<String> institutionRoleStringList =
-        ZohoUtils.stringListSupplier(zohoRecord.getKeyValue(ZohoConstants.INSTITUTION_ROLE_FIELD));
-    if (!institutionRoleStringList.isEmpty()) {
-      org.setEuropeanaRole(institutionRoleStringList.stream().map(e -> roleMapping.get(e)).toList());
+    List<String> orgRoleZohoList =
+        ZohoUtils.stringListSupplier(zohoRecord.getKeyValue(ZohoConstants.ORGANIZATION_ROLE_FIELD));
+    if (!orgRoleZohoList.isEmpty()) {
+      List<String> orgRoleList = new ArrayList<>();
+      for(String orgRoleZoho : orgRoleZohoList) {
+        if(roleMapping.containsKey(orgRoleZoho.toLowerCase())) {
+          orgRoleList.add(roleMapping.get(orgRoleZoho.toLowerCase()));
+        }
+      }
+      if(! orgRoleList.isEmpty()) {
+        org.setEuropeanaRole(orgRoleList);
+      }
     }
 
     Address address = new Address();

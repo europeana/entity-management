@@ -89,13 +89,15 @@ public class EntityFieldsCleaner {
           String[] normalized = normalizedList.toArray(new String[0]);
           entity.setFieldValue(field, normalized);
         } else if (fieldType.isAssignableFrom(List.class)) {
-          List<String> fieldValueList = (List<String>) fieldValue;
-          if (fieldValueList.isEmpty()) {
+          List<?> fieldValueList = (List<?>) fieldValue;
+          if(fieldValueList.isEmpty() || !(fieldValueList.get(0) instanceof String)) {
             continue;
           }
+          
+          List<String> fieldValueListString = (List<String>) fieldValue;
 
           // remove spaces from the List<String> fields
-          List<String> normalizedList = normalizeValues(field.getName(), fieldValueList);
+          List<String> normalizedList = normalizeValues(field.getName(), fieldValueListString);
 
           // if Entity field is supposed to contain a single element, remove all elements
           // except the
@@ -125,7 +127,7 @@ public class EntityFieldsCleaner {
           e);
     }
   }
-
+  
   private WebResource normalizeWebResource(WebResource existingFieldValue) {
     WebResource webResource = new WebResource(existingFieldValue);
 

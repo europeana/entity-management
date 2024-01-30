@@ -9,8 +9,8 @@ public interface WebEntityFields {
   public static final String LANGUAGE_EN = "en";
   public static final String BASE_DATA_EUROPEANA_URI = "http://data.europeana.eu/";
   public static final String WIKIDATA_HOST = "www.wikidata.org";
-  public static final String ZOHO_CRM_HOST = "crm.zoho.com";
-//  public static final String ZOHO_CRM_HOST = "crm.zoho.eu";
+//  public static final String ZOHO_CRM_HOST = "crm.zoho.com";
+  public static final String ZOHO_CRM_HOST = "crm.zoho.eu";
 
   // common fields
   public static final String ID = "id";

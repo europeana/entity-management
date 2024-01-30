@@ -35,4 +35,7 @@ public class VocabularyRepository  {
     return datastore.save(vocabs);
   }
 
+  public void dropCollection() {
+    datastore.getMapper().getCollection(Vocabulary.class).drop();
+  }
 }

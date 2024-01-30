@@ -10,8 +10,8 @@
     <!-- 'europeana' id required for this data source. See DataSources class  -->
     <source url="https://www.europeana.eu/"  					   rights="https://creativecommons.org/publicdomain/zero/1.0/"    id="europeana"/>
     <!-- 'europeana' id required for this data source. See DataSources class  -->
-    <source url="https://crm.zoho.com/"  					   		rights="https://creativecommons.org/publicdomain/zero/1.0/"    id="zoho-crm"/>
-<!--    <source url="https://crm.zoho.eu/"  					   		rights="https://creativecommons.org/publicdomain/zero/1.0/"    id="zoho-crm"/>  -->
+<!--    <source url="https://crm.zoho.com/"  					   		rights="https://creativecommons.org/publicdomain/zero/1.0/"    id="zoho-crm"/>  -->
+    <source url="https://crm.zoho.eu/"  					   		rights="https://creativecommons.org/publicdomain/zero/1.0/"    id="zoho-crm"/>
     <source url="http://bib.arts.kuleuven.be/photoVocabulary/" 		rights="https://creativecommons.org/publicdomain/zero/1.0/"   id="photoconsortium" frequency="static"/>
     
 </config>
