@@ -35,8 +35,7 @@ public class ZohoDereferenceService implements Dereferencer {
     Optional<Record> zohoOrganization =
         zohoConfiguration.getZohoAccessClient().getZohoRecordOrganizationById(id);
     
-        
-      System.out.println(serialize(zohoOrganization.get())); 
+    //enable when you need to print the data for debuging purposes System.out.println(serialize(zohoOrganization.get())); 
 
     if(zohoOrganization.isPresent()) {
       return Optional.of(
