@@ -23,6 +23,7 @@ import com.zoho.crm.api.ParameterMap;
 import com.zoho.crm.api.SDKConfig;
 import com.zoho.crm.api.UserSignature;
 import com.zoho.crm.api.dc.DataCenter.Environment;
+import com.zoho.crm.api.dc.EUDataCenter;
 import com.zoho.crm.api.dc.USDataCenter;
 import com.zoho.crm.api.exception.SDKException;
 import com.zoho.crm.api.record.APIException;
@@ -84,7 +85,8 @@ public class ZohoAccessClient {
           new OAuthToken(clientId, clientSecret, refreshToken, TokenType.REFRESH, redirectUrl);
       SDKConfig sdkConfig =
           new SDKConfig.Builder().setAutoRefreshFields(false).setPickListValidation(true).build();
-      Environment environment = USDataCenter.PRODUCTION;
+      //Environment environment = USDataCenter.PRODUCTION;
+      Environment environment = EUDataCenter.PRODUCTION;
       String resourcePath = SystemUtils.getUserHome().getAbsolutePath();
       // Does not generate any tokens, we'll need to execute a command to do so
       Initializer.initialize(

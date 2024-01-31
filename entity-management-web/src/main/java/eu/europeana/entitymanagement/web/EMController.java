@@ -72,6 +72,7 @@ import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
+import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 import io.swagger.annotations.ApiOperation;
 
 @RestController
@@ -521,8 +522,7 @@ public class EMController extends BaseRest {
 
     // in case of Organization it must be the zoho Organization
     String creationRequestType = europeanaProxyEntity.getType();
-    if (EntityTypes.isOrganization(creationRequestType)
-        && !creationRequestId.contains(DataSource.ZOHO_HOST)) {
+    if (!ZohoUtils.isZohoOrganization(creationRequestId, creationRequestType)) {
       throw new HttpBadRequestException(String.format(
           "The Organization entity should come from Zoho and have the corresponding id format containing: %s",
           DataSource.ZOHO_HOST));

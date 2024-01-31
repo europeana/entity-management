@@ -169,7 +169,7 @@ public class IntegrationTestUtils {
   public static final String INVALID_MIGRATION_ID = "http://www.testing.org/entity/testing";
 
   public static final String ORGANIZATION_BNF_URI_ZOHO =
-      "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000002112001";
+      "https://crm.zoho.eu/crm/org20085137532/tab/Accounts/486281000000938399";
   public static final String ORGANIZATION_NATURALIS_URI_ZOHO =
       "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000000370517";
   public static final String ORGANIZATION_PCCE_URI_ZOHO =

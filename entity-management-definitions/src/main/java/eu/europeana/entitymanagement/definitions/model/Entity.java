@@ -239,6 +239,10 @@ public abstract class Entity implements ValidationObject {
 
   public void setFieldValue(Field field, Object value)
       throws IllegalAccessException {
+    if(TYPE.equals(field.getName())) {
+      //type is immutable must not be overwritten
+      return;
+    }
     field.set(this, value);
   }
 

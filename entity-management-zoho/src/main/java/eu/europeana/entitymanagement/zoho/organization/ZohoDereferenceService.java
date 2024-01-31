@@ -1,7 +1,6 @@
 package eu.europeana.entitymanagement.zoho.organization;
 
 import java.text.SimpleDateFormat;
-import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
@@ -9,11 +8,12 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.zoho.crm.api.record.Record;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.definitions.model.CountryMapping;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.dereference.Dereferencer;
 
@@ -34,8 +34,9 @@ public class ZohoDereferenceService implements Dereferencer {
 
     Optional<Record> zohoOrganization =
         zohoConfiguration.getZohoAccessClient().getZohoRecordOrganizationById(id);
-    //    Gson resp = new Gson();
-    //    System.out.println(resp.toJson(zohoOrganization.get().getKeyValues()));
+    
+        
+      System.out.println(serialize(zohoOrganization.get())); 
 
     if(zohoOrganization.isPresent()) {
       return Optional.of(
@@ -57,7 +58,7 @@ public class ZohoDereferenceService implements Dereferencer {
             .serializationInclusion(JsonInclude.Include.NON_NULL)
             .build();
     mapper.findAndRegisterModules();
-    return mapper.writeValueAsString(zohoRecord.getKeyValues());
+    return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(zohoRecord.getKeyValues());
   }
 
 }

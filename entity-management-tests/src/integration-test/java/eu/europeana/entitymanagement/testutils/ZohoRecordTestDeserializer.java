@@ -99,7 +99,13 @@ public class ZohoRecordTestDeserializer extends StdDeserializer<Record> {
         List<Choice<?>> values = new ArrayList<Choice<?>>();
         currentNode.elements().forEachRemaining(v -> values.add(new Choice<String>(v.asText())));
         record.addKeyValue(key, values);
-      }
+      }else if (currentNode.isContainerNode()){
+        System.out.println("container node: " + key);
+      }else if(currentNode.isPojo()) {
+        System.out.println("pojo node: " + key);
+      }else if(currentNode.isObject()) {
+        System.out.println("object node: " + key);
+      } 
     }
 
     // add fields with numeric suffixes

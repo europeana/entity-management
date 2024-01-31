@@ -28,7 +28,7 @@ import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 // enable test config to use zoho mocking
 @Import(TestConfig.class)
 // enable tests only on local machine
-// @Disabled
+//@Disabled
 @SpringBootTest
 public class DereferenceServiceIT extends AbstractIntegrationTest {
 
@@ -65,7 +65,7 @@ public class DereferenceServiceIT extends AbstractIntegrationTest {
     assertEquals(8, entity.getNote().size());
   }
 
-  // @Test
+  @Test
   public void zohoOrganizationDereferenceTest() throws Exception {
     String organizationId = IntegrationTestUtils.ORGANIZATION_BNF_URI_ZOHO;    
     Dereferencer dereferencer =
