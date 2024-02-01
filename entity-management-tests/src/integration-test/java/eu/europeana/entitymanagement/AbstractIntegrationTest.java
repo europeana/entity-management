@@ -65,7 +65,7 @@ public abstract class AbstractIntegrationTest {
   @Autowired protected ConceptSchemeService emConceptSchemeService;
   @Autowired protected EntityManagementConfiguration emConfig;
   @Autowired protected ZohoConfiguration zohoConfiguration;
-  
+    
   static {
     MONGO_CONTAINER =
         new MongoContainer("entity-management", "job-repository", "enrichment")
@@ -78,6 +78,8 @@ public abstract class AbstractIntegrationTest {
             .withLogConsumer(new WaitingConsumer().andThen(new ToStringConsumer()));
 
     SOLR_CONTAINER.start();
+    
+
   }
 
   /** MockWebServer needs to be static, so we can inject its port into the Spring context. */
@@ -101,6 +103,7 @@ public abstract class AbstractIntegrationTest {
     mockSearchAndRecord = new MockWebServer();
     mockSearchAndRecord.setDispatcher(setupSearchAndRecordDispatcher());
     mockSearchAndRecord.start();
+    
   }
 
   @AfterAll

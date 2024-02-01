@@ -16,7 +16,7 @@ import eu.europeana.entitymanagement.zoho.organization.ZohoConfiguration;
 public class TestConfig {
 
   
-  public static final String MOCK_ZOHO_BASE_URL = "https://crm.zoho.com/crm/org51823723/tab/Accounts/";
+  public static final String MOCK_ZOHO_BASE_URL = "https://crm.zoho.eu/crm/org20085137532/tab/Accounts/";
   public static final String MOCK_ZOHO_COUNTRY_MAPPING_FILE = "/zoho_country_mapping_test.json";
   
   @Autowired
@@ -32,7 +32,7 @@ public class TestConfig {
     ZohoConfiguration zohoConfiguration = Mockito.mock(ZohoConfiguration.class);
     ZohoAccessClient zohoClient = Mockito.mock(ZohoAccessClient.class);
     Mockito.when(zohoConfiguration.getZohoAccessClient()).thenReturn(zohoClient);
-    Mockito.when(zohoConfiguration.getZohoBaseUrl()).thenReturn(zohoConfiguration.getZohoBaseUrl());
+    Mockito.when(zohoConfiguration.getZohoBaseUrl()).thenReturn(MOCK_ZOHO_BASE_URL);
 
     // find matching JSON file based on zohoId argument, then create a Record object for it
     Mockito.doAnswer(

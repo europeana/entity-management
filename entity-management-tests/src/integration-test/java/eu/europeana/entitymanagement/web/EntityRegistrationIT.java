@@ -273,7 +273,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                 Matchers.hasItems(
                     IntegrationTestUtils.ORGANIZATION_BERGER_MUSEUM_WIKIDATA_URI,
                     IntegrationTestUtils.ORGANIZATION_BERGER_MUSEUM_URI_ZOHO)))
-        .andExpect(jsonPath("$.prefLabel[*]", hasSize(1)))
+        .andExpect(jsonPath("$.prefLabel[*]", hasSize(2)))
         // should have Europeana, Zoho and Wikidata proxies
         .andExpect(jsonPath("$.proxies", hasSize(3)));
 

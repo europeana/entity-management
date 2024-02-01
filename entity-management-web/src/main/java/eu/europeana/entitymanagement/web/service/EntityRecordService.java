@@ -152,7 +152,6 @@ public class EntityRecordService {
     return entityRecord;
   }
 
-  @SuppressWarnings("incomplete-switch")
   void dereferenceLinkedEntities(EntityRecord entityRecord) {
     //dereference links for organizations
     if(EntityTypes.isOrganization(entityRecord.getEntity().getType())) {

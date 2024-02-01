@@ -171,13 +171,14 @@ public class IntegrationTestUtils {
   public static final String ORGANIZATION_BNF_URI_ZOHO =
       "https://crm.zoho.eu/crm/org20085137532/tab/Accounts/486281000000938399";
   public static final String ORGANIZATION_NATURALIS_URI_ZOHO =
-      "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000000370517";
+      "https://crm.zoho.eu/crm/org20085137532/tab/Accounts/486281000000923816";
   public static final String ORGANIZATION_PCCE_URI_ZOHO =
-      "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000000338555";
+      "https://crm.zoho.eu/crm/org20085137532/tab/Accounts/486281000000923271";
   public static final String ORGANIZATION_GFM_URI_ZOHO =
-      "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000004503618";
+      "https://crm.zoho.eu/crm/org20085137532/tab/Accounts/486281000000940433";
   public static final String ORGANIZATION_BERGER_MUSEUM_URI_ZOHO =
-      "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000004477407";
+      "https://crm.zoho.eu/crm/org20085137532/tab/Accounts/486281000000939337";
+  
   public static final String ORGANIZATION_NATURALIS_URI_WIKIDATA_PATH_SUFFIX = "/entity/Q641676";
   public static final String ORGANIZATION_NATURALIS_URI_WIKIDATA_URI =
       WIKIDATA_BASE_URI + ORGANIZATION_NATURALIS_URI_WIKIDATA_PATH_SUFFIX;

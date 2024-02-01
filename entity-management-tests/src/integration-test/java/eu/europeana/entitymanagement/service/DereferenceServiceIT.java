@@ -84,9 +84,9 @@ public class DereferenceServiceIT extends AbstractIntegrationTest {
     Assertions.assertNotNull(org.getLogo());
     Assertions.assertNotNull(org.getAddress().getVcardStreetAddress());
     Assertions.assertNotNull(org.getAddress().getVcardCountryName());
+    Assertions.assertTrue(org.getHiddenLabel().contains("BN Paris (blíže neurčeno)"));
     Assertions.assertTrue(org.getHiddenLabel().contains("Bibliothèque nationale"));
-    Assertions.assertTrue(org.getHiddenLabel().contains("Bibliothèque nationale Francaise"));
-    Assertions.assertTrue(org.getHiddenLabel().contains("French National Library"));
+    Assertions.assertTrue(org.getHiddenLabel().contains("Bibliothèque nationale Francaise French National Library"));
   }
 
 //  @Test

@@ -37,10 +37,10 @@ public class ZohoTestDataGenerator {
   public void generateBNFJson() throws Exception {
     //get original zoho record
     Optional<Record> zohoOrganization =
-        zohoConfiguration.getZohoAccessClient().getZohoRecordOrganizationById(IntegrationTestUtils.ORGANIZATION_BNF_URI_ZOHO);
+        zohoConfiguration.getZohoAccessClient().getZohoRecordOrganizationById(IntegrationTestUtils.ORGANIZATION_PCCE_URI_ZOHO);
     String zohoRecord = getZohoDereferenceService().serialize(zohoOrganization.get());
     //if you need to see original enable : System.out.println(zohoRecord);
-//    System.out.println(zohoRecord);
+    System.out.println(zohoRecord);
     
     //deserialize data with the test deserializer
     ZohoRecordTestDeserializer zohoRecordDeserializer = new ZohoRecordTestDeserializer();

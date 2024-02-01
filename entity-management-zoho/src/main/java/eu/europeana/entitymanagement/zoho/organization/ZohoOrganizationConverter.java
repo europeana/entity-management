@@ -2,12 +2,12 @@ package eu.europeana.entitymanagement.zoho.organization;
 
 import static eu.europeana.entitymanagement.zoho.utils.ZohoUtils.toIsoLanguage;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -79,7 +79,7 @@ public class ZohoOrganizationConverter {
         String entityUri = countryMappings.get(zohoCountryLabel).getEntityUri();
         org.setCountryId(entityUri);
       } else if(logger.isInfoEnabled()){
-        logger.info("The mapping for the zoho country label: {}, to the europeana uri does not exist.", org.getCountry());
+        logger.info("The mapping for the zoho country label: {}, to the europeana uri does not exist.", zohoCountryLabel);
       }
     }
     
@@ -91,11 +91,10 @@ public class ZohoOrganizationConverter {
       org.setAddress(address);
     }
 
-    List<String> edmLanguage =
-        ZohoUtils.stringListSupplier(zohoRecord.getKeyValue(ZohoConstants.OFFICIAL_LANGUAGE_FIELD));
-    if (!edmLanguage.isEmpty()) {
-      List<String> edmISOLanguage =
-          edmLanguage.stream().map(ZohoUtils::toIsoLanguage).collect(Collectors.toList());
+    String edmLanguage =
+        ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.OFFICIAL_LANGUAGE_FIELD));
+    if (edmLanguage!=null) {
+      List<String> edmISOLanguage = Arrays.asList(ZohoUtils.toIsoLanguage(edmLanguage));
       org.setLanguage(edmISOLanguage);
     }
 
@@ -120,7 +119,7 @@ public class ZohoOrganizationConverter {
 
   private static String extractCountryName(String zohoCountryLabel) {
     //get only the country name from zohoLabels (e.g France, FR)
-    return StringUtils.substringBeforeLast(zohoCountryLabel, ",");
+    return StringUtils.substringBeforeLast(zohoCountryLabel, ",").trim();
   }
 
   private static WebResource buildWebResource(Record zohoRecord, String logoFieldName) {
@@ -199,7 +198,8 @@ public class ZohoOrganizationConverter {
       return Collections.emptyList();
     }
 
-    return List.of(StringUtils.split(textArea, "\n"));
+    //regex to split on any new line system variations ("\n", "\r\n", or "\r") 
+    return List.of(textArea.split("\\r?\\n|\\r"));
   }
 
   static String getIsoLanguage(Record zohoRecord, String zohoLangFieldName) {

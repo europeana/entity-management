@@ -523,8 +523,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
         .andExpect(jsonPath("$.id", is(entityId)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
         .andExpect(jsonPath("$.sameAs").isNotEmpty())
-        .andExpect(jsonPath("$.countryId", is("http://data.europeana.eu/place/1")))
-        .andExpect(jsonPath("$.countryPlace.prefLabel.en", is("Sweden")));
+        .andExpect(jsonPath("$.country.prefLabel.en", is("Sweden")));
   }
 
   @Test
@@ -547,7 +546,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
         .andExpect(jsonPath("$.id", is(entityId)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
         .andExpect(jsonPath("$.sameAs").isNotEmpty())
-        .andExpect(jsonPath("$.countryId").isNotEmpty())
+        .andExpect(jsonPath("$.hasAddress.countryName").isNotEmpty())
         .andExpect(jsonPath("$.countryPlace").doesNotExist());
   }
 

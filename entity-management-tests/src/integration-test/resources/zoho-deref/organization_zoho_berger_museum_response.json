@@ -1,21 +1,19 @@
 {
-  "Last_Activity_Time": "2021-11-23T14:08:03+01:00",
-  "id": "1482250000004477407",
-  "Industry": "Museum",
-  "Working_Language": "NO(NORSK)",
-  "DEA_Sent": true,
-  "Content_Language": "NO(NORSK)",
-  "Image_service_Opt_in": false,
-  "Lang_Organisation_Name": "NO(NORSK)",
-  "DEA_Signed": true,
-  "Account_Name": "Berger museum",
-  "Sector": "Cultural Heritage",
-  "Organisation_Role2": [
-    "Data Provider"
+  "Organisation_Role" : [
+    "Providing institution"
   ],
-  "SameAs_1": "http://www.wikidata.org/entity/Q23014463",
-  "Country": "Norway",
-  "Tag": [],
-  "Latitude": "-1",
-  "Longitude": "-1"
+  "Organisation_Country" : "Norway, NO",
+  "id" : 486281000000939337,
+  "Lang_Alternative_1" : "NO(Norwegian)",
+  "Subsector" : "Museum",
+  "Alternative_1" : "Berger museum",
+  "Website" : "https://vestfoldmuseene.no/berger-museum/",
+  "Lang_Organisation_Name" : "EN(English)",
+  "Zoho_ID" : "zcrm_1482250000004477407",
+  "Account_Name" : "Berger museum",
+  "Official_language" : "NO(Norwegian)",
+  "Sector" : "Cultural heritage",
+  "SameAs_1" : "http://www.wikidata.org/entity/Q23014463",
+  "Continent" : "Europe",
+  "Tag" : [ ]
 }

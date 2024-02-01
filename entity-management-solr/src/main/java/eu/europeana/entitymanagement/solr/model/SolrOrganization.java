@@ -8,7 +8,6 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.solr.client.solrj.beans.Field;
 import eu.europeana.entitymanagement.definitions.model.Address;
 import eu.europeana.entitymanagement.definitions.model.Organization;
-import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.solr.SolrUtils;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
@@ -40,17 +39,8 @@ public class SolrOrganization extends SolrEntity<Organization> {
   @Field(OrganizationSolrFields.EUROPEANA_ROLE_ALL)
   private Map<String, List<String>> europeanaRole;
 
-  @Field(OrganizationSolrFields.COUNTRY_ID)
-  private String countryId;
-
-  @Field(OrganizationSolrFields.COUNTRY_PREF_LABEL_ALL)
-  private Map<String, String> countryPrefLabel;
-
-  @Field(OrganizationSolrFields.COUNTRY_LAT)
-  private Float countryLatitude;
-
-  @Field(OrganizationSolrFields.COUNTRY_LONG)
-  private Float countryLongitude;
+  @Field(OrganizationSolrFields.COUNTRY)
+  private String country;
 
   @Field(OrganizationSolrFields.VCARD_HAS_ADDRESS)
   private String hasAddress;
@@ -93,12 +83,7 @@ public class SolrOrganization extends SolrEntity<Organization> {
     if (organization.getMbox() != null) this.mbox = new ArrayList<>(organization.getMbox());
     setEuropeanaRole(organization.getEuropeanaRole());
     
-    if(organization.getCountry()!=null) {
-      this.countryId = organization.getCountry().getEntityId();
-      this.setCountryPrefLabel(organization.getCountry().getPrefLabel());
-      this.countryLatitude = ((Place) organization.getCountry()).getLatitude();
-      this.countryLongitude = ((Place) organization.getCountry()).getLongitude();
-    }
+    this.country=organization.getCountryId();
     
     if (organization.getSameReferenceLinks() != null) {
       this.sameAs = new ArrayList<>(organization.getSameReferenceLinks());
@@ -145,16 +130,6 @@ public class SolrOrganization extends SolrEntity<Organization> {
     }
   }
   
-  private void setCountryPrefLabel(Map<String, String> prefLabel) {
-    if (MapUtils.isNotEmpty(prefLabel)) {
-      this.countryPrefLabel =
-          new HashMap<>(
-              SolrUtils.normalizeStringMapByAddingPrefix(
-                  OrganizationSolrFields.COUNTRY_PREF_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
-                  prefLabel));
-    }
-  }
-
   public Map<String, String> getDescription() {
     return description;
   }
@@ -220,19 +195,7 @@ public class SolrOrganization extends SolrEntity<Organization> {
     this.sameAs = uris;
   }
 
-  public String getCountryId() {
-    return countryId;
-  }
-
-  public Map<String, String> getCountryPrefLabel() {
-    return countryPrefLabel;
-  }
-
-  public Float getCountryLatitude() {
-    return countryLatitude;
-  }
-
-  public Float getCountryLongitude() {
-    return countryLongitude;
+  public String getCountry() {
+    return country;
   }
 }

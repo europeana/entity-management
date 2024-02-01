@@ -20,11 +20,11 @@ import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LATITUDE_FI
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LONGITUDE_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.OFFICIAL_LANGUAGE_FIELD;
-import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.ORGANIZATION_COUNTRY_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.ORGANIZATION_ROLE_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.PO_BOX_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.SAME_AS_CODE_LENGTH;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.SAME_AS_FIELD;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.STREET_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.WEBSITE_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.ZIP_CODE_FIELD;
 import java.io.IOException;
@@ -57,7 +57,7 @@ public class ZohoRecordTestDeserializer extends StdDeserializer<Record> {
           ACRONYM_FIELD,
           LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD,
           WEBSITE_FIELD,
-          ORGANIZATION_COUNTRY_FIELD,
+          STREET_FIELD,
           CITY_FIELD,
           COUNTRY_FIELD,
           ZIP_CODE_FIELD,
