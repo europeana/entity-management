@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
   ENTITY_URI,
   WIKIDATA_URI
 })
-public class CountryMapping {
+public class ZohoLabelUriMapping {
 
   private String zohoLabel;
   private String entityUri;

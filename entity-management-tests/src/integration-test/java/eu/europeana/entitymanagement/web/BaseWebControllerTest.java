@@ -30,6 +30,7 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
+import eu.europeana.entitymanagement.mongo.repository.VocabularyRepository;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
@@ -53,6 +54,8 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
   protected SolrService emSolrService;
 
   @Autowired private WebApplicationContext webApplicationContext;
+  
+  @Autowired protected VocabularyRepository vocabRepository;
 
   @BeforeEach
   protected void setup() throws Exception {
@@ -176,7 +179,8 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
         ZohoOrganizationConverter.convertToOrganizationEntity(
             zohoRecord, 
             zohoConfiguration.getZohoBaseUrl(),
-            emConfig.getCountryMappings());
+            emConfig.getCountryMappings(),
+            emConfig.getRoleMappings());
     EntityRecord savedRecord =
         entityRecordService.createEntityFromRequest(
             europeanaProxyEntity, zohoOrganization, dataSource, null);

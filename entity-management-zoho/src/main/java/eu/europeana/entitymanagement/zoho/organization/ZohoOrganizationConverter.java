@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -15,9 +14,9 @@ import org.springframework.lang.NonNull;
 import com.zoho.crm.api.record.Record;
 import com.zoho.crm.api.users.User;
 import eu.europeana.entitymanagement.definitions.model.Address;
-import eu.europeana.entitymanagement.definitions.model.CountryMapping;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
+import eu.europeana.entitymanagement.definitions.model.ZohoLabelUriMapping;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
@@ -28,7 +27,8 @@ public class ZohoOrganizationConverter {
 
   private static final String POSITION_SEPARATOR = "_";
   
-  public static Organization convertToOrganizationEntity(Record zohoRecord, String zohoBaseUrl,  @NonNull final Map<String, CountryMapping> countryMappings) {
+  public static Organization convertToOrganizationEntity(Record zohoRecord, String zohoBaseUrl,  @NonNull final Map<String, ZohoLabelUriMapping> countryMappings,
+      @NonNull final Map<String, String> roleMappings) {
     Organization org = new Organization();
     Long zohoId = zohoRecord.getId();
     org.setAbout(ZohoUtils.buildZohoOrganizationId(zohoBaseUrl, zohoRecord.getId()));
@@ -51,12 +51,19 @@ public class ZohoOrganizationConverter {
     String logoFieldName = ZohoConstants.LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD;
     org.setLogo(buildWebResource(zohoRecord, logoFieldName));
     org.setHomepage(getStringFieldValue(zohoRecord, ZohoConstants.WEBSITE_FIELD));
-    List<String> organizationRoleStringList =
+    
+    List<String> orgRoleLabels =
         ZohoUtils.stringListSupplier(zohoRecord.getKeyValue(ZohoConstants.ORGANIZATION_ROLE_FIELD));
-    if (!organizationRoleStringList.isEmpty()) {
-      org.setEuropeanaRole(
-          ZohoUtils.createLanguageMapOfStringList(
-              Locale.ENGLISH.getLanguage(), organizationRoleStringList));
+    if (!orgRoleLabels.isEmpty()) {
+      List<String> orgRoleIds = new ArrayList<>();
+      for(String roleLabel : orgRoleLabels) {
+        if(roleMappings.containsKey(roleLabel.toLowerCase())) {
+          orgRoleIds.add(roleMappings.get(roleLabel.toLowerCase()));
+        }
+      }
+      if(! orgRoleIds.isEmpty()) {
+        org.setEuropeanaRoleIds(orgRoleIds);
+      }
     }
 
     //build address object

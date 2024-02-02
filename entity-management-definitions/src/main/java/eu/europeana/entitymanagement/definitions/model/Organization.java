@@ -65,13 +65,18 @@ public class Organization extends Entity {
   private String homepage;
   private List<String> phone;
   private List<String> mbox;
-  private Map<String, List<String>> europeanaRole;
   
   @Reference(lazy = true)
   private EntityRecord countryRef;
   private String countryId;
   @Transient
   private Place country;
+  
+  private List<String> europeanaRoleIds;
+  @Reference(lazy = true)
+  private List<Vocabulary> europeanaRoleRefs;
+  @Transient
+  private List<Vocabulary> europeanaRole;
   
   private Address hasAddress;
   private List<String> sameAs;
@@ -89,9 +94,11 @@ public class Organization extends Entity {
     this.homepage = copy.getHomepage();
     if (copy.getPhone() != null) this.phone = new ArrayList<>(copy.getPhone());
     if (copy.getMbox() != null) this.mbox = new ArrayList<>(copy.getMbox());
-    if (copy.getEuropeanaRole() != null)
-      this.europeanaRole = new HashMap<>(copy.getEuropeanaRole());
-    //because the countryRef is a reference to the object we keep it the same
+    //because the europeanaRoleRef is a reference to the object we keep it the same (therefore also for europeanaRole)
+    this.europeanaRole = copy.getEuropeanaRole();
+    this.europeanaRoleRefs = copy.getEuropeanaRoleRefs();
+    if(copy.getEuropeanaRoleIds()!=null) this.europeanaRoleIds=new ArrayList<>(copy.getEuropeanaRoleIds());
+    //because the countryRef is a reference to the object we keep it the same (therefore also for country)
     this.countryRef=copy.getCountryRef();
     this.countryId = copy.getCountryId();
     this.country = copy.getCountry();
@@ -119,16 +126,6 @@ public class Organization extends Entity {
   @JsonSetter(ACRONYM)
   public void setAcronym(Map<String, List<String>> acronym) {
     this.acronym = acronym;
-  }
-
-  @JsonGetter(EUROPEANA_ROLE)
-  public Map<String, List<String>> getEuropeanaRole() {
-    return europeanaRole;
-  }
-
-  @JsonSetter(EUROPEANA_ROLE)
-  public void setEuropeanaRole(Map<String, List<String>> europeanaRole) {
-    this.europeanaRole = europeanaRole;
   }
 
   @JsonGetter(FOAF_PHONE)
@@ -249,6 +246,42 @@ public class Organization extends Entity {
 
   public void setCountryId(String countryId) {
     this.countryId = countryId;
+  }
+
+  @JsonIgnore
+  public List<String> getEuropeanaRoleIds() {
+    return europeanaRoleIds;
+  }
+
+  public void setEuropeanaRoleIds(List<String> europeanaRoleIds) {
+    this.europeanaRoleIds = europeanaRoleIds;
+  }
+
+  @JsonIgnore
+  public List<Vocabulary> getEuropeanaRoleRefs() {
+    return europeanaRoleRefs;
+  }
+
+  public void setEuropeanaRoleRefs(List<Vocabulary> europeanaRoleRefs) {
+    this.europeanaRoleRefs = europeanaRoleRefs;
+  }
+
+  @JsonGetter(EUROPEANA_ROLE)
+  public List<Vocabulary> getEuropeanaRole() {
+    if(europeanaRole==null && europeanaRoleIds!=null && !europeanaRoleIds.isEmpty()) {
+      europeanaRole=new ArrayList<>();
+      for(String roleId : europeanaRoleIds) {
+        Vocabulary vocab = new Vocabulary();
+        vocab.setVocabularyUri(roleId);
+        europeanaRole.add(vocab);
+      }
+    }
+    return europeanaRole;
+  }
+
+  @JsonSetter(EUROPEANA_ROLE)
+  public void setEuropeanaRole(List<Vocabulary> europeanaRole) {
+    this.europeanaRole = europeanaRole;
   }
   
 }

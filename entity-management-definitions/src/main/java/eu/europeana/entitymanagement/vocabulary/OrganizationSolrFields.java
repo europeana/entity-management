@@ -15,7 +15,6 @@ public interface OrganizationSolrFields extends EntitySolrFields {
   public static final String FOAF_PHONE = "foaf_phone";
   public static final String FOAF_MBOX = "foaf_mbox";
   public static final String EUROPEANA_ROLE = "europeanaRole";
-  public static final String EUROPEANA_ROLE_ALL = EUROPEANA_ROLE + EXTENSION_ALL;
   public static final String COUNTRY = "country";
   public static final String VCARD_HAS_ADDRESS = "vcard_hasAddress.1";
   public static final String VCARD_STREET_ADDRESS = "vcard_streetAddress.1";

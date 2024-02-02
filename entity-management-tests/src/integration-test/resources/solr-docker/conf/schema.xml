@@ -485,8 +485,10 @@
 		<!-- these fields are all populated by controlled values. These are all 
 			en, but in future may be expanded -->
 		<!-- TODO: alias -->
-		<dynamicField name="europeanaRole.*" type="string"
-			indexed="true" multiValued="true" stored="true" />
+		<!-- <dynamicField name="europeanaRole.*" type="string"
+			indexed="true" multiValued="true" stored="true" />   -->
+		<field name="europeanaRole" type="string" indexed="true"
+			stored="true" multiValued="true" />
 		<!-- <dynamicField name="edm_europeanaRole.*" type="string" indexed="true" 
 			multiValued="true" /> <copyField source="europeanaRole.*" dest="edm_europeanaRole.*" 
 			/> -->
@@ -571,7 +573,7 @@
 			dest="text.*" />
 		<copyField source="rdagr2_biographicalInformation.*"
 			dest="text.*" />
-		<copyField source="europeanaRole.*" dest="text.*" />
+		<!-- <copyField source="europeanaRole.*" dest="text.*" />   -->
 		<copyField source="organizationDomain.*" dest="text.*" />
 		<copyField source="geographicLevel.*" dest="text.*" />
 
@@ -585,7 +587,7 @@
 			dest="text" />
 		<copyField source="rdagr2_biographicalInformation.*"
 			dest="text" />
-		<copyField source="europeanaRole.*" dest="text" />
+		<!-- <copyField source="europeanaRole.*" dest="text" />   -->
 		<copyField source="organizationDomain.*" dest="text" />
 		<copyField source="geographicLevel.*" dest="text" />
 

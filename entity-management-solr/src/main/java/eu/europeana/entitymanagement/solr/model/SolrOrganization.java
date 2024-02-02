@@ -36,8 +36,8 @@ public class SolrOrganization extends SolrEntity<Organization> {
   @Field(OrganizationSolrFields.FOAF_MBOX)
   private List<String> mbox;
 
-  @Field(OrganizationSolrFields.EUROPEANA_ROLE_ALL)
-  private Map<String, List<String>> europeanaRole;
+  @Field(OrganizationSolrFields.EUROPEANA_ROLE)
+  private List<String> europeanaRole;
 
   @Field(OrganizationSolrFields.COUNTRY)
   private String country;
@@ -81,7 +81,8 @@ public class SolrOrganization extends SolrEntity<Organization> {
     this.homepage = organization.getHomepage();
     this.phone = organization.getPhone();
     if (organization.getMbox() != null) this.mbox = new ArrayList<>(organization.getMbox());
-    setEuropeanaRole(organization.getEuropeanaRole());
+    
+    if(organization.getEuropeanaRoleIds()!=null) this.europeanaRole=new ArrayList<>(organization.getEuropeanaRoleIds());
     
     this.country=organization.getCountryId();
     
@@ -119,16 +120,6 @@ public class SolrOrganization extends SolrEntity<Organization> {
                   acronym));
     }
   }
-
-  private void setEuropeanaRole(Map<String, List<String>> europeanaRole) {
-    if (MapUtils.isNotEmpty(europeanaRole)) {
-      this.europeanaRole =
-          new HashMap<>(
-              SolrUtils.normalizeStringListMapByAddingPrefix(
-                  OrganizationSolrFields.EUROPEANA_ROLE + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
-                  europeanaRole));
-    }
-  }
   
   public Map<String, String> getDescription() {
     return description;
@@ -154,7 +145,7 @@ public class SolrOrganization extends SolrEntity<Organization> {
     return mbox;
   }
 
-  public Map<String, List<String>> getEuropeanaRole() {
+  public List<String> getEuropeanaRole() {
     return europeanaRole;
   }
 

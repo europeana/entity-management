@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.hamcrest.Matchers;
@@ -28,6 +29,7 @@ import com.zoho.crm.api.record.Record;
 import eu.europeana.entitymanagement.batch.service.FailedTaskService;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.model.Vocabulary;
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.FailedTaskJsonFields;
@@ -490,11 +492,18 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
   }
 
   @Test
-  public void retrieveOrganizationJsonExternalWithCountryDereference() throws Exception {
+  public void retrieveOrganizationJsonExternalWithCountryAndRoleDereference() throws Exception {
     //1. create a place "Sweden" to be used to dereference zoho country for the zoho GFM org
     String europeanaMetadata = loadFile(IntegrationTestUtils.PLACE_REGISTER_SWEDEN_JSON);
     String metisResponse = loadFile(IntegrationTestUtils.PLACE_SWEDEN_XML);
     createEntity(europeanaMetadata, metisResponse, IntegrationTestUtils.PLACE_SWEDEN_URI);
+    
+    //2. create a vocabulary for the europeanaRole
+    Vocabulary vocab = new Vocabulary();
+    vocab.setVocabularyUri("http://data.europeana.eu/vocabulary/role/ProvidingInstitution");
+    vocab.setInScheme(List.of("http://data.europeana.eu/vocabulary/role"));
+    vocab.setPrefLabel(Map.of("en", "Providing Institution"));
+    vocabRepository.save(vocab);
     
 //    //forcefully change the country mapping uri to the right one
 //    List<CountryMapping> countryMap= entityRecordService.getCountryMapping();
@@ -504,7 +513,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
 //      }
 //    }
 
-    //2. register zoho GFM org
+    //3. register zoho GFM org
     europeanaMetadata = loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_GFM_ZOHO_JSON);
     Optional<Record> zohoRecord =
         IntegrationTestUtils.getZohoOrganizationRecord(
@@ -523,7 +532,8 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
         .andExpect(jsonPath("$.id", is(entityId)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
         .andExpect(jsonPath("$.sameAs").isNotEmpty())
-        .andExpect(jsonPath("$.country.prefLabel.en", is("Sweden")));
+        .andExpect(jsonPath("$.country.prefLabel.en", is("Sweden")))
+        .andExpect(jsonPath("$.europeanaRole[0].prefLabel.en", is("Providing Institution")));
   }
 
   @Test

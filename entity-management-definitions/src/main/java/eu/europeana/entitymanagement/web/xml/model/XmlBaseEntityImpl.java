@@ -102,6 +102,10 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
   public List<LabelledResource> getPrefLabel() {
     return this.prefLabel;
   }
+  
+  public void setPrefLabel(List<LabelledResource> prefLabel) {
+    this.prefLabel=prefLabel;
+  }
 
   public List<LabelledResource> getAltLabel() {
     return this.altLabel;

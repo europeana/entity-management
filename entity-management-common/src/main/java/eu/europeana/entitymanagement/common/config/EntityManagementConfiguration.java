@@ -23,7 +23,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.europeana.entitymanagement.definitions.model.CountryMapping;
+import eu.europeana.entitymanagement.definitions.model.ZohoLabelUriMapping;
 
 /**
  * Container for all settings that we load from the entitymanagement.properties file and optionally
@@ -167,8 +167,12 @@ public class EntityManagementConfiguration implements InitializingBean {
 
   @Value("${zoho.country.mapping:null}")
   private String zohoCountryMappingFilename;
-  
-  Map<String, CountryMapping> countryMappings = new HashMap<>();
+
+  @Value("${zoho.role.mapping:null}")
+  private String zohoRoleMappingFilename;
+
+  Map<String, ZohoLabelUriMapping> countryMappings = new HashMap<>();
+  Map<String, String> roleMappings = new HashMap<>();
   
   @Autowired
   @Qualifier(BEAN_JSON_MAPPER)
@@ -186,6 +190,8 @@ public class EntityManagementConfiguration implements InitializingBean {
     }
     //initialize country mapping
     initCountryMappings();
+    //initialize role mapping
+    initRoleMappings();
   }
   
   /** verify properties */
@@ -222,9 +228,22 @@ public class EntityManagementConfiguration implements InitializingBean {
       assert inputStream != null;
       try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
         String contents = reader.lines().collect(Collectors.joining(System.lineSeparator()));
-        List<CountryMapping> countryMappingList = emJsonMapper.readValue(contents, new TypeReference<List<CountryMapping>>(){});
-        for (CountryMapping countryMapping : countryMappingList) {
+        List<ZohoLabelUriMapping> countryMappingList = emJsonMapper.readValue(contents, new TypeReference<List<ZohoLabelUriMapping>>(){});
+        for (ZohoLabelUriMapping countryMapping : countryMappingList) {
           countryMappings.put(countryMapping.getZohoLabel(), countryMapping);
+        }
+      }
+    }
+  }
+  
+  private void initRoleMappings() throws IOException {
+    try (InputStream inputStream = getClass().getResourceAsStream(getZohoRoleMappingFilename())) {
+      assert inputStream != null;
+      try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+        String contents = reader.lines().collect(Collectors.joining(System.lineSeparator()));
+        List<ZohoLabelUriMapping> roleMappingList = emJsonMapper.readValue(contents, new TypeReference<List<ZohoLabelUriMapping>>(){});
+        for (ZohoLabelUriMapping roleMapping : roleMappingList) {
+          roleMappings.put(roleMapping.getZohoLabel(), roleMapping.getEntityUri());
         }
       }
     }
@@ -406,7 +425,15 @@ public class EntityManagementConfiguration implements InitializingBean {
     return zohoCountryMappingFilename;
   }
 
-  public Map<String, CountryMapping> getCountryMappings() {
+  public Map<String, ZohoLabelUriMapping> getCountryMappings() {
     return countryMappings;
+  }
+
+  public String getZohoRoleMappingFilename() {
+    return zohoRoleMappingFilename;
+  }
+
+  public Map<String, String> getRoleMappings() {
+    return roleMappings;
   }
 }

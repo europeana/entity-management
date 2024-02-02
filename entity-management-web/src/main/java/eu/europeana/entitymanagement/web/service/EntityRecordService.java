@@ -47,6 +47,7 @@ import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.definitions.model.TimeSpan;
+import eu.europeana.entitymanagement.definitions.model.Vocabulary;
 import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
 import eu.europeana.entitymanagement.exception.EntityAlreadyExistsException;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
@@ -57,6 +58,7 @@ import eu.europeana.entitymanagement.exception.HttpUnprocessableException;
 import eu.europeana.entitymanagement.exception.MultipleChoicesException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
+import eu.europeana.entitymanagement.mongo.repository.VocabularyRepository;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.utils.EMCollectionUtils;
@@ -79,6 +81,8 @@ import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 public class EntityRecordService {
 
   private final EntityRecordRepository entityRecordRepository;
+  
+  private final VocabularyRepository vocabRepository;
 
   final EntityManagementConfiguration emConfiguration;
 
@@ -94,10 +98,11 @@ public class EntityRecordService {
   private static final Set<String> ignoredMergeFields = Set.of(WebEntityFields.TYPE);
 
   @Autowired
-  public EntityRecordService(EntityRecordRepository entityRecordRepository,
+  public EntityRecordService(EntityRecordRepository entityRecordRepository, VocabularyRepository vocabRepository,
       EntityManagementConfiguration emConfiguration, ZohoConfiguration zohoConfiguration,
       DataSources datasources, SolrService solrService) throws IOException {
     this.entityRecordRepository = entityRecordRepository;
+    this.vocabRepository=vocabRepository;
     this.emConfiguration = emConfiguration;
     this.zohoConfiguration = zohoConfiguration;
     this.datasources = datasources;
@@ -160,7 +165,7 @@ public class EntityRecordService {
   }
 
   private void dereferenceLinkedEntities(Organization org) {
-    // in case of dereference profile
+    //dereference country
     if (org.getCountryId() != null) {
       EntityRecord countryRecord = entityRecordRepository.findByEntityId(org.getCountryId(), true);
       if (countryRecord != null) {
@@ -168,6 +173,10 @@ public class EntityRecordService {
         Place country = (Place) countryRecord.getEntity();
         org.setCountry(country);
       }
+    }
+    //dereference role
+    if(org.getEuropeanaRoleIds()!=null && !org.getEuropeanaRoleIds().isEmpty()) {
+      org.setEuropeanaRole(vocabRepository.findByVocabularyUris(org.getEuropeanaRoleIds()));          
     }
   }
 
@@ -1279,6 +1288,7 @@ public class EntityRecordService {
 
   public void dropRepository() {
     this.entityRecordRepository.dropCollection();
+    this.vocabRepository.dropCollection();
   }
 
   /**
@@ -1462,7 +1472,7 @@ public class EntityRecordService {
   public void processReferenceFields(Entity entity) {
     if (EntityTypes.isOrganization(entity.getType())) {
       Organization org = (Organization) entity;
-
+      //country reference
       if (StringUtils.isNotEmpty(org.getCountryId())) {
         EntityRecord orgCountry = entityRecordRepository.findByEntityId(org.getCountryId());
         if (orgCountry == null) {
@@ -1472,6 +1482,17 @@ public class EntityRecordService {
         } else {
           org.setCountryRef(orgCountry);
         }
+      }
+      //role reference
+      if(org.getEuropeanaRoleIds()!=null && !org.getEuropeanaRoleIds().isEmpty()) {
+        List<Vocabulary> vocabs=vocabRepository.findByVocabularyUris(org.getEuropeanaRoleIds());
+        if (vocabs.isEmpty()) {
+          logger.info(
+              "No vocabularies with the uris: {} were found in the database. Cannot assign role reference to organization with id {}",
+              org.getEuropeanaRoleIds(), org.getEntityId());
+        } else {
+          org.setEuropeanaRoleRefs(vocabs);
+        }       
       }
     }
   }

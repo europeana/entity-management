@@ -8,10 +8,8 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import com.zoho.crm.api.record.Record;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.model.Entity;
@@ -42,7 +40,8 @@ public class ZohoDereferenceService implements Dereferencer {
            ZohoOrganizationConverter.convertToOrganizationEntity(
                zohoOrganization.get(), 
                zohoConfiguration.getZohoBaseUrl(),
-               emConfig.getCountryMappings())); 
+               emConfig.getCountryMappings(),
+               emConfig.getRoleMappings())); 
     } else {
       return Optional.empty();
     }

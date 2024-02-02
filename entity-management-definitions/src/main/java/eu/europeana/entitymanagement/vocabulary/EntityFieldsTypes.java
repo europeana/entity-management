@@ -99,11 +99,14 @@ public enum EntityFieldsTypes {
 
   // Organization-specific fields
   logo(EntityFieldsTypes.FIELD_TYPE_WEB_RESOURCE, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
+  europeanaRoleIds(
+      EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
   europeanaRole(
-      EntityFieldsTypes.FIELD_TYPE_KEYWORD, true, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
-  country(EntityFieldsTypes.FIELD_TYPE_TEXT, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
+      EntityFieldsTypes.FIELD_TYPE_VOCABULARY, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),  
+  europeanaRoleRefs(
+      EntityFieldsTypes.FIELD_TYPE_VOCABULARY, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
   countryId(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
-  countryPlace(EntityFieldsTypes.FIELD_TYPE_PLACE, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
+  country(EntityFieldsTypes.FIELD_TYPE_PLACE, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
   countryRef(EntityFieldsTypes.FIELD_TYPE_ENTITY_RECORD, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
   homepage(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
   phone(
@@ -142,6 +145,7 @@ public enum EntityFieldsTypes {
   public static final String FIELD_TYPE_ADDRESS = "Address";
   public static final String FIELD_TYPE_PLACE = "Place";
   public static final String FIELD_TYPE_ENTITY_RECORD = "EntityRecord";
+  public static final String FIELD_TYPE_VOCABULARY = "Vocabulary";
 
   public static final String FIELD_CARDINALITY_1_1 = "1..1";
   public static final String FIELD_CARDINALITY_0_1 = "0..1";

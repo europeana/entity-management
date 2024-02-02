@@ -326,7 +326,7 @@ public class BaseZohoAccess {
    */
   private void performEntityRegistration(Operation operation, ZohoSyncReport zohoSyncReport, List<String> entitiesToUpdate) {
     Organization zohoOrganization =
-        ZohoOrganizationConverter.convertToOrganizationEntity(operation.getZohoRecord(), zohoConfiguration.getZohoBaseUrl(), emConfiguration.getCountryMappings());
+        ZohoOrganizationConverter.convertToOrganizationEntity(operation.getZohoRecord(), zohoConfiguration.getZohoBaseUrl(), emConfiguration.getCountryMappings(), emConfiguration.getRoleMappings());
     
     try {
       List<EntityRecord> existingEntities =

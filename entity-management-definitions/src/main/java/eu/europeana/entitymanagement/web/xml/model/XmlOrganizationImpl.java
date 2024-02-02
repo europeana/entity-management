@@ -34,6 +34,7 @@ import javax.xml.bind.annotation.XmlType;
 import org.apache.commons.collections.CollectionUtils;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.definitions.model.Vocabulary;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @XmlRootElement(namespace = NAMESPACE_EDM, name = XML_ORGANIZATION)
@@ -75,7 +76,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
   private XmlWebResourceWrapper logo;
 
   @XmlElement(namespace = NAMESPACE_EDM, name = XML_EUROPEANA_ROLE)
-  private List<LabelledResource> europeanaRole = new ArrayList<>();
+  private List<XmlConceptImpl> europeanaRole = new ArrayList<>();
 
   @XmlElement(namespace = NAMESPACE_EDM, name = XML_COUNTRY)
   private XmlPlaceImpl country;
@@ -106,8 +107,19 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     if (organization.getLogo() != null) {
       this.logo = XmlWebResourceWrapper.fromWebResource(organization.getLogo());
     }
-    this.europeanaRole =
-        RdfXmlUtils.convertToXmlMultilingualString(organization.getEuropeanaRole());
+    //set the europeanaRole
+    List<Vocabulary> orgRole=organization.getEuropeanaRole();
+    if(orgRole!=null && !orgRole.isEmpty()) {
+      List<XmlConceptImpl> orgXmlRole= new ArrayList<>();
+      for(Vocabulary vocab : orgRole) {
+        XmlConceptImpl xmlConcept = new XmlConceptImpl();
+        xmlConcept.setAbout(vocab.getVocabularyUri());
+        xmlConcept.setPrefLabel(RdfXmlUtils.convertMapToXmlMultilingualString(vocab.getPrefLabel()));
+        xmlConcept.setInScheme(RdfXmlUtils.convertToRdfResource(vocab.getInScheme()));
+        orgXmlRole.add(xmlConcept);
+      }
+      this.europeanaRole=orgXmlRole;
+    }
     
     this.country = new XmlPlaceImpl(organization.getCountry());
     
@@ -137,7 +149,21 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     entity.setAcronym(RdfXmlUtils.toLanguageMapList(getAcronym()));
     entity.setDescription(RdfXmlUtils.toLanguageMap(getDescription()));
     entity.setLogo(XmlWebResourceWrapper.toWebResource(getLogo()));
-    entity.setEuropeanaRole(RdfXmlUtils.toLanguageMapList(getEuropeanaRole()));
+    //set europeanaRole
+    if(getEuropeanaRole()!=null && !getEuropeanaRole().isEmpty()) {
+      List<String> roleIds=new ArrayList<>();
+      List<Vocabulary> role=new ArrayList<>();
+      for(XmlConceptImpl xmlConcept : getEuropeanaRole()) {
+        Vocabulary vocab=new Vocabulary();
+        vocab.setVocabularyUri(xmlConcept.getAbout());
+        vocab.setPrefLabel(RdfXmlUtils.toLanguageMap(xmlConcept.getPrefLabel()));
+        vocab.setInScheme(RdfXmlUtils.toStringList(xmlConcept.getInScheme()));
+        role.add(vocab);
+        roleIds.add(xmlConcept.getAbout());
+      }
+      entity.setEuropeanaRole(role);
+      entity.setEuropeanaRoleIds(roleIds);
+    }
     
     if(getCountry() != null) {
       //the country is not saved in the database 
@@ -178,7 +204,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     return logo;
   }
 
-  public List<LabelledResource> getEuropeanaRole() {
+  public List<XmlConceptImpl> getEuropeanaRole() {
     return europeanaRole;
   }
 
