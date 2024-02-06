@@ -70,6 +70,7 @@ import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import io.swagger.annotations.ApiOperation;
@@ -132,7 +133,7 @@ public class EMController extends BaseRest {
     EntityRecord entityRecord = null;
     try {
       entityRecord = entityRecordService.retrieveEntityRecord(EntityTypes.getByEntityType(type),
-          identifier, false);
+          identifier, profile, false);
     } catch (UnsupportedEntityTypeException e) {
       throw new EntityNotFoundException("/" + type + "/" + identifier, e);
     }
@@ -180,7 +181,7 @@ public class EMController extends BaseRest {
       throw new EntityNotFoundException("/" + type + "/" + identifier, e1);
     }
 
-    EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier, true);
+    EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier, profile, true);
 
     if (!entityRecord.isDisabled()) {
       return generateResponseEntityForEntityRecord(request, entityProfile, FormatTypes.jsonld, null,
@@ -189,7 +190,7 @@ public class EMController extends BaseRest {
     logger.debug("Re-enabling entityId={}", entityRecord.getEntityId());
     entityRecordService.enableEntityRecord(entityRecord);
 
-    entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier, false);
+    entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier, profile, false);
 
     return generateResponseEntityForEntityRecord(request, entityProfile, FormatTypes.jsonld, null,
         HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, entityRecord, HttpStatus.OK);
@@ -218,7 +219,7 @@ public class EMController extends BaseRest {
     } catch (UnsupportedEntityTypeException e) {
       throw new EntityNotFoundException("/" + type + "/" + identifier, e);
     }
-    EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier, false);
+    EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier, profile, false);
 
     // check that type from update request matches existing entity's
     if (!entityRecord.getEntity().getType().equals(updateRequestEntity.getType())) {
@@ -297,7 +298,7 @@ public class EMController extends BaseRest {
       throw new EntityNotFoundException("/" + type + "/" + identifier, e);
     }
 
-    EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier, false);
+    EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier, profile, false);
     // update from external data source is not available for static data sources
     datasources.verifyDataSource(entityRecord.getExternalProxies().get(0).getProxyId(), false);
     return launchTaskAndRetrieveEntity(request, enType, identifier, entityRecord, profile);
@@ -376,8 +377,8 @@ public class EMController extends BaseRest {
     validateAction(action);
 
     EntityRecord entityRecord = entityRecordService
-        .updateUsedForEnrichment(EntityTypes.getByEntityType(type), identifier, action);
-    entityRecord = launchMetricsUpdateTask(entityRecord, true);
+        .updateUsedForEnrichment(EntityTypes.getByEntityType(type), identifier, profile, action);
+    entityRecord = launchMetricsUpdateTask(entityRecord, profile, true);
     return generateResponseEntityForEntityRecord(request, getEntityProfile(profile),
         FormatTypes.jsonld, null, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, entityRecord,
         HttpStatus.OK);
@@ -521,11 +522,11 @@ public class EMController extends BaseRest {
 
     // in case of Organization it must be the zoho Organization
     String creationRequestType = europeanaProxyEntity.getType();
-    if (EntityTypes.isOrganization(creationRequestType)
-        && !creationRequestId.contains(DataSource.ZOHO_HOST)) {
+    if(EntityTypes.isOrganization(creationRequestType) 
+        && !creationRequestId.contains(WebEntityFields.ZOHO_CRM_HOST)) {
       throw new HttpBadRequestException(String.format(
           "The Organization entity should come from Zoho and have the corresponding id format containing: %s",
-          DataSource.ZOHO_HOST));
+          WebEntityFields.ZOHO_CRM_HOST));
     }
 
     Entity datasourceResponse = dereferenceEntity(creationRequestId, creationRequestType);
@@ -580,7 +581,7 @@ public class EMController extends BaseRest {
     verifyWriteAccess(Operations.UPDATE, request);
 
     EntityTypes enType = EntityTypes.getByEntityType(type);
-    EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier, false);
+    EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier, profile, false);
 
     if (!entityRecord.getEntity().getSameReferenceLinks().contains(url)) {
       throw new HttpBadRequestException(String.format(SAME_AS_NOT_EXISTS_MSG, url));
@@ -611,7 +612,7 @@ public class EMController extends BaseRest {
     
     try {
       //retrieve record
-      entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, true);
+      entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, profile, true);
     } catch (EntityNotFoundException ex) {
       //if not found, verify co-references
       String redirectUri = entityRecordService.getRedirectUriWhenNotFound(type, identifier, ex);
@@ -678,8 +679,9 @@ public class EMController extends BaseRest {
       return List.of(DEFAULT_REQUEST_PROFILE);
     }
 
-    List<String> requestProfiles =
-        new ArrayList<>(List.of((profileParamString.split(QUERY_PARAM_PROFILE_SEPARATOR))));
+    String[] splitAndTrimProfile=Arrays.stream(profileParamString.split(QUERY_PARAM_PROFILE_SEPARATOR)).map(String::trim).toArray(String[]::new);
+    
+    List<String> requestProfiles = new ArrayList<>(List.of((splitAndTrimProfile)));
 
     List<String> validProfiles =
         Arrays.stream(EntityProfile.values()).map(Enum::name).collect(Collectors.toList());
@@ -689,17 +691,17 @@ public class EMController extends BaseRest {
     // profile string contains an invalid value, or is internal,external (which can't be specified
     // together)
     if (requestProfiles.isEmpty()
-        || (requestProfiles.size() > 1 && !requestProfiles.contains(EntityProfile.debug.name()))) {
+        || (requestProfiles.contains(EntityProfile.internal.name()) && requestProfiles.contains(EntityProfile.external.name()))) {
       throw new HttpBadRequestException("Invalid profile query param " + profileParamString);
     }
     return requestProfiles.stream().map(EntityProfile::valueOf).collect(Collectors.toList());
   }
 
-  private EntityRecord launchMetricsUpdateTask(EntityRecord entityRecord, boolean includeDisabled)
+  private EntityRecord launchMetricsUpdateTask(EntityRecord entityRecord, String profile, boolean includeDisabled)
       throws Exception {
     // launch synchronous metrics update, then retrieve entity from DB afterwards
     entityUpdateService.runSynchronousMetricsUpdate(entityRecord.getEntityId());
-    return entityRecordService.retrieveEntityRecord(entityRecord.getEntityId(), includeDisabled);
+    return entityRecordService.retrieveEntityRecord(entityRecord.getEntityId(), profile, includeDisabled);
   }
 
   private ResponseEntity<String> launchTaskAndRetrieveEntity(HttpServletRequest request,
@@ -707,7 +709,7 @@ public class EMController extends BaseRest {
       throws Exception {
     // launch synchronous update, then retrieve entity from DB afterwards
     launchUpdateTask(entityRecord.getEntityId());
-    entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, false);
+    entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, profile, false);
 
     return generateResponseEntityForEntityRecord(request, getEntityProfile(profile),
         FormatTypes.jsonld, null, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, entityRecord,

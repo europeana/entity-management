@@ -11,28 +11,37 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zoho.crm.api.record.Record;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.dereference.Dereferencer;
 
 @Service
 public class ZohoDereferenceService implements Dereferencer {
 
-  private final ZohoAccessConfiguration zohoAccessConfiguration;
+  private final ZohoConfiguration zohoConfiguration;
+  private final EntityManagementConfiguration emConfig;
 
   @Autowired
-  public ZohoDereferenceService(ZohoAccessConfiguration zohoAccessConfiguration) {
-    this.zohoAccessConfiguration = zohoAccessConfiguration;
+  public ZohoDereferenceService(ZohoConfiguration zohoConfiguration, EntityManagementConfiguration emConfig) {
+    this.zohoConfiguration = zohoConfiguration;
+    this.emConfig = emConfig;
   }
 
   @Override
   public Optional<Entity> dereferenceEntityById(@NonNull String id) throws Exception {
 
     Optional<Record> zohoOrganization =
-        zohoAccessConfiguration.getZohoAccessClient().getZohoRecordOrganizationById(id);
+        zohoConfiguration.getZohoAccessClient().getZohoRecordOrganizationById(id);
     
+    //enable when you need to print the data for debuging purposes System.out.println(serialize(zohoOrganization.get())); 
+
     if(zohoOrganization.isPresent()) {
-      //for debugging zoho response locally use serialize(zohoOrganization.get());
-      return Optional.of(ZohoOrganizationConverter.convertToOrganizationEntity(zohoOrganization.get(), zohoAccessConfiguration.getZohoBaseUrl())); 
+      return Optional.of(
+           ZohoOrganizationConverter.convertToOrganizationEntity(
+               zohoOrganization.get(), 
+               zohoConfiguration.getZohoBaseUrl(),
+               emConfig.getCountryMappings(),
+               emConfig.getRoleMappings())); 
     } else {
       return Optional.empty();
     }
@@ -47,7 +56,7 @@ public class ZohoDereferenceService implements Dereferencer {
             .serializationInclusion(JsonInclude.Include.NON_NULL)
             .build();
     mapper.findAndRegisterModules();
-    return mapper.writeValueAsString(zohoRecord.getKeyValues());
+    return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(zohoRecord.getKeyValues());
   }
 
 }

@@ -9,7 +9,7 @@ public interface WebEntityFields {
   public static final String LANGUAGE_EN = "en";
   public static final String BASE_DATA_EUROPEANA_URI = "http://data.europeana.eu/";
   public static final String WIKIDATA_HOST = "www.wikidata.org";
-  public static final String ZOHO_CRM_HOST = "crm.zoho.com";
+  public static final String ZOHO_CRM_HOST = "crm.zoho.eu";
 
   // common fields
   public static final String ID = "id";
@@ -90,9 +90,7 @@ public interface WebEntityFields {
   public static final String DESCRIPTION = "description";
   public static final String ACRONYM = "acronym";
   public static final String COUNTRY = "country";
-  public static final String ORGANIZATION_DOMAIN = "organizationDomain";
   public static final String EUROPEANA_ROLE = "europeanaRole";
-  public static final String GEOGRAPHIC_LEVEL = "geographicLevel";
   public static final String FOAF_LOGO = "logo";
   public static final String FOAF_HOMEPAGE = "homepage";
   public static final String FOAF_PHONE = "phone";
@@ -126,4 +124,9 @@ public interface WebEntityFields {
   public static final String PROXY_FOR = "proxyFor";
   public static final String PROXY_IN = "proxyIn";
   public static final String PROXY = "Proxy";
+  
+  //CountryMapping fields
+  public static final String ZOHO_LABEL="Zoho Label";
+  public static final String ENTITY_URI="Entity URI";
+  public static final String WIKIDATA_URI="Wikidata URI";
 }

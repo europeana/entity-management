@@ -6,7 +6,6 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PROXY;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PROXY_FOR;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PROXY_IN;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
-
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -24,6 +23,9 @@ public class EntityProxy {
   String proxyFor;
   Aggregation proxyIn;
   String type;
+  
+  public EntityProxy() {
+  }
 
   @JsonGetter(TYPE)
   public String getType() {

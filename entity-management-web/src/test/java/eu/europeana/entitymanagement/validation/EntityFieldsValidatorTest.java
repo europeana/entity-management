@@ -57,7 +57,7 @@ public class EntityFieldsValidatorTest {
     for (ConstraintViolation<Entity> violation : violations) {
       System.out.println(violation.getMessageTemplate());
     }
-    Assertions.assertEquals(13, violations.size());
+    Assertions.assertEquals(12, violations.size());
   }
 
   @Test

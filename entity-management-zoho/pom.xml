@@ -23,6 +23,8 @@
             <groupId>com.zoho.crm</groupId>
             <artifactId>java-sdk</artifactId>
             <version>${zoho-sdk.version}</version>
+            
+            <!--3.0.1-->
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>

@@ -20,10 +20,6 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.PREF_LABE
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.RELATED;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.RELATED_MATCH;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_CONCEPT;
-
-import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
-import eu.europeana.entitymanagement.definitions.model.Concept;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -31,8 +27,11 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
+import eu.europeana.entitymanagement.definitions.model.Concept;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
-@XmlRootElement(name = XML_CONCEPT)
+@XmlRootElement(namespace = NAMESPACE_SKOS, name = XML_CONCEPT)
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
     propOrder = {
@@ -171,6 +170,10 @@ public class XmlConceptImpl extends XmlBaseEntityImpl<Concept> {
 
   public List<LabelledResource> getInScheme() {
     return this.inScheme;
+  }
+  
+  public void setInScheme(List<LabelledResource> inScheme) {
+    this.inScheme=inScheme;
   }
 
   @Override

@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.hamcrest.Matchers;
@@ -28,6 +29,7 @@ import com.zoho.crm.api.record.Record;
 import eu.europeana.entitymanagement.batch.service.FailedTaskService;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.model.Vocabulary;
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.FailedTaskJsonFields;
@@ -490,8 +492,45 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
   }
 
   @Test
-  public void retrieveOrganizationJsonExternalShouldBeSuccessful() throws Exception {
-    // id in JSON matches ORGANIZATION_BNF_URI_ZOHO value
+  public void retrieveOrganizationJsonExternalWithCountryAndRoleDereference() throws Exception {
+    //1. create a place "Sweden" to be used to dereference zoho country for the zoho GFM org
+    String europeanaMetadata = loadFile(IntegrationTestUtils.PLACE_REGISTER_SWEDEN_JSON);
+    String metisResponse = loadFile(IntegrationTestUtils.PLACE_SWEDEN_XML);
+    createEntity(europeanaMetadata, metisResponse, IntegrationTestUtils.PLACE_SWEDEN_URI);
+    
+//    //forcefully change the country mapping uri to the right one
+//    List<CountryMapping> countryMap= entityRecordService.getCountryMapping();
+//    for(CountryMapping cm : countryMap) {
+//      if(cm.getZohoLabel().equals("Sweden, SE")) {
+//        cm.setEntityUri("http://data.europeana.eu/place/1");
+//      }
+//    }
+
+    //2. register zoho GFM org
+    europeanaMetadata = loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_GFM_ZOHO_JSON);
+    Optional<Record> zohoRecord =
+        IntegrationTestUtils.getZohoOrganizationRecord(
+            IntegrationTestUtils.ORGANIZATION_GFM_URI_ZOHO);
+
+    assert zohoRecord.isPresent() : "Mocked Zoho response not loaded";
+    String entityId = createOrganization(europeanaMetadata, zohoRecord.get()).getEntityId();
+
+    String requestPath = getEntityRequestPath(entityId);
+    ResultActions resultActions = mockMvc
+        .perform(
+            get(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath + ".jsonld")
+                .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external, dereference")
+                .accept(MediaType.APPLICATION_JSON));
+    resultActions.andExpect(status().isOk())
+        .andExpect(jsonPath("$.id", is(entityId)))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
+        .andExpect(jsonPath("$.sameAs").isNotEmpty())
+        .andExpect(jsonPath("$.country.prefLabel.en", is("Sweden")))
+        .andExpect(jsonPath("$.europeanaRole[0].prefLabel.en", is("Providing Institution")));
+  }
+
+  @Test
+  public void retrieveOrganizationJsonExternal() throws Exception {
     String europeanaMetadata = loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_GFM_ZOHO_JSON);
     Optional<Record> zohoRecord =
         IntegrationTestUtils.getZohoOrganizationRecord(
@@ -509,7 +548,9 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(entityId)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
-        .andExpect(jsonPath("$.sameAs").isNotEmpty());
+        .andExpect(jsonPath("$.sameAs").isNotEmpty())
+        .andExpect(jsonPath("$.hasAddress.countryName").isNotEmpty())
+        .andExpect(jsonPath("$.countryPlace").doesNotExist());
   }
 
   @Test
@@ -563,7 +604,8 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
         .andExpect(xpath(entityBaseXpath + "/@rdf:about", xmlNamespaces).string(entityId))
         .andExpect(xpath(entityBaseXpath + "/@rdf:about", xmlNamespaces).string(entityId))
         .andExpect(
-            xpath(entityBaseXpath + "/skos:prefLabel", xmlNamespaces).nodeCount(greaterThan(0)));
+            xpath(entityBaseXpath + "/skos:prefLabel", xmlNamespaces).nodeCount(greaterThan(0)))
+        .andExpect(xpath(entityBaseXpath + "/edm:countryPlace", xmlNamespaces).doesNotExist());
   }
 
   @Test

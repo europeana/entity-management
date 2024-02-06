@@ -214,11 +214,18 @@
                 </xsl:call-template>
             </xsl:for-each>
 
+			<!-- 
             <xsl:variable name="country" select="lib:toISO639_2(wdt:P17[1]/@rdf:resource)"/>
-
             <xsl:if test="$country">
                 <xsl:element name="edm:country">
                     <xsl:value-of select="$country"/>
+                </xsl:element>
+            </xsl:if>
+             -->
+             <xsl:variable name="country" select="wdt:P17[1]/@rdf:resource"/>
+             <xsl:if test="$country">
+                <xsl:element name="edm:country">
+                	<xsl:attribute name="rdf:about"><xsl:value-of select="$country"/></xsl:attribute>
                 </xsl:element>
             </xsl:if>
 

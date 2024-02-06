@@ -6,6 +6,7 @@ import static dev.morphia.query.experimental.filters.Filters.in;
 import static dev.morphia.query.experimental.filters.Filters.ne;
 import static dev.morphia.query.experimental.filters.Filters.or;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.DISABLED;
+import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_EXACT_MATCH;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_ID;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_MODIFIED;
@@ -54,16 +55,6 @@ public class EntityRecordRepository extends AbstractRepository {
   }
 
   /**
-   * Find and return EntityRecord that matches the given parameters
-   *
-   * @param entityId ID of the dataset
-   * @return EntityRecord
-   */
-  public EntityRecord findByEntityId(String entityId) {
-    return getDataStore().find(EntityRecord.class).filter(eq(ENTITY_ID, entityId)).first();
-  }
-
-  /**
    * Find List of EntityRecord that matches the given entity ids
    *
    * @param entityIds : list of entity id's to be fetched
@@ -95,6 +86,54 @@ public class EntityRecordRepository extends AbstractRepository {
         .toList();
   }
 
+  /**
+   * Find and return EntityRecord that matches the given parameters
+   *
+   * @param entityId ID of the dataset
+   * @return EntityRecord the database record
+   */
+  public EntityRecord findByEntityId(String entityId) {
+    return findEntityRecord(entityId);
+  }
+  
+  /**
+   * Find and return EntityRecord that matches the given parameters
+   *
+   * @param entityId ID of the dataset
+   * @param consolidatedOnly if set to true, the retrieved record will only include the consolidated entity
+   * @return EntityRecord the database record
+   */
+  public EntityRecord findByEntityId(String entityId, boolean consolidatedOnly) {
+      return consolidatedOnly ? findEntityRecord(entityId, ENTITY) : findEntityRecord(entityId);
+  }
+
+  /**
+   * Find and return EntityRecord that matches the given parameters
+   *
+   * @param entityId ID of the dataset
+   * @param consolidatedOnly if set to true, the retrieved record will only include the consolidated entity
+   * @return EntityRecord the database record
+   */
+  protected EntityRecord findEntityRecord(String entityId, String... fields) {
+    Query<EntityRecord> query = getDataStore()
+        .find(EntityRecord.class);
+      
+    List<Filter> filters = new ArrayList<>();
+    filters.add(eq(ENTITY_ID, entityId));
+    query = query.filter(filters.toArray(Filter[]::new));
+
+    FindOptions findOptions = null;
+    //array must not be empty, invocation of this method with only one parameter uses and empty array
+    if(fields != null && fields.length > 0) {
+      findOptions = new FindOptions();
+      findOptions.projection().include(fields);
+      
+      return query.first(findOptions);
+    } else {
+      return query.first();
+    }
+  }
+  
   public List<EntityIdDisabledStatus> getEntityIds(
       List<String> entityIds, boolean excludeDisabled) {
     List<EntityRecord> entityRecords = findByEntityIds(entityIds, excludeDisabled, false);
@@ -182,6 +221,13 @@ public class EntityRecordRepository extends AbstractRepository {
     return getDataStore()
         .find(EntityRecord.class)
         .filter(filters)
+        .iterator(new FindOptions().skip(start).sort(ascending(ENTITY_MODIFIED)).limit(count))
+        .toList();
+  }
+
+  public List<EntityRecord> findAll(int start, int count) {
+    return getDataStore()
+        .find(EntityRecord.class)
         .iterator(new FindOptions().skip(start).sort(ascending(ENTITY_MODIFIED)).limit(count))
         .toList();
   }

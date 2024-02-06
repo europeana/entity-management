@@ -18,7 +18,9 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NOTE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -26,9 +28,6 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
@@ -74,6 +73,11 @@ public class Place extends Entity {
     super();
   }
 
+  public Place(String entityId) {
+    super();
+    setEntityId(entityId);
+  }
+  
   @JsonGetter(IS_NEXT_IN_SEQUENCE)
   @JacksonXmlProperty(localName = XmlFields.XML_EDM_IS_NEXT_IN_SEQUENCE)
   public List<String> getIsNextInSequence() {
@@ -133,17 +137,28 @@ public class Place extends Entity {
   public String getType() {
     return type;
   }
+  
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
 
-  public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
-    // TODO:in case of the performance overhead cause by using the reflecion code, change this
-    // method to call the getters for each field individually
-    return field.get(this);
+    Place that = (Place) o;
+   
+    return Objects.equals(latitude, that.getLatitude()) &&
+        Objects.equals(longitude, that.getLongitude()) &&
+        Objects.equals(altitude, that.getAltitude()); 
   }
 
-  public void setFieldValue(Field field, Object value)
-      throws IllegalArgumentException, IllegalAccessException {
-    // TODO:in case of the performance overhead cause by using the reflecion code, change this
-    // method to call the setter for each field individually
-    field.set(this, value);
+  public int hashCode() {
+    return ((latitude == null) ? 0 : latitude.hashCode()) +
+        ((longitude == null) ? 0 : longitude.hashCode()) +
+        ((altitude == null) ? 0 : altitude.hashCode());
   }
+  
 }

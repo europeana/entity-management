@@ -6,7 +6,6 @@ import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.matchesRegex;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -274,14 +273,13 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                 Matchers.hasItems(
                     IntegrationTestUtils.ORGANIZATION_BERGER_MUSEUM_WIKIDATA_URI,
                     IntegrationTestUtils.ORGANIZATION_BERGER_MUSEUM_URI_ZOHO)))
-        .andExpect(jsonPath("$.prefLabel[*]", hasSize(1)))
+        .andExpect(jsonPath("$.prefLabel[*]", hasSize(2)))
         // should have Europeana, Zoho and Wikidata proxies
         .andExpect(jsonPath("$.proxies", hasSize(3)));
 
     // check if indexing is successfull by searching the organization in solr
     SolrOrganization org = emSolrService.searchById(SolrOrganization.class, WebEntityFields.BASE_DATA_EUROPEANA_URI + "organization/1");
-    assertNotNull(org.getHasGeo());
-    assertFalse(org.getHasGeo().startsWith("geo:"));
+    assertNotNull(org.getHasAddress());
   }
 
   @Test
@@ -328,11 +326,12 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
     response
         .andExpect(status().isAccepted())
-        .andExpect(jsonPath("$.hasAddress.hasGeo").isNotEmpty())
+        .andExpect(jsonPath("$.hasAddress.postalCode").isNotEmpty())
         .andExpect(jsonPath("$.language", everyItem(matchesRegex("[a-z]+"))))
         .andExpect(jsonPath("$.hiddenLabel", hasSize(3)))
-        .andExpect(jsonPath("$.organizationDomain[*]", hasSize(1)))
         .andExpect(jsonPath("$.id", any(String.class)));
+        // excluded as the wikidata hasGeo is not consolidated  
+        //.andExpect(jsonPath("$.hasAddress.hasGeo").isNotEmpty())
   }
 
   @Test

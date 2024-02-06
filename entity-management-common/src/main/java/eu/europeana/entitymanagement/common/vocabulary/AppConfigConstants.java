@@ -16,6 +16,7 @@ public class AppConfigConstants {
   public static final String BEAN_MESSAGE_SOURCE = "messageSource";
   
   public static final String BEAN_ENTITY_RECORD_REPO = "emEntityRecordRepo";
+  public static final String BEAN_VOCABULARY_REPO = "emVocabularyRepo";
   public static final String BEAN_CONCEPT_SCHEME_REPO = "emConceptSchemeRepo";
   public static final String BEAN_ZOHO_SYNC_REPO = "emZohoSyncRepo";
   public static final String BEAN_ENTITY_RECORD_SERVICE = "emEntityRecordService";
@@ -56,7 +57,7 @@ public class AppConfigConstants {
 
   public static final String BEAN_SOLR_ENTITY_SUGGESTER_FILTER = "solrEntityFilter";
 
-  public static final String BEAN_ZOHO_ACCESS_CONFIGURATION = "zohoAccessConfiguration";
+  public static final String BEAN_ZOHO_CONFIGURATION = "zohoConfiguration";
   public static final String BEAN_WIKIDATA_ACCESS_SERVICE = "wikidataAccessService";
   public static final String BEAN_WIKIDATA_ACCESS_DAO = "wikidataAccessDao";
 }

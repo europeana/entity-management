@@ -16,7 +16,8 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NOTE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
-
+import java.util.ArrayList;
+import java.util.List;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -24,9 +25,6 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
@@ -105,18 +103,6 @@ public class TimeSpan extends Entity {
     return type;
   }
 
-  @Override
-  public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
-    // method to call the getters for each field individually
-    return field.get(this);
-  }
-
-  @Override
-  public void setFieldValue(Field field, Object value)
-      throws IllegalArgumentException, IllegalAccessException {
-    // method to call the setter for each field individually
-    field.set(this, value);
-  }
 
   @Override
   @JsonSetter(SAME_AS)

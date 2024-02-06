@@ -1,16 +1,31 @@
 package eu.europeana.entitymanagement.common.config;
 
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_JSON_MAPPER;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
+import org.springframework.core.io.ClassPathResource;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.europeana.entitymanagement.definitions.model.ZohoLabelUriMapping;
 
 /**
  * Container for all settings that we load from the entitymanagement.properties file and optionally
@@ -152,10 +167,109 @@ public class EntityManagementConfiguration implements InitializingBean {
   @Value("${spring.profiles.active:}")
   private String activeProfileString;
 
+  @Value("${zoho.country.mapping:zoho_country_mapping.json}")
+  private String zohoCountryMappingFilename;
+
+  @Value("${zoho.role.mapping:zoho_role_mapping.json}")
+  private String zohoRoleMappingFilename;
+  
+  @Value("${europeana.role.vocabulary:role_vocabulary.xml}")
+  private String roleVocabularyFilename;
+
+  Map<String, ZohoLabelUriMapping> countryMappings = new HashMap<>();
+  Map<String, String> roleMappings = new HashMap<>();
+  
+  @Autowired
+  @Qualifier(BEAN_JSON_MAPPER)
+  private ObjectMapper emJsonMapper;
+
+
   public EntityManagementConfiguration() {
     LOG.info("Initializing EntityManagementConfiguration bean as: configuration");
   }
 
+  @Override
+  public void afterPropertiesSet() throws Exception {
+    if (isNotTestProfile(activeProfileString)) {
+      verifyRequiredProperties();
+    }
+    //initialize country mapping
+    initCountryMappings();
+    //initialize role mapping
+    initRoleMappings();
+  }
+  
+  /** verify properties */
+  private void verifyRequiredProperties() {
+    List<String> missingProps = new ArrayList<>();
+
+    // search api prefix is mandatory
+    if (StringUtils.isBlank(getSearchApiUrlPrefix())) {
+      missingProps.add("europeana.searchapi.urlPrefix");
+    }
+
+    // one of zookeeperUrl or solr indexing url are
+    if (StringUtils.isBlank(getIndexingSolrZookeeperUrl())
+        && StringUtils.isBlank(getIndexingSolrUrl())) {
+      missingProps.add(
+          "entitymanagement.solr.indexing.url/entitymanagement.solr.indexing.zookeeper.url");
+    }
+
+    // collection name is mandatory when using zookeeper url
+    if (StringUtils.isNotBlank(getIndexingSolrZookeeperUrl())
+        && StringUtils.isBlank(getIndexingSolrCollection())) {
+      missingProps.add("entitymanagement.solr.indexing.collection");
+    }
+
+    if (!missingProps.isEmpty()) {
+      throw new IllegalStateException(
+          String.format(
+              "The following config properties are not set: %s", String.join("\n", missingProps)));
+    }
+  }
+
+  private void initCountryMappings() throws IOException {
+    ClassPathResource resource = new ClassPathResource(getZohoCountryMappingFilename());
+    
+    try (InputStream inputStream = resource.getInputStream()) {
+      assert inputStream != null;
+      try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+        String contents = reader.lines().collect(Collectors.joining(System.lineSeparator()));
+        List<ZohoLabelUriMapping> countryMappingList = emJsonMapper.readValue(contents, new TypeReference<List<ZohoLabelUriMapping>>(){});
+        for (ZohoLabelUriMapping countryMapping : countryMappingList) {
+          countryMappings.put(countryMapping.getZohoLabel(), countryMapping);
+        }
+      }
+    }
+  }
+  
+  private void initRoleMappings() throws IOException {
+    
+    ClassPathResource resource = new ClassPathResource(getZohoRoleMappingFilename());
+    
+    try (InputStream inputStream =  resource.getInputStream()) {
+      assert inputStream != null;
+      try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+        String contents = reader.lines().collect(Collectors.joining(System.lineSeparator()));
+        List<ZohoLabelUriMapping> roleMappingList = emJsonMapper.readValue(contents, new TypeReference<List<ZohoLabelUriMapping>>(){});
+        for (ZohoLabelUriMapping roleMapping : roleMappingList) {
+          roleMappings.put(roleMapping.getZohoLabel(), roleMapping.getEntityUri());
+        }
+      }
+    }
+  }
+  
+  public String loadRoleVocabulary() throws IOException {
+    ClassPathResource resource = new ClassPathResource(getRoleVocabularyFilename());
+    
+    try (InputStream inputStream = resource.getInputStream()) {
+      assert inputStream != null;
+      try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+        return reader.lines().collect(Collectors.joining(System.lineSeparator()));
+      }
+    }
+  }
+  
   public String getPrSolrUrl() {
     return prSolrUrl;
   }
@@ -308,44 +422,8 @@ public class EntityManagementConfiguration implements InitializingBean {
     return itemDataEndpoint;
   }
 
-  @Override
-  public void afterPropertiesSet() throws Exception {
-    if (isNotTestProfile(activeProfileString)) {
-      verifyRequiredProperties();
-    }
-  }
-
   public static boolean isNotTestProfile(String activeProfileString) {
     return Arrays.stream(activeProfileString.split(",")).noneMatch(ACTIVE_TEST_PROFILE::equals);
-  }
-
-  /** verify properties */
-  private void verifyRequiredProperties() {
-    List<String> missingProps = new ArrayList<>();
-
-    // search api prefix is mandatory
-    if (StringUtils.isBlank(getSearchApiUrlPrefix())) {
-      missingProps.add("europeana.searchapi.urlPrefix");
-    }
-
-    // one of zookeeperUrl or solr indexing url are
-    if (StringUtils.isBlank(getIndexingSolrZookeeperUrl())
-        && StringUtils.isBlank(getIndexingSolrUrl())) {
-      missingProps.add(
-          "entitymanagement.solr.indexing.url/entitymanagement.solr.indexing.zookeeper.url");
-    }
-
-    // collection name is mandatory when using zookeeper url
-    if (StringUtils.isNotBlank(getIndexingSolrZookeeperUrl())
-        && StringUtils.isBlank(getIndexingSolrCollection())) {
-      missingProps.add("entitymanagement.solr.indexing.collection");
-    }
-
-    if (!missingProps.isEmpty()) {
-      throw new IllegalStateException(
-          String.format(
-              "The following config properties are not set: %s", String.join("\n", missingProps)));
-    }
   }
 
   public String getSchemeDataEndpoint() {
@@ -359,9 +437,28 @@ public class EntityManagementConfiguration implements InitializingBean {
   public boolean isGenerateOrganizationEuropeanaId() {
     return generateOrganizationEuropeanaId;
   }
-
+  
   public boolean isRegisterDeprecated() {
     return registerDeprecated;
   }
 
+  public String getZohoCountryMappingFilename() {
+    return zohoCountryMappingFilename;
+  }
+
+  public Map<String, ZohoLabelUriMapping> getCountryMappings() {
+    return countryMappings;
+  }
+
+  public String getZohoRoleMappingFilename() {
+    return zohoRoleMappingFilename;
+  }
+
+  public Map<String, String> getRoleMappings() {
+    return roleMappings;
+  }
+
+  public String getRoleVocabularyFilename() {
+    return roleVocabularyFilename;
+  }
 }

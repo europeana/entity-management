@@ -1,6 +1,9 @@
 package eu.europeana.entitymanagement.normalization;
 
-import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.*;
+import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_DATE;
+import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_KEYWORD;
+import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_TEXT;
+import static eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes.FIELD_TYPE_TEXT_OR_URI;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BASE_DATA_EUROPEANA_URI;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BEGIN;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DATE_OF_BIRTH;
@@ -9,14 +12,6 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DATE_OF_E
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DATE_OF_TERMINATION;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.END;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.GENDER;
-
-import eu.europeana.entitymanagement.definitions.LanguageCodes;
-import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
-import eu.europeana.entitymanagement.definitions.model.ConsolidatedAgent;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.WebResource;
-import eu.europeana.entitymanagement.utils.EntityUtils;
-import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
@@ -35,6 +30,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import eu.europeana.entitymanagement.definitions.LanguageCodes;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
+import eu.europeana.entitymanagement.definitions.model.ConsolidatedAgent;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.WebResource;
+import eu.europeana.entitymanagement.utils.EntityUtils;
+import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 
 public class EntityFieldsCleaner {
 
@@ -89,13 +91,15 @@ public class EntityFieldsCleaner {
           String[] normalized = normalizedList.toArray(new String[0]);
           entity.setFieldValue(field, normalized);
         } else if (fieldType.isAssignableFrom(List.class)) {
-          List<String> fieldValueList = (List<String>) fieldValue;
-          if (fieldValueList.isEmpty()) {
+          List<?> fieldValueList = (List<?>) fieldValue;
+          if(fieldValueList.isEmpty() || !(fieldValueList.get(0) instanceof String)) {
             continue;
           }
+          
+          List<String> fieldValueListString = (List<String>) fieldValue;
 
           // remove spaces from the List<String> fields
-          List<String> normalizedList = normalizeValues(field.getName(), fieldValueList);
+          List<String> normalizedList = normalizeValues(field.getName(), fieldValueListString);
 
           // if Entity field is supposed to contain a single element, remove all elements
           // except the

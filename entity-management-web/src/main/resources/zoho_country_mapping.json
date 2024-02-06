@@ -1,0 +1,337 @@
+[
+  {
+    "Zoho Label": "Albania, AL",
+    "Entity URI": "http://data.europeana.eu/place/72",
+    "Wikidata URI": ""
+  },
+  {
+    "Zoho Label": "Andorra, AD",
+    "Entity URI": "http://data.europeana.eu/place/71",
+    "Wikidata URI": ""
+  },
+  {
+    "Zoho Label": "Armenia, AM",
+    "Entity URI": "http://data.europeana.eu/place/216258",
+    "Wikidata URI": ""
+  },
+  {
+    "Zoho Label": "Australia, AU",
+    "Entity URI": "http://data.europeana.eu/place/5",
+    "Wikidata URI": ""
+  },
+  {
+    "Zoho Label": "Austria, AT",
+    "Entity URI": "http://data.europeana.eu/place/73",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q40"
+  },
+  {
+    "Zoho Label": "Azerbaijan, AZ",
+    "Entity URI": "http://data.europeana.eu/place/216259",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q227"
+  },
+  {
+    "Zoho Label": "Belarus, BY",
+    "Entity URI": "http://data.europeana.eu/place/77",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q184"
+  },
+  {
+    "Zoho Label": "Belgium, BE",
+    "Entity URI": "http://data.europeana.eu/place/75",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q31"
+  },
+  {
+    "Zoho Label": "Bosnia and Herzegovina, BA",
+    "Entity URI": "http://data.europeana.eu/place/74",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q225"
+  },
+  {
+    "Zoho Label": "Brazil, BR",
+    "Entity URI": "http://data.europeana.eu/place/216302",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q155"
+  },
+  {
+    "Zoho Label": "Bulgaria, BG",
+    "Entity URI": "http://data.europeana.eu/place/76",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q219"
+  },
+  {
+    "Zoho Label": "Canada, CA",
+    "Entity URI": "http://data.europeana.eu/place/216237",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q16"
+  },
+  {
+    "Zoho Label": "China, CN",
+    "Entity URI": "http://data.europeana.eu/place/216264",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q148"
+  },
+  {
+    "Zoho Label": "Costa Rica, CR",
+    "Entity URI": "http://data.europeana.eu/place/216238",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q800"
+  },
+  {
+    "Zoho Label": "Croatia, HR",
+    "Entity URI": "http://data.europeana.eu/place/88",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q224"
+  },
+  {
+    "Zoho Label": "Cyprus, CY",
+    "Entity URI": "http://data.europeana.eu/place/216265",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q229"
+  },
+  {
+    "Zoho Label": "Czech Republic, CZ",
+    "Entity URI": "http://data.europeana.eu/place/79",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q213"
+  },
+  {
+    "Zoho Label": "Denmark, DK",
+    "Entity URI": "http://data.europeana.eu/place/81",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q35"
+  },
+  {
+    "Zoho Label": "Egypt, EG",
+    "Entity URI": "http://data.europeana.eu/place/32",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q79"
+  },
+  {
+    "Zoho Label": "Estonia, EE",
+    "Entity URI": "http://data.europeana.eu/place/82",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q191"
+  },
+  {
+    "Zoho Label": "Finland, FI",
+    "Entity URI": "http://data.europeana.eu/place/84",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q33"
+  },
+  {
+    "Zoho Label": "France, FR",
+    "Entity URI": "http://data.europeana.eu/place/85",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q142"
+  },
+  {
+    "Zoho Label": "Georgia, GE",
+    "Entity URI": "http://data.europeana.eu/place/216266",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q230"
+  },
+  {
+    "Zoho Label": "Germany, DE",
+    "Entity URI": "http://data.europeana.eu/place/80",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q183"
+  },
+  {
+    "Zoho Label": "Greece, GR",
+    "Entity URI": "http://data.europeana.eu/place/87",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q41"
+  },
+  {
+    "Zoho Label": "Hungary, HU",
+    "Entity URI": "http://data.europeana.eu/place/89",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q28"
+  },
+  {
+    "Zoho Label": "Iceland, IS",
+    "Entity URI": "http://data.europeana.eu/place/91",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q189"
+  },
+  {
+    "Zoho Label": "India, IN",
+    "Entity URI": "http://data.europeana.eu/place/216269",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q668"
+  },
+  {
+    "Zoho Label": "Ireland, IE",
+    "Entity URI": "http://data.europeana.eu/place/90",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q27"
+  },
+  {
+    "Zoho Label": "Israel, IL",
+    "Entity URI": "http://data.europeana.eu/place/216268",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q801"
+  },
+  {
+    "Zoho Label": "Italy, IT",
+    "Entity URI": "http://data.europeana.eu/place/92",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q38"
+  },
+  {
+    "Zoho Label": "Japan, JP",
+    "Entity URI": "http://data.europeana.eu/place/216272",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q17"
+  },
+  {
+    "Zoho Label": "Kazakhstan, KZ",
+    "Entity URI": "http://data.europeana.eu/place/216278",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q232"
+  },
+  {
+    "Zoho Label": "Kenya, KE",
+    "Entity URI": "http://data.europeana.eu/place/41",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q114"
+  },
+  {
+    "Zoho Label": "Latvia, LV",
+    "Entity URI": "http://data.europeana.eu/place/101",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q211"
+  },
+  {
+    "Zoho Label": "Lebanon, LB",
+    "Entity URI": "http://data.europeana.eu/place/216280",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q822"
+  },
+  {
+    "Zoho Label": "Liechtenstein, LI",
+    "Entity URI": "http://data.europeana.eu/place/93",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q347"
+  },
+  {
+    "Zoho Label": "Lithuania, LT",
+    "Entity URI": "http://data.europeana.eu/place/94",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q37"
+  },
+  {
+    "Zoho Label": "Luxembourg, LU",
+    "Entity URI": "http://data.europeana.eu/place/95",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q32"
+  },
+  {
+    "Zoho Label": "Macedonia (the former Yugoslav Republic of), MK",
+    "Entity URI": "http://data.europeana.eu/place/104",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q221"
+  },
+  {
+    "Zoho Label": "Malta, MT",
+    "Entity URI": "http://data.europeana.eu/place/105",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q233"
+  },
+  {
+    "Zoho Label": "Mexico, MX",
+    "Entity URI": "http://data.europeana.eu/place/216249",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q96"
+  },
+  {
+    "Zoho Label": "Moldova (Republic of), MD",
+    "Entity URI": "http://data.europeana.eu/place/102",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q217"
+  },
+  {
+    "Zoho Label": "Monaco, MC",
+    "Entity URI": "http://data.europeana.eu/place/96",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q235"
+  },
+  {
+    "Zoho Label": "Montenegro, ME",
+    "Entity URI": "http://data.europeana.eu/place/103",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q236"
+  },
+  {
+    "Zoho Label": "Netherlands, NL",
+    "Entity URI": "http://data.europeana.eu/place/106",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q55"
+  },
+  {
+    "Zoho Label": "Norway, NO",
+    "Entity URI": "http://data.europeana.eu/place/107",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q20"
+  },
+  {
+    "Zoho Label": "Poland, PL",
+    "Entity URI": "http://data.europeana.eu/place/108",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q36"
+  },
+  {
+    "Zoho Label": "Portugal, PT",
+    "Entity URI": "http://data.europeana.eu/place/109",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q45"
+  },
+  {
+    "Zoho Label": "Republic of Korea, KR",
+    "Entity URI": "http://data.europeana.eu/place/216276",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q884"
+  },
+  {
+    "Zoho Label": "Romania, RO",
+    "Entity URI": "http://data.europeana.eu/place/110",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q218"
+  },
+  {
+    "Zoho Label": "Russian Federation, RU",
+    "Entity URI": "http://data.europeana.eu/place/112",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q159"
+  },
+  {
+    "Zoho Label": "San Marino, SM",
+    "Entity URI": "http://data.europeana.eu/place/116",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q238"
+  },
+  {
+    "Zoho Label": "Serbia, RS",
+    "Entity URI": "http://data.europeana.eu/place/111",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q403"
+  },
+  {
+    "Zoho Label": "Singapore, SG",
+    "Entity URI": "http://data.europeana.eu/place/216292",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q334"
+  },
+  {
+    "Zoho Label": "Slovakia, SK",
+    "Entity URI": "http://data.europeana.eu/place/115",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q214"
+  },
+  {
+    "Zoho Label": "Slovenia, SI",
+    "Entity URI": "http://data.europeana.eu/place/114",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q215"
+  },
+  {
+    "Zoho Label": "South Africa, ZA",
+    "Entity URI": "http://data.europeana.eu/place/68",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q258"
+  },
+  {
+    "Zoho Label": "Spain, ES",
+    "Entity URI": "http://data.europeana.eu/place/83",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q29"
+  },
+  {
+    "Zoho Label": "Sweden, SE",
+    "Entity URI": "http://data.europeana.eu/place/113",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q34"
+  },
+  {
+    "Zoho Label": "Switzerland, CH",
+    "Entity URI": "http://data.europeana.eu/place/78",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q39"
+  },
+  {
+    "Zoho Label": "Turkey, TR",
+    "Entity URI": "http://data.europeana.eu/place/216295",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q43"
+  },
+  {
+    "Zoho Label": "Ukraine, UA",
+    "Entity URI": "http://data.europeana.eu/place/117",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q212"
+  },
+  {
+    "Zoho Label": "United Kingdom of Great Britain and Northern Ireland, GB",
+    "Entity URI": "http://data.europeana.eu/place/86",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q145"
+  },
+  {
+    "Zoho Label": "United States of America, US",
+    "Entity URI": "http://data.europeana.eu/place/216254",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q30"
+  },
+  {
+    "Zoho Label": "Vatican City State, VA",
+    "Entity URI": "http://data.europeana.eu/place/118",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q237"
+  },
+  {
+    "Zoho Label": "Europe, EU",
+    "Entity URI": "",
+    "Wikidata URI": ""
+  }
+]

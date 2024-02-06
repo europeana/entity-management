@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import eu.europeana.entitymanagement.AbstractIntegrationTest;
-import eu.europeana.entitymanagement.config.AppConfig;
+import eu.europeana.entitymanagement.config.AppAutoconfig;
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.definitions.model.TimeSpan;
@@ -26,7 +26,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 @AutoConfigureMockMvc
 class ScoringServiceIT extends AbstractIntegrationTest {
 
-  @Resource(name = AppConfig.BEAN_EM_SCORING_SERVICE)
+  @Resource(name = AppAutoconfig.BEAN_EM_SCORING_SERVICE)
   ScoringService scoringService;
 
   // @Test

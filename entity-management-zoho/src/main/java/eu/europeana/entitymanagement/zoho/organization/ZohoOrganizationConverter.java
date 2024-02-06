@@ -1,34 +1,34 @@
 package eu.europeana.entitymanagement.zoho.organization;
 
 import static eu.europeana.entitymanagement.zoho.utils.ZohoUtils.toIsoLanguage;
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.lang.NonNull;
 import com.zoho.crm.api.record.Record;
 import com.zoho.crm.api.users.User;
 import eu.europeana.entitymanagement.definitions.model.Address;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
+import eu.europeana.entitymanagement.definitions.model.ZohoLabelUriMapping;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
 
 public class ZohoOrganizationConverter {
 
+  static final Logger logger = LogManager.getLogger(ZohoOrganizationConverter.class);
+
   private static final String POSITION_SEPARATOR = "_";
   
-  private ZohoOrganizationConverter() {
-    // private constructor to prevent instantiation
-  }
-
-  public static Organization convertToOrganizationEntity(Record zohoRecord, String zohoBaseUrl) {
+  public static Organization convertToOrganizationEntity(Record zohoRecord, String zohoBaseUrl,  @NonNull final Map<String, ZohoLabelUriMapping> countryMappings,
+      @NonNull final Map<String, String> roleMappings) {
     Organization org = new Organization();
     Long zohoId = zohoRecord.getId();
     org.setAbout(ZohoUtils.buildZohoOrganizationId(zohoBaseUrl, zohoRecord.getId()));
@@ -51,49 +51,46 @@ public class ZohoOrganizationConverter {
     String logoFieldName = ZohoConstants.LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD;
     org.setLogo(buildWebResource(zohoRecord, logoFieldName));
     org.setHomepage(getStringFieldValue(zohoRecord, ZohoConstants.WEBSITE_FIELD));
-    List<String> organizationRoleStringList =
+    
+    List<String> orgRoleLabels =
         ZohoUtils.stringListSupplier(zohoRecord.getKeyValue(ZohoConstants.ORGANIZATION_ROLE_FIELD));
-    if (!organizationRoleStringList.isEmpty()) {
-      org.setEuropeanaRole(
-          ZohoUtils.createLanguageMapOfStringList(
-              Locale.ENGLISH.getLanguage(), organizationRoleStringList));
-    }
-    org.setOrganizationDomain(
-        ZohoUtils.createMapWithLists(
-            Locale.ENGLISH.getLanguage(),
-            ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.DOMAIN_FIELD))));
-
-    List<String> geographicLevel =
-        ZohoUtils.stringListSupplier(zohoRecord.getKeyValue(ZohoConstants.GEOGRAPHIC_LEVEL_FIELD));
-    if (!geographicLevel.isEmpty()) {
-      org.setGeographicLevel(
-          ZohoUtils.createMap(Locale.ENGLISH.getLanguage(), geographicLevel.get(0)));
+    if (!orgRoleLabels.isEmpty()) {
+      List<String> orgRoleIds = new ArrayList<>();
+      for(String roleLabel : orgRoleLabels) {
+        if(roleMappings.containsKey(roleLabel.toLowerCase())) {
+          orgRoleIds.add(roleMappings.get(roleLabel.toLowerCase()));
+        }
+      }
+      if(! orgRoleIds.isEmpty()) {
+        org.setEuropeanaRoleIds(orgRoleIds);
+      }
     }
 
-    String organizationCountry =
-        toEdmCountry(getStringFieldValue(zohoRecord, ZohoConstants.ORGANIZATION_COUNTRY_FIELD));
-    org.setCountry(organizationCountry);
-    org.setSameReferenceLinks(getAllSameAs(zohoRecord));
-
+    //build address object
     Address address = new Address();
     address.setVcardStreetAddress(
         ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.STREET_FIELD)));
     address.setVcardLocality(
         ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.CITY_FIELD)));
-    address.setVcardCountryName(
-        ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.COUNTRY_FIELD)));
     address.setVcardPostalCode(
         ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.ZIP_CODE_FIELD)));
-    address.setVcardPostOfficeBox(
-        ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.PO_BOX_FIELD)));
 
-    String lat =
-        ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.LATITUDE_FIELD));
-    String lon =
-        ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.LONGITUDE_FIELD));
-    if (lat != null && lon != null) {
-      address.setVcardHasGeo(EntityUtils.toGeoUri(lat, lon));
+    String zohoCountryLabel = ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.COUNTRY_FIELD));
+    if(zohoCountryLabel != null) {
+      //update address country
+      address.setVcardCountryName(extractCountryName(zohoCountryLabel));
+      
+      //update organization country id
+      if(countryMappings.containsKey(zohoCountryLabel)) {
+        //get country ID from mappings
+        String entityUri = countryMappings.get(zohoCountryLabel).getEntityUri();
+        org.setCountryId(entityUri);
+      } else if(logger.isInfoEnabled()){
+        logger.info("The mapping for the zoho country label: {}, to the europeana uri does not exist.", zohoCountryLabel);
+      }
     }
+    
+    org.setSameReferenceLinks(getAllSameAs(zohoRecord));
 
     // only set address if it contains metadata properties.
     if (address.hasMetadataProperties()) {
@@ -101,11 +98,10 @@ public class ZohoOrganizationConverter {
       org.setAddress(address);
     }
 
-    List<String> edmLanguage =
-        ZohoUtils.stringListSupplier(zohoRecord.getKeyValue(ZohoConstants.OFFICIAL_LANGUAGE_FIELD));
-    if (!edmLanguage.isEmpty()) {
-      List<String> edmISOLanguage =
-          edmLanguage.stream().map(ZohoUtils::toIsoLanguage).collect(Collectors.toList());
+    String edmLanguage =
+        ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.OFFICIAL_LANGUAGE_FIELD));
+    if (edmLanguage!=null) {
+      List<String> edmISOLanguage = Arrays.asList(ZohoUtils.toIsoLanguage(edmLanguage));
       org.setLanguage(edmISOLanguage);
     }
 
@@ -125,15 +121,12 @@ public class ZohoOrganizationConverter {
       org.setHiddenLabel(hiddenLabels);
     }
 
-    List<String> industry =
-        ZohoUtils.stringListSupplier(zohoRecord.getKeyValue(ZohoConstants.INDUSTRY_FIELD));
-    if (!industry.isEmpty()) {
-      Map<String, List<String>> orgDomain = new HashMap<String, List<String>>();
-      orgDomain.put("en", industry);
-      org.setOrganizationDomain(orgDomain);
-    }
-
     return org;
+  }
+
+  private static String extractCountryName(String zohoCountryLabel) {
+    //get only the country name from zohoLabels (e.g France, FR)
+    return StringUtils.substringBeforeLast(zohoCountryLabel, ",").trim();
   }
 
   private static WebResource buildWebResource(Record zohoRecord, String logoFieldName) {
@@ -212,7 +205,8 @@ public class ZohoOrganizationConverter {
       return Collections.emptyList();
     }
 
-    return List.of(StringUtils.split(textArea, "\n"));
+    //regex to split on any new line system variations ("\n", "\r\n", or "\r") 
+    return List.of(textArea.split("\\r?\\n|\\r"));
   }
 
   static String getIsoLanguage(Record zohoRecord, String zohoLangFieldName) {
@@ -239,23 +233,6 @@ public class ZohoOrganizationConverter {
       }
     }
     return sameAsList;
-  }
-
-  private static String toEdmCountry(String organizationCountry) {
-    if (StringUtils.isBlank(organizationCountry)) {
-      return null;
-    } else {
-      String isoCode = null;
-      int commaSeparatorPos = organizationCountry.indexOf(44);
-      int bracketSeparatorPos = organizationCountry.indexOf(40);
-      if (commaSeparatorPos > 0) {
-        isoCode = organizationCountry.substring(commaSeparatorPos + 1).trim();
-      } else if (bracketSeparatorPos > 0) {
-        isoCode = organizationCountry.substring(0, bracketSeparatorPos).trim();
-      }
-
-      return isoCode;
-    }
   }
 
   /**
