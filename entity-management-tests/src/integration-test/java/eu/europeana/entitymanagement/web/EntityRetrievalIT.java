@@ -498,13 +498,6 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
     String metisResponse = loadFile(IntegrationTestUtils.PLACE_SWEDEN_XML);
     createEntity(europeanaMetadata, metisResponse, IntegrationTestUtils.PLACE_SWEDEN_URI);
     
-    //2. create a vocabulary for the europeanaRole
-    Vocabulary vocab = new Vocabulary();
-    vocab.setVocabularyUri("http://data.europeana.eu/vocabulary/role/ProvidingInstitution");
-    vocab.setInScheme(List.of("http://data.europeana.eu/vocabulary/role"));
-    vocab.setPrefLabel(Map.of("en", "Providing Institution"));
-    vocabRepository.save(vocab);
-    
 //    //forcefully change the country mapping uri to the right one
 //    List<CountryMapping> countryMap= entityRecordService.getCountryMapping();
 //    for(CountryMapping cm : countryMap) {
@@ -513,7 +506,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
 //      }
 //    }
 
-    //3. register zoho GFM org
+    //2. register zoho GFM org
     europeanaMetadata = loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_GFM_ZOHO_JSON);
     Optional<Record> zohoRecord =
         IntegrationTestUtils.getZohoOrganizationRecord(
@@ -523,12 +516,12 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
     String entityId = createOrganization(europeanaMetadata, zohoRecord.get()).getEntityId();
 
     String requestPath = getEntityRequestPath(entityId);
-    mockMvc
+    ResultActions resultActions = mockMvc
         .perform(
             get(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath + ".jsonld")
                 .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external, dereference")
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
+                .accept(MediaType.APPLICATION_JSON));
+    resultActions.andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(entityId)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
         .andExpect(jsonPath("$.sameAs").isNotEmpty())

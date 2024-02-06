@@ -19,7 +19,7 @@ import eu.europeana.api.commons.definitions.utils.DateUtils;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.config.AppConfig;
+import eu.europeana.entitymanagement.config.AppAutoconfig;
 import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
@@ -36,7 +36,7 @@ import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 
-@Service(AppConfig.BEAN_ZOHO_SYNC_SERVICE)
+@Service(AppAutoconfig.BEAN_ZOHO_SYNC_SERVICE)
 public class ZohoSyncService extends BaseZohoAccess {
 
   @Autowired

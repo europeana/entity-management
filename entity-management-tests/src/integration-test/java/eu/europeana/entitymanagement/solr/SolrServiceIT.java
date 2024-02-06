@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
-import eu.europeana.entitymanagement.config.AppConfig;
+import eu.europeana.entitymanagement.config.AppAutoconfig;
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Concept;
@@ -48,7 +48,7 @@ public class SolrServiceIT extends AbstractIntegrationTest {
 
   //  private static final String RIGHTS_PD = "https://creativecommons.org/publicdomain/zero/1.0/";
 
-  @Qualifier(AppConfig.BEAN_EM_SOLR_SERVICE)
+  @Qualifier(AppAutoconfig.BEAN_EM_SOLR_SERVICE)
   @Autowired
   private SolrService emSolrService;
   

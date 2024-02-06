@@ -48,5 +48,7 @@ europeana.searchapi.urlPrefix=https://<api_endpoint>/record/v2/search.json?wskey
 #enable/disable generation of entity ids for organizations (should be enabled only in productive environment)
 #zoho.generate.organization.europeanaid=false
 
-zoho.country.mapping=
-zoho.role.mapping=
+#configuration files for zoho country and role mappings 
+#zoho.country.mapping=zoho_country_mapping.json
+#zoho.role.mapping=zoho_role_mapping.json
+#europeana.role.vocabulary=role_vocabulary.xml

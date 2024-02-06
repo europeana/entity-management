@@ -95,7 +95,6 @@ public class Organization extends Entity {
     if (copy.getPhone() != null) this.phone = new ArrayList<>(copy.getPhone());
     if (copy.getMbox() != null) this.mbox = new ArrayList<>(copy.getMbox());
     //because the europeanaRoleRef is a reference to the object we keep it the same (therefore also for europeanaRole)
-    this.europeanaRole = copy.getEuropeanaRole();
     this.europeanaRoleRefs = copy.getEuropeanaRoleRefs();
     if(copy.getEuropeanaRoleIds()!=null) this.europeanaRoleIds=new ArrayList<>(copy.getEuropeanaRoleIds());
     //because the countryRef is a reference to the object we keep it the same (therefore also for country)
@@ -272,7 +271,7 @@ public class Organization extends Entity {
       europeanaRole=new ArrayList<>();
       for(String roleId : europeanaRoleIds) {
         Vocabulary vocab = new Vocabulary();
-        vocab.setVocabularyUri(roleId);
+        vocab.setUri(roleId);
         europeanaRole.add(vocab);
       }
     }

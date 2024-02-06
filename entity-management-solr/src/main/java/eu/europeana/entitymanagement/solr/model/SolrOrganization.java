@@ -36,7 +36,8 @@ public class SolrOrganization extends SolrEntity<Organization> {
   @Field(OrganizationSolrFields.FOAF_MBOX)
   private List<String> mbox;
 
-  @Field(OrganizationSolrFields.EUROPEANA_ROLE)
+  //MAPPING TO BE ENABLED BACK IN THE NEXT VERSION - requires schema and ENtity API UPDATE
+  //@Field(OrganizationSolrFields.EUROPEANA_ROLE)
   private List<String> europeanaRole;
 
   @Field(OrganizationSolrFields.COUNTRY)

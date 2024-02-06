@@ -330,6 +330,8 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         .andExpect(jsonPath("$.language", everyItem(matchesRegex("[a-z]+"))))
         .andExpect(jsonPath("$.hiddenLabel", hasSize(3)))
         .andExpect(jsonPath("$.id", any(String.class)));
+        // excluded as the wikidata hasGeo is not consolidated  
+        //.andExpect(jsonPath("$.hasAddress.hasGeo").isNotEmpty())
   }
 
   @Test

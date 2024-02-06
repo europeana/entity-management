@@ -4,7 +4,7 @@ import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants
 import static eu.europeana.entitymanagement.web.MetisDereferenceUtils.parseMetisResponse;
 
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.config.AppConfig;
+import eu.europeana.entitymanagement.config.AppAutoconfig;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.dereference.Dereferencer;
 import eu.europeana.entitymanagement.exception.DatasourceNotReachableException;
@@ -37,7 +37,7 @@ import reactor.core.Exceptions;
 import reactor.netty.http.client.HttpClient;
 
 /** Handles de-referencing entities from Metis. */
-@Service(AppConfig.BEAN_METIS_DEREF_SERVICE)
+@Service(AppAutoconfig.BEAN_METIS_DEREF_SERVICE)
 public class MetisDereferenceService implements InitializingBean, Dereferencer {
   private static final Logger logger = LogManager.getLogger(MetisDereferenceService.class);
 

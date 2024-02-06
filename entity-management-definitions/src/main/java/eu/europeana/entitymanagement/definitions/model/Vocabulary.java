@@ -21,6 +21,9 @@ import eu.europeana.entitymanagement.utils.VocabularyWatcher;
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @dev.morphia.annotations.Entity("Vocabulary")
 @EntityListeners(VocabularyWatcher.class)
+/**
+ * class used for storing static vocabularies (e.g. europeana roles)
+ */
 public class Vocabulary {
 
   private String type = "Vocabulary";
@@ -28,7 +31,7 @@ public class Vocabulary {
   @Id @JsonIgnore private ObjectId dbId;
 
   @Indexed(options = @IndexOptions(unique = true))
-  private String vocabularyUri;
+  private String uri;
   
   protected List<String> inScheme;
   
@@ -40,6 +43,9 @@ public class Vocabulary {
   @JsonIgnore 
   private Date modified;
   
+  /**
+   * default constructor
+   */
   public Vocabulary() {
   }
 
@@ -69,17 +75,17 @@ public class Vocabulary {
 
   @Override
   public String toString() {
-    return String.format("Vocabulary.vocabularyUri: %s", getVocabularyUri());
+    return String.format("Vocabulary.uri: %s", getUri());
   }
 
   @JsonGetter
-  public String getVocabularyUri() {
-    return vocabularyUri;
+  public String getUri() {
+    return uri;
   }
 
   @JsonSetter
-  public void setVocabularyUri(String vocabularyUri) {
-    this.vocabularyUri = vocabularyUri;
+  public void setUri(String vocabularyUri) {
+    this.uri = vocabularyUri;
   }
 
   @JsonGetter(IN_SCHEME)

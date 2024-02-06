@@ -14,7 +14,7 @@ import eu.europeana.entitymanagement.batch.config.EntityUpdateJobConfig;
 import eu.europeana.entitymanagement.batch.repository.FailedTaskRepository;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.batch.utils.BatchUtils;
-import eu.europeana.entitymanagement.config.AppConfig;
+import eu.europeana.entitymanagement.config.AppAutoconfig;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
 import eu.europeana.entitymanagement.definitions.batch.model.FailedTask.Builder;
@@ -63,7 +63,7 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
 
   @Autowired EntityUpdateJobConfig updateJobConfig;
 
-  @Qualifier(AppConfig.BEAN_EM_SOLR_SERVICE)
+  @Qualifier(AppAutoconfig.BEAN_EM_SOLR_SERVICE)
   @Autowired
   private SolrService emSolrService;
 

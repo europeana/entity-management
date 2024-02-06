@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
+import org.springframework.core.io.ClassPathResource;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europeana.entitymanagement.definitions.model.ZohoLabelUriMapping;
@@ -165,11 +167,14 @@ public class EntityManagementConfiguration implements InitializingBean {
   @Value("${spring.profiles.active:}")
   private String activeProfileString;
 
-  @Value("${zoho.country.mapping:null}")
+  @Value("${zoho.country.mapping:zoho_country_mapping.json}")
   private String zohoCountryMappingFilename;
 
-  @Value("${zoho.role.mapping:null}")
+  @Value("${zoho.role.mapping:zoho_role_mapping.json}")
   private String zohoRoleMappingFilename;
+  
+  @Value("${europeana.role.vocabulary:role_vocabulary.xml}")
+  private String roleVocabularyFilename;
 
   Map<String, ZohoLabelUriMapping> countryMappings = new HashMap<>();
   Map<String, String> roleMappings = new HashMap<>();
@@ -224,7 +229,9 @@ public class EntityManagementConfiguration implements InitializingBean {
   }
 
   private void initCountryMappings() throws IOException {
-    try (InputStream inputStream = getClass().getResourceAsStream(getZohoCountryMappingFilename())) {
+    ClassPathResource resource = new ClassPathResource(getZohoCountryMappingFilename());
+    
+    try (InputStream inputStream = resource.getInputStream()) {
       assert inputStream != null;
       try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
         String contents = reader.lines().collect(Collectors.joining(System.lineSeparator()));
@@ -237,7 +244,10 @@ public class EntityManagementConfiguration implements InitializingBean {
   }
   
   private void initRoleMappings() throws IOException {
-    try (InputStream inputStream = getClass().getResourceAsStream(getZohoRoleMappingFilename())) {
+    
+    ClassPathResource resource = new ClassPathResource(getZohoRoleMappingFilename());
+    
+    try (InputStream inputStream =  resource.getInputStream()) {
       assert inputStream != null;
       try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
         String contents = reader.lines().collect(Collectors.joining(System.lineSeparator()));
@@ -245,6 +255,17 @@ public class EntityManagementConfiguration implements InitializingBean {
         for (ZohoLabelUriMapping roleMapping : roleMappingList) {
           roleMappings.put(roleMapping.getZohoLabel(), roleMapping.getEntityUri());
         }
+      }
+    }
+  }
+  
+  public String loadRoleVocabulary() throws IOException {
+    ClassPathResource resource = new ClassPathResource(getRoleVocabularyFilename());
+    
+    try (InputStream inputStream = resource.getInputStream()) {
+      assert inputStream != null;
+      try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+        return reader.lines().collect(Collectors.joining(System.lineSeparator()));
       }
     }
   }
@@ -435,5 +456,9 @@ public class EntityManagementConfiguration implements InitializingBean {
 
   public Map<String, String> getRoleMappings() {
     return roleMappings;
+  }
+
+  public String getRoleVocabularyFilename() {
+    return roleVocabularyFilename;
   }
 }

@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.mongo.repository;
 
 import static dev.morphia.query.experimental.filters.Filters.in;
-import static eu.europeana.entitymanagement.definitions.VocabularyFields.VOCABULARY_URI;
+import static eu.europeana.entitymanagement.definitions.VocabularyFields.URI;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Resource;
@@ -18,24 +18,50 @@ public class VocabularyRepository  {
   @Resource(name = AppConfigConstants.BEAN_EM_DATA_STORE)
   Datastore datastore;
 
-  public List<Vocabulary> findByVocabularyUris(List<String> vocabularyUris) {
+  /**
+   * retrieve records by their URI/id
+   * @param vocabularyUris
+   * @return
+   */
+  public List<Vocabulary> findByUri(List<String> vocabularyUris) {
     List<Filter> filters = new ArrayList<>();
-    filters.add(in(VOCABULARY_URI, vocabularyUris));
+    filters.add(in(URI, vocabularyUris));
     return datastore.find(Vocabulary.class)
         .filter(filters.toArray(Filter[]::new))
         .iterator()
         .toList();
   }
 
+  /**
+   * save to database 
+   * @param vocab record to save
+   * @return saved record
+   */
   public Vocabulary save(Vocabulary vocab) {
     return datastore.save(vocab);
   }
   
+  /**
+   * save list of records to database
+   * @param vocabs list of records to save
+   * @return saved records
+   */
   public List<Vocabulary> saveBulk(List<Vocabulary> vocabs) {
     return datastore.save(vocabs);
   }
 
+  /**
+   * clear database collection
+   */
   public void dropCollection() {
     datastore.getMapper().getCollection(Vocabulary.class).drop();
+  }
+
+  /**
+   * count the records available in the database
+   * @return number of database records
+   */
+  public long countRecords() {
+    return datastore.find(Vocabulary.class).count();
   }
 }

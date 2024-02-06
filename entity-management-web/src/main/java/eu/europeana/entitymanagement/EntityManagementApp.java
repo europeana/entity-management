@@ -19,7 +19,9 @@ import eu.europeana.entitymanagement.batch.model.JobType;
 import eu.europeana.entitymanagement.batch.service.BatchEntityUpdateExecutor;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
+import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
+import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.web.service.ZohoSyncService;
 
 /**
@@ -39,6 +41,8 @@ public class EntityManagementApp implements CommandLineRunner {
   private BatchEntityUpdateExecutor batchUpdateExecutor;
   @Autowired
   private ZohoSyncService zohoSyncService;
+  @Autowired
+  private EntityRecordService entityRecordService;
 
   /**
    * Main entry point of this application
@@ -51,7 +55,7 @@ public class EntityManagementApp implements CommandLineRunner {
    */
   public static void main(String[] args) {
     // jobType = args.length > 0 ? args[0] : "";
-    if (hasCmdLineParams(args)) {
+    if (isScheduledTask(args)) {
       if (LOG.isInfoEnabled()) {
         LOG.info("Starting batch updates execution with args: {}", Arrays.toString(args));
       }
@@ -92,6 +96,10 @@ public class EntityManagementApp implements CommandLineRunner {
     }
   }
 
+  static boolean isScheduledTask(String[] args) {
+    return hasCmdLineParams(args);
+  }
+
   static ScheduledTaskService getScheduledTasksService(ConfigurableApplicationContext context) {
     return (ScheduledTaskService) context
         .getBean(AppConfigConstants.BEAN_BATCH_SCHEDULED_TASK_SERVICE);
@@ -108,34 +116,38 @@ public class EntityManagementApp implements CommandLineRunner {
 
   @Override
   public void run(String... args) throws Exception {
-    if (hasCmdLineParams(args)) {
-      Set<String> tasks = Set.of(args);
-
-      // first zoho sync as it runs synchronuous operations
-      if (tasks.contains(JobType.ZOHO_SYNC.value())) {
-        LOG.info("Executing zoho sync");
-        ZohoSyncReport zohoSyncReport = zohoSyncService.synchronizeModifiedZohoOrganizations();
-        LOG.info("Synchronization Report: {}", zohoSyncReport.toString());
-      }
-
-      if (tasks.contains(JobType.SCHEDULE_DELETION.value())) {
-        // run also the deletions called through the API directly
-        LOG.info("Executing scheduled deletions");
-        batchUpdateExecutor.runScheduledDeprecationsAndDeletions();
-        // TODO: should read the number of scheduled deletions and deprecations from the database
-        // and write it to the logs
-      }
-
-      if (tasks.contains(JobType.SCHEDULE_UPDATE.value())) {
-        LOG.info("Executing scheduled updates");
-        batchUpdateExecutor.runScheduledUpdate();
-        // TODO: should read the number of scheduled deletions and deprecations from the database
-        // and write it to the logs
-      }
-
-    }
+    if (isScheduledTask(args)) {
+      runScheduledTasks(args);
+    } 
     // if no arguments then web server should be started
     return;
+  }
+
+
+  void runScheduledTasks(String... args) throws EntityUpdateException {
+    Set<String> tasks = Set.of(args);
+
+    // first zoho sync as it runs synchronuous operations
+    if (tasks.contains(JobType.ZOHO_SYNC.value())) {
+      LOG.info("Executing zoho sync");
+      ZohoSyncReport zohoSyncReport = zohoSyncService.synchronizeModifiedZohoOrganizations();
+      LOG.info("Synchronization Report: {}", zohoSyncReport.toString());
+    }
+
+    if (tasks.contains(JobType.SCHEDULE_DELETION.value())) {
+      // run also the deletions called through the API directly
+      LOG.info("Executing scheduled deletions");
+      batchUpdateExecutor.runScheduledDeprecationsAndDeletions();
+      // TODO: should read the number of scheduled deletions and deprecations from the database
+      // and write it to the logs
+    }
+
+    if (tasks.contains(JobType.SCHEDULE_UPDATE.value())) {
+      LOG.info("Executing scheduled updates");
+      batchUpdateExecutor.runScheduledUpdate();
+      // TODO: should read the number of scheduled deletions and deprecations from the database
+      // and write it to the logs
+    }
   }
 
   /** validates the arguments passed */

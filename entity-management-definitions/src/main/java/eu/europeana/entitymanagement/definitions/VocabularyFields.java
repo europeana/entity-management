@@ -7,6 +7,6 @@ public class VocabularyFields {
     // private constructor to prevent instantiation
   }
 
-  public static final String VOCABULARY_URI = "vocabularyUri";
+  public static final String URI = "uri";
 
 }

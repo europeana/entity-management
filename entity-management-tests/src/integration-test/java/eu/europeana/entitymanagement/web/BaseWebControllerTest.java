@@ -23,7 +23,7 @@ import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.common.config.DataSource;
-import eu.europeana.entitymanagement.config.AppConfig;
+import eu.europeana.entitymanagement.config.AppAutoconfig;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.model.Entity;
@@ -49,7 +49,7 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
 
   @Autowired private EntityUpdateService entityUpdateService;
 
-  @Qualifier(AppConfig.BEAN_EM_SOLR_SERVICE)
+  @Qualifier(AppAutoconfig.BEAN_EM_SOLR_SERVICE)
   @Autowired
   protected SolrService emSolrService;
 

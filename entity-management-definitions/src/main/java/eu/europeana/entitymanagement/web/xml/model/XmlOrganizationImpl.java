@@ -113,7 +113,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
       List<XmlConceptImpl> orgXmlRole= new ArrayList<>();
       for(Vocabulary vocab : orgRole) {
         XmlConceptImpl xmlConcept = new XmlConceptImpl();
-        xmlConcept.setAbout(vocab.getVocabularyUri());
+        xmlConcept.setAbout(vocab.getUri());
         xmlConcept.setPrefLabel(RdfXmlUtils.convertMapToXmlMultilingualString(vocab.getPrefLabel()));
         xmlConcept.setInScheme(RdfXmlUtils.convertToRdfResource(vocab.getInScheme()));
         orgXmlRole.add(xmlConcept);
@@ -149,29 +149,17 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     entity.setAcronym(RdfXmlUtils.toLanguageMapList(getAcronym()));
     entity.setDescription(RdfXmlUtils.toLanguageMap(getDescription()));
     entity.setLogo(XmlWebResourceWrapper.toWebResource(getLogo()));
-    //set europeanaRole
+    //set europeanaRole id (external dereferencers deliver only the ids, not transitive data)
     if(getEuropeanaRole()!=null && !getEuropeanaRole().isEmpty()) {
-      List<String> roleIds=new ArrayList<>();
-      List<Vocabulary> role=new ArrayList<>();
-      for(XmlConceptImpl xmlConcept : getEuropeanaRole()) {
-        Vocabulary vocab=new Vocabulary();
-        vocab.setVocabularyUri(xmlConcept.getAbout());
-        vocab.setPrefLabel(RdfXmlUtils.toLanguageMap(xmlConcept.getPrefLabel()));
-        vocab.setInScheme(RdfXmlUtils.toStringList(xmlConcept.getInScheme()));
-        role.add(vocab);
-        roleIds.add(xmlConcept.getAbout());
-      }
-      entity.setEuropeanaRole(role);
+      List<String> roleIds = getEuropeanaRole().stream().map(e -> e.getAbout()).toList();
       entity.setEuropeanaRoleIds(roleIds);
     }
     
+    //set country id (external dereferencers deliver only the ids, not transitive data)
     if(getCountry() != null) {
-      //the country is not saved in the database 
-      entity.setCountry(getCountry().toEntityModel());
       //we need to extract the countryID as well (xml about holds the entityId)
       entity.setCountryId(getCountry().getAbout());
     }
-    
     
     if (getHomepage() != null) {
       entity.setHomepage(getHomepage().getResource());

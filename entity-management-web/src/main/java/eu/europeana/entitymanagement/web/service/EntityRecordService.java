@@ -33,7 +33,7 @@ import dev.morphia.query.experimental.filters.Filter;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.config.AppConfig;
+import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
@@ -77,7 +77,7 @@ import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 
-@Service(AppConfig.BEAN_ENTITY_RECORD_SERVICE)
+@Service(AppConfigConstants.BEAN_ENTITY_RECORD_SERVICE)
 public class EntityRecordService {
 
   private final EntityRecordRepository entityRecordRepository;
@@ -176,7 +176,7 @@ public class EntityRecordService {
     }
     //dereference role
     if(org.getEuropeanaRoleIds()!=null && !org.getEuropeanaRoleIds().isEmpty()) {
-      org.setEuropeanaRole(vocabRepository.findByVocabularyUris(org.getEuropeanaRoleIds()));          
+      org.setEuropeanaRole(vocabRepository.findByUri(org.getEuropeanaRoleIds()));          
     }
   }
 
@@ -1288,7 +1288,6 @@ public class EntityRecordService {
 
   public void dropRepository() {
     this.entityRecordRepository.dropCollection();
-    this.vocabRepository.dropCollection();
   }
 
   /**
@@ -1485,7 +1484,7 @@ public class EntityRecordService {
       }
       //role reference
       if(org.getEuropeanaRoleIds()!=null && !org.getEuropeanaRoleIds().isEmpty()) {
-        List<Vocabulary> vocabs=vocabRepository.findByVocabularyUris(org.getEuropeanaRoleIds());
+        List<Vocabulary> vocabs=vocabRepository.findByUri(org.getEuropeanaRoleIds());
         if (vocabs.isEmpty()) {
           logger.info(
               "No vocabularies with the uris: {} were found in the database. Cannot assign role reference to organization with id {}",
