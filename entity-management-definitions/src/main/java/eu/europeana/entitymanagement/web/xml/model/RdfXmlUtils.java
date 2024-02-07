@@ -1,12 +1,12 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
-import eu.europeana.entitymanagement.utils.UriValidator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringEscapeUtils;
+import eu.europeana.entitymanagement.utils.UriValidator;
 
 public class RdfXmlUtils {
 

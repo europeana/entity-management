@@ -31,6 +31,7 @@ public class ScheduledTask {
   private ScheduledTaskType updateType;
   private boolean hasBeenProcessed;
 
+  @SuppressWarnings("unused")
   private ScheduledTask() {
     // private constructor
   }

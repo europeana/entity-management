@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest(
     classes = {
@@ -33,6 +34,7 @@ import org.springframework.boot.test.context.SpringBootTest;
       EntityManagementConfiguration.class,
       SerializationConfig.class
     })
+@ActiveProfiles("test")//enable application-test.yml
 public class EntityFieldsValidatorTest {
 
   @Qualifier(AppConfigConstants.BEAN_JSON_MAPPER)
