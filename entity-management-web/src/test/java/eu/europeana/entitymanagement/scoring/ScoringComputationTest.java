@@ -12,9 +12,11 @@ import eu.europeana.entitymanagement.web.model.scoring.MaxEntityMetrics;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 /** JUnit test for testing the EMControllerTest class */
 @SpringBootTest(classes = SerializationConfig.class)
+@ActiveProfiles("test")//enable application-test.yml
 public class ScoringComputationTest {
 
   /** Use configured ObjectMapper so we know the output from this test matches the real thing */

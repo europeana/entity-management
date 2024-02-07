@@ -12,12 +12,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 /** JUnit test to check if Swagger is setup fine */
 @SpringBootTest
 @AutoConfigureMockMvc
 @Disabled("Disabled temporarily")
+@ActiveProfiles("test")//enable application-test.yml
 public class SwaggerConfigTest {
 
   @Autowired private MockMvc mockMvc;

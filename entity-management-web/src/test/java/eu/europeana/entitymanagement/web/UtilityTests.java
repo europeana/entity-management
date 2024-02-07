@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Disabled;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import eu.europeana.entitymanagement.config.AppAutoconfig;
 import eu.europeana.entitymanagement.definitions.model.Concept;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -22,6 +23,7 @@ import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
 
 @SpringBootTest
 @Disabled("Excluded from automated runs")
+@ActiveProfiles("test")//enable application-test.yml
 public class UtilityTests {
 
   @Qualifier(AppAutoconfig.BEAN_EM_SOLR_SERVICE)
