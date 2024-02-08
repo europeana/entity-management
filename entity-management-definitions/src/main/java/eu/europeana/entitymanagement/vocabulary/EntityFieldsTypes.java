@@ -108,6 +108,7 @@ public enum EntityFieldsTypes {
   countryId(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
   country(EntityFieldsTypes.FIELD_TYPE_PLACE, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
   countryRef(EntityFieldsTypes.FIELD_TYPE_ENTITY_RECORD, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
+  countryISO(EntityFieldsTypes.FIELD_TYPE_TEXT, false, EntityFieldsTypes.FIELD_CARDINALITY_1_1),
   homepage(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
   phone(
       EntityFieldsTypes.FIELD_TYPE_KEYWORD, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
