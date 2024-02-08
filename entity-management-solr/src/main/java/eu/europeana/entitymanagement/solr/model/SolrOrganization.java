@@ -37,11 +37,11 @@ public class SolrOrganization extends SolrEntity<Organization> {
   private List<String> mbox;
 
   //MAPPING TO BE ENABLED BACK IN THE NEXT VERSION - requires schema and ENtity API UPDATE
-  //@Field(OrganizationSolrFields.EUROPEANA_ROLE)
+  @Field(OrganizationSolrFields.EUROPEANA_ROLE)
   private List<String> europeanaRole;
 
   @Field(OrganizationSolrFields.COUNTRY)
-  private String country;
+  private List<String> country;
 
   @Field(OrganizationSolrFields.VCARD_HAS_ADDRESS)
   private String hasAddress;
@@ -85,7 +85,15 @@ public class SolrOrganization extends SolrEntity<Organization> {
     
     if(organization.getEuropeanaRoleIds()!=null) this.europeanaRole=new ArrayList<>(organization.getEuropeanaRoleIds());
     
-    this.country=organization.getCountryId();
+    this.country=new ArrayList<>();
+    String orgCountryId=organization.getCountryId();
+    String orgCoutryISO=organization.getCountryISO();
+    if(orgCountryId!=null) {
+      this.country.add(orgCountryId);
+    }
+    if(orgCoutryISO!=null) {
+      this.country.add(orgCoutryISO);
+    }
     
     if (organization.getSameReferenceLinks() != null) {
       this.sameAs = new ArrayList<>(organization.getSameReferenceLinks());
@@ -187,7 +195,7 @@ public class SolrOrganization extends SolrEntity<Organization> {
     this.sameAs = uris;
   }
 
-  public String getCountry() {
+  public List<String> getCountry() {
     return country;
   }
 }

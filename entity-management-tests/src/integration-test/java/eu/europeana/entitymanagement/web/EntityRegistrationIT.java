@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.matchesRegex;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -280,6 +281,8 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
     // check if indexing is successfull by searching the organization in solr
     SolrOrganization org = emSolrService.searchById(SolrOrganization.class, WebEntityFields.BASE_DATA_EUROPEANA_URI + "organization/1");
     assertNotNull(org.getHasAddress());
+    assertNotNull(org.getEuropeanaRole());
+    assertTrue(org.getCountry().size()==2);
   }
 
   @Test

@@ -80,6 +80,7 @@ public class ZohoOrganizationConverter {
       //update address country
       address.setVcardCountryName(extractCountryName(zohoCountryLabel));
       
+      org.setCountryISO(StringUtils.substringAfterLast(zohoCountryLabel, ",").trim());
       //update organization country id
       if(countryMappings.containsKey(zohoCountryLabel)) {
         //get country ID from mappings

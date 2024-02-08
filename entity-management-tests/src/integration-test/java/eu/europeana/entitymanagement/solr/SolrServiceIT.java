@@ -41,7 +41,6 @@ import eu.europeana.entitymanagement.solr.model.SolrTimeSpan;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @SpringBootTest
 public class SolrServiceIT extends AbstractIntegrationTest {
@@ -79,11 +78,6 @@ public class SolrServiceIT extends AbstractIntegrationTest {
     // mandatory fields
     assertThat(payload, Matchers.containsString("\"prefLabel\""));
     assertThat(payload, Matchers.containsString("\"type\""));
-
-    // for organizations verify country
-    if (EntityTypes.Organization.getEntityType().equals(entity.getType())) {
-      assertThat(payload, Matchers.containsString("\"country\""));
-    }
   }
 
   void verifyIsShownBy(String payload) {

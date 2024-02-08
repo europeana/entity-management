@@ -3,5 +3,10 @@
     "Zoho Label": "Sweden, SE",
     "Entity URI": "http://data.europeana.eu/place/1",
     "Wikidata URI": "http://www.wikidata.org/entity/Q34"
-  }
+  },
+  {
+    "Zoho Label": "Norway, NO",
+    "Entity URI": "http://data.europeana.eu/place/2",
+    "Wikidata URI": "http://www.wikidata.org/entity/Q20"
+  }  
 ]
