@@ -31,12 +31,12 @@ spec:
                 - name: SPRING_CONFIG_ADDITIONAL_LOCATION
                   value: "file:/opt/app/config/entitymanagement.user.properties,file:/opt/app/config/zoho_import.properties"
                 - name: JAVA_OPTS
-                  value: "-XX:+UseParallelGC -XX:MaxRAMPercentage=75"
+                  value: "-Xms:${MEMORY}M -XMX:${MEMORY_LIMIT}M -XX:+UseParallelGC -XX:MaxRAMPercentage=75"
                 - name: JAVA_TOOL_OPTIONS
                   value: "-Dlogging.config=/opt/app/config/log4j2.xml"  
               resources:
                 requests:
-                  memory: "${MEMORY}"
+                  memory: "${MEMORY}M"
                   cpu: "${CPU}m"
                 limits:
                   memory: "${MEMORY_LIMIT}M"
