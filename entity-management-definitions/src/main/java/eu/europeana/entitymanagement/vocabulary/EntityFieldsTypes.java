@@ -106,7 +106,6 @@ public enum EntityFieldsTypes {
   europeanaRoleRefs(
       EntityFieldsTypes.FIELD_TYPE_VOCABULARY, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
   countryId(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
-  country(EntityFieldsTypes.FIELD_TYPE_PLACE, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
   countryRef(EntityFieldsTypes.FIELD_TYPE_ENTITY_RECORD, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
   homepage(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
   phone(
