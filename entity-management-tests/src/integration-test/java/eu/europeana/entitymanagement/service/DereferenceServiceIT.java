@@ -170,6 +170,15 @@ public class DereferenceServiceIT extends AbstractIntegrationTest {
     // GFM
     dereferenceWikidataOrganization(IntegrationTestUtils.ORGANIZATION_GFM_URI_WIKIDATA_URI);
   }
+  
+//  @Test
+  // (not available in test data)
+  public void wikidataOrganizationSNHDereferenceTest() throws ZohoException, Exception {
+    // SNH 
+    dereferenceWikidataOrganization("https://crm.zoho.eu/crm/org20085137532/tab/Accounts/486281000000938800");
+  }
+  
+  
 
   Organization dereferenceWikidataOrganization(String organizationId) throws Exception {
     Dereferencer dereferencer =

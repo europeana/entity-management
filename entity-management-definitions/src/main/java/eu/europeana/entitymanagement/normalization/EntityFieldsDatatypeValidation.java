@@ -148,17 +148,18 @@ public class EntityFieldsDatatypeValidation {
       addConstraint(context, "Field '" + fieldName + "' has an invalid or empty id value.");
       isValid = false;
     }
-    if (address.getVcardCountryName() == null
-        || address.getVcardCountryName().isBlank()
-        || !validateStringValue(
-            context,
-            fieldName,
-            EntityFieldsTypes.getFieldType(fieldName),
-            address.getVcardCountryName(),
-            null)) {
-      addConstraint(context, "Field '" + fieldName + "' has an invalid or empty country name.");
-      isValid = false;
-    }
+    //SG: EA-3720 temporarily disable until a new rule will be defined
+//    if (address.getVcardCountryName() == null
+//        || address.getVcardCountryName().isBlank()
+//        || !validateStringValue(
+//            context,
+//            fieldName,
+//            EntityFieldsTypes.getFieldType(fieldName),
+//            address.getVcardCountryName(),
+//            null)) {
+//      addConstraint(context, "Field '" + fieldName + "' has an invalid or empty country name.");
+//      isValid = false;
+//    }
     return isValid;
   }
 

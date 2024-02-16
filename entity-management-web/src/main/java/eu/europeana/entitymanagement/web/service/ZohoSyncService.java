@@ -376,7 +376,7 @@ public class ZohoSyncService extends BaseZohoAccess {
 
   private boolean skipNoZohoEuropeanaId(String zohoRecordEuropeanaID,
       boolean organizationIdGenerationEnabled) {
-    return zohoRecordEuropeanaID == null && !organizationIdGenerationEnabled;
+    return StringUtils.isBlank(zohoRecordEuropeanaID) && !organizationIdGenerationEnabled;
   }
 
   boolean skipNonExisting(boolean hasDpsOwner, boolean markedForDeletion) {

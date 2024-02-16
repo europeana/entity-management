@@ -121,7 +121,9 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
       this.europeanaRole=orgXmlRole;
     }
     
-    this.country = new XmlPlaceImpl(organization.getCountry());
+    if(organization.getCountry() != null) {
+      this.country = new XmlPlaceImpl(organization.getCountry());
+    }
     
     if (organization.getHomepage() != null) {
       this.homepage = new LabelledResource(organization.getHomepage());

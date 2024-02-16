@@ -32,6 +32,7 @@ public final class ZohoConstants {
   public static final String LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD = "Logo";
   public static final String WEBSITE_FIELD = "Website";
   public static final String SECTOR_FIELD = "Sector";
+  public static final String SUBSECTOR_FIELD = "Subsector";
   public static final String SCOPE_FIELD = "Scope";
   public static final String SAME_AS_FIELD = "SameAs";
   public static final String STREET_FIELD = "Street";
@@ -50,7 +51,7 @@ public final class ZohoConstants {
   public static final String HIDDEN_LABEL_FIELD = "Hidden_names";
 
   public static final String INDUSTRY_FIELD = "Industry_2";
-  public static final String EUROPEANA_ID_FIELD = "Europeana_ID";
+  public static final String EUROPEANA_ID_FIELD = "Europeana_org_ID";
 
   // Operations
   public static final String EQUALS_OPERATION = "equals";
