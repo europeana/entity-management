@@ -1461,6 +1461,9 @@ public class EntityRecordService {
     try {
       zohoConfiguration.getZohoAccessClient().updateZohoRecordOrganizationStringField(
           zohoOrganizationUrl, ZohoConstants.EUROPEANA_ID_FIELD, europeanaId);
+      if(logger.isDebugEnabled()) {
+        logger.debug("Updated organization id in Zoho got organization: {} - {}", zohoOrganizationUrl, europeanaId);
+      }
     } catch (ZohoException e) {
       String message =
           "Updating EuropeanaID field in Zoho faild for Organization: " + zohoOrganizationUrl;
