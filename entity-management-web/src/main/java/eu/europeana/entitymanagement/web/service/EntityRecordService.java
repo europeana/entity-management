@@ -479,8 +479,7 @@ public class EntityRecordService {
     // prevent registration of organizations if id generation is not enabled and now EuropeanaID
     // available in zoho
     boolean isZohoOrg = isZohoOrg(externalEntityId, datasourceResponse);
-    if (isZohoOrg && !emConfiguration.isGenerateOrganizationEuropeanaId()
-        && predefinedEntityId == null) {
+    if (isRegistrationRejected(predefinedEntityId, isZohoOrg)) {
       throw new EntityCreationException(
           "This instance is not allowed to register new Organizations. Registration of external entity refused: "
               + externalEntityId);
@@ -506,6 +505,11 @@ public class EntityRecordService {
 
     // save entity record object into the database
     return entityRecordRepository.save(entityRecord);
+  }
+
+  boolean isRegistrationRejected(String predefinedEntityId, boolean isZohoOrg) {
+    return isZohoOrg && !emConfiguration.isGenerateOrganizationEuropeanaId()
+        && predefinedEntityId == null;
   }
 
   EntityRecord buildEntityRecordObject(String entityId, Entity europeanaProxyEntity,
@@ -1474,28 +1478,58 @@ public class EntityRecordService {
   public void processReferenceFields(Entity entity) {
     if (EntityTypes.isOrganization(entity.getType())) {
       Organization org = (Organization) entity;
-      //country reference
-      if (StringUtils.isNotEmpty(org.getCountryId())) {
-        EntityRecord orgCountry = entityRecordRepository.findByEntityId(org.getCountryId());
+      //update country reference
+      processCountryReference(org);
+      
+      //update role reference
+      processRoleReference(org);
+    }
+  }
+
+  void processRoleReference(Organization org) {
+    if(org.getEuropeanaRoleIds()!=null && !org.getEuropeanaRoleIds().isEmpty()) {
+      List<Vocabulary> vocabs=vocabRepository.findByUri(org.getEuropeanaRoleIds());
+      if (vocabs.isEmpty()) {
+        logger.warn(
+            "No vocabularies with the uris: {} were found in the database. Cannot assign role reference to organization with id {}",
+            org.getEuropeanaRoleIds(), org.getEntityId());
+      } else {
+        org.setEuropeanaRoleRefs(vocabs);
+      }       
+    }
+  }
+
+  void processCountryReference(Organization org) {
+    //country reference
+    if (StringUtils.isNotEmpty(org.getCountryId())) {
+      String europeanaCountryId = getEuropeanaCountryId(org);
+      if(europeanaCountryId == null) {
+        logger.warn("Dropping unsupported country id in consolidated entity version: {} -- {} ", org.getEntityId(), org.getCountryId());
+        org.setCountryId(null);
+      } else {
+        //replace wikidata country ids
+        org.setCountryId(europeanaCountryId);
+        //search reference
+        EntityRecord orgCountry = entityRecordRepository.findByEntityId(europeanaCountryId);
         if (orgCountry == null) {
-          logger.info(
-              "No entity record with the entity id: {} was found in the database. Cannot assign country reference to organization with id {}",
-              org.getCountryId(), org.getEntityId());
+          logger.warn(
+              "No country found in database for the entity id: {}. Cannot assign country reference to organization with id {}",
+              europeanaCountryId, org.getEntityId());
         } else {
           org.setCountryRef(orgCountry);
-        }
-      }
-      //role reference
-      if(org.getEuropeanaRoleIds()!=null && !org.getEuropeanaRoleIds().isEmpty()) {
-        List<Vocabulary> vocabs=vocabRepository.findByUri(org.getEuropeanaRoleIds());
-        if (vocabs.isEmpty()) {
-          logger.info(
-              "No vocabularies with the uris: {} were found in the database. Cannot assign role reference to organization with id {}",
-              org.getEuropeanaRoleIds(), org.getEntityId());
-        } else {
-          org.setEuropeanaRoleRefs(vocabs);
-        }       
+        }   
       }
     }
+  }
+
+  String getEuropeanaCountryId(Organization org) {
+    if(EntityRecordUtils.isEuropeanaEntity(org.getCountryId())) {
+      // country id is already europeana entity
+      return org.getCountryId();
+    }else if(WikidataUtils.isWikidataEntity(org.getCountryId())) {
+      //get europeana country id by wikidata id
+      return emConfiguration.getWikidataCountryMappings().getOrDefault(org.getCountryId(), null);
+    } 
+    return null;
   }
 }

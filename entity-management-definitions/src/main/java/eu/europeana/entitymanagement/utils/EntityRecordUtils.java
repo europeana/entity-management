@@ -110,4 +110,16 @@ public class EntityRecordUtils {
     }
     return entities.stream().map(e -> e.getEntityId()).toList();
   }
+  
+  
+  /**
+   * Checks if the entity with the given id is a Europeana entity (data.europeana.eu)
+   *
+   * @param id entity id
+   * @return true if given entity is a Europeana entity, false otherwise
+   */
+  public static boolean isEuropeanaEntity(String id) {
+    
+    return id!=null && id.startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI);
+  }
 }

@@ -1,0 +1,40 @@
+#CHECK organizations
+db.getCollection('EntityRecord').count({"entity.type":"Organization"})
+4574
+
+#DELETE Organizations
+db.getCollection('EntityRecord').deleteMany({"entity.type":"Organization"})
+
+#Remove From Generator
+db.getCollection("EntityIdGenerator").deleteMany({"_id" : "Organization"})
+
+#remove from ZohoSyncReport
+db.getCollection("ZohoSyncReport").find({})
+db.getCollection("ZohoSyncReport").deleteMany({})
+
+
+#check remove failed tasks for organizations
+db.getCollection("FailedTasks").find({entityId: /.*organization.*/})
+db.getCollection("FailedTasks").deleteMany({entityId: /.*organization.*/})
+
+#check existing schedules tasks
+db.getCollection("ScheduledTasks").find({})
+db.getCollection("ScheduledTasks").deleteMany({})
+
+#job instances
+db.getCollection("JobInstance").deleteMany({})
+
+#check failed job executions
+db.getCollection("JobExecution").find({status: {$ne: "COMPLETED" } })
+db.getCollection("JobExecution").deleteMany({})
+
+
+#check failed job executions
+db.getCollection("StepExecution").find({status: {$ne: "COMPLETED" } }) 
+db.getCollection("StepExecution").deleteMany({}) 
+
+#clean execution context
+db.getCollection("ExecutionContext").deleteMany({})
+
+#eventually
+#db.getCollection("Sequence").delete({})
