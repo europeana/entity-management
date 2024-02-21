@@ -68,8 +68,7 @@ public class EntityRecordService extends BaseEntityRecordService {
   @Autowired
   public EntityRecordService(EntityRecordRepository entityRecordRepository,
       VocabularyRepository vocabRepository, EntityManagementConfiguration emConfiguration,
-      ZohoConfiguration zohoConfiguration, DataSources datasources, SolrService solrService)
-      throws IOException {
+      ZohoConfiguration zohoConfiguration, DataSources datasources, SolrService solrService){
 
     super(entityRecordRepository, vocabRepository, emConfiguration, zohoConfiguration, datasources,
         solrService);
