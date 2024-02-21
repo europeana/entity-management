@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -175,9 +176,9 @@ public class EntityManagementConfiguration implements InitializingBean {
   @Value("${europeana.role.vocabulary:role_vocabulary.xml}")
   private String roleVocabularyFilename;
 
-  Map<String, ZohoLabelUriMapping> countryMappings = new HashMap<>();
-  Map<String, String> wikidataCountryMappings = new HashMap<>();
-  Map<String, String> roleMappings = new HashMap<>();
+  private Map<String, ZohoLabelUriMapping> countryMappings = new ConcurrentHashMap<>();
+  private Map<String, String> wikidataCountryMappings = new ConcurrentHashMap<>();
+  private Map<String, String> roleMappings = new ConcurrentHashMap<>();
   
   @Autowired
   @Qualifier(BEAN_JSON_MAPPER)
@@ -236,14 +237,18 @@ public class EntityManagementConfiguration implements InitializingBean {
       try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
         String contents = reader.lines().collect(Collectors.joining(System.lineSeparator()));
         List<ZohoLabelUriMapping> countryMappingList = emJsonMapper.readValue(contents, new TypeReference<List<ZohoLabelUriMapping>>(){});
-        for (ZohoLabelUriMapping countryMapping : countryMappingList) {
-          //init zoho country mapping
-          countryMappings.put(countryMapping.getZohoLabel(), countryMapping);
-          //init wikidata country mapping 
-          if(StringUtils.isNotEmpty(countryMapping.getWikidataUri())){
-            wikidataCountryMappings.put(countryMapping.getWikidataUri(), countryMapping.getEntityUri()); 
-          }
-        }
+        addToCountryMappings(countryMappingList);
+      }
+    }
+  }
+
+  void addToCountryMappings(List<ZohoLabelUriMapping> countryMappingList) {
+    for (ZohoLabelUriMapping countryMapping : countryMappingList) {
+      //init zoho country mapping
+      countryMappings.put(countryMapping.getZohoLabel(), countryMapping);
+      //init wikidata country mapping 
+      if(StringUtils.isNotEmpty(countryMapping.getWikidataUri())){
+        wikidataCountryMappings.put(countryMapping.getWikidataUri(), countryMapping.getEntityUri()); 
       }
     }
   }
