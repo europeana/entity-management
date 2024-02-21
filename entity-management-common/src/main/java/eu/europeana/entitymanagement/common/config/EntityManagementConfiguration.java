@@ -176,9 +176,9 @@ public class EntityManagementConfiguration implements InitializingBean {
   @Value("${europeana.role.vocabulary:role_vocabulary.xml}")
   private String roleVocabularyFilename;
 
-  private Map<String, ZohoLabelUriMapping> countryMappings = new ConcurrentHashMap<>();
-  private Map<String, String> wikidataCountryMappings = new ConcurrentHashMap<>();
-  private Map<String, String> roleMappings = new ConcurrentHashMap<>();
+  private final Map<String, ZohoLabelUriMapping> countryMappings = new ConcurrentHashMap<>();
+  private final Map<String, String> wikidataCountryMappings = new ConcurrentHashMap<>();
+  private final Map<String, String> roleMappings = new ConcurrentHashMap<>();
   
   @Autowired
   @Qualifier(BEAN_JSON_MAPPER)

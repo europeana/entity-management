@@ -22,7 +22,6 @@ import java.util.stream.Stream;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.common.config.DataSource;
@@ -48,13 +47,13 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.zoho.organization.ZohoConfiguration;
 import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
 
-public class BaseEntityRecord {
+public class BaseEntityRecordService {
 
   final EntityRecordRepository entityRecordRepository;
 
   final VocabularyRepository vocabRepository;
 
-  EntityManagementConfiguration emConfiguration;
+  final EntityManagementConfiguration emConfiguration;
 
   final DataSources datasources;
 
@@ -68,7 +67,7 @@ public class BaseEntityRecord {
   static final Set<String> ignoredMergeFields = Set.of(WebEntityFields.TYPE);
 
 
-  protected BaseEntityRecord(EntityRecordRepository entityRecordRepository,
+  protected BaseEntityRecordService(EntityRecordRepository entityRecordRepository,
       VocabularyRepository vocabRepository, EntityManagementConfiguration emConfiguration,
       ZohoConfiguration zohoConfiguration, DataSources datasources, SolrService solrService)
       throws IOException {
@@ -146,35 +145,14 @@ public class BaseEntityRecord {
         String fieldName = field.getName();
 
         if (isStringOrPrimitive(fieldType)) {
-          Object fieldValuePrimaryObjectPrimitiveOrString = primary.getFieldValue(field);
-          Object fieldValueSecondaryObjectPrimitiveOrString = secondary.getFieldValue(field);
-
-          if (fieldValuePrimaryObjectPrimitiveOrString != null) {
-            consolidatedEntity.setFieldValue(field, fieldValuePrimaryObjectPrimitiveOrString);
-          } else if (fieldValueSecondaryObjectPrimitiveOrString != null) {
-            consolidatedEntity.setFieldValue(field, fieldValueSecondaryObjectPrimitiveOrString);
-          }
-
+          mergePrimitiveField(field, primary, secondary, consolidatedEntity);
         } else if (Date.class.isAssignableFrom(fieldType)) {
-          Object fieldValuePrimaryObjectDate = primary.getFieldValue(field);
-          Object fieldValueSecondaryObjectDate = secondary.getFieldValue(field);
-
-          if (fieldValuePrimaryObjectDate != null) {
-            consolidatedEntity.setFieldValue(field,
-                new Date(((Date) fieldValuePrimaryObjectDate).getTime()));
-          } else if (fieldValueSecondaryObjectDate != null) {
-            consolidatedEntity.setFieldValue(field,
-                new Date(((Date) fieldValueSecondaryObjectDate).getTime()));
-          }
+          mergeDateField(field, primary, secondary, consolidatedEntity);
         } else if (fieldType.isArray()) {
           Object[] mergedArray = mergeArrays(primary, secondary, field, accumulate);
           consolidatedEntity.setFieldValue(field, mergedArray);
         } else if (List.class.isAssignableFrom(fieldType)) {
-          List<Object> fieldValuePrimaryObjectList = (List<Object>) primary.getFieldValue(field);
-          List<Object> fieldValueSecondaryObjectList =
-              (List<Object>) secondary.getFieldValue(field);
-          mergeList(consolidatedEntity, fieldValuePrimaryObjectList, fieldValueSecondaryObjectList,
-              field, accumulate);
+          mergeListField(field, primary, secondary, consolidatedEntity, accumulate);
         } else if (Map.class.isAssignableFrom(fieldType)) {
           combineEntities(consolidatedEntity, primary, secondary, prefLabelsForAltLabels, field,
               fieldName, accumulate);
@@ -191,6 +169,41 @@ public class BaseEntityRecord {
     }
 
     return consolidatedEntity;
+  }
+
+  @SuppressWarnings("unchecked")
+  void mergeListField(Field field, Entity primary, Entity secondary, Entity consolidatedEntity,
+      boolean accumulate) throws IllegalAccessException, EntityUpdateException {
+    List<Object> fieldValuePrimaryObjectList = (List<Object>) primary.getFieldValue(field);
+    List<Object> fieldValueSecondaryObjectList = (List<Object>) secondary.getFieldValue(field);
+    mergeList(consolidatedEntity, fieldValuePrimaryObjectList, fieldValueSecondaryObjectList, field,
+        accumulate);
+  }
+
+  void mergeDateField(Field field, Entity primary, Entity secondary, Entity consolidatedEntity)
+      throws IllegalAccessException {
+    Object fieldValuePrimaryObjectDate = primary.getFieldValue(field);
+    Object fieldValueSecondaryObjectDate = secondary.getFieldValue(field);
+
+    if (fieldValuePrimaryObjectDate != null) {
+      consolidatedEntity.setFieldValue(field,
+          new Date(((Date) fieldValuePrimaryObjectDate).getTime()));
+    } else if (fieldValueSecondaryObjectDate != null) {
+      consolidatedEntity.setFieldValue(field,
+          new Date(((Date) fieldValueSecondaryObjectDate).getTime()));
+    }
+  }
+
+  void mergePrimitiveField(Field field, Entity primary, Entity secondary, Entity consolidatedEntity)
+      throws IllegalAccessException {
+    Object fieldValuePrimaryObjectPrimitiveOrString = primary.getFieldValue(field);
+    Object fieldValueSecondaryObjectPrimitiveOrString = secondary.getFieldValue(field);
+
+    if (fieldValuePrimaryObjectPrimitiveOrString != null) {
+      consolidatedEntity.setFieldValue(field, fieldValuePrimaryObjectPrimitiveOrString);
+    } else if (fieldValueSecondaryObjectPrimitiveOrString != null) {
+      consolidatedEntity.setFieldValue(field, fieldValueSecondaryObjectPrimitiveOrString);
+    }
   }
 
 
@@ -557,28 +570,27 @@ public class BaseEntityRecord {
 
   protected void processCountryReference(Organization org) {
     // country reference
-    if (StringUtils.isNotEmpty(org.getCountryId())) {
-      String europeanaCountryId = getEuropeanaCountryId(org);
-      if (europeanaCountryId == null) {
-        if (logger.isWarnEnabled()) {
-          logger.warn("Dropping unsupported country id in consolidated entity version: {} -- {} ",
-              org.getEntityId(), org.getCountryId());
-        }
-        org.setCountryId(null);
-      } else {
-        // replace wikidata country ids
-        org.setCountryId(europeanaCountryId);
-        // search reference
-        EntityRecord orgCountry = entityRecordRepository.findByEntityId(europeanaCountryId);
-        if (orgCountry == null) {
-          if (logger.isWarnEnabled()) {
-            logger.warn(
-                "No country found in database for the entity id: {}. Cannot assign country reference to organization with id {}",
-                europeanaCountryId, org.getEntityId());
-          }
-        } else {
-          org.setCountryRef(orgCountry);
-        }
+    if (StringUtils.isEmpty(org.getCountryId())) {
+      return;
+    }
+    String europeanaCountryId = getEuropeanaCountryId(org);
+    if (europeanaCountryId == null) {
+      if (logger.isWarnEnabled()) {
+        logger.warn("Dropping unsupported country id in consolidated entity version: {} -- {} ",
+            org.getEntityId(), org.getCountryId());
+      }
+      org.setCountryId(null);
+    } else {
+      // replace wikidata country ids
+      org.setCountryId(europeanaCountryId);
+      // search reference
+      EntityRecord orgCountry = entityRecordRepository.findByEntityId(europeanaCountryId);
+      if (orgCountry != null) {
+        org.setCountryRef(orgCountry);
+      } else if (logger.isWarnEnabled()) {
+        logger.warn(
+            "No country found in database for the entity id: {}. Cannot assign country reference to organization with id {}",
+            europeanaCountryId, org.getEntityId());
       }
     }
   }
@@ -596,11 +608,7 @@ public class BaseEntityRecord {
   }
 
   boolean isStringOrPrimitive(Class<?> fieldType) {
-    return String.class.isAssignableFrom(fieldType) || fieldType.isPrimitive()
-        || Float.class.isAssignableFrom(fieldType) || Integer.class.isAssignableFrom(fieldType)
-        || Double.class.isAssignableFrom(fieldType) || Short.class.isAssignableFrom(fieldType)
-        || Byte.class.isAssignableFrom(fieldType) || Boolean.class.isAssignableFrom(fieldType)
-        || Long.class.isAssignableFrom(fieldType);
+    return String.class.isAssignableFrom(fieldType) || fieldType.isPrimitive();
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -636,28 +644,55 @@ public class BaseEntityRecord {
   }
 
   @SuppressWarnings("unchecked")
-  void mergeSkippedPrefLabels(Entity consilidatedEntity, Map<Object, Object> prefLabelsForAltLabels,
+  void mergeSkippedPrefLabels(Entity consolidatedEntity, Map<Object, Object> prefLabelsForAltLabels,
       List<Field> allEntityFields) throws IllegalAccessException, EntityUpdateException {
     /*
      * adding the preferred labels from the secondary object to the alternative labels of
      * consolidated object
      */
-    if (prefLabelsForAltLabels.size() > 0) {
-      for (Field field : allEntityFields) {
-        String fieldName = field.getName();
-        if (isFieldAltLabel(fieldName)) {
-          Map<Object, Object> altLabelConsolidatedMap =
-              (Map<Object, Object>) consilidatedEntity.getFieldValue(field);
-          Map<Object, Object> altLabelPrimaryObject = deepCopyOfMap(altLabelConsolidatedMap);
-          boolean altLabelPrimaryValueChanged = false;
-          altLabelPrimaryValueChanged = addValuesToAltLabel(prefLabelsForAltLabels,
-              altLabelPrimaryObject, altLabelPrimaryValueChanged);
-          if (altLabelPrimaryValueChanged) {
-            consilidatedEntity.setFieldValue(field, altLabelPrimaryObject);
-          }
-          break;
+    if (prefLabelsForAltLabels.isEmpty()) {
+      //nothing to merge
+      return;
+    }
+
+    //TODO: the for is redundant, use get field by name
+    for (Field field : allEntityFields) {
+      String fieldName = field.getName();
+      if (isFieldAltLabel(fieldName)) {
+        Map<Object, Object> altLabelConsolidatedMap =
+            (Map<Object, Object>) consolidatedEntity.getFieldValue(field);
+        Map<Object, Object> altLabelPrimaryObject = deepCopyOfMap(altLabelConsolidatedMap);
+        boolean altLabelPrimaryValueChanged = false;
+        altLabelPrimaryValueChanged = addValuesToAltLabel(prefLabelsForAltLabels,
+            altLabelPrimaryObject, altLabelPrimaryValueChanged);
+        if (altLabelPrimaryValueChanged) {
+          consolidatedEntity.setFieldValue(field, altLabelPrimaryObject);
         }
+        break;
       }
+    }
+    
+    //get the alt label field
+    Optional<Field> altLabelField = allEntityFields.stream().filter(field -> isFieldAltLabel(field.getName())).findFirst();
+    
+    if(altLabelField.isEmpty()) {
+      //altLabel field not found
+      if(logger.isWarnEnabled()) {
+        logger.warn("altLabel field not found in list: {}", allEntityFields);
+      }
+      
+      //skip
+      return;
+    }
+
+    Map<Object, Object> altLabelConsolidatedMap =
+        (Map<Object, Object>) consolidatedEntity.getFieldValue(altLabelField.get());
+    Map<Object, Object> altLabelPrimaryObject = deepCopyOfMap(altLabelConsolidatedMap);
+    boolean altLabelPrimaryValueChanged = false;
+    altLabelPrimaryValueChanged = addValuesToAltLabel(prefLabelsForAltLabels,
+        altLabelPrimaryObject, altLabelPrimaryValueChanged);
+    if (altLabelPrimaryValueChanged) {
+      consolidatedEntity.setFieldValue(altLabelField.get(), altLabelPrimaryObject);
     }
   }
 
