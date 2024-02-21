@@ -4,7 +4,6 @@ import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getDatasourc
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEuropeanaAggregationId;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEuropeanaProxyId;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getIsAggregatedById;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -20,6 +19,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ClassUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.util.CollectionUtils;
@@ -61,7 +61,7 @@ public class BaseEntityRecordService {
 
   final ZohoConfiguration zohoConfiguration;
 
-  static final Logger logger = LogManager.getLogger(EntityRecordService.class);
+  protected final Logger logger = LogManager.getLogger(getClass());
 
   // Fields to be ignored during consolidation ("type" is final)
   static final Set<String> ignoredMergeFields = Set.of(WebEntityFields.TYPE);
@@ -69,8 +69,7 @@ public class BaseEntityRecordService {
 
   protected BaseEntityRecordService(EntityRecordRepository entityRecordRepository,
       VocabularyRepository vocabRepository, EntityManagementConfiguration emConfiguration,
-      ZohoConfiguration zohoConfiguration, DataSources datasources, SolrService solrService)
-      throws IOException {
+      ZohoConfiguration zohoConfiguration, DataSources datasources, SolrService solrService) {
     this.entityRecordRepository = entityRecordRepository;
     this.vocabRepository = vocabRepository;
     this.emConfiguration = emConfiguration;
@@ -126,7 +125,6 @@ public class BaseEntityRecordService {
    *        collection (eg. maps, lists and arrays) within the primary . If accumulate is false, the
    *        "primary" content overwrites the "secondary"
    */
-  @SuppressWarnings("unchecked")
   protected Entity combineEntities(Entity primary, Entity secondary, List<Field> fieldsToCombine,
       boolean accumulate) throws EuropeanaApiException, EntityModelCreationException {
     Entity consolidatedEntity =
@@ -443,6 +441,7 @@ public class BaseEntityRecordService {
   }
 
 
+  @SuppressWarnings("unchecked")
   protected Map<Object, Object> deepCopyOfMap(Map<Object, Object> input)
       throws EntityUpdateException {
     if (input == null || input.isEmpty()) {
@@ -494,10 +493,14 @@ public class BaseEntityRecordService {
       List<String> corefs, EntityRecord entityRecord, Date timestamp) {
     Aggregation europeanaAggr = new Aggregation();
     Optional<DataSource> europeanaDataSource = datasources.getEuropeanaDatasource();
+
+
     europeanaAggr.setId(getEuropeanaAggregationId(entityId));
     // europeana datasource is checked on startup, so it cannot be empty here
-    europeanaAggr.setRights(europeanaDataSource.get().getRights());
-    europeanaAggr.setSource(europeanaDataSource.get().getUrl());
+    if (europeanaDataSource.isPresent()) {
+      europeanaAggr.setRights(europeanaDataSource.get().getRights());
+      europeanaAggr.setSource(europeanaDataSource.get().getUrl());
+    }
     europeanaAggr.setCreated(timestamp);
     europeanaAggr.setModified(timestamp);
 
@@ -608,7 +611,8 @@ public class BaseEntityRecordService {
   }
 
   boolean isStringOrPrimitive(Class<?> fieldType) {
-    return String.class.isAssignableFrom(fieldType) || fieldType.isPrimitive();
+    return String.class.isAssignableFrom(fieldType) 
+        || ClassUtils.isPrimitiveOrWrapper(fieldType);
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -651,20 +655,21 @@ public class BaseEntityRecordService {
      * consolidated object
      */
     if (prefLabelsForAltLabels.isEmpty()) {
-      //nothing to merge
+      // nothing to merge
       return;
     }
 
-    //get the alt label field
-    Optional<Field> altLabelField = allEntityFields.stream().filter(field -> isFieldAltLabel(field.getName())).findFirst();
-    
-    if(altLabelField.isEmpty()) {
-      //altLabel field not found
-      if(logger.isWarnEnabled()) {
+    // get the alt label field
+    Optional<Field> altLabelField =
+        allEntityFields.stream().filter(field -> isFieldAltLabel(field.getName())).findFirst();
+
+    if (altLabelField.isEmpty()) {
+      // altLabel field not found
+      if (logger.isWarnEnabled()) {
         logger.warn("altLabel field not found in list: {}", allEntityFields);
       }
-      
-      //skip
+
+      // skip
       return;
     }
 
@@ -672,8 +677,8 @@ public class BaseEntityRecordService {
         (Map<Object, Object>) consolidatedEntity.getFieldValue(altLabelField.get());
     Map<Object, Object> altLabelPrimaryObject = deepCopyOfMap(altLabelConsolidatedMap);
     boolean altLabelPrimaryValueChanged = false;
-    altLabelPrimaryValueChanged = addValuesToAltLabel(prefLabelsForAltLabels,
-        altLabelPrimaryObject, altLabelPrimaryValueChanged);
+    altLabelPrimaryValueChanged = addValuesToAltLabel(prefLabelsForAltLabels, altLabelPrimaryObject,
+        altLabelPrimaryValueChanged);
     if (altLabelPrimaryValueChanged) {
       consolidatedEntity.setFieldValue(altLabelField.get(), altLabelPrimaryObject);
     }

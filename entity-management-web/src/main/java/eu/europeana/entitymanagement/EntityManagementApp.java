@@ -21,7 +21,6 @@ import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
-import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.web.service.ZohoSyncService;
 
 /**
@@ -41,9 +40,7 @@ public class EntityManagementApp implements CommandLineRunner {
   private BatchEntityUpdateExecutor batchUpdateExecutor;
   @Autowired
   private ZohoSyncService zohoSyncService;
-  @Autowired
-  private EntityRecordService entityRecordService;
-
+ 
   /**
    * Main entry point of this application
    *
