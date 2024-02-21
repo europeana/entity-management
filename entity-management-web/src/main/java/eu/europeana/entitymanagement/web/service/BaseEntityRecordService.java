@@ -655,23 +655,6 @@ public class BaseEntityRecordService {
       return;
     }
 
-    //TODO: the for is redundant, use get field by name
-    for (Field field : allEntityFields) {
-      String fieldName = field.getName();
-      if (isFieldAltLabel(fieldName)) {
-        Map<Object, Object> altLabelConsolidatedMap =
-            (Map<Object, Object>) consolidatedEntity.getFieldValue(field);
-        Map<Object, Object> altLabelPrimaryObject = deepCopyOfMap(altLabelConsolidatedMap);
-        boolean altLabelPrimaryValueChanged = false;
-        altLabelPrimaryValueChanged = addValuesToAltLabel(prefLabelsForAltLabels,
-            altLabelPrimaryObject, altLabelPrimaryValueChanged);
-        if (altLabelPrimaryValueChanged) {
-          consolidatedEntity.setFieldValue(field, altLabelPrimaryObject);
-        }
-        break;
-      }
-    }
-    
     //get the alt label field
     Optional<Field> altLabelField = allEntityFields.stream().filter(field -> isFieldAltLabel(field.getName())).findFirst();
     
