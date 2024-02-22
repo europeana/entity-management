@@ -603,12 +603,8 @@ public class BaseEntityRecordService {
     if (EntityRecordUtils.isEuropeanaEntity(org.getCountryId())) {
       // country id is already europeana entity
       return org.getCountryId();
-    } else if (WikidataUtils.isWikidataEntity(org.getCountryId())) {
-      //to drop the wikidata id in country return null here ...
-      //return null;
-      // get europeana country id by wikidata id
-      return emConfiguration.getWikidataCountryMappings().getOrDefault(org.getCountryId(), null);
-    }
+    } 
+    //drop all country ids except for the Europeana entities
     return null;
   }
 

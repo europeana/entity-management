@@ -176,7 +176,6 @@ public class EntityManagementConfiguration implements InitializingBean {
   private String roleVocabularyFilename;
 
   private final Map<String, ZohoLabelUriMapping> countryMappings = new ConcurrentHashMap<>();
-  private final Map<String, String> wikidataCountryMappings = new ConcurrentHashMap<>();
   private final Map<String, String> roleMappings = new ConcurrentHashMap<>();
   
   @Autowired
@@ -245,10 +244,6 @@ public class EntityManagementConfiguration implements InitializingBean {
     for (ZohoLabelUriMapping countryMapping : countryMappingList) {
       //init zoho country mapping
       countryMappings.put(countryMapping.getZohoLabel(), countryMapping);
-      //init wikidata country mapping 
-      if(StringUtils.isNotEmpty(countryMapping.getWikidataUri())){
-        wikidataCountryMappings.put(countryMapping.getWikidataUri(), countryMapping.getEntityUri()); 
-      }
     }
   }
   
@@ -470,8 +465,5 @@ public class EntityManagementConfiguration implements InitializingBean {
   public String getRoleVocabularyFilename() {
     return roleVocabularyFilename;
   }
-
-  public Map<String, String> getWikidataCountryMappings() {
-    return wikidataCountryMappings;
-  }
+ 
 }
