@@ -15,6 +15,7 @@ import dev.morphia.annotations.EntityListeners;
 import dev.morphia.annotations.Id;
 import dev.morphia.annotations.IndexOptions;
 import dev.morphia.annotations.Indexed;
+import dev.morphia.annotations.Transient;
 import eu.europeana.entitymanagement.utils.VocabularyWatcher;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -26,6 +27,7 @@ import eu.europeana.entitymanagement.utils.VocabularyWatcher;
  */
 public class Vocabulary {
 
+  @Transient
   private String type = "Concept";
   
   @Id @JsonIgnore private ObjectId dbId;

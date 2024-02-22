@@ -1,7 +1,6 @@
 package eu.europeana.entitymanagement.mongo.repository;
 
 import static dev.morphia.query.experimental.filters.Filters.in;
-import static eu.europeana.entitymanagement.definitions.VocabularyFields.ID;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Resource;
@@ -17,6 +16,8 @@ public class VocabularyRepository  {
   
   @Resource(name = AppConfigConstants.BEAN_EM_DATA_STORE)
   Datastore datastore;
+  
+  private static final String ID = "id";
 
   /**
    * retrieve records by their id
