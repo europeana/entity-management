@@ -45,7 +45,6 @@ import eu.europeana.entitymanagement.utils.UriValidator;
 import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.zoho.organization.ZohoConfiguration;
-import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
 
 public class BaseEntityRecordService {
 
@@ -603,14 +602,13 @@ public class BaseEntityRecordService {
     if (EntityRecordUtils.isEuropeanaEntity(org.getCountryId())) {
       // country id is already europeana entity
       return org.getCountryId();
-    } 
-    //drop all country ids except for the Europeana entities
+    }
+    // drop all country ids except for the Europeana entities
     return null;
   }
 
   boolean isStringOrPrimitive(Class<?> fieldType) {
-    return String.class.isAssignableFrom(fieldType) 
-        || ClassUtils.isPrimitiveOrWrapper(fieldType);
+    return String.class.isAssignableFrom(fieldType) || ClassUtils.isPrimitiveOrWrapper(fieldType);
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -683,15 +681,17 @@ public class BaseEntityRecordService {
   }
 
   static boolean doSloppyMatch(String fieldName) {
-    String type = EntityFieldsTypes.getFieldType(fieldName);
-    // for text do a sloppy match
-    if (StringUtils.equals(type, EntityFieldsTypes.FIELD_TYPE_TEXT)) {
-      return true;
-    }
-    // for uri or keywords do an exact match
-    else if (StringUtils.equals(type, EntityFieldsTypes.FIELD_TYPE_URI)
-        || StringUtils.equals(type, EntityFieldsTypes.FIELD_TYPE_KEYWORD)) {
-      return false;
+    if (EntityFieldsTypes.hasTypeDefinition(fieldName)) {
+      String type = EntityFieldsTypes.getFieldType(fieldName);
+      // for text do a sloppy match
+      if (StringUtils.equals(type, EntityFieldsTypes.FIELD_TYPE_TEXT)) {
+        return true;
+      }
+      // for uri or keywords do an exact match
+      else if (StringUtils.equals(type, EntityFieldsTypes.FIELD_TYPE_URI)
+          || StringUtils.equals(type, EntityFieldsTypes.FIELD_TYPE_KEYWORD)) {
+        return false;
+      }
     }
     // for all other cases
     return false;

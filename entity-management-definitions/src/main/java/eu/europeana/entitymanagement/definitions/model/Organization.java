@@ -231,7 +231,7 @@ public class Organization extends Entity {
       country = new Place(getCountryId());
     }else if(country != null) {
       //reset context to remove it from serialization
-      getCountry().setContext(null);
+      country.setContext(null);
     }
     return country;
   }

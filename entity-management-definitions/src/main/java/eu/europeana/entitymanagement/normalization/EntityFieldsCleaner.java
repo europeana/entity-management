@@ -213,7 +213,12 @@ public class EntityFieldsCleaner {
 
   private List<String> normalizeValues(String fieldName, List<String> values) {
     List<String> normalized;
-    if (EntityFieldsTypes.getFieldType(fieldName).equals(FIELD_TYPE_DATE)) {
+    //process only functional fields defined in the field types
+    if(!EntityFieldsTypes.hasTypeDefinition(fieldName)) {
+      return values;
+    }
+      
+    if (FIELD_TYPE_DATE.equals(EntityFieldsTypes.getFieldType(fieldName))) {
       normalized = new ArrayList<>();
       for (String value : values) {
         String normalizedValue = normalizeTextValue(fieldName, value);
@@ -264,7 +269,8 @@ public class EntityFieldsCleaner {
 
   private void normalizeTextField(Field field, String fieldValue, Entity entity)
       throws IllegalArgumentException, IllegalAccessException {
-    if (fieldValue != null) {
+    //process only the functional fields defined in the fieldTypes
+    if (fieldValue != null && EntityFieldsTypes.hasTypeDefinition(field.getName())) {
       String normalizedValue = normalizeTextValue(field.getName(), fieldValue);
       if (!normalizedValue.equals(fieldValue)) {
         entity.setFieldValue(field, normalizedValue);
@@ -273,11 +279,12 @@ public class EntityFieldsCleaner {
   }
 
   String normalizeTextValue(String fieldName, String fieldValue) {
-    if (fieldValue != null) {
+    //process only the functional fields defined in the fieldTypes
+    if (fieldValue != null && EntityFieldsTypes.hasTypeDefinition(fieldName)) {
       // remove trailing spaces and capitalise Text fields
       String normalizedValue = capitaliseTextFields(fieldName, fieldValue);
 
-      if (EntityFieldsTypes.getFieldType(fieldName).equals(FIELD_TYPE_DATE)) {
+      if (FIELD_TYPE_DATE.equals(EntityFieldsTypes.getFieldType(fieldName))) {
         normalizedValue = convertDatetimeToDate(normalizedValue);
       }
       if (fieldValue != normalizedValue) {
@@ -309,17 +316,19 @@ public class EntityFieldsCleaner {
    * @return
    */
   private String capitaliseTextFields(String fieldName, String fieldValue) {
+    
     // do not capitalize language code strings (e.g. en, de, fr)
-    if (!ISO_LANGUAGES.contains(fieldValue)) {
-      if (EntityFieldsTypes.getFieldType(fieldName).equals(FIELD_TYPE_TEXT)) {
+    // process only functional fields
+    if (EntityFieldsTypes.hasTypeDefinition(fieldName) && !ISO_LANGUAGES.contains(fieldValue)) {
+      if (FIELD_TYPE_TEXT.equals(EntityFieldsTypes.getFieldType(fieldName))) {
         return StringUtils.capitalize(fieldValue.trim());
       }
-      if (EntityFieldsTypes.getFieldType(fieldName).equals(FIELD_TYPE_TEXT_OR_URI)
+      if (FIELD_TYPE_TEXT_OR_URI.equals(EntityFieldsTypes.getFieldType(fieldName))
           && !(StringUtils.startsWithAny(fieldValue, "https://", "http://"))) {
         return StringUtils.capitalize(fieldValue.trim());
       }
       // for keyword field type leave it as it is
-      if (StringUtils.equals(EntityFieldsTypes.getFieldType(fieldName), FIELD_TYPE_KEYWORD)) {
+      if (StringUtils.equals(FIELD_TYPE_KEYWORD, EntityFieldsTypes.getFieldType(fieldName))) {
         return fieldValue.trim();
       }
     }
