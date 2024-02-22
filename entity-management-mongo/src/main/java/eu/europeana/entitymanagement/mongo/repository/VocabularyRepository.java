@@ -1,7 +1,6 @@
 package eu.europeana.entitymanagement.mongo.repository;
 
 import static dev.morphia.query.experimental.filters.Filters.in;
-import static eu.europeana.entitymanagement.definitions.VocabularyFields.URI;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Resource;
@@ -17,15 +16,17 @@ public class VocabularyRepository  {
   
   @Resource(name = AppConfigConstants.BEAN_EM_DATA_STORE)
   Datastore datastore;
+  
+  private static final String ID = "id";
 
   /**
-   * retrieve records by their URI/id
-   * @param vocabularyUris
+   * retrieve records by their id
+   * @param vocabularyIds
    * @return
    */
-  public List<Vocabulary> findByUri(List<String> vocabularyUris) {
+  public List<Vocabulary> findByUri(List<String> vocabularyIds) {
     List<Filter> filters = new ArrayList<>();
-    filters.add(in(URI, vocabularyUris));
+    filters.add(in(ID, vocabularyIds));
     return datastore.find(Vocabulary.class)
         .filter(filters.toArray(Filter[]::new))
         .iterator()

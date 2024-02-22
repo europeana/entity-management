@@ -15,6 +15,7 @@ import dev.morphia.annotations.EntityListeners;
 import dev.morphia.annotations.Id;
 import dev.morphia.annotations.IndexOptions;
 import dev.morphia.annotations.Indexed;
+import dev.morphia.annotations.Transient;
 import eu.europeana.entitymanagement.utils.VocabularyWatcher;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -26,12 +27,13 @@ import eu.europeana.entitymanagement.utils.VocabularyWatcher;
  */
 public class Vocabulary {
 
-  private String type = "Vocabulary";
+  @Transient
+  private String type = "Concept";
   
   @Id @JsonIgnore private ObjectId dbId;
 
   @Indexed(options = @IndexOptions(unique = true))
-  private String uri;
+  private String id;
   
   protected List<String> inScheme;
   
@@ -75,17 +77,17 @@ public class Vocabulary {
 
   @Override
   public String toString() {
-    return String.format("Vocabulary.uri: %s", getUri());
+    return String.format("Vocabulary.id: %s", getId());
   }
 
   @JsonGetter
-  public String getUri() {
-    return uri;
+  public String getId() {
+    return id;
   }
 
   @JsonSetter
-  public void setUri(String vocabularyUri) {
-    this.uri = vocabularyUri;
+  public void setId(String id) {
+    this.id = id;
   }
 
   @JsonGetter(IN_SCHEME)

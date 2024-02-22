@@ -64,7 +64,7 @@ public class UtilityTests {
       XmlConceptImpl xmlConcept = (XmlConceptImpl) xmlEntity;
       Concept concept = xmlConcept.toEntityModel();
       Vocabulary vocab = new Vocabulary();
-      vocab.setUri(concept.getEntityId());
+      vocab.setId(concept.getEntityId());
       vocab.setInScheme(concept.getInScheme());
       vocab.setPrefLabel(concept.getPrefLabel());
       vocabularyRepo.save(vocab);

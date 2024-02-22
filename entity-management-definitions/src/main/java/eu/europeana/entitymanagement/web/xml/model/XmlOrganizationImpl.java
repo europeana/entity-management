@@ -113,7 +113,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
       List<XmlConceptImpl> orgXmlRole= new ArrayList<>();
       for(Vocabulary vocab : orgRole) {
         XmlConceptImpl xmlConcept = new XmlConceptImpl();
-        xmlConcept.setAbout(vocab.getUri());
+        xmlConcept.setAbout(vocab.getId());
         xmlConcept.setPrefLabel(RdfXmlUtils.convertMapToXmlMultilingualString(vocab.getPrefLabel()));
         xmlConcept.setInScheme(RdfXmlUtils.convertToRdfResource(vocab.getInScheme()));
         orgXmlRole.add(xmlConcept);

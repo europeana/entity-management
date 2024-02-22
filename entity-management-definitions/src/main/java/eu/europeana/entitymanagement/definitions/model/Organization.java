@@ -274,7 +274,7 @@ public class Organization extends Entity {
       europeanaRole=new ArrayList<>();
       for(String roleId : europeanaRoleIds) {
         Vocabulary vocab = new Vocabulary();
-        vocab.setUri(roleId);
+        vocab.setId(roleId);
         europeanaRole.add(vocab);
       }
     }
