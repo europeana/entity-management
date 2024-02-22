@@ -229,6 +229,9 @@ public class Organization extends Entity {
     if(country == null && getCountryId() != null) {
       //set country if not dereferenced during retrieval from database
       country = new Place(getCountryId());
+    }else if(country != null) {
+      //reset context to remove it from serialization
+      country.setContext(null);
     }
     return country;
   }

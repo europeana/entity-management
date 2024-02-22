@@ -21,7 +21,6 @@ import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
-import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.web.service.ZohoSyncService;
 
 /**
@@ -41,9 +40,7 @@ public class EntityManagementApp implements CommandLineRunner {
   private BatchEntityUpdateExecutor batchUpdateExecutor;
   @Autowired
   private ZohoSyncService zohoSyncService;
-  @Autowired
-  private EntityRecordService entityRecordService;
-
+ 
   /**
    * Main entry point of this application
    *
@@ -82,9 +79,9 @@ public class EntityManagementApp implements CommandLineRunner {
         //failed tasks will not complete, therefore not all scheduled tasks are marked as completed in the database
         //untill we have a better mechanism to reschedule failed tasks we wait for the next executions to mark them as complete
         if (currentRunningTasks == 0 || currentRunningTasks == notCompletedTasks){
-          //if the open tasks is the same after waiting interval, than the processing is considered complete  
+          //if the open tasks is the same after waiting interval, than the processing is considered complete
+          //reseting currentRunningTasks is not needed anymore
           processingComplete = true;
-          currentRunningTasks = 0;
         } else {
           processingComplete = false;
           notCompletedTasks = currentRunningTasks;
@@ -97,7 +94,7 @@ public class EntityManagementApp implements CommandLineRunner {
           SpringApplication.exit(context);
           System.exit(-2);
         }
-      } while (notCompletedTasks > 0);
+      } while (!processingComplete);
 
       // failed application execution should be indicated with negative codes
       LOG.info("Stoping application after processing all Schdeduled Tasks!");

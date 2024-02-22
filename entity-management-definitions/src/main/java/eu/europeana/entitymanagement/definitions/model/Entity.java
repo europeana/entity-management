@@ -29,6 +29,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import dev.morphia.annotations.Transient;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidationGroup;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidationInterface;
 import eu.europeana.entitymanagement.normalization.EntityFieldsDataSourceProxyValidationGroup;
@@ -56,6 +57,9 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
     groups = {EntityFieldsDataSourceProxyValidationGroup.class})
 public abstract class Entity implements ValidationObject {
 
+  
+  @Transient
+  protected String context = ENTITY_CONTEXT;
   protected String entityId;
   // ID of entityRecord in database
 
@@ -83,6 +87,7 @@ public abstract class Entity implements ValidationObject {
   protected <T extends Entity> Entity(T copy) {
     this.entityId = copy.getEntityId();
     this.depiction = copy.getDepiction();
+    this.context = copy.getContext();
     if (copy.getNote() != null) this.note = new HashMap<>(copy.getNote());
     if (copy.getPrefLabel() != null) this.prefLabel = new HashMap<>(copy.getPrefLabel());
     if (copy.getAltLabel() != null) this.altLabel = new HashMap<>(copy.getAltLabel());
@@ -254,8 +259,13 @@ public abstract class Entity implements ValidationObject {
   /** Not included in XML responses */
   @JsonGetter(CONTEXT)
   public String getContext() {
-    return ENTITY_CONTEXT;
+    return context;
   }
+  
+  public void setContext(String context) {
+    this.context = context;
+  }
+
 
   @JsonSetter(IS_AGGREGATED_BY)
   public void setIsAggregatedBy(Aggregation isAggregatedBy) {

@@ -17,6 +17,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import dev.morphia.annotations.Embedded;
+import dev.morphia.annotations.Transient;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 
 @Embedded
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
@@ -49,6 +51,8 @@ public class Address {
     this.hasGeo = copy.getVcardHasGeo();
   }
 
+  @Transient
+  private String type = WebEntityFields.ADDRESS_TYPE;
   private String about;
   private String streetAddress;
   private String postalCode;
@@ -127,6 +131,11 @@ public class Address {
     this.hasGeo = hasGeo;
   }
 
+  @JsonGetter(TYPE)
+  public String getType() {
+    return type;
+  }
+  
   /** Checks that this Address metadata properties set. 'about' field not included in this check. */
   public boolean hasMetadataProperties() {
     return StringUtils.isNotEmpty(streetAddress)
