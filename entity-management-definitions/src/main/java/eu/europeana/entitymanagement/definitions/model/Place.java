@@ -76,6 +76,8 @@ public class Place extends Entity {
   public Place(String entityId) {
     super();
     setEntityId(entityId);
+    //reset default value for context 
+    setContext(null);
   }
   
   @JsonGetter(IS_NEXT_IN_SEQUENCE)
