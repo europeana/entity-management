@@ -64,7 +64,7 @@ public final class ZohoConstants {
   public static final String UNDEFINED_LANGUAGE_KEY = "def";
 
   public static final int LANGUAGE_CODE_LENGTH = 5;
-  public static final int SAME_AS_CODE_LENGTH = 3;
+  public static final int SAME_AS_CODE_LENGTH = 5;
 
   // constants for filtering by Owner
   public static final String ZOHO_OWNER_FIELD = "Owner";
