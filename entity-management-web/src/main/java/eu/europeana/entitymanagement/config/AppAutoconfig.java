@@ -80,7 +80,7 @@ public class AppAutoconfig extends AppConfigConstants {
         for(XmlBaseEntityImpl<?> xmlEntity : xmlEntities) {
           XmlConceptImpl xmlConcept = (XmlConceptImpl) xmlEntity;
           Vocabulary vocab = new Vocabulary();
-          vocab.setUri(xmlConcept.getAbout());
+          vocab.setId(xmlConcept.getAbout());
           vocab.setInScheme(RdfXmlUtils.toStringList(xmlConcept.getInScheme()));
           vocab.setPrefLabel(RdfXmlUtils.toLanguageMap(xmlConcept.getPrefLabel()));
           roles.add(vocab);
