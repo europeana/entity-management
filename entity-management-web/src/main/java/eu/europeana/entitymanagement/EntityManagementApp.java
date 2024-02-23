@@ -73,7 +73,7 @@ public class EntityManagementApp implements CommandLineRunner {
         long currentRunningTasks = scheduledTaskService.getRunningTasksCount();
         // log progress
         if (LOG.isInfoEnabled()) {
-          LOG.info("Scheduled Tasks to process : {}", notCompletedTasks);
+          LOG.info("Scheduled Tasks to process : before {}, after {}", notCompletedTasks, currentRunningTasks);
         }
         
         //failed tasks will not complete, therefore not all scheduled tasks are marked as completed in the database
