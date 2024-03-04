@@ -524,6 +524,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
         .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
         .andExpect(jsonPath("$.sameAs").isNotEmpty())
         .andExpect(jsonPath("$.country.prefLabel.en", is("Sweden")))
+        .andExpect(jsonPath("$.country.latitude").doesNotExist()) //only the country prefLabel, id, and type should be present
         .andExpect(jsonPath("$.europeanaRole[0].prefLabel.en", is("Providing Institution")));
   }
 
@@ -603,7 +604,8 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
         .andExpect(xpath(entityBaseXpath + "/@rdf:about", xmlNamespaces).string(entityId))
         .andExpect(
             xpath(entityBaseXpath + "/skos:prefLabel", xmlNamespaces).nodeCount(greaterThan(0)))
-        .andExpect(xpath(entityBaseXpath + "/edm:countryPlace", xmlNamespaces).doesNotExist());
+        .andExpect(xpath(entityBaseXpath + "/edm:country/@rdf:resource", xmlNamespaces).exists())
+        .andExpect(xpath(entityBaseXpath + "/edm:country/skos:prefLabel", xmlNamespaces).doesNotExist());
   }
 
   @Test

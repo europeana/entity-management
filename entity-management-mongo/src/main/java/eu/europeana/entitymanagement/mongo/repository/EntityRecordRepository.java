@@ -6,7 +6,6 @@ import static dev.morphia.query.experimental.filters.Filters.in;
 import static dev.morphia.query.experimental.filters.Filters.ne;
 import static dev.morphia.query.experimental.filters.Filters.or;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.DISABLED;
-import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_EXACT_MATCH;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_ID;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_MODIFIED;
@@ -87,34 +86,12 @@ public class EntityRecordRepository extends AbstractRepository {
   }
 
   /**
-   * Find and return EntityRecord that matches the given parameters
-   *
-   * @param entityId ID of the dataset
-   * @return EntityRecord the database record
+   * Find entity record with id, and pick only the given fields from the record
+   * @param entityId
+   * @param fields
+   * @return
    */
-  public EntityRecord findByEntityId(String entityId) {
-    return findEntityRecord(entityId);
-  }
-  
-  /**
-   * Find and return EntityRecord that matches the given parameters
-   *
-   * @param entityId ID of the dataset
-   * @param consolidatedOnly if set to true, the retrieved record will only include the consolidated entity
-   * @return EntityRecord the database record
-   */
-  public EntityRecord findByEntityId(String entityId, boolean consolidatedOnly) {
-      return consolidatedOnly ? findEntityRecord(entityId, ENTITY) : findEntityRecord(entityId);
-  }
-
-  /**
-   * Find and return EntityRecord that matches the given parameters
-   *
-   * @param entityId ID of the dataset
-   * @param consolidatedOnly if set to true, the retrieved record will only include the consolidated entity
-   * @return EntityRecord the database record
-   */
-  protected EntityRecord findEntityRecord(String entityId, String... fields) {
+  public EntityRecord findEntityRecord(String entityId, String... fields) {
     Query<EntityRecord> query = getDataStore()
         .find(EntityRecord.class);
       
@@ -204,6 +181,21 @@ public class EntityRecordRepository extends AbstractRepository {
     //query the database
     return query.iterator().toList();
   }
+  
+  public List<EntityRecord> findByEntityIdsOrCoreference(List<String> uris) {
+    // Get all EntityRecords that have the given uris as their entityId or in the sameAs/exactMatch field 
+    List<Filter> filters = new ArrayList<>();
+    filters.add(or(in(ENTITY_ID, uris), in(ENTITY_SAME_AS, uris), in(ENTITY_EXACT_MATCH, uris)));
+    // Only fetch active records. Disabled records have a date value
+    filters.add(eq(DISABLED, null));    
+
+    return getDataStore()
+        .find(EntityRecord.class)
+        .filter(filters.toArray(Filter[]::new))
+        .iterator()
+        .toList();
+  }
+
   
   public List<EntityRecord> saveBulk(List<EntityRecord> entityRecords) {
     return getDataStore().save(entityRecords);

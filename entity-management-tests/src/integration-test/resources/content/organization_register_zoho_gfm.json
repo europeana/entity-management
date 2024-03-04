@@ -1,4 +1,7 @@
 {
   "type": "Organization",
-  "id": "https://crm.zoho.eu/crm/org20085137532/tab/Accounts/486281000000940433"
+  "id": "https://crm.zoho.eu/crm/org20085137532/tab/Accounts/486281000000940433",
+  "sameAs": [
+	  "http://data.europeana.eu/organization/486281000000940433"
+  ]
 }

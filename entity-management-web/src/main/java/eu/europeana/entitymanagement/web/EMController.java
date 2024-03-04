@@ -638,7 +638,7 @@ public class EMController extends BaseRest {
   private ResponseEntity<String> createResponseMultipleEntities(List<String> entityIds,
       HttpServletRequest request) throws EuropeanaApiException {
     List<EntityRecord> entityRecords =
-        entityRecordService.retrieveMultipleByEntityIds(entityIds, true, true);
+        entityRecordService.retrieveMultipleByEntityIdsOrCoreference(entityIds);
     if (entityRecords.isEmpty()) {
       throw new EntityNotFoundException(entityIds.toString());
     }
@@ -647,11 +647,10 @@ public class EMController extends BaseRest {
     // improves sort performance significantly
     Map<String, EntityRecord> sortedEntityRecordMap = new LinkedHashMap<>(entityIds.size());
     for (String id : entityIds) {
-      sortedEntityRecordMap.put(id, null);
-    }
-
-    for (EntityRecord entityRecord : entityRecords) {
-      sortedEntityRecordMap.replace(entityRecord.getEntityId(), entityRecord);
+      Optional<EntityRecord> recordIdMatched= entityRecords.stream().filter(er -> id.equals(er.getEntityId()) || er.getEntity().getSameReferenceLinks().contains(id)).findFirst();
+      if(recordIdMatched.isPresent()) {
+        sortedEntityRecordMap.put(id, recordIdMatched.get());
+      }
     }
 
     // create response headers
