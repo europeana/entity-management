@@ -643,25 +643,12 @@ public class EMController extends BaseRest {
       throw new EntityNotFoundException(entityIds.toString());
     }
 
-    // LinkedHashMap iterates keys() and values() in order of insertion. Using a map
-    // improves sort performance significantly
-    Map<String, EntityRecord> sortedEntityRecordMap = new LinkedHashMap<>(entityIds.size());
-    for (String id : entityIds) {
-      Optional<EntityRecord> recordIdMatched= entityRecords.stream().filter(er -> id.equals(er.getEntityId()) || er.getEntity().getSameReferenceLinks().contains(id)).findFirst();
-      if(recordIdMatched.isPresent()) {
-        sortedEntityRecordMap.put(id, recordIdMatched.get());
-      }
-    }
-
     // create response headers
     String contentType = HttpHeaders.CONTENT_TYPE_JSONLD_UTF8;
     org.springframework.http.HttpHeaders headers = createAllowHeader(request);
     headers.add(HttpHeaders.CONTENT_TYPE, contentType);
 
-    // remove null values in response
-    List<EntityRecord> responseBody = sortedEntityRecordMap.values().stream()
-        .filter(Objects::nonNull).collect(Collectors.toList());
-    String body = serialize(responseBody);
+    String body = serialize(entityRecords);
     return ResponseEntity.status(HttpStatus.OK).headers(headers).body(body);
   }
 

@@ -110,7 +110,7 @@ public class EntityRecordRepository extends AbstractRepository {
       return query.first();
     }
   }
-  
+    
   public List<EntityIdDisabledStatus> getEntityIds(
       List<String> entityIds, boolean excludeDisabled) {
     List<EntityRecord> entityRecords = findByEntityIds(entityIds, excludeDisabled, false);

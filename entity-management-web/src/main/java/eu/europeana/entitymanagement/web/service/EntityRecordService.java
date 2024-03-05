@@ -96,7 +96,16 @@ public class EntityRecordService extends BaseEntityRecordService {
   }
   
   public List<EntityRecord> retrieveMultipleByEntityIdsOrCoreference(List<String> entityIds) {
-    return entityRecordRepository.findByEntityIdsOrCoreference(entityIds);
+    List<EntityRecord> records=entityRecordRepository.findByEntityIdsOrCoreference(entityIds);
+    //sorting the list in order of the input ids
+    List<EntityRecord> recordsSorted=new ArrayList<>();
+    for (String id : entityIds) {
+      Optional<EntityRecord> recordIdMatched= records.stream().filter(er -> id.equals(er.getEntityId()) || er.getEntity().getSameReferenceLinks().contains(id)).findFirst();
+      if(recordIdMatched.isPresent()) {
+        recordsSorted.add(recordIdMatched.get());
+      }
+    }
+    return recordsSorted;
   }
 
   public EntityRecord retrieveEntityRecord(EntityTypes type, String identifier, String profiles,
@@ -138,7 +147,6 @@ public class EntityRecordService extends BaseEntityRecordService {
     if (org.getCountryId() != null) {
       EntityRecord countryRecord = entityRecordRepository.findEntityRecord(org.getCountryId(), EntityRecordFields.ENTITY);
       if (countryRecord != null) {
-        // fill in only the chosen fields
         Place country = new Place();
         country.setEntityId(countryRecord.getEntity().getEntityId());
         country.setPrefLabel(countryRecord.getEntity().getPrefLabel());

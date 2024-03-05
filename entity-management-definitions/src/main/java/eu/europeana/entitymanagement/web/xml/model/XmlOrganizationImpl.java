@@ -160,7 +160,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     //set country id (external dereferencers deliver only the ids, not transitive data)
     if(getCountry() != null) {
       //we need to extract the countryID as well (xml about holds the entityId)
-      entity.setCountryId(getCountry().getAbout());
+      entity.setCountryId(getCountry().getResource());
     }
     
     if (getHomepage() != null) {
