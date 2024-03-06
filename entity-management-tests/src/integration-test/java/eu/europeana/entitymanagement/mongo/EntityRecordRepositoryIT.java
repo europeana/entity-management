@@ -3,13 +3,6 @@ package eu.europeana.entitymanagement.mongo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import eu.europeana.entitymanagement.AbstractIntegrationTest;
-import eu.europeana.entitymanagement.definitions.model.Aggregation;
-import eu.europeana.entitymanagement.definitions.model.EntityProxy;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.TimeSpan;
-import eu.europeana.entitymanagement.definitions.model.WebResource;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -19,6 +12,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import eu.europeana.entitymanagement.AbstractIntegrationTest;
+import eu.europeana.entitymanagement.definitions.model.Aggregation;
+import eu.europeana.entitymanagement.definitions.model.EntityProxy;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.model.TimeSpan;
+import eu.europeana.entitymanagement.definitions.model.WebResource;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -32,7 +31,7 @@ class EntityRecordRepositoryIT extends AbstractIntegrationTest {
   @Test
   public void shouldCorrectlyInsertAndRetrieve() {
     EntityRecord savedRecord = createEntityRecord();
-    EntityRecord retrievedRecord = entityRecordRepository.findByEntityId(savedRecord.getEntityId());
+    EntityRecord retrievedRecord = entityRecordRepository.findEntityRecord(savedRecord.getEntityId());
 
     assertEquals(retrievedRecord.getEntityId(), savedRecord.getEntityId());
 
@@ -45,7 +44,7 @@ class EntityRecordRepositoryIT extends AbstractIntegrationTest {
     EntityRecord savedRecord = createEntityRecord();
     entityRecordRepository.disableBulk(List.of(savedRecord.getEntityId()));
 
-    EntityRecord retrievedRecord = entityRecordRepository.findByEntityId(savedRecord.getEntityId());
+    EntityRecord retrievedRecord = entityRecordRepository.findEntityRecord(savedRecord.getEntityId());
     assertTrue(retrievedRecord.isDisabled());
   }
 

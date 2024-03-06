@@ -79,7 +79,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
   private List<XmlConceptImpl> europeanaRole = new ArrayList<>();
 
   @XmlElement(namespace = NAMESPACE_EDM, name = XML_COUNTRY)
-  private XmlPlaceImpl country;
+  private XmlEdmCountry country;
 
   @XmlElement(namespace = NAMESPACE_FOAF, name = XML_HOMEPAGE)
   private LabelledResource homepage;
@@ -122,7 +122,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     }
     
     if(organization.getCountry() != null) {
-      this.country = new XmlPlaceImpl(organization.getCountry());
+      this.country = new XmlEdmCountry(organization.getCountry());
     }
     
     if (organization.getHomepage() != null) {
@@ -160,7 +160,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     //set country id (external dereferencers deliver only the ids, not transitive data)
     if(getCountry() != null) {
       //we need to extract the countryID as well (xml about holds the entityId)
-      entity.setCountryId(getCountry().getAbout());
+      entity.setCountryId(getCountry().getResource());
     }
     
     if (getHomepage() != null) {
@@ -198,7 +198,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     return europeanaRole;
   }
 
-  public XmlPlaceImpl getCountry() {
+  public XmlEdmCountry getCountry() {
     return country;
   }
 

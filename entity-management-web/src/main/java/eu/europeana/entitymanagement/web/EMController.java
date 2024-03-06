@@ -638,20 +638,9 @@ public class EMController extends BaseRest {
   private ResponseEntity<String> createResponseMultipleEntities(List<String> entityIds,
       HttpServletRequest request) throws EuropeanaApiException {
     List<EntityRecord> entityRecords =
-        entityRecordService.retrieveMultipleByEntityIds(entityIds, true, true);
+        entityRecordService.retrieveMultipleByEntityIdsOrCoreference(entityIds);
     if (entityRecords.isEmpty()) {
       throw new EntityNotFoundException(entityIds.toString());
-    }
-
-    // LinkedHashMap iterates keys() and values() in order of insertion. Using a map
-    // improves sort performance significantly
-    Map<String, EntityRecord> sortedEntityRecordMap = new LinkedHashMap<>(entityIds.size());
-    for (String id : entityIds) {
-      sortedEntityRecordMap.put(id, null);
-    }
-
-    for (EntityRecord entityRecord : entityRecords) {
-      sortedEntityRecordMap.replace(entityRecord.getEntityId(), entityRecord);
     }
 
     // create response headers
@@ -659,10 +648,7 @@ public class EMController extends BaseRest {
     org.springframework.http.HttpHeaders headers = createAllowHeader(request);
     headers.add(HttpHeaders.CONTENT_TYPE, contentType);
 
-    // remove null values in response
-    List<EntityRecord> responseBody = sortedEntityRecordMap.values().stream()
-        .filter(Objects::nonNull).collect(Collectors.toList());
-    String body = serialize(responseBody);
+    String body = serialize(entityRecords);
     return ResponseEntity.status(HttpStatus.OK).headers(headers).body(body);
   }
 

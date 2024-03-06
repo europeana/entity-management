@@ -4,7 +4,6 @@ import static eu.europeana.entitymanagement.solr.SolrUtils.createSolrEntity;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getDatasourceAggregationId;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEuropeanaAggregationId;
 import static java.time.Instant.now;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,6 +23,7 @@ import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.config.DataSources;
+import eu.europeana.entitymanagement.definitions.EntityRecordFields;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.model.Agent;
@@ -79,7 +79,7 @@ public class EntityRecordService extends BaseEntityRecordService {
   }
 
   public Optional<EntityRecord> retrieveByEntityId(String entityId) {
-    return Optional.ofNullable(entityRecordRepository.findByEntityId(entityId));
+    return Optional.ofNullable(entityRecordRepository.findEntityRecord(entityId));
   }
 
   /**
@@ -93,6 +93,19 @@ public class EntityRecordService extends BaseEntityRecordService {
   public List<EntityRecord> retrieveMultipleByEntityIds(List<String> entityIds,
       boolean excludeDisabled, boolean fetchFullRecord) {
     return entityRecordRepository.findByEntityIds(entityIds, excludeDisabled, fetchFullRecord);
+  }
+  
+  public List<EntityRecord> retrieveMultipleByEntityIdsOrCoreference(List<String> entityIds) {
+    List<EntityRecord> records=entityRecordRepository.findByEntityIdsOrCoreference(entityIds);
+    //sorting the list in order of the input ids
+    List<EntityRecord> recordsSorted=new ArrayList<>();
+    for (String id : entityIds) {
+      Optional<EntityRecord> recordIdMatched= records.stream().filter(er -> id.equals(er.getEntityId()) || er.getEntity().getSameReferenceLinks().contains(id)).findFirst();
+      if(recordIdMatched.isPresent()) {
+        recordsSorted.add(recordIdMatched.get());
+      }
+    }
+    return recordsSorted;
   }
 
   public EntityRecord retrieveEntityRecord(EntityTypes type, String identifier, String profiles,
@@ -132,10 +145,11 @@ public class EntityRecordService extends BaseEntityRecordService {
   private void dereferenceLinkedEntities(Organization org) {
     // dereference country
     if (org.getCountryId() != null) {
-      EntityRecord countryRecord = entityRecordRepository.findByEntityId(org.getCountryId(), true);
+      EntityRecord countryRecord = entityRecordRepository.findEntityRecord(org.getCountryId(), EntityRecordFields.ENTITY);
       if (countryRecord != null) {
-        // fill in the country file with the retrieved entity
-        Place country = (Place) countryRecord.getEntity();
+        Place country = new Place();
+        country.setEntityId(countryRecord.getEntity().getEntityId());
+        country.setPrefLabel(countryRecord.getEntity().getPrefLabel());
         org.setCountry(country);
       }
     }
