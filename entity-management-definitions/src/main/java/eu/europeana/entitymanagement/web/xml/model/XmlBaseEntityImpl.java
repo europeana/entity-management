@@ -94,7 +94,7 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
   public void setAbout(String about) {
     this.about = about;
   }
-
+  
   public XmlWebResourceWrapper getDepiction() {
     return depiction;
   }
@@ -130,4 +130,5 @@ public abstract class XmlBaseEntityImpl<T extends Entity> {
 
     return getSameReferenceLinks().stream().anyMatch(e -> uri.equals(e.getResource()));
   }
+
 }
