@@ -605,7 +605,9 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
         .andExpect(
             xpath(entityBaseXpath + "/skos:prefLabel", xmlNamespaces).nodeCount(greaterThan(0)))
         .andExpect(xpath(entityBaseXpath + "/edm:country/@rdf:resource", xmlNamespaces).exists())
-        .andExpect(xpath(entityBaseXpath + "/edm:country/skos:prefLabel", xmlNamespaces).doesNotExist());
+        .andExpect(xpath(entityBaseXpath + "/edm:country/skos:prefLabel", xmlNamespaces).doesNotExist())
+        .andExpect(xpath(entityBaseXpath + "/edm:europeanaRole/@rdf:resource", xmlNamespaces).exists())
+        .andExpect(xpath(entityBaseXpath + "/edm:europeanaRole/skos:prefLabel", xmlNamespaces).doesNotExist());        
   }
 
   @Test
