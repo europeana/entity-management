@@ -110,7 +110,7 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     //set the europeanaRole
     List<Vocabulary> orgRole=organization.getEuropeanaRole();
     if(orgRole!=null && !orgRole.isEmpty()) {
-      List<XmlEdmEuropeanaRole> orgXmlRole= new ArrayList<>();
+      List<XmlEdmEuropeanaRole> orgXmlRole= new ArrayList<>(orgRole.size());
       for(Vocabulary vocab : orgRole) {
         XmlEdmEuropeanaRole xmlRole = new XmlEdmEuropeanaRole(vocab);
         orgXmlRole.add(xmlRole);
