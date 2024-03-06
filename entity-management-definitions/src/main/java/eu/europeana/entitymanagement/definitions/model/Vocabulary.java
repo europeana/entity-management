@@ -1,7 +1,9 @@
 package eu.europeana.entitymanagement.definitions.model;
 
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IN_SCHEME;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import dev.morphia.annotations.EntityListeners;
 import dev.morphia.annotations.Id;
@@ -25,6 +28,12 @@ import eu.europeana.entitymanagement.utils.VocabularyWatcher;
 /**
  * class used for storing static vocabularies (e.g. europeana roles)
  */
+@JsonPropertyOrder({
+  ID,
+  TYPE,
+  PREF_LABEL,
+  IN_SCHEME
+})
 public class Vocabulary {
 
   @Transient
@@ -80,12 +89,12 @@ public class Vocabulary {
     return String.format("Vocabulary.id: %s", getId());
   }
 
-  @JsonGetter
+  @JsonGetter(ID)
   public String getId() {
     return id;
   }
 
-  @JsonSetter
+  @JsonSetter(ID)
   public void setId(String id) {
     this.id = id;
   }
@@ -110,6 +119,7 @@ public class Vocabulary {
     this.prefLabel = prefLabel;
   }
 
+  @JsonGetter(TYPE)
   public String getType() {
     return type;
   }
