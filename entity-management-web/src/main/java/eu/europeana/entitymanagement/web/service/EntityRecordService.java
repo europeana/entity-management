@@ -847,7 +847,7 @@ public class EntityRecordService extends BaseEntityRecordService {
    * @return
    */
   public List<EntityRecord> findEntitiesWithFilter(int start, int count, Filter[] queryFilters) {
-    return this.entityRecordRepository.findWithFilters(start, count, queryFilters);
+    return this.entityRecordRepository.findWithCount(start, count, queryFilters);
   }
 
   private void updateEntityAggregation(EntityRecord entityRecord, String entityId, Date timestamp) {

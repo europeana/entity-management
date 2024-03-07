@@ -263,7 +263,7 @@ public class ZohoSyncService extends BaseZohoAccess {
    */
   List<EntityRecord> findEntityRecordsByProxyId(Set<String> modifiedInZoho) {
     Filter proxyIdsFilter = Filters.in("proxies.proxyId", modifiedInZoho);
-    return entityRecordRepository.findWithFilters(0, modifiedInZoho.size(),
+    return entityRecordRepository.findWithCount(0, modifiedInZoho.size(),
         new Filter[] {proxyIdsFilter});
   }
 

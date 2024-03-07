@@ -20,7 +20,6 @@ import org.springframework.stereotype.Repository;
 import com.mongodb.client.result.UpdateResult;
 import dev.morphia.query.FindOptions;
 import dev.morphia.query.Query;
-import dev.morphia.query.Sort;
 import dev.morphia.query.experimental.filters.Filter;
 import dev.morphia.query.experimental.updates.UpdateOperators;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
@@ -82,7 +81,7 @@ public class EntityRecordRepository extends AbstractRepository {
       fields.add(DISABLED);
     }
     
-    return findEntityRecords(filters.toArray(Filter[]::new), false, -1, -1, null, fields.toArray(String[]::new));
+    return findEntityRecords(filters.toArray(Filter[]::new), false, fields.toArray(String[]::new));
     
   }
 
@@ -96,7 +95,7 @@ public class EntityRecordRepository extends AbstractRepository {
     List<Filter> filters = new ArrayList<>();
     filters.add(eq(ENTITY_ID, entityId));
 
-    List<EntityRecord> recordList=findEntityRecords(filters.toArray(Filter[]::new), false, -1, -1, null, fields);
+    List<EntityRecord> recordList=findEntityRecords(filters.toArray(Filter[]::new), false, fields);
     if(recordList.isEmpty()) {
       return null;
     }
@@ -105,7 +104,7 @@ public class EntityRecordRepository extends AbstractRepository {
     }
   }
   
-  protected List<EntityRecord> findEntityRecords(Filter[] filters, boolean disableValidation, int start, int count, Sort[] sorts, String[] fields) {
+  protected List<EntityRecord> findEntityRecords(Filter[] filters, boolean disableValidation, String[] fields) {
     Query<EntityRecord> query = getDataStore().find(EntityRecord.class);
     
     if(disableValidation) {
@@ -117,15 +116,6 @@ public class EntityRecordRepository extends AbstractRepository {
     }
 
     FindOptions findOptions = new FindOptions();
-    if(start>=0) {
-      findOptions.skip(start);
-    }
-    if(count>0) {
-      findOptions.limit(count);
-    }
-    if(sorts!=null && sorts.length>0) {
-      findOptions.sort(sorts);
-    }
     //array must not be empty, invocation of this method with only one parameter uses and empty array
     if(fields != null && fields.length > 0) {
       findOptions.projection().include(fields);
@@ -198,7 +188,7 @@ public class EntityRecordRepository extends AbstractRepository {
     }
 
     //query the database
-    return findEntityRecords(filters.toArray(Filter[]::new), true, -1, -1, null, null);
+    return findEntityRecords(filters.toArray(Filter[]::new), true, null);
   }
   
   public List<EntityRecord> findByEntityIdsOrCoreference(List<String> uris) {
@@ -208,7 +198,7 @@ public class EntityRecordRepository extends AbstractRepository {
     // Only fetch active records. Disabled records have a date value
     filters.add(eq(DISABLED, null));    
 
-    return findEntityRecords(filters.toArray(Filter[]::new), true, -1, -1, null, null);
+    return findEntityRecords(filters.toArray(Filter[]::new), true, null);
   }
 
   
@@ -224,16 +214,17 @@ public class EntityRecordRepository extends AbstractRepository {
    * @param filters Query filters
    * @return List with results
    */
-  public List<EntityRecord> findWithFilters(int start, int count, Filter[] filters) {
-    List<Sort> sorts=new ArrayList<>();
-    sorts.add(ascending(ENTITY_MODIFIED));
-    return findEntityRecords(filters, false, start, count, sorts.toArray(Sort[]::new), null);
+  public List<EntityRecord> findWithCount(int start, int count, Filter[] filters) {
+    return getDataStore().find(EntityRecord.class)
+        .filter(filters)
+        .iterator(new FindOptions().skip(start).sort(ascending(ENTITY_MODIFIED)).limit(count))
+        .toList();
   }
 
   public List<EntityRecord> findAll(int start, int count) {
-    List<Sort> sorts=new ArrayList<>();
-    sorts.add(ascending(ENTITY_MODIFIED));
-    return findEntityRecords(null, false, start, count, sorts.toArray(Sort[]::new), null);
+    return getDataStore().find(EntityRecord.class)
+        .iterator(new FindOptions().skip(start).sort(ascending(ENTITY_MODIFIED)).limit(count))
+        .toList();
   }
 
   public long deleteBulk(List<String> entityIds) {
