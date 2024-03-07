@@ -31,7 +31,7 @@ class EntityRecordRepositoryIT extends AbstractIntegrationTest {
   @Test
   public void shouldCorrectlyInsertAndRetrieve() {
     EntityRecord savedRecord = createEntityRecord();
-    EntityRecord retrievedRecord = entityRecordRepository.findEntityRecord(savedRecord.getEntityId());
+    EntityRecord retrievedRecord = entityRecordRepository.findByEntityId(savedRecord.getEntityId(), null);
 
     assertEquals(retrievedRecord.getEntityId(), savedRecord.getEntityId());
 
@@ -44,7 +44,7 @@ class EntityRecordRepositoryIT extends AbstractIntegrationTest {
     EntityRecord savedRecord = createEntityRecord();
     entityRecordRepository.disableBulk(List.of(savedRecord.getEntityId()));
 
-    EntityRecord retrievedRecord = entityRecordRepository.findEntityRecord(savedRecord.getEntityId());
+    EntityRecord retrievedRecord = entityRecordRepository.findByEntityId(savedRecord.getEntityId(), null);
     assertTrue(retrievedRecord.isDisabled());
   }
 

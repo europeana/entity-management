@@ -71,7 +71,7 @@ class EntityMultipleRetrievalIT extends BaseWebControllerTest {
   }
 
   @Test
-  void multipleEntitiesRetrieveOldOrganizationIds() throws Exception {
+  void multipleEntitiesRetrieveOldOrganizationIdsWithoutDuplicates() throws Exception {
     //register zoho GFM org with old id in sameAs
     String europeanaMetadata = loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_GFM_ZOHO_JSON);
     Optional<Record> zohoRecord =
@@ -87,9 +87,9 @@ class EntityMultipleRetrievalIT extends BaseWebControllerTest {
     .perform(
         post(IntegrationTestUtils.BASE_SERVICE_URL + "/retrieve")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(List.of(oldId))))
+            .content(objectMapper.writeValueAsString(List.of(oldId, entityId))))//here we ask for 2 orgs ids which should return the same org 
     .andExpect(status().isOk())
-    .andExpect(jsonPath("$.items.*.id", is(List.of(entityId))));
+    .andExpect(jsonPath("$.items.*.id", is(List.of(entityId))));//only 1 org is returned (no duplicates)
 
   }
   
@@ -102,7 +102,8 @@ class EntityMultipleRetrievalIT extends BaseWebControllerTest {
                 // db is cleared between test runs, so these shouldn't exist
                 .content(
                     "[ \"http://data.europeana.eu/concept/1\" , \"http://data.europeana.eu/concept/2\"]"))
-        .andExpect(status().isNotFound());
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.items.*.id").isEmpty());
   }
 
   @Test

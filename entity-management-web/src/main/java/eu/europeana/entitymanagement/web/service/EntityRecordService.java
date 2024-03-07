@@ -79,7 +79,7 @@ public class EntityRecordService extends BaseEntityRecordService {
   }
 
   public Optional<EntityRecord> retrieveByEntityId(String entityId) {
-    return Optional.ofNullable(entityRecordRepository.findEntityRecord(entityId));
+    return Optional.ofNullable(entityRecordRepository.findByEntityId(entityId, null));
   }
 
   /**
@@ -97,12 +97,15 @@ public class EntityRecordService extends BaseEntityRecordService {
   
   public List<EntityRecord> retrieveMultipleByEntityIdsOrCoreference(List<String> entityIds) {
     List<EntityRecord> records=entityRecordRepository.findByEntityIdsOrCoreference(entityIds);
-    //sorting the list in order of the input ids
+    //sorting the list in order of the input ids, and exclude duplicates
     List<EntityRecord> recordsSorted=new ArrayList<>();
     for (String id : entityIds) {
       Optional<EntityRecord> recordIdMatched= records.stream().filter(er -> id.equals(er.getEntityId()) || er.getEntity().getSameReferenceLinks().contains(id)).findFirst();
       if(recordIdMatched.isPresent()) {
-        recordsSorted.add(recordIdMatched.get());
+        boolean isDuplicate=recordsSorted.stream().map(er -> er.getEntityId()).toList().contains(recordIdMatched.get().getEntityId());
+        if(! isDuplicate) {
+          recordsSorted.add(recordIdMatched.get());
+        }
       }
     }
     return recordsSorted;
@@ -145,7 +148,7 @@ public class EntityRecordService extends BaseEntityRecordService {
   private void dereferenceLinkedEntities(Organization org) {
     // dereference country
     if (org.getCountryId() != null) {
-      EntityRecord countryRecord = entityRecordRepository.findEntityRecord(org.getCountryId(), EntityRecordFields.ENTITY);
+      EntityRecord countryRecord = entityRecordRepository.findByEntityId(org.getCountryId(), new String[] {EntityRecordFields.ENTITY});
       if (countryRecord != null) {
         Place country = new Place();
         country.setEntityId(countryRecord.getEntity().getEntityId());
@@ -178,7 +181,7 @@ public class EntityRecordService extends BaseEntityRecordService {
     String entityUri = EntityRecordUtils.buildEntityIdUri(type, identifier);
     // entity not found, search co-references by requested entity id
     List<EntityRecord> corefEntities =
-        findEntitiesByCoreference(Collections.singletonList(entityUri), null, true);
+        findEntitiesByCoreference(Collections.singletonList(entityUri), null, false);
     if (corefEntities.size() > 1) {
       throw new MultipleChoicesException(
           String.format(EntityRecordUtils.MULTIPLE_CHOICES_FOR_REDIRECTION_MSG, entityUri,

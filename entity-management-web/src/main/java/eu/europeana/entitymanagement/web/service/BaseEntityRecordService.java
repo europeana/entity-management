@@ -586,7 +586,7 @@ public class BaseEntityRecordService {
       // replace wikidata country ids
       org.setCountryId(europeanaCountryId);
       // search reference
-      EntityRecord orgCountry = entityRecordRepository.findEntityRecord(europeanaCountryId);
+      EntityRecord orgCountry = entityRecordRepository.findByEntityId(europeanaCountryId, null);
       if (orgCountry != null) {
         org.setCountryRef(orgCountry);
       } else if (logger.isWarnEnabled()) {

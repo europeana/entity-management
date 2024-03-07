@@ -20,6 +20,7 @@ import org.springframework.stereotype.Repository;
 import com.mongodb.client.result.UpdateResult;
 import dev.morphia.query.FindOptions;
 import dev.morphia.query.Query;
+import dev.morphia.query.Sort;
 import dev.morphia.query.experimental.filters.Filter;
 import dev.morphia.query.experimental.updates.UpdateOperators;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
@@ -71,18 +72,18 @@ public class EntityRecordRepository extends AbstractRepository {
     if (excludeDisabled) {
       filters.add(eq(DISABLED, null));
     }
-
-    FindOptions findOptions = new FindOptions();
+    
+    List<String> fields=new ArrayList<>();
     // if fetchFullRecord is set to false, we only care about the entityId and disabled flag for
     // this query
     if (!fetchFullRecord) {
-      findOptions.projection().include(ENTITY_ID).projection().include(DISABLED);
+      fields=new ArrayList<>();
+      fields.add(ENTITY_ID);
+      fields.add(DISABLED);
     }
-    return getDataStore()
-        .find(EntityRecord.class)
-        .filter(filters.toArray(Filter[]::new))
-        .iterator(findOptions)
-        .toList();
+    
+    return findEntityRecords(filters.toArray(Filter[]::new), false, -1, -1, null, fields.toArray(String[]::new));
+    
   }
 
   /**
@@ -91,24 +92,47 @@ public class EntityRecordRepository extends AbstractRepository {
    * @param fields
    * @return
    */
-  public EntityRecord findEntityRecord(String entityId, String... fields) {
-    Query<EntityRecord> query = getDataStore()
-        .find(EntityRecord.class);
-      
+  public EntityRecord findByEntityId(String entityId, String[] fields) {
     List<Filter> filters = new ArrayList<>();
     filters.add(eq(ENTITY_ID, entityId));
-    query = query.filter(filters.toArray(Filter[]::new));
 
-    FindOptions findOptions = null;
+    List<EntityRecord> recordList=findEntityRecords(filters.toArray(Filter[]::new), false, -1, -1, null, fields);
+    if(recordList.isEmpty()) {
+      return null;
+    }
+    else {
+      return recordList.get(0);
+    }
+  }
+  
+  protected List<EntityRecord> findEntityRecords(Filter[] filters, boolean disableValidation, int start, int count, Sort[] sorts, String[] fields) {
+    Query<EntityRecord> query = getDataStore().find(EntityRecord.class);
+    
+    if(disableValidation) {
+      query.disableValidation();
+    }
+    
+    if(filters!=null && filters.length>0) {
+      query.filter(filters);
+    }
+
+    FindOptions findOptions = new FindOptions();
+    if(start>=0) {
+      findOptions.skip(start);
+    }
+    if(count>0) {
+      findOptions.limit(count);
+    }
+    if(sorts!=null && sorts.length>0) {
+      findOptions.sort(sorts);
+    }
     //array must not be empty, invocation of this method with only one parameter uses and empty array
     if(fields != null && fields.length > 0) {
-      findOptions = new FindOptions();
       findOptions.projection().include(fields);
-      
-      return query.first(findOptions);
-    } else {
-      return query.first();
     }
+
+    return query.iterator(findOptions).toList();
+    
   }
     
   public List<EntityIdDisabledStatus> getEntityIds(
@@ -164,22 +188,17 @@ public class EntityRecordRepository extends AbstractRepository {
   public List<EntityRecord> findEntitiesByCoreference(
       List<String> uris, String entityId, boolean excludeDisabled) {
 
-    Query<EntityRecord> query =
-        getDataStore()
-            .find(EntityRecord.class)
-            .disableValidation()
-            .filter(or(in(ENTITY_SAME_AS, uris), in(ENTITY_EXACT_MATCH, uris)));
-
+    List<Filter> filters = new ArrayList<>();
+    filters.add(or(in(ENTITY_SAME_AS, uris), in(ENTITY_EXACT_MATCH, uris)));
     if (StringUtils.isNotBlank(entityId)) {
-      query.filter(ne(ENTITY_ID, entityId));
+      filters.add(ne(ENTITY_ID, entityId));
     }
-    
     if(excludeDisabled) {
-      query.filter(eq(DISABLED, null));
+      filters.add(eq(DISABLED, null));
     }
 
     //query the database
-    return query.iterator().toList();
+    return findEntityRecords(filters.toArray(Filter[]::new), true, -1, -1, null, null);
   }
   
   public List<EntityRecord> findByEntityIdsOrCoreference(List<String> uris) {
@@ -189,11 +208,7 @@ public class EntityRecordRepository extends AbstractRepository {
     // Only fetch active records. Disabled records have a date value
     filters.add(eq(DISABLED, null));    
 
-    return getDataStore()
-        .find(EntityRecord.class)
-        .filter(filters.toArray(Filter[]::new))
-        .iterator()
-        .toList();
+    return findEntityRecords(filters.toArray(Filter[]::new), true, -1, -1, null, null);
   }
 
   
@@ -210,18 +225,15 @@ public class EntityRecordRepository extends AbstractRepository {
    * @return List with results
    */
   public List<EntityRecord> findWithFilters(int start, int count, Filter[] filters) {
-    return getDataStore()
-        .find(EntityRecord.class)
-        .filter(filters)
-        .iterator(new FindOptions().skip(start).sort(ascending(ENTITY_MODIFIED)).limit(count))
-        .toList();
+    List<Sort> sorts=new ArrayList<>();
+    sorts.add(ascending(ENTITY_MODIFIED));
+    return findEntityRecords(filters, false, start, count, sorts.toArray(Sort[]::new), null);
   }
 
   public List<EntityRecord> findAll(int start, int count) {
-    return getDataStore()
-        .find(EntityRecord.class)
-        .iterator(new FindOptions().skip(start).sort(ascending(ENTITY_MODIFIED)).limit(count))
-        .toList();
+    List<Sort> sorts=new ArrayList<>();
+    sorts.add(ascending(ENTITY_MODIFIED));
+    return findEntityRecords(null, false, start, count, sorts.toArray(Sort[]::new), null);
   }
 
   public long deleteBulk(List<String> entityIds) {

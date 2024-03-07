@@ -639,9 +639,6 @@ public class EMController extends BaseRest {
       HttpServletRequest request) throws EuropeanaApiException {
     List<EntityRecord> entityRecords =
         entityRecordService.retrieveMultipleByEntityIdsOrCoreference(entityIds);
-    if (entityRecords.isEmpty()) {
-      throw new EntityNotFoundException(entityIds.toString());
-    }
 
     // create response headers
     String contentType = HttpHeaders.CONTENT_TYPE_JSONLD_UTF8;
