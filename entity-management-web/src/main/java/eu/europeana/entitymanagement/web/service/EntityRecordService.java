@@ -8,8 +8,10 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -99,13 +101,14 @@ public class EntityRecordService extends BaseEntityRecordService {
     List<EntityRecord> records=entityRecordRepository.findByEntityIdsOrCoreference(entityIds);
     //sorting the list in order of the input ids, and exclude duplicates
     List<EntityRecord> recordsSorted=new ArrayList<>();
+    //for improved performance use a hashset to verify if the record was added to the sorted list 
+    Set<String> foundIds = new HashSet<>(entityIds.size());
     for (String id : entityIds) {
       Optional<EntityRecord> recordIdMatched= records.stream().filter(er -> id.equals(er.getEntityId()) || er.getEntity().getSameReferenceLinks().contains(id)).findFirst();
-      if(recordIdMatched.isPresent()) {
-        boolean isDuplicate=recordsSorted.stream().map(er -> er.getEntityId()).toList().contains(recordIdMatched.get().getEntityId());
-        if(! isDuplicate) {
+      //if the record was found and was not allready added to the sorted list
+      if(recordIdMatched.isPresent() && !foundIds.contains(recordIdMatched.get().getEntityId())) {
           recordsSorted.add(recordIdMatched.get());
-        }
+          foundIds.add(recordIdMatched.get().getEntityId());
       }
     }
     return recordsSorted;
