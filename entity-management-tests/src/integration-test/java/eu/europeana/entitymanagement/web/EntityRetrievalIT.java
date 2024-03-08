@@ -322,7 +322,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
   }
 
   @Test
-  public void retrieveAgentNotFoundShouldBeRedirected() throws Exception {
+  public void retrieveAgentNotFoundShouldBeRedirectedEvenDeprecated() throws Exception {
     String europeanaMetadataBirch = loadFile(IntegrationTestUtils.AGENT_REGISTER_BIRCH_REDIRECTION_JSON);
     String metisResponseBirch = loadFile(IntegrationTestUtils.AGENT_BIRCH_XML);
     String entityIdBirch =
@@ -336,6 +336,16 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
             .getEntityId();
     
     deleteEntity(entityIdRaphael);
+
+    //deprecate the entity to which we redirect, so the redirection to the deprecated entity should also work
+    String requestPathBirch = getEntityRequestPath(entityIdBirch);
+    // sync deprecation
+    mockMvc
+        .perform(
+            delete(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPathBirch)
+                .param(QUERY_PARAM_PROFILE, PARAM_PROFILE_SYNC)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent());
 
     String requestPathRaphael = getEntityRequestPath(entityIdRaphael);
     // retrieve
@@ -604,10 +614,10 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
         .andExpect(xpath(entityBaseXpath + "/@rdf:about", xmlNamespaces).string(entityId))
         .andExpect(
             xpath(entityBaseXpath + "/skos:prefLabel", xmlNamespaces).nodeCount(greaterThan(0)))
-        .andExpect(xpath(entityBaseXpath + "/edm:country/@rdf:resource", xmlNamespaces).exists())
-        .andExpect(xpath(entityBaseXpath + "/edm:country/skos:prefLabel", xmlNamespaces).doesNotExist())
-        .andExpect(xpath(entityBaseXpath + "/edm:europeanaRole/@rdf:resource", xmlNamespaces).exists())
-        .andExpect(xpath(entityBaseXpath + "/edm:europeanaRole/skos:prefLabel", xmlNamespaces).doesNotExist());        
+        .andExpect(xpath(entityBaseXpath + "/edm:country/edm:Place/@rdf:about", xmlNamespaces).exists())
+        .andExpect(xpath(entityBaseXpath + "/edm:country/edm:Place/skos:prefLabel", xmlNamespaces).doesNotExist())
+        .andExpect(xpath(entityBaseXpath + "/edm:europeanaRole/skos:Concept/@rdf:about", xmlNamespaces).exists())
+        .andExpect(xpath(entityBaseXpath + "/edm:europeanaRole/skos:Concept/skos:prefLabel", xmlNamespaces).doesNotExist());        
   }
 
   @Test

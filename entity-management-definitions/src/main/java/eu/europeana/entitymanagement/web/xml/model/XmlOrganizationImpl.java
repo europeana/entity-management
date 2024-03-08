@@ -76,10 +76,10 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
   private XmlWebResourceWrapper logo;
 
   @XmlElement(namespace = NAMESPACE_EDM, name = XML_EUROPEANA_ROLE)
-  private List<XmlEdmEuropeanaRole> europeanaRole = new ArrayList<>();
+  private List<XmlEdmEuropeanaRoleWrapper> europeanaRole = new ArrayList<>();
 
   @XmlElement(namespace = NAMESPACE_EDM, name = XML_COUNTRY)
-  private XmlEdmCountry country;
+  private XmlEdmCountryWrapper country;
 
   @XmlElement(namespace = NAMESPACE_FOAF, name = XML_HOMEPAGE)
   private LabelledResource homepage;
@@ -110,16 +110,16 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     //set the europeanaRole
     List<Vocabulary> orgRole=organization.getEuropeanaRole();
     if(orgRole!=null && !orgRole.isEmpty()) {
-      List<XmlEdmEuropeanaRole> orgXmlRole= new ArrayList<>(orgRole.size());
+      List<XmlEdmEuropeanaRoleWrapper> orgXmlRole= new ArrayList<>(orgRole.size());
       for(Vocabulary vocab : orgRole) {
-        XmlEdmEuropeanaRole xmlRole = new XmlEdmEuropeanaRole(vocab);
+        XmlEdmEuropeanaRoleWrapper xmlRole = new XmlEdmEuropeanaRoleWrapper(vocab);
         orgXmlRole.add(xmlRole);
       }
       this.europeanaRole=orgXmlRole;
     }
     
     if(organization.getCountry() != null) {
-      this.country=new XmlEdmCountry(organization.getCountry());
+      this.country=new XmlEdmCountryWrapper(organization.getCountry());
     }
     
     if (organization.getHomepage() != null) {
@@ -150,13 +150,13 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     entity.setLogo(XmlWebResourceWrapper.toWebResource(getLogo()));
     //set europeanaRole id (external dereferencers deliver only the ids, not transitive data)
     if(getEuropeanaRole()!=null && !getEuropeanaRole().isEmpty()) {
-      List<String> roleIds = getEuropeanaRole().stream().map(e -> e.getResource()).toList();
+      List<String> roleIds = getEuropeanaRole().stream().map(e -> e.getConcept().getAbout()).toList();
       entity.setEuropeanaRoleIds(roleIds);
     }
     
     //set country id (external dereferencers deliver only the ids, not transitive data)
     if(getCountry() != null) {
-      entity.setCountryId(getCountry().getResource());
+      entity.setCountryId(getCountry().getPlace().getAbout());
     }
     
     if (getHomepage() != null) {
@@ -190,11 +190,11 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     return logo;
   }
 
-  public List<XmlEdmEuropeanaRole> getEuropeanaRole() {
+  public List<XmlEdmEuropeanaRoleWrapper> getEuropeanaRole() {
     return europeanaRole;
   }
 
-  public XmlEdmCountry getCountry() {
+  public XmlEdmCountryWrapper getCountry() {
     return country;
   }
 
