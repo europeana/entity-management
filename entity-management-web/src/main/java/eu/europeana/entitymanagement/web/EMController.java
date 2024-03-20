@@ -615,7 +615,7 @@ public class EMController extends BaseRest {
       entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, profile, true);
     } catch (EntityNotFoundException ex) {
       //if not found, verify co-references
-      String redirectUri = entityRecordService.getRedirectUriWhenNotFound(type, identifier, ex);
+      String redirectUri = entityRecordService.getRedirectUriWhenNotFound(type, identifier, ex, request);
       // return 301 redirect
       return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).location(URI.create(redirectUri))
           .build();
@@ -623,7 +623,7 @@ public class EMController extends BaseRest {
 
     if (entityRecord.isDisabled()) {
       //if disabled verify co-references
-      String redirectUri = entityRecordService.getRedirectUriWhenDeprecated(entityRecord);
+      String redirectUri = entityRecordService.getRedirectUriWhenDeprecated(entityRecord, identifier, request);
       // return 301 redirect
       return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).location(URI.create(redirectUri))
           .build();
@@ -720,7 +720,7 @@ public class EMController extends BaseRest {
       return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
           .location(UriComponentsBuilder.newInstance().path("/entity/{id}")
               .buildAndExpand(EntityRecordUtils
-                  .extractIdentifierFromEntityId(existingEntities.get(0).getEntityId()))
+                  .extractEntityPathFromEntityId(existingEntities.get(0).getEntityId()))
               .toUri())
           .build();
     }

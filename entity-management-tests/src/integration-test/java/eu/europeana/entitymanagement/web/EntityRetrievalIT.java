@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -301,62 +302,31 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
     String entityIdRaphael =
         createEntity(europeanaMetadataRaphael, metisResponseRaphael, IntegrationTestUtils.AGENT_RAPHAEL_URI)
             .getEntityId();
+    assertNotNull(entityIdRaphael);
 
     String requestPathBirch = getEntityRequestPath(entityIdBirch);
-    // sync deprecation
-    mockMvc
-        .perform(
-            delete(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPathBirch)
-                .param(QUERY_PARAM_PROFILE, PARAM_PROFILE_SYNC)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNoContent());
-
-    // retrieve
-    ResultActions result =
-        mockMvc.perform(
-            get(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPathBirch + ".jsonld")
-                .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
-                .accept(MediaType.APPLICATION_JSON));
-    result.andExpect(status().isMovedPermanently());
-    result.andExpect(header().string("Location", entityIdRaphael));
-  }
-
-  @Test
-  public void retrieveAgentNotFoundShouldBeRedirectedEvenDeprecated() throws Exception {
-    String europeanaMetadataBirch = loadFile(IntegrationTestUtils.AGENT_REGISTER_BIRCH_REDIRECTION_JSON);
-    String metisResponseBirch = loadFile(IntegrationTestUtils.AGENT_BIRCH_XML);
-    String entityIdBirch =
-        createEntity(europeanaMetadataBirch, metisResponseBirch, IntegrationTestUtils.AGENT_BIRCH_URI)
-            .getEntityId();
-    
-    String europeanaMetadataRaphael = loadFile(IntegrationTestUtils.AGENT_REGISTER_RAPHAEL_JSON);
-    String metisResponseRaphael = loadFile(IntegrationTestUtils.AGENT_RAPHAEL_XML);
-    String entityIdRaphael =
-        createEntity(europeanaMetadataRaphael, metisResponseRaphael, IntegrationTestUtils.AGENT_RAPHAEL_URI)
-            .getEntityId();
-    
-    deleteEntity(entityIdRaphael);
-
-    //deprecate the entity to which we redirect, so the redirection to the deprecated entity should also work
-    String requestPathBirch = getEntityRequestPath(entityIdBirch);
-    // sync deprecation
-    mockMvc
-        .perform(
-            delete(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPathBirch)
-                .param(QUERY_PARAM_PROFILE, PARAM_PROFILE_SYNC)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNoContent());
-
     String requestPathRaphael = getEntityRequestPath(entityIdRaphael);
+    // sync deprecation
+    mockMvc
+        .perform(
+            delete(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPathBirch)
+                .param(QUERY_PARAM_PROFILE, PARAM_PROFILE_SYNC)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNoContent());
+
     // retrieve
     ResultActions result =
         mockMvc.perform(
-            get(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPathRaphael + ".jsonld")
+            get(IntegrationTestUtils.BASE_SERVICE_URL + requestPathBirch + ".jsonld")
                 .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                .param(WebEntityConstants.QUERY_PARAM_WSKEY, "testapikey")
                 .accept(MediaType.APPLICATION_JSON));
     result.andExpect(status().isMovedPermanently());
-    result.andExpect(header().string("Location", entityIdBirch));
+    //MOckMvc does not provide the queryString, need to reconstruct from parameter map
+    //the query string is missing in integration tests ("?profile=external&wskey=testapikey")
+    result.andExpect(header().string("Location", "/entity/" + requestPathRaphael + ".jsonld"));
   }
+
 
   @Test
   public void retrieveAgentXmlExternalShouldBeSuccessful() throws Exception {

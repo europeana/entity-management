@@ -100,7 +100,7 @@ public class ZohoAccessClient {
    * @throws ZohoException wrapping the original SDK exception
    */
   public Optional<Record> getZohoRecordOrganizationById(String zohoUrl) throws ZohoException {
-    String zohoId = EntityRecordUtils.getIdFromUrl(zohoUrl);
+    String zohoId = EntityRecordUtils.getIdentifierFromUrl(zohoUrl);
     try {
       RecordOperations recordOperations = new RecordOperations();
       ParameterMap paramInstance = new ParameterMap();
@@ -126,7 +126,7 @@ public class ZohoAccessClient {
    */
   public void updateZohoRecordOrganizationStringField(String zohoUrl, String fieldName,
       String fieldValue) throws ZohoException {
-    String zohoId = EntityRecordUtils.getIdFromUrl(zohoUrl);
+    String zohoId = EntityRecordUtils.getIdentifierFromUrl(zohoUrl);
     try {
       RecordOperations recordOperations = new RecordOperations();
       BodyWrapper request = buildUpdateRequest(fieldName, fieldValue);

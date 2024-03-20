@@ -343,7 +343,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         createEntity(europeanaMetadata, metisResponse, IntegrationTestUtils.CONCEPT_BATHTUB_URI)
             .getEntityId();
     String redirectUrl =
-        String.format("/entity/%s", EntityRecordUtils.extractIdentifierFromEntityId(entityId));
+        String.format("/entity/%s", EntityRecordUtils.extractEntityPathFromEntityId(entityId));
 
     mockMvc
         .perform(
