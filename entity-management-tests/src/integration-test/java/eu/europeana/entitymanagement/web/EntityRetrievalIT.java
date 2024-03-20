@@ -324,7 +324,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
     result.andExpect(status().isMovedPermanently());
     //MOckMvc does not provide the queryString, need to reconstruct from parameter map
     //the query string is missing in integration tests ("?profile=external&wskey=testapikey")
-    result.andExpect(header().string("Location", "/" + requestPathRaphael + ".jsonld"));
+    result.andExpect(header().string("Location", "/entity/" + requestPathRaphael + ".jsonld"));
   }
 
 
