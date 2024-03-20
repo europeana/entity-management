@@ -148,7 +148,7 @@ public class WikidataDereferenceService implements Dereferencer, InitializingBea
 
     // wikidataBaseUrl is only set in integration tests (where a mock Wikidata service is used)
     if (StringUtils.hasLength(wikidataBaseUrl)) {
-      urlToRead = wikidataBaseUrl + "/entity/" + EntityRecordUtils.getIdFromUrl(urlToRead);
+      urlToRead = wikidataBaseUrl + "/entity/" + EntityRecordUtils.getIdentifierFromUrl(urlToRead);
     }
 
     try (CloseableHttpClient httpClient = HttpClients.createDefault()) {

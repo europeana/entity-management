@@ -37,11 +37,11 @@ public class EntityRecordUtils {
   }
 
   /**
-   * Extract identifier part from the EntityId Url
+   * Extract entity part from the EntityId Url
    * @param entityId as URL
-   * @return identifier
+   * @return the entity path including {type}/{identifier}
    */
-  public static String extractIdentifierFromEntityId(String entityId) {
+  public static String extractEntityPathFromEntityId(String entityId) {
     return entityId.replace(WebEntityFields.BASE_DATA_EUROPEANA_URI, "");
   }
 
@@ -66,7 +66,7 @@ public class EntityRecordUtils {
    * @param url
    * @return
    */
-  public static String getIdFromUrl(String url) {
+  public static String getIdentifierFromUrl(String url) {
     if (!url.contains("/")) {
       return url;
     } else {
@@ -121,5 +121,25 @@ public class EntityRecordUtils {
   public static boolean isEuropeanaEntity(String id) {
     
     return id!=null && id.startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI);
+  }
+  
+  /**
+   * Build redirection relative Location by replacing the identifier of requested entity with the identifier extracted from redirectionEntityId, the query string is appended if non null   
+   * @param identifier the identifier of the URL from the original request
+   * @param redirectionEntityId the full entityId of the entity to redirect to
+   * @param requestUri the URI of the original request
+   * @param queryString the queryString from the original request
+   * @return the constructed Location for redirection
+   */
+  public static String buildRedirectionLocation(String identifier, String redirectionEntityId, String requestUri, String queryString) {
+    //get entity identifier
+    String redirectionIdentifier = getIdentifierFromUrl(redirectionEntityId);
+    //replace identifier in original request URI
+    String redirectLocation = requestUri.replaceFirst(identifier, redirectionIdentifier);
+    //append queryString if exists
+    if(queryString != null) {
+      redirectLocation += ('?' + queryString);
+    }
+    return redirectLocation;
   }
 }

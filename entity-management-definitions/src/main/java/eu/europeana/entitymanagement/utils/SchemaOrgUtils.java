@@ -112,7 +112,7 @@ public final class SchemaOrgUtils {
           String.format(
               SchemaOrgConstants.ENTITY_PAGE_URL_PATTERN,
               entityPageType,
-              EntityRecordUtils.getIdFromUrl(entity.getEntityId()));
+              EntityRecordUtils.getIdentifierFromUrl(entity.getEntityId()));
       conceptObject.setEntityPageUrl(entityPageUrl);
     }
   }
