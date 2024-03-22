@@ -96,9 +96,12 @@ public abstract class Entity implements ValidationObject {
     if (copy.getIsRelatedTo() != null) this.isRelatedTo = new ArrayList<>(copy.getIsRelatedTo());
     if (copy.getHasPart() != null) this.hasPart = new ArrayList<>(copy.getHasPart());
     if (copy.getIsPartOfArray() != null) this.isPartOf = new ArrayList<>(copy.getIsPartOfArray());
-    if (copy.getIsAggregatedBy() != null)
+    if (copy.getIsAggregatedBy() != null) {
       this.isAggregatedBy = new Aggregation(copy.getIsAggregatedBy());
-    if (copy.getIsShownBy() != null) this.isShownBy = new WebResource(copy.getIsShownBy());
+    }
+    if (copy.getIsShownBy() != null) {
+      this.isShownBy = new WebResource(copy.getIsShownBy());
+    }
 
     this.payload = copy.getPayload();
   }

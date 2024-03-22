@@ -63,7 +63,7 @@ public class BaseEntityRecordService {
   protected final Logger logger = LogManager.getLogger(getClass());
 
   // Fields to be ignored during consolidation ("type" is final)
-  static final Set<String> ignoredMergeFields = Set.of(WebEntityFields.TYPE);
+  static final Set<String> ignoredMergeFields = Set.of(WebEntityFields.TYPE, WebEntityFields.IS_AGGREGATED_BY);
 
 
   protected BaseEntityRecordService(EntityRecordRepository entityRecordRepository,

@@ -15,8 +15,10 @@ import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
+import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.exception.ingestion.EntityValidationException;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
@@ -55,10 +57,11 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
     this.depictionGeneratorService = depictionGeneratorService;
   }
 
-  public BatchEntityRecord doProcessing(BatchEntityRecord entityRecord)
+  public BatchEntityRecord doProcessing(BatchEntityRecord batchEntityRecord)
       throws EuropeanaApiException, EntityModelCreationException {
 
-    List<EntityProxy> externalProxies = entityRecord.getEntityRecord().getExternalProxies();
+    EntityRecord entityRecord = batchEntityRecord.getEntityRecord();
+    List<EntityProxy> externalProxies = entityRecord.getExternalProxies();
 
     EntityProxy primaryExternalProxy = externalProxies.get(0);
     Entity externalProxyEntity = primaryExternalProxy.getEntity();
@@ -88,7 +91,7 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
       }
     }
 
-    Entity europeanaProxyEntity = entityRecord.getEntityRecord().getEuropeanaProxy().getEntity();
+    Entity europeanaProxyEntity = entityRecord.getEuropeanaProxy().getEntity();
 
     Entity consolidatedEntity = null;
     if (isStaticDataSource) {
@@ -117,10 +120,19 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
       }
     }
     validateCompleteValidationConstraints(consolidatedEntity);
+    
+    //Aggregation is not a merged field, need to copy it from the old consolidated entity 
+    copyIsAggregatedBy(entityRecord, consolidatedEntity);
+    
+    
     entityRecordService.updateConsolidatedVersion(
-        entityRecord.getEntityRecord(), consolidatedEntity);
+        entityRecord, consolidatedEntity);
 
-    return entityRecord;
+    return batchEntityRecord;
+  }
+
+  void copyIsAggregatedBy(EntityRecord entityRecord, Entity consolidatedEntity) {
+    consolidatedEntity.setIsAggregatedBy(new Aggregation(entityRecord.getEntity().getIsAggregatedBy()));
   }
 
   /**
