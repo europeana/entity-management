@@ -814,7 +814,6 @@ public class EntityRecordService extends BaseEntityRecordService {
   }
 
   public void updateConsolidatedVersion(EntityRecord entityRecord, Entity consolidatedEntity) {
-
     entityRecord.setEntity(consolidatedEntity);
     updateEntityAggregation(entityRecord, consolidatedEntity.getEntityId(), new Date());
   }
