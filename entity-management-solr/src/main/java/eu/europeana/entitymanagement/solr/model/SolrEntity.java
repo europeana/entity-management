@@ -296,4 +296,12 @@ public abstract class SolrEntity<T extends Entity> {
                   labelEnrich));
     }
   }
+
+  public Date getCreated() {
+    return created;
+  }
+
+  public void setCreated(Date created) {
+    this.created = created;
+  }
 }
