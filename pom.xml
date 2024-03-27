@@ -38,11 +38,10 @@
 		</repository>
 	</repositories>
 
-
-	<groupId>eu.europeana.api</groupId>
-	<artifactId>entity-management</artifactId>
-	<version>1.6.3-SNAPSHOT</version>
-	<packaging>pom</packaging>
+    <groupId>eu.europeana.api</groupId>
+    <artifactId>entity-management</artifactId>
+    <version>1.6.4-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
 	<name>Entity Management</name>
 	<description>Service for managing entity data from external sources and

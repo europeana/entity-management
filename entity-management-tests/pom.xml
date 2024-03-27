@@ -5,7 +5,7 @@
 	<parent>
 		<artifactId>entity-management</artifactId>
 		<groupId>eu.europeana.api</groupId>
-		<version>1.6.3-SNAPSHOT</version>
+		<version>1.6.4-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
@@ -13,43 +13,39 @@
 	<properties>
 		<sonar.coverage.jacoco.xmlReportPaths>
 			${project.basedir}/../${aggregate.report.xml}
-    </sonar.coverage.jacoco.xmlReportPaths>
+		</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>eu.europeana.api</groupId>
 			<artifactId>entity-management-web</artifactId>
-			<version>1.6.3-SNAPSHOT</version>
+			<version>1.6.4-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>eu.europeana.api</groupId>
 			<artifactId>entity-management-definitions</artifactId>
-			<version>1.6.3-SNAPSHOT</version>
+			<version>1.6.4-SNAPSHOT</version>
 		</dependency>
-
 		<dependency>
 			<groupId>eu.europeana.api</groupId>
 			<artifactId>entity-management-common</artifactId>
-			<version>1.6.3-SNAPSHOT</version>
+			<version>1.6.4-SNAPSHOT</version>
 		</dependency>
-
 		<dependency>
 			<groupId>eu.europeana.api</groupId>
 			<artifactId>entity-management-mongo</artifactId>
-			<version>1.6.3-SNAPSHOT</version>
+			<version>1.6.4-SNAPSHOT</version>
 		</dependency>
-
 		<dependency>
 			<groupId>eu.europeana.api</groupId>
 			<artifactId>entity-management-solr</artifactId>
-			<version>1.6.3-SNAPSHOT</version>
+			<version>1.6.4-SNAPSHOT</version>
 		</dependency>
-
 		<dependency>
 			<groupId>eu.europeana.api</groupId>
 			<artifactId>entity-management-zoho</artifactId>
-			<version>1.6.3-SNAPSHOT</version>
+			<version>1.6.4-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
@@ -164,7 +160,7 @@
 									</dataFileIncludes>
 									<outputDirectory>
 										${project.reporting.outputDirectory}/jacoco-aggregate
-									</outputDirectory>	
+									</outputDirectory>
 								</configuration>
 							</execution>
 						</executions>
@@ -182,15 +178,16 @@
 								</goals>
 							</execution>
 						</executions>
-					    
-					    		<!-- useModulePath = false Fixes Integration test not finding beans. May
+
+						<!-- useModulePath = false Fixes Integration test not
+						finding beans. May
 							be
 					removed with 3.0.0-M6 is available
                     See: https://stackoverflow.com/a/65806777/14530159 -->
-                     	<configuration>
+						<configuration>
 							<useModulePath>false</useModulePath>
 						</configuration>
-					
+
 					</plugin>
 				</plugins>
 			</build>
