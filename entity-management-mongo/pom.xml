@@ -12,7 +12,7 @@
   <name>entity-management-mongo</name>
 
 	<properties>
-		<sonar.coverage.jacoco.xmlReportPaths>${basedir}/../${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
+		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 
   <dependencies>
