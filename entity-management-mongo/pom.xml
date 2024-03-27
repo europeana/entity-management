@@ -4,7 +4,7 @@
   <parent>
     <artifactId>entity-management</artifactId>
     <groupId>eu.europeana.api</groupId>
-		<version>1.6.3-SNAPSHOT</version>
+		<version>1.6.3</version>
   </parent>
 
   <artifactId>entity-management-mongo</artifactId>
@@ -20,13 +20,13 @@
 	<dependency>
 		<groupId>eu.europeana.api</groupId>
 		<artifactId>entity-management-definitions</artifactId>
-		<version>1.6.3-SNAPSHOT</version>
+		<version>1.6.3</version>
 	</dependency>
 	
 	<dependency>
 		<groupId>eu.europeana.api</groupId>
 		<artifactId>entity-management-common</artifactId>
-		<version>1.6.3-SNAPSHOT</version>
+		<version>1.6.3</version>
 	</dependency> 
 	
 	<dependency>
