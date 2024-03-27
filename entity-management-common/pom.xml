@@ -13,7 +13,7 @@
     <description>Common functionality to be reused by individual Entity Management Modules</description>
 
     <properties>
-        <sonar.coverage.jacoco.xmlReportPaths>${basedir}/../${aggregate.report.xml}
+        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../${aggregate.report.xml}
         </sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
