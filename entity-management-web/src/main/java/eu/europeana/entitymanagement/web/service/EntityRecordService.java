@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang.StringUtils;
@@ -102,9 +103,7 @@ public class EntityRecordService extends BaseEntityRecordService {
         setAggregatesFromForOrganizations(record.getEntity());
       }
     }
-    
-    return resp;
-    
+    return resp;  
   }
   
   public List<EntityRecord> retrieveMultipleByEntityIdsOrCoreference(List<String> entityIds) {

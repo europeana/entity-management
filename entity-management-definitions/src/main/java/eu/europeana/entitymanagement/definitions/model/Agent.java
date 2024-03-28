@@ -119,24 +119,47 @@ public class Agent extends Entity {
 
   public Agent(Agent copy) {
     super(copy);
-    if (copy.getDate() != null) this.date = new ArrayList<>(copy.getDate());
-    if (copy.getBegin() != null) this.begin = new ArrayList<>(copy.getBegin());
-    if (copy.getEnd() != null) this.end = new ArrayList<>(copy.getEnd());
-    if (copy.getDateOfBirth() != null) this.dateOfBirth = new ArrayList<>(copy.getDateOfBirth());
-    if (copy.getDateOfDeath() != null) this.dateOfDeath = new ArrayList<>(copy.getDateOfDeath());
-    if (copy.getWasPresentAt() != null) this.wasPresentAt = new ArrayList<>(copy.getWasPresentAt());
-    if (copy.getHasMet() != null) this.hasMet = new ArrayList<>(copy.getHasMet());
-    if (copy.getName() != null) this.name = new HashMap<>(copy.getName());
-    if (copy.getBiographicalInformation() != null)
+    if (copy.getDate() != null) {
+      this.date = new ArrayList<>(copy.getDate());
+    }
+    if (copy.getBegin() != null) {
+      this.begin = new ArrayList<>(copy.getBegin());
+    }
+    if (copy.getEnd() != null) {
+      this.end = new ArrayList<>(copy.getEnd());
+    }
+    if (copy.getDateOfBirth() != null) {
+      this.dateOfBirth = new ArrayList<>(copy.getDateOfBirth());
+    }
+    if (copy.getDateOfDeath() != null) {
+      this.dateOfDeath = new ArrayList<>(copy.getDateOfDeath());
+    }
+    if (copy.getWasPresentAt() != null) {
+      this.wasPresentAt = new ArrayList<>(copy.getWasPresentAt());
+    }
+    if (copy.getHasMet() != null) {
+      this.hasMet = new ArrayList<>(copy.getHasMet());
+    }
+    if (copy.getName() != null) {
+      this.name = new HashMap<>(copy.getName());
+    }
+    if (copy.getBiographicalInformation() != null) {
       this.biographicalInformation = new HashMap<>(copy.getBiographicalInformation());
+    }
     if (copy.getProfessionOrOccupation() != null)
       this.professionOrOccupation = new ArrayList<>(copy.getProfessionOrOccupation());
-    if (copy.getPlaceOfBirth() != null) this.placeOfBirth = new ArrayList<>(copy.getPlaceOfBirth());
-    if (copy.getPlaceOfDeath() != null) this.placeOfDeath = new ArrayList<>(copy.getPlaceOfDeath());
+    if (copy.getPlaceOfBirth() != null) {
+      this.placeOfBirth = new ArrayList<>(copy.getPlaceOfBirth());
+    }
+    if (copy.getPlaceOfDeath() != null) {
+      this.placeOfDeath = new ArrayList<>(copy.getPlaceOfDeath());
+    }
     this.dateOfEstablishment = copy.getDateOfEstablishment();
     this.dateOfTermination = copy.getDateOfTermination();
     this.gender = copy.getGender();
-    if (copy.getSameReferenceLinks() != null) this.sameAs = (new ArrayList<>(copy.getSameReferenceLinks()));
+    if (copy.getSameReferenceLinks() != null) {
+      this.sameAs = (new ArrayList<>(copy.getSameReferenceLinks()));
+    }
   }
 
   public Agent() {

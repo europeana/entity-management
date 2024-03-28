@@ -197,7 +197,7 @@
 		<copyField source="owl_sameAs" dest="coref" />
 		<copyField source="skos_exactMatch" dest="coref" />
 
-		<field name="edm_aggregatedVia" type="string" indexed="false"
+		<field name="edm_aggregatedVia" type="string" indexed="yes"
 			stored="true" multiValued="true" />			
 
 		<field name="foaf_depiction" type="string" indexed="false"

@@ -24,8 +24,6 @@ public enum EntityFieldsTypes {
   hiddenLabel(
       EntityFieldsTypes.FIELD_TYPE_KEYWORD, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
   sameAs(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
-  aggregatesFrom(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
-  aggregatedVia(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
   language(
       EntityFieldsTypes.FIELD_TYPE_TEXT, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
 
@@ -114,6 +112,10 @@ public enum EntityFieldsTypes {
       EntityFieldsTypes.FIELD_TYPE_KEYWORD, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
   mbox(EntityFieldsTypes.FIELD_TYPE_EMAIL, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
   hasAddress(EntityFieldsTypes.FIELD_TYPE_ADDRESS, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
+  //note: SG - aggregatesFrom is not stored, we should probably remove it from here 
+//  aggregatesFrom(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
+  aggregatedVia(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
+  
 
   // Address-specific fields
   streetAddress(EntityFieldsTypes.FIELD_TYPE_TEXT, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),

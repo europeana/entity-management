@@ -21,6 +21,7 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.LANGUAGE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_AGGREGATED_BY;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,7 +59,8 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
   AGGREGATES_FROM,
   AGGREGATED_VIA,
   IDENTIFIER,
-  SAME_AS
+  SAME_AS,
+  IS_AGGREGATED_BY
 })
 public class Organization extends Entity {
 
@@ -84,7 +86,8 @@ public class Organization extends Entity {
   
   private Address hasAddress;
   private List<String> sameAs; 
-  @Transient private List<String> aggregatesFrom;
+  @Transient 
+  private List<String> aggregatesFrom;
   private List<String> aggregatedVia;
   private List<String> language;
 
