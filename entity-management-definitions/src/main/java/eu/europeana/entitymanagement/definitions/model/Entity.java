@@ -14,7 +14,13 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_RELATE
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_SHOWN_BY;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NOTE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
-
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -23,6 +29,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import dev.morphia.annotations.Transient;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidationGroup;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidationInterface;
 import eu.europeana.entitymanagement.normalization.EntityFieldsDataSourceProxyValidationGroup;
@@ -31,13 +38,6 @@ import eu.europeana.entitymanagement.normalization.EntityFieldsEuropeanaProxyVal
 import eu.europeana.entitymanagement.normalization.EntityFieldsEuropeanaProxyValidationInterface;
 import eu.europeana.entitymanagement.vocabulary.ValidationObject;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @dev.morphia.annotations.Embedded
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -57,6 +57,9 @@ import java.util.stream.Collectors;
     groups = {EntityFieldsDataSourceProxyValidationGroup.class})
 public abstract class Entity implements ValidationObject {
 
+  
+  @Transient
+  protected String context = ENTITY_CONTEXT;
   protected String entityId;
   // ID of entityRecord in database
 
@@ -84,6 +87,7 @@ public abstract class Entity implements ValidationObject {
   protected <T extends Entity> Entity(T copy) {
     this.entityId = copy.getEntityId();
     this.depiction = copy.getDepiction();
+    this.context = copy.getContext();
     if (copy.getNote() != null) this.note = new HashMap<>(copy.getNote());
     if (copy.getPrefLabel() != null) this.prefLabel = new HashMap<>(copy.getPrefLabel());
     if (copy.getAltLabel() != null) this.altLabel = new HashMap<>(copy.getAltLabel());
@@ -92,9 +96,12 @@ public abstract class Entity implements ValidationObject {
     if (copy.getIsRelatedTo() != null) this.isRelatedTo = new ArrayList<>(copy.getIsRelatedTo());
     if (copy.getHasPart() != null) this.hasPart = new ArrayList<>(copy.getHasPart());
     if (copy.getIsPartOfArray() != null) this.isPartOf = new ArrayList<>(copy.getIsPartOfArray());
-    if (copy.getIsAggregatedBy() != null)
+    if (copy.getIsAggregatedBy() != null) {
       this.isAggregatedBy = new Aggregation(copy.getIsAggregatedBy());
-    if (copy.getIsShownBy() != null) this.isShownBy = new WebResource(copy.getIsShownBy());
+    }
+    if (copy.getIsShownBy() != null) {
+      this.isShownBy = new WebResource(copy.getIsShownBy());
+    }
 
     this.payload = copy.getPayload();
   }
@@ -231,12 +238,19 @@ public abstract class Entity implements ValidationObject {
     isShownBy = resource;
   }
 
-  public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
+  public Object getFieldValue(Field field) throws IllegalAccessException {
+    if(!field.canAccess(this)) {
+      field.setAccessible(true);
+    }
     return field.get(this);
   }
 
   public void setFieldValue(Field field, Object value)
-      throws IllegalArgumentException, IllegalAccessException {
+      throws IllegalAccessException {
+    if(TYPE.equals(field.getName())) {
+      //type is immutable must not be overwritten
+      return;
+    }
     field.set(this, value);
   }
 
@@ -248,8 +262,13 @@ public abstract class Entity implements ValidationObject {
   /** Not included in XML responses */
   @JsonGetter(CONTEXT)
   public String getContext() {
-    return ENTITY_CONTEXT;
+    return context;
   }
+  
+  public void setContext(String context) {
+    this.context = context;
+  }
+
 
   @JsonSetter(IS_AGGREGATED_BY)
   public void setIsAggregatedBy(Aggregation isAggregatedBy) {
@@ -299,4 +318,5 @@ public abstract class Entity implements ValidationObject {
       getSameReferenceLinks().add(uri);
     }
   }
+
 }

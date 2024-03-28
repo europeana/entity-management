@@ -1,0 +1,54 @@
+## overall max recordcount
+db.getCollection("EntityRecord").find({}, {entityId: 1, "entity.isAggregatedBy.recordCount": 1, "entity.prefLabel.en":1 }).sort({"entity.isAggregatedBy.recordCount": -1}).limit(1)
+(OpenUp!), http://data.europeana.eu/organization/1609, { "prefLabel" : { "en" : "OpenUp!" }, "isAggregatedBy" : { "recordCount" : 12113168 } }
+
+## overall max pagerank
+db.getCollection("EntityRecord").find({}, {entityId: 1, "entity.isAggregatedBy.pageRank": 1,"entity.prefLabel.en":1, "entity.prefLabel.en":1 }).sort({"entity.isAggregatedBy.pageRank": -1}).limit(1)
+(US) http://data.europeana.eu/place/216254,  { "prefLabel" : { "en" : "United States of America" }, "isAggregatedBy" : { "pageRank" : 48421.0 } }
+
+## max for Agent
+# pagerank
+db.getCollection("EntityRecord").find({"entity.type": "Agent"}, {entityId: 1, "entity.type": 1, "entity.isAggregatedBy.pageRank": 1, "entity.prefLabel.en":1 }).sort({"entity.isAggregatedBy.pageRank": -1}).limit(1)
+http://data.europeana.eu/agent/174116, { "type" : "Agent", "prefLabel" : { "en" : "United Nations" }, "isAggregatedBy" : { "pageRank" : 5165.0 } }
+
+#record count
+db.getCollection("EntityRecord").find({"entity.type": "Agent"}, {entityId: 1, "entity.type": 1, "entity.isAggregatedBy.recordCount": 1, "entity.prefLabel.en":1 }).sort({"entity.isAggregatedBy.recordCount": -1}).limit(1)
+http://data.europeana.eu/agent/166033, { "type" : "Agent", "prefLabel" : { "en" : "Etienne Tordoir" }, "isAggregatedBy" : { "recordCount" : 522716 } }
+
+## max for Concept 
+#pagerank
+db.getCollection("EntityRecord").find({"entity.type": "Concept"}, {entityId: 1, "entity.type": 1, "entity.isAggregatedBy.pageRank": 1, "entity.prefLabel.en":1 }).sort({"entity.isAggregatedBy.pageRank": -1}).limit(1)
+http://data.europeana.eu/concept/3286, { "type" : "Concept", "prefLabel" : { "en" : "World War II" }, "isAggregatedBy" : { "pageRank" : 9477.0 } }
+
+#record count
+db.getCollection("EntityRecord").find({"entity.type": "Concept"}, {entityId: 1, "entity.type": 1, "entity.isAggregatedBy.recordCount": 1, "entity.prefLabel.en":1 }).sort({"entity.isAggregatedBy.recordCount": -1}).limit(1)
+http://data.europeana.eu/concept/48, { "type" : "Concept", "prefLabel" : { "en" : "Photograph" }, "isAggregatedBy" : { "recordCount" : 4223487 } }
+
+## max for Organization 
+#pagerank
+db.getCollection("EntityRecord").find({"entity.type": "Organization"}, {entityId: 1, "entity.type": 1, "entity.isAggregatedBy.pageRank": 1, "entity.prefLabel.en":1 }).sort({"entity.isAggregatedBy.pageRank": -1}).limit(1)
+http://data.europeana.eu/organization/4373, { "type" : "Organization", "prefLabel" : { "en" : "National Library of France" }, "isAggregatedBy" : { "pageRank" : 18909.0 } }
+
+#record count
+db.getCollection("EntityRecord").find({"entity.type": "Organization"}, {entityId: 1, "entity.type": 1, "entity.isAggregatedBy.recordCount": 1, "entity.prefLabel.en":1 }).sort({"entity.isAggregatedBy.recordCount": -1}).limit(1)
+http://data.europeana.eu/organization/1609, { "type" : "Organization", "prefLabel" : { "en" : "OpenUp!" }, "isAggregatedBy" : { "recordCount" : 12113168 } }
+
+## max for Place
+#pagerank
+db.getCollection("EntityRecord").find({"entity.type": "Place"}, {entityId: 1, "entity.type": 1, "entity.isAggregatedBy.pageRank": 1, "entity.prefLabel.en":1 }).sort({"entity.isAggregatedBy.pageRank": -1}).limit(1)
+http://data.europeana.eu/place/216254, { "type" : "Place", "prefLabel" : { "en" : "United States of America" }, "isAggregatedBy" : { "pageRank" : 48421.0 } } 
+
+#record count
+db.getCollection("EntityRecord").find({"entity.type": "Place"}, {entityId: 1, "entity.type": 1, "entity.isAggregatedBy.recordCount": 1, "entity.prefLabel.en":1 }).sort({"entity.isAggregatedBy.recordCount": -1}).limit(1)
+http://data.europeana.eu/place/107, { "type" : "Place", "prefLabel" : { "en" : "Norway" }, "isAggregatedBy" : { "recordCount" : 2310877 } }
+
+
+## max for TimeSpan
+#pagerank
+db.getCollection("EntityRecord").find({"entity.type": "TimeSpan"}, {entityId: 1, "entity.type": 1, "entity.isAggregatedBy.pageRank": 1, "entity.prefLabel.en":1 }).sort({"entity.isAggregatedBy.pageRank": -1}).limit(1)
+http://data.europeana.eu/timespan/19, { "type" : "TimeSpan", "prefLabel" : { "en" : "19th century" }, "isAggregatedBy" : { "pageRank" : 5986.0 } }
+
+#record count
+db.getCollection("EntityRecord").find({"entity.type": "TimeSpan"}, {entityId: 1, "entity.type": 1, "entity.isAggregatedBy.recordCount": 1, "entity.prefLabel.en":1 }).sort({"entity.isAggregatedBy.recordCount": -1}).limit(1)
+http://data.europeana.eu/timespan/20, { "type" : "TimeSpan", "prefLabel" : { "en" : "20th century" }, "isAggregatedBy" : { "recordCount" : 3301125 } }
+

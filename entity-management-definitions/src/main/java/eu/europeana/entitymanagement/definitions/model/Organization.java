@@ -13,13 +13,11 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_HOME
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_LOGO;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_MBOX;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_PHONE;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.GEOGRAPHIC_LEVEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_ADDRESS;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HIDDEN_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IDENTIFIER;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.LANGUAGE;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ORGANIZATION_DOMAIN;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
@@ -29,9 +27,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import dev.morphia.annotations.Reference;
 import dev.morphia.annotations.Transient;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
@@ -49,8 +49,6 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
   DESCRIPTION,
   FOAF_LOGO,
   EUROPEANA_ROLE,
-  ORGANIZATION_DOMAIN,
-  GEOGRAPHIC_LEVEL,
   COUNTRY,
   LANGUAGE,
   FOAF_HOMEPAGE,
@@ -71,10 +69,19 @@ public class Organization extends Entity {
   private String homepage;
   private List<String> phone;
   private List<String> mbox;
-  private Map<String, List<String>> europeanaRole;
-  private Map<String, List<String>> organizationDomain;
-  private Map<String, String> geographicLevel;
-  private String country;
+  
+  @Reference(lazy = true)
+  private EntityRecord countryRef;
+  private String countryId;
+  @Transient
+  private Place country;
+  
+  private List<String> europeanaRoleIds;
+  @Reference(lazy = true)
+  private List<Vocabulary> europeanaRoleRefs;
+  @Transient
+  private List<Vocabulary> europeanaRole;
+  
   private Address hasAddress;
   private List<String> sameAs; 
   @Transient private List<String> aggregatesFrom;
@@ -93,13 +100,14 @@ public class Organization extends Entity {
     this.homepage = copy.getHomepage();
     if (copy.getPhone() != null) this.phone = new ArrayList<>(copy.getPhone());
     if (copy.getMbox() != null) this.mbox = new ArrayList<>(copy.getMbox());
-    if (copy.getEuropeanaRole() != null)
-      this.europeanaRole = new HashMap<>(copy.getEuropeanaRole());
-    if (copy.getOrganizationDomain() != null)
-      this.organizationDomain = new HashMap<>(copy.getOrganizationDomain());
-    if (copy.getGeographicLevel() != null)
-      this.geographicLevel = new HashMap<>(copy.getGeographicLevel());
+    //because the europeanaRoleRef is a reference to the object we keep it the same (therefore also for europeanaRole)
+    this.europeanaRoleRefs = copy.getEuropeanaRoleRefs();
+    if(copy.getEuropeanaRoleIds()!=null) this.europeanaRoleIds=new ArrayList<>(copy.getEuropeanaRoleIds());
+    //because the countryRef is a reference to the object we keep it the same (therefore also for country)
+    this.countryRef=copy.getCountryRef();
+    this.countryId = copy.getCountryId();
     this.country = copy.getCountry();
+    
     if (copy.getAddress() != null) this.hasAddress = new Address(copy.getAddress());
     if (copy.sameAs != null) this.sameAs = (new ArrayList<>(copy.sameAs));
     if (copy.getLanguage() != null) this.language = (new ArrayList<>(copy.getLanguage()));
@@ -127,16 +135,6 @@ public class Organization extends Entity {
     this.acronym = acronym;
   }
 
-  @JsonGetter(EUROPEANA_ROLE)
-  public Map<String, List<String>> getEuropeanaRole() {
-    return europeanaRole;
-  }
-
-  @JsonSetter(EUROPEANA_ROLE)
-  public void setEuropeanaRole(Map<String, List<String>> europeanaRole) {
-    this.europeanaRole = europeanaRole;
-  }
-
   @JsonGetter(FOAF_PHONE)
   public List<String> getPhone() {
     return phone;
@@ -157,16 +155,6 @@ public class Organization extends Entity {
     this.mbox = mbox;
   }
 
-  @JsonGetter(COUNTRY)
-  public String getCountry() {
-    return country;
-  }
-
-  @JsonSetter(COUNTRY)
-  public void setCountry(String country) {
-    this.country = country;
-  }
-
   @JsonGetter(HAS_ADDRESS)
   public Address getAddress() {
     return hasAddress;
@@ -175,26 +163,6 @@ public class Organization extends Entity {
   @JsonSetter(HAS_ADDRESS)
   public void setAddress(Address hasAddress) {
     this.hasAddress = hasAddress;
-  }
-
-  @JsonGetter(GEOGRAPHIC_LEVEL)
-  public Map<String, String> getGeographicLevel() {
-    return geographicLevel;
-  }
-
-  @JsonSetter(GEOGRAPHIC_LEVEL)
-  public void setGeographicLevel(Map<String, String> geographicLevel) {
-    this.geographicLevel = geographicLevel;
-  }
-
-  @JsonGetter(ORGANIZATION_DOMAIN)
-  public Map<String, List<String>> getOrganizationDomain() {
-    return organizationDomain;
-  }
-
-  @JsonSetter(ORGANIZATION_DOMAIN)
-  public void setOrganizationDomain(Map<String, List<String>> organizationDomain) {
-    this.organizationDomain = organizationDomain;
   }
 
   @JsonGetter(FOAF_HOMEPAGE)
@@ -222,7 +190,7 @@ public class Organization extends Entity {
   }
 
   @Override
-  public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
+  public Object getFieldValue(Field field) throws IllegalAccessException {
     // method to call the getters for each field individually
     return field.get(this);
   }
@@ -240,7 +208,7 @@ public class Organization extends Entity {
 
   @Override
   public void setFieldValue(Field field, Object value)
-      throws IllegalArgumentException, IllegalAccessException {
+      throws IllegalAccessException {
     // method to call the setter for each field individually
     field.set(this, value);
   }
@@ -273,5 +241,76 @@ public class Organization extends Entity {
   @JsonSetter(AGGREGATED_VIA)
   public void setAggregatedVia(List<String> aggregatedVia) {
     this.aggregatedVia = aggregatedVia;
+  }
+  
+  @JsonIgnore
+  public EntityRecord getCountryRef() {
+    return countryRef;
+  }
+  
+  public void setCountryRef(EntityRecord countryRef) {
+    this.countryRef=countryRef;
+  }
+
+  @JsonGetter(COUNTRY)
+  public Place getCountry() {
+    if(country == null && getCountryId() != null) {
+      //set country if not dereferenced during retrieval from database
+      country = new Place(getCountryId());
+    }else if(country != null) {
+      //reset context to remove it from serialization
+      country.setContext(null);
+    }
+    return country;
+  }
+
+  @JsonSetter(COUNTRY)
+  public void setCountry(Place country) {
+    this.country = country;
+  }
+
+  @JsonIgnore
+  public String getCountryId() {
+    return countryId;
+  }
+
+  public void setCountryId(String countryId) {
+    this.countryId = countryId;
+  }
+
+  @JsonIgnore
+  public List<String> getEuropeanaRoleIds() {
+    return europeanaRoleIds;
+  }
+
+  public void setEuropeanaRoleIds(List<String> europeanaRoleIds) {
+    this.europeanaRoleIds = europeanaRoleIds;
+  }
+
+  @JsonIgnore
+  public List<Vocabulary> getEuropeanaRoleRefs() {
+    return europeanaRoleRefs;
+  }
+
+  public void setEuropeanaRoleRefs(List<Vocabulary> europeanaRoleRefs) {
+    this.europeanaRoleRefs = europeanaRoleRefs;
+  }
+
+  @JsonGetter(EUROPEANA_ROLE)
+  public List<Vocabulary> getEuropeanaRole() {
+    if(europeanaRole==null && europeanaRoleIds!=null && !europeanaRoleIds.isEmpty()) {
+      europeanaRole=new ArrayList<>();
+      for(String roleId : europeanaRoleIds) {
+        Vocabulary vocab = new Vocabulary();
+        vocab.setId(roleId);
+        europeanaRole.add(vocab);
+      }
+    }
+    return europeanaRole;
+  }
+
+  @JsonSetter(EUROPEANA_ROLE)
+  public void setEuropeanaRole(List<Vocabulary> europeanaRole) {
+    this.europeanaRole = europeanaRole;
   }
 }

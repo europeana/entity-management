@@ -1,16 +1,16 @@
 package eu.europeana.entitymanagement.zoho.organization;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.zoho.ZohoAccessClient;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 import eu.europeana.entitymanagement.zoho.utils.ZohoInMemoryTokenStore;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 
-@Configuration(AppConfigConstants.BEAN_ZOHO_ACCESS_CONFIGURATION)
+@Configuration(AppConfigConstants.BEAN_ZOHO_CONFIGURATION)
 @PropertySource(value = "classpath:zoho_import.properties", ignoreResourceNotFound = true)
-public class ZohoAccessConfiguration {
+public class ZohoConfiguration {
 
   @Value("${zoho.email:#{null}}")
   private String zohoEmail;
@@ -29,8 +29,8 @@ public class ZohoAccessConfiguration {
   
   @Value("${zoho.base.url:#{null}}")
   private String zohoBaseUrl;
-
-  private volatile ZohoAccessClient zohoAccessClient;
+  
+  private ZohoAccessClient zohoAccessClient;
 
   public ZohoAccessClient getZohoAccessClient() throws ZohoException {
     if (zohoAccessClient == null) {
@@ -57,4 +57,5 @@ public class ZohoAccessConfiguration {
   public void setZohoBaseUrl(String zohoBaseUrl) {
     this.zohoBaseUrl = zohoBaseUrl;
   }
+  
 }

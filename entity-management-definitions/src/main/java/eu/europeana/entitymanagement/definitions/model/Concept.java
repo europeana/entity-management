@@ -180,14 +180,14 @@ public class Concept extends Entity {
   }
 
   @Override
-  public Object getFieldValue(Field field) throws IllegalArgumentException, IllegalAccessException {
+  public Object getFieldValue(Field field) throws IllegalAccessException {
     // method to call the getters for each field individually
     return field.get(this);
   }
 
   @Override
   public void setFieldValue(Field field, Object value)
-      throws IllegalArgumentException, IllegalAccessException {
+      throws IllegalAccessException {
     // method to call the setter for each field individually
     field.set(this, value);
   }

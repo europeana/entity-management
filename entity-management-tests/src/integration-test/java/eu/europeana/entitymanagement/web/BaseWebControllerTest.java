@@ -23,13 +23,14 @@ import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.common.config.DataSource;
-import eu.europeana.entitymanagement.config.AppConfig;
+import eu.europeana.entitymanagement.config.AppAutoconfig;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
+import eu.europeana.entitymanagement.mongo.repository.VocabularyRepository;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
@@ -48,11 +49,13 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
 
   @Autowired private EntityUpdateService entityUpdateService;
 
-  @Qualifier(AppConfig.BEAN_EM_SOLR_SERVICE)
+  @Qualifier(AppAutoconfig.BEAN_EM_SOLR_SERVICE)
   @Autowired
   protected SolrService emSolrService;
 
   @Autowired private WebApplicationContext webApplicationContext;
+  
+  @Autowired protected VocabularyRepository vocabRepository;
 
   @BeforeEach
   protected void setup() throws Exception {
@@ -173,7 +176,11 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
     Entity europeanaProxyEntity = objectMapper.readValue(europeanaProxyEntityStr, Entity.class);
     DataSource dataSource = datasources.verifyDataSource(europeanaProxyEntity.getEntityId(), false);
     Organization zohoOrganization =
-        ZohoOrganizationConverter.convertToOrganizationEntity(zohoRecord, zohoAccessConfiguration.getZohoBaseUrl());
+        ZohoOrganizationConverter.convertToOrganizationEntity(
+            zohoRecord, 
+            zohoConfiguration.getZohoBaseUrl(),
+            emConfig.getCountryMappings(),
+            emConfig.getRoleMappings());
     EntityRecord savedRecord =
         entityRecordService.createEntityFromRequest(
             europeanaProxyEntity, zohoOrganization, dataSource, null);

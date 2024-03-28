@@ -1,15 +1,16 @@
 package eu.europeana.entitymanagement.solr.model;
 
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.WebResource;
-import eu.europeana.entitymanagement.solr.SolrUtils;
-import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.MapUtils;
 import org.apache.solr.client.solrj.beans.Field;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.WebResource;
+import eu.europeana.entitymanagement.solr.SolrUtils;
+import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 
 public abstract class SolrEntity<T extends Entity> {
 
@@ -79,6 +80,14 @@ public abstract class SolrEntity<T extends Entity> {
 
   @Field(EntitySolrFields.IN_SCHEME)
   private List<String> inScheme;
+  
+  
+  @Field(EntitySolrFields.CREATED)
+  private Date created;
+  
+  @Field(EntitySolrFields.MODIFIED)
+  private Date modified;
+  
 
   public SolrEntity(T entity) {
     this.type = entity.getType();
@@ -100,6 +109,12 @@ public abstract class SolrEntity<T extends Entity> {
       this.isPartOf = new ArrayList<>(entity.getIsPartOfArray());
     if (entity.getInScheme() != null) this.inScheme = new ArrayList<>(entity.getInScheme());
 
+    if(entity.getIsAggregatedBy() != null) {
+      this.created = entity.getIsAggregatedBy().getCreated();
+      this.modified = entity.getIsAggregatedBy().getModified();
+    }
+        
+    
     this.entity = entity;
   }
 
@@ -280,5 +295,21 @@ public abstract class SolrEntity<T extends Entity> {
                   EntitySolrFields.LABEL_ENRICH_GENERAL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
                   labelEnrich));
     }
+  }
+
+  public Date getCreated() {
+    return (Date)created.clone();
+  }
+
+  public void setCreated(Date created) {
+    this.created = created;
+  }
+
+  public Date getModified() {
+    return (Date)modified.clone();
+  }
+
+  public void setModified(Date modified) {
+    this.modified = modified;
   }
 }

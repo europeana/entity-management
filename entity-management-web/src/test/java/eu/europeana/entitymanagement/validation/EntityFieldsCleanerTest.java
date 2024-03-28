@@ -2,7 +2,12 @@ package eu.europeana.entitymanagement.validation;
 
 import static eu.europeana.entitymanagement.testutils.UnitTestUtils.loadFile;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
+import javax.xml.bind.JAXBContext;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.SerializationConfig;
 import eu.europeana.entitymanagement.config.ValidatorConfig;
@@ -12,11 +17,6 @@ import eu.europeana.entitymanagement.definitions.model.ConsolidatedAgent;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
 import eu.europeana.entitymanagement.web.MetisDereferenceUtils;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
-import javax.xml.bind.JAXBContext;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest(
     classes = {
@@ -24,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
       SerializationConfig.class,
       EntityManagementConfiguration.class
     })
+@ActiveProfiles("test")//enable application-test.yml
 public class EntityFieldsCleanerTest {
 
   private static final String AGENT_STALIN_CLEANING_XML =

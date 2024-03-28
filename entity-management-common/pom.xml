@@ -4,7 +4,7 @@
     <parent>
         <artifactId>entity-management</artifactId>
         <groupId>eu.europeana.api</groupId>
-        <version>1.6.3-SNAPSHOT</version>
+        <version>1.6.4-SNAPSHOT</version>
     </parent>
 
     <artifactId>entity-management-common</artifactId>
@@ -13,7 +13,7 @@
     <description>Common functionality to be reused by individual Entity Management Modules</description>
 
     <properties>
-        <sonar.coverage.jacoco.xmlReportPaths>${basedir}/../${aggregate.report.xml}
+        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../${aggregate.report.xml}
         </sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
@@ -34,7 +34,7 @@
         <dependency>
             <groupId>eu.europeana.api</groupId>
             <artifactId>entity-management-definitions</artifactId>
-            <version>1.6.3-SNAPSHOT</version>
+            <version>1.6.4-SNAPSHOT</version>
         </dependency>
 
         <dependency>

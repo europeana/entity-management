@@ -3,3 +3,9 @@ server:
     include-message: on_param
     include-stacktrace: on_param
     include-exception: true
+  port: 8080
+#spring:
+#  config:
+#    activate:
+#      on-profile: test
+    

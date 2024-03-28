@@ -1,21 +1,18 @@
 {
-  "Industry": "Museum",
-  "id": "1482250000004503618",
-  "DEA_Sent": false,
-  "Lang_Alternative_1":"SV(Swedish)",
-  "Image_service_Opt_in": false,
-  "Country": "Sweden",
-  "Geographic_Level": [],
-  "Alternative_1":"Gotlands försvarsmuseum",
-  "Lang_Organisation_Name": "EN(English)",
-  "DEA_Signed": false,
-  "Account_Name": "Gotland Defense Museum",
-  "Sector": "Cultural Heritage",
-  "SameAs_1": "http://www.wikidata.org/entity/Q28933300",
-  "SameAs_2": "http://isni.org/isni/000000012159802X",
-  "Organisation_Role2": [
-    "Data Provider"
+  "Organisation_Role" : [
+	  "Providing institution"
   ],
-  "Latitude": "-1",
-  "Longitude": "-1"
+  "Organisation_Country" : "Sweden, SE",
+  "id" : 486281000000940433,
+  "Lang_Alternative_1" : "SV(Swedish)",
+  "Subsector" : "Museum",
+  "Alternative_1" : "Gotlands försvarsmuseum",
+  "Lang_Organisation_Name" : "EN(English)",
+  "Zoho_ID" : "zcrm_1482250000004503618",
+  "Account_Name" : "Gotland Defense Museum",
+  "Official_language" : "SV(Swedish)",
+  "Sector" : "Cultural heritage",
+  "SameAs_1" : "http://www.wikidata.org/entity/Q28933300",
+  "Continent" : "Europe",
+  "Tag" : [ ]
 }

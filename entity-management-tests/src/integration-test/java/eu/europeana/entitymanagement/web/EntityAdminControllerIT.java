@@ -252,7 +252,7 @@ class EntityAdminControllerIT extends BaseWebControllerTest {
                         + "/{type}/{identifier}"
                         + IntegrationTestUtils.BASE_ADMIN_URL,
                     entityType.toLowerCase(),
-                    EntityRecordUtils.getIdFromUrl(entityId))
+                    EntityRecordUtils.getIdentifierFromUrl(entityId))
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(requestBody))

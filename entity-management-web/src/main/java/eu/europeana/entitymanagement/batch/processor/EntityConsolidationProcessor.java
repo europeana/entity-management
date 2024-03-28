@@ -1,5 +1,13 @@
 package eu.europeana.entitymanagement.batch.processor;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.validation.ConstraintViolation;
+import javax.validation.ValidatorFactory;
+import org.springframework.batch.item.ItemProcessor;
+import org.springframework.stereotype.Component;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
@@ -7,8 +15,10 @@ import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
+import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.exception.ingestion.EntityValidationException;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
@@ -18,14 +28,6 @@ import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.service.DepictionGeneratorService;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.validation.ConstraintViolation;
-import javax.validation.ValidatorFactory;
-import org.springframework.batch.item.ItemProcessor;
-import org.springframework.stereotype.Component;
 
 /**
  * This {@link ItemProcessor} validates Entity metadata, then creates a consolidated entity by
@@ -55,10 +57,11 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
     this.depictionGeneratorService = depictionGeneratorService;
   }
 
-  public BatchEntityRecord doProcessing(BatchEntityRecord entityRecord)
+  public BatchEntityRecord doProcessing(BatchEntityRecord batchEntityRecord)
       throws EuropeanaApiException, EntityModelCreationException {
 
-    List<EntityProxy> externalProxies = entityRecord.getEntityRecord().getExternalProxies();
+    EntityRecord entityRecord = batchEntityRecord.getEntityRecord();
+    List<EntityProxy> externalProxies = entityRecord.getExternalProxies();
 
     EntityProxy primaryExternalProxy = externalProxies.get(0);
     Entity externalProxyEntity = primaryExternalProxy.getEntity();
@@ -88,7 +91,7 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
       }
     }
 
-    Entity europeanaProxyEntity = entityRecord.getEntityRecord().getEuropeanaProxy().getEntity();
+    Entity europeanaProxyEntity = entityRecord.getEuropeanaProxy().getEntity();
 
     Entity consolidatedEntity = null;
     if (isStaticDataSource) {
@@ -98,11 +101,13 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
           entityRecordService.mergeEntities(europeanaProxyEntity, externalProxyEntity);
     }
 
+    entityRecordService.processReferenceFields(consolidatedEntity);
+
     // add external proxyIds to sameAs / exactMatch
     entityRecordService.addSameReferenceLinks(
         consolidatedEntity,
         externalProxies.stream().map(EntityProxy::getProxyId).collect(Collectors.toList()));
-
+    
     emEntityFieldCleaner.cleanAndNormalize(consolidatedEntity);
     entityRecordService.performReferentialIntegrity(consolidatedEntity);
 
@@ -115,10 +120,19 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
       }
     }
     validateCompleteValidationConstraints(consolidatedEntity);
+    
+    //Aggregation is not a merged field, need to copy it from the old consolidated entity 
+    copyIsAggregatedBy(entityRecord, consolidatedEntity);
+    
+    
     entityRecordService.updateConsolidatedVersion(
-        entityRecord.getEntityRecord(), consolidatedEntity);
+        entityRecord, consolidatedEntity);
 
-    return entityRecord;
+    return batchEntityRecord;
+  }
+
+  void copyIsAggregatedBy(EntityRecord entityRecord, Entity consolidatedEntity) {
+    consolidatedEntity.setIsAggregatedBy(new Aggregation(entityRecord.getEntity().getIsAggregatedBy()));
   }
 
   /**

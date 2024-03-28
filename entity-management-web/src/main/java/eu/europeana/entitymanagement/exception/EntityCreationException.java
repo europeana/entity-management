@@ -12,7 +12,7 @@ public class EntityCreationException extends EuropeanaApiException {
   }
 
   public EntityCreationException(String msg, Throwable th) {
-    super(msg);
+    super(msg, th);
   }
 
   public boolean logStacktrace() {

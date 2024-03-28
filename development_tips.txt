@@ -15,3 +15,4 @@ public ZohoDereferenceService(ZohoAccessConfiguration zohoAccessConfiguration,
 }
 
 The printed response can then be saved to a file in test/resources. Also make sure to adjust the fields to be either string or list type (no map).
+

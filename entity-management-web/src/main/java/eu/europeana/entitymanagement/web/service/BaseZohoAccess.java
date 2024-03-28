@@ -38,7 +38,7 @@ import eu.europeana.entitymanagement.web.model.BatchOperations;
 import eu.europeana.entitymanagement.web.model.Operation;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReportFields;
-import eu.europeana.entitymanagement.zoho.organization.ZohoAccessConfiguration;
+import eu.europeana.entitymanagement.zoho.organization.ZohoConfiguration;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 
@@ -58,10 +58,9 @@ public class BaseZohoAccess {
 
   final DataSource zohoDataSource;
   
-  final ZohoAccessConfiguration zohoAccessConfiguration;
-
+  final ZohoConfiguration zohoConfiguration;
+  
   final ZohoSyncRepository zohoSyncRepo;
-
   
   public BaseZohoAccess(
       EntityRecordService entityRecordService,
@@ -69,7 +68,7 @@ public class BaseZohoAccess {
       EntityRecordRepository entityRecordRepository,
       EntityManagementConfiguration emConfiguration,
       DataSources datasources,
-      ZohoAccessConfiguration zohoAccessConfiguration,
+      ZohoConfiguration zohoConfiguration,
       SolrService solrService,
       ZohoSyncRepository zohoSyncRepo) {
     this.entityRecordService = entityRecordService;
@@ -77,7 +76,7 @@ public class BaseZohoAccess {
     this.entityRecordRepository = entityRecordRepository;
     this.emConfiguration = emConfiguration;
     this.datasources = datasources;
-    this.zohoAccessConfiguration = zohoAccessConfiguration;
+    this.zohoConfiguration = zohoConfiguration;
     this.zohoDataSource = initZohoDataSource();
     this.zohoSyncRepo = zohoSyncRepo;
   }
@@ -92,7 +91,7 @@ public class BaseZohoAccess {
     return zohoDatasource.get();
   }
 
-  OffsetDateTime generateFixDate() {
+  OffsetDateTime generateFixDate() throws ParseException {
     //hardcoded date, just for manual testing
     SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss", Locale.ENGLISH);
     String dateInString = "23-Oct-2023 14:38:00"; 
@@ -200,7 +199,7 @@ public class BaseZohoAccess {
     }
 
   String generateZohoOrganizationUrl(Long zohoRecordId) {
-    return ZohoUtils.buildZohoOrganizationId(zohoAccessConfiguration.getZohoBaseUrl(), zohoRecordId);
+    return ZohoUtils.buildZohoOrganizationId(zohoConfiguration.getZohoBaseUrl(), zohoRecordId);
   }
 
   private void performDeprecation(ZohoSyncReport zohoSyncReport, Operation operation) {
@@ -327,7 +326,7 @@ public class BaseZohoAccess {
    */
   private void performEntityRegistration(Operation operation, ZohoSyncReport zohoSyncReport, List<String> entitiesToUpdate) {
     Organization zohoOrganization =
-        ZohoOrganizationConverter.convertToOrganizationEntity(operation.getZohoRecord(), zohoAccessConfiguration.getZohoBaseUrl());
+        ZohoOrganizationConverter.convertToOrganizationEntity(operation.getZohoRecord(), zohoConfiguration.getZohoBaseUrl(), emConfiguration.getCountryMappings(), emConfiguration.getRoleMappings());
     
     try {
       List<EntityRecord> existingEntities =

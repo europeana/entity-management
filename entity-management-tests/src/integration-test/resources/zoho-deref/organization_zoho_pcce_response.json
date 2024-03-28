@@ -1,31 +1,22 @@
 {
-  "Last_Activity_Time": "2021-11-23T14:08:03+01:00",
-  "Industry": "Museum",
-  "Street": "Arenbergstraat 9",
-  "id": 1482250000000338555,
-  "Working_Language": "NL(Dutch)",
-  "DEA_Sent": true,
-  "Lang_Alternative_1": "NL(Dutch)",
-  "Themes": "All subjects and periods",
-  "City": "Brussels",
-  "Content_Language": "NL(Dutch)",
-  "Image_service_Opt_in": false,
-  "Country": "Belgium",
-  "Geographic_Level": [
-    "Regional"
+  "Organisation_Role" : [
+	  "Providing institution"
   ],
-  "Alternative_1": "Erfgoedplus.be",
-  "Website": "http://www.erfgoedplus.be/",
-  "Lang_Organisation_Name": "EN(English)",
-  "DEA_Signed": true,
-  "Country1": "Belgium, BE",
-  "ZIP_code": "1000",
-  "Account_Name": "PCCE (Provincial Centre for Cultural Heritage)",
-  "Sector": "Cultural Heritage",
-  "Organisation_Role2": [
-    "Data Provider"
-  ],
-  "Tag": [],
-  "Latitude": "-1",
-  "Longitude": "-1"
+  "Organisation_Country" : "Belgium, BE",
+  "Street" : "Arenbergstraat 9",
+  "id" : 486281000000923271,
+  "Lang_Alternative_1" : "NL(Dutch)",
+  "Themes" : "Cultural Heritage",
+  "City" : "Brussels",
+  "Subsector" : "Museum",
+  "Alternative_1" : "Erfgoedplus.be",
+  "Website" : "http://www.erfgoedplus.be/",
+  "Lang_Organisation_Name" : "EN(English)",
+  "Zip_code" : "1000",
+  "Zoho_ID" : "zcrm_1482250000000338555",
+  "Account_Name" : "PCCE (Provincial Centre for Cultural Heritage)",
+  "Official_language" : "NL(Dutch)",
+  "Sector" : "Cultural heritage",
+  "Continent" : "Europe",
+  "Tag" : [ ]
 }

@@ -1,13 +1,24 @@
 package eu.europeana.entitymanagement.definitions.model;
 
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
-
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.COUNTRY_NAME;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_GEO;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.LOCALITY;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.POSTAL_CODE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.POST_OFFICE_BOX;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.REGION;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.STREET_ADDRESS;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
+import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import dev.morphia.annotations.Embedded;
-import org.apache.commons.lang3.StringUtils;
+import dev.morphia.annotations.Transient;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 
 @Embedded
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
@@ -40,6 +51,8 @@ public class Address {
     this.hasGeo = copy.getVcardHasGeo();
   }
 
+  @Transient
+  private String type = WebEntityFields.ADDRESS_TYPE;
   private String about;
   private String streetAddress;
   private String postalCode;
@@ -118,6 +131,11 @@ public class Address {
     this.hasGeo = hasGeo;
   }
 
+  @JsonGetter(TYPE)
+  public String getType() {
+    return type;
+  }
+  
   /** Checks that this Address metadata properties set. 'about' field not included in this check. */
   public boolean hasMetadataProperties() {
     return StringUtils.isNotEmpty(streetAddress)
@@ -127,4 +145,32 @@ public class Address {
         || StringUtils.isNotEmpty(countryName)
         || StringUtils.isNotEmpty(hasGeo);
   }
+  
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    Address that = (Address) o;
+    
+    if (Objects.equals(about, that.getAbout()) &&
+        Objects.equals(streetAddress, that.getVcardStreetAddress()) &&
+        Objects.equals(postalCode, that.getVcardPostalCode()) &&
+        Objects.equals(postBox, that.getVcardPostOfficeBox()) &&
+        Objects.equals(locality, that.getVcardLocality()) &&
+        Objects.equals(countryName, that.getVcardCountryName()) &&
+        Objects.equals(hasGeo, that.getVcardHasGeo())) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
+  public int hashCode() {
+    return ((streetAddress == null) ? 0 : streetAddress.hashCode()) +
+        ((locality == null) ? 0 : locality.hashCode()) +
+        ((hasGeo == null) ? 0 : hasGeo.hashCode());
+  }
+  
 }

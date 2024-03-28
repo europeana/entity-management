@@ -73,6 +73,7 @@ public class IntegrationTestUtils {
   public static final String ORGANIZATION_REGISTER_PCCE_ZOHO_JSON =
       "/content/organization_register_zoho_pcce.json";
   public static final String PLACE_REGISTER_PARIS_JSON = "/content/place_register_paris.json";
+  public static final String PLACE_REGISTER_SWEDEN_JSON = "/content/place_register_sweden.json";
   public static final String PLACE_REGISTER_HAGENBACH_JSON =
       "/content/place_register_hagenbach.json";
 
@@ -105,6 +106,7 @@ public class IntegrationTestUtils {
   public static final String ORGANIZATION_BNF_XML = "/metis-deref/organization_bnf.xml";
   public static final String PLACE_PARIS_XML = "/metis-deref/place_paris.xml";
   public static final String PLACE_HAGENBACH_XML = "/metis-deref/place_hagenbach_redirect.xml";
+  public static final String PLACE_SWEDEN_XML = "/metis-deref/place_sweden.xml";
   public static final String TIMESPAN_1ST_CENTURY_XML = "/metis-deref/timespan_1st_century.xml";
 
   public static final String TIMESPAN_1_CENTURY_SEARCH_AND_RECORD_JSON =
@@ -156,6 +158,7 @@ public class IntegrationTestUtils {
       "http://www.wikidata.org/entity/Q41264";
   public static final String PLACE_PARIS_URI = "https://sws.geonames.org/2988507/";
   public static final String PLACE_HAGENBACH_URI = "http://www.wikidata.org/entity/Q32050320";
+  public static final String PLACE_SWEDEN_URI = "http://www.wikidata.org/entity/Q34";
   public static final String PLACE_HAGENBACH_UPDATED_URI = "http://www.wikidata.org/entity/Q541669";
 
   public static final String TIMESPAN_1ST_CENTURY_URI = "http://www.wikidata.org/entity/Q8106";
@@ -166,15 +169,16 @@ public class IntegrationTestUtils {
   public static final String INVALID_MIGRATION_ID = "http://www.testing.org/entity/testing";
 
   public static final String ORGANIZATION_BNF_URI_ZOHO =
-      "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000002112001";
+      "https://crm.zoho.eu/crm/org20085137532/tab/Accounts/486281000000938399";
   public static final String ORGANIZATION_NATURALIS_URI_ZOHO =
-      "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000000370517";
+      "https://crm.zoho.eu/crm/org20085137532/tab/Accounts/486281000000923816";
   public static final String ORGANIZATION_PCCE_URI_ZOHO =
-      "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000000338555";
+      "https://crm.zoho.eu/crm/org20085137532/tab/Accounts/486281000000923271";
   public static final String ORGANIZATION_GFM_URI_ZOHO =
-      "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000004503618";
+      "https://crm.zoho.eu/crm/org20085137532/tab/Accounts/486281000000940433";
   public static final String ORGANIZATION_BERGER_MUSEUM_URI_ZOHO =
-      "https://crm.zoho.com/crm/org51823723/tab/Accounts/1482250000004477407";
+      "https://crm.zoho.eu/crm/org20085137532/tab/Accounts/486281000000939337";
+  
   public static final String ORGANIZATION_NATURALIS_URI_WIKIDATA_PATH_SUFFIX = "/entity/Q641676";
   public static final String ORGANIZATION_NATURALIS_URI_WIKIDATA_URI =
       WIKIDATA_BASE_URI + ORGANIZATION_NATURALIS_URI_WIKIDATA_PATH_SUFFIX;
@@ -249,20 +253,20 @@ public class IntegrationTestUtils {
           ORGANIZATION_BERGER_MUSEUM_ZOHO_RESPONSE);
   
   /** Maps Metis dereferenciation URIs to mocked XML responses */
-  public static final Map<String, String> METIS_RESPONSE_MAP = 
+  public static final Map<String, String> METIS_RESPONSE_MAP =
       Map.ofEntries(
-        Map.entry(AGENT_DA_VINCI_URI, AGENT_DA_VINCI_XML), 
-        Map.entry(AGENT_STALIN_URI, AGENT_STALIN_XML), 
-        Map.entry(PLACE_PARIS_URI, PLACE_PARIS_XML),
-        Map.entry(PLACE_HAGENBACH_URI, PLACE_HAGENBACH_XML),
-        Map.entry(TIMESPAN_1ST_CENTURY_URI, TIMESPAN_1ST_CENTURY_XML),
-        Map.entry(CONCEPT_BATHTUB_URI, CONCEPT_BATHTUB_XML),
-        Map.entry(AGENT_JAN_VERMEER_VIAF_URI, AGENT_JAN_VERMEER_XML_VIAF),
-        Map.entry(AGENT_JAN_VERMEER_WIKIDATA_URI, AGENT_JAN_VERMEER_XML_WIKIDATA),
-        Map.entry(AGENT_SCHEGK_URI, AGENT_SCHEGK_XML),
-        Map.entry(AGENT_BIRCH_URI, AGENT_BIRCH_XML),
-        Map.entry(AGENT_RAPHAEL_URI, AGENT_RAPHAEL_XML)
-      ); 
+          Map.entry(AGENT_DA_VINCI_URI, AGENT_DA_VINCI_XML),
+          Map.entry(AGENT_STALIN_URI, AGENT_STALIN_XML),
+          Map.entry(PLACE_PARIS_URI, PLACE_PARIS_XML),
+          Map.entry(PLACE_HAGENBACH_URI, PLACE_HAGENBACH_XML),
+          Map.entry(PLACE_SWEDEN_URI, PLACE_SWEDEN_XML),
+          Map.entry(TIMESPAN_1ST_CENTURY_URI, TIMESPAN_1ST_CENTURY_XML),
+          Map.entry(CONCEPT_BATHTUB_URI, CONCEPT_BATHTUB_XML),
+          Map.entry(AGENT_JAN_VERMEER_VIAF_URI, AGENT_JAN_VERMEER_XML_VIAF),
+          Map.entry(AGENT_JAN_VERMEER_WIKIDATA_URI, AGENT_JAN_VERMEER_XML_WIKIDATA),
+          Map.entry(AGENT_SCHEGK_URI, AGENT_SCHEGK_XML),
+          Map.entry(AGENT_BIRCH_URI, AGENT_BIRCH_XML),
+          Map.entry(AGENT_RAPHAEL_URI, AGENT_RAPHAEL_XML));
 
   public static String loadFile(String resourcePath) throws IOException {
     return IOUtils.toString(

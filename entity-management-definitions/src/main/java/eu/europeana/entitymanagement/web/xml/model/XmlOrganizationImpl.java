@@ -17,7 +17,6 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_AGGRE
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_COUNTRY;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_DESCRIPTION;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_EUROPEANA_ROLE;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_GEOGRAPHIC_LEVEL;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_HAS_ADDRESS;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_HOMEPAGE;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IDENTIFIER;
@@ -25,7 +24,6 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_LANGU
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_LOGO;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_MBOX;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ORGANIZATION;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ORGANIZATION_DOMAIN;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PHONE;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_SAME_AS;
 import java.util.ArrayList;
@@ -38,6 +36,7 @@ import javax.xml.bind.annotation.XmlType;
 import org.apache.commons.collections.CollectionUtils;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.definitions.model.Vocabulary;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @XmlRootElement(namespace = NAMESPACE_EDM, name = XML_ORGANIZATION)
@@ -54,8 +53,6 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
       XML_DESCRIPTION,
       XML_LOGO,
       XML_EUROPEANA_ROLE,
-      XML_ORGANIZATION_DOMAIN,
-      XML_GEOGRAPHIC_LEVEL,
       XML_COUNTRY,
       XML_LANGUAGE,
       XML_HOMEPAGE,
@@ -89,16 +86,10 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
   private XmlWebResourceWrapper logo;
 
   @XmlElement(namespace = NAMESPACE_EDM, name = XML_EUROPEANA_ROLE)
-  private List<LabelledResource> europeanaRole = new ArrayList<>();
-
-  @XmlElement(namespace = NAMESPACE_EDM, name = XML_ORGANIZATION_DOMAIN)
-  private List<LabelledResource> organizationDomain = new ArrayList<>();
-
-  @XmlElement(namespace = NAMESPACE_EDM, name = XML_GEOGRAPHIC_LEVEL)
-  private List<LabelledResource> geographicLevel = new ArrayList<>();
+  private List<XmlEdmEuropeanaRoleWrapper> europeanaRole = new ArrayList<>();
 
   @XmlElement(namespace = NAMESPACE_EDM, name = XML_COUNTRY)
-  private String country;
+  private XmlEdmCountryWrapper country;
 
   @XmlElement(namespace = NAMESPACE_FOAF, name = XML_HOMEPAGE)
   private LabelledResource homepage;
@@ -128,13 +119,21 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     if (organization.getLogo() != null) {
       this.logo = XmlWebResourceWrapper.fromWebResource(organization.getLogo());
     }
-    this.europeanaRole =
-        RdfXmlUtils.convertToXmlMultilingualString(organization.getEuropeanaRole());
-    this.organizationDomain =
-        RdfXmlUtils.convertToXmlMultilingualString(organization.getOrganizationDomain());
-    this.geographicLevel =
-        RdfXmlUtils.convertMapToXmlMultilingualString(organization.getGeographicLevel());
-    this.country = organization.getCountry();
+    //set the europeanaRole
+    List<Vocabulary> orgRole=organization.getEuropeanaRole();
+    if(orgRole!=null && !orgRole.isEmpty()) {
+      List<XmlEdmEuropeanaRoleWrapper> orgXmlRole= new ArrayList<>(orgRole.size());
+      for(Vocabulary vocab : orgRole) {
+        XmlEdmEuropeanaRoleWrapper xmlRole = new XmlEdmEuropeanaRoleWrapper(vocab);
+        orgXmlRole.add(xmlRole);
+      }
+      this.europeanaRole=orgXmlRole;
+    }
+    
+    if(organization.getCountry() != null) {
+      this.country=new XmlEdmCountryWrapper(organization.getCountry());
+    }
+    
     if (organization.getHomepage() != null) {
       this.homepage = new LabelledResource(organization.getHomepage());
     }
@@ -161,10 +160,17 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     entity.setAcronym(RdfXmlUtils.toLanguageMapList(getAcronym()));
     entity.setDescription(RdfXmlUtils.toLanguageMap(getDescription()));
     entity.setLogo(XmlWebResourceWrapper.toWebResource(getLogo()));
-    entity.setEuropeanaRole(RdfXmlUtils.toLanguageMapList(getEuropeanaRole()));
-    entity.setOrganizationDomain(RdfXmlUtils.toLanguageMapList(getOrganizationDomain()));
-    entity.setGeographicLevel(RdfXmlUtils.toLanguageMap(getGeographicLevel()));
-    entity.setCountry(getCountry());
+    //set europeanaRole id (external dereferencers deliver only the ids, not transitive data)
+    if(getEuropeanaRole()!=null && !getEuropeanaRole().isEmpty()) {
+      List<String> roleIds = getEuropeanaRole().stream().map(e -> e.getConcept().getAbout()).toList();
+      entity.setEuropeanaRoleIds(roleIds);
+    }
+    
+    //set country id (external dereferencers deliver only the ids, not transitive data)
+    if(getCountry() != null) {
+      entity.setCountryId(getCountry().getPlace().getAbout());
+    }
+    
     if (getHomepage() != null) {
       entity.setHomepage(getHomepage().getResource());
     }
@@ -198,19 +204,11 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     return logo;
   }
 
-  public List<LabelledResource> getEuropeanaRole() {
+  public List<XmlEdmEuropeanaRoleWrapper> getEuropeanaRole() {
     return europeanaRole;
   }
 
-  public List<LabelledResource> getOrganizationDomain() {
-    return organizationDomain;
-  }
-
-  public List<LabelledResource> getGeographicLevel() {
-    return geographicLevel;
-  }
-
-  public String getCountry() {
+  public XmlEdmCountryWrapper getCountry() {
     return country;
   }
 
@@ -260,5 +258,4 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
   public List<LabelledResource> getAggregatedVia() {
     return aggregatedVia;
   }
-
 }

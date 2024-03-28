@@ -19,6 +19,7 @@ import eu.europeana.entitymanagement.batch.model.JobType;
 import eu.europeana.entitymanagement.batch.service.BatchEntityUpdateExecutor;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
+import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
 import eu.europeana.entitymanagement.web.service.ZohoSyncService;
 
@@ -39,7 +40,7 @@ public class EntityManagementApp implements CommandLineRunner {
   private BatchEntityUpdateExecutor batchUpdateExecutor;
   @Autowired
   private ZohoSyncService zohoSyncService;
-
+ 
   /**
    * Main entry point of this application
    *
@@ -51,7 +52,7 @@ public class EntityManagementApp implements CommandLineRunner {
    */
   public static void main(String[] args) {
     // jobType = args.length > 0 ? args[0] : "";
-    if (hasCmdLineParams(args)) {
+    if (isScheduledTask(args)) {
       if (LOG.isInfoEnabled()) {
         LOG.info("Starting batch updates execution with args: {}", Arrays.toString(args));
       }
@@ -65,13 +66,27 @@ public class EntityManagementApp implements CommandLineRunner {
             Arrays.toString(args));
       }
       ScheduledTaskService scheduledTaskService = getScheduledTasksService(context);
-      long runningTasks;
+      long notCompletedTasks = 0;
+      boolean processingComplete = false;
       do {
         //wait for execution of schedules tasks
-        runningTasks = scheduledTaskService.getRunningTasksCount();
+        long currentRunningTasks = scheduledTaskService.getRunningTasksCount();
+        // log progress
         if (LOG.isInfoEnabled()) {
-          LOG.info("Scheduled Tasks to process : {}", runningTasks);
+          LOG.info("Scheduled Tasks to process : before {}, after {}", notCompletedTasks, currentRunningTasks);
         }
+        
+        //failed tasks will not complete, therefore not all scheduled tasks are marked as completed in the database
+        //untill we have a better mechanism to reschedule failed tasks we wait for the next executions to mark them as complete
+        if (currentRunningTasks == 0 || currentRunningTasks == notCompletedTasks){
+          //if the open tasks is the same after waiting interval, than the processing is considered complete
+          //reseting currentRunningTasks is not needed anymore
+          processingComplete = true;
+        } else {
+          processingComplete = false;
+          notCompletedTasks = currentRunningTasks;
+        }
+
         try {
           Thread.sleep(Duration.ofMinutes(WAITING_INTREVAL).toMillis());
         } catch (InterruptedException e) {
@@ -79,7 +94,7 @@ public class EntityManagementApp implements CommandLineRunner {
           SpringApplication.exit(context);
           System.exit(-2);
         }
-      } while (runningTasks > 0);
+      } while (!processingComplete);
 
       // failed application execution should be indicated with negative codes
       LOG.info("Stoping application after processing all Schdeduled Tasks!");
@@ -90,6 +105,10 @@ public class EntityManagementApp implements CommandLineRunner {
       SpringApplication.run(EntityManagementApp.class, args);
       return;
     }
+  }
+
+  static boolean isScheduledTask(String[] args) {
+    return hasCmdLineParams(args);
   }
 
   static ScheduledTaskService getScheduledTasksService(ConfigurableApplicationContext context) {
@@ -108,34 +127,38 @@ public class EntityManagementApp implements CommandLineRunner {
 
   @Override
   public void run(String... args) throws Exception {
-    if (hasCmdLineParams(args)) {
-      Set<String> tasks = Set.of(args);
-
-      // first zoho sync as it runs synchronuous operations
-      if (tasks.contains(JobType.ZOHO_SYNC.value())) {
-        LOG.info("Executing zoho sync");
-        ZohoSyncReport zohoSyncReport = zohoSyncService.synchronizeModifiedZohoOrganizations();
-        LOG.info("Synchronization Report: {}", zohoSyncReport.toString());
-      }
-
-      if (tasks.contains(JobType.SCHEDULE_DELETION.value())) {
-        // run also the deletions called through the API directly
-        LOG.info("Executing scheduled deletions");
-        batchUpdateExecutor.runScheduledDeprecationsAndDeletions();
-        // TODO: should read the number of scheduled deletions and deprecations from the database
-        // and write it to the logs
-      }
-
-      if (tasks.contains(JobType.SCHEDULE_UPDATE.value())) {
-        LOG.info("Executing scheduled updates");
-        batchUpdateExecutor.runScheduledUpdate();
-        // TODO: should read the number of scheduled deletions and deprecations from the database
-        // and write it to the logs
-      }
-
-    }
+    if (isScheduledTask(args)) {
+      runScheduledTasks(args);
+    } 
     // if no arguments then web server should be started
     return;
+  }
+
+
+  void runScheduledTasks(String... args) throws EntityUpdateException {
+    Set<String> tasks = Set.of(args);
+
+    // first zoho sync as it runs synchronuous operations
+    if (tasks.contains(JobType.ZOHO_SYNC.value())) {
+      LOG.info("Executing zoho sync");
+      ZohoSyncReport zohoSyncReport = zohoSyncService.synchronizeModifiedZohoOrganizations();
+      LOG.info("Synchronization Report: {}", zohoSyncReport.toString());
+    }
+
+    if (tasks.contains(JobType.SCHEDULE_DELETION.value())) {
+      // run also the deletions called through the API directly
+      LOG.info("Executing scheduled deletions");
+      batchUpdateExecutor.runScheduledDeprecationsAndDeletions();
+      // TODO: should read the number of scheduled deletions and deprecations from the database
+      // and write it to the logs
+    }
+
+    if (tasks.contains(JobType.SCHEDULE_UPDATE.value())) {
+      LOG.info("Executing scheduled updates");
+      batchUpdateExecutor.runScheduledUpdate();
+      // TODO: should read the number of scheduled deletions and deprecations from the database
+      // and write it to the logs
+    }
   }
 
   /** validates the arguments passed */

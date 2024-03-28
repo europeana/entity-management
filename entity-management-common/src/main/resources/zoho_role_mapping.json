@@ -1,0 +1,18 @@
+[
+  {
+    "Zoho Label": "providing institution",
+    "Entity URI": "http://data.europeana.eu/vocabulary/role/ProvidingInstitution"
+  },
+  {
+    "Zoho Label": "aggregator",
+    "Entity URI": "http://data.europeana.eu/vocabulary/role/Aggregator"
+  },
+  {
+    "Zoho Label": "accredited aggregator",
+    "Entity URI": "http://data.europeana.eu/vocabulary/role/AccreditedAggregator"
+  },
+  {
+    "Zoho Label": "potential providing institution",
+    "Entity URI": "http://data.europeana.eu/vocabulary/role/ProvidingInstitution"
+  }
+]

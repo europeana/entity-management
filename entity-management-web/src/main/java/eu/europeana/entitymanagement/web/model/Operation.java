@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.web.model;
 
 import java.util.Date;
+import org.apache.commons.lang3.StringUtils;
 import com.zoho.crm.api.record.Record;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -17,7 +18,11 @@ public class Operation implements Comparable<Operation> {
 
   public Operation(
       String zohoEuropeanaId, String action, Record zohoRecord, EntityRecord entityRecord) {
-    this.zohoEuropeanaId = zohoEuropeanaId;
+    
+    if(! StringUtils.isBlank(zohoEuropeanaId)) {
+      //avoid using empty strings which might have been manually entered in Zoho
+      this.zohoEuropeanaId = zohoEuropeanaId;  
+    }
     this.action = action;
     this.zohoRecord = zohoRecord;
     if (zohoRecord != null) {

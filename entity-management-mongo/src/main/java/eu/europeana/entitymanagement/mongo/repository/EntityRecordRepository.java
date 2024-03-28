@@ -55,16 +55,6 @@ public class EntityRecordRepository extends AbstractRepository {
   }
 
   /**
-   * Find and return EntityRecord that matches the given parameters
-   *
-   * @param entityId ID of the dataset
-   * @return EntityRecord
-   */
-  public EntityRecord findByEntityId(String entityId) {
-    return getDataStore().find(EntityRecord.class).filter(eq(ENTITY_ID, entityId)).first();
-  }
-
-  /**
    * Find List of EntityRecord that matches the given entity ids
    *
    * @param entityIds : list of entity id's to be fetched
@@ -82,20 +72,60 @@ public class EntityRecordRepository extends AbstractRepository {
     if (excludeDisabled) {
       filters.add(eq(DISABLED, null));
     }
-
-    FindOptions findOptions = new FindOptions();
+    
+    List<String> fields=new ArrayList<>();
     // if fetchFullRecord is set to false, we only care about the entityId and disabled flag for
     // this query
     if (!fetchFullRecord) {
-      findOptions.projection().include(ENTITY_ID).projection().include(DISABLED);
+      fields=new ArrayList<>();
+      fields.add(ENTITY_ID);
+      fields.add(DISABLED);
     }
-    return getDataStore()
-        .find(EntityRecord.class)
-        .filter(filters.toArray(Filter[]::new))
-        .iterator(findOptions)
-        .toList();
+    
+    return findEntityRecords(filters.toArray(Filter[]::new), false, fields.toArray(String[]::new));
+    
   }
 
+  /**
+   * Find entity record with id, and pick only the given fields from the record
+   * @param entityId
+   * @param fields
+   * @return
+   */
+  public EntityRecord findByEntityId(String entityId, String[] fields) {
+    List<Filter> filters = new ArrayList<>();
+    filters.add(eq(ENTITY_ID, entityId));
+
+    List<EntityRecord> recordList=findEntityRecords(filters.toArray(Filter[]::new), false, fields);
+    if(recordList.isEmpty()) {
+      return null;
+    }
+    else {
+      return recordList.get(0);
+    }
+  }
+  
+  protected List<EntityRecord> findEntityRecords(Filter[] filters, boolean disableValidation, String[] fields) {
+    Query<EntityRecord> query = getDataStore().find(EntityRecord.class);
+    
+    if(disableValidation) {
+      query.disableValidation();
+    }
+    
+    if(filters!=null && filters.length>0) {
+      query.filter(filters);
+    }
+
+    FindOptions findOptions = new FindOptions();
+    //array must not be empty, invocation of this method with only one parameter uses and empty array
+    if(fields != null && fields.length > 0) {
+      findOptions.projection().include(fields);
+    }
+
+    return query.iterator(findOptions).toList();
+    
+  }
+    
   public List<EntityIdDisabledStatus> getEntityIds(
       List<String> entityIds, boolean excludeDisabled) {
     List<EntityRecord> entityRecords = findByEntityIds(entityIds, excludeDisabled, false);
@@ -149,22 +179,17 @@ public class EntityRecordRepository extends AbstractRepository {
   public List<EntityRecord> findEntitiesByCoreference(
       List<String> uris, String entityId, boolean excludeDisabled) {
 
-    Query<EntityRecord> query =
-        getDataStore()
-            .find(EntityRecord.class)
-            .disableValidation()
-            .filter(or(in(ENTITY_SAME_AS, uris), in(ENTITY_EXACT_MATCH, uris)));
-
+    List<Filter> filters = new ArrayList<>();
+    filters.add(or(in(ENTITY_SAME_AS, uris), in(ENTITY_EXACT_MATCH, uris)));
     if (StringUtils.isNotBlank(entityId)) {
-      query.filter(ne(ENTITY_ID, entityId));
+      filters.add(ne(ENTITY_ID, entityId));
     }
-    
     if(excludeDisabled) {
-      query.filter(eq(DISABLED, null));
+      filters.add(eq(DISABLED, null));
     }
 
     //query the database
-    return query.iterator().toList();
+    return findEntityRecords(filters.toArray(Filter[]::new), true, null);
   }
   
   public List<String> findAggregatesFrom(String entityId) {
@@ -178,6 +203,17 @@ public class EntityRecordRepository extends AbstractRepository {
     
     return entityRecords.stream().map(entityRecord -> entityRecord.getEntityId()).toList();
   }
+
+  public List<EntityRecord> findByEntityIdsOrCoreference(List<String> uris) {
+    // Get all EntityRecords that have the given uris as their entityId or in the sameAs/exactMatch field 
+    List<Filter> filters = new ArrayList<>();
+    filters.add(or(in(ENTITY_ID, uris), in(ENTITY_SAME_AS, uris), in(ENTITY_EXACT_MATCH, uris)));
+    // Only fetch active records. Disabled records have a date value
+    filters.add(eq(DISABLED, null));    
+
+    return findEntityRecords(filters.toArray(Filter[]::new), true, null);
+  }
+
   
   public List<EntityRecord> saveBulk(List<EntityRecord> entityRecords) {
     return getDataStore().save(entityRecords);
@@ -191,10 +227,15 @@ public class EntityRecordRepository extends AbstractRepository {
    * @param filters Query filters
    * @return List with results
    */
-  public List<EntityRecord> findWithFilters(int start, int count, Filter[] filters) {
-    return getDataStore()
-        .find(EntityRecord.class)
+  public List<EntityRecord> findWithCount(int start, int count, Filter[] filters) {
+    return getDataStore().find(EntityRecord.class)
         .filter(filters)
+        .iterator(new FindOptions().skip(start).sort(ascending(ENTITY_MODIFIED)).limit(count))
+        .toList();
+  }
+
+  public List<EntityRecord> findAll(int start, int count) {
+    return getDataStore().find(EntityRecord.class)
         .iterator(new FindOptions().skip(start).sort(ascending(ENTITY_MODIFIED)).limit(count))
         .toList();
   }

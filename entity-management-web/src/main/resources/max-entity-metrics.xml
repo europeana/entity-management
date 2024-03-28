@@ -1,36 +1,36 @@
 <metrics>
 	<maxValues>
-		<enrichmentCount>31734</enrichmentCount>
-		<hitCount>2297502</hitCount>
-		<pageRank>1204</pageRank>
+		<enrichmentCount>522716</enrichmentCount>
+		<hitCount>1</hitCount>
+		<pageRank>5165</pageRank>
 		<entityId>Agent</entityId>
 		<entityType>Agent</entityType>
 	</maxValues>
 	<maxValues>
-		<enrichmentCount>3065416</enrichmentCount>
-		<hitCount>24576199</hitCount>
-		<pageRank>24772</pageRank>
-		<entityId>Place</entityId>
-		<entityType>Place</entityType>
-	</maxValues>
-	<maxValues>
-		<enrichmentCount>1448506</enrichmentCount>
-		<hitCount>8106790</hitCount>
-		<pageRank>4055</pageRank>
+		<enrichmentCount>4223487</enrichmentCount>
+		<hitCount>1</hitCount>
+		<pageRank>9477</pageRank>
 		<entityId>Concept</entityId>
 		<entityType>Concept</entityType>
 	</maxValues>
 	<maxValues>
-		<enrichmentCount>1</enrichmentCount>
-		<hitCount>8977503</hitCount>
-		<pageRank>244</pageRank>
+		<enrichmentCount>12113168</enrichmentCount>
+		<hitCount>1</hitCount>
+		<pageRank>18909</pageRank>
 		<entityId>Organization</entityId>
 		<entityType>Organization</entityType>
 	</maxValues>
 	<maxValues>
-		<enrichmentCount>1</enrichmentCount>
-		<hitCount>8977503</hitCount>
-		<pageRank>3912</pageRank>
+		<enrichmentCount>2310877</enrichmentCount>
+		<hitCount>1</hitCount>
+		<pageRank>48421</pageRank>
+		<entityId>Place</entityId>
+		<entityType>Place</entityType>
+	</maxValues>
+	<maxValues>
+		<enrichmentCount>3301125</enrichmentCount>
+		<hitCount>1</hitCount>
+		<pageRank>5986</pageRank>
 		<entityId>TimeSpan</entityId>
 		<entityType>TimeSpan</entityType>
 	</maxValues>

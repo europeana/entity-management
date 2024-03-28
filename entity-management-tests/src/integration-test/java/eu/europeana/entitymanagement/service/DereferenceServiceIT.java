@@ -28,9 +28,9 @@ import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 // enable test config to use zoho mocking
 @Import(TestConfig.class)
 // enable tests only on local machine
-// @Disabled
+//@Disabled
 @SpringBootTest
-class DereferenceServiceIT extends AbstractIntegrationTest {
+public class DereferenceServiceIT extends AbstractIntegrationTest {
 
   @Autowired private DereferenceServiceLocator dereferenceServiceLocator;
   
@@ -65,7 +65,7 @@ class DereferenceServiceIT extends AbstractIntegrationTest {
     assertEquals(8, entity.getNote().size());
   }
 
-  // @Test
+  @Test
   public void zohoOrganizationDereferenceTest() throws Exception {
     String organizationId = IntegrationTestUtils.ORGANIZATION_BNF_URI_ZOHO;    
     Dereferencer dereferencer =
@@ -79,19 +79,17 @@ class DereferenceServiceIT extends AbstractIntegrationTest {
     assertNull(org.getAltLabel());
     assertEquals(1, org.getAcronym().size());
     assertEquals(1, org.getEuropeanaRole().size());
-    assertEquals(1, org.getGeographicLevel().size());
     assertEquals(1, org.getAcronym().size());
-    assertEquals("FR", org.getCountry());
     Assertions.assertNotNull(org.getHomepage());
     Assertions.assertNotNull(org.getLogo());
     Assertions.assertNotNull(org.getAddress().getVcardStreetAddress());
     Assertions.assertNotNull(org.getAddress().getVcardCountryName());
+    Assertions.assertTrue(org.getHiddenLabel().contains("BN Paris (blíže neurčeno)"));
     Assertions.assertTrue(org.getHiddenLabel().contains("Bibliothèque nationale"));
-    Assertions.assertTrue(org.getHiddenLabel().contains("Bibliothèque nationale Francaise"));
-    Assertions.assertTrue(org.getHiddenLabel().contains("French National Library"));
+    Assertions.assertTrue(org.getHiddenLabel().contains("Bibliothèque nationale Francaise French National Library"));
   }
 
-  //  @Test
+//  @Test
   public void zohoOrganizationDereferenceGFMTest() throws Exception {
     String organizationId = IntegrationTestUtils.ORGANIZATION_GFM_URI_ZOHO;
     Dereferencer dereferencer =
@@ -99,7 +97,6 @@ class DereferenceServiceIT extends AbstractIntegrationTest {
     Optional<Entity> orgOptional = dereferencer.dereferenceEntityById(organizationId);
 
     Assertions.assertTrue(orgOptional.isPresent());
-
     Organization org = (Organization) orgOptional.get();
     assertEquals(2, org.getPrefLabel().size());
     assertNotNull(org.getSameReferenceLinks());
@@ -134,7 +131,11 @@ class DereferenceServiceIT extends AbstractIntegrationTest {
     //    choice = new Choice<String>("EN");
     //    record.addKeyValue(ZohoConstants.LANG_ALTERNATIVE_FIELD + "_4", choice);
 
-    Organization org = ZohoOrganizationConverter.convertToOrganizationEntity(record, zohoAccessConfiguration.getZohoBaseUrl());
+    Organization org = ZohoOrganizationConverter.convertToOrganizationEntity(
+        record, 
+        zohoConfiguration.getZohoBaseUrl(),
+        emConfig.getCountryMappings(),
+        emConfig.getRoleMappings());
 
     Assertions.assertEquals(2, org.getPrefLabel().size());
     Assertions.assertEquals(1, org.getAltLabel().size());
@@ -169,6 +170,15 @@ class DereferenceServiceIT extends AbstractIntegrationTest {
     // GFM
     dereferenceWikidataOrganization(IntegrationTestUtils.ORGANIZATION_GFM_URI_WIKIDATA_URI);
   }
+  
+//  @Test
+  // (not available in test data)
+  public void wikidataOrganizationSNHDereferenceTest() throws ZohoException, Exception {
+    // SNH 
+    dereferenceWikidataOrganization("https://crm.zoho.eu/crm/org20085137532/tab/Accounts/486281000000938800");
+  }
+  
+  
 
   Organization dereferenceWikidataOrganization(String organizationId) throws Exception {
     Dereferencer dereferencer =

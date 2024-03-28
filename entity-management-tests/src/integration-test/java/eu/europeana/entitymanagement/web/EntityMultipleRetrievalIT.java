@@ -5,14 +5,15 @@ import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import com.zoho.crm.api.record.Record;
+import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -70,6 +71,29 @@ class EntityMultipleRetrievalIT extends BaseWebControllerTest {
   }
 
   @Test
+  void multipleEntitiesRetrieveOldOrganizationIdsWithoutDuplicates() throws Exception {
+    //register zoho GFM org with old id in sameAs
+    String europeanaMetadata = loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_GFM_ZOHO_JSON);
+    Optional<Record> zohoRecord =
+        IntegrationTestUtils.getZohoOrganizationRecord(
+            IntegrationTestUtils.ORGANIZATION_GFM_URI_ZOHO);
+    assert zohoRecord.isPresent() : "Mocked Zoho response not loaded";
+    String entityId = createOrganization(europeanaMetadata, zohoRecord.get()).getEntityId();
+
+    //please check that this id is also in the sameAs of the org json file (IntegrationTestUtils.ORGANIZATION_REGISTER_GFM_ZOHO_JSON)
+    String oldId="http://data.europeana.eu/organization/486281000000940433";
+
+    mockMvc
+    .perform(
+        post(IntegrationTestUtils.BASE_SERVICE_URL + "/retrieve")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(List.of(oldId, entityId))))//here we ask for 2 orgs ids which should return the same org 
+    .andExpect(status().isOk())
+    .andExpect(jsonPath("$.items.*.id", is(List.of(entityId))));//only 1 org is returned (no duplicates)
+
+  }
+  
+  @Test
   void multipleEntitiesRetrievedNotFound() throws Exception {
     mockMvc
         .perform(
@@ -78,7 +102,8 @@ class EntityMultipleRetrievalIT extends BaseWebControllerTest {
                 // db is cleared between test runs, so these shouldn't exist
                 .content(
                     "[ \"http://data.europeana.eu/concept/1\" , \"http://data.europeana.eu/concept/2\"]"))
-        .andExpect(status().isNotFound());
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.items.*.id").isEmpty());
   }
 
   @Test

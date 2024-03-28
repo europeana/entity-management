@@ -5,13 +5,24 @@ import static eu.europeana.entitymanagement.vocabulary.EntitySolrFields.SUGGEST_
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.context.SpringBootTest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europeana.entitymanagement.AbstractIntegrationTest;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
-import eu.europeana.entitymanagement.config.AppConfig;
+import eu.europeana.entitymanagement.config.AppAutoconfig;
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Concept;
@@ -31,28 +42,16 @@ import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 public class SolrServiceIT extends AbstractIntegrationTest {
 
   //  private static final String RIGHTS_PD = "https://creativecommons.org/publicdomain/zero/1.0/";
 
-  @Qualifier(AppConfig.BEAN_EM_SOLR_SERVICE)
+  @Qualifier(AppAutoconfig.BEAN_EM_SOLR_SERVICE)
   @Autowired
   private SolrService emSolrService;
-
+  
   @Qualifier(AppConfigConstants.BEAN_JSON_MAPPER)
   @Autowired
   private ObjectMapper objectMapper;
@@ -84,7 +83,6 @@ public class SolrServiceIT extends AbstractIntegrationTest {
     // for organizations verify country
     if (EntityTypes.Organization.getEntityType().equals(entity.getType())) {
       assertThat(payload, Matchers.containsString("\"country\""));
-      assertThat(payload, Matchers.containsString("\"organizationDomain\""));
     }
   }
 
@@ -247,4 +245,5 @@ public class SolrServiceIT extends AbstractIntegrationTest {
 
     return solrEntities;
   }
+  
 }

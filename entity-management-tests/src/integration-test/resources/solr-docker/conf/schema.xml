@@ -488,9 +488,15 @@
 		<!-- these fields are all populated by controlled values. These are all 
 			en, but in future may be expanded -->
 		<!-- TODO: alias -->
+		<!-- TO BE DELETED IN NEXT RELEASE -->
 		<dynamicField name="europeanaRole.*" type="string"
-			indexed="true" multiValued="true" stored="true" />
-		<!-- <dynamicField name="edm_europeanaRole.*" type="string" indexed="true" 
+			indexed="true" multiValued="true" stored="true" />   
+		<!-- TO BE ENABLED IN NEXT RELEASE 	
+		<field name="europeanaRole" type="string" indexed="true"
+			stored="true" multiValued="true" />
+		 -->	
+		<!-- DEPRECATED TO BE DELETED 
+		<dynamicField name="edm_europeanaRole.*" type="string" indexed="true" 
 			multiValued="true" /> <copyField source="europeanaRole.*" dest="edm_europeanaRole.*" 
 			/> -->
 
@@ -514,6 +520,7 @@
 		<!-- ISO ALPHA-2 codes -->
 		<field name="country" type="string" indexed="true" stored="true"
 			multiValued="false" />
+			
 		<!-- TODO: alias -->
 		<!-- <field name="edm_country" type="string" indexed="true" stored="true" 
 			multiValued="false"/> <copyField source="country" dest="edm_country"/> -->
@@ -573,6 +580,7 @@
 			dest="text.*" />
 		<copyField source="rdagr2_biographicalInformation.*"
 			dest="text.*" />
+		<!-- TO VERIFY IF STILL NEEDED IN THE NEXT VERSION  -->	
 		<copyField source="europeanaRole.*" dest="text.*" />
 		<copyField source="organizationDomain.*" dest="text.*" />
 		<copyField source="geographicLevel.*" dest="text.*" />
@@ -587,6 +595,7 @@
 			dest="text" />
 		<copyField source="rdagr2_biographicalInformation.*"
 			dest="text" />
+		<!-- TO VERIFY IF STILL NEEDED IN THE NEXT VERSION  -->	
 		<copyField source="europeanaRole.*" dest="text" />
 		<copyField source="organizationDomain.*" dest="text" />
 		<copyField source="geographicLevel.*" dest="text" />
