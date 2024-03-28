@@ -204,6 +204,8 @@ public class EntityRecordService extends BaseEntityRecordService {
    * Redirection in case of deprecated entities
    * 
    * @param deprecatedEntity for which enabled entites are searched
+   * @param identifier - entity identifier extracted from the original request
+   * @param request - the web request
    * @return the entity id to redirect to
    * @throws EntityRemovedException if no entity is found to redirect to
    * @throws MultipleChoicesException if multiple candidates are found for redirection, typically

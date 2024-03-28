@@ -331,7 +331,9 @@
 			<id>coverage</id>
 			<build>
 				<plugins>
+					<!-- plugins that need to be executed for all modules -->
 					<plugin>
+						<!-- jacoco agent needs to be prepared when building the parent pom --> 
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
 						<version>${jacoco-plugin.version}</version>
@@ -342,16 +344,6 @@
 									<goal>prepare-agent</goal>
 								</goals>
 							</execution>
-
-							<!--	
-							<execution>
-								<id>jacoco-report</id>
-								<phase>test</phase>
-								<goals>
-									<goal>report</goal>
-								</goals>
-							</execution>
-							-->
 						</executions>
 					</plugin>
 					<plugin>
