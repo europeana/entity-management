@@ -143,6 +143,7 @@
 			<id>coverage</id>
 			<build>
 				<plugins>
+					<!-- plugins that need to be executed only on this module -->
 					<plugin>
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
@@ -153,7 +154,7 @@
 								<goals>
 									<goal>report-aggregate</goal>
 								</goals>
-								<!-- include the reports from all modules -->
+								<!-- include the reports from all modules into the aggegated report (only in this module)-->
 								<configuration>
 									<dataFileIncludes>
 										<dataFileInclude>**/jacoco.exec</dataFileInclude>

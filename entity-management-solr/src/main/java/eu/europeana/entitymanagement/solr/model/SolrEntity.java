@@ -298,7 +298,7 @@ public abstract class SolrEntity<T extends Entity> {
   }
 
   public Date getCreated() {
-    return created;
+    return (Date)created.clone();
   }
 
   public void setCreated(Date created) {
@@ -306,7 +306,7 @@ public abstract class SolrEntity<T extends Entity> {
   }
 
   public Date getModified() {
-    return modified;
+    return (Date)modified.clone();
   }
 
   public void setModified(Date modified) {
