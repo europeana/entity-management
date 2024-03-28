@@ -97,25 +97,45 @@ public class Organization extends Entity {
 
   public Organization(Organization copy) {
     super(copy);
-    if (copy.getDescription() != null) this.description = new HashMap<>(copy.getDescription());
-    if (copy.getAcronym() != null) this.acronym = new HashMap<>(copy.getAcronym());
+    if (copy.getDescription() != null) {
+      this.description = new HashMap<>(copy.getDescription());
+    }
+    if (copy.getAcronym() != null) {
+      this.acronym = new HashMap<>(copy.getAcronym());
+    }
     this.logo = copy.getLogo();
     this.homepage = copy.getHomepage();
-    if (copy.getPhone() != null) this.phone = new ArrayList<>(copy.getPhone());
-    if (copy.getMbox() != null) this.mbox = new ArrayList<>(copy.getMbox());
+    if (copy.getPhone() != null) {
+      this.phone = new ArrayList<>(copy.getPhone());
+    }
+    if (copy.getMbox() != null) {
+      this.mbox = new ArrayList<>(copy.getMbox());
+    }
     //because the europeanaRoleRef is a reference to the object we keep it the same (therefore also for europeanaRole)
     this.europeanaRoleRefs = copy.getEuropeanaRoleRefs();
-    if(copy.getEuropeanaRoleIds()!=null) this.europeanaRoleIds=new ArrayList<>(copy.getEuropeanaRoleIds());
+    if(copy.getEuropeanaRoleIds()!=null) {
+      this.europeanaRoleIds=new ArrayList<>(copy.getEuropeanaRoleIds());
+    }
     //because the countryRef is a reference to the object we keep it the same (therefore also for country)
     this.countryRef=copy.getCountryRef();
     this.countryId = copy.getCountryId();
     this.country = copy.getCountry();
     
-    if (copy.getAddress() != null) this.hasAddress = new Address(copy.getAddress());
-    if (copy.sameAs != null) this.sameAs = (new ArrayList<>(copy.sameAs));
-    if (copy.getLanguage() != null) this.language = (new ArrayList<>(copy.getLanguage()));
-    if (copy.getAggregatesFrom() != null) this.aggregatesFrom = (new ArrayList<>(copy.getAggregatesFrom()));
-    if (copy.getAggregatedVia() != null) this.aggregatedVia = (new ArrayList<>(copy.getAggregatedVia()));
+    if (copy.getAddress() != null) {
+      this.hasAddress = new Address(copy.getAddress());
+    }
+    if (copy.sameAs != null) {
+      this.sameAs = (new ArrayList<>(copy.sameAs));
+    }
+    if (copy.getLanguage() != null) {
+      this.language = (new ArrayList<>(copy.getLanguage()));
+    }
+    if (copy.getAggregatesFrom() != null) {
+      this.aggregatesFrom = (new ArrayList<>(copy.getAggregatesFrom()));
+    }
+    if (copy.getAggregatedVia() != null) {
+      this.aggregatedVia = (new ArrayList<>(copy.getAggregatedVia()));
+    }
   }
 
   @JsonGetter(DESCRIPTION)

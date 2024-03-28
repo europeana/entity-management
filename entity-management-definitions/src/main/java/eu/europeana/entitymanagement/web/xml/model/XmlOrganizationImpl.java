@@ -9,6 +9,7 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.IS_SHOWN_
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_DC;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_EDM;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_FOAF;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_OWL;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_VCARD;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.PREF_LABEL;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ACRONYM;
@@ -67,13 +68,13 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
     })
 public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
 
-  @XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.XML_SAME_AS)
+  @XmlElement(namespace = NAMESPACE_OWL, name = XML_SAME_AS)
   private List<LabelledResource> sameAs = new ArrayList<>();
 
-  @XmlElement(namespace = XmlConstants.NAMESPACE_EDM, name = XmlConstants.XML_AGGREGATES_FROM)
+  @XmlElement(namespace = NAMESPACE_EDM, name = XML_AGGREGATES_FROM)
   private List<LabelledResource> aggregatesFrom = new ArrayList<>();
 
-  @XmlElement(namespace = XmlConstants.NAMESPACE_EDM, name = XmlConstants.XML_AGGREGATED_VIA)
+  @XmlElement(namespace = NAMESPACE_EDM, name = XML_AGGREGATED_VIA)
   private List<LabelledResource> aggregatedVia = new ArrayList<>();
 
   @XmlElement(namespace = NAMESPACE_EDM, name = XML_ACRONYM)

@@ -192,6 +192,11 @@ public class EntityRecordRepository extends AbstractRepository {
     return findEntityRecords(filters.toArray(Filter[]::new), true, null);
   }
   
+  /**
+   * Returns a list of organizations from which the given aggregator identified by the entityId aggregates from 
+   * @param entityId the id of the organization (aggregator)
+   * @return the list of organization ids from which the provided organization aggregated from 
+   */
   public List<String> findAggregatesFrom(String entityId) {
     List<EntityRecord> entityRecords =
         getDataStore()
@@ -201,9 +206,14 @@ public class EntityRecordRepository extends AbstractRepository {
             .iterator(new FindOptions().projection().include(ENTITY_ID))
             .toList();
     
-    return entityRecords.stream().map(entityRecord -> entityRecord.getEntityId()).toList();
+    return entityRecords.stream().map(EntityRecord::getEntityId).toList();
   }
 
+  /**
+   * Find entities by their ids or coreferences
+   * @param uris entities to search for
+   * @return list of records retrieved from database 
+   */
   public List<EntityRecord> findByEntityIdsOrCoreference(List<String> uris) {
     // Get all EntityRecords that have the given uris as their entityId or in the sameAs/exactMatch field 
     List<Filter> filters = new ArrayList<>();
@@ -215,6 +225,11 @@ public class EntityRecordRepository extends AbstractRepository {
   }
 
   
+  /**
+   * save a list of entity records
+   * @param entityRecords records to be saved into the database
+   * @return the records retrieved after saving
+   */
   public List<EntityRecord> saveBulk(List<EntityRecord> entityRecords) {
     return getDataStore().save(entityRecords);
   }
