@@ -22,6 +22,7 @@ public interface EntitySolrFields {
   public static final String LABEL_ENRICH_ALL =
       LABEL_ENRICH_GENERAL + DYNAMIC_FIELD_SEPARATOR + "*";
   public static final String SAME_AS = "owl_sameAs";
+  public static final String AGGREGATED_VIA = "edm_aggregatedVia";
   public static final String IDENTIFIER = "dc_identifier";
   public static final String IS_RELATED_TO = "edm_isRelatedTo";
   public static final String HAS_PART = "dcterms_hasPart";

@@ -59,7 +59,7 @@ public class TimeSpan extends Entity {
       this.isNextInSequence = new ArrayList<>(copy.getIsNextInSequence());
     this.begin = copy.getBeginString();
     this.end = copy.getEndString();
-    if (copy.sameAs != null) this.sameAs = (new ArrayList<>(copy.sameAs));
+    if (copy.getSameReferenceLinks() != null) this.sameAs = (new ArrayList<>(copy.getSameReferenceLinks()));
   }
 
   public TimeSpan() {

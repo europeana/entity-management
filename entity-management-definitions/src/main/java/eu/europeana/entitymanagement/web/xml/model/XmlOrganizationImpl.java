@@ -9,9 +9,12 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.IS_SHOWN_
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_DC;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_EDM;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_FOAF;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_OWL;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_VCARD;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.PREF_LABEL;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ACRONYM;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_AGGREGATED_VIA;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_AGGREGATES_FROM;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_COUNTRY;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_DESCRIPTION;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_EUROPEANA_ROLE;
@@ -57,14 +60,22 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
       XML_PHONE,
       XML_MBOX,
       XML_HAS_ADDRESS,
+      XML_AGGREGATED_VIA,
+      IS_AGGREGATED_BY,
       XML_IDENTIFIER,
       XML_SAME_AS,
-      IS_AGGREGATED_BY
+      XML_AGGREGATES_FROM
     })
 public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
 
-  @XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.XML_SAME_AS)
+  @XmlElement(namespace = NAMESPACE_OWL, name = XML_SAME_AS)
   private List<LabelledResource> sameAs = new ArrayList<>();
+
+  @XmlElement(namespace = NAMESPACE_EDM, name = XML_AGGREGATES_FROM)
+  private List<LabelledResource> aggregatesFrom = new ArrayList<>();
+
+  @XmlElement(namespace = NAMESPACE_EDM, name = XML_AGGREGATED_VIA)
+  private List<LabelledResource> aggregatedVia = new ArrayList<>();
 
   @XmlElement(namespace = NAMESPACE_EDM, name = XML_ACRONYM)
   private List<LabelledResource> acronym = new ArrayList<>();
@@ -102,6 +113,8 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
   public XmlOrganizationImpl(Organization organization) {
     super(organization);
     this.sameAs = RdfXmlUtils.convertToRdfResource(organization.getSameReferenceLinks());
+    this.aggregatesFrom = RdfXmlUtils.convertToRdfResource(organization.getAggregatesFrom());
+    this.aggregatedVia = RdfXmlUtils.convertToRdfResource(organization.getAggregatedVia());
     this.acronym = RdfXmlUtils.convertToXmlMultilingualString(organization.getAcronym());
     this.description = RdfXmlUtils.convertMapToXmlMultilingualString(organization.getDescription());
     if (organization.getLogo() != null) {
@@ -171,6 +184,8 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     }
     entity.setIdentifier(getIdentifier());
     entity.setLanguage(getLanguage());
+    entity.setAggregatesFrom(RdfXmlUtils.toStringList(getAggregatesFrom()));
+    entity.setAggregatedVia(RdfXmlUtils.toStringList(getAggregatedVia()));
     return entity;
   }
 
@@ -237,4 +252,11 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     return language;
   }
 
+  public List<LabelledResource> getAggregatesFrom() {
+    return aggregatesFrom;
+  }
+
+  public List<LabelledResource> getAggregatedVia() {
+    return aggregatedVia;
+  }
 }

@@ -95,7 +95,14 @@ public class EntityRecordService extends BaseEntityRecordService {
    */
   public List<EntityRecord> retrieveMultipleByEntityIds(List<String> entityIds,
       boolean excludeDisabled, boolean fetchFullRecord) {
-    return entityRecordRepository.findByEntityIds(entityIds, excludeDisabled, fetchFullRecord);
+    List<EntityRecord> resp = entityRecordRepository.findByEntityIds(entityIds, excludeDisabled, fetchFullRecord);
+    //for the organizations, populate the aggregatesFrom field
+    if(fetchFullRecord && !resp.isEmpty()) {
+      for(EntityRecord record : resp) {
+        setAggregatesFromForOrganizations(record.getEntity());
+      }
+    }
+    return resp;  
   }
   
   public List<EntityRecord> retrieveMultipleByEntityIdsOrCoreference(List<String> entityIds) {
@@ -133,6 +140,10 @@ public class EntityRecordService extends BaseEntityRecordService {
       throw new EntityRemovedException(
           String.format(EntityRecordUtils.ENTITY_ID_REMOVED_MSG, entityUri));
     }
+    
+    //for the organizations, populate the aggregatesFrom field
+    setAggregatesFromForOrganizations(entityRecord.getEntity());
+    
 
     // dereference morphia @Reference fields (e.g. the organization country)
     if (EntityProfile.hasDereferenceProfile(profiles)) {
@@ -142,6 +153,13 @@ public class EntityRecordService extends BaseEntityRecordService {
     return entityRecord;
   }
 
+  private void setAggregatesFromForOrganizations(Entity entity) {
+    if(EntityTypes.Organization.getEntityType().equals(entity.getType())) {
+      Organization org = (Organization) entity;
+      org.setAggregatesFrom(entityRecordRepository.findAggregatesFrom(entity.getEntityId()));
+    }
+  }
+  
   void dereferenceLinkedEntities(EntityRecord entityRecord) {
     // dereference links for organizations
     if (EntityTypes.isOrganization(entityRecord.getEntity().getType())) {

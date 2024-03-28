@@ -1,6 +1,8 @@
 package eu.europeana.entitymanagement.definitions.model;
 
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ACRONYM;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.AGGREGATED_VIA;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.AGGREGATES_FROM;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ALT_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.COUNTRY;
@@ -19,6 +21,7 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.LANGUAGE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_AGGREGATED_BY;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,8 +56,11 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
   FOAF_PHONE,
   FOAF_MBOX,
   HAS_ADDRESS,
+  AGGREGATES_FROM,
+  AGGREGATED_VIA,
   IDENTIFIER,
-  SAME_AS
+  SAME_AS,
+  IS_AGGREGATED_BY
 })
 public class Organization extends Entity {
 
@@ -79,7 +85,10 @@ public class Organization extends Entity {
   private List<Vocabulary> europeanaRole;
   
   private Address hasAddress;
-  private List<String> sameAs;
+  private List<String> sameAs; 
+  @Transient 
+  private List<String> aggregatesFrom;
+  private List<String> aggregatedVia;
   private List<String> language;
 
   public Organization() {
@@ -88,23 +97,45 @@ public class Organization extends Entity {
 
   public Organization(Organization copy) {
     super(copy);
-    if (copy.getDescription() != null) this.description = new HashMap<>(copy.getDescription());
-    if (copy.getAcronym() != null) this.acronym = new HashMap<>(copy.getAcronym());
+    if (copy.getDescription() != null) {
+      this.description = new HashMap<>(copy.getDescription());
+    }
+    if (copy.getAcronym() != null) {
+      this.acronym = new HashMap<>(copy.getAcronym());
+    }
     this.logo = copy.getLogo();
     this.homepage = copy.getHomepage();
-    if (copy.getPhone() != null) this.phone = new ArrayList<>(copy.getPhone());
-    if (copy.getMbox() != null) this.mbox = new ArrayList<>(copy.getMbox());
+    if (copy.getPhone() != null) {
+      this.phone = new ArrayList<>(copy.getPhone());
+    }
+    if (copy.getMbox() != null) {
+      this.mbox = new ArrayList<>(copy.getMbox());
+    }
     //because the europeanaRoleRef is a reference to the object we keep it the same (therefore also for europeanaRole)
     this.europeanaRoleRefs = copy.getEuropeanaRoleRefs();
-    if(copy.getEuropeanaRoleIds()!=null) this.europeanaRoleIds=new ArrayList<>(copy.getEuropeanaRoleIds());
+    if(copy.getEuropeanaRoleIds()!=null) {
+      this.europeanaRoleIds=new ArrayList<>(copy.getEuropeanaRoleIds());
+    }
     //because the countryRef is a reference to the object we keep it the same (therefore also for country)
     this.countryRef=copy.getCountryRef();
     this.countryId = copy.getCountryId();
     this.country = copy.getCountry();
     
-    if (copy.getAddress() != null) this.hasAddress = new Address(copy.getAddress());
-    if (copy.sameAs != null) this.sameAs = (new ArrayList<>(copy.sameAs));
-    if (copy.language != null) this.language = (new ArrayList<>(copy.language));
+    if (copy.getAddress() != null) {
+      this.hasAddress = new Address(copy.getAddress());
+    }
+    if (copy.sameAs != null) {
+      this.sameAs = (new ArrayList<>(copy.sameAs));
+    }
+    if (copy.getLanguage() != null) {
+      this.language = (new ArrayList<>(copy.getLanguage()));
+    }
+    if (copy.getAggregatesFrom() != null) {
+      this.aggregatesFrom = (new ArrayList<>(copy.getAggregatesFrom()));
+    }
+    if (copy.getAggregatedVia() != null) {
+      this.aggregatedVia = (new ArrayList<>(copy.getAggregatedVia()));
+    }
   }
 
   @JsonGetter(DESCRIPTION)
@@ -214,6 +245,26 @@ public class Organization extends Entity {
   public void setLanguage(List<String> edmLanguage) {
     this.language = edmLanguage;
   }
+
+  @JsonGetter(AGGREGATES_FROM)
+  public List<String> getAggregatesFrom() {
+    return aggregatesFrom;
+  }
+
+  @JsonSetter(AGGREGATES_FROM)
+  public void setAggregatesFrom(List<String> aggregatesFrom) {
+    this.aggregatesFrom = aggregatesFrom;
+  }
+
+  @JsonGetter(AGGREGATED_VIA)
+  public List<String> getAggregatedVia() {
+    return aggregatedVia;
+  }
+
+  @JsonSetter(AGGREGATED_VIA)
+  public void setAggregatedVia(List<String> aggregatedVia) {
+    this.aggregatedVia = aggregatedVia;
+  }
   
   @JsonIgnore
   public EntityRecord getCountryRef() {
@@ -285,5 +336,4 @@ public class Organization extends Entity {
   public void setEuropeanaRole(List<Vocabulary> europeanaRole) {
     this.europeanaRole = europeanaRole;
   }
-  
 }

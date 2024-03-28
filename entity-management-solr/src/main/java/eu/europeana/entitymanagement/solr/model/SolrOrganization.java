@@ -18,6 +18,9 @@ public class SolrOrganization extends SolrEntity<Organization> {
   @Field(EntitySolrFields.SAME_AS)
   private List<String> sameAs;
 
+  @Field(EntitySolrFields.AGGREGATED_VIA)
+  private List<String> aggregatedVia;
+
   @Field(OrganizationSolrFields.DC_DESCRIPTION_ALL)
   private Map<String, String> description;
 
@@ -89,6 +92,9 @@ public class SolrOrganization extends SolrEntity<Organization> {
     
     if (organization.getSameReferenceLinks() != null) {
       this.sameAs = new ArrayList<>(organization.getSameReferenceLinks());
+    }
+    if (organization.getAggregatedVia() != null) {
+      this.aggregatedVia = new ArrayList<>(organization.getAggregatedVia());
     }
     Address organizationAddress = organization.getAddress();
     if (organizationAddress != null) {
@@ -187,7 +193,11 @@ public class SolrOrganization extends SolrEntity<Organization> {
     this.sameAs = uris;
   }
 
-  public String getCountry() {
+  public List<String> getAggregatedVia() {
+    return aggregatedVia;
+  }
+  
+    public String getCountry() {
     return country;
   }
 }

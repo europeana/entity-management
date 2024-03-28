@@ -6,12 +6,14 @@ import static dev.morphia.query.experimental.filters.Filters.in;
 import static dev.morphia.query.experimental.filters.Filters.ne;
 import static dev.morphia.query.experimental.filters.Filters.or;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.DISABLED;
+import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_AGGREGATED_VIA;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_EXACT_MATCH;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_ID;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_MODIFIED;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_SAME_AS;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_UPDATE_OPTS;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,7 +25,6 @@ import dev.morphia.query.Query;
 import dev.morphia.query.experimental.filters.Filter;
 import dev.morphia.query.experimental.updates.UpdateOperators;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
-import eu.europeana.entitymanagement.definitions.EntityRecordFields;
 import eu.europeana.entitymanagement.definitions.model.EntityIdGenerator;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
@@ -48,7 +49,7 @@ public class EntityRecordRepository extends AbstractRepository {
   public boolean existsByEntityId(String entityId) {
     return getDataStore()
             .find(EntityRecord.class)
-            .filter(eq(EntityRecordFields.ENTITY_ID, entityId))
+            .filter(eq(ENTITY_ID, entityId))
             .count()
         > 0;
   }
@@ -191,6 +192,28 @@ public class EntityRecordRepository extends AbstractRepository {
     return findEntityRecords(filters.toArray(Filter[]::new), true, null);
   }
   
+  /**
+   * Returns a list of organizations from which the given aggregator identified by the entityId aggregates from 
+   * @param entityId the id of the organization (aggregator)
+   * @return the list of organization ids from which the provided organization aggregated from 
+   */
+  public List<String> findAggregatesFrom(String entityId) {
+    List<EntityRecord> entityRecords =
+        getDataStore()
+            .find(EntityRecord.class)
+            .disableValidation()
+            .filter(in(ENTITY_AGGREGATED_VIA, Arrays.asList(entityId)))
+            .iterator(new FindOptions().projection().include(ENTITY_ID))
+            .toList();
+    
+    return entityRecords.stream().map(EntityRecord::getEntityId).toList();
+  }
+
+  /**
+   * Find entities by their ids or coreferences
+   * @param uris entities to search for
+   * @return list of records retrieved from database 
+   */
   public List<EntityRecord> findByEntityIdsOrCoreference(List<String> uris) {
     // Get all EntityRecords that have the given uris as their entityId or in the sameAs/exactMatch field 
     List<Filter> filters = new ArrayList<>();
@@ -202,6 +225,11 @@ public class EntityRecordRepository extends AbstractRepository {
   }
 
   
+  /**
+   * save a list of entity records
+   * @param entityRecords records to be saved into the database
+   * @return the records retrieved after saving
+   */
   public List<EntityRecord> saveBulk(List<EntityRecord> entityRecords) {
     return getDataStore().save(entityRecords);
   }
