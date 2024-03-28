@@ -88,7 +88,16 @@
 		 "en": "Netherlands"  
 	  }
   },
-  
+  "europeanaRole": {
+      "type" : "Vocabulary",
+      "vocabularyUri" : "http://data.europeana.eu/vocabulary/role/ProvidingInstitution",
+      "inScheme" : [
+		  "http://data.europeana.eu/vocabulary/role"
+      ],
+      "prefLabel" : {
+          "en" : "Providing Institution"
+      }
+  },  
   "homepage": "https://www.naturalis.nl/nl/",
   "phone": [
     "+31-71-751-9600"

@@ -491,10 +491,8 @@
 		<!-- TO BE DELETED IN NEXT RELEASE -->
 		<dynamicField name="europeanaRole.*" type="string"
 			indexed="true" multiValued="true" stored="true" />   
-		<!-- TO BE ENABLED IN NEXT RELEASE 	
 		<field name="europeanaRole" type="string" indexed="true"
 			stored="true" multiValued="true" />
-		 -->	
 		<!-- DEPRECATED TO BE DELETED 
 		<dynamicField name="edm_europeanaRole.*" type="string" indexed="true" 
 			multiValued="true" /> <copyField source="europeanaRole.*" dest="edm_europeanaRole.*" 
@@ -519,7 +517,7 @@
 			indexed="false" stored="true" multiValued="true" />
 		<!-- ISO ALPHA-2 codes -->
 		<field name="country" type="string" indexed="true" stored="true"
-			multiValued="false" />
+			multiValued="true" />
 			
 		<!-- TODO: alias -->
 		<!-- <field name="edm_country" type="string" indexed="true" stored="true" 

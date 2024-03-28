@@ -77,6 +77,9 @@ public class Organization extends Entity {
   private String countryId;
   @Transient
   private Place country;
+  @Transient
+  private String countryISO;
+  
   
   private List<String> europeanaRoleIds;
   @Reference(lazy = true)
@@ -335,5 +338,14 @@ public class Organization extends Entity {
   @JsonSetter(EUROPEANA_ROLE)
   public void setEuropeanaRole(List<Vocabulary> europeanaRole) {
     this.europeanaRole = europeanaRole;
+  }
+
+  @JsonIgnore
+  public String getCountryISO() {
+    return countryISO;
+  }
+
+  public void setCountryISO(String countryISO) {
+    this.countryISO = countryISO;
   }
 }
