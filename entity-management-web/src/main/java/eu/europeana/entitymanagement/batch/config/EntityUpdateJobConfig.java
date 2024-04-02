@@ -203,7 +203,7 @@ public class EntityUpdateJobConfig {
 
     ScheduledTaskDatabaseReader reader =
         new ScheduledTaskDatabaseReader(
-            scheduledTaskService,
+            scheduledTaskService, entityRecordService,
             configuredBatchChunkSize,
             Filters.lte(EMBatchConstants.CREATED, currentStartTime),
             Filters.in(UPDATE_TYPE, updateTypeList));
@@ -362,5 +362,9 @@ public class EntityUpdateJobConfig {
             removeEntity(
                 removalType, configuredBatchChunkSize, removalsStepExecutor, scheduledTaskReader))
         .build();
+  }
+
+  EntityVerificationLogger getVerificationLogger() {
+    return verificationLogger;
   }
 }

@@ -1,8 +1,11 @@
 package eu.europeana.entitymanagement;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ActiveProfiles;
 
 /** Basic test for loading context */
@@ -11,7 +14,11 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")//enable application-test.yml
 class EntityManagementAppTest {
 
-  @SuppressWarnings("squid:S2699") // we are aware that this test doesn't have any assertion
+  @Autowired
+  private ApplicationContext applicationContext;
+  
   @Test
-  void contextLoads() {}
+  void contextLoads() {
+    assertNotNull(applicationContext.getApplicationName());
+  }
 }

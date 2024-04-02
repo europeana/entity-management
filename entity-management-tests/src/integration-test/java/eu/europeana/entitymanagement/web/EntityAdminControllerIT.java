@@ -80,7 +80,7 @@ class EntityAdminControllerIT extends BaseWebControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
-    Optional<EntityRecord> dbRecordOptional = retrieveEntity(entityRecord.getEntityId());
+    Optional<EntityRecord> dbRecordOptional = retrieveEntityEvenIfDisabled(entityRecord.getEntityId());
     Assertions.assertTrue(dbRecordOptional.isEmpty());
 
     // confirm that Solr document no longer exists
@@ -139,7 +139,7 @@ class EntityAdminControllerIT extends BaseWebControllerTest {
         .andExpect(jsonPath("$.proxies", hasSize(2)));
 
     // check that record is present
-    Optional<EntityRecord> dbRecordOptional = retrieveEntity(entityId);
+    Optional<EntityRecord> dbRecordOptional = retrieveEntityEvenIfDisabled(entityId);
     Assertions.assertFalse(dbRecordOptional.isEmpty());
   }
 
@@ -177,7 +177,7 @@ class EntityAdminControllerIT extends BaseWebControllerTest {
     migrateEntity("Concept", entityId, IntegrationTestUtils.STATIC_ENTITY_EXTERNAL_ID);
 
     // check that record is present
-    Optional<EntityRecord> dbRecordOptional = retrieveEntity(entityId);
+    Optional<EntityRecord> dbRecordOptional = retrieveEntityEvenIfDisabled(entityId);
     Assertions.assertFalse(dbRecordOptional.isEmpty());
   }
 

@@ -595,11 +595,12 @@ public class EMController extends BaseRest {
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
   public ResponseEntity<String> retrieveEntities(
       @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
+      @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = false) String profiles,
       @RequestBody List<String> urls, HttpServletRequest request) throws Exception {
 
     verifyReadAccess(request);
 
-    return createResponseMultipleEntities(urls, request);
+    return createResponseMultipleEntities(urls, profiles, request);
   }
 
   private ResponseEntity<String> createResponseForRetrieve(EntityTypes type, String identifier,
@@ -633,10 +634,10 @@ public class EMController extends BaseRest {
         contentType, entityRecord, HttpStatus.OK);
   }
 
-  private ResponseEntity<String> createResponseMultipleEntities(List<String> entityIds,
+  private ResponseEntity<String> createResponseMultipleEntities(List<String> entityIds, String profiles,
       HttpServletRequest request) throws EuropeanaApiException {
     List<EntityRecord> entityRecords =
-        entityRecordService.retrieveMultipleByEntityIdsOrCoreference(entityIds);
+        entityRecordService.retrieveMultipleByEntityIdsOrCoreference(entityIds, profiles);
 
     // create response headers
     String contentType = HttpHeaders.CONTENT_TYPE_JSONLD_UTF8;

@@ -119,7 +119,7 @@ class EntityUpdateIT extends BaseWebControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isAccepted());
 
-    Optional<EntityRecord> entityRecordUpdated = retrieveEntity(entityRecord.getEntityId());
+    Optional<EntityRecord> entityRecordUpdated = retrieveEntityEvenIfDisabled(entityRecord.getEntityId());
     Assertions.assertTrue(entityRecordUpdated.isPresent());
     TimeSpan timespan = (TimeSpan) (entityRecordUpdated.get().getEntity());
     Assertions.assertNotNull(timespan.getPrefLabel());
@@ -148,7 +148,7 @@ class EntityUpdateIT extends BaseWebControllerTest {
     final ObjectNode nodeReference =
         mapper.readValue(
             loadFile(IntegrationTestUtils.CONCEPT_UPDATE_BATHTUB_JSON), ObjectNode.class);
-    Optional<EntityRecord> entityRecordUpdated = retrieveEntity(entityRecord.getEntityId());
+    Optional<EntityRecord> entityRecordUpdated = retrieveEntityEvenIfDisabled(entityRecord.getEntityId());
     Assertions.assertTrue(entityRecordUpdated.isPresent());
     Assertions.assertEquals(
         nodeReference.path("depiction").path("id").asText(),
@@ -190,7 +190,7 @@ class EntityUpdateIT extends BaseWebControllerTest {
         .andExpect(status().isAccepted());
 
     // check that update removed fields from Europeana proxy in original request
-    Optional<EntityRecord> updatedRecord = retrieveEntity(savedRecord.getEntityId());
+    Optional<EntityRecord> updatedRecord = retrieveEntityEvenIfDisabled(savedRecord.getEntityId());
     Assertions.assertTrue(updatedRecord.isPresent());
     europeanaProxyEntity = updatedRecord.get().getEuropeanaProxy().getEntity();
 

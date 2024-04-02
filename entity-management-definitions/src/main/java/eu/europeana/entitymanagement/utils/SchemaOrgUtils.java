@@ -1,5 +1,13 @@
 package eu.europeana.entitymanagement.utils;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import eu.europeana.corelib.edm.model.schemaorg.ContextualEntity;
 import eu.europeana.corelib.edm.model.schemaorg.EdmOrganization;
 import eu.europeana.corelib.edm.model.schemaorg.GeoCoordinates;
@@ -17,30 +25,13 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.definitions.model.TimeSpan;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public final class SchemaOrgUtils {
 
   private static final Logger LOG = LogManager.getLogger(SchemaOrgUtils.class);
 
   private static final String URL_PREFIX = "http://data.europeana.eu";
-  private static final String PLACE_PREFIX = "http://data.europeana.eu/place";
-  private static final String TIMESPAN_PREFIX = "http://semium.org";
-  private static final String UNIT_CODE_E37 = "E37";
-
-  private static DateTimeFormatter formatter =
-      DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz yyyy", Locale.ENGLISH);
-  private static DateTimeFormatter dateFormatter =
-      DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH);
-
+  
   private SchemaOrgUtils() {
     // empty constructor prevent initialization
   }
@@ -649,6 +640,7 @@ public final class SchemaOrgUtils {
    * @param propertyName name of property
    * @param referenceClass class of reference that should be used for Reference object
    */
+  @SuppressWarnings("rawtypes")
   private static void addReference(
       Thing object, String id, String propertyName, Class<? extends Thing> referenceClass) {
     Reference reference = new Reference(referenceClass);
@@ -711,8 +703,8 @@ public final class SchemaOrgUtils {
     if (referenceClass == null) return new Thing();
     Thing resource = null;
     try {
-      resource = referenceClass.newInstance();
-    } catch (InstantiationException | IllegalAccessException e) {
+      resource = referenceClass.getDeclaredConstructor().newInstance();
+    } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
       resource = new Thing();
       LOG.debug(
           "Cannot instantiate object of class {} . Instance of Thing is used instead!",

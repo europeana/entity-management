@@ -1,20 +1,20 @@
 package eu.europeana.entitymanagement.batch.reader;
 
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.batch.item.ItemReader;
+import org.springframework.lang.NonNull;
 import dev.morphia.query.experimental.filters.Filter;
 import eu.europeana.entitymanagement.batch.utils.BatchUtils;
 import eu.europeana.entitymanagement.definitions.batch.ScheduledTaskUtils;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.batch.item.ItemReader;
-import org.springframework.lang.NonNull;
 
 /** {@link ItemReader} that reads documents from MongoDB via a paging technique. */
 public class EntityRecordDatabaseReader extends BaseDatabaseReader<BatchEntityRecord> {
@@ -41,13 +41,11 @@ public class EntityRecordDatabaseReader extends BaseDatabaseReader<BatchEntityRe
     // number of items to skip when reading. pageSize is incremented in parent class every time
     // this method is invoked
     int start = page * pageSize;
-    List<? extends EntityRecord> result =
-        entityRecordService.findEntitiesWithFilter(start, pageSize, queryFilters);
+    //need to use dereference profile in order to correctly index organizations
+    List<EntityRecord> result =
+        entityRecordService.findEntitiesWithFilter(start, pageSize, queryFilters, EntityProfile.dereference.name());
 
-    List<BatchEntityRecord> batchEntityRecords =
-        result.stream()
-            .map(p -> new BatchEntityRecord(p, scheduledTaskType))
-            .collect(Collectors.toList());
+    List<BatchEntityRecord> batchEntityRecords = toBatchEntityRecords(result, scheduledTaskType);
 
     if (logger.isDebugEnabled()) {
       logger.debug(

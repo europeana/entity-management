@@ -242,7 +242,7 @@ public class EntityRecordRepository extends AbstractRepository {
    * @param filters Query filters
    * @return List with results
    */
-  public List<EntityRecord> findWithCount(int start, int count, Filter[] filters) {
+  public List<EntityRecord> find(int start, int count, Filter[] filters) {
     return getDataStore().find(EntityRecord.class)
         .filter(filters)
         .iterator(new FindOptions().skip(start).sort(ascending(ENTITY_MODIFIED)).limit(count))

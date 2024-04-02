@@ -33,6 +33,7 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.definitions.model.Vocabulary;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
@@ -43,6 +44,7 @@ import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.utils.UriValidator;
 import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.zoho.organization.ZohoConfiguration;
 
@@ -554,6 +556,10 @@ public class BaseEntityRecordService {
   }
 
 
+  /**
+   * Method used for entity consolidation
+   * @param org consolidated Organization to process
+   */
   protected void processRoleReference(Organization org) {
     if (org.getEuropeanaRoleIds() != null && !org.getEuropeanaRoleIds().isEmpty()) {
       List<Vocabulary> vocabs = vocabRepository.findByUri(org.getEuropeanaRoleIds());
@@ -569,8 +575,27 @@ public class BaseEntityRecordService {
     }
   }
 
+  /**
+   * Method used for entity consolidation
+   * @param entity consolidated Entities to process reference fields
+   */
+  public void processReferenceFields(Entity entity) {
+    if (EntityTypes.isOrganization(entity.getType())) {
+      Organization org = (Organization) entity;
+      // update country reference
+      processCountryReference(org);
 
-  protected void processCountryReference(Organization org) {
+      // update role reference
+      processRoleReference(org);
+    }
+  }
+  
+  
+  /**
+   * Method used for entity consolidation
+   * @param org consolidated Organization to process
+   */
+  void processCountryReference(Organization org) {
     // country reference
     if (StringUtils.isEmpty(org.getCountryId())) {
       return;
@@ -589,11 +614,23 @@ public class BaseEntityRecordService {
       EntityRecord orgCountry = entityRecordRepository.findByEntityId(europeanaCountryId, null);
       if (orgCountry != null) {
         org.setCountryRef(orgCountry);
+        //need to set the country during the consolidation so that it is available for indexing
+        setDereferencedCountry(org, orgCountry);
       } else if (logger.isWarnEnabled()) {
         logger.warn(
             "No country found in database for the entity id: {}. Cannot assign country reference to organization with id {}",
             europeanaCountryId, org.getEntityId());
       }
+    }
+  }
+
+  protected void setDereferencedCountry(Organization org, EntityRecord countryRecord) {
+    if (countryRecord != null) {
+      Place country = new Place();
+      country.setEntityId(countryRecord.getEntity().getEntityId());
+      country.setPrefLabel(countryRecord.getEntity().getPrefLabel());
+      country.setContext(null);
+      org.setCountry(country);
     }
   }
 

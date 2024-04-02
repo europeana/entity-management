@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -476,14 +477,6 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
     String metisResponse = loadFile(IntegrationTestUtils.PLACE_SWEDEN_XML);
     createEntity(europeanaMetadata, metisResponse, IntegrationTestUtils.PLACE_SWEDEN_URI);
     
-//    //forcefully change the country mapping uri to the right one
-//    List<CountryMapping> countryMap= entityRecordService.getCountryMapping();
-//    for(CountryMapping cm : countryMap) {
-//      if(cm.getZohoLabel().equals("Sweden, SE")) {
-//        cm.setEntityUri("http://data.europeana.eu/place/1");
-//      }
-//    }
-
     //2. register zoho GFM org
     europeanaMetadata = loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_GFM_ZOHO_JSON);
     Optional<Record> zohoRecord =
@@ -504,6 +497,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
         .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
         .andExpect(jsonPath("$.sameAs").isNotEmpty())
         .andExpect(jsonPath("$.country.prefLabel.en", is("Sweden")))
+        .andExpect(jsonPath("$.country.prefLabel.en", notNullValue()))
         .andExpect(jsonPath("$.country.latitude").doesNotExist()) //only the country prefLabel, id, and type should be present
         .andExpect(jsonPath("$.europeanaRole[0].prefLabel.en", is("Providing Institution")));
   }

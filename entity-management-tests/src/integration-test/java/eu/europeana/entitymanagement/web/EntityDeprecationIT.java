@@ -64,7 +64,7 @@ public class EntityDeprecationIT extends BaseWebControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
-    Optional<EntityRecord> dbRecordOptional = retrieveEntity(entityRecord.getEntityId());
+    Optional<EntityRecord> dbRecordOptional = retrieveEntityEvenIfDisabled(entityRecord.getEntityId());
     Assertions.assertTrue(dbRecordOptional.get().isDisabled());
 
     // confirm that Solr document no longer exists

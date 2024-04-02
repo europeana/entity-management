@@ -58,7 +58,6 @@ public class EntityComparator implements Comparator<Entity>, Serializable {
     return 0;
   }
 
-  @SuppressWarnings("unchecked")
   int compareContent(Entity e1, Entity e2) throws IllegalAccessException {
 
     List<Field> allObjectFieldsE1 = EntityUtils.getAllFields(e1.getClass());
@@ -74,6 +73,7 @@ public class EntityComparator implements Comparator<Entity>, Serializable {
     return 0;
   }
 
+  @SuppressWarnings("unchecked")
   private int compareEntityField(Entity e1, Entity e2, Field field) throws IllegalAccessException {
     Class<?> fieldType = field.getType();
 
@@ -148,7 +148,6 @@ public class EntityComparator implements Comparator<Entity>, Serializable {
     return 0;
   }
 
-  @SuppressWarnings("unchecked")
   private int compareMaps(Map<Object, Object> m1, Map<Object, Object> m2) {
     if (MapUtils.isEmpty(m1) && MapUtils.isEmpty(m2)) {
       // if both null or empty
@@ -166,6 +165,7 @@ public class EntityComparator implements Comparator<Entity>, Serializable {
     return getMapResults(m1, m2);
   }
 
+  @SuppressWarnings("unchecked")
   private int getMapResults(Map<Object, Object> m1, Map<Object, Object> m2) {
     for (Map.Entry<Object, Object> m1Elem : m1.entrySet()) {
       if (m2.containsKey(m1Elem.getKey())) {
