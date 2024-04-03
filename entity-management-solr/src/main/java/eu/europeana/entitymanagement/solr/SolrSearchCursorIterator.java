@@ -1,10 +1,5 @@
 package eu.europeana.entitymanagement.solr;
 
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.solr.exception.InvalidSearchQueryException;
-import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
-import eu.europeana.entitymanagement.solr.model.SolrEntity;
-import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,7 +12,7 @@ import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.beans.DocumentObjectBinder;
-import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.apache.solr.client.solrj.impl.BaseHttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
@@ -25,6 +20,11 @@ import org.apache.solr.common.params.CursorMarkParams;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.solr.exception.InvalidSearchQueryException;
+import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
+import eu.europeana.entitymanagement.solr.model.SolrEntity;
+import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 
 /**
  * Fetches documents from Solr using a cursor. See
@@ -69,7 +69,7 @@ public class SolrSearchCursorIterator {
 
     try {
       response = client.query(solrQuery);
-    } catch (HttpSolrClient.RemoteSolrException e) {
+    } catch (BaseHttpSolrClient.RemoteSolrException e) {
       throw handleRemoteSolrException(solrQuery, e);
     } catch (SolrServerException | IOException ex) {
       throw new SolrServiceException(
@@ -137,7 +137,7 @@ public class SolrSearchCursorIterator {
   }
 
   private SolrServiceException handleRemoteSolrException(
-      SolrQuery searchQuery, HttpSolrClient.RemoteSolrException e) {
+      SolrQuery searchQuery, BaseHttpSolrClient.RemoteSolrException e) {
     String remoteMessage = e.getMessage();
 
     if (remoteMessage.contains(UNDEFINED_FIELD)) {

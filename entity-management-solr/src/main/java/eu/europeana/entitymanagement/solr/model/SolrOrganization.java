@@ -11,7 +11,7 @@ import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.solr.SolrUtils;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
-import eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields;
+import static eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields.*;
 
 public class SolrOrganization extends SolrEntity<Organization> {
 
@@ -21,53 +21,55 @@ public class SolrOrganization extends SolrEntity<Organization> {
   @Field(EntitySolrFields.AGGREGATED_VIA)
   private List<String> aggregatedVia;
 
-  @Field(OrganizationSolrFields.DC_DESCRIPTION_ALL)
+  @Field(DC_DESCRIPTION_ALL)
   private Map<String, String> description;
 
-  @Field(OrganizationSolrFields.EDM_ACRONYM_ALL)
+  @Field(EDM_ACRONYM_ALL)
   private Map<String, List<String>> acronym;
 
-  @Field(OrganizationSolrFields.FOAF_LOGO)
+  @Field(FOAF_LOGO)
   private String logo;
 
-  @Field(OrganizationSolrFields.FOAF_HOMEPAGE)
+  @Field(FOAF_HOMEPAGE)
   private String homepage;
 
-  @Field(OrganizationSolrFields.FOAF_PHONE)
+  @Field(FOAF_PHONE)
   private List<String> phone;
 
-  @Field(OrganizationSolrFields.FOAF_MBOX)
+  @Field(FOAF_MBOX)
   private List<String> mbox;
 
-  //MAPPING TO BE ENABLED BACK IN THE NEXT VERSION - requires schema and ENtity API UPDATE
-  //@Field(OrganizationSolrFields.EUROPEANA_ROLE)
+  @Field(EUROPEANA_ROLE)
   private List<String> europeanaRole;
 
-  @Field(OrganizationSolrFields.COUNTRY)
-  private String country;
+  @Field(COUNTRY)
+  private List<String> country;
+  
+  @Field(COUNTRY_LABEL_ALL)
+  private Map<String, String> countryLabel;
 
-  @Field(OrganizationSolrFields.VCARD_HAS_ADDRESS)
+  @Field(VCARD_HAS_ADDRESS)
   private String hasAddress;
 
-  @Field(OrganizationSolrFields.VCARD_STREET_ADDRESS)
+  @Field(VCARD_STREET_ADDRESS)
   private String streetAddress;
 
-  @Field(OrganizationSolrFields.VCARD_LOCALITY)
+  @Field(VCARD_LOCALITY)
   private String locality;
 
-  @Field(OrganizationSolrFields.VCARD_REGION)
+  @Field(VCARD_REGION)
   private String region;
 
-  @Field(OrganizationSolrFields.VCARD_POSTAL_CODE)
+  @Field(VCARD_POSTAL_CODE)
   private String postalCode;
 
-  @Field(OrganizationSolrFields.VCARD_COUNTRYNAME)
+  @Field(VCARD_COUNTRYNAME)
   private String countryName;
 
-  @Field(OrganizationSolrFields.VCARD_POST_OFFICE_BOX)
+  @Field(VCARD_POST_OFFICE_BOX)
   private String postBox;
 
-  @Field(OrganizationSolrFields.VCARD_HAS_GEO)
+  @Field(VCARD_HAS_GEO)
   private String hasGeo;
 
   public SolrOrganization() {
@@ -88,7 +90,19 @@ public class SolrOrganization extends SolrEntity<Organization> {
     
     if(organization.getEuropeanaRoleIds()!=null) this.europeanaRole=new ArrayList<>(organization.getEuropeanaRoleIds());
     
-    this.country=organization.getCountryId();
+    this.country=new ArrayList<>();
+    String orgCountryId=organization.getCountryId();
+    String orgCoutryISO=organization.getCountryISO();
+    if(orgCountryId!=null) {
+      this.country.add(orgCountryId);
+    }
+    if(orgCoutryISO!=null) {
+      this.country.add(orgCoutryISO);
+    }
+    if(organization.getCountry() != null) {
+      this.setCountryLabel(organization.getCountry().getPrefLabel()); 
+    }
+    
     
     if (organization.getSameReferenceLinks() != null) {
       this.sameAs = new ArrayList<>(organization.getSameReferenceLinks());
@@ -113,7 +127,7 @@ public class SolrOrganization extends SolrEntity<Organization> {
       this.description =
           new HashMap<>(
               SolrUtils.normalizeStringMapByAddingPrefix(
-                  OrganizationSolrFields.DC_DESCRIPTION + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
+                  DC_DESCRIPTION + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
                   dcDescription));
     }
   }
@@ -123,7 +137,7 @@ public class SolrOrganization extends SolrEntity<Organization> {
       this.acronym =
           new HashMap<>(
               SolrUtils.normalizeStringListMapByAddingPrefix(
-                  OrganizationSolrFields.EDM_ACRONYM + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
+                  EDM_ACRONYM + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
                   acronym));
     }
   }
@@ -197,7 +211,21 @@ public class SolrOrganization extends SolrEntity<Organization> {
     return aggregatedVia;
   }
   
-    public String getCountry() {
+    public List<String> getCountry() {
     return country;
   }
+
+    public Map<String, String> getCountryLabel() {
+      return countryLabel;
+    }
+
+    public void setCountryLabel(Map<String, String> countryLabel) {
+      if (MapUtils.isNotEmpty(countryLabel)) {
+        this.countryLabel =
+            new HashMap<>(
+                SolrUtils.normalizeStringMapByAddingPrefix(
+                    COUNTRY_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
+                    countryLabel));
+      }
+    }
 }

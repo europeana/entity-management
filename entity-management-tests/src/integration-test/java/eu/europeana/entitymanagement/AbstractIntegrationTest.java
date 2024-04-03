@@ -29,11 +29,14 @@ import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.exception.EntityNotFoundException;
+import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
 import eu.europeana.entitymanagement.testutils.MongoContainer;
 import eu.europeana.entitymanagement.testutils.SolrContainer;
 import eu.europeana.entitymanagement.testutils.TestConfig;
+import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.MetisDereferenceUtils;
 import eu.europeana.entitymanagement.web.service.ConceptSchemeService;
@@ -274,7 +277,7 @@ public abstract class AbstractIntegrationTest {
     entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId());
 
     // return entityRecord version with consolidated entity
-    return entityRecordService.retrieveByEntityId(savedRecord.getEntityId()).orElseThrow();
+    return entityRecordService.retrieveEntityRecord(savedRecord.getEntityId(), EntityProfile.dereference.name(), false);
   }
 
   public static String loadFile(String resourcePath) throws IOException {
@@ -283,7 +286,19 @@ public abstract class AbstractIntegrationTest {
     return IOUtils.toString(is, StandardCharsets.UTF_8).replace("\n", "");
   }
 
-  public Optional<EntityRecord> retrieveEntity(String entityId) {
-    return entityRecordService.retrieveByEntityId(entityId);
+  /**
+   * @Deprecated
+   * @deprecated should use the entityRecordService.retrieveEntityRecord directly
+   * @param entityId
+   * @return
+   * @throws EntityRemovedException 
+   * @throws EntityNotFoundException 
+   */
+  public Optional<EntityRecord> retrieveEntityEvenIfDisabled(String entityId){
+    try {
+      return Optional.of(entityRecordService.retrieveEntityRecord(entityId, EntityProfile.dereference.name(), true));
+    } catch (EntityNotFoundException | EntityRemovedException e) {
+      return Optional.empty();
+    }
   }
 }

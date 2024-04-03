@@ -71,7 +71,6 @@
 		<morphia.version>2.1.4</morphia.version>
 		<mock-webserver.version>4.9.0</mock-webserver.version>
 		<testcontainers.version>1.16.0</testcontainers.version>
-		<solrj.version>7.7.2</solrj.version>
 		<apache.commons.validator.version>1.7</apache.commons.validator.version>
 		<zoho-sdk.version>3.0.1</zoho-sdk.version>
 		<jaxb.version>2.3.3</jaxb.version>

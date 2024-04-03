@@ -42,8 +42,8 @@ public class FailedTask {
 
   private Instant modified;
 
-  private FailedTask() {
-    // default constructor
+  FailedTask() {
+    // default constructor used by morphia
   }
 
   public FailedTask(

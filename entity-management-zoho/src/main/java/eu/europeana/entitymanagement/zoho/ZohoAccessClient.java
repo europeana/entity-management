@@ -24,7 +24,6 @@ import com.zoho.crm.api.SDKConfig;
 import com.zoho.crm.api.UserSignature;
 import com.zoho.crm.api.dc.DataCenter.Environment;
 import com.zoho.crm.api.dc.EUDataCenter;
-import com.zoho.crm.api.dc.USDataCenter;
 import com.zoho.crm.api.exception.SDKException;
 import com.zoho.crm.api.record.APIException;
 import com.zoho.crm.api.record.ActionHandler;

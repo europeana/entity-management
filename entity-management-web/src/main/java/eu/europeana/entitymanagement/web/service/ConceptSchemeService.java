@@ -140,4 +140,8 @@ public class ConceptSchemeService {
     logger.warn("The concept scheme collection was deleted!");
     this.emConceptSchemeRepo.dropCollection();
   }
+
+  SolrService getSolrService() {
+    return solrService;
+  }
 }

@@ -28,7 +28,6 @@ import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
-import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.mongo.repository.ZohoSyncRepository;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
@@ -48,8 +47,6 @@ public class BaseZohoAccess {
   
   final EntityRecordService entityRecordService;
 
-  final EntityRecordRepository entityRecordRepository;
-
   final EntityUpdateService entityUpdateService;
 
   final EntityManagementConfiguration emConfiguration;
@@ -65,7 +62,6 @@ public class BaseZohoAccess {
   public BaseZohoAccess(
       EntityRecordService entityRecordService,
       EntityUpdateService entityUpdateService,
-      EntityRecordRepository entityRecordRepository,
       EntityManagementConfiguration emConfiguration,
       DataSources datasources,
       ZohoConfiguration zohoConfiguration,
@@ -73,7 +69,6 @@ public class BaseZohoAccess {
       ZohoSyncRepository zohoSyncRepo) {
     this.entityRecordService = entityRecordService;
     this.entityUpdateService = entityUpdateService;
-    this.entityRecordRepository = entityRecordRepository;
     this.emConfiguration = emConfiguration;
     this.datasources = datasources;
     this.zohoConfiguration = zohoConfiguration;

@@ -14,7 +14,6 @@ import dev.morphia.query.experimental.filters.Filter;
 import dev.morphia.query.internal.MorphiaCursor;
 import eu.europeana.entitymanagement.batch.repository.ScheduledTaskRepository;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
-import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 
@@ -91,14 +90,14 @@ public class ScheduledTaskService {
         repository.getTasksWithFailures(maxFailedTaskRetries, updateType)) {
 
       while (cursor.hasNext()) {
-        repository.deleteScheduledTask(cursor.next().getEntityId());
+        repository.deleteScheduledTasks(cursor.next().getEntityId());
       }
     }
   }
 
-  public List<BatchEntityRecord> getEntityRecordsForTasks(
+  public List<ScheduledTask> getTasks(
       int start, int count, Filter[] queryFilters) {
-    return repository.getEntityRecordsForTasks(start, count, queryFilters);
+    return repository.getTasks(start, count, queryFilters);
   }
 
   /**

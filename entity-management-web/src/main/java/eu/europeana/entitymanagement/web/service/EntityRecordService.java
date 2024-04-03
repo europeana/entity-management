@@ -71,7 +71,7 @@ public class EntityRecordService extends BaseEntityRecordService {
   @Autowired
   public EntityRecordService(EntityRecordRepository entityRecordRepository,
       VocabularyRepository vocabRepository, EntityManagementConfiguration emConfiguration,
-      ZohoConfiguration zohoConfiguration, DataSources datasources, SolrService solrService){
+      ZohoConfiguration zohoConfiguration, DataSources datasources, SolrService solrService) {
 
     super(entityRecordRepository, vocabRepository, emConfiguration, zohoConfiguration, datasources,
         solrService);
@@ -81,7 +81,14 @@ public class EntityRecordService extends BaseEntityRecordService {
     return entityRecordRepository.existsByEntityId(entityId);
   }
 
-  public Optional<EntityRecord> retrieveByEntityId(String entityId) {
+  /**
+   * Return the entity record from the database, only for internal use in this class
+   * Other classes should use use {@link #retrieveEntityRecord(String, String, boolean)} 
+   * @param entityId
+   * @param profiles
+   * @return
+   */
+  private Optional<EntityRecord> retrieveByEntityId(String entityId) {
     return Optional.ofNullable(entityRecordRepository.findByEntityId(entityId, null));
   }
 
@@ -94,29 +101,36 @@ public class EntityRecordService extends BaseEntityRecordService {
    * @return
    */
   public List<EntityRecord> retrieveMultipleByEntityIds(List<String> entityIds,
-      boolean excludeDisabled, boolean fetchFullRecord) {
-    List<EntityRecord> resp = entityRecordRepository.findByEntityIds(entityIds, excludeDisabled, fetchFullRecord);
-    //for the organizations, populate the aggregatesFrom field
-    if(fetchFullRecord && !resp.isEmpty()) {
-      for(EntityRecord record : resp) {
-        setAggregatesFromForOrganizations(record.getEntity());
+      boolean excludeDisabled, boolean fetchFullRecord, String profiles) {
+    List<EntityRecord> resp =
+        entityRecordRepository.findByEntityIds(entityIds, excludeDisabled, fetchFullRecord);
+    // for the organizations, populate dinamically generated fields
+    if (fetchFullRecord && !resp.isEmpty()) {
+      for (EntityRecord record : resp) {
+        postProcessOrganizationRetrieval(profiles, record);
       }
     }
-    return resp;  
+    return resp;
   }
-  
-  public List<EntityRecord> retrieveMultipleByEntityIdsOrCoreference(List<String> entityIds) {
-    List<EntityRecord> records=entityRecordRepository.findByEntityIdsOrCoreference(entityIds);
-    //sorting the list in order of the input ids, and exclude duplicates
-    List<EntityRecord> recordsSorted=new ArrayList<>();
-    //for improved performance use a hashset to verify if the record was added to the sorted list 
+
+  public List<EntityRecord> retrieveMultipleByEntityIdsOrCoreference(List<String> entityIds, String profiles) {
+    List<EntityRecord> records = entityRecordRepository.findByEntityIdsOrCoreference(entityIds);
+    // sorting the list in order of the input ids, and exclude duplicates
+    List<EntityRecord> recordsSorted = new ArrayList<>();
+    // for improved performance use a hashset to verify if the record was added to the sorted list
     Set<String> foundIds = new HashSet<>(entityIds.size());
+    EntityRecord foundRecord;
     for (String id : entityIds) {
-      Optional<EntityRecord> recordIdMatched= records.stream().filter(er -> id.equals(er.getEntityId()) || er.getEntity().getSameReferenceLinks().contains(id)).findFirst();
-      //if the record was found and was not allready added to the sorted list
-      if(recordIdMatched.isPresent() && !foundIds.contains(recordIdMatched.get().getEntityId())) {
-          recordsSorted.add(recordIdMatched.get());
-          foundIds.add(recordIdMatched.get().getEntityId());
+      Optional<EntityRecord> recordIdMatched = records.stream().filter(
+          er -> id.equals(er.getEntityId()) || er.getEntity().getSameReferenceLinks().contains(id))
+          .findFirst();
+      // if the record was found and was not allready added to the sorted list
+      if (recordIdMatched.isPresent() && !foundIds.contains(recordIdMatched.get().getEntityId())) {
+        foundRecord = recordIdMatched.get();
+        recordsSorted.add(foundRecord);
+        //populate dynamic fields for organizations
+        postProcessOrganizationRetrieval(profiles, foundRecord);
+        foundIds.add(foundRecord.getEntityId());
       }
     }
     return recordsSorted;
@@ -140,43 +154,32 @@ public class EntityRecordService extends BaseEntityRecordService {
       throw new EntityRemovedException(
           String.format(EntityRecordUtils.ENTITY_ID_REMOVED_MSG, entityUri));
     }
-    
-    //for the organizations, populate the aggregatesFrom field
-    setAggregatesFromForOrganizations(entityRecord.getEntity());
-    
 
-    // dereference morphia @Reference fields (e.g. the organization country)
-    if (EntityProfile.hasDereferenceProfile(profiles)) {
-      dereferenceLinkedEntities(entityRecord);
-    }
+    // the method checks if the record contains an organization
+    postProcessOrganizationRetrieval(profiles, entityRecord);
 
     return entityRecord;
   }
 
-  private void setAggregatesFromForOrganizations(Entity entity) {
-    if(EntityTypes.Organization.getEntityType().equals(entity.getType())) {
-      Organization org = (Organization) entity;
-      org.setAggregatesFrom(entityRecordRepository.findAggregatesFrom(entity.getEntityId()));
+  void postProcessOrganizationRetrieval(String profiles, EntityRecord entityRecord) {
+    if (EntityTypes.isOrganization(entityRecord.getEntity().getType())) {
+      // for the organizations, populate the aggregatesFrom field
+      Organization org = (Organization) entityRecord.getEntity();
+      org.setAggregatesFrom(entityRecordRepository.findAggregatesFrom(org.getEntityId()));
+
+      // dereference morphia @Reference fields (e.g. the organization country)
+      if (EntityProfile.hasDereferenceProfile(profiles)) {
+        dereferenceLinkedEntities(org);
+      }
     }
   }
   
-  void dereferenceLinkedEntities(EntityRecord entityRecord) {
-    // dereference links for organizations
-    if (EntityTypes.isOrganization(entityRecord.getEntity().getType())) {
-      dereferenceLinkedEntities((Organization) entityRecord.getEntity());
-    }
-  }
-
-  private void dereferenceLinkedEntities(Organization org) {
+  public void dereferenceLinkedEntities(Organization org) {
     // dereference country
     if (org.getCountryId() != null) {
-      EntityRecord countryRecord = entityRecordRepository.findByEntityId(org.getCountryId(), new String[] {EntityRecordFields.ENTITY});
-      if (countryRecord != null) {
-        Place country = new Place();
-        country.setEntityId(countryRecord.getEntity().getEntityId());
-        country.setPrefLabel(countryRecord.getEntity().getPrefLabel());
-        org.setCountry(country);
-      }
+      EntityRecord countryRecord = entityRecordRepository.findByEntityId(org.getCountryId(),
+          new String[] {EntityRecordFields.ENTITY});
+      setDereferencedCountry(org, countryRecord);
     }
     // dereference role
     if (org.getEuropeanaRoleIds() != null && !org.getEuropeanaRoleIds().isEmpty()) {
@@ -212,7 +215,8 @@ public class EntityRecordService extends BaseEntityRecordService {
     } else if (corefEntities.size() == 1) {
       // found alternative entity
       String redirectionEntityId = corefEntities.get(0).getEntityId();
-      return EntityRecordUtils.buildRedirectionLocation(identifier, redirectionEntityId, request.getRequestURI(), request.getQueryString());
+      return EntityRecordUtils.buildRedirectionLocation(identifier, redirectionEntityId,
+          request.getRequestURI(), request.getQueryString());
     } else {
       throw entityNotFoundException;
     }
@@ -229,22 +233,22 @@ public class EntityRecordService extends BaseEntityRecordService {
    * @throws MultipleChoicesException if multiple candidates are found for redirection, typically
    *         generated by inconsistencies in the database
    */
-  public String getRedirectUriWhenDeprecated(EntityRecord deprecatedEntity,  String identifier,
-      HttpServletRequest request)
-      throws EntityRemovedException, MultipleChoicesException {
+  public String getRedirectUriWhenDeprecated(EntityRecord deprecatedEntity, String identifier,
+      HttpServletRequest request) throws EntityRemovedException, MultipleChoicesException {
     // search by the entity id, using the corefs of the disabled entity
     List<String> allCorefEuropeanaIds = deprecatedEntity.getEntity().getSameReferenceLinks()
         .stream().filter(el -> el.startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI))
         .collect(Collectors.toList());
     List<EntityRecord> entitiesRedirect =
-        retrieveMultipleByEntityIds(allCorefEuropeanaIds, true, false);
+        retrieveMultipleByEntityIds(allCorefEuropeanaIds, true, false, null);
     if (entitiesRedirect.size() > 1) {
       throw new MultipleChoicesException(String.format(
           EntityRecordUtils.MULTIPLE_CHOICES_FOR_REDIRECTION_MSG, deprecatedEntity.getEntityId(),
           EntityRecordUtils.getEntityIds(entitiesRedirect).toString()));
     } else if (entitiesRedirect.size() == 1) {
       String redirectionEntityId = entitiesRedirect.get(0).getEntityId();
-      return EntityRecordUtils.buildRedirectionLocation(identifier, redirectionEntityId, request.getRequestURI(), request.getQueryString());
+      return EntityRecordUtils.buildRedirectionLocation(identifier, redirectionEntityId,
+          request.getRequestURI(), request.getQueryString());
     } else {
       throw new EntityRemovedException(
           String.format(EntityRecordUtils.ENTITY_ID_REMOVED_MSG, deprecatedEntity.getEntityId()));
@@ -359,12 +363,31 @@ public class EntityRecordService extends BaseEntityRecordService {
   public void enableEntityRecord(EntityRecord entityRecord) throws EntityUpdateException {
     // disabled records have a date value (indicating when they were disabled)
     entityRecord.setDisabled(null);
-    saveEntityRecord(entityRecord);
+    EntityRecord savedEntityRecord = saveEntityRecord(entityRecord);
 
     // entity needs to be added back to the solr index
+    indexDereferencedEntity(savedEntityRecord);
+  }
+
+  /**
+   * Method for reindexing the entity record. In case of organizations, the record is read again
+   * from databases using dereference profile
+   * 
+   * @param entityRecord entity record
+   * @throws EntityUpdateException thrown if the retrieval or indexing fails
+   */
+  public void indexDereferencedEntity(EntityRecord entityRecord) throws EntityUpdateException {
     try {
-      solrService.storeEntity(createSolrEntity(entityRecord));
-    } catch (SolrServiceException e) {
+      EntityRecord recordToIndex;
+      // for organizations we need dereference
+      if (EntityTypes.isOrganization(entityRecord.getEntity().getType())) {
+        recordToIndex = retrieveEntityRecord(entityRecord.getEntityId(),
+            EntityProfile.dereference.name(), false);
+      } else {
+        recordToIndex = entityRecord;
+      }
+      solrService.storeEntity(createSolrEntity(recordToIndex));
+    } catch (SolrServiceException | EntityNotFoundException | EntityRemovedException e) {
       throw new EntityUpdateException(
           "Cannot create solr record for entity with id: " + entityRecord.getEntityId(), e);
     }
@@ -859,22 +882,29 @@ public class EntityRecordService extends BaseEntityRecordService {
     europeanaProxy.getProxyIn().setModified(Date.from(now()));
   }
 
- 
+
 
   public void dropRepository() {
     this.entityRecordRepository.dropCollection();
   }
 
   /**
-   * Fetches records matching the provided filter(s)
+   * Fetches a record page matching the provided filter(s) and profile
+   * Use dereference profile to retrieve dereferenced entities
    *
-   * @param start
-   * @param count
-   * @param queryFilters
-   * @return
+   * @param start the start index of the records page
+   * @param limit the number of records to retrieve
+   * @param queryFilters filters to be applied for retrieval
+   * @param profiles the profiles to be applied
+   * @return the list or retrieved records
    */
-  public List<EntityRecord> findEntitiesWithFilter(int start, int count, Filter[] queryFilters) {
-    return this.entityRecordRepository.findWithCount(start, count, queryFilters);
+  public List<EntityRecord> findEntitiesWithFilter(int start, int limit, Filter[] queryFilters, String profiles) {
+    List<EntityRecord> records = entityRecordRepository.find(start, limit, queryFilters);
+    //need to post process organizations, when dereference is used 
+    for (EntityRecord entityRecord : records) {
+      postProcessOrganizationRetrieval(profiles, entityRecord);
+    }
+    return records;
   }
 
   private void updateEntityAggregation(EntityRecord entityRecord, String entityId, Date timestamp) {
@@ -962,15 +992,5 @@ public class EntityRecordService extends BaseEntityRecordService {
       throw new EntityCreationException(message, e);
     }
   }
-
-  public void processReferenceFields(Entity entity) {
-    if (EntityTypes.isOrganization(entity.getType())) {
-      Organization org = (Organization) entity;
-      // update country reference
-      processCountryReference(org);
-
-      // update role reference
-      processRoleReference(org);
-    }
-  }
+ 
 }

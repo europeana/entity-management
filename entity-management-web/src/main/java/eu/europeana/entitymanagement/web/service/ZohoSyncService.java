@@ -23,7 +23,6 @@ import eu.europeana.entitymanagement.config.AppAutoconfig;
 import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
-import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
 import eu.europeana.entitymanagement.mongo.repository.ZohoSyncRepository;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
@@ -41,13 +40,13 @@ public class ZohoSyncService extends BaseZohoAccess {
 
   @Autowired
   public ZohoSyncService(EntityRecordService entityRecordService,
-      EntityUpdateService entityUpdateService, EntityRecordRepository entityRecordRepository,
+      EntityUpdateService entityUpdateService,
       EntityManagementConfiguration emConfiguration, DataSources datasources,
       ZohoConfiguration zohoConfiguration,
       SolrService solrService,
       ZohoSyncRepository zohoSyncRepo) {
 
-    super(entityRecordService, entityUpdateService, entityRecordRepository, emConfiguration,
+    super(entityRecordService, entityUpdateService, emConfiguration,
         datasources, zohoConfiguration, solrService, zohoSyncRepo);
   }
 
@@ -263,8 +262,9 @@ public class ZohoSyncService extends BaseZohoAccess {
    */
   List<EntityRecord> findEntityRecordsByProxyId(Set<String> modifiedInZoho) {
     Filter proxyIdsFilter = Filters.in("proxies.proxyId", modifiedInZoho);
-    return entityRecordRepository.findWithCount(0, modifiedInZoho.size(),
-        new Filter[] {proxyIdsFilter});
+    //save to index operations are run asynchronuously, no need to dereference organizations here
+    return entityRecordService.findEntitiesWithFilter(0, modifiedInZoho.size(), new Filter[] {proxyIdsFilter}, null);
+    
   }
 
   private void addOperation(BatchOperations operations, Long zohoId, Record zohoOrg,
