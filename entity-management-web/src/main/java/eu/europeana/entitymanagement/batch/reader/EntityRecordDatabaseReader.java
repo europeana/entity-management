@@ -13,7 +13,6 @@ import eu.europeana.entitymanagement.definitions.batch.ScheduledTaskUtils;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 
 /** {@link ItemReader} that reads documents from MongoDB via a paging technique. */

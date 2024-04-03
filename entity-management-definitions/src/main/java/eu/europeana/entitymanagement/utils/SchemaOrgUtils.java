@@ -652,8 +652,10 @@ public final class SchemaOrgUtils {
     } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
         | InvocationTargetException | NoSuchMethodException | SecurityException e) {
       resource = new Thing();
-      LOG.debug("Cannot instantiate object of class {} . Instance of Thing is used instead!",
-          referenceClass.getCanonicalName(), e);
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Cannot instantiate object of class {} . Instance of Thing is used instead!",
+            referenceClass.getCanonicalName(), e);
+      }
     }
     return resource;
   }

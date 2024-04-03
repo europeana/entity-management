@@ -132,8 +132,12 @@ public class ScheduledTaskRepository implements InitializingBean {
             or(updateType.stream().map(u -> eq(UPDATE_TYPE, u.getValue())).toArray(Filter[]::new)))
         .delete(MULTI_DELETE_OPTS).getDeletedCount();
   }
-
-  public void deleteScheduledTask(String entityId) {
+  
+  /**
+   * Delete scheduled tasks associated to the given entity
+   * @param entityId the ID of the entity for which to delete the scheduled tasks
+   */
+  public void deleteScheduledTasks(String entityId) {
     datastore.find(ScheduledTask.class).filter(eq(ENTITY_ID, entityId)).delete();
   }
 
@@ -155,6 +159,11 @@ public class ScheduledTaskRepository implements InitializingBean {
 
   }
 
+  /**
+   * Retrieve the first scheduled task for the given entity
+   * @param entityId the id of the entity
+   * @return the first task found in the database
+   */
   public ScheduledTask getTask(String entityId) {
     return datastore.find(ScheduledTask.class).filter(eq(ENTITY_ID, entityId)).first();
   }
@@ -180,6 +189,9 @@ public class ScheduledTaskRepository implements InitializingBean {
   /**
    * Gets all ScheduledTasks with failures, whose failureCount is above the maxFailedTaskRetries
    * value. Note: this method returns a cursor, which callers are responsible for closing
+   * @param maxFailedTaskRetries maximum number of failed tasks to be used as filter
+   * @param updateType a list of scheduled tasks types to be used for filtering
+   * @return the database cursor to access scheduled tasks
    */
   public MorphiaCursor<ScheduledTask> getTasksWithFailures(int maxFailedTaskRetries,
       List<? extends ScheduledTaskType> updateType) {

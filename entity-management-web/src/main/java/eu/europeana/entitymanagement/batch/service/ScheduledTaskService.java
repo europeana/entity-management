@@ -90,7 +90,7 @@ public class ScheduledTaskService {
         repository.getTasksWithFailures(maxFailedTaskRetries, updateType)) {
 
       while (cursor.hasNext()) {
-        repository.deleteScheduledTask(cursor.next().getEntityId());
+        repository.deleteScheduledTasks(cursor.next().getEntityId());
       }
     }
   }
