@@ -42,7 +42,8 @@ public class ScheduledTaskDatabaseReader extends BaseDatabaseReader<BatchEntityR
         scheduledTaskService.getTasks(start, pageSize, scheduledTaskFilter);
     
     List<String> entityIds = scheduledTasks.stream().map(st -> st.getEntityId()).toList();
-    List<EntityRecord> records = entityRecordService.retrieveMultipleByEntityIds(entityIds, false, true, EntityProfile.dereference.name());
+    //no need to use the dereference profile here as the consolidation takes care of processing references
+    List<EntityRecord> records = entityRecordService.retrieveMultipleByEntityIds(entityIds, false, true, null);
     List<BatchEntityRecord> batchRecords = toBatchEntityRecords(records, scheduledTasks);
 
     if (logger.isDebugEnabled()) {

@@ -41,9 +41,9 @@ public class EntityRecordDatabaseReader extends BaseDatabaseReader<BatchEntityRe
     // number of items to skip when reading. pageSize is incremented in parent class every time
     // this method is invoked
     int start = page * pageSize;
-    //need to use dereference profile in order to correctly index organizations
+    //the dereference profile is not needed here as the consolidation is taking care of processing references
     List<EntityRecord> result =
-        entityRecordService.findEntitiesWithFilter(start, pageSize, queryFilters, EntityProfile.dereference.name());
+        entityRecordService.findEntitiesWithFilter(start, pageSize, queryFilters, null);
 
     List<BatchEntityRecord> batchEntityRecords = toBatchEntityRecords(result, scheduledTaskType);
 

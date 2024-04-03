@@ -294,7 +294,11 @@ public abstract class AbstractIntegrationTest {
    * @throws EntityRemovedException 
    * @throws EntityNotFoundException 
    */
-  public Optional<EntityRecord> retrieveEntityEvenIfDisabled(String entityId) throws EntityNotFoundException, EntityRemovedException {
-    return Optional.of(entityRecordService.retrieveEntityRecord(entityId, EntityProfile.dereference.name(), true));
+  public Optional<EntityRecord> retrieveEntityEvenIfDisabled(String entityId){
+    try {
+      return Optional.of(entityRecordService.retrieveEntityRecord(entityId, EntityProfile.dereference.name(), true));
+    } catch (EntityNotFoundException | EntityRemovedException e) {
+      return Optional.empty();
+    }
   }
 }
