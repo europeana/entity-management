@@ -101,13 +101,21 @@ public abstract class SolrEntity<T extends Entity> {
     setHiddenLabelMap(entity.getHiddenLabel());
 
     setIsShownBy(entity.getIsShownBy());
-    if (entity.getIdentifier() != null) this.identifier = new ArrayList<>(entity.getIdentifier());
-    if (entity.getIsRelatedTo() != null)
+    if (entity.getIdentifier() != null) {
+      this.identifier = new ArrayList<>(entity.getIdentifier());
+    }
+    if (entity.getIsRelatedTo() != null){
       this.isRelatedTo = new ArrayList<>(entity.getIsRelatedTo());
-    if (entity.getHasPart() != null) this.hasPart = new ArrayList<>(entity.getHasPart());
-    if (entity.getIsPartOfArray() != null)
+    }
+    if (entity.getHasPart() != null) {
+      this.hasPart = new ArrayList<>(entity.getHasPart());
+    }
+    if (entity.getIsPartOfArray() != null) {
       this.isPartOf = new ArrayList<>(entity.getIsPartOfArray());
-    if (entity.getInScheme() != null) this.inScheme = new ArrayList<>(entity.getInScheme());
+    }
+    if (entity.getInScheme() != null) {
+      this.inScheme = new ArrayList<>(entity.getInScheme());
+    }
 
     if(entity.getIsAggregatedBy() != null) {
       this.created = entity.getIsAggregatedBy().getCreated();

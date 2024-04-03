@@ -30,11 +30,10 @@ public abstract class BaseDatabaseReader<T> extends AbstractPaginatedDataItemRea
   }
   
   List<BatchEntityRecord> toBatchEntityRecords(List<EntityRecord> result, ScheduledTaskType scheduledTaskType) {
-    List<BatchEntityRecord> batchEntityRecords =
+    return
         result.stream()
             .map(rec -> new BatchEntityRecord(rec, scheduledTaskType))
             .collect(Collectors.toList());
-    return batchEntityRecords;
   }
   
   List<BatchEntityRecord> toBatchEntityRecords(List<EntityRecord> result, List<ScheduledTask> scheduledTasks) {
@@ -43,10 +42,9 @@ public abstract class BaseDatabaseReader<T> extends AbstractPaginatedDataItemRea
         scheduledTasks.stream()
             .collect(Collectors.toMap(ScheduledTask::getEntityId, ScheduledTask::getUpdateType));
     
-    List<BatchEntityRecord> batchEntityRecords =
-        result.stream()
+    return result.stream()
             .map(rec -> new BatchEntityRecord(rec, taskTypeMap.get(rec.getEntityId())))
             .collect(Collectors.toList());
-    return batchEntityRecords;
+    
   }
 }

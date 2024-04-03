@@ -23,6 +23,7 @@ import org.bson.Document;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 import com.mongodb.bulk.BulkWriteResult;
 import com.mongodb.client.MongoCollection;
@@ -64,8 +65,8 @@ public class ScheduledTaskRepository implements InitializingBean {
    * @param tasks list of scheduled tasks
    * @return BulkWriteResult of db query
    */
-  public BulkWriteResult markAsProcessed(List<ScheduledTask> tasks) {
-    List<WriteModel<ScheduledTask>> updates = new ArrayList<>();
+  public BulkWriteResult markAsProcessed(@NonNull List<ScheduledTask> tasks) {
+    List<WriteModel<ScheduledTask>> updates = new ArrayList<>(tasks.size());
     for (ScheduledTask task : tasks) {
       updates.add(new UpdateOneModel<>(
           // query filters on updateType
@@ -83,11 +84,11 @@ public class ScheduledTaskRepository implements InitializingBean {
    * @param tasks list of tasks
    * @return BulkWriteResult of db query
    */
-  public BulkWriteResult upsertBulk(List<ScheduledTask> tasks) {
+  public BulkWriteResult upsertBulk(@NonNull List<ScheduledTask> tasks) {
     MongoCollection<ScheduledTask> collection =
         datastore.getMapper().getCollection(ScheduledTask.class);
 
-    List<WriteModel<ScheduledTask>> updates = new ArrayList<>();
+    List<WriteModel<ScheduledTask>> updates = new ArrayList<>(tasks.size());
 
     for (ScheduledTask task : tasks) {
       Document updateDoc = new Document(ENTITY_ID, task.getEntityId())
