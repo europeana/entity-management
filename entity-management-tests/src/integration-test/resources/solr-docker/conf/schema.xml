@@ -498,7 +498,7 @@
 			multiValued="true" />
 		<!-- prefLabels for Organization country -->
 		<dynamicField name="countryLabel.*" type="string"
-			indexed="false" stored="true" multiValued="true" docValues="true" />
+			indexed="false" stored="true" multiValued="false" docValues="true" />
 			
 		<!-- TODO: alias -->
 		<!-- Determine the top resource linked through edm:isPartOf -->
