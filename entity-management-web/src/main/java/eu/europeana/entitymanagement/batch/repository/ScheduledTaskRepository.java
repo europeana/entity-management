@@ -1,10 +1,10 @@
 package eu.europeana.entitymanagement.batch.repository;
 
 import static dev.morphia.query.Sort.ascending;
-import static dev.morphia.query.experimental.filters.Filters.eq;
-import static dev.morphia.query.experimental.filters.Filters.gte;
-import static dev.morphia.query.experimental.filters.Filters.in;
-import static dev.morphia.query.experimental.filters.Filters.or;
+import static dev.morphia.query.filters.Filters.eq;
+import static dev.morphia.query.filters.Filters.gte;
+import static dev.morphia.query.filters.Filters.in;
+import static dev.morphia.query.filters.Filters.or;
 import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.CREATED;
 import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.DOC_SET;
 import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.DOC_SET_ON_INSERT;
@@ -30,12 +30,12 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.UpdateOneModel;
 import com.mongodb.client.model.WriteModel;
 import dev.morphia.Datastore;
-import dev.morphia.aggregation.experimental.stages.Lookup;
-import dev.morphia.aggregation.experimental.stages.Projection;
-import dev.morphia.aggregation.experimental.stages.Unwind;
+import dev.morphia.aggregation.stages.Lookup;
+import dev.morphia.aggregation.stages.Projection;
+import dev.morphia.aggregation.stages.Unwind;
 import dev.morphia.query.FindOptions;
-import dev.morphia.query.experimental.filters.Filter;
-import dev.morphia.query.internal.MorphiaCursor;
+import dev.morphia.query.MorphiaCursor;
+import dev.morphia.query.filters.Filter;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
@@ -55,7 +55,8 @@ public class ScheduledTaskRepository implements InitializingBean {
 
   @Override
   public void afterPropertiesSet() {
-    datastore.ensureIndexes(ScheduledTask.class);
+    //SG: TODO should be created by the datastore, need to check
+    //datastore.ensureIndexes(ScheduledTask.class);
   }
 
   /**
@@ -75,7 +76,7 @@ public class ScheduledTaskRepository implements InitializingBean {
           new Document(DOC_SET, new Document(HAS_BEEN_PROCESSED, task.hasBeenProcessed())
               .append(MODIFIED, task.getModified()))));
     }
-    return datastore.getMapper().getCollection(ScheduledTask.class).bulkWrite(updates);
+    return datastore.getCollection(ScheduledTask.class).bulkWrite(updates);
   }
 
   /**
@@ -86,7 +87,7 @@ public class ScheduledTaskRepository implements InitializingBean {
    */
   public BulkWriteResult upsertBulk(@NonNull List<ScheduledTask> tasks) {
     MongoCollection<ScheduledTask> collection =
-        datastore.getMapper().getCollection(ScheduledTask.class);
+        datastore.getCollection(ScheduledTask.class);
 
     List<WriteModel<ScheduledTask>> updates = new ArrayList<>(tasks.size());
 
@@ -183,7 +184,7 @@ public class ScheduledTaskRepository implements InitializingBean {
   }
 
   public void dropCollection() {
-    datastore.getMapper().getCollection(ScheduledTask.class).drop();
+    datastore.getCollection(ScheduledTask.class).drop();
   }
 
   /**

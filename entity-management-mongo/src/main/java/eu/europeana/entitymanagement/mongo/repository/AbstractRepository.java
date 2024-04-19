@@ -1,10 +1,10 @@
 package eu.europeana.entitymanagement.mongo.repository;
 
-import static dev.morphia.query.experimental.filters.Filters.eq;
+import static dev.morphia.query.filters.Filters.eq;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MAJORITY_WRITE_MODIFY_OPTS;
 
 import dev.morphia.Datastore;
-import dev.morphia.query.experimental.updates.UpdateOperators;
+import dev.morphia.query.updates.UpdateOperators;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.EntityIdGenerator;
 import javax.annotation.Resource;

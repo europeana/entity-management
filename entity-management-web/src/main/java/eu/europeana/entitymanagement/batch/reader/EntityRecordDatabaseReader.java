@@ -7,7 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.lang.NonNull;
-import dev.morphia.query.experimental.filters.Filter;
+import dev.morphia.query.filters.Filter;
 import eu.europeana.entitymanagement.batch.utils.BatchUtils;
 import eu.europeana.entitymanagement.definitions.batch.ScheduledTaskUtils;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;

@@ -1,6 +1,6 @@
 package eu.europeana.entitymanagement.mongo.repository;
 
-import static dev.morphia.query.experimental.filters.Filters.eq;
+import static dev.morphia.query.filters.Filters.eq;
 
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.ConceptSchemeFields;
@@ -32,7 +32,7 @@ public class ConceptSchemeRepository extends AbstractRepository {
 
   /** Drops the ConceptScheme collection. */
   public void dropCollection() {
-    getDataStore().getMapper().getCollection(ConceptScheme.class).drop();
+    getDataStore().getCollection(ConceptScheme.class).drop();
   }
 
   public ConceptScheme findConceptScheme(long identifier) {

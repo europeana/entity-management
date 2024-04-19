@@ -1,52 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <artifactId>entity-management</artifactId>
-    <groupId>eu.europeana.api</groupId>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>entity-management</artifactId>
+		<groupId>eu.europeana.api</groupId>
 		<version>1.6.4-SNAPSHOT</version>
-  </parent>
+	</parent>
 
-  <artifactId>entity-management-mongo</artifactId>
-  
-  <name>entity-management-mongo</name>
+	<artifactId>entity-management-mongo</artifactId>
+
+	<name>entity-management-mongo</name>
 
 	<properties>
-		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
+		<sonar.coverage.jacoco.xmlReportPaths>
+			${project.basedir}/../${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 
-  <dependencies>
-    
-	<dependency>
-		<groupId>eu.europeana.api</groupId>
-		<artifactId>entity-management-definitions</artifactId>
-		<version>1.6.4-SNAPSHOT</version>
-	</dependency>
-	
-	<dependency>
-		<groupId>eu.europeana.api</groupId>
-		<artifactId>entity-management-common</artifactId>
-		<version>1.6.4-SNAPSHOT</version>
-	</dependency> 
-	
-	<dependency>
-		<groupId>eu.europeana.api.commons</groupId>
-		<version>${api.commons.version}</version>
-		<artifactId>commons-nosql</artifactId>
-		<scope>compile</scope>
-		<exclusions>
-		<exclusion>
-			<groupId>org.mongodb.morphia</groupId>
-			<artifactId>morphia</artifactId>
-		</exclusion>
+	<dependencies>
 
-		</exclusions>
-	</dependency>
-	
-	<dependency>
-		<groupId>org.springframework</groupId>
-		<artifactId>spring-context</artifactId>
-	</dependency>
+		<dependency>
+			<groupId>eu.europeana.api</groupId>
+			<artifactId>entity-management-definitions</artifactId>
+			<version>1.6.4-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>eu.europeana.api</groupId>
+			<artifactId>entity-management-common</artifactId>
+			<version>1.6.4-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>eu.europeana.api.commons</groupId>
+			<version>${api.commons.version}</version>
+			<artifactId>commons-nosql</artifactId>
+			<scope>compile</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.mongodb.morphia</groupId>
+					<artifactId>morphia</artifactId>
+				</exclusion>
+
+				<exclusion>
+					<groupId>dev.morphia.morphia</groupId>
+					<artifactId>core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.mongodb</groupId>
+					<artifactId>mongodb-driver-legacy</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.mongodb</groupId>
+					<artifactId>mongodb-driver-sync</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<!-- upgrade monhia verion for monngo 6-->
+		<dependency>
+			<groupId>dev.morphia.morphia</groupId>
+			<artifactId>morphia-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>eu.europeana.api</groupId>
 			<artifactId>spring-batch-mongo</artifactId>

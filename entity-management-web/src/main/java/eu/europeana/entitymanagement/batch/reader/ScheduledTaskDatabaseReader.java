@@ -5,7 +5,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.lang.NonNull;
-import dev.morphia.query.experimental.filters.Filter;
+import dev.morphia.query.filters.Filter;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;

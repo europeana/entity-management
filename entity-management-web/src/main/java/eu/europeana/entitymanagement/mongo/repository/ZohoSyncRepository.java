@@ -33,7 +33,7 @@ public class ZohoSyncRepository extends AbstractRepository {
 
   /** Drops the ConceptScheme collection. */
   public void dropCollection() {
-    getDataStore().getMapper().getCollection(ZohoSyncReport.class).drop();
+    getDataStore().getCollection(ZohoSyncReport.class).drop();
   }
 
   public ZohoSyncReport findLastZohoSyncReport() {

@@ -1,8 +1,8 @@
 package eu.europeana.entitymanagement.batch.repository;
 
 import static dev.morphia.query.Sort.ascending;
-import static dev.morphia.query.experimental.filters.Filters.eq;
-import static dev.morphia.query.experimental.filters.Filters.in;
+import static dev.morphia.query.filters.Filters.eq;
+import static dev.morphia.query.filters.Filters.in;
 import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.*;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_DELETE_OPTS;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.UPSERT_OPTS;
@@ -14,7 +14,7 @@ import com.mongodb.client.model.WriteModel;
 import com.mongodb.client.result.UpdateResult;
 import dev.morphia.Datastore;
 import dev.morphia.query.FindOptions;
-import dev.morphia.query.experimental.updates.UpdateOperators;
+import dev.morphia.query.updates.UpdateOperators;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
 import java.util.ArrayList;
@@ -41,7 +41,8 @@ public class FailedTaskRepository implements InitializingBean {
   /** Morphia doesn't map the indexes on {@link FailedTask}. Explicitly set this up here */
   @Override
   public void afterPropertiesSet() {
-    datastore.ensureIndexes(FailedTask.class);
+    //SG: TODO should be created by the datastore, need to check
+    //datastore.ensureIndexes(FailedTask.class);
   }
 
   /**
@@ -75,7 +76,7 @@ public class FailedTaskRepository implements InitializingBean {
    * @return BulkWriteResult of db query
    */
   public BulkWriteResult upsertBulk(List<FailedTask> failures) {
-    MongoCollection<FailedTask> collection = datastore.getMapper().getCollection(FailedTask.class);
+    MongoCollection<FailedTask> collection = datastore.getCollection(FailedTask.class);
 
     List<WriteModel<FailedTask>> updates = new ArrayList<>();
 
@@ -156,6 +157,6 @@ public class FailedTaskRepository implements InitializingBean {
 
   /** Drops the FailedTask collection */
   public void dropCollection() {
-    datastore.getMapper().getCollection(FailedTask.class).drop();
+    datastore.getCollection(FailedTask.class).drop();
   }
 }

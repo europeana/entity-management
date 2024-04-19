@@ -38,10 +38,10 @@
 		</repository>
 	</repositories>
 
-    <groupId>eu.europeana.api</groupId>
-    <artifactId>entity-management</artifactId>
-    <version>1.6.4-SNAPSHOT</version>
-    <packaging>pom</packaging>
+	<groupId>eu.europeana.api</groupId>
+	<artifactId>entity-management</artifactId>
+	<version>1.6.4-SNAPSHOT</version>
+	<packaging>pom</packaging>
 
 	<name>Entity Management</name>
 	<description>Service for managing entity data from external sources and
@@ -51,6 +51,32 @@
 		<java.version>17</java.version>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
+
+		<!-- europeana dependencies -->
+		<api.commons.version>0.3.25-SNAPSHOT</api.commons.version>
+		<springbatch.mongo.version>1.0.7-SNAPSHOT</springbatch.mongo.version>
+		<corelib.version>2.15.4</corelib.version>
+
+		<!-- functional dependencies -->
+		<morphia.version>2.4.13</morphia.version>
+		<mongodb-driver.version>4.7.2</mongodb-driver.version>
+		<zoho-sdk.version>3.0.1</zoho-sdk.version>
+
+		<!-- spring framework -->
+		<spring-boot.version>2.5.14</spring-boot.version>
+		<swagger.version>3.0.0</swagger.version>
+
+		<jackson.version>2.11.4</jackson.version>
+		<em.netty.version>4.1.69.Final</em.netty.version>
+		<jaxb.version>2.3.3</jaxb.version>
+		<saxon-he.version>10.5</saxon-he.version>
+
+		<!-- test dependencies -->
+		<mock-webserver.version>4.9.0</mock-webserver.version>
+		<testcontainers.version>1.16.0</testcontainers.version>
+
+
+		<!-- plugins -->
 		<aggregate.report.xml>
 			entity-management-tests/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.xml>
 		<sonar.coverage.jacoco.xmlReportPaths>${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
@@ -61,20 +87,7 @@
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<!-- Exclude POJOs code duplication analysis -->
 		<sonar.cpd.exclusions>**/model/**/*</sonar.cpd.exclusions>
-		<api.commons.version>0.3.22</api.commons.version>
-		<springbatch.mongo.version>1.0.3</springbatch.mongo.version>
-		<corelib.version>2.15.4</corelib.version>
-		<jackson.version>2.11.4</jackson.version>
-		<em.netty.version>4.1.69.Final</em.netty.version>
-		<spring-boot.version>2.5.5</spring-boot.version>
-		<swagger.version>3.0.0</swagger.version>
-		<morphia.version>2.1.4</morphia.version>
-		<mock-webserver.version>4.9.0</mock-webserver.version>
-		<testcontainers.version>1.16.0</testcontainers.version>
 		<apache.commons.validator.version>1.7</apache.commons.validator.version>
-		<zoho-sdk.version>3.0.1</zoho-sdk.version>
-		<jaxb.version>2.3.3</jaxb.version>
-		<saxon-he.version>10.5</saxon-he.version>
 		<git-code-format.version>3.1</git-code-format.version>
 		<git-commit-id.version>5.0.0</git-commit-id.version>
 		<surefire.version>3.0.0-M5</surefire.version>
@@ -96,6 +109,37 @@
 
 	<dependencyManagement>
 		<dependencies>
+			<!-- upgrade morphia for mongo 6 -->
+			<dependency>
+				<groupId>dev.morphia.morphia</groupId>
+				<artifactId>morphia-core</artifactId>
+				<version>${morphia.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.mongodb</groupId>
+				<artifactId>mongodb-driver-sync</artifactId>
+				<version>${mongodb-driver.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.mongodb</groupId>
+				<artifactId>mongodb-driver-legacy</artifactId>
+				<version>${mongodb-driver.version}</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>org.mongodb</groupId>
+				<artifactId>mongodb-driver-core</artifactId>
+				<version>${mongodb-driver.version}</version>
+			</dependency>
+							
+			
+			<dependency>
+				<groupId>org.mongodb</groupId>
+				<artifactId>bson</artifactId>
+				<version>${mongodb-driver.version}</version>
+			</dependency>
+			
 			<dependency>
 				<!-- Import dependency management from Spring Boot (because we
 				don't use Spring-Boot as parent pom)-->
@@ -191,7 +235,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			
+
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
@@ -332,7 +376,8 @@
 				<plugins>
 					<!-- plugins that need to be executed for all modules -->
 					<plugin>
-						<!-- jacoco agent needs to be prepared when building the parent pom --> 
+						<!-- jacoco agent needs to be prepared when building the
+						parent pom -->
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
 						<version>${jacoco-plugin.version}</version>

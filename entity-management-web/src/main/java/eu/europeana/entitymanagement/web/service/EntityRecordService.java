@@ -20,7 +20,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.mongodb.client.result.UpdateResult;
-import dev.morphia.query.experimental.filters.Filter;
+import dev.morphia.query.filters.Filter;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
