@@ -1,10 +1,10 @@
 package eu.europeana.entitymanagement.mongo.repository;
 
 import static dev.morphia.query.Sort.ascending;
-import static dev.morphia.query.experimental.filters.Filters.eq;
-import static dev.morphia.query.experimental.filters.Filters.in;
-import static dev.morphia.query.experimental.filters.Filters.ne;
-import static dev.morphia.query.experimental.filters.Filters.or;
+import static dev.morphia.query.filters.Filters.eq;
+import static dev.morphia.query.filters.Filters.in;
+import static dev.morphia.query.filters.Filters.ne;
+import static dev.morphia.query.filters.Filters.or;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.DISABLED;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_AGGREGATED_VIA;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_EXACT_MATCH;
@@ -22,8 +22,8 @@ import org.springframework.stereotype.Repository;
 import com.mongodb.client.result.UpdateResult;
 import dev.morphia.query.FindOptions;
 import dev.morphia.query.Query;
-import dev.morphia.query.experimental.filters.Filter;
-import dev.morphia.query.experimental.updates.UpdateOperators;
+import dev.morphia.query.filters.Filter;
+import dev.morphia.query.updates.UpdateOperators;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.EntityIdGenerator;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -163,8 +163,8 @@ public class EntityRecordRepository extends AbstractRepository {
 
   /** Drops the EntityRecord and Entity ID generator collections. */
   public void dropCollection() {
-    getDataStore().getMapper().getCollection(EntityRecord.class).drop();
-    getDataStore().getMapper().getCollection(EntityIdGenerator.class).drop();
+    getDataStore().getCollection(EntityRecord.class).drop();
+    getDataStore().getCollection(EntityIdGenerator.class).drop();
   }
 
   /**

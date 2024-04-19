@@ -11,7 +11,7 @@ import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_ID;
 import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.UPDATE_TYPE;
 
-import dev.morphia.query.experimental.filters.Filters;
+import dev.morphia.query.filters.Filters;
 import eu.europeana.entitymanagement.batch.listener.EntityUpdateStepListener;
 import eu.europeana.entitymanagement.batch.listener.ScheduledTaskItemListener;
 import eu.europeana.entitymanagement.batch.processor.EntityConsolidationProcessor;

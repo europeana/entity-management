@@ -1,12 +1,12 @@
 package eu.europeana.entitymanagement.mongo.repository;
 
-import static dev.morphia.query.experimental.filters.Filters.in;
+import static dev.morphia.query.filters.Filters.in;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Resource;
 import org.springframework.stereotype.Repository;
 import dev.morphia.Datastore;
-import dev.morphia.query.experimental.filters.Filter;
+import dev.morphia.query.filters.Filter;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.Vocabulary;
 
@@ -55,7 +55,7 @@ public class VocabularyRepository  {
    * clear database collection
    */
   public void dropCollection() {
-    datastore.getMapper().getCollection(Vocabulary.class).drop();
+    datastore.getCollection(Vocabulary.class).drop();
   }
 
   /**
