@@ -87,7 +87,6 @@ public class AppAutoconfig extends AppConfigConstants {
         }
         vocabRepository.saveBulk(roles);
     }
-    vocabRepository.loadIntoMemory();
   }
   
   @Bean(name = BEAN_EM_DATA_SOURCES)

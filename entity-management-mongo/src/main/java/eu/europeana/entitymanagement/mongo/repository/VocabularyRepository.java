@@ -19,24 +19,26 @@ public class VocabularyRepository  {
   
   private static final String ID = "id";
   
-  private List<Vocabulary> vocabs = new ArrayList<>();
+  private List<Vocabulary> europeanaRoles;
 
-  public void loadIntoMemory() {
-    if(vocabs.isEmpty()) {
-      vocabs.addAll(
+  public List<Vocabulary> getEuropeanaRoles() {
+    if(europeanaRoles==null) {
+      europeanaRoles=new ArrayList<>();
+      europeanaRoles.addAll(
           datastore.find(Vocabulary.class)
           .iterator()
           .toList());
     }
+    return europeanaRoles;
   }
-  
+
   /**
    * retrieve records by their id, from the in-memory collection
    * @param vocabularyIds
    * @return
    */
   public List<Vocabulary> findByUri(List<String> vocabularyIds) {
-    return vocabs.stream()
+    return getEuropeanaRoles().stream()
     .filter(el -> vocabularyIds.contains(el.getId()))
     .toList();
   }
@@ -87,4 +89,5 @@ public class VocabularyRepository  {
   public long countRecords() {
     return datastore.find(Vocabulary.class).count();
   }
+
 }
