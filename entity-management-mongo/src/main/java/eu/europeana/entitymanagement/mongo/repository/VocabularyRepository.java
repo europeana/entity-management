@@ -22,16 +22,16 @@ public class VocabularyRepository  {
   private List<Vocabulary> europeanaRoles;
 
   public List<Vocabulary> getEuropeanaRoles() {
-    if(europeanaRoles==null) {
-      synchronized(this) {
+    synchronized(this) {
+      if(europeanaRoles==null) {
         europeanaRoles=new ArrayList<>();
         europeanaRoles.addAll(
             datastore.find(Vocabulary.class)
             .iterator()
             .toList());
       }
+      return europeanaRoles;
     }
-    return europeanaRoles;
   }
 
   /**
