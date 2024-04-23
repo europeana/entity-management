@@ -23,19 +23,21 @@ public class VocabularyRepository  {
 
   public List<Vocabulary> getEuropeanaRoles() {
     if(europeanaRoles==null) {
-      europeanaRoles=new ArrayList<>();
-      europeanaRoles.addAll(
-          datastore.find(Vocabulary.class)
-          .iterator()
-          .toList());
+      synchronized(this) {
+        europeanaRoles=new ArrayList<>();
+        europeanaRoles.addAll(
+            datastore.find(Vocabulary.class)
+            .iterator()
+            .toList());
+      }
     }
     return europeanaRoles;
   }
 
   /**
    * retrieve records by their id, from the in-memory collection
-   * @param vocabularyIds
-   * @return
+   * @param vocabularyIds ids to search for
+   * @return list of Vocabularies
    */
   public List<Vocabulary> findByUri(List<String> vocabularyIds) {
     return getEuropeanaRoles().stream()
@@ -45,8 +47,8 @@ public class VocabularyRepository  {
 
   /**
    * retrieve records by their id
-   * @param vocabularyIds
-   * @return
+   * @param vocabularyIds ids to search for
+   * @return list of Vocabularies
    */
   public List<Vocabulary> findInDbByUri(List<String> vocabularyIds) {
     List<Filter> filters = new ArrayList<>();
