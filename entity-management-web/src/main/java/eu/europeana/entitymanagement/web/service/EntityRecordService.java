@@ -39,6 +39,7 @@ import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.definitions.model.TimeSpan;
+import eu.europeana.entitymanagement.definitions.model.ZohoLabelUriMapping;
 import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
 import eu.europeana.entitymanagement.exception.EntityAlreadyExistsException;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
@@ -182,6 +183,12 @@ public class EntityRecordService extends BaseEntityRecordService {
       EntityRecord countryRecord = entityRecordRepository.findByEntityId(org.getCountryId(),
           new String[] {EntityRecordFields.ENTITY});
       setDereferencedCountry(org, countryRecord);
+      
+      ZohoLabelUriMapping mapping = emConfiguration.getCountryIdMappings().get(org.getEntityId());
+      if(mapping != null) {
+        //extract ISO code from ZohoCountry
+        org.setCountryISO(mapping.getCountryISOCode());  
+      }
     }
     // dereference role
     if (org.getEuropeanaRoleIds() != null && !org.getEuropeanaRoleIds().isEmpty()) {

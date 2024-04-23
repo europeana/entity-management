@@ -3,6 +3,7 @@ package eu.europeana.entitymanagement.definitions.model;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_URI;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.WIKIDATA_URI;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ZOHO_LABEL;
+import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -49,4 +50,12 @@ public class ZohoLabelUriMapping {
   public void setWikidataUri(String wikidataUri) {
     this.wikidataUri = wikidataUri;
   }
+  
+  public String getCountryISOCode() {
+    if (getZohoLabel() != null) {
+      return StringUtils.substringAfterLast(getZohoLabel(), ",").trim();
+    }
+    return null;
+  }
+  
 }
