@@ -197,7 +197,7 @@ public class EntityRecordRepository extends AbstractRepository {
    * @param entityId the id of the organization (aggregator)
    * @return the list of organization ids from which the provided organization aggregated from 
    */
-  public List<String> findAggregatesFrom(String entityId) {
+  public List<String> findByAggregator(String entityId) {
     List<EntityRecord> entityRecords =
         getDataStore()
             .find(EntityRecord.class)

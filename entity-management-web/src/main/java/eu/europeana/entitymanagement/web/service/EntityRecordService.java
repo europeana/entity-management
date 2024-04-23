@@ -165,7 +165,9 @@ public class EntityRecordService extends BaseEntityRecordService {
     if (EntityTypes.isOrganization(entityRecord.getEntity().getType())) {
       // for the organizations, populate the aggregatesFrom field
       Organization org = (Organization) entityRecord.getEntity();
-      org.setAggregatesFrom(entityRecordRepository.findAggregatesFrom(org.getEntityId()));
+      
+      //SG: Temporarily disabled, until data is available and performance tested
+      //org.setAggregatesFrom(entityRecordRepository.findByAggregator(org.getEntityId()));
 
       // dereference morphia @Reference fields (e.g. the organization country)
       if (EntityProfile.hasDereferenceProfile(profiles)) {
