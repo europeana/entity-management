@@ -92,12 +92,12 @@ public class SolrOrganization extends SolrEntity<Organization> {
     
     this.country=new ArrayList<>();
     String orgCountryId=organization.getCountryId();
-    String orgCoutryISO=organization.getCountryISO();
+    String orgCountryISO=organization.getCountryISO();
     if(orgCountryId!=null) {
       this.country.add(orgCountryId);
     }
-    if(orgCoutryISO!=null) {
-      this.country.add(orgCoutryISO);
+    if(orgCountryISO!=null) {
+      this.country.add(orgCountryISO);
     }
     if(organization.getCountry() != null) {
       this.setCountryLabel(organization.getCountry().getPrefLabel()); 
