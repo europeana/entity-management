@@ -18,13 +18,35 @@ public class VocabularyRepository  {
   Datastore datastore;
   
   private static final String ID = "id";
+  
+  private List<Vocabulary> vocabs = new ArrayList<>();
+
+  public void loadIntoMemory() {
+    if(vocabs.isEmpty()) {
+      vocabs.addAll(
+          datastore.find(Vocabulary.class)
+          .iterator()
+          .toList());
+    }
+  }
+  
+  /**
+   * retrieve records by their id, from the in-memory collection
+   * @param vocabularyIds
+   * @return
+   */
+  public List<Vocabulary> findByUri(List<String> vocabularyIds) {
+    return vocabs.stream()
+    .filter(el -> vocabularyIds.contains(el.getId()))
+    .toList();
+  }
 
   /**
    * retrieve records by their id
    * @param vocabularyIds
    * @return
    */
-  public List<Vocabulary> findByUri(List<String> vocabularyIds) {
+  public List<Vocabulary> findInDbByUri(List<String> vocabularyIds) {
     List<Filter> filters = new ArrayList<>();
     filters.add(in(ID, vocabularyIds));
     return datastore.find(Vocabulary.class)
