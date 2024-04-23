@@ -184,7 +184,7 @@ public class EntityRecordService extends BaseEntityRecordService {
           new String[] {EntityRecordFields.ENTITY});
       setDereferencedCountry(org, countryRecord);
       
-      ZohoLabelUriMapping mapping = emConfiguration.getCountryIdMappings().get(org.getEntityId());
+      ZohoLabelUriMapping mapping = emConfiguration.getCountryIdMappings().get(org.getCountryId());
       if(mapping != null) {
         //extract ISO code from ZohoCountry
         org.setCountryISO(mapping.getCountryISOCode());  

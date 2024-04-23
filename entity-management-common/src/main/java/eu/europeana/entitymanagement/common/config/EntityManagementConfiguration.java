@@ -257,8 +257,10 @@ public class EntityManagementConfiguration implements InitializingBean {
   
   void addToCountryIdMappings(List<ZohoLabelUriMapping> countryMappingList) {
     for (ZohoLabelUriMapping countryMapping : countryMappingList) {
-      //init entityID - to ZohoCountry mapping 
-      countryIdMappings.put(countryMapping.getZohoLabel(), countryMapping);
+      //init entityID - to ZohoCountry mapping
+      if(countryMapping.getEntityUri() != null) {
+        countryIdMappings.put(countryMapping.getEntityUri(), countryMapping);
+      }
     }
   }
   
