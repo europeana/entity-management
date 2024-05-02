@@ -188,7 +188,6 @@
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-resolver-dns-native-macos</artifactId>
-			<version>${em.netty.version}</version>
 			<classifier>osx-aarch_64</classifier>
 		</dependency>
 
