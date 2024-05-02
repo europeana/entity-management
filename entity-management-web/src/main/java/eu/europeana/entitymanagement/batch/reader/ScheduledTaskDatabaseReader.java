@@ -10,6 +10,7 @@ import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 
 /**
@@ -42,7 +43,7 @@ public class ScheduledTaskDatabaseReader extends BaseDatabaseReader<BatchEntityR
     
     List<String> entityIds = scheduledTasks.stream().map(st -> st.getEntityId()).toList();
     //no need to use the dereference profile here as the consolidation takes care of processing references
-    List<EntityRecord> records = entityRecordService.retrieveMultipleByEntityIds(entityIds, false, true, null);
+    List<EntityRecord> records = entityRecordService.retrieveMultipleByEntityIds(entityIds, false, true, EntityProfile.dereference.name());
     List<BatchEntityRecord> batchRecords = toBatchEntityRecords(records, scheduledTasks);
 
     if (logger.isDebugEnabled()) {

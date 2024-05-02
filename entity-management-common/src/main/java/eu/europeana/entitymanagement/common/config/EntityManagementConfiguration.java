@@ -175,7 +175,14 @@ public class EntityManagementConfiguration implements InitializingBean {
   @Value("${europeana.role.vocabulary:role_vocabulary.xml}")
   private String roleVocabularyFilename;
 
+  /**
+   * Map of <"Zoho Label", ZohoLabelUriMapping>  
+   */
   private final Map<String, ZohoLabelUriMapping> countryMappings = new ConcurrentHashMap<>();
+  /**
+   * Map of <"EntityId", ZohoLabelUriMapping>  
+   */
+  private final Map<String, ZohoLabelUriMapping> countryIdMappings = new ConcurrentHashMap<>();
   private final Map<String, String> roleMappings = new ConcurrentHashMap<>();
   
   @Autowired
@@ -236,6 +243,7 @@ public class EntityManagementConfiguration implements InitializingBean {
         String contents = reader.lines().collect(Collectors.joining(System.lineSeparator()));
         List<ZohoLabelUriMapping> countryMappingList = emJsonMapper.readValue(contents, new TypeReference<List<ZohoLabelUriMapping>>(){});
         addToCountryMappings(countryMappingList);
+        addToCountryIdMappings(countryMappingList);
       }
     }
   }
@@ -244,6 +252,15 @@ public class EntityManagementConfiguration implements InitializingBean {
     for (ZohoLabelUriMapping countryMapping : countryMappingList) {
       //init zoho country mapping
       countryMappings.put(countryMapping.getZohoLabel(), countryMapping);
+    }
+  }
+  
+  void addToCountryIdMappings(List<ZohoLabelUriMapping> countryMappingList) {
+    for (ZohoLabelUriMapping countryMapping : countryMappingList) {
+      //init entityID - to ZohoCountry mapping
+      if(countryMapping.getEntityUri() != null) {
+        countryIdMappings.put(countryMapping.getEntityUri(), countryMapping);
+      }
     }
   }
   
@@ -464,6 +481,10 @@ public class EntityManagementConfiguration implements InitializingBean {
 
   public String getRoleVocabularyFilename() {
     return roleVocabularyFilename;
+  }
+
+  public Map<String, ZohoLabelUriMapping> getCountryIdMappings() {
+    return countryIdMappings;
   }
  
 }

@@ -80,12 +80,12 @@ public class ZohoOrganizationConverter {
       //update address country
       address.setVcardCountryName(extractCountryName(zohoCountryLabel));
       
-      org.setCountryISO(StringUtils.substringAfterLast(zohoCountryLabel, ",").trim());
       //update organization country id
       if(countryMappings.containsKey(zohoCountryLabel)) {
         //get country ID from mappings
-        String entityUri = countryMappings.get(zohoCountryLabel).getEntityUri();
-        org.setCountryId(entityUri);
+        ZohoLabelUriMapping zohoLabelUriMapping = countryMappings.get(zohoCountryLabel);
+        org.setCountryId(zohoLabelUriMapping.getEntityUri());
+        org.setCountryISO(zohoLabelUriMapping.getCountryISOCode());
       } else if(logger.isInfoEnabled()){
         logger.info("The mapping for the zoho country label: {}, to the europeana uri does not exist.", zohoCountryLabel);
       }
