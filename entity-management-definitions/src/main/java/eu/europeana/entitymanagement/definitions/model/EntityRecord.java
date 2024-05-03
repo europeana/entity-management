@@ -1,8 +1,9 @@
 package eu.europeana.entitymanagement.definitions.model;
 
-import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_EXACT_MATCH;
-import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_SAME_AS;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_AGGREGATED_VIA;
+import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_EXACT_MATCH;
+import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_MODIFIED;
+import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_SAME_AS;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_TYPE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BASE_DATA_EUROPEANA_URI;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
@@ -31,6 +32,7 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
   @Index(fields = {@Field(ENTITY_TYPE)}),
   @Index(fields = {@Field(ENTITY_EXACT_MATCH)}), 
   @Index(fields = {@Field(ENTITY_SAME_AS)}),
+  @Index(fields = {@Field(ENTITY_MODIFIED)}),
   @Index(fields = {@Field(ENTITY_AGGREGATED_VIA)})})
 @EntityListeners(EntityRecordWatcher.class)
 public class EntityRecord {
