@@ -243,7 +243,8 @@ public class ZohoOrganizationConverter {
    * @return the name of the owner
    */
   public static String getOwnerName(Record recordOrganization) {
-    return ((User) recordOrganization.getKeyValue(ZohoConstants.ZOHO_OWNER_FIELD)).getName();
+    Object keyValue = recordOrganization.getKeyValue(ZohoConstants.ZOHO_OWNER_FIELD);
+    return ((User) keyValue).getName();
   }
   
   /**

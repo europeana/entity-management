@@ -83,15 +83,16 @@ public class ZohoSyncService extends BaseZohoAccess {
   public ZohoSyncReport synchronizeZohoOrganizations(@NonNull OffsetDateTime modifiedSince)
       throws EntityUpdateException {
 
+    OffsetDateTime deletedSince = modifiedSince.minusDays(emConfiguration.getZohoSyncDeleteOffsetDays());
     if (logger.isInfoEnabled()) {
-      logger.info("Synchronizing organizations updated after date: {}", modifiedSince);
+      logger.info("Synchronizing organizations updated after date: {}, and delete after date :{}", modifiedSince, deletedSince);
     }
 
     ZohoSyncReport zohoSyncReport = new ZohoSyncReport(new Date());
-    // synchronize updated
+    // synchronize updated in Zoho
     synchronizeZohoOrganizations(modifiedSince, zohoSyncReport);
     // synchronize deleted in zoho
-    synchronizeDeletedZohoOrganizations(modifiedSince, zohoSyncReport);
+    synchronizeDeletedZohoOrganizations(deletedSince, zohoSyncReport);
 
     logger.info("Zoho update operations completed successfully:\n {}", zohoSyncReport);
 

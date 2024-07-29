@@ -157,6 +157,9 @@ public class EntityManagementConfiguration implements InitializingBean {
   @Value("${zoho.sync.register.deprecated: false}")
   private boolean registerDeprecated;
   
+  @Value("${zoho.sync.delete.offset.days: 10}")
+  private int zohoSyncDeleteOffsetDays;
+  
   @Value("${europeana.item.data.endpoint:'http://data.europeana.eu/item'}")
   private String itemDataEndpoint;
 
@@ -485,6 +488,10 @@ public class EntityManagementConfiguration implements InitializingBean {
 
   public Map<String, ZohoLabelUriMapping> getCountryIdMappings() {
     return countryIdMappings;
+  }
+
+  public int getZohoSyncDeleteOffsetDays() {
+    return zohoSyncDeleteOffsetDays;
   }
  
 }
