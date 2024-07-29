@@ -19,6 +19,7 @@ import com.zoho.api.authenticator.Token;
 import com.zoho.api.authenticator.store.TokenStore;
 import com.zoho.crm.api.HeaderMap;
 import com.zoho.crm.api.Initializer;
+import com.zoho.crm.api.Param;
 import com.zoho.crm.api.ParameterMap;
 import com.zoho.crm.api.SDKConfig;
 import com.zoho.crm.api.UserSignature;
@@ -296,6 +297,9 @@ public class ZohoAccessClient {
       paramInstance.add(GetDeletedRecordsParam.TYPE, "all"); // all, recycle, permanent
       paramInstance.add(GetDeletedRecordsParam.PAGE, 1);
       paramInstance.add(GetDeletedRecordsParam.PER_PAGE, pageSize);
+      Param<String> scopeParam = new Param<String>("scope", "com.zoho.crm.api.Record.GetDeletedRecordsParam");
+      paramInstance.add(scopeParam, "ZohoCRM.modules.ALL");
+      
       HeaderMap headersMap = new HeaderMap();
       if (modifiedSince != null) {
         headersMap.add(GetRecordsHeader.IF_MODIFIED_SINCE, modifiedSince);
