@@ -136,7 +136,7 @@ public class ZohoSyncService extends BaseZohoAccess {
       if (isLastPage(orgList.size(), pageSize)) {
         if (logger.isDebugEnabled()) {
           logger.debug(
-              "Processing of deleted records is complete on page on page {}, pageSize {}, items on last page {}",
+              "Processing updated zoho records finished at page {}, pageSize {}, items on last page {}",
               page, pageSize, orgList.size());
         }
         hasNext = false;
@@ -166,8 +166,10 @@ public class ZohoSyncService extends BaseZohoAccess {
     int pageSize = emConfiguration.getZohoSyncBatchSize();
     boolean hasNext = true;
     int currentPageSize = 0;
-    List<String> entitiesDeletedInZoho = null;
+    List<String> entitiesZohoCoref = null;
     // Zoho doesn't return the total results
+    List<EntityRecord> deletedEntityRecords;
+    List<String> entityIdsToDelete;
     while (hasNext) {
       try {
         // list of (europeana) organizations ids
@@ -177,10 +179,15 @@ public class ZohoSyncService extends BaseZohoAccess {
         currentPageSize = deletedRecordsInZoho.size();
         // check exists in EM (Note: zoho doesn't support filtering by lastModified for deleted
         // entities)
-        entitiesDeletedInZoho = getDeletedEntityIds(deletedRecordsInZoho);
+        //build the Zoho Coref URL
+        entitiesZohoCoref = getDeletedEntitiesZohoCoref(deletedRecordsInZoho);
+        //retrieve records by coref
+        deletedEntityRecords = entityRecordService.retrieveMultipleByEntityIdsOrCoreference(entitiesZohoCoref, null);
+        //fetch entity IDs
+        entityIdsToDelete = deletedEntityRecords.stream().map(er -> er.getEntityId()).toList();
 
-        // build delete operations set
-        runPermanentDelete(entitiesDeletedInZoho, zohoSyncReport);
+        //perform permanent deletion 
+        runPermanentDelete(entityIdsToDelete, zohoSyncReport);
       } catch (ZohoException e) {
         logger.error(
             "Zoho synchronization exception occured when handling organizations deleted in Zoho",
@@ -192,7 +199,7 @@ public class ZohoSyncService extends BaseZohoAccess {
             e);
         String message =
             buildErrorMessage("Unexpected error occured when deleting organizations with ids: ",
-                entitiesDeletedInZoho);
+                entitiesZohoCoref);
         zohoSyncReport.addFailedOperation(null, ZohoSyncReportFields.ENTITY_DELETION_ERROR, message,
             e);
       }
@@ -201,7 +208,7 @@ public class ZohoSyncService extends BaseZohoAccess {
         // last page: if no more organizations exist in Zoho
         if (logger.isDebugEnabled()) {
           logger.debug(
-              "Processing of deleted records is complete on page on page {}, pageSize {}, items on last page {}",
+              "Processing of deleted records is completes at page {}, pageSize {}, items on last page {}",
               startPage, pageSize, currentPageSize);
         }
         hasNext = false;
