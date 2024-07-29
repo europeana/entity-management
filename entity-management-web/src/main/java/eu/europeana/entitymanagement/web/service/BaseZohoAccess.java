@@ -128,7 +128,7 @@ public class BaseZohoAccess {
     
     // scheduled updates at the end, otherwise the other operations may overwrite the record in the db with the old captured in the operation
     performUpdateOperations(operations.getUpdateOperations(), zohoSyncReport);
-  
+    
   }
 
   void performPermanentDeleteOperations(SortedSet<Operation> permanentDeleteOperations, ZohoSyncReport zohoSyncReport) {
@@ -151,9 +151,12 @@ public class BaseZohoAccess {
     }
   }
   
-  void runPermanentDelete(List<String> entitiesDeletedInZoho, ZohoSyncReport zohoSyncReport)
+  void runPermanentDelete(List<String> entitiesToDelete, ZohoSyncReport zohoSyncReport)
       throws SolrServiceException {
-    long deleted = entityRecordService.deleteBulk(entitiesDeletedInZoho, true);
+    if(entitiesToDelete == null || entitiesToDelete.isEmpty()) {
+      return;
+    }
+    long deleted = entityRecordService.deleteBulk(entitiesToDelete, true);
     zohoSyncReport.increaseDeleted(deleted);
   }
 
@@ -428,7 +431,7 @@ public class BaseZohoAccess {
   }
 
 
-  protected List<String> getDeletedEntityIds(final List<DeletedRecord> deletedInZoho) {
+  protected List<String> getDeletedEntitiesZohoCoref(final List<DeletedRecord> deletedInZoho) {
   
     List<String> deletedEntityIds = new ArrayList<String>();
     // get the id list from Zoho deleted Record
@@ -436,8 +439,12 @@ public class BaseZohoAccess {
       deletedInZoho.forEach(
           deletedRecord ->
               deletedEntityIds.add(
-                  EntityRecordUtils.buildEntityIdUri(
-                      EntityTypes.Organization, deletedRecord.getId().toString())));
+                  generateZohoOrganizationUrl(deletedRecord.getId().longValue())
+//                  EntityRecordUtils.
+//                  buildEntityIdUri(
+//                      EntityTypes.Organization, deletedRecord.getId().toString())
+                  )
+              );
     }
     return deletedEntityIds;
   }
