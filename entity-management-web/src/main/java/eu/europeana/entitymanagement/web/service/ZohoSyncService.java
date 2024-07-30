@@ -3,6 +3,7 @@ package eu.europeana.entitymanagement.web.service;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -181,10 +182,7 @@ public class ZohoSyncService extends BaseZohoAccess {
         // entities)
         //build the Zoho Coref URL
         entitiesZohoCoref = getDeletedEntitiesZohoCoref(deletedRecordsInZoho);
-        //retrieve records by coref
-        deletedEntityRecords = entityRecordService.retrieveMultipleByEntityIdsOrCoreference(entitiesZohoCoref, null);
-        //fetch entity IDs
-        entityIdsToDelete = deletedEntityRecords.stream().map(er -> er.getEntityId()).toList();
+        entityIdsToDelete = getEntityIdsByZohoCorefs(entitiesZohoCoref);
 
         //perform permanent deletion 
         runPermanentDelete(entityIdsToDelete, zohoSyncReport);
@@ -217,6 +215,37 @@ public class ZohoSyncService extends BaseZohoAccess {
         startPage++;
       }
     }
+  }
+
+  List<String> getEntityIdsByZohoCorefs(List<String> entitiesZohoCoref) {
+    List<EntityRecord> recordsToDelete;
+    List<String> entityIdsToDelete = new ArrayList<String>(entitiesZohoCoref.size());
+    //retrieve records by coref
+    recordsToDelete = entityRecordService.retrieveMultipleByEntityIdsOrCoreference(entitiesZohoCoref, null);
+    String zohoProxyId;
+    for (EntityRecord entityRecord : recordsToDelete) {
+      zohoProxyId = getZohoProxyId(entityRecord);
+      if(zohoProxyId == null && logger.isWarnEnabled()) {
+        logger.warn(
+            "Cannot get zohoProxyId! Organization does not have a zoho proxy, but a zoho coref: {} ", entityRecord);
+      }
+      //for deprecated organizations, make sure to not delete the valid organizations which may contain the deprecated id in corefs
+      //threrefore, delete only records which have the deleted zoho record id in zoho proxy id 
+      if(entitiesZohoCoref.contains(zohoProxyId)) {
+        entityIdsToDelete.add(entityRecord.getEntityId());
+      }
+    }
+    
+    return entityIdsToDelete;
+  }
+
+  String getZohoProxyId(EntityRecord entityRecord) {
+    for (String proxyId : entityRecord.getExternalProxyIds()) {
+      if(proxyId.startsWith(zohoConfiguration.getZohoBaseUrl())) {
+        return proxyId;
+      }
+    }
+    return null;
   }
 
   boolean isLastPage(int currentPageSize, int maxItemsPerPage) {
