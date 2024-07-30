@@ -131,6 +131,13 @@ public class BaseZohoAccess {
     
   }
 
+  /**
+   * run permanent delete operations, use {@link ZohoSyncService#synchronizeDeletedZohoOrganizations(OffsetDateTime, ZohoSyncReport)}
+   * @deprecated the modified in zoho do not results in permanent delete operations
+   * @param permanentDeleteOperations operation to perform
+   * @param zohoSyncReport report to collect results
+   */
+  @Deprecated
   void performPermanentDeleteOperations(SortedSet<Operation> permanentDeleteOperations, ZohoSyncReport zohoSyncReport) {
     if (permanentDeleteOperations == null || permanentDeleteOperations.isEmpty()) {
       return;

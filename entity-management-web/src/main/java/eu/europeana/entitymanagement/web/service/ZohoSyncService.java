@@ -168,9 +168,8 @@ public class ZohoSyncService extends BaseZohoAccess {
     boolean hasNext = true;
     int currentPageSize = 0;
     List<String> entitiesZohoCoref = null;
-    // Zoho doesn't return the total results
-    List<EntityRecord> deletedEntityRecords;
     List<String> entityIdsToDelete;
+    // Zoho doesn't return the total results
     while (hasNext) {
       try {
         // list of (europeana) organizations ids
