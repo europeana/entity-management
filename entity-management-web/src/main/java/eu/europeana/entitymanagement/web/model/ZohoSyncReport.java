@@ -151,7 +151,7 @@ public class ZohoSyncReport {
         getUpdatedItems(),
         getDeprecatedItems(),
         getDeletedItems(),
-        getDeletedItems(),
+        getSubmittedZohoEuropeanaId(),
         getExecutionStatus());
   }
 
