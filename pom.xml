@@ -38,7 +38,7 @@
 
 	<groupId>eu.europeana.api</groupId>
 	<artifactId>entity-management</artifactId>
-	<version>1.7.2-SNAPSHOT</version>
+	<version>1.7.2</version>
 	<packaging>pom</packaging>
 
 	<name>Entity Management</name>
