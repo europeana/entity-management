@@ -130,29 +130,25 @@ public class ZohoSyncService extends BaseZohoAccess {
       // send message to webhook
       ResponseSpec resp = webClient.post().contentType(MediaType.APPLICATION_JSON).bodyValue(jsonMessage).retrieve();
       ResponseEntity<String> response = resp.toEntity(String.class).block();
-      logger.debug("Received webhook response: {}", response.getBody());
+      if(logger.isDebugEnabled()) {
+        logger.debug("Received webhook response: {}", response == null? "" : response.getBody());  
+      }
     } catch (WebClientResponseException e) {
       logger.warn("Exception occurred while sending slack message!", e);
     }
   }
 
   String buildSyncReportMessageForSlackWebHook(ZohoSyncReport zohoSyncReport) {
-    // String template = "X organisations in Zoho were synchronised with the following actions:\n"+
-    // "created: C, updated: U, deprecated: D, undeprecated: UD, permanently deleted: PD, failed:
-    // F\n\n" +
-    // "The following organisations failed synchronisation:\n" +
-    // "<ZOHO_URL> because of Y";
     long synced = zohoSyncReport.getCreatedItems() + zohoSyncReport.getUpdatedItems() 
       + zohoSyncReport.getDeprecatedItems();
     
-    long failures = zohoSyncReport.getFailed() != null? zohoSyncReport.getFailed().size() : 0;   
+    long failures = zohoSyncReport.getFailed() == null? 0: zohoSyncReport.getFailed().size();   
     
     String slackMessage = String.format(ZOHO_SYNC_SLACK_TEMPLATE, synced, zohoSyncReport.getCreatedItems(),
         zohoSyncReport.getUpdatedItems(), zohoSyncReport.getDeprecatedItems(),
         zohoSyncReport.getEnabledItems(), zohoSyncReport.getDeletedItems(),
         failures, generateFailedMessage(zohoSyncReport));
     
-    //{"channel": "#my-channel-here\", "username": "webhookbot", "text": "my text"}
     //could use a proper object and json serializer later
     return "{\"text\":\"" + slackMessage + "\"}";
   }
@@ -164,11 +160,14 @@ public class ZohoSyncService extends BaseZohoAccess {
       return "";
     }
     
-    StringBuilder builder = new StringBuilder("\\n\\nThe following organisations failed synchronisation:\\n");
+    String headLine = "\\n\\nThe following organisations failed synchronisation:\\n";
+    int estimatedSize = headLine.length() + (zohoSyncReport.getFailed().size() * 100);
+    StringBuilder builder = new StringBuilder(estimatedSize);
+    builder.append(headLine);
     for (FailedOperation failed : zohoSyncReport.getFailed()) {
       builder.append(failed.getZohoId())
         .append(" because of error: ")
-        .append(failed.getMessage()).append("\n");
+        .append(failed.getMessage()).append("\\n");
     }
     
     return builder.toString();
