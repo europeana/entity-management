@@ -154,8 +154,7 @@ public class ZohoSyncService extends BaseZohoAccess {
     
     //{"channel": "#my-channel-here\", "username": "webhookbot", "text": "my text"}
     //could use a proper object and json serializer later
-    String webHoockMessage = "{\"text\":\"" + slackMessage + "\"}";
-    return webHoockMessage;
+    return "{\"text\":\"" + slackMessage + "\"}";
   }
 
 
