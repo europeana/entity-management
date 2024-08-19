@@ -177,7 +177,10 @@ public class EntityManagementConfiguration implements InitializingBean {
   
   @Value("${europeana.role.vocabulary:role_vocabulary.xml}")
   private String roleVocabularyFilename;
-
+  
+  @Value("${slack.webhook:}")
+  private String slackWebHook;
+  
   /**
    * Map of <"Zoho Label", ZohoLabelUriMapping>  
    */
@@ -492,6 +495,10 @@ public class EntityManagementConfiguration implements InitializingBean {
 
   public int getZohoSyncDeleteOffsetDays() {
     return zohoSyncDeleteOffsetDays;
+  }
+
+  public String getSlackWebHook() {
+    return slackWebHook;
   }
  
 }
