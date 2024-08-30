@@ -10,8 +10,13 @@ import java.util.Optional;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import com.zoho.crm.api.record.DeletedRecord;
 import com.zoho.crm.api.record.Record;
 import dev.morphia.query.filters.Filter;
@@ -28,6 +33,7 @@ import eu.europeana.entitymanagement.mongo.repository.ZohoSyncRepository;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.web.model.BatchOperations;
+import eu.europeana.entitymanagement.web.model.FailedOperation;
 import eu.europeana.entitymanagement.web.model.Operation;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReportFields;
@@ -39,16 +45,18 @@ import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 @Service(AppAutoconfig.BEAN_ZOHO_SYNC_SERVICE)
 public class ZohoSyncService extends BaseZohoAccess {
 
+  public static final String ZOHO_SYNC_SLACK_TEMPLATE =
+      "%d organisations in Zoho were synchronised with the following actions:\\n"
+          + "created: %d, updated: %d, deprecated: %d, undeprecated: %d, permanently deleted: %d, failed: %d";
+  
   @Autowired
   public ZohoSyncService(EntityRecordService entityRecordService,
-      EntityUpdateService entityUpdateService,
-      EntityManagementConfiguration emConfiguration, DataSources datasources,
-      ZohoConfiguration zohoConfiguration,
-      SolrService solrService,
+      EntityUpdateService entityUpdateService, EntityManagementConfiguration emConfiguration,
+      DataSources datasources, ZohoConfiguration zohoConfiguration, SolrService solrService,
       ZohoSyncRepository zohoSyncRepo) {
 
-    super(entityRecordService, entityUpdateService, emConfiguration,
-        datasources, zohoConfiguration, solrService, zohoSyncRepo);
+    super(entityRecordService, entityUpdateService, emConfiguration, datasources, zohoConfiguration,
+        solrService, zohoSyncRepo);
   }
 
   /**
@@ -70,7 +78,6 @@ public class ZohoSyncService extends BaseZohoAccess {
 
     // for development debugging purposes use modifiedSince = generateFixDate();
     // modifiedSince = generateFixDate();
-
     return synchronizeZohoOrganizations(modifiedSince);
   }
 
@@ -84,9 +91,11 @@ public class ZohoSyncService extends BaseZohoAccess {
   public ZohoSyncReport synchronizeZohoOrganizations(@NonNull OffsetDateTime modifiedSince)
       throws EntityUpdateException {
 
-    OffsetDateTime deletedSince = modifiedSince.minusDays(emConfiguration.getZohoSyncDeleteOffsetDays());
+    OffsetDateTime deletedSince =
+        modifiedSince.minusDays(emConfiguration.getZohoSyncDeleteOffsetDays());
     if (logger.isInfoEnabled()) {
-      logger.info("Synchronizing organizations updated after date: {}, and delete after date :{}", modifiedSince, deletedSince);
+      logger.info("Synchronizing organizations updated after date: {}, and delete after date :{}",
+          modifiedSince, deletedSince);
     }
 
     ZohoSyncReport zohoSyncReport = new ZohoSyncReport(new Date());
@@ -97,7 +106,71 @@ public class ZohoSyncService extends BaseZohoAccess {
 
     logger.info("Zoho update operations completed successfully:\n {}", zohoSyncReport);
 
+    publishReport(zohoSyncReport);
+
     return zohoSyncRepo.save(zohoSyncReport);
+  }
+
+
+  private void publishReport(ZohoSyncReport zohoSyncReport) {
+    if (logger.isDebugEnabled()) {
+      logger.debug("Sending report to slack : {}", zohoSyncReport);
+    }
+
+    try {
+      if (StringUtils.isBlank(emConfiguration.getSlackWebHook())) {
+        logger
+            .warn("Slack webhook not configured, status report will not be published over Slack!");
+        return;
+      }
+
+      String jsonMessage = buildSyncReportMessageForSlackWebHook(zohoSyncReport);
+
+      WebClient webClient = WebClient.builder().baseUrl(emConfiguration.getSlackWebHook()).build();
+      // send message to webhook
+      ResponseSpec resp = webClient.post().contentType(MediaType.APPLICATION_JSON).bodyValue(jsonMessage).retrieve();
+      ResponseEntity<String> response = resp.toEntity(String.class).block();
+      if(logger.isDebugEnabled()) {
+        logger.debug("Received webhook response: {}", response == null? "" : response.getBody());  
+      }
+    } catch (WebClientResponseException e) {
+      logger.warn("Exception occurred while sending slack message!", e);
+    }
+  }
+
+  String buildSyncReportMessageForSlackWebHook(ZohoSyncReport zohoSyncReport) {
+    long synced = zohoSyncReport.getCreatedItems() + zohoSyncReport.getUpdatedItems() 
+      + zohoSyncReport.getDeprecatedItems();
+    
+    long failures = zohoSyncReport.getFailed() == null? 0: zohoSyncReport.getFailed().size();   
+    
+    String slackMessage = String.format(ZOHO_SYNC_SLACK_TEMPLATE, synced, zohoSyncReport.getCreatedItems(),
+        zohoSyncReport.getUpdatedItems(), zohoSyncReport.getDeprecatedItems(),
+        zohoSyncReport.getEnabledItems(), zohoSyncReport.getDeletedItems(),
+        failures, generateFailedMessage(zohoSyncReport));
+    
+    //could use a proper object and json serializer later
+    return "{\"text\":\"" + slackMessage + "\"}";
+  }
+
+
+
+  private String generateFailedMessage(ZohoSyncReport zohoSyncReport) {
+    if(zohoSyncReport.getFailed() == null || zohoSyncReport.getFailed().isEmpty()) {
+      return "";
+    }
+    
+    String headLine = "\\n\\nThe following organisations failed synchronisation:\\n";
+    int estimatedSize = headLine.length() + (zohoSyncReport.getFailed().size() * 100);
+    StringBuilder builder = new StringBuilder(estimatedSize);
+    builder.append(headLine);
+    for (FailedOperation failed : zohoSyncReport.getFailed()) {
+      builder.append(failed.getZohoId())
+        .append(" because of error: ")
+        .append(failed.getMessage()).append("\\n");
+    }
+    
+    return builder.toString();
   }
 
   void synchronizeZohoOrganizations(@NonNull OffsetDateTime modifiedSince,
@@ -115,8 +188,8 @@ public class ZohoSyncService extends BaseZohoAccess {
       // OffsetDateTime offsetDateTime = modifiedSince.toInstant()
       // .atOffset(ZoneOffset.UTC);
       try {
-        orgList = zohoConfiguration.getZohoAccessClient().getZcrmRecordOrganizations(page,
-            pageSize, modifiedSince);
+        orgList = zohoConfiguration.getZohoAccessClient().getZcrmRecordOrganizations(page, pageSize,
+            modifiedSince);
 
         logExecutionProgress(orgList, page, pageSize);
       } catch (ZohoException e) {
@@ -179,11 +252,11 @@ public class ZohoSyncService extends BaseZohoAccess {
         currentPageSize = deletedRecordsInZoho.size();
         // check exists in EM (Note: zoho doesn't support filtering by lastModified for deleted
         // entities)
-        //build the Zoho Coref URL
+        // build the Zoho Coref URL
         entitiesZohoCoref = getDeletedEntitiesZohoCoref(deletedRecordsInZoho);
         entityIdsToDelete = getEntityIdsByZohoCorefs(entitiesZohoCoref);
 
-        //perform permanent deletion 
+        // perform permanent deletion
         runPermanentDelete(entityIdsToDelete, zohoSyncReport);
       } catch (ZohoException e) {
         logger.error(
@@ -194,9 +267,8 @@ public class ZohoSyncService extends BaseZohoAccess {
         logger.error(
             "Zoho synchronization exception occured when handling organizations deleted in Zoho",
             e);
-        String message =
-            buildErrorMessage("Unexpected error occured when deleting organizations with ids: ",
-                entitiesZohoCoref);
+        String message = buildErrorMessage(
+            "Unexpected error occured when deleting organizations with ids: ", entitiesZohoCoref);
         zohoSyncReport.addFailedOperation(null, ZohoSyncReportFields.ENTITY_DELETION_ERROR, message,
             e);
       }
@@ -219,28 +291,31 @@ public class ZohoSyncService extends BaseZohoAccess {
   List<String> getEntityIdsByZohoCorefs(List<String> entitiesZohoCoref) {
     List<EntityRecord> recordsToDelete;
     List<String> entityIdsToDelete = new ArrayList<String>(entitiesZohoCoref.size());
-    //retrieve records by coref
-    recordsToDelete = entityRecordService.retrieveMultipleByEntityIdsOrCoreference(entitiesZohoCoref, null);
+    // retrieve records by coref
+    recordsToDelete =
+        entityRecordService.retrieveMultipleByEntityIdsOrCoreference(entitiesZohoCoref, null);
     String zohoProxyId;
     for (EntityRecord entityRecord : recordsToDelete) {
       zohoProxyId = getZohoProxyId(entityRecord);
-      if(zohoProxyId == null && logger.isWarnEnabled()) {
+      if (zohoProxyId == null && logger.isWarnEnabled()) {
         logger.warn(
-            "Cannot get zohoProxyId! Organization does not have a zoho proxy, but a zoho coref: {} ", entityRecord);
+            "Cannot get zohoProxyId! Organization does not have a zoho proxy, but a zoho coref: {} ",
+            entityRecord);
       }
-      //for deprecated organizations, make sure to not delete the valid organizations which may contain the deprecated id in corefs
-      //threrefore, delete only records which have the deleted zoho record id in zoho proxy id 
-      if(entitiesZohoCoref.contains(zohoProxyId)) {
+      // for deprecated organizations, make sure to not delete the valid organizations which may
+      // contain the deprecated id in corefs
+      // threrefore, delete only records which have the deleted zoho record id in zoho proxy id
+      if (entitiesZohoCoref.contains(zohoProxyId)) {
         entityIdsToDelete.add(entityRecord.getEntityId());
       }
     }
-    
+
     return entityIdsToDelete;
   }
 
   String getZohoProxyId(EntityRecord entityRecord) {
     for (String proxyId : entityRecord.getExternalProxyIds()) {
-      if(proxyId.startsWith(zohoConfiguration.getZohoBaseUrl())) {
+      if (proxyId.startsWith(zohoConfiguration.getZohoBaseUrl())) {
         return proxyId;
       }
     }
@@ -298,9 +373,10 @@ public class ZohoSyncService extends BaseZohoAccess {
    */
   List<EntityRecord> findEntityRecordsByProxyId(Set<String> modifiedInZoho) {
     Filter proxyIdsFilter = Filters.in("proxies.proxyId", modifiedInZoho);
-    //save to index operations are run asynchronuously, no need to dereference organizations here
-    return entityRecordService.findEntitiesWithFilter(0, modifiedInZoho.size(), new Filter[] {proxyIdsFilter}, null);
-    
+    // save to index operations are run asynchronuously, no need to dereference organizations here
+    return entityRecordService.findEntitiesWithFilter(0, modifiedInZoho.size(),
+        new Filter[] {proxyIdsFilter}, null);
+
   }
 
   private void addOperation(BatchOperations operations, Long zohoId, Record zohoOrg,
@@ -343,11 +419,10 @@ public class ZohoSyncService extends BaseZohoAccess {
       return shouldCreate(zohoId, zohoRecordEuropeanaID, hasDpsOwner, markedForDeletion)
           ? Operations.CREATE
           : null;
-    } else if(emConfiguration.isGenerateOrganizationEuropeanaId() && isModifiedByApi(zohoOrg)) {
-      if(logger.isInfoEnabled()) {
-      logger.info(
-          "Skip Organization organization, it was last modified by the API by the  {}",
-          zohoId);
+    } else if (emConfiguration.isGenerateOrganizationEuropeanaId() && isModifiedByApi(zohoOrg)) {
+      if (logger.isInfoEnabled()) {
+        logger.info("Skip Organization organization, it was last modified by the API by the  {}",
+            zohoId);
       }
       return null;
     } else if (shouldDisable(hasDpsOwner, markedForDeletion)) {
@@ -416,10 +491,9 @@ public class ZohoSyncService extends BaseZohoAccess {
   }
 
   boolean skipNonExisting(boolean hasDpsOwner, boolean markedForDeletion) {
-    //skip deprecated if not explicitly enabled in configs
-    //skip if owner is not DPS Team
-    return (markedForDeletion && !emConfiguration.isRegisterDeprecated())
-        || !hasDpsOwner;
+    // skip deprecated if not explicitly enabled in configs
+    // skip if owner is not DPS Team
+    return (markedForDeletion && !emConfiguration.isRegisterDeprecated()) || !hasDpsOwner;
   }
 
   boolean needsToBeEnabled(EntityRecord entityRecord, boolean hasDpsOwner,

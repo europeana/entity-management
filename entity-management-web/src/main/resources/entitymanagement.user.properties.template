@@ -55,3 +55,6 @@ europeana.searchapi.urlPrefix=https://<api_endpoint>/record/v2/search.json?wskey
 #zoho.country.mapping=zoho_country_mapping.json
 #zoho.role.mapping=zoho_role_mapping.json
 #europeana.role.vocabulary=role_vocabulary.xml
+
+#optional, webhook to send messages (i.e. ZohoSyncReport) to slack channels 
+#slack.webhook
