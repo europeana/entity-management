@@ -21,8 +21,9 @@ public class EntitySolrInsertionWriter implements ItemWriter<BatchEntityRecord> 
 
   @Override
   public void write(List<? extends BatchEntityRecord> entityRecords) throws Exception {
+    //filter out disabled entities and convert to solr docs
     List<SolrEntity<?>> solrEntities =
-        entityRecords.stream()
+        entityRecords.stream().filter(record -> !record.getEntityRecord().isDisabled())
             .map(entityRecord -> createSolrEntity(entityRecord.getEntityRecord()))
             .collect(Collectors.toList());
 
