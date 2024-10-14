@@ -176,7 +176,8 @@ public class BaseZohoAccess {
       //first update the EuropeanaId in Zoho and disable organizations
       for (Operation operation : deprecateOperations) {
         // deprecate if not already deprecated
-        if(operation.getEntityRecord().isDisabled()) {
+        boolean allreadyDisabled = operation.getEntityRecord().isDisabled();
+        if(allreadyDisabled) {
           logger.info(
               "Organization was marked for deletion, but it is already disabled. Skipping disable for id: {}",
               operation.getZohoEuropeanaId());        
@@ -194,8 +195,15 @@ public class BaseZohoAccess {
          */
         //through this update, the sameAs field from zoho should also end up in the sameAs field of the entity
         try {
-          //SG: run update synchronously as we don't have many entities disabled and we can report failures 
+          //SG: run update synchronously as we don't have many entities disabled and we can report failures
+          logger.info(
+              "Updating disabled organization with id: {}",
+              operation.getZohoEuropeanaId());
           entityUpdateService.runSynchronousUpdate(operation.getEntityRecord().getEntityId());
+          if(allreadyDisabled) {
+            //not counted to disabled, needs to be counted for updates
+            zohoSyncReport.increaseUpdated(1);
+          }
         } catch (Exception e) {
           zohoSyncReport.addFailedOperation(
               operation.getZohoEuropeanaId(), ZohoSyncReportFields.ENTITY_SYNCHRONOUS_UPDATE_ERROR, e);
