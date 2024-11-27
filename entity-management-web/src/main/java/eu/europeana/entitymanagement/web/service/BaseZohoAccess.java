@@ -266,7 +266,7 @@ public class BaseZohoAccess {
       String message =
           "Cannot schedule update operations for organizations with ids:"
               + entityIds.toArray();
-      zohoSyncReport.addFailedOperation(null, ZohoSyncReportFields.CREATION_ERROR, message, e);
+      zohoSyncReport.addFailedOperation(null, ZohoSyncReportFields.UPDATE_ERROR, message, e);
     }
     
   }
@@ -288,7 +288,7 @@ public class BaseZohoAccess {
       String message =
           "Cannot schedule update operations for organizations with ids:"
               + entityIds.toArray();
-      zohoSyncReport.addFailedOperation(null, ZohoSyncReportFields.CREATION_ERROR, message, e);
+      zohoSyncReport.addFailedOperation(null, ZohoSyncReportFields.UPDATE_ERROR, message, e);
     }
   }
 
