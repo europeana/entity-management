@@ -112,60 +112,6 @@ public class EntityAdminController extends BaseRest {
     return noContentResponse(request);
   }
 
-  /**
-   * Migrate existing Entity
-   *
-   * @param wskey
-   * @param type type of entity
-   * @param identifier entity id
-   * @param request
-   * @return
-   * @throws HttpException
-   */
-  @ApiOperation(
-      value = "Migrate existing Entity",
-      nickname = "migrateExistingEntity",
-      response = java.lang.Void.class)
-  @PostMapping(
-      value = "/{type}/{identifier}/management",
-      produces = {MediaType.APPLICATION_JSON_VALUE, HttpHeaders.CONTENT_TYPE_JSONLD})
-  public ResponseEntity<String> migrateExistingEntity(
-      @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
-      @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
-      @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
-      @RequestBody Entity europeanaProxyEntity,
-      HttpServletRequest request)
-      throws HttpException, EuropeanaApiException {
-
-    verifyWriteAccess(Operations.CREATE, request);
-
-    validateBodyEntity(europeanaProxyEntity, false);
-
-    try {
-      // get the entity type based on path param
-      type = EntityTypes.getByEntityType(type).toString();
-      EntityRecord savedEntityRecord =
-          entityRecordService.createEntityFromMigrationRequest(
-              europeanaProxyEntity, type, identifier);
-      LOG.debug(
-          "Created Entity record for {}; entityId={}",
-          europeanaProxyEntity.getEntityId(),
-          savedEntityRecord.getEntityId());
-      return generateResponseEntityForEntityRecord(
-          request,
-          List.of(EntityProfile.internal),
-          FormatTypes.jsonld,
-          null,
-          null,
-          savedEntityRecord,
-          HttpStatus.ACCEPTED);
-    } catch (UnsupportedEntityTypeException e) {
-      throw new EntityCreationException("Entity type invalid or not supported: " + type, e);
-    } catch (EntityModelCreationException e) {
-      throw new EntityCreationException("Error while creating entity object for " + type, e);
-    }
-  }
-
   @ApiOperation(
       value = "Retrieve a list of entities for which an update failed.",
       nickname = "getEntitiesUpdateFailedJsonLd",

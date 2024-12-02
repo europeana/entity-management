@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import com.zoho.crm.api.record.DeletedRecord;
@@ -323,10 +324,27 @@ public class BaseZohoAccess {
     List<String> entitiesToUpdate = new ArrayList<String>(createOperations.size());
   
     // register new entitities
+    boolean mustGenerateEuropeanaId;
+   
     for (Operation operation : createOperations) {
-      performEntityRegistration(operation, zohoSyncReport, entitiesToUpdate);
-      //entity registration submits Europeana ID to zoho
-      zohoSyncReport.increaseSubmittedZohoEuropeanaId();
+      //verify if the EuropeanaID was already present in Zoho
+      mustGenerateEuropeanaId = StringUtils.isEmpty(operation.getZohoEuropeanaId());
+      //backup zohoId from operation if existed
+      String beforeOperationZohoId = (mustGenerateEuropeanaId) ? null : new String(operation.getZohoEuropeanaId()); 
+      
+      Optional<EntityRecord> registeredRecord = performEntityRegistration(operation, zohoSyncReport, entitiesToUpdate);
+      
+      if(registeredRecord.isPresent()) {
+        //entity successfully registered
+        if(mustGenerateEuropeanaId) {
+          //entity registration submits Europeana ID to zoho
+          zohoSyncReport.increaseSubmittedZohoEuropeanaId();
+        } 
+        
+        if(mustGenerateEuropeanaId && beforeOperationZohoId != null && !beforeOperationZohoId.equals(registeredRecord.get().getEntityId())) {
+          throw new FunctionalRuntimeException("Organization registration should not update existing Org.ID in Zoho! Check logs for organization: " +  operation.getZohoRecord().getId());
+        }
+      }
     }
     return entitiesToUpdate;
   }
@@ -337,9 +355,11 @@ public class BaseZohoAccess {
    * @param zohoSyncReport the report collecting executed operations
    * @param entitiesToUpdate the ids of the newly created organizations
    */
-  private void performEntityRegistration(Operation operation, ZohoSyncReport zohoSyncReport, List<String> entitiesToUpdate) {
+  private Optional<EntityRecord> performEntityRegistration(Operation operation, ZohoSyncReport zohoSyncReport, List<String> entitiesToUpdate) {
     Organization zohoOrganization =
         ZohoOrganizationConverter.convertToOrganizationEntity(operation.getZohoRecord(), zohoConfiguration.getZohoBaseUrl(), emConfiguration.getCountryMappings(), emConfiguration.getRoleMappings());
+    
+    Optional<EntityRecord> res = Optional.empty();
     
     try {
       List<EntityRecord> existingEntities =
@@ -361,9 +381,12 @@ public class BaseZohoAccess {
             entityRecordService.createEntityFromRequest(
                 europeanaProxyEntity, zohoOrganization, getZohoDataSource(), operation.getZohoEuropeanaId());
         
+        res = Optional.of(savedEntityRecord);
         
         //update organization ID into the operation, generated ids are available only at this stage
-        operation.setZohoEuropeanaId(savedEntityRecord.getEntityId());
+        if(StringUtils.isEmpty(operation.getZohoEuropeanaId())) {
+          operation.setZohoEuropeanaId(savedEntityRecord.getEntityId());
+        }
         entitiesToUpdate.add(savedEntityRecord.getEntityId());
         
         zohoSyncReport.increaseCreated(1);
@@ -385,6 +408,8 @@ public class BaseZohoAccess {
       zohoSyncReport.addFailedOperation(
           zohoOrganization.getAbout(), ZohoSyncReportFields.CREATION_ERROR, e);
     }
+    
+    return res;
   }
 
   List<EntityRecord> findDupplicateOrganization(Operation operation,
