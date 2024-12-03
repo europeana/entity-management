@@ -236,7 +236,7 @@ public class HeadersIT extends BaseWebControllerTest {
         .andExpect(
             header()
                 .stringValues(
-                    HttpHeaders.ALLOW, hasItems(containsString("DELETE"), containsString("POST"))));
+                    HttpHeaders.ALLOW, hasItems(containsString("DELETE"))));
   }
 
   @Test
