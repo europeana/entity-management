@@ -1,32 +1,5 @@
 package eu.europeana.entitymanagement.web;
 
-import eu.europeana.api.commons.definitions.exception.DateParsingException;
-import eu.europeana.api.commons.definitions.utils.DateUtils;
-import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
-import eu.europeana.api.commons.error.EuropeanaApiException;
-import eu.europeana.api.commons.web.exception.HttpException;
-import eu.europeana.api.commons.web.http.HttpHeaders;
-import eu.europeana.api.commons.web.model.vocabulary.Operations;
-import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType;
-import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
-import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.exception.EntityCreationException;
-import eu.europeana.entitymanagement.exception.EntityNotFoundException;
-import eu.europeana.entitymanagement.exception.HttpBadRequestException;
-import eu.europeana.entitymanagement.utils.EntityRecordUtils;
-import eu.europeana.entitymanagement.vocabulary.EntityProfile;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.vocabulary.FormatTypes;
-import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
-import eu.europeana.entitymanagement.web.auth.EMOperations;
-import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
-import eu.europeana.entitymanagement.web.service.EntityRecordService;
-import eu.europeana.entitymanagement.web.service.ZohoSyncService;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -37,7 +10,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -45,10 +17,30 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import eu.europeana.api.commons.definitions.exception.DateParsingException;
+import eu.europeana.api.commons.definitions.utils.DateUtils;
+import eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants;
+import eu.europeana.api.commons.error.EuropeanaApiException;
+import eu.europeana.api.commons.web.exception.HttpException;
+import eu.europeana.api.commons.web.http.HttpHeaders;
+import eu.europeana.api.commons.web.model.vocabulary.Operations;
+import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType;
+import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
+import eu.europeana.entitymanagement.exception.EntityNotFoundException;
+import eu.europeana.entitymanagement.exception.HttpBadRequestException;
+import eu.europeana.entitymanagement.utils.EntityRecordUtils;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
+import eu.europeana.entitymanagement.web.auth.EMOperations;
+import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
+import eu.europeana.entitymanagement.web.service.EntityRecordService;
+import eu.europeana.entitymanagement.web.service.ZohoSyncService;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 @RestController
 @Validated
@@ -110,60 +102,6 @@ public class EntityAdminController extends BaseRest {
     }
 
     return noContentResponse(request);
-  }
-
-  /**
-   * Migrate existing Entity
-   *
-   * @param wskey
-   * @param type type of entity
-   * @param identifier entity id
-   * @param request
-   * @return
-   * @throws HttpException
-   */
-  @ApiOperation(
-      value = "Migrate existing Entity",
-      nickname = "migrateExistingEntity",
-      response = java.lang.Void.class)
-  @PostMapping(
-      value = "/{type}/{identifier}/management",
-      produces = {MediaType.APPLICATION_JSON_VALUE, HttpHeaders.CONTENT_TYPE_JSONLD})
-  public ResponseEntity<String> migrateExistingEntity(
-      @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
-      @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
-      @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
-      @RequestBody Entity europeanaProxyEntity,
-      HttpServletRequest request)
-      throws HttpException, EuropeanaApiException {
-
-    verifyWriteAccess(Operations.CREATE, request);
-
-    validateBodyEntity(europeanaProxyEntity, false);
-
-    try {
-      // get the entity type based on path param
-      type = EntityTypes.getByEntityType(type).toString();
-      EntityRecord savedEntityRecord =
-          entityRecordService.createEntityFromMigrationRequest(
-              europeanaProxyEntity, type, identifier);
-      LOG.debug(
-          "Created Entity record for {}; entityId={}",
-          europeanaProxyEntity.getEntityId(),
-          savedEntityRecord.getEntityId());
-      return generateResponseEntityForEntityRecord(
-          request,
-          List.of(EntityProfile.internal),
-          FormatTypes.jsonld,
-          null,
-          null,
-          savedEntityRecord,
-          HttpStatus.ACCEPTED);
-    } catch (UnsupportedEntityTypeException e) {
-      throw new EntityCreationException("Entity type invalid or not supported: " + type, e);
-    } catch (EntityModelCreationException e) {
-      throw new EntityCreationException("Error while creating entity object for " + type, e);
-    }
   }
 
   @ApiOperation(

@@ -41,12 +41,10 @@ import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.definitions.model.TimeSpan;
 import eu.europeana.entitymanagement.definitions.model.ZohoLabelUriMapping;
 import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
-import eu.europeana.entitymanagement.exception.EntityAlreadyExistsException;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
-import eu.europeana.entitymanagement.exception.HttpUnprocessableException;
 import eu.europeana.entitymanagement.exception.MultipleChoicesException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
@@ -425,63 +423,7 @@ public class EntityRecordService extends BaseEntityRecordService {
 
     return entityRecordRepository.deleteForGood(entityId);
   }
-
-  /**
-   * Creates an {@link EntityRecord} from an {@link Entity}, which is then persisted. Note : This
-   * method is used for creating Entity for Migration requests
-   *
-   * @param europeanaProxyEntity
-   * @param type type of entity
-   * @param identifier id of entity
-   * @return Saved Entity record
-   * @throws EntityCreationException if an error occurs
-   * @throws HttpUnprocessableException
-   * @throws HttpBadRequestException
-   * @throws UnsupportedEntityTypeException
-   */
-  public EntityRecord createEntityFromMigrationRequest(Entity europeanaProxyEntity, String type,
-      String identifier) throws EntityAlreadyExistsException, HttpBadRequestException,
-      HttpUnprocessableException, EntityModelCreationException, UnsupportedEntityTypeException {
-
-    String externalProxyId = europeanaProxyEntity.getEntityId();
-
-    // Fail quick if no datasource is configured
-    DataSource externalDatasource = datasources.verifyDataSource(externalProxyId, true);
-
-    Date timestamp = new Date();
-
-    Entity entity = EntityObjectFactory.createConsolidatedEntityObject(type);
-    String entityId = generateEntityId(EntityTypes.getByEntityType(entity.getType()), identifier);
-    // check if entity already exists
-    // this is avoid MongoDb exception for duplicate key
-    checkIfEntityAlreadyExists(entityId);
-    entity.setEntityId(entityId);
-    /*
-     * sameAs will be replaced during consolidation; however we set this here to prevent duplicate
-     * registrations if consolidation fails
-     */
-    entity.setSameReferenceLinks(new ArrayList<>(List.of(externalProxyId)));
-    EntityRecord entityRecord = new EntityRecord();
-    entityRecord.setEntityId(entityId);
-    entityRecord.setEntity(entity);
-
-    europeanaProxyEntity.setEntityId(entityId);
-
-    // create metis Entity
-    Entity metisEntity = EntityObjectFactory.createProxyEntityObject(type);
-
-    // set proxies
-    // europeana proxy first
-    setEuropeanaMetadata(europeanaProxyEntity, entityId, new ArrayList<>(List.of(externalProxyId)),
-        entityRecord, timestamp);
-    // external proxy second
-    setExternalProxy(metisEntity, externalProxyId, entityId, externalDatasource, entityRecord,
-        timestamp, 1);
-
-    updateEntityAggregation(entityRecord, entityId, timestamp);
-    return entityRecordRepository.save(entityRecord);
-  }
-
+  
   /**
    * Creates an {@link EntityRecord} from an {@link Entity}, which is then persisted.
    *
@@ -674,7 +616,7 @@ public class EntityRecordService extends BaseEntityRecordService {
     }
   }
 
-  String generateEntityId(Entity datasourceResponse) throws UnsupportedEntityTypeException {
+  String generateEntityId(Entity datasourceResponse) throws UnsupportedEntityTypeException, EntityCreationException {
     // only in case of Zoho Organization use the provided id from de-referencing
     return generateEntityId(EntityTypes.getByEntityType(datasourceResponse.getType()), null);
   }
@@ -707,19 +649,6 @@ public class EntityRecordService extends BaseEntityRecordService {
   }
 
   /**
-   * Checks if Entity already exists
-   *
-   * @param entityId
-   * @throws EntityAlreadyExistsException
-   */
-  private void checkIfEntityAlreadyExists(String entityId) throws EntityAlreadyExistsException {
-    Optional<EntityRecord> entityRecordOpt = retrieveByEntityId(entityId);
-    if (entityRecordOpt.isPresent()) {
-      throw new EntityAlreadyExistsException(entityId);
-    }
-  }
-
-  /**
    * generates the EntityId If entityId is present, generate entity id uri with entityId else
    * generates a auto increment id ex: http://data.europeana.eu/<entitytype>/<entityId> OR
    * http://data.europeana.eu/<entitytype>/<dbId>
@@ -727,12 +656,14 @@ public class EntityRecordService extends BaseEntityRecordService {
    * @param entityType
    * @param entityId
    * @return the generated EntityId
+   * @throws EntityCreationException 
    */
-  private String generateEntityId(EntityTypes entityType, String entityId) {
+  private String generateEntityId(EntityTypes entityType, String entityId) throws EntityCreationException {
     if (entityId != null) {
-      return EntityRecordUtils.buildEntityIdUri(entityType, entityId);
+      throw new EntityCreationException("Generation of organization ids based on zoho id is not supported anymore. Please verify entity:  " + entityId);
     } else {
       long dbId = entityRecordRepository.generateAutoIncrement(entityType.getEntityType());
+      logger.info("New entity id generated in database /{}/{}", entityType, dbId);
       return EntityRecordUtils.buildEntityIdUri(entityType, String.valueOf(dbId));
     }
   }

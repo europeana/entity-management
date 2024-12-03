@@ -4,25 +4,18 @@ import static eu.europeana.entitymanagement.definitions.batch.model.ScheduledRem
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPath;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.PARAM_PROFILE_SYNC;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.QUERY_PARAM_PROFILE;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.solr.model.SolrConcept;
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
-import eu.europeana.entitymanagement.utils.EntityRecordUtils;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -43,13 +36,8 @@ class EntityAdminControllerIT extends BaseWebControllerTest {
     String requestPath = getEntityRequestPath(entityRecord.getEntityId());
 
     mockMvc
-        .perform(
-            delete(
-                    IntegrationTestUtils.BASE_SERVICE_URL
-                        + "/"
-                        + requestPath
-                        + IntegrationTestUtils.BASE_ADMIN_URL)
-                .accept(MediaType.APPLICATION_JSON))
+        .perform(delete(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath
+            + IntegrationTestUtils.BASE_ADMIN_URL).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
     assertedTaskScheduled(entityRecord.getEntityId(), PERMANENT_DELETION);
@@ -69,22 +57,18 @@ class EntityAdminControllerIT extends BaseWebControllerTest {
 
     String requestPath = getEntityRequestPath(entityRecord.getEntityId());
 
-    mockMvc
-        .perform(
-            delete(
-                    IntegrationTestUtils.BASE_SERVICE_URL
-                        + "/"
-                        + requestPath
-                        + IntegrationTestUtils.BASE_ADMIN_URL)
-                .param(QUERY_PARAM_PROFILE, PARAM_PROFILE_SYNC)
-                .accept(MediaType.APPLICATION_JSON))
+    mockMvc.perform(delete(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath
+        + IntegrationTestUtils.BASE_ADMIN_URL).param(QUERY_PARAM_PROFILE, PARAM_PROFILE_SYNC)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
-
-    Optional<EntityRecord> dbRecordOptional = retrieveEntityEvenIfDisabled(entityRecord.getEntityId());
-    Assertions.assertTrue(dbRecordOptional.isEmpty());
 
     // confirm that Solr document no longer exists
     Assertions.assertNull(solrService.searchById(SolrConcept.class, entityRecord.getEntityId()));
+
+    // retrieval should throw exception
+    Assertions.assertThrows(EntityNotFoundException.class, () -> entityRecordService
+        .retrieveEntityRecord(entityRecord.getEntityId(), EntityProfile.internal.name(), true));
+
   }
 
   @Test
@@ -99,165 +83,11 @@ class EntityAdminControllerIT extends BaseWebControllerTest {
     String requestPath = getEntityRequestPath(entityRecord.getEntityId());
 
     mockMvc
-        .perform(
-            delete(
-                    IntegrationTestUtils.BASE_SERVICE_URL
-                        + "/"
-                        + requestPath
-                        + IntegrationTestUtils.BASE_ADMIN_URL)
-                .accept(MediaType.APPLICATION_JSON))
+        .perform(delete(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath
+            + IntegrationTestUtils.BASE_ADMIN_URL).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
     assertedTaskScheduled(entityRecord.getEntityId(), PERMANENT_DELETION);
   }
 
-  @Test
-  void migrationShouldBeSuccessful() throws Exception {
-    String entityId = "http://data.europeana.eu/concept/1";
-    String requestBody =
-        "{\"type\" : \"Concept\", \"id\" : \"" + IntegrationTestUtils.VALID_MIGRATION_ID + "\"}";
-    ResultActions results =
-        mockMvc
-            .perform(
-                post(
-                        IntegrationTestUtils.BASE_SERVICE_URL
-                            + "/{type}/{identifier}"
-                            + IntegrationTestUtils.BASE_ADMIN_URL,
-                        "concept",
-                        "1")
-                    .accept(MediaType.APPLICATION_JSON)
-                    .contentType(MediaType.APPLICATION_JSON_VALUE)
-                    .content(requestBody))
-            .andExpect(status().isAccepted());
-
-    results
-        .andExpect(jsonPath("$.id", is(entityId)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Concept.getEntityType())))
-        .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
-        .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
-        // should have Europeana and Datasource proxies
-        .andExpect(jsonPath("$.proxies", hasSize(2)));
-
-    // check that record is present
-    Optional<EntityRecord> dbRecordOptional = retrieveEntityEvenIfDisabled(entityId);
-    Assertions.assertFalse(dbRecordOptional.isEmpty());
-  }
-
-  @Test
-  /**
-   * @deprecated the entity migration functionality is deprecated the test case will loose purpose
-   * @throws Exception
-   */
-  @Deprecated
-  void migrationAndUpdateWithStaticDataSourceShouldBeSuccessful() throws Exception {
-    String entityId =
-        "http://data.europeana.eu/concept/" + IntegrationTestUtils.STATIC_ENTITY_IDENTIFIER;
-    migrateEntity("Concept", entityId, IntegrationTestUtils.STATIC_ENTITY_EXTERNAL_ID);
-    ResultActions result =
-        mockMvc.perform(
-            MockMvcRequestBuilders.put(
-                    IntegrationTestUtils.BASE_SERVICE_URL + "/{type}/{identifier}",
-                    "concept",
-                    IntegrationTestUtils.STATIC_ENTITY_IDENTIFIER)
-                .content(loadFile(IntegrationTestUtils.STATIC_ENTITY_FILE))
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON));
-    result
-        .andExpect(status().isAccepted())
-        .andExpect(jsonPath("$.id", is(entityId)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Concept.getEntityType())))
-        .andExpect(jsonPath("$.prefLabel[*]", hasSize(11))) // 4 labels removed through cleaning
-        .andExpect(jsonPath("$.altLabel[*]", hasSize(1)));
-  }
-
-  @Test
-  void updateForStaticDataSourceShouldBeSuccessful() throws Exception {
-    String entityId =
-        "http://data.europeana.eu/concept/" + IntegrationTestUtils.STATIC_ENTITY_IDENTIFIER;
-    migrateEntity("Concept", entityId, IntegrationTestUtils.STATIC_ENTITY_EXTERNAL_ID);
-
-    // check that record is present
-    Optional<EntityRecord> dbRecordOptional = retrieveEntityEvenIfDisabled(entityId);
-    Assertions.assertFalse(dbRecordOptional.isEmpty());
-  }
-
-  @Test
-  void migratingInvalidEntityTypeShouldReturn400() throws Exception {
-    String requestBody =
-        "{\"type\" : \"InvalidEntityType\", \"id\" : \""
-            + IntegrationTestUtils.VALID_MIGRATION_ID
-            + "\"}";
-    mockMvc
-        .perform(
-            post(
-                    IntegrationTestUtils.BASE_SERVICE_URL
-                        + "/{type}/{identifier}"
-                        + IntegrationTestUtils.BASE_ADMIN_URL,
-                    "InvalidEntityType",
-                    "1")
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(requestBody))
-        .andExpect(status().isBadRequest());
-  }
-
-  @Test
-  void migratingInvalidDatasourceShouldReturn400() throws Exception {
-    String requestBody =
-        "{\"type\" : \"Concept\", \"id\" : \"" + IntegrationTestUtils.INVALID_MIGRATION_ID + "\"}";
-    mockMvc
-        .perform(
-            post(
-                    IntegrationTestUtils.BASE_SERVICE_URL
-                        + "/{type}/{identifier}"
-                        + IntegrationTestUtils.BASE_ADMIN_URL,
-                    "concept",
-                    "1")
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(requestBody))
-        .andExpect(status().isBadRequest());
-  }
-
-  @Test
-  void migratingExistingEntityShouldReturn400() throws Exception {
-    String entityId = "http://data.europeana.eu/concept/1";
-    migrateEntity("Concept", entityId, IntegrationTestUtils.VALID_MIGRATION_ID);
-
-    String requestBody =
-        "{\"type\" : \"Concept\", \"id\" : \"" + IntegrationTestUtils.VALID_MIGRATION_ID + "\"}";
-
-    mockMvc
-        .perform(
-            post(
-                    IntegrationTestUtils.BASE_SERVICE_URL
-                        + "/{type}/{identifier}"
-                        + IntegrationTestUtils.BASE_ADMIN_URL,
-                    "concept",
-                    "1")
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(requestBody))
-        .andExpect(status().isBadRequest());
-  }
-  
-  private void migrateEntity(String entityType, String entityId, String externalId)
-      throws Exception {
-    String requestBody = "{\"type\" : \"" + entityType + "\", \"id\" : \"" + externalId + "\"}";
-
-    mockMvc
-        .perform(
-            post(
-                    IntegrationTestUtils.BASE_SERVICE_URL
-                        + "/{type}/{identifier}"
-                        + IntegrationTestUtils.BASE_ADMIN_URL,
-                    entityType.toLowerCase(),
-                    EntityRecordUtils.getIdentifierFromUrl(entityId))
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(requestBody))
-        .andExpect(status().isAccepted())
-        .andExpect(jsonPath("$.id", is(entityId)))
-        .andExpect(jsonPath("$.type", is(entityType)));
-  }
 }

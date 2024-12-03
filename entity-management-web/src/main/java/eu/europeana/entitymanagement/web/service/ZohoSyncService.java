@@ -31,7 +31,6 @@ import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.mongo.repository.ZohoSyncRepository;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
-import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.web.model.BatchOperations;
 import eu.europeana.entitymanagement.web.model.FailedOperation;
 import eu.europeana.entitymanagement.web.model.Operation;
@@ -52,11 +51,11 @@ public class ZohoSyncService extends BaseZohoAccess {
   @Autowired
   public ZohoSyncService(EntityRecordService entityRecordService,
       EntityUpdateService entityUpdateService, EntityManagementConfiguration emConfiguration,
-      DataSources datasources, ZohoConfiguration zohoConfiguration, SolrService solrService,
+      DataSources datasources, ZohoConfiguration zohoConfiguration, 
       ZohoSyncRepository zohoSyncRepo) {
 
     super(entityRecordService, entityUpdateService, emConfiguration, datasources, zohoConfiguration,
-        solrService, zohoSyncRepo);
+        zohoSyncRepo);
   }
 
   /**
