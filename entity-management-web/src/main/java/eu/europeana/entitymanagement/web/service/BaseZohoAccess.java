@@ -31,9 +31,7 @@ import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.mongo.repository.ZohoSyncRepository;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
-import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.model.BatchOperations;
 import eu.europeana.entitymanagement.web.model.Operation;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
@@ -60,9 +58,20 @@ public class BaseZohoAccess {
 
   final ZohoSyncRepository zohoSyncRepo;
 
+  /**
+   * Constructor for service initialization
+   * 
+   * @param entityRecordService the entity record service
+   * @param entityUpdateService the entity update service
+   * @param emConfiguration application configuration
+   * @param datasources data source configurations
+   * @param zohoConfiguration zoho access configuration
+   * @param solrService solr service
+   * @param zohoSyncRepo repository for zoho sync logging
+   */
   public BaseZohoAccess(EntityRecordService entityRecordService,
       EntityUpdateService entityUpdateService, EntityManagementConfiguration emConfiguration,
-      DataSources datasources, ZohoConfiguration zohoConfiguration, SolrService solrService,
+      DataSources datasources, ZohoConfiguration zohoConfiguration,
       ZohoSyncRepository zohoSyncRepo) {
     this.entityRecordService = entityRecordService;
     this.entityUpdateService = entityUpdateService;
@@ -177,9 +186,11 @@ public class BaseZohoAccess {
       // deprecate if not already deprecated
       boolean allreadyDisabled = operation.getEntityRecord().isDisabled();
       if (allreadyDisabled) {
-        logger.info(
-            "Organization was marked for deletion, but it is already disabled. Skipping disable for id: {}",
-            operation.getZohoEuropeanaId());
+        if (logger.isInfoEnabled()) {
+          logger.info(
+              "Organization was marked for deletion, but it is already disabled. Skipping disable for id: {}",
+              operation.getZohoEuropeanaId());
+        }
       } else {
         // registers also the failed operations
         performDeprecation(zohoSyncReport, operation);
@@ -341,8 +352,8 @@ public class BaseZohoAccess {
           zohoSyncReport.increaseSubmittedZohoEuropeanaId();
         }
 
-        if (mustGenerateEuropeanaId && beforeOperationZohoId != null
-            && !beforeOperationZohoId.equals(registeredRecord.get().getEntityId())) {
+        if (mustGenerateEuropeanaId
+            && !registeredRecord.get().getEntityId().equals(beforeOperationZohoId)) {
           throw new FunctionalRuntimeException(
               "Organization registration should not update existing Org.ID in Zoho! Check logs for organization: "
                   + operation.getZohoRecord().getId());
@@ -416,10 +427,10 @@ public class BaseZohoAccess {
       allCorefs.add(operation.getZohoEuropeanaId());
     }
     allCorefs.add(zohoOrganization.getAbout());
-    String Europeana_ID =
+    String europeanaId =
         ZohoOrganizationConverter.getEuropeanaIdFieldValue(operation.getZohoRecord());
-    if (Europeana_ID != null) {
-      allCorefs.add(Europeana_ID);
+    if (europeanaId != null) {
+      allCorefs.add(europeanaId);
     }
     if (zohoOrganization.getSameReferenceLinks() != null
         && !zohoOrganization.getSameReferenceLinks().isEmpty()) {
@@ -478,7 +489,7 @@ public class BaseZohoAccess {
     // get the id list from Zoho deleted Record
     if (!deletedInZoho.isEmpty()) {
       deletedInZoho.forEach(deletedRecord -> deletedEntityIds
-          .add(generateZohoOrganizationUrl(deletedRecord.getId().longValue())
+          .add(generateZohoOrganizationUrl(deletedRecord.getId())
           // EntityRecordUtils.
           // buildEntityIdUri(
           // EntityTypes.Organization, deletedRecord.getId().toString())
