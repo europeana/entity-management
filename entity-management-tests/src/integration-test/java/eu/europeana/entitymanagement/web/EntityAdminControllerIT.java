@@ -12,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.solr.model.SolrConcept;
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
@@ -35,13 +36,8 @@ class EntityAdminControllerIT extends BaseWebControllerTest {
     String requestPath = getEntityRequestPath(entityRecord.getEntityId());
 
     mockMvc
-        .perform(
-            delete(
-                    IntegrationTestUtils.BASE_SERVICE_URL
-                        + "/"
-                        + requestPath
-                        + IntegrationTestUtils.BASE_ADMIN_URL)
-                .accept(MediaType.APPLICATION_JSON))
+        .perform(delete(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath
+            + IntegrationTestUtils.BASE_ADMIN_URL).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
     assertedTaskScheduled(entityRecord.getEntityId(), PERMANENT_DELETION);
@@ -61,22 +57,18 @@ class EntityAdminControllerIT extends BaseWebControllerTest {
 
     String requestPath = getEntityRequestPath(entityRecord.getEntityId());
 
-    mockMvc
-        .perform(
-            delete(
-                    IntegrationTestUtils.BASE_SERVICE_URL
-                        + "/"
-                        + requestPath
-                        + IntegrationTestUtils.BASE_ADMIN_URL)
-                .param(QUERY_PARAM_PROFILE, PARAM_PROFILE_SYNC)
-                .accept(MediaType.APPLICATION_JSON))
+    mockMvc.perform(delete(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath
+        + IntegrationTestUtils.BASE_ADMIN_URL).param(QUERY_PARAM_PROFILE, PARAM_PROFILE_SYNC)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
-    EntityRecord dbRecordOptional = entityRecordService.retrieveEntityRecord(entityRecord.getEntityId(), EntityProfile.internal.name(), true); 
-    Assertions.assertNull(dbRecordOptional);    
-        
     // confirm that Solr document no longer exists
     Assertions.assertNull(solrService.searchById(SolrConcept.class, entityRecord.getEntityId()));
+
+    // retrieval should throw exception
+    Assertions.assertThrows(EntityNotFoundException.class, () -> entityRecordService
+        .retrieveEntityRecord(entityRecord.getEntityId(), EntityProfile.internal.name(), true));
+
   }
 
   @Test
@@ -91,13 +83,8 @@ class EntityAdminControllerIT extends BaseWebControllerTest {
     String requestPath = getEntityRequestPath(entityRecord.getEntityId());
 
     mockMvc
-        .perform(
-            delete(
-                    IntegrationTestUtils.BASE_SERVICE_URL
-                        + "/"
-                        + requestPath
-                        + IntegrationTestUtils.BASE_ADMIN_URL)
-                .accept(MediaType.APPLICATION_JSON))
+        .perform(delete(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath
+            + IntegrationTestUtils.BASE_ADMIN_URL).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
     assertedTaskScheduled(entityRecord.getEntityId(), PERMANENT_DELETION);
