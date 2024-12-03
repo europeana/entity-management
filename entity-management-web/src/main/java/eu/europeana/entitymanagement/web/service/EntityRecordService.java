@@ -46,7 +46,6 @@ import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
-import eu.europeana.entitymanagement.exception.HttpUnprocessableException;
 import eu.europeana.entitymanagement.exception.MultipleChoicesException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.mongo.repository.EntityRecordRepository;
@@ -651,19 +650,6 @@ public class EntityRecordService extends BaseEntityRecordService {
   }
 
   /**
-   * Checks if Entity already exists
-   *
-   * @param entityId
-   * @throws EntityAlreadyExistsException
-   */
-  private void checkIfEntityAlreadyExists(String entityId) throws EntityAlreadyExistsException {
-    Optional<EntityRecord> entityRecordOpt = retrieveByEntityId(entityId);
-    if (entityRecordOpt.isPresent()) {
-      throw new EntityAlreadyExistsException(entityId);
-    }
-  }
-
-  /**
    * generates the EntityId If entityId is present, generate entity id uri with entityId else
    * generates a auto increment id ex: http://data.europeana.eu/<entitytype>/<entityId> OR
    * http://data.europeana.eu/<entitytype>/<dbId>
@@ -676,7 +662,6 @@ public class EntityRecordService extends BaseEntityRecordService {
   private String generateEntityId(EntityTypes entityType, String entityId) throws EntityCreationException {
     if (entityId != null) {
       throw new EntityCreationException("Generation of organization ids based on zoho id is not supported anymore. Please verify entity:  " + entityId);
-      //return EntityRecordUtils.buildEntityIdUri(entityType, entityId);
     } else {
       long dbId = entityRecordRepository.generateAutoIncrement(entityType.getEntityType());
       logger.info("New entity id generated in database /{}/{}", entityType, dbId);

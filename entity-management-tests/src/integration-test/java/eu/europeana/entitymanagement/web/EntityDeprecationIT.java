@@ -6,16 +6,15 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.PARAM_
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.QUERY_PARAM_PROFILE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.solr.model.SolrConcept;
-import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
-import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.solr.model.SolrConcept;
+import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
+import eu.europeana.entitymanagement.vocabulary.EntityProfile;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -64,8 +63,9 @@ public class EntityDeprecationIT extends BaseWebControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
-    Optional<EntityRecord> dbRecordOptional = retrieveEntityEvenIfDisabled(entityRecord.getEntityId());
-    Assertions.assertTrue(dbRecordOptional.get().isDisabled());
+    EntityRecord dbRecord = entityRecordService.retrieveEntityRecord(entityRecord.getEntityId(), EntityProfile.internal.name(), true); 
+    Assertions.assertNotNull(dbRecord);
+    Assertions.assertTrue(dbRecord.isDisabled());
 
     // confirm that Solr document no longer exists
     Assertions.assertNull(solrService.searchById(SolrConcept.class, entityRecord.getEntityId()));
