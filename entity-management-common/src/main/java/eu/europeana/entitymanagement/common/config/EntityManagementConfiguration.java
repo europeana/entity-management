@@ -60,7 +60,13 @@ public class EntityManagementConfiguration implements InitializingBean {
 
   @Value("${entitymanagement.solr.pr.url}")
   private String prSolrUrl;
+  
+  @Value("${entitymanagement.solr.pr.zookeeper.url:}")
+  private String prSolrZookeeperUrl;
 
+  @Value("${entitymanagement.solr.pr.collection}")
+  private String prSolrCollection;
+  
   @Value("${europeana.searchapi.urlPrefix}")
   private String searchApiUrlPrefix;
 
@@ -499,6 +505,14 @@ public class EntityManagementConfiguration implements InitializingBean {
 
   public String getSlackWebHook() {
     return slackWebHook;
+  }
+
+  public String getPrSolrZookeeperUrl() {
+    return prSolrZookeeperUrl;
+  }
+
+  public String getPrSolrCollection() {
+    return prSolrCollection;
   }
  
 }
