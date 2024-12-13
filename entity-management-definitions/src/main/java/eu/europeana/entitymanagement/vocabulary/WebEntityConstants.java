@@ -34,6 +34,7 @@ public interface WebEntityConstants extends WebEntityFields {
   public static final String PARAM_TYPE_CONCEPT = "concept";
   public static final String PARAM_TYPE_TIMESPAN = "timespan";
   public static final String PARAM_TYPE_ORGANIZATION = "organization";
+  public static final String PARAM_TYPE_AGGREGATOR = "aggregator";
 
   // Action param values
   public static final String ACTION_ENABLE = "enable";

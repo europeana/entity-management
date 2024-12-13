@@ -34,7 +34,7 @@ public class OrganizationIndexingIT extends BaseWebControllerTest {
     // 2. register zoho GFM org
     europeanaMetadata = loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_GFM_ZOHO_JSON);
     Optional<Record> zohoRecord = IntegrationTestUtils
-        .getZohoOrganizationRecord(IntegrationTestUtils.ORGANIZATION_GFM_URI_ZOHO);
+        .getZohoOrganizationByUrl(IntegrationTestUtils.ORGANIZATION_GFM_URI_ZOHO);
 
     assert zohoRecord.isPresent() : "Mocked Zoho response not loaded";
     String entityId = createOrganization(europeanaMetadata, zohoRecord.get()).getEntityId();

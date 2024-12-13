@@ -98,7 +98,15 @@ public interface WebEntityFields {
   public static final String LANGUAGE = "language";
   public static final String AGGREGATES_FROM = "aggregatesFrom";
   public static final String AGGREGATED_VIA = "aggregatedVia";
-
+  
+  // Aggregator fields
+  public static final String GEOGRAPHIC_SCOPE = "geographicScope";
+  public static final String HERITAGE_DOMAIN = "heritageDomain";
+  public static final String PROVIDES_SUPPORT_FOR_MEDIA_TYPE = "providesSupportForMediaType";
+  public static final String PROVIDES_SUPPORT_FOR_DATA_ACTIVITY = "providesSupportForDataActivity";
+  public static final String PROVIDES_SUPPORT_FOR_BUILDING_ACTIVITY = "providesCapacityBuildingActivity";
+  public static final String PROVIDES_AUDIENCE_ENGAGEMENT_ACTIVITY = "providesAudienceEngagementActivity";
+  
   // Address Fields
   public static final String STREET_ADDRESS = "streetAddress";
   public static final String LOCALITY = "locality";

@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.zoho.ZohoAccessClient;
+import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 import eu.europeana.entitymanagement.zoho.utils.ZohoInMemoryTokenStore;
 
@@ -50,8 +51,20 @@ public class ZohoConfiguration {
     return zohoAccessClient;
   }
 
-  public String getZohoBaseUrl() {
-    return zohoBaseUrl;
+  public String getZohoBaseUrlOrganizations() {
+    StringBuilder builder = new StringBuilder(zohoBaseUrl);
+    if(!zohoBaseUrl.endsWith("/")) {
+      builder.append('/');
+    }
+    return builder.append(ZohoConstants.ACCOUNTS_MODULE_NAME).append('/').toString();
+  }
+  
+  public String getZohoBaseUrlAggregators() {
+    StringBuilder builder = new StringBuilder(zohoBaseUrl);
+    if(!zohoBaseUrl.endsWith("/")) {
+      builder.append('/');
+    }
+    return builder.append(ZohoConstants.AGGREGATORS_MODULE_NAME).append('/').toString();
   }
 
   public void setZohoBaseUrl(String zohoBaseUrl) {

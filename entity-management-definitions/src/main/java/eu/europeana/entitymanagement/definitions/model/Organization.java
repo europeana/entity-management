@@ -11,17 +11,16 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DESCRIPTI
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.EUROPEANA_ROLE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_HOMEPAGE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_LOGO;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_MBOX;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_PHONE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_ADDRESS;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HIDDEN_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IDENTIFIER;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_AGGREGATED_BY;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.LANGUAGE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_AGGREGATED_BY;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,7 +53,6 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
   LANGUAGE,
   FOAF_HOMEPAGE,
   FOAF_PHONE,
-  FOAF_MBOX,
   HAS_ADDRESS,
   AGGREGATES_FROM,
   AGGREGATED_VIA,
@@ -64,35 +62,38 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 })
 public class Organization extends Entity {
 
-  private String type = EntityTypes.Organization.getEntityType();
-  private Map<String, String> description;
-  private Map<String, List<String>> acronym;
-  private WebResource logo;
-  private String homepage;
-  private List<String> phone;
-  private List<String> mbox;
+  protected String type = EntityTypes.Organization.getEntityType();
+  protected Map<String, String> description;
+  protected Map<String, List<String>> acronym;
+  protected WebResource logo;
+  protected String homepage;
+  protected List<String> phone;
   
   @Reference(lazy = true)
-  private EntityRecord countryRef;
-  private String countryId;
+  protected EntityRecord countryRef;
+  protected String countryId;
   @Transient
-  private Place country;
+  protected Place country;
   @Transient
-  private String countryISO;
+  protected String countryISO;
   
   
-  private List<String> europeanaRoleIds;
+  protected List<String> europeanaRoleIds;
   @Reference(lazy = true)
-  private List<Vocabulary> europeanaRoleRefs;
+  protected List<Vocabulary> europeanaRoleRefs;
   @Transient
-  private List<Vocabulary> europeanaRole;
+  protected List<Vocabulary> europeanaRole;
   
-  private Address hasAddress;
-  private List<String> sameAs; 
+  protected Address hasAddress;
+  protected List<String> sameAs; 
   @Transient 
-  private List<String> aggregatesFrom;
-  private List<String> aggregatedVia;
-  private List<String> language;
+  protected List<String> aggregatesFrom;
+  protected List<String> aggregatedVia;
+  @Transient
+  @JsonIgnore
+  protected List<String> aggregatedViaAggregatorUrls;
+  
+  protected List<String> language;
 
   public Organization() {
     super();
@@ -100,6 +101,7 @@ public class Organization extends Entity {
 
   public Organization(Organization copy) {
     super(copy);
+    this.type=copy.getType();
     if (copy.getDescription() != null) {
       this.description = new HashMap<>(copy.getDescription());
     }
@@ -110,9 +112,6 @@ public class Organization extends Entity {
     this.homepage = copy.getHomepage();
     if (copy.getPhone() != null) {
       this.phone = new ArrayList<>(copy.getPhone());
-    }
-    if (copy.getMbox() != null) {
-      this.mbox = new ArrayList<>(copy.getMbox());
     }
     //because the europeanaRoleRef is a reference to the object we keep it the same (therefore also for europeanaRole)
     this.europeanaRoleRefs = copy.getEuropeanaRoleRefs();
@@ -171,16 +170,6 @@ public class Organization extends Entity {
     this.phone = phone;
   }
 
-  @JsonGetter(FOAF_MBOX)
-  public List<String> getMbox() {
-    return mbox;
-  }
-
-  @JsonSetter(FOAF_MBOX)
-  public void setMbox(List<String> mbox) {
-    this.mbox = mbox;
-  }
-
   @JsonGetter(HAS_ADDRESS)
   public Address getAddress() {
     return hasAddress;
@@ -211,6 +200,7 @@ public class Organization extends Entity {
     this.logo = logo;
   }
 
+  @Override
   public String getType() {
     return type;
   }
@@ -345,5 +335,13 @@ public class Organization extends Entity {
 
   public void setCountryISO(String countryISO) {
     this.countryISO = countryISO;
+  }
+
+  public List<String> getAggregatedViaAggregatorUrls() {
+    return aggregatedViaAggregatorUrls;
+  }
+
+  public void setAggregatedViaAggregatorUrls(List<String> aggregatedViaAggregatorUrls) {
+    this.aggregatedViaAggregatorUrls = aggregatedViaAggregatorUrls;
   }
 }

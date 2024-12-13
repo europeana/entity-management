@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import org.apache.commons.io.IOUtils;
+import org.springframework.lang.NonNull;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -178,6 +179,12 @@ public class IntegrationTestUtils {
       "https://crm.zoho.eu/crm/org20085137532/tab/Accounts/486281000000940433";
   public static final String ORGANIZATION_BERGER_MUSEUM_URI_ZOHO =
       "https://crm.zoho.eu/crm/org20085137532/tab/Accounts/486281000000939337";
+  public static final String ORGANIZATION_ARMA_URI_ZOHO =
+      "https://crm.zoho.eu/crm/org20085137532/tab/Accounts/486281000004375001";
+  public static final String ORGANIZATION_EUSKARIANA_URI_ZOHO =
+      "https://crm.zoho.eu/crm/org20085137532/tab/Accounts/486281000000939318"; 
+  public static final String ORGANIZATION_EUSKARIANA_NAME = "Euskariana";
+  public static final String ORGANIZATION_ARMA_NAME = "Armagintzaren Museoa";
   
   public static final String ORGANIZATION_NATURALIS_URI_WIKIDATA_PATH_SUFFIX = "/entity/Q641676";
   public static final String ORGANIZATION_NATURALIS_URI_WIKIDATA_URI =
@@ -213,7 +220,15 @@ public class IntegrationTestUtils {
       "/wikidata-deref/organization_wikidata_naturalis_response.xml";
   public static final String ORGANIZATION_GFM_WIKIDATA_RESPONSE_XML =
       "/wikidata-deref/organization_wikidata_gfm_response.xml";
-
+  public static final String ORGANIZATION_ARMA_ZOHO_RESPONSE =
+      "/zoho-deref/organization_zoho_arma_response.json";
+  public static final String ORGANIZATION_EUSKARIANA_ZOHO_RESPONSE =
+      "/zoho-deref/organization_zoho_euskariana_response.json";
+  public static final String AGGREGATOR_EUSKARIANA_ZOHO_RESPONSE =
+      "/zoho-deref/aggregator_zoho_euskariana_response.json";
+  public static final String LINKING_ARMA_EUSKARIANA_ZOHO_RESPONSE =
+      "/zoho-deref/linking_zoho_arma_euskariana_response.json";
+  
   public static final String ORGANIZATION_BERGER_MUSEUM_WIKIDATA_RESPONSE_XML =
       "/wikidata-deref/organization_wikidata_berger_museum_response.xml";
   public static final String ORGANIZATION_BNF_WIKIDATA_RESPONSE_XML =
@@ -239,7 +254,7 @@ public class IntegrationTestUtils {
                   Map.of(Record.class, new ZohoRecordTestDeserializer())));
 
   /** Maps ZOHO organization URIs to mocked JSON responses */
-  public static Map<String, String> ZOHO_RESPONSE_MAP =
+  public static Map<String, String> ZOHO_ORG_URL_RESPONSE_MAP =
       Map.of(
           ORGANIZATION_NATURALIS_URI_ZOHO,
           ORGANIZATION_NATURALIS_ZOHO_RESPONSE,
@@ -250,8 +265,30 @@ public class IntegrationTestUtils {
           ORGANIZATION_PCCE_URI_ZOHO,
           ORGANIZATION_PCCE_ZOHO_RESPONSE,
           ORGANIZATION_BERGER_MUSEUM_URI_ZOHO,
-          ORGANIZATION_BERGER_MUSEUM_ZOHO_RESPONSE);
-  
+          ORGANIZATION_BERGER_MUSEUM_ZOHO_RESPONSE,
+          ORGANIZATION_ARMA_URI_ZOHO,
+          ORGANIZATION_ARMA_ZOHO_RESPONSE,
+          ORGANIZATION_EUSKARIANA_URI_ZOHO,
+          ORGANIZATION_EUSKARIANA_ZOHO_RESPONSE);
+
+  /** Maps ZOHO organization names to mocked JSON responses */
+  public static Map<String, String> ZOHO_ORG_NAME_RESPONSE_MAP =
+      Map.of(
+          ORGANIZATION_EUSKARIANA_NAME,
+          ORGANIZATION_EUSKARIANA_ZOHO_RESPONSE);
+
+  /** Maps ZOHO organization urls to the aggregators mocked JSON responses */
+  public static Map<String, String> ZOHO_ORG_URL_AGGREGATOR_RESPONSE_MAP =
+      Map.of(
+          ORGANIZATION_EUSKARIANA_URI_ZOHO,
+          AGGREGATOR_EUSKARIANA_ZOHO_RESPONSE);
+
+  /** Maps ZOHO organization:aggregator  to the linking mocked JSON responses */
+  public static Map<String, String> ZOHO_ORG_AGGREG_LINKING_RESPONSE_MAP =
+      Map.of(
+          String.format("%s:%s", ORGANIZATION_ARMA_NAME, ORGANIZATION_EUSKARIANA_NAME),
+          LINKING_ARMA_EUSKARIANA_ZOHO_RESPONSE);
+
   /** Maps Metis dereferenciation URIs to mocked XML responses */
   public static final Map<String, String> METIS_RESPONSE_MAP =
       Map.ofEntries(
@@ -275,8 +312,45 @@ public class IntegrationTestUtils {
         .replace("\n", "");
   }
 
-  public static Optional<Record> getZohoOrganizationRecord(String zohoId) throws Exception {
-    String zohoResponseData = loadFile(ZOHO_RESPONSE_MAP.get(zohoId));
-    return Optional.ofNullable(zohoResponseObjectMapper.readValue(zohoResponseData, Record.class));
+  public static Optional<Record> getZohoOrganizationByUrl(String zohoUrl) throws Exception {
+    if(ZOHO_ORG_URL_RESPONSE_MAP.containsKey(zohoUrl)) {
+      String zohoResponseData = loadFile(ZOHO_ORG_URL_RESPONSE_MAP.get(zohoUrl));
+      return Optional.ofNullable(zohoResponseObjectMapper.readValue(zohoResponseData, Record.class));
+    }
+    else {
+      return Optional.empty();
+    }
   }
+  
+  public static Optional<Record> searchZohoOrganizationByName(String orgName) throws Exception {
+    if(ZOHO_ORG_NAME_RESPONSE_MAP.containsKey(orgName)) {
+      String zohoResponseData = loadFile(ZOHO_ORG_NAME_RESPONSE_MAP.get(orgName));
+      return Optional.ofNullable(zohoResponseObjectMapper.readValue(zohoResponseData, Record.class));
+    }
+    else {
+      return Optional.empty();
+    }
+  }
+
+  public static Optional<Record> getZohoAggregatorByOrgUrl(String orgUrl) throws Exception {
+    if(ZOHO_ORG_URL_AGGREGATOR_RESPONSE_MAP.containsKey(orgUrl)) {
+      String zohoResponseData = loadFile(ZOHO_ORG_URL_AGGREGATOR_RESPONSE_MAP.get(orgUrl));
+      return Optional.ofNullable(zohoResponseObjectMapper.readValue(zohoResponseData, Record.class));
+    }
+    else {
+      return Optional.empty();
+    }
+  }
+  
+  public static Optional<Record> searchZohoAggregatedViaModule(@NonNull String orgName, @NonNull String aggregName) throws Exception {
+    String orgAggregJoin = String.format("%s:%s", orgName, aggregName);
+    if(ZOHO_ORG_AGGREG_LINKING_RESPONSE_MAP.containsKey(orgAggregJoin)) {
+      String zohoResponseData = loadFile(ZOHO_ORG_AGGREG_LINKING_RESPONSE_MAP.get(orgAggregJoin));
+      return Optional.ofNullable(zohoResponseObjectMapper.readValue(zohoResponseData, Record.class));
+    }
+    else {
+      return Optional.empty();
+    }
+  }
+    
 }

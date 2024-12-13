@@ -556,7 +556,7 @@ public class EntityRecordService extends BaseEntityRecordService {
       long predefinedIdentifier =
           Long.parseLong(StringUtils.substringAfterLast(predefinedEntityId, "/"));
       long lastGeneratedId = entityRecordRepository
-          .getLastGeneratedIdentifier(EntityTypes.Organization.getEntityType());
+          .getLastGeneratedIdentifier();
 
       if (lastGeneratedId < predefinedIdentifier || predefinedIdentifier < 1) {
         // predefined entity ID out of range

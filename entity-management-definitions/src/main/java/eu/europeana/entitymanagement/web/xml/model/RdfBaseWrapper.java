@@ -5,11 +5,11 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_SKOS;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.RDF;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_AGENT;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_AGGREGATOR;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_CONCEPT;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ORGANIZATION;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PLACE;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_TIMESPAN;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -33,6 +33,10 @@ public class RdfBaseWrapper {
             name = XML_ORGANIZATION,
             namespace = NAMESPACE_EDM,
             type = XmlOrganizationImpl.class),
+        @XmlElement(
+            name = XML_AGGREGATOR,
+            namespace = NAMESPACE_EDM,
+            type = XmlAggregatorImpl.class),
         @XmlElement(name = XML_TIMESPAN, namespace = NAMESPACE_EDM, type = XmlTimeSpanImpl.class)
       })
   private XmlBaseEntityImpl<?> xmlEntity;

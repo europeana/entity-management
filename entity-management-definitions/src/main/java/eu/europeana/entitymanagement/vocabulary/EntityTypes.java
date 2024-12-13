@@ -4,6 +4,7 @@ import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTyp
 
 public enum EntityTypes implements EntityKeyword {
   Organization("Organization", "organization", "http://www.europeana.eu/schemas/edm/Organization"),
+  Aggregator("Aggregator", "aggregator", "http://www.europeana.eu/schemas/edm/Aggregator"),
   Concept("Concept", "concept", "https://www.w3.org/2009/08/skos-reference/skos.html#Concept"),
   ConceptScheme(
       "ConceptScheme",
@@ -110,6 +111,7 @@ public enum EntityTypes implements EntityKeyword {
    * @return true if Organization
    */
   public static boolean isOrganization(String entityType) {
-    return EntityTypes.Organization.getEntityType().equals(entityType);
+    return EntityTypes.Organization.getEntityType().equals(entityType) ||
+        EntityTypes.Aggregator.getEntityType().equals(entityType);
   }
 }

@@ -1,21 +1,5 @@
 package eu.europeana.entitymanagement.solr;
 
-import eu.europeana.entitymanagement.definitions.model.Agent;
-import eu.europeana.entitymanagement.definitions.model.Aggregation;
-import eu.europeana.entitymanagement.definitions.model.Concept;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.model.Organization;
-import eu.europeana.entitymanagement.definitions.model.Place;
-import eu.europeana.entitymanagement.definitions.model.TimeSpan;
-import eu.europeana.entitymanagement.solr.model.SolrAgent;
-import eu.europeana.entitymanagement.solr.model.SolrConcept;
-import eu.europeana.entitymanagement.solr.model.SolrEntity;
-import eu.europeana.entitymanagement.solr.model.SolrOrganization;
-import eu.europeana.entitymanagement.solr.model.SolrPlace;
-import eu.europeana.entitymanagement.solr.model.SolrTimeSpan;
-import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,6 +7,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.MapUtils;
+import eu.europeana.entitymanagement.definitions.model.Agent;
+import eu.europeana.entitymanagement.definitions.model.Aggregation;
+import eu.europeana.entitymanagement.definitions.model.Aggregator;
+import eu.europeana.entitymanagement.definitions.model.Concept;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.definitions.model.Place;
+import eu.europeana.entitymanagement.definitions.model.TimeSpan;
+import eu.europeana.entitymanagement.solr.model.SolrAgent;
+import eu.europeana.entitymanagement.solr.model.SolrAggregator;
+import eu.europeana.entitymanagement.solr.model.SolrConcept;
+import eu.europeana.entitymanagement.solr.model.SolrEntity;
+import eu.europeana.entitymanagement.solr.model.SolrOrganization;
+import eu.europeana.entitymanagement.solr.model.SolrPlace;
+import eu.europeana.entitymanagement.solr.model.SolrTimeSpan;
+import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 /**
  * This class implements supporting methods for Solr*Impl classes e.g. normalization of the content
@@ -103,6 +105,8 @@ public class SolrUtils {
       return (Class<U>) SolrConcept.class;
     } else if (solrType.equals(EntityTypes.Organization.getEntityType())) {
       return (Class<U>) SolrOrganization.class;
+    } else if (solrType.equals(EntityTypes.Aggregator.getEntityType())) {
+      return (Class<U>) SolrAggregator.class;
     } else if (solrType.equals(EntityTypes.Place.getEntityType())) {
       return (Class<U>) SolrPlace.class;
     } else if (solrType.equalsIgnoreCase(EntityTypes.TimeSpan.getEntityType())) {
@@ -123,6 +127,8 @@ public class SolrUtils {
       solrEntity = new SolrConcept((Concept) entity);
     } else if (entity instanceof Organization) {
       solrEntity = new SolrOrganization((Organization) entity);
+    } else if (entity instanceof Aggregator) {
+      solrEntity = new SolrAggregator((Aggregator) entity);
     } else if (entity instanceof Place) {
       solrEntity = new SolrPlace((Place) entity);
     } else if (entity instanceof TimeSpan) {

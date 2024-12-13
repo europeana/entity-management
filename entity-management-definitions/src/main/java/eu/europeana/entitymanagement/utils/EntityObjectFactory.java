@@ -1,8 +1,10 @@
 package eu.europeana.entitymanagement.utils;
 
+import java.util.Map;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityManagementRuntimeException;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.model.Agent;
+import eu.europeana.entitymanagement.definitions.model.Aggregator;
 import eu.europeana.entitymanagement.definitions.model.Concept;
 import eu.europeana.entitymanagement.definitions.model.ConsolidatedAgent;
 import eu.europeana.entitymanagement.definitions.model.Entity;
@@ -17,12 +19,12 @@ import eu.europeana.entitymanagement.schemaorg.model.SchemaOrgPlace;
 import eu.europeana.entitymanagement.schemaorg.model.SchemaOrgTimeSpan;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.xml.model.XmlAgentImpl;
+import eu.europeana.entitymanagement.web.xml.model.XmlAggregatorImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlOrganizationImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlPlaceImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlTimeSpanImpl;
-import java.util.Map;
 
 /**
  * Instantiates a {@link eu.europeana.entitymanagement.definitions.model.Entity} instance, based on
@@ -36,6 +38,7 @@ public class EntityObjectFactory {
           EntityTypes.Agent, ConsolidatedAgent.class,
           EntityTypes.Concept, Concept.class,
           EntityTypes.Organization, Organization.class,
+          EntityTypes.Aggregator, Aggregator.class,
           EntityTypes.Place, Place.class,
           EntityTypes.TimeSpan, TimeSpan.class);
 
@@ -44,6 +47,7 @@ public class EntityObjectFactory {
           EntityTypes.Agent, Agent.class,
           EntityTypes.Concept, Concept.class,
           EntityTypes.Organization, Organization.class,
+          EntityTypes.Aggregator, Aggregator.class,
           EntityTypes.Place, Place.class,
           EntityTypes.TimeSpan, TimeSpan.class);
 
@@ -52,6 +56,7 @@ public class EntityObjectFactory {
           EntityTypes.Agent, XmlAgentImpl.class,
           EntityTypes.Concept, XmlConceptImpl.class,
           EntityTypes.Organization, XmlOrganizationImpl.class,
+          EntityTypes.Aggregator, XmlAggregatorImpl.class,
           EntityTypes.Place, XmlPlaceImpl.class,
           EntityTypes.TimeSpan, XmlTimeSpanImpl.class);
 
@@ -107,6 +112,10 @@ public class EntityObjectFactory {
           return consolidatedEntityClass
               .getDeclaredConstructor(consolidatedEntityClass)
               .newInstance((Organization) entity);
+        case Aggregator:
+          return consolidatedEntityClass
+              .getDeclaredConstructor(consolidatedEntityClass)
+              .newInstance((Aggregator) entity);
         case TimeSpan:
           return consolidatedEntityClass
               .getDeclaredConstructor(consolidatedEntityClass)
@@ -162,7 +171,8 @@ public class EntityObjectFactory {
         return (T) new XmlTimeSpanImpl((TimeSpan) entity);
       case Organization:
         return (T) new XmlOrganizationImpl((Organization) entity);
-
+      case Aggregator:
+        return (T) new XmlAggregatorImpl((Aggregator) entity);
       default:
         throw new EntityManagementRuntimeException(
             String.format(
@@ -184,7 +194,9 @@ public class EntityObjectFactory {
         return new TimeSpan((TimeSpan) entity);
       case Organization:
         return new Organization((Organization) entity);
-
+      case Aggregator:
+        return new Aggregator((Aggregator) entity);
+        
       default:
         throw new EntityManagementRuntimeException(
             String.format(

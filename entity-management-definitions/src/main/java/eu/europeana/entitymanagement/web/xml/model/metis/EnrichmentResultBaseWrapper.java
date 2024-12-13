@@ -1,11 +1,5 @@
 package eu.europeana.entitymanagement.web.xml.model.metis;
 
-import eu.europeana.entitymanagement.web.xml.model.XmlAgentImpl;
-import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
-import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
-import eu.europeana.entitymanagement.web.xml.model.XmlOrganizationImpl;
-import eu.europeana.entitymanagement.web.xml.model.XmlPlaceImpl;
-import eu.europeana.entitymanagement.web.xml.model.XmlTimeSpanImpl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -14,6 +8,13 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElements;
+import eu.europeana.entitymanagement.web.xml.model.XmlAgentImpl;
+import eu.europeana.entitymanagement.web.xml.model.XmlAggregatorImpl;
+import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
+import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
+import eu.europeana.entitymanagement.web.xml.model.XmlOrganizationImpl;
+import eu.europeana.entitymanagement.web.xml.model.XmlPlaceImpl;
+import eu.europeana.entitymanagement.web.xml.model.XmlTimeSpanImpl;
 
 /** Root element for Metis de-reference response */
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -37,6 +38,10 @@ public class EnrichmentResultBaseWrapper {
             name = "Organization",
             namespace = "http://www.europeana.eu/schemas/edm/",
             type = XmlOrganizationImpl.class),
+        @XmlElement(
+            name = "Aggregator",
+            namespace = "http://www.europeana.eu/schemas/edm/",
+            type = XmlAggregatorImpl.class),
         @XmlElement(
             name = "TimeSpan",
             namespace = "http://www.europeana.eu/schemas/edm/",

@@ -36,9 +36,6 @@ public class SolrOrganization extends SolrEntity<Organization> {
   @Field(FOAF_PHONE)
   private List<String> phone;
 
-  @Field(FOAF_MBOX)
-  private List<String> mbox;
-
   @Field(EUROPEANA_ROLE)
   private List<String> europeanaRole;
 
@@ -86,7 +83,6 @@ public class SolrOrganization extends SolrEntity<Organization> {
     }
     this.homepage = organization.getHomepage();
     this.phone = organization.getPhone();
-    if (organization.getMbox() != null) this.mbox = new ArrayList<>(organization.getMbox());
     
     if(organization.getEuropeanaRoleIds()!=null) this.europeanaRole=new ArrayList<>(organization.getEuropeanaRoleIds());
     
@@ -160,10 +156,6 @@ public class SolrOrganization extends SolrEntity<Organization> {
 
   public List<String> getPhone() {
     return phone;
-  }
-
-  public List<String> getMbox() {
-    return mbox;
   }
 
   public List<String> getEuropeanaRole() {

@@ -314,7 +314,7 @@ public class ZohoSyncService extends BaseZohoAccess {
 
   String getZohoProxyId(EntityRecord entityRecord) {
     for (String proxyId : entityRecord.getExternalProxyIds()) {
-      if (proxyId.startsWith(zohoConfiguration.getZohoBaseUrl())) {
+      if (proxyId.startsWith(zohoConfiguration.getZohoBaseUrlOrganizations())) {
         return proxyId;
       }
     }

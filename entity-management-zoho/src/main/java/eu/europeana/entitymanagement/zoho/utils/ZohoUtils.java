@@ -42,7 +42,7 @@ public final class ZohoUtils {
     return null;
   }
 
-  public static String buildZohoOrganizationId(@NotEmpty String zohoBaseUrl, Long zohoId) {
+  public static String buildZohoRecordUrl(@NotEmpty String zohoBaseUrl, Long zohoId) {
     StringBuilder builder = new StringBuilder(zohoBaseUrl);
     if(!zohoBaseUrl.endsWith("/")) {
       builder.append('/');
@@ -303,7 +303,7 @@ public final class ZohoUtils {
    * @return
    */
   public static boolean isZohoOrganization(String id, String entityType) {
-    return EntityTypes.Organization.getEntityType().equals(entityType)
+    return EntityTypes.isOrganization(entityType)
         && id.contains(WebEntityFields.ZOHO_CRM_HOST);
   }
 }

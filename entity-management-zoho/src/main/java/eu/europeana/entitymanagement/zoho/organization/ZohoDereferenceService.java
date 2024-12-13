@@ -1,7 +1,10 @@
 package eu.europeana.entitymanagement.zoho.organization;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.lang.NonNull;
@@ -12,8 +15,13 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zoho.crm.api.record.Record;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.definitions.model.Aggregator;
 import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.dereference.Dereferencer;
+import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
+import eu.europeana.entitymanagement.zoho.utils.ZohoException;
+import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 
 @Service
 public class ZohoDereferenceService implements Dereferencer {
@@ -28,23 +36,27 @@ public class ZohoDereferenceService implements Dereferencer {
   }
 
   @Override
-  public Optional<Entity> dereferenceEntityById(@NonNull String id) throws Exception {
+  public Optional<Entity> dereferenceEntityById(@NonNull String url) throws Exception {
 
     Optional<Record> zohoOrganization =
-        zohoConfiguration.getZohoAccessClient().getZohoRecordOrganizationById(id);
-    
-    //enable when you need to print the data for debuging purposes System.out.println(serialize(zohoOrganization.get())); 
+        zohoConfiguration.getZohoAccessClient().getZohoOrganizationByUrl(url);
 
-    if(zohoOrganization.isPresent()) {
-      return Optional.of(
-           ZohoOrganizationConverter.convertToOrganizationEntity(
-               zohoOrganization.get(), 
-               zohoConfiguration.getZohoBaseUrl(),
-               emConfig.getCountryMappings(),
-               emConfig.getRoleMappings())); 
-    } else {
-      return Optional.empty();
+    //if the org is Aggregator, fetch additionally the Aggregator info
+    Optional<Record> zohoAggregator =
+        zohoConfiguration.getZohoAccessClient().getZohoAggregatorByOrgUrl(url);
+
+    //enable when you need to print the data for debuging purposes System.out.println(serialize(zohoOrganization.get())); 
+    
+    Organization org = createOrganizationFromZohoRecords(zohoOrganization, zohoAggregator);
+    
+    fillAggregatedVia(org, zohoOrganization);
+    
+    if(org!=null) {
+      return Optional.of(org);
     }
+    else {
+      return Optional.empty();
+    }    
   }  
   
   public String serialize(Record zohoRecord) throws JsonProcessingException {
@@ -58,5 +70,56 @@ public class ZohoDereferenceService implements Dereferencer {
     mapper.findAndRegisterModules();
     return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(zohoRecord.getKeyValues());
   }
-
+  
+  private Organization createOrganizationFromZohoRecords(Optional<Record> zohoOrganization, 
+      Optional<Record> zohoAggregator) {
+    Organization org=null;
+    if(zohoOrganization.isPresent()) {    
+      if(zohoAggregator.isPresent()) {
+        org = new Aggregator();
+        ZohoOrganizationConverter.fillAggregatorInfoFromZohoRecord((Aggregator)org, zohoAggregator.get(), zohoConfiguration.getZohoBaseUrlAggregators());
+      }
+      else {
+        org=new Organization();
+      }
+      ZohoOrganizationConverter.fillOrganizationInfoFromZohoRecord(org, zohoOrganization.get(),
+          zohoConfiguration.getZohoBaseUrlOrganizations(), emConfig.getCountryMappings(), emConfig.getRoleMappings());
+    }
+    return org;
+  }
+  
+  private void fillAggregatedVia(Organization org, Optional<Record> zohoOrganization) throws ZohoException {
+    if(org!=null && zohoOrganization.isPresent()) {
+      String aggregName = ZohoOrganizationConverter.getStringFieldValue(zohoOrganization.get(), ZohoConstants.AGGREGATORS);
+      String orgName = ZohoOrganizationConverter.getStringFieldValue(zohoOrganization.get(), ZohoConstants.ACCOUNT_NAME_FIELD);
+      if(StringUtils.isNotBlank(orgName) && StringUtils.isNotBlank(aggregName)) {
+        /*
+         * search zoho organization that has the same name as the aggregator,
+         * and get its europeana id, to store in the aggregatedVia
+         */
+        Optional<Record> zohoAggregatorOrg =
+            zohoConfiguration.getZohoAccessClient().searchZohoOrganizationByName(aggregName);
+        if(zohoAggregatorOrg.isPresent()) {
+          String europeanaId = ZohoOrganizationConverter.getStringFieldValue(zohoAggregatorOrg.get(), ZohoConstants.EUROPEANA_ID_FIELD);
+          if(europeanaId!=null) {
+            List<String> aggregatedVia = new ArrayList<String>();
+            aggregatedVia.add(europeanaId);
+            org.setAggregatedVia(aggregatedVia);
+          }
+        }
+        else {
+          //search the aggregatedVia/From zoho module for the aggregator id
+          Optional<Record> zohoLinking =
+              zohoConfiguration.getZohoAccessClient().searchZohoAggregatedViaModule(orgName, aggregName);
+          if(zohoLinking.isPresent()) {
+            Record aggregRecord = ZohoOrganizationConverter.getSubRecord(zohoLinking.get(), ZohoConstants.AGGREGATORS);
+            if(aggregRecord != null) {
+              String aggregatorUrl = ZohoUtils.buildZohoRecordUrl(zohoConfiguration.getZohoBaseUrlAggregators(), aggregRecord.getId());
+              org.setAggregatedViaAggregatorUrls(List.of(aggregatorUrl));
+            }
+          }
+        }
+      }
+    }  
+  }
 }

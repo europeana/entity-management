@@ -574,6 +574,24 @@ public class BaseEntityRecordService {
       }
     }
   }
+  
+  protected void fillAggregatedViaWithOrgIds(Organization org) {
+    if (org.getAggregatedViaAggregatorUrls() != null && !org.getAggregatedViaAggregatorUrls().isEmpty()) {
+      List<String> aggregatorUrls = org.getAggregatedViaAggregatorUrls();
+      //search in the corefs
+      List<EntityRecord> entities = entityRecordRepository.findEntitiesByCoreference(aggregatorUrls, null, false);
+      List<String> entityIds = entities.stream().map(el -> el.getEntityId()).collect(Collectors.toList());;
+      if(entityIds.isEmpty()) {
+        if (logger.isWarnEnabled()) {
+          logger.warn(
+              "No entities in the db with the sameAs having these aggregator urls: {}", aggregatorUrls);
+        }
+      }
+      else {
+        org.setAggregatedVia(entityIds);
+      }
+    }
+  }
 
   /**
    * Method used for entity consolidation
@@ -587,6 +605,9 @@ public class BaseEntityRecordService {
 
       // update role reference
       processRoleReference(org);
+      
+      //update aggregetedVia field
+      fillAggregatedViaWithOrgIds(org);
     }
   }
   

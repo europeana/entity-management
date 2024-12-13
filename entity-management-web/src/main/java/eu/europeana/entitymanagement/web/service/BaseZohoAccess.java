@@ -223,7 +223,7 @@ public class BaseZohoAccess {
   }
 
   String generateZohoOrganizationUrl(Long zohoRecordId) {
-    return ZohoUtils.buildZohoOrganizationId(zohoConfiguration.getZohoBaseUrl(), zohoRecordId);
+    return ZohoUtils.buildZohoRecordUrl(zohoConfiguration.getZohoBaseUrlOrganizations(), zohoRecordId);
   }
 
   private void performDeprecation(ZohoSyncReport zohoSyncReport, Operation operation) {
@@ -372,8 +372,9 @@ public class BaseZohoAccess {
    */
   private Optional<EntityRecord> performEntityRegistration(Operation operation,
       ZohoSyncReport zohoSyncReport, List<String> entitiesToUpdate) {
-    Organization zohoOrganization = ZohoOrganizationConverter.convertToOrganizationEntity(
-        operation.getZohoRecord(), zohoConfiguration.getZohoBaseUrl(),
+    Organization zohoOrganization=new Organization();
+    ZohoOrganizationConverter.fillOrganizationInfoFromZohoRecord(zohoOrganization, 
+        operation.getZohoRecord(), zohoConfiguration.getZohoBaseUrlOrganizations(),
         emConfiguration.getCountryMappings(), emConfiguration.getRoleMappings());
 
     Optional<EntityRecord> res = Optional.empty();
