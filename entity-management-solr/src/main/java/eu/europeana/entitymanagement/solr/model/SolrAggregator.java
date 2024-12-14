@@ -36,7 +36,6 @@ public class SolrAggregator extends SolrOrganization {
   List<String> providesAudienceEngagementActivity;
 
   public SolrAggregator() {
-    super();
   }
 
   public SolrAggregator(Aggregator aggregator) {
