@@ -28,7 +28,6 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PROVIDES_
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PROVIDES_SUPPORT_FOR_MEDIA_TYPE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonGetter;
@@ -107,12 +106,6 @@ public class Aggregator extends Organization {
   @Override
   public String getType() {
     return type;
-  }
-
-  @Override
-  public Object getFieldValue(Field field) throws IllegalAccessException {
-    // method to call the getters for each field individually
-    return field.get(this);
   }
 
   @JsonGetter(FOAF_MBOX)

@@ -281,9 +281,8 @@ public class ZohoOrganizationConverter {
   
   public static Record getSubRecord(Record record, String fieldName) {
     Object keyValue = record.getKeyValue(fieldName);
-    if(keyValue!=null && keyValue instanceof Record) {
-      Record subRec = (Record) keyValue;
-      return subRec;
+    if(keyValue instanceof Record) {
+      return (Record)keyValue;
     }
     return null;
   }

@@ -1,5 +1,24 @@
 package eu.europeana.entitymanagement.solr.model;
 
+import static eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields.COUNTRY;
+import static eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields.COUNTRY_LABEL;
+import static eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields.COUNTRY_LABEL_ALL;
+import static eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields.DC_DESCRIPTION;
+import static eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields.DC_DESCRIPTION_ALL;
+import static eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields.EDM_ACRONYM;
+import static eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields.EDM_ACRONYM_ALL;
+import static eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields.EUROPEANA_ROLE;
+import static eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields.FOAF_HOMEPAGE;
+import static eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields.FOAF_LOGO;
+import static eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields.FOAF_PHONE;
+import static eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields.VCARD_COUNTRYNAME;
+import static eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields.VCARD_HAS_ADDRESS;
+import static eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields.VCARD_HAS_GEO;
+import static eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields.VCARD_LOCALITY;
+import static eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields.VCARD_POSTAL_CODE;
+import static eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields.VCARD_POST_OFFICE_BOX;
+import static eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields.VCARD_REGION;
+import static eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields.VCARD_STREET_ADDRESS;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,7 +30,6 @@ import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.solr.SolrUtils;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
-import static eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields.*;
 
 public class SolrOrganization extends SolrEntity<Organization> {
 
@@ -70,7 +88,6 @@ public class SolrOrganization extends SolrEntity<Organization> {
   private String hasGeo;
 
   public SolrOrganization() {
-    super();
   }
 
   public SolrOrganization(Organization organization) {
