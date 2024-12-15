@@ -42,21 +42,21 @@ public class SolrEntityUtils {
    * @param solrType entity type in Solr
    * @return SolrEntity class type
    */
-  @SuppressWarnings("unchecked")
-  public static <T extends Entity, U extends SolrEntity<T>> Class<U> getSolrEntityClass(
+  @SuppressWarnings("rawtypes")
+  public static Class<? extends SolrEntity> getSolrEntityClass(
       String solrType) {
     if (solrType.equals(EntityTypes.Agent.getEntityType())) {
-      return (Class<U>) SolrAgent.class;
+      return SolrAgent.class;
     } else if (solrType.equals(EntityTypes.Concept.getEntityType())) {
-      return (Class<U>) SolrConcept.class;
+      return SolrConcept.class;
     } else if (solrType.equals(EntityTypes.Organization.getEntityType())) {
-      return (Class<U>) SolrOrganization.class;
+      return SolrOrganization.class;
     } else if (solrType.equals(EntityTypes.Aggregator.getEntityType())) {
-      return (Class<U>) SolrAggregator.class;
+      return SolrAggregator.class;
     } else if (solrType.equals(EntityTypes.Place.getEntityType())) {
-      return (Class<U>) SolrPlace.class;
+      return SolrPlace.class;
     } else if (solrType.equalsIgnoreCase(EntityTypes.TimeSpan.getEntityType())) {
-      return (Class<U>) SolrTimeSpan.class;
+      return SolrTimeSpan.class;
     }
 
     throw new IllegalArgumentException(
@@ -67,17 +67,17 @@ public class SolrEntityUtils {
   public static SolrEntity<? extends Entity> createSolrEntity(EntityRecord record) {
     final Entity entity = record.getEntity();
     SolrEntity<? extends Entity> solrEntity = null;
-    if (entity instanceof Agent) {
+    if (EntityTypes.Agent.getEntityType().equals(entity.getType())) {
       solrEntity = new SolrAgent((Agent) entity);
-    } else if (entity instanceof Concept) {
+    } else if (EntityTypes.Concept.getEntityType().equals(entity.getType())) {
       solrEntity = new SolrConcept((Concept) entity);
-    } else if (entity instanceof Organization) {
+    } else if (EntityTypes.Organization.getEntityType().equals(entity.getType())) {
       solrEntity = new SolrOrganization((Organization) entity);
-    } else if (entity instanceof Aggregator) {
+    } else if (EntityTypes.Aggregator.getEntityType().equals(entity.getType())) {
       solrEntity = new SolrAggregator((Aggregator) entity);
-    } else if (entity instanceof Place) {
+    } else if (EntityTypes.Place.getEntityType().equals(entity.getType())) {
       solrEntity = new SolrPlace((Place) entity);
-    } else if (entity instanceof TimeSpan) {
+    } else if (EntityTypes.TimeSpan.getEntityType().equals(entity.getType())) {
       solrEntity = new SolrTimeSpan((TimeSpan) entity);
     }
 
