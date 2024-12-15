@@ -1,6 +1,6 @@
 package eu.europeana.entitymanagement.batch.writer;
 
-import static eu.europeana.entitymanagement.solr.SolrUtils.createSolrEntity;
+import static eu.europeana.entitymanagement.solr.SolrEntityUtils.createSolrEntity;
 
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.solr.model.SolrEntity;

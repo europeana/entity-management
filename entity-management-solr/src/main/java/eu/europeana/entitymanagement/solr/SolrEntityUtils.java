@@ -5,8 +5,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import org.apache.commons.collections.MapUtils;
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Aggregator;
@@ -30,65 +28,13 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
  * This class implements supporting methods for Solr*Impl classes e.g. normalization of the content
  * to match to the required output format.
  */
-public class SolrUtils {
+public class SolrEntityUtils {
 
   public static final String SOLR_AGENT_SUGGESTER_FILTER = "solrAgentFilter";
   public static final String SOLR_ORGANIZATION_SUGGESTER_FILTER = "solrOrganizationFilter";
   public static final String SOLR_TIMESPAN_SUGGESTER_FILTER = "solrTimeSpanFilter";
   public static final String SOLR_PLACE_SUGGESTER_FILTER = "solrPlaceFilter";
   public static final String SOLR_CONCEPT_SUGGESTER_FILTER = "solrConceptFilter";
-
-  /**
-   * This method adds prefixes to the fields in format Map<String, List<String>> languageMap e.g.
-   * "skos_prefLabel"
-   *
-   * @param fieldNamePrefix e.g. ConceptSolrFields.PREF_LABEL
-   * @param languageMap e.g. prefLabel
-   * @return normalized content in format Map<String, List<String>>
-   */
-  public static Map<String, List<String>> normalizeStringListMapByAddingPrefix(
-      String fieldNamePrefix, Map<String, List<String>> languageMap) {
-    if (MapUtils.isEmpty(languageMap)) {
-      return new HashMap<>();
-    }
-    Map<String, List<String>> res;
-    if (!languageMap.keySet().iterator().next().contains(fieldNamePrefix)) {
-      res =
-          languageMap.entrySet().stream()
-              .collect(
-                  Collectors.toMap(entry -> fieldNamePrefix + entry.getKey(), Map.Entry::getValue));
-    } else {
-      res = languageMap;
-    }
-    return res;
-  }
-
-  /**
-   * This method adds prefixes to the fields in format Map<String, String> languageMap e.g.
-   * "skos_prefLabel"
-   *
-   * @param fieldNamePrefix e.g. ConceptSolrFields.PREF_LABEL
-   * @param languageMap e.g. prefLabel
-   * @return normalized content in format Map<String, String>
-   */
-  public static Map<String, String> normalizeStringMapByAddingPrefix(
-      String fieldNamePrefix, Map<String, String> languageMap) {
-
-    if (MapUtils.isEmpty(languageMap)) {
-      return new HashMap<>();
-    }
-
-    Map<String, String> res;
-    if (!languageMap.keySet().iterator().next().contains(fieldNamePrefix)) {
-      res =
-          languageMap.entrySet().stream()
-              .collect(
-                  Collectors.toMap(entry -> fieldNamePrefix + entry.getKey(), Map.Entry::getValue));
-    } else {
-      res = languageMap;
-    }
-    return res;
-  }
 
   /**
    * Gets the {@link SolrEntity} class for an entity type.

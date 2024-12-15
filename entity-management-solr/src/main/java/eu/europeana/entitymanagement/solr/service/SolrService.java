@@ -22,7 +22,7 @@ import eu.europeana.entitymanagement.solr.SolrEntitySuggesterMixins.ConceptSugge
 import eu.europeana.entitymanagement.solr.SolrEntitySuggesterMixins.PlaceSuggesterMixin;
 import eu.europeana.entitymanagement.solr.SolrEntitySuggesterMixins.TimeSpanSuggesterMixin;
 import eu.europeana.entitymanagement.solr.SolrSearchCursorIterator;
-import eu.europeana.entitymanagement.solr.SolrUtils;
+import eu.europeana.entitymanagement.solr.SolrEntityUtils;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.solr.model.SolrConceptScheme;
 import eu.europeana.entitymanagement.solr.model.SolrEntity;
@@ -283,7 +283,7 @@ public class SolrService implements InitializingBean {
 
       for (SolrDocument solrDocument : docList) {
         type = (String) solrDocument.get(EntitySolrFields.TYPE);
-        classType = SolrUtils.getSolrEntityClass(type);
+        classType = SolrEntityUtils.getSolrEntityClass(type);
         res.add((SolrEntity<Entity>) binder.getBean(classType, solrDocument));
       }
       return res;

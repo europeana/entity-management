@@ -1,6 +1,6 @@
 package eu.europeana.entitymanagement.solr.model;
 
-import static eu.europeana.entitymanagement.solr.SolrUtils.SOLR_TIMESPAN_SUGGESTER_FILTER;
+import static eu.europeana.entitymanagement.solr.SolrEntityUtils.SOLR_TIMESPAN_SUGGESTER_FILTER;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 import eu.europeana.entitymanagement.definitions.model.TimeSpan;

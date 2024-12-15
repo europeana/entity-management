@@ -1,11 +1,11 @@
 package eu.europeana.entitymanagement.solr;
 
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_SOLR_ENTITY_SUGGESTER_FILTER;
-import static eu.europeana.entitymanagement.solr.SolrUtils.SOLR_AGENT_SUGGESTER_FILTER;
-import static eu.europeana.entitymanagement.solr.SolrUtils.SOLR_CONCEPT_SUGGESTER_FILTER;
-import static eu.europeana.entitymanagement.solr.SolrUtils.SOLR_ORGANIZATION_SUGGESTER_FILTER;
-import static eu.europeana.entitymanagement.solr.SolrUtils.SOLR_PLACE_SUGGESTER_FILTER;
-import static eu.europeana.entitymanagement.solr.SolrUtils.SOLR_TIMESPAN_SUGGESTER_FILTER;
+import static eu.europeana.entitymanagement.solr.SolrEntityUtils.SOLR_AGENT_SUGGESTER_FILTER;
+import static eu.europeana.entitymanagement.solr.SolrEntityUtils.SOLR_CONCEPT_SUGGESTER_FILTER;
+import static eu.europeana.entitymanagement.solr.SolrEntityUtils.SOLR_ORGANIZATION_SUGGESTER_FILTER;
+import static eu.europeana.entitymanagement.solr.SolrEntityUtils.SOLR_PLACE_SUGGESTER_FILTER;
+import static eu.europeana.entitymanagement.solr.SolrEntityUtils.SOLR_TIMESPAN_SUGGESTER_FILTER;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import com.fasterxml.jackson.databind.ser.FilterProvider;

@@ -1,6 +1,6 @@
 package eu.europeana.entitymanagement.web.service;
 
-import static eu.europeana.entitymanagement.solr.SolrUtils.createSolrEntity;
+import static eu.europeana.entitymanagement.solr.SolrEntityUtils.createSolrEntity;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getDatasourceAggregationId;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEuropeanaAggregationId;
 import static java.time.Instant.now;

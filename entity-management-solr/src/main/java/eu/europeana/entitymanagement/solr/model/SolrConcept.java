@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.solr.model;
 
 import eu.europeana.entitymanagement.definitions.model.Concept;
-import eu.europeana.entitymanagement.solr.SolrUtils;
+import eu.europeana.entitymanagement.utils.SolrGeneralUtils;
 import eu.europeana.entitymanagement.vocabulary.ConceptSolrFields;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import java.util.ArrayList;
@@ -70,7 +70,7 @@ public class SolrConcept extends SolrEntity<Concept> {
     if (MapUtils.isNotEmpty(notation)) {
       this.notation =
           new HashMap<>(
-              SolrUtils.normalizeStringListMapByAddingPrefix(
+              SolrGeneralUtils.normalizeStringListMapByAddingPrefix(
                   ConceptSolrFields.NOTATION + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, notation));
     }
   }

@@ -9,7 +9,7 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.solr.client.solrj.beans.Field;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
-import eu.europeana.entitymanagement.solr.SolrUtils;
+import eu.europeana.entitymanagement.utils.SolrGeneralUtils;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 
 public abstract class SolrEntity<T extends Entity> {
@@ -138,7 +138,7 @@ public abstract class SolrEntity<T extends Entity> {
     if (MapUtils.isNotEmpty(prefLabel)) {
       this.prefLabel =
           new HashMap<>(
-              SolrUtils.normalizeStringMapByAddingPrefix(
+              SolrGeneralUtils.normalizeStringMapByAddingPrefix(
                   EntitySolrFields.PREF_LABEL_FIELD_NAME + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
                   prefLabel));
     }
@@ -148,7 +148,7 @@ public abstract class SolrEntity<T extends Entity> {
     if (MapUtils.isNotEmpty(altLabel)) {
       this.altLabel =
           new HashMap<>(
-              SolrUtils.normalizeStringListMapByAddingPrefix(
+              SolrGeneralUtils.normalizeStringListMapByAddingPrefix(
                   EntitySolrFields.ALT_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, altLabel));
     }
   }
@@ -165,7 +165,7 @@ public abstract class SolrEntity<T extends Entity> {
     if (MapUtils.isNotEmpty(note)) {
       this.note =
           new HashMap<>(
-              SolrUtils.normalizeStringListMapByAddingPrefix(
+              SolrGeneralUtils.normalizeStringListMapByAddingPrefix(
                   EntitySolrFields.NOTE + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, note));
     }
   }
@@ -299,7 +299,7 @@ public abstract class SolrEntity<T extends Entity> {
     if (MapUtils.isNotEmpty(labelEnrich)) {
       this.labelEnrich =
           new HashMap<>(
-              SolrUtils.normalizeStringListMapByAddingPrefix(
+              SolrGeneralUtils.normalizeStringListMapByAddingPrefix(
                   EntitySolrFields.LABEL_ENRICH_GENERAL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
                   labelEnrich));
     }

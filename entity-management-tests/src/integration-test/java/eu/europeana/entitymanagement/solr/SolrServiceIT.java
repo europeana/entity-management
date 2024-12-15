@@ -64,7 +64,7 @@ public class SolrServiceIT extends AbstractIntegrationTest {
   @Test
   public void storeAgentInSolr() throws Exception {
     EntityRecord record = buildAgentRecord();
-    emSolrService.storeEntity(SolrUtils.createSolrEntity(record));
+    emSolrService.storeEntity(SolrEntityUtils.createSolrEntity(record));
     SolrAgent storedAgent =
         emSolrService.searchById(SolrAgent.class, record.getEntity().getEntityId());
     Assertions.assertNotNull(storedAgent);
@@ -123,7 +123,7 @@ public class SolrServiceIT extends AbstractIntegrationTest {
   @Test
   public void searchAgentInEuropeana() throws Exception {
     EntityRecord record = buildAgentRecord();
-    emSolrService.storeEntity(SolrUtils.createSolrEntity(record));
+    emSolrService.storeEntity(SolrEntityUtils.createSolrEntity(record));
     String searchQuery =
         SUGGEST_FILTERS
             + ":"
@@ -151,7 +151,7 @@ public class SolrServiceIT extends AbstractIntegrationTest {
             Organization.class);
     EntityRecord record = new EntityRecord();
     record.setEntity(organization);
-    emSolrService.storeEntity(SolrUtils.createSolrEntity(record));
+    emSolrService.storeEntity(SolrEntityUtils.createSolrEntity(record));
     SolrOrganization storedOrganization =
         emSolrService.searchById(SolrOrganization.class, organization.getEntityId());
     Assertions.assertNotNull(storedOrganization);
@@ -167,7 +167,7 @@ public class SolrServiceIT extends AbstractIntegrationTest {
             IntegrationTestUtils.loadFile(IntegrationTestUtils.TIMESPAN_JSON), TimeSpan.class);
     EntityRecord record = new EntityRecord();
     record.setEntity(timespan);
-    emSolrService.storeEntity(SolrUtils.createSolrEntity(record));
+    emSolrService.storeEntity(SolrEntityUtils.createSolrEntity(record));
     SolrTimeSpan storedTimespan =
         emSolrService.searchById(SolrTimeSpan.class, timespan.getEntityId());
     Assertions.assertNotNull(storedTimespan);
@@ -183,7 +183,7 @@ public class SolrServiceIT extends AbstractIntegrationTest {
             IntegrationTestUtils.loadFile(IntegrationTestUtils.CONCEPT_JSON), Concept.class);
     EntityRecord record = new EntityRecord();
     record.setEntity(concept);
-    emSolrService.storeEntity(SolrUtils.createSolrEntity(record));
+    emSolrService.storeEntity(SolrEntityUtils.createSolrEntity(record));
     SolrConcept storedConcept = emSolrService.searchById(SolrConcept.class, concept.getEntityId());
     Assertions.assertNotNull(storedConcept);
     verifyPayload(storedConcept);
@@ -197,7 +197,7 @@ public class SolrServiceIT extends AbstractIntegrationTest {
             IntegrationTestUtils.loadFile(IntegrationTestUtils.PLACE_JSON), Place.class);
     EntityRecord record = new EntityRecord();
     record.setEntity(place);
-    emSolrService.storeEntity(SolrUtils.createSolrEntity(record));
+    emSolrService.storeEntity(SolrEntityUtils.createSolrEntity(record));
     SolrPlace storedPlace = emSolrService.searchById(SolrPlace.class, place.getEntityId());
     Assertions.assertNotNull(storedPlace);
     verifyPayload(storedPlace);
@@ -220,7 +220,7 @@ public class SolrServiceIT extends AbstractIntegrationTest {
 
     List<SolrEntity<? extends Entity>> solrEntities =
         List.of(agentRecord, placeRecord, conceptRecord).stream()
-            .map(SolrUtils::createSolrEntity)
+            .map(SolrEntityUtils::createSolrEntity)
             .collect(Collectors.toList());
 
     emSolrService.storeMultipleEntities(solrEntities);

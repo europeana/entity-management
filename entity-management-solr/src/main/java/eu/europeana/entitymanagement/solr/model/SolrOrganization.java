@@ -27,8 +27,8 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.solr.client.solrj.beans.Field;
 import eu.europeana.entitymanagement.definitions.model.Address;
 import eu.europeana.entitymanagement.definitions.model.Organization;
-import eu.europeana.entitymanagement.solr.SolrUtils;
 import eu.europeana.entitymanagement.utils.EntityUtils;
+import eu.europeana.entitymanagement.utils.SolrGeneralUtils;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 
 public class SolrOrganization extends SolrEntity<Organization> {
@@ -139,7 +139,7 @@ public class SolrOrganization extends SolrEntity<Organization> {
     if (MapUtils.isNotEmpty(dcDescription)) {
       this.description =
           new HashMap<>(
-              SolrUtils.normalizeStringMapByAddingPrefix(
+              SolrGeneralUtils.normalizeStringMapByAddingPrefix(
                   DC_DESCRIPTION + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
                   dcDescription));
     }
@@ -149,7 +149,7 @@ public class SolrOrganization extends SolrEntity<Organization> {
     if (MapUtils.isNotEmpty(acronym)) {
       this.acronym =
           new HashMap<>(
-              SolrUtils.normalizeStringListMapByAddingPrefix(
+              SolrGeneralUtils.normalizeStringListMapByAddingPrefix(
                   EDM_ACRONYM + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
                   acronym));
     }
@@ -232,7 +232,7 @@ public class SolrOrganization extends SolrEntity<Organization> {
       if (MapUtils.isNotEmpty(countryLabel)) {
         this.countryLabel =
             new HashMap<>(
-                SolrUtils.normalizeStringMapByAddingPrefix(
+                SolrGeneralUtils.normalizeStringMapByAddingPrefix(
                     COUNTRY_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
                     countryLabel));
       }
