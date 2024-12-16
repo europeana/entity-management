@@ -47,7 +47,13 @@ public class ZohoOrganizationConverter {
 
     String acronym = getStringFieldValue(zohoRecord, ZohoConstants.ACRONYM_FIELD);
     String langAcronym = getStringFieldValue(zohoRecord, ZohoConstants.LANG_ACRONYM_FIELD);
-    org.setAcronym(ZohoUtils.createLanguageMapOfStringList(langAcronym, acronym));
+    String acronym_1 = getStringFieldValue(zohoRecord, ZohoConstants.ACRONYM_1_FIELD);
+    String langAcronym_1 = getStringFieldValue(zohoRecord, ZohoConstants.LANG_ACRONYM_1_FIELD);
+    Map<String, List<String>> acronymMap = ZohoUtils.createLanguageMapOfStringList(langAcronym, acronym);
+    Map<String, List<String>> acronym_1_Map = ZohoUtils.createLanguageMapOfStringList(langAcronym_1, acronym_1);
+    Map<String, List<String>> acronymFinalMap = ZohoUtils.mergeMapsWithLists(acronymMap, acronym_1_Map);
+    org.setAcronym(acronymFinalMap);
+    
     String logoFieldName = ZohoConstants.LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD;
     org.setLogo(buildWebResource(zohoRecord, logoFieldName));
     org.setHomepage(getStringFieldValue(zohoRecord, ZohoConstants.WEBSITE_FIELD));

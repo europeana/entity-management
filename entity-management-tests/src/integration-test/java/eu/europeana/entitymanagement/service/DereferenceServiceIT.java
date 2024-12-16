@@ -77,9 +77,8 @@ public class DereferenceServiceIT extends AbstractIntegrationTest {
     Organization org = (Organization) orgOptional.get();
     assertEquals(2, org.getPrefLabel().size());
     assertNull(org.getAltLabel());
-    assertEquals(1, org.getAcronym().size());
+    assertEquals(2, org.getAcronym().size());
     assertEquals(1, org.getEuropeanaRole().size());
-    assertEquals(1, org.getAcronym().size());
     Assertions.assertNotNull(org.getHomepage());
     Assertions.assertNotNull(org.getLogo());
     Assertions.assertNotNull(org.getAddress().getVcardStreetAddress());

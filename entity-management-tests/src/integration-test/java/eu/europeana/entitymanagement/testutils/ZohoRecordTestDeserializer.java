@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.testutils;
 
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.ACCOUNT_NAME_FIELD;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.ACRONYM_1_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.ACRONYM_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.AGGREGATING_FROM;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.AGGREGATORS;
@@ -18,6 +19,7 @@ import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.HIDDEN_LABE
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.ID_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.INDUSTRY_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LANGUAGE_CODE_LENGTH;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LANG_ACRONYM_1_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LANG_ACRONYM_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LANG_ALTERNATIVE_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LANG_ORGANIZATION_NAME_FIELD;
@@ -62,6 +64,8 @@ public class ZohoRecordTestDeserializer extends StdDeserializer<Record> {
           LANG_ORGANIZATION_NAME_FIELD,
           LANG_ACRONYM_FIELD,
           ACRONYM_FIELD,
+          LANG_ACRONYM_1_FIELD,
+          ACRONYM_1_FIELD,
           LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD,
           WEBSITE_FIELD,
           STREET_FIELD,

@@ -32,6 +32,8 @@ public final class ZohoConstants {
   public static final String ALTERNATIVE_FIELD = "Alternative";
   public static final String LANG_ACRONYM_FIELD = "Lang_Acronym";
   public static final String ACRONYM_FIELD = "Acronym";
+  public static final String LANG_ACRONYM_1_FIELD = "Lang_Acronym_1";
+  public static final String ACRONYM_1_FIELD = "Alternative_Acronym_1";
 //  public static final String LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD = "Logo_link_to_WikimediaCommons";
   public static final String LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD = "Logo";
   public static final String WEBSITE_FIELD = "Website";
