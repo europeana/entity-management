@@ -1,7 +1,9 @@
 {
 	"Capacity_Building": [],
 	"Public_Email": null,
-	"Heritage_Domain": [],
+	"Heritage_Domain": [
+		"Cultural Heritage"
+	],
 	"Name": "Euskariana",
 	"Last_Activity_Time": "2024-09-04T15:54:48+02:00",
 	"Record_Image": null,

@@ -20,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.solr.model.SolrAggregator;
 import eu.europeana.entitymanagement.solr.model.SolrOrganization;
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
@@ -283,6 +284,98 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
     assertNotNull(org.getHasAddress());
     assertNotNull(org.getEuropeanaRole());
     assertTrue(org.getCountry().size()==2);
+  }
+
+  @Test
+  public void zohoCheckAggregatedViaOverZohoOrgSearch() throws Exception {
+    /*
+     * 1. register zoho Euskariana organization (which is an aggregator)
+     */
+    ResultActions response =
+        mockMvc.perform(
+            MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL)
+                .content(
+                    loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_EUSKARIANA_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE));
+    response
+        .andExpect(status().isAccepted())
+        .andExpect(jsonPath("$.id", any(String.class)))
+        .andExpect(jsonPath("$.type", is(EntityTypes.Aggregator.getEntityType())))
+        .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
+        // isAggregatedBy should contain 2 aggregates (for Europeana and zoho)
+        .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
+        //1. from the response, 2. the zoho id, 3. the aggregator id
+        .andExpect(jsonPath("$.sameAs", hasSize(3)))
+        .andExpect(jsonPath("$.heritageDomain", hasSize(1)))
+        .andExpect(jsonPath("$.prefLabel[*]", hasSize(2)))
+        // should have Europeana and Zoho proxies
+        .andExpect(jsonPath("$.proxies", hasSize(2)));
+
+    // check if indexing is successfull by searching the organization in solr
+    SolrAggregator aggreg = emSolrService.searchById(SolrAggregator.class, 
+        WebEntityFields.BASE_DATA_EUROPEANA_URI + EntityTypes.Aggregator.getEntityType().toLowerCase() + "/1");
+    assertNotNull(aggreg.getHasAddress());
+    assertNotNull(aggreg.getEuropeanaRole());
+    assertNotNull(aggreg.getHeritageDomain());
+    
+    /*
+     * 2. register zoho Arma organization, which is aggregated via the previously registered
+     * organization (Euskariana), and check the aggregatedVia field.
+     */
+    response =
+        mockMvc.perform(
+            MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL)
+                .content(
+                    loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_ARMA_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE));
+    response
+    .andExpect(status().isAccepted())
+    .andExpect(jsonPath("$.id", any(String.class)))
+    .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
+    .andExpect(jsonPath("$.aggregatedVia", hasSize(1)));
+  }
+
+  @Test
+  public void zohoCheckAggregatedViaOverZohoLinkingAndLocalDbSearch() throws Exception {
+    /*
+     * 1. register zoho Euskariana organization (which is an aggregator)
+     */
+    ResultActions response =
+        mockMvc.perform(
+            MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL)
+                .content(
+                    loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_EUSKARIANA_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE));
+
+    /*
+     * 2. remove the entry from the map that mocks the zoho response for the organization
+     * with the name of the aggregator
+     */
+    IntegrationTestUtils.ZOHO_ORG_NAME_RESPONSE_MAP.clear();
+    
+    /*
+     * 3. register zoho Arma organization, which is aggregated via the previously registered
+     * organization (Euskariana), and check the aggregatedVia field
+     */
+    response =
+        mockMvc.perform(
+            MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL)
+                .content(
+                    loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_ARMA_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE));
+    response
+    .andExpect(status().isAccepted())
+    .andExpect(jsonPath("$.id", any(String.class)))
+    .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
+    .andExpect(jsonPath("$.aggregatedVia", hasSize(1)));
+    
+    /*
+     * 4. put back the removed entry from the map in step 2.
+     */
+    IntegrationTestUtils.ZOHO_ORG_NAME_RESPONSE_MAP.put(
+        IntegrationTestUtils.ORGANIZATION_EUSKARIANA_NAME, 
+        IntegrationTestUtils.ORGANIZATION_EUSKARIANA_ZOHO_RESPONSE);
+
   }
 
   @Test

@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement.testutils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -73,6 +74,10 @@ public class IntegrationTestUtils {
       "/content/organization_register_zoho_berger_museum.json";
   public static final String ORGANIZATION_REGISTER_PCCE_ZOHO_JSON =
       "/content/organization_register_zoho_pcce.json";
+  public static final String ORGANIZATION_REGISTER_EUSKARIANA_JSON =
+      "/content/organization_register_euskariana.json";
+  public static final String ORGANIZATION_REGISTER_ARMA_JSON =
+      "/content/organization_register_arma.json";
   public static final String PLACE_REGISTER_PARIS_JSON = "/content/place_register_paris.json";
   public static final String PLACE_REGISTER_SWEDEN_JSON = "/content/place_register_sweden.json";
   public static final String PLACE_REGISTER_HAGENBACH_JSON =
@@ -272,10 +277,10 @@ public class IntegrationTestUtils {
           ORGANIZATION_EUSKARIANA_ZOHO_RESPONSE);
 
   /** Maps ZOHO organization names to mocked JSON responses */
-  public static Map<String, String> ZOHO_ORG_NAME_RESPONSE_MAP =
-      Map.of(
-          ORGANIZATION_EUSKARIANA_NAME,
-          ORGANIZATION_EUSKARIANA_ZOHO_RESPONSE);
+  public static Map<String, String> ZOHO_ORG_NAME_RESPONSE_MAP = new HashMap<String, String>();
+  static {
+    ZOHO_ORG_NAME_RESPONSE_MAP.put(ORGANIZATION_EUSKARIANA_NAME, ORGANIZATION_EUSKARIANA_ZOHO_RESPONSE);    
+  }
 
   /** Maps ZOHO organization urls to the aggregators mocked JSON responses */
   public static Map<String, String> ZOHO_ORG_URL_AGGREGATOR_RESPONSE_MAP =

@@ -68,13 +68,13 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
   PROVIDES_AUDIENCE_ENGAGEMENT_ACTIVITY
 })
 public class Aggregator extends Organization {
-  private String mbox;
-  private String geographicScope;
-  List<String> heritageDomain;
-  List<String> providesSupportForMediaType;
-  List<String> providesSupportForDataActivity;
-  List<String> providesCapacityBuildingActivity;
-  List<String> providesAudienceEngagementActivity;
+  protected String mbox;
+  protected String geographicScope;
+  protected List<String> heritageDomain;
+  protected List<String> providesSupportForMediaType;
+  protected List<String> providesSupportForDataActivity;
+  protected List<String> providesCapacityBuildingActivity;
+  protected List<String> providesAudienceEngagementActivity;
     
   public Aggregator() {
     super();

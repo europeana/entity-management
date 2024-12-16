@@ -484,6 +484,18 @@
 		<field name="foaf_phone" type="string" indexed="false"
 			stored="true" multiValued="true" />
 		<field name="foaf_mbox" type="string" indexed="false"
+			stored="true" multiValued="false" />
+		<field name="edm_geographicScope" type="string" indexed="false"
+			stored="true" multiValued="false" />
+		<field name="edm_heritageDomain" type="string" indexed="false"
+			stored="true" multiValued="true" />
+		<field name="edm_providesSupportForMediaType" type="string" indexed="false"
+			stored="true" multiValued="true" />
+		<field name="edm_providesSupportForDataActivity" type="string" indexed="false"
+			stored="true" multiValued="true" />
+		<field name="edm_providesCapacityBuildingActivity" type="string" indexed="false"
+			stored="true" multiValued="true" />
+		<field name="edm_providesAudienceEngagementActivity" type="string" indexed="false"
 			stored="true" multiValued="true" />
 		<!-- these fields are all populated by controlled values. These are all 
 			en, but in future may be expanded -->

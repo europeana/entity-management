@@ -2,9 +2,14 @@ package eu.europeana.entitymanagement.testutils;
 
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.ACCOUNT_NAME_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.ACRONYM_FIELD;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.AGGREGATING_FROM;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.AGGREGATORS;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.ALTERNATIVE_FIELD;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.CAPACITY_BUILDING;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.CITY_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.COUNTRY_FIELD;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.EUROPEANA_ID_FIELD;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.HERITAGE_DOMAIN;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.HIDDEN_LABEL1_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.HIDDEN_LABEL2_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.HIDDEN_LABEL3_FIELD;
@@ -19,9 +24,11 @@ import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LANG_ORGANI
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LATITUDE_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LONGITUDE_FIELD;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.NAME_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.OFFICIAL_LANGUAGE_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.ORGANIZATION_ROLE_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.PO_BOX_FIELD;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.PUBLIC_EMAIL;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.SAME_AS_CODE_LENGTH;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.SAME_AS_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.STREET_FIELD;
@@ -70,7 +77,13 @@ public class ZohoRecordTestDeserializer extends StdDeserializer<Record> {
           HIDDEN_LABEL3_FIELD,
           HIDDEN_LABEL4_FIELD,
           HIDDEN_LABEL_FIELD,
-          INDUSTRY_FIELD);
+          INDUSTRY_FIELD,
+          HERITAGE_DOMAIN,
+          PUBLIC_EMAIL,
+          CAPACITY_BUILDING,
+          AGGREGATORS,
+          EUROPEANA_ID_FIELD,
+          AGGREGATING_FROM);
 
   public ZohoRecordTestDeserializer() {
     this(null);
@@ -99,12 +112,18 @@ public class ZohoRecordTestDeserializer extends StdDeserializer<Record> {
         List<Choice<?>> values = new ArrayList<Choice<?>>();
         currentNode.elements().forEachRemaining(v -> values.add(new Choice<String>(v.asText())));
         record.addKeyValue(key, values);
+      }else if(currentNode.isObject()) {
+        System.out.println("object node: " + key);
+        if(AGGREGATORS.equals(key) || AGGREGATING_FROM.equals(key)) {
+          Record subRecord = new Record();  
+          subRecord.setId(currentNode.get(ID_FIELD).asLong());
+          subRecord.addKeyValue(NAME_FIELD, currentNode.get(NAME_FIELD));
+          record.addKeyValue(key, subRecord);
+        }
       }else if (currentNode.isContainerNode()){
         System.out.println("container node: " + key);
       }else if(currentNode.isPojo()) {
         System.out.println("pojo node: " + key);
-      }else if(currentNode.isObject()) {
-        System.out.println("object node: " + key);
       } 
     }
 
