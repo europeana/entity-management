@@ -306,7 +306,13 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
         //1. from the response, 2. the zoho id, 3. the aggregator id
         .andExpect(jsonPath("$.sameAs", hasSize(3)))
+        .andExpect(jsonPath("$.mbox").isNotEmpty())
+        .andExpect(jsonPath("$.geographicScope").isNotEmpty())
         .andExpect(jsonPath("$.heritageDomain", hasSize(1)))
+        .andExpect(jsonPath("$.providesSupportForMediaType", hasSize(1)))
+        .andExpect(jsonPath("$.providesSupportForDataActivity", hasSize(3)))
+        .andExpect(jsonPath("$.providesCapacityBuildingActivity", hasSize(1)))
+        .andExpect(jsonPath("$.providesAudienceEngagementActivity", hasSize(3)))
         .andExpect(jsonPath("$.prefLabel[*]", hasSize(2)))
         // should have Europeana and Zoho proxies
         .andExpect(jsonPath("$.proxies", hasSize(2)));

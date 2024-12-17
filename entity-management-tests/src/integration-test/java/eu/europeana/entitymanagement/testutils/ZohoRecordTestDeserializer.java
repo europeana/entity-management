@@ -6,10 +6,13 @@ import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.ACRONYM_FIE
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.AGGREGATING_FROM;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.AGGREGATORS;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.ALTERNATIVE_FIELD;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.AUDIENCE_ENGAGEMENT_ACTIVITY;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.CAPACITY_BUILDING;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.CITY_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.COUNTRY_FIELD;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.DATA_ACTIVITY;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.EUROPEANA_ID_FIELD;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.GEOGRAPHIC_SCOPE;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.HERITAGE_DOMAIN;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.HIDDEN_LABEL1_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.HIDDEN_LABEL2_FIELD;
@@ -26,6 +29,7 @@ import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LANG_ORGANI
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LATITUDE_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LONGITUDE_FIELD;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.MEDIA_TYPE;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.NAME_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.OFFICIAL_LANGUAGE_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.ORGANIZATION_ROLE_FIELD;
@@ -84,6 +88,10 @@ public class ZohoRecordTestDeserializer extends StdDeserializer<Record> {
           INDUSTRY_FIELD,
           HERITAGE_DOMAIN,
           PUBLIC_EMAIL,
+          GEOGRAPHIC_SCOPE,
+          MEDIA_TYPE,
+          DATA_ACTIVITY,
+          AUDIENCE_ENGAGEMENT_ACTIVITY,
           CAPACITY_BUILDING,
           AGGREGATORS,
           EUROPEANA_ID_FIELD,
