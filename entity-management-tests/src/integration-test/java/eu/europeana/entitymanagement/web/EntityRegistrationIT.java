@@ -351,7 +351,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
      * 2. remove the entry from the map that mocks the zoho response for the organization
      * with the name of the aggregator
      */
-    IntegrationTestUtils.ZOHO_ORG_NAME_RESPONSE_MAP.clear();
+    IntegrationTestUtils.ZOHO_ORG_NAME_RESPONSE_MAP.remove(IntegrationTestUtils.ORGANIZATION_EUSKARIANA_NAME);
     
     /*
      * 3. register zoho Arma organization, which is aggregated via the previously registered
