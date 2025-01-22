@@ -586,17 +586,18 @@ public class BaseEntityRecordService {
           logger.warn(
               "No entities in the db with the sameAs having these aggregator urls: {}", aggregatorUrls);
         }
-        /*
-         * if the aggregatedVia is not set, this exception will cause the consolidation processor
-         * spring batch step to fail, resulting a the failed update task
-         */
-        throw new EntityUpdateException(
-            "Organization aggregatedVia field still not set (not found any internal organization with the given "
-            + "aggregator id as a coref)!");
       }
       else {
         org.setAggregatedVia(entityIds);
       }
+    }
+    
+    if(org.getAggregatedVia()==null) {
+      /*
+       * if the aggregatedVia is still not set, this exception will cause the consolidation processor
+       * spring batch step to fail, resulting a the failed update task
+       */
+      throw new EntityUpdateException("The organization's aggregatedVia field is still not set.");      
     }
   }
 
