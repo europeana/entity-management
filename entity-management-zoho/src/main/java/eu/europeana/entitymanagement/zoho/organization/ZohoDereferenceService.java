@@ -92,6 +92,7 @@ public class ZohoDereferenceService implements Dereferencer {
     if(org!=null && zohoOrganization.isPresent()) {
       String aggregName = ZohoOrganizationConverter.getStringFieldValue(zohoOrganization.get(), ZohoConstants.AGGREGATORS);
       String orgName = ZohoOrganizationConverter.getStringFieldValue(zohoOrganization.get(), ZohoConstants.ACCOUNT_NAME_FIELD);
+      //if the organization has aggregator
       if(StringUtils.isNotBlank(orgName) && StringUtils.isNotBlank(aggregName)) {
         /*
          * search zoho organization that has the same name as the aggregator,
@@ -107,16 +108,28 @@ public class ZohoDereferenceService implements Dereferencer {
             org.setAggregatedVia(aggregatedVia);
           }
         }
-        else {
+        
+        //if the aggregatedVia field is still not set
+        if(org.getAggregatedVia()==null) {
+          String aggregatorUrl=null;
           //search the aggregatedVia/From zoho module for the aggregator id
           Optional<Record> zohoLinking =
               zohoConfiguration.getZohoAccessClient().searchZohoAggregatedViaModule(orgName, aggregName);
           if(zohoLinking.isPresent()) {
             Record aggregRecord = ZohoOrganizationConverter.getSubRecord(zohoLinking.get(), ZohoConstants.AGGREGATORS);
             if(aggregRecord != null) {
-              String aggregatorUrl = ZohoUtils.buildZohoRecordUrl(zohoConfiguration.getZohoBaseUrlAggregators(), aggregRecord.getId());
-              org.setAggregatedViaAggregatorUrls(List.of(aggregatorUrl));
+              aggregatorUrl = ZohoUtils.buildZohoRecordUrl(zohoConfiguration.getZohoBaseUrlAggregators(), aggregRecord.getId());
             }
+          }
+          if(aggregatorUrl!=null) {
+            org.setAggregatedViaAggregatorUrls(List.of(aggregatorUrl));
+          }
+          else {
+            /*
+             * in this case since the organization is aggregator and we cannot set the aggregatedVia field,
+             * we throw an exception in order to execute the org update task later on again
+             */
+            throw new ZohoException("Could not set the aggregatedVia field for the Zoho organization which has its aggregator.");
           }
         }
       }
