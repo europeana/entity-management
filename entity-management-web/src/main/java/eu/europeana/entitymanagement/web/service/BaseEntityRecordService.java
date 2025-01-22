@@ -575,7 +575,7 @@ public class BaseEntityRecordService {
     }
   }
   
-  protected void fillAggregatedViaWithOrgIds(Organization org) {
+  protected void fillAggregatedViaWithOrgIds(Organization org) throws EntityUpdateException {
     if (org.getAggregatedViaAggregatorUrls() != null && !org.getAggregatedViaAggregatorUrls().isEmpty()) {
       List<String> aggregatorUrls = org.getAggregatedViaAggregatorUrls();
       //search in the corefs
@@ -586,6 +586,13 @@ public class BaseEntityRecordService {
           logger.warn(
               "No entities in the db with the sameAs having these aggregator urls: {}", aggregatorUrls);
         }
+        /*
+         * if the aggregatedVia is not set, this exception will cause the consolidation processor
+         * spring batch step to fail, resulting a the failed update task
+         */
+        throw new EntityUpdateException(
+            "Organization aggregatedVia field still not set (not found any internal organization with the given "
+            + "aggregator id as a coref)!");
       }
       else {
         org.setAggregatedVia(entityIds);
@@ -596,8 +603,9 @@ public class BaseEntityRecordService {
   /**
    * Method used for entity consolidation
    * @param entity consolidated Entities to process reference fields
+   * @throws EntityUpdateException 
    */
-  public void processReferenceFields(Entity entity) {
+  public void processReferenceFields(Entity entity) throws EntityUpdateException {
     if (EntityTypes.isOrganization(entity.getType())) {
       Organization org = (Organization) entity;
       // update country reference
