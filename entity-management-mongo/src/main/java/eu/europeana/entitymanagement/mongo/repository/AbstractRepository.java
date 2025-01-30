@@ -2,7 +2,8 @@ package eu.europeana.entitymanagement.mongo.repository;
 
 import static dev.morphia.query.filters.Filters.eq;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MAJORITY_WRITE_MODIFY_OPTS;
-import javax.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import dev.morphia.Datastore;
 import dev.morphia.query.updates.UpdateOperators;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
@@ -10,7 +11,8 @@ import eu.europeana.entitymanagement.definitions.model.EntityIdGenerator;
 
 public abstract class AbstractRepository {
 
-  @Resource(name = AppConfigConstants.BEAN_EM_DATA_STORE)
+  @Autowired
+  @Qualifier(AppConfigConstants.BEAN_EM_DATA_STORE)
   Datastore datastore;
 
   /**
@@ -43,14 +45,14 @@ public abstract class AbstractRepository {
     return autoIncrement.getValue();
   }
 
-  public long getLastGeneratedIdentifier() {
+  public long getLastGeneratedIdentifier(String type) {
     /*
      * Get the given key from the auto increment entity and try to increment it.
      * Synchronization occurs on the DB-level, so we don't need to synchronize this code block.
      */
 
     EntityIdGenerator sequenceValue =
-        getDataStore().find(EntityIdGenerator.class).first();
+        getDataStore().find(EntityIdGenerator.class).filter(eq("_id", type)).first();
 
     return sequenceValue != null ? sequenceValue.getValue() : 0;
   }

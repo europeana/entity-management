@@ -98,6 +98,7 @@ public class SolrSearchCursorIterator {
         .collect(Collectors.toList());
   }
 
+  @SuppressWarnings("unchecked")
   private <T extends Entity> SolrEntity<T> convertFromSolrDoc(SolrDocument solrDocument) {
 
     Object fieldValue = solrDocument.getFieldValue(EntitySolrFields.TYPE);

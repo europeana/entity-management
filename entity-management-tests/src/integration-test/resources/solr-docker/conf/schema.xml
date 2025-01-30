@@ -121,15 +121,13 @@
 		<copyField source="id" dest="entity_uri" />
 
 		<!-- Entity type, in human-readable form (Concept|Agent|Place|Organization|Work) -->
-		<!-- about to be deprecated ... should be fully replaced by type field, 
-			for backward compatibility is currently copied to type field -->
-		<field name="internal_type" type="string" indexed="true"
-			stored="true" multiValued="false"/>
-		<!-- use this shortly ... -->
 		<field name="type" type="string" indexed="true" stored="true"
+			multiValued="false" required="true" />
+		<!-- check if needed for aggregators
+		<field name="parentType" type="string" indexed="true" stored="true"
 			multiValued="false" required="false" />
-		<copyField source="internal_type" dest="type" />
-
+		-->		
+		
 		<!-- License info -->
 		<field name="rights" type="string" indexed="true" stored="true"
 			multiValued="true" />
@@ -483,19 +481,23 @@
 			stored="true" multiValued="false" />
 		<field name="foaf_phone" type="string" indexed="false"
 			stored="true" multiValued="true" />
+		<!--  deprecated: to delete in the next version -->
 		<field name="foaf_mbox" type="string" indexed="false"
 			stored="true" multiValued="false" />
-		<field name="edm_geographicScope" type="string" indexed="false"
+		<!-- Aggregator Fields -->	
+		<field name="mbox" type="string" indexed="false"
+			stored="true" multiValued="false" />	
+		<field name="geographicScope" type="string" indexed="false"
 			stored="true" multiValued="false" />
-		<field name="edm_heritageDomain" type="string" indexed="false"
+		<field name="heritageDomain" type="string" indexed="false"
 			stored="true" multiValued="true" />
-		<field name="edm_providesSupportForMediaType" type="string" indexed="false"
+		<field name="providesSupportForMediaType" type="string" indexed="false"
 			stored="true" multiValued="true" />
-		<field name="edm_providesSupportForDataActivity" type="string" indexed="false"
+		<field name="providesSupportForDataActivity" type="string" indexed="false"
 			stored="true" multiValued="true" />
-		<field name="edm_providesCapacityBuildingActivity" type="string" indexed="false"
+		<field name="providesCapacityBuildingActivity" type="string" indexed="false"
 			stored="true" multiValued="true" />
-		<field name="edm_providesAudienceEngagementActivity" type="string" indexed="false"
+		<field name="providesAudienceEngagementActivity" type="string" indexed="false"
 			stored="true" multiValued="true" />
 		<!-- these fields are all populated by controlled values. These are all 
 			en, but in future may be expanded -->

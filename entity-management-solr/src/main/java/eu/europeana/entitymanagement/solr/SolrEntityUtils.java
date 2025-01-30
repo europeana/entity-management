@@ -45,42 +45,68 @@ public class SolrEntityUtils {
   @SuppressWarnings("rawtypes")
   public static Class<? extends SolrEntity> getSolrEntityClass(
       String solrType) {
-    if (solrType.equals(EntityTypes.Agent.getEntityType())) {
-      return SolrAgent.class;
-    } else if (solrType.equals(EntityTypes.Concept.getEntityType())) {
-      return SolrConcept.class;
-    } else if (solrType.equals(EntityTypes.Organization.getEntityType())) {
-      return SolrOrganization.class;
-    } else if (solrType.equals(EntityTypes.Aggregator.getEntityType())) {
-      return SolrAggregator.class;
-    } else if (solrType.equals(EntityTypes.Place.getEntityType())) {
-      return SolrPlace.class;
-    } else if (solrType.equalsIgnoreCase(EntityTypes.TimeSpan.getEntityType())) {
-      return SolrTimeSpan.class;
+    Class<? extends SolrEntity> solrEntityClass = null;
+    switch(EntityTypes.valueOf(solrType)) {
+      case Agent:
+        solrEntityClass = SolrAgent.class;
+        break;
+      case Concept:
+        solrEntityClass = SolrConcept.class;
+        break;
+      case Organization:
+        solrEntityClass = SolrOrganization.class;
+        break;
+      case Aggregator:
+        solrEntityClass = SolrAggregator.class;
+        break;
+      case Place:
+        solrEntityClass = SolrPlace.class;
+        break; 
+      case TimeSpan:
+        solrEntityClass = SolrTimeSpan.class;
+        break;
+      case ConceptScheme:
+        break;
+      default:
+        break;  
     }
 
-    throw new IllegalArgumentException(
-        String.format(
-            "Unrecognized entity type while determining Solr entity class: %s ", solrType));
+    if(solrEntityClass == null) {
+      throw new IllegalArgumentException(
+          String.format(
+              "Unrecognized entity type while determining Solr entity class: %s ", solrType));
+    }
+    
+    return solrEntityClass;
   }
 
   public static SolrEntity<? extends Entity> createSolrEntity(EntityRecord record) {
     final Entity entity = record.getEntity();
     SolrEntity<? extends Entity> solrEntity = null;
-    if (EntityTypes.Agent.getEntityType().equals(entity.getType())) {
-      solrEntity = new SolrAgent((Agent) entity);
-    } else if (EntityTypes.Concept.getEntityType().equals(entity.getType())) {
-      solrEntity = new SolrConcept((Concept) entity);
-    } else if (EntityTypes.Organization.getEntityType().equals(entity.getType())) {
-      solrEntity = new SolrOrganization((Organization) entity);
-    } else if (EntityTypes.Aggregator.getEntityType().equals(entity.getType())) {
-      solrEntity = new SolrAggregator((Aggregator) entity);
-    } else if (EntityTypes.Place.getEntityType().equals(entity.getType())) {
-      solrEntity = new SolrPlace((Place) entity);
-    } else if (EntityTypes.TimeSpan.getEntityType().equals(entity.getType())) {
-      solrEntity = new SolrTimeSpan((TimeSpan) entity);
+    switch(EntityTypes.valueOf(entity.getType())) {
+      case Agent:
+        solrEntity = new SolrAgent((Agent) entity);
+        break;
+      case Concept:
+        solrEntity = new SolrConcept((Concept) entity);
+        break;
+      case Organization:
+        solrEntity = new SolrOrganization((Organization) entity);
+        break;
+      case Aggregator:
+        solrEntity = new SolrAggregator((Aggregator) entity);
+        break;
+      case Place:
+        solrEntity = new SolrPlace((Place) entity);
+        break; 
+      case TimeSpan:
+        solrEntity = new SolrTimeSpan((TimeSpan) entity);
+        break;
+      case ConceptScheme:
+        break;
+      default:
+        break;  
     }
-
     // All possible types have been checked
     if (solrEntity == null) {
       throw new IllegalArgumentException(
@@ -224,7 +250,6 @@ public class SolrEntityUtils {
 
     if (aggregation != null) {
       solrEntity.setDocCount(aggregation.getRecordCount());
-      // TODO: change data types when solr schema will be updated
       if (aggregation.getPageRank() != null) {
         solrEntity.setPageRank(aggregation.getPageRank().floatValue());
       }
@@ -233,20 +258,20 @@ public class SolrEntityUtils {
       }
     }
 
-    // NOTE:  Commented out as not supported in the MVP, needs to be re-assessed for future versions
-    //    EntityProxy europeanaProxy = record.getEuropeanaProxy();
-    //    if (europeanaProxy != null) {
-    //      // rights only set in Europeana proxy
-    //      solrEntity.setRights(List.of(europeanaProxy.getProxyIn().getRights()));
-    //    }
-
-    if (solrEntity.getDocCount() != null && solrEntity.getDocCount() > 0) {
-      // set type & in_europeana filter
-      solrEntity.setSuggestFilters(
-          Arrays.asList(solrEntity.getType(), EntitySolrFields.SUGGEST_FILTER_EUROPEANA));
-    } else {
-      // set type only
-      solrEntity.setSuggestFilters(List.of(solrEntity.getType()));
+    EntityTypes entityType = EntityTypes.valueOf(solrEntity.getType());
+    int initialCapacity = 3;
+    List<String> filters = new ArrayList<String>(initialCapacity); 
+    filters.add(entityType.getEntityType());
+    if(entityType.getParentType() != null) {
+      //add organization as type for Aggregators
+      filters.add(entityType.getParentType());
     }
+    
+    if (solrEntity.getDocCount() != null && solrEntity.getDocCount() > 0) {
+      //in_europeana filter
+      filters.add(EntitySolrFields.SUGGEST_FILTER_EUROPEANA);
+    } 
+    
+    solrEntity.setSuggestFilters(filters);
   }
 }

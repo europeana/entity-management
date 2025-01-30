@@ -27,7 +27,9 @@ public class EnrichmentCountQueryService {
           EntityTypes.Concept.getEntityType(), "skos_concept",
           EntityTypes.Place.getEntityType(), "edm_place",
           EntityTypes.TimeSpan.getEntityType(), "edm_timespan",
-          EntityTypes.Organization.getEntityType(), "foaf_organization");
+          EntityTypes.Organization.getEntityType(), "foaf_organization",
+          EntityTypes.Aggregator.getEntityType(), "foaf_organization"
+          );
 
   private static final Logger logger = LogManager.getLogger(EnrichmentCountQueryService.class);
   private static final String ERROR_MSG = "Error retrieving enrichmentCount for entityId=";

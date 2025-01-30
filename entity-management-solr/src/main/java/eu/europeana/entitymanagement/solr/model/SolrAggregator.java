@@ -1,39 +1,44 @@
 package eu.europeana.entitymanagement.solr.model;
 
-import static eu.europeana.entitymanagement.vocabulary.AggregatorSolrFields.EDM_AUDIENCE_ENGAGEMENT_ACTIVITY;
-import static eu.europeana.entitymanagement.vocabulary.AggregatorSolrFields.EDM_GEOGRAPHIC_SCOPE;
-import static eu.europeana.entitymanagement.vocabulary.AggregatorSolrFields.EDM_HERITAGE_DOMAIN;
-import static eu.europeana.entitymanagement.vocabulary.AggregatorSolrFields.EDM_PROVIDES_CAPACITY_BUILDING_ACTIVITY;
-import static eu.europeana.entitymanagement.vocabulary.AggregatorSolrFields.EDM_PROVIDES_SUPPORT_FOR_DATA_ACTIVITY;
-import static eu.europeana.entitymanagement.vocabulary.AggregatorSolrFields.EDM_PROVIDES_SUPPORT_FOR_MEDIA_TYPE;
-import static eu.europeana.entitymanagement.vocabulary.AggregatorSolrFields.FOAF_MBOX;
+import static eu.europeana.entitymanagement.vocabulary.AggregatorSolrFields.AUDIENCE_ENGAGEMENT_ACTIVITY;
+import static eu.europeana.entitymanagement.vocabulary.AggregatorSolrFields.GEOGRAPHIC_SCOPE;
+import static eu.europeana.entitymanagement.vocabulary.AggregatorSolrFields.HERITAGE_DOMAIN;
+import static eu.europeana.entitymanagement.vocabulary.AggregatorSolrFields.MBOX;
+import static eu.europeana.entitymanagement.vocabulary.AggregatorSolrFields.PROVIDES_CAPACITY_BUILDING_ACTIVITY;
+import static eu.europeana.entitymanagement.vocabulary.AggregatorSolrFields.PROVIDES_SUPPORT_FOR_DATA_ACTIVITY;
+import static eu.europeana.entitymanagement.vocabulary.AggregatorSolrFields.PROVIDES_SUPPORT_FOR_MEDIA_TYPE;
+import static eu.europeana.entitymanagement.vocabulary.AggregatorSolrFields.PARENT_TYPE;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.solr.client.solrj.beans.Field;
 import eu.europeana.entitymanagement.definitions.model.Aggregator;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 public class SolrAggregator extends SolrOrganization {
 
-  @Field(FOAF_MBOX)
+  @Field(MBOX)
   private String mbox;
   
-  @Field(EDM_GEOGRAPHIC_SCOPE)
+  @Field(GEOGRAPHIC_SCOPE)
   private String geographicScope;
   
-  @Field(EDM_HERITAGE_DOMAIN)
+  @Field(HERITAGE_DOMAIN)
   List<String> heritageDomain;
   
-  @Field(EDM_PROVIDES_SUPPORT_FOR_MEDIA_TYPE)
+  @Field(PROVIDES_SUPPORT_FOR_MEDIA_TYPE)
   List<String> providesSupportForMediaType;
   
-  @Field(EDM_PROVIDES_SUPPORT_FOR_DATA_ACTIVITY)
+  @Field(PROVIDES_SUPPORT_FOR_DATA_ACTIVITY)
   List<String> providesSupportForDataActivity;
   
-  @Field(EDM_PROVIDES_CAPACITY_BUILDING_ACTIVITY)
+  @Field(PROVIDES_CAPACITY_BUILDING_ACTIVITY)
   List<String> providesCapacityBuildingActivity;
   
-  @Field(EDM_AUDIENCE_ENGAGEMENT_ACTIVITY)
+  @Field(AUDIENCE_ENGAGEMENT_ACTIVITY)
   List<String> providesAudienceEngagementActivity;
+  
+//  @Field(PARENT_TYPE)
+//  String parentType;
 
   public SolrAggregator() {
   }
@@ -42,6 +47,7 @@ public class SolrAggregator extends SolrOrganization {
     super(aggregator);
     this.mbox = aggregator.getMbox();   
     this.geographicScope = aggregator.getGeographicScope();
+//  this.parentType = EntityTypes.Aggregator.getParentType();
     if (aggregator.getHeritageDomain() != null) {
       this.heritageDomain = new ArrayList<>(aggregator.getHeritageDomain());
     }
@@ -86,6 +92,11 @@ public class SolrAggregator extends SolrOrganization {
   public List<String> getProvidesAudienceEngagementActivity() {
     return providesAudienceEngagementActivity;
   }
+
+//  public String getParentType() {
+//    return parentType;
+//  }
+
 }
 
 
