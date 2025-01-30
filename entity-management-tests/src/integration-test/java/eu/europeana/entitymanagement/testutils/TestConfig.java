@@ -17,7 +17,7 @@ import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 public class TestConfig {
 
   
-  public static final String MOCK_ZOHO_BASE_URL = "https://crm.zoho.eu/crm/org20085137532/tab/";
+  public static final String MOCK_ZOHO_BASE_URL = "https://crm.zoho.eu/crm/org20085137532/tab_test/";
   public static final String MOCK_ZOHO_COUNTRY_MAPPING_FILE = "/zoho_country_mapping_test.json";
   
   @Autowired

@@ -319,7 +319,8 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
 
     // check if indexing is successfull by searching the organization in solr
     SolrAggregator aggreg = emSolrService.searchById(SolrAggregator.class, 
-        WebEntityFields.BASE_DATA_EUROPEANA_URI + EntityTypes.Aggregator.getEntityType().toLowerCase() + "/1");
+        EntityRecordUtils.buildEntityIdUri(EntityTypes.Aggregator, "1"));
+    //WebEntityFields.BASE_DATA_EUROPEANA_URI + EntityTypes.Aggregator.getEntityType().toLowerCase() + "/1"
     assertNotNull(aggreg.getHasAddress());
     assertNotNull(aggreg.getEuropeanaRole());
     assertNotNull(aggreg.getHeritageDomain());

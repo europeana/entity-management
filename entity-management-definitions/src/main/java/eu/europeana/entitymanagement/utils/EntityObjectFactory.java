@@ -142,6 +142,7 @@ public class EntityObjectFactory {
       case Concept:
         return (SchemaOrgEntity<T>) new SchemaOrgConcept((Concept) entity);
       case Organization:
+      case Aggregator:  
         return (SchemaOrgEntity<T>) new SchemaOrgOrganization((Organization) entity);
       case TimeSpan:
         return (SchemaOrgEntity<T>) new SchemaOrgTimeSpan((TimeSpan) entity);

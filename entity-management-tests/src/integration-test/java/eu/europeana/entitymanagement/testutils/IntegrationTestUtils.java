@@ -174,20 +174,20 @@ public class IntegrationTestUtils {
   public static final String VALID_MIGRATION_ID = "http://www.wikidata.org/entity/testing";
   public static final String INVALID_MIGRATION_ID = "http://www.testing.org/entity/testing";
 
-  public static final String ORGANIZATION_BNF_URI_ZOHO =
-      "https://crm.zoho.eu/crm/org20085137532/tab/Accounts/486281000000938399";
+  public static final String ORGANIZATION_BNF_URI_ZOHO = 
+      TestConfig.MOCK_ZOHO_BASE_URL + "Accounts/486281000000938399";
   public static final String ORGANIZATION_NATURALIS_URI_ZOHO =
-      "https://crm.zoho.eu/crm/org20085137532/tab/Accounts/486281000000923816";
+      TestConfig.MOCK_ZOHO_BASE_URL + "Accounts/486281000000923816";
   public static final String ORGANIZATION_PCCE_URI_ZOHO =
-      "https://crm.zoho.eu/crm/org20085137532/tab/Accounts/486281000000923271";
+      TestConfig.MOCK_ZOHO_BASE_URL + "Accounts/486281000000923271";
   public static final String ORGANIZATION_GFM_URI_ZOHO =
-      "https://crm.zoho.eu/crm/org20085137532/tab/Accounts/486281000000940433";
+      TestConfig.MOCK_ZOHO_BASE_URL + "Accounts/486281000000940433";
   public static final String ORGANIZATION_BERGER_MUSEUM_URI_ZOHO =
-      "https://crm.zoho.eu/crm/org20085137532/tab/Accounts/486281000000939337";
+      TestConfig.MOCK_ZOHO_BASE_URL + "Accounts/486281000000939337";
   public static final String ORGANIZATION_ARMA_URI_ZOHO =
-      "https://crm.zoho.eu/crm/org20085137532/tab/Accounts/486281000004375001";
+      TestConfig.MOCK_ZOHO_BASE_URL + "Accounts/486281000004375001";
   public static final String ORGANIZATION_EUSKARIANA_URI_ZOHO =
-      "https://crm.zoho.eu/crm/org20085137532/tab/Accounts/486281000000939318"; 
+      TestConfig.MOCK_ZOHO_BASE_URL + "Accounts/486281000000939318"; 
   public static final String ORGANIZATION_EUSKARIANA_NAME = "Euskariana";
   public static final String ORGANIZATION_ARMA_NAME = "Armagintzaren Museoa";
   

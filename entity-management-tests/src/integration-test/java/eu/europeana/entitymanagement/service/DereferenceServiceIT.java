@@ -176,7 +176,7 @@ public class DereferenceServiceIT extends AbstractIntegrationTest {
   // (not available in test data)
   public void wikidataOrganizationSNHDereferenceTest() throws ZohoException, Exception {
     // SNH 
-    dereferenceWikidataOrganization("https://crm.zoho.eu/crm/org20085137532/tab/Accounts/486281000000938800");
+    dereferenceWikidataOrganization(TestConfig.MOCK_ZOHO_BASE_URL + "Accounts/486281000000938800");
   }
   
   

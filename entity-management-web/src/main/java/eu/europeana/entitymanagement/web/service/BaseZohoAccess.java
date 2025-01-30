@@ -24,6 +24,7 @@ import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration
 import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
+import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
@@ -37,6 +38,7 @@ import eu.europeana.entitymanagement.web.model.Operation;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReportFields;
 import eu.europeana.entitymanagement.zoho.organization.ZohoConfiguration;
+import eu.europeana.entitymanagement.zoho.organization.ZohoDereferenceService;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 
@@ -58,6 +60,8 @@ public class BaseZohoAccess {
 
   final ZohoSyncRepository zohoSyncRepo;
 
+  final ZohoDereferenceService zohoDereferenceService;
+
   /**
    * Constructor for service initialization
    * 
@@ -71,8 +75,8 @@ public class BaseZohoAccess {
    */
   public BaseZohoAccess(EntityRecordService entityRecordService,
       EntityUpdateService entityUpdateService, EntityManagementConfiguration emConfiguration,
-      DataSources datasources, ZohoConfiguration zohoConfiguration,
-      ZohoSyncRepository zohoSyncRepo) {
+      DataSources datasources, ZohoConfiguration zohoConfiguration, ZohoSyncRepository zohoSyncRepo,
+      ZohoDereferenceService zohoDereferenceService) {
     this.entityRecordService = entityRecordService;
     this.entityUpdateService = entityUpdateService;
     this.emConfiguration = emConfiguration;
@@ -80,6 +84,7 @@ public class BaseZohoAccess {
     this.zohoConfiguration = zohoConfiguration;
     this.zohoDataSource = initZohoDataSource();
     this.zohoSyncRepo = zohoSyncRepo;
+    this.zohoDereferenceService = zohoDereferenceService;
   }
 
   protected DataSource initZohoDataSource() {
@@ -223,7 +228,8 @@ public class BaseZohoAccess {
   }
 
   String generateZohoOrganizationUrl(Long zohoRecordId) {
-    return ZohoUtils.buildZohoRecordUrl(zohoConfiguration.getZohoBaseUrlOrganizations(), zohoRecordId);
+    return ZohoUtils.buildZohoRecordUrl(zohoConfiguration.getZohoBaseUrlOrganizations(),
+        zohoRecordId);
   }
 
   private void performDeprecation(ZohoSyncReport zohoSyncReport, Operation operation) {
@@ -372,13 +378,24 @@ public class BaseZohoAccess {
    */
   private Optional<EntityRecord> performEntityRegistration(Operation operation,
       ZohoSyncReport zohoSyncReport, List<String> entitiesToUpdate) {
-    Organization zohoOrganization=new Organization();
-    ZohoOrganizationConverter.fillOrganizationInfoFromZohoRecord(zohoOrganization, 
-        operation.getZohoRecord(), zohoConfiguration.getZohoBaseUrlOrganizations(),
-        emConfiguration.getCountryMappings(), emConfiguration.getRoleMappings());
-
+    // Organization zohoOrganization=new Organization();
+    // ZohoOrganizationConverter.fillOrganizationInfoFromZohoRecord(zohoOrganization,
+    // operation.getZohoRecord(), zohoConfiguration.getZohoBaseUrlOrganizations(),
+    // emConfiguration.getCountryMappings(), emConfiguration.getRoleMappings());
+    // use dereference service to retrieve also aggregator info
     Optional<EntityRecord> res = Optional.empty();
 
+
+    // dereference organization
+    Long zohoId = operation.getZohoRecord().getId();
+    Organization zohoOrganization = dereferenceFullOrganization(zohoId);
+    if (zohoOrganization == null) {
+      // should not happen, except for wrong configurations
+      zohoSyncReport.addFailedOperation(zohoId.toString(), "Cannot dereference organization",
+          "operation.getZohoRecord().getId() :" + zohoId, null);
+    }
+
+    // perform registration
     try {
       List<EntityRecord> existingEntities = findDupplicateOrganization(operation, zohoOrganization);
       if (!existingEntities.isEmpty()) {
@@ -419,6 +436,21 @@ public class BaseZohoAccess {
     }
 
     return res;
+  }
+
+  Organization dereferenceFullOrganization(Long zohoId) {
+    try {
+      Optional<Entity> orgOptional = Optional.empty();
+      orgOptional = zohoDereferenceService.dereferenceOrganizationByZohoRecordId(zohoId);
+      if (orgOptional.isPresent()) {
+        return (Organization) orgOptional.get();
+      } else {
+        return null;
+      }
+    } catch (Exception e) {
+      logger.warn("Cannot dereference organization by zoho record id: {}", zohoId, e);
+      return null;
+    }
   }
 
   List<EntityRecord> findDupplicateOrganization(Operation operation,
@@ -489,8 +521,8 @@ public class BaseZohoAccess {
     List<String> deletedEntityIds = new ArrayList<String>();
     // get the id list from Zoho deleted Record
     if (!deletedInZoho.isEmpty()) {
-      deletedInZoho.forEach(deletedRecord -> deletedEntityIds
-          .add(generateZohoOrganizationUrl(deletedRecord.getId())
+      deletedInZoho.forEach(
+          deletedRecord -> deletedEntityIds.add(generateZohoOrganizationUrl(deletedRecord.getId())
           // EntityRecordUtils.
           // buildEntityIdUri(
           // EntityTypes.Organization, deletedRecord.getId().toString())

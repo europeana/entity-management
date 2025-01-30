@@ -34,6 +34,12 @@ public class ZohoDereferenceService implements Dereferencer {
     this.zohoConfiguration = zohoConfiguration;
     this.emConfig = emConfig;
   }
+  
+  public Optional<Entity> dereferenceOrganizationByZohoRecordId(@NonNull Long zohoRecordId) throws Exception {
+    String url = ZohoUtils.buildZohoRecordUrl(zohoConfiguration.getZohoBaseUrlOrganizations(), zohoRecordId);
+    return dereferenceEntityById(url);
+  }  
+  
 
   @Override
   public Optional<Entity> dereferenceEntityById(@NonNull String url) throws Exception {
@@ -76,12 +82,14 @@ public class ZohoDereferenceService implements Dereferencer {
     Organization org=null;
     if(zohoOrganization.isPresent()) {    
       if(zohoAggregator.isPresent()) {
+        //fill aggregator properties
         org = new Aggregator();
         ZohoOrganizationConverter.fillAggregatorInfoFromZohoRecord((Aggregator)org, zohoAggregator.get(), zohoConfiguration.getZohoBaseUrlAggregators());
       }
       else {
         org=new Organization();
       }
+      //fill common organization properties
       ZohoOrganizationConverter.fillOrganizationInfoFromZohoRecord(org, zohoOrganization.get(),
           zohoConfiguration.getZohoBaseUrlOrganizations(), emConfig.getCountryMappings(), emConfig.getRoleMappings());
     }

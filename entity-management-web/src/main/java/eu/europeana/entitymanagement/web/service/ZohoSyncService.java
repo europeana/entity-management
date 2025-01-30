@@ -37,6 +37,7 @@ import eu.europeana.entitymanagement.web.model.Operation;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReportFields;
 import eu.europeana.entitymanagement.zoho.organization.ZohoConfiguration;
+import eu.europeana.entitymanagement.zoho.organization.ZohoDereferenceService;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
@@ -52,10 +53,10 @@ public class ZohoSyncService extends BaseZohoAccess {
   public ZohoSyncService(EntityRecordService entityRecordService,
       EntityUpdateService entityUpdateService, EntityManagementConfiguration emConfiguration,
       DataSources datasources, ZohoConfiguration zohoConfiguration, 
-      ZohoSyncRepository zohoSyncRepo) {
+      ZohoSyncRepository zohoSyncRepo, ZohoDereferenceService zohoDereferenceService) {
 
     super(entityRecordService, entityUpdateService, emConfiguration, datasources, zohoConfiguration,
-        zohoSyncRepo);
+        zohoSyncRepo, zohoDereferenceService);
   }
 
   /**

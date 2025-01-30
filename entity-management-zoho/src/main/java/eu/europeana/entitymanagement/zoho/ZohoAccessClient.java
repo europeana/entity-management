@@ -53,7 +53,7 @@ import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 public class ZohoAccessClient {
 
   private static final Logger LOGGER = LogManager.getLogger(ZohoAccessClient.class);
-
+  
   /**
    * Constructor with all parameters.
    *
@@ -77,6 +77,7 @@ public class ZohoAccessClient {
    */
   public ZohoAccessClient(TokenStore tokenStore, String zohoEmail, String clientId,
       String clientSecret, String refreshToken, String redirectUrl) throws ZohoException {
+    
     try {
       UserSignature userSignature = new UserSignature(zohoEmail);
       Token token =
@@ -227,8 +228,9 @@ public class ZohoAccessClient {
    * @param fieldValue the new value
    * @throws ZohoException wrapping the original SDK exception
    */
-  public void updateZohoRecordOrganizationStringField(String zohoUrl, String fieldName,
+  public boolean updateZohoRecordOrganizationStringField(String zohoUrl, String fieldName,
       String fieldValue) throws ZohoException {
+    
     String zohoId = EntityRecordUtils.getIdentifierFromUrl(zohoUrl);
     try {
       RecordOperations recordOperations = new RecordOperations();
@@ -243,6 +245,7 @@ public class ZohoAccessClient {
     } catch (SDKException e) {
       throw new ZohoException("Zoho update the organization field threw an exception.", e);
     }
+    return true;
   }
 
   BodyWrapper buildUpdateRequest(String fieldName, String fieldValue) {
