@@ -509,7 +509,15 @@ public class EntityManagementConfiguration implements InitializingBean {
   public String getSlackWebHook() {
     return slackWebHook;
   }
+ 
+  public String getPrSolrZookeeperUrl() {
+    return prSolrZookeeperUrl;
+  }
 
+  public String getPrSolrCollection() {
+    return prSolrCollection;
+  }
+  
   public boolean isUpdateOrganizationEuropeanaId() {
     return updateOrganizationEuropeanaId;
   }
