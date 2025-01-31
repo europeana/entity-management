@@ -347,7 +347,7 @@ public class BaseZohoAccess {
       if (registeredRecord.isPresent()) {
         // entity successfully registered
         if (mustGenerateEuropeanaId) {
-          // entity registration submits Europeana ID to zoho
+          // entity registration submits new geenrated EuropeanaIDs to zoho
           zohoSyncReport.increaseSubmittedZohoEuropeanaId();
         }
         // verify that the organization ID was not changed if existed
@@ -355,10 +355,9 @@ public class BaseZohoAccess {
           verifyOrgIdAfterRegistration(operation, registeredRecord, beforeOperationZohoId);
         }
       } else {
-        // shoud not be the case, but better verify
-        throw new FunctionalRuntimeException(
-            "Organization registration was not successfull! Check logs for organization: "
-                + operation.getZohoRecord().getId());
+          // in case that the EntityRecord was not successfully created (record not available for further processing)
+          logger.warn("Organization registration was not completed! Check logs for organization: {}",
+              operation.getZohoRecord().getId());          
       }
     }
     return entitiesToUpdate;
