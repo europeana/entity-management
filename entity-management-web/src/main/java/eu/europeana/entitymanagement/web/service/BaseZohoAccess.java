@@ -344,23 +344,35 @@ public class BaseZohoAccess {
 
       Optional<EntityRecord> registeredRecord =
           performEntityRegistration(operation, zohoSyncReport, entitiesToUpdate);
-
       if (registeredRecord.isPresent()) {
         // entity successfully registered
         if (mustGenerateEuropeanaId) {
           // entity registration submits Europeana ID to zoho
           zohoSyncReport.increaseSubmittedZohoEuropeanaId();
         }
-
-        if (mustGenerateEuropeanaId
-            && !registeredRecord.get().getEntityId().equals(beforeOperationZohoId)) {
-          throw new FunctionalRuntimeException(
-              "Organization registration should not update existing Org.ID in Zoho! Check logs for organization: "
-                  + operation.getZohoRecord().getId());
+        // verify that the organization ID was not changed if existed
+        if (beforeOperationZohoId != null) {
+          verifyOrgIdAfterRegistration(operation, registeredRecord, beforeOperationZohoId);
         }
+      } else {
+        // shoud not be the case, but better verify
+        throw new FunctionalRuntimeException(
+            "Organization registration was not successfull! Check logs for organization: "
+                + operation.getZohoRecord().getId());
       }
     }
     return entitiesToUpdate;
+  }
+
+  void verifyOrgIdAfterRegistration(Operation operation, Optional<EntityRecord> registeredRecord,
+      String beforeOperationZohoId) {
+    String currentEntityId = registeredRecord.get().getEntityId();
+    if (beforeOperationZohoId != null && !currentEntityId.equals(beforeOperationZohoId)) {
+      throw new FunctionalRuntimeException(
+          "Organization registration should not update existing Org.ID in Zoho! Check logs for organization: "
+              + operation.getZohoRecord().getId() + " oldOrgId: " + beforeOperationZohoId
+              + " new OrgId: " + currentEntityId);
+    }
   }
 
   /**
@@ -488,8 +500,8 @@ public class BaseZohoAccess {
     List<String> deletedEntityIds = new ArrayList<String>();
     // get the id list from Zoho deleted Record
     if (!deletedInZoho.isEmpty()) {
-      deletedInZoho.forEach(deletedRecord -> deletedEntityIds
-          .add(generateZohoOrganizationUrl(deletedRecord.getId())
+      deletedInZoho.forEach(
+          deletedRecord -> deletedEntityIds.add(generateZohoOrganizationUrl(deletedRecord.getId())
           // EntityRecordUtils.
           // buildEntityIdUri(
           // EntityTypes.Organization, deletedRecord.getId().toString())
