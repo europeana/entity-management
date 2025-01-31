@@ -1,6 +1,6 @@
 package eu.europeana.entitymanagement.vocabulary;
 
-public interface WebEntityFields {
+public abstract class WebEntityFields {
 
   // LD fields
   public static final String CONTEXT = "@context";

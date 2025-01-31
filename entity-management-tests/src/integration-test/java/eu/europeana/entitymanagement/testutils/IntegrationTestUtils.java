@@ -259,7 +259,7 @@ public class IntegrationTestUtils {
                   Map.of(Record.class, new ZohoRecordTestDeserializer())));
 
   /** Maps ZOHO organization URIs to mocked JSON responses */
-  public static Map<String, String> ZOHO_ORG_URL_RESPONSE_MAP =
+  public static final Map<String, String> ZOHO_ORG_URL_RESPONSE_MAP =
       Map.of(
           ORGANIZATION_NATURALIS_URI_ZOHO,
           ORGANIZATION_NATURALIS_ZOHO_RESPONSE,
@@ -277,19 +277,19 @@ public class IntegrationTestUtils {
           ORGANIZATION_EUSKARIANA_ZOHO_RESPONSE);
 
   /** Maps ZOHO organization names to mocked JSON responses */
-  public static Map<String, String> ZOHO_ORG_NAME_RESPONSE_MAP = new HashMap<String, String>();
+  public static final Map<String, String> ZOHO_ORG_NAME_RESPONSE_MAP = new HashMap<String, String>();
   static {
     ZOHO_ORG_NAME_RESPONSE_MAP.put(ORGANIZATION_EUSKARIANA_NAME, ORGANIZATION_EUSKARIANA_ZOHO_RESPONSE);    
   }
 
   /** Maps ZOHO organization urls to the aggregators mocked JSON responses */
-  public static Map<String, String> ZOHO_ORG_URL_AGGREGATOR_RESPONSE_MAP =
+  public static final Map<String, String> ZOHO_ORG_URL_AGGREGATOR_RESPONSE_MAP =
       Map.of(
           ORGANIZATION_EUSKARIANA_URI_ZOHO,
           AGGREGATOR_EUSKARIANA_ZOHO_RESPONSE);
 
   /** Maps ZOHO organization:aggregator  to the linking mocked JSON responses */
-  public static Map<String, String> ZOHO_ORG_AGGREG_LINKING_RESPONSE_MAP =
+  public static final Map<String, String> ZOHO_ORG_AGGREG_LINKING_RESPONSE_MAP =
       Map.of(
           String.format("%s:%s", ORGANIZATION_ARMA_NAME, ORGANIZATION_EUSKARIANA_NAME),
           LINKING_ARMA_EUSKARIANA_ZOHO_RESPONSE);

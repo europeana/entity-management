@@ -1,10 +1,9 @@
 package eu.europeana.entitymanagement.solr;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Aggregator;
@@ -35,7 +34,13 @@ public class SolrEntityUtils {
   public static final String SOLR_TIMESPAN_SUGGESTER_FILTER = "solrTimeSpanFilter";
   public static final String SOLR_PLACE_SUGGESTER_FILTER = "solrPlaceFilter";
   public static final String SOLR_CONCEPT_SUGGESTER_FILTER = "solrConceptFilter";
-
+  public static final int MAX_FILTERS = 3;
+  
+  /**
+   * Hide default constructor
+   */
+  private SolrEntityUtils(){}
+  
   /**
    * Gets the {@link SolrEntity} class for an entity type.
    *
@@ -80,6 +85,11 @@ public class SolrEntityUtils {
     return solrEntityClass;
   }
 
+  /**
+   * Factory method to instantiate solr objects
+   * @param record the entity record
+   * @return the solr entity
+   */
   public static SolrEntity<? extends Entity> createSolrEntity(EntityRecord record) {
     final Entity entity = record.getEntity();
     SolrEntity<? extends Entity> solrEntity = null;
@@ -170,7 +180,7 @@ public class SolrEntityUtils {
   private static Map<String, List<String>> collectLabelEnrich(EntityRecord record) {
     // collect values from prefLabel, altLabel, hiddenLabel acronym
     Entity entity = record.getEntity();
-    Map<String, List<String>> values = new HashMap<>();
+    Map<String, List<String>> values = new ConcurrentHashMap<>();
     if (entity == null) {
       return values;
     }
@@ -230,13 +240,11 @@ public class SolrEntityUtils {
   }
 
   private static boolean isEnrichmentDisabled(EntityRecord record) {
-    if (record.getEntity() == null || record.getEntity().getIsAggregatedBy() == null) {
-      // entity is not consolidated, should not be index at this stage
-      return true;
-    }
-
+    // entity is not consolidated, should not be index at this stage
+    boolean notConsolidated = record.getEntity() == null || record.getEntity().getIsAggregatedBy() == null;
     // check if flag is set to false
-    if (Boolean.FALSE.equals(record.getEntity().getIsAggregatedBy().getEnrich())) {
+    boolean noEnrichment = Boolean.FALSE.equals(record.getEntity().getIsAggregatedBy().getEnrich());
+    if (notConsolidated || noEnrichment) {
       return true;
     }
 
@@ -259,8 +267,7 @@ public class SolrEntityUtils {
     }
 
     EntityTypes entityType = EntityTypes.valueOf(solrEntity.getType());
-    int initialCapacity = 3;
-    List<String> filters = new ArrayList<String>(initialCapacity); 
+    List<String> filters = new ArrayList<>(MAX_FILTERS); 
     filters.add(entityType.getEntityType());
     if(entityType.getParentType() != null) {
       //add organization as type for Aggregators

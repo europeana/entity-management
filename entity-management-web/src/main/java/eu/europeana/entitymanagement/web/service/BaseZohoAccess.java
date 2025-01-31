@@ -46,21 +46,21 @@ public class BaseZohoAccess {
 
   static final Logger logger = LogManager.getLogger(BaseZohoAccess.class);
 
-  final EntityRecordService entityRecordService;
+  protected final EntityRecordService entityRecordService;
 
-  final EntityUpdateService entityUpdateService;
+  protected final EntityUpdateService entityUpdateService;
 
-  final EntityManagementConfiguration emConfiguration;
+  protected final EntityManagementConfiguration emConfiguration;
 
-  final DataSources datasources;
+  protected final DataSources datasources;
 
-  final DataSource zohoDataSource;
+  protected final DataSource zohoDataSource;
 
-  final ZohoConfiguration zohoConfiguration;
+  protected final ZohoConfiguration zohoConfiguration;
 
-  final ZohoSyncRepository zohoSyncRepo;
+  protected final ZohoSyncRepository zohoSyncRepo;
 
-  final ZohoDereferenceService zohoDereferenceService;
+  protected final ZohoDereferenceService zohoDereferenceService;
 
   /**
    * Constructor for service initialization
@@ -72,6 +72,7 @@ public class BaseZohoAccess {
    * @param zohoConfiguration zoho access configuration
    * @param solrService solr service
    * @param zohoSyncRepo repository for zoho sync logging
+   * @param zohoDereferenceService the service used to dereference zoho organizations
    */
   public BaseZohoAccess(EntityRecordService entityRecordService,
       EntityUpdateService entityUpdateService, EntityManagementConfiguration emConfiguration,
@@ -378,21 +379,16 @@ public class BaseZohoAccess {
    */
   private Optional<EntityRecord> performEntityRegistration(Operation operation,
       ZohoSyncReport zohoSyncReport, List<String> entitiesToUpdate) {
-    // Organization zohoOrganization=new Organization();
-    // ZohoOrganizationConverter.fillOrganizationInfoFromZohoRecord(zohoOrganization,
-    // operation.getZohoRecord(), zohoConfiguration.getZohoBaseUrlOrganizations(),
-    // emConfiguration.getCountryMappings(), emConfiguration.getRoleMappings());
-    // use dereference service to retrieve also aggregator info
-    Optional<EntityRecord> res = Optional.empty();
-
 
     // dereference organization
+    Optional<EntityRecord> res = Optional.empty();
     Long zohoId = operation.getZohoRecord().getId();
     Organization zohoOrganization = dereferenceFullOrganization(zohoId);
     if (zohoOrganization == null) {
       // should not happen, except for wrong configurations
       zohoSyncReport.addFailedOperation(zohoId.toString(), "Cannot dereference organization",
           "operation.getZohoRecord().getId() :" + zohoId, null);
+      return res;
     }
 
     // perform registration
@@ -440,17 +436,14 @@ public class BaseZohoAccess {
 
   Organization dereferenceFullOrganization(Long zohoId) {
     try {
-      Optional<Entity> orgOptional = Optional.empty();
-      orgOptional = zohoDereferenceService.dereferenceOrganizationByZohoRecordId(zohoId);
+      Optional<Entity> orgOptional = zohoDereferenceService.dereferenceOrganizationByZohoRecordId(zohoId);
       if (orgOptional.isPresent()) {
         return (Organization) orgOptional.get();
-      } else {
-        return null;
-      }
+      } 
     } catch (Exception e) {
       logger.warn("Cannot dereference organization by zoho record id: {}", zohoId, e);
-      return null;
     }
+    return null;
   }
 
   List<EntityRecord> findDupplicateOrganization(Operation operation,

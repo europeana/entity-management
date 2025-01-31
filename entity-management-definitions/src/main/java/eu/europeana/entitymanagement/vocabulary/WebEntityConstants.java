@@ -1,6 +1,6 @@
 package eu.europeana.entitymanagement.vocabulary;
 
-public interface WebEntityConstants extends WebEntityFields {
+public abstract class WebEntityConstants extends WebEntityFields {
 
   public static final String PATH_PARAM_TYPE = "type";
   public static final String PATH_PARAM_NAMESPACE = "namespace";

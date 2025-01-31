@@ -7,6 +7,7 @@ import eu.europeana.entitymanagement.definitions.exceptions.EntityFieldAccessExc
  *
  * @author StevaneticS
  */
+@SuppressWarnings("java:S115")
 public enum EntityFieldsTypes {
 
   // General fields

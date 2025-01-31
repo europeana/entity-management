@@ -53,7 +53,7 @@ import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 public class ZohoAccessClient {
 
   private static final Logger LOGGER = LogManager.getLogger(ZohoAccessClient.class);
-  
+
   /**
    * Constructor with all parameters.
    *
@@ -77,7 +77,7 @@ public class ZohoAccessClient {
    */
   public ZohoAccessClient(TokenStore tokenStore, String zohoEmail, String clientId,
       String clientSecret, String refreshToken, String redirectUrl) throws ZohoException {
-    
+
     try {
       UserSignature userSignature = new UserSignature(zohoEmail);
       Token token =
@@ -111,110 +111,134 @@ public class ZohoAccessClient {
           String.format(ZohoConstants.ZOHO_OPERATION_FORMAT_STRING, ZohoConstants.ID_FIELD,
               ZohoConstants.EQUALS_OPERATION, zohoId));
 
-      APIResponse<ResponseHandler> response = recordOperations.getRecord(
-          Long.valueOf(zohoId), ZohoConstants.ACCOUNTS_MODULE_API_NAME, null, null);
+      APIResponse<ResponseHandler> response = recordOperations.getRecord(Long.valueOf(zohoId),
+          ZohoConstants.ACCOUNTS_MODULE_API_NAME, null, null);
       return getZohoRecords(response).stream().findFirst();
     } catch (SDKException e) {
-      throw new ZohoException("Zoho search organization by organization id threw an exception", e);
+      throw convertToZohoException(e);
     }
   }
-  
-  public Optional<Record> searchZohoOrganizationByName(@NonNull String orgName) throws ZohoException {
+
+  ZohoException convertToZohoException(SDKException e) {
+    return new ZohoException("Zoho search organization by organization id threw an exception", e);
+  }
+
+  /**
+   * Search orgnaizations in Zoho by name
+   * 
+   * @param orgName organization name
+   * @return zoho record as optional
+   * @throws ZohoException wrapping the original SDK exception
+   */
+  public Optional<Record> searchZohoOrganizationByName(@NonNull String orgName)
+      throws ZohoException {
     try {
       RecordOperations recordOperations = new RecordOperations();
       ParameterMap paramInstance = new ParameterMap();
       paramInstance.add(SearchRecordsParam.CRITERIA,
-          String.format(ZohoConstants.ZOHO_OPERATION_FORMAT_STRING, ZohoConstants.ACCOUNT_NAME_FIELD,
-              ZohoConstants.EQUALS_OPERATION, orgName));
+          String.format(ZohoConstants.ZOHO_OPERATION_FORMAT_STRING,
+              ZohoConstants.ACCOUNT_NAME_FIELD, ZohoConstants.EQUALS_OPERATION, orgName));
 
       APIResponse<ResponseHandler> response =
           recordOperations.searchRecords(ZohoConstants.ACCOUNTS_MODULE_API_NAME, paramInstance);
       List<Record> records = getZohoRecords(response);
-      for(Record rec : records) {
-        /* 
-         * since the equals operator in zoho behaves like contains 
-         * (https://www.zoho.com/crm/developer/docs/api/v7/search-records.html), 
-         * we need to check the exact name
+      for (Record rec : records) {
+        /*
+         * since the equals operator in zoho behaves like contains
+         * (https://www.zoho.com/crm/developer/docs/api/v7/search-records.html), we need to check
+         * the exact name
          */
-        String accountName = ZohoOrganizationConverter.getStringFieldValue(rec, ZohoConstants.ACCOUNT_NAME_FIELD);
-        if(orgName.equals(accountName)) {
+        String accountName =
+            ZohoOrganizationConverter.getStringFieldValue(rec, ZohoConstants.ACCOUNT_NAME_FIELD);
+        if (orgName.equals(accountName)) {
           return Optional.of(rec);
         }
       }
     } catch (SDKException e) {
-      throw new ZohoException("Zoho search organization by organization id threw an exception", e);
+      throw convertToZohoException(e);
     }
     return Optional.empty();
   }
 
   /**
    * Zoho records can have additional information in the related records like e.g. products, notes,
-   * attachments, aggregators, etc. In this case we use this method to get the aggregator information.
+   * attachments, aggregators, etc. In this case we use this method to get the aggregator
+   * information.
    * 
-   * @param zohoUrl
-   * @return
-   * @throws ZohoException
+   * @param zohoUrl the organization's URL in Zoho
+   * @return zoho records as optional
+   * @throws ZohoException wrapping the original SDK exception
    */
   public Optional<Record> getZohoAggregatorByOrgUrl(String zohoUrl) throws ZohoException {
     String zohoId = EntityRecordUtils.getIdentifierFromUrl(zohoUrl);
-    try {          
-      //Get instance of RelatedRecordsOperations class that takes relatedListAPIName moduleAPIName as parameter
-      RelatedRecordsOperations relatedRecordsOperations = new RelatedRecordsOperations(ZohoConstants.RELATED_RECORDS_MODULE_API_NAME, Long.valueOf(zohoId), ZohoConstants.ACCOUNTS_MODULE_API_NAME);
-      APIResponse<com.zoho.crm.api.relatedrecords.ResponseHandler> response = relatedRecordsOperations.getRelatedRecords(null, null);
+    try {
+      // Get instance of RelatedRecordsOperations class that takes relatedListAPIName moduleAPIName
+      // as parameter
+      RelatedRecordsOperations relatedRecordsOperations =
+          new RelatedRecordsOperations(ZohoConstants.RELATED_RECORDS_MODULE_API_NAME,
+              Long.valueOf(zohoId), ZohoConstants.ACCOUNTS_MODULE_API_NAME);
+      APIResponse<com.zoho.crm.api.relatedrecords.ResponseHandler> response =
+          relatedRecordsOperations.getRelatedRecords(null, null);
 
       return getZohoRecords(response).stream().findFirst();
     } catch (SDKException e) {
       throw new ZohoException("Zoho get related records by organization id threw an exception", e);
     }
   }
-  
+
   /**
    * Get the Linking record from the module for the aggregated_via/from (name: LinkingModule1).
    * 
-   * @param zohoUrl
-   * @return
-   * @throws ZohoException
+   * @param orgName the name of the organization
+   * @param aggregatorName name of the aggragator 
+   * @return zoho record as optional
+   * @throws ZohoException if zoho access fails
    */
-  public Optional<Record> searchZohoAggregatedViaModule(@NonNull String orgName, @NonNull String aggregatorName) throws ZohoException {  
+  public Optional<Record> searchZohoAggregatedViaModule(@NonNull String orgName,
+      @NonNull String aggregatorName) throws ZohoException {
     try {
       RecordOperations recordOperations = new RecordOperations();
       ParameterMap paramInstance = new ParameterMap();
-      String criteria = "(";
-      criteria += String.format(ZohoConstants.ZOHO_OPERATION_FORMAT_STRING, ZohoConstants.AGGREGATING_FROM,
-          ZohoConstants.EQUALS_OPERATION, orgName);
-      criteria += ZohoConstants.AND;
-      criteria += String.format(ZohoConstants.ZOHO_OPERATION_FORMAT_STRING, ZohoConstants.AGGREGATORS,
-          ZohoConstants.EQUALS_OPERATION, aggregatorName);
-      criteria += ")";      
-      paramInstance.add(SearchRecordsParam.CRITERIA, criteria);
+      StringBuilder criteria = new StringBuilder("(")
+        .append(
+            String.format(ZohoConstants.ZOHO_OPERATION_FORMAT_STRING, ZohoConstants.AGGREGATING_FROM, ZohoConstants.EQUALS_OPERATION, orgName))
+        .append(ZohoConstants.AND)
+        .append(
+            String.format(ZohoConstants.ZOHO_OPERATION_FORMAT_STRING, ZohoConstants.AGGREGATORS, ZohoConstants.EQUALS_OPERATION, aggregatorName))
+        .append(")");
+      paramInstance.add(SearchRecordsParam.CRITERIA, criteria.toString());
 
-      APIResponse<ResponseHandler> response =
-          recordOperations.searchRecords(ZohoConstants.AGGREGATED_VIA_FROM_MODULE_API_NAME, paramInstance);
-      
+      APIResponse<ResponseHandler> response = recordOperations
+          .searchRecords(ZohoConstants.AGGREGATED_VIA_FROM_MODULE_API_NAME, paramInstance);
+
       List<Record> records = getZohoRecords(response);
-      for(Record rec : records) {
-        /* 
-         * since the equals operator in zoho behaves like contains 
-         * (https://www.zoho.com/crm/developer/docs/api/v7/search-records.html), 
-         * we need to check the exact values
+      for (Record rec : records) {
+        /*
+         * since the equals operator in zoho behaves like contains
+         * (https://www.zoho.com/crm/developer/docs/api/v7/search-records.html), we need to check
+         * the exact values
          */
-        Record aggregatingFrom = ZohoOrganizationConverter.getSubRecord(rec, ZohoConstants.AGGREGATING_FROM);
-        String aggregatingFromName=null;
-        if(aggregatingFrom!=null) {
-          aggregatingFromName=ZohoOrganizationConverter.getStringFieldValue(aggregatingFrom, ZohoConstants.NAME_FIELD);
+        Record aggregatingFrom =
+            ZohoOrganizationConverter.getSubRecord(rec, ZohoConstants.AGGREGATING_FROM);
+        String aggregatingFromName = null;
+        if (aggregatingFrom != null) {
+          aggregatingFromName = ZohoOrganizationConverter.getStringFieldValue(aggregatingFrom,
+              ZohoConstants.NAME_FIELD);
         }
-        Record aggregatorsRecord = ZohoOrganizationConverter.getSubRecord(rec, ZohoConstants.AGGREGATORS);
-        String aggregatorsRecordName=null;
-        if(aggregatorsRecord!=null) {
-          aggregatorsRecordName=ZohoOrganizationConverter.getStringFieldValue(aggregatorsRecord, ZohoConstants.NAME_FIELD);
+        Record aggregatorsRecord =
+            ZohoOrganizationConverter.getSubRecord(rec, ZohoConstants.AGGREGATORS);
+        String aggregatorsRecordName = null;
+        if (aggregatorsRecord != null) {
+          aggregatorsRecordName = ZohoOrganizationConverter.getStringFieldValue(aggregatorsRecord,
+              ZohoConstants.NAME_FIELD);
         }
 
-        if(orgName.equals(aggregatingFromName) && aggregatorName.equals(aggregatorsRecordName)) {
+        if (orgName.equals(aggregatingFromName) && aggregatorName.equals(aggregatorsRecordName)) {
           return Optional.of(rec);
         }
       }
     } catch (SDKException e) {
-      throw new ZohoException("Zoho search organization by organization id threw an exception", e);
+      throw convertToZohoException(e);
     }
     return Optional.empty();
   }
@@ -230,7 +254,7 @@ public class ZohoAccessClient {
    */
   public boolean updateZohoRecordOrganizationStringField(String zohoUrl, String fieldName,
       String fieldValue) throws ZohoException {
-    
+
     String zohoId = EntityRecordUtils.getIdentifierFromUrl(zohoUrl);
     try {
       RecordOperations recordOperations = new RecordOperations();
@@ -260,15 +284,15 @@ public class ZohoAccessClient {
 
   /**
    * Source: https://www.zoho.com/crm/developer/docs/java-sdk/v2/record-samples.html
-   * 
-   * @throws ZohoException
+   * @param response zoho response
+   * @throws ZohoException wrapping SDK exception
    */
   private void validateZohoUpdateResponse(APIResponse<ActionHandler> response)
       throws ZohoException {
     if (response == null || !response.isExpected()) {
       // response is expected, if empty the update operation is not confirmed
-      throw new ZohoException(
-          "Unexpected response during updating a field in Zoho." + response.getStatusCode() + response.getObject());
+      throw new ZohoException("Unexpected response during updating a field in Zoho."
+          + response.getStatusCode() + response.getObject());
     } else {
       // Get object from response
       ActionHandler actionHandler = response.getObject();
@@ -277,7 +301,7 @@ public class ZohoAccessClient {
         throw new ZohoException(extractErrorMessage((APIException) actionHandler));
       } else if (actionHandler instanceof ActionWrapper) {
         verifyZohoConfirmationResponse(actionHandler);
-      }  
+      }
     }
   }
 
@@ -302,9 +326,10 @@ public class ZohoAccessClient {
         throw new ZohoException(message);
       } else {
         //
-        throw new ZohoException("Cannot process Zoho API Response, unknown response type: " + actionResponse);
+        throw new ZohoException(
+            "Cannot process Zoho API Response, unknown response type: " + actionResponse);
       }
-      
+
     }
   }
 
@@ -403,9 +428,10 @@ public class ZohoAccessClient {
       paramInstance.add(GetDeletedRecordsParam.TYPE, "all"); // all, recycle, permanent
       paramInstance.add(GetDeletedRecordsParam.PAGE, 1);
       paramInstance.add(GetDeletedRecordsParam.PER_PAGE, pageSize);
-      Param<String> scopeParam = new Param<String>("scope", "com.zoho.crm.api.Record.GetDeletedRecordsParam");
+      Param<String> scopeParam =
+          new Param<String>("scope", "com.zoho.crm.api.Record.GetDeletedRecordsParam");
       paramInstance.add(scopeParam, "ZohoCRM.modules.ALL");
-      
+
       HeaderMap headersMap = new HeaderMap();
       if (modifiedSince != null) {
         headersMap.add(GetRecordsHeader.IF_MODIFIED_SINCE, modifiedSince);
@@ -439,9 +465,15 @@ public class ZohoAccessClient {
   private static boolean isNullOrEmpty(final Map<?, ?> m) {
     return m == null || m.isEmpty();
   }
-  
-  public static <T> List<Record> getZohoRecords(APIResponse<T> response)
-      throws ZohoException {
+
+  /**
+   * Extract records form Zoho API Response
+   * @param <T> the type of the record in API response
+   * @param response the zoho api response
+   * @return the list of extracted records
+   * @throws ZohoException wrapping SDK exception
+   */
+  private static <T> List<Record> getZohoRecords(APIResponse<T> response) throws ZohoException {
     if (response == null) {
       return Collections.emptyList();
     }
@@ -459,17 +491,16 @@ public class ZohoAccessClient {
       // Get the object from response
       T responseHandler = response.getObject();
       if (responseHandler instanceof com.zoho.crm.api.relatedrecords.ResponseWrapper) {
-        com.zoho.crm.api.relatedrecords.ResponseWrapper responseWrapper = 
+        com.zoho.crm.api.relatedrecords.ResponseWrapper responseWrapper =
             (com.zoho.crm.api.relatedrecords.ResponseWrapper) responseHandler;
         return responseWrapper.getData();
-      }
-      else if (responseHandler instanceof com.zoho.crm.api.record.ResponseWrapper) {
-        com.zoho.crm.api.record.ResponseWrapper responseWrapper = 
+      } else if (responseHandler instanceof com.zoho.crm.api.record.ResponseWrapper) {
+        com.zoho.crm.api.record.ResponseWrapper responseWrapper =
             (com.zoho.crm.api.record.ResponseWrapper) responseHandler;
         return responseWrapper.getData();
       }
     }
     return Collections.emptyList();
   }
-  
+
 }

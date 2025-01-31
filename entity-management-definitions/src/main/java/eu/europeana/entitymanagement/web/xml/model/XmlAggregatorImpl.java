@@ -22,6 +22,10 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @XmlRootElement(namespace = NAMESPACE_EDM, name = XML_AGGREGATOR)
 @XmlAccessorType(XmlAccessType.FIELD)
+/**
+ * class for xml serialization of Aggregators
+ */
+@SuppressWarnings("java:S2384")
 public class XmlAggregatorImpl extends XmlOrganizationImpl {
 
   @XmlElement(namespace = NAMESPACE_FOAF, name = XML_MBOX)
@@ -45,27 +49,35 @@ public class XmlAggregatorImpl extends XmlOrganizationImpl {
   @XmlElement(namespace = NAMESPACE_EDM, name = XML_PROVIDES_AUDIENCE_ENGAGEMENT_ACTIVITY)
   private List<String> providesAudienceEngagementActivity;
 
+  /**
+   * Constructor to convert the POJO for XML serialization
+   * @param aggregator
+   */
   public XmlAggregatorImpl(Aggregator aggregator) {
     super(aggregator);
     this.mbox=aggregator.getMbox();
     this.geographicScope=aggregator.getGeographicScope();
     if (aggregator.getHeritageDomain() != null) {
-      this.heritageDomain = new ArrayList<String>(aggregator.getHeritageDomain());
+      this.heritageDomain = new ArrayList<>(aggregator.getHeritageDomain());
     }
     if (aggregator.getProvidesSupportForMediaType() != null) {
-      this.providesSupportForMediaType = new ArrayList<String>(aggregator.getProvidesSupportForMediaType());
+      this.providesSupportForMediaType = new ArrayList<>(aggregator.getProvidesSupportForMediaType());
     }
     if (aggregator.getProvidesSupportForDataActivity() != null) {
-      this.providesSupportForDataActivity = new ArrayList<String>(aggregator.getProvidesSupportForDataActivity());
+      this.providesSupportForDataActivity = new ArrayList<>(aggregator.getProvidesSupportForDataActivity());
     }
     if (aggregator.getProvidesCapacityBuildingActivity() != null) {
-      this.providesCapacityBuildingActivity = new ArrayList<String>(aggregator.getProvidesCapacityBuildingActivity());
+      this.providesCapacityBuildingActivity = new ArrayList<>(aggregator.getProvidesCapacityBuildingActivity());
     }
     if (aggregator.getProvidesAudienceEngagementActivity() != null) {
-      this.providesAudienceEngagementActivity = new ArrayList<String>(aggregator.getProvidesAudienceEngagementActivity());
+      this.providesAudienceEngagementActivity = new ArrayList<>(aggregator.getProvidesAudienceEngagementActivity());
     }    
   }
 
+  public XmlAggregatorImpl() {
+    // default constructor
+  }
+  
   @Override
   public Aggregator toEntityModel() throws EntityModelCreationException {
     super.toEntityModel();
@@ -77,10 +89,7 @@ public class XmlAggregatorImpl extends XmlOrganizationImpl {
     ((Aggregator)entity).setProvidesAudienceEngagementActivity(getProvidesAudienceEngagementActivity());
     return ((Aggregator)entity);
   }
-
-  public XmlAggregatorImpl() {
-    // default constructor
-  }
+ 
 
   @Override
   protected EntityTypes getTypeEnum() {

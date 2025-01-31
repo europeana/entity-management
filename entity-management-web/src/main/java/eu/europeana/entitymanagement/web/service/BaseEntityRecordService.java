@@ -580,7 +580,7 @@ public class BaseEntityRecordService {
       List<String> aggregatorUrls = org.getAggregatedViaAggregatorUrls();
       //search in the corefs
       List<EntityRecord> entities = entityRecordRepository.findEntitiesByCoreference(aggregatorUrls, null, false);
-      List<String> entityIds = entities.stream().map(el -> el.getEntityId()).collect(Collectors.toList());;
+      List<String> entityIds = entities.stream().map(el -> el.getEntityId()).collect(Collectors.toList());
       if(entityIds.isEmpty()) {
         if (logger.isWarnEnabled()) {
           logger.warn(
@@ -592,8 +592,7 @@ public class BaseEntityRecordService {
          */
         throw new EntityUpdateException("The organization's aggregatedVia field is still not set"
             + " and the update task need to be run again.");        
-      }
-      else {
+      } else {
         org.setAggregatedVia(entityIds);
       }
     }

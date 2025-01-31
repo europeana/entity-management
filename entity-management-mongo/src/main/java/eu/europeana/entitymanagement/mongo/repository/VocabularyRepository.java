@@ -16,13 +16,16 @@ import eu.europeana.entitymanagement.definitions.model.Vocabulary;
 public class VocabularyRepository  {
   
   @Autowired
-  @Qualifier(AppConfigConstants.BEAN_EM_DATA_STORE)
   Datastore datastore;
   
   private static final String ID = "id";
   
   private List<Vocabulary> europeanaRoles;
 
+  public VocabularyRepository(@Qualifier(AppConfigConstants.BEAN_EM_DATA_STORE) Datastore datastore) {
+    this.datastore = datastore;
+  }
+  
   public List<Vocabulary> getEuropeanaRoles() {
     synchronized(this) {
       if(europeanaRoles==null) {

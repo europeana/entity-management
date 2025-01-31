@@ -353,6 +353,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                 .content(
                     loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_EUSKARIANA_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
+    assertNotNull(response);
 
     /*
      * 2. remove the entry from the map that mocks the zoho response for the organization

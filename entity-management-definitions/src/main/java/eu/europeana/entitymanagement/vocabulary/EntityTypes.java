@@ -20,14 +20,6 @@ public enum EntityTypes implements EntityKeyword {
   private String httpUri;
   private String parentType;
 
-  public String getEntityType() {
-    return entityType;
-  }
-
-  public String getUrlPath() {
-    return urlPath;
-  }
-
   EntityTypes(String entityType, String urlPath, String uri, String parentType) {
     this.entityType = entityType;
     this.urlPath = urlPath;
@@ -35,7 +27,13 @@ public enum EntityTypes implements EntityKeyword {
     this.parentType = parentType;
   }
 
+  public String getEntityType() {
+    return entityType;
+  }
 
+  public String getUrlPath() {
+    return urlPath;
+  }
   /**
    * Check if an array of EntityTypes contains an Entity type
    *

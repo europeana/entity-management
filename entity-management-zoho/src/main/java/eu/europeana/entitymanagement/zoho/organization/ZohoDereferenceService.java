@@ -34,7 +34,13 @@ public class ZohoDereferenceService implements Dereferencer {
     this.zohoConfiguration = zohoConfiguration;
     this.emConfig = emConfig;
   }
-  
+  /**
+   * Method to dereference organizations by zohoRecordId
+   * @see #dereferenceEntityById(String)
+   * @param zohoRecordId record id in zoho
+   * @return the dereferenced organization/aggregators as option
+   * @throws Exception if errors occur during dereferencing
+   */
   public Optional<Entity> dereferenceOrganizationByZohoRecordId(@NonNull Long zohoRecordId) throws Exception {
     String url = ZohoUtils.buildZohoRecordUrl(zohoConfiguration.getZohoBaseUrlOrganizations(), zohoRecordId);
     return dereferenceEntityById(url);
@@ -51,18 +57,14 @@ public class ZohoDereferenceService implements Dereferencer {
     Optional<Record> zohoAggregator =
         zohoConfiguration.getZohoAccessClient().getZohoAggregatorByOrgUrl(url);
 
-    //enable when you need to print the data for debuging purposes System.out.println(serialize(zohoOrganization.get())); 
-    
-    Organization org = createOrganizationFromZohoRecords(zohoOrganization, zohoAggregator);
-    
-    fillAggregatedVia(org, zohoOrganization);
-    
-    if(org!=null) {
-      return Optional.of(org);
-    }
-    else {
+    if(zohoOrganization.isEmpty()){
       return Optional.empty();
-    }    
+    }
+    
+    //enable when you need to print the data for debuging purposes System.out.println(serialize(zohoOrganization.get())); 
+    Organization org = createOrganizationFromZohoRecords(zohoOrganization.get(), zohoAggregator);
+    fillAggregatedVia(org, zohoOrganization);
+    return Optional.of(org);
   }  
   
   public String serialize(Record zohoRecord) throws JsonProcessingException {
@@ -77,22 +79,22 @@ public class ZohoDereferenceService implements Dereferencer {
     return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(zohoRecord.getKeyValues());
   }
   
-  private Organization createOrganizationFromZohoRecords(Optional<Record> zohoOrganization, 
+  private Organization createOrganizationFromZohoRecords(Record zohoOrganization, 
       Optional<Record> zohoAggregator) {
-    Organization org=null;
-    if(zohoOrganization.isPresent()) {    
-      if(zohoAggregator.isPresent()) {
-        //fill aggregator properties
-        org = new Aggregator();
-        ZohoOrganizationConverter.fillAggregatorInfoFromZohoRecord((Aggregator)org, zohoAggregator.get(), zohoConfiguration.getZohoBaseUrlAggregators());
-      }
-      else {
-        org=new Organization();
-      }
-      //fill common organization properties
-      ZohoOrganizationConverter.fillOrganizationInfoFromZohoRecord(org, zohoOrganization.get(),
-          zohoConfiguration.getZohoBaseUrlOrganizations(), emConfig.getCountryMappings(), emConfig.getRoleMappings());
+    
+    if(zohoOrganization == null){
+      return null;
     }
+    boolean isAggregator = zohoAggregator.isPresent();
+    Organization org= isAggregator? new Aggregator() : new Organization();
+    if(isAggregator) {
+        //fill aggregator properties
+        ZohoOrganizationConverter.fillAggregatorInfoFromZohoRecord((Aggregator)org, zohoAggregator.get(), zohoConfiguration.getZohoBaseUrlAggregators());
+    }
+    //fill common organization properties
+    ZohoOrganizationConverter.fillOrganizationInfoFromZohoRecord(org, zohoOrganization,
+          zohoConfiguration.getZohoBaseUrlOrganizations(), emConfig.getCountryMappings(), emConfig.getRoleMappings());
+    
     return org;
   }
   
@@ -100,47 +102,56 @@ public class ZohoDereferenceService implements Dereferencer {
     if(org!=null && zohoOrganization.isPresent()) {
       String aggregName = ZohoOrganizationConverter.getStringFieldValue(zohoOrganization.get(), ZohoConstants.AGGREGATORS);
       String orgName = ZohoOrganizationConverter.getStringFieldValue(zohoOrganization.get(), ZohoConstants.ACCOUNT_NAME_FIELD);
+      if(StringUtils.isBlank(aggregName) || StringUtils.isBlank(orgName)) {
+        //organization has no aggregator, nothing to do
+        return;
+      }
+        
       //if the organization has aggregator
-      if(StringUtils.isNotBlank(orgName) && StringUtils.isNotBlank(aggregName)) {
         /*
          * search zoho organization that has the same name as the aggregator,
          * and get its europeana id, to store in the aggregatedVia
          */
-        Optional<Record> zohoAggregatorOrg =
-            zohoConfiguration.getZohoAccessClient().searchZohoOrganizationByName(aggregName);
-        if(zohoAggregatorOrg.isPresent()) {
-          String europeanaId = ZohoOrganizationConverter.getStringFieldValue(zohoAggregatorOrg.get(), ZohoConstants.EUROPEANA_ID_FIELD);
-          if(europeanaId!=null) {
-            List<String> aggregatedVia = new ArrayList<String>();
-            aggregatedVia.add(europeanaId);
-            org.setAggregatedVia(aggregatedVia);
-          }
-        }
+        fillAggregatedViaByAggregatorName(org, aggregName);
         
         //if the aggregatedVia field is still not set
         if(org.getAggregatedVia()==null) {
-          String aggregatorUrl=null;
           //search the aggregatedVia/From zoho module for the aggregator id
-          Optional<Record> zohoLinking =
-              zohoConfiguration.getZohoAccessClient().searchZohoAggregatedViaModule(orgName, aggregName);
-          if(zohoLinking.isPresent()) {
-            Record aggregRecord = ZohoOrganizationConverter.getSubRecord(zohoLinking.get(), ZohoConstants.AGGREGATORS);
-            if(aggregRecord != null) {
-              aggregatorUrl = ZohoUtils.buildZohoRecordUrl(zohoConfiguration.getZohoBaseUrlAggregators(), aggregRecord.getId());
-            }
-          }
-          if(aggregatorUrl!=null) {
-            org.setAggregatedViaAggregatorUrls(List.of(aggregatorUrl));
-          }
-          else {
-            /*
-             * in this case since the organization is aggregator and we cannot set the aggregatedVia field,
-             * we throw an exception in order to execute the org update task later on again
-             */
-            throw new ZohoException("Could not set the aggregatedVia field for the Zoho organization which has its aggregator.");
-          }
+          fillAggregatedViaByZohoModule(org, aggregName, orgName);
         }
-      }
     }  
+  }
+  void fillAggregatedViaByZohoModule(Organization org, String aggregName, String orgName)
+      throws ZohoException {
+    String aggregatorUrl=null;
+    Optional<Record> zohoLinking =
+        zohoConfiguration.getZohoAccessClient().searchZohoAggregatedViaModule(orgName, aggregName);
+    if(zohoLinking.isPresent()) {
+      Record aggregRecord = ZohoOrganizationConverter.getSubRecord(zohoLinking.get(), ZohoConstants.AGGREGATORS);
+      if(aggregRecord != null) {
+        aggregatorUrl = ZohoUtils.buildZohoRecordUrl(zohoConfiguration.getZohoBaseUrlAggregators(), aggregRecord.getId());
+      }
+    }
+    if(aggregatorUrl==null) {
+      /*
+       * in this case since the organization is aggregator and we cannot set the aggregatedVia field,
+       * we throw an exception in order to execute the org update task later on again
+       */
+      throw new ZohoException("Could not set the aggregatedVia field for the Zoho organization which has its aggregator.");
+    } 
+    org.setAggregatedViaAggregatorUrls(List.of(aggregatorUrl));
+  }
+  
+  void fillAggregatedViaByAggregatorName(Organization org, String aggregName) throws ZohoException {
+    Optional<Record> zohoAggregatorOrg =
+        zohoConfiguration.getZohoAccessClient().searchZohoOrganizationByName(aggregName);
+    if(zohoAggregatorOrg.isPresent()) {
+      String europeanaId = ZohoOrganizationConverter.getStringFieldValue(zohoAggregatorOrg.get(), ZohoConstants.EUROPEANA_ID_FIELD);
+      if(europeanaId!=null) {
+        List<String> aggregatedVia = new ArrayList<String>();
+        aggregatedVia.add(europeanaId);
+        org.setAggregatedVia(aggregatedVia);
+      }
+    }
   }
 }

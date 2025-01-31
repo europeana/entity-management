@@ -3,11 +3,20 @@ package eu.europeana.entitymanagement.utils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.MapUtils;
 
+/**
+ * Utils for converting the representation of data to solr fields
+ */
 public class SolrGeneralUtils {
+
+  /**
+   * Hide default constructor
+   */
+  private SolrGeneralUtils() {
+
+  }
 
   /**
    * This method adds prefixes to the fields in format Map<String, List<String>> languageMap e.g.
@@ -23,13 +32,11 @@ public class SolrGeneralUtils {
       return new HashMap<>();
     }
     Map<String, List<String>> res;
-    if (!languageMap.keySet().iterator().next().contains(fieldNamePrefix)) {
-      res =
-          languageMap.entrySet().stream()
-              .collect(
-                  Collectors.toMap(entry -> fieldNamePrefix + entry.getKey(), Map.Entry::getValue));
-    } else {
+    if (languageMap.keySet().iterator().next().contains(fieldNamePrefix)) {
       res = languageMap;
+    } else {
+      res = languageMap.entrySet().stream().collect(
+          Collectors.toMap(entry -> fieldNamePrefix + entry.getKey(), Map.Entry::getValue));
     }
     return res;
   }
@@ -42,21 +49,19 @@ public class SolrGeneralUtils {
    * @param languageMap e.g. prefLabel
    * @return normalized content in format Map<String, String>
    */
-  public static Map<String, String> normalizeStringMapByAddingPrefix(
-      String fieldNamePrefix, Map<String, String> languageMap) {
-  
+  public static Map<String, String> normalizeStringMapByAddingPrefix(String fieldNamePrefix,
+      Map<String, String> languageMap) {
+
     if (MapUtils.isEmpty(languageMap)) {
       return new HashMap<>();
     }
-  
+
     Map<String, String> res;
-    if (!languageMap.keySet().iterator().next().contains(fieldNamePrefix)) {
-      res =
-          languageMap.entrySet().stream()
-              .collect(
-                  Collectors.toMap(entry -> fieldNamePrefix + entry.getKey(), Map.Entry::getValue));
-    } else {
+    if (languageMap.keySet().iterator().next().contains(fieldNamePrefix)) {
       res = languageMap;
+    } else {
+      res = languageMap.entrySet().stream().collect(
+          Collectors.toMap(entry -> fieldNamePrefix + entry.getKey(), Map.Entry::getValue));
     }
     return res;
   }

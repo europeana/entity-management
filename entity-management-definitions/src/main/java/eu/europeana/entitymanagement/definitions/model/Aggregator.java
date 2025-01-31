@@ -1,33 +1,6 @@
 package eu.europeana.entitymanagement.definitions.model;
 
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ACRONYM;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.AGGREGATED_VIA;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.AGGREGATES_FROM;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ALT_LABEL;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.COUNTRY;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DEPICTION;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DESCRIPTION;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.EUROPEANA_ROLE;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_HOMEPAGE;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_LOGO;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_MBOX;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_PHONE;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.GEOGRAPHIC_SCOPE;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_ADDRESS;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HERITAGE_DOMAIN;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HIDDEN_LABEL;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IDENTIFIER;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_AGGREGATED_BY;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.LANGUAGE;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PROVIDES_AUDIENCE_ENGAGEMENT_ACTIVITY;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PROVIDES_SUPPORT_FOR_BUILDING_ACTIVITY;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PROVIDES_SUPPORT_FOR_DATA_ACTIVITY;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PROVIDES_SUPPORT_FOR_MEDIA_TYPE;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 import java.util.ArrayList;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonGetter;
@@ -67,6 +40,9 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
   PROVIDES_SUPPORT_FOR_BUILDING_ACTIVITY,
   PROVIDES_AUDIENCE_ENGAGEMENT_ACTIVITY
 })
+/**
+ * Class implementing aggregator extension for organizations
+ */
 public class Aggregator extends Organization {
   protected String mbox;
   protected String geographicScope;
@@ -75,12 +51,19 @@ public class Aggregator extends Organization {
   protected List<String> providesSupportForDataActivity;
   protected List<String> providesCapacityBuildingActivity;
   protected List<String> providesAudienceEngagementActivity;
-    
+  
+  /**
+   * Public constructor
+   */
   public Aggregator() {
     super();
     type=EntityTypes.Aggregator.getEntityType();
   }
 
+  /**
+   * Public constructor creating a copy of the provided aggregator
+   * @param copy
+   */
   public Aggregator(Aggregator copy) {
     super(copy);
     this.type=copy.getType();
