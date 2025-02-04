@@ -351,23 +351,34 @@ public class BaseZohoAccess {
 
       Optional<EntityRecord> registeredRecord =
           performEntityRegistration(operation, zohoSyncReport, entitiesToUpdate);
-
       if (registeredRecord.isPresent()) {
         // entity successfully registered
         if (mustGenerateEuropeanaId) {
-          // entity registration submits Europeana ID to zoho
+          // entity registration submits new geenrated EuropeanaIDs to zoho
           zohoSyncReport.increaseSubmittedZohoEuropeanaId();
         }
-
-        if (mustGenerateEuropeanaId
-            && !registeredRecord.get().getEntityId().equals(beforeOperationZohoId)) {
-          throw new FunctionalRuntimeException(
-              "Organization registration should not update existing Org.ID in Zoho! Check logs for organization: "
-                  + operation.getZohoRecord().getId());
+        // verify that the organization ID was not changed if existed
+        if (beforeOperationZohoId != null) {
+          verifyOrgIdAfterRegistration(operation, registeredRecord, beforeOperationZohoId);
         }
+      } else {
+          // in case that the EntityRecord was not successfully created (record not available for further processing)
+          logger.warn("Organization registration was not completed! Check logs for organization: {}",
+              operation.getZohoRecord().getId());          
       }
     }
     return entitiesToUpdate;
+  }
+
+  void verifyOrgIdAfterRegistration(Operation operation, Optional<EntityRecord> registeredRecord,
+      String beforeOperationZohoId) {
+    String currentEntityId = registeredRecord.get().getEntityId();
+    if (beforeOperationZohoId != null && !currentEntityId.equals(beforeOperationZohoId)) {
+      throw new FunctionalRuntimeException(
+          "Organization registration should not update existing Org.ID in Zoho! Check logs for organization: "
+              + operation.getZohoRecord().getId() + " oldOrgId: " + beforeOperationZohoId
+              + " new OrgId: " + currentEntityId);
+    }
   }
 
   /**
@@ -476,9 +487,9 @@ public class BaseZohoAccess {
     List<EntityRecord> existingEntities =
         entityRecordService.findEntitiesByCoreference(allCorefs, (String) null, excludeDisabled);
 
-    if (logger.isDebugEnabled() && !existingEntities.isEmpty()) {
-      logger.debug("Found existing dupplicated organization with id: {} ",
-          EntityRecordUtils.getEntityIds(existingEntities));
+    if (logger.isInfoEnabled() && !existingEntities.isEmpty()) {
+      logger.info("Found existing dupplicated entity with id: {} for ZohoOrganization with id: {}",
+          EntityRecordUtils.getEntityIds(existingEntities), zohoOrganization.getAbout());
     }
     return existingEntities;
   }
