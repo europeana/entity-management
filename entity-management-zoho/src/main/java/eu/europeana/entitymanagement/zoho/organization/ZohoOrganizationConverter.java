@@ -4,6 +4,7 @@ import static eu.europeana.entitymanagement.zoho.utils.ZohoUtils.toIsoLanguage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -101,7 +102,7 @@ public class ZohoOrganizationConverter {
       org.setSameReferenceLinks(new ArrayList<>());  
     }
     org.getSameReferenceLinks().addAll(getAllSameAs(zohoRecord));
-
+ 
     // only set address if it contains metadata properties.
     if (address.hasMetadataProperties()) {
       address.setAbout(org.getAbout() + ZohoConstants.ADDRESS_ABOUT);
@@ -290,6 +291,16 @@ public class ZohoOrganizationConverter {
     if(keyValue instanceof Record) {
       return (Record)keyValue;
     }
+    
+    return null;
+  }
+  
+  public static HashMap<String, String> getPropertyMap(Record record, String fieldName) {
+    Object keyValue = record.getKeyValue(fieldName);
+    if(keyValue instanceof HashMap) {
+      return (HashMap)keyValue;
+    }
+    
     return null;
   }
    

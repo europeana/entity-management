@@ -574,29 +574,6 @@ public class BaseEntityRecordService {
       }
     }
   }
-  
-  protected void fillAggregatedViaWithOrgIds(Organization org) throws EntityUpdateException {
-    if (org.getAggregatedViaAggregatorUrls() != null && !org.getAggregatedViaAggregatorUrls().isEmpty()) {
-      List<String> aggregatorUrls = org.getAggregatedViaAggregatorUrls();
-      //search in the corefs
-      List<EntityRecord> entities = entityRecordRepository.findEntitiesByCoreference(aggregatorUrls, null, false);
-      List<String> entityIds = entities.stream().map(el -> el.getEntityId()).collect(Collectors.toList());
-      if(entityIds.isEmpty()) {
-        if (logger.isWarnEnabled()) {
-          logger.warn(
-              "No entities in the db with the sameAs having these aggregator urls: {}", aggregatorUrls);
-        }
-        /*
-         * if the aggregatedVia is still not set, this exception will cause the consolidation processor
-         * spring batch step to fail, resulting a the failed update task
-         */
-        throw new EntityUpdateException("The organization's aggregatedVia field is still not set"
-            + " and the update task need to be run again.");        
-      } else {
-        org.setAggregatedVia(entityIds);
-      }
-    }
-  }
 
   /**
    * Method used for entity consolidation
@@ -611,9 +588,6 @@ public class BaseEntityRecordService {
 
       // update role reference
       processRoleReference(org);
-      
-      //update aggregetedVia field
-      fillAggregatedViaWithOrgIds(org);
     }
   }
   

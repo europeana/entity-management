@@ -89,9 +89,9 @@ public class Organization extends Entity {
   @Transient 
   protected List<String> aggregatesFrom;
   protected List<String> aggregatedVia;
-  @Transient
-  @JsonIgnore
-  protected List<String> aggregatedViaAggregatorUrls;
+//  @Transient
+//  @JsonIgnore
+//  //protected List<String> aggregatedViaAggregatorUrls;
   
   protected List<String> language;
 
@@ -259,6 +259,13 @@ public class Organization extends Entity {
     this.aggregatedVia = aggregatedVia;
   }
   
+  public void addAggregatedVia(List<String> orgIds) {
+    if(aggregatedVia == null) {
+      aggregatedVia = new ArrayList<>();
+    }
+    this.aggregatedVia.addAll(orgIds);
+  }
+  
   @JsonIgnore
   public EntityRecord getCountryRef() {
     return countryRef;
@@ -337,11 +344,11 @@ public class Organization extends Entity {
     this.countryISO = countryISO;
   }
 
-  public List<String> getAggregatedViaAggregatorUrls() {
-    return aggregatedViaAggregatorUrls;
-  }
-
-  public void setAggregatedViaAggregatorUrls(List<String> aggregatedViaAggregatorUrls) {
-    this.aggregatedViaAggregatorUrls = aggregatedViaAggregatorUrls;
-  }
+//  public List<String> getAggregatedViaAggregatorUrls() {
+//    return aggregatedViaAggregatorUrls;
+//  }
+//
+//  public void setAggregatedViaAggregatorUrls(List<String> aggregatedViaAggregatorUrls) {
+//    this.aggregatedViaAggregatorUrls = aggregatedViaAggregatorUrls;
+//  }
 }

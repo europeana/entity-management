@@ -23,6 +23,7 @@ import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -32,6 +33,7 @@ import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.mongo.repository.ZohoSyncRepository;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
+import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.web.model.BatchOperations;
 import eu.europeana.entitymanagement.web.model.Operation;
@@ -411,7 +413,7 @@ public class BaseZohoAccess {
             "Dupplicate of :" + EntityRecordUtils.getEntityIds(existingEntities), null);
       } else {
         // create shell
-        Organization europeanaProxyEntity = new Organization();
+        Organization europeanaProxyEntity = EntityObjectFactory.createProxyEntityObject(zohoOrganization.getType());
         // set zoho URL
         europeanaProxyEntity.setAbout(zohoOrganization.getAbout());
 
@@ -434,13 +436,13 @@ public class BaseZohoAccess {
               zohoOrganization.getAbout(), savedEntityRecord.getEntityId());
         }
       }
-    } catch (EntityCreationException | UnsupportedEntityTypeException e) {
+    } catch (EntityModelCreationException | EntityCreationException | UnsupportedEntityTypeException e) {
       zohoSyncReport.addFailedOperation(zohoOrganization.getAbout(),
           ZohoSyncReportFields.CREATION_ERROR, "Entity registration failed.", e);
     } catch (RuntimeException e) {
       zohoSyncReport.addFailedOperation(zohoOrganization.getAbout(),
           ZohoSyncReportFields.CREATION_ERROR, e);
-    }
+    } 
 
     return res;
   }

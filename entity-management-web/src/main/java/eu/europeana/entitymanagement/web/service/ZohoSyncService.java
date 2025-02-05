@@ -47,7 +47,8 @@ public class ZohoSyncService extends BaseZohoAccess {
 
   public static final String ZOHO_SYNC_SLACK_TEMPLATE =
       "%d organisations in Zoho were synchronised with the following actions:\\n"
-          + "created: %d, updated: %d, deprecated: %d, undeprecated: %d, permanently deleted: %d, failed: %d";
+          + "created: %d, updated: %d, deprecated: %d, undeprecated: %d, permanently deleted: %d, failed: %d\\n"
+          + "%s";
   
   @Autowired
   public ZohoSyncService(EntityRecordService entityRecordService,

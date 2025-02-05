@@ -290,8 +290,7 @@ public class IntegrationTestUtils {
 
   /** Maps ZOHO organization:aggregator  to the linking mocked JSON responses */
   public static final Map<String, String> ZOHO_ORG_AGGREG_LINKING_RESPONSE_MAP =
-      Map.of(
-          String.format("%s:%s", ORGANIZATION_ARMA_NAME, ORGANIZATION_EUSKARIANA_NAME),
+      Map.of(ORGANIZATION_ARMA_NAME,
           LINKING_ARMA_EUSKARIANA_ZOHO_RESPONSE);
 
   /** Maps Metis dereferenciation URIs to mocked XML responses */
@@ -347,10 +346,9 @@ public class IntegrationTestUtils {
     }
   }
   
-  public static Optional<Record> searchZohoAggregatedViaModule(@NonNull String orgName, @NonNull String aggregName) throws Exception {
-    String orgAggregJoin = String.format("%s:%s", orgName, aggregName);
-    if(ZOHO_ORG_AGGREG_LINKING_RESPONSE_MAP.containsKey(orgAggregJoin)) {
-      String zohoResponseData = loadFile(ZOHO_ORG_AGGREG_LINKING_RESPONSE_MAP.get(orgAggregJoin));
+  public static Optional<Record> searchZohoAggregatedViaModule(@NonNull String orgName) throws Exception {
+    if(ZOHO_ORG_AGGREG_LINKING_RESPONSE_MAP.containsKey(orgName)) {
+      String zohoResponseData = loadFile(ZOHO_ORG_AGGREG_LINKING_RESPONSE_MAP.get(orgName));
       return Optional.ofNullable(zohoResponseObjectMapper.readValue(zohoResponseData, Record.class));
     }
     else {

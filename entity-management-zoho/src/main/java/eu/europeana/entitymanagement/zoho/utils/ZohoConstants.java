@@ -7,6 +7,7 @@ public final class ZohoConstants {
   public static final String ACCOUNTS_MODULE_API_NAME = "Accounts";
   public static final String ACCOUNTS_MODULE_NAME = "Accounts";
   public static final String AGGREGATORS_MODULE_NAME = "CustomModule1";
+  public static final String AGGREGATORS_API_MODULE_NAME = "Aggregators";
   public static final String AGGREGATED_VIA_FROM_MODULE_API_NAME = "Instituti_X_Aggregato";
   public static final String RELATED_RECORDS_MODULE_API_NAME = "Related_List_Label_1";
 
@@ -34,7 +35,6 @@ public final class ZohoConstants {
   public static final String ACRONYM_FIELD = "Acronym";
   public static final String LANG_ACRONYM_1_FIELD = "Lang_Acronym_1";
   public static final String ACRONYM_1_FIELD = "Alternative_Acronym_1";
-//  public static final String LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD = "Logo_link_to_WikimediaCommons";
   public static final String LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD = "Logo";
   public static final String WEBSITE_FIELD = "Website";
   public static final String SECTOR_FIELD = "Sector";
@@ -57,6 +57,8 @@ public final class ZohoConstants {
   public static final String HIDDEN_LABEL_FIELD = "Hidden_names";
   public static final String INDUSTRY_FIELD = "Industry_2";
   public static final String EUROPEANA_ID_FIELD = "Europeana_org_ID";
+  
+  //Aggregator related fields
   public static final String AGGREGATING_FROM = "Aggregating_from";
   public static final String AGGREGATORS = "Aggregators";
   public static final String PUBLIC_EMAIL = "Public_Email";
@@ -66,6 +68,7 @@ public final class ZohoConstants {
   public static final String DATA_ACTIVITY = "Data_Activity";
   public static final String CAPACITY_BUILDING = "Capacity_Building";
   public static final String AUDIENCE_ENGAGEMENT_ACTIVITY = "Audience_Engagement_Activity";
+  public static final String INSTITUTION_FIELD = "Insitution";
   
   // Operations
   /* 

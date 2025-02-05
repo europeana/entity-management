@@ -70,11 +70,11 @@ public class TestConfig {
         (Answer<Optional<Record>>)
             invocation -> {
               String orgName = invocation.getArgument(0);
-              String aggregName = invocation.getArgument(1);
-              return IntegrationTestUtils.searchZohoAggregatedViaModule(orgName, aggregName);
+              //String aggregName = invocation.getArgument(1);
+              return IntegrationTestUtils.searchZohoAggregatedViaModule(orgName);
             })
     .when(zohoClient)
-    .searchZohoAggregatedViaModule(ArgumentMatchers.any(String.class), ArgumentMatchers.any(String.class));
+    .searchZohoAggregatedViaModule(ArgumentMatchers.any(String.class));
 
     return zohoConfiguration;
   }

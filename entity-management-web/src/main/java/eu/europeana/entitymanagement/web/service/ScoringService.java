@@ -21,6 +21,7 @@ import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.exception.ScoringComputationException;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.model.scoring.EntityMetrics;
 import eu.europeana.entitymanagement.web.model.scoring.MaxEntityMetrics;
 import eu.europeana.entitymanagement.web.model.scoring.PageRank;
@@ -49,7 +50,12 @@ public class ScoringService {
   public EntityMetrics computeMetrics(Entity entity)
       throws ScoringComputationException {
     EntityMetrics metrics = new EntityMetrics(entity.getEntityId());
-    metrics.setEntityType(entity.getType());
+    String entityType = entity.getType();
+    if(EntityTypes.isOrganization(entityType)) {
+      //aggregators are treated as organization 
+      entityType = EntityTypes.Organization.getEntityType();
+    }
+    metrics.setEntityType(entityType);
     
     PageRank pr = getPageRank(entity);
     if (pr != null && pr.getPageRank() != null) {
