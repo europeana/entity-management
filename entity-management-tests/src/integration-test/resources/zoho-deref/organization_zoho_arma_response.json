@@ -19,7 +19,7 @@
 	"Subsector": "Museum",
 	"Alternative_3": null,
 	"Lang_Alternative_3": "ES(Spanish)",
-	"Aggregators": "Euskariana",
+	"Aggregators": "Euskariana,FAKE_AGG_FORCE_SEARCH",
 	"Alternative_2": "Museo de la Industria Armera",
 	"Lang_Alternative_4": null,
 	"Alternative_5": null,

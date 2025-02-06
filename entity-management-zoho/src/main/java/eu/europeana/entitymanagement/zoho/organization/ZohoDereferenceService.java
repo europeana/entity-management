@@ -153,8 +153,7 @@ public class ZohoDereferenceService implements Dereferencer {
           ZohoOrganizationConverter.getStringFieldValue(record, ZohoConstants.NAME_FIELD);
       Optional<Record> zohoAggregatorOrg =
           zohoConfiguration.getZohoAccessClient().searchZohoOrganizationByName(aggregName);
-      boolean searchByName = false;
-      if (searchByName && zohoAggregatorOrg.isPresent()) {
+      if (zohoAggregatorOrg.isPresent()) {
         europeanaId = ZohoOrganizationConverter.getStringFieldValue(zohoAggregatorOrg.get(),
             ZohoConstants.EUROPEANA_ID_FIELD);
         aggEuropeanaIDs.add(europeanaId);

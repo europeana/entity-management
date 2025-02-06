@@ -356,12 +356,6 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
     assertNotNull(response);
 
     /*
-     * 2. remove the entry from the map that mocks the zoho response for the organization
-     * with the name of the aggregator
-     */
-    IntegrationTestUtils.ZOHO_ORG_NAME_RESPONSE_MAP.remove(IntegrationTestUtils.ORGANIZATION_EUSKARIANA_NAME);
-    
-    /*
      * 3. register zoho Arma organization, which is aggregated via the previously registered
      * organization (Euskariana), and check the aggregatedVia field
      */
@@ -376,13 +370,6 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
     .andExpect(jsonPath("$.id", any(String.class)))
     .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
     .andExpect(jsonPath("$.aggregatedVia", hasSize(1)));
-    
-    /*
-     * 4. put back the removed entry from the map in step 2.
-     */
-    IntegrationTestUtils.ZOHO_ORG_NAME_RESPONSE_MAP.put(
-        IntegrationTestUtils.ORGANIZATION_EUSKARIANA_NAME, 
-        IntegrationTestUtils.ORGANIZATION_EUSKARIANA_ZOHO_RESPONSE);
 
   }
 

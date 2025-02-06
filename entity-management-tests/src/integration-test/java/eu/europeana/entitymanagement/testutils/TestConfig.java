@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.testutils;
 
+import java.util.List;
 import java.util.Optional;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
@@ -11,6 +12,7 @@ import org.springframework.context.annotation.Primary;
 import com.zoho.crm.api.record.Record;
 import eu.europeana.entitymanagement.zoho.ZohoAccessClient;
 import eu.europeana.entitymanagement.zoho.organization.ZohoConfiguration;
+import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 
 @TestConfiguration
@@ -51,8 +53,8 @@ public class TestConfig {
     Mockito.doAnswer(
         (Answer<Optional<Record>>)
             invocation -> {
-              String zohoUrl = invocation.getArgument(0);
-              return IntegrationTestUtils.searchZohoOrganizationByName(zohoUrl);
+              String orgName = invocation.getArgument(0);
+              return IntegrationTestUtils.searchZohoOrganizationByName(orgName);
             })
     .when(zohoClient)
     .searchZohoOrganizationByName(ArgumentMatchers.any(String.class));
@@ -67,7 +69,7 @@ public class TestConfig {
     .getZohoAggregatorByOrgUrl(ArgumentMatchers.any(String.class));
 
     Mockito.doAnswer(
-        (Answer<Optional<Record>>)
+        (Answer<List<Record>>)
             invocation -> {
               String orgName = invocation.getArgument(0);
               //String aggregName = invocation.getArgument(1);

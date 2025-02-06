@@ -2,7 +2,10 @@ package eu.europeana.entitymanagement.testutils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -13,6 +16,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.zoho.crm.api.record.Record;
+import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
 
 public class IntegrationTestUtils {
 
@@ -256,7 +260,10 @@ public class IntegrationTestUtils {
               new SimpleModule(
                   "SimpleModule",
                   Version.unknownVersion(),
-                  Map.of(Record.class, new ZohoRecordTestDeserializer())));
+                  Map.of(
+                      Record.class, new ZohoRecordTestDeserializer(),
+                      (new ArrayList<Record>()).getClass(), new ZohoRecordListTestDeserializer()
+                      )));
 
   /** Maps ZOHO organization URIs to mocked JSON responses */
   public static final Map<String, String> ZOHO_ORG_URL_RESPONSE_MAP =
@@ -346,13 +353,20 @@ public class IntegrationTestUtils {
     }
   }
   
-  public static Optional<Record> searchZohoAggregatedViaModule(@NonNull String orgName) throws Exception {
+  @SuppressWarnings("unchecked")
+  public static List<Record> searchZohoAggregatedViaModule(@NonNull String orgName) throws Exception {
     if(ZOHO_ORG_AGGREG_LINKING_RESPONSE_MAP.containsKey(orgName)) {
       String zohoResponseData = loadFile(ZOHO_ORG_AGGREG_LINKING_RESPONSE_MAP.get(orgName));
-      return Optional.ofNullable(zohoResponseObjectMapper.readValue(zohoResponseData, Record.class));
+      //TODO: update code to support multiple aggregators
+//      Record aggregatedVia = zohoResponseObjectMapper.readValue(zohoResponseData, Record.class);
+//      JsonParser jsonParser = zohoResponseObjectMapper.createParser(zohoResponseData);
+//      jsonParser.
+//      jsonParser.readValuesAs(Record.class)
+      List<Record> aggregatedViaList = zohoResponseObjectMapper.readValue(zohoResponseData, (new ArrayList<Record>()).getClass());
+      return ZohoOrganizationConverter.getAggregatorRecordsFromAggregatedVia(orgName, aggregatedViaList);
     }
     else {
-      return Optional.empty();
+      return Collections.emptyList();
     }
   }
     

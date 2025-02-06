@@ -51,7 +51,7 @@ import com.zoho.crm.api.record.Record;
 import com.zoho.crm.api.util.Choice;
 
 /** Helper class to deserialize JSON into Zoho {@link Record} to make testing easier */
-public class ZohoRecordTestDeserializer extends StdDeserializer<Record> {
+public class ZohoRecordTestDeserializer extends BaseZohoRecordDeserializer<Record> {
 
   /** */
   private static final long serialVersionUID = 7519475270154623735L;
@@ -107,55 +107,6 @@ public class ZohoRecordTestDeserializer extends StdDeserializer<Record> {
 
   @Override
   public Record deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-    JsonNode node = p.getCodec().readTree(p);
-    Record record = new Record();
-
-    for (String key : ZOHO_JSON_FIELDS) {
-      JsonNode currentNode = node.get(key);
-
-      if (currentNode == null) {
-        continue;
-      }
-
-      // JSON contains strings, arrays
-      if (currentNode.isTextual()) {
-        record.addKeyValue(key, currentNode.asText());
-      } else if (currentNode.isArray()) {
-        List<Choice<?>> values = new ArrayList<Choice<?>>();
-        currentNode.elements().forEachRemaining(v -> values.add(new Choice<String>(v.asText())));
-        record.addKeyValue(key, values);
-      }else if(currentNode.isObject()) {
-        System.out.println("object node: " + key);
-        if(AGGREGATORS.equals(key) || AGGREGATING_FROM.equals(key)) {
-          Record subRecord = new Record();  
-          subRecord.setId(currentNode.get(ID_FIELD).asLong());
-          subRecord.addKeyValue(NAME_FIELD, currentNode.get(NAME_FIELD));
-          record.addKeyValue(key, subRecord);
-        }
-      }else if (currentNode.isContainerNode()){
-        System.out.println("container node: " + key);
-      }else if(currentNode.isPojo()) {
-        System.out.println("pojo node: " + key);
-      } 
-    }
-
-    // add fields with numeric suffixes
-    addMultiField(node, record, ALTERNATIVE_FIELD, LANGUAGE_CODE_LENGTH);
-    addMultiField(node, record, LANG_ALTERNATIVE_FIELD, LANGUAGE_CODE_LENGTH);
-    addMultiField(node, record, SAME_AS_FIELD, SAME_AS_CODE_LENGTH);
-
-    // add ID
-    record.setId(node.get(ID_FIELD).asLong());
-
-    return record;
-  }
-
-  private void addMultiField(JsonNode node, Record record, String fieldName, int length) {
-    for (int i = 1; i <= length; i++) {
-      JsonNode currentNode = node.get(fieldName + "_" + i);
-      if (currentNode != null && currentNode.isTextual()) {
-        record.addKeyValue(fieldName + "_" + i, currentNode.asText());
-      }
-    }
+    return deserializeSingleRecord(p.getCodec().readTree(p));
   }
 }

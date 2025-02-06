@@ -1,5 +1,8 @@
 package eu.europeana.entitymanagement.zoho.organization;
 
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.AGGREGATING_FROM;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.AGGREGATORS;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.NAME_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoUtils.toIsoLanguage;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -295,8 +298,10 @@ public class ZohoOrganizationConverter {
     return null;
   }
   
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public static HashMap<String, String> getPropertyMap(Record record, String fieldName) {
-    Object keyValue = record.getKeyValue(fieldName);
+    Object keyValue =
+        record.getKeyValue(fieldName);
     if(keyValue instanceof HashMap) {
       return (HashMap)keyValue;
     }
@@ -323,5 +328,30 @@ public class ZohoOrganizationConverter {
       return ((Boolean) scheduledDeletion).booleanValue();
     }
   }
-  
+
+  public static List<Record> getAggregatorRecordsFromAggregatedVia(String orgName, List<Record> records) {
+    if(records == null || records.isEmpty()) {
+      return Collections.emptyList();
+    }
+    /*
+     * since the equals operator in zoho behaves like contains
+     * (https://www.zoho.com/crm/developer/docs/api/v7/search-records.html), we need to check the
+     * exact values
+     */
+    List<Record> res = new ArrayList<>(records.size());
+    System.out.println();
+    for (Record rec : records) {
+      Record aggregatingFrom = ZohoOrganizationConverter.getSubRecord(rec, AGGREGATING_FROM);
+      if (aggregatingFrom == null) {
+        continue;
+      }
+      String aggregatingFromName =
+          ZohoOrganizationConverter.getStringFieldValue(aggregatingFrom, NAME_FIELD);
+      if (orgName.equals(aggregatingFromName)) {
+        res.add(ZohoOrganizationConverter.getSubRecord(rec, AGGREGATORS));
+      }
+    }
+    return res;
+  }
+ 
 }

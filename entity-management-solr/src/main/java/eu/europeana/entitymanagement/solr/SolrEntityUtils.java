@@ -242,13 +242,11 @@ public class SolrEntityUtils {
   private static boolean isEnrichmentDisabled(EntityRecord record) {
     // entity is not consolidated, should not be index at this stage
     boolean notConsolidated = record.getEntity() == null || record.getEntity().getIsAggregatedBy() == null;
-    // check if flag is set to false
-    boolean noEnrichment = Boolean.FALSE.equals(record.getEntity().getIsAggregatedBy().getEnrich());
-    if (notConsolidated || noEnrichment) {
+    if(notConsolidated) {
       return true;
     }
-
-    return false;
+    // check if flag is set to false, noEnrichments
+    return Boolean.FALSE.equals(record.getEntity().getIsAggregatedBy().getEnrich());
   }
 
   private static void setMetricsAndFilters(
