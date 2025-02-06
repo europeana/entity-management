@@ -26,7 +26,6 @@ import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.dereference.Dereferencer;
 import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.zoho.ZohoAccessClient;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
@@ -34,7 +33,7 @@ import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 @Service
 public class ZohoDereferenceService implements Dereferencer {
 
-  private static final Logger LOGGER = LogManager.getLogger(ZohoAccessClient.class);
+  private static final Logger LOGGER = LogManager.getLogger(ZohoDereferenceService.class);
 
   private final ZohoConfiguration zohoConfiguration;
   private final EntityManagementConfiguration emConfig;
