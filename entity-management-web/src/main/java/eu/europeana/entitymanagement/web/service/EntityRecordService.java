@@ -1,6 +1,6 @@
 package eu.europeana.entitymanagement.web.service;
 
-import static eu.europeana.entitymanagement.solr.SolrUtils.createSolrEntity;
+import static eu.europeana.entitymanagement.solr.SolrEntityUtils.createSolrEntity;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getDatasourceAggregationId;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEuropeanaAggregationId;
 import static java.time.Instant.now;
@@ -465,7 +465,8 @@ public class EntityRecordService extends BaseEntityRecordService {
         datasourceResponse, dataSource, externalEntityId, isZohoOrg);
 
     // if new generated organization ID, store it in zoho
-    if (isZohoOrg && predefinedEntityId == null) {
+    // only if the update to Zoho is allowed
+    if (isZohoOrg && emConfiguration.isUpdateOrganizationEuropeanaId()  && predefinedEntityId == null) {
       // register first the EuropeanaID in Zoho
       updateEuropeanaIDFieldInZoho(externalEntityId, entityId);
     }
@@ -618,7 +619,8 @@ public class EntityRecordService extends BaseEntityRecordService {
 
   String generateEntityId(Entity datasourceResponse) throws UnsupportedEntityTypeException, EntityCreationException {
     // only in case of Zoho Organization use the provided id from de-referencing
-    return generateEntityId(EntityTypes.getByEntityType(datasourceResponse.getType()), null);
+    EntityTypes entityType = EntityTypes.getByEntityType(datasourceResponse.getType());
+    return generateEntityId(entityType, null);
   }
 
   List<String> buildSameAsReferenceLinks(String externalProxyId, Entity datasourceResponse,
@@ -662,8 +664,14 @@ public class EntityRecordService extends BaseEntityRecordService {
     if (entityId != null) {
       throw new EntityCreationException("Generation of organization ids based on zoho id is not supported anymore. Please verify entity:  " + entityId);
     } else {
-      long dbId = entityRecordRepository.generateAutoIncrement(entityType.getEntityType());
-      logger.info("New entity id generated in database /{}/{}", entityType, dbId);
+      String entityTypeString = entityType.getEntityType();
+      //aggregators are organizations, use parent type
+      if(entityType.getParentType() != null) {
+        entityTypeString = entityType.getParentType();
+      }
+      
+      long dbId = entityRecordRepository.generateAutoIncrement(entityTypeString);
+      logger.info("New entity id generated in database /{}/{}", entityTypeString, dbId);
       return EntityRecordUtils.buildEntityIdUri(entityType, String.valueOf(dbId));
     }
   }
@@ -687,6 +695,7 @@ public class EntityRecordService extends BaseEntityRecordService {
         performReferentialIntegrityTimespan((TimeSpan) entity);
         break;
       case Organization:
+      case Aggregator: 
         break;
       default:
         break;

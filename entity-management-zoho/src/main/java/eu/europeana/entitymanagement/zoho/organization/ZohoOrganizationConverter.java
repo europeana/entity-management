@@ -1,9 +1,13 @@
 package eu.europeana.entitymanagement.zoho.organization;
 
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.AGGREGATING_FROM;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.AGGREGATORS;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.NAME_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoUtils.toIsoLanguage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +18,7 @@ import org.springframework.lang.NonNull;
 import com.zoho.crm.api.record.Record;
 import com.zoho.crm.api.users.User;
 import eu.europeana.entitymanagement.definitions.model.Address;
+import eu.europeana.entitymanagement.definitions.model.Aggregator;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.definitions.model.ZohoLabelUriMapping;
@@ -27,11 +32,10 @@ public class ZohoOrganizationConverter {
 
   private static final String POSITION_SEPARATOR = "_";
   
-  public static Organization convertToOrganizationEntity(Record zohoRecord, String zohoBaseUrl,  @NonNull final Map<String, ZohoLabelUriMapping> countryMappings,
+  public static void fillOrganizationInfoFromZohoRecord(Organization org, Record zohoRecord, String zohoBaseUrl,  @NonNull final Map<String, ZohoLabelUriMapping> countryMappings,
       @NonNull final Map<String, String> roleMappings) {
-    Organization org = new Organization();
     Long zohoId = zohoRecord.getId();
-    org.setAbout(ZohoUtils.buildZohoOrganizationId(zohoBaseUrl, zohoRecord.getId()));
+    org.setAbout(ZohoUtils.buildZohoRecordUrl(zohoBaseUrl, zohoRecord.getId()));
     org.setIdentifier(List.of(Long.toString(zohoId)));
 
     // extract language maps
@@ -47,7 +51,13 @@ public class ZohoOrganizationConverter {
 
     String acronym = getStringFieldValue(zohoRecord, ZohoConstants.ACRONYM_FIELD);
     String langAcronym = getStringFieldValue(zohoRecord, ZohoConstants.LANG_ACRONYM_FIELD);
-    org.setAcronym(ZohoUtils.createLanguageMapOfStringList(langAcronym, acronym));
+    String acronym_1 = getStringFieldValue(zohoRecord, ZohoConstants.ACRONYM_1_FIELD);
+    String langAcronym_1 = getStringFieldValue(zohoRecord, ZohoConstants.LANG_ACRONYM_1_FIELD);
+    Map<String, List<String>> acronymMap = ZohoUtils.createLanguageMapOfStringList(langAcronym, acronym);
+    Map<String, List<String>> acronym_1_Map = ZohoUtils.createLanguageMapOfStringList(langAcronym_1, acronym_1);
+    Map<String, List<String>> acronymFinalMap = ZohoUtils.mergeMapsWithLists(acronymMap, acronym_1_Map);
+    org.setAcronym(acronymFinalMap);
+    
     String logoFieldName = ZohoConstants.LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD;
     org.setLogo(buildWebResource(zohoRecord, logoFieldName));
     org.setHomepage(getStringFieldValue(zohoRecord, ZohoConstants.WEBSITE_FIELD));
@@ -91,8 +101,11 @@ public class ZohoOrganizationConverter {
       }
     }
     
-    org.setSameReferenceLinks(getAllSameAs(zohoRecord));
-
+    if(org.getSameReferenceLinks()==null) {
+      org.setSameReferenceLinks(new ArrayList<>());  
+    }
+    org.getSameReferenceLinks().addAll(getAllSameAs(zohoRecord));
+ 
     // only set address if it contains metadata properties.
     if (address.hasMetadataProperties()) {
       address.setAbout(org.getAbout() + ZohoConstants.ADDRESS_ABOUT);
@@ -121,8 +134,37 @@ public class ZohoOrganizationConverter {
     if (hiddenLabels.size()>0) {
       org.setHiddenLabel(hiddenLabels);
     }
+  }
 
-    return org;
+  public static void fillAggregatorInfoFromZohoRecord(Aggregator aggregator, Record zohoRecord, String aggregatorBaseUrl) {
+    String mbox = getStringFieldValue(zohoRecord, ZohoConstants.PUBLIC_EMAIL);
+    aggregator.setMbox(mbox);
+    
+    String geogScope = getStringFieldValue(zohoRecord, ZohoConstants.GEOGRAPHIC_SCOPE);
+    aggregator.setGeographicScope(geogScope);
+    
+    List<String> heritDomain = ZohoUtils.stringListSupplier(zohoRecord.getKeyValue(ZohoConstants.HERITAGE_DOMAIN));
+    aggregator.setHeritageDomain(heritDomain);
+    
+    List<String> mediaType = ZohoUtils.stringListSupplier(zohoRecord.getKeyValue(ZohoConstants.MEDIA_TYPE));
+    aggregator.setProvidesSupportForMediaType(mediaType);
+
+    List<String> dataActivity = ZohoUtils.stringListSupplier(zohoRecord.getKeyValue(ZohoConstants.DATA_ACTIVITY));
+    aggregator.setProvidesSupportForDataActivity(dataActivity);
+
+    List<String> capacityBuilding = ZohoUtils.stringListSupplier(zohoRecord.getKeyValue(ZohoConstants.CAPACITY_BUILDING));
+    aggregator.setProvidesCapacityBuildingActivity(capacityBuilding);
+
+    List<String> audienceEngagementActivity = ZohoUtils.stringListSupplier(zohoRecord.getKeyValue(ZohoConstants.AUDIENCE_ENGAGEMENT_ACTIVITY));
+    aggregator.setProvidesAudienceEngagementActivity(audienceEngagementActivity);
+    
+    //store the aggregator url in the sameAs field of the org
+    if(aggregator.getSameReferenceLinks()==null) {
+      aggregator.setSameReferenceLinks(new ArrayList<>());  
+    }
+    String id = getStringFieldValue(zohoRecord, ZohoConstants.ID_FIELD);
+    String aggregatorUrl = ZohoUtils.buildZohoRecordUrl(aggregatorBaseUrl, Long.valueOf(id));
+    aggregator.getSameReferenceLinks().add(aggregatorUrl);
   }
 
   private static String extractCountryName(String zohoCountryLabel) {
@@ -247,6 +289,26 @@ public class ZohoOrganizationConverter {
     return ((User) keyValue).getName();
   }
   
+  public static Record getSubRecord(Record record, String fieldName) {
+    Object keyValue = record.getKeyValue(fieldName);
+    if(keyValue instanceof Record) {
+      return (Record)keyValue;
+    }
+    
+    return null;
+  }
+  
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  public static HashMap<String, String> getPropertyMap(Record record, String fieldName) {
+    Object keyValue =
+        record.getKeyValue(fieldName);
+    if(keyValue instanceof HashMap) {
+      return (HashMap)keyValue;
+    }
+    
+    return null;
+  }
+   
   /**
    * The method is to process the ZOHO_MODIFIED_BY_FIELD name value
    *
@@ -266,5 +328,30 @@ public class ZohoOrganizationConverter {
       return ((Boolean) scheduledDeletion).booleanValue();
     }
   }
-  
+
+  public static List<Record> getAggregatorRecordsFromAggregatedVia(String orgName, List<Record> records) {
+    if(records == null || records.isEmpty()) {
+      return Collections.emptyList();
+    }
+    /*
+     * since the equals operator in zoho behaves like contains
+     * (https://www.zoho.com/crm/developer/docs/api/v7/search-records.html), we need to check the
+     * exact values
+     */
+    List<Record> res = new ArrayList<>(records.size());
+    System.out.println();
+    for (Record rec : records) {
+      Record aggregatingFrom = ZohoOrganizationConverter.getSubRecord(rec, AGGREGATING_FROM);
+      if (aggregatingFrom == null) {
+        continue;
+      }
+      String aggregatingFromName =
+          ZohoOrganizationConverter.getStringFieldValue(aggregatingFrom, NAME_FIELD);
+      if (orgName.equals(aggregatingFromName)) {
+        res.add(ZohoOrganizationConverter.getSubRecord(rec, AGGREGATORS));
+      }
+    }
+    return res;
+  }
+ 
 }

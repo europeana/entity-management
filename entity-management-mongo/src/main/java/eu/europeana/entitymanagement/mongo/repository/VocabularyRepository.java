@@ -3,7 +3,8 @@ package eu.europeana.entitymanagement.mongo.repository;
 import static dev.morphia.query.filters.Filters.in;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 import dev.morphia.Datastore;
 import dev.morphia.query.filters.Filter;
@@ -14,13 +15,17 @@ import eu.europeana.entitymanagement.definitions.model.Vocabulary;
 @Repository(AppConfigConstants.BEAN_VOCABULARY_REPO)
 public class VocabularyRepository  {
   
-  @Resource(name = AppConfigConstants.BEAN_EM_DATA_STORE)
+  @Autowired
   Datastore datastore;
   
   private static final String ID = "id";
   
   private List<Vocabulary> europeanaRoles;
 
+  public VocabularyRepository(@Qualifier(AppConfigConstants.BEAN_EM_DATA_STORE) Datastore datastore) {
+    this.datastore = datastore;
+  }
+  
   public List<Vocabulary> getEuropeanaRoles() {
     synchronized(this) {
       if(europeanaRoles==null) {

@@ -48,6 +48,9 @@ europeana.searchapi.urlPrefix=https://<api_endpoint>/record/v2/search.json?wskey
 #enable/disable generation of entity ids for organizations (should be enabled only in productive environment)
 #zoho.generate.organization.europeanaid=false
 
+#enable/disable submission of organization IDS to Zoho (should be enabled only in productive environment)
+zoho.update.organization.europeanaid=false
+
 #offset (days before last sync) for fetching deleted organizations 
 #zoho.sync.delete.offset.days=0
 

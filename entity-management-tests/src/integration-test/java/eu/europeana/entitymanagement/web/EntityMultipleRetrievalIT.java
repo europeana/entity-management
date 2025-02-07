@@ -75,7 +75,7 @@ class EntityMultipleRetrievalIT extends BaseWebControllerTest {
     //register zoho GFM org with old id in sameAs
     String europeanaMetadata = loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_GFM_ZOHO_JSON);
     Optional<Record> zohoRecord =
-        IntegrationTestUtils.getZohoOrganizationRecord(
+        IntegrationTestUtils.getZohoOrganizationByUrl(
             IntegrationTestUtils.ORGANIZATION_GFM_URI_ZOHO);
     assert zohoRecord.isPresent() : "Mocked Zoho response not loaded";
     String entityId = createOrganization(europeanaMetadata, zohoRecord.get()).getEntityId();

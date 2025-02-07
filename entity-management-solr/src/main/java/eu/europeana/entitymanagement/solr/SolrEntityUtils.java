@@ -1,7 +1,12 @@
 package eu.europeana.entitymanagement.solr;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
+import eu.europeana.entitymanagement.definitions.model.Aggregator;
 import eu.europeana.entitymanagement.definitions.model.Concept;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -9,6 +14,7 @@ import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.definitions.model.TimeSpan;
 import eu.europeana.entitymanagement.solr.model.SolrAgent;
+import eu.europeana.entitymanagement.solr.model.SolrAggregator;
 import eu.europeana.entitymanagement.solr.model.SolrConcept;
 import eu.europeana.entitymanagement.solr.model.SolrEntity;
 import eu.europeana.entitymanagement.solr.model.SolrOrganization;
@@ -16,119 +22,101 @@ import eu.europeana.entitymanagement.solr.model.SolrPlace;
 import eu.europeana.entitymanagement.solr.model.SolrTimeSpan;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import org.apache.commons.collections.MapUtils;
 
 /**
  * This class implements supporting methods for Solr*Impl classes e.g. normalization of the content
  * to match to the required output format.
  */
-public class SolrUtils {
+public class SolrEntityUtils {
 
   public static final String SOLR_AGENT_SUGGESTER_FILTER = "solrAgentFilter";
   public static final String SOLR_ORGANIZATION_SUGGESTER_FILTER = "solrOrganizationFilter";
   public static final String SOLR_TIMESPAN_SUGGESTER_FILTER = "solrTimeSpanFilter";
   public static final String SOLR_PLACE_SUGGESTER_FILTER = "solrPlaceFilter";
   public static final String SOLR_CONCEPT_SUGGESTER_FILTER = "solrConceptFilter";
-
+  public static final int MAX_FILTERS = 3;
+  
   /**
-   * This method adds prefixes to the fields in format Map<String, List<String>> languageMap e.g.
-   * "skos_prefLabel"
-   *
-   * @param fieldNamePrefix e.g. ConceptSolrFields.PREF_LABEL
-   * @param languageMap e.g. prefLabel
-   * @return normalized content in format Map<String, List<String>>
+   * Hide default constructor
    */
-  public static Map<String, List<String>> normalizeStringListMapByAddingPrefix(
-      String fieldNamePrefix, Map<String, List<String>> languageMap) {
-    if (MapUtils.isEmpty(languageMap)) {
-      return new HashMap<>();
-    }
-    Map<String, List<String>> res;
-    if (!languageMap.keySet().iterator().next().contains(fieldNamePrefix)) {
-      res =
-          languageMap.entrySet().stream()
-              .collect(
-                  Collectors.toMap(entry -> fieldNamePrefix + entry.getKey(), Map.Entry::getValue));
-    } else {
-      res = languageMap;
-    }
-    return res;
-  }
-
-  /**
-   * This method adds prefixes to the fields in format Map<String, String> languageMap e.g.
-   * "skos_prefLabel"
-   *
-   * @param fieldNamePrefix e.g. ConceptSolrFields.PREF_LABEL
-   * @param languageMap e.g. prefLabel
-   * @return normalized content in format Map<String, String>
-   */
-  public static Map<String, String> normalizeStringMapByAddingPrefix(
-      String fieldNamePrefix, Map<String, String> languageMap) {
-
-    if (MapUtils.isEmpty(languageMap)) {
-      return new HashMap<>();
-    }
-
-    Map<String, String> res;
-    if (!languageMap.keySet().iterator().next().contains(fieldNamePrefix)) {
-      res =
-          languageMap.entrySet().stream()
-              .collect(
-                  Collectors.toMap(entry -> fieldNamePrefix + entry.getKey(), Map.Entry::getValue));
-    } else {
-      res = languageMap;
-    }
-    return res;
-  }
-
+  private SolrEntityUtils(){}
+  
   /**
    * Gets the {@link SolrEntity} class for an entity type.
    *
    * @param solrType entity type in Solr
    * @return SolrEntity class type
    */
-  @SuppressWarnings("unchecked")
-  public static <T extends Entity, U extends SolrEntity<T>> Class<U> getSolrEntityClass(
+  @SuppressWarnings("rawtypes")
+  public static Class<? extends SolrEntity> getSolrEntityClass(
       String solrType) {
-    if (solrType.equals(EntityTypes.Agent.getEntityType())) {
-      return (Class<U>) SolrAgent.class;
-    } else if (solrType.equals(EntityTypes.Concept.getEntityType())) {
-      return (Class<U>) SolrConcept.class;
-    } else if (solrType.equals(EntityTypes.Organization.getEntityType())) {
-      return (Class<U>) SolrOrganization.class;
-    } else if (solrType.equals(EntityTypes.Place.getEntityType())) {
-      return (Class<U>) SolrPlace.class;
-    } else if (solrType.equalsIgnoreCase(EntityTypes.TimeSpan.getEntityType())) {
-      return (Class<U>) SolrTimeSpan.class;
+    Class<? extends SolrEntity> solrEntityClass = null;
+    switch(EntityTypes.valueOf(solrType)) {
+      case Agent:
+        solrEntityClass = SolrAgent.class;
+        break;
+      case Concept:
+        solrEntityClass = SolrConcept.class;
+        break;
+      case Organization:
+        solrEntityClass = SolrOrganization.class;
+        break;
+      case Aggregator:
+        solrEntityClass = SolrAggregator.class;
+        break;
+      case Place:
+        solrEntityClass = SolrPlace.class;
+        break; 
+      case TimeSpan:
+        solrEntityClass = SolrTimeSpan.class;
+        break;
+      case ConceptScheme:
+        break;
+      default:
+        break;  
     }
 
-    throw new IllegalArgumentException(
-        String.format(
-            "Unrecognized entity type while determining Solr entity class: %s ", solrType));
+    if(solrEntityClass == null) {
+      throw new IllegalArgumentException(
+          String.format(
+              "Unrecognized entity type while determining Solr entity class: %s ", solrType));
+    }
+    
+    return solrEntityClass;
   }
 
+  /**
+   * Factory method to instantiate solr objects
+   * @param record the entity record
+   * @return the solr entity
+   */
   public static SolrEntity<? extends Entity> createSolrEntity(EntityRecord record) {
     final Entity entity = record.getEntity();
     SolrEntity<? extends Entity> solrEntity = null;
-    if (entity instanceof Agent) {
-      solrEntity = new SolrAgent((Agent) entity);
-    } else if (entity instanceof Concept) {
-      solrEntity = new SolrConcept((Concept) entity);
-    } else if (entity instanceof Organization) {
-      solrEntity = new SolrOrganization((Organization) entity);
-    } else if (entity instanceof Place) {
-      solrEntity = new SolrPlace((Place) entity);
-    } else if (entity instanceof TimeSpan) {
-      solrEntity = new SolrTimeSpan((TimeSpan) entity);
+    switch(EntityTypes.valueOf(entity.getType())) {
+      case Agent:
+        solrEntity = new SolrAgent((Agent) entity);
+        break;
+      case Concept:
+        solrEntity = new SolrConcept((Concept) entity);
+        break;
+      case Organization:
+        solrEntity = new SolrOrganization((Organization) entity);
+        break;
+      case Aggregator:
+        solrEntity = new SolrAggregator((Aggregator) entity);
+        break;
+      case Place:
+        solrEntity = new SolrPlace((Place) entity);
+        break; 
+      case TimeSpan:
+        solrEntity = new SolrTimeSpan((TimeSpan) entity);
+        break;
+      case ConceptScheme:
+        break;
+      default:
+        break;  
     }
-
     // All possible types have been checked
     if (solrEntity == null) {
       throw new IllegalArgumentException(
@@ -192,7 +180,7 @@ public class SolrUtils {
   private static Map<String, List<String>> collectLabelEnrich(EntityRecord record) {
     // collect values from prefLabel, altLabel, hiddenLabel acronym
     Entity entity = record.getEntity();
-    Map<String, List<String>> values = new HashMap<>();
+    Map<String, List<String>> values = new ConcurrentHashMap<>();
     if (entity == null) {
       return values;
     }
@@ -252,17 +240,13 @@ public class SolrUtils {
   }
 
   private static boolean isEnrichmentDisabled(EntityRecord record) {
-    if (record.getEntity() == null || record.getEntity().getIsAggregatedBy() == null) {
-      // entity is not consolidated, should not be index at this stage
+    // entity is not consolidated, should not be index at this stage
+    boolean notConsolidated = record.getEntity() == null || record.getEntity().getIsAggregatedBy() == null;
+    if(notConsolidated) {
       return true;
     }
-
-    // check if flag is set to false
-    if (Boolean.FALSE.equals(record.getEntity().getIsAggregatedBy().getEnrich())) {
-      return true;
-    }
-
-    return false;
+    // check if flag is set to false, noEnrichments
+    return Boolean.FALSE.equals(record.getEntity().getIsAggregatedBy().getEnrich());
   }
 
   private static void setMetricsAndFilters(
@@ -272,7 +256,6 @@ public class SolrUtils {
 
     if (aggregation != null) {
       solrEntity.setDocCount(aggregation.getRecordCount());
-      // TODO: change data types when solr schema will be updated
       if (aggregation.getPageRank() != null) {
         solrEntity.setPageRank(aggregation.getPageRank().floatValue());
       }
@@ -281,20 +264,19 @@ public class SolrUtils {
       }
     }
 
-    // NOTE:  Commented out as not supported in the MVP, needs to be re-assessed for future versions
-    //    EntityProxy europeanaProxy = record.getEuropeanaProxy();
-    //    if (europeanaProxy != null) {
-    //      // rights only set in Europeana proxy
-    //      solrEntity.setRights(List.of(europeanaProxy.getProxyIn().getRights()));
-    //    }
-
-    if (solrEntity.getDocCount() != null && solrEntity.getDocCount() > 0) {
-      // set type & in_europeana filter
-      solrEntity.setSuggestFilters(
-          Arrays.asList(solrEntity.getType(), EntitySolrFields.SUGGEST_FILTER_EUROPEANA));
-    } else {
-      // set type only
-      solrEntity.setSuggestFilters(List.of(solrEntity.getType()));
+    EntityTypes entityType = EntityTypes.valueOf(solrEntity.getType());
+    List<String> filters = new ArrayList<>(MAX_FILTERS); 
+    filters.add(entityType.getEntityType());
+    if(entityType.getParentType() != null) {
+      //add organization as type for Aggregators
+      filters.add(entityType.getParentType());
     }
+    
+    if (solrEntity.getDocCount() != null && solrEntity.getDocCount() > 0) {
+      //in_europeana filter
+      filters.add(EntitySolrFields.SUGGEST_FILTER_EUROPEANA);
+    } 
+    
+    solrEntity.setSuggestFilters(filters);
   }
 }

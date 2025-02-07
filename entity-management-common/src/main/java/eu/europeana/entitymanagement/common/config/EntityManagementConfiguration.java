@@ -160,6 +160,9 @@ public class EntityManagementConfiguration implements InitializingBean {
   @Value("${zoho.generate.organization.europeanaid: false}")
   private boolean generateOrganizationEuropeanaId;
   
+  @Value("${zoho.update.organization.europeanaid: false}")
+  private boolean updateOrganizationEuropeanaId;
+  
   @Value("${zoho.sync.register.deprecated: false}")
   private boolean registerDeprecated;
   
@@ -506,13 +509,17 @@ public class EntityManagementConfiguration implements InitializingBean {
   public String getSlackWebHook() {
     return slackWebHook;
   }
-
+ 
   public String getPrSolrZookeeperUrl() {
     return prSolrZookeeperUrl;
   }
 
   public String getPrSolrCollection() {
     return prSolrCollection;
+  }
+  
+  public boolean isUpdateOrganizationEuropeanaId() {
+    return updateOrganizationEuropeanaId;
   }
  
 }

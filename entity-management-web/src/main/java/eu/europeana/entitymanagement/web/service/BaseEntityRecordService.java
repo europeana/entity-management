@@ -578,8 +578,9 @@ public class BaseEntityRecordService {
   /**
    * Method used for entity consolidation
    * @param entity consolidated Entities to process reference fields
+   * @throws EntityUpdateException 
    */
-  public void processReferenceFields(Entity entity) {
+  public void processReferenceFields(Entity entity) throws EntityUpdateException {
     if (EntityTypes.isOrganization(entity.getType())) {
       Organization org = (Organization) entity;
       // update country reference

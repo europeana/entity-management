@@ -60,6 +60,7 @@ public abstract class XmlFields {
   public static final String XML_EDM_IS_NEXT_IN_SEQUENCE = "edm:isNextInSequence";
 
   public static final String XML_EDM_ORGANIZATION = "edm:Organization";
+  public static final String XML_EDM_AGGREGATOR = "edm:Aggregator";
   public static final String XML_EDM_ACRONYM = "edm:acronym";
   public static final String XML_DC_DESCRIPTION = "dc:description";
   public static final String XML_FOAF_LOGO = "foaf:logo";

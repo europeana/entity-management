@@ -37,6 +37,7 @@ import eu.europeana.entitymanagement.web.model.Operation;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReportFields;
 import eu.europeana.entitymanagement.zoho.organization.ZohoConfiguration;
+import eu.europeana.entitymanagement.zoho.organization.ZohoDereferenceService;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
@@ -46,16 +47,17 @@ public class ZohoSyncService extends BaseZohoAccess {
 
   public static final String ZOHO_SYNC_SLACK_TEMPLATE =
       "%d organisations in Zoho were synchronised with the following actions:\\n"
-          + "created: %d, updated: %d, deprecated: %d, undeprecated: %d, permanently deleted: %d, failed: %d";
+          + "created: %d, updated: %d, deprecated: %d, undeprecated: %d, permanently deleted: %d, failed: %d\\n"
+          + "%s";
   
   @Autowired
   public ZohoSyncService(EntityRecordService entityRecordService,
       EntityUpdateService entityUpdateService, EntityManagementConfiguration emConfiguration,
       DataSources datasources, ZohoConfiguration zohoConfiguration, 
-      ZohoSyncRepository zohoSyncRepo) {
+      ZohoSyncRepository zohoSyncRepo, ZohoDereferenceService zohoDereferenceService) {
 
     super(entityRecordService, entityUpdateService, emConfiguration, datasources, zohoConfiguration,
-        zohoSyncRepo);
+        zohoSyncRepo, zohoDereferenceService);
   }
 
   /**
@@ -314,7 +316,7 @@ public class ZohoSyncService extends BaseZohoAccess {
 
   String getZohoProxyId(EntityRecord entityRecord) {
     for (String proxyId : entityRecord.getExternalProxyIds()) {
-      if (proxyId.startsWith(zohoConfiguration.getZohoBaseUrl())) {
+      if (proxyId.startsWith(zohoConfiguration.getZohoBaseUrlOrganizations())) {
         return proxyId;
       }
     }

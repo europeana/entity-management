@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.solr.model;
 
 import eu.europeana.entitymanagement.definitions.model.Agent;
-import eu.europeana.entitymanagement.solr.SolrUtils;
+import eu.europeana.entitymanagement.utils.SolrGeneralUtils;
 import eu.europeana.entitymanagement.vocabulary.AgentSolrFields;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import java.util.ArrayList;
@@ -103,7 +103,7 @@ public class SolrAgent extends SolrEntity<Agent> {
     if (MapUtils.isNotEmpty(biographicalInformation)) {
       this.biographicalInformation =
           new HashMap<>(
-              SolrUtils.normalizeStringListMapByAddingPrefix(
+              SolrGeneralUtils.normalizeStringListMapByAddingPrefix(
                   AgentSolrFields.BIOGRAPHICAL_INFORMATION
                       + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
                   biographicalInformation));
@@ -114,7 +114,7 @@ public class SolrAgent extends SolrEntity<Agent> {
     if (MapUtils.isNotEmpty(name)) {
       this.name =
           new HashMap<>(
-              SolrUtils.normalizeStringMapByAddingPrefix(
+              SolrGeneralUtils.normalizeStringMapByAddingPrefix(
                   AgentSolrFields.NAME + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR, name));
     }
   }

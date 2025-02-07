@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.lang.NonNull;
 import com.zoho.api.authenticator.OAuthToken;
 import com.zoho.api.authenticator.OAuthToken.TokenType;
 import com.zoho.api.authenticator.Token;
@@ -41,11 +42,12 @@ import com.zoho.crm.api.record.RecordOperations.GetRecordsHeader;
 import com.zoho.crm.api.record.RecordOperations.GetRecordsParam;
 import com.zoho.crm.api.record.RecordOperations.SearchRecordsParam;
 import com.zoho.crm.api.record.ResponseHandler;
-import com.zoho.crm.api.record.ResponseWrapper;
 import com.zoho.crm.api.record.SuccessResponse;
+import com.zoho.crm.api.relatedrecords.RelatedRecordsOperations;
 import com.zoho.crm.api.util.APIResponse;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
-import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
+import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.*;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 
 public class ZohoAccessClient {
@@ -75,6 +77,7 @@ public class ZohoAccessClient {
    */
   public ZohoAccessClient(TokenStore tokenStore, String zohoEmail, String clientId,
       String clientSecret, String refreshToken, String redirectUrl) throws ZohoException {
+
     try {
       UserSignature userSignature = new UserSignature(zohoEmail);
       Token token =
@@ -99,21 +102,197 @@ public class ZohoAccessClient {
    * @return the retrieved zoho records
    * @throws ZohoException wrapping the original SDK exception
    */
-  public Optional<Record> getZohoRecordOrganizationById(String zohoUrl) throws ZohoException {
+  public Optional<Record> getZohoOrganizationByUrl(String zohoUrl) throws ZohoException {
     String zohoId = EntityRecordUtils.getIdentifierFromUrl(zohoUrl);
+    return getZohoOrganizationByRecordId(zohoId);
+  }
+
+  /**
+   * Get Zoho Organization by Aggregator's Zoho (record) ID For performance reasons consider first
+   * to use {@link #searchZohoOrganizationByName(String)}
+   * 
+   * @param aggregatorZohoId the Aggregator's Zoho (record) ID
+   * @return Zoho Organization as optional
+   * @throws ZohoException if the remote invocation of Zoho API fails
+   */
+  public Optional<Record> getZohoOrganizationForAggregator(String aggregatorZohoId)
+      throws ZohoException {
+    Optional<Record> zohoAggregator = getZohoAggregatorByRecordId(aggregatorZohoId);
+    if (zohoAggregator.isEmpty()) {
+      return Optional.empty();
+    }
+    System.out.println("test");
+    HashMap<String, String> aggInstitution =
+        ZohoOrganizationConverter.getPropertyMap(zohoAggregator.get(), INSTITUTION_FIELD);
+    if (aggInstitution == null || !aggInstitution.containsKey(ID_FIELD)) {
+      if(LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Cannot retrieve institution id from aggregator with id: {}", aggregatorZohoId);
+      }
+      return Optional.empty();
+    }
+
+    return getZohoOrganizationByRecordId(aggInstitution.get(ID_FIELD));
+  }
+
+  public Optional<Record> getZohoOrganizationByRecordId(String zohoId) throws ZohoException {
+    try {
+      RecordOperations recordOperations = new RecordOperations();
+      APIResponse<ResponseHandler> response =
+          recordOperations.getRecord(Long.valueOf(zohoId), ACCOUNTS_MODULE_API_NAME, null, null);
+      Optional<Record> res = getZohoRecords(response).stream().findFirst();
+      if (res.isEmpty() && LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Cannot retrieve aggregator by zoho record id: {}", zohoId);
+      }
+      return res;
+    } catch (SDKException e) {
+      throw convertToZohoException(e);
+    }
+  }
+
+  public Optional<Record> getZohoAggregatorByRecordId(String zohoId) throws ZohoException {
+    try {
+      RecordOperations recordOperations = new RecordOperations();
+      APIResponse<ResponseHandler> response =
+          recordOperations.getRecord(Long.valueOf(zohoId), AGGREGATORS_API_MODULE_NAME, null, null);
+      Optional<Record> res = getZohoRecords(response).stream().findFirst();
+      if (res.isEmpty() && LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Cannot retrieve aggregator by zoho record id: {}", zohoId);
+      }
+      return res;
+    } catch (SDKException e) {
+      throw convertToZohoException(e);
+    }
+  }
+
+  ZohoException convertToZohoException(SDKException e) {
+    return new ZohoException("Zoho search organization by organization id threw an exception", e);
+  }
+
+  /**
+   * Search orgnaizations in Zoho by name
+   * 
+   * @param orgName organization name
+   * @return zoho record as optional
+   * @throws ZohoException wrapping the original SDK exception
+   */
+  public Optional<Record> searchZohoOrganizationByName(@NonNull String orgName)
+      throws ZohoException {
     try {
       RecordOperations recordOperations = new RecordOperations();
       ParameterMap paramInstance = new ParameterMap();
-      paramInstance.add(SearchRecordsParam.CRITERIA,
-          String.format(ZohoConstants.ZOHO_OPERATION_FORMAT_STRING, ZohoConstants.ID_FIELD,
-              ZohoConstants.EQUALS_OPERATION, zohoId));
+      paramInstance.add(SearchRecordsParam.CRITERIA, String.format(ZOHO_OPERATION_FORMAT_STRING,
+          ACCOUNT_NAME_FIELD, EQUALS_OPERATION, orgName));
 
       APIResponse<ResponseHandler> response =
-          recordOperations.searchRecords(ZohoConstants.ACCOUNTS_MODULE_NAME, paramInstance);
-      return getZohoRecords(response).stream().findFirst();
+          recordOperations.searchRecords(ACCOUNTS_MODULE_API_NAME, paramInstance);
+      List<Record> records = getZohoRecords(response);
+      for (Record rec : records) {
+        /*
+         * since the equals operator in zoho behaves like contains
+         * (https://www.zoho.com/crm/developer/docs/api/v7/search-records.html), we need to check
+         * the exact name
+         */
+        String accountName = ZohoOrganizationConverter.getStringFieldValue(rec, ACCOUNT_NAME_FIELD);
+        if (orgName.equals(accountName)) {
+          return Optional.of(rec);
+        }
+      }
     } catch (SDKException e) {
-      throw new ZohoException("Zoho search organization by organization id threw an exception", e);
+      throw convertToZohoException(e);
     }
+    return Optional.empty();
+  }
+
+  /**
+   * Zoho records can have additional information in the related records like e.g. products, notes,
+   * attachments, aggregators, etc. In this case we use this method to get the aggregator
+   * information.
+   * 
+   * @param zohoUrl the organization's URL in Zoho
+   * @return zoho records as optional
+   * @throws ZohoException wrapping the original SDK exception
+   */
+  public Optional<Record> getZohoAggregatorByOrgUrl(String zohoUrl) throws ZohoException {
+    String zohoId = EntityRecordUtils.getIdentifierFromUrl(zohoUrl);
+    try {
+      // Get instance of RelatedRecordsOperations class that takes relatedListAPIName moduleAPIName
+      // as parameter
+      RelatedRecordsOperations relatedRecordsOperations = new RelatedRecordsOperations(
+          RELATED_RECORDS_MODULE_API_NAME, Long.valueOf(zohoId), ACCOUNTS_MODULE_API_NAME);
+      APIResponse<com.zoho.crm.api.relatedrecords.ResponseHandler> response =
+          relatedRecordsOperations.getRelatedRecords(null, null);
+
+      Optional<Record> res = getZohoRecords(response).stream().findFirst();
+      if (res.isEmpty() && LOGGER.isDebugEnabled()) {
+        LOGGER.debug("No aggregator found for zoho organization with id: {}", zohoId);
+      }
+      return res;
+    } catch (SDKException e) {
+      throw new ZohoException("Zoho get related records by organization id threw an exception", e);
+    }
+  }
+
+  /**
+   * Get the Linking records from the module for the aggregated_via/from (name: LinkingModule1).
+   * 
+   * @param orgName the name of the organization
+   * @return zoho aggregators subrecords from AggregatedVia module
+   * @throws ZohoException if zoho access fails
+   */
+  public List<Record> searchZohoAggregatedViaModule(@NonNull String orgName) throws ZohoException {
+    try {
+      RecordOperations recordOperations = new RecordOperations();
+      ParameterMap paramInstance = new ParameterMap();
+      String criteria =
+          String.format(ZOHO_OPERATION_FORMAT_STRING, AGGREGATING_FROM, EQUALS_OPERATION, orgName);
+      paramInstance.add(SearchRecordsParam.CRITERIA, criteria);
+
+      APIResponse<ResponseHandler> response =
+          recordOperations.searchRecords(AGGREGATED_VIA_FROM_MODULE_API_NAME, paramInstance);
+
+      List<Record> records = getZohoRecords(response);
+      return ZohoOrganizationConverter.getAggregatorRecordsFromAggregatedVia(orgName, records);
+    } catch (SDKException e) {
+      throw convertToZohoException(e);
+    }
+  }
+  
+  /**
+   * Extract records form Zoho API Response
+   * 
+   * @param <T> the type of the record in API response
+   * @param response the zoho api response
+   * @return the list of extracted records
+   * @throws ZohoException wrapping SDK exception
+   */
+  private <T> List<Record> getZohoRecords(APIResponse<T> response) throws ZohoException {
+    if (response == null) {
+      return Collections.emptyList();
+    }
+    final int FIRST_ERROR_CODE = 400;
+    if (response.getStatusCode() >= FIRST_ERROR_CODE) {
+      // handle error responses
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Zoho Error. Response Status: {}, response Headers:{}",
+            response.getStatusCode(), response.getHeaders());
+      }
+      throw new ZohoException("Zoho access error. Response code: " + response.getStatusCode());
+    }
+
+    if (response.isExpected()) {
+      // Get the object from response
+      T responseHandler = response.getObject();
+      if (responseHandler instanceof com.zoho.crm.api.relatedrecords.ResponseWrapper) {
+        com.zoho.crm.api.relatedrecords.ResponseWrapper responseWrapper =
+            (com.zoho.crm.api.relatedrecords.ResponseWrapper) responseHandler;
+        return responseWrapper.getData();
+      } else if (responseHandler instanceof com.zoho.crm.api.record.ResponseWrapper) {
+        com.zoho.crm.api.record.ResponseWrapper responseWrapper =
+            (com.zoho.crm.api.record.ResponseWrapper) responseHandler;
+        return responseWrapper.getData();
+      }
+    }
+    return Collections.emptyList();
   }
 
   /**
@@ -124,8 +303,9 @@ public class ZohoAccessClient {
    * @param fieldValue the new value
    * @throws ZohoException wrapping the original SDK exception
    */
-  public void updateZohoRecordOrganizationStringField(String zohoUrl, String fieldName,
+  public boolean updateZohoRecordOrganizationStringField(String zohoUrl, String fieldName,
       String fieldValue) throws ZohoException {
+
     String zohoId = EntityRecordUtils.getIdentifierFromUrl(zohoUrl);
     try {
       RecordOperations recordOperations = new RecordOperations();
@@ -133,13 +313,14 @@ public class ZohoAccessClient {
 
       // Call updateRecord method that takes recordId, ModuleAPIName and BodyWrapper instance as
       // parameter.
-      APIResponse<ActionHandler> response = recordOperations.updateRecord(Long.valueOf(zohoId),
-          ZohoConstants.ACCOUNTS_MODULE_NAME, request);
+      APIResponse<ActionHandler> response =
+          recordOperations.updateRecord(Long.valueOf(zohoId), ACCOUNTS_MODULE_API_NAME, request);
       // check if the update was successful
       validateZohoUpdateResponse(response);
     } catch (SDKException e) {
       throw new ZohoException("Zoho update the organization field threw an exception.", e);
     }
+    return true;
   }
 
   BodyWrapper buildUpdateRequest(String fieldName, String fieldValue) {
@@ -155,14 +336,15 @@ public class ZohoAccessClient {
   /**
    * Source: https://www.zoho.com/crm/developer/docs/java-sdk/v2/record-samples.html
    * 
-   * @throws ZohoException
+   * @param response zoho response
+   * @throws ZohoException wrapping SDK exception
    */
   private void validateZohoUpdateResponse(APIResponse<ActionHandler> response)
       throws ZohoException {
     if (response == null || !response.isExpected()) {
       // response is expected, if empty the update operation is not confirmed
-      throw new ZohoException(
-          "Unexpected response during updating a field in Zoho." + response.getStatusCode() + response.getObject());
+      throw new ZohoException("Unexpected response during updating a field in Zoho."
+          + response.getStatusCode() + response.getObject());
     } else {
       // Get object from response
       ActionHandler actionHandler = response.getObject();
@@ -171,7 +353,7 @@ public class ZohoAccessClient {
         throw new ZohoException(extractErrorMessage((APIException) actionHandler));
       } else if (actionHandler instanceof ActionWrapper) {
         verifyZohoConfirmationResponse(actionHandler);
-      }  
+      }
     }
   }
 
@@ -196,9 +378,10 @@ public class ZohoAccessClient {
         throw new ZohoException(message);
       } else {
         //
-        throw new ZohoException("Cannot process Zoho API Response, unknown response type: " + actionResponse);
+        throw new ZohoException(
+            "Cannot process Zoho API Response, unknown response type: " + actionResponse);
       }
-      
+
     }
   }
 
@@ -235,8 +418,8 @@ public class ZohoAccessClient {
       paramInstance.add(GetRecordsParam.PER_PAGE, pageSize);
       HeaderMap headerInstance = new HeaderMap();
       headerInstance.add(GetRecordsHeader.IF_MODIFIED_SINCE, modifiedDate);
-      response = recordOperations.getRecords(ZohoConstants.ACCOUNTS_MODULE_NAME, paramInstance,
-          headerInstance);
+      response =
+          recordOperations.getRecords(ACCOUNTS_MODULE_API_NAME, paramInstance, headerInstance);
 
       return getZohoRecords(response);
     } catch (SDKException e) {
@@ -261,19 +444,18 @@ public class ZohoAccessClient {
       searchCriteria = new HashMap<>();
     }
 
-    if (Objects.isNull(criteriaOperator)
-        || (!ZohoConstants.EQUALS_OPERATION.equals(criteriaOperator)
-            && !ZohoConstants.STARTS_WITH_OPERATION.equals(criteriaOperator))) {
-      criteriaOperator = ZohoConstants.EQUALS_OPERATION;
+    if (Objects.isNull(criteriaOperator) || (!EQUALS_OPERATION.equals(criteriaOperator)
+        && !STARTS_WITH_OPERATION.equals(criteriaOperator))) {
+      criteriaOperator = EQUALS_OPERATION;
     }
 
     String finalCriteriaOperator = criteriaOperator;
     return searchCriteria.entrySet().stream()
-        .map(entry -> Arrays.stream(entry.getValue().split(ZohoConstants.DELIMITER_COMMA))
-            .map(value -> String.format(ZohoConstants.ZOHO_OPERATION_FORMAT_STRING, entry.getKey(),
+        .map(entry -> Arrays.stream(entry.getValue().split(DELIMITER_COMMA))
+            .map(value -> String.format(ZOHO_OPERATION_FORMAT_STRING, entry.getKey(),
                 finalCriteriaOperator, value.trim()))
-            .collect(Collectors.joining(ZohoConstants.OR)))
-        .collect(Collectors.joining(ZohoConstants.OR));
+            .collect(Collectors.joining(OR)))
+        .collect(Collectors.joining(OR));
   }
 
   /**
@@ -297,15 +479,16 @@ public class ZohoAccessClient {
       paramInstance.add(GetDeletedRecordsParam.TYPE, "all"); // all, recycle, permanent
       paramInstance.add(GetDeletedRecordsParam.PAGE, 1);
       paramInstance.add(GetDeletedRecordsParam.PER_PAGE, pageSize);
-      Param<String> scopeParam = new Param<String>("scope", "com.zoho.crm.api.Record.GetDeletedRecordsParam");
+      Param<String> scopeParam =
+          new Param<String>("scope", "com.zoho.crm.api.Record.GetDeletedRecordsParam");
       paramInstance.add(scopeParam, "ZohoCRM.modules.ALL");
-      
+
       HeaderMap headersMap = new HeaderMap();
       if (modifiedSince != null) {
         headersMap.add(GetRecordsHeader.IF_MODIFIED_SINCE, modifiedSince);
       }
-      APIResponse<DeletedRecordsHandler> response = recordOperations
-          .getDeletedRecords(ZohoConstants.ACCOUNTS_MODULE_NAME, paramInstance, headersMap);
+      APIResponse<DeletedRecordsHandler> response =
+          recordOperations.getDeletedRecords(ACCOUNTS_MODULE_API_NAME, paramInstance, headersMap);
       return getZohoDeletedRecords(response);
     } catch (SDKException e) {
       throw new ZohoException("Cannot get deleted organization list from: " + startPage, e);
@@ -334,37 +517,4 @@ public class ZohoAccessClient {
     return m == null || m.isEmpty();
   }
 
-  /**
-   * Extract records from results
-   *
-   * @param response the zoho response
-   * @return the list of records available in results
-   * @throws ZohoException if zoho response indicates error codes
-   */
-  public static List<Record> getZohoRecords(APIResponse<ResponseHandler> response)
-      throws ZohoException {
-
-    if (response == null) {
-      return Collections.emptyList();
-    }
-    final int FIRST_ERROR_CODE = 400;
-    if (response.getStatusCode() >= FIRST_ERROR_CODE) {
-      // handle error responses
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Zoho Error. Response Status: {}, response Headers:{}",
-            response.getStatusCode(), response.getHeaders());
-      }
-      throw new ZohoException("Zoho access error. Response code: " + response.getStatusCode());
-    }
-
-    if (response.isExpected()) {
-      // Get the object from response
-      ResponseHandler responseHandler = response.getObject();
-      if (responseHandler instanceof ResponseWrapper) {
-        ResponseWrapper responseWrapper = (ResponseWrapper) responseHandler;
-        return responseWrapper.getData();
-      }
-    }
-    return Collections.emptyList();
-  }
 }

@@ -430,7 +430,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
     // id in JSON matches ORGANIZATION_BNF_URI_ZOHO value
     String europeanaMetadata = loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_GFM_ZOHO_JSON);
     Optional<Record> zohoRecord =
-        IntegrationTestUtils.getZohoOrganizationRecord(
+        IntegrationTestUtils.getZohoOrganizationByUrl(
             IntegrationTestUtils.ORGANIZATION_GFM_URI_ZOHO);
 
     assert zohoRecord.isPresent() : "Mocked Zoho response not loaded";
@@ -480,7 +480,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
     //2. register zoho GFM org
     europeanaMetadata = loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_GFM_ZOHO_JSON);
     Optional<Record> zohoRecord =
-        IntegrationTestUtils.getZohoOrganizationRecord(
+        IntegrationTestUtils.getZohoOrganizationByUrl(
             IntegrationTestUtils.ORGANIZATION_GFM_URI_ZOHO);
 
     assert zohoRecord.isPresent() : "Mocked Zoho response not loaded";
@@ -506,7 +506,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
   public void retrieveOrganizationJsonExternal() throws Exception {
     String europeanaMetadata = loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_GFM_ZOHO_JSON);
     Optional<Record> zohoRecord =
-        IntegrationTestUtils.getZohoOrganizationRecord(
+        IntegrationTestUtils.getZohoOrganizationByUrl(
             IntegrationTestUtils.ORGANIZATION_GFM_URI_ZOHO);
 
     assert zohoRecord.isPresent() : "Mocked Zoho response not loaded";
@@ -531,7 +531,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
     // id in JSON matches ORGANIZATION_BNF_URI_ZOHO value
     String europeanaMetadata = loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_BNF_ZOHO_JSON);
     Optional<Record> zohoRecord =
-        IntegrationTestUtils.getZohoOrganizationRecord(
+        IntegrationTestUtils.getZohoOrganizationByUrl(
             IntegrationTestUtils.ORGANIZATION_BNF_URI_ZOHO);
 
     assert zohoRecord.isPresent() : "Mocked Zoho response not loaded";
@@ -557,7 +557,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
     // id in JSON matches ORGANIZATION_GFM_URI_ZOHO value
     String europeanaMetadata = loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_GFM_ZOHO_JSON);
     Optional<Record> zohoRecord =
-        IntegrationTestUtils.getZohoOrganizationRecord(
+        IntegrationTestUtils.getZohoOrganizationByUrl(
             IntegrationTestUtils.ORGANIZATION_GFM_URI_ZOHO);
 
     assert zohoRecord.isPresent() : "Mocked Zoho response not loaded";
@@ -589,7 +589,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
     // id in JSON matches ORGANIZATION_BNF_URI_ZOHO value
     String europeanaMetadata = loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_BNF_ZOHO_JSON);
     Optional<Record> zohoRecord =
-        IntegrationTestUtils.getZohoOrganizationRecord(
+        IntegrationTestUtils.getZohoOrganizationByUrl(
             IntegrationTestUtils.ORGANIZATION_BNF_URI_ZOHO);
 
     assert zohoRecord.isPresent() : "Mocked Zoho response not loaded";

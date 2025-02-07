@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.solr.model;
 
+import static eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,10 +9,9 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.solr.client.solrj.beans.Field;
 import eu.europeana.entitymanagement.definitions.model.Address;
 import eu.europeana.entitymanagement.definitions.model.Organization;
-import eu.europeana.entitymanagement.solr.SolrUtils;
 import eu.europeana.entitymanagement.utils.EntityUtils;
+import eu.europeana.entitymanagement.utils.SolrGeneralUtils;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
-import static eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields.*;
 
 public class SolrOrganization extends SolrEntity<Organization> {
 
@@ -35,9 +35,6 @@ public class SolrOrganization extends SolrEntity<Organization> {
 
   @Field(FOAF_PHONE)
   private List<String> phone;
-
-  @Field(FOAF_MBOX)
-  private List<String> mbox;
 
   @Field(EUROPEANA_ROLE)
   private List<String> europeanaRole;
@@ -73,7 +70,6 @@ public class SolrOrganization extends SolrEntity<Organization> {
   private String hasGeo;
 
   public SolrOrganization() {
-    super();
   }
 
   public SolrOrganization(Organization organization) {
@@ -86,7 +82,6 @@ public class SolrOrganization extends SolrEntity<Organization> {
     }
     this.homepage = organization.getHomepage();
     this.phone = organization.getPhone();
-    if (organization.getMbox() != null) this.mbox = new ArrayList<>(organization.getMbox());
     
     if(organization.getEuropeanaRoleIds()!=null) this.europeanaRole=new ArrayList<>(organization.getEuropeanaRoleIds());
     
@@ -126,7 +121,7 @@ public class SolrOrganization extends SolrEntity<Organization> {
     if (MapUtils.isNotEmpty(dcDescription)) {
       this.description =
           new HashMap<>(
-              SolrUtils.normalizeStringMapByAddingPrefix(
+              SolrGeneralUtils.normalizeStringMapByAddingPrefix(
                   DC_DESCRIPTION + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
                   dcDescription));
     }
@@ -136,7 +131,7 @@ public class SolrOrganization extends SolrEntity<Organization> {
     if (MapUtils.isNotEmpty(acronym)) {
       this.acronym =
           new HashMap<>(
-              SolrUtils.normalizeStringListMapByAddingPrefix(
+              SolrGeneralUtils.normalizeStringListMapByAddingPrefix(
                   EDM_ACRONYM + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
                   acronym));
     }
@@ -160,10 +155,6 @@ public class SolrOrganization extends SolrEntity<Organization> {
 
   public List<String> getPhone() {
     return phone;
-  }
-
-  public List<String> getMbox() {
-    return mbox;
   }
 
   public List<String> getEuropeanaRole() {
@@ -223,7 +214,7 @@ public class SolrOrganization extends SolrEntity<Organization> {
       if (MapUtils.isNotEmpty(countryLabel)) {
         this.countryLabel =
             new HashMap<>(
-                SolrUtils.normalizeStringMapByAddingPrefix(
+                SolrGeneralUtils.normalizeStringMapByAddingPrefix(
                     COUNTRY_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
                     countryLabel));
       }

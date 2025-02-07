@@ -3,19 +3,29 @@ package eu.europeana.entitymanagement.vocabulary;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 
 public enum EntityTypes implements EntityKeyword {
-  Organization("Organization", "organization", "http://www.europeana.eu/schemas/edm/Organization"),
-  Concept("Concept", "concept", "https://www.w3.org/2009/08/skos-reference/skos.html#Concept"),
+  Organization("Organization", "organization", "http://www.europeana.eu/schemas/edm/Organization", null),
+  //must keep in sync the parent type of Aggregators to be Organization
+  Aggregator("Aggregator", "organization", "http://www.europeana.eu/schemas/edm/Aggregator", "Organization"),
+  Concept("Concept", "concept", "https://www.w3.org/2009/08/skos-reference/skos.html#Concept", null),
   ConceptScheme(
       "ConceptScheme",
       "scheme",
-      "https://www.w3.org/2009/08/skos-reference/skos.html#ConceptScheme"),
-  Agent("Agent", "agent", "http://www.europeana.eu/schemas/edm/Agent"),
-  Place("Place", "place", "http://www.europeana.eu/schemas/edm/Place"),
-  TimeSpan("TimeSpan", "timespan", "http://www.europeana.eu/schemas/edm/TimeSpan");
+      "https://www.w3.org/2009/08/skos-reference/skos.html#ConceptScheme", null),
+  Agent("Agent", "agent", "http://www.europeana.eu/schemas/edm/Agent", null),
+  Place("Place", "place", "http://www.europeana.eu/schemas/edm/Place", null),
+  TimeSpan("TimeSpan", "timespan", "http://www.europeana.eu/schemas/edm/TimeSpan", null);
 
   private String entityType;
   private String urlPath;
   private String httpUri;
+  private String parentType;
+
+  EntityTypes(String entityType, String urlPath, String uri, String parentType) {
+    this.entityType = entityType;
+    this.urlPath = urlPath;
+    this.httpUri = uri;
+    this.parentType = parentType;
+  }
 
   public String getEntityType() {
     return entityType;
@@ -24,31 +34,6 @@ public enum EntityTypes implements EntityKeyword {
   public String getUrlPath() {
     return urlPath;
   }
-
-  EntityTypes(String entityType, String stringForUrl, String uri) {
-    this.entityType = entityType;
-    this.urlPath = stringForUrl;
-    this.httpUri = uri;
-  }
-
-  @Deprecated
-  /**
-   * refactor to use value of
-   *
-   * @param entityType
-   * @return
-   */
-  public static boolean contains(String entityType) {
-
-    for (EntityTypes field : EntityTypes.values()) {
-      if (field.getEntityType().equalsIgnoreCase(entityType)) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
   /**
    * Check if an array of EntityTypes contains an Entity type
    *
@@ -75,17 +60,6 @@ public enum EntityTypes implements EntityKeyword {
     throw new UnsupportedEntityTypeException(entityType);
   }
 
-  public static EntityTypes getByEntityId(String entityId) throws UnsupportedEntityTypeException {
-
-    for (EntityTypes entityType : EntityTypes.values()) {
-      if (entityId.contains(String.format("/%s/", entityType.getUrlPath()))) {
-        return entityType;
-      }
-    }
-
-    throw new UnsupportedEntityTypeException(entityId);
-  }
-
   public String getHttpUri() {
     return httpUri;
   }
@@ -110,6 +84,11 @@ public enum EntityTypes implements EntityKeyword {
    * @return true if Organization
    */
   public static boolean isOrganization(String entityType) {
-    return EntityTypes.Organization.getEntityType().equals(entityType);
+    return EntityTypes.Organization.getEntityType().equalsIgnoreCase(entityType) ||
+        EntityTypes.Aggregator.getEntityType().equalsIgnoreCase(entityType);
+  }
+
+  public String getParentType() {
+    return parentType;
   }
 }

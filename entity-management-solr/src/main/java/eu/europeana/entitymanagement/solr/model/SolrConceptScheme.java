@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.solr.model;
 
 import eu.europeana.entitymanagement.definitions.model.ConceptScheme;
-import eu.europeana.entitymanagement.solr.SolrUtils;
+import eu.europeana.entitymanagement.utils.SolrGeneralUtils;
 import eu.europeana.entitymanagement.vocabulary.ConceptSchemeSolrFields;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import java.util.Date;
@@ -51,7 +51,7 @@ public class SolrConceptScheme {
     if (MapUtils.isNotEmpty(definition)) {
       this.definition =
           new HashMap<>(
-              SolrUtils.normalizeStringMapByAddingPrefix(
+              SolrGeneralUtils.normalizeStringMapByAddingPrefix(
                   ConceptSchemeSolrFields.DEFINITION + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
                   definition));
     }
@@ -61,7 +61,7 @@ public class SolrConceptScheme {
     if (MapUtils.isNotEmpty(prefLabel)) {
       this.prefLabel =
           new HashMap<>(
-              SolrUtils.normalizeStringMapByAddingPrefix(
+              SolrGeneralUtils.normalizeStringMapByAddingPrefix(
                   EntitySolrFields.PREF_LABEL_FIELD_NAME + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
                   prefLabel));
     }

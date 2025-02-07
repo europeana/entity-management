@@ -1,10 +1,19 @@
 package eu.europeana.entitymanagement.testutils;
 
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.ACCOUNT_NAME_FIELD;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.ACRONYM_1_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.ACRONYM_FIELD;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.AGGREGATING_FROM;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.AGGREGATORS;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.ALTERNATIVE_FIELD;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.AUDIENCE_ENGAGEMENT_ACTIVITY;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.CAPACITY_BUILDING;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.CITY_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.COUNTRY_FIELD;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.DATA_ACTIVITY;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.EUROPEANA_ID_FIELD;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.GEOGRAPHIC_SCOPE;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.HERITAGE_DOMAIN;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.HIDDEN_LABEL1_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.HIDDEN_LABEL2_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.HIDDEN_LABEL3_FIELD;
@@ -13,15 +22,19 @@ import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.HIDDEN_LABE
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.ID_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.INDUSTRY_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LANGUAGE_CODE_LENGTH;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LANG_ACRONYM_1_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LANG_ACRONYM_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LANG_ALTERNATIVE_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LANG_ORGANIZATION_NAME_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LATITUDE_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LONGITUDE_FIELD;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.MEDIA_TYPE;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.NAME_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.OFFICIAL_LANGUAGE_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.ORGANIZATION_ROLE_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.PO_BOX_FIELD;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.PUBLIC_EMAIL;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.SAME_AS_CODE_LENGTH;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.SAME_AS_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.STREET_FIELD;
@@ -38,7 +51,7 @@ import com.zoho.crm.api.record.Record;
 import com.zoho.crm.api.util.Choice;
 
 /** Helper class to deserialize JSON into Zoho {@link Record} to make testing easier */
-public class ZohoRecordTestDeserializer extends StdDeserializer<Record> {
+public class ZohoRecordTestDeserializer extends BaseZohoRecordDeserializer<Record> {
 
   /** */
   private static final long serialVersionUID = 7519475270154623735L;
@@ -55,6 +68,8 @@ public class ZohoRecordTestDeserializer extends StdDeserializer<Record> {
           LANG_ORGANIZATION_NAME_FIELD,
           LANG_ACRONYM_FIELD,
           ACRONYM_FIELD,
+          LANG_ACRONYM_1_FIELD,
+          ACRONYM_1_FIELD,
           LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD,
           WEBSITE_FIELD,
           STREET_FIELD,
@@ -70,7 +85,17 @@ public class ZohoRecordTestDeserializer extends StdDeserializer<Record> {
           HIDDEN_LABEL3_FIELD,
           HIDDEN_LABEL4_FIELD,
           HIDDEN_LABEL_FIELD,
-          INDUSTRY_FIELD);
+          INDUSTRY_FIELD,
+          HERITAGE_DOMAIN,
+          PUBLIC_EMAIL,
+          GEOGRAPHIC_SCOPE,
+          MEDIA_TYPE,
+          DATA_ACTIVITY,
+          AUDIENCE_ENGAGEMENT_ACTIVITY,
+          CAPACITY_BUILDING,
+          AGGREGATORS,
+          EUROPEANA_ID_FIELD,
+          AGGREGATING_FROM);
 
   public ZohoRecordTestDeserializer() {
     this(null);
@@ -82,49 +107,6 @@ public class ZohoRecordTestDeserializer extends StdDeserializer<Record> {
 
   @Override
   public Record deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-    JsonNode node = p.getCodec().readTree(p);
-    Record record = new Record();
-
-    for (String key : ZOHO_JSON_FIELDS) {
-      JsonNode currentNode = node.get(key);
-
-      if (currentNode == null) {
-        continue;
-      }
-
-      // JSON contains strings, arrays
-      if (currentNode.isTextual()) {
-        record.addKeyValue(key, currentNode.asText());
-      } else if (currentNode.isArray()) {
-        List<Choice<?>> values = new ArrayList<Choice<?>>();
-        currentNode.elements().forEachRemaining(v -> values.add(new Choice<String>(v.asText())));
-        record.addKeyValue(key, values);
-      }else if (currentNode.isContainerNode()){
-        System.out.println("container node: " + key);
-      }else if(currentNode.isPojo()) {
-        System.out.println("pojo node: " + key);
-      }else if(currentNode.isObject()) {
-        System.out.println("object node: " + key);
-      } 
-    }
-
-    // add fields with numeric suffixes
-    addMultiField(node, record, ALTERNATIVE_FIELD, LANGUAGE_CODE_LENGTH);
-    addMultiField(node, record, LANG_ALTERNATIVE_FIELD, LANGUAGE_CODE_LENGTH);
-    addMultiField(node, record, SAME_AS_FIELD, SAME_AS_CODE_LENGTH);
-
-    // add ID
-    record.setId(node.get(ID_FIELD).asLong());
-
-    return record;
-  }
-
-  private void addMultiField(JsonNode node, Record record, String fieldName, int length) {
-    for (int i = 1; i <= length; i++) {
-      JsonNode currentNode = node.get(fieldName + "_" + i);
-      if (currentNode != null && currentNode.isTextual()) {
-        record.addKeyValue(fieldName + "_" + i, currentNode.asText());
-      }
-    }
+    return deserializeSingleRecord(p.getCodec().readTree(p));
   }
 }

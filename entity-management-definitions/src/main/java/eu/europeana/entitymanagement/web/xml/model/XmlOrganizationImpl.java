@@ -23,7 +23,6 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_HOMEP
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IDENTIFIER;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_LANGUAGE;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_LOGO;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_MBOX;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ORGANIZATION;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PHONE;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_SAME_AS;
@@ -58,7 +57,6 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
       XML_LANGUAGE,
       XML_HOMEPAGE,
       XML_PHONE,
-      XML_MBOX,
       XML_HAS_ADDRESS,
       XML_AGGREGATED_VIA,
       IS_AGGREGATED_BY,
@@ -97,9 +95,6 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
 
   @XmlElement(namespace = NAMESPACE_FOAF, name = XML_PHONE)
   private List<String> phone;
-
-  @XmlElement(namespace = NAMESPACE_FOAF, name = XML_MBOX)
-  private List<String> mbox;
 
   @XmlElement(namespace = NAMESPACE_VCARD, name = XML_HAS_ADDRESS)
   private XmlAddresses hasAddress;
@@ -141,9 +136,6 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
     if (organization.getPhone() != null) {
       this.phone = new ArrayList<String>(organization.getPhone());
     }
-    if (organization.getMbox() != null) {
-      this.mbox = new ArrayList<String>(organization.getMbox());
-    }
     if (organization.getAddress() != null) {
       this.hasAddress = new XmlAddresses(List.of(new XmlAddressImpl(organization.getAddress())));
     }
@@ -176,7 +168,6 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
       entity.setHomepage(getHomepage().getResource());
     }
     entity.setPhone(getPhone());
-    entity.setMbox(getMbox());
     if (hasAddress != null
         && !CollectionUtils.isEmpty(hasAddress.getVcardAddressesList())
         && hasAddress.getVcardAddressesList().get(0).hasMetadataProperties()) {
@@ -219,10 +210,6 @@ public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
 
   public List<String> getPhone() {
     return phone;
-  }
-
-  public List<String> getMbox() {
-    return mbox;
   }
 
   public List<String> getIdentifier() {

@@ -150,9 +150,11 @@ public abstract class AbstractIntegrationTest {
     
     //overwrite default zoho properties
     registry.add("zoho.base.url", () -> TestConfig.MOCK_ZOHO_BASE_URL);
-    //tests must not register organizations as this is updating the zoho
-    //generate Europeana ID can be set to true when using the mock service, see TextConfig class 
+    //tests may register organizations but not update org ID in Zoho
+    //generate Europeana ID can be set to true when using the mock service, see TestConfig class 
     registry.add("zoho.generate.organization.europeanaid", () -> true);
+    //CAUTIION !!!!! do not update org ids in zoho
+    registry.add("zoho.update.organization.europeanaid", () -> false);
     
     registry.add("zoho.country.mapping", () -> "zoho_country_mapping_test.json");
     

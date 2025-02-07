@@ -3,8 +3,13 @@ package eu.europeana.entitymanagement.zoho.utils;
 public final class ZohoConstants {
 
   // Modules
-  public static final String CONTACTS_MODULE_NAME = "Contacts";
+  public static final String CONTACTS_MODULE_API_NAME = "Contacts";
+  public static final String ACCOUNTS_MODULE_API_NAME = "Accounts";
   public static final String ACCOUNTS_MODULE_NAME = "Accounts";
+  public static final String AGGREGATORS_MODULE_NAME = "CustomModule1";
+  public static final String AGGREGATORS_API_MODULE_NAME = "Aggregators";
+  public static final String AGGREGATED_VIA_FROM_MODULE_API_NAME = "Instituti_X_Aggregato";
+  public static final String RELATED_RECORDS_MODULE_API_NAME = "Related_List_Label_1";
 
   // Fields
   // Accounts is the equivalent to Organizations
@@ -28,7 +33,8 @@ public final class ZohoConstants {
   public static final String ALTERNATIVE_FIELD = "Alternative";
   public static final String LANG_ACRONYM_FIELD = "Lang_Acronym";
   public static final String ACRONYM_FIELD = "Acronym";
-//  public static final String LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD = "Logo_link_to_WikimediaCommons";
+  public static final String LANG_ACRONYM_1_FIELD = "Lang_Acronym_1";
+  public static final String ACRONYM_1_FIELD = "Alternative_Acronym_1";
   public static final String LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD = "Logo";
   public static final String WEBSITE_FIELD = "Website";
   public static final String SECTOR_FIELD = "Sector";
@@ -49,11 +55,27 @@ public final class ZohoConstants {
   public static final String HIDDEN_LABEL3_FIELD = "Hidden_3";
   public static final String HIDDEN_LABEL4_FIELD = "Hidden_4";
   public static final String HIDDEN_LABEL_FIELD = "Hidden_names";
-
   public static final String INDUSTRY_FIELD = "Industry_2";
   public static final String EUROPEANA_ID_FIELD = "Europeana_org_ID";
-
+  
+  //Aggregator related fields
+  public static final String AGGREGATING_FROM = "Aggregating_from";
+  public static final String AGGREGATORS = "Aggregators";
+  public static final String PUBLIC_EMAIL = "Public_Email";
+  public static final String GEOGRAPHIC_SCOPE = "Geographic_Scope";
+  public static final String HERITAGE_DOMAIN = "Heritage_Domain";
+  public static final String MEDIA_TYPE = "Media_Type";
+  public static final String DATA_ACTIVITY = "Data_Activity";
+  public static final String CAPACITY_BUILDING = "Capacity_Building";
+  public static final String AUDIENCE_ENGAGEMENT_ACTIVITY = "Audience_Engagement_Activity";
+  public static final String INSTITUTION_FIELD = "Insitution";
+  
   // Operations
+  /* 
+   * since the equals operator in zoho behaves like contains 
+   * (https://www.zoho.com/crm/developer/docs/api/v7/search-records.html), 
+   * we need to check the exact values in some cases (e.g. when equals use names which can overlap)
+   */
   public static final String EQUALS_OPERATION = "equals";
   public static final String STARTS_WITH_OPERATION = "starts_with";
 
@@ -61,6 +83,7 @@ public final class ZohoConstants {
   public static final String ZOHO_OPERATION_FORMAT_STRING = "(%s:%s:%s)";
   public static final String DELIMITER_COMMA = ",";
   public static final String OR = "OR";
+  public static final String AND = "and";
   public static final String UNDEFINED_LANGUAGE_KEY = "def";
 
   public static final int LANGUAGE_CODE_LENGTH = 5;

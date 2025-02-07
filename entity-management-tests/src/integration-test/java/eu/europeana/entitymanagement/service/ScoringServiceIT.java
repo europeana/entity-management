@@ -36,11 +36,8 @@ class ScoringServiceIT extends AbstractIntegrationTest {
     Agent agent = new Agent();
     String entityId = "http://data.europeana.eu/agent/146741";
     agent.setEntityId(entityId);
-    List<String> sameAs =
-        List.of(
-            "http://wikidata.dbpedia.org/resource/Q762",
-            "http://www.wikidata.org/entity/Q762",
-            "http://purl.org/collections/nl/am/p-10456");
+    List<String> sameAs = List.of("http://wikidata.dbpedia.org/resource/Q762",
+        "http://www.wikidata.org/entity/Q762", "http://purl.org/collections/nl/am/p-10456");
     agent.setSameReferenceLinks(sameAs);
 
     Map<String, String> prefLabels = new HashMap<String, String>();
@@ -54,14 +51,14 @@ class ScoringServiceIT extends AbstractIntegrationTest {
 
     assertEquals(entityId, metrics.getEntityId());
     assertEquals("Agent", metrics.getEntityType());
-    //  actual value = 304.6025939567319
+    // actual value = 304.6025939567319
     assertTrue(metrics.getPageRank() == 304);
     // value may increase in time, currently 807
     assertTrue(metrics.getEnrichmentCount() >= 0);
     // value may increase in time, for provided labels it is currently 2555
-    //  assertTrue(metrics.getHitCount() > 1000);
+    // assertTrue(metrics.getHitCount() > 1000);
 
-    //    assertTrue(metrics.getScore() > 970000);
+    // assertTrue(metrics.getScore() > 970000);
   }
 
   @Test
@@ -82,7 +79,7 @@ class ScoringServiceIT extends AbstractIntegrationTest {
 
     assertEquals(entityId, metrics.getEntityId());
     assertEquals("TimeSpan", metrics.getEntityType());
-    //  actual value = 575.xxx
+    // actual value = 575.xxx
     assertTrue(metrics.getPageRank() == 575);
     // value may increase in time, currently 598943
     assertTrue(metrics.getEnrichmentCount() == 175);
@@ -90,7 +87,7 @@ class ScoringServiceIT extends AbstractIntegrationTest {
     assertTrue(metrics.getScore() >= 1638965);
   }
 
-  //  @Test
+  // @Test
   @Disabled("Excluded from automated, the response mocking is implemented only for timespan")
   public void testComputeMetricsForPlaces() throws Exception {
 
@@ -111,14 +108,14 @@ class ScoringServiceIT extends AbstractIntegrationTest {
 
     assertEquals(entityId, metrics.getEntityId());
     assertEquals("Place", metrics.getEntityType());
-    //      actual value = 304.6025939567319
+    // actual value = 304.6025939567319
     assertTrue(metrics.getPageRank() == 0);
     // value may increase in time, currently
     assertTrue(metrics.getEnrichmentCount() == 0);
     // value may increase in time, for provided labelts it is currently 2555
-    //        assertTrue(metrics.getHitCount() > 2000000);
+    // assertTrue(metrics.getHitCount() > 2000000);
 
-    //    assertTrue(metrics.getScore() > 1085);
+    // assertTrue(metrics.getScore() > 1085);
   }
 
   @Test
@@ -128,13 +125,14 @@ class ScoringServiceIT extends AbstractIntegrationTest {
     assertNotNull(maxValues.maxValues(EntityTypes.Agent));
     assertNotNull(maxValues.maxValues(EntityTypes.Place));
     assertNotNull(maxValues.maxValues(EntityTypes.Concept));
+    // organizations include aggregators
     assertNotNull(maxValues.maxValues(EntityTypes.Organization));
     assertNotNull(maxValues.maxValues(EntityTypes.TimeSpan));
   }
 
   @Test
   public void testGetMaxOverallMetrics() throws Exception {
-    //  MaxEntityMetrics maxValues = scoringService.getMaxEntityMetrics();
+    // MaxEntityMetrics maxValues = scoringService.getMaxEntityMetrics();
     EntityMetrics maxValues = scoringService.getMaxOverallMetrics();
     assertNotNull(maxValues);
     assertEquals(48421, maxValues.getPageRank());

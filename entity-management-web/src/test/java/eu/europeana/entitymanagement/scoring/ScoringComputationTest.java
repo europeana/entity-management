@@ -32,6 +32,7 @@ public class ScoringComputationTest {
         createMetricsObject(EntityTypes.Place.getEntityType(), 24772, 3065416, 24576199));
     maxMetrics.addMetrics(
         createMetricsObject(EntityTypes.Concept.getEntityType(), 4055, 1448506, 8106790));
+    //organizations include aggregators 
     maxMetrics.addMetrics(
         createMetricsObject(EntityTypes.Organization.getEntityType(), 244, 1, 8977503));
     maxMetrics.addMetrics(
@@ -67,6 +68,7 @@ public class ScoringComputationTest {
     assertNotNull(maxMetrics.maxValues(EntityTypes.Agent));
     assertNotNull(maxMetrics.maxValues(EntityTypes.Place));
     assertNotNull(maxMetrics.maxValues(EntityTypes.Concept));
+  //organizations include aggregators
     assertNotNull(maxMetrics.maxValues(EntityTypes.Organization));
     assertNotNull(maxMetrics.maxValues(EntityTypes.TimeSpan));
   }

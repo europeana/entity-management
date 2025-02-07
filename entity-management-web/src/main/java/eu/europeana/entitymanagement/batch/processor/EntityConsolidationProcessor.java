@@ -101,6 +101,7 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
           entityRecordService.mergeEntities(europeanaProxyEntity, externalProxyEntity);
     }
 
+    //for the organizations update reference fields
     entityRecordService.processReferenceFields(consolidatedEntity);
 
     // add external proxyIds to sameAs / exactMatch
@@ -136,14 +137,13 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
   }
 
   /**
-   * Indicates if a depiction (isShownBy needs to be generated for the given entity)
+   * Indicates if a depiction (isShownBy) needs to be generated for the given entity
    *
    * @param consolidatedEntity
    * @return
    */
   boolean hasToGenerateDepiction(Entity consolidatedEntity) {
-    boolean isOrganization =
-        EntityTypes.Organization.getEntityType().equals(consolidatedEntity.getType());
+    boolean isOrganization = EntityTypes.isOrganization(consolidatedEntity.getType());
     return !isOrganization
         && consolidatedEntity.getIsShownBy() == null
         && consolidatedEntity.getDepiction() == null;

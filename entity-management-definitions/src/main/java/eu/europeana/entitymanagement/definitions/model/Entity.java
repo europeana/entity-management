@@ -46,6 +46,7 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
   @JsonSubTypes.Type(value = Agent.class, name = "Agent"),
   @JsonSubTypes.Type(value = Concept.class, name = "Concept"),
   @JsonSubTypes.Type(value = Organization.class, name = "Organization"),
+  @JsonSubTypes.Type(value = Aggregator.class, name = "Aggregator"),
   @JsonSubTypes.Type(value = Place.class, name = "Place"),
   @JsonSubTypes.Type(value = TimeSpan.class, name = "TimeSpan")
 })
@@ -57,7 +58,6 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
     groups = {EntityFieldsDataSourceProxyValidationGroup.class})
 public abstract class Entity implements ValidationObject {
 
-  
   @Transient
   protected String context = ENTITY_CONTEXT;
   protected String entityId;

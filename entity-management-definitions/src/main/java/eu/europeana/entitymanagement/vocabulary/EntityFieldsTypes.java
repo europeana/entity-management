@@ -7,6 +7,7 @@ import eu.europeana.entitymanagement.definitions.exceptions.EntityFieldAccessExc
  *
  * @author StevaneticS
  */
+@SuppressWarnings("java:S115")
 public enum EntityFieldsTypes {
 
   // General fields
@@ -111,12 +112,20 @@ public enum EntityFieldsTypes {
   homepage(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
   phone(
       EntityFieldsTypes.FIELD_TYPE_KEYWORD, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
-  mbox(EntityFieldsTypes.FIELD_TYPE_EMAIL, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
+  mbox(EntityFieldsTypes.FIELD_TYPE_EMAIL, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
   hasAddress(EntityFieldsTypes.FIELD_TYPE_ADDRESS, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
   //note: SG - aggregatesFrom is not stored, we should probably remove it from here 
 //  aggregatesFrom(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
   aggregatedVia(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
+  aggregatedViaAggregatorUrls(EntityFieldsTypes.FIELD_TYPE_URI, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
   
+  //Aggregator fields
+  geographicScope(EntityFieldsTypes.FIELD_TYPE_TEXT, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),
+  heritageDomain(EntityFieldsTypes.FIELD_TYPE_TEXT, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
+  providesSupportForMediaType(EntityFieldsTypes.FIELD_TYPE_TEXT, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
+  providesSupportForDataActivity(EntityFieldsTypes.FIELD_TYPE_TEXT, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
+  providesCapacityBuildingActivity(EntityFieldsTypes.FIELD_TYPE_TEXT, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),
+  providesAudienceEngagementActivity(EntityFieldsTypes.FIELD_TYPE_TEXT, false, EntityFieldsTypes.FIELD_CARDINALITY_0_INFINITE),  
 
   // Address-specific fields
   streetAddress(EntityFieldsTypes.FIELD_TYPE_TEXT, false, EntityFieldsTypes.FIELD_CARDINALITY_0_1),

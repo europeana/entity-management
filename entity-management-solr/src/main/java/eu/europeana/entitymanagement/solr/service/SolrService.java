@@ -3,31 +3,6 @@ package eu.europeana.entitymanagement.solr.service;
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_INDEXING_SOLR_CLIENT;
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_JSON_MAPPER;
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_SOLR_ENTITY_SUGGESTER_FILTER;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.ser.FilterProvider;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
-import eu.europeana.entitymanagement.definitions.model.Agent;
-import eu.europeana.entitymanagement.definitions.model.Concept;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.Organization;
-import eu.europeana.entitymanagement.definitions.model.Place;
-import eu.europeana.entitymanagement.definitions.model.TimeSpan;
-import eu.europeana.entitymanagement.solr.SolrEntitySuggesterMixins;
-import eu.europeana.entitymanagement.solr.SolrEntitySuggesterMixins.ConceptSuggesterMixin;
-import eu.europeana.entitymanagement.solr.SolrEntitySuggesterMixins.PlaceSuggesterMixin;
-import eu.europeana.entitymanagement.solr.SolrEntitySuggesterMixins.TimeSpanSuggesterMixin;
-import eu.europeana.entitymanagement.solr.SolrSearchCursorIterator;
-import eu.europeana.entitymanagement.solr.SolrUtils;
-import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
-import eu.europeana.entitymanagement.solr.model.SolrConceptScheme;
-import eu.europeana.entitymanagement.solr.model.SolrEntity;
-import eu.europeana.entitymanagement.solr.model.SolrOrganization;
-import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,6 +24,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
+import eu.europeana.entitymanagement.definitions.model.Agent;
+import eu.europeana.entitymanagement.definitions.model.Concept;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.definitions.model.Place;
+import eu.europeana.entitymanagement.definitions.model.TimeSpan;
+import eu.europeana.entitymanagement.solr.SolrEntitySuggesterMixins;
+import eu.europeana.entitymanagement.solr.SolrEntitySuggesterMixins.ConceptSuggesterMixin;
+import eu.europeana.entitymanagement.solr.SolrEntitySuggesterMixins.PlaceSuggesterMixin;
+import eu.europeana.entitymanagement.solr.SolrEntitySuggesterMixins.TimeSpanSuggesterMixin;
+import eu.europeana.entitymanagement.solr.SolrEntityUtils;
+import eu.europeana.entitymanagement.solr.SolrSearchCursorIterator;
+import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
+import eu.europeana.entitymanagement.solr.model.SolrConceptScheme;
+import eu.europeana.entitymanagement.solr.model.SolrEntity;
+import eu.europeana.entitymanagement.solr.model.SolrOrganization;
+import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 
 @Service(AppConfigConstants.BEAN_EM_SOLR_SERVICE)
 public class SolrService implements InitializingBean {
@@ -185,9 +184,9 @@ public class SolrService implements InitializingBean {
    * @return SolrEntity instance
    * @throws SolrServiceException if error occurs while executing query
    */
-  public <T extends Entity, U extends SolrEntity<T>> U searchById(
-      Class<U> classType, String entityId) throws SolrServiceException {
-
+  @SuppressWarnings("rawtypes")
+  public <T extends SolrEntity> T searchById(
+      Class<T> classType, String entityId) throws SolrServiceException {
     QueryResponse rsp;
     SolrQuery query = new SolrQuery();
     query.set("q", EntitySolrFields.ID + ":\"" + entityId + "\"");
@@ -283,7 +282,7 @@ public class SolrService implements InitializingBean {
 
       for (SolrDocument solrDocument : docList) {
         type = (String) solrDocument.get(EntitySolrFields.TYPE);
-        classType = SolrUtils.getSolrEntityClass(type);
+        classType = SolrEntityUtils.getSolrEntityClass(type);
         res.add((SolrEntity<Entity>) binder.getBean(classType, solrDocument));
       }
       return res;

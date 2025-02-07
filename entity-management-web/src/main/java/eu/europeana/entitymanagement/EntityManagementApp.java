@@ -68,6 +68,8 @@ public class EntityManagementApp implements CommandLineRunner {
       ScheduledTaskService scheduledTaskService = getScheduledTasksService(context);
       long notCompletedTasks = 0;
       boolean processingComplete = false;
+      int waitLoopCount = 0;
+      final int MAX_LOOPS_FOR_FAILED_TASKS = 3;
       do {
         //wait for execution of schedules tasks
         long currentRunningTasks = scheduledTaskService.getRunningTasksCount();
@@ -78,15 +80,18 @@ public class EntityManagementApp implements CommandLineRunner {
         
         //failed tasks will not complete, therefore not all scheduled tasks are marked as completed in the database
         //untill we have a better mechanism to reschedule failed tasks we wait for the next executions to mark them as complete
-        if (currentRunningTasks == 0 || currentRunningTasks == notCompletedTasks){
-          //if the open tasks is the same after waiting interval, than the processing is considered complete
-          //reseting currentRunningTasks is not needed anymore
+        if (currentRunningTasks == 0){
           processingComplete = true;
+          notCompletedTasks = currentRunningTasks;
+        } else if(currentRunningTasks == notCompletedTasks ) {
+          //if the open tasks is the same after waiting interval for 3 times, than the processing is considered complete
+          processingComplete = (waitLoopCount >= MAX_LOOPS_FOR_FAILED_TASKS);
+          waitLoopCount++;    
         } else {
           processingComplete = false;
           notCompletedTasks = currentRunningTasks;
         }
-
+        
         try {
           Thread.sleep(Duration.ofMinutes(WAITING_INTREVAL).toMillis());
         } catch (InterruptedException e) {

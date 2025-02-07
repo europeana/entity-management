@@ -23,7 +23,9 @@ import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
+import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
@@ -31,12 +33,14 @@ import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.mongo.repository.ZohoSyncRepository;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
+import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.web.model.BatchOperations;
 import eu.europeana.entitymanagement.web.model.Operation;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReportFields;
 import eu.europeana.entitymanagement.zoho.organization.ZohoConfiguration;
+import eu.europeana.entitymanagement.zoho.organization.ZohoDereferenceService;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 
@@ -44,19 +48,21 @@ public class BaseZohoAccess {
 
   static final Logger logger = LogManager.getLogger(BaseZohoAccess.class);
 
-  final EntityRecordService entityRecordService;
+  protected final EntityRecordService entityRecordService;
 
-  final EntityUpdateService entityUpdateService;
+  protected final EntityUpdateService entityUpdateService;
 
-  final EntityManagementConfiguration emConfiguration;
+  protected final EntityManagementConfiguration emConfiguration;
 
-  final DataSources datasources;
+  protected final DataSources datasources;
 
-  final DataSource zohoDataSource;
+  protected final DataSource zohoDataSource;
 
-  final ZohoConfiguration zohoConfiguration;
+  protected final ZohoConfiguration zohoConfiguration;
 
-  final ZohoSyncRepository zohoSyncRepo;
+  protected final ZohoSyncRepository zohoSyncRepo;
+
+  protected final ZohoDereferenceService zohoDereferenceService;
 
   /**
    * Constructor for service initialization
@@ -68,11 +74,12 @@ public class BaseZohoAccess {
    * @param zohoConfiguration zoho access configuration
    * @param solrService solr service
    * @param zohoSyncRepo repository for zoho sync logging
+   * @param zohoDereferenceService the service used to dereference zoho organizations
    */
   public BaseZohoAccess(EntityRecordService entityRecordService,
       EntityUpdateService entityUpdateService, EntityManagementConfiguration emConfiguration,
-      DataSources datasources, ZohoConfiguration zohoConfiguration,
-      ZohoSyncRepository zohoSyncRepo) {
+      DataSources datasources, ZohoConfiguration zohoConfiguration, ZohoSyncRepository zohoSyncRepo,
+      ZohoDereferenceService zohoDereferenceService) {
     this.entityRecordService = entityRecordService;
     this.entityUpdateService = entityUpdateService;
     this.emConfiguration = emConfiguration;
@@ -80,6 +87,7 @@ public class BaseZohoAccess {
     this.zohoConfiguration = zohoConfiguration;
     this.zohoDataSource = initZohoDataSource();
     this.zohoSyncRepo = zohoSyncRepo;
+    this.zohoDereferenceService = zohoDereferenceService;
   }
 
   protected DataSource initZohoDataSource() {
@@ -223,7 +231,8 @@ public class BaseZohoAccess {
   }
 
   String generateZohoOrganizationUrl(Long zohoRecordId) {
-    return ZohoUtils.buildZohoOrganizationId(zohoConfiguration.getZohoBaseUrl(), zohoRecordId);
+    return ZohoUtils.buildZohoRecordUrl(zohoConfiguration.getZohoBaseUrlOrganizations(),
+        zohoRecordId);
   }
 
   private void performDeprecation(ZohoSyncReport zohoSyncReport, Operation operation) {
@@ -344,23 +353,34 @@ public class BaseZohoAccess {
 
       Optional<EntityRecord> registeredRecord =
           performEntityRegistration(operation, zohoSyncReport, entitiesToUpdate);
-
       if (registeredRecord.isPresent()) {
         // entity successfully registered
         if (mustGenerateEuropeanaId) {
-          // entity registration submits Europeana ID to zoho
+          // entity registration submits new geenrated EuropeanaIDs to zoho
           zohoSyncReport.increaseSubmittedZohoEuropeanaId();
         }
-
-        if (mustGenerateEuropeanaId
-            && !registeredRecord.get().getEntityId().equals(beforeOperationZohoId)) {
-          throw new FunctionalRuntimeException(
-              "Organization registration should not update existing Org.ID in Zoho! Check logs for organization: "
-                  + operation.getZohoRecord().getId());
+        // verify that the organization ID was not changed if existed
+        if (beforeOperationZohoId != null) {
+          verifyOrgIdAfterRegistration(operation, registeredRecord, beforeOperationZohoId);
         }
+      } else {
+          // in case that the EntityRecord was not successfully created (record not available for further processing)
+          logger.warn("Organization registration was not completed! Check logs for organization: {}",
+              operation.getZohoRecord().getId());          
       }
     }
     return entitiesToUpdate;
+  }
+
+  void verifyOrgIdAfterRegistration(Operation operation, Optional<EntityRecord> registeredRecord,
+      String beforeOperationZohoId) {
+    String currentEntityId = registeredRecord.get().getEntityId();
+    if (beforeOperationZohoId != null && !currentEntityId.equals(beforeOperationZohoId)) {
+      throw new FunctionalRuntimeException(
+          "Organization registration should not update existing Org.ID in Zoho! Check logs for organization: "
+              + operation.getZohoRecord().getId() + " oldOrgId: " + beforeOperationZohoId
+              + " new OrgId: " + currentEntityId);
+    }
   }
 
   /**
@@ -372,12 +392,19 @@ public class BaseZohoAccess {
    */
   private Optional<EntityRecord> performEntityRegistration(Operation operation,
       ZohoSyncReport zohoSyncReport, List<String> entitiesToUpdate) {
-    Organization zohoOrganization = ZohoOrganizationConverter.convertToOrganizationEntity(
-        operation.getZohoRecord(), zohoConfiguration.getZohoBaseUrl(),
-        emConfiguration.getCountryMappings(), emConfiguration.getRoleMappings());
 
+    // dereference organization
     Optional<EntityRecord> res = Optional.empty();
+    Long zohoId = operation.getZohoRecord().getId();
+    Organization zohoOrganization = dereferenceFullOrganization(zohoId);
+    if (zohoOrganization == null) {
+      // should not happen, except for wrong configurations
+      zohoSyncReport.addFailedOperation(zohoId.toString(), "Cannot dereference organization",
+          "operation.getZohoRecord().getId() :" + zohoId, null);
+      return res;
+    }
 
+    // perform registration
     try {
       List<EntityRecord> existingEntities = findDupplicateOrganization(operation, zohoOrganization);
       if (!existingEntities.isEmpty()) {
@@ -386,7 +413,7 @@ public class BaseZohoAccess {
             "Dupplicate of :" + EntityRecordUtils.getEntityIds(existingEntities), null);
       } else {
         // create shell
-        Organization europeanaProxyEntity = new Organization();
+        Organization europeanaProxyEntity = EntityObjectFactory.createProxyEntityObject(zohoOrganization.getType());
         // set zoho URL
         europeanaProxyEntity.setAbout(zohoOrganization.getAbout());
 
@@ -409,15 +436,27 @@ public class BaseZohoAccess {
               zohoOrganization.getAbout(), savedEntityRecord.getEntityId());
         }
       }
-    } catch (EntityCreationException | UnsupportedEntityTypeException e) {
+    } catch (EntityModelCreationException | EntityCreationException | UnsupportedEntityTypeException e) {
       zohoSyncReport.addFailedOperation(zohoOrganization.getAbout(),
           ZohoSyncReportFields.CREATION_ERROR, "Entity registration failed.", e);
     } catch (RuntimeException e) {
       zohoSyncReport.addFailedOperation(zohoOrganization.getAbout(),
           ZohoSyncReportFields.CREATION_ERROR, e);
-    }
+    } 
 
     return res;
+  }
+
+  Organization dereferenceFullOrganization(Long zohoId) {
+    try {
+      Optional<Entity> orgOptional = zohoDereferenceService.dereferenceOrganizationByZohoRecordId(zohoId);
+      if (orgOptional.isPresent()) {
+        return (Organization) orgOptional.get();
+      } 
+    } catch (Exception e) {
+      logger.warn("Cannot dereference organization by zoho record id: {}", zohoId, e);
+    }
+    return null;
   }
 
   List<EntityRecord> findDupplicateOrganization(Operation operation,
@@ -450,9 +489,9 @@ public class BaseZohoAccess {
     List<EntityRecord> existingEntities =
         entityRecordService.findEntitiesByCoreference(allCorefs, (String) null, excludeDisabled);
 
-    if (logger.isDebugEnabled() && !existingEntities.isEmpty()) {
-      logger.debug("Found existing dupplicated organization with id: {} ",
-          EntityRecordUtils.getEntityIds(existingEntities));
+    if (logger.isInfoEnabled() && !existingEntities.isEmpty()) {
+      logger.info("Found existing dupplicated entity with id: {} for ZohoOrganization with id: {}",
+          EntityRecordUtils.getEntityIds(existingEntities), zohoOrganization.getAbout());
     }
     return existingEntities;
   }
@@ -488,8 +527,8 @@ public class BaseZohoAccess {
     List<String> deletedEntityIds = new ArrayList<String>();
     // get the id list from Zoho deleted Record
     if (!deletedInZoho.isEmpty()) {
-      deletedInZoho.forEach(deletedRecord -> deletedEntityIds
-          .add(generateZohoOrganizationUrl(deletedRecord.getId())
+      deletedInZoho.forEach(
+          deletedRecord -> deletedEntityIds.add(generateZohoOrganizationUrl(deletedRecord.getId())
           // EntityRecordUtils.
           // buildEntityIdUri(
           // EntityTypes.Organization, deletedRecord.getId().toString())

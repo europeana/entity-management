@@ -1,7 +1,10 @@
 package eu.europeana.entitymanagement.solr;
 
-import static eu.europeana.entitymanagement.solr.SolrUtils.*;
-
+import static eu.europeana.entitymanagement.solr.SolrEntityUtils.SOLR_AGENT_SUGGESTER_FILTER;
+import static eu.europeana.entitymanagement.solr.SolrEntityUtils.SOLR_CONCEPT_SUGGESTER_FILTER;
+import static eu.europeana.entitymanagement.solr.SolrEntityUtils.SOLR_ORGANIZATION_SUGGESTER_FILTER;
+import static eu.europeana.entitymanagement.solr.SolrEntityUtils.SOLR_PLACE_SUGGESTER_FILTER;
+import static eu.europeana.entitymanagement.solr.SolrEntityUtils.SOLR_TIMESPAN_SUGGESTER_FILTER;
 import com.fasterxml.jackson.annotation.JsonFilter;
 
 /**

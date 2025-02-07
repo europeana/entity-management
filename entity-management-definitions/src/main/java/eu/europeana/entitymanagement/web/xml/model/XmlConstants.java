@@ -78,6 +78,7 @@ public final class XmlConstants extends XmlFields {
   public static final String XML_IS_NEXT_IN_SEQUENCE = "isNextInSequence";
 
   public static final String XML_ORGANIZATION = "Organization";
+  public static final String XML_AGGREGATOR = "Aggregator";
   public static final String XML_ACRONYM = "acronym";
   public static final String XML_DESCRIPTION = "description";
   public static final String XML_LOGO = "logo";
@@ -90,6 +91,12 @@ public final class XmlConstants extends XmlFields {
   public static final String XML_LANGUAGE = "language";
   public static final String XML_AGGREGATES_FROM = "aggregatesFrom";
   public static final String XML_AGGREGATED_VIA = "aggregatedVia";
+  public static final String XML_GEOGRAPHIC_SCOPE = "geographicScope";
+  public static final String XML_HERITAGE_DOMAIN = "heritageDomain";
+  public static final String XML_PROVIDES_SUPPORT_FOR_MEDIA_TYPE = "providesSupportForMediaType";
+  public static final String XML_PROVIDES_SUPPORT_FOR_DATA_ACTIVITY = "providesSupportForDataActivity";
+  public static final String XML_PROVIDES_CAPACITY_BUILDING_ACTIVITY = "providesCapacityBuildingActivity";
+  public static final String XML_PROVIDES_AUDIENCE_ENGAGEMENT_ACTIVITY = "providesAudienceEngagementActivity";
 
   public static final String XML_ADDRESS = "Address";
   public static final String XML_STREET_ADDRESS = "street-address";

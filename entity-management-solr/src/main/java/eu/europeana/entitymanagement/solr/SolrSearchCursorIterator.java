@@ -98,12 +98,13 @@ public class SolrSearchCursorIterator {
         .collect(Collectors.toList());
   }
 
+  @SuppressWarnings("unchecked")
   private <T extends Entity> SolrEntity<T> convertFromSolrDoc(SolrDocument solrDocument) {
 
     Object fieldValue = solrDocument.getFieldValue(EntitySolrFields.TYPE);
     Assert.notNull(fieldValue, "Solr document type cannot be empty");
 
-    return objectBinder.getBean(SolrUtils.getSolrEntityClass(fieldValue.toString()), solrDocument);
+    return objectBinder.getBean(SolrEntityUtils.getSolrEntityClass(fieldValue.toString()), solrDocument);
   }
 
   /**

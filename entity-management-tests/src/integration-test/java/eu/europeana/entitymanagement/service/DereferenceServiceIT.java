@@ -19,6 +19,8 @@ import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.dereference.Dereferencer;
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
 import eu.europeana.entitymanagement.testutils.TestConfig;
+import eu.europeana.entitymanagement.utils.EntityObjectFactory;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
@@ -77,9 +79,8 @@ public class DereferenceServiceIT extends AbstractIntegrationTest {
     Organization org = (Organization) orgOptional.get();
     assertEquals(2, org.getPrefLabel().size());
     assertNull(org.getAltLabel());
-    assertEquals(1, org.getAcronym().size());
+    assertEquals(2, org.getAcronym().size());
     assertEquals(1, org.getEuropeanaRole().size());
-    assertEquals(1, org.getAcronym().size());
     Assertions.assertNotNull(org.getHomepage());
     Assertions.assertNotNull(org.getLogo());
     Assertions.assertNotNull(org.getAddress().getVcardStreetAddress());
@@ -131,9 +132,11 @@ public class DereferenceServiceIT extends AbstractIntegrationTest {
     //    choice = new Choice<String>("EN");
     //    record.addKeyValue(ZohoConstants.LANG_ALTERNATIVE_FIELD + "_4", choice);
 
-    Organization org = ZohoOrganizationConverter.convertToOrganizationEntity(
+    Organization org = EntityObjectFactory.createProxyEntityObject(EntityTypes.Organization.getEntityType());
+    ZohoOrganizationConverter.fillOrganizationInfoFromZohoRecord(
+        org,
         record, 
-        zohoConfiguration.getZohoBaseUrl(),
+        zohoConfiguration.getZohoBaseUrlOrganizations(),
         emConfig.getCountryMappings(),
         emConfig.getRoleMappings());
 
@@ -175,7 +178,7 @@ public class DereferenceServiceIT extends AbstractIntegrationTest {
   // (not available in test data)
   public void wikidataOrganizationSNHDereferenceTest() throws ZohoException, Exception {
     // SNH 
-    dereferenceWikidataOrganization("https://crm.zoho.eu/crm/org20085137532/tab/Accounts/486281000000938800");
+    dereferenceWikidataOrganization(TestConfig.MOCK_ZOHO_BASE_URL + "Accounts/486281000000938800");
   }
   
   
