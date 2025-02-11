@@ -79,13 +79,47 @@ public enum EntityTypes implements EntityKeyword {
   }
   
   /**
-   * Utility method to verify if the provided type is Organization
+   * Utility method to verify if the provided type is a type or subtype (e.g. agregator) of organization
+   * @param entityType type as string
+   * @return true if Organization or subtype
+   */
+  public static boolean isOrganizationType(String entityType) {
+    return EntityTypes.Organization.getEntityType().equalsIgnoreCase(entityType) ||
+        EntityTypes.Aggregator.getEntityType().equalsIgnoreCase(entityType);
+  }
+
+  /**
+   * Utility method to verify if the provided type is exactly the organization type
    * @param entityType type as string
    * @return true if Organization
    */
   public static boolean isOrganization(String entityType) {
-    return EntityTypes.Organization.getEntityType().equalsIgnoreCase(entityType) ||
-        EntityTypes.Aggregator.getEntityType().equalsIgnoreCase(entityType);
+    return EntityTypes.Organization.getEntityType().equalsIgnoreCase(entityType);
+  }
+  
+  /**
+   * Utility method to verify if the provided type is Aggregator
+   * @param entityType type as string
+   * @return true if Aggregator
+   */
+  public static boolean isAggregator(String entityType) {
+    return EntityTypes.Aggregator.getEntityType().equalsIgnoreCase(entityType);
+  }
+  
+  /**
+   * Method to verify if the entity types are compatible for dereferencing and consolidation. 
+   * Aggregator extends Organization, therefore these two type are compatible types
+   * @param entityType the type of the first (e.g. consolidated) entity
+   * @param proxyResponseType the type of the second (e.g. proxy) entity
+   * @return true if the provided types are incompatible
+   */
+  public static boolean isIncompatibleType(String entityType, String proxyResponseType) {
+    if(isOrganizationType(entityType) && isOrganizationType(proxyResponseType)) {
+      //organizations and aggregators are compatible types 
+      return false;
+    }
+    
+    return !proxyResponseType.equals(entityType);
   }
 
   public String getParentType() {

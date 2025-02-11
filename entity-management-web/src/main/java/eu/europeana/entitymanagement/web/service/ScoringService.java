@@ -51,7 +51,7 @@ public class ScoringService {
       throws ScoringComputationException {
     EntityMetrics metrics = new EntityMetrics(entity.getEntityId());
     String entityType = entity.getType();
-    if(EntityTypes.isOrganization(entityType)) {
+    if(EntityTypes.isOrganizationType(entityType)) {
       //aggregators are treated as organization 
       entityType = EntityTypes.Organization.getEntityType();
     }

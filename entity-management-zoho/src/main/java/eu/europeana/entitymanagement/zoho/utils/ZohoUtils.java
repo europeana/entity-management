@@ -303,7 +303,7 @@ public final class ZohoUtils {
    * @return
    */
   public static boolean isZohoOrganization(String id, String entityType) {
-    return EntityTypes.isOrganization(entityType)
+    return EntityTypes.isOrganizationType(entityType)
         && id.contains(WebEntityFields.ZOHO_CRM_HOST);
   }
 }

@@ -65,8 +65,10 @@ public class Aggregator extends Organization {
    * @param copy
    */
   public Aggregator(Aggregator copy) {
+//    this((Organization) copy);
     super(copy);
-    this.type=copy.getType();
+    type=EntityTypes.Aggregator.getEntityType();
+    
     this.mbox = copy.getMbox();
     this.geographicScope = copy.getGeographicScope();
     if (copy.getHeritageDomain() != null) {
@@ -84,6 +86,15 @@ public class Aggregator extends Organization {
     if (copy.getProvidesAudienceEngagementActivity() != null) {
       this.providesAudienceEngagementActivity = new ArrayList<>(copy.getProvidesAudienceEngagementActivity());
     }
+  }
+  
+  /**
+   * Public constructor creating an aggregator object from an organization 
+   * @param copy
+   */
+  public Aggregator(Organization org) {
+    super(org);
+    type=EntityTypes.Aggregator.getEntityType();
   }
 
   @Override
