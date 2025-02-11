@@ -143,12 +143,12 @@ public class ZohoSyncService extends BaseZohoAccess {
     long synced = zohoSyncReport.getCreatedItems() + zohoSyncReport.getUpdatedItems() 
       + zohoSyncReport.getDeprecatedItems();
     
-    long failures = zohoSyncReport.getFailed() == null? 0: zohoSyncReport.getFailed().size();   
+    long failed = zohoSyncReport.getFailed() == null? 0: zohoSyncReport.getFailed().size();   
     
     String slackMessage = String.format(ZOHO_SYNC_SLACK_TEMPLATE, synced, zohoSyncReport.getCreatedItems(),
         zohoSyncReport.getUpdatedItems(), zohoSyncReport.getDeprecatedItems(),
         zohoSyncReport.getEnabledItems(), zohoSyncReport.getDeletedItems(),
-        failures, generateFailedMessage(zohoSyncReport));
+        failed, generateFailedMessage(zohoSyncReport));
     
     //could use a proper object and json serializer later
     return "{\"text\":\"" + slackMessage + "\"}";

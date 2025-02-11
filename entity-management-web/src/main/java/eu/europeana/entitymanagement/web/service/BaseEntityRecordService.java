@@ -581,7 +581,7 @@ public class BaseEntityRecordService {
    * @throws EntityUpdateException 
    */
   public void processReferenceFields(Entity entity) throws EntityUpdateException {
-    if (EntityTypes.isOrganization(entity.getType())) {
+    if (EntityTypes.isOrganizationType(entity.getType())) {
       Organization org = (Organization) entity;
       // update country reference
       processCountryReference(org);

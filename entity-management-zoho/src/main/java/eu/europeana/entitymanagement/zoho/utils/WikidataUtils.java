@@ -17,7 +17,7 @@ public class WikidataUtils {
    * @return true if given entity is a wikidata organization, false otherwise
    */
   public static boolean isWikidataOrganization(String id, String entityType) {
-    return EntityTypes.isOrganization(entityType) && isWikidataEntity(id);
+    return EntityTypes.isOrganizationType(entityType) && isWikidataEntity(id);
   }
 
   /**

@@ -31,6 +31,7 @@ import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationE
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.model.Agent;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
+import eu.europeana.entitymanagement.definitions.model.Aggregator;
 import eu.europeana.entitymanagement.definitions.model.Concept;
 import eu.europeana.entitymanagement.definitions.model.ConceptScheme;
 import eu.europeana.entitymanagement.definitions.model.Entity;
@@ -800,9 +801,14 @@ public class EntityRecordService extends BaseEntityRecordService {
      * The primary entity corresponds to the entity in the Europeana proxy. The secondary entity
      * corresponds to the entity in the external proxy.
      */
-    List<Field> fieldsToCombine = EntityUtils.getAllFields(primary.getClass()).stream()
+    Entity primaryEntity = primary;
+    if(EntityTypes.isAggregator(secondary.getType()) && EntityTypes.isOrganization(primary.getType())) {
+      primaryEntity = new Aggregator((Organization)primary);
+    }
+    
+    List<Field> fieldsToCombine = EntityUtils.getAllFields(primaryEntity.getClass()).stream()
         .filter(f -> !ignoredMergeFields.contains(f.getName())).toList();
-    return combineEntities(primary, secondary, fieldsToCombine, true);
+    return combineEntities(primaryEntity, secondary, fieldsToCombine, true);
   }
 
   public void updateConsolidatedVersion(EntityRecord entityRecord, Entity consolidatedEntity) {

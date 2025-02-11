@@ -101,7 +101,7 @@ public class EnrichmentCountQueryService {
             "%s:%s ", ENRICHMENT_QUERY_FIELD_MAP.get(entity.getType()), getEntityIdsForQuery(entity));
 
     url.append("&query=" + searchQuery);
-    if (!EntityTypes.isOrganization(entity.getType())) {
+    if (!EntityTypes.isOrganizationType(entity.getType())) {
       url.append(contentTierPrefix);
       url.append(configuration.getEnrichmentsQueryContentTier());
     }
@@ -125,7 +125,7 @@ public class EnrichmentCountQueryService {
     }
     
     //for the organizations search also for all data.europeana.eu uris from the sameAs
-    if(EntityTypes.isOrganization(entity.getType())) {
+    if(EntityTypes.isOrganizationType(entity.getType())) {
       return buildSearchedIdsForOrganizations(entity);
     }
 

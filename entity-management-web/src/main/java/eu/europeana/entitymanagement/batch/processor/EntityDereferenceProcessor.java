@@ -72,7 +72,7 @@ public class EntityDereferenceProcessor extends BaseEntityProcessor {
       collectWikidataEntityIds(externalEntity, wikidataEntityIds);
     }
 
-    if (EntityTypes.isOrganization(entityRecord.getEntityRecord().getEntity().getType())) {
+    if (EntityTypes.isOrganizationType(entityRecord.getEntityRecord().getEntity().getType())) {
       // cross-check wikidata proxy, if reference is lost of changed update the proxy list
       // accordingly
       handleWikidataReferenceChange(wikidataEntityIds, entityRecord.getEntityRecord(), timestamp);
@@ -228,7 +228,7 @@ public class EntityDereferenceProcessor extends BaseEntityProcessor {
 
     Entity proxyResponse = proxyResponseOptional.get();
     String proxyResponseType = proxyResponse.getType();
-    if (!proxyResponseType.equals(entityType)) {
+    if (EntityTypes.isIncompatibleType(entityType, proxyResponseType)) {
       throw new EntityMismatchException(
           String.format(
               MISMATCH_EXCEPTION_STRING, proxyResponseType, entityType, entityId, proxyId));
