@@ -797,18 +797,25 @@ public class EntityRecordService extends BaseEntityRecordService {
 
     // TODO: consider refactoring of this implemeentation by creating a new class
     // EntityReconciliator
-    /*
-     * The primary entity corresponds to the entity in the Europeana proxy. The secondary entity
-     * corresponds to the entity in the external proxy.
-     */
     Entity primaryEntity = primary;
-    if(EntityTypes.isAggregator(secondary.getType()) && EntityTypes.isOrganization(primary.getType())) {
-      primaryEntity = new Aggregator((Organization)primary);
+    Entity secondaryEntity = secondary;
+    //if one of the entities is aggregator, ensure both entities to be Aggregator for consolidation purposes
+    if(shouldConvertToAggregator(primary, secondary)) {
+      if(!(primary instanceof Aggregator)) {
+        primaryEntity = new Aggregator((Organization)primary);
+      }
+      if(!(secondary instanceof Aggregator)) {
+        secondaryEntity = new Aggregator((Organization)secondaryEntity);
+      }
     }
     
     List<Field> fieldsToCombine = EntityUtils.getAllFields(primaryEntity.getClass()).stream()
         .filter(f -> !ignoredMergeFields.contains(f.getName())).toList();
-    return combineEntities(primaryEntity, secondary, fieldsToCombine, true);
+    return combineEntities(primaryEntity, secondaryEntity, fieldsToCombine, true);
+  }
+
+  boolean shouldConvertToAggregator(Entity primary, Entity secondary) {
+    return EntityTypes.isAggregator(secondary.getType()) || EntityTypes.isAggregator(primary.getType());
   }
 
   public void updateConsolidatedVersion(EntityRecord entityRecord, Entity consolidatedEntity) {

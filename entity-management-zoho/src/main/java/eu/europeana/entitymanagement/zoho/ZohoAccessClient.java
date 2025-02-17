@@ -180,8 +180,8 @@ public class ZohoAccessClient {
     try {
       RecordOperations recordOperations = new RecordOperations();
       ParameterMap paramInstance = new ParameterMap();
-      paramInstance.add(SearchRecordsParam.CRITERIA, String.format(ZOHO_OPERATION_FORMAT_STRING,
-          ACCOUNT_NAME_FIELD, EQUALS_OPERATION, orgName));
+      String criteria = buildSearchCriteria(ACCOUNT_NAME_FIELD, orgName);
+      paramInstance.add(SearchRecordsParam.CRITERIA, criteria);
 
       APIResponse<ResponseHandler> response =
           recordOperations.searchRecords(ACCOUNTS_MODULE_API_NAME, paramInstance);
@@ -201,6 +201,19 @@ public class ZohoAccessClient {
       throw convertToZohoException(e);
     }
     return Optional.empty();
+  }
+
+  String buildSearchCriteria(String fieldName, String orgName) {
+    String escapedOrgName = orgName;
+    // need to escape brackets in organization names
+    if(escapedOrgName.indexOf('(') > -1) {
+      escapedOrgName = escapedOrgName.replace("(", "\\(");
+    }
+    if(escapedOrgName.indexOf(')') > -1) {
+      escapedOrgName = escapedOrgName.replace(")", "\\)");
+    }
+    return String.format(ZOHO_OPERATION_FORMAT_STRING,
+        fieldName, EQUALS_OPERATION, escapedOrgName);
   }
 
   /**
@@ -243,8 +256,7 @@ public class ZohoAccessClient {
     try {
       RecordOperations recordOperations = new RecordOperations();
       ParameterMap paramInstance = new ParameterMap();
-      String criteria =
-          String.format(ZOHO_OPERATION_FORMAT_STRING, AGGREGATING_FROM, EQUALS_OPERATION, orgName);
+      String criteria = buildSearchCriteria(AGGREGATING_FROM, orgName);
       paramInstance.add(SearchRecordsParam.CRITERIA, criteria);
 
       APIResponse<ResponseHandler> response =
@@ -273,8 +285,8 @@ public class ZohoAccessClient {
     if (response.getStatusCode() >= FIRST_ERROR_CODE) {
       // handle error responses
       if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Zoho Error. Response Status: {}, response Headers:{}",
-            response.getStatusCode(), response.getHeaders());
+        LOGGER.debug("Zoho Error. Response Status: {}, response Headers:{}, Response: {} ",
+            response.getStatusCode(), response.getHeaders(), response);
       }
       throw new ZohoException("Zoho access error. Response code: " + response.getStatusCode());
     }
