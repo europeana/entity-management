@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -25,7 +27,6 @@ import eu.europeana.entitymanagement.normalization.EntityFieldsDataSourceProxyVa
 import eu.europeana.entitymanagement.normalization.EntityFieldsEuropeanaProxyValidationGroup;
 import eu.europeana.entitymanagement.normalization.EntityFieldsEuropeanaProxyValidationInterface;
 import eu.europeana.entitymanagement.vocabulary.ValidationObject;
-import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 
 @dev.morphia.annotations.Embedded
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -46,6 +47,8 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
     groups = {EntityFieldsDataSourceProxyValidationGroup.class})
 public abstract class Entity implements ValidationObject {
 
+  private static final Logger LOG = LogManager.getLogger(Entity.class);
+  
   @Transient
   protected String context = ENTITY_CONTEXT;
   protected String entityId;
@@ -104,12 +107,12 @@ public abstract class Entity implements ValidationObject {
     this.inScheme = inScheme;
   }
 
-  @JsonGetter(WebEntityFields.PREF_LABEL)
+  @JsonGetter(PREF_LABEL)
   public Map<String, String> getPrefLabel() {
     return prefLabel;
   }
 
-  @JsonSetter(WebEntityFields.PREF_LABEL)
+  @JsonSetter(PREF_LABEL)
   public void setPrefLabel(Map<String, String> prefLabel) {
     this.prefLabel = prefLabel;
   }
@@ -206,17 +209,17 @@ public abstract class Entity implements ValidationObject {
     this.isPartOf = isPartOf;
   }
 
-  @JsonGetter(WebEntityFields.DEPICTION)
+  @JsonGetter(DEPICTION)
   public WebResource getDepiction() {
     return depiction;
   }
 
-  @JsonSetter(WebEntityFields.DEPICTION)
+  @JsonSetter(DEPICTION)
   public void setDepiction(WebResource depiction) {
     this.depiction = depiction;
   }
 
-  @JsonGetter(WebEntityFields.IS_SHOWN_BY)
+  @JsonGetter(IS_SHOWN_BY)
   public WebResource getIsShownBy() {
     return isShownBy;
   }
@@ -233,7 +236,9 @@ public abstract class Entity implements ValidationObject {
     try {
       return field.get(this);
     }catch (RuntimeException e) {
-      //if this class doesn't have the field, simply return null  
+      if(LOG.isTraceEnabled()) {
+        LOG.trace("Cannot retrieve field {} for Organization with id:{}", field.getName(), this.getEntityId(), e);
+      }
       return null;
     }
   }
