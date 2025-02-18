@@ -21,6 +21,7 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.LANGUAGE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.IS_SHOWN_BY;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,6 +43,7 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
   ID,
   TYPE,
   DEPICTION,
+  IS_SHOWN_BY,
   PREF_LABEL,
   ACRONYM,
   ALT_LABEL,

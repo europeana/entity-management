@@ -1,31 +1,6 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.ABOUT;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.ALT_LABEL;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.DEPICTION;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.HIDDEN_LABEL;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.IS_AGGREGATED_BY;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.IS_SHOWN_BY;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_DC;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_EDM;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_FOAF;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_OWL;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_VCARD;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.PREF_LABEL;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ACRONYM;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_AGGREGATED_VIA;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_AGGREGATES_FROM;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_COUNTRY;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_DESCRIPTION;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_EUROPEANA_ROLE;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_HAS_ADDRESS;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_HOMEPAGE;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IDENTIFIER;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_LANGUAGE;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_LOGO;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ORGANIZATION;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PHONE;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_SAME_AS;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.*;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -47,9 +22,9 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
       DEPICTION,
       IS_SHOWN_BY,
       PREF_LABEL,
+      XML_ACRONYM,
       ALT_LABEL,
       HIDDEN_LABEL,
-      XML_ACRONYM,
       XML_DESCRIPTION,
       XML_LOGO,
       XML_EUROPEANA_ROLE,
@@ -59,10 +34,10 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
       XML_PHONE,
       XML_HAS_ADDRESS,
       XML_AGGREGATED_VIA,
-      IS_AGGREGATED_BY,
+      XML_AGGREGATES_FROM,
       XML_IDENTIFIER,
       XML_SAME_AS,
-      XML_AGGREGATES_FROM
+      IS_AGGREGATED_BY
     })
 public class XmlOrganizationImpl extends XmlBaseEntityImpl<Organization> {
 

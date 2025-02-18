@@ -1,27 +1,56 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_EDM;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_FOAF;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_AGGREGATOR;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_GEOGRAPHIC_SCOPE;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_HERITAGE_DOMAIN;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_MBOX;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PROVIDES_AUDIENCE_ENGAGEMENT_ACTIVITY;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PROVIDES_CAPACITY_BUILDING_ACTIVITY;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PROVIDES_SUPPORT_FOR_DATA_ACTIVITY;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PROVIDES_SUPPORT_FOR_MEDIA_TYPE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.*;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.ALT_LABEL;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.DEPICTION;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.HIDDEN_LABEL;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.IS_AGGREGATED_BY;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.IS_SHOWN_BY;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.PREF_LABEL;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.model.Aggregator;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @XmlRootElement(namespace = NAMESPACE_EDM, name = XML_AGGREGATOR)
 @XmlAccessorType(XmlAccessType.FIELD)
+@XmlType( propOrder = {
+      ABOUT,
+      DEPICTION,
+      IS_SHOWN_BY,
+      PREF_LABEL,
+      XML_ACRONYM,
+      ALT_LABEL,
+      HIDDEN_LABEL,
+      XML_DESCRIPTION,
+      XML_LOGO,
+      XML_EUROPEANA_ROLE,
+      XML_COUNTRY,
+      XML_LANGUAGE,
+      GEOGRAPHIC_SCOPE,
+      HERITAGE_DOMAIN,
+      XML_HOMEPAGE,
+      XML_PHONE,
+      XML_MBOX,
+      XML_HAS_ADDRESS,
+      XML_PROVIDES_SUPPORT_FOR_MEDIA_TYPE,
+      XML_PROVIDES_SUPPORT_FOR_DATA_ACTIVITY,
+      XML_PROVIDES_CAPACITY_BUILDING_ACTIVITY,
+      XML_PROVIDES_AUDIENCE_ENGAGEMENT_ACTIVITY,
+      XML_AGGREGATED_VIA,
+      XML_AGGREGATES_FROM,
+      XML_IDENTIFIER,
+      XML_SAME_AS,
+      IS_AGGREGATED_BY
+    })
 /**
  * class for xml serialization of Aggregators
  */

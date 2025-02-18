@@ -64,7 +64,7 @@ public class EntityUtils {
     //filter out static fields
     fields.addAll(
         Arrays.asList(type.getDeclaredFields()).stream().filter(
-            f -> Modifier.isStatic(f.getModifiers())).toList());
+            f -> !Modifier.isStatic(f.getModifiers())).toList());
     if (type.getSuperclass() != null) {
       getAllFieldsRecursively(fields, type.getSuperclass());
     }
