@@ -12,6 +12,7 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.ScoringComputationException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
+import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.web.model.scoring.EntityMetrics;
 import eu.europeana.entitymanagement.web.service.ScoringService;
 
@@ -23,8 +24,8 @@ public class EntityMetricsProcessor extends BaseEntityProcessor {
 
   private static final Logger logger = LogManager.getLogger(EntityMetricsProcessor.class);
 
-  public EntityMetricsProcessor(
-      ScoringService scoringService, EntityManagementConfiguration entityManagementConfiguration) {
+  public EntityMetricsProcessor(ScoringService scoringService,
+      EntityManagementConfiguration entityManagementConfiguration) {
 
     super(ScheduledUpdateType.FULL_UPDATE, ScheduledUpdateType.METRICS_UPDATE);
 
@@ -36,19 +37,19 @@ public class EntityMetricsProcessor extends BaseEntityProcessor {
   public BatchEntityRecord doProcessing(BatchEntityRecord entityRecord) throws Exception {
     Date now = new Date();
     if (entityRecord.getEntityRecord().getEntity().getIsAggregatedBy() == null) {
-      Aggregation aggregation = new Aggregation();
+      Aggregation aggregation =
+          EntityRecordUtils.createNewAggregation(entityRecord.getEntityRecord().getEntityId(), now);
       aggregation.setCreated(now);
       entityRecord.getEntityRecord().getEntity().setIsAggregatedBy(aggregation);
     }
 
     /*
-     *  Metrics not computed by default, as it requires access to the PageRank and Search API
-     *  Solr servers. To prevent Jobs from failing, we make this conditional.
+     * Metrics not computed by default, as it requires access to the PageRank and Search API Solr
+     * servers. To prevent Jobs from failing, we make this conditional.
      */
     if (entityManagementConfiguration.shouldComputeMetrics()) {
       if (logger.isTraceEnabled()) {
-        logger.trace(
-            "Computing ranking metrics for entityId={}",
+        logger.trace("Computing ranking metrics for entityId={}",
             entityRecord.getEntityRecord().getEntityId());
       }
 

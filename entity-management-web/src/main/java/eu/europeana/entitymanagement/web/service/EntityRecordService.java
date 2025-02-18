@@ -162,16 +162,18 @@ public class EntityRecordService extends BaseEntityRecordService {
   }
 
   void postProcessOrganizationRetrieval(String profiles, EntityRecord entityRecord) {
-    if (EntityTypes.isOrganization(entityRecord.getEntity().getType())) {
+    if (EntityTypes.isOrganizationType(entityRecord.getEntity().getType())) {
       // for the organizations, populate the aggregatesFrom field
       Organization org = (Organization) entityRecord.getEntity();
       
-      //SG: Temporarily disabled, until data is available and performance tested
-      //org.setAggregatesFrom(entityRecordRepository.findByAggregator(org.getEntityId()));
-
       // dereference morphia @Reference fields (e.g. the organization country)
       if (EntityProfile.hasDereferenceProfile(profiles)) {
         dereferenceLinkedEntities(org);
+      }
+      
+      //populate aggregatesFrom field
+      if(EntityTypes.isAggregator(entityRecord.getEntity().getType())) {
+        org.setAggregatesFrom(entityRecordRepository.findByAggregator(org.getEntityId()));
       }
     }
   }
@@ -872,7 +874,7 @@ public class EntityRecordService extends BaseEntityRecordService {
   private void updateEntityAggregation(EntityRecord entityRecord, String entityId, Date timestamp) {
     Aggregation aggregation = entityRecord.getEntity().getIsAggregatedBy();
     if (aggregation == null) {
-      aggregation = createNewAggregation(entityId, timestamp);
+      aggregation = EntityRecordUtils.createNewAggregation(entityId, timestamp);
       entityRecord.getEntity().setIsAggregatedBy(aggregation);
     } else {
       aggregation.setModified(timestamp);

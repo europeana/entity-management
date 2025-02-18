@@ -257,6 +257,11 @@ public abstract class Entity implements ValidationObject {
     return isAggregatedBy;
   }
 
+  @JsonSetter(IS_AGGREGATED_BY)
+  public void setIsAggregatedBy(Aggregation isAggregatedBy) {
+    this.isAggregatedBy = isAggregatedBy;
+  }
+
   /** Not included in XML responses */
   @JsonGetter(CONTEXT)
   public String getContext() {
@@ -267,11 +272,6 @@ public abstract class Entity implements ValidationObject {
     this.context = context;
   }
 
-
-  @JsonSetter(IS_AGGREGATED_BY)
-  public void setIsAggregatedBy(Aggregation isAggregatedBy) {
-    this.isAggregatedBy = isAggregatedBy;
-  }
 
   @JsonIgnore
   public String getPayload() {

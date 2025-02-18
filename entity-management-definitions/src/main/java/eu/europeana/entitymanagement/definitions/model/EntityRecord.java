@@ -6,6 +6,7 @@ import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTIT
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_SAME_AS;
 import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_TYPE;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BASE_DATA_EUROPEANA_URI;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ENTITY_ID;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
 import java.util.ArrayList;
 import java.util.Date;
@@ -21,7 +22,6 @@ import dev.morphia.annotations.Field;
 import dev.morphia.annotations.Id;
 import dev.morphia.annotations.Index;
 import dev.morphia.annotations.IndexOptions;
-import dev.morphia.annotations.Indexed;
 import dev.morphia.annotations.Indexes;
 import eu.europeana.entitymanagement.utils.EntityRecordWatcher;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
@@ -29,6 +29,7 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @dev.morphia.annotations.Entity("EntityRecord")
 @Indexes({
+  @Index(fields = {@Field(ENTITY_ID)}, options = @IndexOptions(unique = true)),
   @Index(fields = {@Field(ENTITY_TYPE)}),
   @Index(fields = {@Field(ENTITY_EXACT_MATCH)}), 
   @Index(fields = {@Field(ENTITY_SAME_AS)}),
@@ -39,7 +40,6 @@ public class EntityRecord {
 
   @Id @JsonIgnore private ObjectId dbId;
 
-  @Indexed(options = @IndexOptions(unique = true))
   private String entityId;
 
   private Entity entity;

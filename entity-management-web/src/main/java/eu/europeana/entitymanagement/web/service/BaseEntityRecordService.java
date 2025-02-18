@@ -480,16 +480,6 @@ public class BaseEntityRecordService {
 
   }
 
-
-  protected Aggregation createNewAggregation(String entityId, Date timestamp) {
-    Aggregation isAggregatedBy = new Aggregation();
-    isAggregatedBy.setId(getIsAggregatedById(entityId));
-    isAggregatedBy.setCreated(timestamp);
-    isAggregatedBy.setModified(timestamp);
-    return isAggregatedBy;
-  }
-
-
   protected void setEuropeanaMetadata(Entity europeanaProxyMetadata, String entityId,
       List<String> corefs, EntityRecord entityRecord, Date timestamp) {
     Aggregation europeanaAggr = new Aggregation();
