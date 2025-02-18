@@ -34,10 +34,8 @@ public class ZohoOrganizationConverter {
   
   public static void fillOrganizationInfoFromZohoRecord(Organization org, Record zohoRecord, String zohoBaseUrl,  @NonNull final Map<String, ZohoLabelUriMapping> countryMappings,
       @NonNull final Map<String, String> roleMappings) {
-    Long zohoId = zohoRecord.getId();
     org.setAbout(ZohoUtils.buildZohoRecordUrl(zohoBaseUrl, zohoRecord.getId()));
-    org.setIdentifier(List.of(Long.toString(zohoId)));
-
+    
     // extract language maps
     Map<String, List<String>> allLabels = getAllRecordLabels(zohoRecord);
     Map<String, String> prefLabel = getPrefLabel(allLabels);
