@@ -875,7 +875,6 @@ public class EntityRecordService extends BaseEntityRecordService {
     Aggregation aggregation = entityRecord.getEntity().getIsAggregatedBy();
     if (aggregation == null) {
       aggregation = EntityRecordUtils.createNewAggregation(entityRecord.getEntityId(), timestamp);
-      System.out.println("");
       entityRecord.getEntity().setIsAggregatedBy(aggregation);
     } else {
       aggregation.setModified(timestamp);

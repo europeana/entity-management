@@ -43,10 +43,11 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
       XML_SAME_AS,
       IS_AGGREGATED_BY
     })
+
+@SuppressWarnings("java:S2384")
 /**
  * class for xml serialization of Aggregators
  */
-@SuppressWarnings("java:S2384")
 public class XmlAggregatorImpl extends XmlBaseOrganizationImpl {
 
   @XmlElement(namespace = NAMESPACE_FOAF, name = XML_MBOX)

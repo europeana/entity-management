@@ -32,13 +32,23 @@ import eu.europeana.entitymanagement.definitions.model.Organization;
       XML_SAME_AS,
       IS_AGGREGATED_BY
     })
+/**
+ * Class for XML serialization and deserialization of Organizations
+ */
 public class XmlOrganizationImpl extends XmlBaseOrganizationImpl {
   
+  /**
+   * Constructor from organization
+   * @param organization pojo
+   */
   public XmlOrganizationImpl(Organization organization) {
     super(organization);
   }
   
+  /**
+   * Default constructor
+   */
   public XmlOrganizationImpl() {
-    super();
+    //default connstructor
   } 
 }

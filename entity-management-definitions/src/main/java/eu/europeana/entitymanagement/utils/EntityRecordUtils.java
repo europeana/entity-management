@@ -65,6 +65,12 @@ public class EntityRecordUtils {
     return entityId + "#proxy_europeana";
   }
 
+  /**
+   * Instantiates a new Aggregation and fills the mandatory fields
+   * @param entityId the entity ID
+   * @param timestamp creation timestamp
+   * @return the Aggregation object
+   */
   public static Aggregation createNewAggregation(String entityId, Date timestamp) {
     Aggregation isAggregatedBy = new Aggregation();
     isAggregatedBy.setId(getIsAggregatedById(entityId));

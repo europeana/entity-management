@@ -57,6 +57,17 @@ public class ZohoSyncService extends BaseZohoAccess {
   
   private final JsonLdSerializer emJsonldSerializer; 
   
+  /**
+   * Constructor using autowired beans
+   * @param entityRecordService the entity record service
+   * @param entityUpdateService the entity update service
+   * @param emConfiguration the app configuration
+   * @param datasources the datasources
+   * @param zohoConfiguration the zoho access configuration
+   * @param zohoSyncRepo the zoho sync repository
+   * @param zohoDereferenceService the zoho dereference service 
+   * @param emJsonldSerializer the json serializer
+   */
   @Autowired
   public ZohoSyncService(EntityRecordService entityRecordService,
       EntityUpdateService entityUpdateService, EntityManagementConfiguration emConfiguration,
@@ -164,7 +175,7 @@ public class ZohoSyncService extends BaseZohoAccess {
     //could use a proper object and json serializer later
     Map<String, String> body = new ConcurrentHashMap<>();
     body.put("text", slackMessage);
-    return emJsonldSerializer.serializeObject(slackMessage);
+    return emJsonldSerializer.serializeObject(body);
   }
 
 

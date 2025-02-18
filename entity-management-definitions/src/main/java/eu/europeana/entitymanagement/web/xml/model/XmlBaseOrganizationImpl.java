@@ -15,6 +15,9 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlTransient
+/**
+ * Base class for XML serialization of organizations 
+ */
 public abstract class XmlBaseOrganizationImpl extends XmlBaseEntityImpl<Organization> {
 
   @XmlElement(namespace = NAMESPACE_OWL, name = XML_SAME_AS)
