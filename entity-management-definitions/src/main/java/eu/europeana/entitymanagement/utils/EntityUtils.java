@@ -56,6 +56,14 @@ public class EntityUtils {
   public static List<Field> getAllFields(Class<?> type) {
     List<Field> entityFields = new ArrayList<Field>();
     getAllFieldsRecursively(entityFields, type);
+    //remove static fields
+    List<Field> toRemove = new ArrayList<Field>();
+    for (Field field : entityFields) {
+      if (java.lang.reflect.Modifier.isStatic(field.getModifiers())) {
+        toRemove.add(field);
+      }
+    }
+    entityFields.removeAll(toRemove);
     return entityFields;
   }
 
