@@ -111,7 +111,7 @@ public class Aggregation {
         + id
         + '\''
         + ", type='"
-        + type
+        + getAggregationType()
         + '\''
         + ", rights='"
         + rights

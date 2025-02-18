@@ -1,27 +1,6 @@
 package eu.europeana.entitymanagement.definitions.model;
 
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ACRONYM;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.AGGREGATED_VIA;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.AGGREGATES_FROM;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ALT_LABEL;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.COUNTRY;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DEPICTION;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DESCRIPTION;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.EUROPEANA_ROLE;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_HOMEPAGE;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_LOGO;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.FOAF_PHONE;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_ADDRESS;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HIDDEN_LABEL;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IDENTIFIER;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_AGGREGATED_BY;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.LANGUAGE;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.IS_SHOWN_BY;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;

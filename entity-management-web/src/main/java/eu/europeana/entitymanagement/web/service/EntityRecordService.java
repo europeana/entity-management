@@ -536,7 +536,7 @@ public class EntityRecordService extends BaseEntityRecordService {
     }
 
     // create aggregation object
-    updateEntityAggregation(entityRecord, entityId, timestamp);
+    updateEntityAggregation(entityRecord, timestamp);
     return entityRecord;
   }
 
@@ -612,7 +612,7 @@ public class EntityRecordService extends BaseEntityRecordService {
       // add wikidata uri to entity sameAs
       entityRecord.getEntity().addSameReferenceLink(wikidataProxyId);
       // add to entityIsAggregatedBy, use upsertMethod
-      updateEntityAggregation(entityRecord, entityType, timestamp);
+      updateEntityAggregation(entityRecord, timestamp);
 
       return wikidataProxy;
     } catch (EntityModelCreationException e) {
@@ -822,7 +822,7 @@ public class EntityRecordService extends BaseEntityRecordService {
 
   public void updateConsolidatedVersion(EntityRecord entityRecord, Entity consolidatedEntity) {
     entityRecord.setEntity(consolidatedEntity);
-    updateEntityAggregation(entityRecord, consolidatedEntity.getEntityId(), new Date());
+    updateEntityAggregation(entityRecord, new Date());
   }
 
   /**
@@ -871,23 +871,23 @@ public class EntityRecordService extends BaseEntityRecordService {
     return records;
   }
 
-  private void updateEntityAggregation(EntityRecord entityRecord, String entityId, Date timestamp) {
+  private void updateEntityAggregation(EntityRecord entityRecord, Date timestamp) {
     Aggregation aggregation = entityRecord.getEntity().getIsAggregatedBy();
     if (aggregation == null) {
-      aggregation = EntityRecordUtils.createNewAggregation(entityId, timestamp);
+      aggregation = EntityRecordUtils.createNewAggregation(entityRecord.getEntityId(), timestamp);
+      System.out.println("");
       entityRecord.getEntity().setIsAggregatedBy(aggregation);
     } else {
       aggregation.setModified(timestamp);
     }
 
-    updateEntityAggregatesList(aggregation, entityRecord, entityId);
+    updateEntityAggregatesList(aggregation, entityRecord);
   }
 
-  private void updateEntityAggregatesList(Aggregation aggregation, EntityRecord entityRecord,
-      String entityId) {
+  private void updateEntityAggregatesList(Aggregation aggregation, EntityRecord entityRecord) {
     // aggregates is mutable in case we need to append to it later
     List<String> aggregates = new ArrayList<>();
-    aggregates.add(getEuropeanaAggregationId(entityId));
+    aggregates.add(getEuropeanaAggregationId(entityRecord.getEntityId()));
     if (entityRecord.getExternalProxies() != null) {
       for (int i = 0; i < entityRecord.getExternalProxies().size(); i++) {
         aggregates.add(getDatasourceAggregationId(entityRecord.getEntityId(), i + 1));

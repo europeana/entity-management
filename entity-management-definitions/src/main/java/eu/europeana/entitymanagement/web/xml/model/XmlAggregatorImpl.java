@@ -1,13 +1,6 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.*;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.ALT_LABEL;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.DEPICTION;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.HIDDEN_LABEL;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.IS_AGGREGATED_BY;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.IS_SHOWN_BY;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.PREF_LABEL;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -15,7 +8,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.model.Aggregator;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
@@ -35,8 +27,8 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
       XML_EUROPEANA_ROLE,
       XML_COUNTRY,
       XML_LANGUAGE,
-      GEOGRAPHIC_SCOPE,
-      HERITAGE_DOMAIN,
+      XML_GEOGRAPHIC_SCOPE,
+      XML_HERITAGE_DOMAIN,
       XML_HOMEPAGE,
       XML_PHONE,
       XML_MBOX,
@@ -55,7 +47,7 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
  * class for xml serialization of Aggregators
  */
 @SuppressWarnings("java:S2384")
-public class XmlAggregatorImpl extends XmlOrganizationImpl {
+public class XmlAggregatorImpl extends XmlBaseOrganizationImpl {
 
   @XmlElement(namespace = NAMESPACE_FOAF, name = XML_MBOX)
   private String mbox;
