@@ -399,8 +399,7 @@ public class BaseZohoAccess {
     Organization zohoOrganization = dereferenceFullOrganization(zohoId);
     if (zohoOrganization == null) {
       // should not happen, except for wrong configurations
-      zohoSyncReport.addFailedOperation(zohoId.toString(), "Cannot dereference organization",
-          "operation.getZohoRecord().getId() :" + zohoId, null);
+      zohoSyncReport.addFailedOperation(zohoId.toString(), "Zoho Dereferencing Error",  "Cannot dereference organization with zohoRecord ID: " + zohoId, null);
       return res;
     }
 

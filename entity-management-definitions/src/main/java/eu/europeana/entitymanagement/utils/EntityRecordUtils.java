@@ -1,10 +1,12 @@
 package eu.europeana.entitymanagement.utils;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import javax.validation.constraints.NotNull;
 import org.apache.commons.lang3.StringUtils;
+import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
@@ -63,6 +65,21 @@ public class EntityRecordUtils {
     return entityId + "#proxy_europeana";
   }
 
+  /**
+   * Instantiates a new Aggregation and fills the mandatory fields
+   * @param entityId the entity ID
+   * @param timestamp creation timestamp
+   * @return the Aggregation object
+   */
+  public static Aggregation createNewAggregation(String entityId, Date timestamp) {
+    Aggregation isAggregatedBy = new Aggregation();
+    isAggregatedBy.setId(getIsAggregatedById(entityId));
+    isAggregatedBy.setCreated(timestamp);
+    isAggregatedBy.setModified(timestamp);
+    return isAggregatedBy;
+  }
+
+  
   /**
    * extract the identifier part from the URL
    * 

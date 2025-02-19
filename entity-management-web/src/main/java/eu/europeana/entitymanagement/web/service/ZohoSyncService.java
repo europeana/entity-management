@@ -1,13 +1,16 @@
 package eu.europeana.entitymanagement.web.service;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -30,6 +33,7 @@ import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.mongo.repository.ZohoSyncRepository;
+import eu.europeana.entitymanagement.serialization.JsonLdSerializer;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.web.model.BatchOperations;
 import eu.europeana.entitymanagement.web.model.FailedOperation;
@@ -50,14 +54,29 @@ public class ZohoSyncService extends BaseZohoAccess {
           + "created: %d, updated: %d, deprecated: %d, undeprecated: %d, permanently deleted: %d, failed: %d\\n"
           + "%s";
   
+  
+  private final JsonLdSerializer emJsonldSerializer; 
+  
+  /**
+   * Constructor using autowired beans
+   * @param entityRecordService the entity record service
+   * @param entityUpdateService the entity update service
+   * @param emConfiguration the app configuration
+   * @param datasources the datasources
+   * @param zohoConfiguration the zoho access configuration
+   * @param zohoSyncRepo the zoho sync repository
+   * @param zohoDereferenceService the zoho dereference service 
+   * @param emJsonldSerializer the json serializer
+   */
   @Autowired
   public ZohoSyncService(EntityRecordService entityRecordService,
       EntityUpdateService entityUpdateService, EntityManagementConfiguration emConfiguration,
       DataSources datasources, ZohoConfiguration zohoConfiguration, 
-      ZohoSyncRepository zohoSyncRepo, ZohoDereferenceService zohoDereferenceService) {
+      ZohoSyncRepository zohoSyncRepo, ZohoDereferenceService zohoDereferenceService, JsonLdSerializer emJsonldSerializer) {
 
     super(entityRecordService, entityUpdateService, emConfiguration, datasources, zohoConfiguration,
         zohoSyncRepo, zohoDereferenceService);
+    this.emJsonldSerializer = emJsonldSerializer;
   }
 
   /**
@@ -118,6 +137,7 @@ public class ZohoSyncService extends BaseZohoAccess {
       logger.debug("Sending report to slack : {}", zohoSyncReport);
     }
 
+    String jsonMessage = null;
     try {
       if (StringUtils.isBlank(emConfiguration.getSlackWebHook())) {
         logger
@@ -125,21 +145,23 @@ public class ZohoSyncService extends BaseZohoAccess {
         return;
       }
 
-      String jsonMessage = buildSyncReportMessageForSlackWebHook(zohoSyncReport);
+      jsonMessage = buildSyncReportMessageForSlackWebHook(zohoSyncReport);
 
       WebClient webClient = WebClient.builder().baseUrl(emConfiguration.getSlackWebHook()).build();
       // send message to webhook
+          
       ResponseSpec resp = webClient.post().contentType(MediaType.APPLICATION_JSON).bodyValue(jsonMessage).retrieve();
+      
       ResponseEntity<String> response = resp.toEntity(String.class).block();
       if(logger.isDebugEnabled()) {
         logger.debug("Received webhook response: {}", response == null? "" : response.getBody());  
       }
-    } catch (WebClientResponseException e) {
-      logger.warn("Exception occurred while sending slack message!", e);
+    } catch (WebClientResponseException | IOException e) {
+      logger.warn("Exception occurred while sending slack message: {}", jsonMessage, e);
     }
   }
 
-  String buildSyncReportMessageForSlackWebHook(ZohoSyncReport zohoSyncReport) {
+  String buildSyncReportMessageForSlackWebHook(ZohoSyncReport zohoSyncReport) throws IOException {
     long synced = zohoSyncReport.getCreatedItems() + zohoSyncReport.getUpdatedItems() 
       + zohoSyncReport.getDeprecatedItems();
     
@@ -151,7 +173,9 @@ public class ZohoSyncService extends BaseZohoAccess {
         failed, generateFailedMessage(zohoSyncReport));
     
     //could use a proper object and json serializer later
-    return "{\"text\":\"" + slackMessage + "\"}";
+    Map<String, String> body = new ConcurrentHashMap<>();
+    body.put("text", slackMessage);
+    return emJsonldSerializer.serializeObject(body);
   }
 
 

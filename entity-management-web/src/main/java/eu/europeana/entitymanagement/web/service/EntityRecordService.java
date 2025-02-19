@@ -162,16 +162,18 @@ public class EntityRecordService extends BaseEntityRecordService {
   }
 
   void postProcessOrganizationRetrieval(String profiles, EntityRecord entityRecord) {
-    if (EntityTypes.isOrganization(entityRecord.getEntity().getType())) {
+    if (EntityTypes.isOrganizationType(entityRecord.getEntity().getType())) {
       // for the organizations, populate the aggregatesFrom field
       Organization org = (Organization) entityRecord.getEntity();
       
-      //SG: Temporarily disabled, until data is available and performance tested
-      //org.setAggregatesFrom(entityRecordRepository.findByAggregator(org.getEntityId()));
-
       // dereference morphia @Reference fields (e.g. the organization country)
       if (EntityProfile.hasDereferenceProfile(profiles)) {
         dereferenceLinkedEntities(org);
+      }
+      
+      //populate aggregatesFrom field
+      if(EntityTypes.isAggregator(entityRecord.getEntity().getType())) {
+        org.setAggregatesFrom(entityRecordRepository.findByAggregator(org.getEntityId()));
       }
     }
   }
@@ -534,7 +536,7 @@ public class EntityRecordService extends BaseEntityRecordService {
     }
 
     // create aggregation object
-    updateEntityAggregation(entityRecord, entityId, timestamp);
+    updateEntityAggregation(entityRecord, timestamp);
     return entityRecord;
   }
 
@@ -610,7 +612,7 @@ public class EntityRecordService extends BaseEntityRecordService {
       // add wikidata uri to entity sameAs
       entityRecord.getEntity().addSameReferenceLink(wikidataProxyId);
       // add to entityIsAggregatedBy, use upsertMethod
-      updateEntityAggregation(entityRecord, entityType, timestamp);
+      updateEntityAggregation(entityRecord, timestamp);
 
       return wikidataProxy;
     } catch (EntityModelCreationException e) {
@@ -797,23 +799,30 @@ public class EntityRecordService extends BaseEntityRecordService {
 
     // TODO: consider refactoring of this implemeentation by creating a new class
     // EntityReconciliator
-    /*
-     * The primary entity corresponds to the entity in the Europeana proxy. The secondary entity
-     * corresponds to the entity in the external proxy.
-     */
     Entity primaryEntity = primary;
-    if(EntityTypes.isAggregator(secondary.getType()) && EntityTypes.isOrganization(primary.getType())) {
-      primaryEntity = new Aggregator((Organization)primary);
+    Entity secondaryEntity = secondary;
+    //if one of the entities is aggregator, ensure both entities to be Aggregator for consolidation purposes
+    if(shouldConvertToAggregator(primary, secondary)) {
+      if(!(primary instanceof Aggregator)) {
+        primaryEntity = new Aggregator((Organization)primary);
+      }
+      if(!(secondary instanceof Aggregator)) {
+        secondaryEntity = new Aggregator((Organization)secondaryEntity);
+      }
     }
     
     List<Field> fieldsToCombine = EntityUtils.getAllFields(primaryEntity.getClass()).stream()
         .filter(f -> !ignoredMergeFields.contains(f.getName())).toList();
-    return combineEntities(primaryEntity, secondary, fieldsToCombine, true);
+    return combineEntities(primaryEntity, secondaryEntity, fieldsToCombine, true);
+  }
+
+  boolean shouldConvertToAggregator(Entity primary, Entity secondary) {
+    return EntityTypes.isAggregator(secondary.getType()) || EntityTypes.isAggregator(primary.getType());
   }
 
   public void updateConsolidatedVersion(EntityRecord entityRecord, Entity consolidatedEntity) {
     entityRecord.setEntity(consolidatedEntity);
-    updateEntityAggregation(entityRecord, consolidatedEntity.getEntityId(), new Date());
+    updateEntityAggregation(entityRecord, new Date());
   }
 
   /**
@@ -862,23 +871,22 @@ public class EntityRecordService extends BaseEntityRecordService {
     return records;
   }
 
-  private void updateEntityAggregation(EntityRecord entityRecord, String entityId, Date timestamp) {
+  private void updateEntityAggregation(EntityRecord entityRecord, Date timestamp) {
     Aggregation aggregation = entityRecord.getEntity().getIsAggregatedBy();
     if (aggregation == null) {
-      aggregation = createNewAggregation(entityId, timestamp);
+      aggregation = EntityRecordUtils.createNewAggregation(entityRecord.getEntityId(), timestamp);
       entityRecord.getEntity().setIsAggregatedBy(aggregation);
     } else {
       aggregation.setModified(timestamp);
     }
 
-    updateEntityAggregatesList(aggregation, entityRecord, entityId);
+    updateEntityAggregatesList(aggregation, entityRecord);
   }
 
-  private void updateEntityAggregatesList(Aggregation aggregation, EntityRecord entityRecord,
-      String entityId) {
+  private void updateEntityAggregatesList(Aggregation aggregation, EntityRecord entityRecord) {
     // aggregates is mutable in case we need to append to it later
     List<String> aggregates = new ArrayList<>();
-    aggregates.add(getEuropeanaAggregationId(entityId));
+    aggregates.add(getEuropeanaAggregationId(entityRecord.getEntityId()));
     if (entityRecord.getExternalProxies() != null) {
       for (int i = 0; i < entityRecord.getExternalProxies().size(); i++) {
         aggregates.add(getDatasourceAggregationId(entityRecord.getEntityId(), i + 1));

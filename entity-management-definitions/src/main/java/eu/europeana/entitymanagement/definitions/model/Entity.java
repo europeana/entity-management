@@ -1,19 +1,7 @@
 package eu.europeana.entitymanagement.definitions.model;
 
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.ENTITY_CONTEXT;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ALT_LABEL;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_PART;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HIDDEN_LABEL;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IDENTIFIER;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IN_SCHEME;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_AGGREGATED_BY;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_PART_OF;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_RELATED_TO;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_SHOWN_BY;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NOTE;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -37,7 +27,6 @@ import eu.europeana.entitymanagement.normalization.EntityFieldsDataSourceProxyVa
 import eu.europeana.entitymanagement.normalization.EntityFieldsEuropeanaProxyValidationGroup;
 import eu.europeana.entitymanagement.normalization.EntityFieldsEuropeanaProxyValidationInterface;
 import eu.europeana.entitymanagement.vocabulary.ValidationObject;
-import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 
 @dev.morphia.annotations.Embedded
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -58,6 +47,8 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
     groups = {EntityFieldsDataSourceProxyValidationGroup.class})
 public abstract class Entity implements ValidationObject {
 
+  private static final Logger LOG = LogManager.getLogger(Entity.class);
+  
   @Transient
   protected String context = ENTITY_CONTEXT;
   protected String entityId;
@@ -116,12 +107,12 @@ public abstract class Entity implements ValidationObject {
     this.inScheme = inScheme;
   }
 
-  @JsonGetter(WebEntityFields.PREF_LABEL)
+  @JsonGetter(PREF_LABEL)
   public Map<String, String> getPrefLabel() {
     return prefLabel;
   }
 
-  @JsonSetter(WebEntityFields.PREF_LABEL)
+  @JsonSetter(PREF_LABEL)
   public void setPrefLabel(Map<String, String> prefLabel) {
     this.prefLabel = prefLabel;
   }
@@ -218,17 +209,17 @@ public abstract class Entity implements ValidationObject {
     this.isPartOf = isPartOf;
   }
 
-  @JsonGetter(WebEntityFields.DEPICTION)
+  @JsonGetter(DEPICTION)
   public WebResource getDepiction() {
     return depiction;
   }
 
-  @JsonSetter(WebEntityFields.DEPICTION)
+  @JsonSetter(DEPICTION)
   public void setDepiction(WebResource depiction) {
     this.depiction = depiction;
   }
 
-  @JsonGetter(WebEntityFields.IS_SHOWN_BY)
+  @JsonGetter(IS_SHOWN_BY)
   public WebResource getIsShownBy() {
     return isShownBy;
   }
@@ -242,7 +233,14 @@ public abstract class Entity implements ValidationObject {
     if(!field.canAccess(this)) {
       field.setAccessible(true);
     }
-    return field.get(this);
+    try {
+      return field.get(this);
+    }catch (RuntimeException e) {
+      if(LOG.isTraceEnabled()) {
+        LOG.trace("Cannot retrieve field {} for Organization with id:{}", field.getName(), this.getEntityId(), e);
+      }
+      return null;
+    }
   }
 
   public void setFieldValue(Field field, Object value)
@@ -259,6 +257,11 @@ public abstract class Entity implements ValidationObject {
     return isAggregatedBy;
   }
 
+  @JsonSetter(IS_AGGREGATED_BY)
+  public void setIsAggregatedBy(Aggregation isAggregatedBy) {
+    this.isAggregatedBy = isAggregatedBy;
+  }
+
   /** Not included in XML responses */
   @JsonGetter(CONTEXT)
   public String getContext() {
@@ -269,11 +272,6 @@ public abstract class Entity implements ValidationObject {
     this.context = context;
   }
 
-
-  @JsonSetter(IS_AGGREGATED_BY)
-  public void setIsAggregatedBy(Aggregation isAggregatedBy) {
-    this.isAggregatedBy = isAggregatedBy;
-  }
 
   @JsonIgnore
   public String getPayload() {

@@ -2,6 +2,11 @@ package eu.europeana.entitymanagement.web.xml.model;
 
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
+/**
+ * Constants for XML serialization
+ * After adding the namespaces, the most of the XML fieldnames are redundant. 
+ * These fields needs to be sorted out and reuse WebEntityFields
+ */
 public final class XmlConstants extends XmlFields {
 
   public static final String NAMESPACE_SKOS = "http://www.w3.org/2004/02/skos/core#";

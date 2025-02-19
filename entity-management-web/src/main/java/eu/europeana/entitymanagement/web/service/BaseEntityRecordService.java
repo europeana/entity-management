@@ -3,7 +3,6 @@ package eu.europeana.entitymanagement.web.service;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getDatasourceAggregationId;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEuropeanaAggregationId;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEuropeanaProxyId;
-import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getIsAggregatedById;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -479,16 +478,6 @@ public class BaseEntityRecordService {
     return copy;
 
   }
-
-
-  protected Aggregation createNewAggregation(String entityId, Date timestamp) {
-    Aggregation isAggregatedBy = new Aggregation();
-    isAggregatedBy.setId(getIsAggregatedById(entityId));
-    isAggregatedBy.setCreated(timestamp);
-    isAggregatedBy.setModified(timestamp);
-    return isAggregatedBy;
-  }
-
 
   protected void setEuropeanaMetadata(Entity europeanaProxyMetadata, String entityId,
       List<String> corefs, EntityRecord entityRecord, Date timestamp) {

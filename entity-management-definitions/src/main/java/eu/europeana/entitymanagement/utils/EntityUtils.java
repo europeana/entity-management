@@ -1,10 +1,11 @@
 package eu.europeana.entitymanagement.utils;
 
-import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 
 public class EntityUtils {
 
@@ -60,7 +61,10 @@ public class EntityUtils {
   }
 
   private static void getAllFieldsRecursively(List<Field> fields, Class<?> type) {
-    fields.addAll(Arrays.asList(type.getDeclaredFields()));
+    //filter out static fields
+    fields.addAll(
+        Arrays.asList(type.getDeclaredFields()).stream().filter(
+            f -> !Modifier.isStatic(f.getModifiers())).toList());
     if (type.getSuperclass() != null) {
       getAllFieldsRecursively(fields, type.getSuperclass());
     }

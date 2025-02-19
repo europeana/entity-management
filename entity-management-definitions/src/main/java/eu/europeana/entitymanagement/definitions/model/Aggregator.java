@@ -15,6 +15,7 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
   ID,
   TYPE,
   DEPICTION,
+  IS_SHOWN_BY,
   PREF_LABEL,
   ACRONYM,
   ALT_LABEL,
@@ -24,21 +25,21 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
   EUROPEANA_ROLE,
   COUNTRY,
   LANGUAGE,
+  GEOGRAPHIC_SCOPE,
+  HERITAGE_DOMAIN,
   FOAF_HOMEPAGE,
   FOAF_PHONE,
   FOAF_MBOX,
   HAS_ADDRESS,
+  PROVIDES_SUPPORT_FOR_MEDIA_TYPE,
+  PROVIDES_SUPPORT_FOR_DATA_ACTIVITY,
+  PROVIDES_SUPPORT_FOR_CAPACITY_BUILDING_ACTIVITY,
+  PROVIDES_AUDIENCE_ENGAGEMENT_ACTIVITY,
   AGGREGATES_FROM,
   AGGREGATED_VIA,
   IDENTIFIER,
   SAME_AS,
-  IS_AGGREGATED_BY,
-  GEOGRAPHIC_SCOPE,
-  HERITAGE_DOMAIN,
-  PROVIDES_SUPPORT_FOR_MEDIA_TYPE,
-  PROVIDES_SUPPORT_FOR_DATA_ACTIVITY,
-  PROVIDES_SUPPORT_FOR_BUILDING_ACTIVITY,
-  PROVIDES_AUDIENCE_ENGAGEMENT_ACTIVITY
+  IS_AGGREGATED_BY
 })
 /**
  * Class implementing aggregator extension for organizations
@@ -152,12 +153,12 @@ public class Aggregator extends Organization {
     this.providesSupportForDataActivity = providesSupportForDataActivity;
   }
 
-  @JsonGetter(PROVIDES_SUPPORT_FOR_BUILDING_ACTIVITY)
+  @JsonGetter(PROVIDES_SUPPORT_FOR_CAPACITY_BUILDING_ACTIVITY)
   public List<String> getProvidesCapacityBuildingActivity() {
     return providesCapacityBuildingActivity;
   }
 
-  @JsonSetter(PROVIDES_SUPPORT_FOR_BUILDING_ACTIVITY)
+  @JsonSetter(PROVIDES_SUPPORT_FOR_CAPACITY_BUILDING_ACTIVITY)
   public void setProvidesCapacityBuildingActivity(List<String> providesCapacityBuildingActivity) {
     this.providesCapacityBuildingActivity = providesCapacityBuildingActivity;
   }

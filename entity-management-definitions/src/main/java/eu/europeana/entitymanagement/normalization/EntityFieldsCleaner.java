@@ -42,7 +42,7 @@ public class EntityFieldsCleaner {
 
   private static final Set<String> ISO_LANGUAGES = Set.of(Locale.getISOLanguages());
 
-  private static final Logger logger = LogManager.getLogger(EntityFieldsCleaner.class);
+  private static final Logger LOG = LogManager.getLogger(EntityFieldsCleaner.class);
 
   private final LanguageCodes emLanguageCodes;
 
@@ -156,8 +156,8 @@ public class EntityFieldsCleaner {
     } else if (isMultipleValueStringMap(field)) {
       return normalizeMultipleValueMap(field.getName(), (Map<String, List<String>>) fieldValue);
     } else {
-      if (logger.isTraceEnabled()) {
-        logger.trace("normalization not supported for maps of type: {}", field.getGenericType());
+      if (LOG.isTraceEnabled()) {
+        LOG.trace("normalization not supported for maps of type: {}", field.getGenericType());
       }
       return fieldValue;
     }

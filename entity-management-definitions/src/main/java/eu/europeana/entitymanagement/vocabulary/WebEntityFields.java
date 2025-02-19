@@ -104,7 +104,7 @@ public abstract class WebEntityFields {
   public static final String HERITAGE_DOMAIN = "heritageDomain";
   public static final String PROVIDES_SUPPORT_FOR_MEDIA_TYPE = "providesSupportForMediaType";
   public static final String PROVIDES_SUPPORT_FOR_DATA_ACTIVITY = "providesSupportForDataActivity";
-  public static final String PROVIDES_SUPPORT_FOR_BUILDING_ACTIVITY = "providesCapacityBuildingActivity";
+  public static final String PROVIDES_SUPPORT_FOR_CAPACITY_BUILDING_ACTIVITY = "providesCapacityBuildingActivity";
   public static final String PROVIDES_AUDIENCE_ENGAGEMENT_ACTIVITY = "providesAudienceEngagementActivity";
   
   // Address Fields
