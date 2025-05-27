@@ -190,6 +190,9 @@ public class EntityManagementConfiguration implements InitializingBean {
   @Value("${slack.webhook:}")
   private String slackWebHook;
   
+  @Value("${rapidapiKey:}")
+  private String rapidapiKey;
+  
   /**
    * Map of <"Zoho Label", ZohoLabelUriMapping>  
    */
@@ -520,6 +523,10 @@ public class EntityManagementConfiguration implements InitializingBean {
   
   public boolean isUpdateOrganizationEuropeanaId() {
     return updateOrganizationEuropeanaId;
+  }
+
+  public String getRapidapiKey() {
+    return rapidapiKey;
   }
  
 }

@@ -1,12 +1,12 @@
 package eu.europeana.entitymanagement.zoho.organization;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
+import java.net.URISyntaxException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
@@ -15,8 +15,10 @@ import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import eu.europeana.api.commons.error.EuropeanaApiException;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.model.Address;
 
 @Service
@@ -28,9 +30,11 @@ public class RapidapiGeocodingClient {
   private String acceptLanguage="en";
   private String limitNumResults="1";
   private String rapidApiHost="forward-reverse-geocoding.p.rapidapi.com";
-  private String rapidApiKey="3ed04b4a52msh8f13bc729419234p1a3dc3jsndde2203fd7d0";
+  private String rapidApiKey;
   
-  public RapidapiGeocodingClient() {
+  @Autowired
+  public RapidapiGeocodingClient(EntityManagementConfiguration config) {
+    rapidApiKey=config.getRapidapiKey();
   }
 
   public String getGeoURI(Address address) throws EuropeanaApiException {
@@ -49,30 +53,42 @@ public class RapidapiGeocodingClient {
   }
 
   private String getRapidapiResponse(Address address) throws EuropeanaApiException {
-    String uri = baseUrl;
-    uri += "?";
-    uri += "format=" + formatResults;
-    try {
-      if(!StringUtils.isBlank(address.getVcardStreetAddress())) {
-        uri += "&street=" + URLEncoder.encode(address.getVcardStreetAddress(), "UTF-8");
-      }
-      if(!StringUtils.isBlank(address.getVcardPostalCode())) {
-        uri += "&postalcode=" + URLEncoder.encode(address.getVcardPostalCode(), "UTF-8");
-      }
-      if(!StringUtils.isBlank(address.getVcardCountryName())) {
-        uri += "&country=" + URLEncoder.encode(address.getVcardCountryName(), "UTF-8");
-      }
-    } catch (UnsupportedEncodingException e) {
-      logger.error("Error during character encoding in the uri: {}, for the rapidapi geocoding service.", uri);
-      throw new EuropeanaApiException("Error during character encoding in the uri for the rapidapi geocoding service: " 
-          + uri, e);
+    //according to the rapidapi docs, at least one of: street, city, postcode, county or country is required
+    if(StringUtils.isBlank(address.getVcardStreetAddress()) && StringUtils.isBlank(address.getVcardPostalCode())
+        && StringUtils.isBlank(address.getVcardCountryName())) {
+      return null;
     }
     
-    uri += "&accept-language=" + acceptLanguage;
-    uri += "&limit=" + limitNumResults;
+    URIBuilder uriBuilder = null;
+    try {
+      uriBuilder = new URIBuilder(baseUrl);
+    } catch (URISyntaxException e) {
+      logger.error("Invalid geocoding rapidapi input uri: {}", baseUrl);
+      throw new EuropeanaApiException("Invalid geocoding rapidapi input uri: " + baseUrl, e);
+    }
+    uriBuilder.addParameter("format", formatResults);
+    if(!StringUtils.isBlank(address.getVcardStreetAddress())) {
+      uriBuilder.addParameter("street", address.getVcardStreetAddress());
+    }
+    if(!StringUtils.isBlank(address.getVcardPostalCode())) {
+      uriBuilder.addParameter("postalcode", address.getVcardPostalCode());
+    }
+    if(!StringUtils.isBlank(address.getVcardCountryName())) {
+      uriBuilder.addParameter("country", address.getVcardCountryName());
+    }
+    uriBuilder.addParameter("accept-language", acceptLanguage);
+    uriBuilder.addParameter("limit", limitNumResults);
+    
+    String uriString = null;
+    try {
+      uriString=uriBuilder.build().toString();
+    } catch (URISyntaxException e) {
+      logger.error("Invalid geocoding rapidapi input uri.");
+      throw new EuropeanaApiException("Invalid geocoding rapidapi input uri.", e);
+    }
 
     try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-      HttpGet request = new HttpGet(uri);
+      HttpGet request = new HttpGet(uriString);
       request.addHeader("x-rapidapi-host", rapidApiHost);
       request.addHeader("x-rapidapi-key", rapidApiKey);
       try (CloseableHttpResponse response = httpClient.execute(request)) {
@@ -85,9 +101,9 @@ public class RapidapiGeocodingClient {
         }
       }
     } catch (IOException e) {
-      logger.error("Error during executing the request to the geocoding rapidapi: {}", uri);
+      logger.error("Error during executing the request to the geocoding rapidapi: {}", uriString);
       throw new EuropeanaApiException("Error executing the request to the rapidapi geocoding service "
-          + "for the uri: " + uri, e);
+          + "for the uri: " + uriString, e);
     }
     return null;
   }
