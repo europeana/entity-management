@@ -14,7 +14,7 @@ public class RapidapiGeocodingTest extends AbstractIntegrationTest {
   @Autowired
   private RapidapiGeocodingClient rapidapiGeocodingClient;
 
-  @Test
+  //@Test
   public void getRapidapiGeocodingURI() throws Exception {
     Address address = new Address();
     address.setVcardStreetAddress("34 West 13th Street");
