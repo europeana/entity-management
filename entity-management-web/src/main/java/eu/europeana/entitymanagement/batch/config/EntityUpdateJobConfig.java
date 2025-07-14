@@ -64,6 +64,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.SINGLE_ENTITY_RECORD_READER;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.SCHEDULED_TASK_READER;
+
+
 @Component
 @EnableBatchProcessing
 /**
@@ -74,9 +78,6 @@ import org.springframework.stereotype.Component;
  *
  */
 public class EntityUpdateJobConfig {
-
-  private static final String SINGLE_ENTITY_RECORD_READER = "singleEntityRecordReader";
-  private static final String SCHEDULED_TASK_READER = "scheduledTaskReader";
 
   private final JobBuilderFactory jobBuilderFactory;
   private final StepBuilderFactory stepBuilderFactory;

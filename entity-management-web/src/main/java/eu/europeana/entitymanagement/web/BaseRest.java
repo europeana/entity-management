@@ -2,16 +2,13 @@ package eu.europeana.entitymanagement.web;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
 import javax.validation.ValidatorFactory;
+
+import eu.europeana.entitymanagement.exception.ParamValidationException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -326,6 +323,30 @@ public abstract class BaseRest extends BaseRestController {
     } catch (IllegalArgumentException | IllegalAccessException e) {
       throw new EuropeanaApiException(
           "An exception occurred during setting the entity field: " + fieldName, e);
+    }
+  }
+
+  /**
+   * Validates profile paramater.
+   * profile can be : internal/external or debug
+   * @param profile profile param
+   * @return
+   */
+  protected void validateProfile(String profile) throws ParamValidationException {
+    boolean valid = false;
+    if (StringUtils.hasLength(profile)) {
+      if (profile.contains(",")) { // has multiple profile
+        Set<String> profiles = new HashSet<>(Arrays.asList(profile.split(",")));
+        valid = profiles.contains(EntityProfile.debug.toString()) &&
+                (profiles.contains(EntityProfile.external.toString()) || profiles.contains(EntityProfile.internal.toString()));
+      } else {
+        valid = org.apache.commons.lang3.StringUtils.equalsAny(profile,
+                EntityProfile.external.toString(), EntityProfile.internal.toString());
+      }
+    }
+    if (!valid) {
+      throw new ParamValidationException("Invalid profile param !! Excepted value - " +
+              EntityProfile.internal + "/" + EntityProfile.external + ", " + EntityProfile.debug);
     }
   }
 

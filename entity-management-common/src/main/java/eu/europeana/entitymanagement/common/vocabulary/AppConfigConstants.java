@@ -40,6 +40,8 @@ public class AppConfigConstants {
   public static final String ENTITY_UPDATE_JOB_LAUNCHER = "entityUpdateJobLauncher";
   public static final String ENTITY_REMOVALS_JOB_LAUNCHER = "entityRemovalsJobLauncher";
   public static final String SYNC_WEB_REQUEST_JOB_LAUNCHER = "synchronousWebRequestJobLauncher";
+  public static final String SINGLE_ENTITY_RECORD_READER = "singleEntityRecordReader";
+  public static final String SCHEDULED_TASK_READER = "scheduledTaskReader";
 
   public static final String PERIODIC_UPDATES_SCHEDULER = "periodicUpdatesScheduler";
   public static final String PERIODIC_REMOVALS_SCHEDULER = "periodicRemovalsScheduler";

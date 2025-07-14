@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.web;
 
 import static eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants.QUERY_PARAM_PROFILE_SEPARATOR;
+import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.PROFILE_MINIMAL;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.QUERY_PARAM_QUERY;
 import static java.util.stream.Collectors.groupingBy;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
@@ -476,11 +477,15 @@ public class EMController extends BaseRest {
       response = Void.class)
   @PostMapping(value = "/entity/",
       produces = {MediaType.APPLICATION_JSON_VALUE, HttpHeaders.CONTENT_TYPE_JSONLD})
-  public ResponseEntity<String> registerEntity(@RequestBody Entity europeanaProxyEntity,
+  public ResponseEntity<String> registerEntity(
+    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE,
+            required = false, defaultValue = "internal") String profile,
+    @RequestBody Entity europeanaProxyEntity,
       HttpServletRequest request) throws Exception {
 
     verifyWriteAccess(Operations.CREATE, request);
 
+    validateProfile(profile);
     validateBodyEntity(europeanaProxyEntity, false);
 
     String creationRequestId = europeanaProxyEntity.getEntityId();
