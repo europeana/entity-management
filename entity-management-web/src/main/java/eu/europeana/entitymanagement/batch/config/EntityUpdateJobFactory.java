@@ -131,7 +131,6 @@ public class EntityUpdateJobFactory {
      */
     @Bean(compositeProcessor)
     private ItemProcessor<BatchEntityRecord, BatchEntityRecord> compositeUpdateProcessor() {
-        System.out.println("here again creating processor ");
         CompositeItemProcessor<BatchEntityRecord, BatchEntityRecord> compositeItemProcessor =
                 new CompositeItemProcessor<>();
         compositeItemProcessor.setDelegates(
@@ -153,7 +152,6 @@ public class EntityUpdateJobFactory {
      */
     @Bean(compositeEntityInsertionWriter)
     private ItemWriter<BatchEntityRecord> compositeEntityWriter() {
-        System.out.println("here again creating writers ");
         CompositeItemWriter<BatchEntityRecord> compositeWriter = new CompositeItemWriter<>();
         compositeWriter.setDelegates(Arrays.asList(
                 applicationContext.getBean(entityRecordDBInsertionWriter, EntityRecordDatabaseInsertionWriter.class),

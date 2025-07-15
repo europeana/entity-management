@@ -328,7 +328,7 @@ public abstract class BaseRest extends BaseRestController {
 
   /**
    * Validates profile paramater.
-   * profile can be : internal/external or debug
+   * profile can be : internal,external or debug
    * @param profile profile param
    * @return
    */
@@ -341,12 +341,12 @@ public abstract class BaseRest extends BaseRestController {
                 (profiles.contains(EntityProfile.external.toString()) || profiles.contains(EntityProfile.internal.toString()));
       } else {
         valid = org.apache.commons.lang3.StringUtils.equalsAny(profile,
-                EntityProfile.external.toString(), EntityProfile.internal.toString());
+                EntityProfile.external.toString(), EntityProfile.internal.toString(), EntityProfile.debug.toString());
       }
     }
     if (!valid) {
       throw new ParamValidationException("Invalid profile param !! Excepted value - " +
-              EntityProfile.internal + "/" + EntityProfile.external + ", " + EntityProfile.debug);
+              EntityProfile.internal + " or " + EntityProfile.external + " or " + EntityProfile.debug);
     }
   }
 
