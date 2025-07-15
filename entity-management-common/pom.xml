@@ -49,6 +49,12 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>eu.europeana.api.commons</groupId>
+            <artifactId>commons-clientutils</artifactId>
+            <version>${api.commons.version}</version>
+        </dependency>
+        
+        <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
         </dependency>
