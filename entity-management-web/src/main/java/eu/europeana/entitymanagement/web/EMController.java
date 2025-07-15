@@ -142,17 +142,11 @@ public class EMController extends BaseRest {
         generateETag(isAggregatedBy.getModified(), FormatTypes.jsonld.name(), getApiVersion());
     checkIfMatchHeader(etag, request);
 
-    boolean isSynchronous = containsSyncProfile(profile);
     String entityId = entityRecord.getEntityId();
-    logger.debug("Deprecating entityId={}, isSynchronous={}", entityId, isSynchronous);
+    logger.debug("Deprecating entityId={}, isSynchronous={}", entityId, true);
 
-    if (isSynchronous) {
-      // delete from Solr before Mongo, so Solr errors won't leave DB in an inconsistent state
-      entityRecordService.disableEntityRecord(entityRecord, true);
-    } else {
-      entityUpdateService.scheduleTasks(Collections.singletonList(entityId),
-          ScheduledRemovalType.DEPRECATION);
-    }
+    // delete from Solr before Mongo, so Solr errors won't leave DB in an inconsistent state
+    entityRecordService.disableEntityRecord(entityRecord, true);
 
     return noContentResponse(request);
   }
