@@ -143,7 +143,7 @@ public class EntityUpdateJobFactory {
     }
 
     /**
-     * Creating it as a bean as the processor list is same for all the Internal Task of EM.
+     * Creating it as a bean as the writer list is same for all the Internal Task of EM.
      * For performance will access them from application context than creating a list for every request
      * @see <a href="http://docs.google.com/document/d/16k9PcCMFwl2LXjnnzotZRPc-QqM-Ar1D0VELHt4t_hA/edit?tab=t.0#heading=h.fj6e15rbq64q"></a> }
      * Creates the writer list -
