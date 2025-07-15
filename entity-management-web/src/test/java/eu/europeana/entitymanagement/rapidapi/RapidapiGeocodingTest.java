@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.rapidapi;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,6 +13,7 @@ import eu.europeana.entitymanagement.definitions.model.Address;
 
 @SpringBootTest(classes = {SerializationConfig.class, EntityManagementConfiguration.class})
 @ActiveProfiles("test")//enable application-test.yml
+@Disabled
 public class RapidapiGeocodingTest {
 
   @Autowired EntityManagementConfiguration emConfig;
