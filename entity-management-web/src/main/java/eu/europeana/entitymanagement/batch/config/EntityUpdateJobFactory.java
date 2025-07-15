@@ -30,6 +30,7 @@ import org.springframework.batch.item.support.CompositeItemWriter;
 import org.springframework.batch.item.support.SynchronizedItemStreamReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 
@@ -95,8 +96,8 @@ public class EntityUpdateJobFactory {
                 .get(STEP_UPDATE_ENTITY)
                 .<BatchEntityRecord, BatchEntityRecord>chunk(1)
                 .reader(getReader(true))
-                .processor(compositeUpdateProcessor())
-                .writer(compositeEntityWriter())
+                .processor((ItemProcessor<BatchEntityRecord, BatchEntityRecord>) applicationContext.getBean(compositeProcessor))
+                .writer((ItemWriter<BatchEntityRecord>) applicationContext.getBean(compositeEntityInsertionWriter))
                 .listener((ItemProcessListener<? super BatchEntityRecord, ? super BatchEntityRecord>) itemListener)
                 .faultTolerant()
                 .skipPolicy(noopSkipPolicy)
@@ -120,32 +121,43 @@ public class EntityUpdateJobFactory {
 
 
     /**
+     * Creating it as a bean as the processor list is same for all the Internal Task of EM.
+     * For performnace will access them from application context than creating a list for every request
+     * @see <a href="http://docs.google.com/document/d/16k9PcCMFwl2LXjnnzotZRPc-QqM-Ar1D0VELHt4t_hA/edit?tab=t.0#heading=h.fj6e15rbq64q"></a> }
+     *
      * Creates the processor list -
      *    Processors: Dereference + consolidation + metrics + validation
      * @return
      */
+    @Bean(compositeProcessor)
     private ItemProcessor<BatchEntityRecord, BatchEntityRecord> compositeUpdateProcessor() {
+        System.out.println("here again creating processor ");
         CompositeItemProcessor<BatchEntityRecord, BatchEntityRecord> compositeItemProcessor =
                 new CompositeItemProcessor<>();
         compositeItemProcessor.setDelegates(
                 Arrays.asList(
-                        (EntityDereferenceProcessor) applicationContext.getBean(EntityDereferenceProcessor.class.getSimpleName()),
-                        (EntityConsolidationProcessor) applicationContext.getBean(EntityConsolidationProcessor.class.getSimpleName()),
-                        (EntityMetricsProcessor) applicationContext.getBean(EntityMetricsProcessor.class.getSimpleName()),
-                        (EntityVerificationLogger) applicationContext.getBean(EntityVerificationLogger.class.getSimpleName())));
+                        applicationContext.getBean(entityDereferenceProcessor, EntityDereferenceProcessor.class),
+                        applicationContext.getBean(entityConsolidationProcessor, EntityConsolidationProcessor.class),
+                        applicationContext.getBean(entityMetricsProcessor, EntityMetricsProcessor.class),
+                        applicationContext.getBean(entityVerificationLogger, EntityVerificationLogger.class)));
         return compositeItemProcessor;
     }
 
     /**
+     * Creating it as a bean as the processor list is same for all the Internal Task of EM.
+     * For performance will access them from application context than creating a list for every request
+     * @see <a href="http://docs.google.com/document/d/16k9PcCMFwl2LXjnnzotZRPc-QqM-Ar1D0VELHt4t_hA/edit?tab=t.0#heading=h.fj6e15rbq64q"></a> }
      * Creates the writer list -
      *    Writer: Db update + Solr update
      * @return
      */
+    @Bean(compositeEntityInsertionWriter)
     private ItemWriter<BatchEntityRecord> compositeEntityWriter() {
+        System.out.println("here again creating writers ");
         CompositeItemWriter<BatchEntityRecord> compositeWriter = new CompositeItemWriter<>();
         compositeWriter.setDelegates(Arrays.asList(
-                (EntityRecordDatabaseInsertionWriter) applicationContext.getBean(EntityRecordDatabaseInsertionWriter.class.getSimpleName()),
-                (EntitySolrInsertionWriter) applicationContext.getBean(EntitySolrInsertionWriter.class.getSimpleName())));
+                applicationContext.getBean(entityRecordDBInsertionWriter, EntityRecordDatabaseInsertionWriter.class),
+                applicationContext.getBean(entitySolrInsertionWriter, EntitySolrInsertionWriter.class)));
         return compositeWriter;
     }
 

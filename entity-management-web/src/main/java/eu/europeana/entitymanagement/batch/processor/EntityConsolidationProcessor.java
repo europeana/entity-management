@@ -28,12 +28,13 @@ import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.service.DepictionGeneratorService;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.entityConsolidationProcessor;
 
 /**
  * This {@link ItemProcessor} validates Entity metadata, then creates a consolidated entity by
  * merging the metadata from all data sources .
  */
-@Component
+@Component(entityConsolidationProcessor)
 public class EntityConsolidationProcessor extends BaseEntityProcessor {
 
   private final EntityRecordService entityRecordService;

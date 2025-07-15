@@ -15,9 +15,10 @@ import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.web.model.scoring.EntityMetrics;
 import eu.europeana.entitymanagement.web.service.ScoringService;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.entityMetricsProcessor;
 
 /** Updates Metrics for EntityRecords */
-@Component
+@Component(entityMetricsProcessor)
 public class EntityMetricsProcessor extends BaseEntityProcessor {
   private final ScoringService scoringService;
   private final EntityManagementConfiguration entityManagementConfiguration;

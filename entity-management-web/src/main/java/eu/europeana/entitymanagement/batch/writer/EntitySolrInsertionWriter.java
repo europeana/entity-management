@@ -9,9 +9,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.stereotype.Component;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.entitySolrInsertionWriter;
 
 /** Saves Entities to Solr */
-@Component
+@Component(entitySolrInsertionWriter)
 public class EntitySolrInsertionWriter implements ItemWriter<BatchEntityRecord> {
   private final SolrService solrService;
 

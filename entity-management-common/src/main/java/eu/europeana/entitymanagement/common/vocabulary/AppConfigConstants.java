@@ -43,6 +43,15 @@ public class AppConfigConstants {
   public static final String SINGLE_ENTITY_RECORD_READER = "singleEntityRecordReader";
   public static final String SCHEDULED_TASK_READER = "scheduledTaskReader";
 
+  public static  final String entityDereferenceProcessor       = "entityDereferenceProcessor";
+  public static  final String entityConsolidationProcessor     = "entityConsolidationProcessor";
+  public static  final String entityMetricsProcessor           = "entityMetricsProcessor";
+  public static  final String entityVerificationLogger         = "entityVerificationLogger";
+  public static  final String entityRecordDBInsertionWriter    = "entityRecordDBInsertionWriter";
+  public static  final String entitySolrInsertionWriter        = "entitySolrInsertionWriter";
+  public static  final String compositeProcessor               = "compositeProcessor";
+  public static  final String compositeEntityInsertionWriter   = "compositeEntityInsertionWriter";
+
   public static final String PERIODIC_UPDATES_SCHEDULER = "periodicUpdatesScheduler";
   public static final String PERIODIC_REMOVALS_SCHEDULER = "periodicRemovalsScheduler";
 

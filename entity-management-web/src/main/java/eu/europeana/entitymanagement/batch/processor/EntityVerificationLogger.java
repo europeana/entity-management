@@ -9,12 +9,13 @@ import java.util.Objects;
 import java.util.Set;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.entityVerificationLogger;
 
 /**
  * This processor checks the content of Entities after consolidation and logs warnings for any
  * potential issues with the record
  */
-@Component
+@Component(entityVerificationLogger)
 public class EntityVerificationLogger extends BaseEntityProcessor {
 
   private final Set<String> supportedLanguageCodes;
