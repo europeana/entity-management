@@ -143,7 +143,7 @@ public class EMController extends BaseRest {
     checkIfMatchHeader(etag, request);
 
     String entityId = entityRecord.getEntityId();
-    logger.debug("Deprecating entityId={}, isSynchronous={}", entityId, true);
+    logger.debug("Synchronously Deprecating entityId={}", entityId);
 
     // delete from Solr before Mongo, so Solr errors won't leave DB in an inconsistent state
     entityRecordService.disableEntityRecord(entityRecord, true);
