@@ -8,10 +8,10 @@ import java.util.stream.Collectors;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
-import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.entityRecordDBInsertionWriter;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_ENTITY_RECORD_DBINSERTION_WRITER;
 
 /** This {@link ItemWriter} saves EntityRecords to the database. */
-@Component(entityRecordDBInsertionWriter)
+@Component(BEAN_ENTITY_RECORD_DBINSERTION_WRITER)
 public class EntityRecordDatabaseInsertionWriter implements ItemWriter<BatchEntityRecord> {
 
   private final EntityRecordService entityRecordService;

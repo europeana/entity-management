@@ -24,13 +24,13 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
-import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.entityDereferenceProcessor;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_ENTITY_DEREFERENCE_PROCESSOR;
 
 /**
  * This {@link ItemProcessor} retrieves Entity metadata from all proxy datasources, and then
  * overwrites the local metadata if datasource response is different.
  */
-@Component(entityDereferenceProcessor)
+@Component(BEAN_ENTITY_DEREFERENCE_PROCESSOR)
 public class EntityDereferenceProcessor extends BaseEntityProcessor {
 
   private static final String MISMATCH_EXCEPTION_STRING =

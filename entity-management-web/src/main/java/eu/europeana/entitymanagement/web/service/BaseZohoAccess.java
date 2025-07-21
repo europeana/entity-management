@@ -3,15 +3,10 @@ package eu.europeana.entitymanagement.web.service;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.Set;
-import java.util.SortedSet;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import eu.europeana.entitymanagement.batch.model.Task;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -218,7 +213,9 @@ public class BaseZohoAccess {
         // SG: run update synchronously as we don't have many entities disabled and we can report
         // failures
         logger.info("Updating disabled organization with id: {}", operation.getZohoEuropeanaId());
-        entityUpdateService.runSynchronousUpdate(operation.getEntityRecord().getEntityId());
+        entityUpdateService.runSynchronousUpdate(operation.getEntityRecord().getEntityId(),
+                Arrays.asList(Task.DEREFERENCE, Task.CONSOLIDATION, Task.METRICS, Task.VALIDATION),
+                Arrays.asList(Task.DB_UPDATE, Task.SOLR_INSERTION));
         if (allreadyDisabled) {
           // not counted to disabled, needs to be counted for updates
           zohoSyncReport.increaseUpdated(1);

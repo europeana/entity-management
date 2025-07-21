@@ -2,15 +2,11 @@ package eu.europeana.entitymanagement.batch.config;
 
 import eu.europeana.entitymanagement.batch.listener.EntityUpdateStepListener;
 import eu.europeana.entitymanagement.batch.listener.ScheduledTaskItemListener;
-import eu.europeana.entitymanagement.batch.processor.EntityConsolidationProcessor;
-import eu.europeana.entitymanagement.batch.processor.EntityDereferenceProcessor;
-import eu.europeana.entitymanagement.batch.processor.EntityMetricsProcessor;
-import eu.europeana.entitymanagement.batch.processor.EntityVerificationLogger;
+import eu.europeana.entitymanagement.batch.model.Task;
 import eu.europeana.entitymanagement.batch.reader.EntityRecordDatabaseReader;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
-import eu.europeana.entitymanagement.batch.writer.EntityRecordDatabaseInsertionWriter;
-import eu.europeana.entitymanagement.batch.writer.EntitySolrInsertionWriter;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.config.AppAutoconfig;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
@@ -25,17 +21,13 @@ import org.springframework.batch.core.step.skip.SkipPolicy;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.support.CompositeItemProcessor;
 import org.springframework.batch.item.support.CompositeItemWriter;
 import org.springframework.batch.item.support.SynchronizedItemStreamReader;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.Arrays;
 import java.util.List;
 
 import static eu.europeana.entitymanagement.batch.utils.BatchUtils.*;
@@ -60,8 +52,8 @@ public class EntityUpdateJobFactory {
     @Resource
     EntityManagementConfiguration emConfig;
 
-    @Autowired
-    ApplicationContext applicationContext;
+    @Resource
+    AppAutoconfig emAutoConfig;
 
     public EntityUpdateJobFactory(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory,
                                   ScheduledTaskItemListener itemListener,
@@ -72,18 +64,18 @@ public class EntityUpdateJobFactory {
         this.scheduledTaskService = scheduledTaskService;
     }
 
-    // TODO this is a execution, we should seperate it from the factory methods and step creations
     /**
-     * Job for updating a single entity. Expects `entityId` string in JobParameters. This would
+     * Creates Job via JobBuilderFactory.
+     * Expects `entityId` string in JobParameters. This would
      * typically be run synchronously
      */
-    public Job updateSingleEntity() {
+    public Job createJob(List<Task> processors, List<Task> writers) {
         return this.jobBuilderFactory
                 .get(JOB_UPDATE_SINGLE_ENTITY)
                 .incrementer(new RunIdIncrementer())
                 // this job is always launched from web requests, so synchronousTaskExecutor is used. It
                 // also directly retrieves entities from the EntityRecord database.
-                .start(synchronousUpdate())
+                .start(synchronousUpdate(processors, writers))
                 .build();
     }
 
@@ -91,23 +83,22 @@ public class EntityUpdateJobFactory {
      * Creates a step for synchronous update
      * @return
      */
-    private Step synchronousUpdate() {
+    private Step synchronousUpdate(List<Task> processors, List<Task> writers) {
         return this.stepBuilderFactory
                 .get(STEP_UPDATE_ENTITY)
                 .<BatchEntityRecord, BatchEntityRecord>chunk(1)
                 .reader(getReader(true))
-                .processor((ItemProcessor<BatchEntityRecord, BatchEntityRecord>) applicationContext.getBean(compositeProcessor))
-                .writer((ItemWriter<BatchEntityRecord>) applicationContext.getBean(compositeEntityInsertionWriter))
+                .processor(getProcessor(processors))
+                .writer(getWriter(writers))
                 .listener((ItemProcessListener<? super BatchEntityRecord, ? super BatchEntityRecord>) itemListener)
                 .faultTolerant()
                 .skipPolicy(noopSkipPolicy)
-                .taskExecutor((TaskExecutor)applicationContext.getBean(WEB_REQUEST_JOB_EXECUTOR))
+                .taskExecutor((TaskExecutor)getApplicationContext().getBean(WEB_REQUEST_JOB_EXECUTOR))
                 .throttleLimit(emConfig.getBatchUpdatesThrottleLimit())
                 .listener(stepExecutionListener(List.of(ScheduledUpdateType.FULL_UPDATE), true))
                 .build();
 
     }
-
 
     /**
      * Creates Item reader based on synchronus and async updates
@@ -115,48 +106,27 @@ public class EntityUpdateJobFactory {
      * @return
      */
     private ItemReader<BatchEntityRecord> getReader(boolean synchronous) {
-        return synchronous ? (EntityRecordDatabaseReader) applicationContext.getBean(SINGLE_ENTITY_RECORD_READER)
-                : (SynchronizedItemStreamReader)applicationContext.getBean(SCHEDULED_TASK_READER);
+        return synchronous ? (EntityRecordDatabaseReader) getApplicationContext().getBean(SINGLE_ENTITY_RECORD_READER)
+                : (SynchronizedItemStreamReader)getApplicationContext().getBean(SCHEDULED_TASK_READER);
     }
 
+    private ItemProcessor<BatchEntityRecord, BatchEntityRecord> getProcessor(List<Task> processors) {
+        return isFullUpdate(processors) ?
+                (ItemProcessor<BatchEntityRecord, BatchEntityRecord>) getApplicationContext().getBean(FULL_ENTITY_UPDATE_PROCESSOR)
+                 : emAutoConfig.compositeProcessor(processors);
 
-    /**
-     * Creating it as a bean as the processor list is same for all the Internal Task of EM.
-     * For performnace will access them from application context than creating a list for every request
-     * @see <a href="http://docs.google.com/document/d/16k9PcCMFwl2LXjnnzotZRPc-QqM-Ar1D0VELHt4t_hA/edit?tab=t.0#heading=h.fj6e15rbq64q"></a> }
-     *
-     * Creates the processor list -
-     *    Processors: Dereference + consolidation + metrics + validation
-     * @return
-     */
-    @Bean(compositeProcessor)
-    private ItemProcessor<BatchEntityRecord, BatchEntityRecord> compositeUpdateProcessor() {
-        CompositeItemProcessor<BatchEntityRecord, BatchEntityRecord> compositeItemProcessor =
-                new CompositeItemProcessor<>();
-        compositeItemProcessor.setDelegates(
-                Arrays.asList(
-                        applicationContext.getBean(entityDereferenceProcessor, EntityDereferenceProcessor.class),
-                        applicationContext.getBean(entityConsolidationProcessor, EntityConsolidationProcessor.class),
-                        applicationContext.getBean(entityMetricsProcessor, EntityMetricsProcessor.class),
-                        applicationContext.getBean(entityVerificationLogger, EntityVerificationLogger.class)));
-        return compositeItemProcessor;
     }
 
-    /**
-     * Creating it as a bean as the writer list is same for all the Internal Task of EM.
-     * For performance will access them from application context than creating a list for every request
-     * @see <a href="http://docs.google.com/document/d/16k9PcCMFwl2LXjnnzotZRPc-QqM-Ar1D0VELHt4t_hA/edit?tab=t.0#heading=h.fj6e15rbq64q"></a> }
-     * Creates the writer list -
-     *    Writer: Db update + Solr update
-     * @return
-     */
-    @Bean(compositeEntityInsertionWriter)
-    private ItemWriter<BatchEntityRecord> compositeEntityWriter() {
-        CompositeItemWriter<BatchEntityRecord> compositeWriter = new CompositeItemWriter<>();
-        compositeWriter.setDelegates(Arrays.asList(
-                applicationContext.getBean(entityRecordDBInsertionWriter, EntityRecordDatabaseInsertionWriter.class),
-                applicationContext.getBean(entitySolrInsertionWriter, EntitySolrInsertionWriter.class)));
-        return compositeWriter;
+    private ItemWriter<BatchEntityRecord> getWriter(List<Task> writers) {
+        ItemWriter<BatchEntityRecord> writer = new CompositeItemWriter<>();
+        if (writers.contains(Task.DB_UPDATE) && writers.contains(Task.SOLR_INSERTION)) {
+            writer = (ItemWriter<BatchEntityRecord>) getApplicationContext().getBean(ENTITY_UPDATE_WRITERS);
+        } else if (writers.contains(Task.DB_UPDATE)) {
+            writer = emAutoConfig.recordDBInsertionWriter();
+        } else if (writers.contains(Task.SOLR_INSERTION)) {
+            writer = emAutoConfig.entitySolrInsertionWriter();
+        }
+        return writer;
     }
 
     /** Creates a StepExecutionListener that's called before / after the step runs
@@ -168,4 +138,12 @@ public class EntityUpdateJobFactory {
                 scheduledTaskService, updateType, isSynchronous, emConfig.getMaxFailedTaskRetries());
     }
 
+    private boolean isFullUpdate(List<Task> processors) {
+        return processors.contains(Task.DEREFERENCE) && processors.contains(Task.CONSOLIDATION)
+                && processors.contains(Task.VALIDATION) && processors.contains(Task.METRICS);
+    }
+
+    public ApplicationContext getApplicationContext() {
+        return emAutoConfig.getApplicationContext();
+    }
 }

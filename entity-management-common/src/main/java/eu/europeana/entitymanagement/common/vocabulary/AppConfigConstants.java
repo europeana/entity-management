@@ -43,14 +43,14 @@ public class AppConfigConstants {
   public static final String SINGLE_ENTITY_RECORD_READER = "singleEntityRecordReader";
   public static final String SCHEDULED_TASK_READER = "scheduledTaskReader";
 
-  public static  final String entityDereferenceProcessor       = "entityDereferenceProcessor";
-  public static  final String entityConsolidationProcessor     = "entityConsolidationProcessor";
-  public static  final String entityMetricsProcessor           = "entityMetricsProcessor";
-  public static  final String entityVerificationLogger         = "entityVerificationLogger";
-  public static  final String entityRecordDBInsertionWriter    = "entityRecordDBInsertionWriter";
-  public static  final String entitySolrInsertionWriter        = "entitySolrInsertionWriter";
-  public static  final String compositeProcessor               = "compositeProcessor";
-  public static  final String compositeEntityInsertionWriter   = "compositeEntityInsertionWriter";
+  public static  final String BEAN_ENTITY_DEREFERENCE_PROCESSOR       = "entityDereferenceProcessor";
+  public static  final String BEAN_ENTITY_CONSOLIDATION_PROCESSOR     = "entityConsolidationProcessor";
+  public static  final String BEAN_ENTITY_METRICS_PROCESSOR           = "entityMetricsProcessor";
+  public static  final String BEAN_ENTITY_VERIFICATION_LOGGER         = "entityVerificationLogger";
+  public static  final String BEAN_ENTITY_RECORD_DBINSERTION_WRITER   = "entityRecordDBInsertionWriter";
+  public static  final String BEAN_ENTITY_SOLR_INSERTION_WRITER       = "entitySolrInsertionWriter";
+  public static  final String FULL_ENTITY_UPDATE_PROCESSOR            = "fullEntityUpdateProcessor";
+  public static  final String ENTITY_UPDATE_WRITERS                   = "entityUpdateWriters";
 
   public static final String PERIODIC_UPDATES_SCHEDULER = "periodicUpdatesScheduler";
   public static final String PERIODIC_REMOVALS_SCHEDULER = "periodicRemovalsScheduler";

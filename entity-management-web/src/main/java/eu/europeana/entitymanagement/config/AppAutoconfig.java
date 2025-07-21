@@ -6,13 +6,29 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.xml.bind.JAXBContext;
+
+import eu.europeana.entitymanagement.batch.model.Task;
+import eu.europeana.entitymanagement.batch.processor.EntityConsolidationProcessor;
+import eu.europeana.entitymanagement.batch.processor.EntityDereferenceProcessor;
+import eu.europeana.entitymanagement.batch.processor.EntityMetricsProcessor;
+import eu.europeana.entitymanagement.batch.processor.EntityVerificationLogger;
+import eu.europeana.entitymanagement.batch.writer.EntityRecordDatabaseInsertionWriter;
+import eu.europeana.entitymanagement.batch.writer.EntitySolrInsertionWriter;
+import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.batch.item.ItemProcessor;
+import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.support.CompositeItemProcessor;
+import org.springframework.batch.item.support.CompositeItemWriter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,6 +54,9 @@ import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
 public class AppAutoconfig extends AppConfigConstants {
 
   private static final Logger LOG = LogManager.getLogger(AppAutoconfig.class);
+
+  @Autowired
+  ApplicationContext applicationContext;
 
   @Resource private EntityManagementConfiguration emConfiguration;
 
@@ -135,5 +154,74 @@ public class AppAutoconfig extends AppConfigConstants {
     source.setBasename("messages");
     source.setDefaultEncoding(StandardCharsets.UTF_8.name());
     return source;
+  }
+
+
+  public EntityRecordDatabaseInsertionWriter recordDBInsertionWriter() {
+    return applicationContext.getBean(BEAN_ENTITY_RECORD_DBINSERTION_WRITER, EntityRecordDatabaseInsertionWriter.class);
+  }
+
+  public EntitySolrInsertionWriter entitySolrInsertionWriter() {
+    return applicationContext.getBean(BEAN_ENTITY_SOLR_INSERTION_WRITER, EntitySolrInsertionWriter.class);
+  }
+
+
+  /**
+   * Creating it as a bean as the writer list is same for all the Internal Task of EM.
+   * For performance will access them from application context than creating a list for every request
+   * @see <a href="http://docs.google.com/document/d/16k9PcCMFwl2LXjnnzotZRPc-QqM-Ar1D0VELHt4t_hA/edit?tab=t.0#heading=h.fj6e15rbq64q"></a> }
+   * Creates the writer list -
+   *    Writer: Db update + Solr update
+   * @return
+   */
+  @Bean(ENTITY_UPDATE_WRITERS)
+  public ItemWriter<BatchEntityRecord> entityUpdateWriters() {
+    CompositeItemWriter<BatchEntityRecord> compositeWriter = new CompositeItemWriter<>();
+    compositeWriter.setDelegates(Arrays.asList(recordDBInsertionWriter(), entitySolrInsertionWriter()));
+    return compositeWriter;
+  }
+
+
+  /**
+   * Creating it as a bean as this processor list is used for most of the Internal Task of EM.
+   * For performnace will access them from application context than creating a list for every request
+   * @see <a href="http://docs.google.com/document/d/16k9PcCMFwl2LXjnnzotZRPc-QqM-Ar1D0VELHt4t_hA/edit?tab=t.0#heading=h.fj6e15rbq64q"></a> }
+   *
+   * Creates the processor list -
+   *    Processors: Dereference + consolidation + metrics + validation
+   * @return
+   */
+  @Bean(FULL_ENTITY_UPDATE_PROCESSOR)
+  public ItemProcessor<BatchEntityRecord, BatchEntityRecord> fullEntityUpdateProcessor() {
+    CompositeItemProcessor<BatchEntityRecord, BatchEntityRecord> compositeItemProcessor =
+            new CompositeItemProcessor<>();
+    compositeItemProcessor.setDelegates(Arrays.asList(
+            applicationContext.getBean(BEAN_ENTITY_DEREFERENCE_PROCESSOR, EntityDereferenceProcessor.class),
+            applicationContext.getBean(BEAN_ENTITY_CONSOLIDATION_PROCESSOR, EntityConsolidationProcessor.class),
+            applicationContext.getBean(BEAN_ENTITY_METRICS_PROCESSOR, EntityMetricsProcessor.class),
+            applicationContext.getBean(BEAN_ENTITY_VERIFICATION_LOGGER, EntityVerificationLogger.class)));
+
+    return compositeItemProcessor;
+  }
+
+  /**
+   * More generic composite processor,
+   * Creates a composite processor with the list of processors provided
+   * @param processors
+   * @return
+   */
+  public ItemProcessor<BatchEntityRecord, BatchEntityRecord> compositeProcessor(List<Task> processors) {
+    CompositeItemProcessor<BatchEntityRecord, BatchEntityRecord> compositeItemProcessor =
+            new CompositeItemProcessor<>();
+    List<ItemProcessor<BatchEntityRecord, BatchEntityRecord>> delegates = new ArrayList<>(processors.size());
+    for (Task process: processors) {
+      delegates.add((ItemProcessor<BatchEntityRecord, BatchEntityRecord>) applicationContext.getBean(process.getBeanName()));
+    }
+    compositeItemProcessor.setDelegates(delegates);
+    return compositeItemProcessor;
+  }
+
+  public ApplicationContext getApplicationContext() {
+    return applicationContext;
   }
 }
