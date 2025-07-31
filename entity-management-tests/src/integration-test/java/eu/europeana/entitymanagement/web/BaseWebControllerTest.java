@@ -11,6 +11,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Arrays;
 import java.util.Optional;
 
+import eu.europeana.entitymanagement.batch.config.JobDescriptionFactory;
+import eu.europeana.entitymanagement.batch.model.JobDescription;
+import eu.europeana.entitymanagement.batch.model.JobType;
 import eu.europeana.entitymanagement.batch.model.Task;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,6 +65,8 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
   @Autowired private WebApplicationContext webApplicationContext;
   
   @Autowired protected VocabularyRepository vocabRepository;
+
+  @Autowired protected JobDescriptionFactory jobDescriptionFactory;
 
   @BeforeEach
   protected void setup() throws Exception {
@@ -156,9 +161,7 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
             europeanaProxyEntity, xmlBaseEntity.toEntityModel(), dataSource, null);
 
     // trigger update to generate consolidated entity
-    entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId(),
-            Arrays.asList(Task.DEREFERENCE, Task.CONSOLIDATION, Task.METRICS, Task.VALIDATION),
-            Arrays.asList(Task.DB_UPDATE, Task.SOLR_INSERTION));
+    entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId(), jobDescriptionFactory.get(JobType.FULL_UPDATE));
 
     // return entityRecord version with consolidated entity
     return entityRecordService.retrieveEntityRecord(savedRecord.getEntityId(), EntityProfile.dereference.name(), false);
@@ -195,9 +198,7 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
             europeanaProxyEntity, zohoOrganization, dataSource, null);
 
     // trigger update to generate consolidated entity
-    entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId(),
-            Arrays.asList(Task.DEREFERENCE, Task.CONSOLIDATION, Task.METRICS, Task.VALIDATION),
-            Arrays.asList(Task.DB_UPDATE, Task.SOLR_INSERTION));
+    entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId(), jobDescriptionFactory.get(JobType.FULL_UPDATE));
 
     // return entityRecord version with consolidated entity
     return entityRecordService.retrieveEntityRecord(savedRecord.getEntityId(), EntityProfile.dereference.name(), false);

@@ -4,6 +4,7 @@ import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants
 
 import eu.europeana.entitymanagement.batch.config.EntityUpdateJobConfig;
 import eu.europeana.entitymanagement.batch.config.EntityUpdateJobFactory;
+import eu.europeana.entitymanagement.batch.model.JobDescription;
 import eu.europeana.entitymanagement.batch.model.Task;
 import eu.europeana.entitymanagement.batch.utils.BatchUtils;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
@@ -51,10 +52,11 @@ public class EntityUpdateService {
    * @param writers writers to be run for the entity
    * @throws Exception on exception
    */
-  public void runSynchronousUpdate(String entityId, List<Task> processors, List<Task> writers) throws Exception {
-    logger.debug("Triggering synchronous update for entityId={} with processors={}, writers={}", entityId, processors, writers);
+  public void runSynchronousUpdate(String entityId, JobDescription jobDescription) throws Exception {
+    logger.debug("Triggering synchronous update for entityId={} with processors={}, writers={}",
+            entityId, jobDescription.getProcessors(), jobDescription.getWriters());
     syncWebRequestLauncher.run(
-        entityUpdateJobFactory.createJob(processors, writers),
+        entityUpdateJobFactory.createJob(jobDescription),
         BatchUtils.createJobParameters(
             entityId, Date.from(Instant.now()), List.of(ScheduledUpdateType.FULL_UPDATE), true));
   }

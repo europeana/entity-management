@@ -3,7 +3,9 @@ package eu.europeana.entitymanagement.batch.model;
 public enum JobType {
   SCHEDULE_UPDATE("schedule_update"),
   ZOHO_SYNC("zoho_sync"),
-  SCHEDULE_DELETION("schedule_deletion");
+  SCHEDULE_DELETION("schedule_deletion"),
+  FULL_UPDATE("full_update"),
+  META_UPDATE("meta_update");
 
   final String value;
 

@@ -14,9 +14,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 
-import eu.europeana.entitymanagement.batch.model.Task;
+import eu.europeana.entitymanagement.batch.config.JobDescriptionFactory;
+import eu.europeana.entitymanagement.batch.model.JobDescription;
+import eu.europeana.entitymanagement.batch.model.JobType;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -42,7 +45,6 @@ import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.common.config.DataSource;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
@@ -74,6 +76,7 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import io.swagger.annotations.ApiOperation;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.JOB_DESCRIPTION_FACTORY;
 
 @RestController
 @Validated
@@ -85,6 +88,7 @@ public class EMController extends BaseRest {
   private final DereferenceServiceLocator dereferenceServiceLocator;
   private final DataSources datasources;
   private final EntityUpdateService entityUpdateService;
+  private final JobDescriptionFactory jobDescriptionFactory;
 
   private static final String EXTERNAL_ID_REMOVED_MSG =
       "Entity id '%s' already exists as '%s', which has been removed";
@@ -103,17 +107,19 @@ public class EMController extends BaseRest {
    * @param dereferenceServiceLocator service for dereferencing external uros
    * @param datasources datasources configurations
    * @param entityUpdateService service for batch updating of entities
-   * @param emConfig application configurations
+   * @param jobDescriptionFactory factory to fetch the updates to be run
    */
   @Autowired
   public EMController(EntityRecordService entityRecordService, SolrService solrService,
-      DereferenceServiceLocator dereferenceServiceLocator, DataSources datasources,
-      EntityUpdateService entityUpdateService, EntityManagementConfiguration emConfig) {
+                      DereferenceServiceLocator dereferenceServiceLocator, DataSources datasources,
+                      EntityUpdateService entityUpdateService,
+                      @Qualifier(JOB_DESCRIPTION_FACTORY) JobDescriptionFactory jobDescriptionFactory) {
     this.entityRecordService = entityRecordService;
     this.solrService = solrService;
     this.dereferenceServiceLocator = dereferenceServiceLocator;
     this.datasources = datasources;
     this.entityUpdateService = entityUpdateService;
+    this.jobDescriptionFactory = jobDescriptionFactory;
   }
 
   @ApiOperation(value = "Disable an entity", nickname = "disableEntity",
@@ -237,14 +243,9 @@ public class EMController extends BaseRest {
 
     entityRecordService.replaceEuropeanaProxy(updateRequestEntity, entityRecord);
     entityRecordService.update(entityRecord);
-
-    // update the consolidated version in mongo and solr with - Processors: Consolidation, Validation
-    // Writers: Database, Index
     try {
       return launchTaskAndRetrieveEntity(request, EntityTypes.getByEntityType(type), identifier,
-          entityRecord, profile,
-              Arrays.asList(Task.CONSOLIDATION, Task.VALIDATION),
-              Arrays.asList(Task.DB_UPDATE, Task.SOLR_INSERTION));
+              entityRecord, profile, jobDescriptionFactory.get(JobType.META_UPDATE));
     } catch (UnsupportedEntityTypeException e) {
       throw new EntityNotFoundException("/" + type + "/" + identifier, e);
     }
@@ -304,11 +305,7 @@ public class EMController extends BaseRest {
     EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier, profile, false);
     // update from external data source is not available for static data sources
     datasources.verifyDataSource(entityRecord.getExternalProxies().get(0).getProxyId(), false);
-
-    // Processors: Dereference, Consolidation, Metrics, Validation and Writers: Database, Index
-    return launchTaskAndRetrieveEntity(request, enType, identifier, entityRecord, profile,
-            Arrays.asList(Task.DEREFERENCE, Task.CONSOLIDATION, Task.METRICS, Task.VALIDATION),
-            Arrays.asList(Task.DB_UPDATE, Task.SOLR_INSERTION));
+    return launchTaskAndRetrieveEntity(request, enType, identifier, entityRecord, profile, jobDescriptionFactory.get(JobType.FULL_UPDATE));
   }
 
   @ApiOperation(value = "Update multiple entities from external data source",
@@ -547,14 +544,12 @@ public class EMController extends BaseRest {
     logger.debug("Created Entity record for externalId={}; entityId={}", creationRequestId,
         savedEntityRecord.getEntityId());
 
-    // Processors: Dereference, Consolidation, Metrics, Validation and Writers: Database, Index
     return launchTaskAndRetrieveEntity(request,
             EntityTypes.getByEntityType(savedEntityRecord.getEntity().getType()),
             getDatabaseIdentifier(savedEntityRecord.getEntityId()),
             savedEntityRecord,
             EntityProfile.internal.toString(),
-            Arrays.asList(Task.DEREFERENCE, Task.CONSOLIDATION, Task.METRICS, Task.VALIDATION),
-            Arrays.asList(Task.DB_UPDATE, Task.SOLR_INSERTION));
+            jobDescriptionFactory.get(JobType.FULL_UPDATE));
   }
 
   Entity dereferenceEntity(String creationRequestId, String creationRequestType)
@@ -603,10 +598,7 @@ public class EMController extends BaseRest {
 
     entityRecordService.changeExternalProxy(entityRecord, url);
     entityRecordService.update(entityRecord);
-    // Processors: Dereference, Consolidation, Metrics, Validation and Writers: Database, Index
-    return launchTaskAndRetrieveEntity(request, enType, identifier, entityRecord, profile,
-            Arrays.asList(Task.DEREFERENCE, Task.CONSOLIDATION, Task.METRICS, Task.VALIDATION),
-            Arrays.asList(Task.DB_UPDATE, Task.SOLR_INSERTION));
+    return launchTaskAndRetrieveEntity(request, enType, identifier, entityRecord, profile, jobDescriptionFactory.get(JobType.FULL_UPDATE));
   }
 
   @ApiOperation(value = "Retrieve multiple entities", nickname = "retrieveEntities")
@@ -707,10 +699,10 @@ public class EMController extends BaseRest {
 
   private ResponseEntity<String> launchTaskAndRetrieveEntity(HttpServletRequest request,
                                                              EntityTypes type, String identifier, EntityRecord entityRecord, String profile,
-                                                             List<Task> processors, List<Task> writers) throws Exception {
+                                                             JobDescription jobDescription) throws Exception {
 
     // launch synchronous update, then retrieve entity from DB afterwards
-    entityUpdateService.runSynchronousUpdate(entityRecord.getEntityId(), processors, writers);
+    entityUpdateService.runSynchronousUpdate(entityRecord.getEntityId(), jobDescription);
 
     entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, profile, false);
 

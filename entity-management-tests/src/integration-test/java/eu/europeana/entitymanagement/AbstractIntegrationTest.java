@@ -8,6 +8,9 @@ import java.util.Objects;
 import java.util.Optional;
 import javax.xml.bind.JAXBContext;
 
+import eu.europeana.entitymanagement.batch.config.JobDescriptionFactory;
+import eu.europeana.entitymanagement.batch.model.JobDescription;
+import eu.europeana.entitymanagement.batch.model.JobType;
 import eu.europeana.entitymanagement.batch.model.Task;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -71,6 +74,7 @@ public abstract class AbstractIntegrationTest {
   @Autowired protected ConceptSchemeService emConceptSchemeService;
   @Autowired protected EntityManagementConfiguration emConfig;
   @Autowired protected ZohoConfiguration zohoConfiguration;
+  @Autowired protected JobDescriptionFactory jobDescriptionFactory;
     
   static {
     MONGO_CONTAINER =
@@ -279,9 +283,7 @@ public abstract class AbstractIntegrationTest {
             europeanaProxyEntity, xmlBaseEntity.toEntityModel(), dataSource, null);
 
     // trigger update to generate consolidated entity
-    entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId(),
-            Arrays.asList(Task.DEREFERENCE, Task.CONSOLIDATION, Task.METRICS, Task.VALIDATION),
-            Arrays.asList(Task.DB_UPDATE, Task.SOLR_INSERTION));
+    entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId(), jobDescriptionFactory.get(JobType.FULL_UPDATE));
 
     // return entityRecord version with consolidated entity
     return entityRecordService.retrieveEntityRecord(savedRecord.getEntityId(), EntityProfile.dereference.name(), false);

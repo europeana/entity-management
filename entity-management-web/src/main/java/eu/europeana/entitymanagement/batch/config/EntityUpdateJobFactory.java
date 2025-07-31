@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement.batch.config;
 
 import eu.europeana.entitymanagement.batch.listener.EntityUpdateStepListener;
 import eu.europeana.entitymanagement.batch.listener.ScheduledTaskItemListener;
+import eu.europeana.entitymanagement.batch.model.JobDescription;
 import eu.europeana.entitymanagement.batch.model.Task;
 import eu.europeana.entitymanagement.batch.reader.EntityRecordDatabaseReader;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
@@ -69,13 +70,13 @@ public class EntityUpdateJobFactory {
      * Expects `entityId` string in JobParameters. This would
      * typically be run synchronously
      */
-    public Job createJob(List<Task> processors, List<Task> writers) {
+    public Job createJob(JobDescription jobDescription) {
         return this.jobBuilderFactory
                 .get(JOB_UPDATE_SINGLE_ENTITY)
                 .incrementer(new RunIdIncrementer())
                 // this job is always launched from web requests, so synchronousTaskExecutor is used. It
                 // also directly retrieves entities from the EntityRecord database.
-                .start(synchronousUpdate(processors, writers))
+                .start(synchronousUpdate(jobDescription))
                 .build();
     }
 
@@ -83,21 +84,25 @@ public class EntityUpdateJobFactory {
      * Creates a step for synchronous update
      * @return
      */
-    private Step synchronousUpdate(List<Task> processors, List<Task> writers) {
+    private Step synchronousUpdate(JobDescription jobDescription) {
         return this.stepBuilderFactory
                 .get(STEP_UPDATE_ENTITY)
                 .<BatchEntityRecord, BatchEntityRecord>chunk(1)
                 .reader(getReader(true))
-                .processor(getProcessor(processors))
-                .writer(getWriter(writers))
+                .processor(getProcessor(jobDescription))
+                .writer(getWriter(jobDescription))
                 .listener((ItemProcessListener<? super BatchEntityRecord, ? super BatchEntityRecord>) itemListener)
                 .faultTolerant()
                 .skipPolicy(noopSkipPolicy)
-                .taskExecutor((TaskExecutor)getApplicationContext().getBean(WEB_REQUEST_JOB_EXECUTOR))
+                .taskExecutor(getTaskExecutor())
                 .throttleLimit(emConfig.getBatchUpdatesThrottleLimit())
                 .listener(stepExecutionListener(List.of(ScheduledUpdateType.FULL_UPDATE), true))
                 .build();
 
+    }
+
+    private TaskExecutor getTaskExecutor() {
+        return (TaskExecutor)getApplicationContext().getBean(WEB_REQUEST_JOB_EXECUTOR);
     }
 
     /**
@@ -110,20 +115,20 @@ public class EntityUpdateJobFactory {
                 : (SynchronizedItemStreamReader)getApplicationContext().getBean(SCHEDULED_TASK_READER);
     }
 
-    private ItemProcessor<BatchEntityRecord, BatchEntityRecord> getProcessor(List<Task> processors) {
-        return isFullUpdate(processors) ?
+    private ItemProcessor<BatchEntityRecord, BatchEntityRecord> getProcessor(JobDescription jobDescription) {
+        return jobDescription.isFullUpdate() ?
                 (ItemProcessor<BatchEntityRecord, BatchEntityRecord>) getApplicationContext().getBean(FULL_ENTITY_UPDATE_PROCESSOR)
-                 : emAutoConfig.compositeProcessor(processors);
+                 : emAutoConfig.compositeProcessor(jobDescription.getProcessors());
 
     }
 
-    private ItemWriter<BatchEntityRecord> getWriter(List<Task> writers) {
+    private ItemWriter<BatchEntityRecord> getWriter(JobDescription jobDescription) {
         ItemWriter<BatchEntityRecord> writer = new CompositeItemWriter<>();
-        if (writers.contains(Task.DB_UPDATE) && writers.contains(Task.SOLR_INSERTION)) {
+        if (jobDescription.isFullUpdate()) {
             writer = (ItemWriter<BatchEntityRecord>) getApplicationContext().getBean(ENTITY_UPDATE_WRITERS);
-        } else if (writers.contains(Task.DB_UPDATE)) {
+        } else if (jobDescription.mongoUpdate()) {
             writer = emAutoConfig.recordDBInsertionWriter();
-        } else if (writers.contains(Task.SOLR_INSERTION)) {
+        } else if (jobDescription.solrInsertion()) {
             writer = emAutoConfig.entitySolrInsertionWriter();
         }
         return writer;

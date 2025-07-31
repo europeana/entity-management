@@ -52,6 +52,9 @@ public class AppConfigConstants {
   public static  final String FULL_ENTITY_UPDATE_PROCESSOR            = "fullEntityUpdateProcessor";
   public static  final String ENTITY_UPDATE_WRITERS                   = "entityUpdateWriters";
 
+  public static  final String JOB_DESCRIPTION_FACTORY                 = "jobDescriptionFactory";
+
+
   public static final String PERIODIC_UPDATES_SCHEDULER = "periodicUpdatesScheduler";
   public static final String PERIODIC_REMOVALS_SCHEDULER = "periodicRemovalsScheduler";
 

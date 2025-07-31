@@ -11,8 +11,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import eu.europeana.entitymanagement.batch.config.JobDescriptionFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
@@ -46,6 +49,8 @@ import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.JOB_DESCRIPTION_FACTORY;
+
 @Service(AppAutoconfig.BEAN_ZOHO_SYNC_SERVICE)
 public class ZohoSyncService extends BaseZohoAccess {
 
@@ -72,10 +77,11 @@ public class ZohoSyncService extends BaseZohoAccess {
   public ZohoSyncService(EntityRecordService entityRecordService,
       EntityUpdateService entityUpdateService, EntityManagementConfiguration emConfiguration,
       DataSources datasources, ZohoConfiguration zohoConfiguration, 
-      ZohoSyncRepository zohoSyncRepo, ZohoDereferenceService zohoDereferenceService, JsonLdSerializer emJsonldSerializer) {
+      ZohoSyncRepository zohoSyncRepo, ZohoDereferenceService zohoDereferenceService, JsonLdSerializer emJsonldSerializer,
+      @Qualifier(JOB_DESCRIPTION_FACTORY) JobDescriptionFactory jobDescriptionFactory) {
 
     super(entityRecordService, entityUpdateService, emConfiguration, datasources, zohoConfiguration,
-        zohoSyncRepo, zohoDereferenceService);
+        zohoSyncRepo, zohoDereferenceService, jobDescriptionFactory);
     this.emJsonldSerializer = emJsonldSerializer;
   }
 

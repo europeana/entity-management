@@ -6,7 +6,9 @@ import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import eu.europeana.entitymanagement.batch.model.Task;
+import eu.europeana.entitymanagement.batch.config.JobDescriptionFactory;
+import eu.europeana.entitymanagement.batch.model.JobDescription;
+import eu.europeana.entitymanagement.batch.model.JobType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,6 +40,9 @@ import eu.europeana.entitymanagement.zoho.organization.ZohoConfiguration;
 import eu.europeana.entitymanagement.zoho.organization.ZohoDereferenceService;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
+
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.JOB_DESCRIPTION_FACTORY;
 
 public class BaseZohoAccess {
 
@@ -59,22 +64,24 @@ public class BaseZohoAccess {
 
   protected final ZohoDereferenceService zohoDereferenceService;
 
+  protected final JobDescriptionFactory jobDescriptionFactory;
+
   /**
    * Constructor for service initialization
-   * 
+   *  @param solrService solr service
    * @param entityRecordService the entity record service
    * @param entityUpdateService the entity update service
    * @param emConfiguration application configuration
    * @param datasources data source configurations
    * @param zohoConfiguration zoho access configuration
-   * @param solrService solr service
    * @param zohoSyncRepo repository for zoho sync logging
    * @param zohoDereferenceService the service used to dereference zoho organizations
+   * @param jobDescriptionFactory
    */
   public BaseZohoAccess(EntityRecordService entityRecordService,
-      EntityUpdateService entityUpdateService, EntityManagementConfiguration emConfiguration,
-      DataSources datasources, ZohoConfiguration zohoConfiguration, ZohoSyncRepository zohoSyncRepo,
-      ZohoDereferenceService zohoDereferenceService) {
+                        EntityUpdateService entityUpdateService, EntityManagementConfiguration emConfiguration,
+                        DataSources datasources, ZohoConfiguration zohoConfiguration, ZohoSyncRepository zohoSyncRepo,
+                        ZohoDereferenceService zohoDereferenceService, JobDescriptionFactory jobDescriptionFactory) {
     this.entityRecordService = entityRecordService;
     this.entityUpdateService = entityUpdateService;
     this.emConfiguration = emConfiguration;
@@ -83,6 +90,7 @@ public class BaseZohoAccess {
     this.zohoDataSource = initZohoDataSource();
     this.zohoSyncRepo = zohoSyncRepo;
     this.zohoDereferenceService = zohoDereferenceService;
+    this.jobDescriptionFactory = jobDescriptionFactory;
   }
 
   protected DataSource initZohoDataSource() {
@@ -213,9 +221,7 @@ public class BaseZohoAccess {
         // SG: run update synchronously as we don't have many entities disabled and we can report
         // failures
         logger.info("Updating disabled organization with id: {}", operation.getZohoEuropeanaId());
-        entityUpdateService.runSynchronousUpdate(operation.getEntityRecord().getEntityId(),
-                Arrays.asList(Task.DEREFERENCE, Task.CONSOLIDATION, Task.METRICS, Task.VALIDATION),
-                Arrays.asList(Task.DB_UPDATE, Task.SOLR_INSERTION));
+        entityUpdateService.runSynchronousUpdate(operation.getEntityRecord().getEntityId(), jobDescriptionFactory.get(JobType.FULL_UPDATE));
         if (allreadyDisabled) {
           // not counted to disabled, needs to be counted for updates
           zohoSyncReport.increaseUpdated(1);
