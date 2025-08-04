@@ -37,7 +37,7 @@ public class JobDescription {
     }
 
     public boolean isFullUpdate() {
-        return this.getJobType().equals(JobType.FULL_UPDATE);
+        return this.getJobType() == JobType.FULL_UPDATE;
     }
 
     public boolean mongoUpdate() {
