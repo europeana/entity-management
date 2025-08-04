@@ -203,8 +203,7 @@ public class EMController extends BaseRest {
             getDatabaseIdentifier(entityRecord.getEntityId()),
             entityRecord,
             EntityProfile.internal.toString(),
-            jobDescriptionFactory.get(JobType.FULL_UPDATE),
-            HttpStatus.OK);
+            jobDescriptionFactory.get(JobType.FULL_UPDATE));
   }
 
   @ApiOperation(value = "Update an entity", nickname = "updateEntity",
@@ -250,7 +249,7 @@ public class EMController extends BaseRest {
     entityRecordService.update(entityRecord);
     try {
       return launchTaskAndRetrieveEntity(request, EntityTypes.getByEntityType(type), identifier,
-              entityRecord, profile, jobDescriptionFactory.get(JobType.META_UPDATE), HttpStatus.ACCEPTED);
+              entityRecord, profile, jobDescriptionFactory.get(JobType.META_UPDATE));
     } catch (UnsupportedEntityTypeException e) {
       throw new EntityNotFoundException("/" + type + "/" + identifier, e);
     }
@@ -311,7 +310,7 @@ public class EMController extends BaseRest {
     // update from external data source is not available for static data sources
     datasources.verifyDataSource(entityRecord.getExternalProxies().get(0).getProxyId(), false);
     return launchTaskAndRetrieveEntity(request, enType, identifier, entityRecord, profile,
-            jobDescriptionFactory.get(JobType.FULL_UPDATE), HttpStatus.ACCEPTED);
+            jobDescriptionFactory.get(JobType.FULL_UPDATE));
   }
 
   @ApiOperation(value = "Update multiple entities from external data source",
@@ -555,7 +554,7 @@ public class EMController extends BaseRest {
             getDatabaseIdentifier(savedEntityRecord.getEntityId()),
             savedEntityRecord,
             EntityProfile.internal.toString(),
-            jobDescriptionFactory.get(JobType.FULL_UPDATE), HttpStatus.OK);
+            jobDescriptionFactory.get(JobType.FULL_UPDATE));
   }
 
   Entity dereferenceEntity(String creationRequestId, String creationRequestType)
@@ -606,7 +605,7 @@ public class EMController extends BaseRest {
     entityRecordService.changeExternalProxy(entityRecord, url);
     entityRecordService.update(entityRecord);
     return launchTaskAndRetrieveEntity(request, enType, identifier, entityRecord, profile,
-            jobDescriptionFactory.get(JobType.FULL_UPDATE), HttpStatus.OK);
+            jobDescriptionFactory.get(JobType.FULL_UPDATE));
   }
 
   @ApiOperation(value = "Retrieve multiple entities", nickname = "retrieveEntities")
@@ -707,8 +706,7 @@ public class EMController extends BaseRest {
 
   private ResponseEntity<String> launchTaskAndRetrieveEntity(HttpServletRequest request,
                                                              EntityTypes type, String identifier, EntityRecord entityRecord, String profile,
-                                                             JobDescription jobDescription,
-                                                             HttpStatus status) throws Exception {
+                                                             JobDescription jobDescription) throws Exception {
 
     // launch synchronous update, then retrieve entity from DB afterwards
     entityUpdateService.runSynchronousUpdate(entityRecord.getEntityId(), jobDescription);
@@ -717,7 +715,7 @@ public class EMController extends BaseRest {
 
     return generateResponseEntityForEntityRecord(request, getEntityProfile(profile),
         FormatTypes.jsonld, null, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, entityRecord,
-        status);
+        HttpStatus.OK);
   }
 
   private ResponseEntity<String> checkExistingEntity(List<EntityRecord> existingEntities,
