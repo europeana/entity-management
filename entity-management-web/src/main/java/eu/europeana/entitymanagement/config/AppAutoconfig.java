@@ -13,6 +13,9 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.xml.bind.JAXBContext;
 
+import eu.europeana.entitymanagement.batch.config.JobDescriptionFactory;
+import eu.europeana.entitymanagement.batch.model.JobDescription;
+import eu.europeana.entitymanagement.batch.model.JobType;
 import eu.europeana.entitymanagement.batch.model.Task;
 import eu.europeana.entitymanagement.batch.processor.EntityConsolidationProcessor;
 import eu.europeana.entitymanagement.batch.processor.EntityDereferenceProcessor;
@@ -223,5 +226,23 @@ public class AppAutoconfig extends AppConfigConstants {
 
   public ApplicationContext getApplicationContext() {
     return applicationContext;
+  }
+
+
+  @Bean(JOB_DESCRIPTION_FACTORY)
+  public JobDescriptionFactory jobDescriptionProvider() {
+    JobDescriptionFactory factory = new JobDescriptionFactory();
+    factory.register(
+            new JobDescription(
+                    JobType.FULL_UPDATE
+                    , JobDescription.PROCESSORS_FULL_UPDATE
+                    , JobDescription.PERSISTENCE_ITEM_WRITERS));
+
+    factory.register(
+            new JobDescription(
+                    JobType.META_UPDATE
+                    , JobDescription.PROCESSORS_META_UPDATE
+                    , JobDescription.PERSISTENCE_ITEM_WRITERS));
+    return factory;
   }
 }
