@@ -171,14 +171,14 @@ public class EMController extends BaseRest {
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
   public ResponseEntity<String> enableEntity(
       @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE,
-          required = false) String profile,
+          required = false, defaultValue = "internal") String profile,
       @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
       @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
-      HttpServletRequest request) throws HttpException, EuropeanaApiException {
+      HttpServletRequest request) throws Exception {
 
     List<EntityProfile> entityProfile = getEntityProfile(profile);
-
     verifyWriteAccess(Operations.UPDATE, request);
+    validateProfile(profile);
 
     EntityTypes enType = null;
     try {
@@ -198,8 +198,13 @@ public class EMController extends BaseRest {
 
     entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier, profile, false);
 
-    return generateResponseEntityForEntityRecord(request, entityProfile, FormatTypes.jsonld, null,
-        HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, entityRecord, HttpStatus.OK);
+    return launchTaskAndRetrieveEntity(request,
+            enType,
+            getDatabaseIdentifier(entityRecord.getEntityId()),
+            entityRecord,
+            EntityProfile.internal.toString(),
+            jobDescriptionFactory.get(JobType.FULL_UPDATE),
+            HttpStatus.OK);
   }
 
   @ApiOperation(value = "Update an entity", nickname = "updateEntity",
@@ -245,7 +250,7 @@ public class EMController extends BaseRest {
     entityRecordService.update(entityRecord);
     try {
       return launchTaskAndRetrieveEntity(request, EntityTypes.getByEntityType(type), identifier,
-              entityRecord, profile, jobDescriptionFactory.get(JobType.META_UPDATE));
+              entityRecord, profile, jobDescriptionFactory.get(JobType.META_UPDATE), HttpStatus.ACCEPTED);
     } catch (UnsupportedEntityTypeException e) {
       throw new EntityNotFoundException("/" + type + "/" + identifier, e);
     }
@@ -305,7 +310,8 @@ public class EMController extends BaseRest {
     EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier, profile, false);
     // update from external data source is not available for static data sources
     datasources.verifyDataSource(entityRecord.getExternalProxies().get(0).getProxyId(), false);
-    return launchTaskAndRetrieveEntity(request, enType, identifier, entityRecord, profile, jobDescriptionFactory.get(JobType.FULL_UPDATE));
+    return launchTaskAndRetrieveEntity(request, enType, identifier, entityRecord, profile,
+            jobDescriptionFactory.get(JobType.FULL_UPDATE), HttpStatus.ACCEPTED);
   }
 
   @ApiOperation(value = "Update multiple entities from external data source",
@@ -549,7 +555,7 @@ public class EMController extends BaseRest {
             getDatabaseIdentifier(savedEntityRecord.getEntityId()),
             savedEntityRecord,
             EntityProfile.internal.toString(),
-            jobDescriptionFactory.get(JobType.FULL_UPDATE));
+            jobDescriptionFactory.get(JobType.FULL_UPDATE), HttpStatus.ACCEPTED);
   }
 
   Entity dereferenceEntity(String creationRequestId, String creationRequestType)
@@ -598,7 +604,8 @@ public class EMController extends BaseRest {
 
     entityRecordService.changeExternalProxy(entityRecord, url);
     entityRecordService.update(entityRecord);
-    return launchTaskAndRetrieveEntity(request, enType, identifier, entityRecord, profile, jobDescriptionFactory.get(JobType.FULL_UPDATE));
+    return launchTaskAndRetrieveEntity(request, enType, identifier, entityRecord, profile,
+            jobDescriptionFactory.get(JobType.FULL_UPDATE), HttpStatus.ACCEPTED);
   }
 
   @ApiOperation(value = "Retrieve multiple entities", nickname = "retrieveEntities")
@@ -699,7 +706,8 @@ public class EMController extends BaseRest {
 
   private ResponseEntity<String> launchTaskAndRetrieveEntity(HttpServletRequest request,
                                                              EntityTypes type, String identifier, EntityRecord entityRecord, String profile,
-                                                             JobDescription jobDescription) throws Exception {
+                                                             JobDescription jobDescription,
+                                                             HttpStatus status) throws Exception {
 
     // launch synchronous update, then retrieve entity from DB afterwards
     entityUpdateService.runSynchronousUpdate(entityRecord.getEntityId(), jobDescription);
@@ -708,7 +716,7 @@ public class EMController extends BaseRest {
 
     return generateResponseEntityForEntityRecord(request, getEntityProfile(profile),
         FormatTypes.jsonld, null, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, entityRecord,
-        HttpStatus.ACCEPTED);
+        status);
   }
 
   private ResponseEntity<String> checkExistingEntity(List<EntityRecord> existingEntities,
