@@ -5,7 +5,8 @@ public enum JobType {
   ZOHO_SYNC("zoho_sync"),
   SCHEDULE_DELETION("schedule_deletion"),
   FULL_UPDATE("full_update"),
-  META_UPDATE("meta_update");
+  META_UPDATE("meta_update"),
+  METRICS_UPDATE("metrics_update");
 
   final String value;
 

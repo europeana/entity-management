@@ -5,7 +5,6 @@ import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants
 import eu.europeana.entitymanagement.batch.config.EntityUpdateJobConfig;
 import eu.europeana.entitymanagement.batch.config.EntityUpdateJobFactory;
 import eu.europeana.entitymanagement.batch.model.JobDescription;
-import eu.europeana.entitymanagement.batch.model.Task;
 import eu.europeana.entitymanagement.batch.utils.BatchUtils;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
@@ -48,31 +47,16 @@ public class EntityUpdateService {
    * Synchronously updates the entity with the given entityId
    *
    * @param entityId entityId
-   * @param processors processors to be run for the entity
-   * @param writers writers to be run for the entity
+   * @param jobDescription jobs to be run ( processors and writers)
    * @throws Exception on exception
    */
   public void runSynchronousUpdate(String entityId, JobDescription jobDescription) throws Exception {
     logger.debug("Triggering synchronous update for entityId={} with processors={}, writers={}",
-            entityId, jobDescription.getProcessors(), jobDescription.getWriters());
+            entityId, jobDescription.getProcessors() , jobDescription.getWriters());
     syncWebRequestLauncher.run(
         entityUpdateJobFactory.createJob(jobDescription),
         BatchUtils.createJobParameters(
             entityId, Date.from(Instant.now()), List.of(ScheduledUpdateType.FULL_UPDATE), true));
-  }
-
-  /**
-   * Runs the re-indexing of the entity synchronously for the given entityId
-   *
-   * @param entityId entityId
-   * @throws Exception on exception
-   */
-  public void runSynchronousMetricsUpdate(String entityId) throws Exception {
-    logger.debug("Triggering synchronous metrics update for entityId={}", entityId);
-    syncWebRequestLauncher.run(
-        entityUpdateJobConfig.updateSingleEntity(),
-        BatchUtils.createJobParameters(
-            entityId, Date.from(Instant.now()), List.of(ScheduledUpdateType.METRICS_UPDATE), true));
   }
 
   /**

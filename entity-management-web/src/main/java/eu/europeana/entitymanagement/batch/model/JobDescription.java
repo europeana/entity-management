@@ -1,10 +1,11 @@
 package eu.europeana.entitymanagement.batch.model;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
- * Job decsription factory class
+ * Job description factory class
  * @author srishti singh
  * @since 29 July 2025
  */
@@ -25,11 +26,17 @@ public class JobDescription {
     }
 
     public List<Task> getProcessors() {
-        return processors;
+        if (processors != null && !processors.isEmpty()) {
+            return processors;
+        }
+        return Collections.emptyList();
     }
 
     public List<Task> getWriters() {
-        return writers;
+        if (writers != null && !writers.isEmpty()) {
+            return writers;
+        }
+        return Collections.emptyList();
     }
 
     public JobType getJobType() {
@@ -38,14 +45,6 @@ public class JobDescription {
 
     public boolean isFullUpdate() {
         return this.getJobType() == JobType.FULL_UPDATE;
-    }
-
-    public boolean mongoUpdate() {
-       return this.writers.size() == 1 && this.writers.contains(Task.DB_UPDATE);
-    }
-
-    public boolean solrInsertion() {
-        return this.writers.size() == 1 && this.writers.contains(Task.SOLR_INSERTION);
     }
 
 }

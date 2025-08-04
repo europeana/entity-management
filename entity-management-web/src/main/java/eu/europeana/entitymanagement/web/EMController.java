@@ -203,6 +203,7 @@ public class EMController extends BaseRest {
             getDatabaseIdentifier(entityRecord.getEntityId()),
             entityRecord,
             EntityProfile.internal.toString(),
+            false,
             jobDescriptionFactory.get(JobType.FULL_UPDATE));
   }
 
@@ -249,7 +250,7 @@ public class EMController extends BaseRest {
     entityRecordService.update(entityRecord);
     try {
       return launchTaskAndRetrieveEntity(request, EntityTypes.getByEntityType(type), identifier,
-              entityRecord, profile, jobDescriptionFactory.get(JobType.META_UPDATE));
+              entityRecord, profile, false, jobDescriptionFactory.get(JobType.META_UPDATE));
     } catch (UnsupportedEntityTypeException e) {
       throw new EntityNotFoundException("/" + type + "/" + identifier, e);
     }
@@ -309,7 +310,7 @@ public class EMController extends BaseRest {
     EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier, profile, false);
     // update from external data source is not available for static data sources
     datasources.verifyDataSource(entityRecord.getExternalProxies().get(0).getProxyId(), false);
-    return launchTaskAndRetrieveEntity(request, enType, identifier, entityRecord, profile,
+    return launchTaskAndRetrieveEntity(request, enType, identifier, entityRecord, profile, false,
             jobDescriptionFactory.get(JobType.FULL_UPDATE));
   }
 
@@ -383,14 +384,24 @@ public class EMController extends BaseRest {
       HttpServletRequest request) throws Exception {
 
     verifyWriteAccess(Operations.UPDATE, request);
+    validateProfile(profile);
     validateAction(action);
 
     EntityRecord entityRecord = entityRecordService
         .updateUsedForEnrichment(EntityTypes.getByEntityType(type), identifier, profile, action);
-    entityRecord = launchMetricsUpdateTask(entityRecord, profile, true);
-    return generateResponseEntityForEntityRecord(request, getEntityProfile(profile),
-        FormatTypes.jsonld, null, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, entityRecord,
-        HttpStatus.OK);
+
+    return launchTaskAndRetrieveEntity(request,
+            EntityTypes.getByEntityType(entityRecord.getEntity().getType()),
+            getDatabaseIdentifier(entityRecord.getEntityId()),
+            entityRecord,
+            EntityProfile.internal.toString(),
+            true,
+            jobDescriptionFactory.get(JobType.METRICS_UPDATE));
+
+//   entityRecord = launchMetricsUpdateTask(entityRecord, profile, true);
+//    return generateResponseEntityForEntityRecord(request, getEntityProfile(profile),
+//        FormatTypes.jsonld, null, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, entityRecord,
+//        HttpStatus.OK);
   }
 
   private void validateAction(String action) throws HttpBadRequestException {
@@ -554,6 +565,7 @@ public class EMController extends BaseRest {
             getDatabaseIdentifier(savedEntityRecord.getEntityId()),
             savedEntityRecord,
             EntityProfile.internal.toString(),
+            false,
             jobDescriptionFactory.get(JobType.FULL_UPDATE));
   }
 
@@ -604,7 +616,7 @@ public class EMController extends BaseRest {
 
     entityRecordService.changeExternalProxy(entityRecord, url);
     entityRecordService.update(entityRecord);
-    return launchTaskAndRetrieveEntity(request, enType, identifier, entityRecord, profile,
+    return launchTaskAndRetrieveEntity(request, enType, identifier, entityRecord, profile, false,
             jobDescriptionFactory.get(JobType.FULL_UPDATE));
   }
 
@@ -697,21 +709,15 @@ public class EMController extends BaseRest {
     return requestProfiles.stream().map(EntityProfile::valueOf).collect(Collectors.toList());
   }
 
-  private EntityRecord launchMetricsUpdateTask(EntityRecord entityRecord, String profile, boolean includeDisabled)
-      throws Exception {
-    // launch synchronous metrics update, then retrieve entity from DB afterwards
-    entityUpdateService.runSynchronousMetricsUpdate(entityRecord.getEntityId());
-    return entityRecordService.retrieveEntityRecord(entityRecord.getEntityId(), profile, includeDisabled);
-  }
-
   private ResponseEntity<String> launchTaskAndRetrieveEntity(HttpServletRequest request,
                                                              EntityTypes type, String identifier, EntityRecord entityRecord, String profile,
+                                                             boolean includeDisabled,
                                                              JobDescription jobDescription) throws Exception {
 
     // launch synchronous update, then retrieve entity from DB afterwards
     entityUpdateService.runSynchronousUpdate(entityRecord.getEntityId(), jobDescription);
 
-    entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, profile, false);
+    entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, profile, includeDisabled);
 
     return generateResponseEntityForEntityRecord(request, getEntityProfile(profile),
         FormatTypes.jsonld, null, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, entityRecord,

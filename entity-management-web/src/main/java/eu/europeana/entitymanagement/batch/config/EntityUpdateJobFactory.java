@@ -3,7 +3,6 @@ package eu.europeana.entitymanagement.batch.config;
 import eu.europeana.entitymanagement.batch.listener.EntityUpdateStepListener;
 import eu.europeana.entitymanagement.batch.listener.ScheduledTaskItemListener;
 import eu.europeana.entitymanagement.batch.model.JobDescription;
-import eu.europeana.entitymanagement.batch.model.Task;
 import eu.europeana.entitymanagement.batch.reader.EntityRecordDatabaseReader;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
@@ -22,7 +21,6 @@ import org.springframework.batch.core.step.skip.SkipPolicy;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.support.CompositeItemWriter;
 import org.springframework.batch.item.support.SynchronizedItemStreamReader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.task.TaskExecutor;
@@ -90,7 +88,7 @@ public class EntityUpdateJobFactory {
                 .<BatchEntityRecord, BatchEntityRecord>chunk(1)
                 .reader(getReader(true))
                 .processor(getProcessor(jobDescription))
-                .writer(getWriter(jobDescription))
+                .writer(getWriter())
                 .listener((ItemProcessListener<? super BatchEntityRecord, ? super BatchEntityRecord>) itemListener)
                 .faultTolerant()
                 .skipPolicy(noopSkipPolicy)
@@ -122,16 +120,8 @@ public class EntityUpdateJobFactory {
 
     }
 
-    private ItemWriter<BatchEntityRecord> getWriter(JobDescription jobDescription) {
-        ItemWriter<BatchEntityRecord> writer = new CompositeItemWriter<>();
-        if (jobDescription.isFullUpdate()) {
-            writer = (ItemWriter<BatchEntityRecord>) getApplicationContext().getBean(ENTITY_UPDATE_WRITERS);
-        } else if (jobDescription.mongoUpdate()) {
-            writer = emAutoConfig.recordDBInsertionWriter();
-        } else if (jobDescription.solrInsertion()) {
-            writer = emAutoConfig.entitySolrInsertionWriter();
-        }
-        return writer;
+    private ItemWriter<BatchEntityRecord> getWriter() {
+       return (ItemWriter<BatchEntityRecord>) getApplicationContext().getBean(ENTITY_UPDATE_WRITERS);
     }
 
     /** Creates a StepExecutionListener that's called before / after the step runs
@@ -141,11 +131,6 @@ public class EntityUpdateJobFactory {
             List<? extends ScheduledTaskType> updateType, boolean isSynchronous) {
         return new EntityUpdateStepListener(
                 scheduledTaskService, updateType, isSynchronous, emConfig.getMaxFailedTaskRetries());
-    }
-
-    private boolean isFullUpdate(List<Task> processors) {
-        return processors.contains(Task.DEREFERENCE) && processors.contains(Task.CONSOLIDATION)
-                && processors.contains(Task.VALIDATION) && processors.contains(Task.METRICS);
     }
 
     public ApplicationContext getApplicationContext() {

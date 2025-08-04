@@ -243,6 +243,12 @@ public class AppAutoconfig extends AppConfigConstants {
                     JobType.META_UPDATE
                     , JobDescription.PROCESSORS_META_UPDATE
                     , JobDescription.PERSISTENCE_ITEM_WRITERS));
+
+    factory.register(
+            new JobDescription(
+                    JobType.METRICS_UPDATE,
+                    null
+                    , JobDescription.PERSISTENCE_ITEM_WRITERS));
     return factory;
   }
 }
