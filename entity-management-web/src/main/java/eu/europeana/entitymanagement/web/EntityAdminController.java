@@ -72,8 +72,7 @@ public class EntityAdminController extends BaseRest {
       @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
       @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
       @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
-      @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = false)
-          String profile,
+      @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = false) String profile,
       HttpServletRequest request)
       throws HttpException, EuropeanaApiException {
 
@@ -90,17 +89,8 @@ public class EntityAdminController extends BaseRest {
       throw new EntityNotFoundException(entityUri);
     }
 
-    boolean isSynchronous = containsSyncProfile(profile);
-
-    LOG.debug("Permanently deleting entityId={}, isSynchronous={}", entityUri, isSynchronous);
-
-    if (isSynchronous) {
-      entityRecordService.delete(entityUri);
-    } else {
-      entityUpdateService.scheduleTasks(
-          Collections.singletonList(entityUri), ScheduledRemovalType.PERMANENT_DELETION);
-    }
-
+    LOG.debug("Permanently deleting entityId={} synchronously", entityUri);
+    entityRecordService.delete(entityUri);
     return noContentResponse(request);
   }
 
