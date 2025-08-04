@@ -555,7 +555,7 @@ public class EMController extends BaseRest {
             getDatabaseIdentifier(savedEntityRecord.getEntityId()),
             savedEntityRecord,
             EntityProfile.internal.toString(),
-            jobDescriptionFactory.get(JobType.FULL_UPDATE), HttpStatus.ACCEPTED);
+            jobDescriptionFactory.get(JobType.FULL_UPDATE), HttpStatus.OK);
   }
 
   Entity dereferenceEntity(String creationRequestId, String creationRequestType)
@@ -589,11 +589,12 @@ public class EMController extends BaseRest {
       @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
       @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
       @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE,
-          required = false) String profile,
+          required = false, defaultValue = "internal") String profile,
       @RequestParam(value = WebEntityConstants.PATH_PARAM_URL) String url,
       HttpServletRequest request) throws Exception {
 
     verifyWriteAccess(Operations.UPDATE, request);
+    validateProfile(profile);
 
     EntityTypes enType = EntityTypes.getByEntityType(type);
     EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier, profile, false);
@@ -605,7 +606,7 @@ public class EMController extends BaseRest {
     entityRecordService.changeExternalProxy(entityRecord, url);
     entityRecordService.update(entityRecord);
     return launchTaskAndRetrieveEntity(request, enType, identifier, entityRecord, profile,
-            jobDescriptionFactory.get(JobType.FULL_UPDATE), HttpStatus.ACCEPTED);
+            jobDescriptionFactory.get(JobType.FULL_UPDATE), HttpStatus.OK);
   }
 
   @ApiOperation(value = "Retrieve multiple entities", nickname = "retrieveEntities")
