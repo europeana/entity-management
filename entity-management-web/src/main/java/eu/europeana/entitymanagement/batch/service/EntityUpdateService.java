@@ -2,7 +2,6 @@ package eu.europeana.entitymanagement.batch.service;
 
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.SYNC_WEB_REQUEST_JOB_LAUNCHER;
 
-import eu.europeana.entitymanagement.batch.config.EntityUpdateJobConfig;
 import eu.europeana.entitymanagement.batch.config.EntityUpdateJobFactory;
 import eu.europeana.entitymanagement.batch.model.JobDescription;
 import eu.europeana.entitymanagement.batch.utils.BatchUtils;
@@ -26,7 +25,6 @@ import org.springframework.util.CollectionUtils;
 public class EntityUpdateService {
   private static final Logger logger = LogManager.getLogger(EntityUpdateService.class);
 
-  private final EntityUpdateJobConfig entityUpdateJobConfig;
   private final EntityUpdateJobFactory entityUpdateJobFactory;
   private final JobLauncher syncWebRequestLauncher;
 
@@ -34,10 +32,9 @@ public class EntityUpdateService {
 
   @Autowired
   public EntityUpdateService(
-          EntityUpdateJobConfig entityUpdateJobConfig,
-          EntityUpdateJobFactory entityUpdateJobFactory, @Qualifier(SYNC_WEB_REQUEST_JOB_LAUNCHER) JobLauncher syncWebRequestLauncher,
+          EntityUpdateJobFactory entityUpdateJobFactory,
+          @Qualifier(SYNC_WEB_REQUEST_JOB_LAUNCHER) JobLauncher syncWebRequestLauncher,
           ScheduledTaskService scheduledTaskService) {
-    this.entityUpdateJobConfig = entityUpdateJobConfig;
     this.entityUpdateJobFactory = entityUpdateJobFactory;
     this.scheduledTaskService = scheduledTaskService;
     this.syncWebRequestLauncher = syncWebRequestLauncher;

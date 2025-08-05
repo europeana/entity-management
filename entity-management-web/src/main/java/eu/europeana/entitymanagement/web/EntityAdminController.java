@@ -3,7 +3,6 @@ package eu.europeana.entitymanagement.web;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.LogManager;
@@ -27,8 +26,6 @@ import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
-import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
@@ -52,15 +49,12 @@ public class EntityAdminController extends BaseRest {
 
   private final EntityRecordService entityRecordService;
   private final ZohoSyncService zohoSyncService;
-  private final EntityUpdateService entityUpdateService;
 
   @Autowired
   public EntityAdminController(
       EntityRecordService entityRecordService,
-      EntityUpdateService entityUpdateService,
       ZohoSyncService zohoSyncService) {
     this.entityRecordService = entityRecordService;
-    this.entityUpdateService = entityUpdateService;
     this.zohoSyncService = zohoSyncService;
   }
 
