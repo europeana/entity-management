@@ -336,7 +336,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                     loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_ARMA_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
     response
-    .andExpect(status().isAccepted())
+    .andExpect(status().isOk())
     .andExpect(jsonPath("$.id", any(String.class)))
     .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
     .andExpect(jsonPath("$.aggregatedVia", hasSize(1)));
