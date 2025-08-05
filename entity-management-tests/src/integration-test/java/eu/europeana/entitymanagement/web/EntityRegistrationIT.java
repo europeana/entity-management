@@ -39,7 +39,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
             MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL)
                 .content(loadFile(IntegrationTestUtils.CONCEPT_REGISTER_BATHTUB_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
-        .andExpect(status().isAccepted())
+        .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", any(String.class)))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
@@ -55,7 +55,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
             MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL)
                 .content(loadFile(IntegrationTestUtils.AGENT_REGISTER_DAVINCI_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
-        .andExpect(status().isAccepted())
+        .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", any(String.class)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Agent.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
@@ -76,7 +76,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                 .content(loadFile(IntegrationTestUtils.AGENT_REGISTER_BIRCH_REDIRECTION_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
     response
-        .andExpect(status().isAccepted())
+        .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", any(String.class)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Agent.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
@@ -99,7 +99,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
             MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL)
                 .content(loadFile(IntegrationTestUtils.AGENT_REGISTER_STALIN_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
-        .andExpect(status().isAccepted())
+        .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", any(String.class)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Agent.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
@@ -121,7 +121,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
 
     response
-        .andExpect(status().isAccepted())
+        .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", any(String.class)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Agent.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
@@ -145,7 +145,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
             MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL)
                 .content(loadFile(IntegrationTestUtils.PLACE_REGISTER_PARIS_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
-        .andExpect(status().isAccepted())
+        .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", any(String.class)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Place.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
@@ -163,7 +163,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                 .content(loadFile(IntegrationTestUtils.PLACE_REGISTER_HAGENBACH_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
     response
-        .andExpect(status().isAccepted())
+        .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", any(String.class)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Place.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
@@ -189,7 +189,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
 
     response
-        .andExpect(status().isAccepted())
+        .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", any(String.class)))
         .andExpect(jsonPath("$.type", is(EntityTypes.TimeSpan.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
@@ -209,7 +209,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                 .content(loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_NATURALIS_ZOHO_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
     response
-        .andExpect(status().isAccepted())
+        .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", any(String.class)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
@@ -234,7 +234,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                 .content(loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_GFM_ZOHO_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
     response
-        .andExpect(status().isAccepted())
+        .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", any(String.class)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
@@ -262,7 +262,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                     loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_BERGER_MUSEUM_ZOHO_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
     response
-        .andExpect(status().isAccepted())
+        .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", any(String.class)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
@@ -298,7 +298,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                     loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_EUSKARIANA_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
     response
-        .andExpect(status().isAccepted())
+        .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", any(String.class)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Aggregator.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
@@ -366,7 +366,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                     loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_ARMA_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
     response
-    .andExpect(status().isAccepted())
+    .andExpect(status().isOk())
     .andExpect(jsonPath("$.id", any(String.class)))
     .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
     .andExpect(jsonPath("$.aggregatedVia", hasSize(1)));
@@ -386,7 +386,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                 .content(loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_PCCE_ZOHO_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
     response
-        .andExpect(status().isAccepted())
+        .andExpect(status().isOk())
 //        .andExpect(jsonPath("$.id", is(expectedId)))
         .andExpect(jsonPath("$.id", any(String.class)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
@@ -416,7 +416,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
                 .content(loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_BNF_ZOHO_JSON))
                 .contentType(MediaType.APPLICATION_JSON_VALUE));
     response
-        .andExpect(status().isAccepted())
+        .andExpect(status().isOk())
         .andExpect(jsonPath("$.hasAddress.postalCode").isNotEmpty())
         .andExpect(jsonPath("$.language", everyItem(matchesRegex("[a-z]+"))))
         .andExpect(jsonPath("$.hiddenLabel", hasSize(3)))

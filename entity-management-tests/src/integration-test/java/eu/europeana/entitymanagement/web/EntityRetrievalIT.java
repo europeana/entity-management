@@ -737,7 +737,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
                     .content(loadFile(IntegrationTestUtils.AGENT_REGISTER_DAVINCI_JSON))
                     .contentType(MediaType.APPLICATION_JSON_VALUE)
                     .param(WebEntityConstants.QUERY_PARAM_PROFILE, "internal"))
-            .andExpect(status().isAccepted());
+            .andExpect(status().isOk());
 
     results
         .andExpect(jsonPath("$.id", any(String.class)))
