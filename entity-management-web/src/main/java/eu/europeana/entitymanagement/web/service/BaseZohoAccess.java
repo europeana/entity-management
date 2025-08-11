@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import eu.europeana.entitymanagement.batch.config.JobDescriptionFactory;
 import eu.europeana.entitymanagement.batch.model.JobDescription;
 import eu.europeana.entitymanagement.batch.model.JobType;
+import eu.europeana.entitymanagement.batch.model.TaskType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -221,7 +222,7 @@ public class BaseZohoAccess {
         // SG: run update synchronously as we don't have many entities disabled and we can report
         // failures
         logger.info("Updating disabled organization with id: {}", operation.getZohoEuropeanaId());
-        entityUpdateService.runSynchronousUpdate(operation.getEntityRecord().getEntityId(), jobDescriptionFactory.get(JobType.FULL_UPDATE));
+        entityUpdateService.runSynchronousUpdate(operation.getEntityRecord().getEntityId(), jobDescriptionFactory.get(TaskType.FULL_UPDATE));
         if (allreadyDisabled) {
           // not counted to disabled, needs to be counted for updates
           zohoSyncReport.increaseUpdated(1);

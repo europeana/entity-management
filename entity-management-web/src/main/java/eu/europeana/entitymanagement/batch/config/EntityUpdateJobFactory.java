@@ -74,33 +74,51 @@ public class EntityUpdateJobFactory {
                 .incrementer(new RunIdIncrementer())
                 // this job is always launched from web requests, so synchronousTaskExecutor is used. It
                 // also directly retrieves entities from the EntityRecord database.
-                .start(synchronousUpdate(jobDescription))
+                .start(entityUpdate(jobDescription, true))
                 .build();
     }
 
     /**
-     * Creates a step for synchronous update
+     * Job for updating entities scheduled via the ScheduledTasks collection Expects
+     * `currentStartTime` date and `updateType` string in JobParameters.
+     */
+    public Job createScheduledUpdateJob(JobDescription jobDescription) {
+        return this.jobBuilderFactory
+                .get(JOB_UPDATE_SCHEDULED_ENTITIES)
+                // This job is always launched via a @Scheduled method.
+                .start(entityUpdate(jobDescription, false))
+                .build();
+    }
+
+    /**
+     * Creates a dynamic step for synchronous and Asynchronous entity update
      * @return
      */
-    private Step synchronousUpdate(JobDescription jobDescription) {
+    private Step entityUpdate(JobDescription jobDescription, boolean isSynchronous) {
         return this.stepBuilderFactory
                 .get(STEP_UPDATE_ENTITY)
-                .<BatchEntityRecord, BatchEntityRecord>chunk(1)
-                .reader(getReader(true))
+                .<BatchEntityRecord, BatchEntityRecord>chunk(getChunkSize(isSynchronous))
+                .reader(getReader(isSynchronous))
                 .processor(getProcessor(jobDescription))
                 .writer(getWriter())
                 .listener((ItemProcessListener<? super BatchEntityRecord, ? super BatchEntityRecord>) itemListener)
                 .faultTolerant()
                 .skipPolicy(noopSkipPolicy)
-                .taskExecutor(getTaskExecutor())
+                .taskExecutor(getTaskExecutor(isSynchronous))
                 .throttleLimit(emConfig.getBatchUpdatesThrottleLimit())
-                .listener(stepExecutionListener(List.of(ScheduledUpdateType.FULL_UPDATE), true))
+                .listener(stepExecutionListener(
+                        List.of(ScheduledUpdateType.getType(jobDescription.getTaskType().getValue())),
+                        isSynchronous))
                 .build();
-
     }
 
-    private TaskExecutor getTaskExecutor() {
-        return (TaskExecutor)getApplicationContext().getBean(WEB_REQUEST_JOB_EXECUTOR);
+    private TaskExecutor getTaskExecutor(boolean isSynchronous) {
+        return isSynchronous ? (TaskExecutor)getApplicationContext().getBean(WEB_REQUEST_JOB_EXECUTOR)
+                : (TaskExecutor) getApplicationContext().getBean(UPDATES_STEP_EXECUTOR);
+    }
+
+    private int getChunkSize(boolean isSynchronous) {
+        return isSynchronous ? 1 : emConfig.getBatchChunkSize();
     }
 
     /**

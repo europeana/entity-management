@@ -1,7 +1,8 @@
 package eu.europeana.entitymanagement.batch.config;
 
 import eu.europeana.entitymanagement.batch.model.JobDescription;
-import eu.europeana.entitymanagement.batch.model.JobType;
+import eu.europeana.entitymanagement.batch.model.TaskType;
+
 import java.util.HashMap;
 
 /**
@@ -9,9 +10,9 @@ import java.util.HashMap;
  * @author srishti singh
  * @since 29 July 2025
  */
-public class JobDescriptionFactory extends HashMap<JobType, JobDescription> {
+public class JobDescriptionFactory extends HashMap<TaskType, JobDescription> {
 
     public void register(JobDescription jobDescription) {
-        this.put(jobDescription.getJobType(), jobDescription);
+        this.put(jobDescription.getTaskType(), jobDescription);
     }
 }

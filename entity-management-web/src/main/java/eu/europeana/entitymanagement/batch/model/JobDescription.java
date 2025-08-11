@@ -12,15 +12,15 @@ import java.util.List;
 public class JobDescription {
 
     public static final List<Task> PROCESSORS_FULL_UPDATE   = Arrays.asList(Task.DEREFERENCE, Task.CONSOLIDATION, Task.METRICS, Task.VALIDATION);
-    public static final List<Task> PROCESSORS_META_UPDATE   =  Arrays.asList(Task.CONSOLIDATION, Task.VALIDATION);
+    public static final List<Task> PROCESSORS_META_UPDATE   = Arrays.asList(Task.CONSOLIDATION, Task.VALIDATION);
     public static final List<Task> PERSISTENCE_ITEM_WRITERS = Arrays.asList(Task.DB_UPDATE, Task.SOLR_INSERTION);
 
-    private JobType jobType;
+    private TaskType   taskType;
     private List<Task> processors;
     private List<Task> writers;
 
-    public JobDescription(JobType jobType, List<Task> processors, List<Task> writers) {
-        this.jobType = jobType;
+    public JobDescription(TaskType taskType, List<Task> processors, List<Task> writers) {
+        this.taskType = taskType;
         this.processors = processors;
         this.writers = writers;
     }
@@ -39,12 +39,12 @@ public class JobDescription {
         return Collections.emptyList();
     }
 
-    public JobType getJobType() {
-        return jobType;
+    public TaskType getTaskType() {
+        return taskType;
     }
 
     public boolean isFullUpdate() {
-        return this.getJobType() == JobType.FULL_UPDATE;
+        return this.getTaskType() == TaskType.FULL_UPDATE;
     }
 
 }

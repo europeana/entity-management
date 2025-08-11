@@ -1,12 +1,15 @@
 package eu.europeana.entitymanagement.batch.service;
 
-import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.ENTITY_REMOVALS_JOB_LAUNCHER;
-import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.ENTITY_UPDATE_JOB_LAUNCHER;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.*;
 import static eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType.DEPRECATION;
 import static eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType.PERMANENT_DELETION;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+
+import eu.europeana.entitymanagement.batch.config.EntityUpdateJobFactory;
+import eu.europeana.entitymanagement.batch.config.JobDescriptionFactory;
+import eu.europeana.entitymanagement.batch.model.TaskType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.launch.JobLauncher;
@@ -35,15 +38,46 @@ public class BatchEntityUpdateExecutor {
   private final JobLauncher entityUpdateJobLauncher;
   private final JobLauncher entityDeletionsJobLauncher;
   private final EntityUpdateJobConfig updateJobConfig;
+  private final EntityUpdateJobFactory entityUpdateJobFactory;
+  private final JobDescriptionFactory jobDescriptionFactory;
 
   @Autowired
   public BatchEntityUpdateExecutor(
-      @Qualifier(ENTITY_UPDATE_JOB_LAUNCHER) JobLauncher entityUpdateJobLauncher,
-      @Qualifier(ENTITY_REMOVALS_JOB_LAUNCHER) JobLauncher entityDeletionsJobLauncher,
-      EntityUpdateJobConfig batchUpdateConfig) {
-    this.entityUpdateJobLauncher = entityUpdateJobLauncher;
+          @Qualifier(ENTITY_UPDATE_JOB_LAUNCHER) JobLauncher entityUpdateJobLauncher,
+          @Qualifier(ENTITY_REMOVALS_JOB_LAUNCHER) JobLauncher entityDeletionsJobLauncher,
+          EntityUpdateJobConfig batchUpdateConfig,
+          EntityUpdateJobFactory entityUpdateJobFactory,
+          @Qualifier(JOB_DESCRIPTION_FACTORY) JobDescriptionFactory jobDescriptionFactory) {
+    this.entityUpdateJobLauncher    = entityUpdateJobLauncher;
     this.entityDeletionsJobLauncher = entityDeletionsJobLauncher;
-    this.updateJobConfig = batchUpdateConfig;
+    this.updateJobConfig            = batchUpdateConfig;
+    this.entityUpdateJobFactory     = entityUpdateJobFactory;
+    this.jobDescriptionFactory = jobDescriptionFactory;
+  }
+
+  /** Periodically run full entity and metric updates (in one run). */
+  @Async
+  public void runAsynchronousUpdate() {
+    logger.info("Triggering scheduled {}, {} for entities", TaskType.FULL_UPDATE, TaskType.METRICS_UPDATE);
+    try {
+      entityUpdateJobLauncher.run(
+              entityUpdateJobFactory.createScheduledUpdateJob(jobDescriptionFactory.get(TaskType.FULL_UPDATE)),
+              BatchUtils.createJobParameters(
+                      null,
+                      Date.from(Instant.now()),
+                      List.of(ScheduledUpdateType.FULL_UPDATE),
+                      false));
+
+      entityUpdateJobLauncher.run(
+              entityUpdateJobFactory.createScheduledUpdateJob(jobDescriptionFactory.get(TaskType.METRICS_UPDATE)),
+              BatchUtils.createJobParameters(
+                      null,
+                      Date.from(Instant.now()),
+                      List.of(ScheduledUpdateType.METRICS_UPDATE),
+                      false));
+    } catch (Exception e) {
+      logger.warn("Error running scheduled {} and {} update", TaskType.FULL_UPDATE, TaskType.METRICS_UPDATE, e);
+    }
   }
 
   /** Periodically run full entity and metric updates (in one run). */

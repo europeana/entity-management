@@ -17,6 +17,7 @@ import eu.europeana.entitymanagement.batch.config.JobDescriptionFactory;
 import eu.europeana.entitymanagement.batch.model.JobDescription;
 import eu.europeana.entitymanagement.batch.model.JobType;
 import eu.europeana.entitymanagement.batch.model.Task;
+import eu.europeana.entitymanagement.batch.model.TaskType;
 import eu.europeana.entitymanagement.batch.processor.EntityConsolidationProcessor;
 import eu.europeana.entitymanagement.batch.processor.EntityDereferenceProcessor;
 import eu.europeana.entitymanagement.batch.processor.EntityMetricsProcessor;
@@ -234,20 +235,20 @@ public class AppAutoconfig extends AppConfigConstants {
     JobDescriptionFactory factory = new JobDescriptionFactory();
     factory.register(
             new JobDescription(
-                    JobType.FULL_UPDATE
+                    TaskType.FULL_UPDATE
                     , JobDescription.PROCESSORS_FULL_UPDATE
                     , JobDescription.PERSISTENCE_ITEM_WRITERS));
 
     factory.register(
             new JobDescription(
-                    JobType.META_UPDATE
+                    TaskType.META_UPDATE
                     , JobDescription.PROCESSORS_META_UPDATE
                     , JobDescription.PERSISTENCE_ITEM_WRITERS));
 
     factory.register(
             new JobDescription(
-                    JobType.METRICS_UPDATE,
-                    null
+                    TaskType.METRICS_UPDATE
+                    , Arrays.asList(Task.METRICS)
                     , JobDescription.PERSISTENCE_ITEM_WRITERS));
     return factory;
   }

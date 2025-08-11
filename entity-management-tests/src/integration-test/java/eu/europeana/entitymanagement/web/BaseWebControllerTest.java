@@ -15,6 +15,7 @@ import eu.europeana.entitymanagement.batch.config.JobDescriptionFactory;
 import eu.europeana.entitymanagement.batch.model.JobDescription;
 import eu.europeana.entitymanagement.batch.model.JobType;
 import eu.europeana.entitymanagement.batch.model.Task;
+import eu.europeana.entitymanagement.batch.model.TaskType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -161,7 +162,7 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
             europeanaProxyEntity, xmlBaseEntity.toEntityModel(), dataSource, null);
 
     // trigger update to generate consolidated entity
-    entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId(), jobDescriptionFactory.get(JobType.FULL_UPDATE));
+    entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId(), jobDescriptionFactory.get(TaskType.FULL_UPDATE));
 
     // return entityRecord version with consolidated entity
     return entityRecordService.retrieveEntityRecord(savedRecord.getEntityId(), EntityProfile.dereference.name(), false);
@@ -198,7 +199,7 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
             europeanaProxyEntity, zohoOrganization, dataSource, null);
 
     // trigger update to generate consolidated entity
-    entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId(), jobDescriptionFactory.get(JobType.FULL_UPDATE));
+    entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId(), jobDescriptionFactory.get(TaskType.FULL_UPDATE));
 
     // return entityRecord version with consolidated entity
     return entityRecordService.retrieveEntityRecord(savedRecord.getEntityId(), EntityProfile.dereference.name(), false);

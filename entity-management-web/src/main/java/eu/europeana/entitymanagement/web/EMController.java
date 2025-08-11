@@ -16,7 +16,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import eu.europeana.entitymanagement.batch.config.JobDescriptionFactory;
 import eu.europeana.entitymanagement.batch.model.JobDescription;
-import eu.europeana.entitymanagement.batch.model.JobType;
+import eu.europeana.entitymanagement.batch.model.Task;
+import eu.europeana.entitymanagement.batch.model.TaskType;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -204,7 +205,7 @@ public class EMController extends BaseRest {
             entityRecord,
             EntityProfile.internal.toString(),
             false,
-            jobDescriptionFactory.get(JobType.FULL_UPDATE));
+            jobDescriptionFactory.get(TaskType.FULL_UPDATE));
   }
 
   @ApiOperation(value = "Update an entity", nickname = "updateEntity",
@@ -250,7 +251,7 @@ public class EMController extends BaseRest {
     entityRecordService.update(entityRecord);
     try {
       return launchTaskAndRetrieveEntity(request, EntityTypes.getByEntityType(type), identifier,
-              entityRecord, profile, false, jobDescriptionFactory.get(JobType.META_UPDATE));
+              entityRecord, profile, false, jobDescriptionFactory.get(TaskType.META_UPDATE));
     } catch (UnsupportedEntityTypeException e) {
       throw new EntityNotFoundException("/" + type + "/" + identifier, e);
     }
@@ -311,7 +312,7 @@ public class EMController extends BaseRest {
     // update from external data source is not available for static data sources
     datasources.verifyDataSource(entityRecord.getExternalProxies().get(0).getProxyId(), false);
     return launchTaskAndRetrieveEntity(request, enType, identifier, entityRecord, profile, false,
-            jobDescriptionFactory.get(JobType.FULL_UPDATE));
+            jobDescriptionFactory.get(TaskType.FULL_UPDATE));
   }
 
   @ApiOperation(value = "Update multiple entities from external data source",
@@ -396,12 +397,10 @@ public class EMController extends BaseRest {
             entityRecord,
             EntityProfile.internal.toString(),
             true,
-            jobDescriptionFactory.get(JobType.METRICS_UPDATE));
-
-//   entityRecord = launchMetricsUpdateTask(entityRecord, profile, true);
-//    return generateResponseEntityForEntityRecord(request, getEntityProfile(profile),
-//        FormatTypes.jsonld, null, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, entityRecord,
-//        HttpStatus.OK);
+            new JobDescription(
+                     TaskType.METRICS_UPDATE
+                    , null
+                    , JobDescription.PERSISTENCE_ITEM_WRITERS));
   }
 
   private void validateAction(String action) throws HttpBadRequestException {
@@ -566,12 +565,10 @@ public class EMController extends BaseRest {
             savedEntityRecord,
             EntityProfile.internal.toString(),
             false,
-            jobDescriptionFactory.get(JobType.FULL_UPDATE));
+            jobDescriptionFactory.get(TaskType.FULL_UPDATE));
   }
 
-  Entity dereferenceEntity(String creationRequestId, String creationRequestType)
-      throws Exception, DatasourceNotKnownException, EntityMismatchException {
-
+  Entity dereferenceEntity(String creationRequestId, String creationRequestType) throws Exception {
     Dereferencer dereferenceService =
         dereferenceServiceLocator.getDereferencer(creationRequestId, creationRequestType);
 
@@ -617,7 +614,7 @@ public class EMController extends BaseRest {
     entityRecordService.changeExternalProxy(entityRecord, url);
     entityRecordService.update(entityRecord);
     return launchTaskAndRetrieveEntity(request, enType, identifier, entityRecord, profile, false,
-            jobDescriptionFactory.get(JobType.FULL_UPDATE));
+            jobDescriptionFactory.get(TaskType.FULL_UPDATE));
   }
 
   @ApiOperation(value = "Retrieve multiple entities", nickname = "retrieveEntities")
