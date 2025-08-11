@@ -107,10 +107,12 @@ public class EntityUpdateJobFactory {
                 .taskExecutor(getTaskExecutor(isSynchronous))
                 .throttleLimit(emConfig.getBatchUpdatesThrottleLimit())
                 .listener(stepExecutionListener(
-                        List.of(ScheduledUpdateType.getType(jobDescription.getTaskType().getValue())),
+                        List.of(ScheduledUpdateType.FULL_UPDATE, ScheduledUpdateType.METRICS_UPDATE),
                         isSynchronous))
                 .build();
     }
+
+
 
     private TaskExecutor getTaskExecutor(boolean isSynchronous) {
         return isSynchronous ? (TaskExecutor)getApplicationContext().getBean(WEB_REQUEST_JOB_EXECUTOR)
