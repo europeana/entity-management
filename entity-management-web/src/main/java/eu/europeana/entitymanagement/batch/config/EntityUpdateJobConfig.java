@@ -29,10 +29,7 @@ import eu.europeana.entitymanagement.batch.writer.EntitySolrInsertionWriter;
 import eu.europeana.entitymanagement.batch.writer.EntitySolrRemovalWriter;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.batch.EMBatchConstants;
-import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
+import eu.europeana.entitymanagement.definitions.batch.model.*;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import java.util.Arrays;
 import java.util.Date;
@@ -228,7 +225,7 @@ public class EntityUpdateJobConfig {
 
   /** Creates a StepExecutionListener that's called before / after the step runs */
   private StepExecutionListener stepExecutionListener(
-      List<? extends ScheduledTaskType> updateType, boolean isSynchronous) {
+          List<TaskType> updateType, boolean isSynchronous) {
     return new EntityUpdateStepListener(
         scheduledTaskService, updateType, isSynchronous, maxFailedTaskRetries);
   }
@@ -275,7 +272,7 @@ public class EntityUpdateJobConfig {
    * @param isSynchronous indicates whether this update is executed synchronously or async
    * @return step
    */
-  private Step updateEntity(List<ScheduledUpdateType> updateType, boolean isSynchronous) {
+  private Step updateEntity(List<TaskType> updateType, boolean isSynchronous) {
 
     // use different thread executor, reader and chunkSize for sync / async requests
     ItemReader<BatchEntityRecord> reader =
@@ -305,7 +302,7 @@ public class EntityUpdateJobConfig {
   }
 
   private Step removeEntity(
-      List<ScheduledRemovalType> removalType,
+      List<TaskType> removalType,
       int chunkSize,
       TaskExecutor executor,
       ItemReader<BatchEntityRecord> reader) {
@@ -340,7 +337,7 @@ public class EntityUpdateJobConfig {
         .incrementer(new RunIdIncrementer())
         // this job is always launched from web requests, so synchronousTaskExecutor is used. It
         // also directly retrieves entities from the EntityRecord database.
-        .start(updateEntity(List.of(ScheduledUpdateType.FULL_UPDATE), true))
+        .start(updateEntity(List.of(TaskType.FULL_UPDATE), true))
         .build();
   }
 
@@ -348,7 +345,7 @@ public class EntityUpdateJobConfig {
    * Job for updating entities scheduled via the ScheduledTasks collection Expects
    * `currentStartTime` date and `updateType` string in JobParameters.
    */
-  public Job updateScheduledEntities(List<ScheduledUpdateType> updateType) {
+  public Job updateScheduledEntities(List<TaskType> updateType) {
     return this.jobBuilderFactory
         .get(JOB_UPDATE_SCHEDULED_ENTITIES)
         // This job is always launched via a @Scheduled method.
@@ -356,7 +353,7 @@ public class EntityUpdateJobConfig {
         .build();
   }
 
-  public Job removeScheduledEntities(List<ScheduledRemovalType> removalType) {
+  public Job removeScheduledEntities(List<TaskType> removalType) {
     return this.jobBuilderFactory
         .get(JOB_REMOVE_SCHEDULED_ENTITIES)
         .start(

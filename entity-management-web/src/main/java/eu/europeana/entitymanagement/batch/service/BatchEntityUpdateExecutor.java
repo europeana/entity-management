@@ -9,7 +9,7 @@ import java.util.List;
 
 import eu.europeana.entitymanagement.batch.config.EntityUpdateJobFactory;
 import eu.europeana.entitymanagement.batch.config.JobDescriptionFactory;
-import eu.europeana.entitymanagement.batch.model.TaskType;
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.launch.JobLauncher;
@@ -87,7 +87,7 @@ public class BatchEntityUpdateExecutor {
     try {
       entityUpdateJobLauncher.run(
           updateJobConfig.updateScheduledEntities(
-              List.of(ScheduledUpdateType.FULL_UPDATE, ScheduledUpdateType.METRICS_UPDATE)),
+              List.of(TaskType.FULL_UPDATE, TaskType.METRICS_UPDATE)),
           BatchUtils.createJobParameters(
               null,
               Date.from(Instant.now()),
@@ -104,7 +104,7 @@ public class BatchEntityUpdateExecutor {
     logger.info("Triggering scheduled deprecations and deletions for entities");
     try {
       entityDeletionsJobLauncher.run(
-          updateJobConfig.removeScheduledEntities(List.of(PERMANENT_DELETION, DEPRECATION)),
+          updateJobConfig.removeScheduledEntities(List.of(TaskType.PERMANENT_DELETION, TaskType.DEPRECATION)),
           BatchUtils.createJobParameters(
               null, Date.from(Instant.now()), List.of(PERMANENT_DELETION, DEPRECATION), false));
     } catch (Exception e) {

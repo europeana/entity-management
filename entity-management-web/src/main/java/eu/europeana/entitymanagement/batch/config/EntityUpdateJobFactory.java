@@ -10,6 +10,7 @@ import eu.europeana.entitymanagement.config.AppAutoconfig;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import org.springframework.batch.core.ItemProcessListener;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -107,7 +108,7 @@ public class EntityUpdateJobFactory {
                 .taskExecutor(getTaskExecutor(isSynchronous))
                 .throttleLimit(emConfig.getBatchUpdatesThrottleLimit())
                 .listener(stepExecutionListener(
-                        List.of(ScheduledUpdateType.FULL_UPDATE, ScheduledUpdateType.METRICS_UPDATE),
+                        List.of(TaskType.FULL_UPDATE, TaskType.METRICS_UPDATE),
                         isSynchronous))
                 .build();
     }
@@ -148,7 +149,7 @@ public class EntityUpdateJobFactory {
      *
      * */
     private StepExecutionListener stepExecutionListener(
-            List<? extends ScheduledTaskType> updateType, boolean isSynchronous) {
+            List<TaskType> updateType, boolean isSynchronous) {
         return new EntityUpdateStepListener(
                 scheduledTaskService, updateType, isSynchronous, emConfig.getMaxFailedTaskRetries());
     }

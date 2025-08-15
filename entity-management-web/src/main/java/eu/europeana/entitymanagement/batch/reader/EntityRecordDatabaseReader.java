@@ -3,6 +3,8 @@ package eu.europeana.entitymanagement.batch.reader;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.item.ItemReader;
@@ -22,7 +24,7 @@ public class EntityRecordDatabaseReader extends BaseDatabaseReader<BatchEntityRe
   private static final Logger logger = LogManager.getLogger(EntityRecordDatabaseReader.class);
   private final EntityRecordService entityRecordService;
   private final Filter[] queryFilters;
-  private final ScheduledTaskType scheduledTaskType;
+  private final TaskType scheduledTaskType;
 
   public EntityRecordDatabaseReader(
       String scheduledTaskType,
@@ -30,7 +32,7 @@ public class EntityRecordDatabaseReader extends BaseDatabaseReader<BatchEntityRe
       int pageSize,
       Filter... queryFilters) {
     super(pageSize);
-    this.scheduledTaskType = ScheduledTaskUtils.scheduledTaskTypeValueOf(scheduledTaskType);
+    this.scheduledTaskType = TaskType.valueOf(scheduledTaskType);
     this.entityRecordService = entityRecordService;
     this.queryFilters = queryFilters;
   }

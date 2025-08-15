@@ -13,6 +13,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.launch.JobLauncher;
@@ -62,7 +64,7 @@ public class EntityUpdateService {
    * @param entityIds list of entity ids
    * @param updateType type of update to schedule
    */
-  public void scheduleTasks(List<String> entityIds, ScheduledTaskType updateType) {
+  public void scheduleTasks(List<String> entityIds, TaskType updateType) {
     if (CollectionUtils.isEmpty(entityIds)) {
       return;
     }
@@ -71,7 +73,7 @@ public class EntityUpdateService {
         Arrays.toString(entityIds.toArray()),
         entityIds.size(),
         updateType);
-    Map<String, ScheduledTaskType> mapEntityIdScheduledTaskType =
+    Map<String, TaskType> mapEntityIdScheduledTaskType =
         new HashMap<>(entityIds.size());
     for (String id : entityIds) {
       mapEntityIdScheduledTaskType.put(id, updateType);

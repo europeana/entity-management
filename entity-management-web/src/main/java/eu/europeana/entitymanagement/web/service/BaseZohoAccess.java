@@ -7,9 +7,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import eu.europeana.entitymanagement.batch.config.JobDescriptionFactory;
-import eu.europeana.entitymanagement.batch.model.JobDescription;
-import eu.europeana.entitymanagement.batch.model.JobType;
-import eu.europeana.entitymanagement.batch.model.TaskType;
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -41,9 +39,6 @@ import eu.europeana.entitymanagement.zoho.organization.ZohoConfiguration;
 import eu.europeana.entitymanagement.zoho.organization.ZohoDereferenceService;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
-import org.springframework.beans.factory.annotation.Qualifier;
-
-import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.JOB_DESCRIPTION_FACTORY;
 
 public class BaseZohoAccess {
 
@@ -283,7 +278,7 @@ public class BaseZohoAccess {
     List<String> entityIds = enablingOperations.stream()
         .map(operation -> operation.getEntityRecord().getEntityId()).collect(Collectors.toList());
     try {
-      entityUpdateService.scheduleTasks(entityIds, ScheduledUpdateType.FULL_UPDATE);
+      entityUpdateService.scheduleTasks(entityIds, TaskType.FULL_UPDATE);
       // not needed to update to updated field in the report, as the enabled counter was already
       // updated
     } catch (RuntimeException e) {
@@ -304,7 +299,7 @@ public class BaseZohoAccess {
     List<String> entityIds = updateOperations.stream()
         .map(operation -> operation.getEntityRecord().getEntityId()).collect(Collectors.toList());
     try {
-      entityUpdateService.scheduleTasks(entityIds, ScheduledUpdateType.FULL_UPDATE);
+      entityUpdateService.scheduleTasks(entityIds, TaskType.FULL_UPDATE);
       zohoSyncReport.increaseUpdated(updateOperations.size());
     } catch (RuntimeException e) {
       String message =
@@ -325,7 +320,7 @@ public class BaseZohoAccess {
 
     // schedule updates
     try {
-      entityUpdateService.scheduleTasks(entitiesToUpdate, ScheduledUpdateType.FULL_UPDATE);
+      entityUpdateService.scheduleTasks(entitiesToUpdate, TaskType.FULL_UPDATE);
       // note: the zoho report was allready during the entity registration
     } catch (RuntimeException e) {
       String message = "Cannot schedule update operations for newly created organizations with ids:"

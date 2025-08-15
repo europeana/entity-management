@@ -3,16 +3,12 @@ package eu.europeana.entitymanagement;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 import javax.xml.bind.JAXBContext;
 
 import eu.europeana.entitymanagement.batch.config.JobDescriptionFactory;
-import eu.europeana.entitymanagement.batch.model.JobDescription;
-import eu.europeana.entitymanagement.batch.model.JobType;
-import eu.europeana.entitymanagement.batch.model.Task;
-import eu.europeana.entitymanagement.batch.model.TaskType;
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

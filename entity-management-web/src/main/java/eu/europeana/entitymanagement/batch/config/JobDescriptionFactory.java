@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.batch.config;
 
 import eu.europeana.entitymanagement.batch.model.JobDescription;
-import eu.europeana.entitymanagement.batch.model.TaskType;
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 
 import java.util.HashMap;
 

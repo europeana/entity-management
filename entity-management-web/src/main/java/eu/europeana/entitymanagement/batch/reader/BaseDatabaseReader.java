@@ -3,6 +3,8 @@ package eu.europeana.entitymanagement.batch.reader;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import org.springframework.batch.item.data.AbstractPaginatedDataItemReader;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
@@ -29,7 +31,7 @@ public abstract class BaseDatabaseReader<T> extends AbstractPaginatedDataItemRea
     setName(getClassName());
   }
   
-  List<BatchEntityRecord> toBatchEntityRecords(List<EntityRecord> result, ScheduledTaskType scheduledTaskType) {
+  List<BatchEntityRecord> toBatchEntityRecords(List<EntityRecord> result, TaskType scheduledTaskType) {
     return
         result.stream()
             .map(rec -> new BatchEntityRecord(rec, scheduledTaskType))
@@ -38,7 +40,7 @@ public abstract class BaseDatabaseReader<T> extends AbstractPaginatedDataItemRea
   
   List<BatchEntityRecord> toBatchEntityRecords(List<EntityRecord> result, List<ScheduledTask> scheduledTasks) {
     // Use EntityId - ScheduledTaskType map for quick lookup
-    Map<String, ScheduledTaskType> taskTypeMap =
+    Map<String, TaskType> taskTypeMap =
         scheduledTasks.stream()
             .collect(Collectors.toMap(ScheduledTask::getEntityId, ScheduledTask::getUpdateType));
     

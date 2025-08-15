@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import eu.europeana.entitymanagement.definitions.batch.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.launch.JobLauncher;
@@ -27,12 +29,7 @@ import eu.europeana.entitymanagement.batch.repository.FailedTaskRepository;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.batch.utils.BatchUtils;
 import eu.europeana.entitymanagement.config.AppAutoconfig;
-import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
 import eu.europeana.entitymanagement.definitions.batch.model.FailedTask.Builder;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.solr.model.SolrConcept;
 import eu.europeana.entitymanagement.solr.service.SolrService;
@@ -73,13 +70,13 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
   private static final String entityId1 = "http://data.europeana.eu/agent/1";
   private static final String entityId2 = "http://data.europeana.eu/agent/2";
 
-  private static final ScheduledTaskType testUpdateType = ScheduledUpdateType.FULL_UPDATE;
+  private static final TaskType testUpdateType = TaskType.FULL_UPDATE;
 
   @Test
   void shouldCreateTasksForEntities() {
     List<String> entityIds = List.of(ScheduledTaskServiceIT.entityId1, entityId2);
 
-    Map<String, ScheduledTaskType> map =
+    Map<String, TaskType> map =
         Map.of(
             entityId1, testUpdateType,
             entityId2, testUpdateType);
@@ -99,7 +96,7 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
     EntityRecord savedEntityRecord =
         createEntity(europeanaMetadata, metisResponse, IntegrationTestUtils.CONCEPT_BATHTUB_URI);
     String entityId = savedEntityRecord.getEntityId();
-    Map<String, ScheduledTaskType> entityIdUpdateType = Map.of(entityId, testUpdateType);
+    Map<String, TaskType> entityIdUpdateType = Map.of(entityId, testUpdateType);
     scheduledTaskService.scheduleTasksForEntities(entityIdUpdateType);
 
     List<ScheduledTask> tasks =
@@ -121,7 +118,7 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
   @Test
   void shouldMarkAsProcessed() {
     List<String> entityIds = List.of(entityId1, entityId2);
-    Map<String, ScheduledTaskType> map =
+    Map<String, TaskType> map =
         Map.of(
             entityId1, testUpdateType,
             entityId2, testUpdateType);
@@ -142,7 +139,7 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
 
     // create scheduledTasks for entityId1 and entityId2
     List<String> entityIds = List.of(ScheduledTaskServiceIT.entityId1, entityId2);
-    Map<String, ScheduledTaskType> map =
+    Map<String, TaskType> map =
         Map.of(
             entityId1, testUpdateType,
             entityId2, testUpdateType);
@@ -185,10 +182,10 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
             .getEntityId();
 
     // create scheduledTasks for entityId1 and entityId2
-    Map<String, ScheduledTaskType> map =
+    Map<String, TaskType> map =
         Map.of(
-            entityId1, ScheduledUpdateType.FULL_UPDATE,
-            entityId2, ScheduledUpdateType.METRICS_UPDATE);
+            entityId1, TaskType.FULL_UPDATE,
+            entityId2, TaskType.METRICS_UPDATE);
     scheduledTaskService.scheduleTasksForEntities(map);
 
     //check the count method
@@ -199,7 +196,7 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
 
     entityUpdateJobLauncher.run(
         updateJobConfig.updateScheduledEntities(
-            List.of(ScheduledUpdateType.FULL_UPDATE, ScheduledUpdateType.METRICS_UPDATE)),
+            List.of(TaskType.FULL_UPDATE, TaskType.METRICS_UPDATE)),
         BatchUtils.createJobParameters(
             null,
             Date.from(Instant.now()),
@@ -282,10 +279,10 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
     Assertions.assertNotNull(solrConcept);
 
     // create scheduledTasks for entityId1 and entityId2
-    Map<String, ScheduledTaskType> map =
+    Map<String, TaskType> map =
         Map.of(
-            entityId1, ScheduledRemovalType.DEPRECATION,
-            entityId2, ScheduledRemovalType.PERMANENT_DELETION);
+            entityId1, TaskType.DEPRECATION,
+            entityId2, TaskType.PERMANENT_DELETION);
     scheduledTaskService.scheduleTasksForEntities(map);
 
     //check the count method

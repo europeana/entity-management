@@ -1,6 +1,8 @@
 package eu.europeana.entitymanagement.batch.processor;
 
 import java.util.Set;
+
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.lang.NonNull;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
@@ -10,14 +12,14 @@ import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 public abstract class BaseEntityProcessor
     implements ItemProcessor<BatchEntityRecord, BatchEntityRecord> {
 
-  private final Set<ScheduledTaskType> supportedScheduledTasks;
+  private final Set<TaskType> supportedScheduledTasks;
 
   /**
    * Instantiates the processor with a list of supported ScheduledTask types
    *
    * @param supportedScheduledTasks @{@link ScheduledTaskType} supported by processor
    */
-  protected BaseEntityProcessor(@NonNull ScheduledTaskType... supportedScheduledTasks) {
+  protected BaseEntityProcessor(@NonNull TaskType... supportedScheduledTasks) {
     this.supportedScheduledTasks = Set.of(supportedScheduledTasks);
   }
 
@@ -27,7 +29,7 @@ public abstract class BaseEntityProcessor
    * @param updateType ScheduledTask update type
    * @return
    */
-  private boolean shouldProcessUpdateType(ScheduledTaskType updateType) {
+  private boolean shouldProcessUpdateType(TaskType updateType) {
     return supportedScheduledTasks.contains(updateType);
   }
 

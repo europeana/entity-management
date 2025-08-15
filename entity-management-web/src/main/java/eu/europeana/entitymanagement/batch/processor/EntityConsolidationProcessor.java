@@ -6,6 +6,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.validation.ConstraintViolation;
 import javax.validation.ValidatorFactory;
+
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
 import eu.europeana.api.commons.error.EuropeanaApiException;
@@ -50,7 +52,7 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
       DataSources datasources,
       EntityManagementConfiguration emConfiguration,
       DepictionGeneratorService depictionGeneratorService) {
-    super(ScheduledUpdateType.FULL_UPDATE);
+    super(TaskType.FULL_UPDATE);
     this.entityRecordService = entityRecordService;
     this.emValidatorFactory = emValidatorFactory;
     this.emEntityFieldCleaner = emEntityFieldCleaner;

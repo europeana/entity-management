@@ -16,8 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import eu.europeana.entitymanagement.batch.config.JobDescriptionFactory;
 import eu.europeana.entitymanagement.batch.model.JobDescription;
-import eu.europeana.entitymanagement.batch.model.Task;
-import eu.europeana.entitymanagement.batch.model.TaskType;
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -160,7 +159,7 @@ public class EMController extends BaseRest {
       entityRecordService.disableEntityRecord(entityRecord, true);
     } else {
       entityUpdateService.scheduleTasks(Collections.singletonList(entityId),
-          ScheduledRemovalType.DEPRECATION);
+              TaskType.DEPRECATION);
     }
 
     return noContentResponse(request);
@@ -328,14 +327,14 @@ public class EMController extends BaseRest {
 
     // query param takes precedence over request body
     if (StringUtils.isNotEmpty(query)) {
-      return scheduleUpdatesWithSearch(request, query, ScheduledUpdateType.FULL_UPDATE);
+      return scheduleUpdatesWithSearch(request, query, TaskType.FULL_UPDATE);
     }
 
     if (CollectionUtils.isEmpty(entityIds)) {
       throw new HttpBadRequestException(INVALID_UPDATE_REQUEST_MSG);
     }
 
-    return scheduleBatchUpdates(request, entityIds, ScheduledUpdateType.FULL_UPDATE);
+    return scheduleBatchUpdates(request, entityIds, TaskType.FULL_UPDATE);
   }
 
   @ApiOperation(value = "Update metrics for given entities", nickname = "updateMetricsForEntities",
@@ -351,14 +350,14 @@ public class EMController extends BaseRest {
 
     // query param takes precedence over request body
     if (StringUtils.isNotEmpty(query)) {
-      return scheduleUpdatesWithSearch(request, query, ScheduledUpdateType.METRICS_UPDATE);
+      return scheduleUpdatesWithSearch(request, query, TaskType.METRICS_UPDATE);
     }
 
     if (CollectionUtils.isEmpty(entityIds)) {
       throw new HttpBadRequestException(INVALID_UPDATE_REQUEST_MSG);
     }
 
-    return scheduleBatchUpdates(request, entityIds, ScheduledUpdateType.METRICS_UPDATE);
+    return scheduleBatchUpdates(request, entityIds, TaskType.METRICS_UPDATE);
   }
 
   /**
@@ -749,7 +748,7 @@ public class EMController extends BaseRest {
   }
 
   private ResponseEntity<EntityIdResponse> scheduleBatchUpdates(HttpServletRequest request,
-      List<String> entityIds, ScheduledTaskType updateType) {
+      List<String> entityIds, TaskType updateType) {
     // get the entities to be scheduled, failed and skipped for update
     EntityIdResponse entityIdResponse = new EntityIdResponse();
     List<String> entityIdsToSchedule = updateEntityIdResponse(entityIdResponse, entityIds);
@@ -769,7 +768,7 @@ public class EMController extends BaseRest {
    * @throws SolrServiceException if error occurs during search
    */
   ResponseEntity<EntityIdResponse> scheduleUpdatesWithSearch(HttpServletRequest request,
-      String query, ScheduledTaskType updateType) throws SolrServiceException {
+      String query, TaskType updateType) throws SolrServiceException {
     SolrSearchCursorIterator iterator =
         solrService.getSearchIterator(query, List.of(EntitySolrFields.TYPE, EntitySolrFields.ID));
 

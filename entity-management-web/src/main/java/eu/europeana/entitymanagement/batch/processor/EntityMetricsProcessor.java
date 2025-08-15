@@ -1,6 +1,8 @@
 package eu.europeana.entitymanagement.batch.processor;
 
 import java.util.Date;
+
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -28,7 +30,7 @@ public class EntityMetricsProcessor extends BaseEntityProcessor {
   public EntityMetricsProcessor(ScoringService scoringService,
       EntityManagementConfiguration entityManagementConfiguration) {
 
-    super(ScheduledUpdateType.FULL_UPDATE, ScheduledUpdateType.METRICS_UPDATE);
+    super(TaskType.FULL_UPDATE, TaskType.METRICS_UPDATE);
 
     this.scoringService = scoringService;
     this.entityManagementConfiguration = entityManagementConfiguration;

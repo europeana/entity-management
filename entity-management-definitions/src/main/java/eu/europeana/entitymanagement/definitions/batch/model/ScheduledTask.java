@@ -28,7 +28,7 @@ public class ScheduledTask {
   private Instant created;
 
   private Instant modified;
-  private ScheduledTaskType updateType;
+  private TaskType updateType;
   private boolean hasBeenProcessed;
 
   @SuppressWarnings("unused")
@@ -37,7 +37,7 @@ public class ScheduledTask {
   }
 
   public ScheduledTask(
-      String entityId, ScheduledTaskType updateType, Instant modified, boolean hasBeenProcessed) {
+      String entityId, TaskType updateType, Instant modified, boolean hasBeenProcessed) {
     this.entityId = entityId;
     this.updateType = updateType;
     this.modified = modified;
@@ -56,7 +56,7 @@ public class ScheduledTask {
     return modified;
   }
 
-  public ScheduledTaskType getUpdateType() {
+  public TaskType getUpdateType() {
     return updateType;
   }
 
@@ -66,11 +66,11 @@ public class ScheduledTask {
 
   public static class Builder {
     private final String entityId;
-    private final ScheduledTaskType updateType;
+    private final TaskType updateType;
     private Instant modified;
     private boolean hasBeenProcessed;
 
-    public Builder(String entityId, ScheduledTaskType updateType) {
+    public Builder(String entityId, TaskType updateType) {
       this.entityId = entityId;
       this.updateType = updateType;
     }

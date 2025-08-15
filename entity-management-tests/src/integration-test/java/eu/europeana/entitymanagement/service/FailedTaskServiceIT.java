@@ -1,6 +1,6 @@
 package eu.europeana.entitymanagement.service;
 
-import static eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType.PERMANENT_DELETION;
+import static eu.europeana.entitymanagement.definitions.batch.model.TaskType.PERMANENT_DELETION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -11,6 +11,8 @@ import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +31,7 @@ class FailedTaskServiceIT extends AbstractIntegrationTest {
   private static final Exception testException = new Exception("Exception Message");
   private static final Exception secondException = new Exception("Second Exception Message");
 
-  private static final ScheduledTaskType testUpdateType = PERMANENT_DELETION;
+  private static final TaskType testUpdateType = PERMANENT_DELETION;
 
   @BeforeEach
   public void setup() {
@@ -51,7 +53,7 @@ class FailedTaskServiceIT extends AbstractIntegrationTest {
 
   @Test
   void shouldPersistMultipleFailures() {
-    Map<String, ScheduledTaskType> map =
+    Map<String, TaskType> map =
         Map.of(
             entityId1, testUpdateType,
             entityId2, testUpdateType);
@@ -85,7 +87,7 @@ class FailedTaskServiceIT extends AbstractIntegrationTest {
     service.persistFailure(entityId1, testUpdateType, testException);
 
     // insert two failures - with one matching pre-inserted
-    Map<String, ScheduledTaskType> map =
+    Map<String, TaskType> map =
         Map.of(
             entityId1, testUpdateType,
             entityId2, testUpdateType);

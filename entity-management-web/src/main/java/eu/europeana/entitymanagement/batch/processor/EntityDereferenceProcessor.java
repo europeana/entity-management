@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.TreeSet;
+
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.item.ItemProcessor;
@@ -45,7 +47,7 @@ public class EntityDereferenceProcessor extends BaseEntityProcessor {
       DereferenceServiceLocator dereferenceServiceLocator,
       DataSources datasources,
       EntityRecordService entityRecordService) {
-    super(ScheduledUpdateType.FULL_UPDATE);
+    super(TaskType.FULL_UPDATE);
     this.dereferenceServiceLocator = dereferenceServiceLocator;
     this.datasources = datasources;
     this.entityRecordService = entityRecordService;
