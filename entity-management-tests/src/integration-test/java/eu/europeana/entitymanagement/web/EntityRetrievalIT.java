@@ -29,6 +29,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import com.zoho.crm.api.record.Record;
 import eu.europeana.entitymanagement.batch.service.FailedTaskService;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
@@ -68,7 +69,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
     Exception testException = new Exception("TestMessage");
     failedTaskService.dropCollection();
     failedTaskService.persistFailure(
-        entityRecord.getEntityId(), ScheduledUpdateType.FULL_UPDATE, testException);
+        entityRecord.getEntityId(), TaskType.FULL_UPDATE, testException);
 
     // MockMvc requests use "localhost" without a port
     String clickableUrl =
@@ -203,7 +204,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
 
     // create FailedTask for entityId
     Exception testException = new Exception("TestMessage");
-    failedTaskService.persistFailure(entityId, ScheduledUpdateType.FULL_UPDATE, testException);
+    failedTaskService.persistFailure(entityId, TaskType.FULL_UPDATE, testException);
 
     String requestPath = getEntityRequestPath(entityId);
     mockMvc

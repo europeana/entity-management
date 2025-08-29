@@ -291,7 +291,7 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
     
     entityDeletionsJobLauncher.run(
         updateJobConfig.removeScheduledEntities(
-            List.of(ScheduledRemovalType.DEPRECATION, ScheduledRemovalType.PERMANENT_DELETION)),
+            List.of(TaskType.DEPRECATION, TaskType.PERMANENT_DELETION)),
         BatchUtils.createJobParameters(
             null,
             Date.from(Instant.now()),
