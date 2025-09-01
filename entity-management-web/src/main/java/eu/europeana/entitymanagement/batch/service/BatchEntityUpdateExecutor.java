@@ -57,7 +57,7 @@ public class BatchEntityUpdateExecutor {
 
   /** Periodically run full entity and metric updates (in one run). */
   @Async
-  public void runAsynchronousUpdate() {
+  public void runScheduledTasks() {
     logger.info("Triggering scheduled {}, {} for entities", TaskType.FULL_UPDATE, TaskType.METRICS_UPDATE);
     try {
       entityUpdateJobLauncher.run(
@@ -65,7 +65,7 @@ public class BatchEntityUpdateExecutor {
               BatchUtils.createJobParameters(
                       null,
                       Date.from(Instant.now()),
-                      List.of(ScheduledUpdateType.FULL_UPDATE),
+                      TaskType.FULL_UPDATE,
                       false));
 
       entityUpdateJobLauncher.run(
@@ -73,28 +73,10 @@ public class BatchEntityUpdateExecutor {
               BatchUtils.createJobParameters(
                       null,
                       Date.from(Instant.now()),
-                      List.of(ScheduledUpdateType.METRICS_UPDATE),
+                      TaskType.METRICS_UPDATE,
                       false));
     } catch (Exception e) {
       logger.warn("Error running scheduled {} and {} update", TaskType.FULL_UPDATE, TaskType.METRICS_UPDATE, e);
-    }
-  }
-
-  /** Periodically run full entity and metric updates (in one run). */
-  @Async
-  public void runScheduledUpdate() {
-    logger.info("Triggering scheduled full and metrics update for entities");
-    try {
-      entityUpdateJobLauncher.run(
-          updateJobConfig.updateScheduledEntities(
-              List.of(TaskType.FULL_UPDATE, TaskType.METRICS_UPDATE)),
-          BatchUtils.createJobParameters(
-              null,
-              Date.from(Instant.now()),
-              List.of(ScheduledUpdateType.FULL_UPDATE, ScheduledUpdateType.METRICS_UPDATE),
-              false));
-    } catch (Exception e) {
-      logger.warn("Error running scheduled full and metrics update", e);
     }
   }
 

@@ -196,15 +196,7 @@ public class AppAutoconfig extends AppConfigConstants {
    */
   @Bean(FULL_ENTITY_UPDATE_PROCESSOR)
   public ItemProcessor<BatchEntityRecord, BatchEntityRecord> fullEntityUpdateProcessor() {
-    CompositeItemProcessor<BatchEntityRecord, BatchEntityRecord> compositeItemProcessor =
-            new CompositeItemProcessor<>();
-    compositeItemProcessor.setDelegates(Arrays.asList(
-            applicationContext.getBean(BEAN_ENTITY_DEREFERENCE_PROCESSOR, EntityDereferenceProcessor.class),
-            applicationContext.getBean(BEAN_ENTITY_CONSOLIDATION_PROCESSOR, EntityConsolidationProcessor.class),
-            applicationContext.getBean(BEAN_ENTITY_METRICS_PROCESSOR, EntityMetricsProcessor.class),
-            applicationContext.getBean(BEAN_ENTITY_VERIFICATION_LOGGER, EntityVerificationLogger.class)));
-
-    return compositeItemProcessor;
+    return compositeProcessor(JobDescription.PROCESSORS_FULL_UPDATE);
   }
 
   /**

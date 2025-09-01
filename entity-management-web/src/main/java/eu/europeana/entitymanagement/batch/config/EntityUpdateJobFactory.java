@@ -11,6 +11,15 @@ import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.WEB_REQUEST_JOB_EXECUTOR;
 import java.util.List;
 import javax.annotation.Resource;
+import eu.europeana.entitymanagement.batch.listener.EntityUpdateStepListener;
+import eu.europeana.entitymanagement.batch.listener.ScheduledTaskItemListener;
+import eu.europeana.entitymanagement.batch.model.JobDescription;
+import eu.europeana.entitymanagement.batch.reader.EntityRecordDatabaseReader;
+import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.config.AppAutoconfig;
+import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import org.springframework.batch.core.ItemProcessListener;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -36,6 +45,12 @@ import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration
 import eu.europeana.entitymanagement.config.AppAutoconfig;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
+
+import javax.annotation.Resource;
+import java.util.Collections;
+
+import static eu.europeana.entitymanagement.batch.utils.BatchUtils.*;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.*;
 
 /**
  * Entity Job update factory class
@@ -113,7 +128,7 @@ public class EntityUpdateJobFactory {
                 .taskExecutor(getTaskExecutor(isSynchronous))
                 .throttleLimit(emConfig.getBatchUpdatesThrottleLimit())
                 .listener(stepExecutionListener(
-                        List.of(TaskType.FULL_UPDATE, TaskType.METRICS_UPDATE),
+                        jobDescription.getTaskType(),
                         isSynchronous))
                 .build();
     }
@@ -154,9 +169,9 @@ public class EntityUpdateJobFactory {
      *
      * */
     private StepExecutionListener stepExecutionListener(
-            List<TaskType> updateType, boolean isSynchronous) {
+            TaskType updateType, boolean isSynchronous) {
         return new EntityUpdateStepListener(
-                scheduledTaskService, updateType, isSynchronous, emConfig.getMaxFailedTaskRetries());
+                scheduledTaskService, Collections.singletonList(updateType), isSynchronous, emConfig.getMaxFailedTaskRetries());
     }
 
     ApplicationContext getApplicationContext() {
