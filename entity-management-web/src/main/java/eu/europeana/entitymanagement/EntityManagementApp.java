@@ -161,7 +161,7 @@ public class EntityManagementApp implements CommandLineRunner {
     if (tasks.contains(JobType.SCHEDULE_UPDATE.value())) {
       LOG.info("Executing scheduled updates");
 //      batchUpdateExecutor.runScheduledUpdate();
-      batchUpdateExecutor.runAsynchronousUpdate();
+      batchUpdateExecutor.runScheduledTasks();
       // TODO: should read the number of scheduled deletions and deprecations from the database
       // and write it to the logs
     }

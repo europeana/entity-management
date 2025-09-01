@@ -55,7 +55,7 @@ public class EntityUpdateService {
     syncWebRequestLauncher.run(
         entityUpdateJobFactory.createJob(jobDescription),
         BatchUtils.createJobParameters(
-            entityId, Date.from(Instant.now()), List.of(ScheduledUpdateType.FULL_UPDATE), true));
+            entityId, Date.from(Instant.now()), jobDescription.getTaskType(), true));
   }
 
   /**
