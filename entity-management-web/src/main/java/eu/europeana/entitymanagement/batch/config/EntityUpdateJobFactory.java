@@ -1,16 +1,16 @@
 package eu.europeana.entitymanagement.batch.config;
 
-import eu.europeana.entitymanagement.batch.listener.EntityUpdateStepListener;
-import eu.europeana.entitymanagement.batch.listener.ScheduledTaskItemListener;
-import eu.europeana.entitymanagement.batch.model.JobDescription;
-import eu.europeana.entitymanagement.batch.reader.EntityRecordDatabaseReader;
-import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.config.AppAutoconfig;
-import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
-import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
+import static eu.europeana.entitymanagement.batch.utils.BatchUtils.JOB_UPDATE_SCHEDULED_ENTITIES;
+import static eu.europeana.entitymanagement.batch.utils.BatchUtils.JOB_UPDATE_SINGLE_ENTITY;
+import static eu.europeana.entitymanagement.batch.utils.BatchUtils.STEP_UPDATE_ENTITY;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.ENTITY_UPDATE_WRITERS;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.FULL_ENTITY_UPDATE_PROCESSOR;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.SCHEDULED_TASK_READER;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.SINGLE_ENTITY_RECORD_READER;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.UPDATES_STEP_EXECUTOR;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.WEB_REQUEST_JOB_EXECUTOR;
+import java.util.List;
+import javax.annotation.Resource;
 import org.springframework.batch.core.ItemProcessListener;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -23,15 +23,19 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.support.SynchronizedItemStreamReader;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.Resource;
-import java.util.List;
-
-import static eu.europeana.entitymanagement.batch.utils.BatchUtils.*;
-import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.*;
+import eu.europeana.entitymanagement.batch.listener.EntityUpdateStepListener;
+import eu.europeana.entitymanagement.batch.listener.ScheduledTaskItemListener;
+import eu.europeana.entitymanagement.batch.model.JobDescription;
+import eu.europeana.entitymanagement.batch.reader.EntityRecordDatabaseReader;
+import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.entitymanagement.config.AppAutoconfig;
+import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 
 /**
  * Entity Job update factory class
@@ -41,27 +45,28 @@ import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants
 @Component
 public class EntityUpdateJobFactory {
 
-    private final JobBuilderFactory jobBuilderFactory;
-    private final StepBuilderFactory stepBuilderFactory;
-    private final ScheduledTaskItemListener itemListener;
-    private final ScheduledTaskService scheduledTaskService;
+    @Resource
+    private JobBuilderFactory jobBuilderFactory;
+    @Resource
+    private StepBuilderFactory stepBuilderFactory;
+    @Resource
+    private ScheduledTaskItemListener itemListener;
+    @Resource
+    private ScheduledTaskService scheduledTaskService;
 
     /** SkipPolicy to ignore all failures when executing jobs, as they can be handled later */
     private final SkipPolicy noopSkipPolicy = (Throwable t, int skipCount) -> true;
 
     @Resource
     EntityManagementConfiguration emConfig;
+    
+//    @Resource
+//    AppAutoconfig emAutoConfig;
+    @Autowired
+    ApplicationContext appContext;
 
-    @Resource
-    AppAutoconfig emAutoConfig;
-
-    public EntityUpdateJobFactory(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory,
-                                  ScheduledTaskItemListener itemListener,
-                                  ScheduledTaskService scheduledTaskService) {
-        this.jobBuilderFactory = jobBuilderFactory;
-        this.stepBuilderFactory = stepBuilderFactory;
-        this.itemListener = itemListener;
-        this.scheduledTaskService = scheduledTaskService;
+    public EntityUpdateJobFactory() {
+      super();
     }
 
     /**
@@ -136,9 +141,9 @@ public class EntityUpdateJobFactory {
 
     private ItemProcessor<BatchEntityRecord, BatchEntityRecord> getProcessor(JobDescription jobDescription) {
         return jobDescription.isFullUpdate() ?
-                (ItemProcessor<BatchEntityRecord, BatchEntityRecord>) getApplicationContext().getBean(FULL_ENTITY_UPDATE_PROCESSOR)
-                 : emAutoConfig.compositeProcessor(jobDescription.getProcessors());
-
+                (ItemProcessor<BatchEntityRecord, BatchEntityRecord>) getApplicationContext().getBean(FULL_ENTITY_UPDATE_PROCESSOR) : null;
+//                 : emAutoConfig.compositeProcessor(jobDescription.getProcessors());
+ //TODO: move to factory 
     }
 
     private ItemWriter<BatchEntityRecord> getWriter() {
@@ -154,7 +159,7 @@ public class EntityUpdateJobFactory {
                 scheduledTaskService, updateType, isSynchronous, emConfig.getMaxFailedTaskRetries());
     }
 
-    public ApplicationContext getApplicationContext() {
-        return emAutoConfig.getApplicationContext();
+    ApplicationContext getApplicationContext() {
+        return appContext;
     }
 }
