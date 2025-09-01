@@ -45,8 +45,8 @@ public class JobDescription {
         return taskType;
     }
 
-    public boolean isFullUpdate() {
-        return this.getTaskType() == TaskType.FULL_UPDATE;
-    }
+//    public boolean isFullUpdate() {
+//        return this.getTaskType() == TaskType.FULL_UPDATE;
+//    }
 
 }

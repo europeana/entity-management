@@ -53,6 +53,7 @@ public class AppConfigConstants {
   public static  final String ENTITY_UPDATE_WRITERS                   = "entityUpdateWriters";
 
   public static  final String JOB_DESCRIPTION_FACTORY                 = "jobDescriptionFactory";
+  public static  final String ENTITY_UPDATE_JOB_FACTORY                 = "entityUpdateJobFactory";
 
 
   public static final String PERIODIC_UPDATES_SCHEDULER = "periodicUpdatesScheduler";

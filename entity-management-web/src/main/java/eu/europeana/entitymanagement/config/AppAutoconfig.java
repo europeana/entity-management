@@ -12,38 +12,31 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.xml.bind.JAXBContext;
-
-import eu.europeana.entitymanagement.batch.config.JobDescriptionFactory;
-import eu.europeana.entitymanagement.batch.model.JobDescription;
-import eu.europeana.entitymanagement.batch.model.Task;
-import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
-import eu.europeana.entitymanagement.batch.processor.EntityConsolidationProcessor;
-import eu.europeana.entitymanagement.batch.processor.EntityDereferenceProcessor;
-import eu.europeana.entitymanagement.batch.processor.EntityMetricsProcessor;
-import eu.europeana.entitymanagement.batch.processor.EntityVerificationLogger;
-import eu.europeana.entitymanagement.batch.writer.EntityRecordDatabaseInsertionWriter;
-import eu.europeana.entitymanagement.batch.writer.EntitySolrInsertionWriter;
-import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.support.CompositeItemProcessor;
-import org.springframework.batch.item.support.CompositeItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import eu.europeana.api.commons.config.i18n.I18nService;
 import eu.europeana.api.commons.config.i18n.I18nServiceImpl;
 import eu.europeana.api.commons.oauth2.service.impl.EuropeanaClientDetailsService;
+import eu.europeana.entitymanagement.batch.config.EntityUpdateJobFactory;
+import eu.europeana.entitymanagement.batch.config.JobDescriptionFactory;
+import eu.europeana.entitymanagement.batch.model.JobDescription;
+import eu.europeana.entitymanagement.batch.model.Task;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
+import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import eu.europeana.entitymanagement.definitions.model.Vocabulary;
 import eu.europeana.entitymanagement.exception.ApplicationInitializationException;
 import eu.europeana.entitymanagement.mongo.repository.VocabularyRepository;
@@ -70,6 +63,8 @@ public class AppAutoconfig extends AppConfigConstants {
   private VocabularyRepository vocabRepository;
   
   @Resource protected JAXBContext jaxbContext; 
+  
+  private EntityUpdateJobFactory entityUpdateJobFactory;
   
   public AppAutoconfig() {
     LOG.info("Initializing EntityManagementConfiguration bean as: configuration");
@@ -159,67 +154,17 @@ public class AppAutoconfig extends AppConfigConstants {
     return source;
   }
 
+//  public ApplicationContext getApplicationContext() {
+//    return applicationContext;
+//  }
 
-  public EntityRecordDatabaseInsertionWriter recordDBInsertionWriter() {
-    return applicationContext.getBean(BEAN_ENTITY_RECORD_DBINSERTION_WRITER, EntityRecordDatabaseInsertionWriter.class);
-  }
-
-  public EntitySolrInsertionWriter entitySolrInsertionWriter() {
-    return applicationContext.getBean(BEAN_ENTITY_SOLR_INSERTION_WRITER, EntitySolrInsertionWriter.class);
-  }
-
-
-  /**
-   * Creating it as a bean as the writer list is same for all the Internal Task of EM.
-   * For performance will access them from application context than creating a list for every request
-   * @see <a href="http://docs.google.com/document/d/16k9PcCMFwl2LXjnnzotZRPc-QqM-Ar1D0VELHt4t_hA/edit?tab=t.0#heading=h.fj6e15rbq64q"></a> }
-   * Creates the writer list -
-   *    Writer: Db update + Solr update
-   * @return
-   */
-  @Bean(ENTITY_UPDATE_WRITERS)
-  public ItemWriter<BatchEntityRecord> entityUpdateWriters() {
-    CompositeItemWriter<BatchEntityRecord> compositeWriter = new CompositeItemWriter<>();
-    compositeWriter.setDelegates(Arrays.asList(recordDBInsertionWriter(), entitySolrInsertionWriter()));
-    return compositeWriter;
-  }
-
-
-  /**
-   * Creating it as a bean as this processor list is used for most of the Internal Task of EM.
-   * For performnace will access them from application context than creating a list for every request
-   * @see <a href="http://docs.google.com/document/d/16k9PcCMFwl2LXjnnzotZRPc-QqM-Ar1D0VELHt4t_hA/edit?tab=t.0#heading=h.fj6e15rbq64q"></a> }
-   *
-   * Creates the processor list -
-   *    Processors: Dereference + consolidation + metrics + validation
-   * @return
-   */
-  @Bean(FULL_ENTITY_UPDATE_PROCESSOR)
-  public ItemProcessor<BatchEntityRecord, BatchEntityRecord> fullEntityUpdateProcessor() {
-    return compositeProcessor(JobDescription.PROCESSORS_FULL_UPDATE);
-  }
-
-  /**
-   * More generic composite processor,
-   * Creates a composite processor with the list of processors provided
-   * @param processors
-   * @return
-   */
-  public ItemProcessor<BatchEntityRecord, BatchEntityRecord> compositeProcessor(List<Task> processors) {
-    CompositeItemProcessor<BatchEntityRecord, BatchEntityRecord> compositeItemProcessor =
-            new CompositeItemProcessor<>();
-    List<ItemProcessor<BatchEntityRecord, BatchEntityRecord>> delegates = new ArrayList<>(processors.size());
-    for (Task process: processors) {
-      delegates.add((ItemProcessor<BatchEntityRecord, BatchEntityRecord>) applicationContext.getBean(process.getBeanName()));
+  @Bean(ENTITY_UPDATE_JOB_FACTORY)
+  public EntityUpdateJobFactory getEntityUpdateJobFactory() {
+    if(entityUpdateJobFactory == null) {
+      entityUpdateJobFactory = new EntityUpdateJobFactory();
     }
-    compositeItemProcessor.setDelegates(delegates);
-    return compositeItemProcessor;
+    return entityUpdateJobFactory;
   }
-
-  public ApplicationContext getApplicationContext() {
-    return applicationContext;
-  }
-
 
   @Bean(JOB_DESCRIPTION_FACTORY)
   public JobDescriptionFactory jobDescriptionProvider() {
@@ -243,4 +188,17 @@ public class AppAutoconfig extends AppConfigConstants {
                     , JobDescription.PERSISTENCE_ITEM_WRITERS));
     return factory;
   }
+  
+  @Bean(FULL_ENTITY_UPDATE_PROCESSOR)
+  @DependsOn({JOB_DESCRIPTION_FACTORY, ENTITY_UPDATE_JOB_FACTORY})
+  public ItemProcessor<BatchEntityRecord, BatchEntityRecord> getFullEntityUpdateProcessor() {
+    return getEntityUpdateJobFactory().createFullEntityUpdateProcessor();
+  }
+  
+  @Bean(ENTITY_UPDATE_WRITERS)
+  @DependsOn({BEAN_ENTITY_RECORD_DBINSERTION_WRITER, BEAN_ENTITY_SOLR_INSERTION_WRITER, ENTITY_UPDATE_JOB_FACTORY})
+  public ItemWriter<BatchEntityRecord> entityUpdateWriters() {
+    return getEntityUpdateJobFactory().buildEntityUpdateWriters();
+  }
+
 }
