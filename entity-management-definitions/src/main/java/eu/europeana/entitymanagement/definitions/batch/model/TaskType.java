@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement.definitions.batch.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import eu.europeana.entitymanagement.serialization.TaskTypeSerializer;
+import org.apache.commons.lang3.StringUtils;
 
 @JsonSerialize(using = TaskTypeSerializer.class)
 public enum TaskType {
@@ -20,6 +21,15 @@ public enum TaskType {
 
     public String getValue() {
         return value;
+    }
+
+    public static TaskType getType(String value) {
+        for (TaskType type: TaskType.values()) {
+            if (StringUtils.equals(type.getValue(), value)) {
+                return type;
+            }
+        }
+        return null;
     }
 
     @Override

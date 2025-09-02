@@ -51,6 +51,9 @@ public class AppConfigConstants {
   public static  final String BEAN_ENTITY_SOLR_INSERTION_WRITER       = "entitySolrInsertionWriter";
   public static  final String FULL_ENTITY_UPDATE_PROCESSOR            = "fullEntityUpdateProcessor";
   public static  final String ENTITY_UPDATE_WRITERS                   = "entityUpdateWriters";
+  public static  final String ENTITY_RECORD_DB_DEPRECATION_WRITER     = "entityRecordDbDeprecationWriter";
+  public static  final String ENTITY_RECORD_DB_REMOVAL_WRITER         = "entityRecordDbRemovalWriter";
+  public static  final String ENTITY_SOLR_REMOVAL_WRITER              = "entitySolrRemovalWriter";
 
   public static  final String JOB_DESCRIPTION_FACTORY                 = "jobDescriptionFactory";
   public static  final String ENTITY_UPDATE_JOB_FACTORY                 = "entityUpdateJobFactory";

@@ -1,11 +1,8 @@
 package eu.europeana.entitymanagement.batch.service;
 
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.*;
-import static eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType.DEPRECATION;
-import static eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType.PERMANENT_DELETION;
 import java.time.Instant;
 import java.util.Date;
-import java.util.List;
 
 import eu.europeana.entitymanagement.batch.config.EntityUpdateJobFactory;
 import eu.europeana.entitymanagement.batch.config.JobDescriptionFactory;
@@ -20,7 +17,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import eu.europeana.entitymanagement.batch.config.EntityUpdateJobConfig;
 import eu.europeana.entitymanagement.batch.utils.BatchUtils;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 
 //@Configuration
 @PropertySource("classpath:entitymanagement.properties")
@@ -85,10 +81,21 @@ public class BatchEntityUpdateExecutor {
   public void runScheduledDeprecationsAndDeletions() {
     logger.info("Triggering scheduled deprecations and deletions for entities");
     try {
-      entityDeletionsJobLauncher.run(
-          updateJobConfig.removeScheduledEntities(List.of(TaskType.PERMANENT_DELETION, TaskType.DEPRECATION)),
-          BatchUtils.createJobParameters(
-              null, Date.from(Instant.now()), List.of(PERMANENT_DELETION, DEPRECATION), false));
+      entityUpdateJobLauncher.run(
+              entityUpdateJobFactory.removeScheduledEntities(jobDescriptionFactory.get(TaskType.PERMANENT_DELETION)),
+              BatchUtils.createJobParameters(
+                      null,
+                      Date.from(Instant.now()),
+                      TaskType.PERMANENT_DELETION,
+                      false));
+
+      entityUpdateJobLauncher.run(
+              entityUpdateJobFactory.createScheduledUpdateJob(jobDescriptionFactory.get(TaskType.DEPRECATION)),
+              BatchUtils.createJobParameters(
+                      null,
+                      Date.from(Instant.now()),
+                      TaskType.DEPRECATION,
+                      false));
     } catch (Exception e) {
       logger.warn("Error running scheduled deprecations and deletions", e);
     }

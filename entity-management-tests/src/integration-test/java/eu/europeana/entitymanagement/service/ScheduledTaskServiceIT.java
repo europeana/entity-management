@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import eu.europeana.entitymanagement.batch.config.EntityUpdateJobFactory;
 import eu.europeana.entitymanagement.definitions.batch.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -54,6 +55,9 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
   JobLauncher entityDeletionsJobLauncher;
 
   @Autowired EntityUpdateJobConfig updateJobConfig;
+
+  @Autowired
+  EntityUpdateJobFactory entityUpdateJobFactory;
 
   @Qualifier(AppAutoconfig.BEAN_EM_SOLR_SERVICE)
   @Autowired
@@ -200,13 +204,20 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
     Date dateBeforeRun = new Date();
 
     entityUpdateJobLauncher.run(
-        updateJobConfig.updateScheduledEntities(
-            List.of(TaskType.FULL_UPDATE, TaskType.METRICS_UPDATE)),
-        BatchUtils.createJobParameters(
-            null,
-            Date.from(Instant.now()),
-            List.of(ScheduledUpdateType.FULL_UPDATE, ScheduledUpdateType.METRICS_UPDATE),
-            false));
+            entityUpdateJobFactory.createScheduledUpdateJob(jobDescriptionFactory.get(TaskType.FULL_UPDATE)),
+            BatchUtils.createJobParameters(
+                    null,
+                    Date.from(Instant.now()),
+                    TaskType.FULL_UPDATE,
+                    false));
+
+    entityUpdateJobLauncher.run(
+            entityUpdateJobFactory.createScheduledUpdateJob(jobDescriptionFactory.get(TaskType.METRICS_UPDATE)),
+            BatchUtils.createJobParameters(
+                    null,
+                    Date.from(Instant.now()),
+                    TaskType.METRICS_UPDATE,
+                    false));
 
     Optional<EntityRecord> entityRecord1Updated = retrieveEntityEvenIfDisabled(entityId1);
     Optional<EntityRecord> entityRecord2Updated = retrieveEntityEvenIfDisabled(entityId2);
@@ -293,15 +304,22 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
     //check the count method
     long runningTasks = scheduledTaskService.getRunningTasksCount();
     assertEquals(map.size(), runningTasks);
-    
+
     entityDeletionsJobLauncher.run(
-        updateJobConfig.removeScheduledEntities(
-            List.of(TaskType.DEPRECATION, TaskType.PERMANENT_DELETION)),
-        BatchUtils.createJobParameters(
-            null,
-            Date.from(Instant.now()),
-            List.of(ScheduledRemovalType.DEPRECATION, ScheduledRemovalType.PERMANENT_DELETION),
-            false));
+            entityUpdateJobFactory.removeScheduledEntities(jobDescriptionFactory.get(TaskType.PERMANENT_DELETION)),
+            BatchUtils.createJobParameters(
+                    null,
+                    Date.from(Instant.now()),
+                    TaskType.PERMANENT_DELETION,
+                    false));
+
+    entityDeletionsJobLauncher.run(
+            entityUpdateJobFactory.createScheduledUpdateJob(jobDescriptionFactory.get(TaskType.DEPRECATION)),
+            BatchUtils.createJobParameters(
+                    null,
+                    Date.from(Instant.now()),
+                    TaskType.DEPRECATION,
+                    false));
 
     Optional<EntityRecord> entityRecord1DbUpdated = retrieveEntityEvenIfDisabled(entityId1);
     Optional<EntityRecord> entityRecord2DbUpdated = retrieveEntityEvenIfDisabled(entityId2);

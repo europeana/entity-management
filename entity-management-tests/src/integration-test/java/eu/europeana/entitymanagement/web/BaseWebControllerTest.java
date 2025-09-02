@@ -29,7 +29,6 @@ import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.config.AppAutoconfig;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Organization;
@@ -209,7 +208,7 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
     entityRecordService.delete(entityId);
   }
 
-  protected void assertedTaskScheduled(String entityId, ScheduledTaskType taskType) {
+  protected void assertedTaskScheduled(String entityId, TaskType taskType) {
     // check that record is disabled
     Optional<ScheduledTask> scheduledTask = scheduledTaskService.getTask(entityId);
     Assertions.assertTrue(scheduledTask.isPresent());

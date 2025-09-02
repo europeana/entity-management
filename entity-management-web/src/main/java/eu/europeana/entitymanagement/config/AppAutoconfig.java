@@ -186,6 +186,18 @@ public class AppAutoconfig extends AppConfigConstants {
                     TaskType.METRICS_UPDATE
                     , Arrays.asList(Task.METRICS)
                     , JobDescription.PERSISTENCE_ITEM_WRITERS));
+
+    factory.register(
+            new JobDescription(
+                    TaskType.DEPRECATION
+                    , null
+                    , JobDescription.DEPRECATION_WRITERS));
+
+    factory.register(
+            new JobDescription(
+                    TaskType.PERMANENT_DELETION
+                    , null
+                    , JobDescription.PERMANENT_REMOVAL_WRITERS));
     return factory;
   }
   

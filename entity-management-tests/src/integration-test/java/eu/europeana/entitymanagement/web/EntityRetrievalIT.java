@@ -28,7 +28,6 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import com.zoho.crm.api.record.Record;
 import eu.europeana.entitymanagement.batch.service.FailedTaskService;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
@@ -217,7 +216,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
         .andExpect(
             jsonPath(
                 "$.isAggregatedBy." + WebEntityFields.FAILURES + "." + FailedTaskJsonFields.TYPE,
-                is(ScheduledUpdateType.FULL_UPDATE.getValue())))
+                is(TaskType.FULL_UPDATE.getValue())))
         .andExpect(
             jsonPath(
                     "$.isAggregatedBy."

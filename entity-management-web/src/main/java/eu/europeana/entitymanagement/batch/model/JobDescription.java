@@ -13,9 +13,11 @@ import java.util.List;
  */
 public class JobDescription {
 
-    public static final List<Task> PROCESSORS_FULL_UPDATE   = Arrays.asList(Task.DEREFERENCE, Task.CONSOLIDATION, Task.METRICS, Task.VALIDATION);
-    public static final List<Task> PROCESSORS_META_UPDATE   = Arrays.asList(Task.CONSOLIDATION, Task.VALIDATION);
-    public static final List<Task> PERSISTENCE_ITEM_WRITERS = Arrays.asList(Task.DB_UPDATE, Task.SOLR_INSERTION);
+    public static final List<Task> PROCESSORS_FULL_UPDATE     = Arrays.asList(Task.DEREFERENCE, Task.CONSOLIDATION, Task.METRICS, Task.VALIDATION);
+    public static final List<Task> PROCESSORS_META_UPDATE     = Arrays.asList(Task.CONSOLIDATION, Task.VALIDATION);
+    public static final List<Task> PERSISTENCE_ITEM_WRITERS   = Arrays.asList(Task.DB_UPDATE, Task.SOLR_INSERTION);
+    public static final List<Task> PERMANENT_REMOVAL_WRITERS  = Arrays.asList(Task.RECORD_REMOVAL, Task.SOLR_REMOVAL);
+    public static final List<Task> DEPRECATION_WRITERS        = Arrays.asList(Task.RECORD_DEPRECATION, Task.SOLR_REMOVAL);
 
     private TaskType taskType;
     private List<Task> processors;

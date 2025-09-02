@@ -1,16 +1,9 @@
 package eu.europeana.entitymanagement.batch.config;
 
-import static eu.europeana.entitymanagement.batch.utils.BatchUtils.JOB_UPDATE_SCHEDULED_ENTITIES;
-import static eu.europeana.entitymanagement.batch.utils.BatchUtils.JOB_UPDATE_SINGLE_ENTITY;
-import static eu.europeana.entitymanagement.batch.utils.BatchUtils.STEP_UPDATE_ENTITY;
-import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.ENTITY_UPDATE_WRITERS;
-import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.FULL_ENTITY_UPDATE_PROCESSOR;
-import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.SCHEDULED_TASK_READER;
-import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.SINGLE_ENTITY_RECORD_READER;
-import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.UPDATES_STEP_EXECUTOR;
-import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.WEB_REQUEST_JOB_EXECUTOR;
+import static eu.europeana.entitymanagement.batch.utils.BatchUtils.*;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.*;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Resource;
@@ -37,10 +30,7 @@ import eu.europeana.entitymanagement.batch.model.JobDescription;
 import eu.europeana.entitymanagement.batch.model.Task;
 import eu.europeana.entitymanagement.batch.reader.EntityRecordDatabaseReader;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
-import eu.europeana.entitymanagement.batch.writer.EntityRecordDatabaseInsertionWriter;
-import eu.europeana.entitymanagement.batch.writer.EntitySolrInsertionWriter;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 
@@ -101,6 +91,17 @@ public class EntityUpdateJobFactory {
     }
 
     /**
+     * Job for updating entities scheduled via the ScheduledTasks collection Expects
+     * `currentStartTime` date and `updateType` string in JobParameters.
+     */
+    public Job removeScheduledEntities(JobDescription jobDescription) {
+        return this.jobBuilderFactory
+                .get(JOB_REMOVE_SCHEDULED_ENTITIES)
+                .start(removeEntity(jobDescription))
+                .build();
+    }
+
+    /**
      * Creates a dynamic step for synchronous and Asynchronous entity update
      * @return
      */
@@ -122,11 +123,30 @@ public class EntityUpdateJobFactory {
                 .build();
     }
 
-
+    private Step removeEntity(JobDescription jobDescription) {
+        return this.stepBuilderFactory
+                .get(STEP_REMOVE_ENTITY)
+                .<BatchEntityRecord, BatchEntityRecord>chunk(emConfig.getBatchChunkSize())
+                .reader(getReader(false))
+                .writer(compositeWriters(jobDescription.getWriters()))
+                .listener((ItemProcessListener<? super BatchEntityRecord, ? super BatchEntityRecord>)
+                        itemListener)
+                .faultTolerant()
+                .skipPolicy(noopSkipPolicy)
+                .taskExecutor(getRemovalTaskExecutor())
+                .throttleLimit(emConfig.getBatchRemovalsThrottleLimit())
+                // removal steps are always async
+                .listener(stepExecutionListener(jobDescription.getTaskType(), false))
+                .build();
+    }
 
     private TaskExecutor getTaskExecutor(boolean isSynchronous) {
         return isSynchronous ? (TaskExecutor)getApplicationContext().getBean(WEB_REQUEST_JOB_EXECUTOR)
                 : (TaskExecutor) getApplicationContext().getBean(UPDATES_STEP_EXECUTOR);
+    }
+
+    private TaskExecutor getRemovalTaskExecutor() {
+        return (TaskExecutor) getApplicationContext().getBean(REMOVALS_STEP_EXECUTOR);
     }
 
     private int getChunkSize(boolean isSynchronous) {
@@ -168,15 +188,6 @@ public class EntityUpdateJobFactory {
         return new EntityUpdateStepListener(
                 scheduledTaskService, Collections.singletonList(updateType), isSynchronous, emConfig.getMaxFailedTaskRetries());
     }
-    
-    public EntityRecordDatabaseInsertionWriter recordDBInsertionWriter() {
-      return getApplicationContext().getBean(AppConfigConstants.BEAN_ENTITY_RECORD_DBINSERTION_WRITER, EntityRecordDatabaseInsertionWriter.class);
-    }
-
-    public EntitySolrInsertionWriter entitySolrInsertionWriter() {
-      return getApplicationContext().getBean(AppConfigConstants.BEAN_ENTITY_SOLR_INSERTION_WRITER, EntitySolrInsertionWriter.class);
-    }
-
 
     /**
      * Creating it as a bean as the writer list is same for all the Internal Task of EM.
@@ -187,9 +198,17 @@ public class EntityUpdateJobFactory {
      * @return
      */
     public ItemWriter<BatchEntityRecord> buildEntityUpdateWriters() {
-      CompositeItemWriter<BatchEntityRecord> compositeWriter = new CompositeItemWriter<>();
-      compositeWriter.setDelegates(Arrays.asList(recordDBInsertionWriter(), entitySolrInsertionWriter()));
-      return compositeWriter;
+        return compositeWriters(JobDescription.PERSISTENCE_ITEM_WRITERS);
+    }
+
+    private ItemWriter<BatchEntityRecord> compositeWriters(List<Task> writers) {
+        CompositeItemWriter<BatchEntityRecord> compositeWriter = new CompositeItemWriter<>();
+        List<ItemWriter<? super BatchEntityRecord>> delegates = new ArrayList<>(writers.size());
+        for (Task writer: writers) {
+            delegates.add((ItemWriter<BatchEntityRecord>) getApplicationContext().getBean(writer.getBeanName()));
+        }
+        compositeWriter.setDelegates(delegates);
+        return compositeWriter;
     }
 
 
@@ -223,7 +242,7 @@ public class EntityUpdateJobFactory {
       compositeItemProcessor.setDelegates(delegates);
       return compositeItemProcessor;
     }
-    
+
     /**
      * local getter method for application context
      * @return the {@link ApplicationContext}
