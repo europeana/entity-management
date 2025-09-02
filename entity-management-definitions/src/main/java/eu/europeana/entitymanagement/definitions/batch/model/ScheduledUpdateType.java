@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement.definitions.batch.model;
 
 import org.apache.commons.lang3.StringUtils;
 
+@Deprecated
 public enum ScheduledUpdateType implements ScheduledTaskType {
   METRICS_UPDATE("metrics_update"),
   FULL_UPDATE("full_update");

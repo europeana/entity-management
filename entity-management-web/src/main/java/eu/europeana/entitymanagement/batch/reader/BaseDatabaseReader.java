@@ -8,7 +8,6 @@ import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import org.springframework.batch.item.data.AbstractPaginatedDataItemReader;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 
 public abstract class BaseDatabaseReader<T> extends AbstractPaginatedDataItemReader<T> {

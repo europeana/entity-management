@@ -12,8 +12,8 @@ import dev.morphia.Morphia;
 import dev.morphia.mapping.MapperOptions;
 import eu.europeana.batch.entity.JobExecutionEntity;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
-import eu.europeana.entitymanagement.definitions.batch.codec.ScheduledTaskTypeCodec;
-import eu.europeana.entitymanagement.definitions.batch.codec.ScheduledTaskTypeCodecProvider;
+import eu.europeana.entitymanagement.definitions.batch.codec.TaskTypeCodec;
+import eu.europeana.entitymanagement.definitions.batch.codec.TaskTypeCodecProvider;
 import java.io.*;
 import java.net.URL;
 import java.nio.file.Path;
@@ -67,11 +67,11 @@ public class DataSourceConfig {
 
     // Configure custom codecs
     CodecProvider pojoCodecProvider =
-        PojoCodecProvider.builder().register(new ScheduledTaskTypeCodecProvider()).build();
+        PojoCodecProvider.builder().register(new TaskTypeCodecProvider()).build();
 
     CodecRegistry codecRegistry =
         CodecRegistries.fromRegistries(
-            CodecRegistries.fromCodecs(new ScheduledTaskTypeCodec()),
+            CodecRegistries.fromCodecs(new TaskTypeCodec()),
             CodecRegistries.fromProviders(pojoCodecProvider),
             MongoClientSettings.getDefaultCodecRegistry());
 

@@ -2,8 +2,6 @@ package eu.europeana.entitymanagement.batch.processor;
 
 import eu.europeana.entitymanagement.definitions.LanguageCodes;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
-import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityMismatchException;
 import java.util.Objects;
@@ -22,7 +20,6 @@ public class EntityVerificationLogger extends BaseEntityProcessor {
   private final Set<String> supportedLanguageCodes;
 
   public EntityVerificationLogger(LanguageCodes languageCodes) {
-    super(TaskType.FULL_UPDATE, TaskType.METRICS_UPDATE);
     this.supportedLanguageCodes = languageCodes.getSupportedLangCodes();
   }
 

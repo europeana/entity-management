@@ -5,8 +5,6 @@ import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants
 import eu.europeana.entitymanagement.batch.config.EntityUpdateJobFactory;
 import eu.europeana.entitymanagement.batch.model.JobDescription;
 import eu.europeana.entitymanagement.batch.utils.BatchUtils;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;

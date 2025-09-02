@@ -1,7 +1,6 @@
 package eu.europeana.entitymanagement.batch.listener;
 
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import java.util.List;
 import java.util.stream.Collectors;
 

@@ -7,15 +7,12 @@ import java.util.stream.Collectors;
 import javax.validation.ConstraintViolation;
 import javax.validation.ValidatorFactory;
 
-import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.common.config.DataSource;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
@@ -50,9 +47,7 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
       ValidatorFactory emValidatorFactory,
       EntityFieldsCleaner emEntityFieldCleaner,
       DataSources datasources,
-      EntityManagementConfiguration emConfiguration,
       DepictionGeneratorService depictionGeneratorService) {
-    super(TaskType.FULL_UPDATE);
     this.entityRecordService = entityRecordService;
     this.emValidatorFactory = emValidatorFactory;
     this.emEntityFieldCleaner = emEntityFieldCleaner;

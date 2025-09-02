@@ -17,7 +17,6 @@ import dev.morphia.query.filters.Filter;
 import eu.europeana.entitymanagement.batch.repository.ScheduledTaskRepository;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 
 @Service(AppConfigConstants.BEAN_BATCH_SCHEDULED_TASK_SERVICE)
 public class ScheduledTaskService {

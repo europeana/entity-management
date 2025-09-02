@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.definitions.batch.model;
 
+@Deprecated
 public enum ScheduledRemovalType implements ScheduledTaskType {
   PERMANENT_DELETION("permanent_deletion"),
   DEPRECATION("deprecation");

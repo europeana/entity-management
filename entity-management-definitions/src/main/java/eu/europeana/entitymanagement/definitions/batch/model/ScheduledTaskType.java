@@ -3,6 +3,7 @@ package eu.europeana.entitymanagement.definitions.batch.model;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import eu.europeana.entitymanagement.serialization.TaskTypeSerializer;
 
+@Deprecated
 @JsonSerialize(using = TaskTypeSerializer.class)
 public interface ScheduledTaskType {
 
