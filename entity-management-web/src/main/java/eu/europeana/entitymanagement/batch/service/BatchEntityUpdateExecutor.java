@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import eu.europeana.entitymanagement.batch.config.EntityUpdateJobConfig;
 import eu.europeana.entitymanagement.batch.utils.BatchUtils;
 
 //@Configuration
@@ -33,7 +32,6 @@ public class BatchEntityUpdateExecutor {
   private static final Logger logger = LogManager.getLogger(BatchEntityUpdateExecutor.class);
   private final JobLauncher entityUpdateJobLauncher;
   private final JobLauncher entityDeletionsJobLauncher;
-  private final EntityUpdateJobConfig updateJobConfig;
   private final EntityUpdateJobFactory entityUpdateJobFactory;
   private final JobDescriptionFactory jobDescriptionFactory;
 
@@ -41,12 +39,10 @@ public class BatchEntityUpdateExecutor {
   public BatchEntityUpdateExecutor(
           @Qualifier(ENTITY_UPDATE_JOB_LAUNCHER) JobLauncher entityUpdateJobLauncher,
           @Qualifier(ENTITY_REMOVALS_JOB_LAUNCHER) JobLauncher entityDeletionsJobLauncher,
-          EntityUpdateJobConfig batchUpdateConfig,
           EntityUpdateJobFactory entityUpdateJobFactory,
           @Qualifier(JOB_DESCRIPTION_FACTORY) JobDescriptionFactory jobDescriptionFactory) {
     this.entityUpdateJobLauncher    = entityUpdateJobLauncher;
     this.entityDeletionsJobLauncher = entityDeletionsJobLauncher;
-    this.updateJobConfig            = batchUpdateConfig;
     this.entityUpdateJobFactory     = entityUpdateJobFactory;
     this.jobDescriptionFactory = jobDescriptionFactory;
   }
@@ -81,7 +77,7 @@ public class BatchEntityUpdateExecutor {
   public void runScheduledDeprecationsAndDeletions() {
     logger.info("Triggering scheduled deprecations and deletions for entities");
     try {
-      entityUpdateJobLauncher.run(
+      entityDeletionsJobLauncher.run(
               entityUpdateJobFactory.removeScheduledEntities(jobDescriptionFactory.get(TaskType.PERMANENT_DELETION)),
               BatchUtils.createJobParameters(
                       null,
@@ -89,7 +85,7 @@ public class BatchEntityUpdateExecutor {
                       TaskType.PERMANENT_DELETION,
                       false));
 
-      entityUpdateJobLauncher.run(
+      entityDeletionsJobLauncher.run(
               entityUpdateJobFactory.createScheduledUpdateJob(jobDescriptionFactory.get(TaskType.DEPRECATION)),
               BatchUtils.createJobParameters(
                       null,

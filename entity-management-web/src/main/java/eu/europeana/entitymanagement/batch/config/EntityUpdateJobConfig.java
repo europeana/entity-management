@@ -74,6 +74,7 @@ import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants
  * @author GordeaS
  *
  */
+@Deprecated
 public class EntityUpdateJobConfig {
 
   private final JobBuilderFactory jobBuilderFactory;
@@ -169,59 +170,59 @@ public class EntityUpdateJobConfig {
     maxFailedTaskRetries = emConfig.getMaxFailedTaskRetries();
   }
 
-  /** Makes ItemReader thread-safe */
-  private <T> SynchronizedItemStreamReader<T> threadSafeReader(ItemStreamReader<T> reader) {
-    final SynchronizedItemStreamReader<T> synchronizedItemStreamReader =
-        new SynchronizedItemStreamReader<>();
-    synchronizedItemStreamReader.setDelegate(reader);
-    return synchronizedItemStreamReader;
-  }
+//  /** Makes ItemReader thread-safe */
+//  private <T> SynchronizedItemStreamReader<T> threadSafeReader(ItemStreamReader<T> reader) {
+//    final SynchronizedItemStreamReader<T> synchronizedItemStreamReader =
+//        new SynchronizedItemStreamReader<>();
+//    synchronizedItemStreamReader.setDelegate(reader);
+//    return synchronizedItemStreamReader;
+//  }
+//
+//  /** ItemReader that queries by entityId when retrieving EntityRecords from the database */
+//  @Bean(name = SINGLE_ENTITY_RECORD_READER)
+//  @StepScope
+//  private EntityRecordDatabaseReader singleEntityRecordReader(
+//      @Value("#{jobParameters[entityId]}") String entityIdString,
+//      @Value("#{jobParameters[updateType]}") String updateType) {
+//    return new EntityRecordDatabaseReader(
+//        updateType,
+//        entityRecordService,
+//        configuredBatchChunkSize,
+//        Filters.eq(ENTITY_ID, entityIdString));
+//  }
+//
+//  @Bean(name = SCHEDULED_TASK_READER)
+//  @StepScope
+//  private SynchronizedItemStreamReader<BatchEntityRecord> scheduledTaskReader(
+//      @Value("#{jobParameters[currentStartTime]}") Date currentStartTime,
+//      @Value("#{jobParameters[updateType]}") String updateType) {
+//
+//    List<String> updateTypeList =
+//        Stream.of(updateType.split(",")).map(String::trim).collect(Collectors.toList());
+//
+//    ScheduledTaskDatabaseReader reader =
+//        new ScheduledTaskDatabaseReader(
+//            scheduledTaskService, entityRecordService,
+//            configuredBatchChunkSize,
+//            Filters.lte(EMBatchConstants.CREATED, currentStartTime),
+//            Filters.in(UPDATE_TYPE, updateTypeList));
+//
+//    return threadSafeReader(reader);
+//  }
 
-  /** ItemReader that queries by entityId when retrieving EntityRecords from the database */
-  @Bean(name = SINGLE_ENTITY_RECORD_READER)
-  @StepScope
-  private EntityRecordDatabaseReader singleEntityRecordReader(
-      @Value("#{jobParameters[entityId]}") String entityIdString,
-      @Value("#{jobParameters[updateType]}") String updateType) {
-    return new EntityRecordDatabaseReader(
-        updateType,
-        entityRecordService,
-        configuredBatchChunkSize,
-        Filters.eq(ENTITY_ID, entityIdString));
-  }
-
-  @Bean(name = SCHEDULED_TASK_READER)
-  @StepScope
-  private SynchronizedItemStreamReader<BatchEntityRecord> scheduledTaskReader(
-      @Value("#{jobParameters[currentStartTime]}") Date currentStartTime,
-      @Value("#{jobParameters[updateType]}") String updateType) {
-
-    List<String> updateTypeList =
-        Stream.of(updateType.split(",")).map(String::trim).collect(Collectors.toList());
-
-    ScheduledTaskDatabaseReader reader =
-        new ScheduledTaskDatabaseReader(
-            scheduledTaskService, entityRecordService,
-            configuredBatchChunkSize,
-            Filters.lte(EMBatchConstants.CREATED, currentStartTime),
-            Filters.in(UPDATE_TYPE, updateTypeList));
-
-    return threadSafeReader(reader);
-  }
-
-  @Bean
-  @StepScope
-  /*
-   * Creates a listener that's called while processing a single item
-   *
-   * JobParameters cannot be boolean, so the isSynchronous value is converted from its string representation
-   */
-  private ScheduledTaskItemListener entityUpdateListener(
-      // see JobParameter enum for string values
-      @Value("#{jobParameters[isSynchronous]}") String isSynchronousString) {
-    return new ScheduledTaskItemListener(
-        failedTaskService, scheduledTaskService, Boolean.parseBoolean(isSynchronousString));
-  }
+//  @Bean
+//  @StepScope
+//  /*
+//   * Creates a listener that's called while processing a single item
+//   *
+//   * JobParameters cannot be boolean, so the isSynchronous value is converted from its string representation
+//   */
+//  private ScheduledTaskItemListener entityUpdateListener(
+//      // see JobParameter enum for string values
+//      @Value("#{jobParameters[isSynchronous]}") String isSynchronousString) {
+//    return new ScheduledTaskItemListener(
+//        failedTaskService, scheduledTaskService, Boolean.parseBoolean(isSynchronousString));
+//  }
 
   /** Creates a StepExecutionListener that's called before / after the step runs */
   private StepExecutionListener stepExecutionListener(
