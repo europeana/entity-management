@@ -2,10 +2,8 @@ package eu.europeana.entitymanagement.batch.utils;
 
 import eu.europeana.entitymanagement.batch.model.JobParameter;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import eu.europeana.entitymanagement.definitions.batch.model.TaskType;

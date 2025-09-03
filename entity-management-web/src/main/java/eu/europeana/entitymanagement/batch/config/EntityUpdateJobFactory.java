@@ -12,6 +12,7 @@ import org.springframework.batch.core.ItemProcessListener;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecutionListener;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
@@ -34,12 +35,15 @@ import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
+import org.springframework.stereotype.Component;
 
 /**
  * Entity Job update factory class
  * @author srishti singh
  * @since 14 July 2025
  */
+@Component(ENTITY_UPDATE_JOB_FACTORY)
+@EnableBatchProcessing
 public class EntityUpdateJobFactory {
 
     @Resource

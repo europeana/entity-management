@@ -172,16 +172,8 @@ public class AppAutoconfig extends AppConfigConstants {
     return source;
   }
 
-//  public ApplicationContext getApplicationContext() {
-//    return applicationContext;
-//  }
-
-  @Bean(ENTITY_UPDATE_JOB_FACTORY)
   public EntityUpdateJobFactory getEntityUpdateJobFactory() {
-    if(entityUpdateJobFactory == null) {
-      entityUpdateJobFactory = new EntityUpdateJobFactory();
-    }
-    return entityUpdateJobFactory;
+   return applicationContext.getBean(ENTITY_UPDATE_JOB_FACTORY, EntityUpdateJobFactory.class);
   }
 
   @Bean(JOB_DESCRIPTION_FACTORY)
@@ -231,7 +223,13 @@ public class AppAutoconfig extends AppConfigConstants {
     return getEntityUpdateJobFactory().buildEntityUpdateWriters();
   }
 
-
+  /** Note for StepScope annotations we need the context to be set for the target class
+   *  EnableBatchProcessing annotation is needed to the target class
+   *  by specifying a spring batch component being StepScope means that Spring Batch
+   *  will use the spring container to instantiate a new instance of that component for each step execution.
+   *
+   *  Another useful reason to use StepScope is when you decide to reuse the same component in parallel steps
+   */
 
   /*
    * Creates a listener that's called while processing a single item
@@ -289,6 +287,5 @@ public class AppAutoconfig extends AppConfigConstants {
     synchronizedItemStreamReader.setDelegate(reader);
     return synchronizedItemStreamReader;
   }
-
 
 }

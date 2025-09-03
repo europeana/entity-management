@@ -65,8 +65,8 @@ import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.SCHEDULED_TASK_READER;
 
 
-@Component
-@EnableBatchProcessing
+//@Component
+//@EnableBatchProcessing
 /**
  * This class instantiates  beens required for performing the actual processing of the Entity Manaement Update tasks (see specs)
  * It support synchronuous execution for web requests and asynchronuous for scheduled jobs (see also {@link TaskExecutorConfig} and {@link JobLauncherConfig}
