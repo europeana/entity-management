@@ -68,7 +68,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
     Exception testException = new Exception("TestMessage");
     failedTaskService.dropCollection();
     failedTaskService.persistFailure(
-        entityRecord.getEntityId(), TaskType.FULL_UPDATE, testException);
+        entityRecord.getEntityId(), TaskType.full_update, testException);
 
     // MockMvc requests use "localhost" without a port
     String clickableUrl =
@@ -203,7 +203,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
 
     // create FailedTask for entityId
     Exception testException = new Exception("TestMessage");
-    failedTaskService.persistFailure(entityId, TaskType.FULL_UPDATE, testException);
+    failedTaskService.persistFailure(entityId, TaskType.full_update, testException);
 
     String requestPath = getEntityRequestPath(entityId);
     mockMvc
@@ -216,7 +216,7 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
         .andExpect(
             jsonPath(
                 "$.isAggregatedBy." + WebEntityFields.FAILURES + "." + FailedTaskJsonFields.TYPE,
-                is(TaskType.FULL_UPDATE.getValue())))
+                is(TaskType.full_update.getValue())))
         .andExpect(
             jsonPath(
                     "$.isAggregatedBy."

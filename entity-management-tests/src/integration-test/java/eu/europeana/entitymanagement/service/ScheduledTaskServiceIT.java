@@ -75,7 +75,7 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
   private static final String entityId1 = "http://data.europeana.eu/agent/1";
   private static final String entityId2 = "http://data.europeana.eu/agent/2";
 
-  private static final TaskType testUpdateType = TaskType.FULL_UPDATE;
+  private static final TaskType testUpdateType = TaskType.full_update;
 
   @Test
   void shouldCreateTasksForEntities() {
@@ -193,8 +193,8 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
     // create scheduledTasks for entityId1 and entityId2
     Map<String, TaskType> map =
         Map.of(
-            entityId1, TaskType.FULL_UPDATE,
-            entityId2, TaskType.METRICS_UPDATE);
+            entityId1, TaskType.full_update,
+            entityId2, TaskType.metrics_update);
     scheduledTaskService.scheduleTasksForEntities(map);
 
     //check the count method
@@ -204,19 +204,19 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
     Date dateBeforeRun = new Date();
 
     entityUpdateJobLauncher.run(
-            entityUpdateJobFactory.createScheduledUpdateJob(jobDescriptionFactory.get(TaskType.FULL_UPDATE)),
+            entityUpdateJobFactory.createScheduledUpdateJob(jobDescriptionFactory.get(TaskType.full_update)),
             BatchUtils.createJobParameters(
                     null,
                     Date.from(Instant.now()),
-                    TaskType.FULL_UPDATE,
+                    TaskType.full_update,
                     false));
 
     entityUpdateJobLauncher.run(
-            entityUpdateJobFactory.createScheduledUpdateJob(jobDescriptionFactory.get(TaskType.METRICS_UPDATE)),
+            entityUpdateJobFactory.createScheduledUpdateJob(jobDescriptionFactory.get(TaskType.metrics_update)),
             BatchUtils.createJobParameters(
                     null,
                     Date.from(Instant.now()),
-                    TaskType.METRICS_UPDATE,
+                    TaskType.metrics_update,
                     false));
 
     Optional<EntityRecord> entityRecord1Updated = retrieveEntityEvenIfDisabled(entityId1);
@@ -297,8 +297,8 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
     // create scheduledTasks for entityId1 and entityId2
     Map<String, TaskType> map =
         Map.of(
-            entityId1, TaskType.DEPRECATION,
-            entityId2, TaskType.PERMANENT_DELETION);
+            entityId1, TaskType.deprecation,
+            entityId2, TaskType.permanent_deletion);
     scheduledTaskService.scheduleTasksForEntities(map);
 
     //check the count method
@@ -306,19 +306,19 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
     assertEquals(map.size(), runningTasks);
 
     entityDeletionsJobLauncher.run(
-            entityUpdateJobFactory.removeScheduledEntities(jobDescriptionFactory.get(TaskType.PERMANENT_DELETION)),
+            entityUpdateJobFactory.removeScheduledEntities(jobDescriptionFactory.get(TaskType.permanent_deletion)),
             BatchUtils.createJobParameters(
                     null,
                     Date.from(Instant.now()),
-                    TaskType.PERMANENT_DELETION,
+                    TaskType.permanent_deletion,
                     false));
 
     entityDeletionsJobLauncher.run(
-            entityUpdateJobFactory.createScheduledUpdateJob(jobDescriptionFactory.get(TaskType.DEPRECATION)),
+            entityUpdateJobFactory.createScheduledUpdateJob(jobDescriptionFactory.get(TaskType.deprecation)),
             BatchUtils.createJobParameters(
                     null,
                     Date.from(Instant.now()),
-                    TaskType.DEPRECATION,
+                    TaskType.deprecation,
                     false));
 
     Optional<EntityRecord> entityRecord1DbUpdated = retrieveEntityEvenIfDisabled(entityId1);

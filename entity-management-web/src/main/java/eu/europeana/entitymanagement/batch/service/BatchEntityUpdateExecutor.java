@@ -50,25 +50,25 @@ public class BatchEntityUpdateExecutor {
   /** Periodically run full entity and metric updates (in one run). */
   @Async
   public void runScheduledTasks() {
-    logger.info("Triggering scheduled {}, {} for entities", TaskType.FULL_UPDATE, TaskType.METRICS_UPDATE);
+    logger.info("Triggering scheduled {}, {} for entities", TaskType.full_update, TaskType.metrics_update);
     try {
       entityUpdateJobLauncher.run(
-              entityUpdateJobFactory.createScheduledUpdateJob(jobDescriptionFactory.get(TaskType.FULL_UPDATE)),
+              entityUpdateJobFactory.createScheduledUpdateJob(jobDescriptionFactory.get(TaskType.full_update)),
               BatchUtils.createJobParameters(
                       null,
                       Date.from(Instant.now()),
-                      TaskType.FULL_UPDATE,
+                      TaskType.full_update,
                       false));
 
       entityUpdateJobLauncher.run(
-              entityUpdateJobFactory.createScheduledUpdateJob(jobDescriptionFactory.get(TaskType.METRICS_UPDATE)),
+              entityUpdateJobFactory.createScheduledUpdateJob(jobDescriptionFactory.get(TaskType.metrics_update)),
               BatchUtils.createJobParameters(
                       null,
                       Date.from(Instant.now()),
-                      TaskType.METRICS_UPDATE,
+                      TaskType.metrics_update,
                       false));
     } catch (Exception e) {
-      logger.warn("Error running scheduled {} and {} update", TaskType.FULL_UPDATE, TaskType.METRICS_UPDATE, e);
+      logger.warn("Error running scheduled {} and {} update", TaskType.full_update, TaskType.metrics_update, e);
     }
   }
 
@@ -78,19 +78,19 @@ public class BatchEntityUpdateExecutor {
     logger.info("Triggering scheduled deprecations and deletions for entities");
     try {
       entityDeletionsJobLauncher.run(
-              entityUpdateJobFactory.removeScheduledEntities(jobDescriptionFactory.get(TaskType.PERMANENT_DELETION)),
+              entityUpdateJobFactory.removeScheduledEntities(jobDescriptionFactory.get(TaskType.permanent_deletion)),
               BatchUtils.createJobParameters(
                       null,
                       Date.from(Instant.now()),
-                      TaskType.PERMANENT_DELETION,
+                      TaskType.permanent_deletion,
                       false));
 
       entityDeletionsJobLauncher.run(
-              entityUpdateJobFactory.createScheduledUpdateJob(jobDescriptionFactory.get(TaskType.DEPRECATION)),
+              entityUpdateJobFactory.createScheduledUpdateJob(jobDescriptionFactory.get(TaskType.deprecation)),
               BatchUtils.createJobParameters(
                       null,
                       Date.from(Instant.now()),
-                      TaskType.DEPRECATION,
+                      TaskType.deprecation,
                       false));
     } catch (Exception e) {
       logger.warn("Error running scheduled deprecations and deletions", e);

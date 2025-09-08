@@ -216,7 +216,7 @@ public class BaseZohoAccess {
         // SG: run update synchronously as we don't have many entities disabled and we can report
         // failures
         logger.info("Updating disabled organization with id: {}", operation.getZohoEuropeanaId());
-        entityUpdateService.runSynchronousUpdate(operation.getEntityRecord().getEntityId(), jobDescriptionFactory.get(TaskType.FULL_UPDATE));
+        entityUpdateService.runSynchronousUpdate(operation.getEntityRecord().getEntityId(), jobDescriptionFactory.get(TaskType.full_update));
         if (allreadyDisabled) {
           // not counted to disabled, needs to be counted for updates
           zohoSyncReport.increaseUpdated(1);
@@ -277,7 +277,7 @@ public class BaseZohoAccess {
     List<String> entityIds = enablingOperations.stream()
         .map(operation -> operation.getEntityRecord().getEntityId()).collect(Collectors.toList());
     try {
-      entityUpdateService.scheduleTasks(entityIds, TaskType.FULL_UPDATE);
+      entityUpdateService.scheduleTasks(entityIds, TaskType.full_update);
       // not needed to update to updated field in the report, as the enabled counter was already
       // updated
     } catch (RuntimeException e) {
@@ -298,7 +298,7 @@ public class BaseZohoAccess {
     List<String> entityIds = updateOperations.stream()
         .map(operation -> operation.getEntityRecord().getEntityId()).collect(Collectors.toList());
     try {
-      entityUpdateService.scheduleTasks(entityIds, TaskType.FULL_UPDATE);
+      entityUpdateService.scheduleTasks(entityIds, TaskType.full_update);
       zohoSyncReport.increaseUpdated(updateOperations.size());
     } catch (RuntimeException e) {
       String message =
@@ -319,7 +319,7 @@ public class BaseZohoAccess {
 
     // schedule updates
     try {
-      entityUpdateService.scheduleTasks(entitiesToUpdate, TaskType.FULL_UPDATE);
+      entityUpdateService.scheduleTasks(entitiesToUpdate, TaskType.full_update);
       // note: the zoho report was allready during the entity registration
     } catch (RuntimeException e) {
       String message = "Cannot schedule update operations for newly created organizations with ids:"

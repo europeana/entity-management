@@ -156,7 +156,7 @@ public class EMController extends BaseRest {
       entityRecordService.disableEntityRecord(entityRecord, true);
     } else {
       entityUpdateService.scheduleTasks(Collections.singletonList(entityId),
-              TaskType.DEPRECATION);
+              TaskType.deprecation);
     }
 
     return noContentResponse(request);
@@ -201,7 +201,7 @@ public class EMController extends BaseRest {
             entityRecord,
             EntityProfile.internal.toString(),
             false,
-            jobDescriptionFactory.get(TaskType.FULL_UPDATE));
+            jobDescriptionFactory.get(TaskType.full_update));
   }
 
   @ApiOperation(value = "Update an entity", nickname = "updateEntity",
@@ -247,7 +247,7 @@ public class EMController extends BaseRest {
     entityRecordService.update(entityRecord);
     try {
       return launchTaskAndRetrieveEntity(request, EntityTypes.getByEntityType(type), identifier,
-              entityRecord, profile, false, jobDescriptionFactory.get(TaskType.META_UPDATE));
+              entityRecord, profile, false, jobDescriptionFactory.get(TaskType.meta_update));
     } catch (UnsupportedEntityTypeException e) {
       throw new EntityNotFoundException("/" + type + "/" + identifier, e);
     }
@@ -308,7 +308,7 @@ public class EMController extends BaseRest {
     // update from external data source is not available for static data sources
     datasources.verifyDataSource(entityRecord.getExternalProxies().get(0).getProxyId(), false);
     return launchTaskAndRetrieveEntity(request, enType, identifier, entityRecord, profile, false,
-            jobDescriptionFactory.get(TaskType.FULL_UPDATE));
+            jobDescriptionFactory.get(TaskType.full_update));
   }
 
   @ApiOperation(value = "Update multiple entities from external data source",
@@ -324,14 +324,14 @@ public class EMController extends BaseRest {
 
     // query param takes precedence over request body
     if (StringUtils.isNotEmpty(query)) {
-      return scheduleUpdatesWithSearch(request, query, TaskType.FULL_UPDATE);
+      return scheduleUpdatesWithSearch(request, query, TaskType.full_update);
     }
 
     if (CollectionUtils.isEmpty(entityIds)) {
       throw new HttpBadRequestException(INVALID_UPDATE_REQUEST_MSG);
     }
 
-    return scheduleBatchUpdates(request, entityIds, TaskType.FULL_UPDATE);
+    return scheduleBatchUpdates(request, entityIds, TaskType.full_update);
   }
 
   @ApiOperation(value = "Update metrics for given entities", nickname = "updateMetricsForEntities",
@@ -347,14 +347,14 @@ public class EMController extends BaseRest {
 
     // query param takes precedence over request body
     if (StringUtils.isNotEmpty(query)) {
-      return scheduleUpdatesWithSearch(request, query, TaskType.METRICS_UPDATE);
+      return scheduleUpdatesWithSearch(request, query, TaskType.metrics_update);
     }
 
     if (CollectionUtils.isEmpty(entityIds)) {
       throw new HttpBadRequestException(INVALID_UPDATE_REQUEST_MSG);
     }
 
-    return scheduleBatchUpdates(request, entityIds, TaskType.METRICS_UPDATE);
+    return scheduleBatchUpdates(request, entityIds, TaskType.metrics_update);
   }
 
   /**
@@ -394,7 +394,7 @@ public class EMController extends BaseRest {
             EntityProfile.internal.toString(),
             true,
             new JobDescription(
-                     TaskType.METRICS_UPDATE
+                     TaskType.metrics_update
                     , null
                     , JobDescription.PERSISTENCE_ITEM_WRITERS));
   }
@@ -561,7 +561,7 @@ public class EMController extends BaseRest {
             savedEntityRecord,
             EntityProfile.internal.toString(),
             false,
-            jobDescriptionFactory.get(TaskType.FULL_UPDATE));
+            jobDescriptionFactory.get(TaskType.full_update));
   }
 
   Entity dereferenceEntity(String creationRequestId, String creationRequestType) throws Exception {
@@ -610,7 +610,7 @@ public class EMController extends BaseRest {
     entityRecordService.changeExternalProxy(entityRecord, url);
     entityRecordService.update(entityRecord);
     return launchTaskAndRetrieveEntity(request, enType, identifier, entityRecord, profile, false,
-            jobDescriptionFactory.get(TaskType.FULL_UPDATE));
+            jobDescriptionFactory.get(TaskType.full_update));
   }
 
   @ApiOperation(value = "Retrieve multiple entities", nickname = "retrieveEntities")

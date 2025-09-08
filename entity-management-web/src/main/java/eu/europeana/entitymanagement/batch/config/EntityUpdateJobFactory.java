@@ -172,7 +172,7 @@ public class EntityUpdateJobFactory {
     @SuppressWarnings("unchecked")
     private ItemProcessor<BatchEntityRecord, BatchEntityRecord> getProcessor(JobDescription jobDescription) {
       switch (jobDescription.getTaskType()) {
-        case FULL_UPDATE: 
+        case full_update:
           //SG: should evaluate performance and eventually cash referenced beans
           return (ItemProcessor<BatchEntityRecord, BatchEntityRecord>) getApplicationContext().getBean(FULL_ENTITY_UPDATE_PROCESSOR);
         default:

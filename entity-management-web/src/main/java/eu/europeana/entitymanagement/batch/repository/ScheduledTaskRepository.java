@@ -97,7 +97,7 @@ public class ScheduledTaskRepository implements InitializingBean {
           // manually set Morphia discriminator as we're bypassing its API for this query
           .append(MORPHIA_DISCRIMINATOR, SCHEDULED_TASK_CLASSNAME);
 
-      boolean shouldChangeUpdateType = task.getUpdateType() == TaskType.FULL_UPDATE;
+      boolean shouldChangeUpdateType = task.getUpdateType() == TaskType.full_update;
       /*
        * If entity is being scheduled for a full update, this: - changes the current updateType from
        * METRICS to FULL; or - leaves current updateType as FULL (no change) otherwise

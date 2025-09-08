@@ -181,31 +181,31 @@ public class AppAutoconfig extends AppConfigConstants {
     JobDescriptionFactory factory = new JobDescriptionFactory();
     factory.register(
             new JobDescription(
-                    TaskType.FULL_UPDATE
+                    TaskType.full_update
                     , JobDescription.PROCESSORS_FULL_UPDATE
                     , JobDescription.PERSISTENCE_ITEM_WRITERS));
 
     factory.register(
             new JobDescription(
-                    TaskType.META_UPDATE
+                    TaskType.meta_update
                     , JobDescription.PROCESSORS_META_UPDATE
                     , JobDescription.PERSISTENCE_ITEM_WRITERS));
 
     factory.register(
             new JobDescription(
-                    TaskType.METRICS_UPDATE
+                    TaskType.metrics_update
                     , Arrays.asList(Task.METRICS)
                     , JobDescription.PERSISTENCE_ITEM_WRITERS));
 
     factory.register(
             new JobDescription(
-                    TaskType.DEPRECATION
+                    TaskType.deprecation
                     , null
                     , JobDescription.DEPRECATION_WRITERS));
 
     factory.register(
             new JobDescription(
-                    TaskType.PERMANENT_DELETION
+                    TaskType.permanent_deletion
                     , null
                     , JobDescription.PERMANENT_REMOVAL_WRITERS));
     return factory;
