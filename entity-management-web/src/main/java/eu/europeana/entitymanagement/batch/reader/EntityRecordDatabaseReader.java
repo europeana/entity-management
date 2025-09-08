@@ -32,8 +32,7 @@ public class EntityRecordDatabaseReader extends BaseDatabaseReader<BatchEntityRe
       Filter... queryFilters) {
     super(pageSize);
     //SG: works for now with uppercase, still wil be better to add a method to getByValue 
-    this.scheduledTaskType = TaskType.valueOf(
-        scheduledTaskType.toUpperCase(Locale.ENGLISH));
+    this.scheduledTaskType = TaskType.valueOf(scheduledTaskType);
     this.entityRecordService = entityRecordService;
     this.queryFilters = queryFilters;
   }
