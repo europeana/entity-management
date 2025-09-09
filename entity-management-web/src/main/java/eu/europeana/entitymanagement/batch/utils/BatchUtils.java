@@ -50,38 +50,6 @@ public class BatchUtils {
     return jobParametersBuilder.toJobParameters();
   }
 
-//  /**
-//   * Creates JobParameters for triggering the Spring Batch update job for specific entities
-//   *
-//   * @param entityId entity id
-//   * @param runTime trigger time for job
-//   * @param updateType update tpe for job
-//   * @return JobParameters with trigger time and entityId
-//   */
-//  @Deprecated(since = "1 September 2025")
-//  public static JobParameters createJobParameters(
-//      @Nullable String entityId,
-//      Date runTime,
-//      List<ScheduledTaskType> updateType,
-//      boolean isSynchronous) {
-//    JobParametersBuilder jobParametersBuilder =
-//        new JobParametersBuilder()
-//            .addDate(JobParameter.CURRENT_START_TIME.key(), runTime)
-//            .addString(
-//                JobParameter.UPDATE_TYPE.key(),
-//                updateType.stream()
-//                    .map(ScheduledTaskType::getValue)
-//                    .collect(Collectors.joining(",")))
-//            // boolean parameters not supported
-//            .addString(JobParameter.IS_SYNCHRONOUS.key(), String.valueOf(isSynchronous));
-//
-//    if (StringUtils.hasLength(entityId)) {
-//      jobParametersBuilder.addString(JobParameter.ENTITY_ID.key(), entityId);
-//    }
-//
-//    return jobParametersBuilder.toJobParameters();
-//  }
-
   public static String[] getEntityIds(List<BatchEntityRecord> batchEntityRecords) {
     return batchEntityRecords.stream()
         .map(p -> p.getEntityRecord().getEntityId())

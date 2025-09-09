@@ -86,7 +86,7 @@ public class BatchEntityUpdateExecutor {
                       false));
 
       entityDeletionsJobLauncher.run(
-              entityUpdateJobFactory.createScheduledUpdateJob(jobDescriptionFactory.get(TaskType.deprecation)),
+              entityUpdateJobFactory.removeScheduledEntities(jobDescriptionFactory.get(TaskType.deprecation)),
               BatchUtils.createJobParameters(
                       null,
                       Date.from(Instant.now()),

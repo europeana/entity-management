@@ -26,7 +26,6 @@ import com.mongodb.assertions.Assertions;
 import dev.morphia.query.filters.Filter;
 import dev.morphia.query.filters.Filters;
 import eu.europeana.entitymanagement.AbstractIntegrationTest;
-import eu.europeana.entitymanagement.batch.config.EntityUpdateJobConfig;
 import eu.europeana.entitymanagement.batch.repository.FailedTaskRepository;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.batch.utils.BatchUtils;
@@ -53,8 +52,6 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
   @Autowired
   @Qualifier(ENTITY_REMOVALS_JOB_LAUNCHER)
   JobLauncher entityDeletionsJobLauncher;
-
-  @Autowired EntityUpdateJobConfig updateJobConfig;
 
   @Autowired
   EntityUpdateJobFactory entityUpdateJobFactory;
@@ -314,7 +311,7 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
                     false));
 
     entityDeletionsJobLauncher.run(
-            entityUpdateJobFactory.createScheduledUpdateJob(jobDescriptionFactory.get(TaskType.deprecation)),
+            entityUpdateJobFactory.removeScheduledEntities(jobDescriptionFactory.get(TaskType.deprecation)),
             BatchUtils.createJobParameters(
                     null,
                     Date.from(Instant.now()),
