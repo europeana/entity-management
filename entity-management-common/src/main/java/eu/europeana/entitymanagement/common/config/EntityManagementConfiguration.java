@@ -34,6 +34,9 @@ import eu.europeana.entitymanagement.definitions.model.ZohoLabelUriMapping;
 @PropertySources({
   @PropertySource("classpath:entitymanagement.properties"),
   @PropertySource(
+      value = "classpath:entitymanagement.user.properties",
+      ignoreResourceNotFound = true),
+  @PropertySource(
       value = "entitymanagement.user.properties",
       ignoreResourceNotFound = true)
 })
@@ -195,7 +198,13 @@ public class EntityManagementConfiguration implements InitializingBean {
 
   @Value("${entity.management.api.baseurl:}")
   private String entityManagementBaseUrl;
-
+  
+  @Value("${rapidapi.apiKey:}")
+  private String rapidApiKey;
+  
+  @Value("${rapidapi.baseUrl:}")
+  private String rapidApiBaseUrl;
+  
   /**
    * Map of <"Zoho Label", ZohoLabelUriMapping>  
    */
@@ -534,6 +543,14 @@ public class EntityManagementConfiguration implements InitializingBean {
   
   public boolean isUpdateOrganizationEuropeanaId() {
     return updateOrganizationEuropeanaId;
+  }
+
+  public String getRapidApiKey() {
+    return rapidApiKey;
+  }
+
+  public String getRapidApiBaseUrl() {
+    return rapidApiBaseUrl;
   }
  
 }

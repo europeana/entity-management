@@ -70,6 +70,7 @@ public class EntityDeprecationIT extends BaseWebControllerTest {
 
     // confirm that Solr document no longer exists
     Assertions.assertNull(solrService.searchById(SolrConcept.class, entityRecord.getEntityId()));
+
   }
 
   @Test
