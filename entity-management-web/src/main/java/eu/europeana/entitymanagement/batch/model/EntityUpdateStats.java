@@ -51,10 +51,10 @@ public class EntityUpdateStats {
     public void updateEntityByType(BatchEntityRecord entityRecord) {
         try {
             switch (EntityTypes.getByEntityType(entityRecord.getEntityRecord().getEntity().getType())) {
-                case Agent:    agents.incrementAndGet();
-                case Concept:  concepts.incrementAndGet();
-                case Place:    places.incrementAndGet();
-                case TimeSpan: timespans.incrementAndGet();
+                case Agent:    agents.incrementAndGet(); break;
+                case Concept:  concepts.incrementAndGet(); break;
+                case Place:    places.incrementAndGet(); break;
+                case TimeSpan: timespans.incrementAndGet(); break;
             }
         } catch (UnsupportedEntityTypeException e) {
             logger.info("Unknown type of entity found in the DB {}", e.getMessage(), e);
@@ -88,5 +88,4 @@ public class EntityUpdateStats {
     public int getFailed() {
         return failed.get();
     }
-
 }
