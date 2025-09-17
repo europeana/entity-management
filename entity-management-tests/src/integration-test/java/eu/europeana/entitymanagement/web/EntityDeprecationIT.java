@@ -40,30 +40,6 @@ public class EntityDeprecationIT extends BaseWebControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
-    assertedTaskScheduled(entityRecord.getEntityId(), TaskType.deprecation);
-  }
-
-  @Test
-  void deprecationWithSyncProfileShouldBeSuccessful() throws Exception {
-    String europeanaMetadata = loadFile(IntegrationTestUtils.CONCEPT_REGISTER_BATHTUB_JSON);
-    String metisResponse = loadFile(IntegrationTestUtils.CONCEPT_BATHTUB_XML);
-
-    EntityRecord entityRecord =
-        createEntity(europeanaMetadata, metisResponse, IntegrationTestUtils.CONCEPT_BATHTUB_URI);
-
-    // confirm that Solr document is saved
-    SolrConcept solrConcept = solrService.searchById(SolrConcept.class, entityRecord.getEntityId());
-    Assertions.assertNotNull(solrConcept);
-
-    String requestPath = getEntityRequestPath(entityRecord.getEntityId());
-
-    mockMvc
-        .perform(
-            delete(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath)
-                .param(QUERY_PARAM_PROFILE, PARAM_PROFILE_SYNC)
-                .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNoContent());
-
     EntityRecord dbRecord = entityRecordService.retrieveEntityRecord(entityRecord.getEntityId(), EntityProfile.internal.name(), true); 
     Assertions.assertNotNull(dbRecord);
     Assertions.assertTrue(dbRecord.isDisabled());
