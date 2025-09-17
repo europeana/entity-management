@@ -189,7 +189,10 @@ public class EntityManagementConfiguration implements InitializingBean {
   
   @Value("${slack.webhook:}")
   private String slackWebHook;
-  
+
+  @Value("${entity.management.api.baseurl:}")
+  private String entityManagementBaseUrl;
+
   /**
    * Map of <"Zoho Label", ZohoLabelUriMapping>  
    */
@@ -509,7 +512,11 @@ public class EntityManagementConfiguration implements InitializingBean {
   public String getSlackWebHook() {
     return slackWebHook;
   }
- 
+
+  public String getEntityManagementBaseUrl() {
+    return entityManagementBaseUrl;
+  }
+
   public String getPrSolrZookeeperUrl() {
     return prSolrZookeeperUrl;
   }

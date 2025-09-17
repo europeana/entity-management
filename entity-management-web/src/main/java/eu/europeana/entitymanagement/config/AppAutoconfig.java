@@ -17,12 +17,14 @@ import javax.xml.bind.JAXBContext;
 
 import dev.morphia.query.filters.Filters;
 import eu.europeana.entitymanagement.batch.listener.ScheduledTaskItemListener;
+import eu.europeana.entitymanagement.batch.model.EntityUpdateStats;
 import eu.europeana.entitymanagement.batch.reader.EntityRecordDatabaseReader;
 import eu.europeana.entitymanagement.batch.reader.ScheduledTaskDatabaseReader;
 import eu.europeana.entitymanagement.batch.service.FailedTaskService;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.definitions.batch.EMBatchConstants;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
+import eu.europeana.entitymanagement.web.service.SlackConnection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -81,9 +83,7 @@ public class AppAutoconfig extends AppConfigConstants {
   private VocabularyRepository vocabRepository;
   
   @Resource protected JAXBContext jaxbContext; 
-  
-  private EntityUpdateJobFactory entityUpdateJobFactory;
-  
+
   public AppAutoconfig() {
     LOG.info("Initializing EntityManagementConfiguration bean as: configuration");
   }
@@ -244,7 +244,8 @@ public class AppAutoconfig extends AppConfigConstants {
     return new ScheduledTaskItemListener(
             applicationContext.getBean("failedTaskService", FailedTaskService.class),
             applicationContext.getBean(BEAN_BATCH_SCHEDULED_TASK_SERVICE, ScheduledTaskService.class),
-            Boolean.parseBoolean(isSynchronousString));
+            Boolean.parseBoolean(isSynchronousString),
+            applicationContext.getBean(ENTITY_UPDATE_STATUS, EntityUpdateStats.class));
   }
 
   /** ItemReader that queries by entityId when retrieving EntityRecords from the database */
@@ -286,6 +287,11 @@ public class AppAutoconfig extends AppConfigConstants {
             new SynchronizedItemStreamReader<>();
     synchronizedItemStreamReader.setDelegate(reader);
     return synchronizedItemStreamReader;
+  }
+
+  @Bean(name = SLACK_CONNECTION)
+  public SlackConnection getSlackConnection() {
+    return new SlackConnection(emConfiguration.getSlackWebHook());
   }
 
 }

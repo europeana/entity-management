@@ -8,6 +8,9 @@ import java.util.Collections;
 import java.util.List;
 import javax.annotation.Resource;
 
+import eu.europeana.entitymanagement.batch.model.EntityUpdateStats;
+import eu.europeana.entitymanagement.batch.service.ReportSenderTasklet;
+import eu.europeana.entitymanagement.web.service.SlackConnection;
 import org.springframework.batch.core.ItemProcessListener;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -23,6 +26,7 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.support.CompositeItemProcessor;
 import org.springframework.batch.item.support.CompositeItemWriter;
 import org.springframework.batch.item.support.SynchronizedItemStreamReader;
+import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.task.TaskExecutor;
@@ -64,8 +68,11 @@ public class EntityUpdateJobFactory {
     @Autowired
     ApplicationContext appContext;
 
+    @Resource
+    private EntityUpdateStats stats;
+
     public EntityUpdateJobFactory() {
-      super();
+        super();
     }
 
     /**
@@ -91,7 +98,10 @@ public class EntityUpdateJobFactory {
         return this.jobBuilderFactory
                 .get(JOB_UPDATE_SCHEDULED_ENTITIES)
                 // This job is always launched via a @Scheduled method.
-                .start(entityUpdate(jobDescription, false))
+                .start(initStats(stats, jobDescription.getTaskType()))
+                .next(entityUpdate(jobDescription, false))
+                .next(finishStats(stats))
+                .next(sendStatusReportStep())
                 .build();
     }
 
@@ -142,6 +152,38 @@ public class EntityUpdateJobFactory {
                 .throttleLimit(emConfig.getBatchRemovalsThrottleLimit())
                 // removal steps are always async
                 .listener(stepExecutionListener(jobDescription.getTaskType(), false))
+                .build();
+    }
+
+
+    private Step initStats(EntityUpdateStats stats, TaskType taskType) {
+        return stepBuilderFactory
+                .get("initStatsStep")
+                .tasklet(
+                        ((stepContribution, chunkContext) -> {
+                            stats.setTaskType(taskType);
+                            stats.reset();
+                            return RepeatStatus.FINISHED;
+                        }))
+                .build();
+    }
+
+    private Step finishStats(EntityUpdateStats stats) {
+        return stepBuilderFactory
+                .get("finishStatsStep")
+                .tasklet(
+                        ((stepContribution, chunkContext) -> {
+                            return RepeatStatus.FINISHED;
+                        }))
+                .build();
+    }
+
+    private Step sendStatusReportStep() {
+        return stepBuilderFactory
+                .get("sendStatusReport")
+                .tasklet(new ReportSenderTasklet(stats,
+                        emConfig.getEntityManagementBaseUrl(),
+                        getApplicationContext().getBean(SLACK_CONNECTION, SlackConnection.class)))
                 .build();
     }
 

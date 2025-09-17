@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement.batch.listener;
 
 import static eu.europeana.entitymanagement.batch.utils.BatchUtils.getEntityIds;
 
+import eu.europeana.entitymanagement.batch.model.EntityUpdateStats;
 import eu.europeana.entitymanagement.batch.service.FailedTaskService;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
@@ -22,14 +23,23 @@ public class ScheduledTaskItemListener
   private final FailedTaskService failedTaskService;
   private final ScheduledTaskService scheduledTaskService;
   private final boolean isSynchronous;
+  private final EntityUpdateStats statsCounter;
 
   public ScheduledTaskItemListener(
-      FailedTaskService failedTaskService,
-      ScheduledTaskService scheduledTaskService,
-      boolean isSynchronous) {
+          FailedTaskService failedTaskService,
+          ScheduledTaskService scheduledTaskService,
+          boolean isSynchronous, EntityUpdateStats statsCounter) {
     this.failedTaskService = failedTaskService;
     this.scheduledTaskService = scheduledTaskService;
     this.isSynchronous = isSynchronous;
+    this.statsCounter = statsCounter;
+  }
+
+  @Override
+  public void afterRead(BatchEntityRecord item) {
+    // update stats
+    statsCounter.addEntityUpdated();
+    statsCounter.updateEntityByType(item);
   }
 
   @Override
@@ -68,6 +78,8 @@ public class ScheduledTaskItemListener
     String entityId = entityRecord.getEntityRecord().getEntityId();
     logger.warn("onProcessError: entityId={}", entityId, e);
     failedTaskService.persistFailure(entityId, entityRecord.getScheduledTaskType(), e);
+    // update failed count in the stats
+    statsCounter.addFailed();
   }
 
   @Override
@@ -83,5 +95,8 @@ public class ScheduledTaskItemListener
                 Collectors.toMap(
                     r -> r.getEntityRecord().getEntityId(), r -> r.getScheduledTaskType())),
         e);
+    // update failed count in the stats
+    entityRecords.stream().forEach(entity -> statsCounter.addFailed());
+
   }
 }
