@@ -291,7 +291,7 @@ public class AppAutoconfig extends AppConfigConstants {
 
   @Bean(name = SLACK_CONNECTION)
   public SlackConnection getSlackConnection() {
-    return new SlackConnection(emConfiguration.getSlackWebHook());
+    return new SlackConnection(emConfiguration.getEmUpdateSlackWebHook());
   }
 
 }

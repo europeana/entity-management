@@ -145,7 +145,7 @@ public class ZohoSyncService extends BaseZohoAccess {
 
     String jsonMessage = null;
     try {
-      if (StringUtils.isBlank(emConfiguration.getSlackWebHook())) {
+      if (StringUtils.isBlank(emConfiguration.getZohoSlackWebHook())) {
         logger
             .warn("Slack webhook not configured, status report will not be published over Slack!");
         return;
@@ -153,7 +153,7 @@ public class ZohoSyncService extends BaseZohoAccess {
 
       jsonMessage = buildSyncReportMessageForSlackWebHook(zohoSyncReport);
 
-      WebClient webClient = WebClient.builder().baseUrl(emConfiguration.getSlackWebHook()).build();
+      WebClient webClient = WebClient.builder().baseUrl(emConfiguration.getZohoSlackWebHook()).build();
       // send message to webhook
           
       ResponseSpec resp = webClient.post().contentType(MediaType.APPLICATION_JSON).bodyValue(jsonMessage).retrieve();
