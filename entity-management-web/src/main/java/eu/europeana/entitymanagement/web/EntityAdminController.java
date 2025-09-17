@@ -3,7 +3,6 @@ package eu.europeana.entitymanagement.web;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.LogManager;
@@ -27,8 +26,6 @@ import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
-import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
@@ -52,15 +49,12 @@ public class EntityAdminController extends BaseRest {
 
   private final EntityRecordService entityRecordService;
   private final ZohoSyncService zohoSyncService;
-  private final EntityUpdateService entityUpdateService;
 
   @Autowired
   public EntityAdminController(
       EntityRecordService entityRecordService,
-      EntityUpdateService entityUpdateService,
       ZohoSyncService zohoSyncService) {
     this.entityRecordService = entityRecordService;
-    this.entityUpdateService = entityUpdateService;
     this.zohoSyncService = zohoSyncService;
   }
 
@@ -72,8 +66,7 @@ public class EntityAdminController extends BaseRest {
       @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
       @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
       @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
-      @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = false)
-          String profile,
+      @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = false) String profile,
       HttpServletRequest request)
       throws HttpException, EuropeanaApiException {
 
@@ -90,17 +83,8 @@ public class EntityAdminController extends BaseRest {
       throw new EntityNotFoundException(entityUri);
     }
 
-    boolean isSynchronous = containsSyncProfile(profile);
-
-    LOG.debug("Permanently deleting entityId={}, isSynchronous={}", entityUri, isSynchronous);
-
-    if (isSynchronous) {
-      entityRecordService.delete(entityUri);
-    } else {
-      entityUpdateService.scheduleTasks(
-          Collections.singletonList(entityUri), ScheduledRemovalType.PERMANENT_DELETION);
-    }
-
+    LOG.debug("Permanently deleting entityId={} synchronously", entityUri);
+    entityRecordService.delete(entityUri);
     return noContentResponse(request);
   }
 

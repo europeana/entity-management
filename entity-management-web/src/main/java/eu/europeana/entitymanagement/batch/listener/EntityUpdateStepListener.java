@@ -1,9 +1,10 @@
 package eu.europeana.entitymanagement.batch.listener;
 
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.ExitStatus;
@@ -17,14 +18,14 @@ public class EntityUpdateStepListener implements StepExecutionListener {
   private static final Logger logger = LogManager.getLogger(EntityUpdateStepListener.class);
 
   private final ScheduledTaskService scheduledTaskService;
-  private final List<? extends ScheduledTaskType> updateType;
+  private final List<TaskType> updateType;
 
   private final int maxFailedTaskRetries;
   private final boolean isSynchronous;
 
   public EntityUpdateStepListener(
       ScheduledTaskService scheduledTaskService,
-      List<? extends ScheduledTaskType> updateType,
+      List<TaskType> updateType,
       boolean isSynchronous,
       int maxFailedTaskRetries) {
     this.scheduledTaskService = scheduledTaskService;
@@ -44,7 +45,7 @@ public class EntityUpdateStepListener implements StepExecutionListener {
       if (logger.isDebugEnabled()) {
         logger.debug(
             "Cleaning up processed tasks before step execution. updateType={}",
-            updateType.stream().map(ScheduledTaskType::getValue).collect(Collectors.joining(",")));
+            updateType.stream().map(TaskType::getValue).collect(Collectors.joining(",")));
       }
       // remove processed tasks here, in case application restarted before step finished execution
       scheduledTaskService.removeProcessedTasks(updateType);

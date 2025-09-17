@@ -1,11 +1,12 @@
 package eu.europeana.entitymanagement.web;
 
-import static eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType.DEPRECATION;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPath;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.PARAM_PROFILE_SYNC;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.QUERY_PARAM_PROFILE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -39,7 +40,7 @@ public class EntityDeprecationIT extends BaseWebControllerTest {
                 .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isNoContent());
 
-    EntityRecord dbRecord = entityRecordService.retrieveEntityRecord(entityRecord.getEntityId(), EntityProfile.internal.name(), true);
+    EntityRecord dbRecord = entityRecordService.retrieveEntityRecord(entityRecord.getEntityId(), EntityProfile.internal.name(), true); 
     Assertions.assertNotNull(dbRecord);
     Assertions.assertTrue(dbRecord.isDisabled());
 

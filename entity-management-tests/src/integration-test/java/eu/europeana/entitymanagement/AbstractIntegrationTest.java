@@ -6,6 +6,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Optional;
 import javax.xml.bind.JAXBContext;
+
+import eu.europeana.entitymanagement.batch.config.JobDescriptionFactory;
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -68,6 +71,7 @@ public abstract class AbstractIntegrationTest {
   @Autowired protected ConceptSchemeService emConceptSchemeService;
   @Autowired protected EntityManagementConfiguration emConfig;
   @Autowired protected ZohoConfiguration zohoConfiguration;
+  @Autowired protected JobDescriptionFactory jobDescriptionFactory;
     
   static {
     MONGO_CONTAINER =
@@ -276,7 +280,7 @@ public abstract class AbstractIntegrationTest {
             europeanaProxyEntity, xmlBaseEntity.toEntityModel(), dataSource, null);
 
     // trigger update to generate consolidated entity
-    entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId());
+    entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId(), jobDescriptionFactory.get(TaskType.full_update));
 
     // return entityRecord version with consolidated entity
     return entityRecordService.retrieveEntityRecord(savedRecord.getEntityId(), EntityProfile.dereference.name(), false);

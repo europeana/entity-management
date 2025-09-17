@@ -8,18 +8,13 @@ import static eu.europeana.entitymanagement.batch.utils.BatchUtils.STEP_UPDATE_E
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.REMOVALS_STEP_EXECUTOR;
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.UPDATES_STEP_EXECUTOR;
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.WEB_REQUEST_JOB_EXECUTOR;
-import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_ID;
-import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.UPDATE_TYPE;
 
-import dev.morphia.query.filters.Filters;
 import eu.europeana.entitymanagement.batch.listener.EntityUpdateStepListener;
 import eu.europeana.entitymanagement.batch.listener.ScheduledTaskItemListener;
 import eu.europeana.entitymanagement.batch.processor.EntityConsolidationProcessor;
 import eu.europeana.entitymanagement.batch.processor.EntityDereferenceProcessor;
 import eu.europeana.entitymanagement.batch.processor.EntityMetricsProcessor;
 import eu.europeana.entitymanagement.batch.processor.EntityVerificationLogger;
-import eu.europeana.entitymanagement.batch.reader.EntityRecordDatabaseReader;
-import eu.europeana.entitymanagement.batch.reader.ScheduledTaskDatabaseReader;
 import eu.europeana.entitymanagement.batch.service.FailedTaskService;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.batch.writer.EntityRecordDatabaseDeprecationWriter;
@@ -28,44 +23,36 @@ import eu.europeana.entitymanagement.batch.writer.EntityRecordDatabaseRemovalWri
 import eu.europeana.entitymanagement.batch.writer.EntitySolrInsertionWriter;
 import eu.europeana.entitymanagement.batch.writer.EntitySolrRemovalWriter;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.definitions.batch.EMBatchConstants;
-import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
+import eu.europeana.entitymanagement.definitions.batch.model.*;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
 import org.springframework.batch.core.ItemProcessListener;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecutionListener;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.step.builder.SimpleStepBuilder;
 import org.springframework.batch.core.step.skip.SkipPolicy;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.support.CompositeItemProcessor;
 import org.springframework.batch.item.support.CompositeItemWriter;
-import org.springframework.batch.item.support.SynchronizedItemStreamReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.stereotype.Component;
 
-@Component
-@EnableBatchProcessing
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.SINGLE_ENTITY_RECORD_READER;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.SCHEDULED_TASK_READER;
+
+
+//@Component
+//@EnableBatchProcessing
 /**
  * This class instantiates  beens required for performing the actual processing of the Entity Manaement Update tasks (see specs)
  * It support synchronuous execution for web requests and asynchronuous for scheduled jobs (see also {@link TaskExecutorConfig} and {@link JobLauncherConfig}
@@ -73,10 +60,8 @@ import org.springframework.stereotype.Component;
  * @author GordeaS
  *
  */
+@Deprecated
 public class EntityUpdateJobConfig {
-
-  private static final String SINGLE_ENTITY_RECORD_READER = "singleEntityRecordReader";
-  private static final String SCHEDULED_TASK_READER = "scheduledTaskReader";
 
   private final JobBuilderFactory jobBuilderFactory;
   private final StepBuilderFactory stepBuilderFactory;
@@ -171,63 +156,63 @@ public class EntityUpdateJobConfig {
     maxFailedTaskRetries = emConfig.getMaxFailedTaskRetries();
   }
 
-  /** Makes ItemReader thread-safe */
-  private <T> SynchronizedItemStreamReader<T> threadSafeReader(ItemStreamReader<T> reader) {
-    final SynchronizedItemStreamReader<T> synchronizedItemStreamReader =
-        new SynchronizedItemStreamReader<>();
-    synchronizedItemStreamReader.setDelegate(reader);
-    return synchronizedItemStreamReader;
-  }
+//  /** Makes ItemReader thread-safe */
+//  private <T> SynchronizedItemStreamReader<T> threadSafeReader(ItemStreamReader<T> reader) {
+//    final SynchronizedItemStreamReader<T> synchronizedItemStreamReader =
+//        new SynchronizedItemStreamReader<>();
+//    synchronizedItemStreamReader.setDelegate(reader);
+//    return synchronizedItemStreamReader;
+//  }
+//
+//  /** ItemReader that queries by entityId when retrieving EntityRecords from the database */
+//  @Bean(name = SINGLE_ENTITY_RECORD_READER)
+//  @StepScope
+//  private EntityRecordDatabaseReader singleEntityRecordReader(
+//      @Value("#{jobParameters[entityId]}") String entityIdString,
+//      @Value("#{jobParameters[updateType]}") String updateType) {
+//    return new EntityRecordDatabaseReader(
+//        updateType,
+//        entityRecordService,
+//        configuredBatchChunkSize,
+//        Filters.eq(ENTITY_ID, entityIdString));
+//  }
+//
+//  @Bean(name = SCHEDULED_TASK_READER)
+//  @StepScope
+//  private SynchronizedItemStreamReader<BatchEntityRecord> scheduledTaskReader(
+//      @Value("#{jobParameters[currentStartTime]}") Date currentStartTime,
+//      @Value("#{jobParameters[updateType]}") String updateType) {
+//
+//    List<String> updateTypeList =
+//        Stream.of(updateType.split(",")).map(String::trim).collect(Collectors.toList());
+//
+//    ScheduledTaskDatabaseReader reader =
+//        new ScheduledTaskDatabaseReader(
+//            scheduledTaskService, entityRecordService,
+//            configuredBatchChunkSize,
+//            Filters.lte(EMBatchConstants.CREATED, currentStartTime),
+//            Filters.in(UPDATE_TYPE, updateTypeList));
+//
+//    return threadSafeReader(reader);
+//  }
 
-  /** ItemReader that queries by entityId when retrieving EntityRecords from the database */
-  @Bean(name = SINGLE_ENTITY_RECORD_READER)
-  @StepScope
-  private EntityRecordDatabaseReader singleEntityRecordReader(
-      @Value("#{jobParameters[entityId]}") String entityIdString,
-      @Value("#{jobParameters[updateType]}") String updateType) {
-    return new EntityRecordDatabaseReader(
-        updateType,
-        entityRecordService,
-        configuredBatchChunkSize,
-        Filters.eq(ENTITY_ID, entityIdString));
-  }
-
-  @Bean(name = SCHEDULED_TASK_READER)
-  @StepScope
-  private SynchronizedItemStreamReader<BatchEntityRecord> scheduledTaskReader(
-      @Value("#{jobParameters[currentStartTime]}") Date currentStartTime,
-      @Value("#{jobParameters[updateType]}") String updateType) {
-
-    List<String> updateTypeList =
-        Stream.of(updateType.split(",")).map(String::trim).collect(Collectors.toList());
-
-    ScheduledTaskDatabaseReader reader =
-        new ScheduledTaskDatabaseReader(
-            scheduledTaskService, entityRecordService,
-            configuredBatchChunkSize,
-            Filters.lte(EMBatchConstants.CREATED, currentStartTime),
-            Filters.in(UPDATE_TYPE, updateTypeList));
-
-    return threadSafeReader(reader);
-  }
-
-  @Bean
-  @StepScope
-  /*
-   * Creates a listener that's called while processing a single item
-   *
-   * JobParameters cannot be boolean, so the isSynchronous value is converted from its string representation
-   */
-  private ScheduledTaskItemListener entityUpdateListener(
-      // see JobParameter enum for string values
-      @Value("#{jobParameters[isSynchronous]}") String isSynchronousString) {
-    return new ScheduledTaskItemListener(
-        failedTaskService, scheduledTaskService, Boolean.parseBoolean(isSynchronousString));
-  }
+//  @Bean
+//  @StepScope
+//  /*
+//   * Creates a listener that's called while processing a single item
+//   *
+//   * JobParameters cannot be boolean, so the isSynchronous value is converted from its string representation
+//   */
+//  private ScheduledTaskItemListener entityUpdateListener(
+//      // see JobParameter enum for string values
+//      @Value("#{jobParameters[isSynchronous]}") String isSynchronousString) {
+//    return new ScheduledTaskItemListener(
+//        failedTaskService, scheduledTaskService, Boolean.parseBoolean(isSynchronousString));
+//  }
 
   /** Creates a StepExecutionListener that's called before / after the step runs */
   private StepExecutionListener stepExecutionListener(
-      List<? extends ScheduledTaskType> updateType, boolean isSynchronous) {
+          List<TaskType> updateType, boolean isSynchronous) {
     return new EntityUpdateStepListener(
         scheduledTaskService, updateType, isSynchronous, maxFailedTaskRetries);
   }
@@ -274,7 +259,7 @@ public class EntityUpdateJobConfig {
    * @param isSynchronous indicates whether this update is executed synchronously or async
    * @return step
    */
-  private Step updateEntity(List<ScheduledUpdateType> updateType, boolean isSynchronous) {
+  private Step updateEntity(List<TaskType> updateType, boolean isSynchronous) {
 
     // use different thread executor, reader and chunkSize for sync / async requests
     ItemReader<BatchEntityRecord> reader =
@@ -304,7 +289,7 @@ public class EntityUpdateJobConfig {
   }
 
   private Step removeEntity(
-      List<ScheduledRemovalType> removalType,
+      List<TaskType> removalType,
       int chunkSize,
       TaskExecutor executor,
       ItemReader<BatchEntityRecord> reader) {
@@ -339,7 +324,7 @@ public class EntityUpdateJobConfig {
         .incrementer(new RunIdIncrementer())
         // this job is always launched from web requests, so synchronousTaskExecutor is used. It
         // also directly retrieves entities from the EntityRecord database.
-        .start(updateEntity(List.of(ScheduledUpdateType.FULL_UPDATE), true))
+        .start(updateEntity(List.of(TaskType.full_update), true))
         .build();
   }
 
@@ -347,7 +332,7 @@ public class EntityUpdateJobConfig {
    * Job for updating entities scheduled via the ScheduledTasks collection Expects
    * `currentStartTime` date and `updateType` string in JobParameters.
    */
-  public Job updateScheduledEntities(List<ScheduledUpdateType> updateType) {
+  public Job updateScheduledEntities(List<TaskType> updateType) {
     return this.jobBuilderFactory
         .get(JOB_UPDATE_SCHEDULED_ENTITIES)
         // This job is always launched via a @Scheduled method.
@@ -355,7 +340,7 @@ public class EntityUpdateJobConfig {
         .build();
   }
 
-  public Job removeScheduledEntities(List<ScheduledRemovalType> removalType) {
+  public Job removeScheduledEntities(List<TaskType> removalType) {
     return this.jobBuilderFactory
         .get(JOB_REMOVE_SCHEDULED_ENTITIES)
         .start(

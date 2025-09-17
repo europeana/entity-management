@@ -102,7 +102,7 @@ class EntityUpdateIT extends BaseWebControllerTest {
                 .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
                 .content(loadFile(IntegrationTestUtils.CONCEPT_UPDATE_BATHTUB_JSON))
                 .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isAccepted());
+        .andExpect(status().isOk());
   }
 
   @Test
@@ -117,7 +117,7 @@ class EntityUpdateIT extends BaseWebControllerTest {
                 .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
                 .content(loadFile(IntegrationTestUtils.TIMESPAN_UPDATE_1ST_CENTURY_JSON))
                 .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isAccepted());
+        .andExpect(status().isOk());
 
     Optional<EntityRecord> entityRecordUpdated = retrieveEntityEvenIfDisabled(entityRecord.getEntityId());
     Assertions.assertTrue(entityRecordUpdated.isPresent());
@@ -141,7 +141,7 @@ class EntityUpdateIT extends BaseWebControllerTest {
             MockMvcRequestBuilders.put(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath)
                 .content(loadFile(IntegrationTestUtils.CONCEPT_UPDATE_BATHTUB_JSON))
                 .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isAccepted())
+        .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(entityRecord.getEntityId())))
         .andExpect(jsonPath("$.type", is(EntityTypes.Concept.getEntityType())));
 
@@ -187,7 +187,7 @@ class EntityUpdateIT extends BaseWebControllerTest {
                 .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
                 .content(loadFile(IntegrationTestUtils.CONCEPT_BATHTUB_EMPTY_UPDATE_JSON))
                 .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isAccepted());
+        .andExpect(status().isOk());
 
     // check that update removed fields from Europeana proxy in original request
     Optional<EntityRecord> updatedRecord = retrieveEntityEvenIfDisabled(savedRecord.getEntityId());

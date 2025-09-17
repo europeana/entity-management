@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +17,6 @@ import dev.morphia.query.filters.Filter;
 import eu.europeana.entitymanagement.batch.repository.ScheduledTaskRepository;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 
 @Service(AppConfigConstants.BEAN_BATCH_SCHEDULED_TASK_SERVICE)
 public class ScheduledTaskService {
@@ -35,7 +36,7 @@ public class ScheduledTaskService {
    *
    * @param entityIdsToUpdateType
    */
-  public void scheduleTasksForEntities(Map<String, ScheduledTaskType> entityIdsToUpdateType) {
+  public void scheduleTasksForEntities(Map<String, TaskType> entityIdsToUpdateType) {
     List<ScheduledTask> tasks = createScheduledTasks(entityIdsToUpdateType, false);
 
     BulkWriteResult writeResult = repository.upsertBulk(tasks);
@@ -51,7 +52,7 @@ public class ScheduledTaskService {
    *
    * @param entityIdsToUpdateType
    */
-  public void markAsProcessed(Map<String, ScheduledTaskType> entityIdsToUpdateType) {
+  public void markAsProcessed(Map<String, TaskType> entityIdsToUpdateType) {
     List<ScheduledTask> tasks = createScheduledTasks(entityIdsToUpdateType, true);
 
     BulkWriteResult writeResult = repository.markAsProcessed(tasks);
@@ -67,13 +68,13 @@ public class ScheduledTaskService {
    *
    * @param updateType updateType to filter on
    */
-  public void removeProcessedTasks(List<? extends ScheduledTaskType> updateType) {
+  public void removeProcessedTasks(List<TaskType> updateType) {
     long removeCount = repository.removeProcessedTasks(updateType);
     if (removeCount > 0 && logger.isDebugEnabled()) {
       logger.debug(
           "Removed scheduled tasks from db: count={}, updateType={}",
           removeCount,
-          updateType.stream().map(ScheduledTaskType::getValue).collect(Collectors.joining(",")));
+          updateType.stream().map(TaskType::getValue).collect(Collectors.joining(",")));
     }
   }
 
@@ -84,7 +85,7 @@ public class ScheduledTaskService {
    * <p>TODO: investigate if this can be replaced with a delete query
    */
   public void removeScheduledTasksWithFailures(
-      int maxFailedTaskRetries, List<? extends ScheduledTaskType> updateType) {
+      int maxFailedTaskRetries, List<TaskType> updateType) {
 
     try (MorphiaCursor<ScheduledTask> cursor =
         repository.getTasksWithFailures(maxFailedTaskRetries, updateType)) {
@@ -125,7 +126,7 @@ public class ScheduledTaskService {
 
   /** Helper method to instantiate ScheduledTasks from list of entityIds */
   private List<ScheduledTask> createScheduledTasks(
-      Map<String, ScheduledTaskType> entityIdToUpdateType, boolean hasBeenProcessed) {
+          Map<String, TaskType> entityIdToUpdateType, boolean hasBeenProcessed) {
     Instant now = Instant.now();
 
     return entityIdToUpdateType.entrySet().stream()

@@ -19,6 +19,8 @@ import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.UPSERT_OPTS
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import eu.europeana.entitymanagement.definitions.batch.model.*;
 import org.bson.Document;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,10 +39,6 @@ import dev.morphia.query.FindOptions;
 import dev.morphia.query.MorphiaCursor;
 import dev.morphia.query.filters.Filter;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
-import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 
 @Repository
 public class ScheduledTaskRepository implements InitializingBean {
@@ -99,7 +97,7 @@ public class ScheduledTaskRepository implements InitializingBean {
           // manually set Morphia discriminator as we're bypassing its API for this query
           .append(MORPHIA_DISCRIMINATOR, SCHEDULED_TASK_CLASSNAME);
 
-      boolean shouldChangeUpdateType = task.getUpdateType() == ScheduledUpdateType.FULL_UPDATE;
+      boolean shouldChangeUpdateType = task.getUpdateType() == TaskType.full_update;
       /*
        * If entity is being scheduled for a full update, this: - changes the current updateType from
        * METRICS to FULL; or - leaves current updateType as FULL (no change) otherwise
@@ -127,7 +125,7 @@ public class ScheduledTaskRepository implements InitializingBean {
    * @param updateType update types to filter on
    * @return number of deleted entries
    */
-  public long removeProcessedTasks(List<? extends ScheduledTaskType> updateType) {
+  public long removeProcessedTasks(List<TaskType> updateType) {
     return datastore.find(ScheduledTask.class)
         .filter(eq(HAS_BEEN_PROCESSED, Boolean.TRUE),
             or(updateType.stream().map(u -> eq(UPDATE_TYPE, u.getValue())).toArray(Filter[]::new)))
@@ -195,11 +193,11 @@ public class ScheduledTaskRepository implements InitializingBean {
    * @return the database cursor to access scheduled tasks
    */
   public MorphiaCursor<ScheduledTask> getTasksWithFailures(int maxFailedTaskRetries,
-      List<? extends ScheduledTaskType> updateType) {
+      List<TaskType> updateType) {
     return datastore.aggregate(ScheduledTask.class)
         .match(eq(HAS_BEEN_PROCESSED, Boolean.FALSE),
             in(UPDATE_TYPE,
-                updateType.stream().map(ScheduledTaskType::getValue).collect(Collectors.toList())))
+                updateType.stream().map(TaskType::getValue).collect(Collectors.toList())))
         // both collections use the same entityId field name
         .lookup(Lookup.from(FailedTask.class).localField(ENTITY_ID).foreignField(ENTITY_ID)
             .as("failed_tasks_lookup"))

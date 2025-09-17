@@ -1,27 +1,22 @@
 package eu.europeana.entitymanagement.definitions.batch;
 
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class ScheduledTaskUtils {
 
-  private static final Map<String, ScheduledTaskType> scheduledTaskTypeMap = new HashMap<>();
+  private static final Map<String, TaskType> taskTypeMap = new HashMap<>();
 
   static {
     // build map of ScheduledType string values to enum
-    for (ScheduledUpdateType value : ScheduledUpdateType.values()) {
-      scheduledTaskTypeMap.put(value.getValue(), value);
-    }
-
-    for (ScheduledRemovalType value : ScheduledRemovalType.values()) {
-      scheduledTaskTypeMap.put(value.getValue(), value);
+    for (TaskType value : TaskType.values()) {
+      taskTypeMap.put(value.getValue(), value);
     }
   }
 
-  public static ScheduledTaskType scheduledTaskTypeValueOf(String taskTypeString) {
-    return scheduledTaskTypeMap.get(taskTypeString);
+  public static TaskType taskTypeValueOf(String taskTypeString) {
+    return taskTypeMap.get(taskTypeString);
   }
 }

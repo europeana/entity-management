@@ -9,6 +9,8 @@ import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import javax.annotation.Resource;
+
 /**
  * Configurations for instantiation of Task executors
  * @author GordeaS
@@ -17,10 +19,10 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Configuration
 public class TaskExecutorConfig {
 
-  private final EntityManagementConfiguration emConfig;
+  @Resource
+  private EntityManagementConfiguration emConfig;
 
-  public TaskExecutorConfig(EntityManagementConfiguration emConfig) {
-    this.emConfig = emConfig;
+  public TaskExecutorConfig() {
   }
 
   /**

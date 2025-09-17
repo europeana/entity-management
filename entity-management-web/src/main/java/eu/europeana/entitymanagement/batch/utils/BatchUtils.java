@@ -2,11 +2,11 @@ package eu.europeana.entitymanagement.batch.utils;
 
 import eu.europeana.entitymanagement.batch.model.JobParameter;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
+
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.lang.Nullable;
@@ -26,24 +26,22 @@ public class BatchUtils {
    *
    * @param entityId entity id
    * @param runTime trigger time for job
-   * @param updateType update tpe for job
+   * @param taskType of task for the job
    * @return JobParameters with trigger time and entityId
    */
   public static JobParameters createJobParameters(
-      @Nullable String entityId,
-      Date runTime,
-      List<ScheduledTaskType> updateType,
-      boolean isSynchronous) {
+          @Nullable String entityId,
+          Date runTime,
+          TaskType taskType,
+          boolean isSynchronous) {
     JobParametersBuilder jobParametersBuilder =
-        new JobParametersBuilder()
-            .addDate(JobParameter.CURRENT_START_TIME.key(), runTime)
-            .addString(
-                JobParameter.UPDATE_TYPE.key(),
-                updateType.stream()
-                    .map(ScheduledTaskType::getValue)
-                    .collect(Collectors.joining(",")))
-            // boolean parameters not supported
-            .addString(JobParameter.IS_SYNCHRONOUS.key(), String.valueOf(isSynchronous));
+            new JobParametersBuilder()
+                    .addDate(JobParameter.CURRENT_START_TIME.key(), runTime)
+                    .addString(
+                            JobParameter.UPDATE_TYPE.key(),
+                            taskType.getValue())
+                    // boolean parameters not supported
+                    .addString(JobParameter.IS_SYNCHRONOUS.key(), String.valueOf(isSynchronous));
 
     if (StringUtils.hasLength(entityId)) {
       jobParametersBuilder.addString(JobParameter.ENTITY_ID.key(), entityId);
@@ -58,10 +56,9 @@ public class BatchUtils {
         .toArray(String[]::new);
   }
 
-  public static List<String> filterRecordsForWriters(
-      Set<ScheduledTaskType> supportedScheduledTasks, List<? extends BatchEntityRecord> records) {
+  public static List<String> filterRecordsForWriters(List<? extends BatchEntityRecord> records) {
     return records.stream()
-        .filter(p -> supportedScheduledTasks.contains(p.getScheduledTaskType()))
+//        .filter(p -> supportedScheduledTasks.contains(p.getScheduledTaskType()))
         .map(r -> r.getEntityRecord().getEntityId())
         .collect(Collectors.toList());
   }

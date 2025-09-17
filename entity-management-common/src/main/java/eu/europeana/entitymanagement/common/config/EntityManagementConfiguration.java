@@ -190,11 +190,18 @@ public class EntityManagementConfiguration implements InitializingBean {
   @Value("${europeana.role.vocabulary:role_vocabulary.xml}")
   private String roleVocabularyFilename;
   
-  @Value("${slack.webhook:}")
-  private String slackWebHook;
+  @Value("${slack.webhook.zoho:}")
+  private String zohoSlackWebHook;
+
+  @Value("${slack.webhook.em.update:}")
+  private String emUpdateSlackWebHook;
+
+  @Value("${entity.management.api.baseurl:}")
+  private String entityManagementBaseUrl;
   
   @Value("${rapidapi.apiKey:}")
   private String rapidApiKey;
+  
   @Value("${rapidapi.baseUrl:}")
   private String rapidApiBaseUrl;
   
@@ -514,10 +521,18 @@ public class EntityManagementConfiguration implements InitializingBean {
     return zohoSyncDeleteOffsetDays;
   }
 
-  public String getSlackWebHook() {
-    return slackWebHook;
+  public String getZohoSlackWebHook() {
+    return zohoSlackWebHook;
   }
- 
+
+  public String getEmUpdateSlackWebHook() {
+    return emUpdateSlackWebHook;
+  }
+
+  public String getEntityManagementBaseUrl() {
+    return entityManagementBaseUrl;
+  }
+
   public String getPrSolrZookeeperUrl() {
     return prSolrZookeeperUrl;
   }

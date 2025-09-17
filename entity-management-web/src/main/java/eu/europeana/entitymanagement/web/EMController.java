@@ -13,8 +13,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
+
+import eu.europeana.entitymanagement.batch.config.JobDescriptionFactory;
+import eu.europeana.entitymanagement.batch.model.JobDescription;
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -40,11 +45,7 @@ import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.common.config.DataSource;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.DataSources;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
@@ -72,6 +73,7 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import io.swagger.annotations.ApiOperation;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.JOB_DESCRIPTION_FACTORY;
 
 @RestController
 @Validated
@@ -83,6 +85,7 @@ public class EMController extends BaseRest {
   private final DereferenceServiceLocator dereferenceServiceLocator;
   private final DataSources datasources;
   private final EntityUpdateService entityUpdateService;
+  private final JobDescriptionFactory jobDescriptionFactory;
 
   private static final String EXTERNAL_ID_REMOVED_MSG =
       "Entity id '%s' already exists as '%s', which has been removed";
@@ -101,17 +104,19 @@ public class EMController extends BaseRest {
    * @param dereferenceServiceLocator service for dereferencing external uros
    * @param datasources datasources configurations
    * @param entityUpdateService service for batch updating of entities
-   * @param emConfig application configurations
+   * @param jobDescriptionFactory factory to fetch the updates to be run
    */
   @Autowired
   public EMController(EntityRecordService entityRecordService, SolrService solrService,
-      DereferenceServiceLocator dereferenceServiceLocator, DataSources datasources,
-      EntityUpdateService entityUpdateService, EntityManagementConfiguration emConfig) {
+                      DereferenceServiceLocator dereferenceServiceLocator, DataSources datasources,
+                      EntityUpdateService entityUpdateService,
+                      @Qualifier(JOB_DESCRIPTION_FACTORY) JobDescriptionFactory jobDescriptionFactory) {
     this.entityRecordService = entityRecordService;
     this.solrService = solrService;
     this.dereferenceServiceLocator = dereferenceServiceLocator;
     this.datasources = datasources;
     this.entityUpdateService = entityUpdateService;
+    this.jobDescriptionFactory = jobDescriptionFactory;
   }
 
   @ApiOperation(value = "Disable an entity", nickname = "disableEntity",
@@ -157,14 +162,14 @@ public class EMController extends BaseRest {
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
   public ResponseEntity<String> enableEntity(
       @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE,
-          required = false) String profile,
+          required = false, defaultValue = "internal") String profile,
       @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
       @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
-      HttpServletRequest request) throws HttpException, EuropeanaApiException {
+      HttpServletRequest request) throws Exception {
 
     List<EntityProfile> entityProfile = getEntityProfile(profile);
-
     verifyWriteAccess(Operations.UPDATE, request);
+    validateProfile(profile);
 
     EntityTypes enType = null;
     try {
@@ -184,8 +189,13 @@ public class EMController extends BaseRest {
 
     entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier, profile, false);
 
-    return generateResponseEntityForEntityRecord(request, entityProfile, FormatTypes.jsonld, null,
-        HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, entityRecord, HttpStatus.OK);
+    return launchTaskAndRetrieveEntity(request,
+            enType,
+            getDatabaseIdentifier(entityRecord.getEntityId()),
+            entityRecord,
+            EntityProfile.internal.toString(),
+            false,
+            jobDescriptionFactory.get(TaskType.full_update));
   }
 
   @ApiOperation(value = "Update an entity", nickname = "updateEntity",
@@ -229,11 +239,9 @@ public class EMController extends BaseRest {
 
     entityRecordService.replaceEuropeanaProxy(updateRequestEntity, entityRecord);
     entityRecordService.update(entityRecord);
-
-    // update the consolidated version in mongo and solr
     try {
       return launchTaskAndRetrieveEntity(request, EntityTypes.getByEntityType(type), identifier,
-          entityRecord, profile);
+              entityRecord, profile, false, jobDescriptionFactory.get(TaskType.meta_update));
     } catch (UnsupportedEntityTypeException e) {
       throw new EntityNotFoundException("/" + type + "/" + identifier, e);
     }
@@ -293,7 +301,8 @@ public class EMController extends BaseRest {
     EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier, profile, false);
     // update from external data source is not available for static data sources
     datasources.verifyDataSource(entityRecord.getExternalProxies().get(0).getProxyId(), false);
-    return launchTaskAndRetrieveEntity(request, enType, identifier, entityRecord, profile);
+    return launchTaskAndRetrieveEntity(request, enType, identifier, entityRecord, profile, false,
+            jobDescriptionFactory.get(TaskType.full_update));
   }
 
   @ApiOperation(value = "Update multiple entities from external data source",
@@ -309,14 +318,14 @@ public class EMController extends BaseRest {
 
     // query param takes precedence over request body
     if (StringUtils.isNotEmpty(query)) {
-      return scheduleUpdatesWithSearch(request, query, ScheduledUpdateType.FULL_UPDATE);
+      return scheduleUpdatesWithSearch(request, query, TaskType.full_update);
     }
 
     if (CollectionUtils.isEmpty(entityIds)) {
       throw new HttpBadRequestException(INVALID_UPDATE_REQUEST_MSG);
     }
 
-    return scheduleBatchUpdates(request, entityIds, ScheduledUpdateType.FULL_UPDATE);
+    return scheduleBatchUpdates(request, entityIds, TaskType.full_update);
   }
 
   @ApiOperation(value = "Update metrics for given entities", nickname = "updateMetricsForEntities",
@@ -332,14 +341,14 @@ public class EMController extends BaseRest {
 
     // query param takes precedence over request body
     if (StringUtils.isNotEmpty(query)) {
-      return scheduleUpdatesWithSearch(request, query, ScheduledUpdateType.METRICS_UPDATE);
+      return scheduleUpdatesWithSearch(request, query, TaskType.metrics_update);
     }
 
     if (CollectionUtils.isEmpty(entityIds)) {
       throw new HttpBadRequestException(INVALID_UPDATE_REQUEST_MSG);
     }
 
-    return scheduleBatchUpdates(request, entityIds, ScheduledUpdateType.METRICS_UPDATE);
+    return scheduleBatchUpdates(request, entityIds, TaskType.metrics_update);
   }
 
   /**
@@ -366,14 +375,22 @@ public class EMController extends BaseRest {
       HttpServletRequest request) throws Exception {
 
     verifyWriteAccess(Operations.UPDATE, request);
+    validateProfile(profile);
     validateAction(action);
 
     EntityRecord entityRecord = entityRecordService
         .updateUsedForEnrichment(EntityTypes.getByEntityType(type), identifier, profile, action);
-    entityRecord = launchMetricsUpdateTask(entityRecord, profile, true);
-    return generateResponseEntityForEntityRecord(request, getEntityProfile(profile),
-        FormatTypes.jsonld, null, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, entityRecord,
-        HttpStatus.OK);
+
+    return launchTaskAndRetrieveEntity(request,
+            EntityTypes.getByEntityType(entityRecord.getEntity().getType()),
+            getDatabaseIdentifier(entityRecord.getEntityId()),
+            entityRecord,
+            EntityProfile.internal.toString(),
+            true,
+            new JobDescription(
+                     TaskType.metrics_update
+                    , null
+                    , JobDescription.PERSISTENCE_ITEM_WRITERS));
   }
 
   private void validateAction(String action) throws HttpBadRequestException {
@@ -470,11 +487,15 @@ public class EMController extends BaseRest {
       response = Void.class)
   @PostMapping(value = "/entity/",
       produces = {MediaType.APPLICATION_JSON_VALUE, HttpHeaders.CONTENT_TYPE_JSONLD})
-  public ResponseEntity<String> registerEntity(@RequestBody Entity europeanaProxyEntity,
+  public ResponseEntity<String> registerEntity(
+    @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE,
+            required = false, defaultValue = "internal") String profile,
+    @RequestBody Entity europeanaProxyEntity,
       HttpServletRequest request) throws Exception {
 
     verifyWriteAccess(Operations.CREATE, request);
 
+    validateProfile(profile);
     validateBodyEntity(europeanaProxyEntity, false);
 
     String creationRequestId = europeanaProxyEntity.getEntityId();
@@ -529,14 +550,15 @@ public class EMController extends BaseRest {
         savedEntityRecord.getEntityId());
 
     return launchTaskAndRetrieveEntity(request,
-        EntityTypes.getByEntityType(savedEntityRecord.getEntity().getType()),
-        getDatabaseIdentifier(savedEntityRecord.getEntityId()), savedEntityRecord,
-        EntityProfile.internal.toString());
+            EntityTypes.getByEntityType(savedEntityRecord.getEntity().getType()),
+            getDatabaseIdentifier(savedEntityRecord.getEntityId()),
+            savedEntityRecord,
+            EntityProfile.internal.toString(),
+            false,
+            jobDescriptionFactory.get(TaskType.full_update));
   }
 
-  Entity dereferenceEntity(String creationRequestId, String creationRequestType)
-      throws Exception, DatasourceNotKnownException, EntityMismatchException {
-
+  Entity dereferenceEntity(String creationRequestId, String creationRequestType) throws Exception {
     Dereferencer dereferenceService =
         dereferenceServiceLocator.getDereferencer(creationRequestId, creationRequestType);
 
@@ -565,11 +587,12 @@ public class EMController extends BaseRest {
       @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
       @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
       @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE,
-          required = false) String profile,
+          required = false, defaultValue = "internal") String profile,
       @RequestParam(value = WebEntityConstants.PATH_PARAM_URL) String url,
       HttpServletRequest request) throws Exception {
 
     verifyWriteAccess(Operations.UPDATE, request);
+    validateProfile(profile);
 
     EntityTypes enType = EntityTypes.getByEntityType(type);
     EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier, profile, false);
@@ -580,7 +603,8 @@ public class EMController extends BaseRest {
 
     entityRecordService.changeExternalProxy(entityRecord, url);
     entityRecordService.update(entityRecord);
-    return launchTaskAndRetrieveEntity(request, enType, identifier, entityRecord, profile);
+    return launchTaskAndRetrieveEntity(request, enType, identifier, entityRecord, profile, false,
+            jobDescriptionFactory.get(TaskType.full_update));
   }
 
   @ApiOperation(value = "Retrieve multiple entities", nickname = "retrieveEntities")
@@ -672,23 +696,19 @@ public class EMController extends BaseRest {
     return requestProfiles.stream().map(EntityProfile::valueOf).collect(Collectors.toList());
   }
 
-  private EntityRecord launchMetricsUpdateTask(EntityRecord entityRecord, String profile, boolean includeDisabled)
-      throws Exception {
-    // launch synchronous metrics update, then retrieve entity from DB afterwards
-    entityUpdateService.runSynchronousMetricsUpdate(entityRecord.getEntityId());
-    return entityRecordService.retrieveEntityRecord(entityRecord.getEntityId(), profile, includeDisabled);
-  }
-
   private ResponseEntity<String> launchTaskAndRetrieveEntity(HttpServletRequest request,
-      EntityTypes type, String identifier, EntityRecord entityRecord, String profile)
-      throws Exception {
+                                                             EntityTypes type, String identifier, EntityRecord entityRecord, String profile,
+                                                             boolean includeDisabled,
+                                                             JobDescription jobDescription) throws Exception {
+
     // launch synchronous update, then retrieve entity from DB afterwards
-    launchUpdateTask(entityRecord.getEntityId());
-    entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, profile, false);
+    entityUpdateService.runSynchronousUpdate(entityRecord.getEntityId(), jobDescription);
+
+    entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, profile, includeDisabled);
 
     return generateResponseEntityForEntityRecord(request, getEntityProfile(profile),
         FormatTypes.jsonld, null, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, entityRecord,
-        HttpStatus.ACCEPTED);
+        HttpStatus.OK);
   }
 
   private ResponseEntity<String> checkExistingEntity(List<EntityRecord> existingEntities,
@@ -719,7 +739,7 @@ public class EMController extends BaseRest {
   }
 
   private ResponseEntity<EntityIdResponse> scheduleBatchUpdates(HttpServletRequest request,
-      List<String> entityIds, ScheduledTaskType updateType) {
+      List<String> entityIds, TaskType updateType) {
     // get the entities to be scheduled, failed and skipped for update
     EntityIdResponse entityIdResponse = new EntityIdResponse();
     List<String> entityIdsToSchedule = updateEntityIdResponse(entityIdResponse, entityIds);
@@ -739,7 +759,7 @@ public class EMController extends BaseRest {
    * @throws SolrServiceException if error occurs during search
    */
   ResponseEntity<EntityIdResponse> scheduleUpdatesWithSearch(HttpServletRequest request,
-      String query, ScheduledTaskType updateType) throws SolrServiceException {
+      String query, TaskType updateType) throws SolrServiceException {
     SolrSearchCursorIterator iterator =
         solrService.getSearchIterator(query, List.of(EntitySolrFields.TYPE, EntitySolrFields.ID));
 
@@ -802,9 +822,5 @@ public class EMController extends BaseRest {
     entityIdResponse.updateValues(entityIds.size(), toBeScheduled, failures, skipped,
         emConfig.getEntityIdResponseMaxSize());
     return toBeScheduled;
-  }
-
-  private void launchUpdateTask(String entityId) throws Exception {
-    entityUpdateService.runSynchronousUpdate(entityId);
   }
 }

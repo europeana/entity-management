@@ -2,21 +2,17 @@ package eu.europeana.entitymanagement.batch.writer;
 
 import eu.europeana.entitymanagement.batch.utils.BatchUtils;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledRemovalType;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import java.util.List;
-import java.util.Set;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
-/** ItemWriter for removing entities from Solr */
-@Component
-public class EntitySolrRemovalWriter implements ItemWriter<BatchEntityRecord> {
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.ENTITY_SOLR_REMOVAL_WRITER;
 
-  private static final Set<ScheduledTaskType> supportedScheduledTasks =
-      Set.of(ScheduledRemovalType.DEPRECATION, ScheduledRemovalType.PERMANENT_DELETION);
+/** ItemWriter for removing entities from Solr */
+@Component(ENTITY_SOLR_REMOVAL_WRITER)
+public class EntitySolrRemovalWriter implements ItemWriter<BatchEntityRecord> {
 
   private final SolrService solrService;
 
@@ -27,7 +23,7 @@ public class EntitySolrRemovalWriter implements ItemWriter<BatchEntityRecord> {
   @Override
   public void write(@NonNull List<? extends BatchEntityRecord> entityRecords) throws Exception {
     List<String> entityIds =
-        BatchUtils.filterRecordsForWriters(supportedScheduledTasks, entityRecords);
+        BatchUtils.filterRecordsForWriters(entityRecords);
 
     if (!entityIds.isEmpty()) {
       solrService.deleteById(entityIds, true);

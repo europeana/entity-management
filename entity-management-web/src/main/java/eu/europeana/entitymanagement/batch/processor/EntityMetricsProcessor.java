@@ -1,12 +1,12 @@
 package eu.europeana.entitymanagement.batch.processor;
 
 import java.util.Date;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -15,9 +15,10 @@ import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.web.model.scoring.EntityMetrics;
 import eu.europeana.entitymanagement.web.service.ScoringService;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_ENTITY_METRICS_PROCESSOR;
 
 /** Updates Metrics for EntityRecords */
-@Component
+@Component(BEAN_ENTITY_METRICS_PROCESSOR)
 public class EntityMetricsProcessor extends BaseEntityProcessor {
   private final ScoringService scoringService;
   private final EntityManagementConfiguration entityManagementConfiguration;
@@ -26,9 +27,6 @@ public class EntityMetricsProcessor extends BaseEntityProcessor {
 
   public EntityMetricsProcessor(ScoringService scoringService,
       EntityManagementConfiguration entityManagementConfiguration) {
-
-    super(ScheduledUpdateType.FULL_UPDATE, ScheduledUpdateType.METRICS_UPDATE);
-
     this.scoringService = scoringService;
     this.entityManagementConfiguration = entityManagementConfiguration;
   }

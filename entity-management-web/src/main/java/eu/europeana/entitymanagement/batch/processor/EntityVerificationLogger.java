@@ -2,25 +2,24 @@ package eu.europeana.entitymanagement.batch.processor;
 
 import eu.europeana.entitymanagement.definitions.LanguageCodes;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.exception.EntityMismatchException;
 import java.util.Objects;
 import java.util.Set;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_ENTITY_VERIFICATION_LOGGER;
 
 /**
  * This processor checks the content of Entities after consolidation and logs warnings for any
  * potential issues with the record
  */
-@Component
+@Component(BEAN_ENTITY_VERIFICATION_LOGGER)
 public class EntityVerificationLogger extends BaseEntityProcessor {
 
   private final Set<String> supportedLanguageCodes;
 
   public EntityVerificationLogger(LanguageCodes languageCodes) {
-    super(ScheduledUpdateType.FULL_UPDATE, ScheduledUpdateType.METRICS_UPDATE);
     this.supportedLanguageCodes = languageCodes.getSupportedLangCodes();
   }
 

@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.TreeSet;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.item.ItemProcessor;
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Component;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
@@ -24,12 +24,13 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.zoho.utils.WikidataUtils;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_ENTITY_DEREFERENCE_PROCESSOR;
 
 /**
  * This {@link ItemProcessor} retrieves Entity metadata from all proxy datasources, and then
  * overwrites the local metadata if datasource response is different.
  */
-@Component
+@Component(BEAN_ENTITY_DEREFERENCE_PROCESSOR)
 public class EntityDereferenceProcessor extends BaseEntityProcessor {
 
   private static final String MISMATCH_EXCEPTION_STRING =
@@ -44,7 +45,6 @@ public class EntityDereferenceProcessor extends BaseEntityProcessor {
       DereferenceServiceLocator dereferenceServiceLocator,
       DataSources datasources,
       EntityRecordService entityRecordService) {
-    super(ScheduledUpdateType.FULL_UPDATE);
     this.dereferenceServiceLocator = dereferenceServiceLocator;
     this.datasources = datasources;
     this.entityRecordService = entityRecordService;

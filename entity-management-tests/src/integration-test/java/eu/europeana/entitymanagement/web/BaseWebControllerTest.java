@@ -7,7 +7,11 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+
 import java.util.Optional;
+
+import eu.europeana.entitymanagement.batch.config.JobDescriptionFactory;
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +29,6 @@ import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.config.AppAutoconfig;
 import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Organization;
@@ -58,6 +61,8 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
   @Autowired private WebApplicationContext webApplicationContext;
   
   @Autowired protected VocabularyRepository vocabRepository;
+
+  @Autowired protected JobDescriptionFactory jobDescriptionFactory;
 
   @BeforeEach
   protected void setup() throws Exception {
@@ -152,7 +157,7 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
             europeanaProxyEntity, xmlBaseEntity.toEntityModel(), dataSource, null);
 
     // trigger update to generate consolidated entity
-    entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId());
+    entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId(), jobDescriptionFactory.get(TaskType.full_update));
 
     // return entityRecord version with consolidated entity
     return entityRecordService.retrieveEntityRecord(savedRecord.getEntityId(), EntityProfile.dereference.name(), false);
@@ -189,7 +194,7 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
             europeanaProxyEntity, zohoOrganization, dataSource, null);
 
     // trigger update to generate consolidated entity
-    entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId());
+    entityUpdateService.runSynchronousUpdate(savedRecord.getEntityId(), jobDescriptionFactory.get(TaskType.full_update));
 
     // return entityRecord version with consolidated entity
     return entityRecordService.retrieveEntityRecord(savedRecord.getEntityId(), EntityProfile.dereference.name(), false);
@@ -203,7 +208,7 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
     entityRecordService.delete(entityId);
   }
 
-  protected void assertedTaskScheduled(String entityId, ScheduledTaskType taskType) {
+  protected void assertedTaskScheduled(String entityId, TaskType taskType) {
     // check that record is disabled
     Optional<ScheduledTask> scheduledTask = scheduledTaskService.getTask(entityId);
     Assertions.assertTrue(scheduledTask.isPresent());

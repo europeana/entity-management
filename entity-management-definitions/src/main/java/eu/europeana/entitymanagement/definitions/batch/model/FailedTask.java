@@ -28,7 +28,7 @@ public class FailedTask {
   private String errorMessage;
   private String stackTrace;
 
-  private ScheduledTaskType updateType;
+  private TaskType updateType;
 
   /**
    * FailureCount not explicitly set. Value is updated during Mongo upserts via the $inc operator
@@ -51,7 +51,7 @@ public class FailedTask {
       Instant modified,
       String errorMessage,
       String stackTrace,
-      ScheduledTaskType updateType) {
+      TaskType updateType) {
     this.entityId = entityId;
     this.modified = modified;
     this.errorMessage = errorMessage;
@@ -89,21 +89,21 @@ public class FailedTask {
   }
 
   @JsonGetter(FailedTaskJsonFields.TYPE)
-  public ScheduledTaskType getUpdateType() {
+  public TaskType getUpdateType() {
     return updateType;
   }
 
   public static class Builder {
 
     private final String entityId;
-    private final ScheduledTaskType updateType;
+    private final TaskType updateType;
 
     private Instant modified;
     // default values saved if they're not overwritten
     private String errorMessage = "No error message";
     private String stackTrace = "No stacktrace";
 
-    public Builder(String entityId, ScheduledTaskType updateType) {
+    public Builder(String entityId, TaskType updateType) {
       this.entityId = entityId;
       this.updateType = updateType;
     }

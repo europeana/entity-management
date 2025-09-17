@@ -189,7 +189,7 @@ public class HeadersIT extends BaseWebControllerTest {
                     .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
                     .content(loadFile(IntegrationTestUtils.CONCEPT_UPDATE_BATHTUB_JSON))
                     .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isAccepted());
+            .andExpect(status().isOk());
 
     checkAllowHeaderForPOST(resultActions);
     checkCommonResponseHeaders(resultActions, false);
@@ -207,7 +207,7 @@ public class HeadersIT extends BaseWebControllerTest {
                     .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
                     .content(loadFile(IntegrationTestUtils.CONCEPT_BATHTUB_EMPTY_UPDATE_JSON))
                     .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isAccepted());
+            .andExpect(status().isOk());
     checkAllowHeaderForDPGP(resultActions);
     checkCommonResponseHeaders(resultActions, false);
   }

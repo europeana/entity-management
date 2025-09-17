@@ -6,25 +6,54 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.xml.bind.JAXBContext;
+
+import dev.morphia.query.filters.Filters;
+import eu.europeana.entitymanagement.batch.listener.ScheduledTaskItemListener;
+import eu.europeana.entitymanagement.batch.model.EntityUpdateStats;
+import eu.europeana.entitymanagement.batch.reader.EntityRecordDatabaseReader;
+import eu.europeana.entitymanagement.batch.reader.ScheduledTaskDatabaseReader;
+import eu.europeana.entitymanagement.batch.service.FailedTaskService;
+import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
+import eu.europeana.entitymanagement.definitions.batch.EMBatchConstants;
+import eu.europeana.entitymanagement.web.service.EntityRecordService;
+import eu.europeana.entitymanagement.web.service.SlackConnection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.item.ItemProcessor;
+import org.springframework.batch.item.ItemStreamReader;
+import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.support.SynchronizedItemStreamReader;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import eu.europeana.api.commons.config.i18n.I18nService;
 import eu.europeana.api.commons.config.i18n.I18nServiceImpl;
 import eu.europeana.api.commons.oauth2.service.impl.EuropeanaClientDetailsService;
+import eu.europeana.entitymanagement.batch.config.EntityUpdateJobFactory;
+import eu.europeana.entitymanagement.batch.config.JobDescriptionFactory;
+import eu.europeana.entitymanagement.batch.model.JobDescription;
+import eu.europeana.entitymanagement.batch.model.Task;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
+import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import eu.europeana.entitymanagement.definitions.model.Vocabulary;
 import eu.europeana.entitymanagement.exception.ApplicationInitializationException;
 import eu.europeana.entitymanagement.mongo.repository.VocabularyRepository;
@@ -33,11 +62,17 @@ import eu.europeana.entitymanagement.web.xml.model.RdfXmlUtils;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
 
+import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_ID;
+import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.UPDATE_TYPE;
+
 /** @author GordeaS */
 @Configuration
 public class AppAutoconfig extends AppConfigConstants {
 
   private static final Logger LOG = LogManager.getLogger(AppAutoconfig.class);
+
+  @Autowired
+  ApplicationContext applicationContext;
 
   @Resource private EntityManagementConfiguration emConfiguration;
 
@@ -48,7 +83,7 @@ public class AppAutoconfig extends AppConfigConstants {
   private VocabularyRepository vocabRepository;
   
   @Resource protected JAXBContext jaxbContext; 
-  
+
   public AppAutoconfig() {
     LOG.info("Initializing EntityManagementConfiguration bean as: configuration");
   }
@@ -136,4 +171,127 @@ public class AppAutoconfig extends AppConfigConstants {
     source.setDefaultEncoding(StandardCharsets.UTF_8.name());
     return source;
   }
+
+  public EntityUpdateJobFactory getEntityUpdateJobFactory() {
+   return applicationContext.getBean(ENTITY_UPDATE_JOB_FACTORY, EntityUpdateJobFactory.class);
+  }
+
+  @Bean(JOB_DESCRIPTION_FACTORY)
+  public JobDescriptionFactory jobDescriptionProvider() {
+    JobDescriptionFactory factory = new JobDescriptionFactory();
+    factory.register(
+            new JobDescription(
+                    TaskType.full_update
+                    , JobDescription.PROCESSORS_FULL_UPDATE
+                    , JobDescription.PERSISTENCE_ITEM_WRITERS));
+
+    factory.register(
+            new JobDescription(
+                    TaskType.meta_update
+                    , JobDescription.PROCESSORS_META_UPDATE
+                    , JobDescription.PERSISTENCE_ITEM_WRITERS));
+
+    factory.register(
+            new JobDescription(
+                    TaskType.metrics_update
+                    , Arrays.asList(Task.METRICS)
+                    , JobDescription.PERSISTENCE_ITEM_WRITERS));
+
+    factory.register(
+            new JobDescription(
+                    TaskType.deprecation
+                    , null
+                    , JobDescription.DEPRECATION_WRITERS));
+
+    factory.register(
+            new JobDescription(
+                    TaskType.permanent_deletion
+                    , null
+                    , JobDescription.PERMANENT_REMOVAL_WRITERS));
+    return factory;
+  }
+  
+  @Bean(FULL_ENTITY_UPDATE_PROCESSOR)
+  @DependsOn({JOB_DESCRIPTION_FACTORY, ENTITY_UPDATE_JOB_FACTORY})
+  public ItemProcessor<BatchEntityRecord, BatchEntityRecord> getFullEntityUpdateProcessor() {
+    return getEntityUpdateJobFactory().createFullEntityUpdateProcessor();
+  }
+  
+  @Bean(ENTITY_UPDATE_WRITERS)
+  @DependsOn({BEAN_ENTITY_RECORD_DBINSERTION_WRITER, BEAN_ENTITY_SOLR_INSERTION_WRITER, ENTITY_UPDATE_JOB_FACTORY})
+  public ItemWriter<BatchEntityRecord> entityUpdateWriters() {
+    return getEntityUpdateJobFactory().buildEntityUpdateWriters();
+  }
+
+  /** Note for StepScope annotations we need the context to be set for the target class
+   *  EnableBatchProcessing annotation is needed to the target class
+   *  by specifying a spring batch component being StepScope means that Spring Batch
+   *  will use the spring container to instantiate a new instance of that component for each step execution.
+   *
+   *  Another useful reason to use StepScope is when you decide to reuse the same component in parallel steps
+   */
+
+  /*
+   * Creates a listener that's called while processing a single item
+   *
+   * JobParameters cannot be boolean, so the isSynchronous value is converted from its string representation
+   */
+  @Bean
+  @StepScope
+  public ScheduledTaskItemListener getScheduledTaskItemListener(
+          // see JobParameter enum for string values
+          @Value("#{jobParameters[isSynchronous]}") String isSynchronousString) {
+    return new ScheduledTaskItemListener(
+            applicationContext.getBean("failedTaskService", FailedTaskService.class),
+            applicationContext.getBean(BEAN_BATCH_SCHEDULED_TASK_SERVICE, ScheduledTaskService.class),
+            Boolean.parseBoolean(isSynchronousString),
+            applicationContext.getBean(ENTITY_UPDATE_STATUS, EntityUpdateStats.class));
+  }
+
+  /** ItemReader that queries by entityId when retrieving EntityRecords from the database */
+  @Bean(name = SINGLE_ENTITY_RECORD_READER)
+  @StepScope
+  public EntityRecordDatabaseReader singleEntityRecordReader(
+          @Value("#{jobParameters[entityId]}") String entityIdString,
+          @Value("#{jobParameters[updateType]}") String updateType) {
+    return new EntityRecordDatabaseReader(
+            updateType,
+            applicationContext.getBean(BEAN_ENTITY_RECORD_SERVICE, EntityRecordService.class),
+            emConfiguration.getBatchChunkSize(),
+            Filters.eq(ENTITY_ID, entityIdString));
+  }
+
+  @Bean(name = SCHEDULED_TASK_READER)
+  @StepScope
+  public SynchronizedItemStreamReader<BatchEntityRecord> scheduledTaskReader(
+          @Value("#{jobParameters[currentStartTime]}") Date currentStartTime,
+          @Value("#{jobParameters[updateType]}") String updateType) {
+
+    List<String> updateTypeList =
+            Stream.of(updateType.split(",")).map(String::trim).collect(Collectors.toList());
+
+    ScheduledTaskDatabaseReader reader =
+            new ScheduledTaskDatabaseReader(
+                    applicationContext.getBean(BEAN_BATCH_SCHEDULED_TASK_SERVICE, ScheduledTaskService.class),
+                    applicationContext.getBean(BEAN_ENTITY_RECORD_SERVICE, EntityRecordService.class),
+                    emConfiguration.getBatchChunkSize(),
+                    Filters.lte(EMBatchConstants.CREATED, currentStartTime),
+                    Filters.in(UPDATE_TYPE, updateTypeList));
+
+    return threadSafeReader(reader);
+  }
+
+  /** Makes ItemReader thread-safe */
+  private <T> SynchronizedItemStreamReader<T> threadSafeReader(ItemStreamReader<T> reader) {
+    final SynchronizedItemStreamReader<T> synchronizedItemStreamReader =
+            new SynchronizedItemStreamReader<>();
+    synchronizedItemStreamReader.setDelegate(reader);
+    return synchronizedItemStreamReader;
+  }
+
+  @Bean(name = SLACK_CONNECTION)
+  public SlackConnection getSlackConnection() {
+    return new SlackConnection(emConfiguration.getEmUpdateSlackWebHook());
+  }
+
 }

@@ -49,7 +49,7 @@ public class EntityChangeProvenanceIT extends BaseWebControllerTest {
                     WebEntityConstants.PATH_PARAM_URL,
                     IntegrationTestUtils.AGENT_JAN_VERMEER_WIKIDATA_URI)
                 .accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isAccepted())
+        .andExpect(status().isOk())
         // external proxyId should have changed to wikidata. expects external proxy to come second!
         .andExpect(
             jsonPath(

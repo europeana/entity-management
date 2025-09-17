@@ -4,12 +4,13 @@ import com.mongodb.bulk.BulkWriteResult;
 import com.mongodb.client.result.UpdateResult;
 import eu.europeana.entitymanagement.batch.repository.FailedTaskRepository;
 import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTaskType;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,7 +35,7 @@ public class FailedTaskService {
    * @param updateType
    * @param e exception
    */
-  public void persistFailure(String entityId, ScheduledTaskType updateType, Exception e) {
+  public void persistFailure(String entityId, TaskType updateType, Exception e) {
     UpdateResult result =
         failureRepository.upsert(
             createUpdateFailure(
@@ -58,7 +59,7 @@ public class FailedTaskService {
    * @param e
    */
   public void persistFailureBulk(
-      Map<String, ScheduledTaskType> entityIdsToUpdateType, Exception e) {
+      Map<String, TaskType> entityIdsToUpdateType, Exception e) {
     String message = e.getMessage();
     String stackTrace = ExceptionUtils.getStackTrace(e);
     Instant now = Instant.now();
@@ -109,7 +110,7 @@ public class FailedTaskService {
   /** Helper method to instantiate {@link FailedTask} instances */
   private FailedTask createUpdateFailure(
       String entityId,
-      ScheduledTaskType updateType,
+      TaskType updateType,
       Instant modified,
       String message,
       String stacktrace) {

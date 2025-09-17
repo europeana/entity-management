@@ -6,14 +6,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.validation.ConstraintViolation;
 import javax.validation.ValidatorFactory;
+
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.common.config.DataSource;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.DataSources;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
-import eu.europeana.entitymanagement.definitions.batch.model.ScheduledUpdateType;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
@@ -28,12 +27,13 @@ import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.service.DepictionGeneratorService;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_ENTITY_CONSOLIDATION_PROCESSOR;
 
 /**
  * This {@link ItemProcessor} validates Entity metadata, then creates a consolidated entity by
  * merging the metadata from all data sources .
  */
-@Component
+@Component(BEAN_ENTITY_CONSOLIDATION_PROCESSOR)
 public class EntityConsolidationProcessor extends BaseEntityProcessor {
 
   private final EntityRecordService entityRecordService;
@@ -47,9 +47,7 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
       ValidatorFactory emValidatorFactory,
       EntityFieldsCleaner emEntityFieldCleaner,
       DataSources datasources,
-      EntityManagementConfiguration emConfiguration,
       DepictionGeneratorService depictionGeneratorService) {
-    super(ScheduledUpdateType.FULL_UPDATE);
     this.entityRecordService = entityRecordService;
     this.emValidatorFactory = emValidatorFactory;
     this.emEntityFieldCleaner = emEntityFieldCleaner;

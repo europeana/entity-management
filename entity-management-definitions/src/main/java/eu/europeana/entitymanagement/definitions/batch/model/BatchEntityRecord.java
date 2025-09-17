@@ -5,9 +5,9 @@ import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 public class BatchEntityRecord {
 
   private final EntityRecord entityRecord;
-  private final ScheduledTaskType scheduledTaskType;
+  private final TaskType scheduledTaskType;
 
-  public BatchEntityRecord(EntityRecord entityRecord, ScheduledTaskType scheduledTaskType) {
+  public BatchEntityRecord(EntityRecord entityRecord, TaskType scheduledTaskType) {
     this.entityRecord = entityRecord;
     this.scheduledTaskType = scheduledTaskType;
   }
@@ -16,7 +16,7 @@ public class BatchEntityRecord {
     return entityRecord;
   }
 
-  public ScheduledTaskType getScheduledTaskType() {
+  public TaskType getScheduledTaskType() {
     return scheduledTaskType;
   }
 }
