@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.batch.service;
 
 import eu.europeana.entitymanagement.batch.model.EntityUpdateStats;
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import eu.europeana.entitymanagement.web.service.SlackConnection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,9 +24,9 @@ public class ReportSenderTasklet implements Tasklet {
             {
                  "text" :
                  " %s entites were scheduled for %s from external source with the following results:
-                  agents: %s, concepts: %s, places: %s, timespans: %s, failed: %s
-                                                                 
-                 See here %s which entities have failed update. "
+                 agents: %s, concepts: %s, places: %s, timespans: %s, failed: %s
+                 
+                 See <here|%s> which entities have failed update. "
             }
                  """;
 

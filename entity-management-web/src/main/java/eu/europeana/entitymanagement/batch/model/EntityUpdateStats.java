@@ -37,13 +37,14 @@ public class EntityUpdateStats {
         failed.set(0);
     }
 
-    public TaskType getTaskType() {
-        return taskType;
+    public String getTaskType() {
+        return TaskType.full_update.equals(this.taskType) ? "update" : "metrics update";
     }
 
     public void setTaskType(TaskType taskType) {
         this.taskType = taskType;
     }
+
     public void addEntityUpdated() {
         totalEntitiesForUpdate.getAndIncrement();
     }
