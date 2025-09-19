@@ -56,6 +56,7 @@ public final class XmlConstants extends XmlFields {
   public static final String XML_IDENTIFIER = "identifier";
   public static final String XML_HAS_PART = "hasPart";
   public static final String XML_IS_PART_OF = "isPartOf";
+  public static final String XML_WAS_PRESENT_AT = "wasPresentAt";
   public static final String XML_BEGIN = "begin";
   public static final String XML_END = "end";
   public static final String XML_HASMET = "hasMet";
