@@ -225,7 +225,7 @@
  -->
  
             <!-- Address -->
-            <xsl:if test="$address and (($deref and wdt:P669) or wdt:P969 or wdt:P281 or wdt:P625)">
+            <xsl:if test="(($deref and wdt:P669) or wdt:P969 or wdt:P281 or wdt:P625) and $address">
 
 <!--
                 <xsl:variable name="countryName"   select="lib:toCountryName(wdt:P17[1]/@rdf:resource)"/>

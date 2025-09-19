@@ -89,7 +89,9 @@ public class WikidataDereferenceService implements Dereferencer, InitializingBea
                 Transformer newTransformer =
                     transformerFactory.newTransformer(new StreamSource(transformerXSL));
                 newTransformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-                newTransformer.setParameter("deref", Boolean.TRUE);
+                //SG: EA
+                newTransformer.setParameter("deref", Boolean.FALSE);
+                //newTransformer.setParameter("deref", Boolean.TRUE);
                 newTransformer.setParameter("address", Boolean.TRUE);
                 return newTransformer;
               } catch (TransformerConfigurationException e) {
