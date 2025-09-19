@@ -21,13 +21,8 @@ public class ReportSenderTasklet implements Tasklet {
     private static final Logger logger = LogManager.getLogger(ReportSenderTasklet.class);
 
     public static final String ASYNC_STATUS_REPORT = """
-            {
-                 "text" :
-                 " %s entites were scheduled for %s from external source with the following results:
-                 agents: %s, concepts: %s, places: %s, timespans: %s, failed: %s
-                 
-                 See <here|%s> which entities have failed update. "
-            }
+{"text" : " %s entites were scheduled for %s from external source with the following results: agents: %s, concepts: %s, places: %s, timespans: %s, failed: %s.
+See <%s|here> which entities have failed update. "}
                  """;
 
     private final EntityUpdateStats stats;
@@ -44,7 +39,7 @@ public class ReportSenderTasklet implements Tasklet {
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext)
             throws Exception {
         if (stats.getTotalEntitiesForUpdate() > 0) {
-            String entityMangmtFailedUrl = entityMnagmntUrl + "entity/management/failed?pageSize=60";
+            String entityMangmtFailedUrl = entityMnagmntUrl + "/entity/management/failed?pageSize=60";
             slackConnection.publishStatusReport(String.format(ASYNC_STATUS_REPORT,
                     stats.getTotalEntitiesForUpdate(),
                     stats.getTaskType(),
