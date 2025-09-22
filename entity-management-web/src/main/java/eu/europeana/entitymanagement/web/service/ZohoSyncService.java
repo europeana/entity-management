@@ -103,7 +103,6 @@ public class ZohoSyncService extends BaseZohoAccess {
       
     }
     // for development debugging purposes use modifiedSince = generateFixDate();
-    modifiedSince = generateFixDate();
     return synchronizeZohoOrganizations(modifiedSince);
   }
 
