@@ -100,10 +100,10 @@ public class ZohoSyncService extends BaseZohoAccess {
       modifiedSince = DateUtils.toOffsetDateTime(previousSync.getStartDate());
     } else {
       modifiedSince = OffsetDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC);
+      
     }
-
     // for development debugging purposes use modifiedSince = generateFixDate();
-    // modifiedSince = generateFixDate();
+    modifiedSince = generateFixDate();
     return synchronizeZohoOrganizations(modifiedSince);
   }
 

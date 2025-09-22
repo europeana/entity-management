@@ -248,6 +248,7 @@ public class EntityUpdateJobFactory {
         return compositeWriters(JobDescription.PERSISTENCE_ITEM_WRITERS);
     }
 
+    @SuppressWarnings("unchecked")
     private ItemWriter<BatchEntityRecord> compositeWriters(List<Task> writers) {
         CompositeItemWriter<BatchEntityRecord> compositeWriter = new CompositeItemWriter<>();
         List<ItemWriter<? super BatchEntityRecord>> delegates = new ArrayList<>(writers.size());

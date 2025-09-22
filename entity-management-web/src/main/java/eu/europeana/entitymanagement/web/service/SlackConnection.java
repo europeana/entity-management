@@ -40,7 +40,8 @@ public class SlackConnection {
     public  void publishStatusReport(String message) {
         LOG.info("Sending Slack Message : " + message);
         try {
-            String slackWebhookApiAutomation = System.getenv(slackWebhook);
+            //String slackWebhookApiAutomation = System.getenv(slackWebhook);
+            String slackWebhookApiAutomation = slackWebhook;
             if (StringUtils.isBlank(slackWebhookApiAutomation)) {
                 LOG.error("Slack webhook not configured, status report will not be published over Slack.");
                 return;

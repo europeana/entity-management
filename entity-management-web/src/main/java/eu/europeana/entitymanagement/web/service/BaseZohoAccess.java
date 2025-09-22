@@ -98,17 +98,16 @@ public class BaseZohoAccess {
     return zohoDatasource.get();
   }
 
-  OffsetDateTime generateFixDate() throws ParseException {
+  OffsetDateTime generateFixDate() throws EntityUpdateException {
     // hardcoded date, just for manual testing
     SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss", Locale.ENGLISH);
-    String dateInString = "23-Oct-2023 14:38:00";
+    String dateInString = "01-Sep-2025 14:38:00";
     try {
       Date date = formatter.parse(dateInString);
       return DateUtils.toOffsetDateTime(date);
     } catch (ParseException e) {
-      logger.warn("Invalid date format!", e);
+      throw new EntityUpdateException("Invalid date format: + dateInString", e);
     }
-    return null;
   }
 
   protected String buildErrorMessage(String message, List<String> ids) {

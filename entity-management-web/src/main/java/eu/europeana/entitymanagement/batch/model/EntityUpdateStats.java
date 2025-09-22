@@ -56,6 +56,13 @@ public class EntityUpdateStats {
                 case Concept:  concepts.incrementAndGet(); break;
                 case Place:    places.incrementAndGet(); break;
                 case TimeSpan: timespans.incrementAndGet(); break;
+                case Aggregator:
+                case ConceptScheme:
+                case Organization:
+                  //skip organizations and concept schemes
+                  break;
+                default:
+                  break;
             }
         } catch (UnsupportedEntityTypeException e) {
             logger.info("Unknown type of entity found in the DB {}", e.getMessage(), e);

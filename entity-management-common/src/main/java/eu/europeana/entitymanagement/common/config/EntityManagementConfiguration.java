@@ -105,6 +105,9 @@ public class EntityManagementConfiguration implements InitializingBean {
 
   @Value("${wikidata.baseUrl:}")
   private String wikidataBaseUrl;
+  
+  @Value("${wikidata.userAgent: 'Europeana_Entity_/1.0 (https://pro.europeana.eu/page/apis)'")
+  private String wikidataUserAgent;
 
   @Value("${batch.step.chunkSize: 10}")
   private int batchChunkSize;
@@ -551,6 +554,10 @@ public class EntityManagementConfiguration implements InitializingBean {
 
   public String getRapidApiBaseUrl() {
     return rapidApiBaseUrl;
+  }
+
+  public String getWikidataUserAgent() {
+    return wikidataUserAgent;
   }
  
 }

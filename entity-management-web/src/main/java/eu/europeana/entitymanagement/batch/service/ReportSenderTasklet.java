@@ -1,14 +1,13 @@
 package eu.europeana.entitymanagement.batch.service;
 
-import eu.europeana.entitymanagement.batch.model.EntityUpdateStats;
-import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
-import eu.europeana.entitymanagement.web.service.SlackConnection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
+import eu.europeana.entitymanagement.batch.model.EntityUpdateStats;
+import eu.europeana.entitymanagement.web.service.SlackConnection;
 
 /**
  * Class to send update reports for the Batch processing
@@ -44,7 +43,11 @@ public class ReportSenderTasklet implements Tasklet {
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext)
             throws Exception {
         if (stats.getTotalEntitiesForUpdate() > 0) {
-            String entityMangmtFailedUrl = entityMnagmntUrl + "entity/management/failed?pageSize=60";
+            StringBuilder entityMangmtFailedUrl= new StringBuilder(entityMnagmntUrl);
+            if(!entityMnagmntUrl.endsWith("/")) {
+              entityMangmtFailedUrl.append('/');
+            }
+            entityMangmtFailedUrl.append("entity/management/failed?pageSize=60");
             slackConnection.publishStatusReport(String.format(ASYNC_STATUS_REPORT,
                     stats.getTotalEntitiesForUpdate(),
                     stats.getTaskType(),
@@ -53,7 +56,7 @@ public class ReportSenderTasklet implements Tasklet {
                     stats.getPlaces(),
                     stats.getTimespans(),
                     stats.getFailed(),
-                    entityMangmtFailedUrl));
+                    entityMangmtFailedUrl.toString()));
         } else {
             logger.debug("Status report not sent !! As there are no entities for update type {}", stats.getTaskType());
         }

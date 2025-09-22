@@ -39,7 +39,7 @@ import eu.europeana.entitymanagement.zoho.utils.WikidataAccessException;
 public class WikidataDereferenceService implements Dereferencer, InitializingBean {
   private static final Logger logger = LogManager.getLogger(WikidataDereferenceService.class);
   private final JAXBContext jaxbContext;
-  private final String wikidataBaseUrl;
+  private final EntityManagementConfiguration entityManagementConfiguration;
 
   /** Create a separate JAXB unmarshaller and Xml Transformer for each thread */
   private ThreadLocal<Unmarshaller> unmarshaller;
@@ -50,7 +50,7 @@ public class WikidataDereferenceService implements Dereferencer, InitializingBea
   public WikidataDereferenceService(
       JAXBContext jaxbContext, EntityManagementConfiguration entityManagementConfiguration) {
     this.jaxbContext = jaxbContext;
-    this.wikidataBaseUrl = entityManagementConfiguration.getWikidataBaseUrl();
+    this.entityManagementConfiguration = entityManagementConfiguration;
   }
 
   private void setupJaxb() {
@@ -149,13 +149,16 @@ public class WikidataDereferenceService implements Dereferencer, InitializingBea
   private String getEntityFromURL(String urlToRead) throws WikidataAccessException {
 
     // wikidataBaseUrl is only set in integration tests (where a mock Wikidata service is used)
-    if (StringUtils.hasLength(wikidataBaseUrl)) {
-      urlToRead = wikidataBaseUrl + "/entity/" + EntityRecordUtils.getIdentifierFromUrl(urlToRead);
+    if (StringUtils.hasLength(getWikidatBaseUrl())) {
+      urlToRead = getWikidatBaseUrl() + "/entity/" + EntityRecordUtils.getIdentifierFromUrl(urlToRead);
     }
 
     try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
       HttpGet request = new HttpGet(urlToRead);
       request.addHeader("Accept", "application/xml");
+      request.addHeader("User-Agent", entityManagementConfiguration.getWikidataUserAgent());
+      request.addHeader("Accept-Encoding", "gzip,deflate");
+      
       try (CloseableHttpResponse response = httpClient.execute(request)) {
         if (response.getStatusLine().getStatusCode() != 200) {
           return null;
@@ -169,6 +172,10 @@ public class WikidataDereferenceService implements Dereferencer, InitializingBea
       throw new WikidataAccessException("Error executing the request for uri " + urlToRead, e);
     }
     return null;
+  }
+
+  String getWikidatBaseUrl() {
+    return entityManagementConfiguration.getWikidataBaseUrl();
   }
 
   private WikidataOrganization parse(String xml) throws JAXBException { 
