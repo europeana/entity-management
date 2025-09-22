@@ -106,7 +106,7 @@ public class EntityManagementConfiguration implements InitializingBean {
   @Value("${wikidata.baseUrl:}")
   private String wikidataBaseUrl;
   
-  @Value("${wikidata.userAgent: 'Europeana_Entity_/1.0 (https://pro.europeana.eu/page/apis)'")
+  @Value("${wikidata.userAgent: 'EuropeanaAPIs/v1.0 (https://apis.europeana.eu/)'")
   private String wikidataUserAgent;
 
   @Value("${batch.step.chunkSize: 10}")
