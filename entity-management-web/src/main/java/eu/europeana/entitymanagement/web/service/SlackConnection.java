@@ -40,14 +40,12 @@ public class SlackConnection {
     public  void publishStatusReport(String message) {
         LOG.info("Sending Slack Message : " + message);
         try {
-            //String slackWebhookApiAutomation = System.getenv(slackWebhook);
-            String slackWebhookApiAutomation = slackWebhook;
-            if (StringUtils.isBlank(slackWebhookApiAutomation)) {
+            if (StringUtils.isBlank(slackWebhook)) {
                 LOG.error("Slack webhook not configured, status report will not be published over Slack.");
                 return;
             }
 
-            HttpPost httpPost = new HttpPost(slackWebhookApiAutomation);
+            HttpPost httpPost = new HttpPost(slackWebhook);
             httpPost.setEntity(new StringEntity(message));
             httpPost.setHeader(CONTENT_TYPE, CONTENT_TYPE_JSON_UTF8);
             try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
