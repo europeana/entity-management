@@ -4,9 +4,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 
 public class EntityUtils {
@@ -14,7 +14,7 @@ public class EntityUtils {
   /**
    * List of entity fields
    */
-  static Map<Class<?>, List<Field>> entityFieldsMap = new HashMap<Class<?>, List<Field>>();
+  private static Map<Class<?>, List<Field>> entityFieldsMap = new ConcurrentHashMap<>();
   
   public static String createWikimediaResourceString(String wikimediaCommonsId) {
     if (wikimediaCommonsId != null && wikimediaCommonsId.contains("/Special:FilePath/")) {

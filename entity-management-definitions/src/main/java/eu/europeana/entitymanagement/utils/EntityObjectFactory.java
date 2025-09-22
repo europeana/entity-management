@@ -51,15 +51,6 @@ public class EntityObjectFactory {
           EntityTypes.Place, Place.class,
           EntityTypes.TimeSpan, TimeSpan.class);
 
-  private static final Map<EntityTypes, Class<? extends XmlBaseEntityImpl<?>>> xmlEntityMap =
-      Map.of(
-          EntityTypes.Agent, XmlAgentImpl.class,
-          EntityTypes.Concept, XmlConceptImpl.class,
-          EntityTypes.Organization, XmlOrganizationImpl.class,
-          EntityTypes.Aggregator, XmlAggregatorImpl.class,
-          EntityTypes.Place, XmlPlaceImpl.class,
-          EntityTypes.TimeSpan, XmlTimeSpanImpl.class);
-
   @SuppressWarnings("unchecked")
   private static <T extends Entity> T instantiateEntityObject(
       Map<EntityTypes, Class<? extends Entity>> entityMap, EntityTypes entityType)
