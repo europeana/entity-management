@@ -71,6 +71,9 @@ public class EntityUpdateJobFactory {
     @Resource
     private EntityUpdateStats stats;
 
+    /**
+     * Constructor default
+     */
     public EntityUpdateJobFactory() {
         super();
     }
@@ -79,6 +82,8 @@ public class EntityUpdateJobFactory {
      * Creates Job via JobBuilderFactory.
      * Expects `entityId` string in JobParameters. This would
      * typically be run synchronously
+     * @param jobDescription the job to be run ( contains list of processors and writers to be executed)
+     * @return Job for entity update synchronous
      */
     public Job createJob(JobDescription jobDescription) {
         return this.jobBuilderFactory
@@ -92,7 +97,9 @@ public class EntityUpdateJobFactory {
 
     /**
      * Job for updating entities scheduled via the ScheduledTasks collection Expects
-     * `currentStartTime` date and `updateType` string in JobParameters.
+     * `currentStartTime` date and `updateType` string in JobParameters
+     * @param jobDescription the job to be run ( contains list of processors and writers to be executed)
+     * @return Job for scheduled updates
      */
     public Job createScheduledUpdateJob(JobDescription jobDescription) {
         return this.jobBuilderFactory
@@ -108,6 +115,9 @@ public class EntityUpdateJobFactory {
     /**
      * Job for updating entities scheduled via the ScheduledTasks collection Expects
      * `currentStartTime` date and `updateType` string in JobParameters.
+     * @param jobDescription the job to be run ( contains list of processors and writers to be executed)
+     * @param jobDescription the job to be run ( contains list of processors and writers to be executed)
+     * @return Job for scheduled removal
      */
     public Job removeScheduledEntities(JobDescription jobDescription) {
         return this.jobBuilderFactory
@@ -242,7 +252,7 @@ public class EntityUpdateJobFactory {
      * @see <a href="http://docs.google.com/document/d/16k9PcCMFwl2LXjnnzotZRPc-QqM-Ar1D0VELHt4t_hA/edit?tab=t.0#heading=h.fj6e15rbq64q"></a> }
      * Creates the writer list -
      *    Writer: Db update + Solr update
-     * @return
+     * @return ItemWriter<BatchEntityRecord> with above mentioned list
      */
     public ItemWriter<BatchEntityRecord> buildEntityUpdateWriters() {
         return compositeWriters(JobDescription.PERSISTENCE_ITEM_WRITERS);
@@ -267,7 +277,7 @@ public class EntityUpdateJobFactory {
      *
      * Creates the processor list -
      *    Processors: Dereference + consolidation + metrics + validation
-     * @return
+     * @return ItemProcessor with the above list
      */
     public ItemProcessor<BatchEntityRecord, BatchEntityRecord> createFullEntityUpdateProcessor() {
       return compositeProcessor(JobDescription.PROCESSORS_FULL_UPDATE);
@@ -276,8 +286,8 @@ public class EntityUpdateJobFactory {
     /**
      * More generic composite processor,
      * Creates a composite processor with the list of processors provided
-     * @param processors
-     * @return
+     * @param processors list of processors
+     * @return ItemProcessor - composite list of processors
      */
     @SuppressWarnings("unchecked")
     public ItemProcessor<BatchEntityRecord, BatchEntityRecord> compositeProcessor(List<Task> processors) {

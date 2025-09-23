@@ -28,6 +28,9 @@ public class EntityUpdateStats {
     private AtomicInteger places = new AtomicInteger();
     private AtomicInteger failed = new AtomicInteger();
 
+    /**
+     * Resets the values for next time
+     */
     public void reset() {
         totalEntitiesForUpdate.set(0);
         agents.set(0);
@@ -45,17 +48,28 @@ public class EntityUpdateStats {
         this.taskType = taskType;
     }
 
+    /**
+     * Increments the totalEntitiesForUpdate
+     */
     public void addEntityUpdated() {
         totalEntitiesForUpdate.getAndIncrement();
     }
 
+    /**
+     * Increments the entites values by type
+     * @param entityRecord entity to be checked for type
+     */
     public void updateEntityByType(BatchEntityRecord entityRecord) {
         try {
             switch (EntityTypes.getByEntityType(entityRecord.getEntityRecord().getEntity().getType())) {
-                case Agent:    agents.incrementAndGet(); break;
-                case Concept:  concepts.incrementAndGet(); break;
-                case Place:    places.incrementAndGet(); break;
-                case TimeSpan: timespans.incrementAndGet(); break;
+                case Agent:    agents.incrementAndGet();
+                break;
+                case Concept:  concepts.incrementAndGet();
+                break;
+                case Place:    places.incrementAndGet();
+                break;
+                case TimeSpan: timespans.incrementAndGet();
+                break;
                 case Aggregator:
                 case ConceptScheme:
                 case Organization:

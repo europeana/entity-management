@@ -71,7 +71,7 @@ public class BaseZohoAccess {
    * @param zohoConfiguration zoho access configuration
    * @param zohoSyncRepo repository for zoho sync logging
    * @param zohoDereferenceService the service used to dereference zoho organizations
-   * @param jobDescriptionFactory
+   * @param jobDescriptionFactory entity job factory
    */
   public BaseZohoAccess(EntityRecordService entityRecordService,
                         EntityUpdateService entityUpdateService, EntityManagementConfiguration emConfiguration,

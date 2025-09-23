@@ -1,6 +1,5 @@
 package eu.europeana.entitymanagement.definitions.model;
 
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_EDM;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +9,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
+
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
@@ -53,7 +53,7 @@ public class TimeSpan extends Entity {
   }
 
   @JsonGetter(IS_NEXT_IN_SEQUENCE)
-  @JacksonXmlProperty(namespace = NAMESPACE_EDM, localName = WebEntityFields.IS_NEXT_IN_SEQUENCE)
+  @JacksonXmlProperty(namespace = NAMESPACE_EDM, localName = IS_NEXT_IN_SEQUENCE)
   public List<String> getIsNextInSequence() {
     return isNextInSequence;
   }
@@ -74,13 +74,13 @@ public class TimeSpan extends Entity {
   }
 
   @JsonGetter(BEGIN)
-  @JacksonXmlProperty(namespace = NAMESPACE_EDM, localName = WebEntityFields.BEGIN)
+  @JacksonXmlProperty(namespace = NAMESPACE_EDM, localName = BEGIN)
   public String getBeginString() {
     return begin;
   }
 
   @JsonGetter(END)
-  @JacksonXmlProperty(namespace = NAMESPACE_EDM, localName = WebEntityFields.END)
+  @JacksonXmlProperty(namespace = NAMESPACE_EDM, localName = END)
   public String getEndString() {
     return end;
   }

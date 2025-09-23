@@ -22,14 +22,20 @@ public class ReportSenderTasklet implements Tasklet {
     private static final Logger logger = LogManager.getLogger(ReportSenderTasklet.class);
 
     public static final String ASYNC_STATUS_REPORT = """
-{"text" : " %s entites were scheduled for %s from external source with the following results: agents: %s, concepts: %s, places: %s, timespans: %s, failed: %s.
+            {"text" : " %s entites were scheduled for %s from external source with the following results: agents: %s, concepts: %s, places: %s, timespans: %s, failed: %s.
 See <%s|here> which entities have failed update. "}
-                 """;
+                             """;
 
     private final EntityUpdateStats stats;
     private final String entityMnagmntUrl;
     private final SlackConnection slackConnection;
 
+    /**
+     * Constructor
+     * @param stats  Statistics for the Report
+     * @param entityMnagmntUrl EM url
+     * @param slackConnection slack connection with webhook
+     */
     public ReportSenderTasklet(EntityUpdateStats stats, String entityMnagmntUrl, SlackConnection slackConnection) {
         this.stats = stats;
         this.entityMnagmntUrl = entityMnagmntUrl;
@@ -56,7 +62,9 @@ See <%s|here> which entities have failed update. "}
                     stats.getFailed(),
                     entityMangmtFailedUrl));
         } else {
-            logger.debug("Status report not sent !! As there are no entities for update type {}", stats.getTaskType());
+            if (logger.isDebugEnabled()) {
+                logger.debug("Status report not sent !! As there are no entities for update type {}", stats.getTaskType());
+            }
         }
         return RepeatStatus.FINISHED;
     }

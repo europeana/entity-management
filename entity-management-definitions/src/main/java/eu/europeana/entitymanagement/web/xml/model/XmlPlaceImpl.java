@@ -1,6 +1,5 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.*;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -10,6 +9,7 @@ import javax.xml.bind.annotation.XmlType;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.*;
 
 @XmlRootElement(namespace = NAMESPACE_EDM, name = XML_PLACE)
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -33,7 +33,7 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
     })
 public class XmlPlaceImpl extends XmlBaseEntityImpl<Place> {
 
-  @XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.XML_SAME_AS)
+  @XmlElement(namespace = NAMESPACE_OWL, name = XML_SAME_AS)
   private List<LabelledResource> sameAs;
 
   @XmlElement(namespace = NAMESPACE_WGS84_POS, name = XML_WGS84_POS_LAT)
