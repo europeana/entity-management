@@ -37,8 +37,8 @@ public class EntityUpdateStats {
         failed.set(0);
     }
 
-    public String getTaskType() {
-        return TaskType.full_update == this.taskType ? "update" : "metrics update";
+    public TaskType getTaskType() {
+        return this.taskType;
     }
 
     public void setTaskType(TaskType taskType) {

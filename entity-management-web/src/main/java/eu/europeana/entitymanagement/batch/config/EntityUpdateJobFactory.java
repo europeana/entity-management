@@ -100,7 +100,7 @@ public class EntityUpdateJobFactory {
                 // This job is always launched via a @Scheduled method.
                 .start(initStats(stats, jobDescription.getTaskType()))
                 .next(entityUpdate(jobDescription, false))
-                .next(finishStats(stats))
+                .next(finishStats())
                 .next(sendStatusReportStep())
                 .build();
     }
@@ -168,7 +168,7 @@ public class EntityUpdateJobFactory {
                 .build();
     }
 
-    private Step finishStats(EntityUpdateStats stats) {
+    private Step finishStats() {
         return stepBuilderFactory
                 .get("finishStatsStep")
                 .tasklet(

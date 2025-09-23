@@ -1,5 +1,7 @@
 package eu.europeana.entitymanagement.batch.service;
 
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.StepContribution;
@@ -39,19 +41,20 @@ See <%s|here> which entities have failed update. "}
             throws Exception {
         if (stats.getTotalEntitiesForUpdate() > 0) {
             StringBuilder entityMangmtFailedUrl= new StringBuilder(entityMnagmntUrl);
-            if(!entityMnagmntUrl.endsWith("/")) {
+            if (!entityMnagmntUrl.endsWith("/")) {
               entityMangmtFailedUrl.append('/');
             }
+            String update = StringUtils.equals(stats.getTaskType().getValue(), TaskType.full_update.getValue()) ? "update" : "metrics update" ;
             entityMangmtFailedUrl.append("entity/management/failed?pageSize=60");
             slackConnection.publishStatusReport(String.format(ASYNC_STATUS_REPORT,
                     stats.getTotalEntitiesForUpdate(),
-                    stats.getTaskType(),
+                    update,
                     stats.getAgents(),
                     stats.getConcepts(),
                     stats.getPlaces(),
                     stats.getTimespans(),
                     stats.getFailed(),
-                    entityMangmtFailedUrl.toString()));
+                    entityMangmtFailedUrl));
         } else {
             logger.debug("Status report not sent !! As there are no entities for update type {}", stats.getTaskType());
         }
