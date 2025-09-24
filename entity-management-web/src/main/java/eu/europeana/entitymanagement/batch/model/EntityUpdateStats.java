@@ -67,11 +67,8 @@ public class EntityUpdateStats {
                 break;
                 case TimeSpan: timespans.incrementAndGet();
                 break;
-                case Aggregator:
-                case ConceptScheme:
-                case Organization:
-                  //skip organizations and concept schemes
-                  break;
+                case Aggregator, ConceptScheme, Organization: //skip organizations and concept schemes
+                break;
                 default:
                   break;
             }
