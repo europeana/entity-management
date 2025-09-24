@@ -31,21 +31,18 @@ public class EntityUpdateStats {
     /**
      * Resets the values for next time
      */
-    public void reset() {
+    public void reset(TaskType taskType) {
         totalEntitiesForUpdate.set(0);
         agents.set(0);
         concepts.set(0);
         timespans.set(0);
         places.set(0);
         failed.set(0);
+        this.taskType = taskType;
     }
 
     public TaskType getTaskType() {
         return this.taskType;
-    }
-
-    public void setTaskType(TaskType taskType) {
-        this.taskType = taskType;
     }
 
     /**
