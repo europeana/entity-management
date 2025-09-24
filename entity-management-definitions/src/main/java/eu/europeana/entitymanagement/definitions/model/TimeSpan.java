@@ -1,21 +1,6 @@
 package eu.europeana.entitymanagement.definitions.model;
 
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ALT_LABEL;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BEGIN;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.CONTEXT;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.DEPICTION;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.END;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HAS_PART;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.HIDDEN_LABEL;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.ID;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_AGGREGATED_BY;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_NEXT_IN_SEQUENCE;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_PART_OF;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.IS_SHOWN_BY;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.NOTE;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.PREF_LABEL;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.SAME_AS;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.TYPE;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_EDM;
 import java.util.ArrayList;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonGetter;
@@ -24,7 +9,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.vocabulary.XmlFields;
+
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
@@ -67,7 +53,7 @@ public class TimeSpan extends Entity {
   }
 
   @JsonGetter(IS_NEXT_IN_SEQUENCE)
-  @JacksonXmlProperty(localName = XmlFields.XML_EDM_IS_NEXT_IN_SEQUENCE)
+  @JacksonXmlProperty(namespace = NAMESPACE_EDM, localName = IS_NEXT_IN_SEQUENCE)
   public List<String> getIsNextInSequence() {
     return isNextInSequence;
   }
@@ -88,13 +74,13 @@ public class TimeSpan extends Entity {
   }
 
   @JsonGetter(BEGIN)
-  @JacksonXmlProperty(localName = XmlFields.XML_EDM_BEGIN)
+  @JacksonXmlProperty(namespace = NAMESPACE_EDM, localName = BEGIN)
   public String getBeginString() {
     return begin;
   }
 
   @JsonGetter(END)
-  @JacksonXmlProperty(localName = XmlFields.XML_EDM_END)
+  @JacksonXmlProperty(namespace = NAMESPACE_EDM, localName = END)
   public String getEndString() {
     return end;
   }

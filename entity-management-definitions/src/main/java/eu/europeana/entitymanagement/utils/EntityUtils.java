@@ -5,10 +5,17 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 
 public class EntityUtils {
 
+  /**
+   * List of entity fields
+   */
+  private static Map<Class<?>, List<Field>> entityFieldsMap = new ConcurrentHashMap<>();
+  
   public static String createWikimediaResourceString(String wikimediaCommonsId) {
     if (wikimediaCommonsId != null && wikimediaCommonsId.contains("/Special:FilePath/")) {
       return wikimediaCommonsId.replace("/Special:FilePath/", "/File:");
@@ -55,9 +62,15 @@ public class EntityUtils {
    * getting all fields of the class including the ones from the parent classes using Java reflection
    */
   public static List<Field> getAllFields(Class<?> type) {
-    List<Field> entityFields = new ArrayList<Field>();
-    getAllFieldsRecursively(entityFields, type);
-    return entityFields;
+    if(entityFieldsMap.containsKey(type)) {
+      return entityFieldsMap.get(type);
+    } else {
+      //fetch entity fields and store into fields map (cache)
+      List<Field> entityFields = new ArrayList<Field>();
+      getAllFieldsRecursively(entityFields, type);
+      entityFieldsMap.put(type, entityFields);
+      return entityFields;
+    }
   }
 
   private static void getAllFieldsRecursively(List<Field> fields, Class<?> type) {

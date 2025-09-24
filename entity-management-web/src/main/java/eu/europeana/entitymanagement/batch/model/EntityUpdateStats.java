@@ -9,6 +9,8 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.ENTITY_UPDATE_STATUS;
 /**
  * Entity Update statistics class
@@ -20,7 +22,7 @@ public class EntityUpdateStats {
 
     private static final Logger logger = LogManager.getLogger(EntityUpdateStats.class);
 
-    private TaskType taskType;
+    private AtomicReference<TaskType> taskType = new AtomicReference<>();
     private AtomicInteger totalEntitiesForUpdate = new AtomicInteger();
     private AtomicInteger agents = new AtomicInteger();
     private AtomicInteger concepts = new AtomicInteger();
@@ -28,6 +30,10 @@ public class EntityUpdateStats {
     private AtomicInteger places = new AtomicInteger();
     private AtomicInteger failed = new AtomicInteger();
 
+    /**
+     * Resets the values for next time
+     * call this before setting any values to EntityUpdateStats
+     */
     public void reset() {
         totalEntitiesForUpdate.set(0);
         agents.set(0);
@@ -37,25 +43,40 @@ public class EntityUpdateStats {
         failed.set(0);
     }
 
-    public String getTaskType() {
-        return TaskType.full_update.equals(this.taskType) ? "update" : "metrics update";
+    public TaskType getTaskType() {
+        return this.taskType.get();
     }
 
-    public void setTaskType(TaskType taskType) {
-        this.taskType = taskType;
+    public void setTaskType(TaskType taskTypeValue) {
+        taskType.set(taskTypeValue);
     }
 
+    /**
+     * Increments the totalEntitiesForUpdate
+     */
     public void addEntityUpdated() {
         totalEntitiesForUpdate.getAndIncrement();
     }
 
+    /**
+     * Increments the entites values by type
+     * @param entityRecord entity to be checked for type
+     */
     public void updateEntityByType(BatchEntityRecord entityRecord) {
         try {
             switch (EntityTypes.getByEntityType(entityRecord.getEntityRecord().getEntity().getType())) {
-                case Agent:    agents.incrementAndGet(); break;
-                case Concept:  concepts.incrementAndGet(); break;
-                case Place:    places.incrementAndGet(); break;
-                case TimeSpan: timespans.incrementAndGet(); break;
+                case Agent:    agents.incrementAndGet();
+                break;
+                case Concept:  concepts.incrementAndGet();
+                break;
+                case Place:    places.incrementAndGet();
+                break;
+                case TimeSpan: timespans.incrementAndGet();
+                break;
+                case Aggregator, ConceptScheme, Organization: //skip organizations and concept schemes
+                break;
+                default:
+                  break;
             }
         } catch (UnsupportedEntityTypeException e) {
             logger.info("Unknown type of entity found in the DB {}", e.getMessage(), e);

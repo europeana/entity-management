@@ -60,7 +60,16 @@ zoho.update.organization.europeanaid=false
 #europeana.role.vocabulary=role_vocabulary.xml
 
 #optional, webhook to send messages (i.e. ZohoSyncReport) to slack channels 
-#slack.webhook
+#slack.webhook for zoho reports (optional)
+slack.webhook.zoho=
+#slack.webhook for batch update reports (optional)
+slack.webhook.em.update=
+ 
+# base url of the deployment with pending slash
+entity.management.api.baseurl=
+
+#User Agent for accessing Wikidata (optional, used to overwrte the default value)
+#wikidata.userAgent=Europeana_Entity_/1.0 (https://pro.europeana.eu/page/apis)
 
 #optional, rapidapi geocoding endpoint
 #rapidapi.baseUrl="https://forward-reverse-geocoding.p.rapidapi.com/v1/forward"

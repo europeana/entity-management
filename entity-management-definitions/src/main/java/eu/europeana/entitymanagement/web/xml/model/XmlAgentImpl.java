@@ -1,6 +1,5 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
-import static eu.europeana.entitymanagement.vocabulary.XmlFields.XML_WAS_PRESENT_AT;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.ABOUT;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.ALT_LABEL;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.DEPICTION;
@@ -30,6 +29,7 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_HAS_P
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IDENTIFIER;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IS_PART_OF;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IS_RELATED_TO;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_WAS_PRESENT_AT;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_NAME;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PLACE_OF_BIRTH;
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PLACE_OF_DEATH;

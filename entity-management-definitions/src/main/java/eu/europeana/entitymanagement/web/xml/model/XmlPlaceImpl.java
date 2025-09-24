@@ -1,38 +1,15 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.ABOUT;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.ALT_LABEL;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.DEPICTION;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.HIDDEN_LABEL;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.IS_AGGREGATED_BY;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.IS_SHOWN_BY;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_DC_TERMS;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_EDM;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_SKOS;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_WGS84_POS;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NOTE;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.PREF_LABEL;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_ALTITUDE;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_HAS_PART;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IS_NEXT_IN_SEQUENCE;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_IS_PART_OF;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_LATITUDE;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_LONGITUDE;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_PLACE;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_SAME_AS;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_WGS84_POS_ALT;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_WGS84_POS_LAT;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.XML_WGS84_POS_LONG;
-
-import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
-import eu.europeana.entitymanagement.definitions.model.Place;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
+import eu.europeana.entitymanagement.definitions.model.Place;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.*;
 
 @XmlRootElement(namespace = NAMESPACE_EDM, name = XML_PLACE)
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -44,9 +21,9 @@ import javax.xml.bind.annotation.XmlType;
       PREF_LABEL,
       ALT_LABEL,
       HIDDEN_LABEL,
-      XML_LATITUDE,
-      XML_LONGITUDE,
-      XML_ALTITUDE,
+      "latitude", //must match field name not xml name, should change fieldname in the future (XML_WGS84_POS_LAT),
+      "longitude", //must match field name not xml name, XML_WGS84_POS_LONG,
+      "altitude", //must match field name not xml name, XML_WGS84_POS_ALT,
       NOTE,
       XML_HAS_PART,
       XML_IS_PART_OF,
@@ -56,7 +33,7 @@ import javax.xml.bind.annotation.XmlType;
     })
 public class XmlPlaceImpl extends XmlBaseEntityImpl<Place> {
 
-  @XmlElement(namespace = XmlConstants.NAMESPACE_OWL, name = XmlConstants.XML_SAME_AS)
+  @XmlElement(namespace = NAMESPACE_OWL, name = XML_SAME_AS)
   private List<LabelledResource> sameAs;
 
   @XmlElement(namespace = NAMESPACE_WGS84_POS, name = XML_WGS84_POS_LAT)
