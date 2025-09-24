@@ -171,7 +171,8 @@ public class EntityUpdateJobFactory {
                 .get("initStatsStep")
                 .tasklet(
                         ((stepContribution, chunkContext) -> {
-                            stats.reset(taskType);
+                            stats.reset();
+                            stats.setTaskType(taskType);
                             return RepeatStatus.FINISHED;
                         }))
                 .build();

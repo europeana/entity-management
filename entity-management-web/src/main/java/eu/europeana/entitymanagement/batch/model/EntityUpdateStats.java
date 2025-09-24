@@ -9,6 +9,8 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.ENTITY_UPDATE_STATUS;
 /**
  * Entity Update statistics class
@@ -20,7 +22,7 @@ public class EntityUpdateStats {
 
     private static final Logger logger = LogManager.getLogger(EntityUpdateStats.class);
 
-    private TaskType taskType;
+    private AtomicReference<TaskType> taskType;
     private AtomicInteger totalEntitiesForUpdate = new AtomicInteger();
     private AtomicInteger agents = new AtomicInteger();
     private AtomicInteger concepts = new AtomicInteger();
@@ -30,19 +32,23 @@ public class EntityUpdateStats {
 
     /**
      * Resets the values for next time
+     * call this before setting any values to EntityUpdateStats
      */
-    public void reset(TaskType taskType) {
+    public void reset() {
         totalEntitiesForUpdate.set(0);
         agents.set(0);
         concepts.set(0);
         timespans.set(0);
         places.set(0);
         failed.set(0);
-        this.taskType = taskType;
     }
 
     public TaskType getTaskType() {
-        return this.taskType;
+        return this.taskType.get();
+    }
+
+    public void setTaskType(TaskType taskTypeValue) {
+        taskType.set(taskTypeValue);
     }
 
     /**
