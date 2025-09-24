@@ -22,7 +22,7 @@ public class EntityUpdateStats {
 
     private static final Logger logger = LogManager.getLogger(EntityUpdateStats.class);
 
-    private AtomicReference<TaskType> taskType;
+    private AtomicReference<TaskType> taskType = new AtomicReference<>();
     private AtomicInteger totalEntitiesForUpdate = new AtomicInteger();
     private AtomicInteger agents = new AtomicInteger();
     private AtomicInteger concepts = new AtomicInteger();
