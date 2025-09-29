@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.definitions.model;
 
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -9,9 +10,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
-
-import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
@@ -65,7 +65,7 @@ public class Place extends Entity {
   }
   
   @JsonGetter(IS_NEXT_IN_SEQUENCE)
-  @JacksonXmlProperty(namespace = XmlFields.XML_NAMESPACE_PREFIX_EDM, localName = IS_NEXT_IN_SEQUENCE)
+  @JacksonXmlProperty(namespace = XmlFields.XML_NAMESPACE_PREFIX_EDM, localName = WebEntityFields.IS_NEXT_IN_SEQUENCE)
   public List<String> getIsNextInSequence() {
     return isNextInSequence;
   }
@@ -76,7 +76,7 @@ public class Place extends Entity {
   }
 
   @JsonGetter(LATITUDE)
-  @JacksonXmlProperty(namespace = XmlFields.XML_NAMESPACE_PREFIX_WGS84, localName = LATITUDE)
+  @JacksonXmlProperty(namespace = XmlFields.XML_NAMESPACE_PREFIX_WGS84, localName = WebEntityFields.LATITUDE)
   public Float getLatitude() {
     return latitude;
   }
@@ -87,7 +87,7 @@ public class Place extends Entity {
   }
 
   @JsonGetter(LONGITUDE)
-  @JacksonXmlProperty(namespace = XmlFields.XML_NAMESPACE_PREFIX_WGS84, localName = LONGITUDE)
+  @JacksonXmlProperty(namespace = XmlFields.XML_NAMESPACE_PREFIX_WGS84, localName = WebEntityFields.LONGITUDE)
   public Float getLongitude() {
     return longitude;
   }
@@ -98,7 +98,7 @@ public class Place extends Entity {
   }
 
   @JsonGetter(ALTITUDE)
-  @JacksonXmlProperty(namespace = XmlFields.XML_NAMESPACE_PREFIX_WGS84, localName = ALTITUDE)
+  @JacksonXmlProperty(namespace = XmlFields.XML_NAMESPACE_PREFIX_WGS84, localName = WebEntityFields.ALTITUDE)
   public Float getAltitude() {
     return altitude;
   }

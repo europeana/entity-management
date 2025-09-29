@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
+import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.*;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -9,7 +10,6 @@ import javax.xml.bind.annotation.XmlType;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.*;
 
 @XmlRootElement(namespace = NAMESPACE_EDM, name = XML_PLACE)
 @XmlAccessorType(XmlAccessType.FIELD)

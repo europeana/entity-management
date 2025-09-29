@@ -71,9 +71,6 @@ public class EntityUpdateJobFactory {
     @Resource
     private EntityUpdateStats stats;
 
-    /**
-     * Constructor default
-     */
     public EntityUpdateJobFactory() {
         super();
     }

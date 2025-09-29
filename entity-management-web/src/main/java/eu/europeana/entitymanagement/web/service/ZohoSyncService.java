@@ -102,7 +102,11 @@ public class ZohoSyncService extends BaseZohoAccess {
       modifiedSince = OffsetDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC);
       
     }
-    // for development debugging purposes use modifiedSince = generateFixDate();
+    //for development debugging purposes use
+    boolean locallDebugging = true;
+    if(locallDebugging) {
+      modifiedSince = generateFixDate("29-Sep-2025 10:30:00");
+    }
     return synchronizeZohoOrganizations(modifiedSince);
   }
 

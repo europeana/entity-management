@@ -98,12 +98,11 @@ public class BaseZohoAccess {
     return zohoDatasource.get();
   }
 
-  OffsetDateTime generateFixDate() throws EntityUpdateException {
+  OffsetDateTime generateFixDate(String since) throws EntityUpdateException {
     // hardcoded date, just for manual testing
     SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss", Locale.ENGLISH);
-    String dateInString = "01-Sep-2025 14:38:00";
     try {
-      Date date = formatter.parse(dateInString);
+      Date date = formatter.parse(since);
       return DateUtils.toOffsetDateTime(date);
     } catch (ParseException e) {
       throw new EntityUpdateException("Invalid date format: + dateInString", e);
