@@ -144,7 +144,7 @@ public class BaseZohoAccess {
 
   /**
    * run permanent delete operations, use
-   * {@link ZohoSyncService#synchronizeDeletedZohoOrganizations(OffsetDateTime, ZohoSyncReport)}
+   * {@link EntitySynchronizationService#synchronizeDeletedZohoOrganizations(OffsetDateTime, ZohoSyncReport)}
    * 
    * @deprecated the modified in zoho do not results in permanent delete operations
    * @param permanentDeleteOperations operation to perform

@@ -1,22 +1,17 @@
 package eu.europeana.entitymanagement.web;
 
 import static eu.europeana.api.commons.definitions.vocabulary.CommonApiConstants.QUERY_PARAM_PROFILE_SEPARATOR;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.JOB_DESCRIPTION_FACTORY;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.QUERY_PARAM_QUERY;
-import static java.util.stream.Collectors.groupingBy;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
-
-import eu.europeana.entitymanagement.batch.config.JobDescriptionFactory;
-import eu.europeana.entitymanagement.batch.model.JobDescription;
-import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -43,14 +38,16 @@ import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
+import eu.europeana.entitymanagement.batch.config.JobDescriptionFactory;
+import eu.europeana.entitymanagement.batch.model.JobDescription;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.config.DataSources;
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.model.Aggregation;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
 import eu.europeana.entitymanagement.definitions.web.EntityIdResponse;
 import eu.europeana.entitymanagement.dereference.Dereferencer;
 import eu.europeana.entitymanagement.exception.DatasourceNotKnownException;
@@ -59,13 +56,10 @@ import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.EntityRemovedException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
 import eu.europeana.entitymanagement.exception.MultipleChoicesException;
-import eu.europeana.entitymanagement.solr.SolrSearchCursorIterator;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
-import eu.europeana.entitymanagement.solr.model.SolrEntity;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityProfile;
-import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.FormatTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
@@ -73,7 +67,6 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.web.service.DereferenceServiceLocator;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import io.swagger.annotations.ApiOperation;
-import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.JOB_DESCRIPTION_FACTORY;
 
 @RestController
 @Validated
@@ -81,7 +74,6 @@ import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants
 public class EMController extends BaseRest {
 
   private final EntityRecordService entityRecordService;
-  private final SolrService solrService;
   private final DereferenceServiceLocator dereferenceServiceLocator;
   private final DataSources datasources;
   private final EntityUpdateService entityUpdateService;
@@ -112,7 +104,6 @@ public class EMController extends BaseRest {
                       EntityUpdateService entityUpdateService,
                       @Qualifier(JOB_DESCRIPTION_FACTORY) JobDescriptionFactory jobDescriptionFactory) {
     this.entityRecordService = entityRecordService;
-    this.solrService = solrService;
     this.dereferenceServiceLocator = dereferenceServiceLocator;
     this.datasources = datasources;
     this.entityUpdateService = entityUpdateService;
@@ -742,7 +733,7 @@ public class EMController extends BaseRest {
       List<String> entityIds, TaskType updateType) {
     // get the entities to be scheduled, failed and skipped for update
     EntityIdResponse entityIdResponse = new EntityIdResponse();
-    List<String> entityIdsToSchedule = updateEntityIdResponse(entityIdResponse, entityIds);
+    List<String> entityIdsToSchedule = entityUpdateService.updateEntityIdResponse(entityIdResponse, entityIds);
     entityUpdateService.scheduleTasks(entityIdsToSchedule, updateType);
 
     // set required headers for this endpoint
@@ -760,22 +751,7 @@ public class EMController extends BaseRest {
    */
   ResponseEntity<EntityIdResponse> scheduleUpdatesWithSearch(HttpServletRequest request,
       String query, TaskType updateType) throws SolrServiceException {
-    SolrSearchCursorIterator iterator =
-        solrService.getSearchIterator(query, List.of(EntitySolrFields.TYPE, EntitySolrFields.ID));
-
-    EntityIdResponse entityIdResponse = new EntityIdResponse();
-
-    while (iterator.hasNext()) {
-      List<SolrEntity<Entity>> solrEntities = iterator.next();
-
-      List<String> entityIds =
-          solrEntities.stream().map(SolrEntity::getEntityId).collect(Collectors.toList());
-
-      // get the entities to be scheduled, failed and skipped for update
-      List<String> entityIdsToSchedule = updateEntityIdResponse(entityIdResponse, entityIds);
-
-      entityUpdateService.scheduleTasks(entityIdsToSchedule, updateType);
-    }
+    EntityIdResponse entityIdResponse = entityUpdateService.scheduleUpdatesWithSearch(query, updateType);
 
     // set required headers for this endpoint
     org.springframework.http.HttpHeaders httpHeaders = createAllowHeader(request);
@@ -783,44 +759,4 @@ public class EMController extends BaseRest {
     return ResponseEntity.accepted().headers(httpHeaders).body(entityIdResponse);
   }
 
-  /**
-   * Generate the EntityIdResponse based on entity Ids to be processed for update
-   *
-   * @param entityIds
-   * @return
-   */
-  private List<String> updateEntityIdResponse(EntityIdResponse entityIdResponse,
-      List<String> entityIds) {
-    // Get all existing EntityIds and their disabled status
-    List<EntityIdDisabledStatus> statusList =
-        entityRecordService.retrieveEntityDeprecationStatus(entityIds, false);
-
-    // extract only the entityIds for easy comparison
-    List<String> existingEntityIds =
-        statusList.stream().map(EntityIdDisabledStatus::getEntityId).collect(Collectors.toList());
-
-    // failures are entityIds that weren't retrieved
-    List<String> failures =
-        entityIds.stream().filter(e -> !existingEntityIds.contains(e)).collect(Collectors.toList());
-
-    Map<Boolean, List<EntityIdDisabledStatus>> entityIdsByDisabled =
-        statusList.stream().collect(groupingBy(EntityIdDisabledStatus::isDisabled));
-
-    // get entityIds that can be scheduled (they are not disabled)
-    List<EntityIdDisabledStatus> nonDisabledEntities = entityIdsByDisabled.get(false);
-    List<String> toBeScheduled =
-        CollectionUtils.isEmpty(nonDisabledEntities) ? Collections.emptyList()
-            : nonDisabledEntities.stream().map(EntityIdDisabledStatus::getEntityId)
-                .collect(Collectors.toList());
-
-    // updates skipped if EntityIdDisabledStatus.disabled=true
-    List<EntityIdDisabledStatus> disabledEntities = entityIdsByDisabled.get(true);
-    List<String> skipped = CollectionUtils.isEmpty(disabledEntities) ? Collections.emptyList()
-        : disabledEntities.stream().map(EntityIdDisabledStatus::getEntityId)
-            .collect(Collectors.toList());
-
-    entityIdResponse.updateValues(entityIds.size(), toBeScheduled, failures, skipped,
-        emConfig.getEntityIdResponseMaxSize());
-    return toBeScheduled;
-  }
 }

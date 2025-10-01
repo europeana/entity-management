@@ -138,6 +138,16 @@ public class EntityManagementConfiguration implements InitializingBean {
 
   @Value("${batch.computeMetrics: false}")
   private boolean batchComputeMetrics;
+  
+  @Value("${batch.schedule.fullupdate.day: SUNDAY}")
+  private String batchScheduleFullupdateDay;
+
+  @Value("${batch.schedule.fullupdate.types: 'Concept,TimeSpan,Agent,Place'}")
+  private String batchScheduleFullupdateTypes;
+  
+  @Value("${batch.schedule.metricsupdate.types: 'Concept,TimeSpan,Agent,Place'}")
+  private String batchScheduleMetricsupdateTypes;
+  
 
   @Value("${batch.maxFailedTaskRetries: 3}")
   private int maxFailedTaskRetries;
@@ -558,6 +568,18 @@ public class EntityManagementConfiguration implements InitializingBean {
 
   public String getWikidataUserAgent() {
     return wikidataUserAgent;
+  }
+
+  public String getBatchScheduleFullupdateDay() {
+    return batchScheduleFullupdateDay;
+  }
+
+  public String getBatchScheduleFullupdateTypes() {
+    return batchScheduleFullupdateTypes;
+  }
+
+  public String getBatchScheduleMetricsupdateTypes() {
+    return batchScheduleMetricsupdateTypes;
   }
  
 }

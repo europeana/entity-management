@@ -35,7 +35,7 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.web.auth.EMOperations;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
-import eu.europeana.entitymanagement.web.service.ZohoSyncService;
+import eu.europeana.entitymanagement.web.service.EntitySynchronizationService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
@@ -48,12 +48,12 @@ public class EntityAdminController extends BaseRest {
   private static final Logger LOG = LogManager.getLogger(EntityAdminController.class);
 
   private final EntityRecordService entityRecordService;
-  private final ZohoSyncService zohoSyncService;
+  private final EntitySynchronizationService zohoSyncService;
 
   @Autowired
   public EntityAdminController(
       EntityRecordService entityRecordService,
-      ZohoSyncService zohoSyncService) {
+      EntitySynchronizationService zohoSyncService) {
     this.entityRecordService = entityRecordService;
     this.zohoSyncService = zohoSyncService;
   }

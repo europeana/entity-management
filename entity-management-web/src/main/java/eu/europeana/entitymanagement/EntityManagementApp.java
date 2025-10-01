@@ -1,8 +1,11 @@
 package eu.europeana.entitymanagement;
 
+import java.time.DayOfWeek;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,11 +20,16 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 import eu.europeana.entitymanagement.batch.model.JobType;
 import eu.europeana.entitymanagement.batch.service.BatchEntityUpdateExecutor;
+import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
+import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
+import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
+import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
-import eu.europeana.entitymanagement.web.service.ZohoSyncService;
+import eu.europeana.entitymanagement.web.service.EntitySynchronizationService;
 
 /**
  * Main application. Allows deploying as a war and logs instance data when deployed in Cloud Foundry
@@ -39,8 +47,12 @@ public class EntityManagementApp implements CommandLineRunner {
   @Autowired
   private BatchEntityUpdateExecutor batchUpdateExecutor;
   @Autowired
-  private ZohoSyncService zohoSyncService;
- 
+  private EntitySynchronizationService zohoSyncService;
+  @Autowired
+  private EntityManagementConfiguration emConfiguration;
+  @Autowired
+  private EntityUpdateService entityUpdateService;
+
   /**
    * Main entry point of this application
    *
@@ -52,67 +64,87 @@ public class EntityManagementApp implements CommandLineRunner {
    */
   public static void main(String[] args) {
     // jobType = args.length > 0 ? args[0] : "";
-    if (isScheduledTask(args)) {
+    if (isEntitySyncJob(args)) {
+      // run stand alone app for entity synchronization
       if (LOG.isInfoEnabled()) {
         LOG.info("Starting batch updates execution with args: {}", Arrays.toString(args));
       }
-      validateArguments(args);
-      // disable web server since we're only running an update task
-      ConfigurableApplicationContext context = startStandAlloneApp(args);
-
-      if (LOG.isInfoEnabled()) {
-        LOG.info(
-            "Batch scheduling was completed for {}, waiting for completion of asynchonuous processing ",
-            Arrays.toString(args));
-      }
-      ScheduledTaskService scheduledTaskService = getScheduledTasksService(context);
-      long notCompletedTasks = 0;
-      boolean processingComplete = false;
-      int waitLoopCount = 0;
-      final int MAX_LOOPS_FOR_FAILED_TASKS = 3;
-      do {
-        //wait for execution of schedules tasks
-        long currentRunningTasks = scheduledTaskService.getRunningTasksCount();
-        // log progress
-        if (LOG.isInfoEnabled()) {
-          LOG.info("Scheduled Tasks to process : before {}, after {}", notCompletedTasks, currentRunningTasks);
-        }
-        
-        //failed tasks will not complete, therefore not all scheduled tasks are marked as completed in the database
-        //untill we have a better mechanism to reschedule failed tasks we wait for the next executions to mark them as complete
-        if (currentRunningTasks == 0){
-          processingComplete = true;
-          notCompletedTasks = currentRunningTasks;
-        } else if(currentRunningTasks == notCompletedTasks ) {
-          //if the open tasks is the same after waiting interval for 3 times, than the processing is considered complete
-          processingComplete = (waitLoopCount >= MAX_LOOPS_FOR_FAILED_TASKS);
-          waitLoopCount++;    
-        } else {
-          processingComplete = false;
-          notCompletedTasks = currentRunningTasks;
-        }
-        
-        try {
-          Thread.sleep(Duration.ofMinutes(WAITING_INTREVAL).toMillis());
-        } catch (InterruptedException e) {
-          LOG.error("Cannot complete execution!", e);
-          SpringApplication.exit(context);
-          System.exit(-2);
-        }
-      } while (!processingComplete);
-
-      // failed application execution should be indicated with negative codes
-      LOG.info("Stoping application after processing all Schdeduled Tasks!");
-      System.exit(SpringApplication.exit(context));
-
+      runStandAloneApp(args);
     } else {
-      LOG.info("No args provided to application. Starting web server");
+      // run API server
+      if (LOG.isInfoEnabled()) {
+        LOG.info("No args provided to application. Starting web server");
+      }
       SpringApplication.run(EntityManagementApp.class, args);
       return;
     }
   }
 
-  static boolean isScheduledTask(String[] args) {
+  static void runStandAloneApp(String[] args) {
+    validateArguments(args);
+    // disable web server and run as stand alone App for scheduling and running entity
+    // synchronizations
+    ConfigurableApplicationContext context = new SpringApplicationBuilder(EntityManagementApp.class)
+        .web(WebApplicationType.NONE).run(args);
+
+    // scheduling complete, processing is executed with multiple threads
+    if (LOG.isInfoEnabled()) {
+      LOG.info(
+          "Batch scheduling was completed for {}, waiting for completion of asynchonuous processing ",
+          Arrays.toString(args));
+    }
+
+    // wait for completion of scheduled tasks execution
+    awaitForScheduledTasksCompletion(context);
+
+    // failed application execution should be indicated with negative codes
+    LOG.info("Stoping application after processing all Schdeduled Tasks!");
+    System.exit(SpringApplication.exit(context));
+  }
+
+  static void awaitForScheduledTasksCompletion(ConfigurableApplicationContext context) {
+    ScheduledTaskService scheduledTaskService = getScheduledTasksService(context);
+    long notCompletedTasks = 0;
+    boolean processingComplete = false;
+    int waitLoopCount = 0;
+    final int MAX_LOOPS_FOR_FAILED_TASKS = 3;
+    do {
+      // wait for execution of schedules tasks
+      long currentRunningTasks = scheduledTaskService.getRunningTasksCount();
+      // log progress
+      if (LOG.isInfoEnabled()) {
+        LOG.info("Scheduled Tasks to process : before {}, after {}", notCompletedTasks,
+            currentRunningTasks);
+      }
+
+      // failed tasks will not complete, therefore not all scheduled tasks are marked as completed
+      // in the database
+      // untill we have a better mechanism to reschedule failed tasks we wait for the next
+      // executions to mark them as complete
+      if (currentRunningTasks == 0) {
+        processingComplete = true;
+        notCompletedTasks = currentRunningTasks;
+      } else if (currentRunningTasks == notCompletedTasks) {
+        // if the open tasks is the same after waiting interval for 3 times, than the processing is
+        // considered complete
+        processingComplete = (waitLoopCount >= MAX_LOOPS_FOR_FAILED_TASKS);
+        waitLoopCount++;
+      } else {
+        processingComplete = false;
+        notCompletedTasks = currentRunningTasks;
+      }
+
+      try {
+        Thread.sleep(Duration.ofMinutes(WAITING_INTREVAL).toMillis());
+      } catch (InterruptedException e) {
+        LOG.error("Cannot complete execution!", e);
+        SpringApplication.exit(context);
+        System.exit(-2);
+      }
+    } while (!processingComplete);
+  }
+
+  static boolean isEntitySyncJob(String[] args) {
     return hasCmdLineParams(args);
   }
 
@@ -121,35 +153,27 @@ public class EntityManagementApp implements CommandLineRunner {
         .getBean(AppConfigConstants.BEAN_BATCH_SCHEDULED_TASK_SERVICE);
   }
 
-  static ConfigurableApplicationContext startStandAlloneApp(String[] args) {
-    return new SpringApplicationBuilder(EntityManagementApp.class).web(WebApplicationType.NONE)
-            .run(args);
-  }
-
   static boolean hasCmdLineParams(String[] args) {
     return args != null && args.length > 0;
   }
 
   @Override
   public void run(String... args) throws Exception {
-    if (isScheduledTask(args)) {
-      runScheduledTasks(args);
-    } 
+    if (isEntitySyncJob(args)) {
+      // invoked automatically by runStandAlloneApp (when SpringApplicationBuilder.run())
+      performEntitySynchronizationWorkflow(args);
+    }
     // if no arguments then web server should be started
     return;
   }
 
 
-  void runScheduledTasks(String... args) throws EntityUpdateException {
+  void performEntitySynchronizationWorkflow(String... args) throws EntityUpdateException {
     Set<String> tasks = Set.of(args);
-
-    // first zoho sync as it runs synchronuous operations
-    if (tasks.contains(JobType.ZOHO_SYNC.value())) {
-      LOG.info("Executing zoho sync");
-      ZohoSyncReport zohoSyncReport = zohoSyncService.synchronizeModifiedZohoOrganizations();
-      LOG.info("Synchronization Report: {}", zohoSyncReport.toString());
-    }
-
+    //Schedule Tasks
+    scheduleTasks(tasks);
+    
+    //execute tasks
     if (tasks.contains(JobType.SCHEDULE_DELETION.value())) {
       // run also the deletions called through the API directly
       LOG.info("Executing scheduled deletions");
@@ -160,14 +184,70 @@ public class EntityManagementApp implements CommandLineRunner {
 
     if (tasks.contains(JobType.SCHEDULE_UPDATE.value())) {
       LOG.info("Executing scheduled updates");
-//      batchUpdateExecutor.runScheduledUpdate();
+      // batchUpdateExecutor.runScheduledUpdate();
       batchUpdateExecutor.runScheduledTasks();
       // TODO: should read the number of scheduled deletions and deprecations from the database
       // and write it to the logs
     }
   }
 
-  /** validates the arguments passed */
+  void scheduleTasks(Set<String> tasks) throws EntityUpdateException {
+    Instant now = Instant.ofEpochMilli(System.currentTimeMillis());
+
+    // first zoho sync as it runs synchronuous operations
+    if (tasks.contains(JobType.ZOHO_SYNC.value())) {
+      LOG.info("Executing zoho sync");
+      ZohoSyncReport zohoSyncReport = zohoSyncService.synchronizeModifiedZohoOrganizations();
+      LOG.info("Synchronization Report: {}", zohoSyncReport.toString());
+    }
+
+    if (isExecuteFullUpdates(now)) {
+      // schedule FULL Updates
+      scheduleFullUpdates();
+    } else {
+      // schedule Metrics Update
+      scheduleMetricsUpdates();
+    }
+  }
+
+  protected boolean isExecuteFullUpdates(Instant now) {
+    return DayOfWeek.from(now) == DayOfWeek.valueOf(emConfiguration.getBatchScheduleFullupdateDay());
+  }
+
+  protected void scheduleFullUpdates() {
+    if(StringUtils.isAllBlank(emConfiguration.getBatchScheduleFullupdateTypes())){
+      LOG.info("Skipping scheduling of full updates for entities, no entity types configured for update");
+      return;
+    }
+    
+    String[] typesToUpdate = emConfiguration.getBatchScheduleFullupdateTypes().split(",");
+    scheduleTasks(TaskType.full_update, typesToUpdate);
+  }
+  
+  void scheduleMetricsUpdates() {
+    if(StringUtils.isAllBlank(emConfiguration.getBatchScheduleMetricsupdateTypes())){
+      LOG.info("Skipping scheduling of metrics update for entities, no entity types configured for update");
+      return;
+    }
+    
+    String[] typesToUpdate = emConfiguration.getBatchScheduleMetricsupdateTypes().split(",");
+    scheduleTasks(TaskType.full_update, typesToUpdate);
+  }
+
+  void scheduleTasks(TaskType taskType, String[] typesToUpdate) {
+    //schedule for each entity type
+    for(String entityType : typesToUpdate) {
+      try {
+        entityUpdateService.scheduleUpdatesWithSearch(EntitySolrFields.TYPE + ":" + entityType, taskType);
+      } catch (SolrServiceException e) {
+        LOG.warn("Cannot schedule updates ({}) for entity type:{}", taskType, entityType, e);
+      }
+    }
+  }
+
+  /** validates the arguments passed 
+   * @param commanda line params for tasks shceuling and execution 
+   */
   private static void validateArguments(String[] args) {
     for (String arg : args) {
       if (!JobType.isValidJobType(arg)) {

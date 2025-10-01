@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import eu.europeana.entitymanagement.batch.config.JobDescriptionFactory;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.jena.atlas.logging.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
@@ -52,7 +53,7 @@ import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.JOB_DESCRIPTION_FACTORY;
 
 @Service(AppAutoconfig.BEAN_ZOHO_SYNC_SERVICE)
-public class ZohoSyncService extends BaseZohoAccess {
+public class EntitySynchronizationService extends BaseZohoAccess {
 
   public static final String ZOHO_SYNC_SLACK_TEMPLATE =
       "%d organisations in Zoho were synchronised with the following actions:\n"
@@ -74,7 +75,7 @@ public class ZohoSyncService extends BaseZohoAccess {
    * @param emJsonldSerializer the json serializer
    */
   @Autowired
-  public ZohoSyncService(EntityRecordService entityRecordService,
+  public EntitySynchronizationService(EntityRecordService entityRecordService,
       EntityUpdateService entityUpdateService, EntityManagementConfiguration emConfiguration,
       DataSources datasources, ZohoConfiguration zohoConfiguration, 
       ZohoSyncRepository zohoSyncRepo, ZohoDereferenceService zohoDereferenceService, JsonLdSerializer emJsonldSerializer,
@@ -92,7 +93,7 @@ public class ZohoSyncService extends BaseZohoAccess {
    * @return the report on performed operations
    * @throws EntityUpdateException
    */
-  public ZohoSyncReport synchronizeModifiedZohoOrganizations() throws EntityUpdateException {
+  public ZohoSyncReport synchronizeModifiedZohoOrganizations() {
 
     ZohoSyncReport previousSync = zohoSyncRepo.findLastZohoSyncReport();
     OffsetDateTime modifiedSince;
@@ -105,7 +106,13 @@ public class ZohoSyncService extends BaseZohoAccess {
     //for development debugging purposes use
     boolean locallDebugging = true;
     if(locallDebugging) {
-      modifiedSince = generateFixDate("29-Sep-2025 10:30:00");
+      String since = "29-Sep-2025 10:30:00";
+      try {
+        modifiedSince = generateFixDate(since);
+      } catch (EntityUpdateException e) {
+        Log.info("Cannot parse since date: {}", since, e);
+        return null;
+      }
     }
     return synchronizeZohoOrganizations(modifiedSince);
   }
@@ -117,8 +124,7 @@ public class ZohoSyncService extends BaseZohoAccess {
    * @return the report on performed operations
    * @throws EntityUpdateException
    */
-  public ZohoSyncReport synchronizeZohoOrganizations(@NonNull OffsetDateTime modifiedSince)
-      throws EntityUpdateException {
+  public ZohoSyncReport synchronizeZohoOrganizations(@NonNull OffsetDateTime modifiedSince) {
 
     OffsetDateTime deletedSince =
         modifiedSince.minusDays(emConfiguration.getZohoSyncDeleteOffsetDays());
@@ -257,14 +263,11 @@ public class ZohoSyncService extends BaseZohoAccess {
 
   /**
    * Retrieve deleted in Zoho organizations and remove them from the Enrichment database
-   *
-   * @return the number of deleted from Enrichment database organizations
-   * @throws EntityUpdateException
-   * @throws ZohoException
-   * @throws OrganizationImportException
+   * @param modifiedSince optional, select only organizations updated after this date
+   * @param zohoSyncReport report collectign the results of the execution
    */
   void synchronizeDeletedZohoOrganizations(OffsetDateTime modifiedSince,
-      ZohoSyncReport zohoSyncReport) throws EntityUpdateException {
+      ZohoSyncReport zohoSyncReport){
 
     // do not delete organizations for individual entity importer
     // in case of full import the database should be manually cleaned. No need to delete
