@@ -1,23 +1,18 @@
 package eu.europeana.entitymanagement.batch.model;
 
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.stereotype.Component;
-
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.ENTITY_UPDATE_STATUS;
 /**
  * Entity Update statistics class
  * @author srishti singh
  * @since 15 September 2025
  */
-@Component(ENTITY_UPDATE_STATUS)
 public class EntityUpdateStats {
 
     private static final Logger logger = LogManager.getLogger(EntityUpdateStats.class);
@@ -30,6 +25,14 @@ public class EntityUpdateStats {
     private AtomicInteger places = new AtomicInteger();
     private AtomicInteger failed = new AtomicInteger();
 
+    /**
+     * main constructor
+     * @param taskType the type of the scheduled tasks for which the stats are collected
+     */
+    public EntityUpdateStats(TaskType taskType) {
+      setTaskType(taskType);
+    }
+    
     /**
      * Resets the values for next time
      * call this before setting any values to EntityUpdateStats
@@ -47,7 +50,7 @@ public class EntityUpdateStats {
         return this.taskType.get();
     }
 
-    public void setTaskType(TaskType taskTypeValue) {
+    protected void setTaskType(TaskType taskTypeValue) {
         taskType.set(taskTypeValue);
     }
 

@@ -1,16 +1,15 @@
 package eu.europeana.entitymanagement.batch.config;
 
-import static eu.europeana.entitymanagement.batch.utils.BatchUtils.*;
+import static eu.europeana.entitymanagement.batch.utils.BatchUtils.JOB_REMOVE_SCHEDULED_ENTITIES;
+import static eu.europeana.entitymanagement.batch.utils.BatchUtils.JOB_UPDATE_SCHEDULED_ENTITIES;
+import static eu.europeana.entitymanagement.batch.utils.BatchUtils.JOB_UPDATE_SINGLE_ENTITY;
+import static eu.europeana.entitymanagement.batch.utils.BatchUtils.STEP_REMOVE_ENTITY;
+import static eu.europeana.entitymanagement.batch.utils.BatchUtils.STEP_UPDATE_ENTITY;
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.*;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Resource;
-
-import eu.europeana.entitymanagement.batch.model.EntityUpdateStats;
-import eu.europeana.entitymanagement.batch.service.ReportSenderTasklet;
-import eu.europeana.entitymanagement.web.service.SlackConnection;
 import org.springframework.batch.core.ItemProcessListener;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -30,16 +29,19 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.stereotype.Component;
 import eu.europeana.entitymanagement.batch.listener.EntityUpdateStepListener;
 import eu.europeana.entitymanagement.batch.listener.ScheduledTaskItemListener;
+import eu.europeana.entitymanagement.batch.model.EntityUpdateStats;
 import eu.europeana.entitymanagement.batch.model.JobDescription;
 import eu.europeana.entitymanagement.batch.model.Task;
 import eu.europeana.entitymanagement.batch.reader.EntityRecordDatabaseReader;
+import eu.europeana.entitymanagement.batch.service.ReportSenderTasklet;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
-import org.springframework.stereotype.Component;
+import eu.europeana.entitymanagement.web.service.SlackConnection;
 
 /**
  * Entity Job update factory class
@@ -68,8 +70,13 @@ public class EntityUpdateJobFactory {
     @Autowired
     ApplicationContext appContext;
 
-    @Resource
-    private EntityUpdateStats stats;
+    @Resource(name = BEAN_ENTITY_UPDATE_STATS)
+    private EntityUpdateStats enitityUpdateStats;
+    
+    @Resource(name = BEAN_METRICS_UPDATE_STATS)
+    private EntityUpdateStats metricsUpdateStats;
+    
+    
 
     public EntityUpdateJobFactory() {
         super();
@@ -102,10 +109,10 @@ public class EntityUpdateJobFactory {
         return this.jobBuilderFactory
                 .get(JOB_UPDATE_SCHEDULED_ENTITIES)
                 // This job is always launched via a @Scheduled method.
-                .start(initStats(stats, jobDescription.getTaskType()))
+                .start(initStats(jobDescription))
                 .next(entityUpdate(jobDescription, false))
                 .next(finishStats())
-                .next(sendStatusReportStep())
+                .next(sendStatusReportStep(jobDescription))
                 .build();
     }
 
@@ -163,16 +170,27 @@ public class EntityUpdateJobFactory {
     }
 
 
-    private Step initStats(EntityUpdateStats stats, TaskType taskType) {
-        return stepBuilderFactory
+    private Step initStats(JobDescription jobDescription) {
+        
+      return stepBuilderFactory
                 .get("initStatsStep")
                 .tasklet(
                         ((stepContribution, chunkContext) -> {
-                            stats.reset();
-                            stats.setTaskType(taskType);
-                            return RepeatStatus.FINISHED;
+                          getStats(jobDescription.getTaskType()).reset();  
+                          return RepeatStatus.FINISHED;
                         }))
                 .build();
+    }
+    
+    private EntityUpdateStats getStats(TaskType taskType) {
+      switch (taskType) {
+        case full_update: 
+          return enitityUpdateStats;
+        case metrics_update:
+          return metricsUpdateStats;
+        default:
+          throw new IllegalArgumentException("Unexpected value: " + taskType);
+      }
     }
 
     private Step finishStats() {
@@ -185,13 +203,15 @@ public class EntityUpdateJobFactory {
                 .build();
     }
 
-    private Step sendStatusReportStep() {
+    private Step sendStatusReportStep(JobDescription jobDescription) {
         return stepBuilderFactory
                 .get("sendStatusReport")
-                .tasklet(new ReportSenderTasklet(stats,
+                .tasklet(
+                    new ReportSenderTasklet(
+                        getStats(jobDescription.getTaskType()),
                         emConfig.getEntityManagementBaseUrl(),
-                        getApplicationContext().getBean(SLACK_CONNECTION, SlackConnection.class)))
-                .build();
+                        getApplicationContext().getBean(SLACK_CONNECTION, SlackConnection.class))
+                 ).build();
     }
 
     private TaskExecutor getTaskExecutor(boolean isSynchronous) {

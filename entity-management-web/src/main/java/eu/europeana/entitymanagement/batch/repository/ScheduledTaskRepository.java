@@ -199,11 +199,11 @@ public class ScheduledTaskRepository implements InitializingBean {
             in(UPDATE_TYPE,
                 updateType.stream().map(TaskType::getValue).collect(Collectors.toList())))
         // both collections use the same entityId field name
-        .lookup(Lookup.from(FailedTask.class).localField(ENTITY_ID).foreignField(ENTITY_ID)
+        .lookup(Lookup.lookup(FailedTask.class).localField(ENTITY_ID).foreignField(ENTITY_ID)
             .as("failed_tasks_lookup"))
-        .unwind(Unwind.on("failed_tasks_lookup"))
+        .unwind(Unwind.unwind("failed_tasks_lookup"))
         .match(gte("failed_tasks_lookup.failureCount", maxFailedTaskRetries))
         // we only care about the entityId for this query
-        .project(Projection.of().include(ENTITY_ID)).execute(ScheduledTask.class);
+        .project(Projection.project().include(ENTITY_ID)).execute(ScheduledTask.class);
   }
 }

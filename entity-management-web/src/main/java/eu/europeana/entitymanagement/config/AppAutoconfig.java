@@ -1,5 +1,7 @@
 package eu.europeana.entitymanagement.config;
 
+import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_ID;
+import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.UPDATE_TYPE;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,17 +16,6 @@ import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.xml.bind.JAXBContext;
-
-import dev.morphia.query.filters.Filters;
-import eu.europeana.entitymanagement.batch.listener.ScheduledTaskItemListener;
-import eu.europeana.entitymanagement.batch.model.EntityUpdateStats;
-import eu.europeana.entitymanagement.batch.reader.EntityRecordDatabaseReader;
-import eu.europeana.entitymanagement.batch.reader.ScheduledTaskDatabaseReader;
-import eu.europeana.entitymanagement.batch.service.FailedTaskService;
-import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
-import eu.europeana.entitymanagement.definitions.batch.EMBatchConstants;
-import eu.europeana.entitymanagement.web.service.EntityRecordService;
-import eu.europeana.entitymanagement.web.service.SlackConnection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -42,28 +33,35 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import dev.morphia.query.filters.Filters;
 import eu.europeana.api.commons.config.i18n.I18nService;
 import eu.europeana.api.commons.config.i18n.I18nServiceImpl;
 import eu.europeana.api.commons.oauth2.service.impl.EuropeanaClientDetailsService;
 import eu.europeana.entitymanagement.batch.config.EntityUpdateJobFactory;
 import eu.europeana.entitymanagement.batch.config.JobDescriptionFactory;
+import eu.europeana.entitymanagement.batch.listener.ScheduledTaskItemListener;
+import eu.europeana.entitymanagement.batch.model.EntityUpdateStats;
 import eu.europeana.entitymanagement.batch.model.JobDescription;
 import eu.europeana.entitymanagement.batch.model.Task;
+import eu.europeana.entitymanagement.batch.reader.EntityRecordDatabaseReader;
+import eu.europeana.entitymanagement.batch.reader.ScheduledTaskDatabaseReader;
+import eu.europeana.entitymanagement.batch.service.FailedTaskService;
+import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
+import eu.europeana.entitymanagement.definitions.batch.EMBatchConstants;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import eu.europeana.entitymanagement.definitions.model.Vocabulary;
 import eu.europeana.entitymanagement.exception.ApplicationInitializationException;
 import eu.europeana.entitymanagement.mongo.repository.VocabularyRepository;
 import eu.europeana.entitymanagement.web.MetisDereferenceUtils;
+import eu.europeana.entitymanagement.web.service.EntityRecordService;
+import eu.europeana.entitymanagement.web.service.SlackConnection;
 import eu.europeana.entitymanagement.web.xml.model.RdfXmlUtils;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
-
-import static eu.europeana.entitymanagement.definitions.EntityRecordFields.ENTITY_ID;
-import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.UPDATE_TYPE;
 
 /** @author GordeaS */
 @Configuration
@@ -145,6 +143,16 @@ public class AppAutoconfig extends AppConfigConstants {
     }
 
     return dataSources;
+  }
+  
+  @Bean(name = BEAN_ENTITY_UPDATE_STATS)
+  public EntityUpdateStats getEntityUpdateStats() {
+    return new EntityUpdateStats(TaskType.full_update);
+  }
+  
+  @Bean(name = BEAN_METRICS_UPDATE_STATS)
+  public EntityUpdateStats getMetricUpdateStats() {
+    return new EntityUpdateStats(TaskType.metrics_update);
   }
 
   @Bean(name = BEAN_CLIENT_DETAILS_SERVICE)
@@ -245,7 +253,7 @@ public class AppAutoconfig extends AppConfigConstants {
             applicationContext.getBean("failedTaskService", FailedTaskService.class),
             applicationContext.getBean(BEAN_BATCH_SCHEDULED_TASK_SERVICE, ScheduledTaskService.class),
             Boolean.parseBoolean(isSynchronousString),
-            applicationContext.getBean(ENTITY_UPDATE_STATUS, EntityUpdateStats.class));
+            applicationContext.getBean(BEAN_ENTITY_UPDATE_STATS, EntityUpdateStats.class));
   }
 
   /** ItemReader that queries by entityId when retrieving EntityRecords from the database */
