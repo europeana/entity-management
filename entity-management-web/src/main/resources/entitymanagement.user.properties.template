@@ -27,7 +27,14 @@ batch.step.chunkSize=100
 
 # Whether entity metrics should be computed. This requires access to the Pagerank and
 # Search API Solr servers.
-batch.computeMetrics=false
+#batch.computeMetrics=false
+
+#day of week for scheduling full updates
+batch.schedule.fullupdate.day=SUNDAY
+#entity types for which the full updates are scheduled
+batch.schedule.fullupdate.types=Concept,TimeSpan,Agent,Place
+#entity types for which the metrics update is scheduled
+batch.schedule.metricsupdate.types=Concept,TimeSpan,Agent,Place
 
 # Whether user requests should be authenticated. Requires Keycloak public key and ApiKey URL if "true"
 auth.read.enabled=false

@@ -139,7 +139,7 @@ public class EntityManagementConfiguration implements InitializingBean {
   @Value("${batch.computeMetrics: false}")
   private boolean batchComputeMetrics;
   
-  @Value("${batch.schedule.fullupdate.day: SUNDAY}")
+  @Value("${batch.schedule.fullupdate.day: 'SUNDAY'}")
   private String batchScheduleFullupdateDay;
 
   @Value("${batch.schedule.fullupdate.types: 'Concept,TimeSpan,Agent,Place'}")

@@ -3,6 +3,7 @@ package eu.europeana.entitymanagement;
 import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.temporal.TemporalAccessor;
 import java.util.Arrays;
 import java.util.Set;
@@ -198,7 +199,7 @@ public class EntityManagementApp implements CommandLineRunner {
   }
 
   void scheduleTasks(Set<String> tasks){
-    Instant now = Instant.ofEpochMilli(System.currentTimeMillis());
+    Instant now = Instant.now();
 
     // first zoho sync as it runs synchronuous operations
     if (tasks.contains(JobType.ZOHO_SYNC.value())) {
@@ -216,8 +217,8 @@ public class EntityManagementApp implements CommandLineRunner {
     }
   }
 
-  protected boolean isExecuteFullUpdates(TemporalAccessor now) {
-    return DayOfWeek.from(now) == DayOfWeek.valueOf(emConfiguration.getBatchScheduleFullupdateDay());
+  protected boolean isExecuteFullUpdates(Instant now) {
+    return now.atZone(ZoneId.systemDefault()).getDayOfWeek() == DayOfWeek.valueOf(emConfiguration.getBatchScheduleFullupdateDay().trim());
   }
 
   protected void scheduleFullUpdates() {
@@ -244,7 +245,7 @@ public class EntityManagementApp implements CommandLineRunner {
     //schedule for each entity type
     for(String entityType : typesToUpdate) {
       try {
-        entityUpdateService.scheduleUpdatesWithSearch(EntitySolrFields.TYPE + ":" + entityType, taskType);
+        entityUpdateService.scheduleUpdatesWithSearch(EntitySolrFields.TYPE + ": " + entityType, taskType);
       } catch (SolrServiceException e) {
         LOG.warn("Cannot schedule updates ({}) for entity type:{}", taskType, entityType, e);
       }
