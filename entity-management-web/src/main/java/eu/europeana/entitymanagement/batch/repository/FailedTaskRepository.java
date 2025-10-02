@@ -25,7 +25,6 @@ import dev.morphia.query.FindOptions;
 import dev.morphia.query.updates.UpdateOperators;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
-import eu.europeana.entitymanagement.mongo.utils.MorphiaUtils;
 
 @Repository
 public class FailedTaskRepository implements InitializingBean {

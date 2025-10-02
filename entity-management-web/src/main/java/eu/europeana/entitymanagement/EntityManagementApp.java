@@ -26,7 +26,6 @@ import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
-import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
@@ -54,6 +53,7 @@ public class EntityManagementApp implements CommandLineRunner {
   @Autowired
   private EntityUpdateService entityUpdateService;
 
+  private static int exitStatus = 1;
   /**
    * Main entry point of this application
    *
@@ -74,7 +74,13 @@ public class EntityManagementApp implements CommandLineRunner {
       
       LOG.info("Stoping application after processing all Schdeduled Tasks!");
       // failed application execution should be indicated with negative codes
-      System.exit(SpringApplication.exit(context));
+      int appStopStatus = SpringApplication.exit(context);
+      //do not overwrite previously set of failure status
+      if(exitStatus > 0) {
+        exitStatus = appStopStatus;
+      }
+      //indicate status on exit, negative means failure
+      System.exit(exitStatus);
     } else {
       // run API server
       if (LOG.isInfoEnabled()) {
@@ -140,8 +146,7 @@ public class EntityManagementApp implements CommandLineRunner {
         Thread.sleep(Duration.ofMinutes(WAITING_INTREVAL).toMillis());
       } catch (InterruptedException e) {
         LOG.error("Cannot complete execution!", e);
-        SpringApplication.exit(context);
-        System.exit(-2);
+        exitStatus = -2;
       }
     } while (!processingComplete);
   }
@@ -170,7 +175,7 @@ public class EntityManagementApp implements CommandLineRunner {
   }
 
 
-  void performEntitySynchronizationWorkflow(Set<String> tasks) throws EntityUpdateException {
+  void performEntitySynchronizationWorkflow(Set<String> tasks){
     //Schedule Tasks
     scheduleTasks(tasks);
     

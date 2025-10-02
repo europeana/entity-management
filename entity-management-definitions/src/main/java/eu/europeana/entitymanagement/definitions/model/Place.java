@@ -10,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 import eu.europeana.entitymanagement.vocabulary.XmlFields;
 
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)

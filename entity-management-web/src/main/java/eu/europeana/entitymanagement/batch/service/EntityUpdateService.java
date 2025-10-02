@@ -129,6 +129,7 @@ public class EntityUpdateService {
   /**
    * Generate the EntityIdResponse based on entity Ids to be processed for update
    *
+   * @param entityIdResponse object to be updated
    * @param entityIds the ids of the entities to schedule updates
    * @return the list of active entities for which the update was successfully performed  
    */

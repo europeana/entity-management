@@ -207,7 +207,7 @@ public class EntitySynchronizationService extends BaseZohoAccess {
     }
 
     String headLine = "\\n\\nThe following organisations failed synchronisation:\\n";
-    int avgUrlSize = 100;
+    final int avgUrlSize = 100;
     int estimatedSize = headLine.length() + (zohoSyncReport.getFailed().size() * avgUrlSize);
     StringBuilder builder = new StringBuilder(estimatedSize);
     builder.append(headLine);
@@ -498,7 +498,8 @@ public class EntitySynchronizationService extends BaseZohoAccess {
 
     if (skipNonExisting(hasDpsOwner, markedForDeletion)) {
       logger.debug(
-          "Organization has changed in zoho, but it is marked for deletion or doesn't have DPS as Owner. Skipped creation for Zoho id: {}, hasDpsOwner: {}, markedForDeletion: {}",
+          "Organization has changed in zoho, but it is marked for deletion or doesn't have DPS as Owner. "
+          + "Skipped creation for Zoho id: {}, hasDpsOwner: {}, markedForDeletion: {}",
           zohoId, hasDpsOwner, markedForDeletion);
       // skipped
       return false;
@@ -507,7 +508,8 @@ public class EntitySynchronizationService extends BaseZohoAccess {
     if (skipNoZohoEuropeanaId(zohoRecordEuropeanaID,
         emConfiguration.isGenerateOrganizationEuropeanaId())) {
       logger.debug(
-          "Organization has changed in zoho, but the job instance is not allowed to generate entity ids for Organizations. Skipped entity registration for Zoho id: {}",
+          "Organization has changed in zoho, but the job instance is not allowed to generate entity ids for Organizations. "
+          + "Skipped entity registration for Zoho id: {}",
           zohoId);
       // skipped if Europeana ID Generation is not allowed
       return false;
