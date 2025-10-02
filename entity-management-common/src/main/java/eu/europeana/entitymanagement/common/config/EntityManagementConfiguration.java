@@ -106,7 +106,7 @@ public class EntityManagementConfiguration implements InitializingBean {
   @Value("${wikidata.baseUrl:}")
   private String wikidataBaseUrl;
   
-  @Value("${wikidata.userAgent: 'EuropeanaAPIs/v1.0 (https://apis.europeana.eu/)'")
+  @Value("${wikidata.userAgent:EuropeanaAPIs/v1.0 (https://apis.europeana.eu/)")
   private String wikidataUserAgent;
 
   @Value("${batch.step.chunkSize: 10}")
@@ -185,10 +185,10 @@ public class EntityManagementConfiguration implements InitializingBean {
   @Value("${zoho.sync.delete.offset.days: 10}")
   private int zohoSyncDeleteOffsetDays;
   
-  @Value("${europeana.item.data.endpoint:'http://data.europeana.eu/item'}")
+  @Value("${europeana.item.data.endpoint:http://data.europeana.eu/item}")
   private String itemDataEndpoint;
 
-  @Value("${europeana.scheme.data.endpoint:'http://data.europeana.eu/scheme'}")
+  @Value("${europeana.scheme.data.endpoint:http://data.europeana.eu/scheme}")
   private String schemeDataEndpoint;
 
   @Value("${spring.profiles.active:}")
