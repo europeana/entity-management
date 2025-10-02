@@ -30,7 +30,7 @@ public class EntityUpdateStats {
      * @param taskType the type of the scheduled tasks for which the stats are collected
      */
     public EntityUpdateStats(TaskType taskType) {
-      setTaskType(taskType);
+      this.taskType.set(taskType);
     }
     
     /**

@@ -3,6 +3,7 @@ package eu.europeana.entitymanagement;
 import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.TemporalAccessor;
 import java.util.Arrays;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
@@ -69,7 +70,11 @@ public class EntityManagementApp implements CommandLineRunner {
       if (LOG.isInfoEnabled()) {
         LOG.info("Starting batch updates execution with args: {}", Arrays.toString(args));
       }
-      runStandAloneApp(args);
+      ConfigurableApplicationContext context = runStandAloneApp(args);
+      
+      LOG.info("Stoping application after processing all Schdeduled Tasks!");
+      // failed application execution should be indicated with negative codes
+      System.exit(SpringApplication.exit(context));
     } else {
       // run API server
       if (LOG.isInfoEnabled()) {
@@ -80,7 +85,7 @@ public class EntityManagementApp implements CommandLineRunner {
     }
   }
 
-  static void runStandAloneApp(String[] args) {
+  static ConfigurableApplicationContext runStandAloneApp(String[] args) {
     validateArguments(args);
     // disable web server and run as stand alone App for scheduling and running entity
     // synchronizations
@@ -93,13 +98,10 @@ public class EntityManagementApp implements CommandLineRunner {
           "Batch scheduling was completed for {}, waiting for completion of asynchonuous processing ",
           Arrays.toString(args));
     }
-
+    
     // wait for completion of scheduled tasks execution
     awaitForScheduledTasksCompletion(context);
-
-    // failed application execution should be indicated with negative codes
-    LOG.info("Stoping application after processing all Schdeduled Tasks!");
-    System.exit(SpringApplication.exit(context));
+    return context;
   }
 
   static void awaitForScheduledTasksCompletion(ConfigurableApplicationContext context) {
@@ -161,15 +163,14 @@ public class EntityManagementApp implements CommandLineRunner {
   public void run(String... args) throws Exception {
     if (isEntitySyncJob(args)) {
       // invoked automatically by runStandAlloneApp (when SpringApplicationBuilder.run())
-      performEntitySynchronizationWorkflow(args);
+      performEntitySynchronizationWorkflow(Set.of(args));
     }
     // if no arguments then web server should be started
     return;
   }
 
 
-  void performEntitySynchronizationWorkflow(String... args) throws EntityUpdateException {
-    Set<String> tasks = Set.of(args);
+  void performEntitySynchronizationWorkflow(Set<String> tasks) throws EntityUpdateException {
     //Schedule Tasks
     scheduleTasks(tasks);
     
@@ -191,7 +192,7 @@ public class EntityManagementApp implements CommandLineRunner {
     }
   }
 
-  void scheduleTasks(Set<String> tasks) throws EntityUpdateException {
+  void scheduleTasks(Set<String> tasks){
     Instant now = Instant.ofEpochMilli(System.currentTimeMillis());
 
     // first zoho sync as it runs synchronuous operations
@@ -210,7 +211,7 @@ public class EntityManagementApp implements CommandLineRunner {
     }
   }
 
-  protected boolean isExecuteFullUpdates(Instant now) {
+  protected boolean isExecuteFullUpdates(TemporalAccessor now) {
     return DayOfWeek.from(now) == DayOfWeek.valueOf(emConfiguration.getBatchScheduleFullupdateDay());
   }
 

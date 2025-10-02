@@ -98,6 +98,13 @@ public class EntityUpdateService {
     scheduledTaskService.scheduleTasksForEntities(mapEntityIdScheduledTaskType);
   }
   
+  /**
+   * Method to schedule a metrics update using a solr search query
+   * @param query solr search query
+   * @param updateType the type of the Task to be scheduled
+   * @return the results of the scheduling 
+   * @throws SolrServiceException if the query is malformed or the solr is not accessible
+   */
   public EntityIdResponse scheduleUpdatesWithSearch(String query, TaskType updateType)
       throws SolrServiceException {
     SolrSearchCursorIterator iterator =
@@ -122,8 +129,8 @@ public class EntityUpdateService {
   /**
    * Generate the EntityIdResponse based on entity Ids to be processed for update
    *
-   * @param entityIds
-   * @return
+   * @param entityIds the ids of the entities to schedule updates
+   * @return the list of active entities for which the update was successfully performed  
    */
   public List<String> updateEntityIdResponse(EntityIdResponse entityIdResponse,
       List<String> entityIds) {
@@ -143,20 +150,20 @@ public class EntityUpdateService {
         statusList.stream().collect(groupingBy(EntityIdDisabledStatus::isDisabled));
 
     // get entityIds that can be scheduled (they are not disabled)
-    List<EntityIdDisabledStatus> nonDisabledEntities = entityIdsByDisabled.get(false);
-    List<String> toBeScheduled =
+    List<EntityIdDisabledStatus> nonDisabledEntities = entityIdsByDisabled.get(Boolean.FALSE);
+    List<String> activeEntities =
         CollectionUtils.isEmpty(nonDisabledEntities) ? Collections.emptyList()
             : nonDisabledEntities.stream().map(EntityIdDisabledStatus::getEntityId)
                 .collect(Collectors.toList());
 
     // updates skipped if EntityIdDisabledStatus.disabled=true
-    List<EntityIdDisabledStatus> disabledEntities = entityIdsByDisabled.get(true);
+    List<EntityIdDisabledStatus> disabledEntities = entityIdsByDisabled.get(Boolean.TRUE);
     List<String> skipped = CollectionUtils.isEmpty(disabledEntities) ? Collections.emptyList()
         : disabledEntities.stream().map(EntityIdDisabledStatus::getEntityId)
             .collect(Collectors.toList());
 
-    entityIdResponse.updateValues(entityIds.size(), toBeScheduled, failures, skipped,
+    entityIdResponse.updateValues(entityIds.size(), activeEntities, failures, skipped,
         emConfiguration.getEntityIdResponseMaxSize());
-    return toBeScheduled;
+    return activeEntities;
   }
 }

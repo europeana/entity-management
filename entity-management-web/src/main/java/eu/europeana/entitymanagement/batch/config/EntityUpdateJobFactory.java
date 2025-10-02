@@ -1,10 +1,6 @@
 package eu.europeana.entitymanagement.batch.config;
 
-import static eu.europeana.entitymanagement.batch.utils.BatchUtils.JOB_REMOVE_SCHEDULED_ENTITIES;
-import static eu.europeana.entitymanagement.batch.utils.BatchUtils.JOB_UPDATE_SCHEDULED_ENTITIES;
-import static eu.europeana.entitymanagement.batch.utils.BatchUtils.JOB_UPDATE_SINGLE_ENTITY;
-import static eu.europeana.entitymanagement.batch.utils.BatchUtils.STEP_REMOVE_ENTITY;
-import static eu.europeana.entitymanagement.batch.utils.BatchUtils.STEP_UPDATE_ENTITY;
+import static eu.europeana.entitymanagement.batch.utils.BatchUtils.*;
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -76,8 +72,9 @@ public class EntityUpdateJobFactory {
     @Resource(name = BEAN_METRICS_UPDATE_STATS)
     private EntityUpdateStats metricsUpdateStats;
     
-    
-
+    /**
+     * Main constructor for job factory
+     */
     public EntityUpdateJobFactory() {
         super();
     }

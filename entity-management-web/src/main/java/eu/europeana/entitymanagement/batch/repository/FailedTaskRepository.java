@@ -57,7 +57,7 @@ public class FailedTaskRepository implements InitializingBean {
         .find(FailedTask.class)
         .filter(eq(ENTITY_ID, failure.getEntityId()))
         .update(
-            MorphiaUtils.UPSERT_OPTS,
+            UPSERT_OPTS,
             UpdateOperators.set(ENTITY_ID, failure.getEntityId()),
             UpdateOperators.set(STACKTRACE, failure.getStackTrace()),
             UpdateOperators.set(ERROR_MSG, failure.getErrorMessage()),

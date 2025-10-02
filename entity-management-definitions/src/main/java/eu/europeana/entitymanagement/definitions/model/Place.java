@@ -65,7 +65,7 @@ public class Place extends Entity {
   }
   
   @JsonGetter(IS_NEXT_IN_SEQUENCE)
-  @JacksonXmlProperty(namespace = XmlFields.XML_NAMESPACE_PREFIX_EDM, localName = WebEntityFields.IS_NEXT_IN_SEQUENCE)
+  @JacksonXmlProperty(namespace = XmlFields.XML_NAMESPACE_PREFIX_EDM, localName = IS_NEXT_IN_SEQUENCE)
   public List<String> getIsNextInSequence() {
     return isNextInSequence;
   }
@@ -76,7 +76,7 @@ public class Place extends Entity {
   }
 
   @JsonGetter(LATITUDE)
-  @JacksonXmlProperty(namespace = XmlFields.XML_NAMESPACE_PREFIX_WGS84, localName = WebEntityFields.LATITUDE)
+  @JacksonXmlProperty(namespace = XmlFields.XML_NAMESPACE_PREFIX_WGS84, localName = LATITUDE)
   public Float getLatitude() {
     return latitude;
   }
@@ -87,7 +87,7 @@ public class Place extends Entity {
   }
 
   @JsonGetter(LONGITUDE)
-  @JacksonXmlProperty(namespace = XmlFields.XML_NAMESPACE_PREFIX_WGS84, localName = WebEntityFields.LONGITUDE)
+  @JacksonXmlProperty(namespace = XmlFields.XML_NAMESPACE_PREFIX_WGS84, localName = LONGITUDE)
   public Float getLongitude() {
     return longitude;
   }
@@ -98,7 +98,7 @@ public class Place extends Entity {
   }
 
   @JsonGetter(ALTITUDE)
-  @JacksonXmlProperty(namespace = XmlFields.XML_NAMESPACE_PREFIX_WGS84, localName = WebEntityFields.ALTITUDE)
+  @JacksonXmlProperty(namespace = XmlFields.XML_NAMESPACE_PREFIX_WGS84, localName = ALTITUDE)
   public Float getAltitude() {
     return altitude;
   }

@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.web.service;
 
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.JOB_DESCRIPTION_FACTORY;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -8,13 +9,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
-import eu.europeana.entitymanagement.batch.config.JobDescriptionFactory;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.jena.atlas.logging.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
@@ -30,6 +29,7 @@ import dev.morphia.query.filters.Filter;
 import dev.morphia.query.filters.Filters;
 import eu.europeana.api.commons.definitions.utils.DateUtils;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
+import eu.europeana.entitymanagement.batch.config.JobDescriptionFactory;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.AppAutoconfig;
@@ -50,35 +50,38 @@ import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 
-import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.JOB_DESCRIPTION_FACTORY;
-
+/**
+ * Service class for scheduling taks for entity synchronization with external data sources
+ */
 @Service(AppAutoconfig.BEAN_ZOHO_SYNC_SERVICE)
 public class EntitySynchronizationService extends BaseZohoAccess {
 
   public static final String ZOHO_SYNC_SLACK_TEMPLATE =
-      "%d organisations in Zoho were synchronised with the following actions:\n"
-          + "created: %d, updated: %d, deprecated: %d, undeprecated: %d, permanently deleted: %d, failed: %d\n"
+      "%d organisations in Zoho were synchronised with the following actions:%n"
+          + "created: %d, updated: %d, deprecated: %d, undeprecated: %d, permanently deleted: %d, failed: %d%n"
           + "%s";
-  
-  
-  private final JsonLdSerializer emJsonldSerializer; 
-  
+
+
+  private final JsonLdSerializer emJsonldSerializer;
+
   /**
    * Constructor using autowired beans
+   * 
    * @param entityRecordService the entity record service
    * @param entityUpdateService the entity update service
    * @param emConfiguration the app configuration
    * @param datasources the datasources
    * @param zohoConfiguration the zoho access configuration
    * @param zohoSyncRepo the zoho sync repository
-   * @param zohoDereferenceService the zoho dereference service 
+   * @param zohoDereferenceService the zoho dereference service
    * @param emJsonldSerializer the json serializer
+   * @param jobDescriptionFactory the factory for instantiating job descriptions
    */
   @Autowired
   public EntitySynchronizationService(EntityRecordService entityRecordService,
       EntityUpdateService entityUpdateService, EntityManagementConfiguration emConfiguration,
-      DataSources datasources, ZohoConfiguration zohoConfiguration, 
-      ZohoSyncRepository zohoSyncRepo, ZohoDereferenceService zohoDereferenceService, JsonLdSerializer emJsonldSerializer,
+      DataSources datasources, ZohoConfiguration zohoConfiguration, ZohoSyncRepository zohoSyncRepo,
+      ZohoDereferenceService zohoDereferenceService, JsonLdSerializer emJsonldSerializer,
       @Qualifier(JOB_DESCRIPTION_FACTORY) JobDescriptionFactory jobDescriptionFactory) {
 
     super(entityRecordService, entityUpdateService, emConfiguration, datasources, zohoConfiguration,
@@ -97,23 +100,24 @@ public class EntitySynchronizationService extends BaseZohoAccess {
 
     ZohoSyncReport previousSync = zohoSyncRepo.findLastZohoSyncReport();
     OffsetDateTime modifiedSince;
-    if (previousSync != null && previousSync.getStartDate() != null) {
-      modifiedSince = DateUtils.toOffsetDateTime(previousSync.getStartDate());
-    } else {
+    if (previousSync == null || previousSync.getStartDate() == null) {
+      // first sync, schedule all
       modifiedSince = OffsetDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC);
-      
+    } else {
+      // schedule modified since last update
+      modifiedSince = DateUtils.toOffsetDateTime(previousSync.getStartDate());
     }
-    //for development debugging purposes use
-    boolean locallDebugging = true;
-    if(locallDebugging) {
+    // for development debugging purposes use
+    boolean locallDebugging = false;
+    if (locallDebugging) {
       String since = "29-Sep-2025 10:30:00";
-      try {
-        modifiedSince = generateFixDate(since);
-      } catch (EntityUpdateException e) {
-        Log.info("Cannot parse since date: {}", since, e);
+      modifiedSince = generateFixDate(since);
+      if (modifiedSince == null) {
+        // date parsing error
         return null;
       }
     }
+
     return synchronizeZohoOrganizations(modifiedSince);
   }
 
@@ -162,14 +166,16 @@ public class EntitySynchronizationService extends BaseZohoAccess {
 
       jsonMessage = buildSyncReportMessageForSlackWebHook(zohoSyncReport);
 
-      WebClient webClient = WebClient.builder().baseUrl(emConfiguration.getZohoSlackWebHook()).build();
+      WebClient webClient =
+          WebClient.builder().baseUrl(emConfiguration.getZohoSlackWebHook()).build();
       // send message to webhook
-          
-      ResponseSpec resp = webClient.post().contentType(MediaType.APPLICATION_JSON).bodyValue(jsonMessage).retrieve();
-      
+
+      ResponseSpec resp = webClient.post().contentType(MediaType.APPLICATION_JSON)
+          .bodyValue(jsonMessage).retrieve();
+
       ResponseEntity<String> response = resp.toEntity(String.class).block();
-      if(logger.isDebugEnabled()) {
-        logger.debug("Received webhook response: {}", response == null? "" : response.getBody());  
+      if (logger.isDebugEnabled()) {
+        logger.debug("Received webhook response: {}", response == null ? "" : response.getBody());
       }
     } catch (WebClientResponseException | IOException e) {
       logger.warn("Exception occurred while sending slack message: {}", jsonMessage, e);
@@ -177,17 +183,17 @@ public class EntitySynchronizationService extends BaseZohoAccess {
   }
 
   String buildSyncReportMessageForSlackWebHook(ZohoSyncReport zohoSyncReport) throws IOException {
-    long synced = zohoSyncReport.getCreatedItems() + zohoSyncReport.getUpdatedItems() 
-      + zohoSyncReport.getDeprecatedItems();
-    
-    long failed = zohoSyncReport.getFailed() == null? 0: zohoSyncReport.getFailed().size();   
-    
-    String slackMessage = String.format(ZOHO_SYNC_SLACK_TEMPLATE, synced, zohoSyncReport.getCreatedItems(),
-        zohoSyncReport.getUpdatedItems(), zohoSyncReport.getDeprecatedItems(),
-        zohoSyncReport.getEnabledItems(), zohoSyncReport.getDeletedItems(),
-        failed, generateFailedMessage(zohoSyncReport));
-    
-    //could use a proper object and json serializer later
+    long synced = zohoSyncReport.getCreatedItems() + zohoSyncReport.getUpdatedItems()
+        + zohoSyncReport.getDeprecatedItems();
+
+    long failed = zohoSyncReport.getFailed() == null ? 0 : zohoSyncReport.getFailed().size();
+
+    String slackMessage = String.format(ZOHO_SYNC_SLACK_TEMPLATE, synced,
+        zohoSyncReport.getCreatedItems(), zohoSyncReport.getUpdatedItems(),
+        zohoSyncReport.getDeprecatedItems(), zohoSyncReport.getEnabledItems(),
+        zohoSyncReport.getDeletedItems(), failed, generateFailedMessage(zohoSyncReport));
+
+    // could use a proper object and json serializer later
     Map<String, String> body = new ConcurrentHashMap<>();
     body.put("text", slackMessage);
     return emJsonldSerializer.serializeObject(body);
@@ -196,20 +202,20 @@ public class EntitySynchronizationService extends BaseZohoAccess {
 
 
   private String generateFailedMessage(ZohoSyncReport zohoSyncReport) {
-    if(zohoSyncReport.getFailed() == null || zohoSyncReport.getFailed().isEmpty()) {
+    if (zohoSyncReport.getFailed() == null || zohoSyncReport.getFailed().isEmpty()) {
       return "";
     }
-    
+
     String headLine = "\\n\\nThe following organisations failed synchronisation:\\n";
-    int estimatedSize = headLine.length() + (zohoSyncReport.getFailed().size() * 100);
+    int avgUrlSize = 100;
+    int estimatedSize = headLine.length() + (zohoSyncReport.getFailed().size() * avgUrlSize);
     StringBuilder builder = new StringBuilder(estimatedSize);
     builder.append(headLine);
     for (FailedOperation failed : zohoSyncReport.getFailed()) {
-      builder.append(failed.getZohoId())
-        .append(" because of error: ")
-        .append(failed.getMessage()).append("\\n");
+      builder.append(failed.getZohoId()).append(" because of error: ").append(failed.getMessage())
+          .append("\\n");
     }
-    
+
     return builder.toString();
   }
 
@@ -225,8 +231,6 @@ public class EntitySynchronizationService extends BaseZohoAccess {
 
     while (hasNext) {
       // retrieve modified organizations
-      // OffsetDateTime offsetDateTime = modifiedSince.toInstant()
-      // .atOffset(ZoneOffset.UTC);
       try {
         orgList = zohoConfiguration.getZohoAccessClient().getZcrmRecordOrganizations(page, pageSize,
             modifiedSince);
@@ -236,7 +240,8 @@ public class EntitySynchronizationService extends BaseZohoAccess {
         // break if Zoho access failures occurs
         // sets also execution status
         zohoSyncReport.addFailedOperation(null, ZohoSyncReportFields.ZOHO_ACCESS_ERROR,
-            "Zoho synchronization exception occured when handling organizations modified in Zoho, the execution was interupted without updating all organizations",
+            "Zoho synchronization exception occured when handling organizations modified in Zoho, "
+            + "the execution was interupted without updating all organizations",
             e);
         // stop execution if the organizations cannot be read from zoho
         return;
@@ -263,11 +268,12 @@ public class EntitySynchronizationService extends BaseZohoAccess {
 
   /**
    * Retrieve deleted in Zoho organizations and remove them from the Enrichment database
+   * 
    * @param modifiedSince optional, select only organizations updated after this date
    * @param zohoSyncReport report collectign the results of the execution
    */
   void synchronizeDeletedZohoOrganizations(OffsetDateTime modifiedSince,
-      ZohoSyncReport zohoSyncReport){
+      ZohoSyncReport zohoSyncReport) {
 
     // do not delete organizations for individual entity importer
     // in case of full import the database should be manually cleaned. No need to delete
@@ -327,7 +333,7 @@ public class EntitySynchronizationService extends BaseZohoAccess {
 
   List<String> getEntityIdsByZohoCorefs(List<String> entitiesZohoCoref) {
     List<EntityRecord> recordsToDelete;
-    List<String> entityIdsToDelete = new ArrayList<String>(entitiesZohoCoref.size());
+    List<String> entityIdsToDelete = new ArrayList<>(entitiesZohoCoref.size());
     // retrieve records by coref
     recordsToDelete =
         entityRecordService.retrieveMultipleByEntityIdsOrCoreference(entitiesZohoCoref, null);
@@ -362,7 +368,6 @@ public class EntitySynchronizationService extends BaseZohoAccess {
   boolean isLastPage(int currentPageSize, int maxItemsPerPage) {
     // END LOOP: if no more organizations exist in Zoho
     return currentPageSize < maxItemsPerPage;
-    // return currentPageSize == 0;
   }
 
 
@@ -383,14 +388,12 @@ public class EntitySynchronizationService extends BaseZohoAccess {
     BatchOperations operations = new BatchOperations();
 
     Set<String> modifiedZohoUrls = getZohoOrganizationUrls(orgList);
-    // List<EntityRecord> existingRecords = findEntityRecordsBySameAs(modifiedZohoUrls);
     List<EntityRecord> existingEntityRecords = findEntityRecordsByProxyId(modifiedZohoUrls);
 
     Long zohoId;
     for (Record zohoOrg : orgList) {
       // if full import then always update no deletion required
       zohoId = zohoOrg.getId();
-      // organizationId = EntityRecordUtils.buildEntityIdUri(EntityTypes.Organization, zohoId);
       Optional<EntityRecord> entityRecordOptional = findRecordInList(zohoId, existingEntityRecords);
       EntityRecord entityRecord = null;
       if (entityRecordOptional.isPresent()) {
@@ -419,8 +422,6 @@ public class EntitySynchronizationService extends BaseZohoAccess {
   private void addOperation(BatchOperations operations, Long zohoId, Record zohoOrg,
       EntityRecord entityRecord) {
 
-    // String zohoBasedEntityId =
-    // EntityRecordUtils.buildEntityIdUri(EntityTypes.Organization, zohoId.toString());
     String zohoRecordEuropeanaID = ZohoOrganizationConverter.getEuropeanaIdFieldValue(zohoOrg);
 
     boolean hasDpsOwner = hasRequiredOwnership(zohoOrg);
@@ -429,7 +430,7 @@ public class EntitySynchronizationService extends BaseZohoAccess {
     String emOperation = identifyOperationType(zohoId, zohoRecordEuropeanaID, entityRecord,
         hasDpsOwner, markedForDeletion, zohoOrg);
 
-    if (emOperation != null) {
+    if (Objects.nonNull(emOperation)) {
       // only if there is an operation to perform in EM
       // zohoRecordEuropeanaID might be null at this stage
       Operation operation =
@@ -438,13 +439,14 @@ public class EntitySynchronizationService extends BaseZohoAccess {
     } else {
       // skip
       if (logger.isDebugEnabled()) {
+        Object entityId = (entityRecord == null) ? "null" : entityRecord.getEntityId();
         logger.debug(
             "Organization has changed in zoho, but there is no operation to perform on entity database, "
                 + "probably becasue the zoho organization doesn't have the required role, it was marked for deletion, "
                 + "or the generation of Organizations is not allowed for this job instance. Zoho id: {}, "
                 + "hasDpsOwner: {}, markedForDeletion: {}, entityRecord: {}",
             zohoId, hasDpsOwner, markedForDeletion,
-            entityRecord != null ? entityRecord.getEntityId() : "null");
+            entityId);
       }
     }
   }
@@ -452,8 +454,9 @@ public class EntitySynchronizationService extends BaseZohoAccess {
   String identifyOperationType(Long zohoId, String zohoRecordEuropeanaID, EntityRecord entityRecord,
       boolean hasDpsOwner, boolean markedForDeletion, Record zohoOrg) {
 
+    String operation = null;
     if (entityRecord == null) {
-      return shouldCreate(zohoId, zohoRecordEuropeanaID, hasDpsOwner, markedForDeletion)
+      operation = shouldCreate(zohoId, zohoRecordEuropeanaID, hasDpsOwner, markedForDeletion)
           ? Operations.CREATE
           : null;
     } else if (emConfiguration.isGenerateOrganizationEuropeanaId() && isModifiedByApi(zohoOrg)) {
@@ -464,20 +467,21 @@ public class EntitySynchronizationService extends BaseZohoAccess {
       return null;
     } else if (shouldDisable(hasDpsOwner, markedForDeletion)) {
       // if needsToBeDisabled
-      return Operations.DELETE;
+      operation = Operations.DELETE;
       // NOTE: the perform deletion needs to be updated to schedule updates
     } else if (shouldEnable(entityRecord, hasDpsOwner, markedForDeletion)) {
       // enable and update
       // if needsToBeDidabled
-      return Operations.ENABLE;
+      operation = Operations.ENABLE;
     } else {
       if (StringUtils.isBlank(zohoRecordEuropeanaID)) {
         logger.warn(
             "Zoho Organization doesn't have a Europeana ID, it should be set in Zoho before running the update workflow {}",
             zohoId);
       }
-      return Operations.UPDATE;
+      operation = Operations.UPDATE;
     }
+    return operation;
   }
 
   private boolean isModifiedByApi(Record zohoOrg) {

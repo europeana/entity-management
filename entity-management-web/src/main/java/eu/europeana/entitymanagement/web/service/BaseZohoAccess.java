@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import eu.europeana.entitymanagement.batch.config.JobDescriptionFactory;
 import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.jena.atlas.logging.Log;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import com.zoho.crm.api.record.DeletedRecord;
@@ -98,14 +99,15 @@ public class BaseZohoAccess {
     return zohoDatasource.get();
   }
 
-  OffsetDateTime generateFixDate(String since) throws EntityUpdateException {
+  OffsetDateTime generateFixDate(String since){
     // hardcoded date, just for manual testing
     SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss", Locale.ENGLISH);
     try {
       Date date = formatter.parse(since);
       return DateUtils.toOffsetDateTime(date);
     } catch (ParseException e) {
-      throw new EntityUpdateException("Invalid date format: + dateInString", e);
+      Log.info("Invalid date format:{}", since, e);
+      return null;
     }
   }
 
