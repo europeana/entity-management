@@ -11,9 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import eu.europeana.entitymanagement.batch.config.EntityUpdateJobFactory;
-import eu.europeana.entitymanagement.definitions.batch.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -26,11 +23,15 @@ import com.mongodb.assertions.Assertions;
 import dev.morphia.query.filters.Filter;
 import dev.morphia.query.filters.Filters;
 import eu.europeana.entitymanagement.AbstractIntegrationTest;
+import eu.europeana.entitymanagement.batch.config.EntityUpdateJobFactory;
 import eu.europeana.entitymanagement.batch.repository.FailedTaskRepository;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.batch.utils.BatchUtils;
 import eu.europeana.entitymanagement.config.AppAutoconfig;
+import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
 import eu.europeana.entitymanagement.definitions.batch.model.FailedTask.Builder;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.solr.model.SolrConcept;
 import eu.europeana.entitymanagement.solr.service.SolrService;
@@ -323,7 +324,7 @@ class ScheduledTaskServiceIT extends AbstractIntegrationTest {
     SolrConcept entity1Solr = emSolrService.searchById(SolrConcept.class, entityId1);
     SolrConcept entity2Solr = emSolrService.searchById(SolrConcept.class, entityId2);
 
-    // check that the first record is disbaled and the second deleted from the db, and both solr
+    // check that the first record is disabled and the second deleted from the db, and both solr
     // records are deleted
     Assertions.assertTrue(entityRecord1DbUpdated.get().isDisabled());
     Assertions.assertFalse(entityRecord2DbUpdated.isPresent());

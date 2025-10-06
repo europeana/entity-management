@@ -7,6 +7,7 @@ import eu.europeana.entitymanagement.batch.service.FailedTaskService;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.batch.utils.BatchUtils;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,7 +42,9 @@ public class ScheduledTaskItemListener
   @Override
   public void afterRead(BatchEntityRecord item) {
     // update stats
-    BatchUtils.selectStats(item.getScheduledTaskType(), metricUpdateStats, fullUpdateStats).updateEntityCounters(item);
+    if(TaskType.hasStatsToCount(item.getScheduledTaskType())) {
+      BatchUtils.selectStats(item.getScheduledTaskType(), metricUpdateStats, fullUpdateStats).updateEntityCounters(item);
+    }
   }
 
   @Override
@@ -81,7 +84,9 @@ public class ScheduledTaskItemListener
     logger.warn("onProcessError: entityId={}", entityId, e);
     failedTaskService.persistFailure(entityId, entityRecord.getScheduledTaskType(), e);
     // update failed count in the stats
-    BatchUtils.selectStats(entityRecord.getScheduledTaskType(), metricUpdateStats, fullUpdateStats).addFailed();
+    if(TaskType.hasStatsToCount(entityRecord.getScheduledTaskType())) {
+      BatchUtils.selectStats(entityRecord.getScheduledTaskType(), metricUpdateStats, fullUpdateStats).addFailed();
+    }
   }
 
   @Override
@@ -98,8 +103,11 @@ public class ScheduledTaskItemListener
                     r -> r.getEntityRecord().getEntityId(), r -> r.getScheduledTaskType())),
         e);
     // update failed count in the stats
-    entityRecords.stream().forEach(entityRecord -> 
-          BatchUtils.selectStats(entityRecord.getScheduledTaskType(), metricUpdateStats, fullUpdateStats).addFailed());
+    entityRecords.stream().forEach(entityRecord ->{
+      if(TaskType.hasStatsToCount(entityRecord.getScheduledTaskType())) {
+        BatchUtils.selectStats(entityRecord.getScheduledTaskType(), metricUpdateStats, fullUpdateStats).addFailed();
+      }
+    });
 
   }
 }

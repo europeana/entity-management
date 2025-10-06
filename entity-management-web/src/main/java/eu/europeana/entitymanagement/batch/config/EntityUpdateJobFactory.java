@@ -173,7 +173,9 @@ public class EntityUpdateJobFactory {
                 .get("initStatsStep")
                 .tasklet(
                         ((stepContribution, chunkContext) -> {
-                          selectStats(jobDescription.getTaskType(), enitityUpdateStats, metricsUpdateStats).reset();  
+                          if(TaskType.hasStatsToCount(jobDescription.getTaskType())) {
+                            selectStats(jobDescription.getTaskType(), enitityUpdateStats, metricsUpdateStats).reset();
+                          }
                           return RepeatStatus.FINISHED;
                         }))
                 .build();
@@ -190,6 +192,7 @@ public class EntityUpdateJobFactory {
     }
 
     private Step sendStatusReportStep(JobDescription jobDescription) {
+      if(TaskType.hasStatsToCount(jobDescription.getTaskType())) {  
         return stepBuilderFactory
                 .get("sendStatusReport")
                 .tasklet(
@@ -198,6 +201,9 @@ public class EntityUpdateJobFactory {
                         emConfig.getEntityManagementBaseUrl(),
                         getApplicationContext().getBean(SLACK_CONNECTION, SlackConnection.class))
                  ).build();
+      }
+      
+      return null;
     }
 
     private TaskExecutor getTaskExecutor(boolean isSynchronous) {

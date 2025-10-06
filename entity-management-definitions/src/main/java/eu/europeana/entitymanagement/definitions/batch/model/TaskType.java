@@ -28,4 +28,8 @@ public enum TaskType {
         }
         return null;
     }
+    
+    public static boolean hasStatsToCount(TaskType taskType) {
+      return full_update == taskType || metrics_update == taskType;
+    }
 }
