@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.batch.utils;
 
+import eu.europeana.entitymanagement.batch.model.EntityUpdateStats;
 import eu.europeana.entitymanagement.batch.model.JobParameter;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import java.util.Date;
@@ -61,5 +62,23 @@ public class BatchUtils {
 //        .filter(p -> supportedScheduledTasks.contains(p.getScheduledTaskType()))
         .map(r -> r.getEntityRecord().getEntityId())
         .collect(Collectors.toList());
+  }
+  
+  /**
+   * Select the stats for the given taskType
+   * @param taskType the type assigned to the current job execution
+   * @param entityUpdateStats the stats for entity updates execution
+   * @param metricsUpdateStats the stats for metrics update execution
+   * @return the selected stats object
+   */
+  public static EntityUpdateStats selectStats(TaskType taskType, EntityUpdateStats entityUpdateStats, EntityUpdateStats metricsUpdateStats) {
+    switch (taskType) {
+      case full_update: 
+        return entityUpdateStats;
+      case metrics_update:
+        return metricsUpdateStats;
+      default:
+        throw new IllegalArgumentException("Unexpected value: " + taskType);
+    }
   }
 }

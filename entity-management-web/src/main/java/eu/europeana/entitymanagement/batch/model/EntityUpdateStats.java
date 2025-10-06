@@ -57,17 +57,20 @@ public class EntityUpdateStats {
     /**
      * Increments the totalEntitiesForUpdate
      */
-    public void addEntityUpdated() {
+    protected void addEntityUpdated() {
         totalEntitiesForUpdate.getAndIncrement();
     }
 
     /**
-     * Increments the entites values by type
+     * Increments the entities values by type and total
      * @param entityRecord entity to be checked for type
      */
-    public void updateEntityByType(BatchEntityRecord entityRecord) {
+    public void updateEntityCounters(BatchEntityRecord entityRecord) {
         try {
-            switch (EntityTypes.getByEntityType(entityRecord.getEntityRecord().getEntity().getType())) {
+          //increase total  
+          addEntityUpdated();
+          //increase typed counter
+          switch (EntityTypes.getByEntityType(entityRecord.getEntityRecord().getEntity().getType())) {
                 case Agent:    agents.incrementAndGet();
                 break;
                 case Concept:  concepts.incrementAndGet();

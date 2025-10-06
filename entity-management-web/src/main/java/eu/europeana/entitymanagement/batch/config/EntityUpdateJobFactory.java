@@ -1,7 +1,7 @@
 package eu.europeana.entitymanagement.batch.config;
 
-import static eu.europeana.entitymanagement.batch.utils.BatchUtils.*;
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.*;
+import static eu.europeana.entitymanagement.batch.utils.BatchUtils.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -173,21 +173,10 @@ public class EntityUpdateJobFactory {
                 .get("initStatsStep")
                 .tasklet(
                         ((stepContribution, chunkContext) -> {
-                          getStats(jobDescription.getTaskType()).reset();  
+                          selectStats(jobDescription.getTaskType(), enitityUpdateStats, metricsUpdateStats).reset();  
                           return RepeatStatus.FINISHED;
                         }))
                 .build();
-    }
-    
-    private EntityUpdateStats getStats(TaskType taskType) {
-      switch (taskType) {
-        case full_update: 
-          return enitityUpdateStats;
-        case metrics_update:
-          return metricsUpdateStats;
-        default:
-          throw new IllegalArgumentException("Unexpected value: " + taskType);
-      }
     }
 
     private Step finishStats() {
@@ -205,7 +194,7 @@ public class EntityUpdateJobFactory {
                 .get("sendStatusReport")
                 .tasklet(
                     new ReportSenderTasklet(
-                        getStats(jobDescription.getTaskType()),
+                        selectStats(jobDescription.getTaskType(),  enitityUpdateStats, metricsUpdateStats),
                         emConfig.getEntityManagementBaseUrl(),
                         getApplicationContext().getBean(SLACK_CONNECTION, SlackConnection.class))
                  ).build();

@@ -253,7 +253,8 @@ public class AppAutoconfig extends AppConfigConstants {
             applicationContext.getBean("failedTaskService", FailedTaskService.class),
             applicationContext.getBean(BEAN_BATCH_SCHEDULED_TASK_SERVICE, ScheduledTaskService.class),
             Boolean.parseBoolean(isSynchronousString),
-            applicationContext.getBean(BEAN_ENTITY_UPDATE_STATS, EntityUpdateStats.class));
+            applicationContext.getBean(BEAN_ENTITY_UPDATE_STATS, EntityUpdateStats.class),
+            applicationContext.getBean(BEAN_METRICS_UPDATE_STATS, EntityUpdateStats.class));
   }
 
   /** ItemReader that queries by entityId when retrieving EntityRecords from the database */
