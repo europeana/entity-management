@@ -5,6 +5,7 @@ import static eu.europeana.entitymanagement.batch.utils.BatchUtils.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import javax.annotation.Resource;
 import org.springframework.batch.core.ItemProcessListener;
 import org.springframework.batch.core.Job;
@@ -13,6 +14,7 @@ import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.job.builder.SimpleJobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.step.skip.SkipPolicy;
 import org.springframework.batch.item.ItemProcessor;
@@ -103,14 +105,17 @@ public class EntityUpdateJobFactory {
      * @return Job for scheduled updates
      */
     public Job createScheduledUpdateJob(JobDescription jobDescription) {
-        return this.jobBuilderFactory
-                .get(JOB_UPDATE_SCHEDULED_ENTITIES)
-                // This job is always launched via a @Scheduled method.
-                .start(initStats(jobDescription))
-                .next(entityUpdate(jobDescription, false))
-                .next(finishStats())
-                .next(sendStatusReportStep(jobDescription))
-                .build();
+        SimpleJobBuilder stepBuilder = this.jobBuilderFactory
+              .get(JOB_UPDATE_SCHEDULED_ENTITIES)
+              // This job is always launched via a @Scheduled method.
+              .start(initStats(jobDescription))
+              .next(entityUpdate(jobDescription, false))
+              .next(finishStats());
+        Step statusReportStep = createSendStatusReportStep(jobDescription);
+        if(Objects.nonNull(statusReportStep)) {
+          stepBuilder.next(statusReportStep);
+        }
+        return stepBuilder.build();
     }
 
     /**
@@ -191,16 +196,19 @@ public class EntityUpdateJobFactory {
                 .build();
     }
 
-    private Step sendStatusReportStep(JobDescription jobDescription) {
+    private Step createSendStatusReportStep(JobDescription jobDescription) {
+      
       if(TaskType.hasStatsToCount(jobDescription.getTaskType())) {  
+        //create tasklet
+        ReportSenderTasklet tasklet = new ReportSenderTasklet(
+            selectStats(jobDescription.getTaskType(),  enitityUpdateStats, metricsUpdateStats),
+            emConfig.getEntityManagementBaseUrl(),
+            getApplicationContext().getBean(SLACK_CONNECTION, SlackConnection.class));
+        
         return stepBuilderFactory
                 .get("sendStatusReport")
-                .tasklet(
-                    new ReportSenderTasklet(
-                        selectStats(jobDescription.getTaskType(),  enitityUpdateStats, metricsUpdateStats),
-                        emConfig.getEntityManagementBaseUrl(),
-                        getApplicationContext().getBean(SLACK_CONNECTION, SlackConnection.class))
-                 ).build();
+                .tasklet(tasklet)
+                .build();
       }
       
       return null;

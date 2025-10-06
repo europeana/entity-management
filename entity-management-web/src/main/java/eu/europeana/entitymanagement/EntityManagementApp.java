@@ -43,7 +43,8 @@ public class EntityManagementApp implements CommandLineRunner {
 
   private static final Logger LOG = LogManager.getLogger(EntityManagementApp.class);
   private static final int WAITING_INTREVAL = 5;
-
+  private static int exitStatus = 1;
+  
   @Autowired
   private BatchEntityUpdateExecutor batchUpdateExecutor;
   @Autowired
@@ -53,7 +54,6 @@ public class EntityManagementApp implements CommandLineRunner {
   @Autowired
   private EntityUpdateService entityUpdateService;
 
-  private static int exitStatus = 1;
   /**
    * Main entry point of this application
    *

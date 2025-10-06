@@ -1,7 +1,5 @@
 package eu.europeana.entitymanagement.batch.service;
 
-import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.StepContribution;
@@ -9,6 +7,7 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import eu.europeana.entitymanagement.batch.model.EntityUpdateStats;
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import eu.europeana.entitymanagement.web.service.SlackConnection;
 
 /**
@@ -50,7 +49,8 @@ See <%s|here> which entities have failed update. "}
             if (!entityMnagmntUrl.endsWith("/")) {
               entityMangmtFailedUrl.append('/');
             }
-            String update = StringUtils.equals(stats.getTaskType().getValue(), TaskType.full_update.getValue()) ? "update from external source" : "metrics update" ;
+            String update = (TaskType.full_update == stats.getTaskType()) ? "update from external source" : "metrics update" ;
+            
             entityMangmtFailedUrl.append("entity/management/failed?pageSize=60");
             slackConnection.publishStatusReport(String.format(ASYNC_STATUS_REPORT,
                     stats.getTotalEntitiesForUpdate(),

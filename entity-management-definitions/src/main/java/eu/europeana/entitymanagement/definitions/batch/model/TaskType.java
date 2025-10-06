@@ -29,6 +29,11 @@ public enum TaskType {
         return null;
     }
     
+    /**
+     * Indicates if metrics need to be collected for the given task type
+     * @param taskType the type
+     * @return true for metrics update and full update
+     */
     public static boolean hasStatsToCount(TaskType taskType) {
       return full_update == taskType || metrics_update == taskType;
     }
