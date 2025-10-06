@@ -22,7 +22,7 @@ public class ReportSenderTasklet implements Tasklet {
     private static final Logger logger = LogManager.getLogger(ReportSenderTasklet.class);
 
     public static final String ASYNC_STATUS_REPORT = """
-            {"text" : " %s entites were scheduled for %s from external source with the following results: agents: %s, concepts: %s, places: %s, timespans: %s, failed: %s.
+            {"text" : " %s entites were scheduled for %s with the following results: agents: %s, concepts: %s, places: %s, timespans: %s, failed: %s.
 See <%s|here> which entities have failed update. "}
                              """;
 
@@ -50,7 +50,7 @@ See <%s|here> which entities have failed update. "}
             if (!entityMnagmntUrl.endsWith("/")) {
               entityMangmtFailedUrl.append('/');
             }
-            String update = StringUtils.equals(stats.getTaskType().getValue(), TaskType.full_update.getValue()) ? "update" : "metrics update" ;
+            String update = StringUtils.equals(stats.getTaskType().getValue(), TaskType.full_update.getValue()) ? "update from external source" : "metrics update" ;
             entityMangmtFailedUrl.append("entity/management/failed?pageSize=60");
             slackConnection.publishStatusReport(String.format(ASYNC_STATUS_REPORT,
                     stats.getTotalEntitiesForUpdate(),

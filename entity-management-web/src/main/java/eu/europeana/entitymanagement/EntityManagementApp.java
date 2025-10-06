@@ -238,7 +238,7 @@ public class EntityManagementApp implements CommandLineRunner {
     }
     
     String[] typesToUpdate = emConfiguration.getBatchScheduleMetricsupdateTypes().split(",");
-    scheduleTasks(TaskType.full_update, typesToUpdate);
+    scheduleTasks(TaskType.metrics_update, typesToUpdate);
   }
 
   void scheduleTasks(TaskType taskType, String[] typesToUpdate) {
