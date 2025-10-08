@@ -102,9 +102,8 @@ public class EntitySynchronizationService extends BaseZohoAccess {
       // schedule modified since last update
       modifiedSince = DateUtils.toOffsetDateTime(previousSync.getStartDate());
     }
-    // for development debugging purposes use
-    boolean locallDebugging = false;
-    if (locallDebugging) {
+    // for development debugging purposes use, switch to true
+    if (isLocalDebugging()) {
       String since = "29-Sep-2025 10:30:00";
       modifiedSince = generateFixDate(since);
       if (modifiedSince == null) {
@@ -114,6 +113,10 @@ public class EntitySynchronizationService extends BaseZohoAccess {
     }
 
     return synchronizeZohoOrganizations(modifiedSince);
+  }
+
+  protected boolean isLocalDebugging() {
+    return false;
   }
 
   /**
@@ -143,7 +146,10 @@ public class EntitySynchronizationService extends BaseZohoAccess {
     return zohoSyncRepo.save(zohoSyncReport);
   }
 
-
+  /**
+   * Generate and send slack message for the given report
+   * @param zohoSyncReport report on zoho sync execution
+   */
   public void publishReport(ZohoSyncReport zohoSyncReport) {
     
     try {

@@ -27,9 +27,21 @@ import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
 import eu.europeana.entitymanagement.web.service.EntitySynchronizationService;
 import eu.europeana.entitymanagement.web.service.SlackConnection;
 
+/**
+ * Base class for Entity Synchronization cron jobs
+ */
 public class EntitySyncCronJob {
 
   private static final Logger LOGGER = LogManager.getLogger(EntitySyncCronJob.class);
+  
+  public static final String STATS_REPORT_MESSAGE =
+      "%d entites were scheduled for %s with the following distribution: organizations: %d, agents: %d, concepts: %d, places: %d, timespans: %d.";
+  public static final String STATS_REPORT_FAILED_MESSAGE =
+      "failed update: %d See <%s|here> which entities have failed update. ";
+
+  // slack json format including full update, metrics update and failed on separate text lines
+  public static final String SYNC_REPORT_SLACK_MESSAGE = """
+      {"text" : "%s%n%s%n%s"}""";
 
   @Autowired
   private BatchEntityUpdateExecutor batchUpdateExecutor;
@@ -44,15 +56,6 @@ public class EntitySyncCronJob {
 
   @Resource(name = BEAN_METRICS_UPDATE_STATS)
   private EntityUpdateStats metricsUpdateStats;
-  
-  public static final String STATS_REPORT_MESSAGE =
-      "%d entites were scheduled for %s with the following distribution: organizations: %d, agents: %d, concepts: %d, places: %d, timespans: %d.";
-  public static final String STATS_REPORT_FAILED_MESSAGE =
-      "failed update: %d See <%s|here> which entities have failed update. ";
-
-  // slack json format including full update, metrics update and failed on separate text lines
-  public static final String SYNC_REPORT_SLACK_MESSAGE = """
-      {"text" : "%s%n%s%n%s"}""";
 
   static ScheduledTaskService getScheduledTasksService(ConfigurableApplicationContext context) {
     return (ScheduledTaskService) context
@@ -71,22 +74,21 @@ public class EntitySyncCronJob {
     }
 
     // Schedule Tasks
-    scheduleUpdateTasks(tasks);
+    scheduleUpdateTasks();
 
     // execute tasks
     if (tasks.contains(JobType.SCHEDULE_DELETION.value())) {
       // run also the deletions called through the API directly
       LOGGER.info("Executing scheduled deletions");
       batchUpdateExecutor.runScheduledDeprecationsAndDeletions();
-      // TODO: should read the number of scheduled deletions and deprecations from the database
+      // SG: should read the number of scheduled deletions and deprecations from the database
       // and write it to the LOGGERs
     }
 
     if (tasks.contains(JobType.SCHEDULE_UPDATE.value())) {
       LOGGER.info("Executing scheduled updates");
-      // batchUpdateExecutor.runScheduledUpdate();
       batchUpdateExecutor.runScheduledTasks();
-      // TODO: should read the number of scheduled deletions and deprecations from the database
+      // SG: should read the number of scheduled deletions and deprecations from the database
       // and write it to the LOGGERs
     }
 
@@ -130,13 +132,14 @@ public class EntitySyncCronJob {
       
   } else {
       if (LOGGER.isInfoEnabled()) {
-        LOGGER.info("Status report not sent !! As there are no entities were scheduled for update (full or metrics):  {}, \n {}", entityUpdateStats, metricsUpdateStats);
+        LOGGER.info("Status report not sent !! As there are no entities were scheduled for update (full or metrics):  {}, \n {}", 
+            entityUpdateStats, metricsUpdateStats);
       }
   }
     
   }
 
-  void scheduleUpdateTasks(Set<String> tasks) {
+  void scheduleUpdateTasks() {
     Instant now = Instant.now();
 
     if (isExecuteFullUpdates(now)) {

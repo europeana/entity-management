@@ -121,8 +121,7 @@ public class EntityUpdateService {
 
       // get the entities to be scheduled, failed and skipped for update
       List<String> entityIdsToSchedule = updateEntityIdResponse(entityIdResponse, entityIds);
-      System.out.println("Entities to schedule: " + entityIdsToSchedule);
-
+      
       scheduleTasks(entityIdsToSchedule, updateType);
     }
     return entityIdResponse;

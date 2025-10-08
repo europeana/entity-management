@@ -1,10 +1,6 @@
 package eu.europeana.entitymanagement.batch.config;
 
-import static eu.europeana.entitymanagement.batch.utils.BatchUtils.JOB_REMOVE_SCHEDULED_ENTITIES;
-import static eu.europeana.entitymanagement.batch.utils.BatchUtils.JOB_UPDATE_SCHEDULED_ENTITIES;
-import static eu.europeana.entitymanagement.batch.utils.BatchUtils.JOB_UPDATE_SINGLE_ENTITY;
-import static eu.europeana.entitymanagement.batch.utils.BatchUtils.STEP_REMOVE_ENTITY;
-import static eu.europeana.entitymanagement.batch.utils.BatchUtils.STEP_UPDATE_ENTITY;
+import static eu.europeana.entitymanagement.batch.utils.BatchUtils.*;
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,6 +45,9 @@ import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 @EnableBatchProcessing
 public class EntityUpdateJobFactory {
 
+    /** SkipPolicy to ignore all failures when executing jobs, as they can be handled later */
+    private static final SkipPolicy NOOP_SKIP_POLICY = (Throwable t, int skipCount) -> true;
+
     @Resource
     private JobBuilderFactory jobBuilderFactory;
     @Resource
@@ -57,9 +56,6 @@ public class EntityUpdateJobFactory {
     private ScheduledTaskItemListener itemListener;
     @Resource
     private ScheduledTaskService scheduledTaskService;
-
-    /** SkipPolicy to ignore all failures when executing jobs, as they can be handled later */
-    private final SkipPolicy noopSkipPolicy = (Throwable t, int skipCount) -> true;
 
     @Resource
     EntityManagementConfiguration emConfig;
@@ -137,7 +133,7 @@ public class EntityUpdateJobFactory {
                 .writer(getWriter())
                 .listener((ItemProcessListener<? super BatchEntityRecord, ? super BatchEntityRecord>) itemListener)
                 .faultTolerant()
-                .skipPolicy(noopSkipPolicy)
+                .skipPolicy(NOOP_SKIP_POLICY)
                 .taskExecutor(getTaskExecutor(isSynchronous))
                 .throttleLimit(emConfig.getBatchUpdatesThrottleLimit())
                 .listener(stepExecutionListener(
@@ -155,7 +151,7 @@ public class EntityUpdateJobFactory {
                 .listener((ItemProcessListener<? super BatchEntityRecord, ? super BatchEntityRecord>)
                         itemListener)
                 .faultTolerant()
-                .skipPolicy(noopSkipPolicy)
+                .skipPolicy(NOOP_SKIP_POLICY)
                 .taskExecutor(getRemovalTaskExecutor())
                 .throttleLimit(emConfig.getBatchRemovalsThrottleLimit())
                 // removal steps are always async

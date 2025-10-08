@@ -21,14 +21,14 @@ public class EntityUpdateStats {
   public static final String TO_STRING_FORMAT =
       "%s entites were scheduled for %s with the following distribution: organizations: %s, agents: %s, concepts: %s, places: %s, timespans: %s, failed: %s";
 
-  private AtomicReference<TaskType> taskType = new AtomicReference<>();
-  private AtomicInteger totalEntitiesForUpdate = new AtomicInteger();
-  private AtomicInteger organizations = new AtomicInteger();
-  private AtomicInteger agents = new AtomicInteger();
-  private AtomicInteger concepts = new AtomicInteger();
-  private AtomicInteger timespans = new AtomicInteger();
-  private AtomicInteger places = new AtomicInteger();
-  private AtomicInteger failed = new AtomicInteger();
+  private final AtomicReference<TaskType> taskType = new AtomicReference<>();
+  private final AtomicInteger totalEntitiesForUpdate = new AtomicInteger();
+  private final AtomicInteger organizations = new AtomicInteger();
+  private final AtomicInteger agents = new AtomicInteger();
+  private final AtomicInteger concepts = new AtomicInteger();
+  private final AtomicInteger timespans = new AtomicInteger();
+  private final AtomicInteger places = new AtomicInteger();
+  private final AtomicInteger failed = new AtomicInteger();
 
   /**
    * main constructor
@@ -98,7 +98,9 @@ public class EntityUpdateStats {
           break;
       }
     } catch (UnsupportedEntityTypeException e) {
-      logger.warn("Unknown type of entity found in the DB {}", e.getMessage(), e);
+      if(logger.isWarnEnabled()) {
+        logger.warn("Unknown type of entity found in the DB {}", e.getMessage(), e);
+      }
     }
   }
 
