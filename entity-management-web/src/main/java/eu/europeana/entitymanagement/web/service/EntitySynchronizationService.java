@@ -16,13 +16,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import com.zoho.crm.api.record.DeletedRecord;
 import com.zoho.crm.api.record.Record;
 import dev.morphia.query.filters.Filter;
@@ -144,45 +139,23 @@ public class EntitySynchronizationService extends BaseZohoAccess {
     synchronizeDeletedZohoOrganizations(deletedSince, zohoSyncReport);
 
     logger.info("Zoho update operations completed successfully:\n {}", zohoSyncReport);
-
-    publishReport(zohoSyncReport);
-
+    
     return zohoSyncRepo.save(zohoSyncReport);
   }
 
 
-  private void publishReport(ZohoSyncReport zohoSyncReport) {
-    if (logger.isDebugEnabled()) {
-      logger.debug("Sending report to slack : {}", zohoSyncReport);
-    }
-
-    String jsonMessage = null;
+  public void publishReport(ZohoSyncReport zohoSyncReport) {
+    
     try {
-      if (StringUtils.isBlank(emConfiguration.getZohoSlackWebHook())) {
-        logger
-            .warn("Slack webhook not configured, status report will not be published over Slack!");
-        return;
-      }
-
-      jsonMessage = buildSyncReportMessageForSlackWebHook(zohoSyncReport);
-
-      WebClient webClient =
-          WebClient.builder().baseUrl(emConfiguration.getZohoSlackWebHook()).build();
-      // send message to webhook
-
-      ResponseSpec resp = webClient.post().contentType(MediaType.APPLICATION_JSON)
-          .bodyValue(jsonMessage).retrieve();
-
-      ResponseEntity<String> response = resp.toEntity(String.class).block();
-      if (logger.isDebugEnabled()) {
-        logger.debug("Received webhook response: {}", response == null ? "" : response.getBody());
-      }
-    } catch (WebClientResponseException | IOException e) {
-      logger.warn("Exception occurred while sending slack message: {}", jsonMessage, e);
+      SlackConnection slackConnection = new SlackConnection(emConfiguration.getZohoSlackWebHook());
+      String jsonMessage = buildReportMessage(zohoSyncReport);
+      slackConnection.publishStatusReport(jsonMessage);
+    } catch (IOException e) {
+      logger.warn("Exception occurred while buiding the slack message for ZohoReport: {}", zohoSyncReport, e);
     }
   }
 
-  String buildSyncReportMessageForSlackWebHook(ZohoSyncReport zohoSyncReport) throws IOException {
+  String buildReportMessage(ZohoSyncReport zohoSyncReport) throws IOException {
     long synced = zohoSyncReport.getCreatedItems() + zohoSyncReport.getUpdatedItems()
         + zohoSyncReport.getDeprecatedItems();
 

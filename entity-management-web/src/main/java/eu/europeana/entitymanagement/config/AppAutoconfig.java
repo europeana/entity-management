@@ -58,7 +58,6 @@ import eu.europeana.entitymanagement.exception.ApplicationInitializationExceptio
 import eu.europeana.entitymanagement.mongo.repository.VocabularyRepository;
 import eu.europeana.entitymanagement.web.MetisDereferenceUtils;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
-import eu.europeana.entitymanagement.web.service.SlackConnection;
 import eu.europeana.entitymanagement.web.xml.model.RdfXmlUtils;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
@@ -296,11 +295,6 @@ public class AppAutoconfig extends AppConfigConstants {
             new SynchronizedItemStreamReader<>();
     synchronizedItemStreamReader.setDelegate(reader);
     return synchronizedItemStreamReader;
-  }
-
-  @Bean(name = SLACK_CONNECTION)
-  public SlackConnection getSlackConnection() {
-    return new SlackConnection(emConfiguration.getEmUpdateSlackWebHook());
   }
 
 }

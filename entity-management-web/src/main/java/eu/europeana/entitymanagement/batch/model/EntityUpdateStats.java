@@ -8,112 +8,136 @@ import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
+
 /**
  * Entity Update statistics class
+ * 
  * @author srishti singh
  * @since 15 September 2025
  */
 public class EntityUpdateStats {
 
-    private static final Logger logger = LogManager.getLogger(EntityUpdateStats.class);
+  private static final Logger logger = LogManager.getLogger(EntityUpdateStats.class);
+  public static final String TO_STRING_FORMAT =
+      "%s entites were scheduled for %s with the following distribution: organizations: %s, agents: %s, concepts: %s, places: %s, timespans: %s, failed: %s";
 
-    private AtomicReference<TaskType> taskType = new AtomicReference<>();
-    private AtomicInteger totalEntitiesForUpdate = new AtomicInteger();
-    private AtomicInteger agents = new AtomicInteger();
-    private AtomicInteger concepts = new AtomicInteger();
-    private AtomicInteger timespans = new AtomicInteger();
-    private AtomicInteger places = new AtomicInteger();
-    private AtomicInteger failed = new AtomicInteger();
+  private AtomicReference<TaskType> taskType = new AtomicReference<>();
+  private AtomicInteger totalEntitiesForUpdate = new AtomicInteger();
+  private AtomicInteger organizations = new AtomicInteger();
+  private AtomicInteger agents = new AtomicInteger();
+  private AtomicInteger concepts = new AtomicInteger();
+  private AtomicInteger timespans = new AtomicInteger();
+  private AtomicInteger places = new AtomicInteger();
+  private AtomicInteger failed = new AtomicInteger();
 
-    /**
-     * main constructor
-     * @param taskType the type of the scheduled tasks for which the stats are collected
-     */
-    public EntityUpdateStats(TaskType taskType) {
-      this.taskType.set(taskType);
-    }
-    
-    /**
-     * Resets the values for next time
-     * call this before setting any values to EntityUpdateStats
-     */
-    public void reset() {
-        totalEntitiesForUpdate.set(0);
-        agents.set(0);
-        concepts.set(0);
-        timespans.set(0);
-        places.set(0);
-        failed.set(0);
-    }
+  /**
+   * main constructor
+   * 
+   * @param taskType the type of the scheduled tasks for which the stats are collected
+   */
+  public EntityUpdateStats(TaskType taskType) {
+    this.taskType.set(taskType);
+  }
 
-    public TaskType getTaskType() {
-        return this.taskType.get();
-    }
+  /**
+   * Resets the values for next time call this before setting any values to EntityUpdateStats
+   */
+  public void reset() {
+    totalEntitiesForUpdate.set(0);
+    agents.set(0);
+    concepts.set(0);
+    timespans.set(0);
+    places.set(0);
+    failed.set(0);
+  }
 
-    protected void setTaskType(TaskType taskTypeValue) {
-        taskType.set(taskTypeValue);
-    }
+  public TaskType getTaskType() {
+    return this.taskType.get();
+  }
 
-    /**
-     * Increments the totalEntitiesForUpdate
-     */
-    protected void addEntityUpdated() {
-        totalEntitiesForUpdate.getAndIncrement();
-    }
+  protected void setTaskType(TaskType taskTypeValue) {
+    taskType.set(taskTypeValue);
+  }
 
-    /**
-     * Increments the entities values by type and total
-     * @param entityRecord entity to be checked for type
-     */
-    public void updateEntityCounters(BatchEntityRecord entityRecord) {
-        try {
-          //increase total  
-          addEntityUpdated();
-          //increase typed counter
-          switch (EntityTypes.getByEntityType(entityRecord.getEntityRecord().getEntity().getType())) {
-                case Agent:    agents.incrementAndGet();
-                break;
-                case Concept:  concepts.incrementAndGet();
-                break;
-                case Place:    places.incrementAndGet();
-                break;
-                case TimeSpan: timespans.incrementAndGet();
-                break;
-                case Aggregator, ConceptScheme, Organization: //skip organizations and concept schemes
-                break;
-                default:
-                  break;
-            }
-        } catch (UnsupportedEntityTypeException e) {
-            logger.info("Unknown type of entity found in the DB {}", e.getMessage(), e);
-        }
-    }
+  /**
+   * Increments the totalEntitiesForUpdate
+   */
+  protected void addEntityUpdated() {
+    totalEntitiesForUpdate.getAndIncrement();
+  }
 
-    public void addFailed() {
-        failed.incrementAndGet();
-    }
+  /**
+   * Increments the entities values by type and total
+   * 
+   * @param entityRecord entity to be checked for type
+   */
+  public void updateEntityCounters(BatchEntityRecord entityRecord) {
+    try {
+      // increase total
+      addEntityUpdated();
 
-    public int getAgents() {
-        return agents.get();
+      // increase typed counter
+      switch (EntityTypes.getByEntityType(entityRecord.getEntityRecord().getEntity().getType())) {
+        case Agent:
+          agents.incrementAndGet();
+          break;
+        case Concept:
+          concepts.incrementAndGet();
+          break;
+        case Place:
+          places.incrementAndGet();
+          break;
+        case TimeSpan:
+          timespans.incrementAndGet();
+          break;
+        case Aggregator, Organization:
+          organizations.incrementAndGet();
+          break;
+        case ConceptScheme: // skip concept schemes
+        default:
+          break;
+      }
+    } catch (UnsupportedEntityTypeException e) {
+      logger.warn("Unknown type of entity found in the DB {}", e.getMessage(), e);
     }
+  }
 
-    public int getTotalEntitiesForUpdate() {
-        return totalEntitiesForUpdate.get();
-    }
+  public void addFailed() {
+    failed.incrementAndGet();
+  }
 
-    public int getConcepts() {
-        return concepts.get();
-    }
+  public int getOrganizations() {
+    return organizations.get();
+  }
 
-    public int getTimespans() {
-        return timespans.get();
-    }
+  public int getAgents() {
+    return agents.get();
+  }
 
-    public int getPlaces() {
-        return places.get();
-    }
+  public int getTotalEntitiesForUpdate() {
+    return totalEntitiesForUpdate.get();
+  }
 
-    public int getFailed() {
-        return failed.get();
-    }
+  public int getConcepts() {
+    return concepts.get();
+  }
+
+  public int getTimespans() {
+    return timespans.get();
+  }
+
+  public int getPlaces() {
+    return places.get();
+  }
+
+  public int getFailed() {
+    return failed.get();
+  }
+
+  @Override
+  public String toString() {
+
+    return String.format(TO_STRING_FORMAT, getTotalEntitiesForUpdate(), getTaskType().getValue(),
+        getOrganizations(), getAgents(), getConcepts(), getPlaces(), getTimespans(), getFailed());
+  }
 }

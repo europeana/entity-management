@@ -48,14 +48,14 @@ public class EntityAdminController extends BaseRest {
   private static final Logger LOG = LogManager.getLogger(EntityAdminController.class);
 
   private final EntityRecordService entityRecordService;
-  private final EntitySynchronizationService zohoSyncService;
+  private final EntitySynchronizationService entitySyncService;
 
   @Autowired
   public EntityAdminController(
       EntityRecordService entityRecordService,
-      EntitySynchronizationService zohoSyncService) {
+      EntitySynchronizationService entitySyncService) {
     this.entityRecordService = entityRecordService;
-    this.zohoSyncService = zohoSyncService;
+    this.entitySyncService = entitySyncService;
   }
 
   @ApiOperation(value = "Permanent Deletion of Entity", nickname = "deleteEntity")
@@ -149,7 +149,7 @@ public class EntityAdminController extends BaseRest {
     verifyWriteAccess(EMOperations.OPERATION_ZOHO_SYNC, request);
 
     OffsetDateTime modifiedSince = validateSince(since);
-    ZohoSyncReport zohoSyncReport = zohoSyncService.synchronizeZohoOrganizations(modifiedSince);
+    ZohoSyncReport zohoSyncReport = entitySyncService.synchronizeZohoOrganizations(modifiedSince);
 
     return generateZohoSyncResponse(request, zohoSyncReport);
   }

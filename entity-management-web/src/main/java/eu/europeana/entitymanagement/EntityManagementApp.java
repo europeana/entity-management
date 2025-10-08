@@ -1,15 +1,10 @@
 package eu.europeana.entitymanagement;
 
-import java.time.DayOfWeek;
 import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Set;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
@@ -20,16 +15,7 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 import eu.europeana.entitymanagement.batch.model.JobType;
-import eu.europeana.entitymanagement.batch.service.BatchEntityUpdateExecutor;
-import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
-import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
-import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
-import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
-import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
-import eu.europeana.entitymanagement.web.service.EntitySynchronizationService;
 
 /**
  * Main application. Allows deploying as a war and logs instance data when deployed in Cloud Foundry
@@ -39,21 +25,13 @@ import eu.europeana.entitymanagement.web.service.EntitySynchronizationService;
     SecurityAutoConfiguration.class, ManagementWebSecurityAutoConfiguration.class,
     // DataSources are manually configured (for EM and batch DBs)
     DataSourceAutoConfiguration.class})
-public class EntityManagementApp implements CommandLineRunner {
+public class EntityManagementApp extends EntitySyncCronJob implements CommandLineRunner {
 
   private static final Logger LOG = LogManager.getLogger(EntityManagementApp.class);
+  
   private static final int WAITING_INTREVAL = 5;
   private static int exitStatus = 1;
   
-  @Autowired
-  private BatchEntityUpdateExecutor batchUpdateExecutor;
-  @Autowired
-  private EntitySynchronizationService zohoSyncService;
-  @Autowired
-  private EntityManagementConfiguration emConfiguration;
-  @Autowired
-  private EntityUpdateService entityUpdateService;
-
   /**
    * Main entry point of this application
    *
@@ -155,11 +133,6 @@ public class EntityManagementApp implements CommandLineRunner {
     return hasCmdLineParams(args);
   }
 
-  static ScheduledTaskService getScheduledTasksService(ConfigurableApplicationContext context) {
-    return (ScheduledTaskService) context
-        .getBean(AppConfigConstants.BEAN_BATCH_SCHEDULED_TASK_SERVICE);
-  }
-
   static boolean hasCmdLineParams(String[] args) {
     return args != null && args.length > 0;
   }
@@ -173,84 +146,7 @@ public class EntityManagementApp implements CommandLineRunner {
     // if no arguments then web server should be started
     return;
   }
-
-
-  void performEntitySynchronizationWorkflow(Set<String> tasks){
-    //Schedule Tasks
-    scheduleTasks(tasks);
-    
-    //execute tasks
-    if (tasks.contains(JobType.SCHEDULE_DELETION.value())) {
-      // run also the deletions called through the API directly
-      LOG.info("Executing scheduled deletions");
-      batchUpdateExecutor.runScheduledDeprecationsAndDeletions();
-      // TODO: should read the number of scheduled deletions and deprecations from the database
-      // and write it to the logs
-    }
-
-    if (tasks.contains(JobType.SCHEDULE_UPDATE.value())) {
-      LOG.info("Executing scheduled updates");
-      // batchUpdateExecutor.runScheduledUpdate();
-      batchUpdateExecutor.runScheduledTasks();
-      // TODO: should read the number of scheduled deletions and deprecations from the database
-      // and write it to the logs
-    }
-  }
-
-  void scheduleTasks(Set<String> tasks){
-    Instant now = Instant.now();
-
-    // first zoho sync as it runs synchronuous operations
-    if (tasks.contains(JobType.ZOHO_SYNC.value())) {
-      LOG.info("Executing zoho sync");
-      ZohoSyncReport zohoSyncReport = zohoSyncService.synchronizeModifiedZohoOrganizations();
-      LOG.info("Synchronization Report: {}", zohoSyncReport.toString());
-    }
-
-    if (isExecuteFullUpdates(now)) {
-      // schedule FULL Updates
-      scheduleFullUpdates();
-    } else {
-      // schedule Metrics Update
-      scheduleMetricsUpdates();
-    }
-  }
-
-  protected boolean isExecuteFullUpdates(Instant now) {
-    return now.atZone(ZoneId.systemDefault()).getDayOfWeek() == DayOfWeek.valueOf(emConfiguration.getBatchScheduleFullupdateDay().trim());
-  }
-
-  protected void scheduleFullUpdates() {
-    if(StringUtils.isAllBlank(emConfiguration.getBatchScheduleFullupdateTypes())){
-      LOG.info("Skipping scheduling of full updates for entities, no entity types configured for update");
-      return;
-    }
-    
-    String[] typesToUpdate = emConfiguration.getBatchScheduleFullupdateTypes().trim().split(",");
-    scheduleTasks(TaskType.full_update, typesToUpdate);
-  }
   
-  void scheduleMetricsUpdates() {
-    if(StringUtils.isAllBlank(emConfiguration.getBatchScheduleMetricsupdateTypes())){
-      LOG.info("Skipping scheduling of metrics update for entities, no entity types configured for update");
-      return;
-    }
-    
-    String[] typesToUpdate = emConfiguration.getBatchScheduleMetricsupdateTypes().split(",");
-    scheduleTasks(TaskType.metrics_update, typesToUpdate);
-  }
-
-  void scheduleTasks(TaskType taskType, String[] typesToUpdate) {
-    //schedule for each entity type
-    for(String entityType : typesToUpdate) {
-      try {
-        entityUpdateService.scheduleUpdatesWithSearch(EntitySolrFields.TYPE + ": " + entityType, taskType);
-      } catch (SolrServiceException e) {
-        LOG.warn("Cannot schedule updates ({}) for entity type:{}", taskType, entityType, e);
-      }
-    }
-  }
-
   /** validates the arguments passed 
    * @param commanda line params for tasks shceuling and execution 
    */

@@ -47,6 +47,7 @@ public class EntityUpdateService {
   private SolrService solrService;
   @Resource
   private EntityManagementConfiguration emConfiguration;
+  
   private final ScheduledTaskService scheduledTaskService;
 
   @Autowired
@@ -120,6 +121,7 @@ public class EntityUpdateService {
 
       // get the entities to be scheduled, failed and skipped for update
       List<String> entityIdsToSchedule = updateEntityIdResponse(entityIdResponse, entityIds);
+      System.out.println("Entities to schedule: " + entityIdsToSchedule);
 
       scheduleTasks(entityIdsToSchedule, updateType);
     }
@@ -143,7 +145,7 @@ public class EntityUpdateService {
     List<String> existingEntityIds =
         statusList.stream().map(EntityIdDisabledStatus::getEntityId).collect(Collectors.toList());
 
-    // failures are entityIds that weren't retrieved
+    // failures are entityIds that weren't retrieved with status
     List<String> failures =
         entityIds.stream().filter(e -> !existingEntityIds.contains(e)).collect(Collectors.toList());
 

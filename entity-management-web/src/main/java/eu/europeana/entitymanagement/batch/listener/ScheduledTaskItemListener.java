@@ -43,7 +43,7 @@ public class ScheduledTaskItemListener
   public void afterRead(BatchEntityRecord item) {
     // update stats
     if(TaskType.hasStatsToCount(item.getScheduledTaskType())) {
-      BatchUtils.selectStats(item.getScheduledTaskType(), metricUpdateStats, fullUpdateStats).updateEntityCounters(item);
+      BatchUtils.selectStats(item.getScheduledTaskType(), fullUpdateStats, metricUpdateStats).updateEntityCounters(item);
     }
   }
 
@@ -85,7 +85,7 @@ public class ScheduledTaskItemListener
     failedTaskService.persistFailure(entityId, entityRecord.getScheduledTaskType(), e);
     // update failed count in the stats
     if(TaskType.hasStatsToCount(entityRecord.getScheduledTaskType())) {
-      BatchUtils.selectStats(entityRecord.getScheduledTaskType(), metricUpdateStats, fullUpdateStats).addFailed();
+      BatchUtils.selectStats(entityRecord.getScheduledTaskType(), fullUpdateStats, metricUpdateStats).addFailed();
     }
   }
 
@@ -105,7 +105,7 @@ public class ScheduledTaskItemListener
     // update failed count in the stats
     entityRecords.stream().forEach(entityRecord ->{
       if(TaskType.hasStatsToCount(entityRecord.getScheduledTaskType())) {
-        BatchUtils.selectStats(entityRecord.getScheduledTaskType(), metricUpdateStats, fullUpdateStats).addFailed();
+        BatchUtils.selectStats(entityRecord.getScheduledTaskType(), fullUpdateStats, metricUpdateStats).addFailed();
       }
     });
 

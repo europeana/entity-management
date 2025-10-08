@@ -1,11 +1,14 @@
 package eu.europeana.entitymanagement.batch.config;
 
+import static eu.europeana.entitymanagement.batch.utils.BatchUtils.JOB_REMOVE_SCHEDULED_ENTITIES;
+import static eu.europeana.entitymanagement.batch.utils.BatchUtils.JOB_UPDATE_SCHEDULED_ENTITIES;
+import static eu.europeana.entitymanagement.batch.utils.BatchUtils.JOB_UPDATE_SINGLE_ENTITY;
+import static eu.europeana.entitymanagement.batch.utils.BatchUtils.STEP_REMOVE_ENTITY;
+import static eu.europeana.entitymanagement.batch.utils.BatchUtils.STEP_UPDATE_ENTITY;
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.*;
-import static eu.europeana.entitymanagement.batch.utils.BatchUtils.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import javax.annotation.Resource;
 import org.springframework.batch.core.ItemProcessListener;
 import org.springframework.batch.core.Job;
@@ -14,7 +17,6 @@ import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.core.job.builder.SimpleJobBuilder;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.step.skip.SkipPolicy;
 import org.springframework.batch.item.ItemProcessor;
@@ -23,7 +25,6 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.support.CompositeItemProcessor;
 import org.springframework.batch.item.support.CompositeItemWriter;
 import org.springframework.batch.item.support.SynchronizedItemStreamReader;
-import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.task.TaskExecutor;
@@ -34,12 +35,10 @@ import eu.europeana.entitymanagement.batch.model.EntityUpdateStats;
 import eu.europeana.entitymanagement.batch.model.JobDescription;
 import eu.europeana.entitymanagement.batch.model.Task;
 import eu.europeana.entitymanagement.batch.reader.EntityRecordDatabaseReader;
-import eu.europeana.entitymanagement.batch.service.ReportSenderTasklet;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
-import eu.europeana.entitymanagement.web.service.SlackConnection;
 
 /**
  * Entity Job update factory class
@@ -69,7 +68,7 @@ public class EntityUpdateJobFactory {
     ApplicationContext appContext;
 
     @Resource(name = BEAN_ENTITY_UPDATE_STATS)
-    private EntityUpdateStats enitityUpdateStats;
+    private EntityUpdateStats entityUpdateStats;
     
     @Resource(name = BEAN_METRICS_UPDATE_STATS)
     private EntityUpdateStats metricsUpdateStats;
@@ -105,17 +104,10 @@ public class EntityUpdateJobFactory {
      * @return Job for scheduled updates
      */
     public Job createScheduledUpdateJob(JobDescription jobDescription) {
-        SimpleJobBuilder stepBuilder = this.jobBuilderFactory
+        return this.jobBuilderFactory
               .get(JOB_UPDATE_SCHEDULED_ENTITIES)
               // This job is always launched via a @Scheduled method.
-              .start(initStats(jobDescription))
-              .next(entityUpdate(jobDescription, false))
-              .next(finishStats());
-        Step statusReportStep = createSendStatusReportStep(jobDescription);
-        if(Objects.nonNull(statusReportStep)) {
-          stepBuilder.next(statusReportStep);
-        }
-        return stepBuilder.build();
+              .start(entityUpdate(jobDescription, false)).build();
     }
 
     /**
@@ -169,49 +161,6 @@ public class EntityUpdateJobFactory {
                 // removal steps are always async
                 .listener(stepExecutionListener(jobDescription.getTaskType(), false))
                 .build();
-    }
-
-
-    private Step initStats(JobDescription jobDescription) {
-        
-      return stepBuilderFactory
-                .get("initStatsStep")
-                .tasklet(
-                        ((stepContribution, chunkContext) -> {
-                          if(TaskType.hasStatsToCount(jobDescription.getTaskType())) {
-                            selectStats(jobDescription.getTaskType(), enitityUpdateStats, metricsUpdateStats).reset();
-                          }
-                          return RepeatStatus.FINISHED;
-                        }))
-                .build();
-    }
-
-    private Step finishStats() {
-        return stepBuilderFactory
-                .get("finishStatsStep")
-                .tasklet(
-                        ((stepContribution, chunkContext) -> {
-                            return RepeatStatus.FINISHED;
-                        }))
-                .build();
-    }
-
-    private Step createSendStatusReportStep(JobDescription jobDescription) {
-      
-      if(TaskType.hasStatsToCount(jobDescription.getTaskType())) {  
-        //create tasklet
-        ReportSenderTasklet tasklet = new ReportSenderTasklet(
-            selectStats(jobDescription.getTaskType(),  enitityUpdateStats, metricsUpdateStats),
-            emConfig.getEntityManagementBaseUrl(),
-            getApplicationContext().getBean(SLACK_CONNECTION, SlackConnection.class));
-        
-        return stepBuilderFactory
-                .get("sendStatusReport")
-                .tasklet(tasklet)
-                .build();
-      }
-      
-      return null;
     }
 
     private TaskExecutor getTaskExecutor(boolean isSynchronous) {
