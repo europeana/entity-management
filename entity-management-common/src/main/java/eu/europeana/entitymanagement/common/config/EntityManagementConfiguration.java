@@ -106,7 +106,7 @@ public class EntityManagementConfiguration implements InitializingBean {
   @Value("${wikidata.baseUrl:}")
   private String wikidataBaseUrl;
   
-  @Value("${wikidata.userAgent: 'EuropeanaAPIs/v1.0 (https://apis.europeana.eu/)'")
+  @Value("${wikidata.userAgent:EuropeanaAPIs/v1.0 (https://apis.europeana.eu/)")
   private String wikidataUserAgent;
 
   @Value("${batch.step.chunkSize: 10}")
@@ -138,6 +138,16 @@ public class EntityManagementConfiguration implements InitializingBean {
 
   @Value("${batch.computeMetrics: false}")
   private boolean batchComputeMetrics;
+  
+  @Value("${batch.schedule.fullupdate.day: SUNDAY}")
+  private String batchScheduleFullupdateDay;
+
+  @Value("${batch.schedule.fullupdate.types: Concept,TimeSpan,Agent,Place}")
+  private String batchScheduleFullupdateTypes;
+  
+  @Value("${batch.schedule.metricsupdate.types: Concept,TimeSpan,Agent,Place}")
+  private String batchScheduleMetricsupdateTypes;
+  
 
   @Value("${batch.maxFailedTaskRetries: 3}")
   private int maxFailedTaskRetries;
@@ -175,10 +185,10 @@ public class EntityManagementConfiguration implements InitializingBean {
   @Value("${zoho.sync.delete.offset.days: 10}")
   private int zohoSyncDeleteOffsetDays;
   
-  @Value("${europeana.item.data.endpoint:'http://data.europeana.eu/item'}")
+  @Value("${europeana.item.data.endpoint:http://data.europeana.eu/item}")
   private String itemDataEndpoint;
 
-  @Value("${europeana.scheme.data.endpoint:'http://data.europeana.eu/scheme'}")
+  @Value("${europeana.scheme.data.endpoint:http://data.europeana.eu/scheme}")
   private String schemeDataEndpoint;
 
   @Value("${spring.profiles.active:}")
@@ -558,6 +568,18 @@ public class EntityManagementConfiguration implements InitializingBean {
 
   public String getWikidataUserAgent() {
     return wikidataUserAgent;
+  }
+
+  public String getBatchScheduleFullupdateDay() {
+    return batchScheduleFullupdateDay;
+  }
+
+  public String getBatchScheduleFullupdateTypes() {
+    return batchScheduleFullupdateTypes;
+  }
+
+  public String getBatchScheduleMetricsupdateTypes() {
+    return batchScheduleMetricsupdateTypes;
   }
  
 }

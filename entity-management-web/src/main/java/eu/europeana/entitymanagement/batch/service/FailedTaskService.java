@@ -46,10 +46,11 @@ public class FailedTaskService {
                 ExceptionUtils.getStackTrace(e)));
 
     logger.debug(
-        "Persisted update failure to db. entityId={} matched={}, modified={}",
+        "Persisted update failure to db. entityId={} matched={}, modified={}, aknowledged={}",
         entityId,
         result.getMatchedCount(),
-        result.getModifiedCount());
+        result.getModifiedCount(),
+        result.wasAcknowledged());
   }
 
   /**

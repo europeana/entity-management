@@ -5,7 +5,9 @@ import static eu.europeana.entitymanagement.batch.utils.BatchUtils.getEntityIds;
 import eu.europeana.entitymanagement.batch.model.EntityUpdateStats;
 import eu.europeana.entitymanagement.batch.service.FailedTaskService;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
+import eu.europeana.entitymanagement.batch.utils.BatchUtils;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,23 +25,26 @@ public class ScheduledTaskItemListener
   private final FailedTaskService failedTaskService;
   private final ScheduledTaskService scheduledTaskService;
   private final boolean isSynchronous;
-  private final EntityUpdateStats statsCounter;
+  private final EntityUpdateStats fullUpdateStats;
+  private final EntityUpdateStats metricUpdateStats;
 
   public ScheduledTaskItemListener(
           FailedTaskService failedTaskService,
           ScheduledTaskService scheduledTaskService,
-          boolean isSynchronous, EntityUpdateStats statsCounter) {
+          boolean isSynchronous, EntityUpdateStats fullUpdateStats, EntityUpdateStats metricUpdateStats) {
     this.failedTaskService = failedTaskService;
     this.scheduledTaskService = scheduledTaskService;
     this.isSynchronous = isSynchronous;
-    this.statsCounter = statsCounter;
+    this.fullUpdateStats = fullUpdateStats;
+    this.metricUpdateStats = metricUpdateStats;
   }
 
   @Override
   public void afterRead(BatchEntityRecord item) {
     // update stats
-    statsCounter.addEntityUpdated();
-    statsCounter.updateEntityByType(item);
+    if(TaskType.hasStatsToCount(item.getScheduledTaskType())) {
+      BatchUtils.selectStats(item.getScheduledTaskType(), fullUpdateStats, metricUpdateStats).updateEntityCounters(item);
+    }
   }
 
   @Override
@@ -79,7 +84,9 @@ public class ScheduledTaskItemListener
     logger.warn("onProcessError: entityId={}", entityId, e);
     failedTaskService.persistFailure(entityId, entityRecord.getScheduledTaskType(), e);
     // update failed count in the stats
-    statsCounter.addFailed();
+    if(TaskType.hasStatsToCount(entityRecord.getScheduledTaskType())) {
+      BatchUtils.selectStats(entityRecord.getScheduledTaskType(), fullUpdateStats, metricUpdateStats).addFailed();
+    }
   }
 
   @Override
@@ -96,7 +103,11 @@ public class ScheduledTaskItemListener
                     r -> r.getEntityRecord().getEntityId(), r -> r.getScheduledTaskType())),
         e);
     // update failed count in the stats
-    entityRecords.stream().forEach(entity -> statsCounter.addFailed());
+    entityRecords.stream().forEach(entityRecord ->{
+      if(TaskType.hasStatsToCount(entityRecord.getScheduledTaskType())) {
+        BatchUtils.selectStats(entityRecord.getScheduledTaskType(), fullUpdateStats, metricUpdateStats).addFailed();
+      }
+    });
 
   }
 }

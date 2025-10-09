@@ -42,9 +42,10 @@ public class AppConfigConstants {
   public static final String SYNC_WEB_REQUEST_JOB_LAUNCHER = "synchronousWebRequestJobLauncher";
   public static final String SINGLE_ENTITY_RECORD_READER = "singleEntityRecordReader";
   public static final String SCHEDULED_TASK_READER = "scheduledTaskReader";
-  public static final String SLACK_CONNECTION      = "slackConnection";
-  public static final String ENTITY_UPDATE_STATUS      = "entityUpdateStatus";
+  public static final String BEAN_ENTITY_UPDATE_STATS      = "entityUpdateStats";
+  public static final String BEAN_METRICS_UPDATE_STATS      = "metricsUpdateStats";
 
+  public static  final String BEAN_ENTITY_UPDATE_SERVICE              = "entityUpdateService";
   public static  final String BEAN_ENTITY_DEREFERENCE_PROCESSOR       = "entityDereferenceProcessor";
   public static  final String BEAN_ENTITY_CONSOLIDATION_PROCESSOR     = "entityConsolidationProcessor";
   public static  final String BEAN_ENTITY_METRICS_PROCESSOR           = "entityMetricsProcessor";

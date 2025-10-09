@@ -1,16 +1,18 @@
 package eu.europeana.entitymanagement.web.model;
 
-import static eu.europeana.entitymanagement.web.model.ZohoSyncReportFields.*;
-
+import static eu.europeana.entitymanagement.web.model.ZohoSyncReportFields.ERROR;
+import static eu.europeana.entitymanagement.web.model.ZohoSyncReportFields.ID;
+import static eu.europeana.entitymanagement.web.model.ZohoSyncReportFields.MESSAGE;
+import static eu.europeana.entitymanagement.web.model.ZohoSyncReportFields.TRACE;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import dev.morphia.annotations.Embedded;
+import dev.morphia.annotations.Entity;
 
 /** Class used for serialization of zoho sync errors */
 @JsonPropertyOrder({ID, ERROR, MESSAGE, TRACE})
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-@Embedded
+@Entity
 public class FailedOperation {
 
   private String zohoId;

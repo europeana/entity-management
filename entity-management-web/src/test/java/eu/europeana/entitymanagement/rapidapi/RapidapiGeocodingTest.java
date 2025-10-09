@@ -13,12 +13,12 @@ import eu.europeana.entitymanagement.definitions.model.Address;
 
 @SpringBootTest(classes = {SerializationConfig.class, EntityManagementConfiguration.class})
 @ActiveProfiles("test")//enable application-test.yml
-@Disabled
+@Disabled("support for geocoding was defered fro later versions")
 public class RapidapiGeocodingTest {
 
   @Autowired EntityManagementConfiguration emConfig;
   
-  //@Test
+  @Test
   public void getRapidapiGeocodingURI() throws Exception {
     RapidApiGeocodingClient rapidapiGeocodingClient = new RapidApiGeocodingClient(null, emConfig.getRapidApiKey());
     

@@ -2,15 +2,10 @@ package eu.europeana.entitymanagement.batch.config;
 
 import static eu.europeana.entitymanagement.batch.utils.BatchUtils.*;
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.*;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Resource;
-
-import eu.europeana.entitymanagement.batch.model.EntityUpdateStats;
-import eu.europeana.entitymanagement.batch.service.ReportSenderTasklet;
-import eu.europeana.entitymanagement.web.service.SlackConnection;
 import org.springframework.batch.core.ItemProcessListener;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -26,12 +21,13 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.support.CompositeItemProcessor;
 import org.springframework.batch.item.support.CompositeItemWriter;
 import org.springframework.batch.item.support.SynchronizedItemStreamReader;
-import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.stereotype.Component;
 import eu.europeana.entitymanagement.batch.listener.EntityUpdateStepListener;
 import eu.europeana.entitymanagement.batch.listener.ScheduledTaskItemListener;
+import eu.europeana.entitymanagement.batch.model.EntityUpdateStats;
 import eu.europeana.entitymanagement.batch.model.JobDescription;
 import eu.europeana.entitymanagement.batch.model.Task;
 import eu.europeana.entitymanagement.batch.reader.EntityRecordDatabaseReader;
@@ -39,7 +35,6 @@ import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
-import org.springframework.stereotype.Component;
 
 /**
  * Entity Job update factory class
@@ -50,6 +45,9 @@ import org.springframework.stereotype.Component;
 @EnableBatchProcessing
 public class EntityUpdateJobFactory {
 
+    /** SkipPolicy to ignore all failures when executing jobs, as they can be handled later */
+    private static final SkipPolicy NOOP_SKIP_POLICY = (Throwable t, int skipCount) -> true;
+
     @Resource
     private JobBuilderFactory jobBuilderFactory;
     @Resource
@@ -59,20 +57,20 @@ public class EntityUpdateJobFactory {
     @Resource
     private ScheduledTaskService scheduledTaskService;
 
-    /** SkipPolicy to ignore all failures when executing jobs, as they can be handled later */
-    private final SkipPolicy noopSkipPolicy = (Throwable t, int skipCount) -> true;
-
     @Resource
     EntityManagementConfiguration emConfig;
     
     @Autowired
     ApplicationContext appContext;
 
-    @Resource
-    private EntityUpdateStats stats;
-
+    @Resource(name = BEAN_ENTITY_UPDATE_STATS)
+    private EntityUpdateStats entityUpdateStats;
+    
+    @Resource(name = BEAN_METRICS_UPDATE_STATS)
+    private EntityUpdateStats metricsUpdateStats;
+    
     /**
-     * Constructor default
+     * Main constructor for job factory
      */
     public EntityUpdateJobFactory() {
         super();
@@ -103,13 +101,9 @@ public class EntityUpdateJobFactory {
      */
     public Job createScheduledUpdateJob(JobDescription jobDescription) {
         return this.jobBuilderFactory
-                .get(JOB_UPDATE_SCHEDULED_ENTITIES)
-                // This job is always launched via a @Scheduled method.
-                .start(initStats(stats, jobDescription.getTaskType()))
-                .next(entityUpdate(jobDescription, false))
-                .next(finishStats())
-                .next(sendStatusReportStep())
-                .build();
+              .get(JOB_UPDATE_SCHEDULED_ENTITIES)
+              // This job is always launched via a @Scheduled method.
+              .start(entityUpdate(jobDescription, false)).build();
     }
 
     /**
@@ -139,7 +133,7 @@ public class EntityUpdateJobFactory {
                 .writer(getWriter())
                 .listener((ItemProcessListener<? super BatchEntityRecord, ? super BatchEntityRecord>) itemListener)
                 .faultTolerant()
-                .skipPolicy(noopSkipPolicy)
+                .skipPolicy(NOOP_SKIP_POLICY)
                 .taskExecutor(getTaskExecutor(isSynchronous))
                 .throttleLimit(emConfig.getBatchUpdatesThrottleLimit())
                 .listener(stepExecutionListener(
@@ -157,43 +151,11 @@ public class EntityUpdateJobFactory {
                 .listener((ItemProcessListener<? super BatchEntityRecord, ? super BatchEntityRecord>)
                         itemListener)
                 .faultTolerant()
-                .skipPolicy(noopSkipPolicy)
+                .skipPolicy(NOOP_SKIP_POLICY)
                 .taskExecutor(getRemovalTaskExecutor())
                 .throttleLimit(emConfig.getBatchRemovalsThrottleLimit())
                 // removal steps are always async
                 .listener(stepExecutionListener(jobDescription.getTaskType(), false))
-                .build();
-    }
-
-
-    private Step initStats(EntityUpdateStats stats, TaskType taskType) {
-        return stepBuilderFactory
-                .get("initStatsStep")
-                .tasklet(
-                        ((stepContribution, chunkContext) -> {
-                            stats.reset();
-                            stats.setTaskType(taskType);
-                            return RepeatStatus.FINISHED;
-                        }))
-                .build();
-    }
-
-    private Step finishStats() {
-        return stepBuilderFactory
-                .get("finishStatsStep")
-                .tasklet(
-                        ((stepContribution, chunkContext) -> {
-                            return RepeatStatus.FINISHED;
-                        }))
-                .build();
-    }
-
-    private Step sendStatusReportStep() {
-        return stepBuilderFactory
-                .get("sendStatusReport")
-                .tasklet(new ReportSenderTasklet(stats,
-                        emConfig.getEntityManagementBaseUrl(),
-                        getApplicationContext().getBean(SLACK_CONNECTION, SlackConnection.class)))
                 .build();
     }
 

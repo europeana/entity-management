@@ -6,7 +6,15 @@ import static dev.morphia.query.filters.Filters.in;
 import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.*;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_DELETE_OPTS;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.UPSERT_OPTS;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import org.bson.Document;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Repository;
 import com.mongodb.bulk.BulkWriteResult;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.UpdateOneModel;
@@ -17,15 +25,6 @@ import dev.morphia.query.FindOptions;
 import dev.morphia.query.updates.UpdateOperators;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import org.bson.Document;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Repository;
 
 @Repository
 public class FailedTaskRepository implements InitializingBean {
@@ -57,6 +56,7 @@ public class FailedTaskRepository implements InitializingBean {
         .find(FailedTask.class)
         .filter(eq(ENTITY_ID, failure.getEntityId()))
         .update(
+            UPSERT_OPTS,
             UpdateOperators.set(ENTITY_ID, failure.getEntityId()),
             UpdateOperators.set(STACKTRACE, failure.getStackTrace()),
             UpdateOperators.set(ERROR_MSG, failure.getErrorMessage()),
@@ -65,8 +65,7 @@ public class FailedTaskRepository implements InitializingBean {
             // increment failureCount
             UpdateOperators.inc(FAILURE_COUNT, 1),
             // set "created" value if this a new doc. Also make failureCount=0
-            UpdateOperators.setOnInsert(Map.of(CREATED, failure.getModified())))
-        .execute(UPSERT_OPTS);
+            UpdateOperators.setOnInsert(Map.of(CREATED, failure.getModified())));
   }
 
   /**

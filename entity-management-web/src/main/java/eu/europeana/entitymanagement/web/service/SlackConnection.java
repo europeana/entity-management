@@ -55,7 +55,7 @@ public class SlackConnection {
                 }
             }
         } catch (IOException e) {
-            LOG.error("Exception occurred while sending slack message !! " + e.getMessage());
+            LOG.warn("Exception occurred while sending slack message !! " + e.getMessage());
         }
     }
 }
