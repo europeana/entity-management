@@ -35,7 +35,7 @@ public class EntitySyncCronJob {
   private static final Logger LOGGER = LogManager.getLogger(EntitySyncCronJob.class);
   
   public static final String STATS_REPORT_MESSAGE =
-      "%d entites were scheduled for %s with the following distribution: organizations: %d, agents: %d, concepts: %d, places: %d, timespans: %d.";
+      "%d entites %s with the following distribution: organizations: %d, agents: %d, concepts: %d, places: %d, timespans: %d.";
   public static final String STATS_REPORT_FAILED_MESSAGE =
       "failed update: %d See <%s|here> which entities have failed update. ";
 
@@ -101,7 +101,7 @@ public class EntitySyncCronJob {
     if (entityUpdateStats.getTotalEntitiesForUpdate() + metricsUpdateStats.getTotalEntitiesForUpdate() > 0) {
       String fullUpdateMessage = String.format(STATS_REPORT_MESSAGE,
           entityUpdateStats.getTotalEntitiesForUpdate(),
-          TaskType.full_update,
+          "updated",
           entityUpdateStats.getOrganizations(),
           entityUpdateStats.getAgents(),
           entityUpdateStats.getConcepts(),
@@ -110,7 +110,7 @@ public class EntitySyncCronJob {
       
       String metricsUpdateMessage = String.format(STATS_REPORT_MESSAGE,
           metricsUpdateStats.getTotalEntitiesForUpdate(),
-          TaskType.metrics_update,
+          "updated for metrics",
           metricsUpdateStats.getOrganizations(),
           metricsUpdateStats.getAgents(),
           metricsUpdateStats.getConcepts(),

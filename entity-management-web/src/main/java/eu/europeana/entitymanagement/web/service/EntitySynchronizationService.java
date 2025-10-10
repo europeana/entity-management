@@ -163,7 +163,7 @@ public class EntitySynchronizationService extends BaseZohoAccess {
 
   String buildReportMessage(ZohoSyncReport zohoSyncReport) throws IOException {
     long synced = zohoSyncReport.getCreatedItems() + zohoSyncReport.getUpdatedItems()
-        + zohoSyncReport.getDeprecatedItems();
+        + zohoSyncReport.getDeprecatedItems() + zohoSyncReport.getDeletedItems();
 
     long failed = zohoSyncReport.getFailed() == null ? 0 : zohoSyncReport.getFailed().size();
 
