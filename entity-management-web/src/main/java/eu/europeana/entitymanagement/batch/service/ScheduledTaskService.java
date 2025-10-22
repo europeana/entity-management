@@ -64,11 +64,20 @@ public class ScheduledTaskService {
   }
 
   /**
-   * Removes entities from the ScheduledTasks collection that have been processed
+   * Removes entries from the ScheduledTasks collection that have been processed
+   *
+   */
+  public long removeProcessedTasks() {
+    return removeProcessedTasks(null);
+  }
+
+  
+  /**
+   * Removes entries from the ScheduledTasks collection that have one of the given types and are marked with completed processing
    *
    * @param updateType updateType to filter on
    */
-  public void removeProcessedTasks(List<TaskType> updateType) {
+  public long removeProcessedTasks(List<TaskType> updateType) {
     long removeCount = repository.removeProcessedTasks(updateType);
     if (removeCount > 0 && logger.isDebugEnabled()) {
       logger.debug(
@@ -76,6 +85,7 @@ public class ScheduledTaskService {
           removeCount,
           updateType.stream().map(TaskType::getValue).collect(Collectors.joining(",")));
     }
+    return removeCount;
   }
 
   /**

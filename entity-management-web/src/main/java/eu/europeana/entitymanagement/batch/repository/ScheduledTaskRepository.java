@@ -5,22 +5,12 @@ import static dev.morphia.query.filters.Filters.eq;
 import static dev.morphia.query.filters.Filters.gte;
 import static dev.morphia.query.filters.Filters.in;
 import static dev.morphia.query.filters.Filters.or;
-import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.CREATED;
-import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.DOC_SET;
-import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.DOC_SET_ON_INSERT;
-import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.ENTITY_ID;
-import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.HAS_BEEN_PROCESSED;
-import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.MODIFIED;
-import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.MORPHIA_DISCRIMINATOR;
-import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.SCHEDULED_TASK_CLASSNAME;
-import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.UPDATE_TYPE;
+import static eu.europeana.entitymanagement.definitions.batch.EMBatchConstants.*;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.MULTI_DELETE_OPTS;
 import static eu.europeana.entitymanagement.mongo.utils.MorphiaUtils.UPSERT_OPTS;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import eu.europeana.entitymanagement.definitions.batch.model.*;
 import org.bson.Document;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,8 +27,12 @@ import dev.morphia.aggregation.stages.Projection;
 import dev.morphia.aggregation.stages.Unwind;
 import dev.morphia.query.FindOptions;
 import dev.morphia.query.MorphiaCursor;
+import dev.morphia.query.Query;
 import dev.morphia.query.filters.Filter;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
+import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
+import eu.europeana.entitymanagement.definitions.batch.model.ScheduledTask;
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 
 @Repository
 public class ScheduledTaskRepository implements InitializingBean {
@@ -126,10 +120,19 @@ public class ScheduledTaskRepository implements InitializingBean {
    * @return number of deleted entries
    */
   public long removeProcessedTasks(List<TaskType> updateType) {
-    return datastore.find(ScheduledTask.class)
-        .filter(eq(HAS_BEEN_PROCESSED, Boolean.TRUE),
-            or(updateType.stream().map(u -> eq(UPDATE_TYPE, u.getValue())).toArray(Filter[]::new)))
-        .delete(MULTI_DELETE_OPTS).getDeletedCount();
+    Query<ScheduledTask> query = datastore.find(ScheduledTask.class);
+    if(updateType == null || updateType.isEmpty()) {
+      //remove all completed
+      query.filter(eq(HAS_BEEN_PROCESSED, Boolean.TRUE));
+    } else {
+      //remove all completed of the given types
+      query.filter(
+          eq(HAS_BEEN_PROCESSED, Boolean.TRUE),
+          //type:A OR type:B
+          or(updateType.stream().map(u -> eq(UPDATE_TYPE, u.getValue())).toArray(Filter[]::new)));
+    }
+    
+    return query.delete(MULTI_DELETE_OPTS).getDeletedCount();
   }
   
   /**
