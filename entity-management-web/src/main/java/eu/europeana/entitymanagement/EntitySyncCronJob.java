@@ -5,6 +5,7 @@ import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Set;
 import javax.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
@@ -56,7 +57,15 @@ public class EntitySyncCronJob {
 
   @Resource(name = BEAN_METRICS_UPDATE_STATS)
   private EntityUpdateStats metricsUpdateStats;
-
+  
+  @Resource(name = AppConfigConstants.BEAN_BATCH_SCHEDULED_TASK_SERVICE)
+  private ScheduledTaskService scheduledTaskService;
+  
+  /**
+   * Method to support static access to the scheduled tasks service
+   * @param context application context
+   * @return the scheduled task service bean
+   */
   static ScheduledTaskService getScheduledTasksService(ConfigurableApplicationContext context) {
     return (ScheduledTaskService) context
         .getBean(AppConfigConstants.BEAN_BATCH_SCHEDULED_TASK_SERVICE);
@@ -131,8 +140,13 @@ public class EntitySyncCronJob {
       slackConnection.publishStatusReport(slackMessage);
       
   } else {
-      if (LOGGER.isInfoEnabled()) {
-        LOGGER.info("Status report not sent !! As there are no entities were scheduled for update (full or metrics):  {}, \n {}", 
+    String slackMessage = String.format(SYNC_REPORT_SLACK_MESSAGE,
+        "No entities have been scheduled for update (full or metrics)!", "updated: 0", "updated for metrics: 0");
+    
+    SlackConnection slackConnection = new SlackConnection(emConfiguration.getEmUpdateSlackWebHook());
+    slackConnection.publishStatusReport(slackMessage);
+    if (LOGGER.isInfoEnabled()) {
+        LOGGER.info("Slack message sent: No entities have been scheduled for update ( or metrics):  {}, \n {}", 
             entityUpdateStats, metricsUpdateStats);
       }
   }
@@ -140,8 +154,11 @@ public class EntitySyncCronJob {
   }
 
   void scheduleUpdateTasks() {
+    
+    //remove completed tasks first, otherwise we cannot schedule metrics executions (type will stay full_update) #EA-4308
+    scheduledTaskService.removeProcessedTasks(List.of(TaskType.full_update, TaskType.metrics_update));
+    
     Instant now = Instant.now();
-
     if (isExecuteFullUpdates(now)) {
       // schedule FULL Updates
       scheduleFullUpdates();
@@ -161,8 +178,9 @@ public class EntitySyncCronJob {
   }
 
   protected boolean isExecuteFullUpdates(Instant now) {
-    return now.atZone(ZoneId.systemDefault()).getDayOfWeek() == DayOfWeek
-        .valueOf(emConfiguration.getBatchScheduleFullupdateDay().trim());
+    return now.atZone(ZoneId.systemDefault()).getDayOfWeek() 
+        == 
+        DayOfWeek.valueOf(emConfiguration.getBatchScheduleFullupdateDay().trim());
   }
 
   protected void scheduleFullUpdates() {
@@ -172,11 +190,11 @@ public class EntitySyncCronJob {
       return;
     }
 
-    String[] typesToUpdate = emConfiguration.getBatchScheduleFullupdateTypes().trim().split(",");
-    scheduleTasks(TaskType.full_update, typesToUpdate);
+    String[] entityTypes = emConfiguration.getBatchScheduleFullupdateTypes().trim().split(",");
+    scheduleTasks(TaskType.full_update, entityTypes);
   }
 
-  void scheduleMetricsUpdates() {
+  protected void scheduleMetricsUpdates() {
     if (StringUtils.isAllBlank(emConfiguration.getBatchScheduleMetricsupdateTypes())) {
       LOGGER.info(
           "Skipping scheduling of metrics update for entities, no entity types configured for update");
