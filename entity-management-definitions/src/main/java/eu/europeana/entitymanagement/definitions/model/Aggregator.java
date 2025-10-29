@@ -62,6 +62,13 @@ public class Aggregator extends Organization {
   }
 
   /**
+   * EA-4323 temp fix to hide aggregator type
+   */
+  public void updateTypeToOrganisation() {
+    type = EntityTypes.Organization.getEntityType();
+  }
+
+  /**
    * Public constructor creating a copy of the provided aggregator
    * @param copy
    */
