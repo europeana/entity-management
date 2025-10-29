@@ -1,6 +1,11 @@
 package eu.europeana.entitymanagement.web;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import eu.europeana.api.commons.oauth2.model.KeyValidationResult;
+import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.http.HttpStatus;
@@ -29,6 +34,33 @@ public class EMExceptionHandler extends EuropeanaGlobalExceptionHandler {
       RequestPathMethodService requestPathMethodService, I18nService i18nService) {
     this.requestPathMethodService = requestPathMethodService;
     this.i18nService = i18nService;
+  }
+
+  @ExceptionHandler(ApplicationAuthenticationException.class)
+  public ResponseEntity<EuropeanaApiErrorResponse> clientRegistrationExceptionHandler(HttpServletRequest request,
+                                                                                      HttpServletResponse response,
+                                                                                      ApplicationAuthenticationException ee) {
+    if (ee.getResult() != null) {
+      KeyValidationResult result = ee.getResult();
+      return ResponseEntity.status(result.getHttpStatusCode())
+              .headers(createHttpHeaders(request))
+              .body(new EuropeanaApiErrorResponse.Builder(request, ee, stackTraceEnabled())
+                      .setStatus(result.getHttpStatusCode())
+                      .setError(result.getValidationError().getError())
+                      .setMessage(result.getValidationError().getMessage())
+                      .setCode(result.getValidationError().getCode())
+                      .build());
+    } else {
+      return ResponseEntity.status(response.getStatus())
+              .headers(createHttpHeaders(request))
+              .body( new EuropeanaApiErrorResponse.Builder(request, ee, stackTraceEnabled())
+                      .setStatus(HttpServletResponse.SC_UNAUTHORIZED)
+                      .setError("Unauthorized")
+                      .setMessage(i18nService.getMessage(ee.getI18nKey()))
+                      .setCode(StringUtils.substringAfter(ee.getI18nKey(), "."))
+                      .build());
+
+    }
   }
 
   /**

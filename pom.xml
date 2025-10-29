@@ -51,7 +51,7 @@
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 
 		<!-- europeana dependencies -->
-		<api.commons.version>0.4.7-SNAPSHOT</api.commons.version>
+		<api.commons.version>0.4.8</api.commons.version>
 		<springbatch.mongo.version>1.0.7</springbatch.mongo.version>
 		<corelib.version>2.15.4</corelib.version>
 

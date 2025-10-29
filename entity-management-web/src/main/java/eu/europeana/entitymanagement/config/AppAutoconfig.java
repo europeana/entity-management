@@ -7,15 +7,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.xml.bind.JAXBContext;
+
+import eu.europeana.api.commons.auth.AuthenticationBuilder;
+import eu.europeana.api.commons.auth.AuthenticationConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -156,9 +156,11 @@ public class AppAutoconfig extends AppConfigConstants {
 
   @Bean(name = BEAN_CLIENT_DETAILS_SERVICE)
   public EuropeanaClientDetailsService getClientDetailsService() {
-    EuropeanaClientDetailsService clientDetailsService = new EuropeanaClientDetailsService();
-    clientDetailsService.setApiKeyServiceUrl(emConfiguration.getApiKeyUrl());
-    return clientDetailsService;
+    EuropeanaClientDetailsService clientDetails = new EuropeanaClientDetailsService();
+    clientDetails.setApiKeyServiceUrl(emConfiguration.getApiKeyUrl());
+    AuthenticationConfig config = new AuthenticationConfig(loadProperties());
+    clientDetails.setAuthHandler(AuthenticationBuilder.newAuthentication(config));
+    return clientDetails;
   }
 
   @Bean
@@ -295,6 +297,14 @@ public class AppAutoconfig extends AppConfigConstants {
             new SynchronizedItemStreamReader<>();
     synchronizedItemStreamReader.setDelegate(reader);
     return synchronizedItemStreamReader;
+  }
+
+
+  private Properties loadProperties() {
+    Properties properties = new Properties();
+    properties.setProperty(AuthenticationConfig.CONFIG_TOKEN_ENDPOINT,emConfiguration.getTokenEndpoint());
+    properties.setProperty(AuthenticationConfig.CONFIG_GRANT_PARAMS,emConfiguration.getGrantParams());
+    return properties;
   }
 
 }
