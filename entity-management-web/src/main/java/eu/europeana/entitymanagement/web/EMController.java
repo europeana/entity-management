@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
+
+import eu.europeana.entitymanagement.exception.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -51,12 +53,6 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.web.EntityIdResponse;
 import eu.europeana.entitymanagement.dereference.Dereferencer;
-import eu.europeana.entitymanagement.exception.DatasourceNotKnownException;
-import eu.europeana.entitymanagement.exception.EntityMismatchException;
-import eu.europeana.entitymanagement.exception.EntityNotFoundException;
-import eu.europeana.entitymanagement.exception.EntityRemovedException;
-import eu.europeana.entitymanagement.exception.HttpBadRequestException;
-import eu.europeana.entitymanagement.exception.MultipleChoicesException;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
@@ -119,7 +115,7 @@ public class EMController extends BaseRest {
   @SuppressWarnings("java:S6856") // no point in binding {any} to a variable
   @PostMapping(value = {"/entity/{any}", "/entity/{any}/", "/entity/{any}/management/enrich"})
   public ResponseEntity<String> entityManagementInvalidUrl() throws EuropeanaApiException {
-    throw new HttpBadRequestException("Invalid Url");
+    throw new InvalidUrlException("Invalid Url");
   }
 
   @ApiOperation(value = "Disable an entity", nickname = "disableEntity",
