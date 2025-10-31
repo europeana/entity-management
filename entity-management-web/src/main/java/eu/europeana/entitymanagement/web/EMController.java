@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -108,6 +109,17 @@ public class EMController extends BaseRest {
     this.datasources = datasources;
     this.entityUpdateService = entityUpdateService;
     this.jobDescriptionFactory = jobDescriptionFactory;
+  }
+
+  /**
+   * Endpoint to make sure we return a 400 for invalid urls like '/entity/0000', '/entity/0000/', "/entity/0000/management/"
+   * @throws HttpBadRequestException always for this endpoint
+   * @return 400 bad Request
+   */
+  @SuppressWarnings("java:S6856") // no point in binding {any} to a variable
+  @PostMapping(value = {"/entity/{any}", "/entity/{any}/", "/entity/{any}/management/"})
+  public ResponseEntity<String> entityManagementInvalidUrl() throws EuropeanaApiException {
+    throw new HttpBadRequestException("Invalid Url");
   }
 
   @ApiOperation(value = "Disable an entity", nickname = "disableEntity",
