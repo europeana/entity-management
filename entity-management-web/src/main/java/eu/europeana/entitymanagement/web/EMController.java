@@ -112,12 +112,12 @@ public class EMController extends BaseRest {
   }
 
   /**
-   * Endpoint to make sure we return a 400 for invalid urls like '/entity/0000', '/entity/0000/', "/entity/0000/management/"
+   * Endpoint to make sure we return a 400 for invalid urls like '/entity/0000', '/entity/0000/', "/entity/0000/management/enrich"
    * @throws HttpBadRequestException always for this endpoint
    * @return 400 bad Request
    */
   @SuppressWarnings("java:S6856") // no point in binding {any} to a variable
-  @PostMapping(value = {"/entity/{any}", "/entity/{any}/", "/entity/{any}/management/"})
+  @PostMapping(value = {"/entity/{any}", "/entity/{any}/", "/entity/{any}/management/enrich"})
   public ResponseEntity<String> entityManagementInvalidUrl() throws EuropeanaApiException {
     throw new HttpBadRequestException("Invalid Url");
   }
