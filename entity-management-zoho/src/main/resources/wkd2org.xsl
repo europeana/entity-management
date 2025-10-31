@@ -235,8 +235,9 @@
                 <xsl:variable name="streetAddress" select="wdt:P969[1]/text()"/>
                 <xsl:variable name="street"        select="wdt:P669[1]/@rdf:resource"/>
                 <xsl:variable name="postal"        select="wdt:P281[1]/text()"/>
+<!--
                 <xsl:variable name="geo"           select="wdt:P625[1]"/>
-
+-->
                 <xsl:element name="vcard:hasAddress">
 
                     <xsl:element name="vcard:Address">
@@ -283,7 +284,6 @@
                                 <xsl:value-of select="$pobox"/>
                             </xsl:element>
                         </xsl:if>
--->
  
                         <xsl:if test="$geo">
                             <xsl:variable name="geo_value" select="lib:getGeoURI($geo)"/>
@@ -293,6 +293,7 @@
 	                            </xsl:element>
                             </xsl:if>
                         </xsl:if>
+-->
 
                     </xsl:element>
                 </xsl:element>

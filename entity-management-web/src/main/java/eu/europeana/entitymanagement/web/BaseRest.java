@@ -8,7 +8,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
 import javax.validation.ValidatorFactory;
 
+import eu.europeana.entitymanagement.definitions.model.Aggregator;
 import eu.europeana.entitymanagement.exception.ParamValidationException;
+import eu.europeana.entitymanagement.vocabulary.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,11 +40,6 @@ import eu.europeana.entitymanagement.serialization.JsonLdSerializer;
 import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.utils.EntityUtils;
-import eu.europeana.entitymanagement.vocabulary.EntityFieldsTypes;
-import eu.europeana.entitymanagement.vocabulary.EntityProfile;
-import eu.europeana.entitymanagement.vocabulary.FormatTypes;
-import eu.europeana.entitymanagement.vocabulary.ValidationObject;
-import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
 import eu.europeana.entitymanagement.web.service.EMAuthorizationService;
 import eu.europeana.entitymanagement.web.service.RequestPathMethodService;
@@ -219,6 +216,15 @@ public abstract class BaseRest extends BaseRestController {
       EntityRecord entityRecord,
       HttpStatus status)
       throws EuropeanaApiException {
+
+    /**
+     * EA-4323 temp fix to hide aggregator type
+     */
+    if (EntityTypes.isAggregator(entityRecord.getEntity().getType())) {
+      Aggregator aggregator = (Aggregator) entityRecord.getEntity();
+      aggregator.updateTypeToOrganisation();
+      entityRecord.setEntity(aggregator);
+    }
 
     Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
 
