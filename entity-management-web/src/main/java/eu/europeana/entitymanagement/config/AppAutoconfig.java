@@ -16,6 +16,7 @@ import javax.xml.bind.JAXBContext;
 
 import eu.europeana.api.commons.auth.AuthenticationBuilder;
 import eu.europeana.api.commons.auth.AuthenticationConfig;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -158,8 +159,13 @@ public class AppAutoconfig extends AppConfigConstants {
   public EuropeanaClientDetailsService getClientDetailsService() {
     EuropeanaClientDetailsService clientDetails = new EuropeanaClientDetailsService();
     clientDetails.setApiKeyServiceUrl(emConfiguration.getApiKeyUrl());
-    AuthenticationConfig config = new AuthenticationConfig(loadProperties());
-    clientDetails.setAuthHandler(AuthenticationBuilder.newAuthentication(config));
+    // Set authentication handler if values are not empty
+    if (StringUtils.isNotEmpty(emConfiguration.getTokenEndpoint()) && StringUtils.isNotEmpty(emConfiguration.getGrantParams())) {
+      AuthenticationConfig config = new AuthenticationConfig(loadProperties());
+      clientDetails.setAuthHandler(AuthenticationBuilder.newAuthentication(config));
+    } else {
+      LOG.error("Keycloak token endpoint and parameters NOT set !!");
+    }
     return clientDetails;
   }
 

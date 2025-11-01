@@ -119,21 +119,5 @@ public class EMExceptionHandler extends EuropeanaGlobalExceptionHandler {
         .headers(createHttpHeaders(httpRequest))
         .body(response);
   }
-
-  @ExceptionHandler(NoHandlerFoundException.class)
-  public ResponseEntity<EuropeanaApiErrorResponse> handleNoHandlerFoundException(
-      NoHandlerFoundException e, HttpServletRequest httpRequest) {
-
-    EuropeanaApiErrorResponse response =
-        new EuropeanaApiErrorResponse.Builder(httpRequest, e, stackTraceEnabled())
-            .setStatus(HttpStatus.NOT_FOUND.value())
-            .setError(HttpStatus.NOT_FOUND.getReasonPhrase())
-            .setMessage(e.getMessage())
-            .build();
-
-    return ResponseEntity.status(HttpStatus.NOT_FOUND.value())
-        .contentType(MediaType.APPLICATION_JSON)
-        .body(response);
-  }
   
 }

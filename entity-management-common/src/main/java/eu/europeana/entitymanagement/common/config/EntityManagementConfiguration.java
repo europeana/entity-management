@@ -61,10 +61,10 @@ public class EntityManagementConfiguration implements InitializingBean {
   @Value("${europeana.apikey.serviceurl}")
   private String apiKeyUrl;
 
-  @Value("${token.endpoint}")
+  @Value("${keycloak.token.endpoint}")
   private String tokenEndpoint;
 
-  @Value("${grant.params}")
+  @Value("${keycloak.token.grant.params}")
   private String grantParams;
 
   @Value("${entitymanagement.solr.pr.url}")
