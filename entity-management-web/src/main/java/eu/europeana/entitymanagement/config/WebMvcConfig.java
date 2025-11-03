@@ -9,6 +9,7 @@ import org.springframework.web.servlet.config.annotation.*;
 
 /** Setup CORS for all requests and setup default Content-type */
 @Configuration
+@EnableWebMvc
 public class WebMvcConfig implements WebMvcConfigurer {
 
   MediaType jsonLdMediaType =
@@ -69,6 +70,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     // use application/ld+json if no Content-Type is specified
     configurer.defaultContentType(
         MediaType.valueOf(eu.europeana.api.commons.web.http.HttpHeaders.CONTENT_TYPE_JSONLD));
+
   }
 
   private Map<String, MediaType> getMediaTypesMapping() {
