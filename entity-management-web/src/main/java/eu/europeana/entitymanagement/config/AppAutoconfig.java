@@ -62,9 +62,11 @@ import eu.europeana.entitymanagement.web.service.EntityRecordService;
 import eu.europeana.entitymanagement.web.xml.model.RdfXmlUtils;
 import eu.europeana.entitymanagement.web.xml.model.XmlBaseEntityImpl;
 import eu.europeana.entitymanagement.web.xml.model.XmlConceptImpl;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 /** @author GordeaS */
 @Configuration
+@EnableWebMvc
 public class AppAutoconfig extends AppConfigConstants {
 
   private static final Logger LOG = LogManager.getLogger(AppAutoconfig.class);
