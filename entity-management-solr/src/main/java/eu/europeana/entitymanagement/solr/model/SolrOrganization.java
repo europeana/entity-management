@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import eu.europeana.entitymanagement.definitions.model.HasGeo;
 import org.apache.commons.collections.MapUtils;
 import org.apache.solr.client.solrj.beans.Field;
 import eu.europeana.entitymanagement.definitions.model.Address;
@@ -67,7 +69,7 @@ public class SolrOrganization extends SolrEntity<Organization> {
   private String postBox;
 
   @Field(VCARD_HAS_GEO)
-  private String hasGeo;
+  private HasGeo hasGeo;
 
   public SolrOrganization() {
   }
@@ -113,7 +115,8 @@ public class SolrOrganization extends SolrEntity<Organization> {
       this.postalCode = organizationAddress.getVcardPostalCode();
       this.countryName = organizationAddress.getVcardCountryName();
       this.postBox = organizationAddress.getVcardPostOfficeBox();
-      this.hasGeo = EntityUtils.toLatLongValue(organizationAddress.getVcardHasGeo());
+//      this.hasGeo = EntityUtils.toLatLongValue(organizationAddress.getVcardHasGeo());
+      this.hasGeo = organizationAddress.getVcardHasGeo();
     }
   }
 
@@ -189,7 +192,7 @@ public class SolrOrganization extends SolrEntity<Organization> {
     return postBox;
   }
 
-  public String getHasGeo() {
+  public HasGeo getHasGeo() {
     return hasGeo;
   }
 

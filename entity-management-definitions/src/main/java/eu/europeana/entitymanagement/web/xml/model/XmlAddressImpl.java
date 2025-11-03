@@ -4,12 +4,14 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_VCARD;
 
 import eu.europeana.entitymanagement.definitions.model.Address;
-import eu.europeana.entitymanagement.utils.EntityUtils;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import eu.europeana.entitymanagement.definitions.model.HasGeo;
 import org.apache.commons.lang3.StringUtils;
 
 @XmlRootElement(namespace = NAMESPACE_VCARD, name = XmlConstants.XML_ADDRESS)
@@ -41,7 +43,7 @@ public class XmlAddressImpl {
   private String countryName;
 
   @XmlElement(namespace = NAMESPACE_VCARD, name = XmlConstants.XML_HAS_GEO)
-  private LabelledResource hasGeo;
+  private XmlHasGeoImpl hasGeo;
 
   public XmlAddressImpl() {
     // no-arg default constructor
@@ -58,8 +60,8 @@ public class XmlAddressImpl {
     this.postBox = address.getVcardPostOfficeBox();
     this.locality = address.getVcardLocality();
 
-    if (StringUtils.isNotEmpty(address.getVcardHasGeo())) {
-      this.hasGeo = new LabelledResource(EntityUtils.toGeoUri(address.getVcardHasGeo()));
+    if (address.getVcardHasGeo() != null) {
+      this.hasGeo = new XmlHasGeoImpl(address.getVcardHasGeo());
     }
   }
 
@@ -87,7 +89,7 @@ public class XmlAddressImpl {
     return countryName;
   }
 
-  public LabelledResource getHasGeo() {
+  public XmlHasGeoImpl getHasGeo() {
     return hasGeo;
   }
 
@@ -100,7 +102,12 @@ public class XmlAddressImpl {
     address.setVcardLocality(locality);
     address.setVcardCountryName(countryName);
     if (hasGeo != null) {
-      address.setVcardHasGeo(hasGeo.getResource());
+      HasGeo toGeo = new HasGeo();
+      toGeo.setId(hasGeo.getId());
+      toGeo.setType(hasGeo.getType());
+      toGeo.setLatitude(hasGeo.getLatitude());
+      toGeo.setLongitude(hasGeo.getLongitude());
+      address.setVcardHasGeo(toGeo);
     }
 
     return address;
