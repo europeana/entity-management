@@ -11,9 +11,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import eu.europeana.api.commons.web.http.HttpHeaders;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @RestController
 @ConditionalOnWebApplication
+@EnableWebMvc
 public class EMErrorController extends AbstractErrorController {
 
     public EMErrorController(ErrorAttributes errorAttributes) {

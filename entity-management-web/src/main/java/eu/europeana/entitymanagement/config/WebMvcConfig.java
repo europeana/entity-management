@@ -9,7 +9,6 @@ import org.springframework.web.servlet.config.annotation.*;
 
 /** Setup CORS for all requests and setup default Content-type */
 @Configuration
-@EnableWebMvc
 public class WebMvcConfig implements WebMvcConfigurer {
 
   MediaType jsonLdMediaType =
