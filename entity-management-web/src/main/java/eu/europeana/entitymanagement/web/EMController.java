@@ -710,11 +710,13 @@ public class EMController extends BaseRest {
           String.format(EntityRecordUtils.MULTIPLE_CHOICES_FOR_REDIRECTION_MSG, entityCreationId,
               EntityRecordUtils.getEntityIds(existingEntities).toString()));
     } else {
-      // existingEntities contains only one dupplicate
-      if (existingEntities.get(0).isDisabled()) {
-        throw new EntityRemovedException(String.format(EXTERNAL_ID_REMOVED_MSG, entityCreationId,
-            existingEntities.get(0).getEntityId()));
-      }
+
+//      EA-4322 - disabled entites should as well be redirected
+//      // existingEntities contains only one dupplicate
+//      if (existingEntities.get(0).isDisabled()) {
+//        throw new EntityRemovedException(String.format(EXTERNAL_ID_REMOVED_MSG, entityCreationId,
+//            existingEntities.get(0).getEntityId()));
+//      }
 
       // return 301 redirect
       return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
