@@ -69,7 +69,7 @@ public class SolrOrganization extends SolrEntity<Organization> {
   private String postBox;
 
   @Field(VCARD_HAS_GEO)
-  private HasGeo hasGeo;
+  private String hasGeo;
 
   public SolrOrganization() {
   }
@@ -115,8 +115,7 @@ public class SolrOrganization extends SolrEntity<Organization> {
       this.postalCode = organizationAddress.getVcardPostalCode();
       this.countryName = organizationAddress.getVcardCountryName();
       this.postBox = organizationAddress.getVcardPostOfficeBox();
-//      this.hasGeo = EntityUtils.toLatLongValue(organizationAddress.getVcardHasGeo());
-      this.hasGeo = organizationAddress.getVcardHasGeo();
+      this.hasGeo = EntityUtils.toLatLongValue(organizationAddress.getVcardHasGeo().getId());
     }
   }
 
@@ -192,7 +191,7 @@ public class SolrOrganization extends SolrEntity<Organization> {
     return postBox;
   }
 
-  public HasGeo getHasGeo() {
+  public String getHasGeo() {
     return hasGeo;
   }
 
