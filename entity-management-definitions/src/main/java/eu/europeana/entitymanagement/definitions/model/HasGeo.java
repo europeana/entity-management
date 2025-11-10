@@ -1,12 +1,26 @@
 package eu.europeana.entitymanagement.definitions.model;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import dev.morphia.annotations.Entity;
 
+import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
+
+@Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
+@JsonPropertyOrder({
+        ID,
+        TYPE,
+        LATITUDE,
+        LONGITUDE
+})
 public class HasGeo {
 
     private String id;
-    private String type;
+    private String type = "Location";
     private String latitude;
     private String longitude;
 
@@ -23,8 +37,7 @@ public class HasGeo {
         this.longitude = copy.getLongitude();
     }
 
-
-
+    @JsonGetter(ID)
     public String getId() {
         return id;
     }
@@ -33,6 +46,7 @@ public class HasGeo {
         this.id = id;
     }
 
+    @JsonGetter(TYPE)
     public String getType() {
         return type;
     }
@@ -41,6 +55,7 @@ public class HasGeo {
         this.type = type;
     }
 
+    @JsonGetter(LATITUDE)
     public String getLatitude() {
         return latitude;
     }
@@ -49,6 +64,7 @@ public class HasGeo {
         this.latitude = latitude;
     }
 
+    @JsonGetter(LONGITUDE)
     public String getLongitude() {
         return longitude;
     }

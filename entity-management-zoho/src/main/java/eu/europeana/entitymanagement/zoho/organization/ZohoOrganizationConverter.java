@@ -11,17 +11,14 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import eu.europeana.entitymanagement.definitions.model.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.lang.NonNull;
 import com.zoho.crm.api.record.Record;
 import com.zoho.crm.api.users.User;
-import eu.europeana.entitymanagement.definitions.model.Address;
-import eu.europeana.entitymanagement.definitions.model.Aggregator;
-import eu.europeana.entitymanagement.definitions.model.Organization;
-import eu.europeana.entitymanagement.definitions.model.WebResource;
-import eu.europeana.entitymanagement.definitions.model.ZohoLabelUriMapping;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
@@ -98,7 +95,14 @@ public class ZohoOrganizationConverter {
         logger.info("The mapping for the zoho country label: {}, to the europeana uri does not exist.", zohoCountryLabel);
       }
     }
-    
+
+    // set hasGeo
+    HasGeo hasGeo = new HasGeo();
+    hasGeo.setId(ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.GEO_COORDINATES_FIELD)));
+    hasGeo.setLongitude(ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.LONGITUDE_FIELD)));
+    hasGeo.setLatitude(ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.LATITUDE_FIELD)));
+    address.setVcardHasGeo(hasGeo);
+
     if(org.getSameReferenceLinks()==null) {
       org.setSameReferenceLinks(new ArrayList<>());  
     }

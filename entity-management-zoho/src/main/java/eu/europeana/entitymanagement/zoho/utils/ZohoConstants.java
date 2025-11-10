@@ -48,6 +48,8 @@ public final class ZohoConstants {
   public static final String PO_BOX_FIELD = "PO_box";
   public static final String LATITUDE_FIELD = "Latitude";
   public static final String LONGITUDE_FIELD = "Longitude";
+  public static final String GEO_COORDINATES_FIELD = "Geo_coordinate";
+
   public static final String LAST_ACTIVITY_TIME_FIELD = "Last_Activity_Time";
   public static final String ADDRESS_ABOUT = "#address";
   public static final String HIDDEN_LABEL1_FIELD = "Hidden_1";
