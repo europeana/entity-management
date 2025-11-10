@@ -700,7 +700,7 @@ public class EMController extends BaseRest {
   }
 
   private ResponseEntity<String> checkExistingEntity(List<EntityRecord> existingEntities,
-      String entityCreationId) throws EntityRemovedException, MultipleChoicesException {
+      String entityCreationId) throws MultipleChoicesException {
 
     if (existingEntities == null || existingEntities.isEmpty()) {
       return null;

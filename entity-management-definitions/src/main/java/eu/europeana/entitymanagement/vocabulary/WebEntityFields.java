@@ -5,7 +5,7 @@ public abstract class WebEntityFields {
   // LD fields
   public static final String CONTEXT = "@context";
   public static final String ENTITY_CONTEXT =
-      "http://www.europeana.eu/schemas/context/entity.jsonld";
+      "https://api.europeana.eu/schema/context/entity.jsonld";
   public static final String LANGUAGE_EN = "en";
   public static final String BASE_DATA_EUROPEANA_URI = "http://data.europeana.eu/";
   public static final String WIKIDATA_HOST = "www.wikidata.org";
