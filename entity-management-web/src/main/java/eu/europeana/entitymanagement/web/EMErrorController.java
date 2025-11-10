@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import eu.europeana.api.commons.web.http.HttpHeaders;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 @RestController
@@ -41,11 +42,21 @@ public class EMErrorController extends AbstractErrorController {
 
     /**
      * Generates EuropeanaApiErrorResponse for "/error" mappings
+     *
+     * Includes the stack trace and exception details.
+     * See : {@link org.springframework.boot.web.servlet.error.DefaultErrorAttributes#addErrorDetails(Map, WebRequest, boolean)}
+     * the "trace" is added only if exception is set to true and is not an instance of ServletException
+     * So we check we have recived the trace before sending to EuropeanaApiErrorResponse Builder
+     *
      * @param request http request
      * @return error response
      */
     private ResponseEntity<EuropeanaApiErrorResponse> getErrorAttributes(final HttpServletRequest request) {
-        Map<String, Object> map = this.getErrorAttributes(request, ErrorAttributeOptions.defaults());
+        Map<String, Object> map = this.getErrorAttributes(request,
+                ErrorAttributeOptions.of(
+                        ErrorAttributeOptions.Include.STACK_TRACE,
+                        ErrorAttributeOptions.Include.EXCEPTION));
+
         int status = getStatus(map);
 
         org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
@@ -54,7 +65,7 @@ public class EMErrorController extends AbstractErrorController {
         return ResponseEntity.status(status)
                 .headers(headers)
                 .body(
-                new EuropeanaApiErrorResponse.Builder(request, true, null, true)
+                new EuropeanaApiErrorResponse.Builder(request, true, null, map.get("trace") != null)
                         .setStatus(status)
                         .setError(getKeyValues(map, "error"))
                         .setMessage(getKeyValues(map, "message"))
