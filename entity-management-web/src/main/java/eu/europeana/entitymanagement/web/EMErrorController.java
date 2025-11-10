@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.web;
 
 import java.util.Map;
+import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 
 import eu.europeana.api.commons.error.EuropeanaApiErrorResponse;
@@ -46,7 +47,7 @@ public class EMErrorController extends AbstractErrorController {
      * Includes the stack trace and exception details.
      * See : {@link org.springframework.boot.web.servlet.error.DefaultErrorAttributes#addErrorDetails(Map, WebRequest, boolean)}
      * the "trace" is added only if exception is set to true and is not an instance of ServletException
-     * So we check we have recived the trace before sending to EuropeanaApiErrorResponse Builder
+     * So we check we have received the trace before sending to EuropeanaApiErrorResponse Builder
      *
      * @param request http request
      * @return error response
@@ -58,14 +59,14 @@ public class EMErrorController extends AbstractErrorController {
                         ErrorAttributeOptions.Include.EXCEPTION));
 
         int status = getStatus(map);
-
         org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         return ResponseEntity.status(status)
                 .headers(headers)
                 .body(
-                new EuropeanaApiErrorResponse.Builder(request, true, null, map.get("trace") != null)
+                new EuropeanaApiErrorResponse.Builder(request, true, null,
+                        true, getStackTrace(map))
                         .setStatus(status)
                         .setError(getKeyValues(map, "error"))
                         .setMessage(getKeyValues(map, "message"))
@@ -91,6 +92,17 @@ public class EMErrorController extends AbstractErrorController {
             return map.get(key).toString();
         }
         return "";
+    }
 
+    /**
+     * If the error attributes has "trace" key, return the value or else empty
+     * @param map
+     * @return
+     */
+    private Optional<String> getStackTrace(Map<String, Object> map) {
+        if (map.containsKey("trace")) {
+            return Optional.ofNullable(map.get("trace").toString());
+        }
+        return Optional.empty();
     }
 }
