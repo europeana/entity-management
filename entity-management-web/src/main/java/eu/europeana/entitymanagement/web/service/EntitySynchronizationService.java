@@ -367,6 +367,7 @@ public class EntitySynchronizationService extends BaseZohoAccess {
     BatchOperations operations = new BatchOperations();
 
     Set<String> modifiedZohoUrls = getZohoOrganizationUrls(orgList);
+    logger.info("list of org being updated {}" ,  modifiedZohoUrls);
     List<EntityRecord> existingEntityRecords = findEntityRecordsByProxyId(modifiedZohoUrls);
 
     Long zohoId;
