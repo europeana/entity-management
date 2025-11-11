@@ -182,7 +182,7 @@ public class AppAutoconfig extends AppConfigConstants {
   @Bean(name = BEAN_MESSAGE_SOURCE)
   public MessageSource i18nMessagesSource(){
     ReloadableResourceBundleMessageSource source = new ReloadableResourceBundleMessageSource();
-    source.setBasename("messages");
+    source.setBasename("classpath:messages");
     source.setDefaultEncoding(StandardCharsets.UTF_8.name());
     return source;
   }
