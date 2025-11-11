@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import dev.morphia.annotations.Entity;
+import dev.morphia.annotations.Transient;
 
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 
@@ -20,7 +21,10 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 public class HasGeo {
 
     private String id;
+
+    @Transient
     private String type = "Location";
+
     private String latitude;
     private String longitude;
 
