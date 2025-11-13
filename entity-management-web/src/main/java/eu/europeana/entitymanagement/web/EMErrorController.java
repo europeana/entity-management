@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.web;
 
 import java.util.Map;
+import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 
 import eu.europeana.api.commons.error.EuropeanaApiErrorResponse;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import eu.europeana.api.commons.web.http.HttpHeaders;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 @RestController
@@ -41,20 +43,30 @@ public class EMErrorController extends AbstractErrorController {
 
     /**
      * Generates EuropeanaApiErrorResponse for "/error" mappings
+     *
+     * Includes the stack trace and exception details.
+     * See : {@link org.springframework.boot.web.servlet.error.DefaultErrorAttributes#addErrorDetails(Map, WebRequest, boolean)}
+     * the "trace" is added only if exception is set to true and is not an instance of ServletException
+     * So we check we have received the trace before sending to EuropeanaApiErrorResponse Builder
+     *
      * @param request http request
      * @return error response
      */
     private ResponseEntity<EuropeanaApiErrorResponse> getErrorAttributes(final HttpServletRequest request) {
-        Map<String, Object> map = this.getErrorAttributes(request, ErrorAttributeOptions.defaults());
-        int status = getStatus(map);
+        Map<String, Object> map = this.getErrorAttributes(request,
+                ErrorAttributeOptions.of(
+                        ErrorAttributeOptions.Include.STACK_TRACE,
+                        ErrorAttributeOptions.Include.EXCEPTION));
 
+        int status = getStatus(map);
         org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         return ResponseEntity.status(status)
                 .headers(headers)
                 .body(
-                new EuropeanaApiErrorResponse.Builder(request, true, null, true)
+                new EuropeanaApiErrorResponse.Builder(request, true, null,
+                        true, getStackTrace(map))
                         .setStatus(status)
                         .setError(getKeyValues(map, "error"))
                         .setMessage(getKeyValues(map, "message"))
@@ -80,6 +92,17 @@ public class EMErrorController extends AbstractErrorController {
             return map.get(key).toString();
         }
         return "";
+    }
 
+    /**
+     * If the error attributes has "trace" key, return the value or else empty
+     * @param map
+     * @return
+     */
+    private Optional<String> getStackTrace(Map<String, Object> map) {
+        if (map.containsKey("trace")) {
+            return Optional.ofNullable(map.get("trace").toString());
+        }
+        return Optional.empty();
     }
 }

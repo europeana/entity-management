@@ -459,7 +459,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
             MockMvcRequestBuilders.post(IntegrationTestUtils.BASE_SERVICE_URL)
                 .content(europeanaMetadata)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
-        .andExpect(status().isGone());
+        .andExpect(status().isMovedPermanently());
   }
 
   @Test

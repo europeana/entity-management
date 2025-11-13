@@ -70,8 +70,6 @@ public abstract class WebEntityConstants extends WebEntityFields {
   public static final String TOP_CONCEPT = "topConcept";
 
   public static final String LDP_CONTEXT = "https://www.w3.org/ns/ldp.jsonld";
-  public static final String ENTITY_CONTEXT =
-      "http://www.europeana.eu/schemas/context/entity.jsonld";
   public static final String TOTAL = "total";
 
   // Page fields
