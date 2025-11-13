@@ -10,9 +10,10 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import eu.europeana.entitymanagement.definitions.model.HasGeo;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.List;
 
 @XmlRootElement(namespace = NAMESPACE_VCARD, name = XmlConstants.XML_ADDRESS)
 // This throws an error because of fieldname - xml property mismatch.
@@ -43,7 +44,7 @@ public class XmlAddressImpl {
   private String countryName;
 
   @XmlElement(namespace = NAMESPACE_VCARD, name = XmlConstants.XML_HAS_GEO)
-  private XmlHasGeoImpl hasGeo;
+  private XmlHasGeo hasGeo;
 
   public XmlAddressImpl() {
     // no-arg default constructor
@@ -59,9 +60,8 @@ public class XmlAddressImpl {
     this.postalCode = address.getVcardPostalCode();
     this.postBox = address.getVcardPostOfficeBox();
     this.locality = address.getVcardLocality();
-
     if (address.getVcardHasGeo() != null) {
-      this.hasGeo = new XmlHasGeoImpl(address.getVcardHasGeo());
+      this.hasGeo = new XmlHasGeo(List.of(new XmlLocationImpl(address.getVcardHasGeo())));
     }
   }
 
@@ -89,7 +89,7 @@ public class XmlAddressImpl {
     return countryName;
   }
 
-  public XmlHasGeoImpl getHasGeo() {
+  public XmlHasGeo getHasGeo() {
     return hasGeo;
   }
 
@@ -101,14 +101,11 @@ public class XmlAddressImpl {
     address.setVcardPostOfficeBox(postBox);
     address.setVcardLocality(locality);
     address.setVcardCountryName(countryName);
-    if (hasGeo != null) {
-      HasGeo toGeo = new HasGeo();
-      toGeo.setId(hasGeo.getId());
-      toGeo.setLatitude(hasGeo.getLatitude());
-      toGeo.setLongitude(hasGeo.getLongitude());
-      address.setVcardHasGeo(toGeo);
-    }
 
+    if (hasGeo != null && !CollectionUtils.isEmpty(hasGeo.getVcardHasGeoList())
+            && hasGeo.getVcardHasGeoList().get(0).hasMetadataProperties()) {
+      address.setVcardHasGeo(hasGeo.getVcardHasGeoList().get(0).toGeo());
+    }
     return address;
   }
 
