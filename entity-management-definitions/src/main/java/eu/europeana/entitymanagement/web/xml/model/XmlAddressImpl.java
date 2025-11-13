@@ -104,7 +104,6 @@ public class XmlAddressImpl {
     if (hasGeo != null) {
       HasGeo toGeo = new HasGeo();
       toGeo.setId(hasGeo.getId());
-      toGeo.setType(hasGeo.getType());
       toGeo.setLatitude(hasGeo.getLatitude());
       toGeo.setLongitude(hasGeo.getLongitude());
       address.setVcardHasGeo(toGeo);

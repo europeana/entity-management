@@ -24,7 +24,7 @@ public class HasGeo {
     private String id;
 
     @Transient
-    private String type = "Location";
+    private String type = HAS_GEO_TYPE;
 
     private String latitude;
     private String longitude;
