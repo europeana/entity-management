@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import dev.morphia.annotations.Entity;
 import dev.morphia.annotations.Transient;
+import org.apache.commons.lang3.StringUtils;
 
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
 
@@ -75,5 +76,11 @@ public class HasGeo {
 
     public void setLongitude(String longitude) {
         this.longitude = longitude;
+    }
+
+    public boolean hasMetadataProperties() {
+      return StringUtils.isNotEmpty(this.id)
+              || StringUtils.isNotEmpty(this.latitude)
+              || StringUtils.isNotEmpty(this.longitude);
     }
 }

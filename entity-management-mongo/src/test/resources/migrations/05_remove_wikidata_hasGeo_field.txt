@@ -1,0 +1,6 @@
+#CHECK hasGeo field
+db.getCollection("EntityRecord").find({"entity.type": "Organization", "proxies.proxyId" : {$regex : "^http://www.wikidata.org/"}})
+
+#UNSET hasGeo field
+db.getCollection('EntityRecord').updateMany({"entity.type": "Organization", "proxies.proxyId" : {$regex : "^http://www.wikidata.org/"}
+, "proxies.entity.hasAddress.hasGeo" : {$exists : true}}, {$unset: {"proxies.2.entity.hasAddress.hasGeo": null}}, {multi : true})

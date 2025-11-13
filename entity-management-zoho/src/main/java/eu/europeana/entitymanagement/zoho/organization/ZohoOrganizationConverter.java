@@ -101,7 +101,9 @@ public class ZohoOrganizationConverter {
     hasGeo.setId(ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.GEO_COORDINATES_FIELD)));
     hasGeo.setLongitude(ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.LONGITUDE_FIELD)));
     hasGeo.setLatitude(ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.LATITUDE_FIELD)));
-    address.setVcardHasGeo(hasGeo);
+    if (hasGeo.hasMetadataProperties()) {
+      address.setVcardHasGeo(hasGeo);
+    }
 
     if(org.getSameReferenceLinks()==null) {
       org.setSameReferenceLinks(new ArrayList<>());  
