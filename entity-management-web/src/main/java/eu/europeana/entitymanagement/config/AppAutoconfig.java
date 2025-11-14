@@ -161,7 +161,7 @@ public class AppAutoconfig extends AppConfigConstants {
     clientDetails.setApiKeyServiceUrl(emConfiguration.getApiKeyUrl());
     // Set authentication handler if values are not empty
     if (StringUtils.isNotEmpty(emConfiguration.getTokenEndpoint()) && StringUtils.isNotEmpty(emConfiguration.getGrantParams())) {
-      AuthenticationConfig config = new AuthenticationConfig(loadProperties());
+      AuthenticationConfig config = new AuthenticationConfig(emConfiguration.getTokenEndpoint(), emConfiguration.getGrantParams());
       clientDetails.setAuthHandler(AuthenticationBuilder.newAuthentication(config));
     } else {
       LOG.error("Keycloak token endpoint and parameters NOT set !!");
@@ -182,7 +182,7 @@ public class AppAutoconfig extends AppConfigConstants {
   @Bean(name = BEAN_MESSAGE_SOURCE)
   public MessageSource i18nMessagesSource(){
     ReloadableResourceBundleMessageSource source = new ReloadableResourceBundleMessageSource();
-    source.setBasename("messages");
+    source.setBasename("classpath:messages");
     source.setDefaultEncoding(StandardCharsets.UTF_8.name());
     return source;
   }
@@ -303,14 +303,6 @@ public class AppAutoconfig extends AppConfigConstants {
             new SynchronizedItemStreamReader<>();
     synchronizedItemStreamReader.setDelegate(reader);
     return synchronizedItemStreamReader;
-  }
-
-
-  private Properties loadProperties() {
-    Properties properties = new Properties();
-    properties.setProperty(AuthenticationConfig.CONFIG_TOKEN_ENDPOINT,emConfiguration.getTokenEndpoint());
-    properties.setProperty(AuthenticationConfig.CONFIG_GRANT_PARAMS,emConfiguration.getGrantParams());
-    return properties;
   }
 
 }

@@ -1,12 +1,8 @@
 package eu.europeana.entitymanagement.web;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import eu.europeana.api.commons.oauth2.model.KeyValidationResult;
-import eu.europeana.api.commons.web.exception.ApplicationAuthenticationException;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,76 +11,22 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpMediaTypeException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.servlet.NoHandlerFoundException;
 import eu.europeana.api.commons.config.i18n.I18nService;
 import eu.europeana.api.commons.error.EuropeanaApiErrorResponse;
 import eu.europeana.api.commons.web.exception.EuropeanaGlobalExceptionHandler;
-import eu.europeana.api.commons.web.exception.HttpException;
-import eu.europeana.entitymanagement.web.service.RequestPathMethodService;
+
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_I18N_SERVICE;
 
 @ControllerAdvice
 @ConditionalOnWebApplication
 public class EMExceptionHandler extends EuropeanaGlobalExceptionHandler {
   // exception handling inherited from parent
 
-  private I18nService i18nService;
+  @Resource(name = BEAN_I18N_SERVICE)
+  I18nService i18nService;
 
-  @Autowired
-  public EMExceptionHandler(
-      RequestPathMethodService requestPathMethodService, I18nService i18nService) {
-    this.requestPathMethodService = requestPathMethodService;
-    this.i18nService = i18nService;
-  }
-
-  @ExceptionHandler(ApplicationAuthenticationException.class)
-  public ResponseEntity<EuropeanaApiErrorResponse> clientRegistrationExceptionHandler(HttpServletRequest request,
-                                                                                      HttpServletResponse response,
-                                                                                      ApplicationAuthenticationException ee) {
-    if (ee.getResult() != null) {
-      KeyValidationResult result = ee.getResult();
-      return ResponseEntity.status(result.getHttpStatusCode())
-              .headers(createHttpHeaders(request))
-              .body(new EuropeanaApiErrorResponse.Builder(request, ee, stackTraceEnabled())
-                      .setStatus(result.getHttpStatusCode())
-                      .setError(result.getValidationError().getError())
-                      .setMessage(result.getValidationError().getMessage())
-                      .setCode(result.getValidationError().getCode())
-                      .build());
-    } else {
-      return ResponseEntity.status(response.getStatus())
-              .headers(createHttpHeaders(request))
-              .body( new EuropeanaApiErrorResponse.Builder(request, ee, stackTraceEnabled())
-                      .setStatus(HttpServletResponse.SC_UNAUTHORIZED)
-                      .setError("Unauthorized")
-                      .setMessage(i18nService.getMessage(ee.getI18nKey()))
-                      .setCode(StringUtils.substringAfter(ee.getI18nKey(), "."))
-                      .build());
-
-    }
-  }
-
-  /**
-   * Default handler for EuropeanaApiException types
-   *
-   * @param e caught exception
-   */
-  @ExceptionHandler
-  public ResponseEntity<EuropeanaApiErrorResponse> handleCommonHttpException(
-      HttpException e, HttpServletRequest httpRequest) {
-
-    // TODO: harmonize the use of HTTP Exceptions and EuropeanaAPIExceptions
-    EuropeanaApiErrorResponse response =
-        new EuropeanaApiErrorResponse.Builder(httpRequest, e, stackTraceEnabled())
-            .setStatus(e.getStatus().value())
-            .setError(e.getStatus().getReasonPhrase())
-            .setMessage(i18nService.getMessage(e.getI18nKey(), e.getI18nParams()))
-            // code only included in JSON if a value is set in exception
-            .setCode(e.getI18nKey())
-            .build();
-
-    return ResponseEntity.status(e.getStatus())
-        .headers(createHttpHeaders(httpRequest))
-        .body(response);
+  protected I18nService getI18nService() {
+    return i18nService;
   }
 
   @ExceptionHandler
