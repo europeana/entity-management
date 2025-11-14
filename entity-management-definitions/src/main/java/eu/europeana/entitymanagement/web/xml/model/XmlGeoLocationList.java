@@ -12,22 +12,22 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.*;
 
 @XmlRootElement(namespace = NAMESPACE_VCARD, name = XML_HAS_GEO)
 @XmlAccessorType(XmlAccessType.FIELD)
-public class XmlHasGeo {
+public class XmlGeoLocationList {
 
    @XmlElement(namespace = NAMESPACE_VCARD, name = XML_LOCATION)
-   List<XmlLocationImpl> vcardHasGeoList;
+   List<XmlLocationImpl> geoLocations;
 
-   public XmlHasGeo() {
+   public XmlGeoLocationList() {
     // no-arg public constructor
    }
 
-   public XmlHasGeo(List<XmlLocationImpl> vcardHasGeoList) {
-      if (vcardHasGeoList != null) {
-         this.vcardHasGeoList = new ArrayList<>(vcardHasGeoList);
+   public XmlGeoLocationList(List<XmlLocationImpl> geoLocations) {
+      if (geoLocations != null) {
+         this.geoLocations = new ArrayList<>(geoLocations);
       }
    }
 
    public List<XmlLocationImpl> getVcardHasGeoList() {
-      return vcardHasGeoList == null ? null : new ArrayList<>(vcardHasGeoList);
+      return geoLocations == null ? null : new ArrayList<>(geoLocations);
    }
 }

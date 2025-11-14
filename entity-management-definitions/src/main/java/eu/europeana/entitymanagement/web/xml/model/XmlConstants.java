@@ -110,7 +110,7 @@ public final class XmlConstants extends XmlFields {
   public static final String XML_REGION = WebEntityFields.REGION;
   public static final String XML_COUNTRY_NAME = "country-name";
   public static final String XML_HAS_GEO = WebEntityFields.HAS_GEO;
-  public static final String XML_LOCATION = WebEntityFields.HAS_GEO_TYPE;
+  public static final String XML_LOCATION = WebEntityFields.GEO_LOCATION_TYPE;
 
   public static final String IS_AGGREGATED_BY = WebEntityFields.IS_AGGREGATED_BY;
   public static final String AGGREGATION = WebEntityFields.AGGREGATION;

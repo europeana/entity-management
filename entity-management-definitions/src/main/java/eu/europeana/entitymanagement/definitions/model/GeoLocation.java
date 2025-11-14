@@ -19,22 +19,22 @@ import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.*;
         LATITUDE,
         LONGITUDE
 })
-public class HasGeo {
+public class GeoLocation {
 
     private String id;
 
     @Transient
-    private String type = HAS_GEO_TYPE;
+    private String type = GEO_LOCATION_TYPE;
 
     private String latitude;
     private String longitude;
 
 
-    public HasGeo() {
+    public GeoLocation() {
         super();
     }
 
-    public HasGeo(HasGeo copy) {
+    public GeoLocation(GeoLocation copy) {
         super();
         this.id = copy.getId();
         this.type = copy.getType();

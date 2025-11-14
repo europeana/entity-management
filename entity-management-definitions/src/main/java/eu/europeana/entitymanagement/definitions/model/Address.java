@@ -59,7 +59,7 @@ public class Address {
   private String postBox;
   private String locality;
   private String countryName;
-  private HasGeo hasGeo;
+  private GeoLocation hasGeo;
 
   @JsonSetter(POST_OFFICE_BOX)
   public void setVcardPostOfficeBox(String vcardPostOfficeBox) {
@@ -122,12 +122,12 @@ public class Address {
   }
 
   @JsonGetter(HAS_GEO)
-  public HasGeo getVcardHasGeo() {
+  public GeoLocation getVcardHasGeo() {
     return hasGeo;
   }
 
   @JsonSetter(HAS_GEO)
-  public void setVcardHasGeo(HasGeo hasGeo) {
+  public void setVcardHasGeo(GeoLocation hasGeo) {
     this.hasGeo = hasGeo;
   }
 

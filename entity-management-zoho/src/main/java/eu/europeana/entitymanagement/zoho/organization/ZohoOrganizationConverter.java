@@ -97,7 +97,7 @@ public class ZohoOrganizationConverter {
     }
 
     // set hasGeo
-    HasGeo hasGeo = new HasGeo();
+    GeoLocation hasGeo = new GeoLocation();
     hasGeo.setId(ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.GEO_COORDINATES_FIELD)));
     hasGeo.setLongitude(ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.LONGITUDE_FIELD)));
     hasGeo.setLatitude(ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.LATITUDE_FIELD)));

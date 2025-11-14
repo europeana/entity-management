@@ -1,6 +1,6 @@
 package eu.europeana.entitymanagement.web.xml.model;
 
-import eu.europeana.entitymanagement.definitions.model.HasGeo;
+import eu.europeana.entitymanagement.definitions.model.GeoLocation;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.bind.annotation.*;
@@ -25,7 +25,7 @@ public class XmlLocationImpl {
         // no-arg default constructor
     }
 
-    public XmlLocationImpl(HasGeo hasGeo) {
+    public XmlLocationImpl(GeoLocation hasGeo) {
         if (StringUtils.isNotEmpty(hasGeo.getId())) {
             this.id = hasGeo.getId();
         }
@@ -45,8 +45,8 @@ public class XmlLocationImpl {
         return longitude;
     }
 
-    public HasGeo toGeo() {
-        HasGeo hasGeo = new HasGeo();
+    public GeoLocation toGeo() {
+        GeoLocation hasGeo = new GeoLocation();
         hasGeo.setId(id);
         hasGeo.setLatitude(latitude);
         hasGeo.setLongitude(longitude);

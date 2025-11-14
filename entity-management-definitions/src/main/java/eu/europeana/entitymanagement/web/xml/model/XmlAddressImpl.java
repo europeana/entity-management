@@ -44,7 +44,7 @@ public class XmlAddressImpl {
   private String countryName;
 
   @XmlElement(namespace = NAMESPACE_VCARD, name = XmlConstants.XML_HAS_GEO)
-  private XmlHasGeo hasGeo;
+  private XmlGeoLocationList hasGeo;
 
   public XmlAddressImpl() {
     // no-arg default constructor
@@ -61,7 +61,7 @@ public class XmlAddressImpl {
     this.postBox = address.getVcardPostOfficeBox();
     this.locality = address.getVcardLocality();
     if (address.getVcardHasGeo() != null) {
-      this.hasGeo = new XmlHasGeo(List.of(new XmlLocationImpl(address.getVcardHasGeo())));
+      this.hasGeo = new XmlGeoLocationList(List.of(new XmlLocationImpl(address.getVcardHasGeo())));
     }
   }
 
@@ -89,7 +89,7 @@ public class XmlAddressImpl {
     return countryName;
   }
 
-  public XmlHasGeo getHasGeo() {
+  public XmlGeoLocationList getHasGeo() {
     return hasGeo;
   }
 
