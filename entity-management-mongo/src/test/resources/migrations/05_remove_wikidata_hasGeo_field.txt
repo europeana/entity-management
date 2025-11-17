@@ -1,0 +1,12 @@
+#CHECK hasGeo field
+
+## This query might return values if hasGeo field is added for other proxies (zoho or europeana entity)
+db.getCollection("EntityRecord").find({"entity.type": "Organization", "proxies.entity.hasAddress.hasGeo" : {$exists : true}})
+
+## this will specifically check the last wikidata proxy
+db.getCollection("EntityRecord").find({"entity.type": "Organization", "proxies.2.entity.hasAddress.hasGeo" : {$exists : true}})
+
+
+#UNSET hasGeo field (only update the last proxy)
+db.getCollection('EntityRecord').updateMany({"entity.type": "Organization",
+, "proxies.2.entity.hasAddress.hasGeo" : {$exists : true}}, {$unset: {"proxies.2.entity.hasAddress.hasGeo": null}}, {multi : true})

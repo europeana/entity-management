@@ -2,7 +2,6 @@ package eu.europeana.entitymanagement.web;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;

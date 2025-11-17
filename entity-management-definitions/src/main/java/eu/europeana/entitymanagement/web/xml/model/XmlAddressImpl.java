@@ -4,13 +4,16 @@ import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE
 import static eu.europeana.entitymanagement.web.xml.model.XmlConstants.NAMESPACE_VCARD;
 
 import eu.europeana.entitymanagement.definitions.model.Address;
-import eu.europeana.entitymanagement.utils.EntityUtils;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.List;
 
 @XmlRootElement(namespace = NAMESPACE_VCARD, name = XmlConstants.XML_ADDRESS)
 // This throws an error because of fieldname - xml property mismatch.
@@ -41,7 +44,7 @@ public class XmlAddressImpl {
   private String countryName;
 
   @XmlElement(namespace = NAMESPACE_VCARD, name = XmlConstants.XML_HAS_GEO)
-  private LabelledResource hasGeo;
+  private XmlGeoLocationList hasGeo;
 
   public XmlAddressImpl() {
     // no-arg default constructor
@@ -57,9 +60,8 @@ public class XmlAddressImpl {
     this.postalCode = address.getVcardPostalCode();
     this.postBox = address.getVcardPostOfficeBox();
     this.locality = address.getVcardLocality();
-
-    if (StringUtils.isNotEmpty(address.getVcardHasGeo())) {
-      this.hasGeo = new LabelledResource(EntityUtils.toGeoUri(address.getVcardHasGeo()));
+    if (address.getVcardHasGeo() != null) {
+      this.hasGeo = new XmlGeoLocationList(List.of(new XmlLocationImpl(address.getVcardHasGeo())));
     }
   }
 
@@ -87,7 +89,7 @@ public class XmlAddressImpl {
     return countryName;
   }
 
-  public LabelledResource getHasGeo() {
+  public XmlGeoLocationList getHasGeo() {
     return hasGeo;
   }
 
@@ -99,10 +101,11 @@ public class XmlAddressImpl {
     address.setVcardPostOfficeBox(postBox);
     address.setVcardLocality(locality);
     address.setVcardCountryName(countryName);
-    if (hasGeo != null) {
-      address.setVcardHasGeo(hasGeo.getResource());
-    }
 
+    if (hasGeo != null && !CollectionUtils.isEmpty(hasGeo.getVcardHasGeoList())
+            && hasGeo.getVcardHasGeoList().get(0).hasMetadataProperties()) {
+      address.setVcardHasGeo(hasGeo.getVcardHasGeoList().get(0).toGeo());
+    }
     return address;
   }
 

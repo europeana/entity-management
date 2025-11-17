@@ -117,6 +117,7 @@ public abstract class WebEntityFields {
   public static final String HAS_GEO = "hasGeo";
   public static final String HAS_ADDRESS = "hasAddress";
   public static final String ADDRESS_TYPE = "Address";
+  public static final String GEO_LOCATION_TYPE = "Location";
 
   // ConceptScheme fields
   public static final String DEFINITION = "definition";
