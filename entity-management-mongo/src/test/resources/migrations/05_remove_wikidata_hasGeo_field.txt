@@ -9,4 +9,4 @@ db.getCollection("EntityRecord").find({"entity.type": "Organization", "proxies.2
 
 #UNSET hasGeo field (only update the last proxy)
 db.getCollection('EntityRecord').updateMany({"entity.type": "Organization",
-, "proxies.2.entity.hasAddress.hasGeo" : {$exists : true}}, {$unset: {"proxies.2.entity.hasAddress.hasGeo": null}}, {multi : true})
+   "proxies.2.entity.hasAddress.hasGeo" : {$exists : true}}, {$unset: {"proxies.2.entity.hasAddress.hasGeo": null}}, {multi : true})
