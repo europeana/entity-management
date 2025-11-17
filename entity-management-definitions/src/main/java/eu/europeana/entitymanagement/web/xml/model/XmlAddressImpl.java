@@ -13,8 +13,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.List;
-
 @XmlRootElement(namespace = NAMESPACE_VCARD, name = XmlConstants.XML_ADDRESS)
 // This throws an error because of fieldname - xml property mismatch.
 // TODO: Fix and uncomment
@@ -44,7 +42,7 @@ public class XmlAddressImpl {
   private String countryName;
 
   @XmlElement(namespace = NAMESPACE_VCARD, name = XmlConstants.XML_HAS_GEO)
-  private XmlGeoLocationList hasGeo;
+  private XmlGeoLocation hasGeo;
 
   public XmlAddressImpl() {
     // no-arg default constructor
@@ -61,7 +59,7 @@ public class XmlAddressImpl {
     this.postBox = address.getVcardPostOfficeBox();
     this.locality = address.getVcardLocality();
     if (address.getVcardHasGeo() != null) {
-      this.hasGeo = new XmlGeoLocationList(List.of(new XmlLocationImpl(address.getVcardHasGeo())));
+      this.hasGeo = new XmlGeoLocation(new XmlLocationImpl(address.getVcardHasGeo()));
     }
   }
 
@@ -89,7 +87,7 @@ public class XmlAddressImpl {
     return countryName;
   }
 
-  public XmlGeoLocationList getHasGeo() {
+  public XmlGeoLocation getHasGeo() {
     return hasGeo;
   }
 
@@ -102,9 +100,9 @@ public class XmlAddressImpl {
     address.setVcardLocality(locality);
     address.setVcardCountryName(countryName);
 
-    if (hasGeo != null && !CollectionUtils.isEmpty(hasGeo.getVcardHasGeoList())
-            && hasGeo.getVcardHasGeoList().get(0).hasMetadataProperties()) {
-      address.setVcardHasGeo(hasGeo.getVcardHasGeoList().get(0).toGeo());
+    if (hasGeo != null && hasGeo.getGeoLocation() != null
+            && hasGeo.getGeoLocation().hasMetadataProperties()) {
+      address.setVcardHasGeo(hasGeo.getGeoLocation().toGeo());
     }
     return address;
   }
