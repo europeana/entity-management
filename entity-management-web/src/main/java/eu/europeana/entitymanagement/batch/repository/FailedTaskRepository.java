@@ -22,9 +22,12 @@ import com.mongodb.client.model.WriteModel;
 import com.mongodb.client.result.UpdateResult;
 import dev.morphia.Datastore;
 import dev.morphia.query.FindOptions;
+import dev.morphia.query.Query;
 import dev.morphia.query.updates.UpdateOperators;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
+import eu.europeana.entitymanagement.definitions.batch.EMBatchConstants;
 import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 
 @Repository
 public class FailedTaskRepository implements InitializingBean {
@@ -126,14 +129,19 @@ public class FailedTaskRepository implements InitializingBean {
   /**
    * Gets entityIds of entities with failures
    *
+   * @param taskType optional parameter to filter by task type
    * @param start number of documents to skip
    * @param count number of documents to fetch
    * @return List with results
    */
-  public List<String> getEntityIdsWithFailures(int start, int count) {
+  public List<String> getEntityIdsWithFailures(TaskType taskType, int start, int count) {
+    Query<FailedTask> query = datastore
+        .find(FailedTask.class);
+    if(taskType != null) {
+      query.filter(eq(EMBatchConstants.UPDATE_TYPE, taskType.getValue()));
+    }
     List<FailedTask> failedTasks =
-        datastore
-            .find(FailedTask.class)
+        query
             .iterator(
                 new FindOptions()
                     // we only care about the EntityID

@@ -8,7 +8,8 @@ public enum TaskType {
     meta_update("meta_update"),
     metrics_update("metrics_update"),
     permanent_deletion("permanent_deletion"),
-    deprecation("deprecation");
+    deprecation("deprecation"),
+    registration("registration");
 
     final String value;
 

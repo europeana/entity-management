@@ -3,27 +3,37 @@ package eu.europeana.entitymanagement.web.service;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.Set;
+import java.util.SortedSet;
 import java.util.stream.Collectors;
-
-import eu.europeana.entitymanagement.batch.config.JobDescriptionFactory;
-import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.atlas.logging.Log;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.lang.NonNull;
 import com.zoho.crm.api.record.DeletedRecord;
 import com.zoho.crm.api.record.Record;
 import eu.europeana.api.commons.definitions.utils.DateUtils;
+import eu.europeana.entitymanagement.batch.config.JobDescriptionFactory;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
+import eu.europeana.entitymanagement.batch.service.FailedTaskService;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.DataSources;
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import eu.europeana.entitymanagement.definitions.exceptions.EntityModelCreationException;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Organization;
+import eu.europeana.entitymanagement.exception.DatasourceDereferenceException;
+import eu.europeana.entitymanagement.exception.EntityAlreadyExistsException;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.exception.FunctionalRuntimeException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
@@ -62,9 +72,12 @@ public class BaseZohoAccess {
 
   protected final JobDescriptionFactory jobDescriptionFactory;
 
+  protected final FailedTaskService failedTaskService;
+
   /**
    * Constructor for service initialization
-   *  @param solrService solr service
+   * 
+   * @param solrService solr service
    * @param entityRecordService the entity record service
    * @param entityUpdateService the entity update service
    * @param emConfiguration application configuration
@@ -75,9 +88,10 @@ public class BaseZohoAccess {
    * @param jobDescriptionFactory entity job factory
    */
   public BaseZohoAccess(EntityRecordService entityRecordService,
-                        EntityUpdateService entityUpdateService, EntityManagementConfiguration emConfiguration,
-                        DataSources datasources, ZohoConfiguration zohoConfiguration, ZohoSyncRepository zohoSyncRepo,
-                        ZohoDereferenceService zohoDereferenceService, JobDescriptionFactory jobDescriptionFactory) {
+      EntityUpdateService entityUpdateService, EntityManagementConfiguration emConfiguration,
+      DataSources datasources, ZohoConfiguration zohoConfiguration, ZohoSyncRepository zohoSyncRepo,
+      ZohoDereferenceService zohoDereferenceService, JobDescriptionFactory jobDescriptionFactory,
+      FailedTaskService failedTaskService) {
     this.entityRecordService = entityRecordService;
     this.entityUpdateService = entityUpdateService;
     this.emConfiguration = emConfiguration;
@@ -87,6 +101,7 @@ public class BaseZohoAccess {
     this.zohoSyncRepo = zohoSyncRepo;
     this.zohoDereferenceService = zohoDereferenceService;
     this.jobDescriptionFactory = jobDescriptionFactory;
+    this.failedTaskService = failedTaskService;
   }
 
   protected DataSource initZohoDataSource() {
@@ -99,7 +114,7 @@ public class BaseZohoAccess {
     return zohoDatasource.get();
   }
 
-  OffsetDateTime generateFixDate(String since){
+  OffsetDateTime generateFixDate(String since) {
     // hardcoded date, just for manual testing
     SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss", Locale.ENGLISH);
     try {
@@ -164,7 +179,7 @@ public class BaseZohoAccess {
     } catch (SolrServiceException | RuntimeException e) {
       String message = "Cannot perform permanent delete operations for organizations with ids:"
           + entitiesToDelete.toArray();
-      zohoSyncReport.addFailedOperation(null, ZohoSyncReportFields.ENTITY_DELETION_ERROR, message,
+      zohoSyncReport.addFailedOperation(null, ZohoSyncReportFields.DELETION_ERROR, message,
           e);
     }
   }
@@ -214,14 +229,15 @@ public class BaseZohoAccess {
         // SG: run update synchronously as we don't have many entities disabled and we can report
         // failures
         logger.info("Updating disabled organization with id: {}", operation.getZohoEuropeanaId());
-        entityUpdateService.runSynchronousUpdate(operation.getEntityRecord().getEntityId(), jobDescriptionFactory.get(TaskType.full_update));
+        entityUpdateService.runSynchronousUpdate(operation.getEntityRecord().getEntityId(),
+            jobDescriptionFactory.get(TaskType.full_update));
         if (allreadyDisabled) {
           // not counted to disabled, needs to be counted for updates
           zohoSyncReport.increaseUpdated(1);
         }
       } catch (Exception e) {
         zohoSyncReport.addFailedOperation(operation.getZohoEuropeanaId(),
-            ZohoSyncReportFields.ENTITY_SYNCHRONOUS_UPDATE_ERROR, e);
+            ZohoSyncReportFields.DEPRECATION_ERROR,  ZohoSyncReportFields.ENTITY_SYNCHRONOUS_UPDATE_ERROR,  e);
       }
     }
   }
@@ -236,11 +252,11 @@ public class BaseZohoAccess {
       entityRecordService.disableEntityRecord(operation.getEntityRecord(), false);
       zohoSyncReport.increaseDeprecated(1);
     } catch (EntityUpdateException e) {
-      zohoSyncReport.addFailedOperation(operation.getZohoEuropeanaId(),
+      zohoSyncReport.addFailedOperation(operation.getZohoEuropeanaId(), ZohoSyncReportFields.DEPRECATION_ERROR,
           ZohoSyncReportFields.SOLR_DELETION_ERROR, e);
     } catch (RuntimeException e) {
       zohoSyncReport.addFailedOperation(operation.getZohoEuropeanaId(),
-          ZohoSyncReportFields.ENTITY_DEPRECATION_ERROR, e);
+          ZohoSyncReportFields.DEPRECATION_ERROR, "Runtime error", e);
     }
   }
 
@@ -262,7 +278,7 @@ public class BaseZohoAccess {
           zohoSyncReport.increaseEnabled(1);
         } catch (RuntimeException | EntityUpdateException e) {
           zohoSyncReport.addFailedOperation(operation.getEntityRecord().getEntityId(),
-              ZohoSyncReportFields.ENABLE_ERROR, e);
+              ZohoSyncReportFields.ENABLE_ERROR, "Runtime Error",  e);
         }
       } else {
         logger.info(
@@ -360,9 +376,10 @@ public class BaseZohoAccess {
           verifyOrgIdAfterRegistration(operation, registeredRecord, beforeOperationZohoId);
         }
       } else {
-          // in case that the EntityRecord was not successfully created (record not available for further processing)
-          logger.warn("Organization registration was not completed! Check logs for organization: {}",
-              operation.getZohoRecord().getId());          
+        // in case that the EntityRecord was not successfully created (record not available for
+        // further processing)
+        logger.warn("Organization registration was not completed! Check logs for organization: {}",
+            operation.getZohoRecord().getId());
       }
     }
     return entitiesToUpdate;
@@ -395,20 +412,28 @@ public class BaseZohoAccess {
     Organization zohoOrganization = dereferenceFullOrganization(zohoId);
     if (zohoOrganization == null) {
       // should not happen, except for wrong configurations
-      zohoSyncReport.addFailedOperation(zohoId.toString(), "Zoho Dereferencing Error",  "Cannot dereference organization with zohoRecord ID: " + zohoId, null);
+      String message = "Cannot dereference organization with zohoRecord ID: " + zohoId;
+      handleOrgRegistrationFailure(zohoSyncReport, zohoId, "", new DatasourceDereferenceException(message));
+//      zohoSyncReport.addFailedOperation(zohoId.toString(), ZohoSyncReportFields.CREATION_ERROR,
+//          message, null);
       return res;
     }
+    
+    String emOrgId = "";
 
     // perform registration
     try {
       List<EntityRecord> existingEntities = findDupplicateOrganization(operation, zohoOrganization);
       if (!existingEntities.isEmpty()) {
-        // skipp processing
-        zohoSyncReport.addFailedOperation(zohoOrganization.getAbout(), "Dupplicate entity error",
-            "Dupplicate of :" + EntityRecordUtils.getEntityIds(existingEntities), null);
+        // duplicate org, skip processing
+        handleOrgRegistrationFailure(zohoSyncReport, zohoId, existingEntities.toString(), new EntityAlreadyExistsException(existingEntities.toString()));
+        return res;
+//        zohoSyncReport.addFailedOperation(zohoOrganization.getAbout(), ZohoSyncReportFields.CREATION_ERROR,
+//            "Duplicate of :" + EntityRecordUtils.getEntityIds(existingEntities), null);
       } else {
         // create shell
-        Organization europeanaProxyEntity = EntityObjectFactory.createProxyEntityObject(zohoOrganization.getType());
+        Organization europeanaProxyEntity =
+            EntityObjectFactory.createProxyEntityObject(zohoOrganization.getType());
         // set zoho URL
         europeanaProxyEntity.setAbout(zohoOrganization.getAbout());
 
@@ -422,7 +447,9 @@ public class BaseZohoAccess {
         if (StringUtils.isEmpty(operation.getZohoEuropeanaId())) {
           operation.setZohoEuropeanaId(savedEntityRecord.getEntityId());
         }
-        entitiesToUpdate.add(savedEntityRecord.getEntityId());
+        
+        emOrgId = savedEntityRecord.getEntityId();
+        entitiesToUpdate.add(emOrgId);
 
         zohoSyncReport.increaseCreated(1);
 
@@ -431,23 +458,46 @@ public class BaseZohoAccess {
               zohoOrganization.getAbout(), savedEntityRecord.getEntityId());
         }
       }
-    } catch (EntityModelCreationException | EntityCreationException | UnsupportedEntityTypeException e) {
-      zohoSyncReport.addFailedOperation(zohoOrganization.getAbout(),
-          ZohoSyncReportFields.CREATION_ERROR, "Entity registration failed.", e);
-    } catch (RuntimeException e) {
-      zohoSyncReport.addFailedOperation(zohoOrganization.getAbout(),
-          ZohoSyncReportFields.CREATION_ERROR, e);
-    } 
+    } catch (EntityModelCreationException | EntityCreationException | UnsupportedEntityTypeException
+        | RuntimeException e) {
+      handleOrgRegistrationFailure(zohoSyncReport, zohoId, emOrgId, e);
+    }
 
     return res;
   }
 
+  void handleOrgRegistrationFailure(ZohoSyncReport zohoSyncReport, Long zohoId,
+      @NonNull String existingOrgIds, Exception e) {
+    // increase failed registrations count
+    zohoSyncReport.increaseFailedRegistrations();
+    String zohoRecordUrl =
+        ZohoUtils.buildZohoRecordUrl(zohoConfiguration.getZohoBaseUrlOrganizations(), zohoId);
+
+    try {
+      // persist failed task
+      failedTaskService.persistFailure(zohoRecordUrl, TaskType.registration, e);
+    } catch (RuntimeException re) {
+      // do not break worklow
+      if (logger.isInfoEnabled()) {
+        logger.info("Cannot save registration FailedTask to db for Zoho Organization: {}",
+            zohoRecordUrl, re);
+      }
+    }
+
+    // log error
+    if (logger.isInfoEnabled()) {
+      logger.info("Entity registration failed for zohoId={}; entityId={}", zohoRecordUrl,
+          existingOrgIds, e);
+    }
+  }
+
   Organization dereferenceFullOrganization(Long zohoId) {
     try {
-      Optional<Entity> orgOptional = zohoDereferenceService.dereferenceOrganizationByZohoRecordId(zohoId);
+      Optional<Entity> orgOptional =
+          zohoDereferenceService.dereferenceOrganizationByZohoRecordId(zohoId);
       if (orgOptional.isPresent()) {
         return (Organization) orgOptional.get();
-      } 
+      }
     } catch (Exception e) {
       logger.warn("Cannot dereference organization by zoho record id: {}", zohoId, e);
     }

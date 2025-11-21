@@ -22,6 +22,7 @@ public abstract class WebEntityConstants extends WebEntityFields {
   public static final String QUERY_PARAM_PAGE = "page";
   public static final String QUERY_PARAM_PAGE_SIZE = "pageSize";
   public static final String QUERY_PARAM_WSKEY = "wskey";
+  public static final String QUERY_PARAM_TASK_TYPE = "taskType";
 
   public static final String PARAM_PROFILE_SYNC = "sync";
 

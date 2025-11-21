@@ -1,20 +1,22 @@
 package eu.europeana.entitymanagement.batch.listener;
 
 import static eu.europeana.entitymanagement.batch.utils.BatchUtils.getEntityIds;
-
-import eu.europeana.entitymanagement.batch.model.EntityUpdateStats;
-import eu.europeana.entitymanagement.batch.service.FailedTaskService;
-import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
-import eu.europeana.entitymanagement.batch.utils.BatchUtils;
-import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
-import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.annotation.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.batch.core.listener.ItemListenerSupport;
 import org.springframework.lang.NonNull;
+import eu.europeana.entitymanagement.batch.model.EntityUpdateStats;
+import eu.europeana.entitymanagement.batch.service.FailedTaskService;
+import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
+import eu.europeana.entitymanagement.batch.utils.BatchUtils;
+import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
+import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
+import eu.europeana.entitymanagement.zoho.organization.ZohoConfiguration;
 
 /** Listens for Read, Processing and Write operations during Entity Update steps. */
 public class ScheduledTaskItemListener
@@ -27,7 +29,9 @@ public class ScheduledTaskItemListener
   private final boolean isSynchronous;
   private final EntityUpdateStats fullUpdateStats;
   private final EntityUpdateStats metricUpdateStats;
-
+  @Resource(name = AppConfigConstants.BEAN_ZOHO_CONFIGURATION)
+  ZohoConfiguration zohoConfiguration;
+  
   public ScheduledTaskItemListener(
           FailedTaskService failedTaskService,
           ScheduledTaskService scheduledTaskService,
@@ -47,12 +51,12 @@ public class ScheduledTaskItemListener
     }
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public void afterWrite(@NonNull List<? extends BatchEntityRecord> entityRecords) {
     if (entityRecords.isEmpty()) {
       return;
     }
-    @SuppressWarnings("unchecked")
     String[] entityIds = getEntityIds((List<BatchEntityRecord>) entityRecords);
     if (logger.isDebugEnabled()) {
       logger.debug(
@@ -61,6 +65,9 @@ public class ScheduledTaskItemListener
 
     // Remove entries from the FailedTask collection if exists
     failedTaskService.removeFailures(Arrays.asList(entityIds));
+    //remove also eventual organization registration failures
+    List<String> zohoUrls = BatchUtils.getZohoUrls((List<BatchEntityRecord>) entityRecords, zohoConfiguration.getZohoBaseUrlOrganizations());
+    failedTaskService.removeFailures(zohoUrls);
 
     // ScheduledTasks cleanup not required for synchronous execution
     if (!isSynchronous) {
@@ -71,6 +78,7 @@ public class ScheduledTaskItemListener
                       p -> p.getEntityRecord().getEntityId(), p -> p.getScheduledTaskType())));
     }
   }
+
 
   @Override
   public void onReadError(@NonNull Exception e) {

@@ -26,6 +26,7 @@ import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
 import eu.europeana.entitymanagement.exception.HttpBadRequestException;
@@ -89,7 +90,7 @@ public class EntityAdminController extends BaseRest {
   }
 
   @ApiOperation(
-      value = "Retrieve a list of entities for which an update failed.",
+      value = "Retrieve a list of entities for which an update failed. taskType is one of: full_update, metrics_update, registration",
       nickname = "getEntitiesUpdateFailedJsonLd",
       response = java.lang.Void.class)
   @GetMapping(
@@ -107,6 +108,8 @@ public class EntityAdminController extends BaseRest {
               required = false,
               defaultValue = "10")
           int pageSize,
+      @RequestParam(value = WebEntityConstants.QUERY_PARAM_TASK_TYPE, required = false) 
+          TaskType taskType,        
       HttpServletRequest request)
       throws HttpException, EuropeanaApiException {
 
@@ -116,7 +119,7 @@ public class EntityAdminController extends BaseRest {
       pageSize = 1000;
     }
 
-    List<String> entityIds = failedTaskService.getEntityIdsWithFailures(page * pageSize, pageSize);
+    List<String> entityIds = failedTaskService.getEntityIdsWithFailures(taskType, page * pageSize, pageSize);
 
     return generateResponseFailedUpdates(request, entityIds, wskey);
   }

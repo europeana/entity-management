@@ -12,13 +12,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
-
-import eu.europeana.entitymanagement.exception.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +50,11 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.web.EntityIdResponse;
 import eu.europeana.entitymanagement.dereference.Dereferencer;
+import eu.europeana.entitymanagement.exception.DatasourceNotKnownException;
+import eu.europeana.entitymanagement.exception.EntityMismatchException;
+import eu.europeana.entitymanagement.exception.EntityNotFoundException;
+import eu.europeana.entitymanagement.exception.HttpBadRequestException;
+import eu.europeana.entitymanagement.exception.MultipleChoicesException;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
@@ -76,8 +78,6 @@ public class EMController extends BaseRest {
   private final EntityUpdateService entityUpdateService;
   private final JobDescriptionFactory jobDescriptionFactory;
 
-  private static final String EXTERNAL_ID_REMOVED_MSG =
-      "Entity id '%s' already exists as '%s', which has been removed";
   private static final String SAME_AS_NOT_EXISTS_MSG =
       "Url '%s' does not exist in entity owl:sameAs or skos:exactMatch";
   public static final String INVALID_UPDATE_REQUEST_MSG =
