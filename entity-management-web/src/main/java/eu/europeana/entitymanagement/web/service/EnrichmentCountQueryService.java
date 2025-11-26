@@ -3,21 +3,27 @@ package eu.europeana.entitymanagement.web.service;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPath;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPathWithBase;
 import static eu.europeana.entitymanagement.vocabulary.WebEntityFields.BASE_DATA_EUROPEANA_URI;
+
+import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
+
+import eu.europeana.api.commons.auth.AuthenticationHandler;
+import eu.europeana.api.commons.http.HttpConnection;
+import eu.europeana.api.commons.http.HttpResponseHandler;
+import eu.europeana.entitymanagement.exception.ParamValidationException;
+import org.apache.hc.core5.net.URIBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.exception.ScoringComputationException;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
-@Service
+import javax.annotation.Resource;
+
 public class EnrichmentCountQueryService {
 
   /** Query fields for entity types */
@@ -35,12 +41,15 @@ public class EnrichmentCountQueryService {
   private static final String ERROR_MSG = "Error retrieving enrichmentCount for entityId=";
   private static final String contentTierPrefix = " AND contentTier:";
 
-  private final WebClient webClient;
-  private final EntityManagementConfiguration configuration;
+  @Resource
+  private EntityManagementConfiguration configuration;
 
-  public EnrichmentCountQueryService(EntityManagementConfiguration configuration) {
-    this.configuration = configuration;
-    webClient = WebClient.builder().build();
+  private HttpConnection httpConnection;
+  AuthenticationHandler auth;
+
+  public EnrichmentCountQueryService(AuthenticationHandler auth) {
+    this.auth = auth;
+    httpConnection = new HttpConnection(true);
   }
 
   /**
@@ -52,24 +61,21 @@ public class EnrichmentCountQueryService {
    * @throws ScoringComputationException if the European search API cannot be called successfully 
    */
   public int getEnrichmentCount(Entity entity) throws ScoringComputationException {
-    String uri = buildSearchRequestUrl(entity);
-
-    if (logger.isDebugEnabled()) {
-      logger.debug("Getting enrichment count for entityId={}; queryUri={}", entity.getEntityId(), uri);
-    }
-
     String response = null;
     Instant start = Instant.now();
 
     try {
-      response =
-          webClient
-              .get()
-              .uri(uri)
-              .accept(MediaType.APPLICATION_JSON)
-              .retrieve()
-              .bodyToMono(String.class)
-              .block();
+      String uri = buildSearchRequestUrl(entity);
+      if (logger.isDebugEnabled()) {
+        logger.debug("Getting enrichment count for entityId={}; queryUri={}", entity.getEntityId(), uri);
+      }
+
+      HttpResponseHandler httpResponse = httpConnection.get(uri, "application/json", auth);
+      if (httpResponse.getStatus() == 200) {
+        response = httpResponse.getResponse();
+      } else {
+        logger.error("Unable to get the valid response from the Search and Record API");
+      }
     } catch (Exception e) {
       throw new ScoringComputationException(ERROR_MSG + entity.getEntityId(), e);
     }
@@ -94,21 +100,35 @@ public class EnrichmentCountQueryService {
     return result;
   }
 
-  String buildSearchRequestUrl(Entity entity) {
-    StringBuilder url = new StringBuilder(configuration.getSearchApiUrlPrefix());
-    String searchQuery =
-        String.format(
-            "%s:%s ", ENRICHMENT_QUERY_FIELD_MAP.get(entity.getType()), getEntityIdsForQuery(entity));
 
-    url.append("&query=" + searchQuery);
-    if (!EntityTypes.isOrganizationType(entity.getType())) {
-      url.append(contentTierPrefix);
-      url.append(configuration.getEnrichmentsQueryContentTier());
+  /**
+   * Build the search api retrieval url with entity id
+   * @param entity entity
+   * @return URL
+   * @throws ParamValidationException
+   */
+  private String buildSearchRequestUrl(Entity entity) throws ParamValidationException {
+    try {
+      return new URIBuilder(configuration.getSearchApiUrlPrefix())
+              .addParameter("query", buildSearchQuery(entity))
+              .build().toString();
+    } catch (URISyntaxException e) {
+      throw new ParamValidationException("Error building the search request url - " + e.getMessage(), e);
     }
-    url.append("&profile=minimal");
+  }
+
+  private String buildSearchQuery(Entity entity) {
+    StringBuilder searchQuery =
+            new StringBuilder(String.format(
+                    "%s:%s ", ENRICHMENT_QUERY_FIELD_MAP.get(entity.getType()), getEntityIdsForQuery(entity)));
+    if (!EntityTypes.isOrganizationType(entity.getType())) {
+      searchQuery.append(contentTierPrefix);
+      searchQuery.append(configuration.getEnrichmentsQueryContentTier());
+    }
+    searchQuery.append("&profile=minimal");
     // no rows needed, only the count
-    url.append("&rows=0");
-    return url.toString();
+    searchQuery.append("&rows=0");
+    return searchQuery.toString();
   }
 
   /**
@@ -157,7 +177,4 @@ public class EnrichmentCountQueryService {
     orgIdsBuilder.append("\")");
     return orgIdsBuilder.toString();
   }
-
-
-
 }

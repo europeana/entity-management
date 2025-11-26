@@ -49,6 +49,7 @@ public class AppConfigConstants {
   public static  final String BEAN_ENTITY_DEREFERENCE_PROCESSOR       = "entityDereferenceProcessor";
   public static  final String BEAN_ENTITY_CONSOLIDATION_PROCESSOR     = "entityConsolidationProcessor";
   public static  final String BEAN_ENTITY_DEPICTION_SERVICE           = "entityDepictionGeneratorService";
+  public static  final String BEAN_ENRICHMENT_COUNT_SERVICE           = "enrichmentCountQueryService";
 
   public static  final String BEAN_ENTITY_METRICS_PROCESSOR           = "entityMetricsProcessor";
   public static  final String BEAN_ENTITY_VERIFICATION_LOGGER         = "entityVerificationLogger";

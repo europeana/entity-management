@@ -18,6 +18,7 @@ import eu.europeana.api.commons.auth.AuthenticationBuilder;
 import eu.europeana.api.commons.auth.AuthenticationConfig;
 import eu.europeana.api.commons.auth.AuthenticationHandler;
 import eu.europeana.entitymanagement.web.service.DepictionGeneratorService;
+import eu.europeana.entitymanagement.web.service.EnrichmentCountQueryService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -182,6 +183,11 @@ public class AppAutoconfig extends AppConfigConstants {
   @Bean(BEAN_ENTITY_DEPICTION_SERVICE)
   public DepictionGeneratorService getDepictionGeneratorService() throws ApplicationInitializationException {
     return  new DepictionGeneratorService(getAuthenticationHandler());
+  }
+
+  @Bean(BEAN_ENRICHMENT_COUNT_SERVICE)
+  public EnrichmentCountQueryService getEnrichmentCountQueryService() throws ApplicationInitializationException {
+    return  new EnrichmentCountQueryService(getAuthenticationHandler());
   }
 
   @Bean
