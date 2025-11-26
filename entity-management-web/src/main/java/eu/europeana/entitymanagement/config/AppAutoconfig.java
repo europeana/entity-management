@@ -159,7 +159,7 @@ public class AppAutoconfig extends AppConfigConstants {
   }
 
   @Bean(name = BEAN_CLIENT_DETAILS_SERVICE)
-  public EuropeanaClientDetailsService getClientDetailsService() throws ApplicationInitializationException {
+  public EuropeanaClientDetailsService getClientDetailsService() {
     EuropeanaClientDetailsService clientDetails = new EuropeanaClientDetailsService();
     clientDetails.setApiKeyServiceUrl(emConfiguration.getApiKeyUrl());
     clientDetails.setAuthHandler(getAuthenticationHandler());
@@ -171,23 +171,24 @@ public class AppAutoconfig extends AppConfigConstants {
    * @return
    */
   @Bean
-  public AuthenticationHandler getAuthenticationHandler() throws ApplicationInitializationException {
+  public AuthenticationHandler getAuthenticationHandler() {
     if (StringUtils.isNotEmpty(emConfiguration.getTokenEndpoint()) && StringUtils.isNotEmpty(emConfiguration.getGrantParams())) {
       AuthenticationConfig config = new AuthenticationConfig(emConfiguration.getTokenEndpoint(), emConfiguration.getGrantParams());
       return AuthenticationBuilder.newAuthentication(config);
     } else {
-      throw new ApplicationInitializationException("Keycloak token endpoint and parameters NOT set !!");
+      LOG.error("Keycloak token endpoint and parameters NOT set !!");
     }
+    return null;
   }
 
   @Bean(BEAN_ENTITY_DEPICTION_SERVICE)
-  public DepictionGeneratorService getDepictionGeneratorService() throws ApplicationInitializationException {
-    return  new DepictionGeneratorService(getAuthenticationHandler());
+  public DepictionGeneratorService getDepictionGeneratorService() {
+    return new DepictionGeneratorService(getAuthenticationHandler());
   }
 
   @Bean(BEAN_ENRICHMENT_COUNT_SERVICE)
-  public EnrichmentCountQueryService getEnrichmentCountQueryService() throws ApplicationInitializationException {
-    return  new EnrichmentCountQueryService(getAuthenticationHandler());
+  public EnrichmentCountQueryService getEnrichmentCountQueryService() {
+    return new EnrichmentCountQueryService(getAuthenticationHandler());
   }
 
   @Bean
