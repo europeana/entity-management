@@ -1,42 +1,53 @@
 package eu.europeana.entitymanagement.web.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.europeana.api.commons.auth.AuthenticationHandler;
 import eu.europeana.api.commons.error.EuropeanaApiException;
+import eu.europeana.api.commons.http.HttpConnection;
+import eu.europeana.api.commons.http.HttpResponseHandler;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
+import eu.europeana.entitymanagement.exception.ParamValidationException;
+import org.apache.hc.core5.net.URIBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
-@Service
+import javax.annotation.Resource;
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 public class DepictionGeneratorService {
 
-  private final WebClient webClient;
+  @Resource
   EntityManagementConfiguration configuration;
 
-  public DepictionGeneratorService(EntityManagementConfiguration configuration) {
-    this.configuration = configuration;
-    // searchApiUriPrefix = configuration.getSearchApiUrlPrefix();
-    webClient = WebClient.builder().build();
+  private HttpConnection httpConnection;
+  ObjectMapper mapper;
+  AuthenticationHandler auth;
+
+  public DepictionGeneratorService(AuthenticationHandler auth) {
+    this.auth = auth;
+    httpConnection = new HttpConnection(true);
+    mapper = new ObjectMapper();
   }
 
   public WebResource generateIsShownBy(String entityUri) throws EuropeanaApiException {
     String uri = buildSearchRequestUrl(entityUri);
-
     String response = null;
     try {
-      response =
-          webClient
-              .get()
-              .uri(uri)
-              .accept(MediaType.APPLICATION_JSON)
-              .retrieve()
-              .bodyToMono(String.class)
-              .block();
-    } catch (Exception e) {
+      HttpResponseHandler httpResponse = httpConnection.get(uri, "application/json", auth);
+      if (httpResponse.getStatus() == 200) {
+        response = httpResponse.getResponse();
+      } else {
+        throw new EuropeanaApiException(
+                "Unable to get the valid response from the Search and Record API - "
+                        +getErrorMessage(httpResponse.getStatus(), httpResponse.getResponse()));
+      }
+    } catch (IOException e) {
       throw new EuropeanaApiException(
-          "Unable to get the valid response from the Search and Record API.", e);
+          "Unable to get the valid response from the Search and Record API. - " +e.getMessage(), e);
     }
     if (response == null) return null;
 
@@ -84,15 +95,33 @@ public class DepictionGeneratorService {
     return null;
   }
 
-  String buildSearchRequestUrl(String entityUri) {
-    StringBuilder url = new StringBuilder(configuration.getSearchApiUrlPrefix());
-    url.append("&query=\"")
-        .append(entityUri)
-        .append("\" AND provider_aggregation_edm_isShownBy:*")
-        .append("&sort=contentTier+desc,metadataTier+desc")
-        .append("&profile=minimal")
-        // only first result is needed
-        .append("&rows=1");
-    return url.toString();
+
+  /**
+   * Build the serach api retrieval url with entity id
+   * @param entityUri id
+   * @return URL
+   * @throws ParamValidationException
+   */
+  private String buildSearchRequestUrl(String entityUri) throws ParamValidationException {
+    try {
+      return new URIBuilder(configuration.getSearchApiUrlPrefix())
+              .addParameter("query",
+                      "\"" +entityUri + "\" AND provider_aggregation_edm_isShownBy:*&sort=contentTier+desc,metadataTier+desc&profile=minimal&rows=1")
+              .build().toString();
+    } catch (URISyntaxException e) {
+      throw new ParamValidationException("Error building the search request url - " + e.getMessage(), e);
+    }
+  }
+
+  private String getErrorMessage(int responseCode, String json) throws EuropeanaApiException {
+    try {
+      JsonNode node = mapper.readTree(json);
+      if (node.has("message")) {
+        return node.get("message").asText();
+      }
+      return "Error retrieving record : " + responseCode;
+    } catch (JsonProcessingException e) {
+      throw new EuropeanaApiException(" Error parsing the record response: " + e.getMessage());
+    }
   }
 }

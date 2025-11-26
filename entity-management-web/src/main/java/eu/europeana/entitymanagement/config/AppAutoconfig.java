@@ -16,6 +16,8 @@ import javax.xml.bind.JAXBContext;
 
 import eu.europeana.api.commons.auth.AuthenticationBuilder;
 import eu.europeana.api.commons.auth.AuthenticationConfig;
+import eu.europeana.api.commons.auth.AuthenticationHandler;
+import eu.europeana.entitymanagement.web.service.DepictionGeneratorService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -156,17 +158,30 @@ public class AppAutoconfig extends AppConfigConstants {
   }
 
   @Bean(name = BEAN_CLIENT_DETAILS_SERVICE)
-  public EuropeanaClientDetailsService getClientDetailsService() {
+  public EuropeanaClientDetailsService getClientDetailsService() throws ApplicationInitializationException {
     EuropeanaClientDetailsService clientDetails = new EuropeanaClientDetailsService();
     clientDetails.setApiKeyServiceUrl(emConfiguration.getApiKeyUrl());
-    // Set authentication handler if values are not empty
+    clientDetails.setAuthHandler(getAuthenticationHandler());
+    return clientDetails;
+  }
+
+  /**
+   * Generate Authentication for EM ( to be used by keycloak and other services)
+   * @return
+   */
+  @Bean
+  public AuthenticationHandler getAuthenticationHandler() throws ApplicationInitializationException {
     if (StringUtils.isNotEmpty(emConfiguration.getTokenEndpoint()) && StringUtils.isNotEmpty(emConfiguration.getGrantParams())) {
       AuthenticationConfig config = new AuthenticationConfig(emConfiguration.getTokenEndpoint(), emConfiguration.getGrantParams());
-      clientDetails.setAuthHandler(AuthenticationBuilder.newAuthentication(config));
+      return AuthenticationBuilder.newAuthentication(config);
     } else {
-      LOG.error("Keycloak token endpoint and parameters NOT set !!");
+      throw new ApplicationInitializationException("Keycloak token endpoint and parameters NOT set !!");
     }
-    return clientDetails;
+  }
+
+  @Bean(BEAN_ENTITY_DEPICTION_SERVICE)
+  public DepictionGeneratorService getDepictionGeneratorService() throws ApplicationInitializationException {
+    return  new DepictionGeneratorService(getAuthenticationHandler());
   }
 
   @Bean

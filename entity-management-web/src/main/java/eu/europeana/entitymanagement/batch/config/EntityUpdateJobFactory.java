@@ -27,7 +27,6 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 import eu.europeana.entitymanagement.batch.listener.EntityUpdateStepListener;
 import eu.europeana.entitymanagement.batch.listener.ScheduledTaskItemListener;
-import eu.europeana.entitymanagement.batch.model.EntityUpdateStats;
 import eu.europeana.entitymanagement.batch.model.JobDescription;
 import eu.europeana.entitymanagement.batch.model.Task;
 import eu.europeana.entitymanagement.batch.reader.EntityRecordDatabaseReader;
@@ -63,12 +62,6 @@ public class EntityUpdateJobFactory {
     @Autowired
     ApplicationContext appContext;
 
-    @Resource(name = BEAN_ENTITY_UPDATE_STATS)
-    private EntityUpdateStats entityUpdateStats;
-    
-    @Resource(name = BEAN_METRICS_UPDATE_STATS)
-    private EntityUpdateStats metricsUpdateStats;
-    
     /**
      * Main constructor for job factory
      */
