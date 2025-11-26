@@ -10,6 +10,7 @@ import eu.europeana.api.commons.http.HttpResponseHandler;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
 import eu.europeana.entitymanagement.exception.ParamValidationException;
+import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.net.URIBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -23,10 +24,14 @@ public class DepictionGeneratorService {
   @Resource
   EntityManagementConfiguration configuration;
 
-  private HttpConnection httpConnection;
+  private final HttpConnection httpConnection;
   ObjectMapper mapper;
   AuthenticationHandler auth;
 
+  /**
+   * Constructor
+   * @param auth authentication for accessing SR api
+   */
   public DepictionGeneratorService(AuthenticationHandler auth) {
     this.auth = auth;
     httpConnection = new HttpConnection(true);
@@ -38,7 +43,7 @@ public class DepictionGeneratorService {
     String response = null;
     try {
       HttpResponseHandler httpResponse = httpConnection.get(uri, "application/json", auth);
-      if (httpResponse.getStatus() == 200) {
+      if (httpResponse.getStatus() == HttpStatus.SC_OK) {
         response = httpResponse.getResponse();
       } else {
         throw new EuropeanaApiException(
@@ -121,7 +126,7 @@ public class DepictionGeneratorService {
       }
       return "Error retrieving record : " + responseCode;
     } catch (JsonProcessingException e) {
-      throw new EuropeanaApiException(" Error parsing the record response: " + e.getMessage());
+      throw new EuropeanaApiException(" Error parsing the record response: " + e.getMessage(), e);
     }
   }
 }

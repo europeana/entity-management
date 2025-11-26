@@ -13,6 +13,7 @@ import eu.europeana.api.commons.auth.AuthenticationHandler;
 import eu.europeana.api.commons.http.HttpConnection;
 import eu.europeana.api.commons.http.HttpResponseHandler;
 import eu.europeana.entitymanagement.exception.ParamValidationException;
+import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.net.URIBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,9 +45,13 @@ public class EnrichmentCountQueryService {
   @Resource
   private EntityManagementConfiguration configuration;
 
-  private HttpConnection httpConnection;
+  private final HttpConnection httpConnection;
   AuthenticationHandler auth;
 
+  /**
+   * Constructor
+   * @param auth authentication for accessing SR api
+   */
   public EnrichmentCountQueryService(AuthenticationHandler auth) {
     this.auth = auth;
     httpConnection = new HttpConnection(true);
@@ -71,7 +76,7 @@ public class EnrichmentCountQueryService {
       }
 
       HttpResponseHandler httpResponse = httpConnection.get(uri, "application/json", auth);
-      if (httpResponse.getStatus() == 200) {
+      if (httpResponse.getStatus() == HttpStatus.SC_OK) {
         response = httpResponse.getResponse();
       } else {
         logger.error("Unable to get the valid response from the Search and Record API");
@@ -118,16 +123,16 @@ public class EnrichmentCountQueryService {
   }
 
   private String buildSearchQuery(Entity entity) {
-    StringBuilder searchQuery =
-            new StringBuilder(String.format(
-                    "%s:%s ", ENRICHMENT_QUERY_FIELD_MAP.get(entity.getType()), getEntityIdsForQuery(entity)));
+    StringBuilder searchQuery = new StringBuilder(50); // resized as atleast 35 characters are appended
+    searchQuery.append(String.format(
+            "%s:%s ", ENRICHMENT_QUERY_FIELD_MAP.get(entity.getType()), getEntityIdsForQuery(entity)));
+
     if (!EntityTypes.isOrganizationType(entity.getType())) {
       searchQuery.append(contentTierPrefix);
       searchQuery.append(configuration.getEnrichmentsQueryContentTier());
     }
-    searchQuery.append("&profile=minimal");
     // no rows needed, only the count
-    searchQuery.append("&rows=0");
+    searchQuery.append("&profile=minimal&rows=0");
     return searchQuery.toString();
   }
 
