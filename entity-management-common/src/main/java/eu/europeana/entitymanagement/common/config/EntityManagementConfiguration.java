@@ -364,7 +364,7 @@ public class EntityManagementConfiguration implements InitializingBean {
     return tokenEndpoint;
   }
 
-  public String getGrantParams() {
+  public String getKeycloakAccessGrantParams() {
     return grantParams;
   }
 

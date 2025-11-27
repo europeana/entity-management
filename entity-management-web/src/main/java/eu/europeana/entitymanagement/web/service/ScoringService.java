@@ -25,6 +25,7 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.model.scoring.EntityMetrics;
 import eu.europeana.entitymanagement.web.model.scoring.MaxEntityMetrics;
 import eu.europeana.entitymanagement.web.model.scoring.PageRank;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_ENRICHMENT_COUNT_SERVICE;
 
 @Service(AppConfigConstants.BEAN_EM_SCORING_SERVICE)
 public class ScoringService {
@@ -41,7 +42,7 @@ public class ScoringService {
   public static final String WIKIDATA_PREFFIX = "http://www.wikidata.org/entity/";
   
   public ScoringService(
-      EnrichmentCountQueryService enrichmentCountQueryService,
+      @Qualifier(BEAN_ENRICHMENT_COUNT_SERVICE) EnrichmentCountQueryService enrichmentCountQueryService,
       @Qualifier(AppConfigConstants.BEAN_PR_SOLR_CLIENT) SolrClient prSolrClient) {
     this.enrichmentCountQueryService = enrichmentCountQueryService;
     this.prSolrClient = prSolrClient;

@@ -16,6 +16,10 @@ import javax.xml.bind.JAXBContext;
 
 import eu.europeana.api.commons.auth.AuthenticationBuilder;
 import eu.europeana.api.commons.auth.AuthenticationConfig;
+import eu.europeana.api.commons.auth.AuthenticationHandler;
+import eu.europeana.entitymanagement.web.service.DepictionGeneratorService;
+import eu.europeana.entitymanagement.web.service.EnrichmentCountQueryService;
+import eu.europeana.entitymanagement.web.service.SearchRecordAccess;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -159,14 +163,41 @@ public class AppAutoconfig extends AppConfigConstants {
   public EuropeanaClientDetailsService getClientDetailsService() {
     EuropeanaClientDetailsService clientDetails = new EuropeanaClientDetailsService();
     clientDetails.setApiKeyServiceUrl(emConfiguration.getApiKeyUrl());
-    // Set authentication handler if values are not empty
-    if (StringUtils.isNotEmpty(emConfiguration.getTokenEndpoint()) && StringUtils.isNotEmpty(emConfiguration.getGrantParams())) {
-      AuthenticationConfig config = new AuthenticationConfig(emConfiguration.getTokenEndpoint(), emConfiguration.getGrantParams());
-      clientDetails.setAuthHandler(AuthenticationBuilder.newAuthentication(config));
+    clientDetails.setAuthHandler(getAuthenticationHandler());
+    return clientDetails;
+  }
+
+  /**
+   * Generate AuthenticationHandler to access other services via EM ( like keycloak and SR API)
+   * @return
+   */
+  public AuthenticationHandler getAuthenticationHandler() {
+    if (StringUtils.isNotEmpty(emConfiguration.getTokenEndpoint()) && StringUtils.isNotEmpty(emConfiguration.getKeycloakAccessGrantParams())) {
+      AuthenticationConfig config = new AuthenticationConfig(emConfiguration.getTokenEndpoint(), emConfiguration.getKeycloakAccessGrantParams());
+      return AuthenticationBuilder.newAuthentication(config);
     } else {
       LOG.error("Keycloak token endpoint and parameters NOT set !!");
     }
-    return clientDetails;
+    return null;
+  }
+
+  /**
+   * Creates a authentication handler for SR API access
+   * @return authentication for SR API access
+   */
+  @Bean
+  public AuthenticationHandler getSearchRecordAccess() {
+    return getAuthenticationHandler();
+  }
+
+  @Bean(BEAN_ENRICHMENT_COUNT_SERVICE)
+  public EnrichmentCountQueryService getEnrichmentCountQueryService() {
+    return new EnrichmentCountQueryService(getSearchRecordAccess());
+  }
+
+  @Bean(BEAN_ENTITY_DEPICTION_SERVICE)
+  public DepictionGeneratorService getDepictionGeneratorService(){
+    return  new DepictionGeneratorService(getSearchRecordAccess());
   }
 
   @Bean

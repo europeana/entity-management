@@ -11,6 +11,11 @@ public class ParamValidationException extends EuropeanaApiException {
     super(msg);
   }
 
+  public ParamValidationException(String msg, Throwable e) {
+    super(msg, e);
+  }
+
+
   @Override
   public boolean doLog() {
     return false;

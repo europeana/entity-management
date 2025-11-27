@@ -8,6 +8,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ValidatorFactory;
 
 import org.springframework.batch.item.ItemProcessor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.common.config.DataSource;

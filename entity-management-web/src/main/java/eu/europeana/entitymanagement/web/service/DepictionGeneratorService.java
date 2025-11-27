@@ -1,42 +1,43 @@
 package eu.europeana.entitymanagement.web.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import eu.europeana.api.commons.auth.AuthenticationHandler;
 import eu.europeana.api.commons.error.EuropeanaApiException;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
+import eu.europeana.api.commons.http.HttpResponseHandler;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
+import org.apache.hc.core5.http.HttpStatus;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
-@Service
-public class DepictionGeneratorService {
+import java.io.IOException;
 
-  private final WebClient webClient;
-  EntityManagementConfiguration configuration;
+public class DepictionGeneratorService extends SearchRecordAccess{
 
-  public DepictionGeneratorService(EntityManagementConfiguration configuration) {
-    this.configuration = configuration;
-    // searchApiUriPrefix = configuration.getSearchApiUrlPrefix();
-    webClient = WebClient.builder().build();
+  /**
+   * Constructor
+   *
+   * @param auth authentication for accessing SR api
+   */
+  public DepictionGeneratorService(AuthenticationHandler auth) {
+    super(auth);
   }
 
   public WebResource generateIsShownBy(String entityUri) throws EuropeanaApiException {
-    String uri = buildSearchRequestUrl(entityUri);
-
+    String uri = buildSearchDepictionRequestUrl(entityUri);
     String response = null;
     try {
-      response =
-          webClient
-              .get()
-              .uri(uri)
-              .accept(MediaType.APPLICATION_JSON)
-              .retrieve()
-              .bodyToMono(String.class)
-              .block();
-    } catch (Exception e) {
+      HttpResponseHandler httpResponse = httpConnection.get(uri, "application/json", auth);
+      if (httpResponse.getStatus() == HttpStatus.SC_OK) {
+        response = httpResponse.getResponse();
+      } else {
+        throw new EuropeanaApiException(
+                "Unable to get the valid response from the Search and Record API - "
+                        +getErrorMessage(httpResponse.getStatus(), httpResponse.getResponse()));
+      }
+    } catch (IOException e) {
       throw new EuropeanaApiException(
-          "Unable to get the valid response from the Search and Record API.", e);
+          "Unable to get the valid response from the Search and Record API. - " +e.getMessage(), e);
     }
     if (response == null) return null;
 
@@ -84,15 +85,16 @@ public class DepictionGeneratorService {
     return null;
   }
 
-  String buildSearchRequestUrl(String entityUri) {
-    StringBuilder url = new StringBuilder(configuration.getSearchApiUrlPrefix());
-    url.append("&query=\"")
-        .append(entityUri)
-        .append("\" AND provider_aggregation_edm_isShownBy:*")
-        .append("&sort=contentTier+desc,metadataTier+desc")
-        .append("&profile=minimal")
-        // only first result is needed
-        .append("&rows=1");
-    return url.toString();
+
+  private String getErrorMessage(int responseCode, String json) throws EuropeanaApiException {
+    try {
+      JsonNode node = mapper.readTree(json);
+      if (node.has("message")) {
+        return node.get("message").asText();
+      }
+      return "Error retrieving record : " + responseCode;
+    } catch (JsonProcessingException e) {
+      throw new EuropeanaApiException(" Error parsing the record response: " + e.getMessage(), e);
+    }
   }
 }
