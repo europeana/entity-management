@@ -1,17 +1,19 @@
 package eu.europeana.entitymanagement.batch.utils;
 
-import eu.europeana.entitymanagement.batch.model.EntityUpdateStats;
-import eu.europeana.entitymanagement.batch.model.JobParameter;
-import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
+import eu.europeana.entitymanagement.batch.model.EntityUpdateStats;
+import eu.europeana.entitymanagement.batch.model.JobParameter;
+import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
+import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
+import eu.europeana.entitymanagement.definitions.model.Entity;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 
 public class BatchUtils {
 
@@ -55,6 +57,20 @@ public class BatchUtils {
     return batchEntityRecords.stream()
         .map(p -> p.getEntityRecord().getEntityId())
         .toArray(String[]::new);
+  }
+  
+  public static List<String> getZohoUrls(List<BatchEntityRecord> batchEntityRecords, String zohoBaseUrl) {
+    //only organizations
+    List<Entity> orgs =  batchEntityRecords.stream()
+        .filter(p -> EntityTypes.isOrganizationType(p.getEntityRecord().getEntity().getType()))
+        .map(p -> p.getEntityRecord().getEntity()).toList();
+    
+    List<String> zohoUrls = new ArrayList<>();
+    for (Entity org : orgs) {
+      zohoUrls.addAll(
+          org.getSameReferenceLinks().stream().filter(sa -> sa.startsWith(zohoBaseUrl)).toList());
+    }
+    return zohoUrls;
   }
 
   public static List<String> filterRecordsForWriters(List<? extends BatchEntityRecord> records) {

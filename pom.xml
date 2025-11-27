@@ -21,18 +21,18 @@
 		<repository>
 			<id>libs-release-local</id>
 			<name>europeana-releases</name>
-			<url>https://artifactory.eanadev.org/artifactory/libs-release</url>
+			<url>https://artifactory-prod.eanadev.org/artifactory/libs-release</url>
 		</repository>
 		<repository>
 			<id>libs-snapshots-local</id>
 			<name>europeana-snapshots</name>
-			<url>https://artifactory.eanadev.org/artifactory/libs-snapshot</url>
+			<url>https://artifactory-prod.eanadev.org/artifactory/libs-snapshot</url>
 		</repository>
 		<!-- repo for plugins, required to resolve git-commit-id -->
 		<repository>
 			<id>plugins-release</id>
 			<name>artifactory plugins-release</name>
-			<url>https://artifactory.eanadev.org/artifactory/plugins-release</url>
+			<url>https://artifactory-prod.eanadev.org/artifactory/plugins-release</url>
 		</repository>
 	</repositories>
 
@@ -51,7 +51,7 @@
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 
 		<!-- europeana dependencies -->
-		<api.commons.version>0.4.10</api.commons.version>
+		<api.commons.version>0.4.11-SNAPSHOT</api.commons.version>
 		<springbatch.mongo.version>1.0.7</springbatch.mongo.version>
 		<corelib.version>2.15.4</corelib.version>
 

@@ -40,6 +40,7 @@ public class ZohoSyncReport {
   long deprecatedItems;
   long deletedItems;
   long submittedZohoEuropeanaId;
+  long failedRegistrations;
   private List<FailedOperation> failed;
 
   public ZohoSyncReport(Date startDate) {
@@ -132,6 +133,18 @@ public class ZohoSyncReport {
   public void increaseSubmittedZohoEuropeanaId() {
     this.submittedZohoEuropeanaId++;
   }
+  
+  public long getFailedRegistrations() {
+    return failedRegistrations;
+  }
+
+  public void setFailedRegistrations(long failedRegistrations) {
+    this.failedRegistrations = failedRegistrations;
+  }
+  
+  public void increaseFailedRegistrations() {
+    this.failedRegistrations++;
+  }
 
   @JsonProperty(EXECUTION_STATUS)
   public String getExecutionStatus() {
@@ -179,9 +192,9 @@ public class ZohoSyncReport {
    * @param error - the label of the error
    * @param th - the exception indicating the source of the processing error
    */
-  public void addFailedOperation(String id, String error, Throwable th) {
-    addFailedOperation(id, error, th.getMessage(), th);
-  }
+//  public void addFailedOperation(String id, String error, Throwable th) {
+//    addFailedOperation(id, error, th.getMessage(), th);
+//  }
 
   /**
    * Utility method for registering a FailedOperation
@@ -225,4 +238,5 @@ public class ZohoSyncReport {
   public void setFailed(List<FailedOperation> failed) {
     this.failed = failed;
   }
+
 }

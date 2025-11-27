@@ -92,18 +92,47 @@ public class FailedTaskService {
     }
   }
 
+  /**
+   * @deprecated use {@link #getEntityIdsWithFailures(TaskType, int, int)} instead
+   * The method used to retrieve entity ids from failed tasks table
+   * @param start start counter
+   * @param count nr of records
+   * @return list of entity ids for which update failed
+   */
+  @Deprecated
   public List<String> getEntityIdsWithFailures(int start, int count) {
-    return failureRepository.getEntityIdsWithFailures(start, count);
+    return getEntityIdsWithFailures(null, start, count);
+  }
+  
+  /**
+   * The method used to retrieve entity ids from failed tasks table
+   * @param taskType the type of failed update
+   * @param start start counter
+   * @param count nr of records
+   * @return list of entity ids for which update failed
+   */
+  public List<String> getEntityIdsWithFailures(TaskType taskType, int start, int count) {
+    return failureRepository.getEntityIdsWithFailures(taskType, start, count);
   }
 
   public void dropCollection() {
     failureRepository.dropCollection();
   }
 
+  /**
+   * Retrieve the failed task for an entity (note, for failed create organization operations, the external URL needs to be used)
+   * @param entityId 
+   * @return
+   */
   public Optional<FailedTask> getFailure(String entityId) {
     return Optional.ofNullable(failureRepository.getFailure(entityId));
   }
 
+  /**
+   * Retr
+   * @param entityIds
+   * @return
+   */
   public List<FailedTask> getFailures(List<String> entityIds) {
     return failureRepository.getFailures(entityIds);
   }

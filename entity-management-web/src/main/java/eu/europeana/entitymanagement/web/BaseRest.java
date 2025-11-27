@@ -165,15 +165,21 @@ public abstract class BaseRest extends BaseRestController {
 
     // browsers attempt to load xml by default, so specify .jsonld in url
     String entityUrlSuffix = ".jsonld?profile=debug,internal" + wskeyParam;
-    List<String> pathUrls =
-        entityIds.stream()
-            .map(
-                id ->
-                    entityUriPrefix + EntityRecordUtils.getEntityRequestPath(id) + entityUrlSuffix)
-            .collect(Collectors.toList());
+    List<String> publishedIds = new ArrayList<>(entityIds.size());
+    for (String entityId : entityIds) {
+      //rewrite entity ids
+      if(entityId.startsWith(WebEntityFields.BASE_DATA_EUROPEANA_URI)) {
+        publishedIds.add(entityUriPrefix + EntityRecordUtils.getEntityRequestPath(entityId) + entityUrlSuffix);
+      } else {
+        //for failed registrations do not rewrite URL 
+        publishedIds.add(entityId);
+      }
+    }
+    
+
     try {
 
-      String body = jsonLdSerializer.serializeFailedUpdates(pathUrls);
+      String body = jsonLdSerializer.serializeFailedUpdates(publishedIds);
       headers.setContentLength(body.getBytes().length);
       return ResponseEntity.status(HttpStatus.OK).headers(headers).body(body);
     } catch (IOException e) {

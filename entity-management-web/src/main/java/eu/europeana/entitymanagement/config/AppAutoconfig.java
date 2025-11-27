@@ -288,7 +288,7 @@ public class AppAutoconfig extends AppConfigConstants {
           // see JobParameter enum for string values
           @Value("#{jobParameters[isSynchronous]}") String isSynchronousString) {
     return new ScheduledTaskItemListener(
-            applicationContext.getBean("failedTaskService", FailedTaskService.class),
+            applicationContext.getBean(BEAN_FAILED_TASK_SERVICE, FailedTaskService.class),
             applicationContext.getBean(BEAN_BATCH_SCHEDULED_TASK_SERVICE, ScheduledTaskService.class),
             Boolean.parseBoolean(isSynchronousString),
             applicationContext.getBean(BEAN_ENTITY_UPDATE_STATS, EntityUpdateStats.class),

@@ -126,11 +126,7 @@ public class EntitySyncCronJob {
           metricsUpdateStats.getPlaces(),
           metricsUpdateStats.getTimespans());
       
-      StringBuilder entityMangmtFailedUrl= new StringBuilder(emConfiguration.getEntityManagementBaseUrl());
-      if (!emConfiguration.getEntityManagementBaseUrl().endsWith("/")) {
-        entityMangmtFailedUrl.append('/');
-      }    
-      entityMangmtFailedUrl.append("entity/management/failed?pageSize=60");
+      StringBuilder entityMangmtFailedUrl = entitySyncService.buildFailedTasksUrl(null);
       String failedMessage = String.format(STATS_REPORT_FAILED_MESSAGE, 
           entityUpdateStats.getFailed() + metricsUpdateStats.getFailed(), entityMangmtFailedUrl);
       
@@ -152,6 +148,7 @@ public class EntitySyncCronJob {
   }
     
   }
+
 
   void scheduleUpdateTasks() {
     
