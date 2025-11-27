@@ -19,6 +19,7 @@ import eu.europeana.api.commons.auth.AuthenticationConfig;
 import eu.europeana.api.commons.auth.AuthenticationHandler;
 import eu.europeana.entitymanagement.web.service.DepictionGeneratorService;
 import eu.europeana.entitymanagement.web.service.EnrichmentCountQueryService;
+import eu.europeana.entitymanagement.web.service.SearchRecordAccess;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -167,13 +168,12 @@ public class AppAutoconfig extends AppConfigConstants {
   }
 
   /**
-   * Generate Authentication for EM ( to be used by keycloak and other services)
+   * Generate AuthenticationHandler to access other services via EM ( like keycloak and SR API)
    * @return
    */
-  @Bean
   public AuthenticationHandler getAuthenticationHandler() {
-    if (StringUtils.isNotEmpty(emConfiguration.getTokenEndpoint()) && StringUtils.isNotEmpty(emConfiguration.getGrantParams())) {
-      AuthenticationConfig config = new AuthenticationConfig(emConfiguration.getTokenEndpoint(), emConfiguration.getGrantParams());
+    if (StringUtils.isNotEmpty(emConfiguration.getTokenEndpoint()) && StringUtils.isNotEmpty(emConfiguration.getKeycloakAccessGrantParams())) {
+      AuthenticationConfig config = new AuthenticationConfig(emConfiguration.getTokenEndpoint(), emConfiguration.getKeycloakAccessGrantParams());
       return AuthenticationBuilder.newAuthentication(config);
     } else {
       LOG.error("Keycloak token endpoint and parameters NOT set !!");
@@ -181,14 +181,23 @@ public class AppAutoconfig extends AppConfigConstants {
     return null;
   }
 
-  @Bean(BEAN_ENTITY_DEPICTION_SERVICE)
-  public DepictionGeneratorService getDepictionGeneratorService() {
-    return new DepictionGeneratorService(getAuthenticationHandler());
+  /**
+   * Creates a authentication handler for SR API access
+   * @return authentication for SR API access
+   */
+  @Bean
+  public AuthenticationHandler getSearchRecordAccess() {
+    return getAuthenticationHandler();
   }
 
   @Bean(BEAN_ENRICHMENT_COUNT_SERVICE)
   public EnrichmentCountQueryService getEnrichmentCountQueryService() {
-    return new EnrichmentCountQueryService(getAuthenticationHandler());
+    return new EnrichmentCountQueryService(getSearchRecordAccess());
+  }
+
+  @Bean(BEAN_ENTITY_DEPICTION_SERVICE)
+  public DepictionGeneratorService getDepictionGeneratorService(){
+    return  new DepictionGeneratorService(getSearchRecordAccess());
   }
 
   @Bean

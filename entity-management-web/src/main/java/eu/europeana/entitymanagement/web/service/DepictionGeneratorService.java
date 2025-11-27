@@ -2,40 +2,25 @@ package eu.europeana.entitymanagement.web.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europeana.api.commons.auth.AuthenticationHandler;
 import eu.europeana.api.commons.error.EuropeanaApiException;
-import eu.europeana.api.commons.http.HttpConnection;
 import eu.europeana.api.commons.http.HttpResponseHandler;
-import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
-import eu.europeana.entitymanagement.exception.ParamValidationException;
 import org.apache.hc.core5.http.HttpStatus;
-import org.apache.hc.core5.net.URIBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import javax.annotation.Resource;
 import java.io.IOException;
-import java.net.URISyntaxException;
 
-public class DepictionGeneratorService {
-
-  @Resource
-  EntityManagementConfiguration configuration;
-
-  private final HttpConnection httpConnection;
-  ObjectMapper mapper;
-  AuthenticationHandler auth;
+public class DepictionGeneratorService extends SearchRecordAccess{
 
   /**
    * Constructor
+   *
    * @param auth authentication for accessing SR api
    */
   public DepictionGeneratorService(AuthenticationHandler auth) {
-    this.auth = auth;
-    httpConnection = new HttpConnection(true);
-    mapper = new ObjectMapper();
+    super(auth);
   }
 
   public WebResource generateIsShownBy(String entityUri) throws EuropeanaApiException {
@@ -100,23 +85,6 @@ public class DepictionGeneratorService {
     return null;
   }
 
-
-  /**
-   * Build the serach api retrieval url with entity id
-   * @param entityUri id
-   * @return URL
-   * @throws ParamValidationException
-   */
-  private String buildSearchRequestUrl(String entityUri) throws ParamValidationException {
-    try {
-      return new URIBuilder(configuration.getSearchApiUrlPrefix())
-              .addParameter("query",
-                      "\"" +entityUri + "\" AND provider_aggregation_edm_isShownBy:*&sort=contentTier+desc,metadataTier+desc&profile=minimal&rows=1")
-              .build().toString();
-    } catch (URISyntaxException e) {
-      throw new ParamValidationException("Error building the search request url - " + e.getMessage(), e);
-    }
-  }
 
   private String getErrorMessage(int responseCode, String json) throws EuropeanaApiException {
     try {
