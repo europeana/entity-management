@@ -35,7 +35,7 @@ public class EnrichmentCountQueryService extends SearchRecordAccess {
     String response = null;
     Instant start = Instant.now();
     try {
-      String uri = buildSearchRequestUrl(entity);
+      String uri = buildEnrichmentCountRequestUrl(entity);
       if (logger.isDebugEnabled()) {
         logger.debug("Getting enrichment count for entityId={}; queryUri={}", entity.getEntityId(), uri);
       }

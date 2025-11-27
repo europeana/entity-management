@@ -61,12 +61,12 @@ public class SearchRecordAccess {
 
 
     /**
-     * Build the serach api retrieval url with entity id
+     * Build the search api url for retrieving depiction for a given entity
      * @param entityUri id
      * @return URL
      * @throws ParamValidationException
      */
-    protected String buildSearchRequestUrl(String entityUri) throws ParamValidationException {
+    protected String buildSearchDepictionRequestUrl(String entityUri) throws ParamValidationException {
         try {
             return new URIBuilder(configuration.getSearchApiUrlPrefix())
                     .addParameter("query",
@@ -79,22 +79,22 @@ public class SearchRecordAccess {
 
 
     /**
-     * Build the search api retrieval url with entity id
+     * Build the url for retrieving enrichment count from search and record api
      * @param entity entity
      * @return URL
      * @throws ParamValidationException
      */
-    protected String buildSearchRequestUrl(Entity entity) throws ParamValidationException {
+    protected String buildEnrichmentCountRequestUrl(Entity entity) throws ParamValidationException {
         try {
             return new URIBuilder(configuration.getSearchApiUrlPrefix())
-                    .addParameter("query", buildSearchQuery(entity))
+                    .addParameter("query", buildEnrichmentCountSearchQuery(entity))
                     .build().toString();
         } catch (URISyntaxException e) {
             throw new ParamValidationException("Error building the search request url - " + e.getMessage(), e);
         }
     }
 
-    private String buildSearchQuery(Entity entity) {
+    private String buildEnrichmentCountSearchQuery(Entity entity) {
         StringBuilder searchQuery = new StringBuilder(50); // resized as atleast 35 characters are appended
         searchQuery.append(String.format(
                 "%s:%s ", ENRICHMENT_QUERY_FIELD_MAP.get(entity.getType()), getEntityIdsForQuery(entity)));
@@ -139,6 +139,11 @@ public class SearchRecordAccess {
         return entityIdsBuilder.toString();
     }
 
+    /**
+     * Build list of search ids to match and organization (org id and corefs)
+     * @param entity organization
+     * @return search query
+     */
     String buildSearchedIdsForOrganizations(Entity entity) {
         StringBuilder orgIdsBuilder = new StringBuilder("(\"");
         orgIdsBuilder.append(entity.getEntityId());

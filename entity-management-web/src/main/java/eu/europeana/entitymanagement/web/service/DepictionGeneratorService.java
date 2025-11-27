@@ -24,7 +24,7 @@ public class DepictionGeneratorService extends SearchRecordAccess{
   }
 
   public WebResource generateIsShownBy(String entityUri) throws EuropeanaApiException {
-    String uri = buildSearchRequestUrl(entityUri);
+    String uri = buildSearchDepictionRequestUrl(entityUri);
     String response = null;
     try {
       HttpResponseHandler httpResponse = httpConnection.get(uri, "application/json", auth);
