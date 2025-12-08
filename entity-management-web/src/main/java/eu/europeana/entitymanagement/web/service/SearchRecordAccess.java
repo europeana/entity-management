@@ -70,7 +70,10 @@ public class SearchRecordAccess {
         try {
             return new URIBuilder(configuration.getSearchApiUrlPrefix())
                     .addParameter("query",
-                            "\"" +entityUri + "\" AND provider_aggregation_edm_isShownBy:*&sort=contentTier+desc,metadataTier+desc&profile=minimal&rows=1")
+                            "\"" +entityUri + "\" AND provider_aggregation_edm_isShownBy:*")
+                    .addParameter("sort", "contentTier+desc,metadataTier+desc")
+                    .addParameter("profile", "minimal")
+                    .addParameter("rows", "1")
                     .build().toString();
         } catch (URISyntaxException e) {
             throw new ParamValidationException("Error building the search request url - " + e.getMessage(), e);
@@ -88,6 +91,9 @@ public class SearchRecordAccess {
         try {
             return new URIBuilder(configuration.getSearchApiUrlPrefix())
                     .addParameter("query", buildEnrichmentCountSearchQuery(entity))
+                    // no rows needed, only the count
+                    .addParameter("profile", "minimal")
+                    .addParameter("rows", "0")
                     .build().toString();
         } catch (URISyntaxException e) {
             throw new ParamValidationException("Error building the search request url - " + e.getMessage(), e);
@@ -103,8 +109,6 @@ public class SearchRecordAccess {
             searchQuery.append(contentTierPrefix);
             searchQuery.append(configuration.getEnrichmentsQueryContentTier());
         }
-        // no rows needed, only the count
-        searchQuery.append("&profile=minimal&rows=0");
         return searchQuery.toString();
     }
 
