@@ -1,14 +1,13 @@
 package eu.europeana.entitymanagement.batch.processor;
 
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_ENTITY_CONSOLIDATION_PROCESSOR;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.validation.ConstraintViolation;
 import javax.validation.ValidatorFactory;
-
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.common.config.DataSource;
@@ -28,7 +27,6 @@ import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.service.DepictionGeneratorService;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
-import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_ENTITY_CONSOLIDATION_PROCESSOR;
 
 /**
  * This {@link ItemProcessor} validates Entity metadata, then creates a consolidated entity by

@@ -1,11 +1,13 @@
 package eu.europeana.entitymanagement.batch.utils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 import eu.europeana.entitymanagement.batch.model.EntityUpdateStats;
@@ -53,17 +55,22 @@ public class BatchUtils {
     return jobParametersBuilder.toJobParameters();
   }
 
-  public static String[] getEntityIds(List<BatchEntityRecord> batchEntityRecords) {
+  public static List<String> getEntityIds(List<BatchEntityRecord> batchEntityRecords, @NonNull TaskType taskType) {
     return batchEntityRecords.stream()
-        .map(p -> p.getEntityRecord().getEntityId())
-        .toArray(String[]::new);
+        .filter(br -> (taskType == null || taskType == br.getScheduledTaskType()))
+        .map(br -> br.getEntityRecord().getEntityId())
+        .toList();
   }
-  
-  public static List<String> getZohoUrls(List<BatchEntityRecord> batchEntityRecords, String zohoBaseUrl) {
+    
+  public static List<String> getZohoUrls(List<? extends BatchEntityRecord> batchEntityRecords, String zohoBaseUrl) {
     //only organizations
     List<Entity> orgs =  batchEntityRecords.stream()
         .filter(p -> EntityTypes.isOrganizationType(p.getEntityRecord().getEntity().getType()))
         .map(p -> p.getEntityRecord().getEntity()).toList();
+    
+    if(orgs.isEmpty()) {
+      return Collections.emptyList();
+    }
     
     List<String> zohoUrls = new ArrayList<>();
     for (Entity org : orgs) {

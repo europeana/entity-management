@@ -1,8 +1,8 @@
 package eu.europeana.entitymanagement.batch.listener;
 
 import static eu.europeana.entitymanagement.batch.utils.BatchUtils.getEntityIds;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import org.apache.logging.log4j.LogManager;
@@ -51,23 +51,21 @@ public class ScheduledTaskItemListener
     }
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public void afterWrite(@NonNull List<? extends BatchEntityRecord> entityRecords) {
     if (entityRecords.isEmpty()) {
       return;
     }
-    String[] entityIds = getEntityIds((List<BatchEntityRecord>) entityRecords);
-    if (logger.isDebugEnabled()) {
-      logger.debug(
-          "afterWrite: entityIds={}, count={};", Arrays.toString(entityIds), entityIds.length);
-    }
+    
+    // Remove full updates entries from the FailedTask collection if exists
+    removeFailedTasks(entityRecords, TaskType.full_update);
 
-    // Remove entries from the FailedTask collection if exists
-    failedTaskService.removeFailures(Arrays.asList(entityIds));
-    //remove also eventual organization registration failures
-    List<String> zohoUrls = BatchUtils.getZohoUrls((List<BatchEntityRecord>) entityRecords, zohoConfiguration.getZohoBaseUrlOrganizations());
-    failedTaskService.removeFailures(zohoUrls);
+    // Remove metrics update entries from the FailedTask collection if exists
+    removeFailedTasks(entityRecords, TaskType.metrics_update);
+    
+    //remove also eventual organization registration failures, which are saved with external URL
+    List<String> zohoUrls = BatchUtils.getZohoUrls(entityRecords, zohoConfiguration.getZohoBaseUrlOrganizations());
+    failedTaskService.removeFailures(zohoUrls, TaskType.registration);
 
     // ScheduledTasks cleanup not required for synchronous execution
     if (!isSynchronous) {
@@ -76,6 +74,19 @@ public class ScheduledTaskItemListener
               .collect(
                   Collectors.toMap(
                       p -> p.getEntityRecord().getEntityId(), p -> p.getScheduledTaskType())));
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  void removeFailedTasks(List<? extends BatchEntityRecord> entityRecords, TaskType taskType) {
+    List<String> updatedEntityIds = getEntityIds((List<BatchEntityRecord>)entityRecords, taskType);
+    if(!updatedEntityIds.isEmpty()) {
+      failedTaskService.removeFailures(updatedEntityIds);
+      
+      if (logger.isDebugEnabled()) {
+        logger.debug(
+            "Removed full_update Failed Tasks: entityIds={}, count={};", updatedEntityIds, updatedEntityIds.size());
+      }  
     }
   }
 
@@ -100,22 +111,20 @@ public class ScheduledTaskItemListener
   @Override
   public void onWriteError(
       @NonNull Exception e, @NonNull List<? extends BatchEntityRecord> entityRecords) {
-    @SuppressWarnings("unchecked")
-    String[] entityIds = getEntityIds((List<BatchEntityRecord>) entityRecords);
-
-    logger.warn("onWriteError: entityIds={}", entityIds, e);
-    failedTaskService.persistFailureBulk(
-        entityRecords.stream()
-            .collect(
-                Collectors.toMap(
-                    r -> r.getEntityRecord().getEntityId(), r -> r.getScheduledTaskType())),
-        e);
+    //entityId, taskType map
+    Map<String, TaskType> taskMap = entityRecords.stream()
+    .collect(
+        Collectors.toMap(
+            r -> r.getEntityRecord().getEntityId(), r -> r.getScheduledTaskType()));
+    
+    logger.warn("onWriteError: entityIds={}", taskMap.keySet(), e);
+    
+    failedTaskService.persistFailureBulk(taskMap, e);
     // update failed count in the stats
-    entityRecords.stream().forEach(entityRecord ->{
-      if(TaskType.hasStatsToCount(entityRecord.getScheduledTaskType())) {
-        BatchUtils.selectStats(entityRecord.getScheduledTaskType(), fullUpdateStats, metricUpdateStats).addFailed();
+    for (Map.Entry<String, TaskType> entry : taskMap.entrySet()) {
+      if(TaskType.hasStatsToCount(entry.getValue())) {
+        BatchUtils.selectStats(entry.getValue(), fullUpdateStats, metricUpdateStats).addFailed();
       }
-    });
-
+    }
   }
 }

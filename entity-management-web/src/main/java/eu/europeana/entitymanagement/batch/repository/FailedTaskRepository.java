@@ -110,18 +110,25 @@ public class FailedTaskRepository implements InitializingBean {
 
     return collection.bulkWrite(updates);
   }
-
+  
   /**
    * Deletes {@link FailedTask} entries in the db whose entityId is contained within the provided
    * list.
    *
    * @param entityIds entityId list
+   * @param taskType the update type of the FailedTask
    * @return number of deleted entries
    */
-  public long removeFailures(List<String> entityIds) {
-    return datastore
+  public long removeFailures(List<String> entityIds, TaskType taskType) {
+    Query<FailedTask> query = datastore
         .find(FailedTask.class)
-        .filter(in(ENTITY_ID, entityIds))
+        .filter(in(ENTITY_ID, entityIds));
+    //if no specific task required, delete all
+    if(taskType != null) {
+      query.filter(eq(UPDATE_TYPE, taskType.getValue()));
+    }
+      
+    return query
         .delete(MULTI_DELETE_OPTS)
         .getDeletedCount();
   }
