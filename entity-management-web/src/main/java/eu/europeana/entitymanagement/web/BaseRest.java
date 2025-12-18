@@ -2,6 +2,8 @@ package eu.europeana.entitymanagement.web;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
@@ -172,7 +174,8 @@ public abstract class BaseRest extends BaseRestController {
         publishedIds.add(entityUriPrefix + EntityRecordUtils.getEntityRequestPath(entityId) + entityUrlSuffix);
       } else {
         //for failed registrations do not rewrite URL 
-        publishedIds.add(entityId);
+        publishedIds.add(entityUriPrefix + "/management/failedtask?uri=" 
+            + URLEncoder.encode(entityId, StandardCharsets.UTF_8) + wskeyParam);
       }
     }
     

@@ -38,7 +38,7 @@
 
 	<groupId>eu.europeana.api</groupId>
 	<artifactId>entity-management</artifactId>
-	<version>1.7.6-SNAPSHOT</version>
+	<version>1.7.8-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Entity Management</name>
@@ -51,7 +51,7 @@
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 
 		<!-- europeana dependencies -->
-		<api.commons.version>0.4.11-SNAPSHOT</api.commons.version>
+		<api.commons.version>0.4.10</api.commons.version>
 		<springbatch.mongo.version>1.0.7</springbatch.mongo.version>
 		<corelib.version>2.15.4</corelib.version>
 

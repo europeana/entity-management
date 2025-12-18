@@ -1,14 +1,17 @@
 package eu.europeana.entitymanagement.web;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -26,6 +29,7 @@ import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.api.commons.web.exception.HttpException;
 import eu.europeana.api.commons.web.http.HttpHeaders;
 import eu.europeana.api.commons.web.model.vocabulary.Operations;
+import eu.europeana.entitymanagement.definitions.batch.model.FailedTask;
 import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import eu.europeana.entitymanagement.definitions.exceptions.UnsupportedEntityTypeException;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
@@ -123,7 +127,48 @@ public class EntityAdminController extends BaseRest {
 
     return generateResponseFailedUpdates(request, entityIds, wskey);
   }
+  
+  
+  @ApiOperation(
+      value = "Retrieve a FailedTask by entity id",
+      nickname = "getFailedTask",
+      response = java.lang.Void.class)
+  @GetMapping(
+      value = {"/management/failedtask"},
+      produces = {MediaType.APPLICATION_JSON_VALUE})
+  public ResponseEntity<String> getFailedTask(
+      @RequestParam(value = CommonApiConstants.PARAM_WSKEY, required = false) String wskey,
+      @RequestParam(value = WebEntityConstants.QUERY_PARAM_URI, required = false) 
+          String uri,        
+      HttpServletRequest request)
+      throws HttpException, EuropeanaApiException {
 
+    verifyReadAccess(request);
+    Optional<FailedTask> failedTaskOptional = failedTaskService.getFailure(uri);
+
+    return generateFailedTaskResponse(failedTaskOptional, request);
+  }
+
+  
+  protected ResponseEntity<String> generateFailedTaskResponse(
+      Optional<FailedTask> failedTaskOptional, HttpServletRequest request) throws EuropeanaApiException {
+
+    org.springframework.http.HttpHeaders headers = createAllowHeader(request);
+    //headers.add(HttpHeaders.CONTENT_TYPE, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
+
+    if(failedTaskOptional.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+    
+    try {
+      String body = jsonLdSerializer.serializeObject(failedTaskOptional.get());
+      return ResponseEntity.status(HttpStatus.OK).headers(headers).body(body);
+    } catch (IOException e) {
+      throw new EuropeanaApiException("Error serializing failed task", e);
+    }
+  }
+  
+  
   /**
    * Synchronize Organizations from Zoho
    *
