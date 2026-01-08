@@ -19,7 +19,6 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
-import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityValidationException;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidationGroup;
@@ -97,9 +96,18 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
     return batchEntityRecord;
   }
 
+  /**
+   * Method to perform consolidation and validation of the consolidated entity
+   * @param entityRecord the original record
+   * @param externalProxies the list of external proxies
+   * @param externalProxyEntity primary external proxy
+   * @param isStaticDataSource indicates if the primary external proxy is static data source
+   * @throws EntityModelCreationException if the consolidated version cannot be instantiated 
+   * @throws EuropeanaApiException in case of EntityUpdateException or EntityValidationException
+   */
   void performConsolidation(EntityRecord entityRecord, List<EntityProxy> externalProxies,
       Entity externalProxyEntity, boolean isStaticDataSource) throws EntityModelCreationException,
-      EuropeanaApiException, EntityUpdateException, EntityValidationException {
+      EuropeanaApiException {
     Entity europeanaProxyEntity = entityRecord.getEuropeanaProxy().getEntity();
 
     Entity consolidatedEntity = null;

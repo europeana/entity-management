@@ -114,15 +114,17 @@ public class ScheduledTaskItemListener
   }
 
   private boolean mustPersistError(@NonNull BatchEntityRecord entityRecord, @NonNull Exception e) {
+    boolean mustPersist = true;
+    
     if(entityRecord.getEntityRecord().isDisabled()
         && entityRecord.getEntityRecord().getEntity() != null
         && EntityTypes.isOrganizationType(entityRecord.getEntityRecord().getEntity().getType())   
         && ! (e instanceof ZohoException)) {
       //do not persist errors for disabled organizations, except for zoho  dereferencing errors
-      return false;
+      mustPersist = false;
     }
     
-    return true;
+    return mustPersist;
   }
 
   @Override
@@ -134,7 +136,9 @@ public class ScheduledTaskItemListener
         Collectors.toMap(
             r -> r.getEntityRecord().getEntityId(), r -> r.getScheduledTaskType()));
     
-    logger.warn("onWriteError: entityIds={}", taskMap.keySet(), e);
+    if(logger.isWarnEnabled()) {
+      logger.warn("onWriteError: entityIds={}", taskMap.keySet(), e);
+    }
     
     failedTaskService.persistFailureBulk(taskMap, e);
     // update failed count in the stats
