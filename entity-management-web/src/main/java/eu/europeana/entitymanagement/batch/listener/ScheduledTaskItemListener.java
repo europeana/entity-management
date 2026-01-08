@@ -16,7 +16,9 @@ import eu.europeana.entitymanagement.batch.utils.BatchUtils;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.zoho.organization.ZohoConfiguration;
+import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 
 /** Listens for Read, Processing and Write operations during Entity Update steps. */
 public class ScheduledTaskItemListener
@@ -101,11 +103,26 @@ public class ScheduledTaskItemListener
   public void onProcessError(@NonNull BatchEntityRecord entityRecord, @NonNull Exception e) {
     String entityId = entityRecord.getEntityRecord().getEntityId();
     logger.warn("onProcessError: entityId={}", entityId, e);
-    failedTaskService.persistFailure(entityId, entityRecord.getScheduledTaskType(), e);
+    if(mustPersistError(entityRecord, e)) {
+      failedTaskService.persistFailure(entityId, entityRecord.getScheduledTaskType(), e);
+    }
     // update failed count in the stats
+    // SG: for the time being we collect the failed update in the counters even if we don't create a failed tasks 
     if(TaskType.hasStatsToCount(entityRecord.getScheduledTaskType())) {
       BatchUtils.selectStats(entityRecord.getScheduledTaskType(), fullUpdateStats, metricUpdateStats).addFailed();
     }
+  }
+
+  private boolean mustPersistError(@NonNull BatchEntityRecord entityRecord, @NonNull Exception e) {
+    if(entityRecord.getEntityRecord().isDisabled()
+        && entityRecord.getEntityRecord().getEntity() != null
+        && EntityTypes.isOrganizationType(entityRecord.getEntityRecord().getEntity().getType())   
+        && ! (e instanceof ZohoException)) {
+      //do not persist errors for disabled organizations, except for zoho  dereferencing errors
+      return false;
+    }
+    
+    return true;
   }
 
   @Override

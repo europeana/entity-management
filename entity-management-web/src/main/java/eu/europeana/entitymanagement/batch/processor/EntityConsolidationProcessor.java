@@ -19,6 +19,7 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
+import eu.europeana.entitymanagement.exception.ingestion.EntityUpdateException;
 import eu.europeana.entitymanagement.exception.ingestion.EntityValidationException;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCleaner;
 import eu.europeana.entitymanagement.normalization.EntityFieldsCompleteValidationGroup;
@@ -66,7 +67,7 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
     String proxyId = primaryExternalProxy.getProxyId();
     Optional<DataSource> dataSource = datasources.getDatasource(proxyId);
     boolean isStaticDataSource = dataSource.isPresent() && dataSource.get().isStatic();
-
+    
     // do not validate static data sources
     if (!isStaticDataSource) {
       validateDataSourceProxyConstraints(externalProxyEntity);
@@ -88,6 +89,17 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
       }
     }
 
+    //SG: #EA-4376 do not perform consolidation and validation if the entity is disabled
+    if(!entityRecord.isDisabled()) {
+      performConsolidation(entityRecord, externalProxies, externalProxyEntity, isStaticDataSource);
+    }
+   
+    return batchEntityRecord;
+  }
+
+  void performConsolidation(EntityRecord entityRecord, List<EntityProxy> externalProxies,
+      Entity externalProxyEntity, boolean isStaticDataSource) throws EntityModelCreationException,
+      EuropeanaApiException, EntityUpdateException, EntityValidationException {
     Entity europeanaProxyEntity = entityRecord.getEuropeanaProxy().getEntity();
 
     Entity consolidatedEntity = null;
@@ -117,6 +129,7 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
         consolidatedEntity.setIsShownBy(isShownBy);
       }
     }
+    
     validateCompleteValidationConstraints(consolidatedEntity);
     
     //Aggregation is not a merged field, need to copy it from the old consolidated entity 
@@ -125,9 +138,9 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
     
     entityRecordService.updateConsolidatedVersion(
         entityRecord, consolidatedEntity);
-
-    return batchEntityRecord;
   }
+
+
 
   void copyIsAggregatedBy(EntityRecord entityRecord, Entity consolidatedEntity) {
     consolidatedEntity.setIsAggregatedBy(new Aggregation(entityRecord.getEntity().getIsAggregatedBy()));
