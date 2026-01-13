@@ -226,15 +226,6 @@ public abstract class BaseRest extends BaseRestController {
       HttpStatus status)
       throws EuropeanaApiException {
 
-    /**
-     * EA-4323 temp fix to hide aggregator type
-     */
-    if (EntityTypes.isAggregator(entityRecord.getEntity().getType())) {
-      Aggregator aggregator = (Aggregator) entityRecord.getEntity();
-      aggregator.updateTypeToOrganisation();
-      entityRecord.setEntity(aggregator);
-    }
-
     Aggregation isAggregatedBy = entityRecord.getEntity().getIsAggregatedBy();
 
     String etag = generateETag(isAggregatedBy.getModified(), outFormat.name(), getApiVersion());
