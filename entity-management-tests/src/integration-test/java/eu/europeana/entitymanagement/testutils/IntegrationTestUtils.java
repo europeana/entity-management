@@ -74,6 +74,8 @@ public class IntegrationTestUtils {
       "/content/organization_register_zoho_naturalis.json";
   public static final String ORGANIZATION_REGISTER_GFM_ZOHO_JSON =
       "/content/organization_register_zoho_gfm.json";
+  public static final String ORGANIZATION_UPDATE_GFM_ZOHO_JSON =
+          "/content/organization_update_zoho_gfm.json";
   public static final String ORGANIZATION_REGISTER_BERGER_MUSEUM_ZOHO_JSON =
       "/content/organization_register_zoho_berger_museum.json";
   public static final String ORGANIZATION_REGISTER_PCCE_ZOHO_JSON =

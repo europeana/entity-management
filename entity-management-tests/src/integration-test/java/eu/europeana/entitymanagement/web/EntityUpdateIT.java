@@ -1,5 +1,6 @@
 package eu.europeana.entitymanagement.web;
 
+import static eu.europeana.entitymanagement.testutils.IntegrationTestUtils.*;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPath;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
@@ -12,8 +13,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.zoho.crm.api.record.Record;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.definitions.model.TimeSpan;
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
@@ -254,4 +257,42 @@ class EntityUpdateIT extends BaseWebControllerTest {
         .andExpect(jsonPath("$.successful", hasSize(1)))
         .andExpect(jsonPath("$.successful", contains(timeSpan.getEntityId())));
   }
+
+  @Test
+  void updateOrganizationTest() throws Exception {
+    // id in JSON matches ORGANIZATION_BNF_URI_ZOHO value
+    String europeanaMetadata = loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_GFM_ZOHO_JSON);
+    Optional<Record> zohoRecord =
+            IntegrationTestUtils.getZohoOrganizationByUrl(
+                    ORGANIZATION_GFM_URI_ZOHO);
+
+    assert zohoRecord.isPresent() : "Mocked Zoho response not loaded";
+
+    EntityRecord entityRecord = createOrganization(europeanaMetadata, zohoRecord.get());
+    String requestPath = getEntityRequestPath(entityRecord.getEntityId());
+
+    mockMvc
+            .perform(
+                    MockMvcRequestBuilders.put(IntegrationTestUtils.BASE_SERVICE_URL + "/" + requestPath)
+                            .param(WebEntityConstants.QUERY_PARAM_PROFILE, "external")
+                            .content(loadFile(IntegrationTestUtils.ORGANIZATION_UPDATE_GFM_ZOHO_JSON))
+                            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+    Optional<EntityRecord> entityRecordUpdated = retrieveEntityEvenIfDisabled(entityRecord.getEntityId());
+    Assertions.assertTrue(entityRecordUpdated.isPresent());
+    Organization organization = (Organization) (entityRecordUpdated.get().getEntity());
+
+    // checks for sameAs values
+    Assertions.assertNotNull(organization.getSameReferenceLinks());
+    Assertions.assertEquals(3, organization.getSameReferenceLinks().size());
+    Assertions.assertTrue(organization.getSameReferenceLinks().contains(ORGANIZATION_GFM_URI_ZOHO));
+    Assertions.assertTrue(organization.getSameReferenceLinks().contains(ORGANIZATION_GFM_OLD_URI_WIKIDATA_URI));
+    // should not contain this wikidata sent in the update request
+    Assertions.assertFalse(organization.getSameReferenceLinks().contains(CONCEPT_BATHTUB_URI));
+
+    // check if description sent in update request is updated
+    Assertions.assertTrue(organization.getDescription().containsValue("Gotland Defense Museum, Sweden."));
+  }
+
 }
