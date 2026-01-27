@@ -1,6 +1,5 @@
 package eu.europeana.entitymanagement.batch.reader;
 
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
@@ -54,7 +53,7 @@ public class EntityRecordDatabaseReader extends BaseDatabaseReader<BatchEntityRe
           result.size(),
           start,
           pageSize,
-          Arrays.toString(BatchUtils.getEntityIds(batchEntityRecords)));
+          BatchUtils.getEntityIds(batchEntityRecords, null));
     }
 
     return batchEntityRecords.iterator();

@@ -15,6 +15,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -85,23 +86,28 @@ public class FailedTaskService {
    *
    * @param entityIds list of entityIds
    */
-  public void removeFailures(List<String> entityIds) {
-    long removeCount = failureRepository.removeFailures(entityIds);
-    if (removeCount > 0) {
-      logger.debug("Removed update failures from db: count={}", removeCount);
-    }
+  public void removeFailures(@NonNull List<String> entityIds) {
+    removeFailures(entityIds, null);
   }
 
   /**
-   * @deprecated use {@link #getEntityIdsWithFailures(TaskType, int, int)} instead
-   * The method used to retrieve entity ids from failed tasks table
-   * @param start start counter
-   * @param count nr of records
-   * @return list of entity ids for which update failed
+   * Removes entities from the FailedTasks collection if their entityId is contained within the
+   * provided entityIds
+   * @param entityIds list of entityIds
+   * @param taskType the type of failed update
    */
-  @Deprecated
-  public List<String> getEntityIdsWithFailures(int start, int count) {
-    return getEntityIdsWithFailures(null, start, count);
+  public void removeFailures(List<String> entityIds, TaskType taskType) {
+    if(entityIds.isEmpty()) {
+      return;
+    }
+    
+    //delete all if taskType not set or if it is full update
+    TaskType updateType = (taskType == null || TaskType.full_update == taskType)? null : taskType;
+    
+    long removeCount = failureRepository.removeFailures(entityIds, updateType);
+    if (removeCount > 0) {
+      logger.debug("Removed update failures from db: count={}", removeCount);
+    }
   }
   
   /**

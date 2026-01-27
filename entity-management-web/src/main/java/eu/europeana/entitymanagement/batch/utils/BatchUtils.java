@@ -1,6 +1,7 @@
 package eu.europeana.entitymanagement.batch.utils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -53,17 +54,35 @@ public class BatchUtils {
     return jobParametersBuilder.toJobParameters();
   }
 
-  public static String[] getEntityIds(List<BatchEntityRecord> batchEntityRecords) {
+  /**
+   * Return the entity ids for the batch records with the given task type
+   * @param batchEntityRecords the batchRecords
+   * @param taskType the update type 
+   * @return list of extracted entity ids
+   */
+  public static List<String> getEntityIds(List<BatchEntityRecord> batchEntityRecords, TaskType taskType) {
     return batchEntityRecords.stream()
-        .map(p -> p.getEntityRecord().getEntityId())
-        .toArray(String[]::new);
+        //only apply if taskType is not null
+        .filter(br -> (taskType == null || taskType == br.getScheduledTaskType()))
+        .map(br -> br.getEntityRecord().getEntityId())
+        .toList();
   }
   
-  public static List<String> getZohoUrls(List<BatchEntityRecord> batchEntityRecords, String zohoBaseUrl) {
+  /**
+   * Extract the zoho URLs from the batch records, in case of organizations
+   * @param batchEntityRecords the scheduled batch records
+   * @param zohoBaseUrl the base URL for zohoUrls
+   * @return list of extracted URLs
+   */
+  public static List<String> getZohoUrls(List<? extends BatchEntityRecord> batchEntityRecords, String zohoBaseUrl) {
     //only organizations
     List<Entity> orgs =  batchEntityRecords.stream()
         .filter(p -> EntityTypes.isOrganizationType(p.getEntityRecord().getEntity().getType()))
         .map(p -> p.getEntityRecord().getEntity()).toList();
+    
+    if(orgs.isEmpty()) {
+      return Collections.emptyList();
+    }
     
     List<String> zohoUrls = new ArrayList<>();
     for (Entity org : orgs) {

@@ -1,8 +1,8 @@
 package eu.europeana.entitymanagement.batch.listener;
 
 import static eu.europeana.entitymanagement.batch.utils.BatchUtils.getEntityIds;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import org.apache.logging.log4j.LogManager;
@@ -16,6 +16,7 @@ import eu.europeana.entitymanagement.batch.utils.BatchUtils;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
+import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.zoho.organization.ZohoConfiguration;
 
 /** Listens for Read, Processing and Write operations during Entity Update steps. */
@@ -51,23 +52,21 @@ public class ScheduledTaskItemListener
     }
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public void afterWrite(@NonNull List<? extends BatchEntityRecord> entityRecords) {
     if (entityRecords.isEmpty()) {
       return;
     }
-    String[] entityIds = getEntityIds((List<BatchEntityRecord>) entityRecords);
-    if (logger.isDebugEnabled()) {
-      logger.debug(
-          "afterWrite: entityIds={}, count={};", Arrays.toString(entityIds), entityIds.length);
-    }
+    
+    // Remove full updates entries from the FailedTask collection if exists
+    removeFailedTasks(entityRecords, TaskType.full_update);
 
-    // Remove entries from the FailedTask collection if exists
-    failedTaskService.removeFailures(Arrays.asList(entityIds));
-    //remove also eventual organization registration failures
-    List<String> zohoUrls = BatchUtils.getZohoUrls((List<BatchEntityRecord>) entityRecords, zohoConfiguration.getZohoBaseUrlOrganizations());
-    failedTaskService.removeFailures(zohoUrls);
+    // Remove metrics update entries from the FailedTask collection if exists
+    removeFailedTasks(entityRecords, TaskType.metrics_update);
+    
+    //remove also eventual organization registration failures, which are saved with external URL
+    List<String> zohoUrls = BatchUtils.getZohoUrls(entityRecords, zohoConfiguration.getZohoBaseUrlOrganizations());
+    failedTaskService.removeFailures(zohoUrls, TaskType.registration);
 
     // ScheduledTasks cleanup not required for synchronous execution
     if (!isSynchronous) {
@@ -76,6 +75,19 @@ public class ScheduledTaskItemListener
               .collect(
                   Collectors.toMap(
                       p -> p.getEntityRecord().getEntityId(), p -> p.getScheduledTaskType())));
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  void removeFailedTasks(List<? extends BatchEntityRecord> entityRecords, TaskType taskType) {
+    List<String> updatedEntityIds = getEntityIds((List<BatchEntityRecord>)entityRecords, taskType);
+    if(!updatedEntityIds.isEmpty()) {
+      failedTaskService.removeFailures(updatedEntityIds);
+      
+      if (logger.isDebugEnabled()) {
+        logger.debug(
+            "Removed full_update Failed Tasks: entityIds={}, count={};", updatedEntityIds, updatedEntityIds.size());
+      }  
     }
   }
 
@@ -90,32 +102,51 @@ public class ScheduledTaskItemListener
   public void onProcessError(@NonNull BatchEntityRecord entityRecord, @NonNull Exception e) {
     String entityId = entityRecord.getEntityRecord().getEntityId();
     logger.warn("onProcessError: entityId={}", entityId, e);
-    failedTaskService.persistFailure(entityId, entityRecord.getScheduledTaskType(), e);
+    if(mustPersistError(entityRecord, e)) {
+      failedTaskService.persistFailure(entityId, entityRecord.getScheduledTaskType(), e);
+    }
     // update failed count in the stats
+    // SG: for the time being we collect the failed update in the counters even if we don't create a failed tasks 
     if(TaskType.hasStatsToCount(entityRecord.getScheduledTaskType())) {
       BatchUtils.selectStats(entityRecord.getScheduledTaskType(), fullUpdateStats, metricUpdateStats).addFailed();
     }
   }
 
+  private boolean mustPersistError(@NonNull BatchEntityRecord entityRecord, @NonNull Exception e) {
+    boolean mustPersist = true;
+    
+    if(entityRecord.getEntityRecord().isDisabled()
+        && entityRecord.getEntityRecord().getEntity() != null
+        && !EntityTypes.isOrganizationType(entityRecord.getEntityRecord().getEntity().getType())) {
+      //do not persist errors for disabled organizations, except for zoho  dereferencing errors
+      if(logger.isDebugEnabled()) {
+        logger.debug("Failed task nor registered for disabled entity: entityId={}", entityRecord.getEntityRecord().getEntityId(), e);
+      }
+      mustPersist = false;
+    }
+    
+    return mustPersist;
+  }
+
   @Override
   public void onWriteError(
       @NonNull Exception e, @NonNull List<? extends BatchEntityRecord> entityRecords) {
-    @SuppressWarnings("unchecked")
-    String[] entityIds = getEntityIds((List<BatchEntityRecord>) entityRecords);
-
-    logger.warn("onWriteError: entityIds={}", entityIds, e);
-    failedTaskService.persistFailureBulk(
-        entityRecords.stream()
-            .collect(
-                Collectors.toMap(
-                    r -> r.getEntityRecord().getEntityId(), r -> r.getScheduledTaskType())),
-        e);
+    //entityId, taskType map
+    Map<String, TaskType> taskMap = entityRecords.stream()
+    .collect(
+        Collectors.toMap(
+            r -> r.getEntityRecord().getEntityId(), r -> r.getScheduledTaskType()));
+    
+    if(logger.isWarnEnabled()) {
+      logger.warn("onWriteError: entityIds={}", taskMap.keySet(), e);
+    }
+    
+    failedTaskService.persistFailureBulk(taskMap, e);
     // update failed count in the stats
-    entityRecords.stream().forEach(entityRecord ->{
-      if(TaskType.hasStatsToCount(entityRecord.getScheduledTaskType())) {
-        BatchUtils.selectStats(entityRecord.getScheduledTaskType(), fullUpdateStats, metricUpdateStats).addFailed();
+    for (Map.Entry<String, TaskType> entry : taskMap.entrySet()) {
+      if(TaskType.hasStatsToCount(entry.getValue())) {
+        BatchUtils.selectStats(entry.getValue(), fullUpdateStats, metricUpdateStats).addFailed();
       }
-    });
-
+    }
   }
 }

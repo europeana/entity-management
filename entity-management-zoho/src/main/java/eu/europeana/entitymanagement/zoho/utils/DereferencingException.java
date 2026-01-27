@@ -1,13 +1,11 @@
 package eu.europeana.entitymanagement.zoho.utils;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import eu.europeana.api.commons.error.EuropeanaApiException;
 
-/** Exception for describing zoho type of exceptions. */
-@ResponseStatus(value = HttpStatus.NOT_ACCEPTABLE, reason = "Bad Content")
-public class ZohoException extends DereferencingException {
+/** Base exception class for dereferencing errors. */
+public class DereferencingException extends EuropeanaApiException {
 
-  private static final long serialVersionUID = -3332292346834265371L;
+  private static final long serialVersionUID = -3332292346834265370L;
 
   /**
    * Constructs a new exception with the specified detail message.
@@ -15,7 +13,7 @@ public class ZohoException extends DereferencingException {
    * @param message the detail message. The detail message is saved for later retrieval by the
    *     {@link #getMessage()} method.
    */
-  public ZohoException(String message) {
+  public DereferencingException(String message) {
     super(message);
   }
 
@@ -28,7 +26,7 @@ public class ZohoException extends DereferencingException {
    *     (A <tt>null</tt> value is permitted, and indicates that the cause is nonexistent or
    *     unknown.)
    */
-  public ZohoException(String message, Throwable cause) {
+  public DereferencingException(String message, Throwable cause) {
     super(message, cause);
   }
 }

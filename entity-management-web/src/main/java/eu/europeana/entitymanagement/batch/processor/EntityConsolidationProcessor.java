@@ -1,14 +1,13 @@
 package eu.europeana.entitymanagement.batch.processor;
 
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_ENTITY_CONSOLIDATION_PROCESSOR;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.validation.ConstraintViolation;
 import javax.validation.ValidatorFactory;
-
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import eu.europeana.api.commons.error.EuropeanaApiException;
 import eu.europeana.entitymanagement.common.config.DataSource;
@@ -28,7 +27,6 @@ import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.web.service.DepictionGeneratorService;
 import eu.europeana.entitymanagement.web.service.EntityRecordService;
-import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_ENTITY_CONSOLIDATION_PROCESSOR;
 
 /**
  * This {@link ItemProcessor} validates Entity metadata, then creates a consolidated entity by
@@ -68,7 +66,7 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
     String proxyId = primaryExternalProxy.getProxyId();
     Optional<DataSource> dataSource = datasources.getDatasource(proxyId);
     boolean isStaticDataSource = dataSource.isPresent() && dataSource.get().isStatic();
-
+    
     // do not validate static data sources
     if (!isStaticDataSource) {
       validateDataSourceProxyConstraints(externalProxyEntity);
@@ -90,6 +88,23 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
       }
     }
 
+    performConsolidation(entityRecord, externalProxies, externalProxyEntity, isStaticDataSource);
+       
+    return batchEntityRecord;
+  }
+
+  /**
+   * Method to perform consolidation and validation of the consolidated entity
+   * @param entityRecord the original record
+   * @param externalProxies the list of external proxies
+   * @param externalProxyEntity primary external proxy
+   * @param isStaticDataSource indicates if the primary external proxy is static data source
+   * @throws EntityModelCreationException if the consolidated version cannot be instantiated 
+   * @throws EuropeanaApiException in case of EntityUpdateException or EntityValidationException
+   */
+  void performConsolidation(EntityRecord entityRecord, List<EntityProxy> externalProxies,
+      Entity externalProxyEntity, boolean isStaticDataSource) throws EntityModelCreationException,
+      EuropeanaApiException {
     Entity europeanaProxyEntity = entityRecord.getEuropeanaProxy().getEntity();
 
     Entity consolidatedEntity = null;
@@ -119,7 +134,11 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
         consolidatedEntity.setIsShownBy(isShownBy);
       }
     }
-    validateCompleteValidationConstraints(consolidatedEntity);
+    
+    //SG: #EA-4376 do not perform validation if the entity is disabled (allow consolidation as entity is not used anymore)
+    if(!entityRecord.isDisabled()) {
+         validateCompleteValidationConstraints(consolidatedEntity);
+    }
     
     //Aggregation is not a merged field, need to copy it from the old consolidated entity 
     copyIsAggregatedBy(entityRecord, consolidatedEntity);
@@ -127,9 +146,9 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
     
     entityRecordService.updateConsolidatedVersion(
         entityRecord, consolidatedEntity);
-
-    return batchEntityRecord;
   }
+
+
 
   void copyIsAggregatedBy(EntityRecord entityRecord, Entity consolidatedEntity) {
     consolidatedEntity.setIsAggregatedBy(new Aggregation(entityRecord.getEntity().getIsAggregatedBy()));
