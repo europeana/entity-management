@@ -235,8 +235,21 @@ public class EMController extends BaseRest {
     }
   }
 
+  /**
+   * Verifies co references for the entity request sent for update.
+   * @param updateRequestEntity
+   * @param entityRecord
+   * @throws HttpBadRequestException
+   */
   private void verifyCoreferencesForUpdate(Entity updateRequestEntity, EntityRecord entityRecord)
       throws HttpBadRequestException {
+    //EA- 4369 if entity is organization or Aggregator, the value sent in sameAS is ignored for the update request
+    // and is overridden by the zoho Proxy . This also leads to not checking any Co-references
+    if (EntityTypes.isOrganizationType(entityRecord.getEntity().getType())) {
+      overrideSamAsWithZoho(updateRequestEntity, entityRecord);
+      return;
+    }
+
     // Check if all the URIs present in the “sameAs” (of provided entity) dot not clash with another
     // Entity and if all Proxies are reflected on the “sameAs”, if not respond with HTTP 400;
     // check provided coreferences, consider static data sources
@@ -265,6 +278,24 @@ public class EMController extends BaseRest {
               + proxyIds);
     }
   }
+
+  /**
+   * update entity request 'sameAs' field with the zoho proxy id
+   * @param updateRequestEntity update request sent
+   * @param entityRecord entity record (existing in db)
+   * @throws HttpBadRequestException
+   */
+  private void overrideSamAsWithZoho(Entity updateRequestEntity, EntityRecord entityRecord) throws HttpBadRequestException {
+    if (entityRecord.getZohoProxy() != null) {
+      updateRequestEntity.setSameReferenceLinks(
+              Collections.singletonList(entityRecord.getZohoProxy().getProxyId()));
+    } else {
+      throw new HttpBadRequestException(
+              "There is no Zoho proxy present for the " + entityRecord.getEntity().getType() +
+                      " entity with id " + entityRecord.getEntityId());
+    }
+  }
+
 
   @ApiOperation(value = "Update an entity from external data source",
       nickname = "updateEntityFromDatasource", response = Void.class)
