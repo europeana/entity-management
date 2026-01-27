@@ -18,7 +18,6 @@ import eu.europeana.entitymanagement.definitions.batch.model.BatchEntityRecord;
 import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.zoho.organization.ZohoConfiguration;
-import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 
 /** Listens for Read, Processing and Write operations during Entity Update steps. */
 public class ScheduledTaskItemListener
@@ -118,8 +117,7 @@ public class ScheduledTaskItemListener
     
     if(entityRecord.getEntityRecord().isDisabled()
         && entityRecord.getEntityRecord().getEntity() != null
-        && EntityTypes.isOrganizationType(entityRecord.getEntityRecord().getEntity().getType())   
-        && ! (e instanceof ZohoException)) {
+        && !EntityTypes.isOrganizationType(entityRecord.getEntityRecord().getEntity().getType())) {
       //do not persist errors for disabled organizations, except for zoho  dereferencing errors
       mustPersist = false;
     }

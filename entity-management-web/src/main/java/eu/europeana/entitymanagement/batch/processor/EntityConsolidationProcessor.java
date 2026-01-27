@@ -88,11 +88,8 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
       }
     }
 
-    //SG: #EA-4376 do not perform consolidation and validation if the entity is disabled
-    if(!entityRecord.isDisabled()) {
-      performConsolidation(entityRecord, externalProxies, externalProxyEntity, isStaticDataSource);
-    }
-   
+    performConsolidation(entityRecord, externalProxies, externalProxyEntity, isStaticDataSource);
+       
     return batchEntityRecord;
   }
 
@@ -138,7 +135,10 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
       }
     }
     
-    validateCompleteValidationConstraints(consolidatedEntity);
+    //SG: #EA-4376 do not perform validation if the entity is disabled (allow consolidation as entity is not used anymore)
+    if(!entityRecord.isDisabled()) {
+         validateCompleteValidationConstraints(consolidatedEntity);
+    }
     
     //Aggregation is not a merged field, need to copy it from the old consolidated entity 
     copyIsAggregatedBy(entityRecord, consolidatedEntity);

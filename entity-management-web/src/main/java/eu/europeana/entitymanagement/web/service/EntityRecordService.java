@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import com.mongodb.client.result.UpdateResult;
 import dev.morphia.query.filters.Filter;
 import eu.europeana.api.commons.error.EuropeanaApiException;
+import eu.europeana.entitymanagement.batch.service.FailedTaskService;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
@@ -71,10 +72,10 @@ public class EntityRecordService extends BaseEntityRecordService {
   @Autowired
   public EntityRecordService(EntityRecordRepository entityRecordRepository,
       VocabularyRepository vocabRepository, EntityManagementConfiguration emConfiguration,
-      ZohoConfiguration zohoConfiguration, DataSources datasources, SolrService solrService) {
+      ZohoConfiguration zohoConfiguration, DataSources datasources, SolrService solrService, FailedTaskService failedTaskService) {
 
     super(entityRecordRepository, vocabRepository, emConfiguration, zohoConfiguration, datasources,
-        solrService);
+        solrService, failedTaskService);
   }
 
   public boolean existsByEntityId(String entityId) {
@@ -337,6 +338,13 @@ public class EntityRecordService extends BaseEntityRecordService {
     }
     er.setDisabled(new Date());
     entityRecordRepository.save(er);
+    
+    try {
+      //removed failed tasks for disabled entities, EA-4376
+      failedTaskService.removeFailures(List.of(er.getEntityId()));
+    }catch (Exception e) {
+      throw new EntityUpdateException("Cannot remove failedTasks for entity with id: " + er.getEntityId(), e);
+    }
   }
 
   // update the inScheme field of the entities that refer to this scheme

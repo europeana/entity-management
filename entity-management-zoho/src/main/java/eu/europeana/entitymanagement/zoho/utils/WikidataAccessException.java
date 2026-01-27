@@ -1,8 +1,9 @@
 package eu.europeana.entitymanagement.zoho.utils;
 
-import eu.europeana.api.commons.error.EuropeanaApiException;
-
-public class WikidataAccessException extends EuropeanaApiException {
+/**
+ * Exception class for indicating wikidata dereferencing issues
+ */
+public class WikidataAccessException extends DereferencingException {
 
   private static final long serialVersionUID = 7724261367420984595L;
 

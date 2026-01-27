@@ -23,6 +23,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.util.CollectionUtils;
 import eu.europeana.api.commons.error.EuropeanaApiException;
+import eu.europeana.entitymanagement.batch.service.FailedTaskService;
 import eu.europeana.entitymanagement.common.config.DataSource;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.config.DataSources;
@@ -60,6 +61,8 @@ public class BaseEntityRecordService {
   final SolrService solrService;
 
   final ZohoConfiguration zohoConfiguration;
+  
+  final FailedTaskService failedTaskService;
 
   protected final Logger logger = LogManager.getLogger(getClass());
 
@@ -69,13 +72,14 @@ public class BaseEntityRecordService {
 
   protected BaseEntityRecordService(EntityRecordRepository entityRecordRepository,
       VocabularyRepository vocabRepository, EntityManagementConfiguration emConfiguration,
-      ZohoConfiguration zohoConfiguration, DataSources datasources, SolrService solrService) {
+      ZohoConfiguration zohoConfiguration, DataSources datasources, SolrService solrService, FailedTaskService failedTaskService) {
     this.entityRecordRepository = entityRecordRepository;
     this.vocabRepository = vocabRepository;
     this.emConfiguration = emConfiguration;
     this.zohoConfiguration = zohoConfiguration;
     this.datasources = datasources;
     this.solrService = solrService;
+    this.failedTaskService = failedTaskService;
   }
 
   /**
