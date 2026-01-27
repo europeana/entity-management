@@ -50,19 +50,19 @@ import eu.europeana.entitymanagement.zoho.organization.ZohoConfiguration;
 
 public class BaseEntityRecordService {
 
-  final EntityRecordRepository entityRecordRepository;
+  protected final EntityRecordRepository entityRecordRepository;
 
-  final VocabularyRepository vocabRepository;
+  protected final VocabularyRepository vocabRepository;
 
-  final EntityManagementConfiguration emConfiguration;
+  protected final EntityManagementConfiguration emConfiguration;
 
-  final DataSources datasources;
+  protected final DataSources datasources;
 
-  final SolrService solrService;
+  protected final SolrService solrService;
 
-  final ZohoConfiguration zohoConfiguration;
+  protected final ZohoConfiguration zohoConfiguration;
   
-  final FailedTaskService failedTaskService;
+  protected final FailedTaskService failedTaskService;
 
   protected final Logger logger = LogManager.getLogger(getClass());
 

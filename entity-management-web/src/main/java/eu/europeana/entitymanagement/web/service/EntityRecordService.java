@@ -342,7 +342,7 @@ public class EntityRecordService extends BaseEntityRecordService {
     try {
       //removed failed tasks for disabled entities, EA-4376
       failedTaskService.removeFailures(List.of(er.getEntityId()));
-    }catch (Exception e) {
+    }catch (RuntimeException e) {
       throw new EntityUpdateException("Cannot remove failedTasks for entity with id: " + er.getEntityId(), e);
     }
   }

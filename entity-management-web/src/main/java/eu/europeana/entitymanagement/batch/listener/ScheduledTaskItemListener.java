@@ -119,6 +119,9 @@ public class ScheduledTaskItemListener
         && entityRecord.getEntityRecord().getEntity() != null
         && !EntityTypes.isOrganizationType(entityRecord.getEntityRecord().getEntity().getType())) {
       //do not persist errors for disabled organizations, except for zoho  dereferencing errors
+      if(logger.isDebugEnabled()) {
+        logger.debug("Failed task nor registered for disabled entity: entityId={}", entityRecord.getEntityRecord().getEntityId(), e);
+      }
       mustPersist = false;
     }
     
