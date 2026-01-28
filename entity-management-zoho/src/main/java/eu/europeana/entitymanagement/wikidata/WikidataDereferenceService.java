@@ -25,6 +25,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
@@ -163,11 +164,11 @@ public class WikidataDereferenceService implements Dereferencer, InitializingBea
         HttpEntity entity = response.getEntity();
         String responseBody = EntityUtils.toString(entity);
         
-        if (response.getStatusLine().getStatusCode() == 200) {
+        if (HttpStatus.OK.value() == response.getStatusLine().getStatusCode()) {
           return responseBody;
         } else {
           throw new WikidataAccessException(
-              String.format("Cannot retrieve wikidata organization %s, response code: %s, reason:\n %s", 
+              String.format("Cannot retrieve wikidata organization %s, response code: %s, reason:%n %s", 
                   urlToRead,
                   response.getStatusLine().getStatusCode(),
                   responseBody));

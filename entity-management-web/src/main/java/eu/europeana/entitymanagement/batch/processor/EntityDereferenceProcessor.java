@@ -249,8 +249,7 @@ public class EntityDereferenceProcessor extends BaseEntityProcessor {
   DatasourceDereferenceException buildDereferenceException(String entityId, String proxyId, Exception e) {
     String msg = String.format("Unsuccessful dereferenciation (empty response) for externalId= %s; entityId=%s"
         , proxyId, entityId);
-    return new DatasourceDereferenceException(
-        msg);
+    return new DatasourceDereferenceException(msg, e);
   }
 
   private void handleDatasourceRedirections(EntityProxy externalProxy, Entity proxyResponse) {
