@@ -142,9 +142,9 @@ public class WikidataDereferenceService implements Dereferencer, InitializingBea
    * Method to get the RDF/xml response from wikidata using entityId GET :
    * <http://www.wikidata.org/entity/xyztesting>
    *
-   * @param urlToRead
-   * @return
-   * @throws WikidataAccessException
+   * @param urlToRead the wikidata entity id (e.g. Q48 or the full entity URI)
+   * @return the wikidata response (XML) 
+   * @throws WikidataAccessException if the wikidata request doesn't return a valid 200 response
    */
   private String getEntityFromURL(String urlToRead) throws WikidataAccessException {
 
@@ -160,18 +160,22 @@ public class WikidataDereferenceService implements Dereferencer, InitializingBea
       request.addHeader("Accept-Encoding", "gzip,deflate");
       
       try (CloseableHttpResponse response = httpClient.execute(request)) {
-        if (response.getStatusLine().getStatusCode() != 200) {
-          return null;
-        }
         HttpEntity entity = response.getEntity();
-        if (entity != null) {
-          return EntityUtils.toString(entity);
+        String responseBody = EntityUtils.toString(entity);
+        
+        if (response.getStatusLine().getStatusCode() == 200) {
+          return responseBody;
+        } else {
+          throw new WikidataAccessException(
+              String.format("Cannot retrieve wikidata organization %s, response code: %s, reason:\n %s", 
+                  urlToRead,
+                  response.getStatusLine().getStatusCode(),
+                  responseBody));
         }
       }
     } catch (IOException e) {
       throw new WikidataAccessException("Error executing the request for uri " + urlToRead, e);
     }
-    return null;
   }
 
   String getWikidatBaseUrl() {
