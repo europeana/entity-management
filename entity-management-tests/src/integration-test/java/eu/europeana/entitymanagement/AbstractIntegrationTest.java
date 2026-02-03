@@ -138,7 +138,7 @@ public abstract class AbstractIntegrationTest {
         "europeana.searchapi.urlPrefix",
         () ->
             String.format(
-                "http://%s:%s?wskey=api2demo",
+                "http://%s:%s",
                 mockSearchAndRecord.getHostName(), mockSearchAndRecord.getPort()));
 
     registry.add("batch.computeMetrics", () -> "false");

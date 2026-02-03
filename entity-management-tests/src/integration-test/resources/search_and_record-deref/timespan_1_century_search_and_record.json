@@ -1,5 +1,5 @@
 {
-	"apikey": "api2demo",
+	"apikey": "",
 	"success": true,
 	"requestNumber": 999,
 	"itemsCount": 1,
@@ -24,9 +24,9 @@
 				"https://api.europeana.eu/thumbnail/v2/url.json?uri=http%3A%2F%2F93.62.170.226%2Ffoto%2Fmao%2F2524_Cc102.jpg&type=IMAGE"
 			],
 			"europeanaCompleteness": 5,
-			"guid": "https://www.europeana.eu/item/286/MAO1482?utm_source=api&utm_medium=api&utm_campaign=api2demo",
+			"guid": "https://www.europeana.eu/item/286/MAO1482?utm_source=api&utm_medium=api&utm_campaign=xyz",
 			"id": "/286/MAO1482",
-			"link": "https://api.europeana.eu/record/286/MAO1482.json?wskey=api2demo",
+			"link": "https://api.europeana.eu/record/286/MAO1482.json",
 			"provider": [
 				"CulturaItalia"
 			],
