@@ -106,11 +106,16 @@ public class WikidataDereferenceService implements Dereferencer, InitializingBea
       throws WikidataAccessException, EntityModelCreationException {
     StringBuilder wikidataXml = null;
     WikidataOrganization wikidataOrganization = null;
+    if(logger.isDebugEnabled()) {
+      logger.debug("Dereferencing wikidata organization with id: {}", wikidataUri);
+    }
     try {
       wikidataXml = getEntity(wikidataUri);
       wikidataOrganization = parse(wikidataXml.toString());
     } catch (JAXBException e) {
-      logger.debug("Cannot parse wikidata response: {}", wikidataXml);
+      if(logger.isDebugEnabled()) {
+        logger.debug("Cannot parse wikidata response: {}", wikidataXml);
+      }
       throw new WikidataAccessException(
           "Cannot parse wikidata xml response for uri: " + wikidataUri, e);
     }
