@@ -217,13 +217,14 @@ public class EntityDereferenceProcessor extends BaseEntityProcessor {
     String entityType = entityRecord.getEntity().getType();
 
     Dereferencer dereferencer = dereferenceServiceLocator.getDereferencer(proxyId, entityType);
-    Optional<Entity> proxyResponseOptional = dereferencer.dereferenceEntityById(proxyId);
+    Optional<Entity> proxyResponseOptional;
+    try {
+      proxyResponseOptional = dereferencer.dereferenceEntityById(proxyId);
+    }catch (Exception e) {
+      throw buildDereferenceException(entityId, proxyId, e);
+    }
     if (proxyResponseOptional.isEmpty()) {
-      throw new DatasourceDereferenceException(
-          "Unsuccessful dereferenciation (empty response) for externalId="
-              + proxyId
-              + "; entityId="
-              + entityId);
+      throw buildDereferenceException(entityId, proxyId, null);
     }
 
     Entity proxyResponse = proxyResponseOptional.get();
@@ -243,6 +244,12 @@ public class EntityDereferenceProcessor extends BaseEntityProcessor {
     // reset modified field
     externalProxy.getProxyIn().setModified(timestamp);
     return proxyResponse;
+  }
+
+  DatasourceDereferenceException buildDereferenceException(String entityId, String proxyId, Exception e) {
+    String msg = String.format("Unsuccessful dereferenciation (empty response) for externalId= %s; entityId=%s"
+        , proxyId, entityId);
+    return new DatasourceDereferenceException(msg, e);
   }
 
   private void handleDatasourceRedirections(EntityProxy externalProxy, Entity proxyResponse) {
