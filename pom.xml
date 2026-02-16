@@ -71,7 +71,7 @@
 
 		<!-- test dependencies -->
 		<mock-webserver.version>4.9.0</mock-webserver.version>
-		<testcontainers.version>1.16.0</testcontainers.version>
+		<testcontainers.version>1.21.4</testcontainers.version>
 
 
 		<!-- plugins -->
