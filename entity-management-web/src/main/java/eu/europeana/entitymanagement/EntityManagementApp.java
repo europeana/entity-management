@@ -148,7 +148,7 @@ public class EntityManagementApp extends EntitySyncCronJob implements CommandLin
   }
   
   /** validates the arguments passed 
-   * @param commanda line params for tasks shceuling and execution 
+   * @param args line params for tasks shceuling and execution
    */
   private static void validateArguments(String[] args) {
     for (String arg : args) {

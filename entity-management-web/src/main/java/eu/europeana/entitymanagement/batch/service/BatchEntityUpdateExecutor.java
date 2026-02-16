@@ -50,7 +50,7 @@ public class BatchEntityUpdateExecutor {
   /** Periodically run full entity and metric updates (in one run). */
   @Async
   public void runScheduledTasks() {
-    logger.info("Triggering scheduled {}, {} for entities", TaskType.full_update, TaskType.metrics_update);
+    logger.info("Running scheduled tasks - {}, {} for entities", TaskType.full_update, TaskType.metrics_update);
     try {
       entityUpdateJobLauncher.run(
               entityUpdateJobFactory.createScheduledUpdateJob(jobDescriptionFactory.get(TaskType.full_update)),

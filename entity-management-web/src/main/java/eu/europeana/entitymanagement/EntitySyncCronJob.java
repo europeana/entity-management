@@ -3,8 +3,7 @@ package eu.europeana.entitymanagement;
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_ENTITY_UPDATE_STATS;
 import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_METRICS_UPDATE_STATS;
 import java.time.DayOfWeek;
-import java.time.Instant;
-import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Resource;
@@ -150,17 +149,30 @@ public class EntitySyncCronJob {
   }
 
 
+  /**
+   * Schedules task based on the configurations
+   *
+   * 1. Full updates : These are exceuted monthly on the date configured via
+   *                   property 'batch.schedule.monthly.full.update.date'.
+   *                   By default date is set to 1 of month
+   * 2. Metrics update : these are scheduled to run weekly, By default is set for sunday.
+   *                     But is configurable via property 'batch.schedule.metrics.update.day'
+   */
   void scheduleUpdateTasks() {
     
     //remove completed tasks first, otherwise we cannot schedule metrics executions (type will stay full_update) #EA-4308
     scheduledTaskService.removeProcessedTasks(List.of(TaskType.full_update, TaskType.metrics_update));
-    
-    Instant now = Instant.now();
-    if (isExecuteFullUpdates(now)) {
+
+    ZonedDateTime dateTime = ZonedDateTime.now();
+    if (executeMonthlyFullUpdate(dateTime)) {
       // schedule FULL Updates
+      LOGGER.info("{} day of the Month [{}]. Will schedule monthly full updates.",
+              emConfiguration.getBatchScheduleMonthlyFullUpdateDate(), dateTime);
       scheduleFullUpdates();
-    } else {
+    }
+    if (executeMetricsUpdates(dateTime)) {
       // schedule Metrics Update
+      LOGGER.info("Today is [{}]. Will schedule weekly metrics updates.", dateTime.getDayOfWeek());
       scheduleMetricsUpdates();
     }
   }
@@ -174,31 +186,56 @@ public class EntitySyncCronJob {
     return null;
   }
 
-  protected boolean isExecuteFullUpdates(Instant now) {
-    return now.atZone(ZoneId.systemDefault()).getDayOfWeek() 
-        == 
-        DayOfWeek.valueOf(emConfiguration.getBatchScheduleFullupdateDay().trim());
+  /**
+   * Returns true if day of the month matches with configured date
+   * @param dateTime current system date
+   * @return true if matches
+   */
+  private boolean executeMonthlyFullUpdate(ZonedDateTime dateTime) {
+    return (dateTime.getDayOfMonth() == emConfiguration.getBatchScheduleMonthlyFullUpdateDate());
   }
 
+  /**
+   * Returns true if the day of week matches configured day
+   * @param dateTime current system date
+   * @return true if matches
+   */
+  protected boolean executeMetricsUpdates(ZonedDateTime dateTime) {
+    return (dateTime.getDayOfWeek() ==
+        DayOfWeek.valueOf(emConfiguration.getBatchScheduleMetricsUpdateDay().trim()));
+  }
+
+  /**
+   * Schedules full update for the types configured
+   */
   protected void scheduleFullUpdates() {
-    if (StringUtils.isAllBlank(emConfiguration.getBatchScheduleFullupdateTypes())) {
+    if (StringUtils.isAllBlank(emConfiguration.getBatchScheduleFullUpdateTypes())) {
       LOGGER.info(
           "Skipping scheduling of full updates for entities, no entity types configured for update");
       return;
     }
 
-    String[] entityTypes = emConfiguration.getBatchScheduleFullupdateTypes().trim().split(",");
+    LOGGER.info(
+            "Scheduling full updates for entity types : {}",
+            emConfiguration.getBatchScheduleFullUpdateTypes());
+    String[] entityTypes = emConfiguration.getBatchScheduleFullUpdateTypes().trim().split(",");
     scheduleTasks(TaskType.full_update, entityTypes);
   }
 
+  /**
+   * Schedules metrics update for the types configured
+   */
   protected void scheduleMetricsUpdates() {
-    if (StringUtils.isAllBlank(emConfiguration.getBatchScheduleMetricsupdateTypes())) {
+    if (StringUtils.isAllBlank(emConfiguration.getBatchScheduleMetricsUpdateTypes())) {
       LOGGER.info(
           "Skipping scheduling of metrics update for entities, no entity types configured for update");
       return;
     }
+    LOGGER.info(
+            "Scheduling full updates for entity types : {}",
+            emConfiguration.getBatchScheduleMetricsUpdateTypes());
 
-    String[] typesToUpdate = emConfiguration.getBatchScheduleMetricsupdateTypes().split(",");
+    String[] typesToUpdate = emConfiguration.getBatchScheduleMetricsUpdateTypes().split(",");
     scheduleTasks(TaskType.metrics_update, typesToUpdate);
   }
 

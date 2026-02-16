@@ -144,9 +144,12 @@ public class EntityManagementConfiguration implements InitializingBean {
 
   @Value("${batch.computeMetrics: false}")
   private boolean batchComputeMetrics;
-  
-  @Value("${batch.schedule.fullupdate.day: SUNDAY}")
-  private String batchScheduleFullupdateDay;
+
+  @Value("${batch.schedule.monthly.full.update.date: 1}")
+  private Integer batchScheduleMonthlyFullUpdateDate;
+
+  @Value("${batch.schedule.metrics.update.day: SUNDAY}")
+  private String batchScheduleMetricsUpdateDay;
 
   @Value("${batch.schedule.fullupdate.types: Concept,TimeSpan,Agent,Place}")
   private String batchScheduleFullupdateTypes;
@@ -584,15 +587,19 @@ public class EntityManagementConfiguration implements InitializingBean {
     return wikidataUserAgent;
   }
 
-  public String getBatchScheduleFullupdateDay() {
-    return batchScheduleFullupdateDay;
+  public Integer getBatchScheduleMonthlyFullUpdateDate() {
+    return batchScheduleMonthlyFullUpdateDate;
   }
 
-  public String getBatchScheduleFullupdateTypes() {
+  public String getBatchScheduleMetricsUpdateDay() {
+    return batchScheduleMetricsUpdateDay;
+  }
+
+  public String getBatchScheduleFullUpdateTypes() {
     return batchScheduleFullupdateTypes;
   }
 
-  public String getBatchScheduleMetricsupdateTypes() {
+  public String getBatchScheduleMetricsUpdateTypes() {
     return batchScheduleMetricsupdateTypes;
   }
  
