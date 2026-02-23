@@ -185,16 +185,6 @@ public class ZohoSyncReport {
     failed.add(operation);
   }
 
-  /**
-   * Utility method for registering a FailedOperation
-   *
-   * @param id - zoho organization id
-   * @param error - the label of the error
-   * @param th - the exception indicating the source of the processing error
-   */
-//  public void addFailedOperation(String id, String error, Throwable th) {
-//    addFailedOperation(id, error, th.getMessage(), th);
-//  }
 
   /**
    * Utility method for registering a FailedOperation

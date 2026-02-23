@@ -119,7 +119,8 @@ public class EntitySynchronizationService extends BaseZohoAccess {
   }
 
   protected boolean isLocalDebugging() {
-    return true;
+    //make sure to keep it to false when submitting to repository
+    return false;
   }
 
   /**
@@ -145,6 +146,7 @@ public class EntitySynchronizationService extends BaseZohoAccess {
     synchronizeDeletedZohoOrganizations(deletedSince, zohoSyncReport);
 
     logger.info("Zoho update operations completed successfully:\n {}", zohoSyncReport);
+    //zohoSyncReport.
     
     return zohoSyncRepo.save(zohoSyncReport);
   }

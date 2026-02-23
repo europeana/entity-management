@@ -17,19 +17,6 @@ public class ZohoSyncRepository extends AbstractRepository {
     return getDataStore().find(ZohoSyncReport.class).count();
   }
 
-  /**
-   * Deletes all EntityRecord objects that contain the given entityId
-   *
-   * @param the identifier of the ConceptScheme to be deleted
-   * @return the number of deleted objects
-   */
-//  public long deleteForGood(long identifier) {
-//    return getDataStore()
-//        .find(ZohoSyncReport.class)
-//        .filter(eq(ZohoSyncReportFields.IDENTIFIER, identifier))
-//        .delete()
-//        .getDeletedCount();
-//  }
 
   /** Drops the ConceptScheme collection. */
   public void dropCollection() {
