@@ -107,7 +107,7 @@ public class EntitySynchronizationService extends BaseZohoAccess {
     }
     // for development debugging purposes use, switch to true
     if (isLocalDebugging()) {
-      String since = "29-Sep-2025 10:30:00";
+      String since = "21-Feb-2026 10:30:00";
       modifiedSince = generateFixDate(since);
       if (modifiedSince == null) {
         // date parsing error
@@ -120,7 +120,8 @@ public class EntitySynchronizationService extends BaseZohoAccess {
 
   protected boolean isLocalDebugging() {
     //make sure to keep it to false when submitting to repository
-    return false;
+    return StringUtils.isNotBlank(System.getenv("EM_LOCAL_DEBUG")); 
+    //return false;
   }
 
   /**
