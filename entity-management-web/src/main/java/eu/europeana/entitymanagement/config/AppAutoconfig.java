@@ -32,6 +32,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.scheduling.support.CronExpression;
 import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import dev.morphia.query.filters.Filters;
@@ -337,4 +338,13 @@ public class AppAutoconfig extends AppConfigConstants {
     return synchronizedItemStreamReader;
   }
 
+  @Bean(BEAN_FULL_UPDATE_CRON)
+  public CronExpression getFullUpdateCronExpression() {
+    return CronExpression.parse(emConfiguration.getFullUpdateSchedule());
+  }
+
+  @Bean(BEAN_METRICS_UPDATE_CRON)
+  public CronExpression getMetricsUpdateCronExpression() {
+    return CronExpression.parse(emConfiguration.getMetricsUpdateSchedule());
+  }
 }

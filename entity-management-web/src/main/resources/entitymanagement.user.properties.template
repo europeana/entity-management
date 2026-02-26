@@ -29,12 +29,14 @@ batch.step.chunkSize=100
 # Search API Solr servers.
 #batch.computeMetrics=false
 
-#day of week for scheduling metrics updates
-batch.schedule.metrics.update.day=SUNDAY
+#spring Cron expression must consist of 6 fields, hence append 0 in the beginning
+
+#scheduling metrics updates. Cron Expression: 0 0 0 * * SUN (Sunday at 00:00)
+batch.schedule.metrics.update=0 0 0 * * SUN
 batch.schedule.metricsupdate.types=Concept,TimeSpan,Agent,Place
 
-#day of month for scheduling full updates
-batch.schedule.monthly.full.update.date=1
+#scheduling full updates. Cron expression: 0 0 0 1 * * (1st day of the month at 00:00)
+batch.schedule.full.update=0 0 0 1 * *
 batch.schedule.fullupdate.types=Concept,TimeSpan,Agent,Place
 
 # Whether user requests should be authenticated. Requires Keycloak public key and ApiKey URL if "true"

@@ -45,6 +45,8 @@ public class AppConfigConstants {
   public static final String SCHEDULED_TASK_READER = "scheduledTaskReader";
   public static final String BEAN_ENTITY_UPDATE_STATS      = "entityUpdateStats";
   public static final String BEAN_METRICS_UPDATE_STATS      = "metricsUpdateStats";
+  public static final String BEAN_METRICS_UPDATE_CRON     = "metricsUpdateCronExpression";
+  public static final String BEAN_FULL_UPDATE_CRON        = "fullUpdateCronExpression";
 
   public static  final String BEAN_ENTITY_UPDATE_SERVICE              = "entityUpdateService";
   public static  final String BEAN_ENTITY_DEREFERENCE_PROCESSOR       = "entityDereferenceProcessor";

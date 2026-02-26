@@ -1,9 +1,6 @@
 package eu.europeana.entitymanagement;
 
-import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_ENTITY_UPDATE_STATS;
-import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_METRICS_UPDATE_STATS;
-import java.time.DayOfWeek;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Resource;
@@ -26,6 +23,8 @@ import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
 import eu.europeana.entitymanagement.web.service.EntitySynchronizationService;
 import eu.europeana.entitymanagement.web.service.SlackConnection;
+import org.springframework.scheduling.support.CronExpression;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.*;
 
 /**
  * Base class for Entity Synchronization cron jobs
@@ -57,8 +56,14 @@ public class EntitySyncCronJob {
   @Resource(name = BEAN_METRICS_UPDATE_STATS)
   private EntityUpdateStats metricsUpdateStats;
   
-  @Resource(name = AppConfigConstants.BEAN_BATCH_SCHEDULED_TASK_SERVICE)
+  @Resource(name = BEAN_BATCH_SCHEDULED_TASK_SERVICE)
   private ScheduledTaskService scheduledTaskService;
+
+  @Resource(name = BEAN_FULL_UPDATE_CRON)
+  private CronExpression fullUpdateCronExpression;
+
+  @Resource(name = BEAN_METRICS_UPDATE_CRON)
+  private CronExpression metricsUpdateCronExpression;
   
   /**
    * Method to support static access to the scheduled tasks service
@@ -150,29 +155,25 @@ public class EntitySyncCronJob {
 
 
   /**
-   * Schedules task based on the configurations
+   * Schedules the task based on the configurations.
+   * 'batch.schedule.metrics.update' and 'batch.schedule.full.update' configured
+   * cron expressions are used to determine the next execution date for full and metrics updates.
    *
-   * 1. Full updates : These are exceuted monthly on the date configured via
-   *                   property 'batch.schedule.monthly.full.update.date'.
-   *                   By default date is set to 1 of month
-   * 2. Metrics update : these are scheduled to run weekly, By default is set for sunday.
-   *                     But is configurable via property 'batch.schedule.metrics.update.day'
    */
   void scheduleUpdateTasks() {
-    
+
     //remove completed tasks first, otherwise we cannot schedule metrics executions (type will stay full_update) #EA-4308
     scheduledTaskService.removeProcessedTasks(List.of(TaskType.full_update, TaskType.metrics_update));
 
-    ZonedDateTime dateTime = ZonedDateTime.now();
-    if (executeMonthlyFullUpdate(dateTime)) {
+    LocalDateTime dateTime = LocalDateTime.now();
+    if (executeFullUpdate(dateTime)) {
       // schedule FULL Updates
-      LOGGER.info("{} day of the Month [{}]. Will schedule monthly full updates.",
-              emConfiguration.getBatchScheduleMonthlyFullUpdateDate(), dateTime);
+      LOGGER.info("Scheduling full updates for today {} ", dateTime);
       scheduleFullUpdates();
     }
     if (executeMetricsUpdates(dateTime)) {
       // schedule Metrics Update
-      LOGGER.info("Today is [{}]. Will schedule weekly metrics updates.", dateTime.getDayOfWeek());
+      LOGGER.info("Scheduling metrics updates for today {} ", dateTime);
       scheduleMetricsUpdates();
     }
   }
@@ -187,22 +188,33 @@ public class EntitySyncCronJob {
   }
 
   /**
-   * Returns true if day of the month matches with configured date
+   * Returns true if the current system date matches the next Execution date.
+   * This is determined via the Cron expression defined for full update 'batch.schedule.full.update'
    * @param dateTime current system date
    * @return true if matches
    */
-  private boolean executeMonthlyFullUpdate(ZonedDateTime dateTime) {
-    return (dateTime.getDayOfMonth() == emConfiguration.getBatchScheduleMonthlyFullUpdateDate());
+  private boolean executeFullUpdate(LocalDateTime dateTime) {
+    LocalDateTime nextExecutionDate = fullUpdateCronExpression.next(dateTime);
+    if (nextExecutionDate != null) {
+      LOGGER.info("Next execution date for scheduling full update {} ", nextExecutionDate);
+      return (nextExecutionDate.toLocalDate().equals(dateTime.toLocalDate()));
+    }
+    return false;
   }
 
   /**
-   * Returns true if the day of week matches configured day
+   * Returns true if the current system date matches the next Execution date.
+   * This is determined via the Cron expression defined for full update 'batch.schedule.metrics.update'
    * @param dateTime current system date
    * @return true if matches
    */
-  protected boolean executeMetricsUpdates(ZonedDateTime dateTime) {
-    return (dateTime.getDayOfWeek() ==
-        DayOfWeek.valueOf(emConfiguration.getBatchScheduleMetricsUpdateDay().trim()));
+  protected boolean executeMetricsUpdates(LocalDateTime dateTime) {
+    LocalDateTime nextExecutionDate = metricsUpdateCronExpression.next(dateTime);
+    if (nextExecutionDate != null) {
+      LOGGER.info("Next execution date for scheduling metrics update {} ", nextExecutionDate);
+      return (nextExecutionDate.toLocalDate().equals(dateTime.toLocalDate()));
+    }
+    return false;
   }
 
   /**
