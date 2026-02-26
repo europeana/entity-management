@@ -30,7 +30,6 @@ batch.step.chunkSize=100
 #batch.computeMetrics=false
 
 #spring Cron expression must consist of 6 fields, hence append 0 in the beginning
-
 #scheduling metrics updates. Cron Expression: 0 0 0 * * SUN (Sunday at 00:00)
 batch.schedule.metrics.update=0 0 0 * * SUN
 batch.schedule.metricsupdate.types=Concept,TimeSpan,Agent,Place
