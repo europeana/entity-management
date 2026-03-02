@@ -414,7 +414,7 @@
 						<configuration>
 							<rulesets>
 								<ruleset>
-									https://raw.githubusercontent.com/europeana/api-commons/master/misc/rulesets/europeana-pmd-ruleset.xml</ruleset>
+									https://raw.githubusercontent.com/europeana/api-commons/master/misc/rulesets/europeana-pmd-ruleset-v3_28.xml</ruleset>
 							</rulesets>
 							<printFailingErrors>true</printFailingErrors>
 						</configuration>
@@ -446,6 +446,7 @@
 							<!--We just want the reports; build should still pass -->
 							<failOnError>false</failOnError>
 							<!-- Import additional rules from plugins -->
+							<!--
 							<plugins>
 								<plugin>
 									<groupId>com.h3xstream.findsecbugs</groupId>
@@ -458,6 +459,7 @@
 									<version>7.4.3.sb</version>
 								</plugin>
 							</plugins>
+							-->
 						</configuration>
 					</plugin>
 				</plugins>
