@@ -34,6 +34,7 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar      
       - name: Build, run tests and analyse
+        # new project key!! Why does the github action still uses the old one during the execution?
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Pcoverage -Dsonar.projectKey=eu.europeana.api:entity-management
         env:
           # Needed to get some information about the pull request, if any
