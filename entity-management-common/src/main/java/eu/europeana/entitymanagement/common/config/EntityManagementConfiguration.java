@@ -145,10 +145,10 @@ public class EntityManagementConfiguration implements InitializingBean {
   @Value("${batch.computeMetrics: false}")
   private boolean batchComputeMetrics;
 
-  @Value("${batch.schedule.full.update:0 0 0 1 * *}")
+  @Value("${batch.schedule.full.update:0 0 0 ? * SUN#1}")
   private String fullUpdateSchedule;
 
-  @Value("${batch.schedule.metrics.update:0 0 0 * * SUN}")
+  @Value("${batch.schedule.metrics.update:0 0 0 * * SUNL}")
   private String metricsUpdateSchedule;
 
   @Value("${batch.schedule.fullupdate.types: Concept,TimeSpan,Agent,Place}")
