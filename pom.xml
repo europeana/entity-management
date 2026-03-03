@@ -75,9 +75,7 @@
 
 
 		<!-- plugins -->
-		<aggregate.report.xml>
-			entity-management-tests/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.xml>
-		<sonar.coverage.jacoco.xmlReportPaths>${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
+		<sonar.coverage.jacoco.xmlReportPaths>${maven.multiModuleProjectDirectory}/entity-management-tests/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 		<sonar.java.pmd.reportPaths>${project.build.directory}/pmd.xml</sonar.java.pmd.reportPaths>
 		<sonar.java.spotbugs.reportPaths>
 			${project.build.directory}/spotbugsXml.xml</sonar.java.spotbugs.reportPaths>
@@ -88,12 +86,10 @@
 		<apache.commons.validator.version>1.7</apache.commons.validator.version>
 		<git-code-format.version>3.1</git-code-format.version>
 		<git-commit-id.version>5.0.0</git-commit-id.version>
-		<surefire.version>3.0.0-M5</surefire.version>
-		<failsafe.version>3.0.0-M5</failsafe.version>
+		<surefire.version>3.5.3</surefire.version>
+		<failsafe.version>3.5.3</failsafe.version>
 		<jacoco-plugin.version>0.8.11</jacoco-plugin.version>
-		<!--SG: old version: 3.15.0 -->
 		<pmd-plugin.version>3.28.0</pmd-plugin.version>
-		<!--SG: old version: 4.5.2.0 -->
 		<spotbugs-plugin.version>4.9.8.2</spotbugs-plugin.version>
 		<sonar-plugin.version>3.7.0.1746</sonar-plugin.version>
 	</properties>
@@ -353,6 +349,11 @@
 					<artifactId>maven-surefire-plugin</artifactId>
 					<!-- JUnit 5 requires Surefire version 2.22.0 or higher -->
 					<version>${surefire.version}</version>
+				</plugin>
+				 <plugin>
+			      <groupId>org.apache.maven.plugins</groupId>
+			      <artifactId>maven-surefire-report-plugin</artifactId>
+			      <version>${surefire.version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.sonarsource.scanner.maven</groupId>

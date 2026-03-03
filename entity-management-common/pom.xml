@@ -12,11 +12,6 @@
     <name>entity-management-common</name>
     <description>Common functionality to be reused by individual Entity Management Modules</description>
 
-    <properties>
-        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../${aggregate.report.xml}
-        </sonar.coverage.jacoco.xmlReportPaths>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.springframework</groupId>
