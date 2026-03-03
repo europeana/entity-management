@@ -72,7 +72,7 @@ public class EntitySyncCronJob {
    */
   static ScheduledTaskService getScheduledTasksService(ConfigurableApplicationContext context) {
     return (ScheduledTaskService) context
-        .getBean(AppConfigConstants.BEAN_BATCH_SCHEDULED_TASK_SERVICE);
+        .getBean(BEAN_BATCH_SCHEDULED_TASK_SERVICE);
   }
 
   void performEntitySynchronizationWorkflow(Set<String> tasks) {
@@ -227,10 +227,10 @@ public class EntitySyncCronJob {
       return;
     }
 
-    LOGGER.info(
-            "Scheduling full updates for entity types : {}",
-            emConfiguration.getBatchScheduleFullUpdateTypes());
     String[] entityTypes = emConfiguration.getBatchScheduleFullUpdateTypes().trim().split(",");
+    
+    LOGGER.info("Scheduling full updates for entity types : {}", entityTypes);
+    
     scheduleTasks(TaskType.full_update, entityTypes);
   }
 

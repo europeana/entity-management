@@ -65,7 +65,6 @@ public class EntityManagementApp extends EntitySyncCronJob implements CommandLin
         LOG.info("No args provided to application. Starting web server");
       }
       SpringApplication.run(EntityManagementApp.class, args);
-      return;
     }
   }
 
@@ -144,7 +143,6 @@ public class EntityManagementApp extends EntitySyncCronJob implements CommandLin
       performEntitySynchronizationWorkflow(Set.of(args));
     }
     // if no arguments then web server should be started
-    return;
   }
   
   /** validates the arguments passed 
@@ -153,8 +151,7 @@ public class EntityManagementApp extends EntitySyncCronJob implements CommandLin
   private static void validateArguments(String[] args) {
     for (String arg : args) {
       if (!JobType.isValidJobType(arg)) {
-        String allowdJobTypes = JobType.values().toString();
-        LOG.error("Unsupported argument '{}'. Supported arguments are '{}'", arg, allowdJobTypes);
+        LOG.error("Unsupported argument '{}'. Supported arguments are '{}'", arg, JobType.values());
         System.exit(1);
       }
     }
