@@ -16,7 +16,6 @@ import eu.europeana.entitymanagement.batch.service.BatchEntityUpdateExecutor;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
@@ -221,16 +220,15 @@ public class EntitySyncCronJob {
    * Schedules full update for the types configured
    */
   protected void scheduleFullUpdates() {
-    if (StringUtils.isAllBlank(emConfiguration.getBatchScheduleFullUpdateTypes())) {
+    String fullUpdateEntityTypes = emConfiguration.getBatchScheduleFullUpdateTypes();
+    if (StringUtils.isAllBlank(fullUpdateEntityTypes)) {
       LOGGER.info(
           "Skipping scheduling of full updates for entities, no entity types configured for update");
       return;
     }
 
-    String[] entityTypes = emConfiguration.getBatchScheduleFullUpdateTypes().trim().split(",");
-    
-    LOGGER.info("Scheduling full updates for entity types : {}", entityTypes);
-    
+    LOGGER.info("Scheduling full updates for entity types : {}",  fullUpdateEntityTypes);
+    String[] entityTypes = fullUpdateEntityTypes.trim().split(",");
     scheduleTasks(TaskType.full_update, entityTypes);
   }
 
@@ -238,16 +236,17 @@ public class EntitySyncCronJob {
    * Schedules metrics update for the types configured
    */
   protected void scheduleMetricsUpdates() {
-    if (StringUtils.isAllBlank(emConfiguration.getBatchScheduleMetricsUpdateTypes())) {
+    String metricsUpdateEntityTypes = emConfiguration.getBatchScheduleMetricsUpdateTypes();
+    if (StringUtils.isAllBlank(metricsUpdateEntityTypes)) {
       LOGGER.info(
           "Skipping scheduling of metrics update for entities, no entity types configured for update");
       return;
     }
     LOGGER.info(
             "Scheduling full updates for entity types : {}",
-            emConfiguration.getBatchScheduleMetricsUpdateTypes());
+            metricsUpdateEntityTypes);
 
-    String[] typesToUpdate = emConfiguration.getBatchScheduleMetricsUpdateTypes().split(",");
+    String[] typesToUpdate = metricsUpdateEntityTypes.split(",");
     scheduleTasks(TaskType.metrics_update, typesToUpdate);
   }
 

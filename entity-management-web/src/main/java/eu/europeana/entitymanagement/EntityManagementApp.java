@@ -151,7 +151,8 @@ public class EntityManagementApp extends EntitySyncCronJob implements CommandLin
   private static void validateArguments(String[] args) {
     for (String arg : args) {
       if (!JobType.isValidJobType(arg)) {
-        LOG.error("Unsupported argument '{}'. Supported arguments are '{}'", arg, JobType.values());
+        JobType[] allowedValues = JobType.values();
+        LOG.error("Unsupported argument '{}'. Supported arguments are '{}'", arg, allowedValues);
         System.exit(1);
       }
     }
