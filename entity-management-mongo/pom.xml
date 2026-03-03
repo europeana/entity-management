@@ -11,13 +11,8 @@
 
 	<name>entity-management-mongo</name>
 
-	<properties>
-		<sonar.coverage.jacoco.xmlReportPaths>
-			${project.basedir}/../${aggregate.report.xml}</sonar.coverage.jacoco.xmlReportPaths>
-	</properties>
-
+	
 	<dependencies>
-
 		<dependency>
 			<groupId>eu.europeana.api</groupId>
 			<artifactId>entity-management-definitions</artifactId>

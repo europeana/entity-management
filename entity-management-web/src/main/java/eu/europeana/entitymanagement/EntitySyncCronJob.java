@@ -1,10 +1,6 @@
 package eu.europeana.entitymanagement;
 
-import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_ENTITY_UPDATE_STATS;
-import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.BEAN_METRICS_UPDATE_STATS;
-import java.time.DayOfWeek;
-import java.time.Instant;
-import java.time.ZoneId;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Resource;
@@ -20,13 +16,14 @@ import eu.europeana.entitymanagement.batch.service.BatchEntityUpdateExecutor;
 import eu.europeana.entitymanagement.batch.service.EntityUpdateService;
 import eu.europeana.entitymanagement.batch.service.ScheduledTaskService;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
-import eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants;
 import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import eu.europeana.entitymanagement.solr.exception.SolrServiceException;
 import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 import eu.europeana.entitymanagement.web.model.ZohoSyncReport;
 import eu.europeana.entitymanagement.web.service.EntitySynchronizationService;
 import eu.europeana.entitymanagement.web.service.SlackConnection;
+import org.springframework.scheduling.support.CronExpression;
+import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants.*;
 
 /**
  * Base class for Entity Synchronization cron jobs
@@ -58,8 +55,14 @@ public class EntitySyncCronJob {
   @Resource(name = BEAN_METRICS_UPDATE_STATS)
   private EntityUpdateStats metricsUpdateStats;
   
-  @Resource(name = AppConfigConstants.BEAN_BATCH_SCHEDULED_TASK_SERVICE)
+  @Resource(name = BEAN_BATCH_SCHEDULED_TASK_SERVICE)
   private ScheduledTaskService scheduledTaskService;
+
+  @Resource(name = BEAN_FULL_UPDATE_CRON)
+  private CronExpression fullUpdateCronExpression;
+
+  @Resource(name = BEAN_METRICS_UPDATE_CRON)
+  private CronExpression metricsUpdateCronExpression;
   
   /**
    * Method to support static access to the scheduled tasks service
@@ -68,7 +71,7 @@ public class EntitySyncCronJob {
    */
   static ScheduledTaskService getScheduledTasksService(ConfigurableApplicationContext context) {
     return (ScheduledTaskService) context
-        .getBean(AppConfigConstants.BEAN_BATCH_SCHEDULED_TASK_SERVICE);
+        .getBean(BEAN_BATCH_SCHEDULED_TASK_SERVICE);
   }
 
   void performEntitySynchronizationWorkflow(Set<String> tasks) {
@@ -150,17 +153,26 @@ public class EntitySyncCronJob {
   }
 
 
+  /**
+   * Schedules the task based on the configurations.
+   * 'batch.schedule.metrics.update' and 'batch.schedule.full.update' configured
+   * cron expressions are used to determine the next execution date for full and metrics updates.
+   *
+   */
   void scheduleUpdateTasks() {
-    
+
     //remove completed tasks first, otherwise we cannot schedule metrics executions (type will stay full_update) #EA-4308
     scheduledTaskService.removeProcessedTasks(List.of(TaskType.full_update, TaskType.metrics_update));
-    
-    Instant now = Instant.now();
-    if (isExecuteFullUpdates(now)) {
+
+    LocalDateTime dateTime = LocalDateTime.now();
+    if (executeFullUpdate(dateTime)) {
       // schedule FULL Updates
+      LOGGER.info("Scheduling full updates for today {} ", dateTime);
       scheduleFullUpdates();
-    } else {
+    }
+    if (executeMetricsUpdates(dateTime)) {
       // schedule Metrics Update
+      LOGGER.info("Scheduling metrics updates for today {} ", dateTime);
       scheduleMetricsUpdates();
     }
   }
@@ -174,31 +186,67 @@ public class EntitySyncCronJob {
     return null;
   }
 
-  protected boolean isExecuteFullUpdates(Instant now) {
-    return now.atZone(ZoneId.systemDefault()).getDayOfWeek() 
-        == 
-        DayOfWeek.valueOf(emConfiguration.getBatchScheduleFullupdateDay().trim());
+  /**
+   * Returns true if the current system date matches the next Execution date.
+   * This is determined via the Cron expression defined for full update 'batch.schedule.full.update'
+   * @param dateTime current system date
+   * @return true if matches
+   */
+  private boolean executeFullUpdate(LocalDateTime dateTime) {
+    LocalDateTime nextExecutionDate = fullUpdateCronExpression.next(dateTime);
+    if (nextExecutionDate != null) {
+      LOGGER.info("Next execution date for scheduling full update {} ", nextExecutionDate);
+      return (nextExecutionDate.toLocalDate().equals(dateTime.toLocalDate()));
+    }
+    return false;
   }
 
+  /**
+   * Returns true if the current system date matches the next Execution date.
+   * This is determined via the Cron expression defined for full update 'batch.schedule.metrics.update'
+   * @param dateTime current system date
+   * @return true if matches
+   */
+  protected boolean executeMetricsUpdates(LocalDateTime dateTime) {
+    LocalDateTime nextExecutionDate = metricsUpdateCronExpression.next(dateTime);
+    if (nextExecutionDate != null) {
+      LOGGER.info("Next execution date for scheduling metrics update {} ", nextExecutionDate);
+      return (nextExecutionDate.toLocalDate().equals(dateTime.toLocalDate()));
+    }
+    return false;
+  }
+
+  /**
+   * Schedules full update for the types configured
+   */
   protected void scheduleFullUpdates() {
-    if (StringUtils.isAllBlank(emConfiguration.getBatchScheduleFullupdateTypes())) {
+    String fullUpdateEntityTypes = emConfiguration.getBatchScheduleFullUpdateTypes();
+    if (StringUtils.isAllBlank(fullUpdateEntityTypes)) {
       LOGGER.info(
           "Skipping scheduling of full updates for entities, no entity types configured for update");
       return;
     }
 
-    String[] entityTypes = emConfiguration.getBatchScheduleFullupdateTypes().trim().split(",");
+    LOGGER.info("Scheduling full updates for entity types : {}",  fullUpdateEntityTypes);
+    String[] entityTypes = fullUpdateEntityTypes.trim().split(",");
     scheduleTasks(TaskType.full_update, entityTypes);
   }
 
+  /**
+   * Schedules metrics update for the types configured
+   */
   protected void scheduleMetricsUpdates() {
-    if (StringUtils.isAllBlank(emConfiguration.getBatchScheduleMetricsupdateTypes())) {
+    String metricsUpdateEntityTypes = emConfiguration.getBatchScheduleMetricsUpdateTypes();
+    if (StringUtils.isAllBlank(metricsUpdateEntityTypes)) {
       LOGGER.info(
           "Skipping scheduling of metrics update for entities, no entity types configured for update");
       return;
     }
+    LOGGER.info(
+            "Scheduling full updates for entity types : {}",
+            metricsUpdateEntityTypes);
 
-    String[] typesToUpdate = emConfiguration.getBatchScheduleMetricsupdateTypes().split(",");
+    String[] typesToUpdate = metricsUpdateEntityTypes.split(",");
     scheduleTasks(TaskType.metrics_update, typesToUpdate);
   }
 

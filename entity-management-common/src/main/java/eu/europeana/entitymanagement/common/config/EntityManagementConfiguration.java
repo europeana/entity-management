@@ -112,7 +112,7 @@ public class EntityManagementConfiguration implements InitializingBean {
   @Value("${wikidata.baseUrl:}")
   private String wikidataBaseUrl;
   
-  @Value("${wikidata.userAgent:EuropeanaAPIs/v1.0 (https://apis.europeana.eu/)")
+  @Value("${wikidata.userAgent:EuropeanaAPIs/v1.0 (https://apis.europeana.eu/)}")
   private String wikidataUserAgent;
 
   @Value("${batch.step.chunkSize: 10}")
@@ -144,9 +144,12 @@ public class EntityManagementConfiguration implements InitializingBean {
 
   @Value("${batch.computeMetrics: false}")
   private boolean batchComputeMetrics;
-  
-  @Value("${batch.schedule.fullupdate.day: SUNDAY}")
-  private String batchScheduleFullupdateDay;
+
+  @Value("${batch.schedule.full.update:0 0 0 ? * SUN#1}")
+  private String fullUpdateSchedule;
+
+  @Value("${batch.schedule.metrics.update:0 0 0 * * SUNL}")
+  private String metricsUpdateSchedule;
 
   @Value("${batch.schedule.fullupdate.types: Concept,TimeSpan,Agent,Place}")
   private String batchScheduleFullupdateTypes;
@@ -584,15 +587,19 @@ public class EntityManagementConfiguration implements InitializingBean {
     return wikidataUserAgent;
   }
 
-  public String getBatchScheduleFullupdateDay() {
-    return batchScheduleFullupdateDay;
+  public String getMetricsUpdateSchedule() {
+    return metricsUpdateSchedule;
   }
 
-  public String getBatchScheduleFullupdateTypes() {
+  public String getFullUpdateSchedule() {
+    return fullUpdateSchedule;
+  }
+
+  public String getBatchScheduleFullUpdateTypes() {
     return batchScheduleFullupdateTypes;
   }
 
-  public String getBatchScheduleMetricsupdateTypes() {
+  public String getBatchScheduleMetricsUpdateTypes() {
     return batchScheduleMetricsupdateTypes;
   }
  

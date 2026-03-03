@@ -1,5 +1,10 @@
 name: Build, Run Tests and Sonar Analysis
-on: push
+on:
+  push:
+    branches:
+      - develop  # Trigger new analysis for each Merge/Push into the main-Branch (i.e. develop)
+  pull_request:
+    types: [opened, synchronize, reopened] # Trigger for each PR
 
 jobs:
   build:
@@ -29,9 +34,15 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar      
       - name: Build, run tests and analyse
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Pcoverage -Dsonar.projectKey=eu.europeana.api:entity-management
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Pcoverage -Dsonar.projectKey=eu.europeana.api:entity-management -Dsonar.junit.reportPaths=target/surefire-reports
         env:
           # Needed to get some information about the pull request, if any
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # SonarCloud access token should be generated from https://sonarcloud.io/account/security/
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      # used only for debuging
+      #- name: Check existence of coverage files
+      #  run: ls -la set-integration-testing/target/site/jacoco-aggregate/
+      # follow configs from https://github.com/SonarSource/sonar-scanning-examples/tree/master/sonar-scanner-maven/maven-multimodule
+      #- name: Check test coverage file
+      #  run: tail -n 30 ./set-integration-testing/target/site/jacoco-aggregate/jacoco.xml
