@@ -86,7 +86,7 @@ public final class ZohoConstants {
   public static final String DELIMITER_COMMA = ",";
   public static final String OR = "OR";
   public static final String AND = "and";
-  public static final String UNDEFINED_LANGUAGE_KEY = "def";
+  public static final String UNDEFINED_LANGUAGE_KEY = "";
 
   public static final int LANGUAGE_CODE_LENGTH = 5;
   public static final int SAME_AS_CODE_LENGTH = 5;
