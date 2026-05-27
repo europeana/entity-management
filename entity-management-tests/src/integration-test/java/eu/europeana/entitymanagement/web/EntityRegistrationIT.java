@@ -300,7 +300,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
     response
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", any(String.class)))
-        .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType()))) // temp EA-4323
+        .andExpect(jsonPath("$.type", is(EntityTypes.Aggregator.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         // isAggregatedBy should contain 2 aggregates (for Europeana and zoho)
         .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(2)))
