@@ -53,7 +53,7 @@
 		<!-- europeana dependencies -->
 		<api.commons.version>0.4.11</api.commons.version>
 		<springbatch.mongo.version>1.0.7</springbatch.mongo.version>
-		<corelib.version>2.17.7</corelib.version>
+		<corelib.version>2.15.4</corelib.version>
 
 		<!-- functional dependencies -->
 		<morphia.version>2.4.13</morphia.version>
