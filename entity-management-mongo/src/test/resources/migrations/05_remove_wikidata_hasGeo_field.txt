@@ -4,11 +4,16 @@
 db.getCollection("EntityRecord").find({"entity.type": "Organization", "proxies.entity.hasAddress.hasGeo" : {$exists : true}})
 #db.getCollection("EntityRecord").find({"entity.type": "Organization", "proxies.proxyId" : {$regex : "^http://www.wikidata.org/"}, "proxies.entity.hasAddress.hasGeo" : {$exists : true}})
 
+## Check for aggregator type as well
+db.getCollection("EntityRecord").find({ $or :[{"entity.type": "Aggregator"}, {"entity.type": "Organization"} ] , "proxies.proxyId" : {$regex : "^http://www.wikidata.org/"}, "proxies.2.entity.hasAddress.hasGeo" : {$exists : true}})
 
 ## this will specifically check the last wikidata proxy
 db.getCollection("EntityRecord").find({"entity.type": "Organization", "proxies.2.entity.hasAddress.hasGeo" : {$exists : true}})
 
 
-#UNSET hasGeo field (only update the last proxy)
+#UNSET hasGeo field (only update the last proxy) for agregator and organization
 db.getCollection('EntityRecord').updateMany({"entity.type": "Organization",
+   "proxies.2.entity.hasAddress.hasGeo" : {$exists : true}}, {$unset: {"proxies.2.entity.hasAddress.hasGeo": null}}, {multi : true})
+
+db.getCollection('EntityRecord').updateMany({$or :[{"entity.type": "Aggregator"}, {"entity.type": "Organization"} ],
    "proxies.2.entity.hasAddress.hasGeo" : {$exists : true}}, {$unset: {"proxies.2.entity.hasAddress.hasGeo": null}}, {multi : true})
