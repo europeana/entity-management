@@ -19,7 +19,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.lang.NonNull;
 import com.zoho.crm.api.record.Record;
 import com.zoho.crm.api.users.User;
-import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 
@@ -53,8 +52,7 @@ public class ZohoOrganizationConverter {
     Map<String, List<String>> acronymFinalMap = ZohoUtils.mergeMapsWithLists(acronymMap, acronym_1_Map);
     org.setAcronym(acronymFinalMap);
     
-    String logoFieldName = ZohoConstants.LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD;
-    org.setLogo(buildWebResource(zohoRecord, logoFieldName));
+    org.setLogo(buildWebResource(zohoRecord, ZohoConstants.LOGO_LINK_TO_THUMBNAIL_FIELD));
     org.setHomepage(getStringFieldValue(zohoRecord, ZohoConstants.WEBSITE_FIELD));
     
     List<String> orgRoleLabels =
@@ -176,14 +174,19 @@ public class ZohoOrganizationConverter {
     return StringUtils.substringBeforeLast(zohoCountryLabel, ",").trim();
   }
 
+  /**
+   * Builds a WebResource object using the given Zoho record and logo field name.
+   * EA-4538: “Logo” field now has urls pointing to the Thumbnail API. We will no longer use Wikimedia for the logos.
+   *
+   * @param zohoRecord      the record containing the data to construct the WebResource
+   * @param logoFieldName   the field name in the record from which the logo URL is retrieved
+   * @return                a WebResource object with the thumbnail field set based on the logo URL
+   */
   private static WebResource buildWebResource(Record zohoRecord, String logoFieldName) {
-    String id = getStringFieldValue(zohoRecord, logoFieldName);
-    if (id == null) {
-      return null;
-    }
+    String logo = getStringFieldValue(zohoRecord, logoFieldName);
     WebResource resource = new WebResource();
-    resource.setId(id);
-    resource.setSource(EntityUtils.createWikimediaResourceString(id));
+    resource.setThumbnail(logo);
+//    resource.setSource(EntityUtils.createWikimediaResourceString(logo));
     return resource;
   }
 

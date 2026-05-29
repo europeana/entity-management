@@ -5,7 +5,6 @@ import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.ACRONYM_1_F
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.ACRONYM_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.AGGREGATING_FROM;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.AGGREGATORS;
-import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.ALTERNATIVE_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.AUDIENCE_ENGAGEMENT_ACTIVITY;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.CAPACITY_BUILDING;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.CITY_FIELD;
@@ -21,34 +20,25 @@ import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.HIDDEN_LABE
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.HIDDEN_LABEL_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.ID_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.INDUSTRY_FIELD;
-import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LANGUAGE_CODE_LENGTH;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LANG_ACRONYM_1_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LANG_ACRONYM_FIELD;
-import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LANG_ALTERNATIVE_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LANG_ORGANIZATION_NAME_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LATITUDE_FIELD;
-import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LOGO_LINK_TO_THUMBNAIL_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.LONGITUDE_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.MEDIA_TYPE;
-import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.NAME_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.OFFICIAL_LANGUAGE_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.ORGANIZATION_ROLE_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.PO_BOX_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.PUBLIC_EMAIL;
-import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.SAME_AS_CODE_LENGTH;
-import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.SAME_AS_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.STREET_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.WEBSITE_FIELD;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.ZIP_CODE_FIELD;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.zoho.crm.api.record.Record;
-import com.zoho.crm.api.util.Choice;
 
 /** Helper class to deserialize JSON into Zoho {@link Record} to make testing easier */
 public class ZohoRecordTestDeserializer extends BaseZohoRecordDeserializer<Record> {
@@ -70,7 +60,7 @@ public class ZohoRecordTestDeserializer extends BaseZohoRecordDeserializer<Recor
           ACRONYM_FIELD,
           LANG_ACRONYM_1_FIELD,
           ACRONYM_1_FIELD,
-          LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD,
+              LOGO_LINK_TO_THUMBNAIL_FIELD,
           WEBSITE_FIELD,
           STREET_FIELD,
           CITY_FIELD,

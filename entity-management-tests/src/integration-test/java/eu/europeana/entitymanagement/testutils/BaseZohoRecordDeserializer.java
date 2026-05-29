@@ -28,7 +28,7 @@ public abstract class BaseZohoRecordDeserializer<T> extends StdDeserializer<T> {
           ACRONYM_FIELD,
           LANG_ACRONYM_1_FIELD,
           ACRONYM_1_FIELD,
-          LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD,
+              LOGO_LINK_TO_THUMBNAIL_FIELD,
           WEBSITE_FIELD,
           STREET_FIELD,
           CITY_FIELD,
