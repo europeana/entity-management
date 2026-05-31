@@ -28,7 +28,7 @@ public class ZohoOrganizationConverter {
 
   private static final String POSITION_SEPARATOR = "_";
   
-  public static void fillOrganizationInfoFromZohoRecord(Organization org, Record zohoRecord, String zohoBaseUrl,  @NonNull final Map<String, ZohoLabelUriMapping> countryMappings,
+  public static void fillOrganizationInfoFromZohoRecord(Organization org, Record zohoRecord, String zohoBaseUrl,
       @NonNull final Map<String, String> roleMappings) {
     org.setAbout(ZohoUtils.buildZohoRecordUrl(zohoBaseUrl, zohoRecord.getId()));
     
@@ -79,19 +79,17 @@ public class ZohoOrganizationConverter {
         ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.ZIP_CODE_FIELD)));
 
     String zohoCountryLabel = ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.COUNTRY_FIELD));
-    if(zohoCountryLabel != null) {
-      //update address country
-      address.setVcardCountryName(extractCountryName(zohoCountryLabel));
-      
-      //update organization country id
-      if(countryMappings.containsKey(zohoCountryLabel)) {
-        //get country ID from mappings
-        ZohoLabelUriMapping zohoLabelUriMapping = countryMappings.get(zohoCountryLabel);
-        org.setCountryId(zohoLabelUriMapping.getEntityUri());
-        org.setCountryISO(zohoLabelUriMapping.getCountryISOCode());
-      } else if(logger.isInfoEnabled()){
-        logger.info("The mapping for the zoho country label: {}, to the europeana uri does not exist.", zohoCountryLabel);
-      }
+    String zohoCountryUri = ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.COUNTRY_URI_FIELD));
+    if (zohoCountryLabel != null) {
+        //update address country
+        address.setVcardCountryName(extractCountryName(zohoCountryLabel));
+        // update organization country id
+        if (zohoCountryUri != null) {
+          org.setCountryId(zohoCountryUri);
+          org.setCountryISO(zohoCountryLabel);
+      } else if (logger.isInfoEnabled()) {
+          logger.info("Country URI is null for organization: " + org.getAbout());
+        }
     }
 
     // set hasGeo
