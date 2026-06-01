@@ -3,7 +3,8 @@
 	  "Providing institution"
   ],
   "Organisation_Country" : "Sweden, SE",
-  "id" : 486281000000940433,
+  "Country_URI" :"http://data.europeana.eu/place/113",
+   "id" : 486281000000940433,
   "Lang_Alternative_1" : "SV(Swedish)",
   "Subsector" : "Museum",
   "Alternative_1" : "Gotlands försvarsmuseum",

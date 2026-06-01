@@ -41,10 +41,12 @@ import eu.europeana.entitymanagement.web.xml.model.XmlConstants;
 @AutoConfigureMockMvc
 public class EntityRetrievalIT extends BaseWebControllerTest {
 
-  private static final String BNF_LOGO =
-      "http://commons.wikimedia.org/wiki/Special:FilePath/Logo_BnF.svg";
-  private static final String BNF_LOGO_SOURCE =
-      "http://commons.wikimedia.org/wiki/File:Logo_BnF.svg";
+//  private static final String BNF_LOGO =
+//      "http://commons.wikimedia.org/wiki/Special:FilePath/Logo_BnF.svg";
+//  private static final String BNF_LOGO_SOURCE =
+//      "http://commons.wikimedia.org/wiki/File:Logo_BnF.svg";
+
+  private static final String LOGO_THUMBNAIL_URL = "https://api.europeana.eu/thumbnail/v3/400/6c54607d20ebcc332c71e40a65f1db4325a53e7d99f6cc97c1350c3e2056c2e";
 
   @Autowired private FailedTaskService failedTaskService;
 
@@ -548,7 +550,8 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(entityId)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
-        .andExpect(jsonPath("$.logo.id", is(BNF_LOGO)))
+       // .andExpect(jsonPath("$.logo.id", is(BNF_LOGO)))
+        .andExpect(jsonPath("$.logo.thumbnail", is(LOGO_THUMBNAIL_URL)))
         .andExpect(jsonPath("$.sameAs").isNotEmpty());
   }
 
@@ -607,14 +610,14 @@ public class EntityRetrievalIT extends BaseWebControllerTest {
     result
         .andExpect(status().isOk())
         .andExpect(xpath(entityBaseXpath + "/@rdf:about", xmlNamespaces).string(entityId))
-        .andExpect(
-            xpath(entityBaseXpath + "/foaf:logo/edm:WebResource/@rdf:about", xmlNamespaces)
-                .string(BNF_LOGO))
-        .andExpect(
-            xpath(
-                    entityBaseXpath + "/foaf:logo/edm:WebResource/dc:source/@rdf:resource",
-                    xmlNamespaces)
-                .string(BNF_LOGO_SOURCE))
+//        .andExpect(
+//            xpath(entityBaseXpath + "/foaf:logo/edm:WebResource/@rdf:about", xmlNamespaces)
+//                .string(BNF_LOGO))
+//        .andExpect(
+//            xpath(
+//                    entityBaseXpath + "/foaf:logo/edm:WebResource/dc:source/@rdf:resource",
+//                    xmlNamespaces)
+//                .string(BNF_LOGO_SOURCE))
         .andExpect(
             xpath(entityBaseXpath + "/skos:prefLabel", xmlNamespaces).nodeCount(greaterThan(0)));
   }

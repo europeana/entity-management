@@ -21,7 +21,7 @@
   "Sector" : "Cultural heritage",
   "SameAs_1" : "http://www.wikidata.org/entity/Q193563",
   "SameAs_2" : "http://isni.org/isni/0000000123531945",
-  "Logo" : "http://commons.wikimedia.org/wiki/Special:FilePath/Logo_BnF.svg",
+  "Logo" : "https://api.europeana.eu/thumbnail/v3/400/6c54607d20ebcc332c71e40a65f1db4325a53e7d99f6cc97c1350c3e2056c2e5",
   "Continent" : "Europe",
   "Tag" : [ ],
   "Acronym" : "BnF",
