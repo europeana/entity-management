@@ -31,7 +31,7 @@ public final class ZohoUtils {
    * @param countryLabel the label of the country, where the ISO code is expected to follow the last comma
    * @return the ISO code of the country if found, or null if the input is null or does not contain a valid ISO code
    */
-  public String getCountryISOCode(String countryLabel) {
+  public static String getCountryISOCode(String countryLabel) {
     if (countryLabel != null) {
       return StringUtils.substringAfterLast(countryLabel, ",").trim();
     }

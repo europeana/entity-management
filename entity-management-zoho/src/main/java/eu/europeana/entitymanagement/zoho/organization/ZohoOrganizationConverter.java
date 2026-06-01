@@ -86,7 +86,7 @@ public class ZohoOrganizationConverter {
         // update organization country id
         if (zohoCountryUri != null) {
           org.setCountryId(zohoCountryUri);
-          org.setCountryISO(zohoCountryLabel);
+          org.setCountryISO(ZohoUtils.getCountryISOCode(zohoCountryLabel));
       } else if (logger.isInfoEnabled()) {
           logger.info("Country URI is null for organization: " + org.getAbout());
         }
