@@ -112,10 +112,10 @@ public class EntityFieldsDatatypeValidation {
     boolean isValid = true;
 
     // the thumbnail cannot be empty for the field 'logo',
+    // but currently we don't have thumbnails for all the organisation
     if (fieldName.equals("logo")) {
-      // but currently we don't have thumbnails for all the organisation
-      if (webResource.getThumbnail() == null
-              || !validateUri(
+      if (StringUtils.isNotEmpty(webResource.getThumbnail())
+              && !validateUri(
               context,
               fieldName,
               EntityFieldsTypes.getFieldType(fieldName),
