@@ -123,15 +123,16 @@ public class EntityFieldsDatatypeValidation {
               webResource.getThumbnail())) {
         addConstraint(context, "Field '" + fieldName + "' has an invalid or empty thumbnail value.");
         isValid = false;
+        return isValid;
       }
-    } else {
-      if (webResource.getId() == null
+    }
+    if (webResource.getId() == null
               || !validateUri(
               context, fieldName, EntityFieldsTypes.getFieldType(fieldName), webResource.getId())) {
         addConstraint(context, "Field '" + fieldName + "' has an invalid or empty id value.");
         isValid = false;
-      }
-      if (webResource.getSource() == null
+    }
+    if (webResource.getSource() == null
               || !validateUri(
               context,
               fieldName,
@@ -139,7 +140,6 @@ public class EntityFieldsDatatypeValidation {
               webResource.getSource())) {
         addConstraint(context, "Field '" + fieldName + "' has an invalid or empty source value.");
         isValid = false;
-      }
     }
     return isValid;
   }
