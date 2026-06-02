@@ -186,12 +186,6 @@ public class EntityRecordService extends BaseEntityRecordService {
           new String[] {EntityRecordFields.ENTITY});
       setDereferencedCountry(org, countryRecord);
 
-      // don't need it now already processed via zoho if available
-//      ZohoLabelUriMapping mapping = emConfiguration.getCountryIdMappings().get(org.getCountryId());
-//      if(mapping != null) {
-//        //extract ISO code from ZohoCountry
-//        org.setCountryISO(mapping.getCountryISOCode());
-//      }
     }
     // dereference role
     if (org.getEuropeanaRoleIds() != null && !org.getEuropeanaRoleIds().isEmpty()) {

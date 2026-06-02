@@ -167,9 +167,20 @@ public class ZohoOrganizationConverter {
     aggregator.getSameReferenceLinks().add(aggregatorUrl);
   }
 
+  /**
+   * Extracts the country name from a given Zoho country label. If the label contains a comma,
+   * the portion before the last comma is returned as the country name. Otherwise, the original
+   * label is returned.
+   *
+   * @param zohoCountryLabel The country label from which to extract the country name.
+   * @return The extracted country name if the label contains a comma, otherwise the original label.
+   */
   private static String extractCountryName(String zohoCountryLabel) {
-    //get only the country name from zohoLabels (e.g France, FR)
-    return StringUtils.substringBeforeLast(zohoCountryLabel, ",").trim();
+    if (StringUtils.contains(zohoCountryLabel, ",")) {
+      //get only the country name from zohoLabels (e.g France, FR)
+      return StringUtils.substringBeforeLast(zohoCountryLabel, ",").trim();
+    }
+    return zohoCountryLabel;
   }
 
   /**
@@ -184,7 +195,6 @@ public class ZohoOrganizationConverter {
     String logo = getStringFieldValue(zohoRecord, logoFieldName);
     WebResource resource = new WebResource();
     resource.setThumbnail(logo);
-//    resource.setSource(EntityUtils.createWikimediaResourceString(logo));
     return resource;
   }
 
