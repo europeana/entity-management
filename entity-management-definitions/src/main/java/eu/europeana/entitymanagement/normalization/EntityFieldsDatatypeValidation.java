@@ -111,7 +111,19 @@ public class EntityFieldsDatatypeValidation {
       ConstraintValidatorContext context, String fieldName, WebResource webResource) {
     boolean isValid = true;
 
-    if (!fieldName.equals("logo")) {
+    // the thumbnail cannot be empty for the field 'logo',
+    if (fieldName.equals("logo")) {
+      // but currently we don't have thumbnails for all the organisation
+      if (webResource.getThumbnail() == null
+              || !validateUri(
+              context,
+              fieldName,
+              EntityFieldsTypes.getFieldType(fieldName),
+              webResource.getThumbnail())) {
+        addConstraint(context, "Field '" + fieldName + "' has an invalid or empty thumbnail value.");
+        isValid = false;
+      }
+    } else {
       if (webResource.getId() == null
               || !validateUri(
               context, fieldName, EntityFieldsTypes.getFieldType(fieldName), webResource.getId())) {
@@ -127,18 +139,6 @@ public class EntityFieldsDatatypeValidation {
         addConstraint(context, "Field '" + fieldName + "' has an invalid or empty source value.");
         isValid = false;
       }
-    }
-
-    // the thumbnail can be empty but not for the field 'logo',
-    // but currently we don't have thumbnails for all the organisation
-    if (StringUtils.isNotEmpty(webResource.getThumbnail())
-        && !validateUri(
-            context,
-            fieldName,
-            EntityFieldsTypes.getFieldType(fieldName),
-            webResource.getThumbnail())) {
-      addConstraint(context, "Field '" + fieldName + "' has an invalid or empty thumbnail value.");
-      isValid = false;
     }
     return isValid;
   }
