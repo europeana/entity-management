@@ -185,7 +185,8 @@ public class ZohoOrganizationConverter {
 
   /**
    * Builds a WebResource object using the given Zoho record and logo field name.
-   * EA-4538: “Logo” field now has urls pointing to the Thumbnail API. We will no longer use Wikimedia for the logos.
+   * EA-4538: “Logo” field now has urls pointing to the Thumbnail API. We will no longer
+   *          use Wikimedia for the logos.
    *
    * @param zohoRecord      the record containing the data to construct the WebResource
    * @param logoFieldName   the field name in the record from which the logo URL is retrieved
