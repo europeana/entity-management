@@ -1,8 +1,10 @@
 package eu.europeana.entitymanagement.web;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.List;
 import java.util.Optional;
+
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,8 @@ import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.solr.model.SolrEntity;
 import eu.europeana.entitymanagement.solr.service.SolrService;
 import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -29,7 +33,9 @@ public class OrganizationIndexingIT extends BaseWebControllerTest {
     // 1. create a place "Sweden" to be used to dereference zoho country for the zoho GFM org
     String europeanaMetadata = loadFile(IntegrationTestUtils.PLACE_REGISTER_SWEDEN_JSON);
     String metisResponse = loadFile(IntegrationTestUtils.PLACE_SWEDEN_XML);
-    createEntity(europeanaMetadata, metisResponse, IntegrationTestUtils.PLACE_SWEDEN_URI);
+    EntityRecord place = createEntity(europeanaMetadata, metisResponse, IntegrationTestUtils.PLACE_SWEDEN_URI);
+
+    assertNotNull(place);
 
     // 2. register zoho GFM org
     europeanaMetadata = loadFile(IntegrationTestUtils.ORGANIZATION_REGISTER_GFM_ZOHO_JSON);
@@ -37,6 +43,7 @@ public class OrganizationIndexingIT extends BaseWebControllerTest {
         .getZohoOrganizationByUrl(IntegrationTestUtils.ORGANIZATION_GFM_URI_ZOHO);
 
     assert zohoRecord.isPresent() : "Mocked Zoho response not loaded";
+
     String entityId = createOrganization(europeanaMetadata, zohoRecord.get()).getEntityId();
 
     // search by ISO Code

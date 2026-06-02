@@ -18,5 +18,7 @@
   "Official_language" : "NL(Dutch)",
   "Sector" : "Cultural heritage",
   "Continent" : "Europe",
-  "Tag" : [ ]
+  "Tag" : [ ],
+  "Logo" : "https://api.europeana.eu/thumbnail/v3/400/test"
+
 }

@@ -44,12 +44,13 @@
 	"SameAs_2": null,
 	"Institution_page_on_europeana_eu": null,
 	"Country_other": null,
-	"Logo": null,
 	"Continent": "Europe",
 	"Locked__s": false,
 	"Alternative_Acronym_1": null,
 	"Lead_Source": null,
 	"Tag": [],
-	"Acronym": null
+	"Acronym": null,
+	"Logo" : "https://api.europeana.eu/thumbnail/v3/400/test"
+
 }
 		

@@ -16,5 +16,6 @@
   "Sector" : "Cultural heritage",
   "SameAs_1" : "http://www.wikidata.org/entity/Q23014463",
   "Continent" : "Europe",
-  "Tag" : [ ]
+  "Tag" : [ ],
+  "Logo" : "https://api.europeana.eu/thumbnail/v3/400/test"
 }
