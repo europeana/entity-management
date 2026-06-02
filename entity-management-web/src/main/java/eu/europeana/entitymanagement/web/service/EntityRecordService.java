@@ -298,7 +298,7 @@ public class EntityRecordService extends BaseEntityRecordService {
     }
 
     long deleteCount = entityRecordRepository.deleteBulk(entityIds);
-    if (deleteCount > 0) {
+    if (deleteCount > 0 && logger.isDebugEnabled()) {
       logger.debug("Deleted {} entityRecords from database: entityIds={}", deleteCount, entityIds);
     }
     return deleteCount;
@@ -312,8 +312,10 @@ public class EntityRecordService extends BaseEntityRecordService {
    */
   public void disableBulk(List<String> entityIds) {
     UpdateResult updateResult = entityRecordRepository.disableBulk(entityIds);
-    logger.debug("Deprecated {} entities: entityIds={}", updateResult.getModifiedCount(),
-        entityIds);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Deprecated {} entities: entityIds={}", updateResult.getModifiedCount(),
+              entityIds);
+    }
   }
 
   /**

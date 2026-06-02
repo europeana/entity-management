@@ -19,7 +19,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
   ENTITY_URI,
   WIKIDATA_URI
 })
-@Deprecated
+@Deprecated (since ="29 May 2026")
 public class ZohoLabelUriMapping {
 
   private String zohoLabel;
