@@ -14,10 +14,7 @@ import eu.europeana.entitymanagement.vocabulary.ValidationObject;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import javax.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
@@ -548,14 +545,14 @@ public class EntityFieldsDatatypeValidation {
             "During the validation of the entity field: "
                 + field.getName()
                 + ", an illegal or inappropriate argument exception has happened. The exception stack trace is:"
-                + e.getStackTrace());
+                + Arrays.toString(e.getStackTrace()));
       } catch (IllegalAccessException e) {
         addConstraint(
             context,
             "During the validation of the entity field: "
                 + field.getName()
                 + ", an illegal access to some method or field has happened. The exception stack trace is:"
-                + e.getStackTrace());
+                + Arrays.toString(e.getStackTrace()));
       }
     }
 
