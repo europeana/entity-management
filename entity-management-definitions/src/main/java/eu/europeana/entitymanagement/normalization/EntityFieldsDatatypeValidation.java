@@ -22,6 +22,7 @@ import javax.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 
+@SuppressWarnings("java:S1192")
 public class EntityFieldsDatatypeValidation {
 
   private final LanguageCodes emLanguageCodes;

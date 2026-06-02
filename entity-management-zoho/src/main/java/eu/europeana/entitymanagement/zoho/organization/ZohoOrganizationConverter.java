@@ -3,6 +3,7 @@ package eu.europeana.entitymanagement.zoho.organization;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.AGGREGATING_FROM;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.AGGREGATORS;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.NAME_FIELD;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoUtils.getCountryISOCode;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoUtils.toIsoLanguage;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -86,7 +87,7 @@ public class ZohoOrganizationConverter {
         // update organization country id
         if (zohoCountryUri != null) {
           org.setCountryId(zohoCountryUri);
-          org.setCountryISO(ZohoUtils.getCountryISOCode(zohoCountryLabel));
+          org.setCountryISO(getCountryISOCode(zohoCountryLabel));
       } else if (logger.isInfoEnabled()) {
           logger.info("Country URI is null for organization: " + org.getAbout());
         }

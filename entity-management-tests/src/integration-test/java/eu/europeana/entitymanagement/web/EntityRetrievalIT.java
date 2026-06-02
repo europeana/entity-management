@@ -41,11 +41,6 @@ import eu.europeana.entitymanagement.web.xml.model.XmlConstants;
 @AutoConfigureMockMvc
 public class EntityRetrievalIT extends BaseWebControllerTest {
 
-//  private static final String BNF_LOGO =
-//      "http://commons.wikimedia.org/wiki/Special:FilePath/Logo_BnF.svg";
-//  private static final String BNF_LOGO_SOURCE =
-//      "http://commons.wikimedia.org/wiki/File:Logo_BnF.svg";
-
   private static final String LOGO_THUMBNAIL_URL = "https://api.europeana.eu/thumbnail/v3/400/6c54607d20ebcc332c71e40a65f1db4325a53e7d99f6cc97c1350c3e2056c2e5";
 
   @Autowired private FailedTaskService failedTaskService;
