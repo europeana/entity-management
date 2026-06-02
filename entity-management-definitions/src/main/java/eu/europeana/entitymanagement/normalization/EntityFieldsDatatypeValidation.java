@@ -123,8 +123,8 @@ public class EntityFieldsDatatypeValidation {
               webResource.getThumbnail())) {
         addConstraint(context, "Field '" + fieldName + "' has an invalid or empty thumbnail value.");
         isValid = false;
-        return isValid;
       }
+        return isValid;
     }
     if (webResource.getId() == null
               || !validateUri(
