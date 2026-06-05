@@ -187,7 +187,6 @@ abstract class BaseWebControllerTest extends AbstractIntegrationTest {
             zohoOrganization,
             zohoRecord, 
             zohoConfiguration.getZohoBaseUrlOrganizations(),
-            emConfig.getCountryMappings(),
             emConfig.getRoleMappings());
     EntityRecord savedRecord =
         entityRecordService.createEntityFromRequest(

@@ -9,12 +9,17 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
+/**
+ * @deprecated
+ * @since 29 May 2026
+ */
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder({
   ZOHO_LABEL,
   ENTITY_URI,
   WIKIDATA_URI
 })
+@Deprecated (since ="29 May 2026")
 public class ZohoLabelUriMapping {
 
   private String zohoLabel;

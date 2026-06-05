@@ -137,7 +137,6 @@ public class DereferenceServiceIT extends AbstractIntegrationTest {
         org,
         record, 
         zohoConfiguration.getZohoBaseUrlOrganizations(),
-        emConfig.getCountryMappings(),
         emConfig.getRoleMappings());
 
     Assertions.assertEquals(2, org.getPrefLabel().size());

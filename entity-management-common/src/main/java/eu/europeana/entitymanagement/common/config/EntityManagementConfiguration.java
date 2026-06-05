@@ -203,9 +203,6 @@ public class EntityManagementConfiguration implements InitializingBean {
   @Value("${spring.profiles.active:}")
   private String activeProfileString;
 
-  @Value("${zoho.country.mapping:zoho_country_mapping.json}")
-  private String zohoCountryMappingFilename;
-
   @Value("${zoho.role.mapping:zoho_role_mapping.json}")
   private String zohoRoleMappingFilename;
   
@@ -226,15 +223,7 @@ public class EntityManagementConfiguration implements InitializingBean {
   
   @Value("${rapidapi.baseUrl:}")
   private String rapidApiBaseUrl;
-  
-  /**
-   * Map of <"Zoho Label", ZohoLabelUriMapping>  
-   */
-  private final Map<String, ZohoLabelUriMapping> countryMappings = new ConcurrentHashMap<>();
-  /**
-   * Map of <"EntityId", ZohoLabelUriMapping>  
-   */
-  private final Map<String, ZohoLabelUriMapping> countryIdMappings = new ConcurrentHashMap<>();
+
   private final Map<String, String> roleMappings = new ConcurrentHashMap<>();
   
   @Autowired
@@ -251,8 +240,6 @@ public class EntityManagementConfiguration implements InitializingBean {
     if (isNotTestProfile(activeProfileString)) {
       verifyRequiredProperties();
     }
-    //initialize country mapping
-    initCountryMappings();
     //initialize role mapping
     initRoleMappings();
   }
@@ -286,36 +273,6 @@ public class EntityManagementConfiguration implements InitializingBean {
     }
   }
 
-  private void initCountryMappings() throws IOException {
-    ClassPathResource resource = new ClassPathResource(getZohoCountryMappingFilename());
-    
-    try (InputStream inputStream = resource.getInputStream()) {
-      assert inputStream != null;
-      try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-        String contents = reader.lines().collect(Collectors.joining(System.lineSeparator()));
-        List<ZohoLabelUriMapping> countryMappingList = emJsonMapper.readValue(contents, new TypeReference<List<ZohoLabelUriMapping>>(){});
-        addToCountryMappings(countryMappingList);
-        addToCountryIdMappings(countryMappingList);
-      }
-    }
-  }
-
-  void addToCountryMappings(List<ZohoLabelUriMapping> countryMappingList) {
-    for (ZohoLabelUriMapping countryMapping : countryMappingList) {
-      //init zoho country mapping
-      countryMappings.put(countryMapping.getZohoLabel(), countryMapping);
-    }
-  }
-  
-  void addToCountryIdMappings(List<ZohoLabelUriMapping> countryMappingList) {
-    for (ZohoLabelUriMapping countryMapping : countryMappingList) {
-      //init entityID - to ZohoCountry mapping
-      if(countryMapping.getEntityUri() != null) {
-        countryIdMappings.put(countryMapping.getEntityUri(), countryMapping);
-      }
-    }
-  }
-  
   private void initRoleMappings() throws IOException {
     
     ClassPathResource resource = new ClassPathResource(getZohoRoleMappingFilename());
@@ -523,14 +480,6 @@ public class EntityManagementConfiguration implements InitializingBean {
     return registerDeprecated;
   }
 
-  public String getZohoCountryMappingFilename() {
-    return zohoCountryMappingFilename;
-  }
-
-  public Map<String, ZohoLabelUriMapping> getCountryMappings() {
-    return countryMappings;
-  }
-
   public String getZohoRoleMappingFilename() {
     return zohoRoleMappingFilename;
   }
@@ -541,10 +490,6 @@ public class EntityManagementConfiguration implements InitializingBean {
 
   public String getRoleVocabularyFilename() {
     return roleVocabularyFilename;
-  }
-
-  public Map<String, ZohoLabelUriMapping> getCountryIdMappings() {
-    return countryIdMappings;
   }
 
   public int getZohoSyncDeleteOffsetDays() {

@@ -108,8 +108,7 @@ public class ZohoDereferenceService implements Dereferencer {
     }
     // fill common organization properties
     ZohoOrganizationConverter.fillOrganizationInfoFromZohoRecord(org, zohoOrganization,
-        zohoConfiguration.getZohoBaseUrlOrganizations(), emConfig.getCountryMappings(),
-        emConfig.getRoleMappings());
+        zohoConfiguration.getZohoBaseUrlOrganizations(), emConfig.getRoleMappings());
 
     return org;
   }

@@ -17,10 +17,10 @@ import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 
 public class SolrOrganization extends SolrEntity<Organization> {
 
-  @Field(EntitySolrFields.SAME_AS)
+  @Field(SAME_AS)
   private List<String> sameAs;
 
-  @Field(EntitySolrFields.AGGREGATED_VIA)
+  @Field(AGGREGATED_VIA)
   private List<String> aggregatedVia;
 
   @Field(DC_DESCRIPTION_ALL)
@@ -90,13 +90,13 @@ public class SolrOrganization extends SolrEntity<Organization> {
     this.country=new ArrayList<>();
     String orgCountryId=organization.getCountryId();
     String orgCountryISO=organization.getCountryISO();
-    if(orgCountryId!=null) {
+    if (orgCountryId != null) {
       this.country.add(orgCountryId);
     }
-    if(orgCountryISO!=null) {
+    if (orgCountryISO != null) {
       this.country.add(orgCountryISO);
     }
-    if(organization.getCountry() != null) {
+    if (organization.getCountry() != null) {
       this.setCountryLabel(organization.getCountry().getPrefLabel()); 
     }
     
@@ -126,7 +126,7 @@ public class SolrOrganization extends SolrEntity<Organization> {
       this.description =
           new HashMap<>(
               SolrGeneralUtils.normalizeStringMapByAddingPrefix(
-                  DC_DESCRIPTION + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
+                  DC_DESCRIPTION + DYNAMIC_FIELD_SEPARATOR,
                   dcDescription));
     }
   }
@@ -136,7 +136,7 @@ public class SolrOrganization extends SolrEntity<Organization> {
       this.acronym =
           new HashMap<>(
               SolrGeneralUtils.normalizeStringListMapByAddingPrefix(
-                  EDM_ACRONYM + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
+                  EDM_ACRONYM + DYNAMIC_FIELD_SEPARATOR,
                   acronym));
     }
   }
@@ -219,7 +219,7 @@ public class SolrOrganization extends SolrEntity<Organization> {
         this.countryLabel =
             new HashMap<>(
                 SolrGeneralUtils.normalizeStringMapByAddingPrefix(
-                    COUNTRY_LABEL + EntitySolrFields.DYNAMIC_FIELD_SEPARATOR,
+                    COUNTRY_LABEL + DYNAMIC_FIELD_SEPARATOR,
                     countryLabel));
       }
     }

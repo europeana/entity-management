@@ -24,6 +24,20 @@ import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 
 public final class ZohoUtils {
 
+
+  /**
+   * Retrieves the ISO code of a country from the provided country label.
+   *
+   * @param countryLabel the label of the country, where the ISO code is expected to follow the last comma
+   * @return the ISO code of the country if found, or null if the input is null or does not contain a valid ISO code
+   */
+  public static String getCountryISOCode(String countryLabel) {
+    if (countryLabel != null) {
+      return StringUtils.substringAfterLast(countryLabel, ",").trim();
+    }
+    return null;
+  }
+
   /**
    * Method that would check if the object provided is of type {@link JSONObject.Null} and will
    * return a correct representation of {@link String} or null.

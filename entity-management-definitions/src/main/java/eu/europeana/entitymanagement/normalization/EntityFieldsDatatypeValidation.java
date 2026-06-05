@@ -14,14 +14,12 @@ import eu.europeana.entitymanagement.vocabulary.ValidationObject;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import javax.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 
+@SuppressWarnings("java:S1192")
 public class EntityFieldsDatatypeValidation {
 
   private final LanguageCodes emLanguageCodes;
@@ -110,31 +108,35 @@ public class EntityFieldsDatatypeValidation {
   private boolean validateWebResourceField(
       ConstraintValidatorContext context, String fieldName, WebResource webResource) {
     boolean isValid = true;
+
+    // the thumbnail cannot be empty for the field 'logo',
+    // but currently we don't have thumbnails for all the organisation
+    if (fieldName.equals("logo")) {
+      if (StringUtils.isNotEmpty(webResource.getThumbnail())
+              && !validateUri(
+              context,
+              fieldName,
+              EntityFieldsTypes.getFieldType(fieldName),
+              webResource.getThumbnail())) {
+        addConstraint(context, "Field '" + fieldName + "' has an invalid or empty thumbnail value.");
+        isValid = false;
+      }
+        return isValid;
+    }
     if (webResource.getId() == null
-        || !validateUri(
-            context, fieldName, EntityFieldsTypes.getFieldType(fieldName), webResource.getId())) {
-      addConstraint(context, "Field '" + fieldName + "' has an invalid or empty id value.");
-      isValid = false;
+              || !validateUri(
+              context, fieldName, EntityFieldsTypes.getFieldType(fieldName), webResource.getId())) {
+        addConstraint(context, "Field '" + fieldName + "' has an invalid or empty id value.");
+        isValid = false;
     }
     if (webResource.getSource() == null
-        || !validateUri(
-            context,
-            fieldName,
-            EntityFieldsTypes.getFieldType(fieldName),
-            webResource.getSource())) {
-      addConstraint(context, "Field '" + fieldName + "' has an invalid or empty source value.");
-      isValid = false;
-    }
-
-    // thumbnail can be empty
-    if (StringUtils.isNotEmpty(webResource.getThumbnail())
-        && !validateUri(
-            context,
-            fieldName,
-            EntityFieldsTypes.getFieldType(fieldName),
-            webResource.getThumbnail())) {
-      addConstraint(context, "Field '" + fieldName + "' has an invalid or empty thumbnail value.");
-      isValid = false;
+              || !validateUri(
+              context,
+              fieldName,
+              EntityFieldsTypes.getFieldType(fieldName),
+              webResource.getSource())) {
+        addConstraint(context, "Field '" + fieldName + "' has an invalid or empty source value.");
+        isValid = false;
     }
     return isValid;
   }
@@ -543,14 +545,14 @@ public class EntityFieldsDatatypeValidation {
             "During the validation of the entity field: "
                 + field.getName()
                 + ", an illegal or inappropriate argument exception has happened. The exception stack trace is:"
-                + e.getStackTrace());
+                + Arrays.toString(e.getStackTrace()));
       } catch (IllegalAccessException e) {
         addConstraint(
             context,
             "During the validation of the entity field: "
                 + field.getName()
                 + ", an illegal access to some method or field has happened. The exception stack trace is:"
-                + e.getStackTrace());
+                + Arrays.toString(e.getStackTrace()));
       }
     }
 

@@ -3,6 +3,7 @@ package eu.europeana.entitymanagement.zoho.organization;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.AGGREGATING_FROM;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.AGGREGATORS;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.NAME_FIELD;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoUtils.getCountryISOCode;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoUtils.toIsoLanguage;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,7 +20,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.lang.NonNull;
 import com.zoho.crm.api.record.Record;
 import com.zoho.crm.api.users.User;
-import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 
@@ -29,7 +29,7 @@ public class ZohoOrganizationConverter {
 
   private static final String POSITION_SEPARATOR = "_";
   
-  public static void fillOrganizationInfoFromZohoRecord(Organization org, Record zohoRecord, String zohoBaseUrl,  @NonNull final Map<String, ZohoLabelUriMapping> countryMappings,
+  public static void fillOrganizationInfoFromZohoRecord(Organization org, Record zohoRecord, String zohoBaseUrl,
       @NonNull final Map<String, String> roleMappings) {
     org.setAbout(ZohoUtils.buildZohoRecordUrl(zohoBaseUrl, zohoRecord.getId()));
     
@@ -53,8 +53,7 @@ public class ZohoOrganizationConverter {
     Map<String, List<String>> acronymFinalMap = ZohoUtils.mergeMapsWithLists(acronymMap, acronym_1_Map);
     org.setAcronym(acronymFinalMap);
     
-    String logoFieldName = ZohoConstants.LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD;
-    org.setLogo(buildWebResource(zohoRecord, logoFieldName));
+    org.setLogo(buildWebResource(zohoRecord, ZohoConstants.LOGO_LINK_TO_THUMBNAIL_FIELD));
     org.setHomepage(getStringFieldValue(zohoRecord, ZohoConstants.WEBSITE_FIELD));
     
     List<String> orgRoleLabels =
@@ -81,19 +80,17 @@ public class ZohoOrganizationConverter {
         ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.ZIP_CODE_FIELD)));
 
     String zohoCountryLabel = ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.COUNTRY_FIELD));
-    if(zohoCountryLabel != null) {
-      //update address country
-      address.setVcardCountryName(extractCountryName(zohoCountryLabel));
-      
-      //update organization country id
-      if(countryMappings.containsKey(zohoCountryLabel)) {
-        //get country ID from mappings
-        ZohoLabelUriMapping zohoLabelUriMapping = countryMappings.get(zohoCountryLabel);
-        org.setCountryId(zohoLabelUriMapping.getEntityUri());
-        org.setCountryISO(zohoLabelUriMapping.getCountryISOCode());
-      } else if(logger.isInfoEnabled()){
-        logger.info("The mapping for the zoho country label: {}, to the europeana uri does not exist.", zohoCountryLabel);
-      }
+    String zohoCountryUri = ZohoUtils.stringFieldSupplier(zohoRecord.getKeyValue(ZohoConstants.COUNTRY_URI_FIELD));
+    if (zohoCountryLabel != null) {
+        //update address country
+        address.setVcardCountryName(extractCountryName(zohoCountryLabel));
+        // update organization country id
+        if (zohoCountryUri != null) {
+          org.setCountryId(zohoCountryUri);
+          org.setCountryISO(getCountryISOCode(zohoCountryLabel));
+      } else if (logger.isInfoEnabled()) {
+          logger.info("Country URI is null for organization: " + org.getAbout());
+        }
     }
 
     // set hasGeo
@@ -171,19 +168,35 @@ public class ZohoOrganizationConverter {
     aggregator.getSameReferenceLinks().add(aggregatorUrl);
   }
 
+  /**
+   * Extracts the country name from a given Zoho country label. If the label contains a comma,
+   * the portion before the last comma is returned as the country name. Otherwise, the original
+   * label is returned.
+   *
+   * @param zohoCountryLabel The country label from which to extract the country name.
+   * @return The extracted country name if the label contains a comma, otherwise the original label.
+   */
   private static String extractCountryName(String zohoCountryLabel) {
-    //get only the country name from zohoLabels (e.g France, FR)
-    return StringUtils.substringBeforeLast(zohoCountryLabel, ",").trim();
+    if (StringUtils.contains(zohoCountryLabel, ",")) {
+      //get only the country name from zohoLabels (e.g France, FR)
+      return StringUtils.substringBeforeLast(zohoCountryLabel, ",").trim();
+    }
+    return zohoCountryLabel;
   }
 
+  /**
+   * Builds a WebResource object using the given Zoho record and logo field name.
+   * EA-4538: “Logo” field now has urls pointing to the Thumbnail API. We will no longer
+   *          use Wikimedia for the logos.
+   *
+   * @param zohoRecord      the record containing the data to construct the WebResource
+   * @param logoFieldName   the field name in the record from which the logo URL is retrieved
+   * @return                a WebResource object with the thumbnail field set based on the logo URL
+   */
   private static WebResource buildWebResource(Record zohoRecord, String logoFieldName) {
-    String id = getStringFieldValue(zohoRecord, logoFieldName);
-    if (id == null) {
-      return null;
-    }
+    String logo = getStringFieldValue(zohoRecord, logoFieldName);
     WebResource resource = new WebResource();
-    resource.setId(id);
-    resource.setSource(EntityUtils.createWikimediaResourceString(id));
+    resource.setThumbnail(logo);
     return resource;
   }
 

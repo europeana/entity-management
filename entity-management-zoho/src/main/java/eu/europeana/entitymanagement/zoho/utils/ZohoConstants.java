@@ -35,7 +35,8 @@ public final class ZohoConstants {
   public static final String ACRONYM_FIELD = "Acronym";
   public static final String LANG_ACRONYM_1_FIELD = "Lang_Acronym_1";
   public static final String ACRONYM_1_FIELD = "Alternative_Acronym_1";
-  public static final String LOGO_LINK_TO_WIKIMEDIACOMMONS_FIELD = "Logo";
+  // EA-4538: We will no longer use Wikimedia for the logos. “Logo” field now has urls pointing to the Thumbnail API
+  public static final String LOGO_LINK_TO_THUMBNAIL_FIELD = "Logo";
   public static final String WEBSITE_FIELD = "Website";
   public static final String SECTOR_FIELD = "Sector";
   public static final String SUBSECTOR_FIELD = "Subsector";
@@ -44,6 +45,8 @@ public final class ZohoConstants {
   public static final String STREET_FIELD = "Street";
   public static final String CITY_FIELD = "City";
   public static final String COUNTRY_FIELD = "Organisation_Country";
+  public static final String COUNTRY_URI_FIELD = "Country_URI";
+
   public static final String ZIP_CODE_FIELD = "Zip_code";
   public static final String PO_BOX_FIELD = "PO_box";
   public static final String LATITUDE_FIELD = "Latitude";
