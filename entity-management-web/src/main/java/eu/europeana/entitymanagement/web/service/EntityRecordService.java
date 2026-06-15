@@ -69,6 +69,9 @@ import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 @Service(AppConfigConstants.BEAN_ENTITY_RECORD_SERVICE)
 public class EntityRecordService extends BaseEntityRecordService {
 
+  private static final String SAME_AS_NOT_EXISTS_MSG =
+          "Url '%s' does not exist in entity owl:sameAs or skos:exactMatch";
+
   @Autowired
   public EntityRecordService(EntityRecordRepository entityRecordRepository,
       VocabularyRepository vocabRepository, EntityManagementConfiguration emConfiguration,
@@ -901,31 +904,70 @@ public class EntityRecordService extends BaseEntityRecordService {
   }
 
   /**
-   * Recreates the external proxy on an Entity, using the newProxyId value as its proxyId
+   * Validates whether all URLs provided in the input list exist as owl:sameAs references
+   * associated with the given {@code EntityRecord}. If any URL is not found in the
+   * owl:sameAs references of the entity, an {@code HttpBadRequestException} is thrown.
    *
-   * @param entityRecord entity record
-   * @param newProxyId new proxyId value
-   * @throws EuropeanaApiException on exception
+   * @param entityRecord the {@code EntityRecord} containing the entity with owl:sameAs references
+   * @param urls a list of URLs to be checked against the entity's owl:sameAs references
+   * @throws HttpBadRequestException if one or more URLs in the {@code urls} list do not exist
+   *         as owl:sameAs references of the provided {@code EntityRecord}
    */
-  public void changeExternalProxy(EntityRecord entityRecord, String newProxyId)
+  public void checkIfSameAsExists(EntityRecord entityRecord , List<String> urls) throws HttpBadRequestException {
+    List<String> sameAs = entityRecord.getEntity().getSameReferenceLinks();
+    List<String> nonMatches = urls.stream()
+            .filter(s -> !sameAs.contains(s))
+            .collect(Collectors.toList());
+
+    if (!nonMatches.isEmpty()) {
+      throw new HttpBadRequestException(String.format(SAME_AS_NOT_EXISTS_MSG, nonMatches));
+    }
+  }
+
+  /**
+   * Updates the external proxy of a given entity record by replacing its identifier and all associated metadata.
+   * Steps:
+   *  a) Check if the Data Source matching the url is supported, otherwise respond with 400;
+   *  b) Check if the identifier of the respective “Data Source Proxy” (in sequence) matches the url, if so continue in the list;
+   * c) Otherwise, replace the identifier of the “Data Source Proxy” and all associated metadata,
+   *    as well as, reset created and modified field of the “Data Source Aggregation”;
+   *
+   * @param entityRecord The entity record whose external proxy will be updated.
+   * @param newProxyId The identifier of the new external proxy to be associated with the entity record.
+   * @param oldExternalProxyList old existing external proxies
+   * @throws EuropeanaApiException If an error occurs while verifying the data source or during the proxy update process.
+   * @throws EntityModelCreationException If an error occurs while creating a new proxy entity model.
+   */
+  public void changeExternalProxy(EntityRecord entityRecord, String newProxyId, List<EntityProxy> oldExternalProxyList)
       throws EuropeanaApiException, EntityModelCreationException {
-
     DataSource dataSource = datasources.verifyDataSource(newProxyId, true);
-    List<EntityProxy> externalProxies = entityRecord.getExternalProxies();
 
-    if (externalProxies.size() > 1) {
-      // Changing provenance isn't supported if entity has multiple external proxies (eg. for Zoho
-      // orgs)
-      throw new HttpBadRequestException("Changing provenance not supported for entity");
+    for (EntityProxy proxy : oldExternalProxyList) {
+      if (proxy.getEntity().getEntityId().equals(newProxyId)) {
+         return;
+      }
     }
 
-    EntityProxy externalProxy = externalProxies.get(0);
-    String entityType = externalProxy.getEntity().getType();
-
-    entityRecord.getProxies().remove(externalProxy);
-
+    String entityType = entityRecord.getEntity().getType();
     setExternalProxy(EntityObjectFactory.createProxyEntityObject(entityType), newProxyId,
         entityRecord.getEntityId(), dataSource, entityRecord, new Date(), 1);
+  }
+
+  /**
+   * Removes external proxies from the given entity record that are not present
+   * in the specified list of URLs.
+   *
+   * @param entityRecord the entity record containing the external proxies to be evaluated
+   *                     and potentially removed
+   * @param urls a list of proxy IDs representing the allowed external proxies to retain
+   */
+  public void removeExternalProxy(EntityRecord entityRecord, List<String> urls) {
+    List<EntityProxy> externalProxies = entityRecord.getExternalProxies();
+    for (EntityProxy externalProxy : externalProxies) {
+      if (!urls.contains(externalProxy.getProxyId())) {
+        entityRecord.getProxies().remove(externalProxy);
+      }
+    }
   }
 
   public EntityRecord updateUsedForEnrichment(EntityTypes type, String identifier, String profile,

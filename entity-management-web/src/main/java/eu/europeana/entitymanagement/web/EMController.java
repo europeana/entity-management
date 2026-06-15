@@ -5,13 +5,11 @@ import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.QUERY_PARAM_QUERY;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
+
+import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -78,8 +76,6 @@ public class EMController extends BaseRest {
   private final EntityUpdateService entityUpdateService;
   private final JobDescriptionFactory jobDescriptionFactory;
 
-  private static final String SAME_AS_NOT_EXISTS_MSG =
-      "Url '%s' does not exist in entity owl:sameAs or skos:exactMatch";
   public static final String INVALID_UPDATE_REQUEST_MSG =
       "Request must either specify a 'query' param or contain entity identifiers in body";
 
@@ -599,32 +595,72 @@ public class EMController extends BaseRest {
     return datasourceResponse;
   }
 
-  @ApiOperation(value = "Change provenance for an Entity", nickname = "changeProvenance")
-  @PutMapping(value = "/entity/{type}/{identifier}/management/source",
-      produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
-  public ResponseEntity<String> changeProvenance(
-      @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
-      @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
-      @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE,
-          required = false, defaultValue = "internal") String profile,
-      @RequestParam(value = WebEntityConstants.PATH_PARAM_URL) String url,
-      HttpServletRequest request) throws Exception {
+//  @ApiOperation(value = "Change provenance for an Entity", nickname = "changeProvenance")
+//  @PutMapping(value = "/entity/{type}/{identifier}/management/source",
+//      produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
+//  public ResponseEntity<String> changeProvenance(
+//      @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
+//      @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
+//      @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE,
+//          required = false, defaultValue = "internal") String profile,
+//      @RequestParam(value = WebEntityConstants.PATH_PARAM_URL) String url,
+//      HttpServletRequest request) throws Exception {
+//
+//    verifyWriteAccess(Operations.UPDATE, request);
+//    validateProfile(profile);
+//
+//    EntityTypes enType = EntityTypes.getByEntityType(type);
+//    EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier, profile, false);
+//
+//    if (!entityRecord.getEntity().getSameReferenceLinks().contains(url)) {
+//      throw new HttpBadRequestException(String.format(SAME_AS_NOT_EXISTS_MSG, url));
+//    }
+//
+//    entityRecordService.changeExternalProxy(entityRecord, url);
+//    entityRecordService.update(entityRecord);
+//    return launchTaskAndRetrieveEntity(request, enType, identifier, entityRecord, profile, false,
+//            jobDescriptionFactory.get(TaskType.full_update));
+//  }
 
-    verifyWriteAccess(Operations.UPDATE, request);
-    validateProfile(profile);
 
-    EntityTypes enType = EntityTypes.getByEntityType(type);
-    EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier, profile, false);
 
-    if (!entityRecord.getEntity().getSameReferenceLinks().contains(url)) {
-      throw new HttpBadRequestException(String.format(SAME_AS_NOT_EXISTS_MSG, url));
+    @ApiOperation(value = "Change provenance for an Entity", nickname = "changeProvenance")
+    @PutMapping(value = "/entity/{type}/{identifier}/management/source",
+            produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<String> changeProvenance(
+            @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
+            @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
+            @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE,
+                    required = false, defaultValue = "internal") String profile,
+            @RequestBody List<String> urls,
+            HttpServletRequest request) throws Exception {
+
+        verifyWriteAccess(Operations.UPDATE, request);
+        validateProfile(profile);
+
+        EntityTypes enType = EntityTypes.getByEntityType(type);
+        EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier, profile, false);
+
+        entityRecordService.checkIfSameAsExists(entityRecord, urls);
+
+        // get the list of already existing proxies, as the list will get updated later
+      List<EntityProxy> externalProxies = entityRecord.getExternalProxies();
+      for (String url : urls) {
+          entityRecordService.changeExternalProxy(entityRecord, url, externalProxies);
+      }
+
+      // remove any datasource proxy that is not present in the url
+      entityRecordService.removeExternalProxy(entityRecord, urls);
+
+      // sort the proxies in the order of the url
+      EntityProxy europeanaProxy = entityRecord.getEuropeanaProxy();
+      urls.add(entityRecord.getProxies().indexOf(europeanaProxy), europeanaProxy.getProxyId());
+      entityRecord.getProxies().sort(Comparator.comparing(v -> urls.indexOf(v.getProxyId())));
+
+      entityRecordService.update(entityRecord);
+      return launchTaskAndRetrieveEntity(request, enType, identifier, entityRecord, profile, false,
+                jobDescriptionFactory.get(TaskType.full_update));
     }
-
-    entityRecordService.changeExternalProxy(entityRecord, url);
-    entityRecordService.update(entityRecord);
-    return launchTaskAndRetrieveEntity(request, enType, identifier, entityRecord, profile, false,
-            jobDescriptionFactory.get(TaskType.full_update));
-  }
 
   @ApiOperation(value = "Retrieve multiple entities", nickname = "retrieveEntities")
   @PostMapping(value = "/entity/retrieve",
