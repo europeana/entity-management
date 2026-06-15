@@ -48,7 +48,7 @@ public class EntityChangeProvenanceIT extends BaseWebControllerTest {
     String requestPath = getEntityRequestPath(savedRecord.getEntityId());
 
     // pass the existing same as url and a non-existing one
-    List<String> urls = Arrays.asList("http://publications.europa.eu/resource/authority/country/AGO",
+    List<String> urls = Arrays.asList("http://testing_nonexisting_one",
             AGENT_JAN_VERMEER_VIAF_URI);
 
     mockMvc
@@ -120,8 +120,7 @@ public class EntityChangeProvenanceIT extends BaseWebControllerTest {
     String requestPath = getEntityRequestPath(savedRecord.getEntityId());
 
     // pass wikidata url - AGENT_JAN_VERMEER_WIKIDATA_URI
-    List<String> urls = Arrays.asList("http://publications.europa.eu/resource/authority/country/AGOe",
-            AGENT_JAN_VERMEER_WIKIDATA_URI);
+    List<String> urls = Arrays.asList(AGENT_JAN_VERMEER_WIKIDATA_URI);
 
     // request internal profile so proxies are included in response
     mockMvc
