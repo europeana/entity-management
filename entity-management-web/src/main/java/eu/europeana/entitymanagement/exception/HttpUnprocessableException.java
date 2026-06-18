@@ -36,7 +36,7 @@ public class HttpUnprocessableException extends EuropeanaApiException {
    * @param errorCode error code
    */
   public HttpUnprocessableException(String msg, String errorCode) {
-    super(msg, errorCode);
+    super(msg, null, errorCode);
   }
 
   /**

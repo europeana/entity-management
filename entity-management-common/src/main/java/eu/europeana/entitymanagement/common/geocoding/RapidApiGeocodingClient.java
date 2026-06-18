@@ -4,14 +4,16 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.net.URIBuilder;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.springframework.http.MediaType;
 import eu.europeana.api.commons.http.HttpConnection;
-import eu.europeana.api.commons.http.HttpResponseHandler;
 import eu.europeana.entitymanagement.common.config.EntityManagementConfiguration;
 import eu.europeana.entitymanagement.common.exception.HttpClientException;
 import eu.europeana.entitymanagement.definitions.model.Address;
@@ -75,16 +77,13 @@ public class RapidApiGeocodingClient {
             "x-rapidapi-key", rapidApiKey, 
             HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
 
-    try {
-      HttpResponseHandler responseHandler =
-          getHttpConnection().get(uriBuilder.toString(), headers, null);
-
-      if (responseHandler.getStatus() != 200) {
+    try (CloseableHttpResponse response = getHttpConnection().get(uriBuilder.toString(), headers, null)) {
+      if (response.getCode() != 200) {
         throw new HttpClientException(
-            "Cannot retrieve geocoding response. " + responseHandler.getResponse());
+            "Cannot retrieve geocoding response. " + EntityUtils.toString(response.getEntity()));
       }
-      return responseHandler.getResponse();
-    } catch (IOException e) {
+      return EntityUtils.toString(response.getEntity());
+    } catch (IOException | ParseException e) {
       throw new HttpClientException("Error executing the request to the rapidapi geocoding service "
           + "for the uri: " + uriBuilder, e);
     }

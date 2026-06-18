@@ -4,13 +4,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import eu.europeana.api.commons.auth.AuthenticationHandler;
 import eu.europeana.api.commons.error.EuropeanaApiException;
-import eu.europeana.api.commons.http.HttpResponseHandler;
 import eu.europeana.entitymanagement.definitions.model.WebResource;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.Collections;
 
 public class DepictionGeneratorService extends SearchRecordAccess{
 
@@ -26,16 +30,15 @@ public class DepictionGeneratorService extends SearchRecordAccess{
   public WebResource generateIsShownBy(String entityUri) throws EuropeanaApiException {
     String uri = buildSearchDepictionRequestUrl(entityUri);
     String response = null;
-    try {
-      HttpResponseHandler httpResponse = httpConnection.get(uri, "application/json", auth);
-      if (httpResponse.getStatus() == HttpStatus.SC_OK) {
-        response = httpResponse.getResponse();
+    try (CloseableHttpResponse httpResponse = httpConnection.get(uri, Collections.singletonMap(HttpHeaders.ACCEPT, "application/json"), auth)) {
+      if (httpResponse.getCode() == HttpStatus.SC_OK) {
+        response = EntityUtils.toString(httpResponse.getEntity());
       } else {
         throw new EuropeanaApiException(
                 "Unable to get the valid response from the Search and Record API - "
-                        +getErrorMessage(httpResponse.getStatus(), httpResponse.getResponse()));
+                        +getErrorMessage(httpResponse.getCode(), EntityUtils.toString(httpResponse.getEntity())));
       }
-    } catch (IOException e) {
+    } catch (IOException | ParseException e) {
       throw new EuropeanaApiException(
           "Unable to get the valid response from the Search and Record API. - " +e.getMessage(), e);
     }

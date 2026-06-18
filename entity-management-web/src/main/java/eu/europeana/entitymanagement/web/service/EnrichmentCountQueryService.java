@@ -2,10 +2,14 @@ package eu.europeana.entitymanagement.web.service;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collections;
 
 import eu.europeana.api.commons.auth.AuthenticationHandler;
-import eu.europeana.api.commons.http.HttpResponseHandler;
+import eu.europeana.entitymanagement.exception.ParamValidationException;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.json.JSONObject;
 import eu.europeana.entitymanagement.definitions.model.Entity;
 import eu.europeana.entitymanagement.exception.ScoringComputationException;
@@ -31,18 +35,16 @@ public class EnrichmentCountQueryService extends SearchRecordAccess {
    * @return the number of enrichments of Europeana Records using the given entity
    * @throws ScoringComputationException if the European search API cannot be called successfully 
    */
-  public int getEnrichmentCount(Entity entity) throws ScoringComputationException {
+  public int getEnrichmentCount(Entity entity) throws ScoringComputationException, ParamValidationException {
     String response = null;
     Instant start = Instant.now();
-    try {
-      String uri = buildEnrichmentCountRequestUrl(entity);
-      if (logger.isDebugEnabled()) {
-        logger.debug("Getting enrichment count for entityId={}; queryUri={}", entity.getEntityId(), uri);
-      }
-
-      HttpResponseHandler httpResponse = httpConnection.get(uri, "application/json", auth);
-      if (httpResponse.getStatus() == HttpStatus.SC_OK) {
-        response = httpResponse.getResponse();
+    String uri = buildEnrichmentCountRequestUrl(entity);
+    if (logger.isDebugEnabled()) {
+      logger.debug("Getting enrichment count for entityId={}; queryUri={}", entity.getEntityId(), uri);
+    }
+    try (CloseableHttpResponse httpResponse = httpConnection.get(uri, Collections.singletonMap(HttpHeaders.ACCEPT,"application/json") ,auth)){
+      if (httpResponse.getCode() == HttpStatus.SC_OK) {
+        response = EntityUtils.toString(httpResponse.getEntity());
       } else {
         logger.error("Unable to get the valid response from the Search and Record API");
       }

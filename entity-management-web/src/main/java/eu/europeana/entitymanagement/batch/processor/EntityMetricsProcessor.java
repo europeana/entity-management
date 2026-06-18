@@ -2,6 +2,7 @@ package eu.europeana.entitymanagement.batch.processor;
 
 import java.util.Date;
 
+import eu.europeana.entitymanagement.exception.ParamValidationException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -70,7 +71,7 @@ public class EntityMetricsProcessor extends BaseEntityProcessor {
     EntityMetrics metrics;
     try {
       metrics = scoringService.computeMetrics(entity);
-    } catch (ScoringComputationException e) {
+    } catch (ScoringComputationException | ParamValidationException e) {
       throw new EntityUpdateException(
           "Cannot compute ranking metrics for entityId=" + entity.getEntityId(), e);
     }
