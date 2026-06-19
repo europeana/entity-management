@@ -19,6 +19,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -169,7 +170,7 @@ public class EMController extends BaseRest {
     EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier, profile, true);
 
     if (!entityRecord.isDisabled()) {
-      return generateResponseEntityForEntityRecord(request, entityProfile, FormatTypes.jsonld, null,
+      return generateResponseEntityForEntityRecord(null,request, entityProfile, FormatTypes.jsonld, null,
           HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, entityRecord, HttpStatus.OK);
     }
     logger.debug("Re-enabling entityId={}", entityRecord.getEntityId());
@@ -438,10 +439,10 @@ public class EMController extends BaseRest {
       @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
       HttpServletRequest request) throws EuropeanaApiException, HttpException {
 
-    verifyReadAccess(request);
+    Authentication auth = verifyReadAccess(request);
 
     try {
-      return createResponseForRetrieve(EntityTypes.getByEntityType(type), identifier, profile, request,
+      return createResponseForRetrieve(auth,EntityTypes.getByEntityType(type), identifier, profile, request,
           FormatTypes.jsonld, languages, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
     } catch (UnsupportedEntityTypeException e) {
       throw new EntityNotFoundException("/" + type + "/" + identifier, e);
@@ -465,10 +466,10 @@ public class EMController extends BaseRest {
       @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
       HttpServletRequest request) throws EuropeanaApiException, HttpException {
 
-    verifyReadAccess(request);
+    Authentication auth = verifyReadAccess(request);
 
     try {
-      return createResponseForRetrieve(EntityTypes.getByEntityType(type), identifier, profile, request,
+      return createResponseForRetrieve(auth,EntityTypes.getByEntityType(type), identifier, profile, request,
           FormatTypes.xml, languages, HttpHeaders.CONTENT_TYPE_APPLICATION_RDF_XML);
     } catch (UnsupportedEntityTypeException e) {
       throw new EntityNotFoundException("/" + type + "/" + identifier, e);
@@ -492,10 +493,10 @@ public class EMController extends BaseRest {
       @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
       HttpServletRequest request) throws EuropeanaApiException, HttpException {
 
-    verifyReadAccess(request);
+    Authentication auth = verifyReadAccess(request);
 
     try {
-      return createResponseForRetrieve(EntityTypes.getByEntityType(type), identifier, profile, request,
+      return createResponseForRetrieve(auth,EntityTypes.getByEntityType(type), identifier, profile, request,
           FormatTypes.schema, languages, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
     } catch (UnsupportedEntityTypeException e) {
       throw new EntityNotFoundException("/" + type + "/" + identifier, e);
@@ -634,12 +635,12 @@ public class EMController extends BaseRest {
       @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = false) String profiles,
       @RequestBody List<String> urls, HttpServletRequest request) throws Exception {
 
-    verifyReadAccess(request);
+    Authentication auth = verifyReadAccess(request);
 
-    return createResponseMultipleEntities(urls, profiles, request);
+    return createResponseMultipleEntities(auth,urls, profiles, request);
   }
 
-  private ResponseEntity<String> createResponseForRetrieve(EntityTypes type, String identifier,
+  private ResponseEntity<String> createResponseForRetrieve(Authentication auth,EntityTypes type, String identifier,
       String profile, HttpServletRequest request, FormatTypes outFormat, String languages,
       String contentType) throws EuropeanaApiException {
 
@@ -666,11 +667,11 @@ public class EMController extends BaseRest {
 
     List<EntityProfile> entityProfile = getEntityProfile(profile);
     // if request doesn't specify a valid EntityProfile, use external by default
-    return generateResponseEntityForEntityRecord(request, entityProfile, outFormat, languages,
+    return generateResponseEntityForEntityRecord(auth,request, entityProfile, outFormat, languages,
         contentType, entityRecord, HttpStatus.OK);
   }
 
-  private ResponseEntity<String> createResponseMultipleEntities(List<String> entityIds, String profiles,
+  private ResponseEntity<String> createResponseMultipleEntities(Authentication auth,List<String> entityIds, String profiles,
       HttpServletRequest request) throws EuropeanaApiException {
     List<EntityRecord> entityRecords =
         entityRecordService.retrieveMultipleByEntityIdsOrCoreference(entityIds, profiles);
@@ -679,7 +680,7 @@ public class EMController extends BaseRest {
     String contentType = HttpHeaders.CONTENT_TYPE_JSONLD_UTF8;
     org.springframework.http.HttpHeaders headers = createAllowHeader(request);
     headers.add(HttpHeaders.CONTENT_TYPE, contentType);
-
+    addRateLimitHeaders(headers,auth);
     String body = serialize(entityRecords);
     return ResponseEntity.status(HttpStatus.OK).headers(headers).body(body);
   }
@@ -725,7 +726,7 @@ public class EMController extends BaseRest {
 
     entityRecord = entityRecordService.retrieveEntityRecord(type, identifier, profile, includeDisabled);
 
-    return generateResponseEntityForEntityRecord(request, getEntityProfile(profile),
+    return generateResponseEntityForEntityRecord(null,request, getEntityProfile(profile),
         FormatTypes.jsonld, null, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, entityRecord,
         HttpStatus.OK);
   }

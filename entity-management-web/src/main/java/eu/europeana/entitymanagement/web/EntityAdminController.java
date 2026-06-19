@@ -14,6 +14,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -117,7 +118,7 @@ public class EntityAdminController extends BaseRest {
       HttpServletRequest request)
       throws HttpException, EuropeanaApiException {
 
-    verifyReadAccess(request);
+    Authentication auth = verifyReadAccess(request);
 
     if (pageSize > 1000) {
       pageSize = 1000;
@@ -125,7 +126,7 @@ public class EntityAdminController extends BaseRest {
 
     List<String> entityIds = failedTaskService.getEntityIdsWithFailures(taskType, page * pageSize, pageSize);
 
-    return generateResponseFailedUpdates(request, entityIds, wskey);
+    return generateResponseFailedUpdates(auth,request, entityIds, wskey);
   }
   
   
@@ -143,18 +144,19 @@ public class EntityAdminController extends BaseRest {
       HttpServletRequest request)
       throws HttpException, EuropeanaApiException {
 
-    verifyReadAccess(request);
+    Authentication auth = verifyReadAccess(request);
     Optional<FailedTask> failedTaskOptional = failedTaskService.getFailure(uri);
 
-    return generateFailedTaskResponse(failedTaskOptional, request);
+    return generateFailedTaskResponse(auth,failedTaskOptional, request);
   }
 
   
-  protected ResponseEntity<String> generateFailedTaskResponse(
+  protected ResponseEntity<String> generateFailedTaskResponse(Authentication auth,
       Optional<FailedTask> failedTaskOptional, HttpServletRequest request) throws EuropeanaApiException {
 
     org.springframework.http.HttpHeaders headers = createAllowHeader(request);
     //headers.add(HttpHeaders.CONTENT_TYPE, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
+    addRateLimitHeaders(headers,auth);
 
     if(failedTaskOptional.isEmpty()) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -167,16 +169,15 @@ public class EntityAdminController extends BaseRest {
       throw new EuropeanaApiException("Error serializing failed task", e);
     }
   }
-  
-  
+
+
   /**
    * Synchronize Organizations from Zoho
-   *
-   * @param type type of entity
-   * @param identifier entity id
-   * @param request
+   * @param since -
+   * @param request -
    * @return
-   * @throws HttpException
+   * @throws HttpException -
+   * @throws EuropeanaApiException -
    */
   @ApiOperation(
       value = "Synchronize Organizations from Zoho",

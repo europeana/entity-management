@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
 import javax.validation.ValidatorFactory;
 
-import eu.europeana.entitymanagement.definitions.model.Aggregator;
 import eu.europeana.entitymanagement.exception.ParamValidationException;
 import eu.europeana.entitymanagement.vocabulary.*;
 import org.apache.logging.log4j.LogManager;
@@ -139,7 +138,7 @@ public abstract class BaseRest extends BaseRestController {
     return responseBody;
   }
 
-  protected ResponseEntity<String> generateResponseFailedUpdates(
+  protected ResponseEntity<String> generateResponseFailedUpdates(Authentication auth,
       HttpServletRequest request, List<String> entityIds, String wskey)
       throws EuropeanaApiException {
 
@@ -150,6 +149,8 @@ public abstract class BaseRest extends BaseRestController {
     }
 
     headers.add(HttpHeaders.CONTENT_TYPE, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
+
+    addRateLimitHeaders(headers,auth);
 
     StringBuffer requestUrl = request.getRequestURL();
 
@@ -217,6 +218,7 @@ public abstract class BaseRest extends BaseRestController {
    * @throws EuropeanaApiException
    */
   protected ResponseEntity<String> generateResponseEntityForEntityRecord(
+      Authentication auth,
       HttpServletRequest request,
       List<EntityProfile> profiles,
       FormatTypes outFormat,
@@ -241,6 +243,9 @@ public abstract class BaseRest extends BaseRestController {
     // HttpHeaders.ALLOW
     org.springframework.http.HttpHeaders headers = createAllowHeader(request);
     headers.add(HttpHeaders.LINK, HttpHeaders.VALUE_LDP_RESOURCE);
+
+    addRateLimitHeaders(headers,auth);
+
     // ETAG set directly to response
     if (!hasPathExtension) {
       headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
