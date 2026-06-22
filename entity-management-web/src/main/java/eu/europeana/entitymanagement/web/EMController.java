@@ -646,7 +646,8 @@ public class EMController extends BaseRest {
     return createResponseMultipleEntities(auth,urls, profiles, request);
   }
 
-  private ResponseEntity<String> createResponseForRetrieve(Authentication auth, EntityTypes type,
+  private ResponseEntity<String> createResponseForRetrieve(Authentication auth,
+      EntityTypes type,
       String identifier,
       String profile,
       HttpServletRequest request,
