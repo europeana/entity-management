@@ -56,8 +56,7 @@ public class ConceptSchemeController extends BaseRest {
 
   @ApiOperation(
       value = "Disable a concept scheme",
-      nickname = "disableConceptScheme",
-      response = java.lang.Void.class)
+      nickname = "disableConceptScheme")
   @RequestMapping(
       value = {"/scheme/{identifier}"},
       method = RequestMethod.DELETE,
@@ -93,8 +92,7 @@ public class ConceptSchemeController extends BaseRest {
 
   @ApiOperation(
       value = "Create an entity grouping/scheme",
-      nickname = "createScheme",
-      response = java.lang.Void.class)
+      nickname = "createScheme")
   @PostMapping(
       value = "/scheme/",
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
@@ -119,8 +117,7 @@ public class ConceptSchemeController extends BaseRest {
 
   @ApiOperation(
       value = "Retrieve an entity grouping/scheme",
-      nickname = "getConceptSchemeJsonLd",
-      response = java.lang.Void.class)
+      nickname = "getConceptSchemeJsonLd")
   @GetMapping(
       value = {"/scheme/{identifier}.json", "/scheme/{identifier}.jsonld", "/scheme/{identifier}"},
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
@@ -133,7 +130,7 @@ public class ConceptSchemeController extends BaseRest {
           String profile,
       @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
       HttpServletRequest request)
-      throws EuropeanaApiException, HttpException {
+      throws EuropeanaApiException {
 
     Authentication auth = verifyReadAccess(request);
 
@@ -145,8 +142,7 @@ public class ConceptSchemeController extends BaseRest {
   
   @ApiOperation(
       value = "Update concept scheme",
-      nickname = "updateConceptScheme",
-      response = java.lang.Void.class)
+      nickname = "updateConceptScheme")
   @PutMapping(
       value = {"/scheme/{identifier}"},
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})

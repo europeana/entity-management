@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -173,7 +174,10 @@ public class EMController extends BaseRest {
       return generateResponseEntityForEntityRecord(null,request, entityProfile, FormatTypes.jsonld, null,
           HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, entityRecord, HttpStatus.OK);
     }
-    logger.debug("Re-enabling entityId={}", entityRecord.getEntityId());
+
+    if(logger.isEnabled(Level.DEBUG)) {
+      logger.debug("Re-enabling entityId={}", entityRecord.getEntityId());
+    }
     entityRecordService.enableEntityRecord(entityRecord);
 
     entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier, profile, false);
@@ -566,8 +570,10 @@ public class EMController extends BaseRest {
 
     EntityRecord savedEntityRecord = entityRecordService
         .createEntityFromRequest(europeanaProxyEntity, datasourceResponse, dataSource, null);
-    logger.debug("Created Entity record for externalId={}; entityId={}", creationRequestId,
-        savedEntityRecord.getEntityId());
+    if(logger.isEnabled(Level.DEBUG)) {
+      logger.debug("Created Entity record for externalId={}; entityId={}", creationRequestId,
+          savedEntityRecord.getEntityId());
+    }
 
     return launchTaskAndRetrieveEntity(request,
             EntityTypes.getByEntityType(savedEntityRecord.getEntity().getType()),
