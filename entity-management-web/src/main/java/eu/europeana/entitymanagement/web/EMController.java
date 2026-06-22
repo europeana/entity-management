@@ -175,7 +175,7 @@ public class EMController extends BaseRest {
           HttpHeaders.CONTENT_TYPE_JSONLD_UTF8, entityRecord, HttpStatus.OK);
     }
 
-    if(logger.isEnabled(Level.DEBUG)) {
+    if(logger.isDebugEnabled()) {
       logger.debug("Re-enabling entityId={}", entityRecord.getEntityId());
     }
     entityRecordService.enableEntityRecord(entityRecord);
@@ -502,6 +502,7 @@ public class EMController extends BaseRest {
     try {
       return createResponseForRetrieve(auth,EntityTypes.getByEntityType(type), identifier, profile, request,
           FormatTypes.schema, languages, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
+
     } catch (UnsupportedEntityTypeException e) {
       throw new EntityNotFoundException("/" + type + "/" + identifier, e);
     }
@@ -570,7 +571,7 @@ public class EMController extends BaseRest {
 
     EntityRecord savedEntityRecord = entityRecordService
         .createEntityFromRequest(europeanaProxyEntity, datasourceResponse, dataSource, null);
-    if(logger.isEnabled(Level.DEBUG)) {
+    if(logger.isDebugEnabled()) {
       logger.debug("Created Entity record for externalId={}; entityId={}", creationRequestId,
           savedEntityRecord.getEntityId());
     }

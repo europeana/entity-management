@@ -288,7 +288,7 @@ public abstract class BaseRest extends BaseRestController {
     Optional<String> methodsForRequestPattern =
         requestMethodService.getMethodsForRequestPattern(request);
     if (methodsForRequestPattern.isEmpty()) {
-      if(logger.isEnabled(Level.WARN)) {
+      if(logger.isWarnEnabled()) {
         logger.warn(
             "Could not find other matching methods for {}. Using current request method in Allow header",
             request.getRequestURL());
