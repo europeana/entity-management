@@ -640,8 +640,12 @@ public class EMController extends BaseRest {
     return createResponseMultipleEntities(auth,urls, profiles, request);
   }
 
-  private ResponseEntity<String> createResponseForRetrieve(Authentication auth,EntityTypes type, String identifier,
-      String profile, HttpServletRequest request, FormatTypes outFormat, String languages,
+  private ResponseEntity<String> createResponseForRetrieve(Authentication auth, EntityTypes type,
+      String identifier,
+      String profile,
+      HttpServletRequest request,
+      FormatTypes outFormat,
+      String languages,
       String contentType) throws EuropeanaApiException {
 
     EntityRecord entityRecord = null;

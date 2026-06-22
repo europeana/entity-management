@@ -52,6 +52,7 @@ import io.swagger.annotations.ApiParam;
 public class EntityAdminController extends BaseRest {
 
   private static final Logger LOG = LogManager.getLogger(EntityAdminController.class);
+  public static final int MAX_PAGE_SIZE = 1000;
 
   private final EntityRecordService entityRecordService;
   private final EntitySynchronizationService entitySyncService;
@@ -74,7 +75,7 @@ public class EntityAdminController extends BaseRest {
       @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
       @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE, required = false) String profile,
       HttpServletRequest request)
-      throws HttpException, EuropeanaApiException {
+      throws  EuropeanaApiException {
 
     verifyWriteAccess(Operations.DELETE, request);
 
@@ -94,10 +95,11 @@ public class EntityAdminController extends BaseRest {
     return noContentResponse(request);
   }
 
+
   @ApiOperation(
       value = "Retrieve a list of entities for which an update failed. taskType is one of: full_update, metrics_update, registration",
-      nickname = "getEntitiesUpdateFailedJsonLd",
-      response = java.lang.Void.class)
+      nickname = "getEntitiesUpdateFailedJsonLd"
+      )
   @GetMapping(
       value = {"/management/failed"},
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
@@ -116,12 +118,12 @@ public class EntityAdminController extends BaseRest {
       @RequestParam(value = WebEntityConstants.QUERY_PARAM_TASK_TYPE, required = false) 
           TaskType taskType,        
       HttpServletRequest request)
-      throws HttpException, EuropeanaApiException {
+      throws  EuropeanaApiException {
 
     Authentication auth = verifyReadAccess(request);
 
-    if (pageSize > 1000) {
-      pageSize = 1000;
+    if (pageSize > MAX_PAGE_SIZE) {
+      pageSize = MAX_PAGE_SIZE;
     }
 
     List<String> entityIds = failedTaskService.getEntityIdsWithFailures(taskType, page * pageSize, pageSize);
@@ -132,8 +134,7 @@ public class EntityAdminController extends BaseRest {
   
   @ApiOperation(
       value = "Retrieve a FailedTask by entity id",
-      nickname = "getFailedTask",
-      response = java.lang.Void.class)
+      nickname = "getFailedTask")
   @GetMapping(
       value = {"/management/failedtask"},
       produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -142,7 +143,7 @@ public class EntityAdminController extends BaseRest {
       @RequestParam(value = WebEntityConstants.QUERY_PARAM_URI, required = false) 
           String uri,        
       HttpServletRequest request)
-      throws HttpException, EuropeanaApiException {
+      throws  EuropeanaApiException {
 
     Authentication auth = verifyReadAccess(request);
     Optional<FailedTask> failedTaskOptional = failedTaskService.getFailure(uri);
@@ -175,14 +176,13 @@ public class EntityAdminController extends BaseRest {
    * Synchronize Organizations from Zoho
    * @param since -
    * @param request -
-   * @return
+   * @return -
    * @throws HttpException -
    * @throws EuropeanaApiException -
    */
   @ApiOperation(
       value = "Synchronize Organizations from Zoho",
-      nickname = "zohoSync",
-      response = java.lang.Void.class)
+      nickname = "zohoSync")
   @PostMapping(value = "/management/zohosync", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<String> zohoSync(
       @ApiParam(
@@ -193,7 +193,7 @@ public class EntityAdminController extends BaseRest {
           @RequestParam
           String since,
       HttpServletRequest request)
-      throws HttpException, EuropeanaApiException {
+      throws  EuropeanaApiException {
 
     verifyWriteAccess(EMOperations.OPERATION_ZOHO_SYNC, request);
 
