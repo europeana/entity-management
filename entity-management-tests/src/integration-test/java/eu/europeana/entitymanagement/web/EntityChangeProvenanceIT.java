@@ -14,6 +14,7 @@ import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
 import eu.europeana.entitymanagement.utils.EntityObjectFactory;
 import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -150,6 +151,7 @@ public class EntityChangeProvenanceIT extends BaseWebControllerTest {
             createEntity(
                     europeanaMetadata, metisResponse, AGENT_JAN_VERMEER_VIAF_URI);
 
+
     // assert content of default External proxy
     EntityProxy externalProxy = savedRecord.getExternalProxies().get(0);
 
@@ -181,5 +183,19 @@ public class EntityChangeProvenanceIT extends BaseWebControllerTest {
     Assertions.assertEquals(AGENT_JAN_VERMEER_WIKIDATA_URI, proxies.get(0).getProxyId());
     Assertions.assertEquals(AGENT_JAN_VERMEER_VIAF_URI, proxies.get(1).getProxyId());
     Assertions.assertEquals(EU_PUBLICATIONS_COUNTRY_AGO, proxies.get(2).getProxyId());
+
+    // check proxyIn.id (aggregation id )
+    System.out.println(entity.getEntity().getIsAggregatedBy().getAggregates());
+
+    Assertions.assertEquals(entity.getEntityId()+ "#aggr_source_1", proxies.get(0).getProxyIn().getId());
+    Assertions.assertEquals(entity.getEntityId()+ "#aggr_source_2", proxies.get(1).getProxyIn().getId());
+    Assertions.assertEquals(entity.getEntityId()+ "#aggr_source_3", proxies.get(2).getProxyIn().getId());
+
+    // check aggregates list
+    Assertions.assertEquals(4,entity.getEntity().getIsAggregatedBy().getAggregates().size());
+    Assertions.assertTrue(entity.getEntity().getIsAggregatedBy().getAggregates().contains(proxies.get(0).getProxyIn().getId()));
+    Assertions.assertTrue(entity.getEntity().getIsAggregatedBy().getAggregates().contains(proxies.get(1).getProxyIn().getId()));
+    Assertions.assertTrue(entity.getEntity().getIsAggregatedBy().getAggregates().contains(proxies.get(2).getProxyIn().getId()));
+
   }
 }

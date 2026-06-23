@@ -635,29 +635,12 @@ public class EMController extends BaseRest {
             @RequestBody List<String> urls,
             HttpServletRequest request) throws Exception {
 
-        verifyWriteAccess(Operations.UPDATE, request);
-        validateProfile(profile);
+      verifyWriteAccess(Operations.UPDATE, request);
+      validateProfile(profile);
 
-        EntityTypes enType = EntityTypes.getByEntityType(type);
-        EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier, profile, false);
+      EntityTypes enType = EntityTypes.getByEntityType(type);
+      EntityRecord entityRecord = entityRecordService.updateProvenance(enType, identifier, profile, urls);
 
-        entityRecordService.checkIfSameAsExists(entityRecord, urls);
-
-        // get the list of already existing proxies, as the list will get updated later
-      List<EntityProxy> externalProxies = entityRecord.getExternalProxies();
-      for (String url : urls) {
-          entityRecordService.changeExternalProxy(entityRecord, url, externalProxies);
-      }
-
-      // remove any datasource proxy that is not present in the url
-      entityRecordService.removeExternalProxy(entityRecord, urls);
-
-      // sort the proxies in the order of the url
-      EntityProxy europeanaProxy = entityRecord.getEuropeanaProxy();
-      urls.add(entityRecord.getProxies().indexOf(europeanaProxy), europeanaProxy.getProxyId());
-      entityRecord.getProxies().sort(Comparator.comparing(v -> urls.indexOf(v.getProxyId())));
-
-      entityRecordService.update(entityRecord);
       return launchTaskAndRetrieveEntity(request, enType, identifier, entityRecord, profile, false,
                 jobDescriptionFactory.get(TaskType.full_update));
     }

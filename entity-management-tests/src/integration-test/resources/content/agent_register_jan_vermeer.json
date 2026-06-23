@@ -1,4 +1,8 @@
 {
   "id": "http://viaf.org/viaf/51961439",
-  "type": "Agent"
+  "type": "Agent",
+  "sameAs" : [
+    "http://publications.europa.eu/resource/authority/country/AGO",
+    "http://www.wikidata.org/entity/Q41264"
+  ]
 }
