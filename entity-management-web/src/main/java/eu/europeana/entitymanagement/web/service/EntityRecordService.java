@@ -916,15 +916,16 @@ public class EntityRecordService extends BaseEntityRecordService {
           throws EuropeanaApiException, EntityModelCreationException {
     EntityRecord entityRecord = retrieveEntityRecord(type, identifier, profile, false);
 
+    //4. Check if the url provided as parameter exists as owl:sameAs
     checkIfSameAsExistsInEuropeanaProxy(entityRecord, provenanceList);
 
-    // remove any datasource proxy that is not present in the url
+    // 6. remove any datasource proxy that is not present in the url
     removeExternalProxy(entityRecord, provenanceList);
 
     // get the list of already existing proxies, as the list will get updated later
     List<EntityProxy> externalProxies = entityRecord.getExternalProxies();
     for (String url : provenanceList) {
-      changeExternalProxy(entityRecord, url, externalProxies, provenanceList.indexOf(url)+1);
+      upsertExternalProxy(entityRecord, url, externalProxies, provenanceList.indexOf(url)+1);
     }
 
     // sort the proxies in the order of the url
@@ -971,11 +972,12 @@ public class EntityRecordService extends BaseEntityRecordService {
    * @throws EuropeanaApiException If an error occurs while verifying the data source or during the proxy update process.
    * @throws EntityModelCreationException If an error occurs while creating a new proxy entity model.
    */
-  public void changeExternalProxy(EntityRecord entityRecord, String newProxyId,
+  public void upsertExternalProxy(EntityRecord entityRecord, String newProxyId,
                                   List<EntityProxy> oldExternalProxyList, int aggregationId)
       throws EuropeanaApiException, EntityModelCreationException {
     DataSource dataSource = datasources.verifyDataSource(newProxyId, true);
 
+    //update proxy if exists
     for (EntityProxy proxy : oldExternalProxyList) {
       if (proxy.getEntity().getEntityId().equals(newProxyId)) {
         // update proxyIn.id (aggregation id) with the new sequence number
@@ -984,8 +986,9 @@ public class EntityRecordService extends BaseEntityRecordService {
       }
     }
 
+    //create proxy if it doesn't exist
     String entityType = entityRecord.getEntity().getType();
-    EntityProxy newProxy = setExternalProxy(EntityObjectFactory.createProxyEntityObject(entityType), newProxyId,
+    setExternalProxy(EntityObjectFactory.createProxyEntityObject(entityType), newProxyId,
         entityRecord.getEntityId(), dataSource, entityRecord, new Date(), aggregationId);
   }
 
