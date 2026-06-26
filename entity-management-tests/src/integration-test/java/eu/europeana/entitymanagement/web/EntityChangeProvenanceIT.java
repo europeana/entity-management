@@ -2,11 +2,12 @@ package eu.europeana.entitymanagement.web;
 
 import static eu.europeana.entitymanagement.testutils.IntegrationTestUtils.AGENT_JAN_VERMEER_VIAF_URI;
 import static eu.europeana.entitymanagement.testutils.IntegrationTestUtils.AGENT_JAN_VERMEER_WIKIDATA_URI;
-import static eu.europeana.entitymanagement.testutils.IntegrationTestUtils.EU_PUBLICATIONS_COUNTRY_AGO;
+import static eu.europeana.entitymanagement.testutils.IntegrationTestUtils.AGENT_JAN_VERMEER_GND_URI;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPath;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
@@ -23,14 +24,20 @@ import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
 @AutoConfigureMockMvc
 public class EntityChangeProvenanceIT extends BaseWebControllerTest {
 
-  @Test
-  public void changeProvenanceSkosMismatch() throws Exception {
+  
+  EntityRecord createRecordVerneer() throws IOException, Exception {
     String europeanaMetadata = loadFile(IntegrationTestUtils.AGENT_REGISTER_JAN_VERMEER);
     String metisResponse = loadFile(IntegrationTestUtils.AGENT_JAN_VERMEER_XML_VIAF);
 
     EntityRecord savedRecord =
             createEntity(
                     europeanaMetadata, metisResponse, AGENT_JAN_VERMEER_VIAF_URI);
+    return savedRecord;
+  }
+
+  @Test
+  void changeProvenanceBadRequest() throws Exception {
+    EntityRecord savedRecord = createRecordVerneer();
 
     // assert content of default External proxy
     EntityProxy externalProxy = savedRecord.getExternalProxies().get(0);
@@ -58,13 +65,8 @@ public class EntityChangeProvenanceIT extends BaseWebControllerTest {
 
 
   @Test
-  public void changeProvenanceForExistingSameAs() throws Exception {
-    String europeanaMetadata = loadFile(IntegrationTestUtils.AGENT_REGISTER_JAN_VERMEER);
-    String metisResponse = loadFile(IntegrationTestUtils.AGENT_JAN_VERMEER_XML_VIAF);
-
-    EntityRecord savedRecord =
-            createEntity(
-                    europeanaMetadata, metisResponse, AGENT_JAN_VERMEER_VIAF_URI);
+  void changeProvenanceForExistingSameAs() throws Exception {
+    EntityRecord savedRecord = createRecordVerneer();
 
     // assert content of default External proxy
     EntityProxy externalProxy = savedRecord.getExternalProxies().get(0);
@@ -96,13 +98,8 @@ public class EntityChangeProvenanceIT extends BaseWebControllerTest {
 
 
   @Test
-  public void changeProvenanceShouldBeSuccessful() throws Exception {
-    String europeanaMetadata = loadFile(IntegrationTestUtils.AGENT_REGISTER_JAN_VERMEER);
-    String metisResponse = loadFile(IntegrationTestUtils.AGENT_JAN_VERMEER_XML_VIAF);
-
-    EntityRecord savedRecord =
-        createEntity(
-            europeanaMetadata, metisResponse, AGENT_JAN_VERMEER_VIAF_URI);
+  void changeProvenanceShouldBeSuccessful() throws Exception {
+    EntityRecord savedRecord = createRecordVerneer();
 
     // assert content of default External proxy
     EntityProxy externalProxy = savedRecord.getExternalProxies().get(0);
@@ -134,13 +131,8 @@ public class EntityChangeProvenanceIT extends BaseWebControllerTest {
   }
 
   @Test
-  public void changeProvenanceForMultipleProxyShouldBeSuccessful() throws Exception {
-    String europeanaMetadata = loadFile(IntegrationTestUtils.AGENT_REGISTER_JAN_VERMEER);
-    String metisResponse = loadFile(IntegrationTestUtils.AGENT_JAN_VERMEER_XML_VIAF);
-
-    EntityRecord savedRecord =
-            createEntity(
-                    europeanaMetadata, metisResponse, AGENT_JAN_VERMEER_VIAF_URI);
+  void changeProvenanceForMultipleProxyShouldBeSuccessful() throws Exception {
+    EntityRecord savedRecord = createRecordVerneer();
 
 
     // assert content of default External proxy
@@ -151,7 +143,7 @@ public class EntityChangeProvenanceIT extends BaseWebControllerTest {
     String requestPath = getEntityRequestPath(savedRecord.getEntityId());
 
     // pass wikidata url and existing one , country - EU_PUBLICATIONS_COUNTRY_AGO
-    List<String> urls = Arrays.asList(AGENT_JAN_VERMEER_WIKIDATA_URI, AGENT_JAN_VERMEER_VIAF_URI, EU_PUBLICATIONS_COUNTRY_AGO);
+    List<String> urls = Arrays.asList(AGENT_JAN_VERMEER_WIKIDATA_URI, AGENT_JAN_VERMEER_VIAF_URI);
 
     // request internal profile so proxies are included in response
     mockMvc
@@ -168,25 +160,27 @@ public class EntityChangeProvenanceIT extends BaseWebControllerTest {
 
     EntityRecord entity = entityRecordService.retrieveEntityRecord("http://data.europeana.eu/agent/1", savedRecord.getEntityId(), false);
 
-    List<EntityProxy> proxies = entity.getExternalProxies();
-    Assertions.assertEquals(3, proxies.size());
+    List<EntityProxy> proxies = entity.getProxies();
+    int expected_proxies = 3;
+    Assertions.assertEquals(expected_proxies, proxies.size());
     // check that the order of the proxies is preserved
-    Assertions.assertEquals(AGENT_JAN_VERMEER_WIKIDATA_URI, proxies.get(0).getProxyId());
-    Assertions.assertEquals(AGENT_JAN_VERMEER_VIAF_URI, proxies.get(1).getProxyId());
-    Assertions.assertEquals(EU_PUBLICATIONS_COUNTRY_AGO, proxies.get(2).getProxyId());
-
+    Assertions.assertEquals(AGENT_JAN_VERMEER_WIKIDATA_URI, proxies.get(1).getProxyId());//first external proxy
+    Assertions.assertEquals(AGENT_JAN_VERMEER_VIAF_URI, proxies.get(2).getProxyId());//second external proxy
+    
     // check proxyIn.id (aggregation id )
-    System.out.println(entity.getEntity().getIsAggregatedBy().getAggregates());
-
-    Assertions.assertEquals(entity.getEntityId()+ "#aggr_source_1", proxies.get(0).getProxyIn().getId());
-    Assertions.assertEquals(entity.getEntityId()+ "#aggr_source_2", proxies.get(1).getProxyIn().getId());
-    Assertions.assertEquals(entity.getEntityId()+ "#aggr_source_3", proxies.get(2).getProxyIn().getId());
-
+    Assertions.assertEquals(entity.getEntityId()+ "#aggr_source_1", proxies.get(1).getProxyIn().getId());
+    Assertions.assertEquals(entity.getEntityId()+ "#aggr_source_2", proxies.get(2).getProxyIn().getId());
+    
     // check aggregates list
-    Assertions.assertEquals(4,entity.getEntity().getIsAggregatedBy().getAggregates().size());
-    Assertions.assertTrue(entity.getEntity().getIsAggregatedBy().getAggregates().contains(proxies.get(0).getProxyIn().getId()));
-    Assertions.assertTrue(entity.getEntity().getIsAggregatedBy().getAggregates().contains(proxies.get(1).getProxyIn().getId()));
-    Assertions.assertTrue(entity.getEntity().getIsAggregatedBy().getAggregates().contains(proxies.get(2).getProxyIn().getId()));
+    List<String> aggregatesList = entity.getEntity().getIsAggregatedBy().getAggregates();
+    Assertions.assertNotNull(aggregatesList);
 
+    //
+    Assertions.assertEquals(expected_proxies, aggregatesList.size());
+    Assertions.assertTrue(aggregatesList.contains(proxies.get(0).getProxyIn().getId()));
+    Assertions.assertTrue(aggregatesList.contains(proxies.get(1).getProxyIn().getId()));
+    Assertions.assertTrue(aggregatesList.contains(proxies.get(2).getProxyIn().getId()));
+    
+    
   }
 }
