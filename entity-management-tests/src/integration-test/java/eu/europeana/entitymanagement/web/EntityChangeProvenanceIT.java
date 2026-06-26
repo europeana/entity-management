@@ -1,32 +1,23 @@
 package eu.europeana.entitymanagement.web;
 
-import static eu.europeana.entitymanagement.testutils.IntegrationTestUtils.*;
+import static eu.europeana.entitymanagement.testutils.IntegrationTestUtils.AGENT_JAN_VERMEER_VIAF_URI;
+import static eu.europeana.entitymanagement.testutils.IntegrationTestUtils.AGENT_JAN_VERMEER_WIKIDATA_URI;
+import static eu.europeana.entitymanagement.testutils.IntegrationTestUtils.EU_PUBLICATIONS_COUNTRY_AGO;
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPath;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import eu.europeana.entitymanagement.common.config.DataSource;
-import eu.europeana.entitymanagement.definitions.model.Entity;
-import eu.europeana.entitymanagement.definitions.model.EntityProxy;
-import eu.europeana.entitymanagement.definitions.model.EntityRecord;
-import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
-import eu.europeana.entitymanagement.utils.EntityObjectFactory;
-import eu.europeana.entitymanagement.vocabulary.EntityTypes;
-import eu.europeana.entitymanagement.vocabulary.WebEntityConstants;
-import org.apache.commons.lang3.StringUtils;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-
-import javax.validation.constraints.AssertTrue;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import eu.europeana.entitymanagement.definitions.model.EntityProxy;
+import eu.europeana.entitymanagement.definitions.model.EntityRecord;
+import eu.europeana.entitymanagement.testutils.IntegrationTestUtils;
 
 @SpringBootTest
 @AutoConfigureMockMvc

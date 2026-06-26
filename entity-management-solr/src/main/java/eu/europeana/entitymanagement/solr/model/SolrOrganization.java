@@ -1,19 +1,19 @@
 package eu.europeana.entitymanagement.solr.model;
 
+import static eu.europeana.entitymanagement.vocabulary.EntitySolrFields.AGGREGATED_VIA;
+import static eu.europeana.entitymanagement.vocabulary.EntitySolrFields.DYNAMIC_FIELD_SEPARATOR;
+import static eu.europeana.entitymanagement.vocabulary.EntitySolrFields.SAME_AS;
 import static eu.europeana.entitymanagement.vocabulary.OrganizationSolrFields.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import eu.europeana.entitymanagement.definitions.model.GeoLocation;
 import org.apache.commons.collections.MapUtils;
 import org.apache.solr.client.solrj.beans.Field;
 import eu.europeana.entitymanagement.definitions.model.Address;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.utils.EntityUtils;
 import eu.europeana.entitymanagement.utils.SolrGeneralUtils;
-import eu.europeana.entitymanagement.vocabulary.EntitySolrFields;
 
 public class SolrOrganization extends SolrEntity<Organization> {
 

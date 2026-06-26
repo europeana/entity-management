@@ -5,11 +5,13 @@ import static eu.europeana.entitymanagement.common.vocabulary.AppConfigConstants
 import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.QUERY_PARAM_QUERY;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
-
-import eu.europeana.entitymanagement.definitions.model.EntityProxy;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
