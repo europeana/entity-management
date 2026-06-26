@@ -597,34 +597,6 @@ public class EMController extends BaseRest {
     return datasourceResponse;
   }
 
-//  @ApiOperation(value = "Change provenance for an Entity", nickname = "changeProvenance")
-//  @PutMapping(value = "/entity/{type}/{identifier}/management/source",
-//      produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
-//  public ResponseEntity<String> changeProvenance(
-//      @PathVariable(value = WebEntityConstants.PATH_PARAM_TYPE) String type,
-//      @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
-//      @RequestParam(value = WebEntityConstants.QUERY_PARAM_PROFILE,
-//          required = false, defaultValue = "internal") String profile,
-//      @RequestParam(value = WebEntityConstants.PATH_PARAM_URL) String url,
-//      HttpServletRequest request) throws Exception {
-//
-//    verifyWriteAccess(Operations.UPDATE, request);
-//    validateProfile(profile);
-//
-//    EntityTypes enType = EntityTypes.getByEntityType(type);
-//    EntityRecord entityRecord = entityRecordService.retrieveEntityRecord(enType, identifier, profile, false);
-//
-//    if (!entityRecord.getEntity().getSameReferenceLinks().contains(url)) {
-//      throw new HttpBadRequestException(String.format(SAME_AS_NOT_EXISTS_MSG, url));
-//    }
-//
-//    entityRecordService.changeExternalProxy(entityRecord, url);
-//    entityRecordService.update(entityRecord);
-//    return launchTaskAndRetrieveEntity(request, enType, identifier, entityRecord, profile, false,
-//            jobDescriptionFactory.get(TaskType.full_update));
-//  }
-
-
 
     @ApiOperation(value = "Change provenance for an Entity", nickname = "changeProvenance")
     @PutMapping(value = "/entity/{type}/{identifier}/management/source",
@@ -763,13 +735,7 @@ public class EMController extends BaseRest {
               EntityRecordUtils.getEntityIds(existingEntities).toString()));
     } else {
 
-//      EA-4322 - disabled entites should as well be redirected
-//      // existingEntities contains only one dupplicate
-//      if (existingEntities.get(0).isDisabled()) {
-//        throw new EntityRemovedException(String.format(EXTERNAL_ID_REMOVED_MSG, entityCreationId,
-//            existingEntities.get(0).getEntityId()));
-//      }
-
+      //      EA-4322 - disabled entites should as well be redirected
       // return 301 redirect
       return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
           .location(UriComponentsBuilder.newInstance().path("/entity/{id}")
