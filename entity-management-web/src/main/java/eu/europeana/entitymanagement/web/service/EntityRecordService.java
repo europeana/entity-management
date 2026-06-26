@@ -5,15 +5,7 @@ import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getDatasourc
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEuropeanaAggregationId;
 import static java.time.Instant.now;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang.StringUtils;
@@ -41,7 +33,6 @@ import eu.europeana.entitymanagement.definitions.model.EntityRecord;
 import eu.europeana.entitymanagement.definitions.model.Organization;
 import eu.europeana.entitymanagement.definitions.model.Place;
 import eu.europeana.entitymanagement.definitions.model.TimeSpan;
-import eu.europeana.entitymanagement.definitions.model.ZohoLabelUriMapping;
 import eu.europeana.entitymanagement.definitions.web.EntityIdDisabledStatus;
 import eu.europeana.entitymanagement.exception.EntityCreationException;
 import eu.europeana.entitymanagement.exception.EntityNotFoundException;
@@ -68,6 +59,9 @@ import eu.europeana.entitymanagement.zoho.utils.ZohoUtils;
 
 @Service(AppConfigConstants.BEAN_ENTITY_RECORD_SERVICE)
 public class EntityRecordService extends BaseEntityRecordService {
+
+  private static final String SAME_AS_NOT_EXISTS_MSG =
+          "Url '%s' does not exist in entity owl:sameAs or skos:exactMatch";
 
   @Autowired
   public EntityRecordService(EntityRecordRepository entityRecordRepository,
@@ -876,7 +870,12 @@ public class EntityRecordService extends BaseEntityRecordService {
     return records;
   }
 
-  private void updateEntityAggregation(EntityRecord entityRecord, Date timestamp) {
+  /**
+   * Method for creating or updating the aggregation in the consolidated version
+   * @param entityRecord
+   * @param timestamp
+   */
+  protected void updateEntityAggregation(EntityRecord entityRecord, Date timestamp) {
     Aggregation aggregation = entityRecord.getEntity().getIsAggregatedBy();
     if (aggregation == null) {
       aggregation = EntityRecordUtils.createNewAggregation(entityRecord.getEntityId(), timestamp);
@@ -901,31 +900,113 @@ public class EntityRecordService extends BaseEntityRecordService {
   }
 
   /**
-   * Recreates the external proxy on an Entity, using the newProxyId value as its proxyId
+   * Updates the provenance information for a given entity record. This includes managing external
+   * proxies, verifying the existence of "sameAs" relationships, removing non-existent external proxies,
+   * and sorting proxies in the specified order.
    *
-   * @param entityRecord entity record
-   * @param newProxyId new proxyId value
-   * @throws EuropeanaApiException on exception
+   * @param type the type of the entity for which provenance needs to be updated
+   * @param identifier the unique identifier of the entity
+   * @param profile the profile name used to retrieve the entity record
+   * @param provenanceList a list of provenance URLs to be processed and updated
+   * @return the updated {@code EntityRecord} with revised provenance information
+   * @throws EuropeanaApiException if there is an issue with Europeana API operations
+   * @throws EntityModelCreationException if the entity record model cannot be created
    */
-  public void changeExternalProxy(EntityRecord entityRecord, String newProxyId)
-      throws EuropeanaApiException, EntityModelCreationException {
+  public EntityRecord updateProvenance(EntityTypes type, String identifier, String profile, List<String> provenanceList)
+          throws EuropeanaApiException, EntityModelCreationException {
+    EntityRecord entityRecord = retrieveEntityRecord(type, identifier, profile, false);
 
-    DataSource dataSource = datasources.verifyDataSource(newProxyId, true);
+    //4. Check if the url provided as parameter exists as owl:sameAs
+    checkIfSameAsExistsInEuropeanaProxy(entityRecord, provenanceList);
+
+    // 6. remove any datasource proxy that is not present in the url
+    removeExternalProxy(entityRecord, provenanceList);
+
+    // get the list of already existing proxies, as the list will get updated later
     List<EntityProxy> externalProxies = entityRecord.getExternalProxies();
-
-    if (externalProxies.size() > 1) {
-      // Changing provenance isn't supported if entity has multiple external proxies (eg. for Zoho
-      // orgs)
-      throw new HttpBadRequestException("Changing provenance not supported for entity");
+    for (String url : provenanceList) {
+      upsertExternalProxy(entityRecord, url, externalProxies, provenanceList.indexOf(url)+1);
     }
 
-    EntityProxy externalProxy = externalProxies.get(0);
-    String entityType = externalProxy.getEntity().getType();
+    // sort the proxies in the order of the url
+    EntityProxy europeanaProxy = entityRecord.getEuropeanaProxy();
+    provenanceList.add(entityRecord.getProxies().indexOf(europeanaProxy), europeanaProxy.getProxyId());
+    entityRecord.getProxies().sort(Comparator.comparing(v -> provenanceList.indexOf(v.getProxyId())));
 
-    entityRecord.getProxies().remove(externalProxy);
+    return update(entityRecord);
+  }
+ 
 
+  /**
+   * Check if the url provided as parameter exists as owl:sameAs,
+   * (of the Europeana Proxy) otherwise respond with HTTP 400;
+   *
+   * @param entityRecord the {@code EntityRecord} containing the entity with owl:sameAs references
+   * @param urls a list of URLs to be checked against the entity's owl:sameAs references
+   * @throws HttpBadRequestException if one or more URLs in the {@code urls} list do not exist
+   *         as owl:sameAs references of the provided {@code EntityRecord}
+   */
+  public void checkIfSameAsExistsInEuropeanaProxy(EntityRecord entityRecord , List<String> urls)
+          throws HttpBadRequestException {
+    List<String> sameAs = entityRecord.getEuropeanaProxy().getEntity().getSameReferenceLinks();
+    List<String> nonMatches = urls.stream()
+            .filter(s -> !sameAs.contains(s))
+            .collect(Collectors.toList());
+
+    if (!nonMatches.isEmpty()) {
+      throw new HttpBadRequestException(String.format(SAME_AS_NOT_EXISTS_MSG, nonMatches));
+    }
+  }
+
+  /**
+   * Updates the external proxy of a given entity record by replacing its identifier and all associated metadata.
+   * Steps:
+   *  a) Check if the Data Source matching the url is supported, otherwise respond with 400;
+   *  b) Check if the identifier of the respective “Data Source Proxy” (in sequence) matches the url, if so continue in the list;
+   * c) Otherwise, replace the identifier of the “Data Source Proxy” and all associated metadata,
+   *    as well as, reset created and modified field of the “Data Source Aggregation”;
+   *
+   * @param entityRecord The entity record whose external proxy will be updated.
+   * @param newProxyId The identifier of the new external proxy to be associated with the entity record.
+   * @param oldExternalProxyList old existing external proxies
+   * @throws EuropeanaApiException If an error occurs while verifying the data source or during the proxy update process.
+   * @throws EntityModelCreationException If an error occurs while creating a new proxy entity model.
+   */
+  public void upsertExternalProxy(EntityRecord entityRecord, String newProxyId,
+                                  List<EntityProxy> oldExternalProxyList, int aggregationId)
+      throws EuropeanaApiException, EntityModelCreationException {
+    DataSource dataSource = datasources.verifyDataSource(newProxyId, true);
+
+    //update proxy if exists
+    for (EntityProxy proxy : oldExternalProxyList) {
+      if (proxy.getEntity().getEntityId().equals(newProxyId)) {
+        // update proxyIn.id (aggregation id) with the new sequence number
+        proxy.getProxyIn().setId(getDatasourceAggregationId(entityRecord.getEntityId(), aggregationId));
+        return;
+      }
+    }
+
+    //create proxy if it doesn't exist
+    String entityType = entityRecord.getEntity().getType();
     setExternalProxy(EntityObjectFactory.createProxyEntityObject(entityType), newProxyId,
-        entityRecord.getEntityId(), dataSource, entityRecord, new Date(), 1);
+        entityRecord.getEntityId(), dataSource, entityRecord, new Date(), aggregationId);
+  }
+
+  /**
+   * Removes external proxies from the given entity record that are not present
+   * in the specified list of URLs.
+   *
+   * @param entityRecord the entity record containing the external proxies to be evaluated
+   *                     and potentially removed
+   * @param urls a list of proxy IDs representing the allowed external proxies to retain
+   */
+  public void removeExternalProxy(EntityRecord entityRecord, List<String> urls) {
+    List<EntityProxy> externalProxies = entityRecord.getExternalProxies();
+    for (EntityProxy externalProxy : externalProxies) {
+      if (!urls.contains(externalProxy.getProxyId())) {
+        entityRecord.getProxies().remove(externalProxy);
+      }
+    }
   }
 
   public EntityRecord updateUsedForEnrichment(EntityTypes type, String identifier, String profile,

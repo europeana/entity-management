@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Primary;
 import com.zoho.crm.api.record.Record;
 import eu.europeana.entitymanagement.zoho.ZohoAccessClient;
 import eu.europeana.entitymanagement.zoho.organization.ZohoConfiguration;
-import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
 import eu.europeana.entitymanagement.zoho.utils.ZohoConstants;
 
 @TestConfiguration

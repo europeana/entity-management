@@ -168,6 +168,13 @@ public class IntegrationTestUtils {
   public static final String AGENT_JAN_VERMEER_VIAF_URI = "http://viaf.org/viaf/51961439";
   public static final String AGENT_JAN_VERMEER_WIKIDATA_URI =
       "http://www.wikidata.org/entity/Q41264";
+  
+  public static final String AGENT_JAN_VERMEER_GND_URI = "https://d-nb.info/gnd/118626590";
+  
+  public static final String EU_PUBLICATIONS_COUNTRY_AGO =
+          "http://publications.europa.eu/resource/authority/country/AGO";
+  
+  
   public static final String PLACE_PARIS_URI = "https://sws.geonames.org/2988507/";
   public static final String PLACE_HAGENBACH_URI = "http://www.wikidata.org/entity/Q32050320";
   public static final String PLACE_SWEDEN_URI = "http://www.wikidata.org/entity/Q34";

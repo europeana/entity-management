@@ -1,12 +1,8 @@
 package eu.europeana.entitymanagement.web;
 
 import static eu.europeana.entitymanagement.utils.EntityRecordUtils.getEntityRequestPath;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.PARAM_PROFILE_SYNC;
-import static eu.europeana.entitymanagement.vocabulary.WebEntityConstants.QUERY_PARAM_PROFILE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import eu.europeana.entitymanagement.definitions.batch.model.TaskType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

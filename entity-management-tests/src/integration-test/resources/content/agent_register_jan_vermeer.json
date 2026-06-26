@@ -1,4 +1,8 @@
 {
-  "id": "http://viaf.org/viaf/51961439",
-  "type": "Agent"
+	"id" : "http://viaf.org/viaf/51961439",
+	"type" : "Agent",
+	"sameAs" : [
+		"http://www.wikidata.org/entity/Q41264",
+		"https://d-nb.info/gnd/118626590"
+	]
 }
