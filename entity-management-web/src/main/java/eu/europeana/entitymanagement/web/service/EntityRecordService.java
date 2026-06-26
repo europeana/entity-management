@@ -870,7 +870,12 @@ public class EntityRecordService extends BaseEntityRecordService {
     return records;
   }
 
-  private void updateEntityAggregation(EntityRecord entityRecord, Date timestamp) {
+  /**
+   * Method for creating or updating the aggregation in the consolidated version
+   * @param entityRecord
+   * @param timestamp
+   */
+  protected void updateEntityAggregation(EntityRecord entityRecord, Date timestamp) {
     Aggregation aggregation = entityRecord.getEntity().getIsAggregatedBy();
     if (aggregation == null) {
       aggregation = EntityRecordUtils.createNewAggregation(entityRecord.getEntityId(), timestamp);
@@ -922,9 +927,6 @@ public class EntityRecordService extends BaseEntityRecordService {
       changeExternalProxy(entityRecord, url, externalProxies, provenanceList.indexOf(url)+1);
     }
 
-    // updates the aggregates list
-    updateAggregateList(entityRecord);
-
     // sort the proxies in the order of the url
     EntityProxy europeanaProxy = entityRecord.getEuropeanaProxy();
     provenanceList.add(entityRecord.getProxies().indexOf(europeanaProxy), europeanaProxy.getProxyId());
@@ -932,14 +934,7 @@ public class EntityRecordService extends BaseEntityRecordService {
 
     return update(entityRecord);
   }
-
-  private void updateAggregateList(EntityRecord entityRecord) {
-    List<String> aggregates = new ArrayList<>();
-    for(EntityProxy proxy : entityRecord.getProxies()) {
-      aggregates.add(proxy.getProxyIn().getId());
-    }
-    entityRecord.getEntity().getIsAggregatedBy().setAggregates(aggregates);
-  }
+ 
 
   /**
    * Check if the url provided as parameter exists as owl:sameAs,

@@ -140,9 +140,8 @@ public class EntityConsolidationProcessor extends BaseEntityProcessor {
          validateCompleteValidationConstraints(consolidatedEntity);
     }
     
-    //Aggregation is not a merged field, need to copy it from the old consolidated entity 
+    //Aggregation is not a merged field, need to copy it from the old consolidated entity, so that the creation date is preserved 
     copyIsAggregatedBy(entityRecord, consolidatedEntity);
-    
     
     entityRecordService.updateConsolidatedVersion(
         entityRecord, consolidatedEntity);
