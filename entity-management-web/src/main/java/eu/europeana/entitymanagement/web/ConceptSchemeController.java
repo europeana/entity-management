@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -55,8 +56,7 @@ public class ConceptSchemeController extends BaseRest {
 
   @ApiOperation(
       value = "Disable a concept scheme",
-      nickname = "disableConceptScheme",
-      response = java.lang.Void.class)
+      nickname = "disableConceptScheme")
   @RequestMapping(
       value = {"/scheme/{identifier}"},
       method = RequestMethod.DELETE,
@@ -92,8 +92,7 @@ public class ConceptSchemeController extends BaseRest {
 
   @ApiOperation(
       value = "Create an entity grouping/scheme",
-      nickname = "createScheme",
-      response = java.lang.Void.class)
+      nickname = "createScheme")
   @PostMapping(
       value = "/scheme/",
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
@@ -113,13 +112,12 @@ public class ConceptSchemeController extends BaseRest {
 
     emConceptSchemeService.createConceptScheme(conceptScheme);
 
-    return generateResponse(request, conceptScheme, HttpStatus.CREATED);
+    return generateResponse(null,request, conceptScheme, HttpStatus.CREATED);
   }
 
   @ApiOperation(
       value = "Retrieve an entity grouping/scheme",
-      nickname = "getConceptSchemeJsonLd",
-      response = java.lang.Void.class)
+      nickname = "getConceptSchemeJsonLd")
   @GetMapping(
       value = {"/scheme/{identifier}.json", "/scheme/{identifier}.jsonld", "/scheme/{identifier}"},
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
@@ -132,20 +130,19 @@ public class ConceptSchemeController extends BaseRest {
           String profile,
       @PathVariable(value = WebEntityConstants.PATH_PARAM_IDENTIFIER) String identifier,
       HttpServletRequest request)
-      throws EuropeanaApiException, HttpException {
+      throws EuropeanaApiException {
 
-    verifyReadAccess(request);
+    Authentication auth = verifyReadAccess(request);
 
     long numericIdentifier = parseNumericIdentifier(identifier);
 
     ConceptScheme scheme = emConceptSchemeService.retrieveConceptScheme(numericIdentifier, false);
-    return generateResponse(request, scheme, HttpStatus.OK);
+    return generateResponse(auth,request, scheme, HttpStatus.OK);
   }
   
   @ApiOperation(
       value = "Update concept scheme",
-      nickname = "updateConceptScheme",
-      response = java.lang.Void.class)
+      nickname = "updateConceptScheme")
   @PutMapping(
       value = {"/scheme/{identifier}"},
       produces = {HttpHeaders.CONTENT_TYPE_JSONLD, MediaType.APPLICATION_JSON_VALUE})
@@ -172,15 +169,15 @@ public class ConceptSchemeController extends BaseRest {
 //  validateBodyEntity(existingScheme, true);
     
     emConceptSchemeService.storeConceptScheme(existingScheme);
-    return generateResponse(request, existingScheme, HttpStatus.OK);
+    return generateResponse(null,request, existingScheme, HttpStatus.OK);
   }
   
-  protected ResponseEntity<String> generateResponse(
+  protected ResponseEntity<String> generateResponse(Authentication auth,
       HttpServletRequest request, ConceptScheme scheme, HttpStatus status)
       throws EuropeanaApiException {
 
     org.springframework.http.HttpHeaders headers = generateHeaders(scheme, request);
-
+    addRateLimitHeaders(headers,auth);
     try {
       String body = jsonLdSerializer.serializeObject(scheme);
       return ResponseEntity.status(status).headers(headers).body(body);

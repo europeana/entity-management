@@ -16,6 +16,9 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
 import javax.validation.ValidatorFactory;
+import eu.europeana.entitymanagement.exception.ParamValidationException;
+import eu.europeana.entitymanagement.vocabulary.*;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -149,7 +152,7 @@ public abstract class BaseRest extends BaseRestController {
     return responseBody;
   }
 
-  protected ResponseEntity<String> generateResponseFailedUpdates(
+  protected ResponseEntity<String> generateResponseFailedUpdates(Authentication auth,
       HttpServletRequest request, List<String> entityIds, String wskey)
       throws EuropeanaApiException {
 
@@ -160,6 +163,8 @@ public abstract class BaseRest extends BaseRestController {
     }
 
     headers.add(HttpHeaders.CONTENT_TYPE, HttpHeaders.CONTENT_TYPE_JSONLD_UTF8);
+
+    addRateLimitHeaders(headers,auth);
 
     StringBuffer requestUrl = request.getRequestURL();
 
@@ -227,6 +232,7 @@ public abstract class BaseRest extends BaseRestController {
    * @throws EuropeanaApiException
    */
   protected ResponseEntity<String> generateResponseEntityForEntityRecord(
+      Authentication auth,
       HttpServletRequest request,
       List<EntityProfile> profiles,
       FormatTypes outFormat,
@@ -249,8 +255,22 @@ public abstract class BaseRest extends BaseRestController {
             || requestUri.endsWith("." + FormatTypes.xml);
 
     // HttpHeaders.ALLOW
+    org.springframework.http.HttpHeaders headers = createHttpHeaders(auth, request, contentType,
+        hasPathExtension);
+
+    processLanguage(entityRecord.getEntity(), languages);
+
+    String body = serialize(entityRecord, outFormat, profiles);
+    return ResponseEntity.status(status).headers(headers).eTag(etag).body(body);
+  }
+
+  private org.springframework.http.HttpHeaders createHttpHeaders(Authentication auth,
+      HttpServletRequest request, String contentType, boolean hasPathExtension) {
     org.springframework.http.HttpHeaders headers = createAllowHeader(request);
     headers.add(HttpHeaders.LINK, HttpHeaders.VALUE_LDP_RESOURCE);
+
+    addRateLimitHeaders(headers, auth);
+
     // ETAG set directly to response
     if (!hasPathExtension) {
       headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT);
@@ -271,11 +291,7 @@ public abstract class BaseRest extends BaseRestController {
     if (contentType != null && !contentType.isEmpty()) {
       headers.add(HttpHeaders.CONTENT_TYPE, contentType);
     }
-
-    processLanguage(entityRecord.getEntity(), languages);
-
-    String body = serialize(entityRecord, outFormat, profiles);
-    return ResponseEntity.status(status).headers(headers).eTag(etag).body(body);
+    return headers;
   }
 
   protected org.springframework.http.HttpHeaders createAllowHeader(HttpServletRequest request) {
@@ -285,9 +301,11 @@ public abstract class BaseRest extends BaseRestController {
     Optional<String> methodsForRequestPattern =
         requestMethodService.getMethodsForRequestPattern(request);
     if (methodsForRequestPattern.isEmpty()) {
-      logger.warn(
-          "Could not find other matching methods for {}. Using current request method in Allow header",
-          request.getRequestURL());
+      if(logger.isWarnEnabled()) {
+        logger.warn(
+            "Could not find other matching methods for {}. Using current request method in Allow header",
+            request.getRequestURL());
+      }
       allowHeaderValue = request.getMethod();
     } else {
       allowHeaderValue = methodsForRequestPattern.get();
@@ -325,7 +343,7 @@ public abstract class BaseRest extends BaseRestController {
         }
 
         // filter entries by language
-        Map<String, Object> newFieldValue = new HashMap<>();
+          Map<String, Object> newFieldValue = new HashMap<>();
         for (Map.Entry<String, Object> mapEntry : currentFieldValue.entrySet()) {
           // allow also the URIs available for empty key
           if (languagesList.contains(mapEntry.getKey()) || mapEntry.getKey().equals("")) {
