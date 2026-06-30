@@ -195,6 +195,9 @@ public class ZohoOrganizationConverter {
    */
   private static WebResource buildWebResource(Record zohoRecord, String logoFieldName) {
     String logo = getStringFieldValue(zohoRecord, logoFieldName);
+    if (StringUtils.isBlank(logo)) {
+      return null;
+    }
     WebResource resource = new WebResource();
     resource.setThumbnail(logo);
     return resource;

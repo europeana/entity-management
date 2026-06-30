@@ -268,6 +268,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
         // isAggregatedBy should contain 3 aggregates (for Europeana, zoho and wikidata proxies)
         .andExpect(jsonPath("$.isAggregatedBy.aggregates", hasSize(3)))
+        .andExpect(jsonPath("$.logo.thumbnail", is("https://api.europeana.eu/thumbnail/v3/400/test")))
         // sameAs contains Wikidata and Zoho uris
         .andExpect(
             jsonPath(
@@ -391,6 +392,7 @@ public class EntityRegistrationIT extends BaseWebControllerTest {
         .andExpect(jsonPath("$.id", any(String.class)))
         .andExpect(jsonPath("$.type", is(EntityTypes.Organization.getEntityType())))
         .andExpect(jsonPath("$.isAggregatedBy").isNotEmpty())
+            .andExpect(jsonPath("$.logo").doesNotExist()) // there should be any logo field present as logo is not availble for this zoho record
         // isAggregatedBy should contain 2 aggregates (for Europeana and zoho proxies). No wikidata
         // sameAs for this org
 //        .andExpect(
