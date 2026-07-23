@@ -14,6 +14,11 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotEmpty;
+
+import com.zoho.crm.api.ParameterMap;
+import com.zoho.crm.api.exception.SDKException;
+import com.zoho.crm.api.record.RecordOperations;
+import eu.europeana.entitymanagement.zoho.organization.ZohoProperties;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
@@ -23,6 +28,25 @@ import eu.europeana.entitymanagement.vocabulary.EntityTypes;
 import eu.europeana.entitymanagement.vocabulary.WebEntityFields;
 
 public final class ZohoUtils {
+
+
+  /**
+   * Adds fields associated with the given module to the provided ParameterMap instance if ZohoProperties is not null.
+   *
+   * @param paramInstance the ParameterMap instance to which fields are to be added
+   * @param module the name of the module for which fields are to be fetched
+   * @param zohoProperties the ZohoProperties instance used to retrieve the fields for the specified module
+   * @return the updated ParameterMap containing the added fields, if any
+   * @throws SDKException if an error occurs during the field addition process
+   */
+  public static ParameterMap addFieldsParam(ParameterMap paramInstance, String module, ZohoProperties zohoProperties) throws SDKException {
+    if (zohoProperties != null) {
+      paramInstance.add(
+              RecordOperations.GetRecordsParam.FIELDS,
+              String.join(",", zohoProperties.getFieldsByModule(module)));
+    }
+    return paramInstance;
+  }
 
 
   /**

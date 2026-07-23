@@ -2,6 +2,8 @@ package eu.europeana.entitymanagement.zoho.utils;
 
 public final class ZohoConstants {
 
+  public static final String ZOHO_PROPERTIES_BEAN = "zohoPropertiesBean";
+
   // Modules
   public static final String CONTACTS_MODULE_API_NAME = "Contacts";
   public static final String ACCOUNTS_MODULE_API_NAME = "Accounts";

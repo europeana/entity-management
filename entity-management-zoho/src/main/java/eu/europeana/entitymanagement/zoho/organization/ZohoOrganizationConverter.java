@@ -359,7 +359,6 @@ public class ZohoOrganizationConverter {
      * exact values
      */
     List<Record> res = new ArrayList<>(records.size());
-    System.out.println();
     for (Record rec : records) {
       Record aggregatingFrom = ZohoOrganizationConverter.getSubRecord(rec, AGGREGATING_FROM);
       if (aggregatingFrom == null) {

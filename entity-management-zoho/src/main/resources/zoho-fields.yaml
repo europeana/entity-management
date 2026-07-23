@@ -1,0 +1,57 @@
+modules:
+  Accounts:
+    fields:
+      - Owner
+      - id
+      - Europeana_org_ID
+      - Account_Name
+      - Lang_Organisation_Name
+      - Acronym
+      - Lang_Acronym
+      - Official_language
+      - Website
+      - Logo
+      - Email
+      - Organisation_Role
+      - Country_URI
+      - Organisation_Country
+      - Street
+      - City
+      - Zip_code
+      - Geo_coordinate
+      - Latitude
+      - Longitude
+      - Alternative_1
+      - Alternative_2
+      - Alternative_3
+      - Alternative_4
+      - Alternative_5
+      - Lang_Alternative_1
+      - Lang_Alternative_2
+      - Lang_Alternative_3
+      - Lang_Alternative_4
+      - Lang_Alternative_5
+      - Alternative_Acronym_1
+      - Lang_Acronym_1
+      - Hidden_names
+      - SameAs_1
+      - SameAs_2
+      - SameAs_3
+      - SameAs_4
+      - Aggregators
+      - Last_Activity_Time
+      - Modified_By
+      - Scheduled_for_deletion
+  Aggregators:
+    fields:
+      - Institution
+      - Aggregating_from
+      - Geographic_Scope
+      - Heritage_Domain
+      - Public_Email
+      - Capacity_Building
+      - Media_Type
+      - Data_Activity
+      - Audience_Engagement_Activity
+      - Last_Activity_Time
+      - Modified_By
