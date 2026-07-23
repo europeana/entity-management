@@ -42,6 +42,7 @@ modules:
       - Last_Activity_Time
       - Modified_By
       - Scheduled_for_deletion
+      - Modified_Time
   Aggregators:
     fields:
       - Institution
