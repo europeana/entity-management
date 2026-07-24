@@ -14,7 +14,7 @@ modules:
       - Email
       - Organisation_Role
       - Country_URI
-      - Organisation_Country
+      - Country
       - Street
       - City
       - Zip_code
