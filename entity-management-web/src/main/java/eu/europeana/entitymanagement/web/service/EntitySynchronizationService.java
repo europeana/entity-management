@@ -88,13 +88,44 @@ public class EntitySynchronizationService extends BaseZohoAccess {
   }
 
   /**
-   * method to run the zoho synchronization for organizations updated since last successfully
-   * scheduled synchronization (updates are run asynchronously)
+   * Executes a test flow for Zoho synchronization.
+   * This method is designed for development and testing purposes
+   * to avoid triggering actual synchronization operations.
+   * It retrieves a specific Zoho organization record and logs the data for validation.
    *
-   * @return the report on performed operations
-   * @throws EntityUpdateException
+   * The test flow is executed only when `zoho.sync.test.enabled` is set to true in the
+   * configuration. No changes or synchronization tasks are performed outside of testing.
+   *
+   * @return A {@link ZohoSyncReport} instance representing the results of the operation
+   *         (may return null if no synchronization operations are performed).
    */
+  private ZohoSyncReport runTestFlowZohoSynchronization() {
+    if (emConfiguration.isZohoSyncTest()) {
+      logger.info("Zoho sync test enabled , skipping actual synchronization . ");
+      logger.info("------------- RUNNING TEST FLOW --------------------------");
+      try {
+        Optional<Record> record = zohoConfiguration.getZohoAccessClient().getZohoOrganizationByUrl("");
+        if (record.isPresent()) {
+          logger.info("Zoho Organization record: {}", record.get().getKeyValues());
+        }
+      } catch (ZohoException e) {
+        e.printStackTrace();
+      }
+    }
+    return null;
+  }
+
+    /**
+     * method to run the zoho synchronization for organizations updated since last successfully
+     * scheduled synchronization (updates are run asynchronously)
+     *
+     * @return the report on performed operations
+     * @throws EntityUpdateException
+     */
   public ZohoSyncReport synchronizeModifiedZohoOrganizations() {
+    if (emConfiguration.isZohoSyncTest()) {
+     return runTestFlowZohoSynchronization();
+    }
 
     ZohoSyncReport previousSync = zohoSyncRepo.findLastZohoSyncReport();
     OffsetDateTime modifiedSince;

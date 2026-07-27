@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import com.zoho.crm.api.relatedrecords.ResponseWrapper;
+import eu.europeana.entitymanagement.zoho.organization.ZohoProperties;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -48,11 +50,15 @@ import com.zoho.crm.api.util.APIResponse;
 import eu.europeana.entitymanagement.utils.EntityRecordUtils;
 import eu.europeana.entitymanagement.zoho.organization.ZohoOrganizationConverter;
 import static eu.europeana.entitymanagement.zoho.utils.ZohoConstants.*;
+import static eu.europeana.entitymanagement.zoho.utils.ZohoUtils.addFieldsParam;
+
 import eu.europeana.entitymanagement.zoho.utils.ZohoException;
 
 public class ZohoAccessClient {
 
   private static final Logger LOGGER = LogManager.getLogger(ZohoAccessClient.class);
+
+  private final ZohoProperties zohoProperties;
 
   /**
    * Constructor with all parameters.
@@ -76,7 +82,7 @@ public class ZohoAccessClient {
    * @param redirectUrl the registered zoho redirect url
    */
   public ZohoAccessClient(TokenStore tokenStore, String zohoEmail, String clientId,
-      String clientSecret, String refreshToken, String redirectUrl) throws ZohoException {
+      String clientSecret, String refreshToken, String redirectUrl, ZohoProperties zohoProperties) throws ZohoException {
 
     try {
       UserSignature userSignature = new UserSignature(zohoEmail);
@@ -90,6 +96,7 @@ public class ZohoAccessClient {
       // Does not generate any tokens, we'll need to execute a command to do so
       Initializer.initialize(userSignature, environment, token, tokenStore, sdkConfig,
           resourcePath);
+      this.zohoProperties = zohoProperties;
     } catch (SDKException e) {
       throw new ZohoException("Error initializing ZohoAccessClient", e);
     }
@@ -121,12 +128,11 @@ public class ZohoAccessClient {
     if (zohoAggregator.isEmpty()) {
       return Optional.empty();
     }
-    System.out.println("test");
     HashMap<String, String> aggInstitution =
         ZohoOrganizationConverter.getPropertyMap(zohoAggregator.get(), INSTITUTION_FIELD);
     if (aggInstitution == null || !aggInstitution.containsKey(ID_FIELD)) {
-      if(LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Cannot retrieve institution id from aggregator with id: {}", aggregatorZohoId);
+      if (LOGGER.isDebugEnabled()) {
+         LOGGER.debug("Cannot retrieve institution id from aggregator with id: {}", aggregatorZohoId);
       }
       return Optional.empty();
     }
@@ -137,8 +143,12 @@ public class ZohoAccessClient {
   public Optional<Record> getZohoOrganizationByRecordId(String zohoId) throws ZohoException {
     try {
       RecordOperations recordOperations = new RecordOperations();
+
+      ParameterMap paramInstance = new ParameterMap();
+      addFieldsParam(paramInstance, ACCOUNTS_MODULE_API_NAME, zohoProperties);
+
       APIResponse<ResponseHandler> response =
-          recordOperations.getRecord(Long.valueOf(zohoId), ACCOUNTS_MODULE_API_NAME, null, null);
+          recordOperations.getRecord(Long.valueOf(zohoId), ACCOUNTS_MODULE_API_NAME, paramInstance, null);
       Optional<Record> res = getZohoRecords(response).stream().findFirst();
       if (res.isEmpty() && LOGGER.isDebugEnabled()) {
         LOGGER.debug("Cannot retrieve aggregator by zoho record id: {}", zohoId);
@@ -152,8 +162,12 @@ public class ZohoAccessClient {
   public Optional<Record> getZohoAggregatorByRecordId(String zohoId) throws ZohoException {
     try {
       RecordOperations recordOperations = new RecordOperations();
+
+      ParameterMap paramInstance = new ParameterMap();
+      addFieldsParam(paramInstance, AGGREGATORS_API_MODULE_NAME, zohoProperties);
+
       APIResponse<ResponseHandler> response =
-          recordOperations.getRecord(Long.valueOf(zohoId), AGGREGATORS_API_MODULE_NAME, null, null);
+          recordOperations.getRecord(Long.valueOf(zohoId), AGGREGATORS_API_MODULE_NAME, paramInstance, null);
       Optional<Record> res = getZohoRecords(response).stream().findFirst();
       if (res.isEmpty() && LOGGER.isDebugEnabled()) {
         LOGGER.debug("Cannot retrieve aggregator by zoho record id: {}", zohoId);
@@ -179,12 +193,14 @@ public class ZohoAccessClient {
       throws ZohoException {
     try {
       RecordOperations recordOperations = new RecordOperations();
+
       ParameterMap paramInstance = new ParameterMap();
+      addFieldsParam(paramInstance, ACCOUNTS_MODULE_API_NAME, zohoProperties);
       String criteria = buildSearchCriteria(ACCOUNT_NAME_FIELD, orgName);
       paramInstance.add(SearchRecordsParam.CRITERIA, criteria);
 
       APIResponse<ResponseHandler> response =
-          recordOperations.searchRecords(ACCOUNTS_MODULE_API_NAME, paramInstance);
+          recordOperations.searchRecords(ACCOUNTS_MODULE_API_NAME, paramInstance, null);
       List<Record> records = getZohoRecords(response);
       for (Record rec : records) {
         /*
@@ -231,7 +247,7 @@ public class ZohoAccessClient {
       // Get instance of RelatedRecordsOperations class that takes relatedListAPIName moduleAPIName
       // as parameter
       RelatedRecordsOperations relatedRecordsOperations = new RelatedRecordsOperations(
-          RELATED_RECORDS_MODULE_API_NAME, Long.valueOf(zohoId), ACCOUNTS_MODULE_API_NAME);
+          RELATED_RECORDS_MODULE_API_NAME, Long.valueOf(zohoId), ACCOUNTS_MODULE_API_NAME, null);
       APIResponse<com.zoho.crm.api.relatedrecords.ResponseHandler> response =
           relatedRecordsOperations.getRelatedRecords(null, null);
 
@@ -260,7 +276,7 @@ public class ZohoAccessClient {
       paramInstance.add(SearchRecordsParam.CRITERIA, criteria);
 
       APIResponse<ResponseHandler> response =
-          recordOperations.searchRecords(AGGREGATED_VIA_FROM_MODULE_API_NAME, paramInstance);
+          recordOperations.searchRecords(AGGREGATED_VIA_FROM_MODULE_API_NAME, paramInstance, null);
 
       List<Record> records = getZohoRecords(response);
       return ZohoOrganizationConverter.getAggregatorRecordsFromAggregatedVia(orgName, records);
@@ -294,9 +310,9 @@ public class ZohoAccessClient {
     if (response.isExpected()) {
       // Get the object from response
       T responseHandler = response.getObject();
-      if (responseHandler instanceof com.zoho.crm.api.relatedrecords.ResponseWrapper) {
-        com.zoho.crm.api.relatedrecords.ResponseWrapper responseWrapper =
-            (com.zoho.crm.api.relatedrecords.ResponseWrapper) responseHandler;
+      if (responseHandler instanceof ResponseWrapper) {
+        ResponseWrapper responseWrapper =
+            (ResponseWrapper) responseHandler;
         return responseWrapper.getData();
       } else if (responseHandler instanceof com.zoho.crm.api.record.ResponseWrapper) {
         com.zoho.crm.api.record.ResponseWrapper responseWrapper =
@@ -326,7 +342,7 @@ public class ZohoAccessClient {
       // Call updateRecord method that takes recordId, ModuleAPIName and BodyWrapper instance as
       // parameter.
       APIResponse<ActionHandler> response =
-          recordOperations.updateRecord(Long.valueOf(zohoId), ACCOUNTS_MODULE_API_NAME, request);
+          recordOperations.updateRecord(Long.valueOf(zohoId), ACCOUNTS_MODULE_API_NAME, request, null);
       // check if the update was successful
       validateZohoUpdateResponse(response);
     } catch (SDKException e) {
@@ -428,6 +444,10 @@ public class ZohoAccessClient {
       ParameterMap paramInstance = new ParameterMap();
       paramInstance.add(GetRecordsParam.PAGE, page);
       paramInstance.add(GetRecordsParam.PER_PAGE, pageSize);
+
+      // add fields to be fetched for the Accounts module.
+      addFieldsParam(paramInstance, ACCOUNTS_MODULE_API_NAME, zohoProperties);
+
       HeaderMap headerInstance = new HeaderMap();
       headerInstance.add(GetRecordsHeader.IF_MODIFIED_SINCE, modifiedDate);
       response =

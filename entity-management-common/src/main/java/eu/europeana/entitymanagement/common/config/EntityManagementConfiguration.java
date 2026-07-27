@@ -224,6 +224,13 @@ public class EntityManagementConfiguration implements InitializingBean {
   @Value("${rapidapi.baseUrl:}")
   private String rapidApiBaseUrl;
 
+  @Value("${zoho.sync.test.enabled:false}")
+  private boolean zohoSyncTest;
+
+  public boolean isZohoSyncTest() {
+    return zohoSyncTest;
+  }
+
   private final Map<String, String> roleMappings = new ConcurrentHashMap<>();
   
   @Autowired
